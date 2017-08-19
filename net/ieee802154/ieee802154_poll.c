@@ -1,15 +1,9 @@
 /****************************************************************************
- * net/pkt/pkt_poll.c
- * Poll for the availability of packet TX data
+ * net/ieee802154/ieee802154_poll.c
+ * Poll for the availability of ougoing IEEE 802.15.4 frames
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Adapted for NuttX from logic in uIP which also has a BSD-like license:
- *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,23 +37,25 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/netdev.h>
-#include <nuttx/net/udp.h>
+#include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/ieee802154.h>
 
 #include "devif/devif.h"
-#include "pkt/pkt.h"
+#include "ieee802154/ieee802154.h"
+
+#ifdef CONFIG_NET_IEEE802154
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pkt_poll
+ * Name: ieee802154_poll
  *
  * Description:
  *   Poll a packet "connection" structure for availability of TX data
@@ -76,34 +72,34 @@
  *
  ****************************************************************************/
 
-void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
+void ieee802154_poll(FAR struct net_driver_s *dev,
+                     FAR struct ieee802154_conn_s *conn)
 {
+  FAR struct radio_driver_s *radio;
+
+  DEBUGASSERT(dev != NULL && conn != NULL);
+  radio = (FAR struct radio_driver_s *)dev;
+
   /* Verify that the packet connection is valid */
 
-  if (conn)
+  if (conn != NULL)
     {
-      /* Setup for the application callback */
+      /* Setup for the application callback (NOTE:  These should not be
+       * used by PF_IEEE802154 sockets).
+       */
 
-      dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev)];
-      dev->d_len     = 0;
-      dev->d_sndlen  = 0;
+      radio->r_dev.d_appdata = radio->r_dev.d_buf;
+      radio->r_dev.d_len     = 0;
+      radio->r_dev.d_sndlen  = 0;
+
+      /* Perform the application callback */
+      /* REVISIT: Need to pass the meta data and the IOB through the callback */
+#warning Missing logic
 
       /* Perform the application callback */
 
-      (void)pkt_callback(dev, conn, PKT_POLL);
-
-      /* If the application has data to send, setup the UDP/IP header */
-
-      if (dev->d_sndlen > 0)
-        {
-          //devif_pkt_send(dev, conn);
-          return;
-        }
+      (void)ieee802154_callback(radio, conn, IEEE802154_POLL);
     }
-
-  /* Make sure that d_len is zero meaning that there is nothing to be sent */
-
-  dev->d_len = 0;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

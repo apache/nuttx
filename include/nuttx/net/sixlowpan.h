@@ -387,7 +387,7 @@ struct sixlowpan_properties_s
  *
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
- * manage the fragmentation.  'struct sixlowpan_driver_s' is cast
+ * manage the fragmentation.  'struct radio_driver_s' is cast
  * compatible with 'struct net_driver_s' when dev->d_lltype ==
  * NET_LL_IEEE802154 or dev->d_lltype == NET_LL_PKTRADIO.
  *
@@ -428,7 +428,7 @@ struct sixlowpan_properties_s
 
 struct iob_s;  /* Forward reference */
 
-struct sixlowpan_driver_s
+struct radio_driver_s
 {
   /* This definitiona must appear first in the structure definition to
    * assure cast compatibility.
@@ -534,7 +534,7 @@ struct sixlowpan_driver_s
    *
    **************************************************************************/
 
-  CODE int (*r_get_mhrlen)(FAR struct sixlowpan_driver_s *netdev,
+  CODE int (*r_get_mhrlen)(FAR struct radio_driver_s *netdev,
                            FAR const void *meta);
 
   /**************************************************************************
@@ -555,7 +555,7 @@ struct sixlowpan_driver_s
    *
    **************************************************************************/
 
-  CODE int (*r_req_data)(FAR struct sixlowpan_driver_s *netdev,
+  CODE int (*r_req_data)(FAR struct radio_driver_s *netdev,
                          FAR const void *meta, FAR struct iob_s *framelist);
 
   /**************************************************************************
@@ -577,7 +577,7 @@ struct sixlowpan_driver_s
    *
    **************************************************************************/
 
-  CODE int (*r_properties)(FAR struct sixlowpan_driver_s *netdev,
+  CODE int (*r_properties)(FAR struct radio_driver_s *netdev,
                            FAR struct sixlowpan_properties_s *properties);
 };
 
@@ -651,7 +651,7 @@ struct sixlowpan_driver_s
  *
  ****************************************************************************/
 
-int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_input(FAR struct radio_driver_s *radio,
                     FAR struct iob_s *framelist, FAR const void *metadata);
 
 #endif /* CONFIG_NET_6LOWPAN */

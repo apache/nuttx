@@ -623,7 +623,7 @@ void sixlowpan_hc06_initialize(void)
  *
  ****************************************************************************/
 
-int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
                                FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct netdev_varaddr_s *destmac,
                                FAR uint8_t *fptr)
@@ -794,7 +794,7 @@ int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
       /* Compression compare with this nodes address (source) */
 
       iphc1   |= compress_laddr(ipv6->srcipaddr,
-                                &radio->r_dev.d_mac.sixlowpan,
+                                &radio->r_dev.d_mac.radio,
                                 SIXLOWPAN_IPHC_SAM_BIT);
     }
 
@@ -805,7 +805,7 @@ int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
            ipv6->srcipaddr[3] == 0)
     {
       iphc1   |= compress_laddr(ipv6->srcipaddr,
-                                &radio->r_dev.d_mac.sixlowpan,
+                                &radio->r_dev.d_mac.radio,
                                 SIXLOWPAN_IPHC_SAM_BIT);
     }
   else
@@ -1037,7 +1037,7 @@ int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-void sixlowpan_uncompresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
+void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
                                   FAR const void *metadata,
                                   uint16_t iplen, FAR struct iob_s *iob,
                                   FAR uint8_t *fptr, FAR uint8_t *bptr)

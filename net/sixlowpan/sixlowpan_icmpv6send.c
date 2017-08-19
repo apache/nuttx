@@ -117,7 +117,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
                                          ipv6icmpv6->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
@@ -147,7 +147,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct sixlowpan_driver_s *)fwddev,
+                      (FAR struct radio_driver_s *)fwddev,
                       &ipv6icmpv6->ipv6, buf, buflen, &destmac);
             }
         }

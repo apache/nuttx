@@ -121,7 +121,7 @@ struct macnet_driver_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct sixlowpan_driver_s md_dev;  /* Interface understood by the network */
+  struct radio_driver_s md_dev;  /* Interface understood by the network */
                                      /* Cast compatible with struct macnet_driver_s */
 
   /* For internal use by this driver */
@@ -169,10 +169,10 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...);
 
 #ifdef CONFIG_NET_STARPOINT
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
+static int macnet_coord_eaddr(FAR struct radio_driver_s *radio,
                               FAR uint8_t *eaddr);
 #else
-static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
+static int macnet_coord_saddr(FAR struct radio_driver_s *radio,
                               FAR uint8_t *saddr);
 #endif
 #endif
@@ -195,11 +195,11 @@ static int  macnet_rmmac(FAR struct net_driver_s *dev,
 static int  macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
-static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
+static int macnet_get_mhrlen(FAR struct radio_driver_s *netdev,
               FAR const void *meta);
-static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
+static int macnet_req_data(FAR struct radio_driver_s *netdev,
               FAR const void *meta, FAR struct iob_s *framelist);
-static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
+static int macnet_properties(FAR struct radio_driver_s *netdev,
               FAR struct sixlowpan_properties_s *properties);
 
 /****************************************************************************
@@ -249,8 +249,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       /* Set the MAC address as the eaddr */
 
       eaddr = arg.getreq.attrval.mac.eaddr;
-      IEEE802154_EADDRCOPY(dev->d_mac.sixlowpan.nv_addr, eaddr);
-      dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+      IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, eaddr);
+      dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
 
       /* Set the IP address based on the eaddr */
 
@@ -287,8 +287,8 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       /* Set the MAC address as the saddr */
 
       saddr = arg.getreq.attrval.mac.saddr;
-      IEEE802154_SADDRCOPY(dev->d_mac.sixlowpan.nv_addr, saddr);
-      dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+      IEEE802154_SADDRCOPY(dev->d_mac.radio.nv_addr, saddr);
+      dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
 
       /* Set the IP address based on the saddr */
 
@@ -572,7 +572,7 @@ static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_STARPOINT) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
-static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
+static int macnet_coord_eaddr(FAR struct radio_driver_s *radio,
                               FAR uint8_t *eaddr)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)radio;
@@ -609,7 +609,7 @@ static int macnet_coord_eaddr(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_STARPOINT) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR)
-static int macnet_coord_saddr(FAR struct sixlowpan_driver_s *radio,
+static int macnet_coord_saddr(FAR struct radio_driver_s *radio,
                               FAR uint8_t *saddr)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)radio;
@@ -665,13 +665,13 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
       wlinfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
-             dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
-             dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
-             dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
-             dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7]);
+             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+             dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
+             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
+             dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7]);
 #else
       wlinfo("             Node: %02x:%02x\n",
-             dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1]);
+             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
 #endif
 
       /* Set and activate a timer process */
@@ -945,7 +945,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
+static int macnet_get_mhrlen(FAR struct radio_driver_s *netdev,
                              FAR const void *meta)
 {
   FAR struct macnet_driver_s *priv =
@@ -975,7 +975,7 @@ static int macnet_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
+static int macnet_req_data(FAR struct radio_driver_s *netdev,
                            FAR const void *meta, FAR struct iob_s *framelist)
 {
   FAR struct macnet_driver_s *priv =
@@ -1055,7 +1055,7 @@ static int macnet_req_data(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
+static int macnet_properties(FAR struct radio_driver_s *netdev,
                              FAR struct sixlowpan_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
@@ -1131,7 +1131,7 @@ static int macnet_properties(FAR struct sixlowpan_driver_s *netdev,
 int mac802154netdev_register(MACHANDLE mac)
 {
   FAR struct macnet_driver_s *priv;
-  FAR struct sixlowpan_driver_s *radio;
+  FAR struct radio_driver_s *radio;
   FAR struct net_driver_s  *dev;
   FAR struct mac802154_maccb_s *maccb;
   FAR uint8_t *pktbuf;

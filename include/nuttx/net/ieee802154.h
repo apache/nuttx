@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/net_sockif.c
+ * include/nuttx/net/ieee802154.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,83 +33,61 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/net/net.h>
-
-#include "inet/inet.h"
-#include "local/local.h"
-#include "pkt/pkt.h"
-#include "ieee802154/ieee802154.h"
-#include "socket/socket.h"
+#ifndef  __INCLUDE_NUTTX_NET_IEEE802154_H
+#define  __INCLUDE_NUTTX_NET_IEEE802154_H
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_sockif
+ * Name: ieee802154_input
  *
  * Description:
- *   Return the socket interface associated with this address family.
+ *   Handle incoming IEEE 802.15.4 input
+ *
+ *   This function is called when the radio device driver has received an
+ *   frame from the network.  The frame from the device driver must be
+ *   provided in by the IOB frame argument of the  function call:
+ *
+ *   - The frame data is in the IOB io_data[] buffer,
+ *   - The length of the frame is in the IOB io_len field, and
+ *   - The offset past and radio MAC header is provided in the io_offset
+ *     field.
+ *
+ *   The frame argument may refer to a single frame (a list of length one)
+ *   or may it be the head of a list of multiple frames.
+ *
+ *   - The io_flink field points to the next frame in the list (if enable)
+ *   - The last frame in the list will have io_flink == NULL.
  *
  * Parameters:
- *   family - Address family
+ *   radio       The radio network driver interface.
+ *   framelist - The head of an incoming list of frames.  Normally this
+ *               would be a single frame.  A list may be provided if
+ *               appropriate, however.
+ *   meta      - Meta data characterizing the received frame.
  *
- * Returned Value:
- *   On success, a non-NULL instance of struct sock_intf_s is returned.  NULL
- *   is returned only if the address family is not supported.
+ *               If there are multilple frames in the list, this metadata
+ *               must apply to all of the frames in the list.
+ *
+ * Return:
+ *   OK    The IEEE 802.15.4 has been processed  and can be deleted
+ *   ERROR Hold the IEEE 802.15.4 and try again later. There is a listening
+ *         socket but no recv in place to catch the IEEE 802.15.4 yet.
+ *         Useful when a packet arrives before a recv call is in place.
+ *
+ * Assumptions:
+ *   Called from the network diver with the network locked.
  *
  ****************************************************************************/
 
-FAR const struct sock_intf_s *net_sockif(sa_family_t family)
-{
-  FAR const struct sock_intf_s *sockif = NULL;
+struct radio_driver_s;    /* Forward reference */
+struct ieee802154_data_ind_s; /* Forward reference */
+struct iob_s;                 /* Forward reference */
 
-  /* Get the socket interface */
+int ieee802154_input(FAR struct radio_driver_s *radio,
+                    FAR struct iob_s *framelist,
+                    FAR const struct ieee802154_data_ind_s *meta);
 
-  switch (family)
-    {
-#ifdef HAVE_INET_SOCKETS
-#ifdef HAVE_PFINET_SOCKETS
-    case PF_INET:
-#endif
-#ifdef HAVE_PFINET6_SOCKETS
-    case PF_INET6:
-#endif
-      sockif = &g_inet_sockif;
-      break;
-#endif
-
-#ifdef CONFIG_NET_LOCAL
-    case PF_LOCAL:
-      sockif = &g_local_sockif;
-      break;
-#endif
-
-#ifdef CONFIG_NET_PKT
-    case PF_PACKET:
-      sockif = &g_pkt_sockif;
-      break;
-#endif
-
-#ifdef CONFIG_NET_IEEE802154
-    case PF_IEEE802154:
-      sockif = &g_ieee802154_sockif;
-      break;
-#endif
-
-    default:
-      nerr("ERROR: Address family unsupported: %d\n", family);
-    }
-
-  return sockif;
-}
+#endif /*  __INCLUDE_NUTTX_NET_IEEE802154_H */

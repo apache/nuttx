@@ -68,7 +68,7 @@
  * See also the definitions above for portable union selectors.
  */
 
-struct ieee802154_addr_s
+struct ieee802154_saddr_s
 {
   uint8_t s_mode;                        /* Address mode (see enum
                                           * ieee802154_addrmode_e) */
@@ -91,7 +91,7 @@ struct ieee802154_addr_s
 struct sockaddr_ieee802154_s
 {
   sa_family_t sa_family;                 /* AF_IEEE802154 */
-  struct ieee802154_addr_s sa_addr;      /* Radio address */
+  struct ieee802154_saddr_s sa_addr;     /* Radio address */
 };
 
 /****************************************************************************

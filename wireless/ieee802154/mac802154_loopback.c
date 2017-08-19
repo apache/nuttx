@@ -106,7 +106,7 @@ struct lo_driver_s
 
   /* This holds the information visible to the NuttX network */
 
-  struct sixlowpan_driver_s lo_radio;  /* Interface understood by the network */
+  struct radio_driver_s lo_radio;  /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -161,11 +161,11 @@ static int  lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  lo_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
-static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
+static int lo_get_mhrlen(FAR struct radio_driver_s *netdev,
               FAR const void *meta);
-static int lo_req_data(FAR struct sixlowpan_driver_s *netdev,
+static int lo_req_data(FAR struct radio_driver_s *netdev,
               FAR const void *meta, FAR struct iob_s *framelist);
-static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
+static int lo_properties(FAR struct radio_driver_s *netdev,
               FAR struct sixlowpan_properties_s *properties);
 
 /****************************************************************************
@@ -191,8 +191,8 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the eaddr */
 
-  dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
-  IEEE802154_EADDRCOPY(dev->d_mac.sixlowpan.nv_addr, g_eaddr);
+  dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+  IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, g_eaddr);
 
   /* Set the IP address based on the eaddr */
 
@@ -211,8 +211,8 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the saddr */
 
-  dev->d_mac.sixlowpan.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
-  IEEE802154_SADDRCOPY(dev->d_mac.sixlowpan.nv_addr, g_saddr);
+  dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  IEEE802154_SADDRCOPY(dev->d_mac.radio.nv_addr, g_saddr);
 
   /* Set the IP address based on the saddr */
 
@@ -482,14 +482,14 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
-         dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
-         dev->d_mac.sixlowpan.nv_addr[2], dev->d_mac.sixlowpan.nv_addr[3],
-         dev->d_mac.sixlowpan.nv_addr[4], dev->d_mac.sixlowpan.nv_addr[5],
-         dev->d_mac.sixlowpan.nv_addr[6], dev->d_mac.sixlowpan.nv_addr[7],
+         dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+         dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
+         dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
+         dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7],
          priv->lo_panid[0], priv->lo_panid[1]);
 #else
   ninfo("             Node: %02x:%02x PANID=%02x:%02x\n",
-         dev->d_mac.sixlowpan.nv_addr[0], dev->d_mac.sixlowpan.nv_addr[1],
+         dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
          priv->lo_panid[0], priv->lo_panid[1]);
 #endif
 
@@ -811,7 +811,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
+static int lo_get_mhrlen(FAR struct radio_driver_s *netdev,
                          FAR const void *meta)
 {
   return MAC_HDRLEN;
@@ -835,7 +835,7 @@ static int lo_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int lo_req_data(FAR struct sixlowpan_driver_s *netdev,
+static int lo_req_data(FAR struct radio_driver_s *netdev,
                        FAR const void *meta, FAR struct iob_s *framelist)
 {
   FAR struct lo_driver_s *priv;
@@ -905,7 +905,7 @@ static int lo_req_data(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
+static int lo_properties(FAR struct radio_driver_s *netdev,
                          FAR struct sixlowpan_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
@@ -969,7 +969,7 @@ static int lo_properties(FAR struct sixlowpan_driver_s *netdev,
 int ieee8021514_loopback(void)
 {
   FAR struct lo_driver_s *priv;
-  FAR struct sixlowpan_driver_s *radio;
+  FAR struct radio_driver_s *radio;
   FAR struct net_driver_s *dev;
 
   ninfo("Initializing\n");

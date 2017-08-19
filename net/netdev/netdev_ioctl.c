@@ -833,8 +833,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.sixlowpan.nv_addr,
-                         dev->d_mac.sixlowpan.nv_addrlen);
+                         dev->d_mac.radio.nv_addr,
+                         dev->d_mac.radio.nv_addrlen);
                   ret = OK;
                 }
                else
@@ -865,19 +865,19 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (dev->d_lltype == NET_LL_IEEE802154 ||
                   dev->d_lltype == NET_LL_PKTRADIO)
                 {
-                  FAR struct sixlowpan_driver_s *radio;
+                  FAR struct radio_driver_s *radio;
                   struct sixlowpan_properties_s properties;
 
                   /* Get the radio properties */
 
-                  radio = (FAR struct sixlowpan_driver_s *)dev;
+                  radio = (FAR struct radio_driver_s *)dev;
                   DEBUGASSERT(radio->r_properties != NULL);
 
                   ret = radio->r_properties(radio, &properties);
                   if (ret >= 0)
                     {
-                      dev->d_mac.sixlowpan.nv_addrlen = properties.sp_addrlen;
-                      memcpy(dev->d_mac.sixlowpan.nv_addr,
+                      dev->d_mac.radio.nv_addrlen = properties.sp_addrlen;
+                      memcpy(dev->d_mac.radio.nv_addr,
                              req->ifr_hwaddr.sa_data, NET_6LOWPAN_ADDRSIZE);
                     }
                 }

@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "IEEE 802.15.4 socket support"
+
+config NET_IEEE802154
+	bool "IEEE 802.15.4 socket support"
+	default n
+	depends on NET_IPv6 && WIRELESS_IEEE802154
+	select NETDEV_IOCTL
+	---help---
+		Enable support for raw, IEEE 802.15.4 sockets.
+
+		Raw sockets allow receiving and transmitting IEEE 802.15.3 radio
+		frames without a layer2 protocol such as 6LoWPAN in between. Frames
+		received are copied into a IEEE 802.15.4 socket tap before they
+		enter the network. Frames written into a IEEE 802.15.4 socket will
+		bypass the network altogether and will be sent directly to the
+		IEEE 802.15.4 MAC network interface driver outgoing frame queue.
+
+if NET_IEEE802154
+
+config NET_IEEE802154_NCONNS
+	int "Max IEEE 802.15.4 sockets"
+	default 1
+
+endif # NET_IEEE802154
+endmenu # IEEE 802.15.4 Socket Support

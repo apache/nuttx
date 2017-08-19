@@ -1,7 +1,7 @@
 ############################################################################
-# net/Makefile
+# net/ieee802154/Make.defs
 #
-#   Copyright (C) 2007, 2008, 2011-2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,88 +33,27 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Packet socket support
 
-ifeq ($(CONFIG_NET),y)
+ifeq ($(CONFIG_NET_IEEE802154),y)
 
-# Basic networking support
+# Socket layer
 
-NET_ASRCS   =
-NET_CSRCS   = net_initialize.c
+SOCK_CSRCS += ieee802154_sockif.c
+SOCK_CSRCS += ieee802154_sendto.c
+SOCK_CSRCS += ieee802154_recvfrom.c
 
-# Socket support
+# Transport layer
 
-SOCK_ASRCS  =
-SOCK_CSRCS  =
+NET_CSRCS += ieee802154_conn.c
+NET_CSRCS += ieee802154_input.c
+NET_CSRCS += ieee802154_callback.c
+NET_CSRCS += ieee802154_poll.c
+NET_CSRCS += ieee802154_finddev.c
 
-# Support for operations on network devices
+# Include packet socket build support
 
-NETDEV_ASRCS =
-NETDEV_CSRCS =
+DEPPATH += --dep-path ieee802154
+VPATH += :ieee802154
 
-VPATH =
-DEPPATH = --dep-path .
-
-include socket/Make.defs
-include inet/Make.defs
-include netdev/Make.defs
-include arp/Make.defs
-include icmp/Make.defs
-include icmpv6/Make.defs
-include neighbor/Make.defs
-include igmp/Make.defs
-include pkt/Make.defs
-include local/Make.defs
-include tcp/Make.defs
-include udp/Make.defs
-include sixlowpan/Make.defs
-include ieee802154/Make.defs
-include devif/Make.defs
-include ipforward/Make.defs
-include loopback/Make.defs
-include route/Make.defs
-include procfs/Make.defs
-include usrsock/Make.defs
-include utils/Make.defs
-endif
-
-ASRCS = $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-
-CSRCS = $(SOCK_CSRCS) $(NETDEV_CSRCS) $(NET_CSRCS)
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-BIN = libnet$(LIBEXT)
-
-all: $(BIN)
-.PHONY: depend clean distclean
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-$(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-ifeq ($(CONFIG_NET),y)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-endif
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, $(BIN))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+endif # CONFIG_NET_IEEE802154

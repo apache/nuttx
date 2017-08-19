@@ -120,7 +120,7 @@ static int netprocfs_6lowpan_linklayer(FAR struct netprocfs_file_s *netfile,
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev  = netfile->dev;
-  addr = &dev->d_mac.sixlowpan;
+  addr = &dev->d_mac.radio;
 
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6LoWPAN HWaddr ",

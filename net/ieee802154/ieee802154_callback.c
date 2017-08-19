@@ -1,15 +1,9 @@
 /****************************************************************************
- * net/pkt/pkt_poll.c
- * Poll for the availability of packet TX data
+ * net/ieee802154/ieee802154_callback.c
+ * Forward events to waiting PF_IEEE802154 sockets.
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Adapted for NuttX from logic in uIP which also has a BSD-like license:
- *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,67 +37,52 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
 #include <debug.h>
 
-#include <nuttx/net/netconfig.h>
-#include <nuttx/net/netdev.h>
-#include <nuttx/net/udp.h>
+#include <nuttx/mm/iob.h>
+#include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/ieee802154.h>
 
 #include "devif/devif.h"
-#include "pkt/pkt.h"
+#include "ieee802154/ieee802154.h"
+
+#ifdef CONFIG_NET_IEEE802154
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pkt_poll
+ * Name: ieee802154_callback
  *
  * Description:
- *   Poll a packet "connection" structure for availability of TX data
+ *   Inform the application holding the packet socket of a change in state.
  *
- * Parameters:
- *   dev - The device driver structure to use in the send operation
- *   conn - The packet "connection" to poll for TX data
- *
- * Return:
- *   None
+ * Returned Value:
+ *   OK if packet has been processed, otherwise ERROR.
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   This function is called at the interrupt level with interrupts disabled.
  *
  ****************************************************************************/
 
-void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
+uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
+                             FAR struct ieee802154_conn_s *conn,
+                             uint16_t flags)
 {
-  /* Verify that the packet connection is valid */
+  ninfo("flags: %04x\n", flags);
 
-  if (conn)
+  /* Some sanity checking */
+
+  if (conn != NULL)
     {
-      /* Setup for the application callback */
+      /* Perform the callback */
 
-      dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev)];
-      dev->d_len     = 0;
-      dev->d_sndlen  = 0;
-
-      /* Perform the application callback */
-
-      (void)pkt_callback(dev, conn, PKT_POLL);
-
-      /* If the application has data to send, setup the UDP/IP header */
-
-      if (dev->d_sndlen > 0)
-        {
-          //devif_pkt_send(dev, conn);
-          return;
-        }
+      flags = devif_conn_event(&radio->r_dev, conn, flags, conn->list);
     }
 
-  /* Make sure that d_len is zero meaning that there is nothing to be sent */
-
-  dev->d_len = 0;
+  return flags;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_PKT */
+#endif /* CONFIG_NET_IEEE802154 */

@@ -210,7 +210,7 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-static int sixlowpan_ieee802154_metadata(FAR struct sixlowpan_driver_s *radio,
+static int sixlowpan_ieee802154_metadata(FAR struct radio_driver_s *radio,
                                          FAR const struct netdev_varaddr_s *destmac,
                                          FAR union sixlowpan_metadata_u *meta)
 {
@@ -250,10 +250,10 @@ static int sixlowpan_ieee802154_metadata(FAR struct sixlowpan_driver_s *radio,
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   pktmeta.sextended = TRUE;
   sixlowpan_eaddrcopy(pktmeta.source.nm_addr,
-                      &radio->r_dev.d_mac.sixlowpan.nv_addr);
+                      &radio->r_dev.d_mac.radio.nv_addr);
 #else
   sixlowpan_saddrcopy(pktmeta.source.nm_addr,
-                      &radio->r_dev.d_mac.sixlowpan.nv_addr);
+                      &radio->r_dev.d_mac.radio.nv_addr);
 #endif
 
   /* Copy the destination node address into the meta data */
@@ -309,7 +309,7 @@ static int sixlowpan_ieee802154_metadata(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_PKTRADIO
-static int sixlowpan_pktradio_metadata(FAR struct sixlowpan_driver_s *radio,
+static int sixlowpan_pktradio_metadata(FAR struct radio_driver_s *radio,
                                        FAR const struct netdev_varaddr_s *destmac,
                                        FAR union sixlowpan_metadata_u *meta)
 {
@@ -321,10 +321,10 @@ static int sixlowpan_pktradio_metadata(FAR struct sixlowpan_driver_s *radio,
 
   /* Set the source address */
 
-  pktmeta->pm_src.pa_addrlen = radio->r_dev.d_mac.sixlowpan.nv_addrlen;
+  pktmeta->pm_src.pa_addrlen = radio->r_dev.d_mac.radio.nv_addrlen;
   memcpy(pktmeta->pm_src.pa_addr,
-         radio->r_dev.d_mac.sixlowpan.nv_addr,
-         radio->r_dev.d_mac.sixlowpan.nv_addrlen);
+         radio->r_dev.d_mac.radio.nv_addr,
+         radio->r_dev.d_mac.radio.nv_addrlen);
 
   /* Set the destination address.
    * REVISIT: Do we need to check for multicast or broadcast addresses
@@ -373,7 +373,7 @@ static int sixlowpan_pktradio_metadata(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
                            FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf, size_t buflen,
                            FAR const struct netdev_varaddr_s *destmac)

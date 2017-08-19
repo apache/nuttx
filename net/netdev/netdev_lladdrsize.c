@@ -75,7 +75,7 @@
 #if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_WIRELESS_PKTRADIO)
 static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
 {
-  FAR struct sixlowpan_driver_s *radio = (FAR struct sixlowpan_driver_s *)dev;
+  FAR struct radio_driver_s *radio = (FAR struct radio_driver_s *)dev;
   struct sixlowpan_properties_s properties;
   int ret;
 

@@ -295,7 +295,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
    * encoding of the MAC address in the IPv6 address.
    */
 
-  ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
+  ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
                                  to6->sin6_addr.in6_u.u6_addr16, &destmac);
   if (ret < 0)
     {
@@ -471,7 +471,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
                                          ipv6udp->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
@@ -498,7 +498,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct sixlowpan_driver_s *)fwddev,
+                      (FAR struct radio_driver_s *)fwddev,
                       &ipv6udp->ipv6, buf, buflen, &destmac);
             }
         }

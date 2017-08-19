@@ -247,10 +247,10 @@ struct net_driver_s
     struct ether_addr ether;    /* Device Ethernet MAC address */
 #endif
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
   /* The address assigned to an IEEE 802.15.4 or generic packet radio. */
 
-    struct netdev_varaddr_s sixlowpan;
+    struct netdev_varaddr_s radio;
 #endif /* CONFIG_NET_6LOWPAN */
   } d_mac;
 #endif /* CONFIG_NET_ETHERNET || CONFIG_NET_6LOWPAN */
@@ -463,9 +463,9 @@ int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-struct sixlowpan_driver_s;   /* See sixlowpan.h */
+struct radio_driver_s;   /* See sixlowpan.h */
 struct iob_s;                /* See iob.h */
-int sixlowpan_input(FAR struct sixlowpan_driver_s *ieee,
+int sixlowpan_input(FAR struct radio_driver_s *ieee,
                     FAR struct iob_s *framelist, FAR const void *metadata);
 #endif
 

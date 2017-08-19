@@ -151,7 +151,7 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
                         FAR const struct ieee802_txmetadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta,
                         uint16_t paylen)
@@ -258,7 +258,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_frame_hdrlen(FAR struct radio_driver_s *radio,
                            FAR const void *meta)
 {
   return radio->r_get_mhrlen(radio, meta);
@@ -284,7 +284,7 @@ int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
                            FAR const void *meta, FAR struct iob_s *frame)
 {
   return radio->r_req_data(radio, meta, frame);
