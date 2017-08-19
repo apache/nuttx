@@ -470,7 +470,7 @@ struct radio_driver_s
    * This is the sender's copy of the tag.  It is incremented after each
    * fragmented packet is sent so that it will be unique to that
    * sequence fragmentation.  Its value is then persistent, the values of
-   * other fragmentatin variables are valid on during a single
+   * other fragmentation variables are valid on during a single
    * fragmentation sequence (while r_accumlen > 0)
    */
 

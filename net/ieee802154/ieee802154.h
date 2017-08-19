@@ -65,18 +65,20 @@
 
 /* Representation of a IEEE 802.15.4 socket connection */
 
-struct devif_callback_s;              /* Forward reference */
+struct devif_callback_s;            /* Forward reference */
 
 struct ieee802154_conn_s
 {
   dq_entry_t node;                  /* Supports a double linked list */
-  struct ieee802154_saddr_s laddr;  /* Locally bound address */
+  struct ieee802154_saddr_s laddr;  /* Locally bound / source address */
   struct ieee802154_saddr_s raddr;  /* Connected remote address */
   uint8_t crefs;                    /* Reference counts on this instance */
 
-  /* Defines the list of IEEE 802.15.4 callbacks */
+  /* This is a list of IEEE 802.15.4 callbacks.  Each callback represents
+   * a thread that is stalled, waiting for a device-specific event.
+   */
 
-  struct devif_callback_s *list;
+  FAR struct devif_callback_s *list;
 };
 
 /****************************************************************************

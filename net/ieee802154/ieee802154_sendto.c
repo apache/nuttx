@@ -54,6 +54,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
@@ -73,14 +74,15 @@
  * operated upon from the interrupt level.
  */
 
-struct send_s
+struct ieee802154_sendto_s
 {
-  FAR struct socket      *snd_sock;    /* Points to the parent socket structure */
-  FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
-  sem_t                   snd_sem;     /* Used to wake up the waiting thread */
-  FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
-  size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
-  ssize_t                 snd_sent;    /* The number of bytes sent */
+  FAR struct socket *is_sock;            /* Points to the parent socket structure */
+  FAR struct devif_callback_s *is_cb;    /* Reference to callback instance */
+  struct ieee802154_saddr_s is_destaddr; /* Frame destinatin address */
+  sem_t is_sem;                          /* Used to wake up the waiting thread */
+  FAR const uint8_t *is_buffer;          /* User buffer of data to send */
+  size_t is_buflen;                      /* Number of bytes in the is_buffer */
+  ssize_t is_sent;                       /* The number of bytes sent (or error) */
 };
 
 /****************************************************************************
@@ -88,15 +90,212 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_send_interrupt
+ * Name: ieee802154_anyaddrnull
+ *
+ * Description:
+ *   If the destination address is all zero in the MAC header buf, then it is
+ *   broadcast on the 802.15.4 network.
+ *
+ * Input parameters:
+ *   addr    - The address to check
+ *   addrlen - The length of the address in bytes
+ *
+ * Returned Value:
+ *   True if the address is all zero.
+ *
  ****************************************************************************/
 
-static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
-                                     FAR void *pvconn,
-                                     FAR void *pvpriv, uint16_t flags)
+static bool ieee802154_anyaddrnull(FAR const uint8_t *addr, uint8_t addrlen)
 {
-  FAR struct send_s *pstate;
+  while (addrlen-- > 0)
+    {
+      if (addr[addrlen] != 0x00)
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: ieee802154_saddrnull
+ *
+ * Description:
+ *   If the destination address is all zero in the MAC header buf, then it is
+ *   broadcast on the 802.15.4 network.
+ *
+ * Input parameters:
+ *   eaddr - The short address to check
+ *
+ * Returned Value:
+ *   The address length associated with the address mode.
+ *
+ ****************************************************************************/
+
+static inline bool ieee802154_saddrnull(FAR const uint8_t *saddr)
+{
+  return ieee802154_anyaddrnull(saddr, IEEE802154_SADDRSIZE);
+}
+
+/****************************************************************************
+ * Name: ieee802154_eaddrnull
+ *
+ * Description:
+ *   If the destination address is all zero in the MAC header buf, then it is
+ *   broadcast on the 802.15.4 network.
+ *
+ * Input parameters:
+ *   eaddr - The extended address to check
+ *
+ * Returned Value:
+ *   The address length associated with the address mode.
+ *
+ ****************************************************************************/
+
+static inline bool ieee802154_eaddrnull(FAR const uint8_t *eaddr)
+{
+  return ieee802154_anyaddrnull(eaddr, IEEE802154_EADDRSIZE);
+}
+
+/****************************************************************************
+ * Name: ieee802154_meta_data
+ *
+ * Description:
+ *   Based on the collected attributes and addresses, construct the MAC meta
+ *   data structure that we need to interface with the IEEE802.15.4 MAC.
+ *
+ * Input Parameters:
+ *   radio   - Radio network driver state instance.
+ *   pstate  - Send state structure instance
+ *   meta    - Location to return the corresponding meta data.
+ *   paylen  - The size of the data payload to be sent.
+ *
+ * Returned Value:
+ *   Ok is returned on success; Othewise a negated errno value is returned.
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+void ieee802154_meta_data(FAR struct radio_driver_s *radio,
+                          FAR struct ieee802154_sendto_s *pstate,
+                          FAR struct ieee802154_frame_meta_s *meta)
+{
+  FAR struct ieee802154_saddr_s *destaddr;
+  FAR struct ieee802154_saddr_s *srcaddr;
+  FAR struct ieee802154_conn_s *conn;
+  FAR struct socket *psock;
+  bool rcvrnull;
+
+  DEBUGASSERT(radio != NULL && pstate != NULL && pstate->is_sock != NULL &&
+              meta != NULL);
+
+  psock    = pstate->is_sock;
+  DEBUGASSERT(psock->s_conn != NULL);
+
+  conn     = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  srcaddr  = &conn->laddr;
+  destaddr = &pstate->is_destaddr;
+
+  DEBUGASSERT(srcaddr->s_mode != IEEE802154_ADDRMODE_NONE &&
+              destaddr->s_mode != IEEE802154_ADDRMODE_NONE);
+
+  /* Initialize all settings to all zero */
+
+  memset(meta, 0, sizeof(struct ieee802154_frame_meta_s));
+
+  /* Source address mode */
+
+  meta->srcmode = srcaddr->s_mode;
+
+  /* Check for a broadcast destination address (all zero) */
+
+  if (destaddr->s_mode == IEEE802154_ADDRMODE_EXTENDED)
+    {
+      /* Extended destination address mode */
+
+      rcvrnull = ieee802154_eaddrnull(destaddr->s_eaddr);
+    }
+  else
+    {
+      /* Short destination address mode */
+
+      rcvrnull = ieee802154_saddrnull(destaddr->s_saddr);
+    }
+
+  if (rcvrnull)
+    {
+      meta->flags.ackreq = TRUE;
+    }
+
+  /* Destination address */
+  /* If the output address is NULL, then it is broadcast on the 802.15.4
+   * network.
+   */
+
+  if (rcvrnull)
+    {
+      /* Broadcast requires short address mode. */
+
+      meta->destaddr.mode     = IEEE802154_ADDRMODE_SHORT;
+      IEEE802154_PANIDCOPY(meta->destaddr.panid, destaddr->s_panid);
+      meta->destaddr.saddr[0] = 0xff;
+      meta->destaddr.saddr[1] = 0xff;
+      memset(meta->destaddr.eaddr, 0, IEEE802154_EADDRSIZE);
+    }
+  else
+    {
+      /* Destination address. */
+
+      meta->destaddr.mode     = destaddr->s_mode;
+      IEEE802154_PANIDCOPY(meta->destaddr.panid, destaddr->s_panid);
+
+      if (destaddr->s_mode == IEEE802154_ADDRMODE_SHORT)
+        {
+          IEEE802154_SADDRCOPY(meta->destaddr.saddr, destaddr->s_eaddr);
+          memset(meta->destaddr.eaddr, 0, IEEE802154_EADDRSIZE);
+        }
+      else
+        {
+          IEEE802154_EADDRCOPY(meta->destaddr.eaddr, destaddr->s_eaddr);
+          memset(meta->destaddr.saddr, 0, IEEE802154_SADDRSIZE);
+        }
+    }
+
+  /* Handle associated with MSDU.  Will increment once per packet, not
+   * necesarily per frame:  The same MSDU handle will be used for each
+   * fragment of a disassembled packet.
+   */
+
+  meta->handle = radio->r_msdu_handle++;
+
+#ifdef CONFIG_IEEE802154_SECURITY
+#  warning CONFIG_IEEE802154_SECURITY not yet supported
+#endif
+
+#ifdef CONFIG_IEEE802154_UWB
+#  warning CONFIG_IEEE802154_UWB not yet supported
+#endif
+
+  /* Ranging left zero */
+}
+
+/****************************************************************************
+ * Name: ieee802154_sendto_interrupt
+ ****************************************************************************/
+
+static uint16_t ieee802154_sendto_interrupt(FAR struct net_driver_s *dev,
+                                            FAR void *pvconn,
+                                            FAR void *pvpriv, uint16_t flags)
+{
   FAR struct radio_driver_s *radio;
+  FAR struct ieee802154_sendto_s *pstate;
+  struct ieee802154_frame_meta_s meta;
+  FAR struct iob_s *iob;
+  int hdrlen;
+  int ret;
 
   DEBUGASSERT(pvpriv != NULL && dev != NULL && pvconn != NULL);
 
@@ -110,58 +309,97 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
   /* Make sure that this is the driver to which the socket is connected. */
 #warning Missing logic
 
-  pstate = (FAR struct send_s *)pvpriv;
+  pstate = (FAR struct ieee802154_sendto_s *)pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %d\n", flags, pstate->snd_sent);
+  ninfo("flags: %04x sent: %d\n", flags, pstate->is_sent);
 
-  if (pstate)
+  if (pstate != NULL && (flags & IEEE802154_POLL) != 0)
     {
-      /* Check if the outgoing packet is available. It may have been claimed
-       * by a send interrupt serving a different thread -OR- if the output
-       * buffer currently contains unprocessed incoming data. In these cases
-       * we will just have to wait for the next polling cycle.
+      /* Initialize the meta data */
+
+      ieee802154_meta_data(radio, pstate, &meta);
+
+      /* Get the IEEE 802.15.4 MAC header length */
+
+      hdrlen = radio->r_get_mhrlen(radio, &meta);
+      if (hdrlen < 0)
+        {
+          nerr("ERROR: Failed to get header length: %d\n", hdrlen);
+          ret = hdrlen;
+          goto errout;
+        }
+
+      /* Verify that the user buffer can fit within the frame with this
+       * MAC header.
        */
 
-      if (radio->r_dev.d_sndlen > 0 || (flags & PKT_NEWDATA) != 0)
+      DEBUGASSERT(CONFIG_NET_6LOWPAN_FRAMELEN <= CONFIG_IOB_BUFSIZE);
+      if (pstate->is_buflen + hdrlen > CONFIG_IOB_BUFSIZE)
         {
-          /* Another thread has beat us sending data or the buffer is busy,
-           * Check for a timeout. If not timed out, wait for the next
-           * polling cycle and check again.
-           */
+          nerr("ERROR: User buffer will not fit into the frame: %u > %u\n",
+               (unsigned int)(pstate->is_buflen + hdrlen),
+               (unsigned int)CONFIG_IOB_BUFSIZE);
+          ret = -E2BIG;
+          goto errout;
+        }
 
-          /* No timeout. Just wait for the next polling cycle */
+      /* Allocate an IOB to hold the frame data */
 
+      iob = iob_alloc(0);
+      if (iob == NULL)
+        {
+          nwarn("WARNING: Failed to allocate IOB\n");
           return flags;
         }
 
-      /* It looks like we are good to send the data */
+      /* Initialize the IOB */
 
-      else
+      iob->io_offset = hdrlen;
+      iob->io_len    = pstate->is_buflen + hdrlen;
+      iob->io_pktlen = pstate->is_buflen + hdrlen;
+
+      /* Copy the user data into the IOB */
+
+      memcpy(&iob->io_data[hdrlen], pstate->is_buffer, pstate->is_buflen);
+
+      /* And submit the IOB to the network driver */
+
+      ret = radio->r_req_data(radio, &meta, iob);
+      if (ret < 0)
         {
-          /* Copy the packet data into the device packet buffer and send it */
-#warning Missing logic
-          //devif_ieee802154_send(radio, pstate->snd_buffer, pstate->snd_buflen);
-          pstate->snd_sent = pstate->snd_buflen;
-
-          /* Make sure no ARP request overwrites this ARP request.  This
-           * flag will be cleared in arp_out().
-           */
-
-          IFF_SET_NOARP(radio->r_dev.d_flags);
+          nerr("ERROR: r_req_data() failed: %d\n", ret);
+          goto errout;
         }
+
+      /* Save the successful result */
+
+      pstate->is_sent = pstate->is_buflen;
 
       /* Don't allow any further call backs. */
 
-      pstate->snd_cb->flags    = 0;
-      pstate->snd_cb->priv     = NULL;
-      pstate->snd_cb->event    = NULL;
+      pstate->is_cb->flags    = 0;
+      pstate->is_cb->priv     = NULL;
+      pstate->is_cb->event    = NULL;
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->snd_sem);
+      sem_post(&pstate->is_sem);
     }
 
+  return flags;
+
+errout:
+  /* Don't allow any further call backs. */
+
+  pstate->is_cb->flags    = 0;
+  pstate->is_cb->priv     = NULL;
+  pstate->is_cb->event    = NULL;
+  pstate->is_sent         = ret;
+
+  /* Wake up the waiting thread */
+
+  sem_post(&pstate->is_sem);
   return flags;
 }
 
@@ -197,9 +435,10 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
                                 size_t len, int flags,
                                 FAR const struct sockaddr *to, socklen_t tolen)
 {
+  FAR struct sockaddr_ieee802154_s *destaddr;
   FAR struct radio_driver_s *radio;
   FAR struct ieee802154_conn_s *conn;
-  struct send_s state;
+  struct ieee802154_sendto_s state;
   int errcode;
   int ret = OK;
 
@@ -213,6 +452,16 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
 
   conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
+
+  /* Verify that the address is large enough to be a valid PF_IEEE802154
+   * address.
+   */
+
+  if (tolen < sizeof(struct ieee802154_saddr_s))
+    {
+      errcode = EDESTADDRREQ;
+      goto errout;
+    }
 
   /* Get the device driver that will service this transfer */
 
@@ -235,31 +484,37 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
    */
 
   net_lock();
-  memset(&state, 0, sizeof(struct send_s));
+  memset(&state, 0, sizeof(struct ieee802154_sendto_s));
 
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  (void)sem_init(&state.is_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&state.is_sem, SEM_PRIO_NONE);
 
-  state.snd_sock      = psock;          /* Socket descriptor to use */
-  state.snd_buflen    = len;            /* Number of bytes to send */
-  state.snd_buffer    = buf;            /* Buffer to send from */
+  state.is_sock   = psock;          /* Socket descriptor to use */
+  state.is_buflen = len;            /* Number of bytes to send */
+  state.is_buffer = buf;            /* Buffer to send from */
+
+  /* Copy the destination address */
+
+  destaddr = (FAR struct sockaddr_ieee802154_s *)to;
+  memcpy(&state.is_destaddr, &destaddr->sa_addr,
+         sizeof(struct ieee802154_saddr_s));
 
   if (len > 0)
     {
       /* Allocate resource to receive a callback */
 
-      state.snd_cb = ieee802154_callback_alloc(&radio->r_dev, conn);
-      if (state.snd_cb)
+      state.is_cb = ieee802154_callback_alloc(&radio->r_dev, conn);
+      if (state.is_cb)
         {
           /* Set up the callback in the connection */
 
-          state.snd_cb->flags = PKT_POLL;
-          state.snd_cb->priv  = (FAR void *)&state;
-          state.snd_cb->event = psock_send_interrupt;
+          state.is_cb->flags = PKT_POLL;
+          state.is_cb->priv  = (FAR void *)&state;
+          state.is_cb->event = ieee802154_sendto_interrupt;
 
           /* Notify the device driver that new TX data is available. */
 
@@ -271,15 +526,15 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
            * task sleeps and automatically re-enabled when the task restarts.
            */
 
-          ret = net_lockedwait(&state.snd_sem);
+          ret = net_lockedwait(&state.is_sem);
 
           /* Make sure that no further interrupts are processed */
 
-          ieee802154_callback_free(&radio->r_dev, conn, state.snd_cb);
+          ieee802154_callback_free(&radio->r_dev, conn, state.is_cb);
         }
     }
 
-  sem_destroy(&state.snd_sem);
+  sem_destroy(&state.is_sem);
   net_unlock();
 
   /* Set the socket state to idle */
@@ -290,9 +545,9 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
    * for the send length
    */
 
-  if (state.snd_sent < 0)
+  if (state.is_sent < 0)
     {
-      errcode = state.snd_sent;
+      errcode = state.is_sent;
       goto errout;
     }
 
@@ -308,7 +563,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Return the number of bytes actually sent */
 
-  return state.snd_sent;
+  return state.is_sent;
 
 errout:
   set_errno(errcode);

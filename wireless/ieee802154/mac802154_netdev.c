@@ -57,6 +57,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ieee802154.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
@@ -434,7 +435,23 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
 
   /* Transfer the frame to the network logic */
 
-  sixlowpan_input(&priv->md_dev, iob, (FAR void *)ind);
+#ifdef CONFIG_NET_IEEE802154
+  /* Invoke the PF_IEEE802154 tap first.  If the frame matches
+   * with a connected PF_IEEE802145 socket, it will take the
+   * frame and return success.
+   */
+
+#ifndef CONFIG_NET_6LOWPAN
+  (void)ieee802154_input(&priv->md_dev, iob, (FAR void *)ind);
+#else
+  if (ieee802154_input(&priv->md_dev, iob, (FAR void *)ind) < 0)
+#endif
+#endif
+#ifdef CONFIG_NET_6LOWPAN
+    {
+      (void)sixlowpan_input(&priv->md_dev, iob, (FAR void *)ind);
+    }
+#endif
 
   /* sixlowpan_input() will free the IOB, but we must free the struct
    * ieee802154_data_ind_s container here.

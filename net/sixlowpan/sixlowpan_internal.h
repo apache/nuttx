@@ -290,7 +290,6 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *   pktmeta - Meta-data specific to the current outgoing frame
  *   meta    - Location to return the corresponding meta data reference
  *             (obfuscated).
- *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -303,8 +302,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 #ifdef CONFIG_WIRELESS_IEEE802154
 int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
                         FAR const struct ieee802_txmetadata_s *pktmeta,
-                        FAR struct ieee802154_frame_meta_s *meta,
-                        uint16_t paylen);
+                        FAR struct ieee802154_frame_meta_s *meta);
 #endif
 
 /****************************************************************************

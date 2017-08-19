@@ -53,6 +53,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/ieee802154.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
@@ -341,7 +342,26 @@ static int lo_loopback(FAR struct net_driver_s *dev)
       ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
             iob, iob->io_offset, iob->io_len);
 
-      ret = sixlowpan_input(&priv->lo_radio, iob, (FAR void *)&ind);
+#ifdef CONFIG_NET_IEEE802154
+      /* Invoke the PF_IEEE802154 tap first.  If the frame matches
+       * with a connected PF_IEEE802145 socket, it will take the
+       * frame and return success.
+       */
+
+      ret = ieee802154_input(&priv->lo_radio, iob, (FAR void *)&ind);
+#ifdef CONFIG_NET_6LOWPAN
+      /* If PF_IEEE802154 was not interested in the frame, then
+       * give it to 6LoWPAN.
+       */
+
+      if (ret < 0)
+#endif
+#endif
+#ifdef CONFIG_NET_6LOWPAN
+        {
+          ret = sixlowpan_input(&priv->lo_radio, iob, (FAR void *)&ind);
+        }
+#endif
 
       /* Increment statistics */
 

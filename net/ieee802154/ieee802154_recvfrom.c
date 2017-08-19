@@ -130,7 +130,7 @@ static inline void
  ****************************************************************************/
 
 static void ieee802154_recvfrom_newdata(FAR struct radio_driver_s *radio,
-                                 FAR struct ieee802154_recvfrom_s *pstate)
+                                        FAR struct ieee802154_recvfrom_s *pstate)
 {
   size_t recvlen;
 

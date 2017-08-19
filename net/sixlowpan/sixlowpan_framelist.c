@@ -282,7 +282,7 @@ static int sixlowpan_ieee802154_metadata(FAR struct radio_driver_s *radio,
    * will update the MSDU payload size when the IOB has been setup).
    */
 
-  ret = sixlowpan_meta_data(radio, &pktmeta, &meta->ieee802154, 0);
+  ret = sixlowpan_meta_data(radio, &pktmeta, &meta->ieee802154);
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_meta_data() failed: %d\n", ret);

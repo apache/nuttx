@@ -140,7 +140,6 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *   radio   - Radio network driver state instance.
  *   pktmeta - Meta-data specific to the current outgoing frame
  *   meta    - Location to return the corresponding meta data.
- *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -153,8 +152,7 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
 #ifdef CONFIG_WIRELESS_IEEE802154
 int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
                         FAR const struct ieee802_txmetadata_s *pktmeta,
-                        FAR struct ieee802154_frame_meta_s *meta,
-                        uint16_t paylen)
+                        FAR struct ieee802154_frame_meta_s *meta)
 {
   bool rcvrnull;
 
@@ -164,7 +162,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
 
   /* Source address mode */
 
-  meta->srcmode = pktmeta->sextended != 0?
+  meta->srcmode = pktmeta->sextended != 0 ?
                     IEEE802154_ADDRMODE_EXTENDED :
                     IEEE802154_ADDRMODE_SHORT;
 

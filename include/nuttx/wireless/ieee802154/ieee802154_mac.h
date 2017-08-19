@@ -1744,7 +1744,6 @@ FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void);
 
 void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind);
 
-
 #undef EXTERN
 #ifdef __cplusplus
 }
