@@ -67,7 +67,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* Up to 2 DAC interfaces are supported */
+/* Up to 2 DAC interfaces for up to 3 channels are supported */
 
 #if STM32_NDAC < 2
 #  undef CONFIG_STM32_DAC2
@@ -417,7 +417,7 @@ static const struct dac_ops_s g_dacops =
 };
 
 #ifdef CONFIG_STM32_DAC1
-/* Channel 1 */
+/* Channel 1: DAC1 channel 1 */
 
 static struct stm32_chan_s g_dac1priv =
 {
@@ -447,20 +447,15 @@ static struct dac_dev_s g_dac1dev =
   .ad_priv = &g_dac1priv,
 };
 
-/* Channel 2 */
+#if STM32_NDAC > 1
+/* Channel 2: DAC1 channel 2 */
 
 static struct stm32_chan_s g_dac2priv =
 {
   .intf       = 1,
-#if STM32_NDAC < 2
-  .pin        = GPIO_DAC2_OUT,
-  .dro        = STM32_DAC_DHR12R2,
-  .cr         = STM32_DAC_CR,
-#else
   .pin        = GPIO_DAC1_OUT2,
   .dro        = STM32_DAC1_DHR12R2,
   .cr         = STM32_DAC1_CR,
-#endif
 #ifdef CONFIG_STM32_DAC2_DMA
   .hasdma     = 1,
   .dmachan    = DAC2_DMA_CHAN,
@@ -476,10 +471,12 @@ static struct dac_dev_s g_dac2dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac2priv,
 };
-#endif
+#endif  /* STM32_NDAC > 1 */
+
+#endif  /* CONFIG_STM32_DAC1 */
 
 #ifdef CONFIG_STM32_DAC2
-/* Channel 3 */
+/* Channel 3: DAC2 channel 1 */
 
 static struct stm32_chan_s g_dac3priv =
 {
@@ -494,7 +491,7 @@ static struct dac_dev_s g_dac3dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac3priv,
 };
-#endif
+#endif  /* CONFIG_STM32_DAC2 */
 
 static struct stm32_dac_s g_dacblock;
 
