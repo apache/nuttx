@@ -46,6 +46,8 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -293,4 +295,5 @@ struct radio_driver_s
  * Public Function Prototypes
  ****************************************************************************/
 
+#endif /* CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
 #endif /* __INCLUDE_NUTTX_NET_RADIODEV_H */
