@@ -465,7 +465,7 @@ struct stm32_chan_s
   DMA_HANDLE dma;        /* Allocated DMA channel */
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
-  uint16_t   dmabuffer[CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
+  uint16_t   dmabuffer[CONFIG_STM32_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
 #endif
 };
 
