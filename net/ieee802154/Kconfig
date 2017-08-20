@@ -24,7 +24,14 @@ if NET_IEEE802154
 
 config NET_IEEE802154_NCONNS
 	int "Max IEEE 802.15.4 sockets"
-	default 1
+	default 4
+
+config NET_IEEE802154_NCONTAINERS
+	int "Number of pre-allocated frame containers"
+	default 20
+	---help---
+		This specifies the total number of preallocated frame containers.
+		One must be allocated with each incoming frame.
 
 endif # NET_IEEE802154
 endmenu # IEEE 802.15.4 Socket Support

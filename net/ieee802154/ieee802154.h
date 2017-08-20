@@ -59,20 +59,44 @@
 #define ieee802154_callback_free(dev,conn,cb) \
   devif_conn_callback_free(dev, cb, &conn->list)
 
+/* Memory Pools */
+
+#define IEEE802154_POOL_PREALLOCATED  0
+#define IEEE802154_POOL_DYNAMIC       1
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
+/* Used for containing and queuing IOBs along with information about the
+ * source of the frame.
+ */
+
+struct iob_s;  /* Forward reference */
+
+struct ieee802154_container_s
+{
+  FAR struct ieee802154_container_s *ic_flink; /* Supports a singly linked list */
+  struct ieee802154_saddr_s ic_src;            /* Source of the packet */
+  FAR struct iob_s *ic_iob;                    /* Contained IOB */
+  uint8_t ic_pool;                             /* See IEEE802154_POOL_* definitions */
+};
+
 /* Representation of a IEEE 802.15.4 socket connection */
 
-struct devif_callback_s;            /* Forward reference */
+struct devif_callback_s;                       /* Forward reference */
 
 struct ieee802154_conn_s
 {
-  dq_entry_t node;                  /* Supports a double linked list */
-  struct ieee802154_saddr_s laddr;  /* Locally bound / source address */
-  struct ieee802154_saddr_s raddr;  /* Connected remote address */
-  uint8_t crefs;                    /* Reference counts on this instance */
+  dq_entry_t node;                             /* Supports a double linked list */
+  struct ieee802154_saddr_s laddr;             /* Locally bound / source address */
+  struct ieee802154_saddr_s raddr;             /* Connected remote address */
+  uint8_t crefs;                               /* Reference counts on this instance */
+
+  /* List of incoming packets */
+
+  FAR struct ieee802154_container_s *rxhead;
+  FAR struct ieee802154_container_s *rxtail;
 
   /* This is a list of IEEE 802.15.4 callbacks.  Each callback represents
    * a thread that is stalled, waiting for a device-specific event.
@@ -112,15 +136,32 @@ struct sockaddr;              /* Forward reference */
  * Name: ieee802154_initialize()
  *
  * Description:
- *   Initialize the IEEE 802.15.4 socket connection structures.  Called
- *   once and only from the network initialization logic.
+ *   Initialize the IEEE 802.15.4 socket support.  Called once and only
+ *   from the network initialization logic.
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence
  *
  ****************************************************************************/
 
 void ieee802154_initialize(void);
 
 /****************************************************************************
- * Name: ieee802154_alloc()
+ * Name: ieee802154_conn_initialize
+ *
+ * Description:
+ *   Initialize the IEEE 802.15.5 connection structure allocator.  Called
+ *   once and only from ieee802154_initialize().
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence
+ *
+ ****************************************************************************/
+
+void ieee802154_conn_initialize(void);
+
+/****************************************************************************
+ * Name: ieee802154_conn_alloc()
  *
  * Description:
  *   Allocate a new, uninitialized IEEE 802.15.4 socket connection
@@ -129,10 +170,10 @@ void ieee802154_initialize(void);
  *
  ****************************************************************************/
 
-FAR struct ieee802154_conn_s *ieee802154_alloc(void);
+FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void);
 
 /****************************************************************************
- * Name: ieee802154_free()
+ * Name: ieee802154_conn_free()
  *
  * Description:
  *   Free a IEEE 802.15.4 socket connection structure that is no longer in
@@ -140,10 +181,10 @@ FAR struct ieee802154_conn_s *ieee802154_alloc(void);
  *
  ****************************************************************************/
 
-void ieee802154_free(FAR struct ieee802154_conn_s *conn);
+void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn);
 
 /****************************************************************************
- * Name: ieee802154_active()
+ * Name: ieee802154_conn_active()
  *
  * Description:
  *   Find a connection structure that is the appropriate
@@ -155,10 +196,10 @@ void ieee802154_free(FAR struct ieee802154_conn_s *conn);
  ****************************************************************************/
 
 FAR struct ieee802154_conn_s *
-  ieee802154_active(FAR const struct ieee802154_data_ind_s *meta);
+  ieee802154_conn_active(FAR const struct ieee802154_data_ind_s *meta);
 
 /****************************************************************************
- * Name: ieee802154_nextconn()
+ * Name: ieee802154_conn_next()
  *
  * Description:
  *   Traverse the list of allocated IEEE 802.15.4 connections
@@ -169,7 +210,7 @@ FAR struct ieee802154_conn_s *
  ****************************************************************************/
 
 FAR struct ieee802154_conn_s *
-  ieee802154_nextconn(FAR struct ieee802154_conn_s *conn);
+  ieee802154_conn_next(FAR struct ieee802154_conn_s *conn);
 
 /****************************************************************************
  * Name: ieee802154_input
@@ -338,6 +379,75 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
                                 FAR const void *buf,
                                 size_t len, int flags,
                                 FAR const struct sockaddr *to, socklen_t tolen);
+
+/****************************************************************************
+ * Name: ieee802154_container_initialize
+ *
+ * Description:
+ *   This function initializes the container allocator.  This function must
+ *   be called early in the initialization sequence before any socket
+ *   activity.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence
+ *
+ ****************************************************************************/
+
+void ieee802154_container_initialize(void);
+
+/****************************************************************************
+ * Name: ieee802154_container_allocate
+ *
+ * Description:
+ *   The ieee802154_container_allocate function will get a free continer
+ *   for use by the recvfrom() logic.
+ *
+ *   This function will first attempt to allocate from the g_free_container
+ *   list.  If that the list is empty, then the meta-data structure will be
+ *   allocated from the dynamic memory pool.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   A reference to the allocated container structure.  All user fields in this
+ *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   returned.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+FAR struct ieee802154_container_s *ieee802154_container_allocate(void);
+
+/****************************************************************************
+ * Name: ieee802154_container_free
+ *
+ * Description:
+ *   The ieee802154_container_free function will return a container structure
+ *   to the free list of containers if it was a pre-allocated container
+ *   structure. If the container structure was allocated dynamically it will
+ *   be deallocated.
+ *
+ * Inputs:
+ *   container - container structure to free
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+void ieee802154_container_free(FAR struct ieee802154_container_s *container);
 
 #undef EXTERN
 #ifdef __cplusplus

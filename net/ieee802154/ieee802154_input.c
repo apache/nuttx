@@ -38,6 +38,8 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>
@@ -97,15 +99,16 @@
 
 int ieee802154_input(FAR struct radio_driver_s *radio,
                      FAR struct iob_s *framelist,
-                     FAR const struct ieee802154_data_ind_s *meta)
+                     FAR struct ieee802154_data_ind_s *meta)
 {
+  FAR struct ieee802154_container_s *container;
   FAR struct ieee802154_conn_s *conn;
   int ret = OK;
 
   /* Check if there is a connection that will accept this packet */
 
-  conn = ieee802154_active(meta);
-  if (conn)
+  conn = ieee802154_conn_active(meta);
+  if (conn != NULL)
     {
       uint16_t flags;
 
@@ -117,25 +120,66 @@ int ieee802154_input(FAR struct radio_driver_s *radio,
       radio->r_dev.d_len     = 0;
       radio->r_dev.d_sndlen  = 0;
 
+      /* Allocate a container for the IOB */
+
+      container = ieee802154_container_allocate();
+      if (container == NULL)
+        {
+          nerr("ERROR: Failed to allocate a container\n");
+          return -ENOMEM;
+        }
+
+      /* Initialize the container */
+
+      memset(&container->ic_src, 0, sizeof(struct ieee802154_saddr_s));
+
+      DEBUGASSERT(meta->src.mode != IEEE802154_ADDRMODE_NONE);
+      container->ic_src.s_mode = meta->src.mode;
+      IEEE802154_PANIDCOPY(container->ic_src.s_panid, meta->src.panid);
+
+      if (meta->src.mode == IEEE802154_ADDRMODE_SHORT)
+        {
+          IEEE802154_SADDRCOPY(container->ic_src.s_saddr, meta->src.saddr);
+        }
+      else if (meta->src.mode == IEEE802154_ADDRMODE_EXTENDED)
+        {
+          IEEE802154_EADDRCOPY(container->ic_src.s_eaddr, meta->src.eaddr);
+        }
+
+      DEBUGASSERT(framelist != NULL);
+      container->ic_iob = framelist;
+
+      /* Add the container to the tail of the list of incoming frames */
+
+      container->ic_flink = NULL;
+      if (conn->rxtail == NULL)
+        {
+          conn->rxhead    = container;
+        }
+      else
+        {
+          conn->rxtail->ic_flink = container;
+        }
+
+      conn->rxtail        = container;
+
       /* Perform the application callback */
-      /* REVISIT: Need to pass the meta data and the IOB through the callback */
-#warning Missing logic
 
       flags = ieee802154_callback(radio, conn, IEEE802154_NEWDATA);
 
-      /* If the operation was successful, the PKT_NEWDATA flag is removed
-       * and thus the packet can be deleted (OK will be returned).
+      /* If the operation was successful, the IEEE802154_NEWDATA flag is
+       * removed and thus the frame can be deleted (OK will be returned).
        */
 
-      if ((flags & PKT_NEWDATA) != 0)
+      if ((flags & IEEE802154_NEWDATA) != 0)
         {
-          /* No.. the packet was not processed now.  Return ERROR so
+          /* No.. the frame was not processed now.  Return ERROR so
            * that the driver may retry again later.  We still need to
            * set d_len to zero so that the driver is aware that there
            * is nothing to be sent.
            */
 
-           nwarn("WARNING: Packet not processed\n");
+           nwarn("WARNING: Frame not processed\n");
            ret = ERROR;
         }
     }

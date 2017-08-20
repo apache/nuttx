@@ -119,6 +119,9 @@ const struct sock_intf_s g_ieee802154_sockif =
  * Description:
  *   Allocate and attach a PF_IEEE802154 connection structure.
  *
+ * Assumptions:
+ *   The network is locked
+ *
  ****************************************************************************/
 
 static int ieee802154_sockif_alloc(FAR struct socket *psock)
@@ -127,7 +130,7 @@ static int ieee802154_sockif_alloc(FAR struct socket *psock)
    * socket instance.
    */
 
-  FAR struct ieee802154_conn_s *conn = ieee802154_alloc();
+  FAR struct ieee802154_conn_s *conn = ieee802154_conn_alloc();
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -681,7 +684,7 @@ static int ieee802154_close(FAR struct socket *psock)
               /* Yes... free the connection structure */
 
               conn->crefs = 0;          /* No more references on the connection */
-              ieee802154_free(psock->s_conn);  /* Free network resources */
+              ieee802154_conn_free(psock->s_conn);  /* Free network resources */
             }
           else
             {

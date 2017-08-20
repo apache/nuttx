@@ -259,7 +259,7 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
 
   /* Traverse all of the allocated packet connections and perform the poll action */
 
-  while (!bstop && (ieee802154_conn = ieee802154_nextconn(ieee802154_conn)))
+  while (!bstop && (ieee802154_conn = ieee802154_conn_next(ieee802154_conn)))
     {
       /* Perform the packet TX poll */
 

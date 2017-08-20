@@ -1304,7 +1304,7 @@ Configuration sub-directories
 
         Then, on subsequent testing, it "magically" started behaving
         properaly and seems quite stable now.. although I did nothing to
-        the the problem.  Perhaps the radio was in a bad state for awhile;
+        solve the problem.  Perhaps the radio was in a bad state for awhile;
         perhaps something I did masked the problem.  However, all is well
         for the time being.
 

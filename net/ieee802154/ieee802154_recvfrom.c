@@ -68,12 +68,13 @@
 
 struct ieee802154_recvfrom_s
 {
+  FAR struct socket *ir_sock;          /* Points to the parent socket structure */
   FAR struct devif_callback_s *ir_cb;  /* Reference to callback instance */
-  sem_t    ir_sem;                     /* Semaphore signals recv completion */
-  size_t   ir_buflen;                  /* Length of receive buffer */
-  uint8_t *ir_buffer;                  /* Pointer to receive buffer */
-  ssize_t  ir_recvlen;                 /* The received length */
-  int      ir_result;                  /* Success:OK, failure:negated errno */
+  FAR struct sockaddr *ir_from;        /* Location to return the from address */
+  FAR uint8_t *ir_buffer;              /* Pointer to receive buffer */
+  size_t ir_buflen;                    /* Length of receive buffer */
+  sem_t ir_sem;                        /* Semaphore signals recv completion */
+  ssize_t ir_result;                   /* Success:size, failure:negated errno */
 };
 
 /****************************************************************************
@@ -81,95 +82,85 @@ struct ieee802154_recvfrom_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee802154_add_recvlen
- *
- * Description:
- *   Update information about space available for new data and update size
- *   of data in buffer,  This logic accounts for the case where
- *   recvfrom_udpreadahead() sets state.ir_recvlen == -1 .
- *
- * Parameters:
- *   pstate   recvfrom state structure
- *   recvlen  size of new data appended to buffer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void
-  ieee802154_add_recvlen(FAR struct ieee802154_recvfrom_s *pstate,
-                         size_t recvlen)
-{
-  if (pstate->ir_recvlen < 0)
-    {
-      pstate->ir_recvlen = 0;
-    }
-
-  pstate->ir_recvlen += recvlen;
-  pstate->ir_buffer  += recvlen;
-  pstate->ir_buflen  -= recvlen;
-}
-
-/****************************************************************************
- * Name: ieee802154_recvfrom_newdata
- *
- * Description:
- *   Copy the read data from the packet
- *
- * Parameters:
- *   radio      The structure of the network driver that caused the interrupt
- *   pstate   recvfrom state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void ieee802154_recvfrom_newdata(FAR struct radio_driver_s *radio,
-                                        FAR struct ieee802154_recvfrom_s *pstate)
-{
-  size_t recvlen;
-
-  if (radio->r_dev.d_len > pstate->ir_buflen)
-    {
-      recvlen = pstate->ir_buflen;
-    }
-  else
-    {
-      recvlen = radio->r_dev.d_len;
-    }
-
-  /* Copy the new packet data into the user buffer */
-
-  memcpy(pstate->ir_buffer, radio->r_dev.d_buf, recvlen);
-  ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)radio->r_dev.d_len);
-
-  /* Update the accumulated size of the data read */
-
-  ieee802154_add_recvlen(pstate, recvlen);
-}
-
-/****************************************************************************
  * Name: ieee802154_recvfrom_sender
  *
  * Description:
+ *   Perform the reception operation if there are any queued frames in the
+ *   RX frame queue.
  *
  * Parameters:
  *
  * Returned Values:
  *
  * Assumptions:
+ *   The network is lockec
  *
  ****************************************************************************/
 
-static inline void
-  ieee802154_recvfrom_sender(FAR struct radio_driver_s *radio,
-                             FAR struct ieee802154_recvfrom_s *pstate)
+static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
+                                           FAR struct ieee802154_recvfrom_s *pstate)
 {
+  FAR struct ieee802154_container_s *container;
+  FAR struct sockaddr_ieee802154_s *iaddr;
+  FAR struct ieee802154_conn_s *conn;
+  FAR struct iob_s *iob;
+  size_t copylen;
+  int ret = -EAGAIN;
+
+  /* Check if there is anyting in in the RX input queue */
+
+  DEBUGASSERT(pstate != NULL && pstate->ir_sock != NULL);
+  conn = (FAR struct ieee802154_conn_s *)pstate->ir_sock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  if (conn->rxhead != NULL)
+    {
+      /* Remove the container from the RX input queue. */
+
+      container           = conn->rxhead;
+      DEBUGASSERT(container != NULL);
+      conn->rxhead        = container->ic_flink;
+      container->ic_flink = NULL;
+
+      /* Did the RX queue become empty? */
+
+      if (conn->rxhead == NULL)
+        {
+          conn->rxtail = NULL;
+        }
+
+      /* Extract the IOB containing the frame from the container */
+
+      iob               = container->ic_iob;
+      container->ic_iob = NULL;
+      DEBUGASSERT(iob != NULL);
+
+      /* Copy the new packet data into the user buffer */
+
+      copylen = iob->io_len - iob->io_offset;
+      memcpy(pstate->ir_buffer, &iob->io_data[iob->io_offset], copylen);
+
+      ninfo("Received %d bytes\n", (int)copylen);
+      ret = copylen;
+
+      /* If a 'from' address poiner was supplied, copy the source address
+       * in the container there.
+       */
+
+      if (pstate->ir_from != NULL)
+        {
+          iaddr            = (FAR struct sockaddr_ieee802154_s *)pstate->ir_from;
+          iaddr->sa_family = AF_IEEE802154;
+          memcpy(&iaddr->sa_addr, &container->ic_src, sizeof(struct ieee802154_saddr_s));
+        }
+
+      /* Free both the IOB and the container */
+
+      iob_free(iob);
+      ieee802154_container_free(container);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -182,6 +173,7 @@ static inline void
  * Returned Values:
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -191,6 +183,7 @@ static uint16_t ieee802154_recvfrom_interrupt(FAR struct net_driver_s *dev,
 {
   FAR struct ieee802154_recvfrom_s *pstate;
   FAR struct radio_driver_s *radio;
+  ssize_t ret;
 
   ninfo("flags: %04x\n", flags);
 
@@ -209,155 +202,41 @@ static uint16_t ieee802154_recvfrom_interrupt(FAR struct net_driver_s *dev,
   pstate = (FAR struct ieee802154_recvfrom_s *)pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  /* 'priv' might be null in some race conditions (?) */
+  /* 'pstate' might be null in some race conditions (?) */
 
-  if (pstate)
+  if (pstate != NULL)
     {
       /* If a new packet is available, then complete the read action. */
 
       if ((flags & IEEE802154_NEWDATA) != 0)
         {
-          /* Copy the packet */
+          /* Attempt to receive the frame */
 
-          ieee802154_recvfrom_newdata(radio, pstate);
+          ret = ieee802154_recvfrom_rxqueue(radio, pstate);
+          if (ret > 0)
+            {
+              /* Don't allow any further call backs. */
 
-          /* Don't allow any further call backs. */
+              pstate->ir_cb->flags   = 0;
+              pstate->ir_cb->priv    = NULL;
+              pstate->ir_cb->event   = NULL;
+              pstate->ir_result      = ret;
 
-          pstate->ir_cb->flags   = 0;
-          pstate->ir_cb->priv    = NULL;
-          pstate->ir_cb->event   = NULL;
-#if 0
-          /* Save the sender's address in the caller's 'from' location */
+              /* indicate that the data has been consumed */
 
-          ieee802154_recvfrom_sender(radio, pstate);
-#endif
-          /* indicate that the data has been consumed */
+              flags &= ~IEEE802154_NEWDATA;
 
-          flags &= ~IEEE802154_NEWDATA;
+              /* Wake up the waiting thread, returning the number of bytes
+               * actually read.
+               */
 
-          /* Wake up the waiting thread, returning the number of bytes
-           * actually read.
-           */
-
-          sem_post(&pstate->ir_sem);
+              sem_post(&pstate->ir_sem);
+            }
         }
     }
 
   return flags;
 }
-
-/****************************************************************************
- * Name: ieee802154_recvfrom_initialize
- *
- * Description:
- *   Initialize the state structure
- *
- * Parameters:
- *   psock    Pointer to the socket structure for the socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   pstate   A pointer to the state structure to be initialized
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void ieee802154_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
-                                    size_t len, FAR struct sockaddr *infrom,
-                                    FAR socklen_t *fromlen,
-                                    FAR struct ieee802154_recvfrom_s *pstate)
-{
-  /* Initialize the state structure. */
-
-  memset(pstate, 0, sizeof(struct ieee802154_recvfrom_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  (void)sem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
-
-  pstate->ir_buflen = len;
-  pstate->ir_buffer = buf;
-}
-
-/* The only un-initialization that has to be performed is destroying the
- * semaphore.
- */
-
-#define ieee802154_recvfrom_uninitialize(s) sem_destroy(&(s)->ir_sem)
-
-/****************************************************************************
- * Name: ieee802154_recvfrom_result
- *
- * Description:
- *   Evaluate the result of the recv operations
- *
- * Parameters:
- *   result   The result of the net_lockedwait operation (may indicate EINTR)
- *   pstate   A pointer to the state structure to be initialized
- *
- * Returned Value:
- *   The result of the recv operation with errno set appropriately
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static ssize_t ieee802154_recvfrom_result(int result, struct ieee802154_recvfrom_s *pstate)
-{
-  int save_errno = get_errno(); /* In case something we do changes it */
-
-  /* Check for a error/timeout detected by the interrupt handler.  Errors are
-   * signaled by negative errno values for the rcv length
-   */
-
-  if (pstate->ir_result < 0)
-    {
-      /* This might return EAGAIN on a timeout or ENOTCONN on loss of
-       * connection (TCP only)
-       */
-
-      return pstate->ir_result;
-    }
-
-  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have set errno appropriately.
-   */
-
-  if (result < 0)
-    {
-      return -save_errno;
-    }
-
-  return pstate->ir_recvlen;
-}
-
-/****************************************************************************
- * Name: ieee802154_recvfrom_rxnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are ready to receive an
- *   IEEE 802.1.5.4 frame
- *
- * Parameters:
- *   conn - The PF_IEEE802154 connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if 0 /* Not implemented */
-static void ieee802154_recvfrom_rxnotify(FAR struct ieee802154_conn_s *conn)
-{
-#  warning Missing logic
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -392,11 +271,14 @@ static void ieee802154_recvfrom_rxnotify(FAR struct ieee802154_conn_s *conn)
  *   recv() will return 0.  Otherwise, on errors, a negated errno value is
  *   returned (see recvfrom() for the list of appropriate error values).
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
-ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                      int flags, FAR struct sockaddr *from,
-                      FAR socklen_t *fromlen)
+ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
+                            size_t len, int flags, FAR struct sockaddr *from,
+                            FAR socklen_t *fromlen)
 {
   FAR struct ieee802154_conn_s *conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
   FAR struct radio_driver_s *radio;
@@ -407,7 +289,7 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * enough to hold this address family.
    */
 
-  if (from != NULL && *fromlen < sizeof(sa_family_t))
+  if (from != NULL && *fromlen < sizeof(struct sockaddr_ieee802154_s))
     {
       return -EINVAL;
     }
@@ -415,39 +297,51 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (psock->s_type != SOCK_DGRAM)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
-      ret = -ENOSYS;
+      return -EPROTONOSUPPORT;
     }
 
   /* Perform the packet recvfrom() operation */
 
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure.  This is done with the network
+   * locked because we don't want anything to happen until we are ready.
    */
 
   net_lock();
-  ieee802154_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
+  memset(&state, 0, sizeof(struct ieee802154_recvfrom_s));
+
+  state.ir_buflen = len;
+  state.ir_buffer = buf;
+  state.ir_sock   = psock;
+  state.ir_from   = from;
 
   /* Get the device driver that will service this transfer */
 
-  radio  = ieee802154_find_device(conn, &conn->laddr);
+  radio = ieee802154_find_device(conn, &conn->laddr);
   if (radio == NULL)
     {
       ret = -ENODEV;
-      goto errout_with_state;
+      goto errout_with_lock;
     }
 
-  /* TODO ieee802154_recvfrom_initialize() expects from to be of type
-   * sockaddr_in, but in our case is sockaddr_ll
+  /* Before we wait for data, let's check if there are already frame(s)
+   * waiting in the RX queue.
    */
 
-#if 0
-  ret = ieee802154_connect(conn, NULL);
-  if (ret < 0)
+  ret = ieee802154_recvfrom_rxqueue(radio, &state);
+  if (ret > 0)
     {
-      goto errout_with_state;
+      /* Good newe!  We have a frame and we are done. */
+
+      net_unlock();
+      return ret;
     }
-#endif
+
+  /* We will have to wait.  This semaphore is used for signaling and,
+   * hence, should not have priority inheritance enabled.
+   */
+
+  (void)sem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_setprotocol(&state.ir_sem, SEM_PRIO_NONE);
 
   /* Set the socket state to receiving */
 
@@ -462,25 +356,18 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.ir_cb->priv   = (FAR void *)&state;
       state.ir_cb->event  = ieee802154_recvfrom_interrupt;
 
-      /* Notify the device driver of the receive call */
-
-#if 0 /* Not implemented */
-      ieee802154_recvfrom_rxnotify(conn);
-#endif
-
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  (1) net_lockedwait will also terminate if a signal
-       * is received, (2) interrupts are disabled!  They will be re-enabled
-       * while the task sleeps and automatically re-enabled when the task 
-       & restarts.
+       * is received, (2) the network is locked!  It will be un-locked while
+       * the task sleeps and automatically re-locked when the task restarts.
        */
 
-      ret = net_lockedwait(&state.ir_sem);
+      (void)net_lockedwait(&state.ir_sem);
 
-      /* Make sure that no further interrupts are processed */
+      /* Make sure that no further events are processed */
 
       ieee802154_callback_free(&radio->r_dev, conn, state.ir_cb);
-      ret = ieee802154_recvfrom_result(ret, &state);
+      ret = state.ir_result;
     }
   else
     {
@@ -490,10 +377,10 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* Set the socket state to idle */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+  sem_destroy(&state.ir_sem);
 
-errout_with_state:
+errout_with_lock:
   net_unlock();
-  ieee802154_recvfrom_uninitialize(&state);
   return ret;
 }
 

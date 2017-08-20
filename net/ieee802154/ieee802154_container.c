@@ -1,5 +1,5 @@
 /****************************************************************************
- *  wireless/pktradio/pktradio_metadata.c
+ *  wireless/pktradio/ieee802154_container.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,42 +49,38 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
 
-#include <nuttx/wireless/pktradio.h>
+#include "ieee802154/ieee802154.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* The g_free_metadata is a list of meta-data structures that are available for
- * general use.  The number of messages in this list is a system configuration
- * item.
+/* The g_free_container is a list of IOB container structures that are
+ * available for general use.  The number of messages in this list is a
+ * system configuration item.
+ *
+ * Mutually exclusive access to this list is managed via the network lock:
+ * i.e., the network must be locked beffore accessing this free list.
  */
 
-static FAR struct pktradio_metadata_s *g_free_metadata;
-
-/* Supports mutually exclusive access to the free list */
-
-static sem_t g_metadata_sem;
-
-/* Idempotence support */
-
-static bool g_metadata_initialized;
+static FAR struct ieee802154_container_s *g_free_container;
 
 /* Pool of pre-allocated meta-data stuctures */
 
-static struct pktradio_metadata_s g_metadata_pool[CONFIG_PKTRADIO_NRXMETA];
+static struct ieee802154_container_s
+  g_container_pool[CONFIG_NET_IEEE802154_NCONTAINERS];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pktradio_metadata_initialize
+ * Name: ieee802154_container_initialize
  *
  * Description:
- *   This function initializes the meta-data allocator.  This function must
- *   be called early in the initialization sequence before any radios
- *   begin operation.
+ *   This function initializes the container allocator.  This function must
+ *   be called early in the initialization sequence before any socket
+ *   activity.
  *
  * Inputs:
  *   None
@@ -92,47 +88,42 @@ static struct pktradio_metadata_s g_metadata_pool[CONFIG_PKTRADIO_NRXMETA];
  * Return Value:
  *   None
  *
+ * Assumptions:
+ *   Called early in the initialization sequence
+ *
  ****************************************************************************/
 
-void pktradio_metadata_initialize(void)
+void ieee802154_container_initialize(void)
 {
-  FAR struct pktradio_metadata_s *metadata;
+  FAR struct ieee802154_container_s *container;
   int i;
 
-  if (!g_metadata_initialized)
+  /* Initialize g_free_container, the list of meta-data structures that
+   * are available for allocation.
+   */
+
+  g_free_container = NULL;
+  for (i = 0, container = g_container_pool;
+      i < CONFIG_NET_IEEE802154_NCONTAINERS;
+      i++, container++)
     {
-      /* Initialize g_free_metadata, the list of meta-data structures that
-       * are available for allocation.
+      /* Add the next meta data structure from the pool to the list of
+       * general structures.
        */
 
-      g_free_metadata = NULL;
-      for (i = 0, metadata = g_metadata_pool;
-          i < CONFIG_PKTRADIO_NRXMETA;
-          i++, metadata++)
-        {
-          /* Add the next meta data structure from the pool to the list of
-           * general structures.
-           */
-
-          metadata->pm_flink = g_free_metadata;
-          g_free_metadata    = metadata;
-        }
-
-      /* Initialize the mutual exclusion semaphore */
-
-      sem_init(&g_metadata_sem, 0, 1);
-      g_metadata_initialized = true;
+      container->ic_flink = g_free_container;
+      g_free_container    = container;
     }
 }
 
 /****************************************************************************
- * Name: pktradio_metadata_allocate
+ * Name: ieee802154_container_allocate
  *
  * Description:
- *   The pktradio_metadata_allocate function will get a free meta-data
- *   structure for use by the packet radio.
+ *   The ieee802154_container_allocate function will get a free continer
+ *   for use by the recvfrom() logic.
  *
- *   This function will first attempt to allocate from the g_free_metadata
+ *   This function will first attempt to allocate from the g_free_container
  *   list.  If that the list is empty, then the meta-data structure will be
  *   allocated from the dynamic memory pool.
  *
@@ -140,109 +131,91 @@ void pktradio_metadata_initialize(void)
  *   None
  *
  * Return Value:
- *   A reference to the allocated metadata structure.  All user fields in this
+ *   A reference to the allocated container structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
  ****************************************************************************/
 
-FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
+FAR struct ieee802154_container_s *ieee802154_container_allocate(void)
 {
-  FAR struct pktradio_metadata_s *metadata;
+  FAR struct ieee802154_container_s *container;
   uint8_t pool;
-
-  /* Get exclusive access to the free list */
-
-  while (sem_wait(&g_metadata_sem) < 0)
-    {
-      DEBUGASSERT(errno == EINTR);
-    }
 
   /* Try the free list first */
 
-  if (g_free_metadata != NULL)
+  net_lock();
+  if (g_free_container != NULL)
     {
-      metadata         = g_free_metadata;
-      g_free_metadata  = metadata->pm_flink;
-      pool             = PKTRADIO_POOL_PREALLOCATED;
-
-      /* We are finished with the free list */
-
-      sem_post(&g_metadata_sem);
+      container         = g_free_container;
+      g_free_container  = container->ic_flink;
+      pool             = IEEE802154_POOL_PREALLOCATED;
+      net_unlock();
     }
   else
     {
-      /* If we cannot get a meta-data instance from the free list, then we
-       * will have to allocate one from the kernal memory pool.  We won't
-       * access the free list.
-       */
-
-      sem_post(&g_metadata_sem);
-
-      metadata = (FAR struct pktradio_metadata_s *)
-        kmm_malloc((sizeof (struct pktradio_metadata_s)));
-      pool     = PKTRADIO_POOL_DYNAMIC;
+      net_unlock();
+      container = (FAR struct ieee802154_container_s *)
+        kmm_malloc((sizeof (struct ieee802154_container_s)));
+      pool     = IEEE802154_POOL_DYNAMIC;
     }
 
   /* We have successfully allocated memory from some source? */
 
-  if (metadata != NULL)
+  if (container != NULL)
     {
        /* Zero and tag the allocated meta-data structure. */
 
-       memset(metadata, 0, sizeof(struct pktradio_metadata_s));
-       metadata->pm_pool = pool;
+       memset(container, 0, sizeof(struct ieee802154_container_s));
+       container->ic_pool = pool;
     }
 
-  return metadata;
+  return container;
 }
 
 /****************************************************************************
- * Name: pktradio_metadata_free
+ * Name: ieee802154_container_free
  *
  * Description:
- *   The pktradio_metadata_free function will return a metadata structure
- *   to the free list of  messages if it was a pre-allocated metadata
- *   structure. If the metadata structure was allocated dynamically it will
+ *   The ieee802154_container_free function will return a container structure
+ *   to the free list of containers if it was a pre-allocated container
+ *   structure. If the container structure was allocated dynamically it will
  *   be deallocated.
  *
  * Inputs:
- *   metadata - metadata structure to free
+ *   container - container structure to free
  *
  * Return Value:
  *   None
  *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
  ****************************************************************************/
 
-void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata)
+void ieee802154_container_free(FAR struct ieee802154_container_s *container)
 {
-  /* Get exclusive access to the free list */
-
-  while (sem_wait(&g_metadata_sem) < 0)
-    {
-      DEBUGASSERT(errno == EINTR);
-    }
-
   /* If this is a pre-allocated meta-data structure, then just put it back
    * in the free list.
    */
 
-  if (metadata->pm_pool == PKTRADIO_POOL_PREALLOCATED)
+  net_lock();
+  if (container->ic_pool == IEEE802154_POOL_PREALLOCATED)
     {
-      metadata->pm_flink = g_free_metadata;
-      g_free_metadata    = metadata;
-
-      /* We are finished with the free list */
-
-      sem_post(&g_metadata_sem);
+      container->ic_flink = g_free_container;
+      g_free_container    = container;
+      net_unlock();
     }
   else
     {
-      DEBUGASSERT(metadata->pm_pool == PKTRADIO_POOL_DYNAMIC);
+      DEBUGASSERT(container->ic_pool == IEEE802154_POOL_DYNAMIC);
 
-      /* Otherwise, deallocate it.  We won't access the free list */
+      /* Otherwise, deallocate it. */
 
-      sem_post(&g_metadata_sem);
-      sched_kfree(metadata);
+      net_unlock();
+      sched_kfree(container);
     }
 }

@@ -37,19 +37,24 @@
 
 ifeq ($(CONFIG_NET_IEEE802154),y)
 
+# Initialization / resource managment
+
+NET_CSRCS  += ieee802154_initialize.c
+NET_CSRCS  += ieee802154_conn.c
+NET_CSRCS  += ieee802154_container.c
+
 # Socket layer
 
 SOCK_CSRCS += ieee802154_sockif.c
 SOCK_CSRCS += ieee802154_sendto.c
 SOCK_CSRCS += ieee802154_recvfrom.c
 
-# Transport layer
+# Device interface
 
-NET_CSRCS += ieee802154_conn.c
-NET_CSRCS += ieee802154_input.c
-NET_CSRCS += ieee802154_callback.c
-NET_CSRCS += ieee802154_poll.c
-NET_CSRCS += ieee802154_finddev.c
+NET_CSRCS  += ieee802154_input.c
+NET_CSRCS  += ieee802154_callback.c
+NET_CSRCS  += ieee802154_poll.c
+NET_CSRCS  += ieee802154_finddev.c
 
 # Include packet socket build support
 

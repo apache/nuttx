@@ -58,7 +58,9 @@
  * Private Data
  ****************************************************************************/
 
-/* The array containing all packet socket connections */
+/* The array containing all packet socket connections.  Protected via the
+ * network lock.
+ */
 
 static struct ieee802154_conn_s
   g_ieee802154_connections[CONFIG_NET_IEEE802154_NCONNS];
@@ -66,54 +68,28 @@ static struct ieee802154_conn_s
 /* A list of all free packet socket connections */
 
 static dq_queue_t g_free_ieee802154_connections;
-static sem_t g_free_sem;
 
 /* A list of all allocated packet socket connections */
 
 static dq_queue_t g_active_ieee802154_connections;
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: _ieee802154_semtake() and _ieee802154_semgive()
- *
- * Description:
- *   Take/give semaphore
- *
- ****************************************************************************/
-
-static inline void _ieee802154_semtake(sem_t *sem)
-{
-  /* Take the semaphore (perhaps waiting) */
-
-  while (net_lockedwait(sem) != 0)
-    {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(get_errno() == EINTR);
-    }
-}
-
-#define _ieee802154_semgive(sem) sem_post(sem)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee802154_initialize()
+ * Name: ieee802154_conn_initialize
  *
  * Description:
- *   Initialize the packet socket connection structures.  Called once and
- *   only from the network logic early in initialization.
+ *   Initialize the IEEE 802.15.5 connection structure allocator.  Called
+ *   once and only from ieee802154_initialize().
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence
  *
  ****************************************************************************/
 
-void ieee802154_initialize(void)
+void ieee802154_conn_initialize(void)
 {
   int i;
 
@@ -121,7 +97,6 @@ void ieee802154_initialize(void)
 
   dq_init(&g_free_ieee802154_connections);
   dq_init(&g_active_ieee802154_connections);
-  sem_init(&g_free_sem, 0, 1);
 
   for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
     {
@@ -133,7 +108,7 @@ void ieee802154_initialize(void)
 }
 
 /****************************************************************************
- * Name: ieee802154_alloc()
+ * Name: ieee802154_conn_alloc()
  *
  * Description:
  *   Allocate a new, uninitialized packet socket connection structure. This
@@ -141,7 +116,7 @@ void ieee802154_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct ieee802154_conn_s *ieee802154_alloc(void)
+FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 {
   FAR struct ieee802154_conn_s *conn;
 
@@ -149,7 +124,7 @@ FAR struct ieee802154_conn_s *ieee802154_alloc(void)
    * is protected by a semaphore (that behaves like a mutex).
    */
 
-  _ieee802154_semtake(&g_free_sem);
+  net_lock();
   conn = (FAR struct ieee802154_conn_s *)
     dq_remfirst(&g_free_ieee802154_connections);
 
@@ -160,12 +135,12 @@ FAR struct ieee802154_conn_s *ieee802154_alloc(void)
       dq_addlast(&conn->node, &g_active_ieee802154_connections);
     }
 
-  _ieee802154_semgive(&g_free_sem);
+  net_unlock();
   return conn;
 }
 
 /****************************************************************************
- * Name: ieee802154_free()
+ * Name: ieee802154_conn_free()
  *
  * Description:
  *   Free a packet socket connection structure that is no longer in use.
@@ -173,7 +148,7 @@ FAR struct ieee802154_conn_s *ieee802154_alloc(void)
  *
  ****************************************************************************/
 
-void ieee802154_free(FAR struct ieee802154_conn_s *conn)
+void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 {
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
@@ -181,20 +156,19 @@ void ieee802154_free(FAR struct ieee802154_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  _ieee802154_semtake(&g_free_sem);
-
   /* Remove the connection from the active list */
 
+  net_lock();
   dq_rem(&conn->node, &g_active_ieee802154_connections);
 
   /* Free the connection */
 
   dq_addlast(&conn->node, &g_free_ieee802154_connections);
-  _ieee802154_semgive(&g_free_sem);
+  net_unlock();
 }
 
 /****************************************************************************
- * Name: ieee802154_active()
+ * Name: ieee802154_conn_active()
  *
  * Description:
  *   Find a connection structure that is the appropriate
@@ -206,7 +180,7 @@ void ieee802154_free(FAR struct ieee802154_conn_s *conn)
  ****************************************************************************/
 
 FAR struct ieee802154_conn_s *
-  ieee802154_active(FAR const struct ieee802154_data_ind_s *meta)
+  ieee802154_conn_active(FAR const struct ieee802154_data_ind_s *meta)
 {
   FAR struct ieee802154_conn_s *conn;
 
@@ -271,7 +245,7 @@ FAR struct ieee802154_conn_s *
 }
 
 /****************************************************************************
- * Name: ieee802154_nextconn()
+ * Name: ieee802154_conn_next()
  *
  * Description:
  *   Traverse the list of allocated packet connections
@@ -282,7 +256,7 @@ FAR struct ieee802154_conn_s *
  ****************************************************************************/
 
 FAR struct ieee802154_conn_s *
-  ieee802154_nextconn(FAR struct ieee802154_conn_s *conn)
+  ieee802154_conn_next(FAR struct ieee802154_conn_s *conn)
 {
   if (!conn)
     {
