@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TUN)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -55,19 +54,22 @@
 
 #include <arpa/inet.h>
 
+#include <net/if.h>
+
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/tun.h>
 
-#include <net/if.h>
-
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
-#endif
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TUN)
 
 /****************************************************************************
  * Pre-processor Definitions
