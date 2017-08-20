@@ -233,7 +233,7 @@ extern uint8_t g_frame_hdrlen;
  ****************************************************************************/
 
 struct net_driver_s;        /* Forward reference */
-struct radio_driver_s;  /* Forward reference */
+struct radio_driver_s;      /* Forward reference */
 struct devif_callback_s;    /* Forward reference */
 struct ipv6_hdr_s;          /* Forward reference */
 struct netdev_varaddr_s;    /* Forward reference */

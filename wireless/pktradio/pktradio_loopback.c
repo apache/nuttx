@@ -53,6 +53,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/pktradio.h>
 
@@ -177,7 +178,7 @@ static int lo_get_mhrlen(FAR struct radio_driver_s *netdev,
 static int lo_req_data(FAR struct radio_driver_s *netdev,
               FAR const void *meta, FAR struct iob_s *framelist);
 static int lo_properties(FAR struct radio_driver_s *netdev,
-              FAR struct sixlowpan_properties_s *properties);
+              FAR struct radiodev_properties_s *properties);
 
 /****************************************************************************
  * Private Functions
@@ -748,8 +749,8 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           FAR struct radio_driver_s *radio =
             (FAR struct radio_driver_s *)dev;
-          FAR struct sixlowpan_properties_s *props =
-            (FAR struct sixlowpan_properties_s *)&cmddata->pifr_props;
+          FAR struct radiodev_properties_s *props =
+            (FAR struct radiodev_properties_s *)&cmddata->pifr_props;
 
           ret = lo_properties(radio, props);
         }
@@ -929,10 +930,10 @@ static int lo_req_data(FAR struct radio_driver_s *netdev,
  ****************************************************************************/
 
 static int lo_properties(FAR struct radio_driver_s *netdev,
-                         FAR struct sixlowpan_properties_s *properties)
+                         FAR struct radiodev_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
-  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+  memset(properties, 0, sizeof(struct radiodev_properties_s));
 
   /* General */
 

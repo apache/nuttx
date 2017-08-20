@@ -59,6 +59,7 @@
 #endif
 
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/radiodev.h"
 #include "nuttx/net/ip.h"
 #include "nuttx/net/icmpv6.h"
 #include "nuttx/net/sixlowpan.h"

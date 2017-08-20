@@ -57,6 +57,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/ieee802154.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
@@ -201,7 +202,7 @@ static int macnet_get_mhrlen(FAR struct radio_driver_s *netdev,
 static int macnet_req_data(FAR struct radio_driver_s *netdev,
               FAR const void *meta, FAR struct iob_s *framelist);
 static int macnet_properties(FAR struct radio_driver_s *netdev,
-              FAR struct sixlowpan_properties_s *properties);
+              FAR struct radiodev_properties_s *properties);
 
 /****************************************************************************
  * Private Functions
@@ -1073,10 +1074,10 @@ static int macnet_req_data(FAR struct radio_driver_s *netdev,
  ****************************************************************************/
 
 static int macnet_properties(FAR struct radio_driver_s *netdev,
-                             FAR struct sixlowpan_properties_s *properties)
+                             FAR struct radiodev_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
-  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+  memset(properties, 0, sizeof(struct radiodev_properties_s));
 
   /* General */
 

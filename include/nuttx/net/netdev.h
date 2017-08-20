@@ -463,8 +463,9 @@ int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-struct radio_driver_s;   /* See sixlowpan.h */
-struct iob_s;                /* See iob.h */
+struct radio_driver_s;   /* Forward reference.  See radiodev.h */
+struct iob_s;            /* Forward reference See iob.h */
+
 int sixlowpan_input(FAR struct radio_driver_s *ieee,
                     FAR struct iob_s *framelist, FAR const void *metadata);
 #endif

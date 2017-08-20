@@ -64,6 +64,22 @@
 #define IEEE802154_POOL_PREALLOCATED  0
 #define IEEE802154_POOL_DYNAMIC       1
 
+/* Frame size */
+
+/* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
+ * devices may exceed this value, however.
+ */
+
+#define IEEE802154_MAC_STDFRAME 127
+
+/* Space for a two byte FCS must be reserved at the end of the frame */
+
+#define IEEE802154_MAC_FCSSIZE  2
+
+/* This, then, is the usable size of the frame */
+
+#define IEEE802154_FRAMELEN (CONFIG_NET_IEEE802154_FRAMELEN - IEEE802154_MAC_FCSSIZE)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -126,7 +142,7 @@ EXTERN const struct sock_intf_s g_ieee802154_sockif;
  ****************************************************************************/
 
 struct ieee802154_data_ind_s; /* Forward reference */
-struct radio_driver_s;    /* Forward reference */
+struct radio_driver_s;        /* Forward reference */
 struct net_driver_s;          /* Forward reference */
 struct eth_hdr_s;             /* Forward reference */
 struct socket;                /* Forward reference */

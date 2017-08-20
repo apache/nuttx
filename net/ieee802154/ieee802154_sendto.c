@@ -55,7 +55,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
-#include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 
@@ -334,8 +334,8 @@ static uint16_t ieee802154_sendto_interrupt(FAR struct net_driver_s *dev,
        * MAC header.
        */
 
-      DEBUGASSERT(CONFIG_NET_6LOWPAN_FRAMELEN <= CONFIG_IOB_BUFSIZE);
-      if (pstate->is_buflen + hdrlen > CONFIG_IOB_BUFSIZE)
+      DEBUGASSERT(CONFIG_NET_IEEE802154_FRAMELEN <= CONFIG_IOB_BUFSIZE);
+      if (pstate->is_buflen + hdrlen > IEEE802154_FRAMELEN)
         {
           nerr("ERROR: User buffer will not fit into the frame: %u > %u\n",
                (unsigned int)(pstate->is_buflen + hdrlen),

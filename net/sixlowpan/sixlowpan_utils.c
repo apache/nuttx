@@ -54,6 +54,7 @@
 #include <debug.h>
 
 #include <nuttx/net/ip.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
@@ -192,7 +193,7 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct netdev_varaddr_s *destaddr)
 {
-  struct sixlowpan_properties_s properties;
+  struct radiodev_properties_s properties;
   int ret;
 
 #ifdef  CONFIG_NET_STARPOINT

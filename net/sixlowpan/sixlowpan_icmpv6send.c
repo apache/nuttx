@@ -43,6 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/ip.h>
 
 #include "icmpv6/icmpv6.h"
