@@ -1224,6 +1224,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       priv = filep->f_priv;
       strncpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
 
+#ifdef CONFIG_NET_ETHERNET
       if ((ifr->ifr_flags & IFF_MASK) == IFF_TAP)
         {
           /* TAP device -> handling raw Ethernet packets
@@ -1233,6 +1234,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           priv->dev.d_llhdrlen = ETH_HDRLEN;
         }
       else if ((ifr->ifr_flags & IFF_MASK) == IFF_TUN)
+#endif
         {
           /* TUN device -> handling an application data stream
            * -> no header
