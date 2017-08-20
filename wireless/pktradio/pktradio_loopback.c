@@ -774,7 +774,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
             }
           else
            {
-              FAR const struct netdev_varaddr_s *devaddr = &dev->d_mac.radio;
+              FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.radio;
 
               devaddr->nv_addrlen = 1;
               devaddr->nv_addr[0] = newaddr->pa_addr[0];
@@ -814,6 +814,7 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
     }
 
+  UNUSED(priv);
   return ret;
 }
 #endif
