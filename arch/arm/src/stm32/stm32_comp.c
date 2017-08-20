@@ -104,6 +104,10 @@
 #  ifndef COMP2_LOCK
 #    define COMP2_LOCK COMP_LOCK_DEFAULT
 #  endif
+#  ifndef GPIO_COMP2_INM
+#    warning "GPIO_COMP2_INM not selected. Set default value to GPIO_COMP2_INM1"
+#    define GPIO_COMP2_INM GPIO_COMP4_INM_1
+#  endif
 #endif
 
 /* COMP4 default configuration **********************************************/
@@ -124,6 +128,10 @@
 #  ifndef COMP4_LOCK
 #    define COMP4_LOCK COMP_LOCK_DEFAULT
 #  endif
+#  ifndef GPIO_COMP4_INM
+#    warning "GPIO_COMP4_INM not selected. Set default value to GPIO_COMP4_INM1"
+#    define GPIO_COMP4_INM GPIO_COMP4_INM_1
+#  endif
 #endif
 
 /* COMP6 default configuration **********************************************/
@@ -143,6 +151,10 @@
 #  endif
 #  ifndef COMP6_LOCK
 #    define COMP6_LOCK COMP_LOCK_DEFAULT
+#  endif
+#  ifndef GPIO_COMP6_INM
+#    warning "GPIO_COMP6_INM not selected. Set default value to GPIO_COMP6_INM1"
+#    define GPIO_COMP6_INM GPIO_COMP6_INM_1
 #  endif
 #endif
 
@@ -528,9 +540,11 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
       break;
 #endif
 
+#ifdef CONFIG_STM32_COMP2
     case STM32_COMP2_CSR:
       index = 2;
       break;
+#endif
 
 #ifdef CONFIG_STM32_COMP3
     case STM32_COMP3_CSR:
@@ -538,9 +552,11 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
       break;
 #endif
 
+#ifdef CONFIG_STM32_COMP4
     case STM32_COMP4_CSR:
       index = 4;
       break;
+#endif
 
 #ifdef CONFIG_STM32_COMP5
     case STM32_COMP5_CSR:
@@ -548,9 +564,11 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
       break;
 #endif
 
+#ifdef CONFIG_STM32_COMP6
     case STM32_COMP6_CSR:
       index = 6;
       break;
+#endif
 
 #ifdef CONFIG_STM32_COMP7
     case STM32_COMP7_CSR:
@@ -566,9 +584,21 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
 
   switch (index)
     {
+#ifdef CONFIG_STM32_COMP1
+    case 1:
+      stm32_configgpio(GPIO_COMP1_INP);
+      break;
+#endif
+
 #ifdef CONFIG_STM32_COMP2
     case 2:
       stm32_configgpio(GPIO_COMP2_INP);
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP3
+    case 3:
+      stm32_configgpio(GPIO_COMP3_INP);
       break;
 #endif
 
@@ -578,9 +608,21 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
       break;
 #endif
 
+#ifdef CONFIG_STM32_COMP5
+    case 5:
+      stm32_configgpio(GPIO_COMP5_INP);
+      break;
+#endif
+
 #ifdef CONFIG_STM32_COMP6
     case 6:
       stm32_configgpio(GPIO_COMP6_INP);
+      break;
+#endif
+
+#ifdef CONFIG_STM32_COMP7
+    case 7:
+      stm32_configgpio(GPIO_COMP7_INP);
       break;
 #endif
 
@@ -622,11 +664,15 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
 
         switch (index)
           {
+            /* TODO: Inverting input pin configuration for COMP1/3/5/7 */
+
 #ifdef CONFIG_STM32_COMP2
           case 2:
             {
+              /* COMP2_INM can be PA2 or PA4 */
+
               stm32_configgpio(GPIO_COMP2_INM);
-              regval |= COMP_CSR_INMSEL_PA2;
+              regval |= (GPIO_COMP2_INM == GPIO_COMP2_INM_1 ? COMP_CSR_INMSEL_PA2 : COMP_CSR_INMSEL_PA4);
               break;
             }
 #endif
