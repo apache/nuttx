@@ -112,8 +112,8 @@ struct pktradio_addr_s
  * run time.  This information is provided to the 6LoWPAN network via the
  * following structure.
  *
- * NOTE: This MUST be the same as the struct sixlowpan_properties_s as
- * defined in sixlowpan.h.  It is duplicated here with a different name in
+ * NOTE: This MUST be the same as the struct radiodev_properties_s as
+ * defined in radiodev.h.  It is duplicated here with a different name in
  * order to avoid circular header file inclusion.
  */
 

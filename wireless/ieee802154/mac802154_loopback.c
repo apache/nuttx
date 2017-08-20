@@ -53,6 +53,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/ieee802154.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
@@ -77,6 +78,26 @@
 #  else
 #    error Neither CONFIG_IEEE802154_LOOPBACK_HPWORK nor CONFIG_IEEE802154_LOOPBACK_LPWORK defined
 #  endif
+#endif
+
+/* Preferred address size */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#  define LO_ADDRSIZE IEEE802154_EADDRSIZE
+#else
+#  define LO_ADDRSIZE IEEE802154_SADDRSIZE
+#endif
+
+/* Frame size
+ * REVISIT: Too many frame length definitions
+ */
+
+#if defined(CONFIG_NET_6LOWPAN_FRAMELEN)
+#  define LO_FRAMELEN CONFIG_NET_6LOWPAN_FRAMELEN
+#elif defined(CONFIG_NET_IEEE802154_FRAMELEN)
+#  define LO_FRAMELEN CONFIG_NET_IEEE802154_FRAMELEN
+#else
+#  define LO_FRAMELEN IEEE802154_MAX_PHY_PACKET_SIZE
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -115,7 +136,9 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
+#ifdef CONFIG_NET_6LOWPAN
 static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
+#endif
 
 static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
 {
@@ -167,7 +190,7 @@ static int lo_get_mhrlen(FAR struct radio_driver_s *netdev,
 static int lo_req_data(FAR struct radio_driver_s *netdev,
               FAR const void *meta, FAR struct iob_s *framelist);
 static int lo_properties(FAR struct radio_driver_s *netdev,
-              FAR struct sixlowpan_properties_s *properties);
+              FAR struct radiodev_properties_s *properties);
 
 /****************************************************************************
  * Private Functions
@@ -192,9 +215,10 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the eaddr */
 
-  dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+  dev->d_mac.radio.nv_addrlen = IEEE802154_EADDRSIZE;
   IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, g_eaddr);
 
+#ifdef CONFIG_NET_IPv6
   /* Set the IP address based on the eaddr */
 
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
@@ -207,14 +231,16 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[7]  = (uint16_t)g_eaddr[6] << 8 | (uint16_t)g_eaddr[7];
   dev->d_ipv6addr[4] ^= 0x200;
 }
+#endif
 #else
 static void lo_addr2ip(FAR struct net_driver_s *dev)
 {
   /* Set the MAC address as the saddr */
 
-  dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  dev->d_mac.radio.nv_addrlen = IEEE802154_SADDRSIZE;
   IEEE802154_SADDRCOPY(dev->d_mac.radio.nv_addr, g_saddr);
 
+#ifdef CONFIG_NET_IPv6
   /* Set the IP address based on the saddr */
 
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
@@ -226,6 +252,7 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
   dev->d_ipv6addr[7]  = (uint16_t)g_saddr[0] << 8 | (uint16_t)g_saddr[1];
   dev->d_ipv6addr[7] ^= 0x200;
+#endif
 }
 #endif
 
@@ -245,6 +272,7 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
 
 static inline void lo_netmask(FAR struct net_driver_s *dev)
 {
+#ifdef CONFIG_NET_IPv6
   dev->d_ipv6netmask[0]  = 0xffff;
   dev->d_ipv6netmask[1]  = 0xffff;
   dev->d_ipv6netmask[2]  = 0xffff;
@@ -259,6 +287,7 @@ static inline void lo_netmask(FAR struct net_driver_s *dev)
   dev->d_ipv6netmask[5]  = 0xffff;
   dev->d_ipv6netmask[6]  = 0xffff;
   dev->d_ipv6netmask[7]  = 0;
+#endif
 #endif
 }
 
@@ -495,11 +524,11 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
+#ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: IPv6 %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   ninfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
          dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
@@ -511,6 +540,27 @@ static int lo_ifup(FAR struct net_driver_s *dev)
   ninfo("             Node: %02x:%02x PANID=%02x:%02x\n",
          dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
          priv->lo_panid[0], priv->lo_panid[1]);
+#endif
+#else
+  if (dev->d_mac.radio.nv_addrlen == 8)
+    {
+      ninfo("Bringing up: Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
+             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+             dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
+             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
+             dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7],
+             priv->lo_panid[0], priv->lo_panid[1]);
+    }
+  else if (dev->d_mac.radio.nv_addrlen == 2)
+    {
+      ninfo("Bringing up: Node: %02x:%02x PANID=%02x:%02x\n",
+             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+             priv->lo_panid[0], priv->lo_panid[1]);
+    }
+  else
+    {
+      nerr("ERROR: No address assigned\n");
+    }
 #endif
 
   /* Set and activate a timer process */
@@ -926,15 +976,15 @@ static int lo_req_data(FAR struct radio_driver_s *netdev,
  ****************************************************************************/
 
 static int lo_properties(FAR struct radio_driver_s *netdev,
-                         FAR struct sixlowpan_properties_s *properties)
+                         FAR struct radiodev_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
-  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+  memset(properties, 0, sizeof(struct radiodev_properties_s));
 
   /* General */
 
-  properties->sp_addrlen = NET_6LOWPAN_ADDRSIZE;        /* Length of an address */
-  properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
+  properties->sp_addrlen = LO_ADDRSIZE;  /* Length of an address */
+  properties->sp_pktlen  = LO_FRAMELEN;  /* Fixed frame length */
 
   /* Multicast address (uses broadcast address)
    *
@@ -951,12 +1001,12 @@ static int lo_properties(FAR struct radio_driver_s *netdev,
    * (qualified by the destination PANID).
    */
 
-  properties->sp_mcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  properties->sp_mcast.nv_addrlen = IEEE802154_SADDRSIZE;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
 
   /* Broadcast address */
 
-  properties->sp_bcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  properties->sp_bcast.nv_addrlen = IEEE802154_SADDRSIZE;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
 
 #ifdef CONFIG_NET_STARPOINT
@@ -1014,7 +1064,9 @@ int ieee8021514_loopback(void)
 #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = lo_ioctl;         /* Handle network IOCTL commands */
 #endif
+#ifdef CONFIG_NET_6LOWPAN
   dev->d_buf          = g_iobuffer;       /* Attach the IO buffer */
+#endif
   dev->d_private      = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Set the network mask and advertise our MAC-based IP address */

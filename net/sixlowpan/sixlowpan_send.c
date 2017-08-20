@@ -47,6 +47,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/radiodev.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"

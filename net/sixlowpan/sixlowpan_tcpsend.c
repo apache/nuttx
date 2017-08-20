@@ -46,6 +46,7 @@
 
 #include "nuttx/semaphore.h"
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/radiodev.h"
 #include "nuttx/net/netstats.h"
 
 #include "netdev/netdev.h"

@@ -51,7 +51,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
 #  include <net/if.h>
 #endif
 
@@ -1581,7 +1581,7 @@ union ieee802154_macarg_u
   /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
 };
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
 /* For the case of network IOCTLs, the network IOCTL to the MAC network
  * driver will include a device name like "wpan0" as the destination of
  * the IOCTL command.

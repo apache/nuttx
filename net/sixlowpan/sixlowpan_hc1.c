@@ -54,6 +54,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1

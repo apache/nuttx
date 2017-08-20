@@ -57,6 +57,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -866,7 +867,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                   dev->d_lltype == NET_LL_PKTRADIO)
                 {
                   FAR struct radio_driver_s *radio;
-                  struct sixlowpan_properties_s properties;
+                  struct radiodev_properties_s properties;
 
                   /* Get the radio properties */
 

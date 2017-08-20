@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include "nuttx/net/net.h"
+#include "nuttx/net/radiodev.h"
 #include "nuttx/wireless/ieee802154/ieee802154_mac.h"
 
 #include "sixlowpan/sixlowpan_internal.h"

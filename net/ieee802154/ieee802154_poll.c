@@ -42,7 +42,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/ieee802154.h>
 
 #include "devif/devif.h"

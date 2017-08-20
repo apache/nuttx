@@ -182,7 +182,7 @@ struct netdev_statistics_s
 };
 #endif
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
 /* This structure is used to represent addresses of varying length.  This
  * structure is used to represent the address assigned to a radio.
  */
@@ -236,7 +236,9 @@ struct net_driver_s
   uint16_t d_recvwndo;          /* TCP receive window size */
 #endif
 
-#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN)
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN) || \
+    defined(CONFIG_NET_IEEE802154)
+
   /* Link layer address */
 
   union
@@ -251,9 +253,9 @@ struct net_driver_s
   /* The address assigned to an IEEE 802.15.4 or generic packet radio. */
 
     struct netdev_varaddr_s radio;
-#endif /* CONFIG_NET_6LOWPAN */
+#endif /* CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
   } d_mac;
-#endif /* CONFIG_NET_ETHERNET || CONFIG_NET_6LOWPAN */
+#endif /* CONFIG_NET_ETHERNET || CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
 
   /* Network identity */
 
@@ -463,8 +465,9 @@ int ipv6_input(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-struct radio_driver_s;   /* See sixlowpan.h */
-struct iob_s;                /* See iob.h */
+struct radio_driver_s;   /* Forward reference.  See radiodev.h */
+struct iob_s;            /* Forward reference See iob.h */
+
 int sixlowpan_input(FAR struct radio_driver_s *ieee,
                     FAR struct iob_s *framelist, FAR const void *metadata);
 #endif

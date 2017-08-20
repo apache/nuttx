@@ -8,7 +8,7 @@ menu "IEEE 802.15.4 socket support"
 config NET_IEEE802154
 	bool "IEEE 802.15.4 socket support"
 	default n
-	depends on NET_IPv6 && WIRELESS_IEEE802154
+	depends on WIRELESS_IEEE802154
 	select NETDEV_IOCTL
 	---help---
 		Enable support for raw, IEEE 802.15.4 sockets.
@@ -21,6 +21,17 @@ config NET_IEEE802154
 		IEEE 802.15.4 MAC network interface driver outgoing frame queue.
 
 if NET_IEEE802154
+
+config NET_IEEE802154_FRAMELEN
+	int "IEEE802.15.4 Frame Length"
+	default 127
+	range 1 999999
+	---help---
+		For standard IEEE 802.15.4 radios, this should always be 127 bytes.
+		However, some IEEE 802.15.4 radios may non-standard frame lengths.
+
+		This setting is currently used only for detection data transfers
+		that would exceed the radio frame length.
 
 config NET_IEEE802154_NCONNS
 	int "Max IEEE 802.15.4 sockets"

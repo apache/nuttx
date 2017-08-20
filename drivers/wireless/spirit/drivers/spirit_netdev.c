@@ -126,7 +126,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/radiodev.h>
 
 #include <nuttx/wireless/spirit.h>
 #include <nuttx/wireless/pktradio.h>
@@ -352,7 +352,7 @@ static int spirit_get_mhrlen(FAR struct radio_driver_s *netdev,
 static int spirit_req_data(FAR struct radio_driver_s *netdev,
             FAR const void *meta, FAR struct iob_s *framelist);
 static int spirit_properties(FAR struct radio_driver_s *netdev,
-            FAR struct sixlowpan_properties_s *properties);
+            FAR struct radiodev_properties_s *properties);
 
 /* Initialization */
 
@@ -2141,8 +2141,8 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           FAR struct radio_driver_s *radio =
             (FAR struct radio_driver_s *)dev;
-          FAR struct sixlowpan_properties_s *props =
-            (FAR struct sixlowpan_properties_s *)&cmddata->pifr_props;
+          FAR struct radiodev_properties_s *props =
+            (FAR struct radiodev_properties_s *)&cmddata->pifr_props;
 
           ret = spirit_properties(radio, props);
         }
@@ -2373,10 +2373,10 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
  ****************************************************************************/
 
 static int spirit_properties(FAR struct radio_driver_s *netdev,
-                             FAR struct sixlowpan_properties_s *properties)
+                             FAR struct radiodev_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
-  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+  memset(properties, 0, sizeof(struct radiodev_properties_s));
 
   /* General */
 
