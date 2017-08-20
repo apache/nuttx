@@ -43,11 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#ifdef CONFIG_STM32_STM32F33XX
-#include "chip/stm32f33xxx_dac.h"
-#else
 #include "chip/stm32_dac.h"
-#endif
 
 #include <nuttx/analog/dac.h>
 

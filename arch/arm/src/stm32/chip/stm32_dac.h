@@ -129,15 +129,25 @@
 #define DAC_CR_TSEL_SHIFT        (3)       /* Bits 3-5: DAC channel trigger selection */
 #define DAC_CR_TSEL_MASK         (7 << DAC_CR_TSEL_SHIFT)
 #  define DAC_CR_TSEL_TIM6       (0 << DAC_CR_TSEL_SHIFT) /* Timer 6 TRGO event */
-#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F33XX)
 #  define DAC_CR_TSEL_TIM3       (1 << DAC_CR_TSEL_SHIFT) /* Timer 3 TRGO event */
 #else
 #  define DAC_CR_TSEL_TIM8       (1 << DAC_CR_TSEL_SHIFT) /* Timer 8 TRGO event */
 #endif
 #  define DAC_CR_TSEL_TIM7       (2 << DAC_CR_TSEL_SHIFT) /* Timer 7 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL_TIM15      (3 << DAC_CR_TSEL_SHIFT) /* Timer 15 TRGO event, or */
+#  define DAC_CR_TSEL_HRT1TRG1   (3 << DAC_CR_TSEL_SHIFT) /* HRTIM1 DACTRG1 event */
+#else
 #  define DAC_CR_TSEL_TIM5       (3 << DAC_CR_TSEL_SHIFT) /* Timer 5 TRGO event */
+#endif
 #  define DAC_CR_TSEL_TIM2       (4 << DAC_CR_TSEL_SHIFT) /* Timer 2 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL_HRT1TRG2   (5 << DAC_CR_TSEL_SHIFT) /* HRTIM1 DACTRG2 event, or */
+#  define DAC_CR_TSEL_HRT1TRG3   (5 << DAC_CR_TSEL_SHIFT) /* HRTIM1 DACTRG3 event */
+#else
 #  define DAC_CR_TSEL_TIM4       (5 << DAC_CR_TSEL_SHIFT) /* Timer 4 TRGO event */
+#endif
 #  define DAC_CR_TSEL_EXT9       (6 << DAC_CR_TSEL_SHIFT) /* External line9 */
 #  define DAC_CR_TSEL_SW         (7 << DAC_CR_TSEL_SHIFT) /* Software trigger */
 #define DAC_CR_WAVE_SHIFT        (6)       /* Bits 6-7: DAC channel noise/triangle wave generation  */
@@ -170,11 +180,25 @@
 #define DAC_CR_TSEL1_SHIFT        (3)       /* Bits 3-5: DAC channel 1 trigger selection */
 #define DAC_CR_TSEL1_MASK         (7 << DAC_CR_TSEL1_SHIFT)
 #  define DAC_CR_TSEL1_TIM6       (0 << DAC_CR_TSEL1_SHIFT) /* Timer 6 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL1_TIM3       (1 << DAC_CR_TSEL1_SHIFT) /* Timer 3 TRGO event */
+#else
 #  define DAC_CR_TSEL1_TIM8       (1 << DAC_CR_TSEL1_SHIFT) /* Timer 8 TRGO event */
+#endif
 #  define DAC_CR_TSEL1_TIM7       (2 << DAC_CR_TSEL1_SHIFT) /* Timer 7 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL1_TIM15      (3 << DAC_CR_TSEL1_SHIFT) /* Timer 15 TRGO event, or */
+#  define DAC_CR_TSEL1_HRT1TRG1   (3 << DAC_CR_TSEL1_SHIFT) /* HRTIM1 DACTRG1 event (DAC1 only) */
+#else
 #  define DAC_CR_TSEL1_TIM5       (3 << DAC_CR_TSEL1_SHIFT) /* Timer 5 TRGO event */
+#endif
 #  define DAC_CR_TSEL1_TIM2       (4 << DAC_CR_TSEL1_SHIFT) /* Timer 2 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL1_HRT1TRG2   (5 << DAC_CR_TSEL1_SHIFT)  /* HRTIM1 DACTRG2 event (DAC1), or */
+#  define DAC_CR_TSEL1_HRT1TRG3   (5 << DAC_CR_TSEL1_SHIFT)  /* HRTIM1 DACTRG3 event (DAC2) */
+#else
 #  define DAC_CR_TSEL1_TIM4       (5 << DAC_CR_TSEL1_SHIFT) /* Timer 4 TRGO event */
+#endif
 #  define DAC_CR_TSEL1_EXT9       (6 << DAC_CR_TSEL1_SHIFT) /* External line9 */
 #  define DAC_CR_TSEL1_SW         (7 << DAC_CR_TSEL1_SHIFT) /* Software trigger */
 #define DAC_CR_WAVE1_SHIFT        (6)       /* Bits 6-7: DAC channel 1 noise/triangle wave generation  */
@@ -205,11 +229,24 @@
 #define DAC_CR_TSEL2_SHIFT        (19)       /* Bits 19-21: DAC channel 2 trigger selection */
 #define DAC_CR_TSEL2_MASK         (7 << DAC_CR_TSEL2_SHIFT)
 #  define DAC_CR_TSEL2_TIM6       (0 << DAC_CR_TSEL2_SHIFT) /* Timer 6 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL2_TIM3       (1 << DAC_CR_TSEL2_SHIFT) /* Timer 3 TRGO event */
+#else
 #  define DAC_CR_TSEL2_TIM8       (1 << DAC_CR_TSEL2_SHIFT) /* Timer 8 TRGO event */
+#endif
 #  define DAC_CR_TSEL2_TIM7       (2 << DAC_CR_TSEL2_SHIFT) /* Timer 7 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL2_TIM15      (3 << DAC_CR_TSEL2_SHIFT) /* Timer 15 TRGO event, or */
+#  define DAC_CR_TSEL2_HRT1TRG1   (3 << DAC_CR_TSEL2_SHIFT) /* HRTIM1 DACTRG1 event */
+#else
 #  define DAC_CR_TSEL2_TIM5       (3 << DAC_CR_TSEL2_SHIFT) /* Timer 5 TRGO event */
+#endif
 #  define DAC_CR_TSEL2_TIM2       (4 << DAC_CR_TSEL2_SHIFT) /* Timer 2 TRGO event */
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define DAC_CR_TSEL2_HRT1TRG2   (5 << DAC_CR_TSEL2_SHIFT) /* HRTIM1 DACTRG2 event */
+#else
 #  define DAC_CR_TSEL2_TIM4       (5 << DAC_CR_TSEL2_SHIFT) /* Timer 4 TRGO event */
+#endif
 #  define DAC_CR_TSEL2_EXT9       (6 << DAC_CR_TSEL2_SHIFT) /* External line9 */
 #  define DAC_CR_TSEL2_SW         (7 << DAC_CR_TSEL2_SHIFT) /* Software trigger */
 #define DAC_CR_WAVE2_SHIFT        (22)       /* Bit 22-23: DAC channel 2 noise/triangle wave generation enable */
