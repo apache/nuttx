@@ -76,8 +76,8 @@
 #  define COMP_CSR_INMSEL_DAC1CH1   (4 << COMP_CSR_INMSEL_SHIFT)  /* 0100: DAC1_CH1 output if enabled */
 #  define COMP_CSR_INMSEL_DAC1CH2   (5 << COMP_CSR_INMSEL_SHIFT)  /* 0101: DAC1_CH2 output */
 #  define COMP_CSR_INMSEL_PA2       (6 << COMP_CSR_INMSEL_SHIFT)  /* 0110: PA2 (COMP2 only) */
-#  define COMP_CSR_INMSEL_PB2       (7 << COMP4_CSR_INMSEL_SHIFT) /* 0111: PB2 (COMP4 only) */
-#  define COMP_CSR_INMSEL_PB15      (7 << COMP6_CSR_INMSEL_SHIFT) /* 0110: PB15 (COMP6 only) */
+#  define COMP_CSR_INMSEL_PB2       (7 << COMP_CSR_INMSEL_SHIFT)  /* 0111: PB2 (COMP4 only) */
+#  define COMP_CSR_INMSEL_PB15      (7 << COMP_CSR_INMSEL_SHIFT)  /* 0111: PB15 (COMP6 only) */
                                                                   /* 1000: DAC2_CH1 output, look at bit 22 */
                                                 /* Bits 7-9: Reserved */
 #define COMP_CSR_OUTSEL_SHIFT       (4)         /* Bits 10-13: Comparator output selection */
