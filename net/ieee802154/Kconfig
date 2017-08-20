@@ -8,7 +8,7 @@ menu "IEEE 802.15.4 socket support"
 config NET_IEEE802154
 	bool "IEEE 802.15.4 socket support"
 	default n
-	depends on NET_IPv6 && WIRELESS_IEEE802154
+	depends on WIRELESS_IEEE802154
 	select NETDEV_IOCTL
 	---help---
 		Enable support for raw, IEEE 802.15.4 sockets.

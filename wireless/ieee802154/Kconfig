@@ -165,7 +165,7 @@ endif # IEEE802154_MACDEV
 config IEEE802154_NETDEV
 	bool "IEEE802154 6LoWPAN Network Device"
 	default n
-	depends on NET_6LOWPAN && NET_IPv6
+	depends on NET_6LOWPAN || NET_IEEE802154
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Add support for the IEEE802.15.4 6LoWPAN network device built on
@@ -224,7 +224,7 @@ endif # IEEE802154_NETDEV
 config IEEE802154_LOOPBACK
 	bool "IEEE802154 6LoWPAN Loopback"
 	default n
-	depends on NET_6LOWPAN && NET_IPv6
+	depends on NET_6LOWPAN || NET_IEEE802154
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Add support for the IEEE802.15.4 6LoWPAN Loopback test device.

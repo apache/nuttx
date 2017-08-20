@@ -64,7 +64,7 @@
 
 #include "mac802154.h"
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,6 +95,26 @@
 
 #ifndef CONFIG_IEEE802154_NETDEV_NINTERFACES
 # define CONFIG_IEEE802154_NETDEV_NINTERFACES 1
+#endif
+
+/* Preferred address size */
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+#  define MACNET_ADDRSIZE IEEE802154_EADDRSIZE
+#else
+#  define MACNET_ADDRSIZE IEEE802154_SADDRSIZE
+#endif
+
+/* Frame size
+ * REVISIT: Too many frame length definitions
+ */
+
+#if defined(CONFIG_NET_6LOWPAN_FRAMELEN)
+#  define MACNET_FRAMELEN CONFIG_NET_6LOWPAN_FRAMELEN
+#elif defined(CONFIG_NET_IEEE802154_FRAMELEN)
+#  define MACNET_FRAMELEN CONFIG_NET_IEEE802154_FRAMELEN
+#else
+#  define MACNET_FRAMELEN IEEE802154_MAX_PHY_PACKET_SIZE
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -252,8 +272,9 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
 
       eaddr = arg.getreq.attrval.mac.eaddr;
       IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, eaddr);
-      dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+      dev->d_mac.radio.nv_addrlen = IEEE802154_EADDRSIZE;
 
+#ifdef CONFIG_NET_IPv6
       /* Set the IP address based on the eaddr */
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
@@ -265,6 +286,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[6]  = (uint16_t)eaddr[4] << 8 |  (uint16_t)eaddr[5];
       dev->d_ipv6addr[7]  = (uint16_t)eaddr[6] << 8 |  (uint16_t)eaddr[7];
       dev->d_ipv6addr[4] ^= 0x200;
+#endif
       return OK;
     }
 
@@ -290,8 +312,9 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
 
       saddr = arg.getreq.attrval.mac.saddr;
       IEEE802154_SADDRCOPY(dev->d_mac.radio.nv_addr, saddr);
-      dev->d_mac.radio.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+      dev->d_mac.radio.nv_addrlen = IEEE802154_SADDRSIZE;
 
+#ifdef CONFIG_NET_IPv6
       /* Set the IP address based on the saddr */
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
@@ -303,6 +326,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[6]  = HTONS(0xfe00);
       dev->d_ipv6addr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
       dev->d_ipv6addr[7] ^= 0x200;
+#endif
       return OK;
     }
 #endif
@@ -324,6 +348,7 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
 
 static inline void macnet_netmask(FAR struct net_driver_s *dev)
 {
+#ifdef CONFIG_NET_IPv6
   dev->d_ipv6netmask[0]  = 0xffff;
   dev->d_ipv6netmask[1]  = 0xffff;
   dev->d_ipv6netmask[2]  = 0xffff;
@@ -338,6 +363,7 @@ static inline void macnet_netmask(FAR struct net_driver_s *dev)
   dev->d_ipv6netmask[5]  = 0xffff;
   dev->d_ipv6netmask[6]  = 0xffff;
   dev->d_ipv6netmask[7]  = 0;
+#endif
 #endif
 }
 
@@ -395,6 +421,7 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
     (FAR struct macnet_callback_s *)maccb;
   FAR struct macnet_driver_s *priv;
   FAR struct iob_s *iob;
+  int ret;
 
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   priv = cb->mc_priv;
@@ -412,24 +439,6 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
   DEBUGASSERT(priv != NULL && ind != NULL && ind->frame != NULL);
   iob = ind->frame;
 
-  /* If the frame is not a 6LoWPAN frame, then return an error.  The first
-   * byte following the MAC head at the io_offset should be a valid IPHC
-   * header.
-   */
-
-  if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
-      SIXLOWPAN_DISPATCH_NALP)
-    {
-      wlwarn("WARNING: Dropped... Not a 6LoWPAN frame: %02x\n",
-             iob->io_data[iob->io_offset]);
-      return -EINVAL;
-    }
-
-  /* Increment statistics */
-
-  NETDEV_RXPACKETS(&priv->md_dev.r_dev);
-  NETDEV_RXIPV6(&priv->md_dev.r_dev);
-
   /* Remove the IOB containing the frame. */
 
   ind->frame = NULL;
@@ -442,17 +451,40 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
    * frame and return success.
    */
 
-#ifndef CONFIG_NET_6LOWPAN
-  (void)ieee802154_input(&priv->md_dev, iob, (FAR void *)ind);
-#else
-  if (ieee802154_input(&priv->md_dev, iob, (FAR void *)ind) < 0)
-#endif
+  ret = ieee802154_input(&priv->md_dev, iob, (FAR void *)ind);
+  if (ret < 0)
 #endif
 #ifdef CONFIG_NET_6LOWPAN
     {
-      (void)sixlowpan_input(&priv->md_dev, iob, (FAR void *)ind);
+      /* If the frame is not a 6LoWPAN frame, then return an error.  The
+       * first byte following the MAC head at the io_offset should be a
+       * valid IPHC header.
+       */
+
+      if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
+          SIXLOWPAN_DISPATCH_NALP)
+        {
+          wlwarn("WARNING: Dropped... Not a 6LoWPAN frame: %02x\n",
+                 iob->io_data[iob->io_offset]);
+          ret = -EINVAL;
+        }
+      else
+        {
+          ret = sixlowpan_input(&priv->md_dev, iob, (FAR void *)ind);
+        }
     }
+
+  if (ret < 0)
 #endif
+    {
+      ind->frame = iob;
+      return ret;
+    }
+
+  /* Increment statistics */
+
+  NETDEV_RXPACKETS(&priv->md_dev.r_dev);
+  NETDEV_RXIPV6(&priv->md_dev.r_dev);
 
   /* sixlowpan_input() will free the IOB, but we must free the struct
    * ieee802154_data_ind_s container here.
@@ -676,6 +708,7 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
   ret = macnet_advertise(dev);
   if (ret >= 0)
     {
+#ifdef CONFIG_NET_IPv6
       wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
              dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
              dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
@@ -690,6 +723,27 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
 #else
       wlinfo("             Node: %02x:%02x\n",
              dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
+#endif
+#else
+      if (dev->d_mac.radio.nv_addrlen == 8)
+        {
+          ninfo("Bringing up: Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
+                 dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+                 dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
+                 dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
+                 dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7],
+                 priv->lo_panid[0], priv->lo_panid[1]);
+        }
+      else if (dev->d_mac.radio.nv_addrlen == 2)
+        {
+          ninfo("Bringing up: Node: %02x:%02x PANID=%02x:%02x\n",
+                 dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+                 priv->lo_panid[0], priv->lo_panid[1]);
+        }
+      else
+        {
+          nerr("ERROR: No address assigned\n");
+        }
 #endif
 
       /* Set and activate a timer process */
@@ -1081,8 +1135,8 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen = NET_6LOWPAN_ADDRSIZE;        /* Length of an address */
-  properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
+  properties->sp_addrlen = MACNET_ADDRSIZE;  /* Length of an address */
+  properties->sp_pktlen  = MACNET_FRAMELEN;  /* Fixed frame length */
 
   /* Multicast address (uses broadcast address)
    *
@@ -1099,12 +1153,12 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
    * (qualified by the destination PANID).
    */
 
-  properties->sp_mcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  properties->sp_mcast.nv_addrlen = IEEE802154_SADDRSIZE;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
 
   /* Broadcast address */
 
-  properties->sp_bcast.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  properties->sp_bcast.nv_addrlen = IEEE802154_SADDRSIZE;
   memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
 
 #ifdef CONFIG_NET_STARPOINT
@@ -1116,10 +1170,10 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
   (void)macnet_coord_eaddr(netdev, properties->sp_hubnode.nv_addr);
-  properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
+  properties->sp_hubnode.nv_addrlen = IEEE802154_EADDRSIZE;
 #else
   (void)macnet_coord_saddr(netdev, properties->sp_hubnode.nv_addr);
-  properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
+  properties->sp_hubnode.nv_addrlen = IEEE802154_SADDRSIZE;
 #endif
 #endif
 
@@ -1152,7 +1206,9 @@ int mac802154netdev_register(MACHANDLE mac)
   FAR struct radio_driver_s *radio;
   FAR struct net_driver_s  *dev;
   FAR struct mac802154_maccb_s *maccb;
+#ifdef CONFIG_NET_6LOWPAN
   FAR uint8_t *pktbuf;
+#endif
   int ret;
 
   DEBUGASSERT(mac != NULL);
@@ -1168,7 +1224,8 @@ int mac802154netdev_register(MACHANDLE mac)
       return -ENOMEM;
     }
 
-  /* Allocate a packet buffer (not used by this driver, but need by the
+#ifdef CONFIG_NET_6LOWPAN
+  /* Allocate a packet buffer (not used by this driver, but needed by the
    * upper networking layer)
    */
 
@@ -1179,12 +1236,15 @@ int mac802154netdev_register(MACHANDLE mac)
       kmm_free(priv);
       return -ENOMEM;
     }
+#endif
 
   /* Initialize the driver structure */
 
   radio               = &priv->md_dev;
   dev                 = &radio->r_dev;
+#ifdef CONFIG_NET_6LOWPAN
   dev->d_buf          = pktbuf;            /* Single packet buffer */
+#endif
   dev->d_ifup         = macnet_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = macnet_ifdown;     /* I/F down callback */
   dev->d_txavail      = macnet_txavail;    /* New TX data callback */
@@ -1237,7 +1297,9 @@ int mac802154netdev_register(MACHANDLE mac)
 
       /* Free memory and return the error */
 
+#ifdef CONFIG_NET_6LOWPAN
       kmm_free(pktbuf);
+#endif
       kmm_free(priv);
       return ret;
     }

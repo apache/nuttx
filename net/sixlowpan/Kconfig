@@ -3,8 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "6LoWPAN Configuration"
-	depends on NET_6LOWPAN
+if NET_6LOWPAN
 
 config NET_6LOWPAN_FRAG
 	bool "6LoWPAN Fragmentation"
@@ -12,15 +11,6 @@ config NET_6LOWPAN_FRAG
 	---help---
 		CONFIG_NET_6LOWPAN_FRAG specifies if 6lowpan fragmentation should be
 		used or not. Fragmentation is on by default.
-
-config NET_6LOWPAN_FRAMELEN
-	int "Max Radio Frame Size"
-	default 127
-	range 1 999999
-	---help---
-		Wireless devices use a variety of frame sizes.  For IEEE 802.15.4
-		radios, this should be 127 bytes.  However, some IEEE 802.15.4
-		radios may non-standard frame lengths.
 
 choice
 	prompt "6LoWPAN Compression"
@@ -200,4 +190,4 @@ config NET_6LOWPAN_DUMPBUFFER
 		of the 6LoWPAN logic.  This will generate a large volume of data if
 		selected.
 
-endmenu # 6LoWPAN Configuration
+endif # NET_6LOWPAN
