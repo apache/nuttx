@@ -44,6 +44,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -150,6 +151,9 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 
 void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 {
+  FAR struct ieee802154_container_s *container;
+  FAR struct ieee802154_container_s *next;
+
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
    */
@@ -160,6 +164,29 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   net_lock();
   dq_rem(&conn->node, &g_active_ieee802154_connections);
+
+  /* Check if there any any frames attached to the container */
+
+  for (container = conn->rxhead;
+       container != NULL;
+       container = container->ic_flink)
+    {
+      /* Remove the frame from the list */
+
+      next                = container->ic_flink;
+      container->ic_flink = NULL;
+
+      /* Free the contained frame data (should be only one in chain) */
+
+      if (container->ic_iob)
+        {
+          iob_free(container->ic_iob);
+        }
+
+      /* And free the container itself */
+
+      ieee802154_container_free(container);
+    }
 
   /* Free the connection */
 
