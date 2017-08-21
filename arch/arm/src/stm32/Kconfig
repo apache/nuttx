@@ -5849,6 +5849,10 @@ config STM32_DAC1CH1_DMA
 
 if STM32_DAC1CH1_DMA
 
+config STM32_DAC1CH1_DMA_BUFFER_SIZE
+	int "DAC1CH1 DMA buffer size"
+	default 256
+
 config STM32_DAC1CH1_TIMER
 	int "DAC1CH1 timer"
 	range 2 8
@@ -5870,6 +5874,10 @@ config STM32_DAC1CH2_DMA
 		supported by the driver.
 
 if STM32_DAC1CH2_DMA
+
+config STM32_DAC1CH2_DMA_BUFFER_SIZE
+	int "DAC1CH2 DMA buffer size"
+	default 256
 
 config STM32_DAC1CH2_TIMER
 	int "DAC1CH2 timer"
@@ -5893,6 +5901,10 @@ config STM32_DAC2CH1_DMA
 
 if STM32_DAC2CH1_DMA
 
+config STM32_DAC2CH1_DMA_BUFFER_SIZE
+	int "DAC2CH1 DMA buffer size"
+	default 256
+
 config STM32_DAC2CH1_TIMER
 	int "DAC2CH1 timer"
 	default 0
@@ -5903,10 +5915,6 @@ config STM32_DAC2CH1_TIMER_FREQUENCY
 	default 0
 
 endif
-
-config STM32_DAC_DMA_BUFFER_SIZE
-	int "DAC DMA buffer size"
-	default 256
 
 endmenu
 
