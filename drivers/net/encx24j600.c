@@ -341,7 +341,7 @@ static void enc_txif(FAR struct enc_driver_s *priv);
 static void enc_pktif(FAR struct enc_driver_s *priv);
 static void enc_rxabtif(FAR struct enc_driver_s *priv);
 static void enc_irqworker(FAR void *arg);
-static int  enc_interrupt(int irq, FAR void *context);
+static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1454,8 +1454,6 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   FAR struct enc_descr_s *descr;
   struct enc_descr_s *next;
 
-  int ret = ERROR;
-
   /* Process the RX queue */
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
@@ -1475,7 +1473,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
-       pkt_input(&priv->dev);
+       (void)pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1533,7 +1531,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           /* Give the IPv6 packet to the network layer */
 
-          ret = ipv6_input(&priv->dev);
+          (void)ipv6_input(&priv->dev);
 
           /* Free the packet */
 
@@ -1976,9 +1974,12 @@ static void enc_irqworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int enc_interrupt(int irq, FAR void *context)
+static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register FAR struct enc_driver_s *priv = &g_encx24j600[0];
+  FAR struct enc_driver_s *priv = &g_encx24j600[0];
+
+  DEBUGASSERT(arg != NULL);
+  priv = (FAR struct enc_driver_s *)arg;
 
   /* In complex environments, we cannot do SPI transfers from the interrupt
    * handler because semaphores are probably used to lock the SPI bus.  In
@@ -1995,7 +1996,8 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker,
+                    (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -2829,7 +2831,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
 
   /* Attach the interrupt to the driver (but don't enable it yet) */
 
-  if (lower->attach(lower, enc_interrupt))
+  if (lower->attach(lower, enc_interrupt, priv) < 0)
     {
       /* We could not attach the ISR to the interrupt */
 

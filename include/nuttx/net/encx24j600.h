@@ -86,7 +86,8 @@
 
 struct enc_lower_s
 {
-  int  (*attach)(FAR const struct enc_lower_s *lower, xcpt_t handler);
+  int  (*attach)(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                 FAR void *arg);
   void (*enable)(FAR const struct enc_lower_s *lower);
   void (*disable)(FAR const struct enc_lower_s *lower);
 };
