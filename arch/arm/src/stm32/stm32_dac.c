@@ -142,13 +142,23 @@
 # endif
 #endif
 
+#if defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG1) || defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG2)
+#  define DAC1CH1_HRTIM
+#endif
+#if defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG1) || defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG2)
+#  define DAC1CH2_HRTIM
+#endif
+#if defined(CONFIG_STM32_DAC2CH1_HRTIM_TRG3)
+#  define DAC2CH1_HRTIM
+#endif
+
 /* If DMA is selected, then a timer and output frequency must also be
  * provided to support the DMA transfer.  The DMA transfer could be
  * supported by and EXTI trigger, but this feature is not currently
  * supported by the driver.
  */
 
-#ifdef CONFIG_STM32_DAC1CH1_DMA
+#if defined(CONFIG_STM32_DAC1CH1_DMA) && !defined(DAC1CH1_HRTIM)
 #  if !defined(CONFIG_STM32_DAC1CH1_TIMER)
 #    warning "A timer number must be specificed in CONFIG_STM32_DAC1CH1_TIMER"
 #    undef CONFIG_STM32_DAC1CH1_DMA
@@ -160,7 +170,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_DAC1CH2_DMA
+#if defined(CONFIG_STM32_DAC1CH2_DMA) && !defined(DAC1CH2_HRTIM)
 #  if !defined(CONFIG_STM32_DAC1CH2_TIMER)
 #    warning "A timer number must be specificed in CONFIG_STM32_DAC1CH2_TIMER"
 #    undef CONFIG_STM32_DAC1CH2_DMA
@@ -172,7 +182,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_DAC2CH1_DMA
+#if defined(CONFIG_STM32_DAC2CH1_DMA) && !defined(DAC2CH1_HRTIM)
 #  if !defined(CONFIG_STM32_DAC2CH1_TIMER)
 #    warning "A timer number must be specificed in CONFIG_STM32_DAC2CH1_TIMER"
 #    undef CONFIG_STM32_DAC2CH1_DMA
@@ -201,7 +211,7 @@
 #    define DAC1CH2_DMA_CHAN   DMACHAN_DAC1_CH2
 #  endif
 #  ifdef CONFIG_STM32_DAC2CH1
-#    define DAC2CH1_DMA_CHAN   DMACHAN_DAC2_CH2
+#    define DAC2CH1_DMA_CHAN   DMACHAN_DAC2_CH1
 #  endif
 # elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define HAVE_DMA        1
@@ -224,12 +234,16 @@
  * TSEL SOURCE                  DEVICES
  * ---- ----------------------- -------------------------------------
  * 000  Timer 6 TRGO event      ALL
- * 001  Timer 3 TRGO event      STM32 F1 Connectivity Line
+ * 001  Timer 3 TRGO event      STM32 F1 Connectivity Line and STM32 F3
  *      Timer 8 TRGO event      Other STM32 F1 and all STM32 F4
  * 010  Timer 7 TRGO event      ALL
  * 011  Timer 5 TRGO event      ALL
+ *      Timer 15 TRGO event     STM32 F3
+ *      HRTIM1_DACTRG1 event    STM32F33XX (DAC1 only)
  * 100  Timer 2 TRGO event      ALL
  * 101  Timer 4 TRGO event      ALL
+ *      HRTIM1_DACTRG2 event    STM32F33XX (DAC1 only)
+ *      HRTIM1_DACTRG3 event    STM32F33XX (DAC2 only)
  * 110  EXTI line9              ALL
  * 111  SWTRIG Software control ALL
  *
@@ -245,7 +259,17 @@
 #undef NEED_TIM4
 
 #ifdef CONFIG_STM32_DAC1CH1_DMA
-#  if CONFIG_STM32_DAC1CH1_TIMER == 6
+#  if defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG1)
+#    ifndef CONFIG_STM32_HRTIM_DAC
+#      error  "CONFIG_STM32_HRTIM_DAC required for DAC1CH1"
+#    endif
+#    define DAC1CH1_TSEL_VALUE           DAC_CR_TSEL_HRT1TRG1
+#  elif defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG2)
+#    ifndef CONFIG_STM32_HRTIM_DAC
+#      error  "CONFIG_STM32_HRTIM_DAC required for DAC1CH2"
+#    endif
+#    define DAC1CH1_TSEL_VALUE           DAC_CR_TSEL_HRT1TRG2
+#  elif CONFIG_STM32_DAC1CH1_TIMER == 6
 #    ifndef CONFIG_STM32_TIM6_DAC
 #      error "CONFIG_STM32_TIM6_DAC required for DAC1CH1"
 #    endif
@@ -308,7 +332,17 @@
 #endif
 
 #ifdef CONFIG_STM32_DAC1CH2_DMA
-#  if CONFIG_STM32_DAC1CH2_TIMER == 6
+#  if defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG1)
+#    ifndef CONFIG_STM32_HRTIM_DAC
+#      error  "CONFIG_STM32_HRTIM_DAC required for DAC1CH2"
+#    endif
+#    define DAC1CH2_TSEL_VALUE           DAC_CR_TSEL_HRT1TRG1
+#  elif defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG2)
+#    ifndef CONFIG_STM32_HRTIM_DAC
+#      error  "CONFIG_STM32_HRTIM_DAC required for DAC1CH2"
+#    endif
+#    define DAC1CH2_TSEL_VALUE           DAC_CR_TSEL_HRT1TRG2
+#  elif CONFIG_STM32_DAC1CH2_TIMER == 6
 #    ifndef CONFIG_STM32_TIM6_DAC
 #      error "CONFIG_STM32_TIM6_DAC required for DAC1CH2"
 #    endif
@@ -365,7 +399,12 @@
 #endif
 
 #ifdef CONFIG_STM32_DAC2CH1_DMA
-#  if CONFIG_STM32_DAC2CH1_TIMER == 6
+#  if defined(CONFIG_STM32_DAC2CH1_HRTIM_TRG3)
+#    ifndef CONFIG_STM32_HRTIM_DAC
+#      error  "CONFIG_STM32_HRTIM_DAC required for DAC2CH1"
+#    endif
+#    define DAC2CH1_TSEL_VALUE           DAC_CR_TSEL_HRT1TRG3
+#  elif CONFIG_STM32_DAC2CH1_TIMER == 6
 #    ifndef CONFIG_STM32_TIM6_DAC
 #      error "CONFIG_STM32_TIM6_DAC required for DAC2CH1"
 #    endif
@@ -419,6 +458,17 @@
 #  endif
 #else
 #  define DAC2CH1_TSEL_VALUE DAC_CR_TSEL_SW
+#endif
+
+/*
+ * We need index which describes when HRTIM is selected as trigger.
+ * It will be used to skip timer configuration where needed.
+ */
+
+#define TIM_INDEX_HRTIM 255
+
+#if defined(DAC1_HRTIM) || defined(DAC2_HRTIM) || defined(DAC3_HRTIM)
+#  define HAVE_HRTIM
 #endif
 
 #ifndef CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE
@@ -563,10 +613,17 @@ static struct stm32_chan_s g_dac1ch1priv =
   .dmachan    = DAC1CH1_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE,
   .dmabuffer  = dac1ch1_buffer,
+#  ifdef DAC1CH1_HRTIM
+  .timer      = TIM_INDEX_HRTIM,
+  .tsel       = 0,
+  .tbase      = 0,
+  .tfrequency = 0,
+#  else
   .timer      = CONFIG_STM32_DAC1CH1_TIMER,
   .tsel       = DAC1CH1_TSEL_VALUE,
   .tbase      = DAC1CH1_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY,
+#  endif
 #endif
 };
 
@@ -596,10 +653,17 @@ static struct stm32_chan_s g_dac1ch2priv =
   .dmachan    = DAC1CH2_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE,
   .dmabuffer  = dac1ch2_buffer,
+#  ifdef DAC1CH2_HRTIM
+  .timer      = TIM_INDEX_HRTIM,
+  .tsel       = 0,
+  .tbase      = 0,
+  .tfrequency = 0,
+#  else
   .timer      = CONFIG_STM32_DAC1CH2_TIMER,
   .tsel       = DAC1CH2_TSEL_VALUE,
   .tbase      = DAC1CH2_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY,
+#  endif
 #endif
 };
 
@@ -632,10 +696,17 @@ static struct stm32_chan_s g_dac2ch1priv =
   .dmachan    = DAC2CH1_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE,
   .dmabuffer  = dac2ch1_buffer,
+#  ifdef DAC2CH1_HRTIM
+  .timer      = TIM_INDEX_HRTIM,
+  .tsel       = 0,
+  .tbase      = 0,
+  .tfrequency = 0,
+#  else
   .timer      = CONFIG_STM32_DAC2CH1_TIMER,
   .tsel       = DAC2CH1_TSEL_VALUE,
   .tbase      = DAC2CH1_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY,
+#  endif
 #endif
 };
 
@@ -946,10 +1017,13 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
       dac_txdone(dev);
     }
 
-  /* Reset counters (generate an update) */
+  /* Reset counters (generate an update). Only when timer is not HRTIM */
 
 #ifdef HAVE_DMA
-  tim_modifyreg(chan, STM32_BTIM_EGR_OFFSET, 0, ATIM_EGR_UG);
+  if (chan->timer != TIM_INDEX_HRTIM)
+    {
+      tim_modifyreg(chan, STM32_BTIM_EGR_OFFSET, 0, ATIM_EGR_UG);
+    }
 #endif
   return OK;
 }
@@ -996,6 +1070,17 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
   uint32_t reload;
   uint32_t regaddr;
   uint32_t setbits;
+
+  /* Do nothing if HRTIM is selected as trigger.
+   * All necessary configuration is done in the HRTIM driver.
+   */
+
+#ifdef HAVE_HRTIM
+  if (chan->timer == TIM_INDEX_HRTIM)
+    {
+      return OK;
+    }
+#endif
 
   /* Configure the time base: Timer period, prescaler, clock division,
    * counter mode (up).
