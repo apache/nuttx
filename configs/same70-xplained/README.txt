@@ -898,6 +898,11 @@ Click Shield
   some extra Arduino connectors to raise the Click shield so that it clears
   the RJ45.
 
+  NOTE:  Mikroelektronika provides two different click shields:  A UNO style
+  shield with two click mikroBUSes and a larget Mega shield with three
+  click mikroBUSes.  The above discusses on the UNO shield.  I know that the
+  serial ports, at least, differ on the two shields.
+
 Tickless OS
 ===========
 
