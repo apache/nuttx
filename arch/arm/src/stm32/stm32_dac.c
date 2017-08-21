@@ -190,19 +190,31 @@
 #undef HAVE_DMA
 #if defined(CONFIG_STM32_DAC1CH1_DMA) || defined(CONFIG_STM32_DAC1CH2_DMA) || \
     defined(CONFIG_STM32_DAC2CH1_DMA)
-# if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#   define HAVE_DMA        1
-#   define DAC_DMA         2
-#   define DAC1CH1_DMA_CHAN   DMACHAN_DAC_CHAN1
-#   define DAC1CH2_DMA_CHAN   DMACHAN_DAC_CHAN2
-#   define DAC2CH1_DMA_CHAN   DMACHAN_DAC_CHAN2
-# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-  defined(CONFIG_STM32_STM32F33XX)
-#   define HAVE_DMA        1
-#   define DAC_DMA         1
-#   define DAC1CH1_DMA_CHAN   DMAMAP_DAC1
-#   define DAC1CH2_DMA_CHAN   DMAMAP_DAC1
-#   define DAC2CH1_DMA_CHAN   DMAMAP_DAC2
+# if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+     defined(CONFIG_STM32_STM32F33XX)
+#  define HAVE_DMA        1
+#  define DAC_DMA         2
+#  ifdef CONFIG_STM32_DAC1CH1
+#    define DAC1CH1_DMA_CHAN   DMACHAN_DAC1_CH1
+#  endif
+#  ifdef CONFIG_STM32_DAC1CH2
+#    define DAC1CH2_DMA_CHAN   DMACHAN_DAC1_CH2
+#  endif
+#  ifdef CONFIG_STM32_DAC2CH1
+#    define DAC2CH1_DMA_CHAN   DMACHAN_DAC2_CH2
+#  endif
+# elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  define HAVE_DMA        1
+#  define DAC_DMA         1
+#  ifdef CONFIG_STM32_DAC1CH1
+#    define DAC1CH1_DMA_CHAN   DMAMAP_DAC1
+#  endif
+#  ifdef CONFIG_STM32_DAC1CH1
+#    define DAC1CH2_DMA_CHAN   DMAMAP_DAC1
+#  endif
+#  ifdef CONFIG_STM32_DAC1CH1
+#    define DAC2CH1_DMA_CHAN   DMAMAP_DAC2
+#  endif
 # endif
 #endif
 
@@ -409,8 +421,16 @@
 #  define DAC2CH1_TSEL_VALUE DAC_CR_TSEL_SW
 #endif
 
-#ifndef CONFIG_STM32_DAC_DMA_BUFFER_SIZE
-#  define CONFIG_STM32_DAC_DMA_BUFFER_SIZE 256
+#ifndef CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE
+#  define CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE 256
+#endif
+
+#ifndef CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE
+#  define CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE 256
+#endif
+
+#ifndef CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE
+#  define CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE 256
 #endif
 
 /* Calculate timer divider values based upon DACn_TIMER_PCLK_FREQUENCY and
@@ -462,10 +482,11 @@ struct stm32_chan_s
   uint32_t   tsel;       /* CR trigger select value */
 #ifdef HAVE_DMA
   uint16_t   dmachan;    /* DMA channel needed by this DAC */
+  uint16_t   buffer_len; /* DMA buffer length */
   DMA_HANDLE dma;        /* Allocated DMA channel */
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
-  uint16_t   dmabuffer[CONFIG_STM32_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
+  uint16_t   *dmabuffer; /* DMA transfer buffer */
 #endif
 };
 
@@ -521,6 +542,10 @@ static const struct dac_ops_s g_dacops =
 #ifdef CONFIG_STM32_DAC1CH1
 /* Channel 1: DAC1 channel 1 */
 
+#ifdef CONFIG_STM32_DAC1CH1_DMA
+uint16_t   dac1ch1_buffer[CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE];
+#endif
+
 static struct stm32_chan_s g_dac1ch1priv =
 {
   .intf       = 0,
@@ -536,6 +561,8 @@ static struct stm32_chan_s g_dac1ch1priv =
 #ifdef CONFIG_STM32_DAC1CH1_DMA
   .hasdma     = 1,
   .dmachan    = DAC1CH1_DMA_CHAN,
+  .buffer_len = CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE,
+  .dmabuffer  = dac1ch1_buffer,
   .timer      = CONFIG_STM32_DAC1CH1_TIMER,
   .tsel       = DAC1CH1_TSEL_VALUE,
   .tbase      = DAC1CH1_TIMER_BASE,
@@ -554,6 +581,10 @@ static struct dac_dev_s g_dac1ch1dev =
 #ifdef CONFIG_STM32_DAC1CH2
 /* Channel 2: DAC1 channel 2 */
 
+#ifdef CONFIG_STM32_DAC1CH2_DMA
+uint16_t   dac1ch2_buffer[CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE];
+#endif
+
 static struct stm32_chan_s g_dac1ch2priv =
 {
   .intf       = 1,
@@ -563,6 +594,8 @@ static struct stm32_chan_s g_dac1ch2priv =
 #ifdef CONFIG_STM32_DAC2_DMA
   .hasdma     = 1,
   .dmachan    = DAC1CH2_DMA_CHAN,
+  .buffer_len = CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE,
+  .dmabuffer  = dac1ch2_buffer,
   .timer      = CONFIG_STM32_DAC1CH2_TIMER,
   .tsel       = DAC1CH2_TSEL_VALUE,
   .tbase      = DAC1CH2_TIMER_BASE,
@@ -584,6 +617,10 @@ static struct dac_dev_s g_dac1ch2dev =
 #ifdef CONFIG_STM32_DAC2CH1
 /* Channel 3: DAC2 channel 1 */
 
+#ifdef CONFIG_STM32_DAC2CH1_DMA
+uint16_t   dac2ch1_buffer[CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE];
+#endif
+
 static struct stm32_chan_s g_dac2ch1priv =
 {
   .intf       = 2,
@@ -593,6 +630,8 @@ static struct stm32_chan_s g_dac2ch1priv =
 #ifdef CONFIG_STM32_DAC2CH1_DMA
   .hasdma     = 1,
   .dmachan    = DAC2CH1_DMA_CHAN,
+  .buffer_len = CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE,
+  .dmabuffer  = dac2ch1_buffer,
   .timer      = CONFIG_STM32_DAC2CH1_TIMER,
   .tsel       = DAC2CH1_TSEL_VALUE,
   .tbase      = DAC2CH1_TIMER_BASE,
@@ -888,7 +927,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
        */
 
       stm32_dmasetup(chan->dma, chan->dro, (uint32_t)chan->dmabuffer,
-                     CONFIG_STM32_DAC_DMA_BUFFER_SIZE, DAC_DMA_CONTROL_WORD);
+                     chan->buffer_len, DAC_DMA_CONTROL_WORD);
 
       /* Enable DMA */
 
