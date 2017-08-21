@@ -51,6 +51,10 @@
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_NET) && defined(CONFIG_NET_STATISTICS)
 
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6) || \
+    defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP) || \
+    defined(CONFIG_NET_ICMP) || defined(CONFIG_NET_ICMPv6)
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -459,5 +463,15 @@ ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
   return netprocfs_read_linegen(priv, buffer, buflen, g_stat_linegen, NSTAT_LINES);
 }
 
+#else
+
+ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen)
+{
+  return OK;
+}
+
+#endif /* CONFIG_NET_IPv4 || CONFIG_NET_IPv6 || CONFIG_NET_TCP || \
+        * CONFIG_NET_UDP  || CONFIG_NET_ICMP || CONFIG_NET_ICMPv6 */
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
         * !CONFIG_FS_PROCFS_EXCLUDE_NET */
