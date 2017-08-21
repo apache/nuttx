@@ -152,7 +152,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_SCHED_HPWORK) || !defined(CONFIG_SCHED_HPWORK)
+#if !defined(CONFIG_SCHED_LPWORK) || !defined(CONFIG_SCHED_HPWORK)
 #  error Both high and low priority work queues required in this driver
 #endif
 
