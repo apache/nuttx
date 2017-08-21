@@ -41,22 +41,6 @@ config NET_BROADCAST
 	---help---
 		Incoming UDP broadcast support
 
-config NET_RXAVAIL
-	bool "Driver-based UDP backlog"
-	default n
-	---help---
-		One problem with UDP communications is that, unlike TCP/IP, there is
-		no backlog of UDP packets.  So if you are listening at the precise
-		moment that the UDP packet is sent, it will not be received.  This
-		is not incompatible with the properties of UDP, but can result in
-		bad performance if packets are missed, time out, and are resent.
-
-		Some Ethernet controllers have built-in RAM and the drivers can
-		support retention of UDP packets in that RAM.  If the drivers
-		supports such a capability, this option may be enabled to use it.
-		NOTE:  If this option is enabled, the driver must support the
-		rxavail() method in the net_driver_s structure.
-
 config NET_UDP_READAHEAD
 	bool "Enable UDP/IP read-ahead buffering"
 	default y

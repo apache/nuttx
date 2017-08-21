@@ -1166,55 +1166,6 @@ static ssize_t inet_recvfrom_result(int result, struct inet_recvfrom_s *pstate)
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Name: inet_udp_rxnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are ready to receive a
- *   packet (UDP)
- *
- * Parameters:
- *   psock - Socket state structure
- *   conn  - The UDP connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef NET_UDP_HAVE_STACK
-static inline void inet_udp_rxnotify(FAR struct socket *psock,
-                                     FAR struct udp_conn_s *conn)
-{
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver of the receive ready */
-
-      netdev_ipv4_rxnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver of the receive ready */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_rxnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
-}
-#endif /* NET_UDP_HAVE_STACK */
-
-/****************************************************************************
  * Name: inet_udp_recvfrom
  *
  * Description:
@@ -1322,10 +1273,6 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
           state.ir_cb->flags   = (UDP_NEWDATA | UDP_POLL | NETDEV_DOWN);
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = inet_udp_interrupt;
-
-          /* Notify the device driver of the receive call */
-
-          inet_udp_rxnotify(psock, conn);
 
           /* Wait for either the receive to complete or for an error/timeout
            * to occur. NOTES:  (1) net_lockedwait will also terminate if a

@@ -156,10 +156,6 @@
 
 #define ENC_TXTIMEOUT (60*CLK_TCK)
 
-/* RX timeout (Time packets are held in the RX queue until they are dropped) */
-
-#define ENC_RXTIMEOUT MSEC2TICK(2000)
-
 /* Poll timeout */
 
 #define ENC_POLLTIMEOUT MSEC2TICK(50)
@@ -228,7 +224,6 @@ struct enc_descr_s
   struct enc_descr_next *flink;
   uint16_t addr;
   uint16_t len;
-  uint32_t ts;                         /* Timestamp of reception for timeout */
 };
 
 /* The enc_driver_s encapsulates all state information for a single hardware
@@ -360,7 +355,6 @@ static void enc_polltimer(int argc, uint32_t arg, ...);
 static int  enc_ifup(struct net_driver_s *dev);
 static int  enc_ifdown(struct net_driver_s *dev);
 static int  enc_txavail(struct net_driver_s *dev);
-static int  enc_rxavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
 static int  enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -1497,16 +1491,11 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
            */
 
           arp_ipin(&priv->dev);
-          ret = ipv4_input(&priv->dev);
+          (void)ipv4_input(&priv->dev);
 
-          if (ret == OK || (clock_systimer() - (systime_t)descr->ts) > ENC_RXTIMEOUT)
-            {
-              /* If packet has been successfully processed or has timed out,
-               * free it.
-               */
+          /* Free the packet */
 
-              enc_rxrmpkt(priv, descr);
-            }
+          enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -1546,14 +1535,9 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           ret = ipv6_input(&priv->dev);
 
-          if (ret == OK || (clock_systimer() - (systime_t)descr->ts) > ENC_RXTIMEOUT)
-            {
-              /* If packet has been successfully processed or has timed out,
-               * free it.
-               */
+          /* Free the packet */
 
-              enc_rxrmpkt(priv, descr);
-            }
+          enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -1691,10 +1675,6 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
        */
 
       descr = enc_rxgetdescr(priv);
-
-      /* Set current timestamp */
-
-      descr->ts = (uint32_t)clock_systimer();
 
       /* Store the start address of the frame without the enc's header */
 
@@ -2392,38 +2372,6 @@ static int enc_txavail(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: enc_rxavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static int enc_rxavail(struct net_driver_s *dev)
-{
-  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
-
-  if (!sq_empty(&priv->rxqueue))
-    {
-      ninfo("RX queue not empty, trying to dispatch\n");
-      enc_rxdispatch(priv);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: enc_addmac
  *
  * Description:
@@ -2858,7 +2806,6 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */
-  priv->dev.d_rxavail = enc_rxavail;  /* RX wating callback */
 #ifdef CONFIG_NET_IGMP
   priv->dev.d_addmac  = enc_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */

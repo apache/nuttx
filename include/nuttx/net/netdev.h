@@ -368,9 +368,6 @@ struct net_driver_s
   int (*d_ifup)(FAR struct net_driver_s *dev);
   int (*d_ifdown)(FAR struct net_driver_s *dev);
   int (*d_txavail)(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_RXAVAIL
-  int (*d_rxavail)(FAR struct net_driver_s *dev);
-#endif
 #ifdef CONFIG_NET_IGMP
   int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
   int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);

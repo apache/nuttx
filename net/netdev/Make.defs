@@ -41,10 +41,6 @@ NETDEV_CSRCS += netdev_count.c netdev_foreach.c netdev_unregister.c
 NETDEV_CSRCS += netdev_carrier.c netdev_default.c netdev_verify.c
 NETDEV_CSRCS += netdev_lladdrsize.c
 
-ifeq ($(CONFIG_NET_RXAVAIL),y)
-NETDEV_CSRCS += netdev_rxnotify.c
-endif
-
 # Include netdev build support
 
 DEPPATH += --dep-path netdev

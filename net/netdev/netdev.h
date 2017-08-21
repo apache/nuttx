@@ -324,65 +324,6 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
 void netdev_txnotify_dev(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: netdev_ipv4_rxnotify
- *
- * Description:
- *   Notify the device driver that forwards the IPv4 address that the
- *  application waits for RX data.
- *
- * Parameters:
- *   lipaddr - The local board IPv6 address of the socket
- *   ripaddr - The remote IPv4 address to send the data
- *
- * Returned Value:
- *  None
- *
- * Assumptions:
- *  Called from normal user mode
- *
- ****************************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
-
-#ifdef CONFIG_NET_IPv4
-void netdev_ipv4_rxnotify(in_addr_t lipaddr, in_addr_t ripaddr);
-#endif /* CONFIG_NET_IPv4 */
-
-/****************************************************************************
- * Name: netdev_ipv6_rxnotify
- *
- * Description:
- *   Notify the device driver that forwards the IPv6 address that the
- *  application waits for RX data.
- *
- * Parameters:
- *   lipaddr - The local board IPv6 address of the socket
- *   ripaddr - The remote IPv6 address to send the data
- *
- * Returned Value:
- *  None
- *
- * Assumptions:
- *  Called from normal user mode
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv6
-void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t lipaddr,
-                          FAR const net_ipv6addr_t ripaddr);
-#endif /* CONFIG_NET_IPv6 */
-
-#else
-#ifdef CONFIG_NET_IPv4
-#  define netdev_ipv4_rxnotify(lipaddr,ripaddr)
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#  define netdev_ipv6_rxnotify(lipaddr,ripaddr)
-#endif /* CONFIG_NET_IPv6 */
-#endif
-
-/****************************************************************************
  * Name: netdev_count
  *
  * Description:

@@ -324,28 +324,6 @@ static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
 }
 
 /****************************************************************************
- * Name: pkt_recvfrom_rxnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are ready to receive a
- *   packet (PKT)
- *
- * Parameters:
- *   conn - The PKT connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if 0 /* Not implemented */
-static void pkt_recvfrom_rxnotify(FAR struct pkt_conn_s *conn)
-{
-#  warning Missing logic
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -446,12 +424,6 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.pr_cb->flags  = (PKT_NEWDATA | PKT_POLL);
       state.pr_cb->priv   = (FAR void *)&state;
       state.pr_cb->event  = pkt_recvfrom_interrupt;
-
-      /* Notify the device driver of the receive call */
-
-#if 0 /* Not implemented */
-      pkt_recvfrom_rxnotify(conn);
-#endif
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  (1) net_lockedwait will also terminate if a signal
