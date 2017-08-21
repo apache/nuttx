@@ -82,6 +82,36 @@ struct ieee802154_recvfrom_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ieee802154_count_frames
+ *
+ * Description:
+ *   Return the number of frames in the RX queue.
+ *
+ * Parameters:
+ *   conn   - The socket connection structure.
+ *
+ * Return:
+ *   The number of frames in the queue.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_ASSERTIONS) && CONFIG_NET_IEEE802154_BACKLOG > 0
+static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
+{
+  FAR struct ieee802154_container_s *container;
+  int count;
+
+  for (count = 0, container = conn->rxhead;
+       container != NULL;
+       count++, container = container->ic_flink)
+    {
+    }
+
+  return count;
+}
+#endif
+
+/****************************************************************************
  * Name: ieee802154_recvfrom_sender
  *
  * Description:
@@ -134,6 +164,7 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
 
        DEBUGASSERT(conn->backlog > 0);
        conn->backlog--;
+       DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
 #endif
 
       /* Extract the IOB containing the frame from the container */

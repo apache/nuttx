@@ -69,8 +69,8 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
-int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
+#if defined(CONFIG_DEBUG_ASSERTIONS) && CONFIG_NET_IEEE802154_BACKLOG > 0
+static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
 {
   FAR struct ieee802154_container_s *container;
   int count;
@@ -102,9 +102,9 @@ int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
  *
  ****************************************************************************/
 
-int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
-                           FAR struct iob_s *frame,
-                           FAR struct ieee802154_data_ind_s *meta)
+static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
+                                  FAR struct iob_s *frame,
+                                  FAR struct ieee802154_data_ind_s *meta)
 {
   FAR struct ieee802154_container_s *container;
 
@@ -150,16 +150,14 @@ int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
     }
 
 #if CONFIG_NET_IEEE802154_BACKLOG > 0
-   /* Increment the count of frames in the queue.  If the count exceeds the
-    * maximum backlog value, then delete the oldest frame from the head of
-    * the RX queue.
+   /* If incrementing the count would exceed the maximum backlog value, then
+    * delete the oldest frame from the head of the RX queue.
     */
 
-   conn->backlog++;
-   DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
-
-   if (conn->backlog > CONFIG_NET_IEEE802154_BACKLOG)
+   if (conn->backlog >= CONFIG_NET_IEEE802154_BACKLOG)
      {
+      DEBUGASSERT(conn->backlog == CONFIG_NET_IEEE802154_BACKLOG);
+
       /* Remove the container from the tail RX input queue. */
 
       container           = conn->rxhead;
@@ -181,6 +179,14 @@ int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
       iob_free(container->ic_iob);
       ieee802154_container_free(container);
      }
+   else
+     {
+       /* Increment the count of frames in the queue. */
+
+       conn->backlog++;
+     }
+
+   DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
 #endif
 
   return OK;
