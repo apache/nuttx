@@ -591,7 +591,7 @@ static struct stm32_chan_s g_dac1ch2priv =
   .pin        = GPIO_DAC1_OUT2,
   .dro        = STM32_DAC1_DHR12R2,
   .cr         = STM32_DAC1_CR,
-#ifdef CONFIG_STM32_DAC2_DMA
+#ifdef CONFIG_STM32_DAC1CH2_DMA
   .hasdma     = 1,
   .dmachan    = DAC1CH2_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE,
