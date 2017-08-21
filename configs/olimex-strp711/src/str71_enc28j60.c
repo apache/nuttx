@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/olimex-strp711/src/str71_enc28j60.c
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -154,7 +154,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler);
+static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                      FAR void *arg);
 static void up_enable(FAR const struct enc_lower_s *lower);
 static void up_disable(FAR const struct enc_lower_s *lower);
 
@@ -182,9 +183,10 @@ static const struct enc_lower_s g_enclower =
  * Name: struct enc_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler)
+static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                     FAR void *arg)
 {
-  return irq_attach(ENC28J60_IRQ, handler, NULL);
+  return irq_attach(ENC28J60_IRQ, handler, arg);
 }
 
 static void up_enable(FAR const struct enc_lower_s *lower)

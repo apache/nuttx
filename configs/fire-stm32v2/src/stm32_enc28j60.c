@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/fire-stm32v2/src/stm32_enc28j60.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,13 +106,15 @@ struct stm32_lower_s
 {
   const struct enc_lower_s lower;    /* Low-level MCU interface */
   xcpt_t                   handler;  /* ENC28J60 interrupt handler */
+  FAR void                *arg;      /* Argument that accompanies the interrupt */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler);
+static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                      FAR void *arg);
 static void up_enable(FAR const struct enc_lower_s *lower);
 static void up_disable(FAR const struct enc_lower_s *lower);
 
@@ -134,6 +136,7 @@ static struct stm32_lower_s g_enclower =
     .disable = up_disable
   },
   .handler = NULL,
+  .arg     = NULL
 };
 
 /****************************************************************************
@@ -144,13 +147,15 @@ static struct stm32_lower_s g_enclower =
  * Name: struct enc_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler)
+static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                     FAR void *arg)
 {
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   /* Just save the handler for use when the interrupt is enabled */
 
   priv->handler = handler;
+  priv->arg     = arg;
   return OK;
 }
 
@@ -160,8 +165,13 @@ static void up_enable(FAR const struct enc_lower_s *lower)
 
   DEBUGASSERT(priv->handler);
   (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
-                           priv->handler, NULL);
+                           priv->handler, priv->arg);
 }
+
+/* REVISIT:  Since the interrupt is completely torn down, not just disabled,
+ * in interrupt requests that occurs while the interrupt is disabled will be
+ * lost.
+ */
 
 static void up_disable(FAR const struct enc_lower_s *lower)
 {

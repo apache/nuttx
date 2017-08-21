@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/net/encx24j600.c
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013-2014 UVC Ingenieure. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>
  *
@@ -1976,7 +1977,7 @@ static void enc_irqworker(FAR void *arg)
 
 static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct enc_driver_s *priv = &g_encx24j600[0];
+  FAR struct enc_driver_s *priv;
 
   DEBUGASSERT(arg != NULL);
   priv = (FAR struct enc_driver_s *)arg;
