@@ -118,8 +118,11 @@ struct ieee802154_conn_s
   struct ieee802154_saddr_s laddr;             /* Locally bound / source address */
   struct ieee802154_saddr_s raddr;             /* Connected remote address */
   uint8_t crefs;                               /* Reference counts on this instance */
+#if CONFIG_NET_IEEE802154_BACKLOG > 0
+  uint8_t backlog;                             /* Number of frames in RX queue */
+#endif
 
-  /* List of incoming packets */
+  /* Queue of incoming packets */
 
   FAR struct ieee802154_container_s *rxhead;
   FAR struct ieee802154_container_s *rxtail;

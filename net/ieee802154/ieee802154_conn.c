@@ -38,6 +38,7 @@
 #include <nuttx/config.h>
 
 #include <semaphore.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -133,6 +134,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
     {
       /* Enqueue the connection into the active list */
 
+      memset(conn, 0, sizeof(struct ieee802154_conn_s));
       dq_addlast(&conn->node, &g_active_ieee802154_connections);
     }
 
@@ -167,9 +169,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   /* Check if there any any frames attached to the container */
 
-  for (container = conn->rxhead;
-       container != NULL;
-       container = container->ic_flink)
+  for (container = conn->rxhead; container != NULL; container = next)
     {
       /* Remove the frame from the list */
 

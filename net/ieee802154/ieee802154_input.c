@@ -56,6 +56,36 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ieee802154_count_frames
+ *
+ * Description:
+ *   Return the number of frames in the RX queue.
+ *
+ * Parameters:
+ *   conn   - The socket connection structure.
+ *
+ * Return:
+ *   The number of frames in the queue.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_ASSERTIONS
+int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
+{
+  FAR struct ieee802154_container_s *container;
+  int count;
+
+  for (count = 0, container = conn->rxhead;
+       container != NULL;
+       count++, container = container->ic_flink)
+    {
+    }
+
+  return count;
+}
+#endif
+
+/****************************************************************************
  * Name: ieee802154_queue_frame
  *
  * Description:
@@ -118,6 +148,40 @@ int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
     {
       conn->rxtail->ic_flink = container;
     }
+
+#if CONFIG_NET_IEEE802154_BACKLOG > 0
+   /* Increment the count of frames in the queue.  If the count exceeds the
+    * maximum backlog value, then delete the oldest frame from the head of
+    * the RX queue.
+    */
+
+   conn->backlog++;
+   DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
+
+   if (conn->backlog > CONFIG_NET_IEEE802154_BACKLOG)
+     {
+      /* Remove the container from the tail RX input queue. */
+
+      container           = conn->rxhead;
+      DEBUGASSERT(container != NULL);
+      conn->rxhead        = container->ic_flink;
+      container->ic_flink = NULL;
+
+      /* Did the RX queue become empty? */
+
+      if (conn->rxhead == NULL)
+        {
+          conn->rxtail = NULL;
+        }
+
+      DEBUGASSERT(container != NULL && container->ic_iob != NULL);
+
+      /* Free both the IOB and the container */
+
+      iob_free(container->ic_iob);
+      ieee802154_container_free(container);
+     }
+#endif
 
   return OK;
 }

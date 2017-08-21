@@ -39,10 +39,24 @@ config NET_IEEE802154_NCONNS
 
 config NET_IEEE802154_NCONTAINERS
 	int "Number of pre-allocated frame containers"
-	default 20
+	default 8
 	---help---
 		This specifies the total number of preallocated frame containers.
 		One must be allocated with each incoming frame.
+
+config NET_IEEE802154_BACKLOG
+	int "Maximum frame backlog"
+	default 8
+	range 0 255
+	---help---
+		As frames are received, then are help in an RX queue.  They remain
+		in the RX queue until application logic reads the queue frames.  To
+		prevent overrun, the maximum backlog may be set to a nonzero value.
+		What the backlog of queue frames reaches that count, the olds frame
+		will be freed, preventing overrun at the cost of losing the oldest
+		frames.
+
+		NOTE: The special value of zero will disable all backlog checkes.
 
 endif # NET_IEEE802154
 endmenu # IEEE 802.15.4 Socket Support
