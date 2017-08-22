@@ -183,7 +183,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
     {
       /* Bind the SPI port to the OLED */
 
-      dev = ssd1306_initialize(spi, devno);
+      dev = ssd1306_initialize(spi, NULL, devno);
       if (!dev)
         {
           lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);

@@ -280,6 +280,9 @@ struct ssd1306_dev_s
 #endif
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */
+  bool                   is_conf;  /* true: display had been configured */
+
+  FAR const struct ssd1306_priv_s *board_priv; /* Board specific structure */
 
  /* The SSD1306 does not support reading from the display memory in SPI mode.
   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep

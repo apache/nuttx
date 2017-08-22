@@ -1,8 +1,9 @@
 /**************************************************************************************
- * include/nuttx/lcd/ug-2864hsweg01.h
+ * include/nuttx/lcd/ssd1306.h
  *
  * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
- * Univision SSD1306 controller in SPI mode
+ * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
+ * in SPI mode.
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -14,6 +15,8 @@
  *      Doc No.: SAS1-B020-B, Univision Technology Inc.
  *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
  *      Controller,  Solomon Systech
+ *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with Controller,
+ *      Solomon Systech
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -200,6 +203,12 @@
  * Public Types
  **************************************************************************************/
 
+struct ssd1306_priv_s
+{
+  bool (*set_vcc) (bool on); /* Allow board to control display power. Return true if
+                                request state set successfully. */
+};
+
 /**************************************************************************************
  * Public Data
  **************************************************************************************/
@@ -224,6 +233,7 @@ extern "C"
  * Input Parameters:
  *
  *   dev - A reference to the SPI/I2C driver instance.
+ *   board_priv - Board specific structure.
  *   devno - A value in the range of 0 through CONFIG_UG2864HSWEG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
@@ -237,9 +247,13 @@ extern "C"
 struct lcd_dev_s; /* See include/nuttx/lcd/lcd.h */
 struct spi_dev_s; /* See include/nuttx/spi/spi.h */
 #ifdef CONFIG_LCD_SSD1306_SPI
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev, unsigned int devno);
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev,
+                                         FAR const struct ssd1306_priv_s *board_priv,
+                                         unsigned int devno);
 #else
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned int devno);
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
+                                         FAR const struct ssd1306_priv_s *board_priv,
+                                         unsigned int devno);
 #endif
 
 /************************************************************************************************
