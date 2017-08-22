@@ -569,7 +569,6 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   usrmask = LS_BIT;
 #endif
 
-  *buffer = 0;
   for (i = 0; i < pixlen; i++)
     {
       /* Set or clear the corresponding bit */
@@ -583,17 +582,17 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
         {
           *buffer |= usrmask;
         }
+      else
+        {
+          *buffer &= ~usrmask;
+        }
 
-      /* Inc/Decrement to the next destination pixel. Hmmmm. It looks like
-       * this logic could write past the end of the user buffer.  Revisit
-       * this!
-       */
+      /* Inc/Decrement to the next destination pixel. */
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
-         *buffer = 0;
           usrmask = MS_BIT;
         }
       else
@@ -604,7 +603,6 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       if (usrmask == MS_BIT)
         {
           buffer++;
-         *buffer = 0;
           usrmask = LS_BIT;
         }
       else
