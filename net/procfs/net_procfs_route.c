@@ -787,12 +787,12 @@ static int route_stat(const char *relpath, struct stat *buf)
   else
 #endif
 #ifdef CONFIG_NET_IPv6
-if (strcmp(relpath, g_route_ipv6_path) == 0)
+  if (strcmp(relpath, g_route_ipv6_path) == 0)
     {
       buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
     }
-#endif
   else
+#endif
     {
       return -ENOENT;
     }
