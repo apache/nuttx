@@ -1103,7 +1103,11 @@ Debugging
     $ edbg.exe -F r,:, -t atmel_cm7
     GPNVM Bits: 0x42
 
-  Those bits can be changed using CMSIS-DAP programmer, Atmel studio, or
+  If you are trying to use SAM-BA, you might have the opposity problem:
+  The board might be booting into FLASH when you need it to boot into the
+  ROM bootloader.
+
+  That GPNVM bit can be changed using CMSIS-DAP programmer, Atmel studio, or
   using this OpenOCD setup:
 
     atsamv gpnvm [('clr'|'set'|'show') bitnum]
