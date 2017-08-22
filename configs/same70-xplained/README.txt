@@ -1039,11 +1039,15 @@ Tickless OS
 Debugging
 =========
 
+  EDBG
+  ----
   The on-board EDBG appears to work only with Atmel Studio.  You can however,
   simply connect a SAM-ICE or J-Link to the JTAG/SWD connector on the board
   and that works great.  The only tricky thing is getting the correct
   orientation of the JTAG connection.
 
+  J-Link/JTAG
+  -----------
   I have been using Atmel Studio to write code to flash then I use the Segger
   J-Link GDB server to debug.  I have been using the 'Device Programming' I
   available under the Atmel Studio 'Tool' menu.  I have to disconnect the
@@ -1057,6 +1061,57 @@ Debugging
     (gdb) mon reset
     (gdb) file nuttx
     (gdb) ... start debugging ...
+
+  OpenOCD/EDBG
+  ------------
+  Current OpenOCD also works with SAME70-Xplained via EDBG, but I have not
+  used OpenOCD with the board.
+
+  SAM-BA
+  ------
+  SAM-BA is another option.  With SAM-BA, you can load code into FLASH over
+  a serial port or USB connection by booting into the ROM bootloader.
+
+  CMSIS-DAP Programmer
+  --------------------
+  Another useful tool for CMSIS-DAP programmer (formerly Atmel EDBG
+  programmer) available at:
+
+    https://github.com/ataradov/edbg
+
+  This is a simple command line utility for programming ARM-based MCUs
+  (currently only Atmel) though CMSIS-DAP SWD interface. It works on Linux,
+  Mac OS X and Windows.  Very useful to around especially if you have the
+  following issue:
+
+  Booting to FLASH or the ROM Bootloader
+  --------------------------------------
+  If you use EDBG or JTAG to load code into FLASH, you may be puzzled why
+  the code does not run.  It may be that you are booting into the ROM
+  bootloader instead of FLASH.  That can be fixed by modifying the SAME70's
+  GPNVM bits.
+
+  If your SAME70 is booting in ROM by default, the GPNVM bits will probably
+  looking something like:
+
+    $ edbg.exe -F r,:, -t atmel_cm7
+    GPNVM Bits: 0x40
+
+  Where bit 1 = 0 boots into the ROM bootloader and bit 1 = 1 boots into
+  FLASH.  You want:
+
+    $ edbg.exe -F r,:, -t atmel_cm7
+    GPNVM Bits: 0x42
+
+  Those bits can be changed using CMSIS-DAP programmer, Atmel studio, or
+  using this OpenOCD setup:
+
+    atsamv gpnvm [('clr'|'set'|'show') bitnum]
+      Without arguments, shows all bits in the gpnvm register.
+      Otherwise, clears, sets, or shows one General Purpose Non-Volatile
+      Memory (gpnvm) bit.
+
+  Perhaps SAM-BA supports a way to do this as well???
 
 Using OpenOCD and GDB to flash via the EDBG chip
 ================================================
