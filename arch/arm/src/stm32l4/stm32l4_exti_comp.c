@@ -159,23 +159,23 @@ int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
       up_disable_irq(STM32L4_IRQ_COMP);
     }
 
-    /* Configure rising/falling edges */
+  /* Configure rising/falling edges */
 
-    modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ? 0 : ln, risingedge  ? ln : 0);
-    modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ? 0 : ln, fallingedge ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ? 0 : ln, risingedge  ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ? 0 : ln, fallingedge ? ln : 0);
 
-    /* Enable Events and Interrupts */
+  /* Enable Events and Interrupts */
 
-    modifyreg32(STM32L4_EXTI1_EMR, event ? 0 : ln, event ? ln : 0);
-    modifyreg32(STM32L4_EXTI1_IMR, func  ? 0 : ln, func  ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_EMR, event ? 0 : ln, event ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_IMR, func  ? 0 : ln, func  ? ln : 0);
 
-    /* Get the previous IRQ handler and save the new IRQ handler. */
+  /* Get the previous IRQ handler and save the new IRQ handler. */
 
-    g_comp_handlers[cmp].callback = func;
-    g_comp_handlers[cmp].arg      = arg;
+  g_comp_handlers[cmp].callback = func;
+  g_comp_handlers[cmp].arg      = arg;
 
-    /* Leave the critical section */
+  /* Leave the critical section */
 
-    leave_critical_section(flags);
-    return OK;
+  leave_critical_section(flags);
+  return OK;
 }

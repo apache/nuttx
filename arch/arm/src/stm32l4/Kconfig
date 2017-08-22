@@ -1221,6 +1221,7 @@ config STM32L4_TIM17
 config STM32L4_COMP
 	bool "COMP"
 	default n
+	select COMP
 	depends on STM32L4_HAVE_COMP
 
 config STM32L4_SAI1
