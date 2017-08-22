@@ -1,7 +1,8 @@
 /**************************************************************************************
  * drivers/lcd/ssd1306.c
  * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
- * Univision SSD1306 controller in SPI mode
+ * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
+ * in SPI mode.
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -13,6 +14,8 @@
  *      Doc No.: SAS1-B020-B, Univision Technology Inc.
  *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
  *      Controller,  Solomon Systech
+ *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with Controller,
+ *      Solomon Systech
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -198,7 +201,7 @@ static uint8_t g_runbuffer[SSD1306_DEV_ROWSIZE];
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = SSD1306_DEV_COLORFMT,  /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .fmt     = SSD1306_DEV_COLORFMT,  /* Color format: B&W */
   .xres    = SSD1306_DEV_XRES,      /* Horizontal resolution in pixel columns */
   .yres    = SSD1306_DEV_YRES,      /* Vertical resolution in pixel rows */
   .nplanes = 1,                     /* Number of color planes supported */
@@ -813,7 +816,7 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
   FAR struct ssd1306_dev_s  *priv = &g_oleddev;
 
   lcdinfo("Initializing\n");
-  DEBUGASSERT(spi && devno == 0);
+  DEBUGASSERT(dev && devno == 0);
 
 #ifdef CONFIG_LCD_SSD1306_SPI
   priv->spi = dev;
@@ -842,6 +845,40 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
   up_mdelay(5);
 
   /* Configure the device */
+
+#ifdef IS_SSD1309
+
+  ssd1306_sendbyte(priv, SSD1309_PROTOFF);         /* Unlock driver IC */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
+  ssd1306_sendbyte(priv, SSD1309_SETMEMORY);       /* Set page addressing mode: 0x0, 0x01 or 0x02 */
+  ssd1306_sendbyte(priv, SSD1309_MEMADDR(0x02));
+  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
+  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
+  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
+  ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));     /* Set page address (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
+  ssd1306_sendbyte(priv ,SSD1306_CONTRAST(SSD1309_DEV_CONTRAST));  /* Default contrast 0xff */
+  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
+  ssd1306_sendbyte(priv, SSD1306_EDISPOFF);        /* Normal display off 0xa4 (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  ssd1306_sendbyte(priv, SSD1306_SCANFROMCOM0);    /* Com scan direction: Scan from COM[0] to COM[n-1] */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5 */
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV(7,0));     /* 0x70 */
+
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,0x0a)); /* 0xfa: Fh cycles for discharge and Ah cycles for pre-charge */
+
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+
+  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb */
+  ssd1306_sendbyte(priv, SSD1306_VCOM(0x3C));
+
+#else
 
   ssd1306_sendbyte(priv, SSD1306_DISPOFF);          /* Display off 0xae */
   ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));       /* Set lower column address 0x00 */
@@ -875,6 +912,8 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
 
   //ssd1306_sendbyte(priv, SSD1306_DCDC_MODE);      /* DC/DC control mode: on (SSD1306 Not supported) */
   //ssd1306_sendbyte(priv, SSD1306_DCDC_ON);
+
+#endif
 
   ssd1306_sendbyte(priv, SSD1306_DISPON);           /* Display ON 0xaf */
 

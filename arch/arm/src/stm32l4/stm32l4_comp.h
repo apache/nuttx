@@ -58,7 +58,7 @@ enum stm32l4_comp_e
 {
   STM32L4_COMP1,
   STM32L4_COMP2,
-  STM32L4_COMP_NUM  /* Number of comparators */
+  STM32L4_COMP_NUM          /* Number of comparators */
 };
 
 /* Plus input */
@@ -94,7 +94,7 @@ enum stm32l4_comp_e
 {
   STM32L4_COMP1,
   STM32L4_COMP2,
-  STM32L4_COMP_NUM  /* Number of comparators */
+  STM32L4_COMP_NUM          /* Number of comparators */
 };
 
 /* Plus input */

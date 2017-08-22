@@ -65,7 +65,7 @@
 #endif
 
 #if !defined(CONFIG_LCD_SH1106_OLED_132) && !defined(CONFIG_LCD_UG2864HSWEG01) && \
-    !defined(CONFIG_LCD_UG2832HSWEG04)
+    !defined(CONFIG_LCD_UG2832HSWEG04) && !defined(CONFIG_LCD_DD12864WO4A)
 #  error "Unknown and unsupported SSD1306 LCD"
 #endif
 
@@ -139,6 +139,10 @@
 #define SSD1306_STATUS_ONOFF     (0x40)
 #define SSD1306_RDDATA(d)        (d)                    /* Read Display Data */
 
+#define SSD1309_PROTOFF          (0xfd)
+#define SSD1309_SETMEMORY        (0x20)
+#  define SSD1309_MEMADDR(ma)    ((ma) & 0x03)
+
 /* Color Properties *******************************************************************/
 /* Display Resolution
  *
@@ -152,18 +156,28 @@
 #  define SSD1306_DEV_XOFFSET     2    /* Offset to logical column 0 */
 #  define SSD1306_DEV_PAGES       8    /* 8 pages */
 #  define SSD1306_DEV_CMNPAD      0x12 /* COM configuration */
+#  undef IS_SSD1309
 #elif defined(CONFIG_LCD_UG2832HSWEG04)
 #  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 of 131 columns used */
 #  define SSD1306_DEV_NATIVE_YRES 32   /* 4 pages each 8 rows */
 #  define SSD1306_DEV_XOFFSET     2    /* Offset to logical column 0 */
 #  define SSD1306_DEV_PAGES       4    /* 4 pages */
 #  define SSD1306_DEV_CMNPAD      0x02 /* COM configuration */
+#  undef IS_SSD1309
 #elif defined(CONFIG_LCD_SH1106_OLED_132)
 #  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 columns used, supporting 132 is a bit difficult */
 #  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
 #  define SSD1306_DEV_XOFFSET     0    /* Offset to logical column 0 */
 #  define SSD1306_DEV_PAGES       8    /* 8 pages */
 #  define SSD1306_DEV_CMNPAD      0x12 /* COM configuration */
+#  undef IS_SSD1309
+#elif defined(CONFIG_LCD_DD12864WO4A)
+#  define SSD1306_DEV_NATIVE_XRES 128  /* 128 of 128 columns used */
+#  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
+#  define SSD1306_DEV_XOFFSET     0    /* Offset to logical column 0 */
+#  define SSD1306_DEV_PAGES       8    /* 8 pages */
+#  define SSD1306_DEV_CMNPAD      0x10 /* COM configuration */
+#  define IS_SSD1309              1    /* SSD1309 based LCD. */
 #endif
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -194,6 +208,7 @@
 /* Default contrast */
 
 #define SSD1306_DEV_CONTRAST      (128)
+#define SSD1309_DEV_CONTRAST      (255)
 
 /* The size of the shadow frame buffer or one row buffer.
  *
@@ -229,6 +244,14 @@
 #  elif defined(CONFIG_LCD_RLANDSCAPE)
 #    define SSD1306_DEV_REVERSEX  1
 #    undef  SSD1306_DEV_REVERSEY
+#  endif
+#elif defined(CONFIG_LCD_DD12864WO4A)
+#  if defined(CONFIG_LCD_LANDSCAPE)
+#    define SSD1306_DEV_REVERSEX  1
+#    undef  SSD1306_DEV_REVERSEY
+#  elif defined(CONFIG_LCD_RLANDSCAPE)
+#    undef  SSD1306_DEV_REVERSEX
+#    define SSD1306_DEV_REVERSEY  1
 #  endif
 #endif
 
