@@ -221,28 +221,29 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .bpp    = SSD1306_DEV_BPP,            /* Bits-per-pixel */
 };
 
+/* This is the outside visible interface for the OLED driver */
+
+static const struct lcd_dev_s g_oleddev_dev =
+{
+  /* LCD Configuration */
+
+  .getvideoinfo = ssd1306_getvideoinfo,
+  .getplaneinfo = ssd1306_getplaneinfo,
+
+  /* LCD RGB Mapping -- Not supported */
+  /* Cursor Controls -- Not supported */
+
+  /* LCD Specific Controls */
+
+  .getpower     = ssd1306_getpower,
+  .setpower     = ssd1306_setpower,
+  .getcontrast  = ssd1306_getcontrast,
+  .setcontrast  = ssd1306_setcontrast,
+};
+
 /* This is the OLED driver instance (only a single device is supported for now) */
 
-static struct ssd1306_dev_s g_oleddev =
-{
-  .dev =
-  {
-    /* LCD Configuration */
-
-    .getvideoinfo = ssd1306_getvideoinfo,
-    .getplaneinfo = ssd1306_getplaneinfo,
-
-    /* LCD RGB Mapping -- Not supported */
-    /* Cursor Controls -- Not supported */
-
-    /* LCD Specific Controls */
-
-    .getpower     = ssd1306_getpower,
-    .setpower     = ssd1306_setpower,
-    .getcontrast  = ssd1306_getcontrast,
-    .setcontrast  = ssd1306_setcontrast,
-  },
-};
+static struct ssd1306_dev_s g_oleddev;
 
 /**************************************************************************************
  * Private Functions
@@ -1034,6 +1035,8 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
 #endif
 {
   FAR struct ssd1306_dev_s *priv = &g_oleddev;
+
+  priv->dev = g_oleddev_dev;
 
   DEBUGASSERT(dev && devno == 0);
 
