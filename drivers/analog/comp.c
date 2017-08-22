@@ -46,6 +46,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
+#include <poll.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
@@ -63,6 +64,11 @@ static int     comp_close(FAR struct file *filep);
 static ssize_t comp_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static int     comp_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int     comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                         bool setup);
+#endif
+static int     comp_notify(FAR struct comp_dev_s *dev, uint8_t val);
 
 /****************************************************************************
  * Private Data
@@ -77,16 +83,176 @@ static const struct file_operations comp_fops =
   NULL,                         /* seek */
   comp_ioctl                    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , NULL                        /* poll */
+  , comp_poll                   /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                        /* unlink */
 #endif
 };
 
+static const struct comp_callback_s g_comp_callback =
+  {
+    comp_notify   /* au_notify */
+  };
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: comp_pollnotify
+ *
+ * Description:
+ *   This function is called to notificy any waiters of poll-reated events.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static void comp_pollnotify(FAR struct comp_dev_s *dev,
+                            pollevent_t eventset)
+{
+  int i;
+
+  if (eventset & POLLERR)
+    {
+      eventset &= ~(POLLOUT | POLLIN);
+    }
+
+  for (i = 0; i < CONFIG_DEV_COMP_NPOLLWAITERS; i++)
+    {
+      FAR struct pollfd *fds = dev->d_fds[i];
+
+      if (fds)
+        {
+          fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
+
+          if ((fds->revents & (POLLOUT | POLLHUP)) == (POLLOUT | POLLHUP))
+            {
+              /* POLLOUT and POLLHUP are mutually exclusive. */
+
+              fds->revents &= ~POLLOUT;
+            }
+
+          if (fds->revents != 0)
+            {
+              ainfo("Report events: %02x\n", fds->revents);
+              sem_post(fds->sem);
+            }
+        }
+    }
+}
+#else
+#  define comp_pollnotify(dev,event)
+#endif
+
+/****************************************************************************
+ * Name: comp_semtake
+ ****************************************************************************/
+
+static void comp_semtake(FAR sem_t *sem)
+{
+  while (sem_wait(sem) != 0)
+    {
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      ASSERT(get_errno() == EINTR);
+    }
+}
+
+/****************************************************************************
+ * Name: comp_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                     bool setup)
+{
+  FAR struct inode      *inode    = filep->f_inode;
+  FAR struct comp_dev_s *dev      = inode->i_private;
+  int                    ret      = OK;
+  int                    i;
+
+  DEBUGASSERT(dev && fds);
+
+  /* Are we setting up the poll?  Or tearing it down? */
+
+  comp_semtake(&dev->ad_sem);
+  if (setup)
+    {
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference
+       */
+
+      for (i = 0; i < CONFIG_DEV_COMP_NPOLLWAITERS; i++)
+        {
+          /* Find an available slot */
+
+          if (!dev->d_fds[i])
+            {
+              /* Bind the poll structure and this slot */
+
+              dev->d_fds[i] = fds;
+              fds->priv     = &dev->d_fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_DEV_COMP_NPOLLWAITERS)
+        {
+          fds->priv   = NULL;
+          ret          = -EBUSY;
+          goto errout;
+        }
+    }
+  else
+    {
+      /* This is a request to tear down the poll. */
+
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
+#ifdef CONFIG_DEBUG_FEATURES
+      if (!slot)
+        {
+          ret              = -EIO;
+          goto errout;
+        }
+#endif
+
+      /* Remove all memory of the poll setup */
+
+      *slot                = NULL;
+      fds->priv            = NULL;
+    }
+
+ errout:
+  sem_post(&dev->ad_sem);
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: comp_notify
+ *
+ * Description:
+ *   This function is called from the lower half driver to notify
+ *   the change of the comparator output.
+ *
+ ****************************************************************************/
+
+static int comp_notify(FAR struct comp_dev_s *dev, uint8_t val)
+{
+  /* TODO: store values in FIFO? */
+
+  dev->val = val;
+
+  comp_pollnotify(dev, POLLIN);
+  sem_post(&dev->ad_readsem);
+
+  return 0;
+}
+
 /****************************************************************************
  * Name: comp_open
  *
@@ -104,7 +270,7 @@ static int comp_open(FAR struct file *filep)
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  if (sem_wait(&dev->ad_closesem) != OK)
+  if (sem_wait(&dev->ad_sem) != OK)
     {
       ret = -errno;
     }
@@ -143,7 +309,7 @@ static int comp_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->ad_closesem);
+      sem_post(&dev->ad_sem);
     }
 
   return ret;
@@ -165,7 +331,7 @@ static int comp_close(FAR struct file *filep)
   irqstate_t            flags;
   int                   ret = OK;
 
-  if (sem_wait(&dev->ad_closesem) != OK)
+  if (sem_wait(&dev->ad_sem) != OK)
     {
       ret = -errno;
     }
@@ -178,7 +344,7 @@ static int comp_close(FAR struct file *filep)
       if (dev->ad_ocount > 1)
         {
           dev->ad_ocount--;
-          sem_post(&dev->ad_closesem);
+          sem_post(&dev->ad_sem);
         }
       else
         {
@@ -192,7 +358,7 @@ static int comp_close(FAR struct file *filep)
           dev->ad_ops->ao_shutdown(dev);          /* Disable the COMP */
           leave_critical_section(flags);
 
-          sem_post(&dev->ad_closesem);
+          sem_post(&dev->ad_sem);
         }
     }
 
@@ -205,14 +371,27 @@ static int comp_close(FAR struct file *filep)
 
 static ssize_t comp_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct comp_dev_s *dev = inode->i_private;
-  int ret;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct comp_dev_s *dev   = inode->i_private;
+  int                    ret;
 
-  ret = dev->ad_ops->ao_read(dev);
+  /* If non-blocking read, read the value immediately and return. */
 
-  buffer[0] = (uint8_t)ret;
+  if (filep->f_oflags & O_NONBLOCK)
+    {
+      ret = dev->ad_ops->ao_read(dev);
+      buffer[0] = (uint8_t)ret;
+      return 1;
+    }
 
+  ret = sem_wait(&dev->ad_readsem);
+  if (ret < 0)
+    {
+      aerr("sem_wait() failed: %d\n", errno);
+      return -errno;
+    }
+
+  buffer[0] = dev->val;
   return 1;
 }
 
@@ -248,14 +427,32 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
 
   /* Initialize semaphores */
 
-  sem_init(&dev->ad_closesem, 0, 1);
+  sem_init(&dev->ad_sem, 0, 1);
+  (void)sem_setprotocol(&dev->ad_sem, SEM_PRIO_NONE);
+
+  sem_init(&dev->ad_readsem, 0, 0);
+  (void)sem_setprotocol(&dev->ad_readsem, SEM_PRIO_NONE);
+
+  /* Bind the upper-half callbacks to the lower half COMP driver */
+
+  DEBUGASSERT(dev->ad_ops != NULL);
+
+  if (dev->ad_ops->ao_bind != NULL)
+    {
+      ret = dev->ad_ops->ao_bind(dev, &g_comp_callback);
+      if (ret < 0)
+        {
+          aerr("ERROR: Failed to bind callbacks: %d\n", ret);
+          return ret;
+        }
+    }
 
   /* Register the COMP character driver */
 
   ret =  register_driver(path, &comp_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->ad_closesem);
+      sem_destroy(&dev->ad_sem);
     }
 
   return ret;
