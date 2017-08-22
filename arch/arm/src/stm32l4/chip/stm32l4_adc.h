@@ -230,6 +230,30 @@
 #define ADC_CFGR_EXTSEL_SHIFT        (6)       /* Bits 6-9: External Event Select for regular group */
 #define ADC_CFGR_EXTSEL_MASK         (15 << ADC_CFGR_EXTSEL_SHIFT)
 #  define ADC_CFGR_EXTSEL(event)     ((event) << ADC_CFGR_EXTSEL_SHIFT) /* Event = 0..15 */
+#  define ADC_CFGR_EXTSEL_T1CC1      (0x0 << ADC_CFGR_EXTSEL_SHIFT)  /* 0000: Timer 1 CC1 event */
+#  define ADC_CFGR_EXTSEL_T1CC2      (0x01 << ADC_CFGR_EXTSEL_SHIFT) /* 0001: Timer 1 CC2 event */
+#  define ADC_CFGR_EXTSEL_T1CC3      (0x02 << ADC_CFGR_EXTSEL_SHIFT) /* 0010: Timer 1 CC3 event */
+#  define ADC_CFGR_EXTSEL_T2CC2      (0x03 << ADC_CFGR_EXTSEL_SHIFT) /* 0011: Timer 2 CC2 event */
+#  define ADC_CFGR_EXTSEL_T3TRGO     (0x04 << ADC_CFGR_EXTSEL_SHIFT) /* 0100: Timer 3 TRGO event */
+#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#    define ADC_CFGR_EXTSEL_T4CC4    (0x05 << ADC_CFGR_EXTSEL_SHIFT) /* 0101: Timer 4 CC4 event */
+#  endif
+#  define ADC_CFGR_EXTSEL_EXTI11     (0x06 << ADC_CFGR_EXTSEL_SHIFT) /* 0110: EXTI line 11 */
+#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#    define ADC_CFGR_EXTSEL_T8TRGO   (0x07 << ADC_CFGR_EXTSEL_SHIFT) /* 0111: Timer 8 TRGO event */
+#    define ADC_CFGR_EXTSEL_T8TRGO2  (0x08 << ADC_CFGR_EXTSEL_SHIFT) /* 1000: Timer 8 TRGO2 event */
+#  endif
+#  define ADC_CFGR_EXTSEL_T1TRGO     (0x09 << ADC_CFGR_EXTSEL_SHIFT) /* 1001: Timer 1 TRGO event */
+#  define ADC_CFGR_EXTSEL_T1TRGO2    (0x0a << ADC_CFGR_EXTSEL_SHIFT) /* 1010: Timer 1 TRGO2 event */
+#  define ADC_CFGR_EXTSEL_T2TRGO     (0x0b << ADC_CFGR_EXTSEL_SHIFT) /* 1011: Timer 2 TRGO event */
+#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#    define ADC_CFGR_EXTSEL_T4TRGO   (0x0c << ADC_CFGR_EXTSEL_SHIFT) /* 1100: Timer 4 TRGO event */
+#  endif
+#  define ADC_CFGR_EXTSEL_T6TRGO     (0x0d << ADC_CFGR_EXTSEL_SHIFT) /* 1101: Timer 6 TRGO event */
+#  define ADC_CFGR_EXTSEL_T15TRGO    (0x0e << ADC_CFGR_EXTSEL_SHIFT) /* 1110: Timer 15 TRGO event */
+#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#    define ADC_CFGR_EXTSEL_T3CC4    (0x0f << ADC_CFGR_EXTSEL_SHIFT) /* 1111: Timer 3 CC4 event */
+#  endif
 #define ADC_CFGR_EXTEN_SHIFT         (10)      /* Bits 10-11: External trigger/polarity selection regular channels */
 #define ADC_CFGR_EXTEN_MASK          (3 << ADC_CFGR_EXTEN_SHIFT)
 #  define ADC_CFGR_EXTEN_NONE        (0 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection disabled */
@@ -513,7 +537,7 @@
 #  define ADC_CCR_MDMA_SHIFT         (14)      /* Bits 14-15: Direct memory access mode for dual ADC mode */
 #  define ADC_CCR_MDMA_MASK          (3 << ADC_CCR_MDMA_SHIFT)
 #    define ADC_CCR_MDMA_DISABLE     (0 << ADC_CCR_MDMA_SHIFT) /* MDMA mode disabled */
-#    define ADC_CCR_MDMA_ 10_12      (2 << ADC_CCR_MDMA_SHIFT) /* MDMA mode enabled (12 / 10-bit) */
+#    define ADC_CCR_MDMA_10_12       (2 << ADC_CCR_MDMA_SHIFT) /* MDMA mode enabled (12 / 10-bit) */
 #    define ADC_CCR_MDMA_6_8         (3 << ADC_CCR_MDMA_SHIFT) /* MDMA mode enabled (8 / 6-bit) */
 #endif
 #define ADC_CCR_CKMODE_SHIFT         (16)      /* Bits 16-17: ADC clock mode */
