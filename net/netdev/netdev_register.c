@@ -52,6 +52,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/tcp.h>
 
 #include "utils/utils.h"
 #include "igmp/igmp.h"

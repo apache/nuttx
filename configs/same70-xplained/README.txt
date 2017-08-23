@@ -898,10 +898,19 @@ Click Shield
   some extra Arduino connectors to raise the Click shield so that it clears
   the RJ45.
 
+  This may be a problem only for me because the Arduino connectors that I
+  soldered onto the SAME70-Xplained are short (around 10mm clearance from
+  the board).  Taller headers might clear the RJ45 connector (around 15mm).
+
   NOTE:  Mikroelektronika provides two different click shields:  A UNO style
-  shield with two click mikroBUSes and a larget Mega shield with three
+  shield with two click mikroBUSes and a larger Mega shield with three
   click mikroBUSes.  The above discusses on the UNO shield.  I know that the
   serial ports, at least, differ on the two shields.
+
+  UPDATE: And it appears the that Mega shield is *not* compatible with the
+  SAME70-Xplained.  I am told that the SPI in mikroBUS slots does not connect
+  to pins on the  SAME70-Xplained that can support the SPI communications.
+  Avoid this triple mikroBUS shield!
 
 Tickless OS
 ===========
