@@ -275,7 +275,7 @@ void tiva_boardinitialize(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_TIVA_I2C6)
+#if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && defined(CONFIG_TIVA_I2C6)
 int tiva_tmp100_initialize(FAR const char *devpath);
 #endif
 

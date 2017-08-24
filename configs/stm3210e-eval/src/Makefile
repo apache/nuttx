@@ -60,7 +60,7 @@ ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += stm32_composite.c
 endif
 
-ifeq ($(CONFIG_I2C_LM75),y)
+ifeq ($(CONFIG_LM75_I2C),y)
 CSRCS += stm32_lm75.c
 endif
 

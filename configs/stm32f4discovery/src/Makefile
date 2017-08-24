@@ -68,11 +68,11 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
 CSRCS += stm32_bmp180.c
 endif
 
-ifeq ($(CONFIG_MAX31855),y)
+ifeq ($(CONFIG_SENSORS_MAX31855),y)
 CSRCS += stm32_max31855.c
 endif
 
-ifeq ($(CONFIG_MAX6675),y)
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
 CSRCS += stm32_max6675.c
 endif
 

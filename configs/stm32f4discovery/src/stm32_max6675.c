@@ -49,7 +49,7 @@
 #include "stm32_spi.h"
 #include "stm32f4discovery.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MAX6675) && defined(CONFIG_STM32_SPI2)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MAX6675) && defined(CONFIG_STM32_SPI2)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -98,4 +98,4 @@ int stm32_max6675initialize(FAR const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_SPI && CONFIG_MAX6675 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MAX6675 */

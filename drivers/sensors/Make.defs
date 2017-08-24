@@ -93,11 +93,11 @@ ifeq ($(CONFIG_SENSORS_HTS221),y)
   CSRCS += hts221.c
 endif
 
-ifeq ($(CONFIG_I2C_LM75),y)
+ifeq ($(CONFIG_LM75_I2C),y)
   CSRCS += lm75.c
 endif
 
-ifeq ($(CONFIG_LM92),y)
+ifeq ($(CONFIG_SENSORS_LM92),y)
   CSRCS += lm92.c
 endif
 
@@ -134,11 +134,11 @@ ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += lis3dsh.c
 endif
 
-ifeq ($(CONFIG_MAX31855),y)
+ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += max31855.c
 endif
 
-ifeq ($(CONFIG_MAX6675),y)
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
   CSRCS += max6675.c
 endif
 
@@ -146,7 +146,7 @@ ifeq ($(CONFIG_MPL115A),y)
   CSRCS += mpl115a.c
 endif
 
-ifeq ($(CONFIG_LIS3MDL),y)
+ifeq ($(CONFIG_SENSORS_LIS3MDL),y)
   CSRCS += lis3mdl.c
 endif
 

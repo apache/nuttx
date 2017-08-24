@@ -302,36 +302,36 @@ config ADXL345_REGDEBUG
 
 endif # SENSORS_ADXL345
 
-config MAX31855
+config SENSORS_MAX31855
 	bool "Maxim MAX31855 Driver"
 	default n
 	select SPI
 	---help---
 		Enables support for the MAX31855 driver
 
-config MAX6675
+config SENSORS_MAX6675
 	bool "Maxim MAX6675 Driver"
 	default n
 	select SPI
 	---help---
 		Enables support for the MAX6675 driver
 
-config I2C_LM75
-	bool
-	default y if LM75
-
-config LIS3MDL
+config SENSORS_LIS3MDL
 	bool "STMicro LIS3MDL 3-Axis magnetometer support"
 	default n
 	select SPI
 	---help---
 		Enable driver support for the STMicro LIS3MDL 3-axis magnetometer.
 
-config LM75
+config LM75_I2C
+	bool
+	default y if LM75
+
+config SENSORS_LM75
 	bool "STMicro LM-75 Temperature Sensor support"
 	default n
 	select I2C
-	select I2C_LM75
+	select LM75_I2C
 	---help---
 		Enable driver support for the STMicro LM-75 temperature sensor.
 		This should also work with compatible temperature sensors such as
@@ -341,7 +341,7 @@ config LM75_I2C_FREQUENCY
 	int "LM75 I2C frequency"
 	default 100000
 	range 1 100000
-	depends on I2C_LM75
+	depends on LM75_I2C
 
 config LM92
 	bool "TI LM92 Temperature Sensor support"

@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-#if defined(CONFIG_MAX6675)
+#if defined(CONFIG_SENSORS_MAX6675)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,5 +94,5 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* CONFIG_MAX6675 */
+#endif /* CONFIG_SENSORS_MAX6675 */
 #endif /* __INCLUDE_NUTTX_SENSORS_MAX6675_H */

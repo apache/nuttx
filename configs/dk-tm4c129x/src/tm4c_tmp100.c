@@ -47,7 +47,7 @@
 #include "tiva_i2c.h"
 #include "dk-tm4c129x.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && \
+#if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && \
     defined(CONFIG_TIVA_I2C6)
 
 /****************************************************************************
@@ -100,4 +100,4 @@ int tiva_tmp100_initialize(FAR const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_I2C_LM75 && CONFIG_TIVA_I2C6 */
+#endif /* CONFIG_I2C && CONFIG_LM75_I2C && CONFIG_TIVA_I2C6 */

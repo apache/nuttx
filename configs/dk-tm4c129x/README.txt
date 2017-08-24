@@ -496,8 +496,8 @@ Temperature Sensor
       CONFIG_I2C=y
 
     Drivers -> Sensors
-      CONFIG_LM75=y
-      CONFIG_I2C_LM75=y
+      CONFIG_SENSORS_LM75=y
+      CONFIG_LM75_I2C=y
 
     Applications -> NSH Library
       CONFIG_NSH_ARCHINIT=y

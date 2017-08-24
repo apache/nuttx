@@ -264,11 +264,11 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_MAX31855
+#ifdef CONFIG_SENSORS_MAX31855
   ret = stm32_max31855initialize("/dev/temp0");
 #endif
 
-#ifdef CONFIG_MAX6675
+#ifdef CONFIG_SENSORS_MAX6675
   ret = stm32_max6675initialize("/dev/temp0");
 #endif
 

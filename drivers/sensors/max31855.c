@@ -56,7 +56,7 @@
 #include <nuttx/sensors/max31855.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MAX31855)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MAX31855)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -331,4 +331,4 @@ int max31855_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   return ret;
 }
-#endif /* CONFIG_SPI && CONFIG_MAX31855 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MAX31855 */

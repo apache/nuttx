@@ -45,14 +45,14 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_LM92)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_LM92)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************
  * CONFIG_I2C - Enables support for I2C drivers
- * CONFIG_LM92 - Enables support for the LM92 driver
+ * CONFIG_SENSORS_LM92 - Enables support for the LM92 driver
  */
 
 #define CONFIG_LM92_BASEADDR 0x48
@@ -129,5 +129,5 @@ int lm92_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_LM92 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_LM92 */
 #endif /* __INCLUDE_NUTTX_SENSORS_LM92_H */

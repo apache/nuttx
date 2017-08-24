@@ -638,7 +638,7 @@ int stm32_zerocross_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MAX6675
+#ifdef CONFIG_SENSORS_MAX6675
 int stm32_max6675initialize(FAR const char *devpath);
 #endif
 

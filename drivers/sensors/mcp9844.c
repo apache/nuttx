@@ -374,4 +374,4 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   return ret;
 }
-#endif /* CONFIG_I2C && CONFIG_I2C_LM75 */
+#endif /* CONFIG_I2C && CONFIG_LM75_I2C */
