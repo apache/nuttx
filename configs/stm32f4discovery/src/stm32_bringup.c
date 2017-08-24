@@ -106,7 +106,7 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
-#ifdef CONFIG_BH1750FVI
+#ifdef CONFIG_SENSORS_BH1750FVI
   stm32_bh1750initialize("/dev/light0");
 #endif
 

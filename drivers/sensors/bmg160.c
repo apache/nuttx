@@ -53,7 +53,7 @@
 #include <nuttx/sensors/bmg160.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_BMG160)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_BMG160)
 
 /****************************************************************************
  * Private
@@ -597,4 +597,4 @@ int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   return OK;
 }
 
-#endif /* CONFIG_SPI && CONFIG_BMG160 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_BMG160 */

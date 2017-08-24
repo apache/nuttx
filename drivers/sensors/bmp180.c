@@ -55,7 +55,7 @@
 #include <nuttx/sensors/bmp180.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BMP180)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP180)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -642,4 +642,4 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_BMP180 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_BMP180 */

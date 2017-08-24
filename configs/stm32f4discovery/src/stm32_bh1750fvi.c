@@ -49,7 +49,7 @@
 #include "stm32_i2c.h"
 #include "stm32f4discovery.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BH1750FVI)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1750FVI)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -102,4 +102,4 @@ int stm32_bh1750initialize(FAR const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_BH1750FVI && CONFIG_STM32_I2C1 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_BH1750FVI && CONFIG_STM32_I2C1 */

@@ -53,7 +53,7 @@
 #include <nuttx/sensors/bh1750fvi.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BH1750FVI)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1750FVI)
 
 /****************************************************************************
  * Pre-process Definitions
@@ -459,4 +459,4 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_BH1750FVI */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_BH1750FVI */

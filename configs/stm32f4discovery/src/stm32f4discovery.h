@@ -412,7 +412,7 @@ void weak_function stm32_spidev_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BH1750FVI
+#ifdef CONFIG_SENSORS_BH1750FVI
 int stm32_bh1750initialize(FAR const char *devpath);
 #endif
 
@@ -425,7 +425,7 @@ int stm32_bh1750initialize(FAR const char *devpath);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BMP180
+#ifdef CONFIG_SENSORS_BMP180
 int stm32_bmp180initialize(FAR const char *devpath);
 #endif
 

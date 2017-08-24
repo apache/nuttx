@@ -52,7 +52,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/as5048b.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_AS5048B)
+#if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_SENSORS_AS5048B)
 
 /****************************************************************************
  * Private Types
@@ -619,4 +619,4 @@ FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
   return &priv->lower;
 }
 
-#endif /* CONFIG_I2C && CONFIG_QENCODER && CONFIG_AS5048B */
+#endif /* CONFIG_I2C && CONFIG_QENCODER && CONFIG_SENSORS_AS5048B */

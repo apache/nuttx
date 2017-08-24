@@ -49,7 +49,7 @@
 #include "stm32_i2c.h"
 #include "stm32f4discovery.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BMP180)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP180)
 
 /************************************************************************************
  * Pre-processor Definitions

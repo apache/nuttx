@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/qencoder.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_AS5048B)
+#if defined(CONFIG_I2C) && defined(CONFIG_QENCODER) && defined(CONFIG_SENSORS_AS5048B)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,7 +53,7 @@
  *
  * CONFIG_I2C
  *   Enables support for I2C drivers
- * CONFIG_AS5048B
+ * CONFIG_SENSORS_AS5048B
  *   Enables support for the AS5048B driver
  */
 
@@ -137,5 +137,5 @@ FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_QENCODER && CONFIG_AS5048B */
+#endif /* CONFIG_I2C && CONFIG_QENCODER && CONFIG_SENSORS_AS5048B */
 #endif /* __INCLUDE_NUTTX_SENSORS_AS5048B */
