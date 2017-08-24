@@ -159,7 +159,7 @@ config LIS331DL_I2C_FREQUENCY
 	range 1 100000
 	depends on LIS331DL
 
-config SN_LSM9DS1
+config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n
 	select I2C
@@ -172,14 +172,14 @@ config LSM9DS1_I2C_FREQUENCY
 	range 1 400000
 	depends on SN_LSM9DS1
 
-config LPS25H
+config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"
 	default n
 	select I2C
 	---help---
 		Enable driver support for the STMicro LPS25H barometer sensor.
 
-if LPS25H
+if SENSORS_LPS25H
 
 config LPS25H_I2C_FREQUENCY
 	int "LPS25H I2C frequency"
@@ -192,16 +192,21 @@ config DEBUG_LPS25H
 	---help---
 		Enables debug features for the LPS25H
 
-endif # LPS25H
+endif # SENSORS_LPS25H
 
-config LTC4151
+config SENSORS_LTC4151
 	bool "LTC4151 current and voltage monitor"
 	default n
 	select I2C
 	---help---
 		Enable driver support for the LinearTechnology LTC4151 current and voltage monitor.
 
-config MB7040
+config LTC4151_I2C_FREQUENCY
+	int "LTC4151 I2C frequency"
+	default 400000
+	depends on SENSORS_LTC4151
+
+config SENSORS_MB7040
 	bool "MaxBotix MB7040 Sonar support"
 	default n
 	select I2C
@@ -212,16 +217,16 @@ config MB7040_I2C_FREQUENCY
 	int "MB7040 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on MB7040
+	depends on SENSORS_MB7040
 
-config MLX90393
+config SENSORS_MLX90393
 	bool "MLX90393 3-Axis Magnetometer"
 	default n
 	select SPI
 	---help---
 		Enable driver support for the Melex MLX90393 3-Axis magnetometer.
 
-config MCP9844
+config SENSORS_MCP9844
 	bool "MCP9844 Temperature Sensor"
 	default n
 	select I2C
@@ -232,9 +237,9 @@ config MCP9844_I2C_FREQUENCY
 	int "MCP9844 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on MCP9844
+	depends on SENSORS_MCP9844
 
-config MS58XX
+config SENSORS_MS58XX
 	bool "MEAS MS58XX Altimeter support"
 	default n
 	select I2C
@@ -245,19 +250,26 @@ config MS58XX_I2C_FREQUENCY
 	int "MS58XX I2C frequency"
 	default 400000
 	range 1 400000
-	depends on MS58XX
+	depends on SENSORS_MS58XX
 
 config MS58XX_VDD
 	int "MEAS MS58XX VDD"
 	default 30
-	depends on MS58XX
+	depends on SENSORS_MS58XX
 
-config MPL115A
+config SENSORS_MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"
 	default n
 	select SPI
 	---help---
 		Enable driver support for the Freescale MPL115A barometer sensor.
+
+config MPL115A_REGDEBUG
+	bool "Debug support for the MPL115A"
+	default n
+	depends on SENSORS_MPL115A
+	---help---
+		Enables register level debug features for the MPL115A
 
 config SENSORS_ADXL345
 	bool "AnalogDevices ADXL345 Driver"
@@ -379,9 +391,10 @@ config SENSORS_XEN1210
 	---help---
 		Enable driver support for the Sensixs XEN1210 Magnetometer.
 
-config XEN1210_REGDBUG
+config XEN1210_REGDEBUG
 	bool "Debug support for the XEN1210"
 	default n
+	depends on SENSORS_XEN1210
 	---help---
 		Enables register level debug features for the XEN1210
 

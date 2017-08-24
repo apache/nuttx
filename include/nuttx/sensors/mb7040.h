@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MB7040)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MB7040)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,7 +53,7 @@
  *
  * CONFIG_I2C
  *   Enables support for I2C drivers
- * CONFIG_MB7040
+ * CONFIG_SENSORS_MB7040
  *   Enables support for the MB7040 driver
  */
 
@@ -110,5 +110,5 @@ int mb7040_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_MB7040 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_MB7040 */
 #endif /* __INCLUDE_NUTTX_SENSORS_MB7040 */

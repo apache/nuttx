@@ -417,7 +417,7 @@ Freescale MPL115A barometer sensor
 
     Drivers -> Sensors
       CONFIG_SENSORS=y
-      CONFIG_MPL115A=y
+      CONFIG_SENSORS_MPL115A=y
       CONFIG_NSH_ARCHINIT=y
 
 

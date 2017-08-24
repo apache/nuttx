@@ -45,7 +45,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MLX90393)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MLX90393)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -148,6 +148,6 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* CONFIG_SPI && CONFIG_MLX90393 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MLX90393 */
 
 #endif /* __INCLUDE_NUTTX_SENSORS_MLX90393_H */

@@ -49,7 +49,7 @@
 #include "stm32_spi.h"
 #include "viewtool_stm32f107.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MPL115A) && defined(CONFIG_STM32_SPI3)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A) && defined(CONFIG_STM32_SPI3)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -98,4 +98,4 @@ int stm32_mpl115ainitialize(FAR const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_SPI && CONFIG_MPL115A && CONFIG_STM32_SPI3 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MPL115A && CONFIG_STM32_SPI3 */

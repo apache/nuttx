@@ -52,7 +52,7 @@
 #include <nuttx/sensors/mlx90393.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MLX90393)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MLX90393)
 
 /****************************************************************************
  * Private
@@ -627,4 +627,4 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   return OK;
 }
 
-#endif /* CONFIG_SPI && CONFIG_MLX90393 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MLX90393 */

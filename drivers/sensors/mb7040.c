@@ -53,7 +53,7 @@
 #include <nuttx/sensors/mb7040.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MB7040)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MB7040)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -406,4 +406,4 @@ int mb7040_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_MB7040 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_MB7040 */

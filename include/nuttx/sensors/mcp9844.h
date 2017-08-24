@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MCP9844)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MCP9844)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -119,5 +119,5 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_MCP9844 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_MCP9844 */
 #endif /* __INCLUDE_NUTTX_SENSORS_MCP9844_H */

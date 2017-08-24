@@ -52,7 +52,7 @@
 #include <nuttx/sensors/mcp9844.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MCP9844)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MCP9844)
 
 /****************************************************************************
  * Pre-process Definitions

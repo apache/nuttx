@@ -55,7 +55,7 @@
 #include <nuttx/sensors/ms58xx.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MS58XX)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MS58XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1211,4 +1211,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_MS58XX */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_MS58XX */

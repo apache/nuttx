@@ -174,7 +174,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_MPL115A
+#ifdef CONFIG_SENSORS_MPL115A
   ret = stm32_mpl115ainitialize("/dev/press");
   if (ret < 0)
     {
