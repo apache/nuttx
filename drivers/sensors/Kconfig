@@ -54,7 +54,7 @@ config HCSR04_NPOLLWAITERS
 
 endif # SENSORS_HCSR04
 
-config HTS221
+config SENSORS_HTS221
 	bool "STMicro HTS221 humidity sensor"
 	default n
 	select I2C
@@ -80,7 +80,7 @@ config HTS221_NPOLLWAITERS
 	---help---
 		Number of waiters to poll
 
-endif # HTS221
+endif # SENSORS_HTS221
 
 config SENSORS_L3GD20
 	bool "STMicro L3GD20 Gyroscope Sensor support"
