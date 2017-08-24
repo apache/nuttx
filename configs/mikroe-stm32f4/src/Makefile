@@ -86,7 +86,7 @@ ifeq ($(CONFIG_LCD_MIO283QT9A),y)
 CSRCS += stm32_mio283qt9a.c
 endif
 
-ifeq ($(CONFIG_VS1053),y)
+ifeq ($(CONFIG_AUDIO_VS1053),y)
 CSRCS += stm32_vs1053.c
 endif
 
