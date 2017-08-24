@@ -55,7 +55,7 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_HTS221
+#ifdef CONFIG_HTS221_DEBUG
 #  define hts221_dbg(x, ...)    _info(x, ##__VA_ARGS__)
 #else
 #  define hts221_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
@@ -771,7 +771,7 @@ static int hts221_read_convert_data(FAR struct hts221_dev_s *priv,
   return ret;
 }
 
-#ifdef CONFIG_DEBUG_HTS221
+#ifdef CONFIG_HTS221_DEBUG
 static int hts221_dump_registers(FAR struct hts221_dev_s *priv)
 {
   int ret = OK;
@@ -929,7 +929,7 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       ret = hts221_read_raw_data(priv, (FAR hts221_raw_data_t *) arg);
       break;
 
-#ifdef CONFIG_DEBUG_HTS221
+#ifdef CONFIG_HTS221_DEBUG
     case SNIOC_DUMP_REGS:
       ret = hts221_dump_registers(priv);
       break;

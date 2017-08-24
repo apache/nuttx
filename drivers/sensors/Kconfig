@@ -68,7 +68,7 @@ config HTS221_I2C_FREQUENCY
 	default 400000
 	range 1 400000
 
-config DEBUG_HTS221
+config HTS221_DEBUG
 	bool "Debug support for the HTS221"
 	default n
 	---help---
