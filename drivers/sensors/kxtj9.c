@@ -53,7 +53,7 @@
 #include <nuttx/sensors/kxtj9.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSOR_KXTJ9)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_KXTJ9)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,8 +61,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SENSOR_KXTJ9_I2C_BUS_SPEED
-#  define CONFIG_SENSOR_KXTJ9_I2C_BUS_SPEED 400000
+#ifndef CONFIG_KXTJ9_I2C_BUS_SPEED
+#  define CONFIG_KXTJ9_I2C_BUS_SPEED 400000
 #endif
 
 /* Register Definitions *****************************************************/
@@ -216,7 +216,7 @@ static int kxtj9_reg_read(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
 
       buf[0]           = regaddr;
 
-      msg[0].frequency = CONFIG_SENSOR_KXTJ9_I2C_BUS_SPEED,
+      msg[0].frequency = CONFIG_KXTJ9_I2C_BUS_SPEED,
       msg[0].addr      = priv->address;
       msg[0].flags     = 0;
       msg[0].buffer    = buf;
@@ -224,7 +224,7 @@ static int kxtj9_reg_read(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
 
       /* The second is a read with a restart containing the register data */
 
-      msg[1].frequency = CONFIG_SENSOR_KXTJ9_I2C_BUS_SPEED,
+      msg[1].frequency = CONFIG_KXTJ9_I2C_BUS_SPEED,
       msg[1].addr      = priv->address;
       msg[1].flags     = I2C_M_READ;
       msg[1].buffer    = regval;
@@ -262,7 +262,7 @@ static int kxtj9_reg_write(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
       buf[0]        = regaddr;
       buf[1]        = regval;
 
-      msg.frequency = CONFIG_SENSOR_KXTJ9_I2C_BUS_SPEED,
+      msg.frequency = CONFIG_KXTJ9_I2C_BUS_SPEED,
       msg.addr      = priv->address;
       msg.flags     = 0;
       msg.buffer    = buf;
@@ -685,4 +685,4 @@ int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   return OK;
 }
 
-#endif /* CONFIG_I2C && CONFIG_SENSOR_KXTJ9 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_KXTJ9 */

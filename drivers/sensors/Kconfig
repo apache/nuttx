@@ -99,29 +99,29 @@ config SENSOR_KXTJ9
 	default n
 	select I2C
 
-if SENSOR_KXTJ9
+if SENSORS_KXTJ9
 
-config SENSOR_KXTJ9_I2C_BUS_SPEED
+config KXTJ9_I2C_BUS_SPEED
 	int "Kionix KXTJ9 Bus Speed in Hz"
 	default 400000
 
-endif # SENSOR_KXTJ9
+endif # SENSORS_KXTJ9
 
-config LIS2DH
+config SENSORS_LIS2DH
 	bool "STMicro LIS2DH device support"
 	default n
 	select I2C
 	---help---
 		Enable driver support for the STMicro LIS2DH accelerometer
 
-if LIS2DH
+if SENSORS_LIS2DH
 
 config LIS2DH_I2C_FREQUENCY
 	int "LIS2DH I2C frequency"
 	default 400000
 	range 1 400000
 
-config DEBUG_LIS2DH
+config LIS2DH_DEBUG
 	bool "Debug support for the LIS2DH"
 	default n
 	---help---
@@ -139,7 +139,7 @@ config LIS2DH_DRIVER_SELFTEST
 	---help---
 		Enable selftest in LIS2DH driver
 
-endif # LIS2DH
+endif # SENSORS_LIS2DH
 
 config LIS3DSH
 	bool "STMicro LIS3DSH 3-Axis accelerometer support"
