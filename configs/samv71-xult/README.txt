@@ -1956,6 +1956,11 @@ Configuration sub-directories
         The SPI signals look clean on the board and the MRF24J40 seems
         fully functional.
 
+      2017-08-24:  There is only a single buffer for reassemblying larger
+        packets.  This could be an important issue for the hub configuration
+        which really needs the capability concurrently reassemble multiple
+        incoming streams.
+
   mxtxplnd:
 
     Configures the NuttShell (nsh) located at examples/nsh.  There are five

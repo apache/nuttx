@@ -686,9 +686,13 @@ Configurations
         some additional fixes for byte ordering in 16-bit and 64-bit
         compressed IPv6 addresses, then all tests are working as expected:
         TCP, UDP, Telnet.
-      2017-08-5:  It looks like I have lost one of my Clicker2-STM32 boards.
+      2017-08-05:  It looks like I have lost one of my Clicker2-STM32 boards.
         This means that I will not be able to do any regression testing as
         changes are made to the radio interfaces and 6LoWPAN :(
+      2017-08-24:  There is only a single buffer for reassemblying larger
+        packets.  This could be an important issue for the hub configuration
+        which really needs the capability concurrently reassemble multiple
+        incoming streams.
 
   nsh:
 

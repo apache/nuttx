@@ -70,33 +70,15 @@
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
-/* Try to eliminate dependencies on other header files.  This should not harm
- * portability because these are well-known constants anyway.
+/* Eliminate dependencies on other header files.  This should not harm
+ * portability because these are well-known constants.
  */
 
-#ifdef IPv4_HDRLEN
-#  define __IPv4_HDRLEN IPv4_HDRLEN
-#else
-#  define __IPv4_HDRLEN 20
-#endif
-
-#ifdef IPv6_HDRLEN
-#  define __IPv6_HDRLEN IPv6_HDRLEN
-#else
-#  define __IPv6_HDRLEN 40
-#endif
-
-#ifdef UDP_HDRLEN
-#  define __UDP_HDRLEN  UDP_HDRLEN
-#else
-#  define __UDP_HDRLEN  8
-#endif
-
-#ifdef TCP_HDRLEN
-#  define __TCP_HDRLEN  TCP_HDRLEN
-#else
-#  define __TCP_HDRLEN  20  /* REVISIT: Not really a constant */
-#endif
+#define __IPv4_HDRLEN 20  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
+#define __IPv6_HDRLEN 40  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
+#define __UDP_HDRLEN  8   /* Must match UDP_HDRLEN in include/nuttx/net/dup.h */
+#define __TCP_HDRLEN  20  /* Must match TCP_HDRLEN in include/nuttx/net/tcp.h */
+                          /* REVISIT: Not really a constant */
 
 /* Layer 2 Configuration Options ********************************************/
 

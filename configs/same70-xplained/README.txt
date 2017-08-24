@@ -1383,6 +1383,11 @@ Configuration sub-directories
 
         No significant functional testing has yet been performed.
 
+      2017-08-24:  There is only a single buffer for reassemblying larger
+        packets.  This could be an important issue for the hub configuration
+        which really needs the capability concurrently reassemble multiple
+        incoming streams.
+
   netnsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  There are two
