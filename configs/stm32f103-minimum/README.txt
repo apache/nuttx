@@ -255,7 +255,7 @@ Quadrature Encoder:
   - These setting enable support for the common QEncode upper half driver:
 
    CONFIG_SENSORS=y
-     CONFIG_QENCODER=y
+     CONFIG_SENSORS_QENCODER=y
 
   - This is a board setting that selected timer 4 for use with the
     quadrature encode:

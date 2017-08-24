@@ -58,7 +58,7 @@
 
 #include <arch/irq.h>
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -385,4 +385,4 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
   return register_driver(devpath, &g_qeops, 0666, upper);
 }
 
-#endif /* CONFIG_QENCODER */
+#endif /* CONFIG_SENSORS_QENCODER */

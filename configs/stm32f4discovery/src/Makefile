@@ -96,11 +96,11 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_XEN1210),y)
+ifeq ($(CONFIG_SENSORS_XEN1210),y)
 CSRCS += stm32_xen1210.c
 endif
 
@@ -116,7 +116,7 @@ ifeq ($(CONFIG_PM_BUTTONS),y)
 CSRCS += stm32_pmbuttons.c
 endif
 
-ifeq ($(CONFIG_ZEROCROSS),y)
+ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
 CSRCS += stm32_zerocross.c
 endif
 

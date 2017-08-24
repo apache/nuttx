@@ -49,7 +49,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/sensors/xen1210.h>
 
-#if defined(CONFIG_XEN1210)
+#if defined(CONFIG_SENSORS_XEN1210)
 
 /********************************************************************************************
  * Pre-processor Definitions

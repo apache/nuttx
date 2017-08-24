@@ -225,7 +225,7 @@ int stm32_w25initialize(int minor);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
@@ -334,7 +334,7 @@ int stm32_tone_setup(void);
  *
  ***********************************************************************************/
 
-#ifdef CONFIG_VEML6070
+#ifdef CONFIG_SENSORS_VEML6070
 int stm32_veml6070initialize(FAR const char *devpath);
 #endif
 

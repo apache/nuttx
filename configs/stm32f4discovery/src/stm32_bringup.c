@@ -110,7 +110,7 @@ int stm32_bringup(void)
   stm32_bh1750initialize("/dev/light0");
 #endif
 
-#ifdef CONFIG_ZEROCROSS
+#ifdef CONFIG_SENSORS_ZEROCROSS
   /* Configure the zero-crossing driver */
 
   stm32_zerocross_initialize();
@@ -197,7 +197,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
   ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F4DISCO_QETIMER);
@@ -283,7 +283,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_XEN1210
+#ifdef CONFIG_SENSORS_XEN1210
   ret = xen1210_archinitialize(0);
 #endif
 

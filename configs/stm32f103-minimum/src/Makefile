@@ -97,11 +97,11 @@ ifeq ($(CONFIG_LCD_PCD8544),y)
   CSRCS += stm32_pcd8544.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_VEML6070),y)
+ifeq ($(CONFIG_SENSORS_VEML6070),y)
   CSRCS += stm32_veml6070.c
 endif
 

@@ -43,13 +43,13 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************
- * CONFIG_QENCODER - Enables support for the quadrature encoder upper half
+ * CONFIG_SENSORS_QENCODER - Enables support for the quadrature encoder upper half
  */
 
 /* IOCTL Commands ***********************************************************/
@@ -187,5 +187,5 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower);
 }
 #endif
 
-#endif /* CONFIG_QENCODER */
+#endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __INCLUDE_NUTTX_SENSORS_QENCODER_H */

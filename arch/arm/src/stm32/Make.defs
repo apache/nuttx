@@ -249,7 +249,7 @@ ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
 

@@ -250,7 +250,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
   ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F103MINIMUM_QETIMER);
@@ -272,7 +272,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_VEML6070
+#ifdef CONFIG_SENSORS_VEML6070
   /* Register the UV-A light sensor */
 
   ret = stm32_veml6070initialize("/dev/uvlight0");

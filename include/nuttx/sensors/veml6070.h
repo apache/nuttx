@@ -45,7 +45,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_VEML6070)
+#if defined(CONFIG_SENSORS_VEML6070)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -118,5 +118,5 @@ int veml6070_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_VEML6070 */
+#endif /* CONFIG_SENSORS_VEML6070 */
 #endif /* __INCLUDE_NUTTX_SENSORS_VEML6070_H */

@@ -182,7 +182,7 @@ int board_timer_driver_initialize(FAR const char *devpath, int timer);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 

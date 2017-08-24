@@ -343,7 +343,7 @@ config LM75_I2C_FREQUENCY
 	range 1 100000
 	depends on LM75_I2C
 
-config LM92
+config SENSORS_LM92
 	bool "TI LM92 Temperature Sensor support"
 	default n
 	select I2C
@@ -356,24 +356,35 @@ config LM92_I2C_FREQUENCY
 	range 1 400000
 	depends on LM92
 
-config QENCODER
+config SENSORS_QENCODER
 	bool "Qencoder"
 	default n
 
-config VEML6070
+config SENSORS_VEML6070
 	bool "Vishay VEML6070 UV-A Light Sensor support"
 	default n
 	select I2C
 	---help---
 		Enable driver support for the Vishay VEML6070 UV-A light sensor.
 
-config XEN1210
+config VEML6070_I2C_FREQUENCY
+	int "VEML6070 I2C frequency"
+	default 100000
+	depends on SENSORS_VEML6070
+
+config SENSORS_XEN1210
 	bool "Sensixs XEN1210 Magnetometer"
 	default n
 	select SPI
 	---help---
 		Enable driver support for the Sensixs XEN1210 Magnetometer.
 
-config ZEROCROSS
+config XEN1210_REGDBUG
+	bool "Debug support for the XEN1210"
+	default n
+	---help---
+		Enables register level debug features for the XEN1210
+
+config SENSORS_ZEROCROSS
 	bool "Zero Cross Sensor"
 	default n

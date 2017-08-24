@@ -52,7 +52,7 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 

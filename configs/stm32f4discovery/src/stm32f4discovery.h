@@ -614,7 +614,7 @@ void weak_function stm32_netinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
@@ -626,7 +626,7 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ZEROCROSS
+#ifdef CONFIG_SENSORS_ZEROCROSS
 int stm32_zerocross_initialize(void);
 #endif
 
@@ -740,7 +740,7 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_XEN1210
+#ifdef CONFIG_SENSORS_XEN1210
 int xen1210_archinitialize(int minor);
 #endif
 

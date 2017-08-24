@@ -49,7 +49,7 @@
 #include "stm32_gpio.h"
 #include "stm32f4discovery.h"
 
-#ifdef CONFIG_ZEROCROSS
+#ifdef CONFIG_SENSORS_ZEROCROSS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -202,4 +202,4 @@ int stm32_zerocross_initialize(void)
   return zc_register("/dev/zc0", &g_zcrosslower);
 }
 
-#endif /* CONFIG_ZEROCROSS */
+#endif /* CONFIG_SENSORS_ZEROCROSS */
