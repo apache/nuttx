@@ -476,9 +476,9 @@ Timers
 
     Application Configure -> Examples -> Timer Example
       CONFIG_EXAMPLES_TIMER=y
-      CONFIG_EXAMPLE_TIMER_DEVNAME="/dev/timer0"
-      CONFIG_EXAMPLE_TIMER_DELAY=100000
-      CONFIG_EXAMPLE_TIMER_NSAMPLES=20
+      CONFIG_EXAMPLES_TIMER_DEVNAME="/dev/timer0"
+      CONFIG_EXAMPLES_TIMER_DELAY=100000
+      CONFIG_EXAMPLES_TIMER_NSAMPLES=20
 
 Temperature Sensor
 ==================

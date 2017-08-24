@@ -14509,7 +14509,7 @@ detailed bugfix information):
         array. This cause buffer overflow for part array.  This change fixes
         this problem.  From  EunBong Song.
       - examples/can:  Fix can example app to print data when
-        CONFIG_EXAMPLE_CAN_READ is defined.  From Alan Carvalho de Assis.
+        CONFIG_EXAMPLES_CAN_READ is defined.  From Alan Carvalho de Assis.
 
     * Network Utilies: apps/netuils:
 

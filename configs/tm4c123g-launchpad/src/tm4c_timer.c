@@ -87,7 +87,7 @@ int tiva_timer_configure(void)
       timer_config.config.handler = 0;
       timer_config.config.arg     = 0;
 
-      ret = tiva_timer_initialize(CONFIG_EXAMPLE_TIMER_DEVNAME, &timer_config);
+      ret = tiva_timer_initialize(CONFIG_EXAMPLES_TIMER_DEVNAME, &timer_config);
       if (ret < 0)
       {
         syslog(LOG_ERR, "ERROR: Failed to register timer driver: %d\n", ret);
