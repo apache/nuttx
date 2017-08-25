@@ -178,10 +178,13 @@
 
 #define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
 #define STM32L4_APB2_TIM8_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
+#define STM32L4_APB2_TIM15_CLKIN  (2*STM32L4_PCLK2_FREQUENCY)
+#define STM32L4_APB2_TIM16_CLKIN  (2*STM32L4_PCLK2_FREQUENCY)
+#define STM32L4_APB2_TIM17_CLKIN  (2*STM32L4_PCLK2_FREQUENCY)
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1
+ * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
 /* REVISIT : this can be configured */
 
@@ -361,9 +364,9 @@
 /* DMA channels *************************************************************/
 /* ADC */
 
-#define ADC1_DMA_CHAN DMAMAP_ADC1_1
-#define ADC2_DMA_CHAN DMAMAP_ADC2_1
-#define ADC3_DMA_CHAN DMAMAP_ADC3_1
+#define ADC1_DMA_CHAN DMACHAN_ADC1_1
+#define ADC2_DMA_CHAN DMACHAN_ADC2_1
+#define ADC3_DMA_CHAN DMACHAN_ADC3_1
 
 /* SPI
  *

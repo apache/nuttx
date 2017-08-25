@@ -548,7 +548,7 @@ static struct stm32l4_pwmtimer_s g_pwm15dev =
   .irq         = STM32L4_IRQ_TIM15,
 #endif
   .base        = STM32L4_TIM15_BASE,
-  .pclk        = STM32L4_APB1_TIM15_CLKIN,
+  .pclk        = STM32L4_APB2_TIM15_CLKIN,
 };
 #endif
 
@@ -574,7 +574,7 @@ static struct stm32l4_pwmtimer_s g_pwm16dev =
   .irq         = STM32L4_IRQ_TIM16,
 #endif
   .base        = STM32L4_TIM16_BASE,
-  .pclk        = STM32L4_APB1_TIM16_CLKIN,
+  .pclk        = STM32L4_APB2_TIM16_CLKIN,
 };
 #endif
 
@@ -600,7 +600,7 @@ static struct stm32l4_pwmtimer_s g_pwm17dev =
   .irq         = STM32L4_IRQ_TIM17,
 #endif
   .base        = STM32L4_TIM17_BASE,
-  .pclk        = STM32L4_APB1_TIM17_CLKIN,
+  .pclk        = STM32L4_APB2_TIM17_CLKIN,
 };
 #endif
 
