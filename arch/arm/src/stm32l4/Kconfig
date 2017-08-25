@@ -1221,6 +1221,7 @@ config STM32L4_TIM17
 config STM32L4_COMP
 	bool "COMP"
 	default n
+	select COMP
 	depends on STM32L4_HAVE_COMP
 
 config STM32L4_SAI1
@@ -2584,7 +2585,7 @@ config STM32L4_TIM2_ADC
 	default n
 	depends on STM32L4_TIM2 && STM32L4_ADC
 	---help---
-		Reserve timer 1 for use by ADC
+		Reserve timer 2 for use by ADC
 
 		Timer devices may be used for different purposes.  If STM32L4_TIM2 is
 		defined then the following may also be defined to indicate that the
@@ -2626,7 +2627,7 @@ config STM32L4_TIM3_ADC
 	default n
 	depends on STM32L4_TIM3 && STM32L4_ADC
 	---help---
-		Reserve timer 1 for use by ADC
+		Reserve timer 3 for use by ADC
 
 		Timer devices may be used for different purposes.  If STM32L4_TIM3 is
 		defined then the following may also be defined to indicate that the
@@ -2668,7 +2669,7 @@ config STM32L4_TIM4_ADC
 	default n
 	depends on STM32L4_TIM4 && STM32L4_ADC
 	---help---
-		Reserve timer 1 for use by ADC
+		Reserve timer 4 for use by ADC
 
 		Timer devices may be used for different purposes.  If STM32L4_TIM4 is
 		defined then the following may also be defined to indicate that the
@@ -2705,14 +2706,14 @@ config STM32L4_TIM4_ADC3
 
 endchoice
 
-config STM32L4_TIM5_ADC
-	bool "TIM5 ADC"
+config STM32L4_TIM6_ADC
+	bool "TIM6 ADC"
 	default n
-	depends on STM32L4_TIM5 && STM32L4_ADC
+	depends on STM32L4_TIM6 && STM32L4_ADC
 	---help---
-		Reserve timer 1 for use by ADC
+		Reserve timer 6 for use by ADC
 
-		Timer devices may be used for different purposes.  If STM32L4_TIM5 is
+		Timer devices may be used for different purposes.  If STM32L4_TIM6 is
 		defined then the following may also be defined to indicate that the
 		timer is intended to be used for ADC conversion. Note that ADC usage
 		requires two definition:  Not only do you have to assign the timer
@@ -2720,30 +2721,30 @@ config STM32L4_TIM5_ADC
 		channel it is assigned to.
 
 choice
-	prompt "Select TIM5 ADC channel"
-	default STM32L4_TIM5_ADC1
-	depends on STM32L4_TIM5_ADC
+	prompt "Select TIM6 ADC channel"
+	default STM32L4_TIM6_ADC1
+	depends on STM32L4_TIM6_ADC
 
-config STM32L4_TIM5_ADC1
-	bool "TIM5 ADC channel 1"
+config STM32L4_TIM6_ADC1
+	bool "TIM6 ADC channel 1"
 	depends on STM32L4_ADC1
 	select HAVE_ADC1_TIMER
 	---help---
-		Reserve TIM5 to trigger ADC1
+		Reserve TIM6 to trigger ADC1
 
-config STM32L4_TIM5_ADC2
-	bool "TIM5 ADC channel 2"
+config STM32L4_TIM6_ADC2
+	bool "TIM6 ADC channel 2"
 	depends on STM32L4_ADC2
 	select HAVE_ADC2_TIMER
 	---help---
-		Reserve TIM5 to trigger ADC2
+		Reserve TIM6 to trigger ADC2
 
-config STM32L4_TIM5_ADC3
-	bool "TIM5 ADC channel 3"
+config STM32L4_TIM6_ADC3
+	bool "TIM6 ADC channel 3"
 	depends on STM32L4_ADC3
 	select HAVE_ADC3_TIMER
 	---help---
-		Reserve TIM5 to trigger ADC3
+		Reserve TIM6 to trigger ADC3
 
 endchoice
 
@@ -2752,7 +2753,7 @@ config STM32L4_TIM8_ADC
 	default n
 	depends on STM32L4_TIM8 && STM32L4_ADC
 	---help---
-		Reserve timer 1 for use by ADC
+		Reserve timer 8 for use by ADC
 
 		Timer devices may be used for different purposes.  If STM32L4_TIM8 is
 		defined then the following may also be defined to indicate that the
@@ -2786,6 +2787,48 @@ config STM32L4_TIM8_ADC3
 	select HAVE_ADC3_TIMER
 	---help---
 		Reserve TIM8 to trigger ADC3
+
+endchoice
+
+config STM32L4_TIM15_ADC
+	bool "TIM15 ADC"
+	default n
+	depends on STM32L4_TIM15 && STM32L4_ADC
+	---help---
+		Reserve timer 15 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32L4_TIM15 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM15 ADC channel"
+	default STM32L4_TIM15_ADC1
+	depends on STM32L4_TIM15_ADC
+
+config STM32L4_TIM15_ADC1
+	bool "TIM15 ADC channel 1"
+	depends on STM32L4_ADC1
+	select HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC1
+
+config STM32L4_TIM15_ADC2
+	bool "TIM15 ADC channel 2"
+	depends on STM32L4_ADC2
+	select HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC2
+
+config STM32L4_TIM15_ADC3
+	bool "TIM15 ADC channel 3"
+	depends on STM32L4_ADC3
+	select HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC3
 
 endchoice
 
@@ -3158,7 +3201,7 @@ menu "ADC Configuration"
 
 config STM32L4_ADC1_DMA
 	bool "ADC1 DMA"
-	depends on STM32L4_ADC1 && STM32L4_HAVE_ADC1_DMA
+	depends on STM32L4_ADC1
 	default n
 	---help---
 		If DMA is selected, then the ADC may be configured to support
@@ -3167,7 +3210,7 @@ config STM32L4_ADC1_DMA
 
 config STM32L4_ADC2_DMA
 	bool "ADC2 DMA"
-	depends on STM32L4_ADC2 && STM32L4_HAVE_ADC2_DMA
+	depends on STM32L4_ADC2
 	default n
 	---help---
 		If DMA is selected, then the ADC may be configured to support
@@ -3176,7 +3219,7 @@ config STM32L4_ADC2_DMA
 
 config STM32L4_ADC3_DMA
 	bool "ADC3 DMA"
-	depends on STM32L4_ADC3 && STM32L4_HAVE_ADC3_DMA
+	depends on STM32L4_ADC3
 	default n
 	---help---
 		If DMA is selected, then the ADC may be configured to support

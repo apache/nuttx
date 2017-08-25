@@ -92,7 +92,7 @@ struct route_ipv6_match_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static int net_ipv4_match(FAR struct net_route_s *route, FAR void *arg)
+static int net_ipv4_match(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
   FAR struct route_ipv4_match_s *match = (FAR struct route_ipv4_match_s *)arg;
 
@@ -193,7 +193,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
    * address
    */
 
-  ret = net_foreachroute(net_ipv4_match, &match);
+  ret = net_foreachroute_ipv4(net_ipv4_match, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */
@@ -230,7 +230,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_ipv6_router(net_ipv6addr_t target, net_ipv6addr_t router)
+int net_ipv6_router(const net_ipv6addr_t target, net_ipv6addr_t router)
 {
   struct route_ipv6_match_s match;
   int ret;

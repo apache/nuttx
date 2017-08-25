@@ -573,13 +573,13 @@
  * AD7 PC12  *** Not used ***
  * D0  PD28  (both) HDR_RX                  PD28 URXD3      GPIO_UART3_RXD
  * D1  PD30  (both) HDR_TX                  PD30 UTXD3      GPIO_UART3_TXD_1
- * D2  PA5   microBUS1 GPIO interrupt input PA5
+ * D2  PA0   microBUS1 GPIO interrupt input PA0
  * D3  PA6   microBUS2 GPIO interrupt input PA6
  * D4  PD27  *** Not used ***
  * D5  PD11  microBUS2 PWMB                 PD11 PWMC0_H0
  * D6  PC19  microBUS1 PWMA                 PC19 PWMC0_H2
  * D7  PA2   *** Not used ***
- * D8  PA17  *** Not used ***
+ * D8  PA5   *** Not used ***
  * D9  PC9   microBUS2 CS GPIO output       PC9
  * D10 PD25  microBUS1 CS GPIO output       PD25 SPI0_NPCS1
  * D11 PD21  (both) SPI-MOSI                PD21 SPI0_MOSI  GPIO_SPI0_MOSI
@@ -597,11 +597,11 @@
 /* Interrupts. No pull-ups on the BEE; assumig active low. */
 
 #define CLICK_MB1_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN5)
+                            GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN0)
 #define CLICK_MB2_INTR     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
                             GPIO_INT_FALLING | GPIO_PORT_PIOA | GPIO_PIN6)
 
-#define IRQ_MB1            SAM_IRQ_PA5
+#define IRQ_MB1            SAM_IRQ_PA0
 #define IRQ_MB2            SAM_IRQ_PA6
 
 /* SP chip selects */
@@ -610,6 +610,16 @@
                             GPIO_PORT_PIOD | GPIO_PIN25)
 #define CLICK_MB2_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                             GPIO_PORT_PIOC | GPIO_PIN9)
+
+#define MB1_CSNO            SPI0_CS1
+#define MB2_CSNO            SPI0_CS0 /* REVISIT PC9 is not one of the NPCS pins */
+
+/* EDBG DGI_SPI Chip select (PD12) */
+
+#define CLICK_EDBG_CS      (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                            GPIO_PORT_PIOD | GPIO_PIN12)
+
+#define EDBG_CSNO           SPI0_CS2
 
 /************************************************************************************
  * Public Types

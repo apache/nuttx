@@ -233,7 +233,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
 
       wqueue->worker[wndx].busy = false;
       DEBUGVERIFY(sigwaitinfo(&set, NULL));
-       wqueue->worker[wndx].busy = true;
+      wqueue->worker[wndx].busy = true;
     }
   else
 #endif

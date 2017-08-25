@@ -77,6 +77,11 @@
 #define MAX_IRQBUTTON     BUTTON_USER2
 #define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
 
+/* Pins config to use with HC-SR04 sensor */
+
+#define GPIO_HCSR04_INT   (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_HCSR04_TRIG  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN1)
 
 /* SPI chip selects */
 
@@ -193,6 +198,16 @@ int stm32_gpio_initialize(void);
 void stm32_spidev_initialize(void);
 
 /************************************************************************************
+ * Name: stm32_hcsr04_initialize
+ *
+ * Description:
+ *   Called to initialize the HC-SR04 sensor
+ *
+ ************************************************************************************/
+
+int stm32_hcsr04_initialize(FAR const char *devname);
+
+/************************************************************************************
  * Name: stm32_w25initialize
  *
  * Description:
@@ -210,7 +225,7 @@ int stm32_w25initialize(int minor);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
@@ -319,7 +334,7 @@ int stm32_tone_setup(void);
  *
  ***********************************************************************************/
 
-#ifdef CONFIG_VEML6070
+#ifdef CONFIG_SENSORS_VEML6070
 int stm32_veml6070initialize(FAR const char *devpath);
 #endif
 

@@ -425,7 +425,7 @@ static inline void rcc_enableapb1(void)
 #if defined (CONFIG_STM32L4_DAC1) || defined(CONFIG_STM32L4_DAC2)
   /* DAC interface clock enable */
 
-  regval |= RCC_APB1ENR1_DACEN;
+  regval |= RCC_APB1ENR1_DAC1EN;
 #endif
 
 #ifdef CONFIG_STM32L4_OPAMP

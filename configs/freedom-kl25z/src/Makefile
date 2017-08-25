@@ -74,7 +74,7 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += kl_pwm.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += kl_qencoder.c
 endif
 

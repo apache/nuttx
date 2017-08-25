@@ -52,7 +52,7 @@
 #include <nuttx/sensors/mpl115a.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MPL115A)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -409,4 +409,4 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   return ret;
 }
-#endif /* CONFIG_SPI && CONFIG_MPL115A */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MPL115A */

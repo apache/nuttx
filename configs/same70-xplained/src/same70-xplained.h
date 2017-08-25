@@ -375,6 +375,9 @@
 #define CLICK_MB2_CS       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                             GPIO_PORT_PIOC | GPIO_PIN9)
 
+#define MB1_CSNO           SPI0_CS1 /* GPIO_SPI0_NPCS1_1 */
+#define MB2_CSNO           SPI0_CS0 /* REVISIT PC9 is not one of the NPCS pins */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

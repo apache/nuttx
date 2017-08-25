@@ -671,7 +671,7 @@
  *     SDIO_WAITEVENT:     Wait for the event of interest (which might
  *                         already have occurred)
  *
- *   This sequency should eliminate race conditions between the command/trasnfer
+ *   This sequence should eliminate race conditions between the command/transfer
  *   setup and the subsequent events.
  *
  *   The enabled events persist until either (1) SDIO_WAITENABLE is called

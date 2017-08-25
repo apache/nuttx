@@ -54,6 +54,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "ieee802154/ieee802154.h"
 #include "local/local.h"
 #include "igmp/igmp.h"
 #include "route/route.h"
@@ -123,6 +124,12 @@ void net_setup(void)
   /* Initialize packet socket support */
 
   pkt_initialize();
+#endif
+
+#ifdef CONFIG_NET_IEEE802154
+  /* Initialize IEEE 802.15.4  socket support */
+
+  ieee802154_initialize();
 #endif
 
 #ifdef CONFIG_NET_LOCAL

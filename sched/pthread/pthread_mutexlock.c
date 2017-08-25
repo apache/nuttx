@@ -165,70 +165,70 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      /* The calling thread does not hold the semaphore.  The correct
-       * behavior for the 'robust' mutex is to verify that the holder of the
-       * mutex is still valid.  This is protection from the case
-       * where the holder of the mutex has exitted without unlocking it.
-       */
+        /* The calling thread does not hold the semaphore.  The correct
+         * behavior for the 'robust' mutex is to verify that the holder of the
+         * mutex is still valid.  This is protection from the case
+         * where the holder of the mutex has exitted without unlocking it.
+         */
 
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      /* Include check if this is a NORMAL mutex and that it is robust */
+        /* Include check if this is a NORMAL mutex and that it is robust */
 
-      if (mutex->pid > 0 &&
-          ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
-            mutex->type != PTHREAD_MUTEX_NORMAL) &&
-          sched_gettcb(mutex->pid) == NULL)
+        if (mutex->pid > 0 &&
+            ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
+             mutex->type != PTHREAD_MUTEX_NORMAL) &&
+            sched_gettcb(mutex->pid) == NULL)
 
 #else /* CONFIG_PTHREAD_MUTEX_TYPES */
-      /* This can only be a NORMAL mutex.  Include check if it is robust */
+        /* This can only be a NORMAL mutex.  Include check if it is robust */
 
-      if (mutex->pid > 0 &&
-          (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
-          sched_gettcb(mutex->pid) == NULL)
+        if (mutex->pid > 0 &&
+            (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
+            sched_gettcb(mutex->pid) == NULL)
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
-      /* This mutex is always robust, whatever type it is. */
+        /* This mutex is always robust, whatever type it is. */
 
-      if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
+        if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
 #endif
-        {
-          DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
-          DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
+          {
+            DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
+            DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
 
-          /* A thread holds the mutex, but there is no such thread.  POSIX
-           * requires that the 'robust' mutex return EOWNERDEAD in this case.
-           * It is then the caller's responsibility to call pthread_mutx_consistent()
-           * fo fix the mutex.
-           */
+            /* A thread holds the mutex, but there is no such thread.  POSIX
+             * requires that the 'robust' mutex return EOWNERDEAD in this case.
+             * It is then the caller's responsibility to call pthread_mutx_consistent()
+             * fo fix the mutex.
+             */
 
-          mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
-          ret           = EOWNERDEAD;
-        }
-      else
+            mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+            ret           = EOWNERDEAD;
+          }
+        else
 #endif /* !CONFIG_PTHREAD_MUTEX_UNSAFE */
 
-        {
-          /* Take the underlying semaphore, waiting if necessary.  NOTE that
-           * is required to deadlock for the case of the non-robust NORMAL or
-           * default mutex.
-           */
+          {
+            /* Take the underlying semaphore, waiting if necessary.  NOTE that
+             * is required to deadlock for the case of the non-robust NORMAL or
+             * default mutex.
+             */
 
-          ret = pthread_mutex_take(mutex, true);
+            ret = pthread_mutex_take(mutex, true);
 
-          /* If we successfully obtained the semaphore, then indicate
-           * that we own it.
-           */
+            /* If we successfully obtained the semaphore, then indicate
+             * that we own it.
+             */
 
-          if (ret == OK)
-            {
-              mutex->pid    = mypid;
+            if (ret == OK)
+              {
+                mutex->pid    = mypid;
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-              mutex->nlocks = 1;
+                mutex->nlocks = 1;
 #endif
-            }
-        }
+              }
+          }
 
       sched_unlock();
     }

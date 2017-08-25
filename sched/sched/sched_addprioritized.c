@@ -92,7 +92,7 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
    */
 
   for (next = (FAR struct tcb_s *)list->head;
-      (next && sched_priority <= next->sched_priority);
+       (next && sched_priority <= next->sched_priority);
        next = next->flink);
 
   /* Add the tcb to the spot found in the list.  Check if the tcb

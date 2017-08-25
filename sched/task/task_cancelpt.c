@@ -132,7 +132,7 @@ bool enter_cancellation_point(void)
 
   if (((tcb->flags & TCB_FLAG_NONCANCELABLE) == 0 &&
        (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
-       tcb->cpcount > 0)
+      tcb->cpcount > 0)
     {
       /* Check if there is a pending cancellation */
 
@@ -150,15 +150,15 @@ bool enter_cancellation_point(void)
           if (tcb->cpcount == 0)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
-               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-                 {
-                   pthread_exit(PTHREAD_CANCELED);
-                 }
-               else
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+                {
+                  pthread_exit(PTHREAD_CANCELED);
+                }
+              else
 #endif
-                 {
-                   exit(EXIT_FAILURE);
-                 }
+                {
+                  exit(EXIT_FAILURE);
+                }
             }
         }
 
@@ -236,22 +236,22 @@ void leave_cancellation_point(void)
           if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
-               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-                 {
-                   pthread_exit(PTHREAD_CANCELED);
-                 }
-               else
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+                {
+                  pthread_exit(PTHREAD_CANCELED);
+                }
+              else
 #endif
-                 {
-                   exit(EXIT_FAILURE);
-                 }
+                {
+                  exit(EXIT_FAILURE);
+                }
             }
         }
       else
         {
-           /* We are not at the outermost nesting level.  Just decrment the
-            * nesting level count.
-            */
+          /* We are not at the outermost nesting level.  Just decrment the
+           * nesting level count.
+           */
 
           tcb->cpcount--;
         }

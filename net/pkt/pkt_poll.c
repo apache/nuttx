@@ -78,8 +78,6 @@
 
 void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 {
-  ninfo("IN\n");
-
   /* Verify that the packet connection is valid */
 
   if (conn)

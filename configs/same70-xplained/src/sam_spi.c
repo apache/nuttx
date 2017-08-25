@@ -80,7 +80,6 @@ void sam_spidev_initialize(void)
   /* Enable chip select for mikroBUS2 */
 
   (void)sam_configgpio(CLICK_MB2_CS);
-
 #endif
 #endif
 

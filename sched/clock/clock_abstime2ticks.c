@@ -71,7 +71,7 @@ static long compare_timespec(FAR const struct timespec *a,
       return 1;
     }
 
-  return (long)a->tv_nsec -(long)b->tv_nsec;
+  return (long)a->tv_nsec - (long)b->tv_nsec;
 }
 
 /****************************************************************************

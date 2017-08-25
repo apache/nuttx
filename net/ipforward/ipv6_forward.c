@@ -151,7 +151,6 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_6LOWPAN
 static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 {
   int ttl = (int)ipv6->ttl - 1;
@@ -179,7 +178,6 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
 
   return ttl;
 }
-#endif
 
 /****************************************************************************
  * Name: ipv6_packet_conversion

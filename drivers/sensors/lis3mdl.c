@@ -52,7 +52,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/sensors/lis3mdl.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_LIS3MDL)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_LIS3MDL)
 
 /****************************************************************************
  * Private
@@ -638,4 +638,4 @@ int lis3mdl_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   return OK;
 }
 
-#endif /* CONFIG_SPI && CONFIG_LIS3MDL */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_LIS3MDL */

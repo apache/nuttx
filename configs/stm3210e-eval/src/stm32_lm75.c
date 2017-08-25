@@ -48,7 +48,7 @@
 #include "stm32_i2c.h"
 #include "stm3210e-eval.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+#if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && defined(CONFIG_STM32_I2C1)
 
 /************************************************************************************
  * Public Functions
@@ -119,4 +119,4 @@ int stm32_lm75attach(xcpt_t irqhandler, void *arg)
   return OK;
 }
 
-#endif /* CONFIG_I2C && CONFIG_I2C_LM75 && CONFIG_STM32_I2C1 */
+#endif /* CONFIG_I2C && CONFIG_LM75_I2C && CONFIG_STM32_I2C1 */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/encx24j600.h
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,8 @@
 
 struct enc_lower_s
 {
-  int  (*attach)(FAR const struct enc_lower_s *lower, xcpt_t handler);
+  int  (*attach)(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                 FAR void *arg);
   void (*enable)(FAR const struct enc_lower_s *lower);
   void (*disable)(FAR const struct enc_lower_s *lower);
 };

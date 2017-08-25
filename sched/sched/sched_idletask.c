@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
- #include <nuttx/config.h>
+#include <nuttx/config.h>
 
 #include <stdbool.h>
 

@@ -65,9 +65,12 @@
 #ifdef CONFIG_ARCH_FPU
 static inline void kinetis_fpuconfig(void);
 #endif
+
+#if 0 /* Not used */
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
   __attribute__ ((naked, no_instrument_function, noreturn));
+#endif
 #endif
 
 /****************************************************************************
@@ -225,6 +228,7 @@ static inline void kinetis_fpuconfig(void)
  *
  ****************************************************************************/
 
+#if 0 /* Not used */
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
 {
@@ -255,6 +259,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
     "\tb    os_start\n"         /* Branch to os_start */
   );
 }
+#endif
 #endif
 
 /****************************************************************************

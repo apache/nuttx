@@ -46,6 +46,7 @@
 
 #include "nuttx/semaphore.h"
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/radiodev.h"
 #include "nuttx/net/netstats.h"
 
 #include "netdev/netdev.h"
@@ -521,7 +522,7 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
 
           /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
-          ret = sixlowpan_queue_frames((FAR struct sixlowpan_driver_s *)dev,
+          ret = sixlowpan_queue_frames((FAR struct radio_driver_s *)dev,
                                        &ipv6tcp.ipv6,
                                        &sinfo->s_buf[sinfo->s_sent], sndlen,
                                        sinfo->s_destmac);
@@ -827,7 +828,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * an encoding of the MAC address in the IPv6 address.
    */
 
-  ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
+  ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
                                  conn->u.ipv6.raddr, &destmac);
   if (ret < 0)
     {
@@ -946,7 +947,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct sixlowpan_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
                                          ipv6hdr->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
@@ -976,7 +977,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
               buflen = dev->d_len - hdrlen;
 
               (void)sixlowpan_queue_frames(
-                      (FAR struct sixlowpan_driver_s *)fwddev,
+                      (FAR struct radio_driver_s *)fwddev,
                       &ipv6hdr->ipv6, buf, buflen, &destmac);
             }
         }

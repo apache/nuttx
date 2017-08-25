@@ -112,7 +112,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef HAVE_RTC_DRIVER
   FAR struct rtc_lowerhalf_s *rtclower;
 #endif
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
   int index;
   char buf[9];
 #endif
@@ -236,7 +236,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 
   /* Initialize and register the qencoder driver */
 

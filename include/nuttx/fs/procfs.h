@@ -93,6 +93,15 @@ struct procfs_operations
 
 /* Procfs handler prototypes ************************************************/
 
+/* These are the types of entries that may appear in the procfs: */
+
+enum procfs_entry_e
+{
+  PROCFS_UNKOWN_TYPE = 0, /* Unknown type */
+  PROCFS_FILE_TYPE,       /* File type */
+  PROCFS_DIR_TYPE,        /* Directory type */
+};
+
 /* This is a procfs entry that each handler should provide to supply
  * specific operations for file and directory handling.
  */
@@ -101,6 +110,7 @@ struct procfs_entry_s
 {
   FAR const char *pathpattern;
   FAR const struct procfs_operations *ops;
+  uint8_t type;
 };
 
 /* Specifies the common elements for an open file in the procfs

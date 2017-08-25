@@ -1833,7 +1833,10 @@ static void enc_irqworker(FAR void *arg)
 
 static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register FAR struct enc_driver_s *priv = &g_enc28j60[0];
+  FAR struct enc_driver_s *priv;
+
+  DEBUGASSERT(arg != NULL);
+  priv = (FAR struct enc_driver_s *)arg;
 
   /* In complex environments, we cannot do SPI transfers from the interrupt
    * handler because semaphores are probably used to lock the SPI bus.  In
@@ -2648,7 +2651,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
 
   /* Attach the interrupt to the driver (but don't enable it yet) */
 
-  if (lower->attach(lower, enc_interrupt))
+  if (lower->attach(lower, enc_interrupt, priv) < 0)
     {
       /* We could not attach the ISR to the interrupt */
 

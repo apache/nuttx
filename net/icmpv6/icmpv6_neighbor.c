@@ -58,6 +58,7 @@
 #include "devif/devif.h"
 #include "inet/inet.h"
 #include "neighbor/neighbor.h"
+#include "route/route.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR

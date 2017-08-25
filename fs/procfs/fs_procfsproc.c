@@ -1609,5 +1609,5 @@ static int proc_stat(const char *relpath, struct stat *buf)
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_FS_PROC_EXCLUDE_PROCESS */
+#endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

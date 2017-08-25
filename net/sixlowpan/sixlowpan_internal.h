@@ -233,7 +233,7 @@ extern uint8_t g_frame_hdrlen;
  ****************************************************************************/
 
 struct net_driver_s;        /* Forward reference */
-struct sixlowpan_driver_s;  /* Forward reference */
+struct radio_driver_s;      /* Forward reference */
 struct devif_callback_s;    /* Forward reference */
 struct ipv6_hdr_s;          /* Forward reference */
 struct netdev_varaddr_s;    /* Forward reference */
@@ -290,7 +290,6 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *   pktmeta - Meta-data specific to the current outgoing frame
  *   meta    - Location to return the corresponding meta data reference
  *             (obfuscated).
- *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -301,10 +300,9 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
                         FAR const struct ieee802_txmetadata_s *pktmeta,
-                        FAR struct ieee802154_frame_meta_s *meta,
-                        uint16_t paylen);
+                        FAR struct ieee802154_frame_meta_s *meta);
 #endif
 
 /****************************************************************************
@@ -325,7 +323,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_frame_hdrlen(FAR struct radio_driver_s *radio,
                            FAR const void *meta);
 
 /****************************************************************************
@@ -348,7 +346,7 @@ int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
                            FAR const void *meta, FAR struct iob_s *frame);
 
 /****************************************************************************
@@ -383,7 +381,7 @@ int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_queue_frames(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
                            FAR const struct ipv6_hdr_s *ipv6,
                            FAR const void *buf,  size_t buflen,
                            FAR const struct netdev_varaddr_s *destmac);
@@ -441,7 +439,7 @@ void sixlowpan_hc06_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
                                FAR const struct ipv6_hdr_s *ipv6,
                                FAR const struct netdev_varaddr_s *destmac,
                                FAR uint8_t *fptr);
@@ -479,7 +477,7 @@ int sixlowpan_compresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
+void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
                                   FAR const void *metadata,
                                   uint16_t iplen, FAR struct iob_s *iob,
                                   FAR uint8_t *fptr, FAR uint8_t *bptr);
@@ -509,7 +507,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
                               FAR const struct ipv6_hdr_s *ipv6,
                               FAR const struct netdev_varaddr_s *destmac,
                               FAR uint8_t *fptr);
@@ -547,7 +545,7 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
-int sixlowpan_uncompresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
                                 FAR const void *metadata, uint16_t iplen,
                                 FAR struct iob_s *iob, FAR uint8_t *fptr,
                                 FAR uint8_t *bptr);
@@ -586,7 +584,7 @@ int sixlowpan_uncompresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
 
 #define sixlowpan_islinklocal(ipaddr) ((ipaddr)[0] == NTOHS(0xfe80))
 
-int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct netdev_varaddr_s *addr);
 
@@ -613,7 +611,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_src_panid(FAR struct radio_driver_s *radio,
                         FAR uint8_t *panid);
 #endif
 
@@ -634,7 +632,7 @@ int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_extract_srcaddr(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
                               FAR const void *metadata,
                               FAR struct netdev_varaddr_s *srcaddr);
 
@@ -655,7 +653,7 @@ int sixlowpan_extract_srcaddr(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_extract_destaddr(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_extract_destaddr(FAR struct radio_driver_s *radio,
                                FAR const void *metadata,
                                FAR struct netdev_varaddr_s *destaddr);
 

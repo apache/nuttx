@@ -1,7 +1,7 @@
 ############################################################################
-# configs/nucleo-f4x1re/f401-nsh/Make.defs
+# configs/nucleo-f4x1re/scripts/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -61,28 +61,46 @@ else
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
 endif
 
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+  LDFLAGS += -g
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fomit-frame-pointer
+endif
+
+ARCHCFLAGS = -fno-builtin
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
+
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
+  ARCHCCVERSION = {shell $(CC) -v 2>&1 | sed -n '/clang version/p' | sed -e 's/.* clang version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g'}
+  HOSTCC = clang
+  CC = clang
+  CXX = clang++
+  CPP = clang -E
+  ARCHCFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4
+  ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4 -DCONFIG_WCHAR_BUILTIN
+else
+  ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
+  HOSTCC = gcc
+  CC = $(CROSSDEV)gcc
+  CXX = $(CROSSDEV)g++
+  CPP = $(CROSSDEV)gcc -E
+  ARCHCXXFLAGS += -fno-rtti
+  ifneq ($(CONFIG_DEBUG_NOOPT),y)
+    ARCHOPTIMIZATION += -fno-strength-reduce
+  endif
+
+endif
+
 LD = $(CROSSDEV)ld
 AR = $(ARCROSSDEV)ar rcs
 NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
-ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
-endif
-
-ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
@@ -107,11 +125,7 @@ EXEEXT =
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
-endif
 
-HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =

@@ -346,8 +346,8 @@ Temperature Sensor
   following to the NuttX configuration file
 
     Drivers -> Sensors
-      CONFIG_LM75=y
-      CONFIG_I2C_LM75=y
+      CONFIG_SENSORS_LM75=y
+      CONFIG_LM75_I2C=y
 
   Then you can implement logic like the following to use the temperature
   sensor:

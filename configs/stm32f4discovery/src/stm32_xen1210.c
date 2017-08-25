@@ -65,15 +65,15 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_XEN1210
+#ifdef CONFIG_SENSORS_XEN1210
 #ifndef CONFIG_STM32_SPI1
 #  error "XEN1210 support requires CONFIG_STM32_SPI1"
 #endif
 
-#define CONFIG_XEN1210_SPIDEV 1
+#define BOARD_XEN1210_SPIDEV 1
 
-#ifndef CONFIG_XEN1210_DEVMINOR
-#  define CONFIG_XEN1210_DEVMINOR 0
+#ifndef BOARD_XEN1210_DEVMINOR
+#  define BOARD_XEN1210_DEVMINOR 0
 #endif
 
 #ifndef CONFIG_STM32_TIM1
@@ -323,10 +323,10 @@ int xen1210_archinitialize(int minor)
 
       /* Get an instance of the I2C interface */
 
-      dev = stm32_spibus_initialize(CONFIG_XEN1210_SPIDEV);
+      dev = stm32_spibus_initialize(BOARD_XEN1210_SPIDEV);
       if (!dev)
         {
-          snerr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_XEN1210_SPIDEV);
+          snerr("ERROR: Failed to initialize SPI bus %d\n", BOARD_XEN1210_SPIDEV);
           return -ENODEV;
         }
 
@@ -342,7 +342,7 @@ int xen1210_archinitialize(int minor)
 
       /* Initialize and register the XEN1210 driver */
 
-      ret = xen1210_register(g_xen1210config.handle, CONFIG_XEN1210_DEVMINOR);
+      ret = xen1210_register(g_xen1210config.handle, BOARD_XEN1210_DEVMINOR);
       if (ret < 0)
         {
           snerr("ERROR: Failed to register XEN1210 driver: %d\n", ret);

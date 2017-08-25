@@ -58,7 +58,7 @@
 
 #include <nuttx/irq.h>
 
-#ifdef CONFIG_ZEROCROSS
+#ifdef CONFIG_SENSORS_ZEROCROSS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -541,4 +541,4 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
   return ret;
 }
 
-#endif /* CONFIG_ZEROCROSS */
+#endif /* CONFIG_SENSORS_ZEROCROSS */

@@ -47,6 +47,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/sixlowpan.h>
 
 #include "netdev/netdev.h"
@@ -75,8 +76,8 @@
 #if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_WIRELESS_PKTRADIO)
 static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
 {
-  FAR struct sixlowpan_driver_s *radio = (FAR struct sixlowpan_driver_s *)dev;
-  struct sixlowpan_properties_s properties;
+  FAR struct radio_driver_s *radio = (FAR struct radio_driver_s *)dev;
+  struct radiodev_properties_s properties;
   int ret;
 
   DEBUGASSERT(radio != NULL && radio->r_properties != NULL);

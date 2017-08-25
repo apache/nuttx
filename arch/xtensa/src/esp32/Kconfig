@@ -234,23 +234,23 @@ if ESP32_UART0
 
 config ESP32_UART0_TXPIN
 	int "UART0 Tx Pin"
-	default 0
+	default 1
 	range 0 39
 
 config ESP32_UART0_RXPIN
 	int "UART0 Rx Pin"
-	default 0
+	default 3
 	range 0 39
 
 if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
 config ESP32_UART0_RTSPIN
 	int "UART0 RTS Pin"
-	default 0
+	default 22
 	range 0 39
 
 config ESP32_UART0_CTSPIN
 	int "UART0 CTS Pin"
-	default 0
+	default 19
 	range 0 39
 
 endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
@@ -260,23 +260,23 @@ if ESP32_UART1
 
 config ESP32_UART1_TXPIN
 	int "UART1 Tx Pin"
-	default 0
+	default 10
 	range 0 39
 
 config ESP32_UART1_RXPIN
 	int "UART1 Rx Pin"
-	default 0
+	default 9
 	range 0 39
 
 if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
 config ESP32_UART1_RTSPIN
 	int "UART1 RTS Pin"
-	default 0
+	default 11
 	range 0 39
 
 config ESP32_UART1_CTSPIN
 	int "UART1 CTS Pin"
-	default 0
+	default 6
 	range 0 39
 
 endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
@@ -286,23 +286,23 @@ if ESP32_UART2
 
 config ESP32_UART2_TXPIN
 	int "UART2 Tx Pin"
-	default 0
+	default 17
 	range 0 39
 
 config ESP32_UART2_RXPIN
 	int "UART2 Rx Pin"
-	default 0
+	default 16
 	range 0 39
 
 if SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
 config ESP32_UART2_RTSPIN
 	int "UART2 RTS Pin"
-	default 0
+	default 7
 	range 0 39
 
 config ESP32_UART2_CTSPIN
 	int "UART2 CTS Pin"
-	default 0
+	default 8
 	range 0 39
 
 endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL

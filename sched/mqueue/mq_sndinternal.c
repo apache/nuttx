@@ -57,7 +57,7 @@
 
 #include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS
-# include "signal/signal.h"
+#  include "signal/signal.h"
 #endif
 #include "mqueue/mqueue.h"
 
@@ -417,10 +417,10 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
           DEBUGVERIFY(sig_mqnotempty(pid, event.sigev_signo,
-                      event.sigev_value));
+                                     event.sigev_value));
 #else
           DEBUGVERIFY(sig_mqnotempty(pid, event.sigev_signo,
-                      event.sigev_value.sival_ptr));
+                                     event.sigev_value.sival_ptr));
 #endif
         }
 

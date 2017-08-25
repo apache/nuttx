@@ -13585,7 +13585,7 @@
 	* Fix a compile error: in sched_cpuload.c:Line136, the variables ts and
 	  secs are not defined if CONFIG_CPULOAD_ONESHOT_ENTROPY = 0. However,
 	  these variables are used regardless of CONFIG_CPULOAD_ONESHOT_ENTROPY at
-	  lines~180:onwards.  From rg (2017-01-22).
+	  lines~180:onwards.  From Rajan Gill (2017-01-22).
 	* CPU load: Correct computation of the nominal period to use when the
 	  source is a oneshot timer (2017-01-22).
 	* Kernel Modules:  Module initializer may now return a symbol table
@@ -14346,7 +14346,7 @@
 	* Clicker2-STM32: Add support for Mikroelektronika Clicker 2 for
 	  STM32.  From Anthony Merlino (2017-03-21).
 	* Implement DMA support for the stm32f4 I2C.  Max and I have verified
-	  that it works on our systems.  From rg (2017-03-21).
+	  that it works on our systems.  From Rajan Gill (2017-03-21).
 	* drivers/lcd/st7565.c:  Use ST7565_POWERCTRL_INT instead of
 	  ST7565_POWERCTRL_BRF.  From Masayuki Ishikawa (2017-03-21).
 	* SMP Kconfig: Change the minimum SMP_NCPUS to 1.  From Masayuki
@@ -14388,7 +14388,7 @@
 	* Clicker2-STM32:  Add some mostly bogus MAC initializatinon logic
 	  (2017-03-23).
 	* STM32 I2C:  Do not allow CONFIG_I2C_POLLED and CONFIG_I2C_DMA.  From
-	  rg (2017-03-23).
+	  Rajan Gill (2017-03-23).
 	* stm32_flash:  Need conditinal on non F4 targets.  From David Sidrane
 	  (2017-03-23).
 	* stm32_i2c_alt:  Duplicate non CS dev of regval.  From David Sidrane

@@ -50,6 +50,7 @@
 
 #include <net/if.h>
 #include <net/ethernet.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
@@ -210,17 +211,19 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
 #endif
-            devfmt          = NETDEV_LPAN_FORMAT;
+            devfmt          = NETDEV_WLAN_FORMAT;
             break;
 #endif
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
           case NET_LL_IEEE802154: /* IEEE 802.15.4 MAC */
           case NET_LL_PKTRADIO:   /* Non-IEEE 802.15.4 packet radio */
             dev->d_llhdrlen = 0;
+#ifdef CONFIG_NET_6LOWPAN
             dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
 #ifdef CONFIG_NET_TCP
             dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
+#endif
 #endif
             devfmt          = NETDEV_WPAN_FORMAT;
             break;

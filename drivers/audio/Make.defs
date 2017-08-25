@@ -39,7 +39,7 @@
 
 ifeq ($(CONFIG_AUDIO_DEVICES),y)
 
-ifeq ($(CONFIG_VS1053),y)
+ifeq ($(CONFIG_AUDIO_VS1053),y)
 CSRCS += vs1053.c
 endif
 

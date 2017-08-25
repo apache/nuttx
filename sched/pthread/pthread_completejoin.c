@@ -79,7 +79,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
        * awakened when all waiting tasks receive the data
        */
 
-      (void)sem_init(&pjoin->data_sem, 0, (ntasks_waiting+1));
+      (void)sem_init(&pjoin->data_sem, 0, (ntasks_waiting + 1));
 
       /* Post the semaphore to restart each thread that is waiting
        * on the semaphore
@@ -239,7 +239,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
       if (!waiters && pjoin->detached)
         {
-           pthread_destroyjoin(group, pjoin);
+          pthread_destroyjoin(group, pjoin);
         }
 
       /* Giving the following semaphore will allow the waiters

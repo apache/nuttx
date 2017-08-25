@@ -51,13 +51,14 @@
  ************************************************************************************/
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
+
 /* Comparators */
 
 enum stm32l4_comp_e
 {
   STM32L4_COMP1,
   STM32L4_COMP2,
-  STM32L4_COMP_NUM  /* Number of comparators */
+  STM32L4_COMP_NUM          /* Number of comparators */
 };
 
 /* Plus input */
@@ -93,7 +94,7 @@ enum stm32l4_comp_e
 {
   STM32L4_COMP1,
   STM32L4_COMP2,
-  STM32L4_COMP_NUM  /* Number of comparators */
+  STM32L4_COMP_NUM          /* Number of comparators */
 };
 
 /* Plus input */
@@ -142,11 +143,19 @@ enum stm32l4_comp_speed_e
 
 struct stm32l4_comp_config_s
 {
-  uint8_t inp;                /* Plus input pin (see enum stm32l4_comp_inp_e) */
-  uint8_t inm;                /* Minus input pin (see enum stm32l4_comp_inm_e) */
-  uint8_t hyst;               /* Hysteresis (see enum stm32l4_comp_hyst_e) */
-  uint8_t speed;              /* Speed (see stm32l4_comp_speed_e) */
-  bool inverted;              /* Invert output? */
+  struct
+  {
+    FAR const struct comp_callback_s *cb;
+    bool                              rising;
+    bool                              falling;
+  } interrupt;
+
+  uint8_t  inp;                 /* Plus input pin (see enum stm32l4_comp_inp_e) */
+  uint8_t  inm;                 /* Minus input pin (see enum stm32l4_comp_inm_e) */
+  uint8_t  hyst;                /* Hysteresis (see enum stm32l4_comp_hyst_e) */
+  uint8_t  speed;               /* Speed (see stm32l4_comp_speed_e) */
+  bool     inverted;            /* Invert output? */
+  uint32_t csr;                 /* Control and status register */
 };
 
 /************************************************************************************
@@ -162,55 +171,27 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Name: stm32l4_compconfig
+/****************************************************************************
+ * Name: stm32l4_compinitialize
  *
  * Description:
- *   Configure comparator and I/Os used as comparators inputs
+ *   Initialize the COMP.
  *
- * Parameters:
- *  cmp - comparator
- *  cfg - configuration
+ * Input Parameters:
+ *   intf - The COMP interface number.
+ *   cfg  - configuration
  *
- * Returns:
- *  0 on success, a negated errno value on failure
+ * Returned Value:
+ *   Valid COMP device structure reference on success; a NULL on failure.
  *
- ************************************************************************************/
+ * Assumptions:
+ *   1. Clock to the COMP block has enabled,
+ *   2. Board-specific logic has already configured
+ *
+ ****************************************************************************/
 
-int stm32l4_compconfig(int cmp, const struct stm32l4_comp_config_s *cfg);
-
-/************************************************************************************
- * Name: stm32l4_compenable
- *
- * Description:
- *   Enable/disable comparator
- *
- * Parameters:
- *  cmp - comparator
- *  cfg - enable/disable flag
- *
- * Returns:
- *  0 on success, a negated errno value on failure
- *
- ************************************************************************************/
-
-int stm32l4_compenable(int cmp, bool en);
-
-/************************************************************************************
- * Name: stm32l4_compread
- *
- * Description:
- *   Read comparator output
- *
- * Parameters:
- *  - cmp: comparator
- *
- * Returns:
- *  true for high, false for low
- *
- ************************************************************************************/
-
-bool stm32l4_compread(int cmp);
+FAR struct comp_dev_s* stm32l4_compinitialize(int intf,
+                                              FAR const struct stm32l4_comp_config_s *cfg);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -60,7 +60,7 @@
  * item.
  */
 
-static struct pktradio_metadata_s *g_free_metadata;
+static FAR struct pktradio_metadata_s *g_free_metadata;
 
 /* Supports mutually exclusive access to the free list */
 
@@ -188,7 +188,7 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
 
   if (metadata != NULL)
     {
-       /* Zero and tag the alloated meta-data structure. */
+       /* Zero and tag the allocated meta-data structure. */
 
        memset(metadata, 0, sizeof(struct pktradio_metadata_s));
        metadata->pm_pool = pool;

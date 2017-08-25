@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_rxnotify.c
+ * net/route/net_foreachroute.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,93 +38,63 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
 
-#include <sys/types.h>
-#include <string.h>
-#include <errno.h>
 #include <debug.h>
+#include <arpa/inet.h>
 
-#include <nuttx/net/netdev.h>
-#include <nuttx/net/ip.h>
+#include "route/route.h"
 
-#include "netdev/netdev.h"
+#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_DEBUG_NET_INFO)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_ipv4_rxnotify
+ * Name: net_ipv4_dumproute and net_ipv6_dumproute
  *
  * Description:
- *   Notify the device driver that forwards the IPv4 address that the
- *   application waits for RX data.
+ *   Dump a routing table entry
  *
  * Parameters:
- *   lipaddr - The local board IPv6 address of the socket
- *   ripaddr - The remote IPv4 address to send the data
+ *   route - The entry to be dumped
  *
  * Returned Value:
- *  None
- *
- * Assumptions:
- *  Called from normal user mode
+ *   None
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void netdev_ipv4_rxnotify(in_addr_t lipaddr, in_addr_t ripaddr)
+void net_ipv4_dumproute(FAR const char *msg,
+                        FAR struct net_route_ipv4_s *route)
 {
-  FAR struct net_driver_s *dev;
-
-  /* Find the device driver that serves the subnet of the remote address */
-
-  dev = netdev_findby_ipv4addr(lipaddr, ripaddr);
-  if (dev && dev->d_rxavail)
-    {
-      /* Notify the device driver that new RX data is available. */
-
-      (void)dev->d_rxavail(dev);
-    }
+  ninfo("%s:\n", msg);
+  ninfo("  target=%08lx netmask=%08lx router=%08lx\n",
+        htonl(route->target), htonl(route->netmask), htonl(route->router));
 }
-#endif /* CONFIG_NET_IPv4 */
-
-/****************************************************************************
- * Name: netdev_ipv6_rxnotify
- *
- * Description:
- *   Notify the device driver that forwards the IPv6 address that the
- *   application waits for RX data.
- *
- * Parameters:
- *   lipaddr - The local board IPv6 address of the socket
- *   ripaddr - The remote IPv6 address to send the data
- *
- * Returned Value:
- *  None
- *
- * Assumptions:
- *  Called from normal user mode
- *
- ****************************************************************************/
+#endif
 
 #ifdef CONFIG_NET_IPv6
-void netdev_ipv6_rxnotify(FAR const net_ipv6addr_t lipaddr,
-                          FAR const net_ipv6addr_t ripaddr)
+void net_ipv6_dumproute(FAR const char *msg,
+                        FAR struct net_route_ipv6_s *route)
 {
-  FAR struct net_driver_s *dev;
-
-  /* Find the device driver that serves the subnet of the remote address */
-
-  dev = netdev_findby_ipv6addr(lipaddr, ripaddr);
-  if (dev && dev->d_rxavail)
-    {
-      /* Notify the device driver that new RX data is available. */
-
-      (void)dev->d_rxavail(dev);
-    }
+  ninfo("%s:\n", msg);
+  ninfo("  target:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        htons(route->target[0]),  htons(route->target[1]),
+        htons(route->target[2]),  htons(route->target[3]),
+        htons(route->target[4]),  htons(route->target[5]),
+        htons(route->target[6]),  htons(route->target[7]));
+  ninfo("  netmask: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        htons(route->netmask[0]), htons(route->netmask[1]),
+        htons(route->netmask[2]), htons(route->netmask[3]),
+        htons(route->netmask[4]), htons(route->netmask[5]),
+        htons(route->netmask[6]), htons(route->netmask[7]));
+  ninfo("  router:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        htons(route->router[0]),  htons(route->router[1]),
+        htons(route->router[2]),  htons(route->router[3]),
+        htons(route->router[4]),  htons(route->router[5]),
+        htons(route->router[6]),  htons(route->router[7]));
 }
-#endif /* CONFIG_NET_IPv6 */
+#endif
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_RXAVAIL */
+#endif /* CONFIG_NET_ROUTE && CONFIG_DEBUG_NET_INFO */

@@ -57,6 +57,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -146,7 +147,7 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
       router = 0;
     }
 
-  return net_addroute(target, netmask, router);
+  return net_addroute_ipv4(target, netmask, router);
 }
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
 
@@ -212,7 +213,7 @@ static int ioctl_del_ipv4route(FAR struct rtentry *rtentry)
   addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
   netmask = (in_addr_t)addr->sin_addr.s_addr;
 
-  return net_delroute(target, netmask);
+  return net_delroute_ipv4(target, netmask);
 }
 #endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
 
@@ -833,8 +834,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
-                         dev->d_mac.sixlowpan.nv_addr,
-                         dev->d_mac.sixlowpan.nv_addrlen);
+                         dev->d_mac.radio.nv_addr,
+                         dev->d_mac.radio.nv_addrlen);
                   ret = OK;
                 }
                else
@@ -865,19 +866,19 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (dev->d_lltype == NET_LL_IEEE802154 ||
                   dev->d_lltype == NET_LL_PKTRADIO)
                 {
-                  FAR struct sixlowpan_driver_s *radio;
-                  struct sixlowpan_properties_s properties;
+                  FAR struct radio_driver_s *radio;
+                  struct radiodev_properties_s properties;
 
                   /* Get the radio properties */
 
-                  radio = (FAR struct sixlowpan_driver_s *)dev;
+                  radio = (FAR struct radio_driver_s *)dev;
                   DEBUGASSERT(radio->r_properties != NULL);
 
                   ret = radio->r_properties(radio, &properties);
                   if (ret >= 0)
                     {
-                      dev->d_mac.sixlowpan.nv_addrlen = properties.sp_addrlen;
-                      memcpy(dev->d_mac.sixlowpan.nv_addr,
+                      dev->d_mac.radio.nv_addrlen = properties.sp_addrlen;
+                      memcpy(dev->d_mac.radio.nv_addr,
                              req->ifr_hwaddr.sa_data, NET_6LOWPAN_ADDRSIZE);
                     }
                 }

@@ -98,13 +98,15 @@ struct stm32_lower_s
 {
   const struct enc_lower_s lower;    /* Low-level MCU interface */
   xcpt_t                   handler;  /* ENCX24J600 interrupt handler */
+  FAR void                *arg;      /* Arguement that accompanies the handler */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler);
+static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                      FAR void *arg);
 static void up_enable(FAR const struct enc_lower_s *lower);
 static void up_disable(FAR const struct enc_lower_s *lower);
 
@@ -126,6 +128,7 @@ static struct stm32_lower_s g_enclower =
     .disable = up_disable
   },
   .handler = NULL,
+  .arg     = NULL
 };
 
 /****************************************************************************
@@ -136,13 +139,15 @@ static struct stm32_lower_s g_enclower =
  * Name: struct enc_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler)
+static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
+                     FAR void *arg)
 {
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   /* Just save the handler for use when the interrupt is enabled */
 
   priv->handler = handler;
+  priv->arg     = arg;
   return OK;
 }
 
@@ -150,10 +155,14 @@ static void up_enable(FAR const struct enc_lower_s *lower)
 {
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
-  DEBUGASSERT(priv->handler);
+  DEBUGASSERT(priv->handler != NULL);
   (void)stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true,
-                           priv->handler, NULL);
+                           priv->handler, priv->arg);
 }
+
+/* REVISIT:  Since the interrupt is torn down completely, any interrupts
+ * the occur while "disabled" will be lost.
+ */
 
 static void up_disable(FAR const struct enc_lower_s *lower)
 {

@@ -64,7 +64,7 @@
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_DISABLE_SIGNALS
-#  warning "Signals needed by this function (CONFIG_DISABLE_SIGNALS=n)"
+#    warning "Signals needed by this function (CONFIG_DISABLE_SIGNALS=n)"
 #endif
 
 /****************************************************************************
@@ -626,8 +626,8 @@ int pg_worker(int argc, char *argv[])
            * g_pftcb).
            */
 
-           pginfo("Calling pg_startfill\n");
-           (void)pg_startfill();
+          pginfo("Calling pg_startfill\n");
+          (void)pg_startfill();
         }
 #else
       /* Are there tasks blocked and waiting for a fill?  Loop until all

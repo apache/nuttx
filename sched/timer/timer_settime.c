@@ -332,15 +332,15 @@ int timer_settime(timer_t timerid, int flags,
 
   if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
     {
-       (void)clock_time2ticks(&value->it_interval, &delay);
+      (void)clock_time2ticks(&value->it_interval, &delay);
 
-       /* REVISIT: Should pt_delay be ssystime_t? */
+      /* REVISIT: Should pt_delay be ssystime_t? */
 
-       timer->pt_delay = (int)delay;
+      timer->pt_delay = (int)delay;
     }
   else
     {
-       timer->pt_delay = 0;
+      timer->pt_delay = 0;
     }
 
   /* We need to disable timer interrupts through the following section so

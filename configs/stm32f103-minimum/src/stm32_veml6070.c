@@ -49,7 +49,7 @@
 #include "stm32_i2c.h"
 #include "stm32f103_minimum.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_VEML6070)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_VEML6070)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -102,4 +102,4 @@ int stm32_veml6070initialize(FAR const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_VEML6070 && CONFIG_STM32_I2C1 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_VEML6070 && CONFIG_STM32_I2C1 */

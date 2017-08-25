@@ -82,7 +82,7 @@ static const uint32_t g_comp_lines[STM32L4_COMP_NUM] =
  * Private Functions
  ****************************************************************************/
 
-static int stm32l4_exti_comp_isr(int irq, void *context)
+static int stm32l4_exti_comp_isr(int irq, void *context, FAR void *arg)
 {
   uint32_t pr;
   uint32_t ln;
@@ -103,8 +103,8 @@ static int stm32l4_exti_comp_isr(int irq, void *context)
           if (g_comp_handlers[i].callback != NULL)
             {
               xcpt_t callback = g_comp_handlers[i].callback;
-              vid   *arg      = g_comp_handlers[i].arg;
-              ret = callback(irq, context, arg);
+              void *callback_arg = g_comp_handlers[i].arg;
+              ret = callback(irq, context, callback_arg);
             }
         }
     }
@@ -159,23 +159,23 @@ int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
       up_disable_irq(STM32L4_IRQ_COMP);
     }
 
-    /* Configure rising/falling edges */
+  /* Configure rising/falling edges */
 
-    modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ? 0 : ln, risingedge  ? ln : 0);
-    modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ? 0 : ln, fallingedge ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ? 0 : ln, risingedge  ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ? 0 : ln, fallingedge ? ln : 0);
 
-    /* Enable Events and Interrupts */
+  /* Enable Events and Interrupts */
 
-    modifyreg32(STM32L4_EXTI1_EMR, event ? 0 : ln, event ? ln : 0);
-    modifyreg32(STM32L4_EXTI1_IMR, func  ? 0 : ln, func  ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_EMR, event ? 0 : ln, event ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_IMR, func  ? 0 : ln, func  ? ln : 0);
 
-    /* Get the previous IRQ handler and save the new IRQ handler. */
+  /* Get the previous IRQ handler and save the new IRQ handler. */
 
-    g_comp_handlers[cmp].callback = func;
-    g_comp_handlers[cmp].arg      = arg;
+  g_comp_handlers[cmp].callback = func;
+  g_comp_handlers[cmp].arg      = arg;
 
-    /* Leave the critical section */
+  /* Leave the critical section */
 
-    leave_critical_section(flags);
-    return OK;
+  leave_critical_section(flags);
+  return OK;
 }

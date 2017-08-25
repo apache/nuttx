@@ -1374,7 +1374,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
 
       /* Save the new minimum interval */
 
-      if ((ed->hw.ctrl && ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
+      if ((ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
         {
           g_ohci.ininterval  = interval;
         }

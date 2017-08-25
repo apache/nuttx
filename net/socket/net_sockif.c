@@ -48,6 +48,7 @@
 #include "inet/inet.h"
 #include "local/local.h"
 #include "pkt/pkt.h"
+#include "ieee802154/ieee802154.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -97,6 +98,12 @@ FAR const struct sock_intf_s *net_sockif(sa_family_t family)
 #ifdef CONFIG_NET_PKT
     case PF_PACKET:
       sockif = &g_pkt_sockif;
+      break;
+#endif
+
+#ifdef CONFIG_NET_IEEE802154
+    case PF_IEEE802154:
+      sockif = &g_ieee802154_sockif;
       break;
 #endif
 

@@ -108,7 +108,7 @@ config NET_GUARDSIZE
 
 endmenu # Driver buffer configuration
 
-menu "Data link support"
+menu "Link layer support"
 
 config NET_USER_DEVFMT
 	bool "User provided devfmt"
@@ -125,15 +125,10 @@ config NET_ETHERNET
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
-config NET_6LOWPAN
-	bool "6LoWPAN support"
-	default n
-	select NETDEV_IOCTL
-	select NET_HAVE_STAR
-	depends on NET_IPv6
-	---help---
-		Enable support for Low power Wireless Personal Area Networking (6LoWPAN)
-		for IEEE 802.15.4 or other packet radios.
+#menu "IEEE 802.15.4"
+#	depends on WIRELESS_IEEE802154
+#
+#endmenu # IEEE 802.15.4
 
 config NET_LOOPBACK
 	bool "Local loopback"
@@ -141,7 +136,7 @@ config NET_LOOPBACK
 	---help---
 		Add support for the local network loopback device, lo.
 
-config NET_SLIP
+menuconfig NET_SLIP
 	bool "SLIP support"
 	default n
 	---help---
@@ -186,7 +181,7 @@ config SLIP_DEFPRIO
 
 endif # NET_SLIP
 
-config NET_TUN
+menuconfig NET_TUN
 	bool "TUN Virtual Network Device support"
 	default n
 	select ARCH_HAVE_NETDEV_STATISTICS
@@ -262,13 +257,24 @@ config NET_IPv4
 	---help---
 		Build in support for IPv4.
 
-menuconfig NET_IPv6
+config NET_IPv6
 	bool "IPv6"
 	default n
 	---help---
 		Build in support for IPv6.
 
 source "net/neighbor/Kconfig"
+
+menuconfig NET_6LOWPAN
+	bool "6LoWPAN support"
+	default n
+	select NETDEV_IOCTL
+	select NET_HAVE_STAR
+	depends on NET_IPv6
+	---help---
+		Enable support for Low power Wireless Personal Area Networking (6LoWPAN)
+		for IEEE 802.15.4 or other packet radios.
+
 source "net/sixlowpan/Kconfig"
 source "net/ipforward/Kconfig"
 
@@ -280,6 +286,7 @@ source "net/pkt/Kconfig"
 source "net/local/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
+source "net/ieee802154/Kconfig"
 source "net/icmp/Kconfig"
 source "net/icmpv6/Kconfig"
 source "net/igmp/Kconfig"

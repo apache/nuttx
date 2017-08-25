@@ -60,19 +60,19 @@ ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_BH1750FVI),y)
+ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
 CSRCS += stm32_bh1750fvi.c
 endif
 
-ifeq ($(CONFIG_BMP180),y)
+ifeq ($(CONFIG_SENSORS_BMP180),y)
 CSRCS += stm32_bmp180.c
 endif
 
-ifeq ($(CONFIG_MAX31855),y)
+ifeq ($(CONFIG_SENSORS_MAX31855),y)
 CSRCS += stm32_max31855.c
 endif
 
-ifeq ($(CONFIG_MAX6675),y)
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
 CSRCS += stm32_max6675.c
 endif
 
@@ -96,11 +96,11 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_XEN1210),y)
+ifeq ($(CONFIG_SENSORS_XEN1210),y)
 CSRCS += stm32_xen1210.c
 endif
 
@@ -116,7 +116,7 @@ ifeq ($(CONFIG_PM_BUTTONS),y)
 CSRCS += stm32_pmbuttons.c
 endif
 
-ifeq ($(CONFIG_ZEROCROSS),y)
+ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
 CSRCS += stm32_zerocross.c
 endif
 

@@ -47,6 +47,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/radiodev.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -193,7 +194,7 @@ static uint16_t send_interrupt(FAR struct net_driver_s *dev,
       /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
       sinfo->s_result =
-        sixlowpan_queue_frames((FAR struct sixlowpan_driver_s *)dev,
+        sixlowpan_queue_frames((FAR struct radio_driver_s *)dev,
                                sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
                                sinfo->s_destmac);
 

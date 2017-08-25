@@ -40,11 +40,13 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <debug.h>
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "sixlowpan/sixlowpan.h"
 #include "ipforward/ipforward.h"
 
 #ifdef CONFIG_NET_IPFORWARD

@@ -2262,11 +2262,31 @@ config STM32_DAC1
 	depends on STM32_HAVE_DAC1
 	select STM32_DAC
 
+if STM32_DAC1
+
+config STM32_DAC1CH1
+  bool "DAC1CH1"
+	default n
+
+config STM32_DAC1CH2
+  bool "DAC1CH2"
+	default n
+
+endif #STM32_DAC1
+
 config STM32_DAC2
 	bool "DAC2"
 	default n
 	depends on STM32_HAVE_DAC2
 	select STM32_DAC
+
+if STM32_DAC2
+
+config STM32_DAC2CH1
+  bool "DAC2CH1"
+	default n
+
+endif #STM32_DAC2
 
 config STM32_DCMI
 	bool "DCMI"
@@ -5817,9 +5837,9 @@ endmenu
 menu "DAC Configuration"
 	depends on STM32_DAC1 || STM32_DAC2
 
-config STM32_DAC1_DMA
-	bool "DAC1 DMA"
-	depends on STM32_DAC1
+config STM32_DAC1CH1_DMA
+	bool "DAC1CH1 DMA"
+	depends on STM32_DAC1CH1
 	default n
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
@@ -5827,44 +5847,74 @@ config STM32_DAC1_DMA
 		supported by and EXTI trigger, but this feature is not currently
 		supported by the driver.
 
-if STM32_DAC1_DMA
+if STM32_DAC1CH1_DMA
 
-config STM32_DAC1_TIMER
-	int "DAC1 timer"
-	range 2 8
-
-config STM32_DAC1_TIMER_FREQUENCY
-	int "DAC1 timer frequency"
-	default 0
-
-endif
-
-config STM32_DAC2_DMA
-	bool "DAC2 DMA"
-	depends on STM32_DAC2
-	default n
-	---help---
-		If DMA is selected, then a timer and output frequency must also be
-		provided to support the DMA transfer.  The DMA transfer could be
-		supported by and EXTI trigger, but this feature is not currently
-		supported by the driver.
-
-if STM32_DAC2_DMA
-
-config STM32_DAC2_TIMER
-	int "DAC2 timer"
-	default 0
-	range 2 8
-
-config STM32_DAC2_TIMER_FREQUENCY
-	int "DAC2 timer frequency"
-	default 0
-
-endif
-
-config STM32_DAC_DMA_BUFFER_SIZE
-	int "DAC DMA buffer size"
+config STM32_DAC1CH1_DMA_BUFFER_SIZE
+	int "DAC1CH1 DMA buffer size"
 	default 256
+
+config STM32_DAC1CH1_TIMER
+	int "DAC1CH1 timer"
+	range 2 8
+
+config STM32_DAC1CH1_TIMER_FREQUENCY
+	int "DAC1CH1 timer frequency"
+	default 0
+
+endif
+
+config STM32_DAC1CH2_DMA
+	bool "DAC1CH2 DMA"
+	depends on STM32_DAC1CH2
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC1CH2_DMA
+
+config STM32_DAC1CH2_DMA_BUFFER_SIZE
+	int "DAC1CH2 DMA buffer size"
+	default 256
+
+config STM32_DAC1CH2_TIMER
+	int "DAC1CH2 timer"
+	range 2 8
+
+config STM32_DAC1CH2_TIMER_FREQUENCY
+	int "DAC1CH2 timer frequency"
+	default 0
+
+endif
+
+config STM32_DAC2CH1_DMA
+	bool "DAC2CH1 DMA"
+	depends on STM32_DAC2CH1
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC2CH1_DMA
+
+config STM32_DAC2CH1_DMA_BUFFER_SIZE
+	int "DAC2CH1 DMA buffer size"
+	default 256
+
+config STM32_DAC2CH1_TIMER
+	int "DAC2CH1 timer"
+	default 0
+	range 2 8
+
+config STM32_DAC2CH1_TIMER_FREQUENCY
+	int "DAC2CH1 timer frequency"
+	default 0
+
+endif
 
 endmenu
 

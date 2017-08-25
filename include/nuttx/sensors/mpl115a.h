@@ -38,7 +38,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MPL115A)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -126,5 +126,5 @@ int mpl115a_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* CONFIG_SPI && CONFIG_MPL115A */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MPL115A */
 #endif /* __INCLUDE_NUTTX_SENSORS_MPL115A_H */

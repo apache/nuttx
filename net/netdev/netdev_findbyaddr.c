@@ -209,8 +209,8 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
       if (net_ipv4addr_cmp(lipaddr, INADDR_ANY))
         {
           /* Yes.. In this case, I think we are supposed to send the
-           * broadcast packet out ALL local networks.  I am not sure
-           * of that and, in any event, there is nothing we can do
+           * broadcast packet out ALL locally available networks.  I am not
+           * sure of that and, in any event, there is nothing we can do
            * about that here.
            *
            * REVISIT:  For now, arbitrarily return the first network
@@ -228,7 +228,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
         }
     }
 
-  /* Check if the address maps to a local network */
+  /* Check if the address maps to a locally available network */
 
   dev = netdev_finddevice_ipv4addr(ripaddr);
   if (dev)
@@ -313,8 +313,8 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
       if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
         {
           /* Yes.. In this case, I think we are supposed to send the
-           * broadcast packet out ALL local networks.  I am not sure
-           * of that and, in any event, there is nothing we can do
+           * broadcast packet out ALL locally available networks.  I am not
+           * sure of that and, in any event, there is nothing we can do
            * about that here.
            *
            * REVISIT:  For now, arbitrarily return the first network
@@ -332,7 +332,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
         }
     }
 
-  /* Check if the address maps to a local network */
+  /* Check if the address maps to a locally available network */
 
   dev = netdev_finddevice_ipv6addr(ripaddr);
   if (dev)

@@ -52,7 +52,7 @@
 #include <nuttx/sensors/mcp9844.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MCP9844)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MCP9844)
 
 /****************************************************************************
  * Pre-process Definitions
@@ -374,4 +374,4 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   return ret;
 }
-#endif /* CONFIG_I2C && CONFIG_I2C_LM75 */
+#endif /* CONFIG_I2C && CONFIG_LM75_I2C */

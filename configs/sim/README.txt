@@ -829,6 +829,18 @@ pashello
 
   Configures to use apps/examples/pashello.
 
+pf_ieee802154
+
+  This is the configuration that used for unit level test of the
+  socket support for the PF_IEEE802154 address family.  It uses
+  the IEEE 802.15.4 loopback network driver and the test at
+  apps/examples/pf_ieee802154.
+
+  Basic usage example:
+
+    nsh> pfserver ab:cd &
+    nsh> pfclient ab:cd
+
 pktradio
 
   This configuration is identical to the 'sixlowpan configuration

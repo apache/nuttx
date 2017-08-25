@@ -893,6 +893,25 @@ Click Shield
   D12 PD20  (both) SPI-MISO                PD20 SPI0_MISO  GPIO_SPI0_MISO
   D13 PD22  (both) SPI-SCK                 PD22 SPI0_SPCK  GPIO_SPI0_SPCK
 
+  NOTE:  The click shield fits close to the Arduino connect and cannot be
+  installed directly because it hits the RJ45 connector.  You have to get
+  some extra Arduino connectors to raise the Click shield so that it clears
+  the RJ45.
+
+  This may be a problem only for me because the Arduino connectors that I
+  soldered onto the SAME70-Xplained are short (around 10mm clearance from
+  the board).  Taller headers might clear the RJ45 connector (around 15mm).
+
+  NOTE:  Mikroelektronika provides two different click shields:  A UNO style
+  shield with two click mikroBUSes and a larger Mega shield with three
+  click mikroBUSes.  The above discusses on the UNO shield.  I know that the
+  serial ports, at least, differ on the two shields.
+
+  UPDATE: And it appears the that Mega shield is *not* compatible with the
+  SAME70-Xplained.  I am told that the SPI in mikroBUS slots does not connect
+  to pins on the  SAME70-Xplained that can support the SPI communications.
+  Avoid this triple mikroBUS shield!
+
 Tickless OS
 ===========
 
@@ -1029,11 +1048,15 @@ Tickless OS
 Debugging
 =========
 
+  EDBG
+  ----
   The on-board EDBG appears to work only with Atmel Studio.  You can however,
   simply connect a SAM-ICE or J-Link to the JTAG/SWD connector on the board
   and that works great.  The only tricky thing is getting the correct
   orientation of the JTAG connection.
 
+  J-Link/JTAG
+  -----------
   I have been using Atmel Studio to write code to flash then I use the Segger
   J-Link GDB server to debug.  I have been using the 'Device Programming' I
   available under the Atmel Studio 'Tool' menu.  I have to disconnect the
@@ -1047,6 +1070,61 @@ Debugging
     (gdb) mon reset
     (gdb) file nuttx
     (gdb) ... start debugging ...
+
+  OpenOCD/EDBG
+  ------------
+  Current OpenOCD also works with SAME70-Xplained via EDBG, but I have not
+  used OpenOCD with the board.
+
+  SAM-BA
+  ------
+  SAM-BA is another option.  With SAM-BA, you can load code into FLASH over
+  a serial port or USB connection by booting into the ROM bootloader.
+
+  CMSIS-DAP Programmer
+  --------------------
+  Another useful tool for CMSIS-DAP programmer (formerly Atmel EDBG
+  programmer) available at:
+
+    https://github.com/ataradov/edbg
+
+  This is a simple command line utility for programming ARM-based MCUs
+  (currently only Atmel) though CMSIS-DAP SWD interface. It works on Linux,
+  Mac OS X and Windows.  Very useful to around especially if you have the
+  following issue:
+
+  Booting to FLASH or the ROM Bootloader
+  --------------------------------------
+  If you use EDBG or JTAG to load code into FLASH, you may be puzzled why
+  the code does not run.  It may be that you are booting into the ROM
+  bootloader instead of FLASH.  That can be fixed by modifying the SAME70's
+  GPNVM bits.
+
+  If your SAME70 is booting in ROM by default, the GPNVM bits will probably
+  looking something like:
+
+    $ edbg.exe -F r,:, -t atmel_cm7
+    GPNVM Bits: 0x40
+
+  Where bit 1 = 0 boots into the ROM bootloader and bit 1 = 1 boots into
+  FLASH.  You want:
+
+    $ edbg.exe -F r,:, -t atmel_cm7
+    GPNVM Bits: 0x42
+
+  If you are trying to use SAM-BA, you might have the opposity problem:
+  The board might be booting into FLASH when you need it to boot into the
+  ROM bootloader.
+
+  That GPNVM bit can be changed using CMSIS-DAP programmer, Atmel studio, or
+  using this OpenOCD setup:
+
+    atsamv gpnvm [('clr'|'set'|'show') bitnum]
+      Without arguments, shows all bits in the gpnvm register.
+      Otherwise, clears, sets, or shows one General Purpose Non-Volatile
+      Memory (gpnvm) bit.
+
+  Perhaps SAM-BA supports a way to do this as well???
 
 Using OpenOCD and GDB to flash via the EDBG chip
 ================================================
@@ -1217,13 +1295,7 @@ NOTES:
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
      (unless stated otherwise in the description of the configuration).
 
-       https://launchpad.net/gcc-arm-embedded
-
-     As of this writing (2015-03-11), full support is difficult to find
-     for the Cortex-M7, but is supported by at least this realeasse of
-     the ARM GNU tools:
-
-       https://launchpadlibrarian.net/209776344/release.txt
+       https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
      That toolchain selection can easily be reconfigured using
      'make menuconfig'.  Here are the relevant current settings:
@@ -1243,6 +1315,78 @@ NOTES:
 
 Configuration sub-directories
 -----------------------------
+
+  mrf24j40-starhub
+
+    This configuration implement a hub node in a 6LoWPAN start network.
+    It is intended for the us the mrf24j40-starpoint configuration with
+    the clicker2-stm32 configurations.  Essentially, the SAME70 Xplained
+    plays the roll of the hub in the configuration and the clicker2-stm32
+    boards are the endpoints in the start.
+
+    NOTES:
+
+    1. The serial console is configured by default for use with and Arduino
+       serial shield (UART3).  You will need to reconfigure if you will
+       to use a different U[S]ART.
+
+    2. This configuration derives from the netnsh configuration, but adds
+       support for IPv6, 6LoWPAN, and the MRF24J40 IEEE 802.15.4 radio.
+
+    3. This configuration uses the Mikroe BEE MRF24j40 click boards and
+       connects to the SAMV71-XULT using a click shield as described above.
+
+    4. You must must have also have at least two clicker2-stm32 boards each
+       with an  MRF24J40 BEE click board in order to run these tests.
+
+    5. The network initialization thread is NOT enabled.  As a result, the
+       startup will hang if the Ethernet cable is not plugged in.  For more
+       information, see the paragraphs above entitled "Network Initialization
+       Thread" and "Network Monitor".
+
+    6. Telnet:  The clicker2-stm32 star point configuration supports the
+       Telnet daemon, but not the Telnet client; the star hub configuration
+       supports both the Telnet client and the Telnet daemon.  Therefore,
+       the star hub can Telnet to any point in the star, but the star
+       endpoints cannot initiate telnet sessions.  Any host connected via
+       Ethernet can Telnet to the SAME70 Xplained hub or to any Clicker2
+       point in the star.
+
+    7. TCP and UDP Tests:  The same TCP and UDP tests as described for
+       the clicker2-stm32 mrf24j40-starpoint configuration are supported on
+       the star endpoints, but NOT on the star hub.  Therefore, all network
+       testing is between endpoints with the hub acting, well, only like a
+       hub.
+
+       The nsh> dmesg command can be use at any time on any endpoint node
+       to see any debug output that you have selected.  Debug output on the
+       hub will be presented on stdout.
+
+       Telenet sessions may be initiated only from the hub to a star
+       endpoint:
+
+         C: nsh> telnet <server-ip> <-- Runs the Telnet client
+
+       Where <server-ip> is the IP address of either the E1 or I2 endpoints.
+
+    STATUS:
+      2017-08-16:  Configurations added.  Initially, I saw hangs i
+        mrf24j40_reset() before the NSH appears on the serial console.
+        Unlike the SAMV71-XULT, the SPI looks clean, but was hanging
+        nevertheless.
+
+        Then, on subsequent testing, it "magically" started behaving
+        properaly and seems quite stable now.. although I did nothing to
+        solve the problem.  Perhaps the radio was in a bad state for awhile;
+        perhaps something I did masked the problem.  However, all is well
+        for the time being.
+
+        No significant functional testing has yet been performed.
+
+      2017-08-24:  There is only a single buffer for reassemblying larger
+        packets.  This could be an important issue for the hub configuration
+        which really needs the capability concurrently reassemble multiple
+        incoming streams.
 
   netnsh:
 

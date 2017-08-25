@@ -82,81 +82,81 @@ int prctl(int option, ...)
   va_start(ap, option);
   switch (option)
     {
-    case PR_SET_NAME:
-    case PR_GET_NAME:
+      case PR_SET_NAME:
+      case PR_GET_NAME:
 #if CONFIG_TASK_NAME_SIZE > 0
-      {
-        /* Get the prctl arguments */
+        {
+          /* Get the prctl arguments */
 
-        FAR char *name = va_arg(ap, FAR char *);
-        int pid  = va_arg(ap, int);
-        FAR struct tcb_s *tcb;
+          FAR char *name = va_arg(ap, FAR char *);
+          int pid  = va_arg(ap, int);
+          FAR struct tcb_s *tcb;
 
-        /* Get the TCB associated with the PID (handling the special case of
-         * pid==0 meaning "this thread")
-         */
+          /* Get the TCB associated with the PID (handling the special case of
+           * pid==0 meaning "this thread")
+           */
 
-        if (!pid)
-          {
-            tcb = this_task();
-          }
-        else
-          {
-            tcb = sched_gettcb(pid);
-          }
+          if (!pid)
+            {
+              tcb = this_task();
+            }
+          else
+            {
+              tcb = sched_gettcb(pid);
+            }
 
-        /* An invalid pid will be indicated by a NULL TCB returned from
-         * sched_gettcb()
-         */
+          /* An invalid pid will be indicated by a NULL TCB returned from
+           * sched_gettcb()
+           */
 
-        if (!tcb)
-          {
-            serr("ERROR: Pid does not correspond to a task: %d\n", pid);
-            errcode = ESRCH;
-            goto errout;
-          }
+          if (!tcb)
+            {
+              serr("ERROR: Pid does not correspond to a task: %d\n", pid);
+              errcode = ESRCH;
+              goto errout;
+            }
 
-        /* A pointer to the task name storage must also be provided */
+          /* A pointer to the task name storage must also be provided */
 
-        if (!name)
-          {
-            serr("ERROR: No name provide\n");
-            errcode = EFAULT;
-            goto errout;
-          }
+          if (!name)
+            {
+              serr("ERROR: No name provide\n");
+              errcode = EFAULT;
+              goto errout;
+            }
 
-        /* Now get or set the task name */
+          /* Now get or set the task name */
 
-        if (option == PR_SET_NAME)
-          {
-            /* Ensure that tcb->name will be null-terminated, truncating if
-             * necessary.
-             */
+          if (option == PR_SET_NAME)
+            {
+              /* Ensure that tcb->name will be null-terminated, truncating if
+               * necessary.
+               */
 
-            strncpy(tcb->name, name, CONFIG_TASK_NAME_SIZE);
-            tcb->name[CONFIG_TASK_NAME_SIZE] = '\0';
-          }
-        else
-          {
-            /* The returned value will be null-terminated, truncating if
-             * necessary.
-             */
+              strncpy(tcb->name, name, CONFIG_TASK_NAME_SIZE);
+              tcb->name[CONFIG_TASK_NAME_SIZE] = '\0';
+            }
+          else
+            {
+              /* The returned value will be null-terminated, truncating if
+               * necessary.
+               */
 
-            strncpy(name, tcb->name, CONFIG_TASK_NAME_SIZE-1);
-            name[CONFIG_TASK_NAME_SIZE-1] = '\0';
-          }
-      }
-      break;
+              strncpy(name, tcb->name, CONFIG_TASK_NAME_SIZE - 1);
+              name[CONFIG_TASK_NAME_SIZE - 1] = '\0';
+            }
+        }
+        break;
 #else
-      serr("ERROR: Option not enabled: %d\n", option);
-      errcode = ENOSYS;
-      goto errout;
+        serr("ERROR: Option not enabled: %d\n", option);
+        errcode = ENOSYS;
+        goto errout;
 #endif
 
-    default:
-      serr("ERROR: Unrecognized option: %d\n", option);
-      errcode = EINVAL;
-      goto errout;
+      default:
+        serr("ERROR: Unrecognized option: %d\n", option);
+        errcode = EINVAL;
+        goto errout;
     }
 
   /* Not reachable unless CONFIG_TASK_NAME_SIZE is > 0.  NOTE: This might

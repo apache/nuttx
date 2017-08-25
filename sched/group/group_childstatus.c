@@ -119,7 +119,7 @@ static void group_dumpchildren(FAR struct task_group_s *group,
   for (i = 0, child = group->tg_children; child; i++, child = child->flink)
     {
       _info("  %d. ch_flags=%02x ch_pid=%d ch_status=%d\n",
-           i, child->ch_flags, child->ch_pid, child->ch_status);
+            i, child->ch_flags, child->ch_pid, child->ch_status);
     }
 }
 #else
@@ -251,7 +251,7 @@ void group_freechild(FAR struct child_status_s *child)
  ****************************************************************************/
 
 void group_addchild(FAR struct task_group_s *group,
-                   FAR struct child_status_s *child)
+                    FAR struct child_status_s *child)
 {
   /* Add the entry into the TCB list of children */
 

@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_MS58XX)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MS58XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,7 +53,7 @@
  *
  * CONFIG_I2C
  *   Enables support for I2C drivers
- * CONFIG_MS58XX
+ * CONFIG_SENSORS_MS58XX
  *   Enables support for the MS58XX driver
  * CONFIG_MS58XX_VDD
  */
@@ -125,5 +125,5 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_MS58XX */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_MS58XX */
 #endif /* __INCLUDE_NUTTX_SENSORS_MS58XX */

@@ -56,7 +56,7 @@
 #include <nuttx/sensors/max6675.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_MAX6675)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MAX6675)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -308,4 +308,4 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   return ret;
 }
-#endif /* CONFIG_SPI && CONFIG_MAX6675 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_MAX6675 */

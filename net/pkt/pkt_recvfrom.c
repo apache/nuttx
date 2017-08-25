@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/pkt_recvfrom.c
+ * net/pkt/pkt_recvfrom.c
  *
  *   Copyright (C) 2007-2009, 2011-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -117,7 +117,7 @@ static inline void pkt_add_recvlen(FAR struct pkt_recvfrom_s *pstate,
  *   Copy the read data from the packet
  *
  * Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the event.
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -212,11 +212,11 @@ static uint16_t pkt_recvfrom_interrupt(FAR struct net_driver_s *dev,
           pstate->pr_cb->flags   = 0;
           pstate->pr_cb->priv    = NULL;
           pstate->pr_cb->event   = NULL;
-#if 0
+
           /* Save the sender's address in the caller's 'from' location */
 
           pkt_recvfrom_sender(dev, pstate);
-#endif
+
           /* indicate that the data has been consumed */
 
           flags &= ~PKT_NEWDATA;
@@ -324,28 +324,6 @@ static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
 }
 
 /****************************************************************************
- * Name: pkt_recvfrom_rxnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are ready to receive a
- *   packet (PKT)
- *
- * Parameters:
- *   conn - The PKT connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if 0 /* Not implemented */
-static void pkt_recvfrom_rxnotify(FAR struct pkt_conn_s *conn)
-{
-#  warning Missing logic
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -406,9 +384,8 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Perform the packet recvfrom() operation */
 
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure.  This is done with the network
+   * locked because we don't want anything to happen until we are ready.
    */
 
   net_lock();
@@ -448,21 +425,15 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.pr_cb->priv   = (FAR void *)&state;
       state.pr_cb->event  = pkt_recvfrom_interrupt;
 
-      /* Notify the device driver of the receive call */
-
-#if 0 /* Not implemented */
-      pkt_recvfrom_rxnotify(conn);
-#endif
-
-      /* Wait for either the receive to complete or for an error/timeout to occur.
-       * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
-       * interrupts are disabled!  They will be re-enabled while the task sleeps
-       * and automatically re-enabled when the task restarts.
+      /* Wait for either the receive to complete or for an error/timeout to
+       * occur. NOTES:  (1) net_lockedwait will also terminate if a signal
+       * is received, (2) the network is locked!  It will be un-locked while
+       * the task sleeps and automatically re-locked when the task restarts.
        */
 
       ret = net_lockedwait(&state.pr_sem);
 
-      /* Make sure that no further interrupts are processed */
+      /* Make sure that no further events are processed */
 
       pkt_callback_free(dev, conn, state.pr_cb);
       ret = pkt_recvfrom_result(ret, &state);

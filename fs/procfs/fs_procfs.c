@@ -87,6 +87,7 @@ extern const struct procfs_operations uptime_operations;
  */
 
 extern const struct procfs_operations net_procfsoperations;
+extern const struct procfs_operations net_procfs_routeoperations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
@@ -112,42 +113,45 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 {
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-  { "[0-9]*/**",        &proc_operations },
-  { "[0-9]*",           &proc_operations },
+  { "[0-9]*/**",     &proc_operations,            PROCFS_UNKOWN_TYPE },
+  { "[0-9]*",        &proc_operations,            PROCFS_DIR_TYPE    },
 #endif
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
-  { "cpuload",          &cpuload_operations },
+  { "cpuload",       &cpuload_operations,         PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MM_KERNEL_HEAP) && !defined(CONFIG_FS_PROCFS_EXCLUDE_KMM)
-  { "kmm",              &kmm_operations },
+  { "kmm",           &kmm_operations,             PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  { "modules",          &module_operations },
+  { "modules",       &module_operations,          PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-//{ "fs/smartfs",       &smartfs_procfsoperations },
-  { "fs/smartfs**",     &smartfs_procfsoperations },
+  { "fs/smartfs**",  &smartfs_procfsoperations,   PROCFS_UNKOWN_TYPE },
 #endif
 
 #if defined(CONFIG_NET) && !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
-  { "net",              &net_procfsoperations },
-  { "net/**",           &net_procfsoperations },
+  { "net",           &net_procfsoperations,       PROCFS_DIR_TYPE    },
+#if defined(CONFIG_NET_ROUTE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ROUTE)
+  { "net/route",     &net_procfs_routeoperations, PROCFS_DIR_TYPE    },
+  { "net/route/**",  &net_procfs_routeoperations, PROCFS_UNKOWN_TYPE },
+#endif
+  { "net/**",        &net_procfsoperations,       PROCFS_UNKOWN_TYPE },
 #endif
 
 #if defined(CONFIG_MTD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
-  { "mtd",              &mtd_procfsoperations },
+  { "mtd",           &mtd_procfsoperations,       PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITIONS)
-  { "partitions",       &part_procfsoperations },
+  { "partitions",    &part_procfsoperations,      PROCFS_FILE_TYPE   },
 #endif
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
-  { "uptime",           &uptime_operations },
+  { "uptime",        &uptime_operations,          PROCFS_FILE_TYPE   },
 #endif
 };
 
@@ -348,6 +352,7 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
 
               ((struct procfs_file_s *) filep->f_priv)->procfsentry =
                                     &g_procfs_entries[x];
+              break;
             }
         }
     }
@@ -673,6 +678,7 @@ static int procfs_closedir(FAR struct inode *mountpt,
 
 static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
+  FAR const struct procfs_entry_s *entry = NULL;
   FAR struct procfs_dir_priv_s *priv;
   FAR struct procfs_level0_s *level0;
   FAR struct tcb_s *tcb;
@@ -705,7 +711,9 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           while (index < priv->nentries + g_procfs_entrycount)
             {
-              name = g_procfs_entries[index - priv->nentries].pathpattern;
+              entry = &g_procfs_entries[index - priv->nentries];
+              name  = entry->pathpattern;
+
               while (*name != '/' && *name != '\0')
                 {
                   if (*name == '*' || *name == '[' || *name == '?')
@@ -772,7 +780,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
               strncpy(dir->fd_dir.d_name, name, level0->lastlen);
               dir->fd_dir.d_name[level0->lastlen] = '\0';
 
-              if (name[level0->lastlen] == '/')
+              if (entry->type == PROCFS_DIR_TYPE)
                 {
                   dir->fd_dir.d_type = DTYPE_DIRECTORY;
                 }

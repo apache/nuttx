@@ -136,7 +136,7 @@ void pkt_initialize(void)
 }
 
 /****************************************************************************
- * Name: pkt_palloc()
+ * Name: pkt_alloc()
  *
  * Description:
  *   Allocate a new, uninitialized packet socket connection structure. This

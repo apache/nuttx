@@ -59,6 +59,7 @@
 #endif
 
 #include "nuttx/net/netdev.h"
+#include "nuttx/net/radiodev.h"
 #include "nuttx/net/ip.h"
 #include "nuttx/net/icmpv6.h"
 #include "nuttx/net/sixlowpan.h"
@@ -147,7 +148,7 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  *
  ****************************************************************************/
 
-static bool sixlowpan_compare_fragsrc(FAR struct sixlowpan_driver_s *radio,
+static bool sixlowpan_compare_fragsrc(FAR struct radio_driver_s *radio,
                                       FAR const void *metadata)
 {
   struct netdev_varaddr_s fragsrc;
@@ -299,7 +300,7 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
  *
  ****************************************************************************/
 
-static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
+static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
                                    FAR const void *metadata, FAR struct iob_s *iob)
 {
   FAR uint8_t *fptr;          /* Convenience pointer to beginning of the frame */
@@ -667,7 +668,7 @@ static int sixlowpan_frame_process(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-static int sixlowpan_dispatch(FAR struct sixlowpan_driver_s *radio)
+static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
 {
   sixlowpan_dumpbuffer("Incoming packet",
                        (FAR const uint8_t *)IPv6BUF(&radio->r_dev),
@@ -763,7 +764,7 @@ static int sixlowpan_dispatch(FAR struct sixlowpan_driver_s *radio)
  *
  ****************************************************************************/
 
-int sixlowpan_input(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_input(FAR struct radio_driver_s *radio,
                     FAR struct iob_s *framelist,  FAR const void *metadata)
 {
   int ret = -EINVAL;

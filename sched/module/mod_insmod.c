@@ -87,15 +87,15 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 
   binfo("ELF Header:\n");
   binfo("  e_ident:      %02x %02x %02x %02x\n",
-    loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
-    loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
+        loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
+        loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
   binfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
   binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
   binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
   binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
   binfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
   binfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  binfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  binfo("  e_flags:      %08x\n",  loadinfo->ehdr.e_flags);
   binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
   binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
   binfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);

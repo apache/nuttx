@@ -458,7 +458,7 @@ Quadrature Encoder:
    CONFIG_BOARD_INITIALIZE=y
 
    CONFIG_SENSORS=y
-     CONFIG_QENCODER=y
+     CONFIG_SENSORS_QENCODER=y
 
   - The timer 2 needs to be enabled:
 
@@ -1691,7 +1691,7 @@ Where <subdir> is one of the following:
 
        CONFIG_EXAMPLES_QENCODER=y : Enable the apps/examples/qencoder
        CONFIG_SENSORS=y           : Enable support for sensors
-       CONFIG_QENCODER=y          : Enable the generic Quadrature Encoder infrastructure
+       CONFIG_SENSORS_QENCODER=y          : Enable the generic Quadrature Encoder infrastructure
        CONFIG_STM32_TIM8=y        : Enable TIM8
        CONFIG_STM32_TIM2=n        : (Or optionally TIM2)
        CONFIG_STM32_TIM8_QE=y     : Use TIM8 as the quadrature encoder

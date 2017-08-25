@@ -69,6 +69,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include "stm32f103_minimum.h"
 
 /* Conditional logic in stm32f103_minimum.h will determine if certain features
@@ -80,6 +84,10 @@
 #  include <nuttx/timers/rtc.h>
 #  include "stm32_rtc.h"
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* Checking needed by W25 Flash */
 
@@ -196,6 +204,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_HCSR04
+  /* Configure and initialize the HC-SR04 distance sensor */
+
+  ret = stm32_hcsr04_initialize("/dev/dist0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_hcsr04_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
   /* Configure and initialize the MCP2515 CAN device */
 
@@ -232,7 +250,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
   ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F103MINIMUM_QETIMER);
@@ -254,7 +272,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_VEML6070
+#ifdef CONFIG_SENSORS_VEML6070
   /* Register the UV-A light sensor */
 
   ret = stm32_veml6070initialize("/dev/uvlight0");

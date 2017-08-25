@@ -126,7 +126,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/radiodev.h>
 
 #include <nuttx/wireless/spirit.h>
 #include <nuttx/wireless/pktradio.h>
@@ -152,7 +152,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_SCHED_HPWORK) || !defined(CONFIG_SCHED_HPWORK)
+#if !defined(CONFIG_SCHED_LPWORK) || !defined(CONFIG_SCHED_HPWORK)
 #  error Both high and low priority work queues required in this driver
 #endif
 
@@ -265,7 +265,7 @@ enum spirit_driver_state_e
 
 struct spirit_driver_s
 {
-  struct sixlowpan_driver_s        radio;      /* Interface understood by the network */
+  struct radio_driver_s        radio;      /* Interface understood by the network */
   struct spirit_library_s          spirit;    /* Spirit library state */
   FAR const struct spirit_lower_s *lower;     /* Low-level MCU-specific support */
   FAR struct pktradio_metadata_s  *txhead;    /* Head of pending TX transfers */
@@ -347,12 +347,12 @@ static int  spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
             unsigned long arg);
 #endif
 
-static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
+static int spirit_get_mhrlen(FAR struct radio_driver_s *netdev,
             FAR const void *meta);
-static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
+static int spirit_req_data(FAR struct radio_driver_s *netdev,
             FAR const void *meta, FAR struct iob_s *framelist);
-static int spirit_properties(FAR struct sixlowpan_driver_s *netdev,
-            FAR struct sixlowpan_properties_s *properties);
+static int spirit_properties(FAR struct radio_driver_s *netdev,
+            FAR struct radiodev_properties_s *properties);
 
 /* Initialization */
 
@@ -567,7 +567,7 @@ static void spirit_set_ipaddress(FAR struct net_driver_s *dev)
 
   /* Get a convenient pointer to the PktRadio variable length address struct */
 
-  addr = (FAR struct netdev_varaddr_s *)&dev->d_mac.sixlowpan;
+  addr = (FAR struct netdev_varaddr_s *)&dev->d_mac.radio;
 
   /* Has a node address been assigned? */
 
@@ -1238,7 +1238,7 @@ static void spirit_interrupt_work(FAR void *arg)
       DEBUGVERIFY(spirit_management_rxstrobe(spirit));
       DEBUGVERIFY(spirit_command(spirit, CMD_RX));
 
-      if (priv->state == DRIVER_STATE_SENDING);
+      if (priv->state == DRIVER_STATE_SENDING)
         {
           priv->state = DRIVER_STATE_IDLE;
         }
@@ -1894,12 +1894,12 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
 
       /* Instantiate the assigned node address in hardware */
 
-      DEBUGASSERT(dev->d_mac.sixlowpan.nv_addrlen == 1);
+      DEBUGASSERT(dev->d_mac.radio.nv_addrlen == 1);
       wlinfo("Set node address to %02x\n",
-              dev->d_mac.sixlowpan.nv_addr[0]);
+              dev->d_mac.radio.nv_addr[0]);
 
       ret = spirit_pktcommon_set_nodeaddress(spirit,
-               dev->d_mac.sixlowpan.nv_addr[0]);
+               dev->d_mac.radio.nv_addr[0]);
       if (ret < 0)
         {
           wlerr("ERROR: Failed to set node address: %d\n", ret);
@@ -2139,10 +2139,10 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
 
       case SIOCPKTRADIOGGPROPS:
         {
-          FAR struct sixlowpan_driver_s *radio =
-            (FAR struct sixlowpan_driver_s *)dev;
-          FAR struct sixlowpan_properties_s *props =
-            (FAR struct sixlowpan_properties_s *)&cmddata->pifr_props;
+          FAR struct radio_driver_s *radio =
+            (FAR struct radio_driver_s *)dev;
+          FAR struct radiodev_properties_s *props =
+            (FAR struct radiodev_properties_s *)&cmddata->pifr_props;
 
           ret = spirit_properties(radio, props);
         }
@@ -2166,7 +2166,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
             }
           else
             {
-              FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.sixlowpan;
+              FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.radio;
 
               devaddr->nv_addrlen = 1;
               devaddr->nv_addr[0] = newaddr->pa_addr[0];
@@ -2190,7 +2190,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           FAR struct pktradio_addr_s *retaddr =
             (FAR struct pktradio_addr_s *)&cmddata->pifr_hwaddr;
-          FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.sixlowpan;
+          FAR struct netdev_varaddr_s *devaddr = &dev->d_mac.radio;
 
           retaddr->pa_addrlen = devaddr->nv_addrlen;
           retaddr->pa_addr[0] = devaddr->nv_addr[0];
@@ -2231,7 +2231,7 @@ static int spirit_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
+static int spirit_get_mhrlen(FAR struct radio_driver_s *netdev,
                              FAR const void *meta)
 {
   DEBUGASSERT(netdev != NULL && netdev->r_dev.d_private != NULL && meta != NULL);
@@ -2265,7 +2265,7 @@ static int spirit_get_mhrlen(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
+static int spirit_req_data(FAR struct radio_driver_s *netdev,
                            FAR const void *meta, FAR struct iob_s *framelist)
 {
   FAR struct spirit_driver_s *priv;
@@ -2372,11 +2372,11 @@ static int spirit_req_data(FAR struct sixlowpan_driver_s *netdev,
  *
  ****************************************************************************/
 
-static int spirit_properties(FAR struct sixlowpan_driver_s *netdev,
-                             FAR struct sixlowpan_properties_s *properties)
+static int spirit_properties(FAR struct radio_driver_s *netdev,
+                             FAR struct radiodev_properties_s *properties)
 {
   DEBUGASSERT(netdev != NULL && properties != NULL);
-  memset(properties, 0, sizeof(struct sixlowpan_properties_s));
+  memset(properties, 0, sizeof(struct radiodev_properties_s));
 
   /* General */
 
@@ -2750,7 +2750,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
                              FAR const struct spirit_lower_s *lower)
 {
   FAR struct spirit_driver_s *priv;
-  FAR struct sixlowpan_driver_s *radio;
+  FAR struct radio_driver_s *radio;
   FAR struct net_driver_s *dev;
   FAR uint8_t *pktbuf;
   int ret;

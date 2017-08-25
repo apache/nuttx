@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-#if defined(CONFIG_XEN1210)
+#if defined(CONFIG_SENSORS_XEN1210)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -56,7 +56,7 @@
  *
  * Settings that effect the driver: CONFIG_DISABLE_POLL
  *
- * CONFIG_XEN1210
+ * CONFIG_SENSORS_XEN1210
  *   Enables support for the XEN1210 driver
  */
 

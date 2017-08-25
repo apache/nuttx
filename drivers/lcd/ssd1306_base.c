@@ -1,7 +1,8 @@
 /**************************************************************************************
  * drivers/lcd/ssd1306.c
  * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
- * Univision SSD1306 controller in SPI mode
+ * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
+ * in SPI mode.
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -13,6 +14,8 @@
  *      Doc No.: SAS1-B020-B, Univision Technology Inc.
  *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
  *      Controller,  Solomon Systech
+ *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with Controller,
+ *      Solomon Systech
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -177,6 +180,10 @@ static int ssd1306_setpower(struct lcd_dev_s *dev, int power);
 static int ssd1306_getcontrast(struct lcd_dev_s *dev);
 static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
+static void ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on);
+static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv);
+static void ssd1306_redrawfb(struct ssd1306_dev_s *priv);
+
 /**************************************************************************************
  * Private Data
  **************************************************************************************/
@@ -198,7 +205,7 @@ static uint8_t g_runbuffer[SSD1306_DEV_ROWSIZE];
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = SSD1306_DEV_COLORFMT,  /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .fmt     = SSD1306_DEV_COLORFMT,  /* Color format: B&W */
   .xres    = SSD1306_DEV_XRES,      /* Horizontal resolution in pixel columns */
   .yres    = SSD1306_DEV_YRES,      /* Vertical resolution in pixel rows */
   .nplanes = 1,                     /* Number of color planes supported */
@@ -214,28 +221,29 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .bpp    = SSD1306_DEV_BPP,            /* Bits-per-pixel */
 };
 
+/* This is the outside visible interface for the OLED driver */
+
+static const struct lcd_dev_s g_oleddev_dev =
+{
+  /* LCD Configuration */
+
+  .getvideoinfo = ssd1306_getvideoinfo,
+  .getplaneinfo = ssd1306_getplaneinfo,
+
+  /* LCD RGB Mapping -- Not supported */
+  /* Cursor Controls -- Not supported */
+
+  /* LCD Specific Controls */
+
+  .getpower     = ssd1306_getpower,
+  .setpower     = ssd1306_setpower,
+  .getcontrast  = ssd1306_getcontrast,
+  .setcontrast  = ssd1306_setcontrast,
+};
+
 /* This is the OLED driver instance (only a single device is supported for now) */
 
-static struct ssd1306_dev_s g_oleddev =
-{
-  .dev =
-  {
-    /* LCD Configuration */
-
-    .getvideoinfo = ssd1306_getvideoinfo,
-    .getplaneinfo = ssd1306_getplaneinfo,
-
-    /* LCD RGB Mapping -- Not supported */
-    /* Cursor Controls -- Not supported */
-
-    /* LCD Specific Controls */
-
-    .getpower     = ssd1306_getpower,
-    .setpower     = ssd1306_setpower,
-    .getcontrast  = ssd1306_getcontrast,
-    .setcontrast  = ssd1306_setcontrast,
-  },
-};
+static struct ssd1306_dev_s g_oleddev;
 
 /**************************************************************************************
  * Private Functions
@@ -562,7 +570,6 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   usrmask = LS_BIT;
 #endif
 
-  *buffer = 0;
   for (i = 0; i < pixlen; i++)
     {
       /* Set or clear the corresponding bit */
@@ -576,17 +583,17 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
         {
           *buffer |= usrmask;
         }
+      else
+        {
+          *buffer &= ~usrmask;
+        }
 
-      /* Inc/Decrement to the next destination pixel. Hmmmm. It looks like
-       * this logic could write past the end of the user buffer.  Revisit
-       * this!
-       */
+      /* Inc/Decrement to the next destination pixel. */
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
-         *buffer = 0;
           usrmask = MS_BIT;
         }
       else
@@ -597,7 +604,6 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       if (usrmask == MS_BIT)
         {
           buffer++;
-         *buffer = 0;
           usrmask = LS_BIT;
         }
       else
@@ -666,6 +672,34 @@ static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
   return priv->on ? CONFIG_LCD_MAXPOWER : 0;
 }
 
+ /**************************************************************************************
+ * Name:  ssd1306_do_disponoff
+ *
+ * Description:
+ *   Enable/disable LCD panel power
+ *
+ **************************************************************************************/
+
+static void ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
+{
+  /* Lock and select device */
+
+  ssd1306_select(priv, true);
+
+  /* Select command transfer */
+
+  ssd1306_cmddata(priv, true);
+
+  /* Turn the display on/off */
+
+  (void)ssd1306_sendbyte(priv, (on ? SSD1306_DISPON : SSD1306_DISPOFF));
+
+  /* De-select and unlock the device */
+
+  ssd1306_cmddata(priv, false);
+  ssd1306_select(priv, false);
+}
+
 /**************************************************************************************
  * Name:  ssd1306_setpower
  *
@@ -682,28 +716,56 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 
   lcdinfo("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
 
-  /* Lock and select device */
-
-  ssd1306_select(priv, true);
-
   if (power <= 0)
     {
       /* Turn the display off */
 
-      (void)ssd1306_sendbyte(priv, SSD1306_DISPOFF);
+      ssd1306_do_disponoff(priv, false);
       priv->on = false;
+
+      /* Try turn off power completely */
+
+      if (priv->board_priv && priv->board_priv->set_vcc)
+        {
+          /* Do power off. */
+
+          if (priv->board_priv->set_vcc(false))
+            {
+              /* Display is completely powered off, not configured anymore. */
+
+              priv->is_conf = false;
+            }
+        }
     }
   else
     {
-      /* Turn the display on */
+      if (priv->board_priv && priv->board_priv->set_vcc)
+        {
+          /* Do power on. */
 
-      (void)ssd1306_sendbyte(priv, SSD1306_DISPON);
+          (void)priv->board_priv->set_vcc(true);
+        }
+
+      if (!priv->is_conf)
+        {
+          /* Configure display and turn the display on */
+
+          ssd1306_configuredisplay(priv);
+
+          /* Draw the framebuffer */
+
+          ssd1306_redrawfb(priv);
+        }
+      else
+        {
+          /* Turn the display on */
+
+          ssd1306_do_disponoff(priv, true);
+        }
+
       priv->on = true;
     }
 
-  /* De-select and unlock the device */
-
-  ssd1306_select(priv, false);
   return OK;
 }
 
@@ -780,55 +842,15 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 }
 
 /**************************************************************************************
- * Public Functions
- **************************************************************************************/
-
-/**************************************************************************************
- * Name:  ssd1306_initialize
+ * Name:  ssd1306_configuredisplay
  *
  * Description:
- *   Initialize the UG-2864HSWEG01 video hardware.  The initial state of the
- *   OLED is fully initialized, display memory cleared, and the OLED ready
- *   to use, but with the power setting at 0 (full off == sleep mode).
- *
- * Input Parameters:
- *
- *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 through CONFIG_SSD1306_NINTERFACES-1.
- *     This allows support for multiple OLED devices.
- *
- * Returned Value:
- *
- *   On success, this function returns a reference to the LCD object for
- *   the specified OLED.  NULL is returned on any failure.
+ *   Setup LCD display.
  *
  **************************************************************************************/
 
-#ifdef CONFIG_LCD_SSD1306_SPI
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev, unsigned int devno)
-#else
-FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned int devno)
-#endif
+static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 {
-  FAR struct ssd1306_dev_s  *priv = &g_oleddev;
-
-  lcdinfo("Initializing\n");
-  DEBUGASSERT(spi && devno == 0);
-
-#ifdef CONFIG_LCD_SSD1306_SPI
-  priv->spi = dev;
-
-  /* Configure the SPI */
-
-  ssd1306_configspi(priv->spi);
-
-#else
-  /* Remember the I2C configuration */
-
-  priv->i2c  = dev;
-  priv->addr = CONFIG_SSD1306_I2CADDR;
-#endif
-
   /* Lock and select device */
 
   ssd1306_select(priv, true);
@@ -842,6 +864,40 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
   up_mdelay(5);
 
   /* Configure the device */
+
+#ifdef IS_SSD1309
+
+  ssd1306_sendbyte(priv, SSD1309_PROTOFF);         /* Unlock driver IC */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
+  ssd1306_sendbyte(priv, SSD1309_SETMEMORY);       /* Set page addressing mode: 0x0, 0x01 or 0x02 */
+  ssd1306_sendbyte(priv, SSD1309_MEMADDR(0x02));
+  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
+  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
+  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
+  ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));     /* Set page address (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
+  ssd1306_sendbyte(priv ,SSD1306_CONTRAST(SSD1309_DEV_CONTRAST));  /* Default contrast 0xff */
+  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
+  ssd1306_sendbyte(priv, SSD1306_EDISPOFF);        /* Normal display off 0xa4 (Can ignore) */
+  ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  ssd1306_sendbyte(priv, SSD1306_SCANFROMCOM0);    /* Com scan direction: Scan from COM[0] to COM[n-1] */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
+  ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5 */
+  ssd1306_sendbyte(priv, SSD1306_CLKDIV(7,0));     /* 0x70 */
+
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
+  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,0x0a)); /* 0xfa: Fh cycles for discharge and Ah cycles for pre-charge */
+
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
+  ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+
+  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb */
+  ssd1306_sendbyte(priv, SSD1306_VCOM(0x3C));
+
+#else
 
   ssd1306_sendbyte(priv, SSD1306_DISPOFF);          /* Display off 0xae */
   ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));       /* Set lower column address 0x00 */
@@ -876,25 +932,24 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
   //ssd1306_sendbyte(priv, SSD1306_DCDC_MODE);      /* DC/DC control mode: on (SSD1306 Not supported) */
   //ssd1306_sendbyte(priv, SSD1306_DCDC_ON);
 
+#endif
+
   ssd1306_sendbyte(priv, SSD1306_DISPON);           /* Display ON 0xaf */
 
   /* De-select and unlock the device */
 
   ssd1306_select(priv, false);
 
-  /* Clear the display */
-
   up_mdelay(100);
-  ssd1306_fill(&priv->dev, CONFIG_NX_BGCOLOR);
-  return &priv->dev;
+
+  priv->is_conf = true;
 }
 
 /**************************************************************************************
- * Name:  ssd1306_fill
+ * Name:  ssd1306_redrawfb
  *
  * Description:
- *   This non-standard method can be used to clear the entire display by writing one
- *   color to the display.  This is much faster than writing a series of runs.
+ *   Redraw full framebuffer to display
  *
  * Input Parameters:
  *   priv   - Reference to private driver structure
@@ -904,25 +959,9 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev, unsigned 
  *
  **************************************************************************************/
 
-void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
+static void ssd1306_redrawfb(struct ssd1306_dev_s *priv)
 {
-  FAR struct ssd1306_dev_s  *priv = &g_oleddev;
   unsigned int page;
-
-  /* Make an 8-bit version of the selected color */
-
-  if (color & 1)
-    {
-      color = 0xff;
-    }
-  else
-    {
-      color = 0;
-    }
-
-  /* Initialize the framebuffer */
-
-  memset(priv->fb, color, SSD1306_DEV_FBSIZE);
 
   /* Lock and select device */
 
@@ -958,6 +997,118 @@ void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
   /* De-select and unlock the device */
 
   ssd1306_select(priv, false);
+}
+
+/**************************************************************************************
+ * Public Functions
+ **************************************************************************************/
+
+/**************************************************************************************
+ * Name:  ssd1306_initialize
+ *
+ * Description:
+ *   Initialize the UG-2864HSWEG01 video hardware.  The initial state of the
+ *   OLED is fully initialized, display memory cleared, and the OLED ready
+ *   to use, but with the power setting at 0 (full off == sleep mode).
+ *
+ * Input Parameters:
+ *
+ *   spi - A reference to the SPI driver instance.
+ *   devno - A value in the range of 0 through CONFIG_SSD1306_NINTERFACES-1.
+ *     This allows support for multiple OLED devices.
+ *
+ * Returned Value:
+ *
+ *   On success, this function returns a reference to the LCD object for
+ *   the specified OLED.  NULL is returned on any failure.
+ *
+ **************************************************************************************/
+
+#ifdef CONFIG_LCD_SSD1306_SPI
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev,
+                                         FAR const struct ssd1306_priv_s *board_priv,
+                                         unsigned int devno)
+#else
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
+                                         FAR const struct ssd1306_priv_s *board_priv,
+                                         unsigned int devno)
+#endif
+{
+  FAR struct ssd1306_dev_s *priv = &g_oleddev;
+
+  priv->dev = g_oleddev_dev;
+
+  DEBUGASSERT(dev && devno == 0);
+
+  priv->on = false;
+  priv->is_conf = false;
+
+  /* Register board specific functions */
+
+  priv->board_priv = board_priv;
+
+#ifdef CONFIG_LCD_SSD1306_SPI
+  priv->spi = dev;
+
+  /* Configure the SPI */
+
+  ssd1306_configspi(priv->spi);
+
+#else
+  /* Remember the I2C configuration */
+
+  priv->i2c  = dev;
+  priv->addr = CONFIG_SSD1306_I2CADDR;
+#endif
+
+  /* Initialize the framebuffer */
+
+  memset(priv->fb, SSD1306_Y1_BLACK & 1 ? 0xff : 0x00, SSD1306_DEV_FBSIZE);
+
+  /* Power on and configure display */
+
+  ssd1306_setpower(&priv->dev, true);
+
+  return &priv->dev;
+}
+
+/**************************************************************************************
+ * Name:  ssd1306_fill
+ *
+ * Description:
+ *   This non-standard method can be used to clear the entire display by writing one
+ *   color to the display.  This is much faster than writing a series of runs.
+ *
+ * Input Parameters:
+ *   priv   - Reference to private driver structure
+ *
+ * Assumptions:
+ *   Caller has selected the OLED section.
+ *
+ **************************************************************************************/
+
+void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
+{
+  FAR struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
+
+  /* Make an 8-bit version of the selected color */
+
+  if (color & 1)
+    {
+      color = 0xff;
+    }
+  else
+    {
+      color = 0;
+    }
+
+  /* Initialize the framebuffer */
+
+  memset(priv->fb, color, SSD1306_DEV_FBSIZE);
+
+  /* Draw the framebuffer */
+
+  ssd1306_redrawfb(priv);
 }
 
 #endif /* CONFIG_LCD_SSD1306 */

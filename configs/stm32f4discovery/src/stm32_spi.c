@@ -72,10 +72,10 @@ void weak_function stm32_spidev_initialize(void)
 #ifdef CONFIG_STM32_SPI1
   (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
 #endif
-#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_MAX31855)
+#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX31855)
   (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
 #endif
-#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_MAX6675)
+#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX6675)
   (void)stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
 #endif
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
@@ -144,13 +144,13 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_MAX31855)
+#if defined(CONFIG_SENSORS_MAX31855)
   if (devid == SPIDEV_TEMPERATURE(0))
     {
       stm32_gpiowrite(GPIO_MAX31855_CS, !selected);
     }
 #endif
-#if defined(CONFIG_MAX6675)
+#if defined(CONFIG_SENSORS_MAX6675)
   if (devid == SPIDEV_TEMPERATURE(0))
     {
       stm32_gpiowrite(GPIO_MAX6675_CS, !selected);

@@ -8,23 +8,25 @@ Directory Structure
    |
    `- net/
        |
-       +- arp       - Address resolution protocol (IPv4)
-       +- devif     - Stack/device interface layer
-       +- icmp      - Internet Control Message Protocol (IPv4)
-       +- icmpv6    - Internet Control Message Protocol (IPv6)
-       +- inet      - PF_INET/PF_INET6 socket interface
-       +- ipforward - IP forwarding logic
-       +- local     - Unix domain (local) sockets
-       +- loopback  - Local loopback
-       +- neighbor  - Neighbor Discovery Protocol (IPv6)
-       +- netdev    - Socket network device interface
-       +- pkt       - "Raw" packet socket support
-       +- socket    - BSD socket interface
-       +- route     - Routing table support
-       +- tcp       - Transmission Control Protocol
-       +- udp       - User Datagram Protocol
-       +- usrsock   - User socket API for user-space networking stack
-       `- utils     - Miscellaneous utility functions
+       +- arp        - Address resolution protocol (IPv4)
+       +- devif      - Stack/device interface layer
+       +- icmp       - Internet Control Message Protocol (IPv4)
+       +- icmpv6     - Internet Control Message Protocol (IPv6)
+       +- ieee802154 - PF_IEEE802154 socket interface
+       +- inet       - PF_INET/PF_INET6 socket interface
+       +- ipforward  - IP forwarding logic
+       +- local      - Unix domain (local) sockets
+       +- loopback   - Local loopback
+       +- neighbor   - Neighbor Discovery Protocol (IPv6)
+       +- netdev     - Socket network device interface
+       +- pkt        - "Raw" packet socket support
+       +- sixlowpan  - 6LoWPAN implementation
+       +- socket     - BSD socket interface
+       +- route      - Routing table support
+       +- tcp        - Transmission Control Protocol
+       +- udp        - User Datagram Protocol
+       +- usrsock    - User socket API for user-space networking stack
+       `- utils      - Miscellaneous utility functions
 
 
     +-------------------------------------------------------------------++------------------------+

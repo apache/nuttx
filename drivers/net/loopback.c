@@ -499,16 +499,13 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: localhost_initialize
  *
  * Description:
- *   Initialize the Ethernet controller and driver
+ *   Initialize the localhost, loopback network driver
  *
  * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ *   None
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -554,7 +551,7 @@ int localhost_initialize(void)
 #ifdef CONFIG_NET_IPv6
   net_ipv6addr_copy(priv->lo_dev.d_ipv6addr, g_lo_ipv6addr);
   net_ipv6addr_copy(priv->lo_dev.d_ipv6draddr, g_lo_ipv6addr);
-  net_ipv6addr_copy(priv->lo_dev.d_ipv6netmask, g_ipv6_alloneaddr);
+  net_ipv6addr_copy(priv->lo_dev.d_ipv6netmask, g_lo_ipv6mask);
 #endif
 
   /* Put the network in the UP state */

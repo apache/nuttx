@@ -54,6 +54,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC1
@@ -120,7 +121,7 @@
  *
  ****************************************************************************/
 
-int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
                               FAR const struct ipv6_hdr_s *ipv6,
                               FAR const struct netdev_varaddr_s *destmac,
                               FAR uint8_t *fptr)
@@ -132,7 +133,7 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
 
   if (ipv6->vtc != 0x60 || ipv6->tcf != 0 || ipv6->flow != 0 ||
       !sixlowpan_islinklocal(ipv6->srcipaddr) ||
-      !sixlowpan_ismacbased(ipv6->srcipaddr, &radio->r_dev.d_mac.sixlowpan) ||
+      !sixlowpan_ismacbased(ipv6->srcipaddr, &radio->r_dev.d_mac.radio) ||
       !sixlowpan_islinklocal(ipv6->destipaddr) ||
       !sixlowpan_ismacbased(ipv6->destipaddr, destmac) ||
       ( 1
@@ -292,7 +293,7 @@ int sixlowpan_compresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_uncompresshdr_hc1(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
                                 FAR const void *metadata, uint16_t iplen,
                                 FAR struct iob_s *iob, FAR uint8_t *fptr,
                                 FAR uint8_t *bptr)

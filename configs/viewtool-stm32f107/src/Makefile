@@ -54,7 +54,7 @@ CSRCS += stm32_usbdev.c
 endif
 endif
 
-ifeq ($(CONFIG_MPL115A),y)
+ifeq ($(CONFIG_SENSORS_MPL115A),y)
 CSRCS += stm32_mpl115a.c
 endif
 

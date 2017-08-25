@@ -62,7 +62,7 @@ CSRCS += stm32_ajoystick.c
 endif
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 

@@ -1,7 +1,7 @@
 ############################################################################
 # libxx/Makefile
 #
-#   Copyright (C) 2009, 2012, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2012, 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,8 @@ endif
 # because uClibx++ or libcxx will replaces them
 
 ifeq (,$(findstring y,$(CONFIG_UCLIBCXX) $(CONFIG_LIBCXX)))
-CXXSRCS += libxx_delete.cxx libxx_deletea.cxx libxx_new.cxx libxx_newa.cxx
+CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
+CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_stdthrow.cxx
 else
 ifeq (,$(findstring y,$(CONFIG_UCLIBCXX_EXCEPTION) $(CONFIG_LIBCXX_EXCEPTION)))

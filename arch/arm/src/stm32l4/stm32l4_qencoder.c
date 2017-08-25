@@ -60,7 +60,7 @@
 #include "stm32l4_tim.h"
 #include "stm32l4_qencoder.h"
 
-#ifdef CONFIG_QENCODER
+#ifdef CONFIG_SENSORS_QENCODER
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -1154,4 +1154,4 @@ int stm32l4_qeinitialize(FAR const char *devpath, int tim)
   return OK;
 }
 
-#endif /* CONFIG_QENCODER */
+#endif /* CONFIG_SENSORS_QENCODER */

@@ -43,14 +43,14 @@
 #include <nuttx/config.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75)
+#if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************
  * CONFIG_I2C - Enables support for I2C drivers
- * CONFIG_I2C_LM75 - Enables support for the LM-75 driver
+ * CONFIG_LM75_I2C - Enables support for the LM-75 driver
  */
 
 #define CONFIG_LM75_BASEADDR 0x48
@@ -126,5 +126,5 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_I2C_LM75 */
+#endif /* CONFIG_I2C && CONFIG_LM75_I2C */
 #endif /* __INCLUDE_NUTTX_SENSORS_LM75_H */

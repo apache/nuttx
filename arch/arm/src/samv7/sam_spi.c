@@ -1481,7 +1481,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
+#ifdef CONFIG_SAMV7_SPI_VARSELECT
   uint32_t pcs;
+#endif
   uint32_t data;
   uint16_t *rxptr16;
   uint16_t *txptr16;
@@ -1490,9 +1492,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
+#ifdef CONFIG_SAMV7_SPI_VARSELECT
   /* Set up PCS bits */
 
   pcs = spi_cs2pcs(spics) << SPI_TDR_PCS_SHIFT;
+#endif
 
   /* Set up working pointers */
 
@@ -2082,8 +2086,6 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
   if (!spi->initialized)
     {
-      /* Enable clocking to the SPI block */
-
       flags = enter_critical_section();
 #if defined(CONFIG_SAMV7_SPI0_MASTER) && defined(CONFIG_SAMV7_SPI1_MASTER)
       if (spino == 0)
@@ -2186,8 +2188,8 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
    * be reconfigured if there is a change.
    */
 
-  offset = (unsigned int)g_csroffset[csno];
-  regval = spi_getreg(spi, offset);
+  offset  = (unsigned int)g_csroffset[csno];
+  regval  = spi_getreg(spi, offset);
   regval &= ~(SPI_CSR_CPOL | SPI_CSR_NCPHA | SPI_CSR_BITS_MASK);
   regval |= (SPI_CSR_NCPHA | SPI_CSR_BITS(8));
   spi_putreg(spi, regval, offset);

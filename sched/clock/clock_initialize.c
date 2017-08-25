@@ -76,7 +76,7 @@
  */
 
 #  define INITIAL_SYSTEM_TIMER_TICKS \
-          ((uint64_t)(UINT32_MAX - (TICK_PER_SEC * 5)))
+    ((uint64_t)(UINT32_MAX - (TICK_PER_SEC * 5)))
 #else
 #  define INITIAL_SYSTEM_TIMER_TICKS 0
 #endif

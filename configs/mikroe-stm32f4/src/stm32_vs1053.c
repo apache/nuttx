@@ -53,7 +53,7 @@
 #include "up_arch.h"
 #include "mikroe-stm32f4.h"
 
-#ifdef CONFIG_VS1053
+#ifdef CONFIG_AUDIO_VS1053
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -209,4 +209,4 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
   audinfo("Bound SPI port to VS1053 device %s\n", name);
 }
 
-#endif /* CONFIG_VS1053 */
+#endif /* CONFIG_AUDIO_VS1053 */

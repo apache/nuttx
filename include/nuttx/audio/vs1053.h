@@ -51,7 +51,7 @@
 
 /* VS1053 Configuration Settings:
  *
- * CONFIG_VS1053 - Enabled VS1053 support
+ * CONFIG_AUDIO_VS1053 - Enabled VS1053 support
  * CONFIG_VS1053_SPIMODE - Controls the SPI mode
  */
 

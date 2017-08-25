@@ -588,7 +588,7 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
   /* This should not be the main timer */
 
   DEBUGASSERT((repl->flags & (SPORADIC_FLAG_MAIN | SPORADIC_FLAG_REPLENISH))
-               == SPORADIC_FLAG_REPLENISH);
+              == SPORADIC_FLAG_REPLENISH);
 
   /* As a special case, we can do nothing here if scheduler has been locked.
    * We cannot drop the priority because that might cause a context switch,

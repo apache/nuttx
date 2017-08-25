@@ -81,7 +81,7 @@ ifeq ($(CONFIG_INPUT_STMPE811),y)
 CSRCS += stm32_stmpe811.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 

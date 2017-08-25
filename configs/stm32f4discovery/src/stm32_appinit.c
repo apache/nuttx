@@ -82,7 +82,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_BMP180
+#ifdef CONFIG_SENSORS_BMP180
   stm32_bmp180initialize("/dev/press0");
 #endif
 

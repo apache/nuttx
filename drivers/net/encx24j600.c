@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/net/encx24j600.c
  *
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013-2014 UVC Ingenieure. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>
  *
@@ -156,10 +157,6 @@
 
 #define ENC_TXTIMEOUT (60*CLK_TCK)
 
-/* RX timeout (Time packets are held in the RX queue until they are dropped) */
-
-#define ENC_RXTIMEOUT MSEC2TICK(2000)
-
 /* Poll timeout */
 
 #define ENC_POLLTIMEOUT MSEC2TICK(50)
@@ -228,7 +225,6 @@ struct enc_descr_s
   struct enc_descr_next *flink;
   uint16_t addr;
   uint16_t len;
-  uint32_t ts;                         /* Timestamp of reception for timeout */
 };
 
 /* The enc_driver_s encapsulates all state information for a single hardware
@@ -346,7 +342,7 @@ static void enc_txif(FAR struct enc_driver_s *priv);
 static void enc_pktif(FAR struct enc_driver_s *priv);
 static void enc_rxabtif(FAR struct enc_driver_s *priv);
 static void enc_irqworker(FAR void *arg);
-static int  enc_interrupt(int irq, FAR void *context);
+static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -360,7 +356,6 @@ static void enc_polltimer(int argc, uint32_t arg, ...);
 static int  enc_ifup(struct net_driver_s *dev);
 static int  enc_ifdown(struct net_driver_s *dev);
 static int  enc_txavail(struct net_driver_s *dev);
-static int  enc_rxavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
 static int  enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -1460,8 +1455,6 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   FAR struct enc_descr_s *descr;
   struct enc_descr_s *next;
 
-  int ret = ERROR;
-
   /* Process the RX queue */
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
@@ -1481,7 +1474,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
-       pkt_input(&priv->dev);
+       (void)pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1497,16 +1490,11 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
            */
 
           arp_ipin(&priv->dev);
-          ret = ipv4_input(&priv->dev);
+          (void)ipv4_input(&priv->dev);
 
-          if (ret == OK || (clock_systimer() - (systime_t)descr->ts) > ENC_RXTIMEOUT)
-            {
-              /* If packet has been successfully processed or has timed out,
-               * free it.
-               */
+          /* Free the packet */
 
-              enc_rxrmpkt(priv, descr);
-            }
+          enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -1544,16 +1532,11 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           /* Give the IPv6 packet to the network layer */
 
-          ret = ipv6_input(&priv->dev);
+          (void)ipv6_input(&priv->dev);
 
-          if (ret == OK || (clock_systimer() - (systime_t)descr->ts) > ENC_RXTIMEOUT)
-            {
-              /* If packet has been successfully processed or has timed out,
-               * free it.
-               */
+          /* Free the packet */
 
-              enc_rxrmpkt(priv, descr);
-            }
+          enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
@@ -1691,10 +1674,6 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
        */
 
       descr = enc_rxgetdescr(priv);
-
-      /* Set current timestamp */
-
-      descr->ts = (uint32_t)clock_systimer();
 
       /* Store the start address of the frame without the enc's header */
 
@@ -1996,9 +1975,12 @@ static void enc_irqworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int enc_interrupt(int irq, FAR void *context)
+static int enc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register FAR struct enc_driver_s *priv = &g_encx24j600[0];
+  FAR struct enc_driver_s *priv;
+
+  DEBUGASSERT(arg != NULL);
+  priv = (FAR struct enc_driver_s *)arg;
 
   /* In complex environments, we cannot do SPI transfers from the interrupt
    * handler because semaphores are probably used to lock the SPI bus.  In
@@ -2015,7 +1997,8 @@ static int enc_interrupt(int irq, FAR void *context)
    */
 
   priv->lower->disable(priv->lower);
-  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker, (FAR void *)priv, 0);
+  return work_queue(ENCWORK, &priv->irqwork, enc_irqworker,
+                    (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -2387,38 +2370,6 @@ static int enc_txavail(struct net_driver_s *dev)
 
   leave_critical_section(flags);
   enc_unlock(priv);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: enc_rxavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static int enc_rxavail(struct net_driver_s *dev)
-{
-  FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
-
-  if (!sq_empty(&priv->rxqueue))
-    {
-      ninfo("RX queue not empty, trying to dispatch\n");
-      enc_rxdispatch(priv);
-    }
 
   return OK;
 }
@@ -2858,7 +2809,6 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */
-  priv->dev.d_rxavail = enc_rxavail;  /* RX wating callback */
 #ifdef CONFIG_NET_IGMP
   priv->dev.d_addmac  = enc_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */
@@ -2882,7 +2832,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
 
   /* Attach the interrupt to the driver (but don't enable it yet) */
 
-  if (lower->attach(lower, enc_interrupt))
+  if (lower->attach(lower, enc_interrupt, priv) < 0)
     {
       /* We could not attach the ISR to the interrupt */
 

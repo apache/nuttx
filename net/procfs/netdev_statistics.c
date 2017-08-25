@@ -68,6 +68,9 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_inet6address(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile);
 #endif
+#if !defined(CONFIG_NET_IPv4) && !defined(CONFIG_NET_IPv6)
+static int netprocfs_blank_line(FAR struct netprocfs_file_s *netfile);
+#endif
 #ifdef CONFIG_NETDEV_STATISTICS
 static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxstatistics(FAR struct netprocfs_file_s *netfile);
@@ -84,7 +87,7 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile);
 
 /* Line generating functions */
 
-static const linegen_t g_linegen[] =
+static const linegen_t g_netstat_linegen[] =
 {
   netprocfs_linklayer
 #ifdef CONFIG_NET_IPv4
@@ -94,6 +97,10 @@ static const linegen_t g_linegen[] =
   , netprocfs_inet6address
   , netprocfs_inet6draddress
 #endif
+#if !defined(CONFIG_NET_IPv4) && !defined(CONFIG_NET_IPv6)
+  , netprocfs_blank_line
+#endif
+
 #ifdef CONFIG_NETDEV_STATISTICS
   , netprocfs_rxstatistics_header,
   netprocfs_rxstatistics,
@@ -105,14 +112,14 @@ static const linegen_t g_linegen[] =
 #endif /* CONFIG_NETDEV_STATISTICS */
 };
 
-#define NSTAT_LINES (sizeof(g_linegen) / sizeof(linegen_t))
+#define NSTAT_LINES (sizeof(g_netstat_linegen) / sizeof(linegen_t))
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_6LOWPAN
-static int netprocfs_6lowpan_linklayer(FAR struct netprocfs_file_s *netfile,
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
+static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
                                        int len)
 {
   FAR struct netdev_varaddr_s *addr;
@@ -120,11 +127,17 @@ static int netprocfs_6lowpan_linklayer(FAR struct netprocfs_file_s *netfile,
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev  = netfile->dev;
-  addr = &dev->d_mac.sixlowpan;
+  addr = &dev->d_mac.radio;
 
+#ifdef CONFIG_NET_6LOWPAN
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
                   "%s\tLink encap:6LoWPAN HWaddr ",
                   dev->d_ifname);
+#else
+  len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                  "%s\tLink encap:Raw HWaddr ",
+                  dev->d_ifname);
+#endif
 
   switch (addr->nv_addrlen)
     {
@@ -142,17 +155,13 @@ static int netprocfs_6lowpan_linklayer(FAR struct netprocfs_file_s *netfile,
         break;
 #endif
 
-#if defined(CONFIG_WIRELESS_PKTRADIO) || \
-    (defined(CONFIG_WIRELESS_IEEE802154) && !defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR))
-      case 2:
+#if defined(CONFIG_WIRELESS_PKTRADIO) || defined(CONFIG_WIRELESS_IEEE802154)
+       case 2:
         len += snprintf(&netfile->line[len], NET_LINELEN - len,
                         "%02x:%02x",
                         addr->nv_addr[0], addr->nv_addr[1]);
         break;
-#endif
 
-#if defined(CONFIG_WIRELESS_PKTRADIO) || \
-    (defined(CONFIG_WIRELESS_IEEE802154) && defined(CONFIG_NET_6LOWPAN_EXTENDEDADDR))
       case 8:
         len += snprintf(&netfile->line[len], NET_LINELEN - len,
                         "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
@@ -210,14 +219,14 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
         break;
 #endif
 
-#ifdef CONFIG_NET_6LOWPAN
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
       case NET_LL_IEEE802154:
       case NET_LL_PKTRADIO:
         {
-          len += netprocfs_6lowpan_linklayer(netfile, len);
+          len += netprocfs_radio_linklayer(netfile, len);
         }
         break;
-#endif /* CONFIG_NET_6LOWPAN */
+#endif /* CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
 
 #ifdef CONFIG_NET_LOOPBACK
       case NET_LL_LOOPBACK:
@@ -349,7 +358,6 @@ static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile)
 
   preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
 
-
   /* Show the IPv6 default router address */
 
   if (inet_ntop(AF_INET6, dev->d_ipv6draddr, addrstr, INET6_ADDRSTRLEN))
@@ -359,6 +367,19 @@ static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile)
     }
 
   return len;
+}
+#endif
+
+/****************************************************************************
+ * Name: netprocfs_blank_line
+ ****************************************************************************/
+
+#if !defined(CONFIG_NET_IPv4) && !defined(CONFIG_NET_IPv6)
+static int netprocfs_blank_line(FAR struct netprocfs_file_s *netfile)
+{
+  netfile->line[0] = '\n';
+  netfile->line[1] = '\0';
+  return 1;
 }
 #endif
 
@@ -554,7 +575,8 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile)
 ssize_t netprocfs_read_devstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  return netprocfs_read_linegen(priv, buffer, buflen, g_linegen, NSTAT_LINES);
+  return netprocfs_read_linegen(priv, buffer, buflen, g_netstat_linegen,
+                                NSTAT_LINES);
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&

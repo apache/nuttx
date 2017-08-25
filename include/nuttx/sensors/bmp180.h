@@ -38,7 +38,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BMP180)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP180)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -49,10 +49,8 @@
 /* Configuration ****************************************************************************/
 /* Prerequisites:
  *
- * CONFIG_BMP180
+ * CONFIG_SENSORS_BMP180
  *   Enables support for the BMP180 driver
- * CONFIG_BMP180_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
  */
 
 /****************************************************************************
@@ -96,5 +94,5 @@ int bmp180_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_BMP180 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_BMP180 */
 #endif /* __INCLUDE_NUTTX_SENSORS_BMP180_H */

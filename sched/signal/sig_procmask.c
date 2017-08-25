@@ -157,6 +157,6 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
       sig_unmaskpendingsignal();
     }
 
-   sched_unlock();
-   return ret;
+  sched_unlock();
+  return ret;
 }

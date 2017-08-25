@@ -37,6 +37,10 @@
 
 ifeq ($(CONFIG_SENSORS),y)
 
+ifeq ($(CONFIG_SENSORS_HCSR04),y)
+  CSRCS += hc_sr04.c
+endif
+
 ifeq ($(CONFIG_SENSORS_ADXL345),y)
   CSRCS += adxl345_base.c
 endif
@@ -45,15 +49,15 @@ endif
 
 ifeq ($(CONFIG_I2C),y)
 
-ifeq ($(CONFIG_AS5048B),y)
+ifeq ($(CONFIG_SENSORS_AS5048B),y)
   CSRCS += as5048b.c
 endif
 
-ifeq ($(CONFIG_SENSOR_KXTJ9),y)
+ifeq ($(CONFIG_SENSORS_KXTJ9),y)
   CSRCS += kxtj9.c
 endif
 
-ifeq ($(CONFIG_LIS2DH),y)
+ifeq ($(CONFIG_SENSORS_LIS2DH),y)
   CSRCS += lis2dh.c
 endif
 
@@ -61,11 +65,11 @@ ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
 
-ifeq ($(CONFIG_SN_LSM9DS1),y)
+ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
   CSRCS += lsm9ds1.c
 endif
 
-ifeq ($(CONFIG_LPS25H),y)
+ifeq ($(CONFIG_SENSORS_LPS25H),y)
   CSRCS += lps25h.c
 endif
 
@@ -73,47 +77,47 @@ ifeq ($(CONFIG_ADXL345_I2C),y)
   CSRCS += adxl345_i2c.c
 endif
 
-ifeq ($(CONFIG_BH1750FVI),y)
+ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
   CSRCS += bh1750fvi.c
 endif
 
-ifeq ($(CONFIG_BMG160),y)
+ifeq ($(CONFIG_SENSORS_BMG160),y)
   CSRCS += bmg160.c
 endif
 
-ifeq ($(CONFIG_BMP180),y)
+ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += bmp180.c
 endif
 
-ifeq ($(CONFIG_HTS221),y)
+ifeq ($(CONFIG_SENSORS_HTS221),y)
   CSRCS += hts221.c
 endif
 
-ifeq ($(CONFIG_I2C_LM75),y)
+ifeq ($(CONFIG_LM75_I2C),y)
   CSRCS += lm75.c
 endif
 
-ifeq ($(CONFIG_LM92),y)
+ifeq ($(CONFIG_SENSORS_LM92),y)
   CSRCS += lm92.c
 endif
 
-ifeq ($(CONFIG_MB7040),y)
+ifeq ($(CONFIG_SENSORS_MB7040),y)
   CSRCS += mb7040.c
 endif
 
-ifeq ($(CONFIG_MCP9844),y)
+ifeq ($(CONFIG_SENSORS_MCP9844),y)
   CSRCS += mcp9844.c
 endif
 
-ifeq ($(CONFIG_MLX90393),y)
+ifeq ($(CONFIG_SENSORS_MLX90393),y)
   CSRCS += mlx90393.c
 endif
 
-ifeq ($(CONFIG_MS58XX),y)
+ifeq ($(CONFIG_SENSORS_MS58XX),y)
   CSRCS += ms58xx.c
 endif
 
-ifeq ($(CONFIG_LTC4151),y)
+ifeq ($(CONFIG_SENSORS_LTC4151),y)
   CSRCS += ltc4151.c
 endif
 
@@ -130,19 +134,19 @@ ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += lis3dsh.c
 endif
 
-ifeq ($(CONFIG_MAX31855),y)
+ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += max31855.c
 endif
 
-ifeq ($(CONFIG_MAX6675),y)
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
   CSRCS += max6675.c
 endif
 
-ifeq ($(CONFIG_MPL115A),y)
+ifeq ($(CONFIG_SENSORS_MPL115A),y)
   CSRCS += mpl115a.c
 endif
 
-ifeq ($(CONFIG_LIS3MDL),y)
+ifeq ($(CONFIG_SENSORS_LIS3MDL),y)
   CSRCS += lis3mdl.c
 endif
 
@@ -154,25 +158,25 @@ endif # CONFIG_SPI
 
 # Quadrature encoder upper half
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += qencoder.c
 endif
 
 # Vishay VEML6070
 
-ifeq ($(CONFIG_VEML6070),y)
+ifeq ($(CONFIG_SENSORS_VEML6070),y)
   CSRCS += veml6070.c
 endif
 
 # Sensixs XEN1210
 
-ifeq ($(CONFIG_XEN1210),y)
+ifeq ($(CONFIG_SENSORS_XEN1210),y)
   CSRCS += xen1210.c
 endif
 
 # Zero Cross upper half
 
-ifeq ($(CONFIG_ZEROCROSS),y)
+ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
   CSRCS += zerocross.c
 endif
 

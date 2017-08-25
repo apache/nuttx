@@ -46,7 +46,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_BMG160)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_BMG160)
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -436,5 +436,5 @@ int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* CONFIG_SPI && CONFIG_BMG160 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_BMG160 */
 #endif /* __INCLUDE_NUTTX_SENSORS_BMG160_H */

@@ -187,7 +187,7 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
 #ifndef CONFIG_DISABLE_SIGNALS
   DEBUGASSERT(g_spawn_parms.file_actions ||
               (g_spawn_parms.attr &&
-              (g_spawn_parms.attr->flags & POSIX_SPAWN_SETSIGMASK) != 0));
+               (g_spawn_parms.attr->flags & POSIX_SPAWN_SETSIGMASK) != 0));
 #else
   DEBUGASSERT(g_spawn_parms.file_actions);
 #endif

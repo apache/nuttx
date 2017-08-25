@@ -85,9 +85,9 @@
 
 #define _SS_ISNONBLOCK(s)   (((s) & _SF_NONBLOCK)  != 0)
 #define _SS_ISLISTENING(s)  (((s) & _SF_LISTENING) != 0)
-#define _SS_ISBOUND(s)      (((s) & _SF_CONNECTED) != 0)
+#define _SS_ISBOUND(s)      (((s) & _SF_BOUND)     != 0)
 #define _SS_ISCONNECTED(s)  (((s) & _SF_CONNECTED) != 0)
-#define _SS_ISCLOSED(s)     (((s) & _SF_CLOSED) != 0)
+#define _SS_ISCLOSED(s)     (((s) & _SF_CLOSED)    != 0)
 
 /* This macro converts a socket option value into a bit setting */
 

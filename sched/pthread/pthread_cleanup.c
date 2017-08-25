@@ -174,7 +174,7 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 
   sched_lock();
   if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD &&
-       tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
+      tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
     {
       unsigned int ndx = tcb->tos;
 

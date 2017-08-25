@@ -43,13 +43,13 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_ZEROCROSS
+#ifdef CONFIG_SENSORS_ZEROCROSS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************
- * CONFIG_ZEROCROSS - Enables support for the zero cross AC detection upper
+ * CONFIG_SENSORS_ZEROCROSS - Enables support for the zero cross AC detection upper
  *   half
  */
 
@@ -147,5 +147,5 @@ int zc_register(FAR const char *devpath, FAR struct zc_lowerhalf_s *lower);
 }
 #endif
 
-#endif /* CONFIG_ZEROCROSS */
+#endif /* CONFIG_SENSORS_ZEROCROSS */
 #endif /* __INCLUDE_NUTTX_SENSORS_ZEROCROSS_H */

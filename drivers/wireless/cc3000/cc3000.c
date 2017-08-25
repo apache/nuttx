@@ -1648,7 +1648,7 @@ static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd)
           cc3000_devtake(priv);
           sched_unlock();
 
-          if (!priv->sockets[s].sd == sockfd)
+          if (priv->sockets[s].sd != sockfd)
             {
               return -1;
             }

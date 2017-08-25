@@ -59,7 +59,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_LIS2DH
+#ifdef CONFIG_LIS2DH_DEBUG
 #  define lis2dh_dbg(x, ...)        _info(x, ##__VA_ARGS__)
 #else
 #  define lis2dh_dbg(x, ...)        sninfo(x, ##__VA_ARGS__)

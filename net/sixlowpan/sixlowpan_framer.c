@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include "nuttx/net/net.h"
+#include "nuttx/net/radiodev.h"
 #include "nuttx/wireless/ieee802154/ieee802154_mac.h"
 
 #include "sixlowpan/sixlowpan_internal.h"
@@ -140,7 +141,6 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *   radio   - Radio network driver state instance.
  *   pktmeta - Meta-data specific to the current outgoing frame
  *   meta    - Location to return the corresponding meta data.
- *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.
@@ -151,10 +151,9 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
                         FAR const struct ieee802_txmetadata_s *pktmeta,
-                        FAR struct ieee802154_frame_meta_s *meta,
-                        uint16_t paylen)
+                        FAR struct ieee802154_frame_meta_s *meta)
 {
   bool rcvrnull;
 
@@ -164,7 +163,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
 
   /* Source address mode */
 
-  meta->srcmode = pktmeta->sextended != 0?
+  meta->srcmode = pktmeta->sextended != 0 ?
                     IEEE802154_ADDRMODE_EXTENDED :
                     IEEE802154_ADDRMODE_SHORT;
 
@@ -258,7 +257,7 @@ int sixlowpan_meta_data(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_frame_hdrlen(FAR struct radio_driver_s *radio,
                            FAR const void *meta)
 {
   return radio->r_get_mhrlen(radio, meta);
@@ -284,7 +283,7 @@ int sixlowpan_frame_hdrlen(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_frame_submit(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
                            FAR const void *meta, FAR struct iob_s *frame)
 {
   return radio->r_req_data(radio, meta, frame);

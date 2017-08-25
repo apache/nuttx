@@ -54,7 +54,7 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_QENCODER),y)
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
@@ -86,7 +86,7 @@ ifeq ($(CONFIG_LCD_MIO283QT9A),y)
 CSRCS += stm32_mio283qt9a.c
 endif
 
-ifeq ($(CONFIG_VS1053),y)
+ifeq ($(CONFIG_AUDIO_VS1053),y)
 CSRCS += stm32_vs1053.c
 endif
 

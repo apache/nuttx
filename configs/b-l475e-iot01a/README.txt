@@ -249,7 +249,7 @@ Configurations
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
      (unless stated otherwise in the description of the configuration).
 
-       https://launchpad.net/gcc-arm-embedded
+       https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
      That toolchain selection can easily be reconfigured using
      'make menuconfig'.  Here are the relevant current settings:
@@ -609,3 +609,8 @@ Configuration sub-directories
         if multiple radios ACK?  At a minimum it could keep the driver
         unnecessarily busy.  There is some prototype code to do just this
         in the driver, but does not seem to work.
+
+      2017-08-24:  There is only a single buffer for reassemblying larger
+        packets.  This could be an important issue for the hub configuration
+        which really needs the capability concurrently reassemble multiple
+        incoming streams.

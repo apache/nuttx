@@ -54,6 +54,7 @@
 #include <debug.h>
 
 #include <nuttx/net/ip.h>
+#include <nuttx/net/radiodev.h>
 #include <nuttx/net/sixlowpan.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
@@ -188,11 +189,11 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
  *
  ****************************************************************************/
 
-int sixlowpan_destaddrfromip(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
                              const net_ipv6addr_t ipaddr,
                              FAR struct netdev_varaddr_s *destaddr)
 {
-  struct sixlowpan_properties_s properties;
+  struct radiodev_properties_s properties;
   int ret;
 
 #ifdef  CONFIG_NET_STARPOINT
@@ -524,7 +525,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_src_panid(FAR struct radio_driver_s *radio,
                         FAR uint8_t *panid)
 {
   FAR struct net_driver_s *dev = &radio->r_dev;
@@ -563,7 +564,7 @@ int sixlowpan_src_panid(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_extract_srcaddr(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
                               FAR const void *metadata,
                               FAR struct netdev_varaddr_s *srcaddr)
 {
@@ -630,7 +631,7 @@ int sixlowpan_extract_srcaddr(FAR struct sixlowpan_driver_s *radio,
  *
  ****************************************************************************/
 
-int sixlowpan_extract_destaddr(FAR struct sixlowpan_driver_s *radio,
+int sixlowpan_extract_destaddr(FAR struct radio_driver_s *radio,
                                FAR const void *metadata,
                                FAR struct netdev_varaddr_s *destaddr)
 {

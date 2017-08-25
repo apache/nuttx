@@ -47,6 +47,12 @@ ifeq ($(CONFIG_NET_STATISTICS),y)
   NET_CSRCS += net_statistics.c
 endif
 
+# Routing table
+
+ifeq ($(CONFIG_NET_ROUTE),y)
+  NET_CSRCS += net_procfs_route.c
+endif
+
 # Include packet socket build support
 
 DEPPATH += --dep-path procfs

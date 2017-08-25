@@ -93,7 +93,7 @@ GNU Toolchain Options
   class processors, including:
 
     GCC ARM Embedded
-      https://launchpad.net/gcc-arm-embedded
+      https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
     Summon ARM Toolchain
       https://github.com/esden/summon-arm-toolchain

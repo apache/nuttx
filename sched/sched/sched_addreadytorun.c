@@ -259,8 +259,8 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       (void)sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun);
 
-       btcb->task_state = TSTATE_TASK_READYTORUN;
-       doswitch         = false;
+      btcb->task_state = TSTATE_TASK_READYTORUN;
+      doswitch         = false;
     }
   else /* (task_state == TSTATE_TASK_ASSIGNED || task_state == TSTATE_TASK_RUNNING) */
     {
@@ -342,7 +342,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
               /* Release our hold on the IRQ lock. */
 
               spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                         &g_cpu_irqlock);
+                          &g_cpu_irqlock);
             }
 
           /* Sanity check.  g_cpu_netcount should be greater than zero

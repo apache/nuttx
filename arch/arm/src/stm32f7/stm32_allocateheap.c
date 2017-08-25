@@ -56,6 +56,8 @@
 #include "mpu.h"
 #include "up_arch.h"
 #include "up_internal.h"
+
+#include "chip/stm32_memorymap.h"
 #include "stm32_mpuinit.h"
 #include "stm32_dtcm.h"
 

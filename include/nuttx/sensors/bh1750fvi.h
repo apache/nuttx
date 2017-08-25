@@ -45,7 +45,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_BH1750FVI)
+#if defined(CONFIG_SENSORS_BH1750FVI)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -110,5 +110,5 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_BH1750FVI */
+#endif /* CONFIG_SENSORS_BH1750FVI */
 #endif /* __INCLUDE_NUTTX_SENSORS_BH1750FVI_H */

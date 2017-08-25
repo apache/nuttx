@@ -68,6 +68,7 @@ include local/Make.defs
 include tcp/Make.defs
 include udp/Make.defs
 include sixlowpan/Make.defs
+include ieee802154/Make.defs
 include devif/Make.defs
 include ipforward/Make.defs
 include loopback/Make.defs

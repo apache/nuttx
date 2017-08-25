@@ -277,7 +277,7 @@ void stm3210e_lcdclear(uint16_t color);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+#if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && defined(CONFIG_STM32_I2C1)
 int stm32_lm75initialize(FAR const char *devpath);
 #endif
 
@@ -296,7 +296,7 @@ int stm32_lm75initialize(FAR const char *devpath);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+#if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && defined(CONFIG_STM32_I2C1)
 int stm32_lm75attach(xcpt_t irqhandler, void *arg);
 #endif
 

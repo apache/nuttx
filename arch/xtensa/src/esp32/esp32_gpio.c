@@ -178,7 +178,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
         }
       else
         {
-          putreg32((1ul << (pin - 32)), GPIO_ENABLE1_DATA_W1TC);
+          putreg32((1ul << (pin - 32)), GPIO_ENABLE1_W1TC_REG);
         }
 
       if ((attr & PULLUP) != 0)
@@ -197,11 +197,11 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
     {
       if (pin < 32)
         {
-          putreg32((1ul << pin), GPIO_ENABLE_DATA_W1TS);
+          putreg32((1ul << pin), GPIO_ENABLE_W1TS_REG);
         }
       else
         {
-          putreg32((1ul << (pin - 32)), GPIO_ENABLE1_DATA_W1TS);
+          putreg32((1ul << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
         }
     }
 

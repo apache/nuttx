@@ -50,7 +50,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/ltc4151.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_LTC4151)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_LTC4151)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -365,4 +365,4 @@ int ltc4151_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   return ret;
 }
-#endif /* CONFIG_I2C && CONFIG_LTC4151 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_LTC4151 */

@@ -93,9 +93,11 @@ struct route_ipv6_devmatch_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static int net_ipv4_devmatch(FAR struct net_route_s *route, FAR void *arg)
+static int net_ipv4_devmatch(FAR struct net_route_ipv4_s *route,
+                             FAR void *arg)
 {
-  FAR struct route_ipv4_devmatch_s *match = (FAR struct route_ipv4_devmatch_s *)arg;
+  FAR struct route_ipv4_devmatch_s *match =
+    (FAR struct route_ipv4_devmatch_s *)arg;
   FAR struct net_driver_s *dev = match->dev;
 
   /* To match, (1) the masked target addresses must be the same, and (2) the
@@ -134,9 +136,11 @@ static int net_ipv4_devmatch(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route, FAR void *arg)
+static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route,
+                             FAR void *arg)
 {
-  FAR struct route_ipv6_devmatch_s *match = (FAR struct route_ipv6_devmatch_s *)arg;
+  FAR struct route_ipv6_devmatch_s *match =
+    (FAR struct route_ipv6_devmatch_s *)arg;
   FAR struct net_driver_s *dev = match->dev;
 
   /* To match, (1) the masked target addresses must be the same, and (2) the
@@ -147,7 +151,8 @@ static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route, FAR void *arg)
    */
 
   if (net_ipv6addr_maskcmp(route->target, match->target, route->netmask) &&
-      net_ipv6addr_maskcmp(route->router, dev->d_ipv6addr, dev->d_ipv6netmask))
+      net_ipv6addr_maskcmp(route->router, dev->d_ipv6addr,
+                           dev->d_ipv6netmask))
     {
       /* They match.. Copy the router address */
 
@@ -201,7 +206,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
    * address using this device.
    */
 
-  ret = net_foreachroute(net_ipv4_devmatch, &match);
+  ret = net_foreachroute_ipv4(net_ipv4_devmatch, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */

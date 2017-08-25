@@ -45,7 +45,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_LIS3MDL)
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_LIS3MDL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -176,5 +176,5 @@ int lis3mdl_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* CONFIG_SPI && CONFIG_LIS3MDL */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_LIS3MDL */
 #endif /* __INCLUDE_NUTTX_SENSORS_LIS3MDL_H */

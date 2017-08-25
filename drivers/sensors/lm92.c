@@ -53,7 +53,7 @@
 #include <nuttx/sensors/lm92.h>
 #include <nuttx/random.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_LM92)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_LM92)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -694,4 +694,4 @@ int lm92_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   return ret;
 }
-#endif /* CONFIG_I2C && CONFIG_LM92 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_LM92 */

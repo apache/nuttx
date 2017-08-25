@@ -84,7 +84,7 @@ void weak_function stm32_spidev_initialize(void)
   (void)stm32_configgpio(GPIO_SD_CD);       /* MMC/SD card detect */
 #endif
 
-#ifdef CONFIG_VS1053
+#ifdef CONFIG_AUDIO_VS1053
   (void)stm32_configgpio(GPIO_CS_MP3_DATA); /* MP3 codec chip select for DATA */
   (void)stm32_configgpio(GPIO_CS_MP3_CMD);  /* MP3 codec chip select for CMD */
 #endif
@@ -126,7 +126,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_VS1053)
+#if defined(CONFIG_AUDIO_VS1053)
   if (devid == SPIDEV_AUDIO_DATA(0))
     {
       stm32_gpiowrite(GPIO_CS_MP3_DATA, !selected);

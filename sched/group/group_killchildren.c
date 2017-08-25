@@ -105,7 +105,7 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
 int group_killchildren(FAR struct task_tcb_s *tcb)
 {
   return group_foreachchild(tcb->cmn.group, group_killchildren_handler,
-                           (FAR void *)((uintptr_t)tcb->cmn.pid));
+                            (FAR void *)((uintptr_t)tcb->cmn.pid));
 }
 
 #endif /* HAVE_GROUP_MEMBERS */

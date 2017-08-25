@@ -76,8 +76,8 @@
  * Return:
  *   OK    The packet has been processed  and can be deleted
  *   ERROR There is a matching connection, but could not dispatch the packet
- *         yet.  Currently useful for UDP when a packet arrives before a recv
- *         call is in place.
+ *         yet.  Useful when a packet arrives before a recv call is in
+ *         place.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.

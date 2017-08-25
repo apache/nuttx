@@ -46,7 +46,7 @@
 #include <stdint.h>
 #include <nuttx/sensors/ioctl.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSOR_KXTJ9)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_KXTJ9)
 
 /****************************************************************************
  * Public Types
@@ -115,5 +115,5 @@ int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_SENSOR_KXTJ9 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_KXTJ9 */
 #endif /* __INCLUDE_NUTTX_SENSORS_KXTJ9_H */

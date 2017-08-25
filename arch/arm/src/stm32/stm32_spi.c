@@ -625,7 +625,9 @@ static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0)
+    {
+    }
 
   /* Then return the received byte */
 
@@ -671,7 +673,9 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
+    {
+    }
 
   /* Then send the word */
 
