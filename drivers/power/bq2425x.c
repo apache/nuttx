@@ -134,6 +134,7 @@ static int bq2425x_online(struct battery_charger_dev_s *dev, bool *status);
 static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value);
 static int bq2425x_current(struct battery_charger_dev_s *dev, int value);
 static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value);
+static int bq2425x_operate(struct battery_charger_dev_s *dev, uintptr_t param);
 
 /****************************************************************************
  * Private Data
@@ -146,7 +147,8 @@ static const struct battery_charger_operations_s g_bq2425xops =
   bq2425x_online,
   bq2425x_voltage,
   bq2425x_current,
-  bq2425x_input_current
+  bq2425x_input_current,
+  bq2425x_operate
 };
 
 /****************************************************************************
@@ -726,6 +728,19 @@ static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: bq2425x_operate
+ *
+ * Description:
+ *   Do miscellaneous battery ioctl()
+ *
+ ****************************************************************************/
+
+static int bq2425x_operate(struct battery_charger_dev_s *dev, uintptr_t param)
+{
+  return -ENOSYS;
 }
 
 /****************************************************************************
