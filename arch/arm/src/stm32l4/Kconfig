@@ -3249,7 +3249,9 @@ config STM32L4_DAC1_TIMER
 
 config STM32L4_DAC1_TIMER_FREQUENCY
 	int "DAC1 timer frequency"
-	default 0
+	default 100
+	---help---
+		DAC1 output frequency.  Default:  100Hz
 
 endif
 
@@ -3272,7 +3274,9 @@ config STM32L4_DAC2_TIMER
 
 config STM32L4_DAC2_TIMER_FREQUENCY
 	int "DAC2 timer frequency"
-	default 0
+	default 100
+	---help---
+		DAC2 output frequency.  Default:  100Hz
 
 endif
 
