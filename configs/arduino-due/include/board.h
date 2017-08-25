@@ -58,7 +58,7 @@
 /* After power-on reset, the SAM3X device is running on a 4MHz internal RC.  These
  * definitions will configure clocking
  *
- *   MAINOSC:  Frequency = 12MHz (crysta)
+ *   MAINOSC:  Frequency = 12MHz (crystal)
  *   PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
  *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
  *   CPU clock: 84MHz
