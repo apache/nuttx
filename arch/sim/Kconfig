@@ -16,6 +16,9 @@ config HOST_X86_64
 config HOST_X86
 	bool "x86"
 
+config HOST_ARM
+  bool "arm"
+
 endchoice # Host CPU Type
 
 config SIM_M32
