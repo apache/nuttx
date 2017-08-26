@@ -13,6 +13,7 @@ config FS_AUTOMOUNTER
 	bool "Auto-mounter"
 	default n
 	depends on !DISABLE_MOUNTPOINT
+	select SCHED_LPWORK
 	---help---
 		The automounter provides an OS-internal mechanism for automatically
 		mounting and unmounting removable media as the media is inserted and
