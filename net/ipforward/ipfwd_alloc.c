@@ -64,7 +64,7 @@
 #endif
 
 #if defined(CONFIG_NET_TCP)
-#  define L3_MAXHDRLEN TCP_MAX_HDRLEN
+#  define L3_MAXHDRLEN TCP_HDRLEN /* Could be up to TCP_MAX_HDRLEN */
 #elif defined(CONFIG_NET_UDP)
 #  define L3_MAXHDRLEN UDP_HDRLEN
 #elif defined(CONFIG_NET_ICMPv6)

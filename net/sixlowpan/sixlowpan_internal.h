@@ -115,8 +115,13 @@
 
 /* Sucessful return values from header compression logic */
 
-#define COMPRESS_HDR_INLINE 0 /* L2 header not compressed */
-#define COMPRESS_HDR_ELIDED 1 /* L2 header compressed */
+#define COMPRESS_HDR_INLINE     0 /* L2 header not compressed */
+#define COMPRESS_HDR_ELIDED     1 /* L2 header compressed */
+
+/* Memory Pools *************************************************************/
+
+#define REASS_POOL_PREALLOCATED 0
+#define REASS_POOL_DYNAMIC      1
 
 /* Debug ********************************************************************/
 
@@ -656,6 +661,108 @@ int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
 int sixlowpan_extract_destaddr(FAR struct radio_driver_s *radio,
                                FAR const void *metadata,
                                FAR struct netdev_varaddr_s *destaddr);
+
+/****************************************************************************
+ * Name: sixlowpan_reass_initialize
+ *
+ * Description:
+ *   This function initializes the reassembly buffer allocator.  This
+ *   function must be called early in the initialization sequence before
+ *   any radios begin operation.
+ *
+ *   Called only once during network initialization.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef  CONFIG_NET_6LOWPAN_FRAG
+void sixlowpan_reass_initialize(void);
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
+
+/****************************************************************************
+ * Name: sixlowpan_reass_allocate
+ *
+ * Description:
+ *   The sixlowpan_reass_allocate function will get a free reassembly buffer
+ *   structure for use by 6LoWPAN.
+ *
+ *   This function will first attempt to allocate from the g_free_reass
+ *   list.  If that the list is empty, then the reassembly buffer structure
+ *   will be allocated from the dynamic memory pool.
+ *
+ * Inputs:
+ *   reasstag - The reassembly tag for subsequent lookup.
+ *   fragsrc  - The source address of the fragment.
+ *
+ * Return Value:
+ *   A reference to the allocated reass structure.  All fields used by the
+ *   reasembly logic have been zeroed.  On a failure to allocate, NULL is
+ *   returned.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef  CONFIG_NET_6LOWPAN_FRAG
+FAR struct sixlowpan_reassbuf_s *
+  sixlowpan_reass_allocate(uint16_t reasstag,
+                           FAR const struct netdev_varaddr_s *fragsrc);
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
+
+/****************************************************************************
+ * Name: sixlowpan_reass_find
+ *
+ * Description:
+ *   Find a previously allocated, active reassembly buffer with the specified
+ *   reassembly tag.
+ *
+ * Inputs:
+ *   reasstag - The reassembly tag to match.
+ *   fragsrc  - The source address of the fragment.
+ *
+ * Return Value:
+ *   A reference to the matching reass structure.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef  CONFIG_NET_6LOWPAN_FRAG
+FAR struct sixlowpan_reassbuf_s *
+  sixlowpan_reass_find(uint16_t reasstag,
+                       FAR const struct netdev_varaddr_s *fragsrc);
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
+
+/****************************************************************************
+ * Name: sixlowpan_reass_free
+ *
+ * Description:
+ *   The sixlowpan_reass_free function will return a reass structure
+ *   to the free list of  messages if it was a pre-allocated reass
+ *   structure. If the reass structure was allocated dynamically it will
+ *   be deallocated.
+ *
+ * Inputs:
+ *   reass - reass structure to free
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef  CONFIG_NET_6LOWPAN_FRAG
+void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass);
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

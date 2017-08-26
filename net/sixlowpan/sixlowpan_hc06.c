@@ -61,6 +61,7 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/ip.h>

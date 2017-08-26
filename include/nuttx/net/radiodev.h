@@ -42,8 +42,6 @@
 
 #include <stdint.h>
 
-#include <nuttx/clock.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 
 #if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
@@ -76,22 +74,37 @@ struct radiodev_properties_s
  * The radio network driver does not use the d_buf packet buffer directly.
  * Rather, it uses a list smaller frame buffers.
  *
- *   - The packet fragment data is provided in an IOB in the via the
+ *   - Outgoing frame data is provided in an IOB in the via the
  *     r_req_data() interface method each time that the radio needs to
  *     send more data.  The length of the frame is provided in the io_len
  *     field of the IOB.
  *
- *     In this case, the d_buf is not used at all and, if fact, may be
- *     NULL.
+ *     Outgoing frames are generated when the radio network driver calls
+ *     the devif_poll(), devif_timer(), sixlowpan_input(), or
+ *     ieee802154_input() interfaces.  In each case, the radio driver must
+ *     provide a working buffer in the d_buf pointer.  A special form of
+ *     the packet buffer must be used, struct sixlowpan_reassbuf_s.  This
+ *     special for includes appended data for managing reassembly of packets.
  *
  *   - Received frames are provided by radio network driver to the network
  *     via an IOB parameter in the sixlowpan_input() pr ieee802154_input()
  *     interface.  The length of the frame is io_len.
  *
- *   - 6LoWPAN frames and will be uncompressed and possibly reassembled in
- *     the d_buf;  d_len will hold the size of the reassembled packet.
+ *     Again, the radio network driver must provide an instance of struct
+ *     sixlowpan_reassbuf_s as the packet buffer in the d_buf field.  This
+ *     driver-provided data will only be used if the the receive frames are
+ *     not fragmented.
  *
- *     In this case, a d_buf of size CONFIG_NET_6LOWPAN_MTU must be provided.
+ *   - Received 6LoWPAN frames and will be uncompressed and possibly
+ *     reassembled in resassembled the d_buf;  d_len will hold the size of
+ *     the reassembled packet.
+ *
+ *     For fagemented frames, d_buf provided by radio driver will not be
+ *     used.  6LoWPAN must handle mutliple reassemblies from different
+ *     sources simultaneously.  To support this, 6LoWPAN will allocate a
+ *     unique reassembly buffer for each active reassembly, based on the
+ *     reassembly tag and source radio address.  These reassembly buffers
+ *     are managed entirely by the 6LoWPAN layer.
  *
  * This is accomplished by "inheriting" the standard 'struct net_driver_s'
  * and appending the frame buffer as well as other metadata needed to
@@ -103,8 +116,9 @@ struct radiodev_properties_s
  * structure.  In general, all fields must be set to NULL.  In addition:
  *
  * 1. On a TX poll, the radio network driver should provide its driver
- *    structure.  During the course of the poll, the networking layer may
- *    generate outgoing frames.  These frames will by provided to the MAC
+ *    structure along is (single) reassemby buffer provided at d_buf.
+ *    During the course of the poll, the networking layer may generate
+ *    outgoing frames.  These frames will by provided to the radio network
  *    driver via the req_data() method.
  *
  *    After sending each frame through the radio, the MAC driver must
@@ -117,16 +131,17 @@ struct radiodev_properties_s
  *    payload area of an IOB frame structure.  That IOB structure may be
  *    obtained using the iob_alloc() function.
  *
- *    For 6LoWPAN, the larger dev.d_buf must have a size of at least the 
- *    advertised MTU of the protocol, CONFIG_NET_6LOWPAN_MTU, plus
- *    CONFIG_NET_GUARDSIZE.  If fragmentation is enabled, then the logical
- *    packet size may be significantly larger than the size of the frame
- *    buffer.  The dev.d_buf is used for de-compressing each frame and
- *    reassembling any fragmented packets to create the full input packet
- *    that is provided to the application.
+ *    For 6LoWPAN, fragmented packets will be reassembled using allocated
+ *    reassembly buffers that are managed by the 6LoWPAN layer.  The radio
+ *    driver must still provide its (single) reassembly buffer in d_buf;
+ *    that buffer is still used for the case where the packet is not
+ *    fragmented into many frames.  In either case, the packet buffer will
+ *    have a size of advertised MTU of the protocol, CONFIG_NET_6LOWPAN_MTU,
+ *    plus CONFIG_NET_GUARDSIZE and some additional overhead for reassembly
+ *    state data.
  *
- *    The MAC driver should then inform the network of the reciptor of a
- *    frame by calling sixlowpan_input() or ieee802154_input().  That
+ *    The radio network driver should then inform the network of the recipt
+ *    of a frame by calling sixlowpan_input() or ieee802154_input().  That
  *    single frame (or, perhaps, list of frames) should be provided as 
  *    second argument of that call.
  *
@@ -166,65 +181,6 @@ struct radio_driver_s
 
   uint8_t r_msdu_handle;
 #endif
-
-#if CONFIG_NET_6LOWPAN_FRAG
-  /* Fragmentation Support *************************************************/
-  /* Fragmentation is handled frame by frame and requires that certain
-   * state information be retained from frame to frame.
-   */
-
-  /* r_dgramtag.  Datagram tag to be put in the header of the set of
-   * fragments.  It is used by the recipient to match fragments of the
-   * same payload.
-   *
-   * This is the sender's copy of the tag.  It is incremented after each
-   * fragmented packet is sent so that it will be unique to that
-   * sequence fragmentation.  Its value is then persistent, the values of
-   * other fragmentation variables are valid on during a single
-   * fragmentation sequence (while r_accumlen > 0)
-   */
-
-  uint16_t r_dgramtag;
-
-  /* r_reasstag.  Each frame in the reassembly has a tag.  That tag must
-   * match the reassembly tag in the fragments being merged.
-   *
-   * This is the same tag as r_dgramtag but is saved on the receiving
-   * side to match all of the fragments of the packet.
-   */
-
-  uint16_t r_reasstag;
-
-  /* r_pktlen. The total length of the IPv6 packet to be re-assembled in
-   * d_buf.  Used to determine when the re-assembly is complete.
-   */
-
-  uint16_t r_pktlen;
-
-  /* The current accumulated length of the packet being received in d_buf.
-   * Included IPv6 and protocol headers.  Currently used only to determine
-   * there is a fragmentation sequence in progress.
-   */
-
-  uint16_t r_accumlen;
-
-  /* r_boffset.  Offset to the beginning of data in d_buf.  As each fragment
-   * is received, data is placed at an appriate offset added to this.
-   */
-
-  uint16_t r_boffset;
-
-  /* The source MAC address of the fragments being merged */
-
-  struct netdev_varaddr_s r_fragsrc;
-
-  /* That time at which reassembly was started.  If the elapsed time
-   * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
-   * be cancelled.
-   */
-
-  systime_t r_time;
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* MAC network driver callback functions **********************************/
   /**************************************************************************

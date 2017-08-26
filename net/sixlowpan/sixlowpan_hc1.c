@@ -53,6 +53,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
 #include "sixlowpan/sixlowpan_internal.h"

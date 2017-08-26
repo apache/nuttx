@@ -203,7 +203,8 @@
  */
 
 /* prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
- as per comment above HSI) */
+ * as per comment above HSI)
+ */
 
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 

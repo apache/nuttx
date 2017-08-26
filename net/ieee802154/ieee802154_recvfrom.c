@@ -51,6 +51,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/radiodev.h>
 #include <netpacket/ieee802154.h>

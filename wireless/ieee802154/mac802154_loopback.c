@@ -51,6 +51,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/radiodev.h>
@@ -137,7 +138,7 @@ struct lo_driver_s
 
 static struct lo_driver_s g_loopback;
 #ifdef CONFIG_NET_6LOWPAN
-static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
+static struct sixlowpan_reassbuf_s g_iobuffer;
 #endif
 
 static uint8_t g_eaddr[IEEE802154_EADDRSIZE] =
@@ -388,6 +389,12 @@ static int lo_loopback(FAR struct net_driver_s *dev)
 #endif
 #ifdef CONFIG_NET_6LOWPAN
         {
+          /* Make sure the our single packet buffer is attached */
+
+          priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
+
+          /* Then give the frame to 6LoWPAN */
+
           ret = sixlowpan_input(&priv->lo_radio, iob, (FAR void *)&ind);
         }
 #endif
@@ -459,6 +466,15 @@ static void lo_poll_work(FAR void *arg)
   /* Perform the poll */
 
   net_lock();
+
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached */
+
+  priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
+  /* Then perform the poll */
+
   (void)devif_timer(&priv->lo_radio.r_dev, lo_loopback);
 
   /* Setup the watchdog poll timer again */
@@ -633,6 +649,12 @@ static void lo_txavail_work(FAR void *arg)
   if (priv->lo_bifup)
     {
       /* If so, then poll the network for new XMIT data */
+
+#ifdef CONFIG_NET_6LOWPAN
+      /* Make sure the our single packet buffer is attached */
+
+      priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
 
       (void)devif_poll(&priv->lo_radio.r_dev, lo_loopback);
     }
@@ -1063,9 +1085,6 @@ int ieee8021514_loopback(void)
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = lo_ioctl;         /* Handle network IOCTL commands */
-#endif
-#ifdef CONFIG_NET_6LOWPAN
-  dev->d_buf          = g_iobuffer;       /* Attach the IO buffer */
 #endif
   dev->d_private      = (FAR void *)priv; /* Used to recover private state from dev */
 

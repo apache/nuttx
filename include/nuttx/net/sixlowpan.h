@@ -53,6 +53,10 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#include <nuttx/clock.h>
+#include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 
@@ -336,6 +340,99 @@
    (a)[1] == 0 && (a)[2] == 0 && (a)[3] == 0 && \
    (a)[4] == 0 && (a)[5] == 0 && (a)[6] == 0 && \
    (((a)[7] & HTONS(0xff00)) == 0x0000))
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Fragmentation Support
+ *
+ * This structure defines the reassembly buffer.  NOTE:  The packet buffer
+ * is needed even in the case where reassembly is disabled.
+ */
+
+struct sixlowpan_reassbuf_s
+{
+  /* This is the externally visible packet buffer.  This is assigned
+   * to the driver's d_buf field when the reassembly is complete and
+   * provides the full reassembly packet to the network.
+   */
+
+  uint8_t rb_buf[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
+
+  /* Memory pool used to allocate this reassembly buffer */
+
+  uint8_t rb_pool;
+
+  /* True if the reassemby buffer is active (set to false when reassembly is
+   * complete).
+   */
+
+  bool rb_active;
+
+  /* Supports a singly linked list */
+
+  FAR struct sixlowpan_reassbuf_s *rb_flink;
+
+#if CONFIG_NET_6LOWPAN_FRAG
+  /* Fragmentation is handled frame by frame and requires that certain
+   * state information be retained from frame to frame.  That additional
+   * information follows the externally visible packet buffer.
+   */
+
+  /* rb_dgramtag.  Datagram tag to be put in the header of the set of
+   * fragments.  It is used by the recipient to match fragments of the
+   * same payload.
+   *
+   * This is the sender's copy of the tag.  It is incremented after each
+   * fragmented packet is sent so that it will be unique to that
+   * sequence fragmentation.  Its value is then persistent, the values of
+   * other fragmentation variables are valid on during a single
+   * fragmentation sequence (while rb_accumlen > 0)
+   */
+
+  uint16_t rb_dgramtag;
+
+  /* rb_reasstag.  Each frame in the reassembly has a tag.  That tag must
+   * match the reassembly tag in the fragments being merged.
+   *
+   * This is the same tag as rb_dgramtag but is saved on the receiving
+   * side to match all of the fragments of the packet.
+   */
+
+  uint16_t rb_reasstag;
+
+  /* rb_pktlen. The total length of the IPv6 packet to be re-assembled in
+   * d_buf.  Used to determine when the re-assembly is complete.
+   */
+
+  uint16_t rb_pktlen;
+
+  /* The current accumulated length of the packet being received in d_buf.
+   * Included IPv6 and protocol headers.  Currently used only to determine
+   * there is a fragmentation sequence in progress.
+   */
+
+  uint16_t rb_accumlen;
+
+  /* rb_boffset.  Offset to the beginning of data in d_buf.  As each fragment
+   * is received, data is placed at an appriate offset added to this.
+   */
+
+  uint16_t rb_boffset;
+
+  /* The source MAC address of the fragments being merged */
+
+  struct netdev_varaddr_s rb_fragsrc;
+
+  /* That time at which reassembly was started.  If the elapsed time
+   * exceeds CONFIG_NET_6LOWPAN_MAXAGE, then the reassembly will
+   * be cancelled.
+   */
+
+  systime_t rb_time;
+#endif /* CONFIG_NET_6LOWPAN_FRAG */
+};
 
 /****************************************************************************
  * Public Function Prototypes

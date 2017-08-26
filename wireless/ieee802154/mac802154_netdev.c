@@ -225,6 +225,14 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
               FAR struct radiodev_properties_s *properties);
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN
+static struct sixlowpan_reassbuf_s g_iobuffer;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -470,6 +478,12 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
         }
       else
         {
+          /* Make sure the our single packet buffer is attached */
+
+          priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+
+          /* And give the packet to 6LoWPAN */
+
           ret = sixlowpan_input(&priv->md_dev, iob, (FAR void *)ind);
         }
     }
@@ -568,7 +582,13 @@ static void macnet_txpoll_work(FAR void *arg)
 
   net_lock();
 
-  /* Perform the poll */
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached */
+
+  priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
+  /* Then perform the poll */
 
   (void)devif_timer(&priv->md_dev.r_dev, macnet_txpoll_callback);
 
@@ -836,9 +856,13 @@ static void macnet_txavail_work(FAR void *arg)
 
   if (priv->md_bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+#ifdef CONFIG_NET_6LOWPAN
+      /* Make sure the our single packet buffer is attached */
 
-      /* If so, then poll the network for new XMIT data */
+      priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
+      /* Then poll the network for new XMIT data */
 
       (void)devif_poll(&priv->md_dev.r_dev, macnet_txpoll_callback);
     }
@@ -1206,9 +1230,6 @@ int mac802154netdev_register(MACHANDLE mac)
   FAR struct radio_driver_s *radio;
   FAR struct net_driver_s  *dev;
   FAR struct mac802154_maccb_s *maccb;
-#ifdef CONFIG_NET_6LOWPAN
-  FAR uint8_t *pktbuf;
-#endif
   int ret;
 
   DEBUGASSERT(mac != NULL);
@@ -1224,27 +1245,10 @@ int mac802154netdev_register(MACHANDLE mac)
       return -ENOMEM;
     }
 
-#ifdef CONFIG_NET_6LOWPAN
-  /* Allocate a packet buffer (not used by this driver, but needed by the
-   * upper networking layer)
-   */
-
-  pktbuf = (FAR uint8_t *)kmm_malloc(CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE);
-  if (pktbuf == NULL)
-    {
-      nerr("ERROR: Failed to allocate the packet buffer\n");
-      kmm_free(priv);
-      return -ENOMEM;
-    }
-#endif
-
   /* Initialize the driver structure */
 
   radio               = &priv->md_dev;
   dev                 = &radio->r_dev;
-#ifdef CONFIG_NET_6LOWPAN
-  dev->d_buf          = pktbuf;            /* Single packet buffer */
-#endif
   dev->d_ifup         = macnet_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = macnet_ifdown;     /* I/F down callback */
   dev->d_txavail      = macnet_txavail;    /* New TX data callback */
@@ -1297,9 +1301,6 @@ int mac802154netdev_register(MACHANDLE mac)
 
       /* Free memory and return the error */
 
-#ifdef CONFIG_NET_6LOWPAN
-      kmm_free(pktbuf);
-#endif
       kmm_free(priv);
       return ret;
     }

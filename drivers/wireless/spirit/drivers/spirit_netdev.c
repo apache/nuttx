@@ -127,6 +127,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
+#include <nuttx/net/sixlowpan.h>
 
 #include <nuttx/wireless/spirit.h>
 #include <nuttx/wireless/pktradio.h>
@@ -362,6 +363,12 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_NET_6LOWPAN
+/* One single packet buffer */
+
+static struct sixlowpan_reassbuf_s g_iobuffer;
+#endif
 
 /* Spirit radio initialization */
 
@@ -1043,6 +1050,11 @@ static void spirit_receive_work(FAR void *arg)
       iob             = pktmeta->pm_iob;
       pktmeta->pm_iob = NULL;
 
+      /* Make sure the our single packet buffer is attached */
+
+      priv->radio.r_dev.d_buf = g_iobuffer.rb_buf;
+      priv->radio.r_dev.d_len = 0;
+
       /* Send the next frame to the network */
 
       wlinfo("Send frame %p to the network:  Offset=%u Length=%u\n",
@@ -1137,7 +1149,7 @@ static void spirit_interrupt_work(FAR void *arg)
 #ifdef CONFIG_SPIRIT_FIFOS
       irqstatus.IRQ_RX_FIFO_ALMOST_FULL = 0;
 
-      /* Discard any RX buffer that might have been allocated */
+      /* Discard any packet buffer that might have been allocated */
 
       if (priv->rxbuffer != NULL)
         {
@@ -1281,7 +1293,12 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->state != DRIVER_STATE_RECEIVING)
         {
-          DEBUGASSERT(priv->state == DRIVER_STATE_IDLE);
+          /* As a race condition, the TX state, but overriden by concurrent
+           * RX activity?  This assertion here *does* fire:
+           *
+           *   DEBUGASSERT(priv->state == DRIVER_STATE_IDLE);
+           */
+
           priv->state = DRIVER_STATE_RECEIVING;
         }
 
@@ -1320,7 +1337,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
      irqstatus.IRQ_RX_FIFO_ALMOST_FULL = 0;
 
-      /* There should be a RX buffer that was allocated when the data sync
+      /* There should be a packet buffer that was allocated when the data sync
        * interrupt was processed.
        */
 
@@ -1473,7 +1490,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       wlinfo("RX FIFO almost full\n");
 
-      /* There should be a RX buffer that was allocated when the data sync
+      /* There should be a packet buffer that was allocated when the data sync
        * interrupt was processed.
        */
 
@@ -1571,7 +1588,7 @@ static void spirit_interrupt_work(FAR void *arg)
        */
 
 #ifdef CONFIG_SPIRIT_FIFOS
-      /* Discard any RX buffer that might have been allocated */
+      /* Discard any packet buffer that might have been allocated */
 
       if (priv->rxbuffer != NULL)
         {
@@ -1751,6 +1768,12 @@ static void spirit_txpoll_work(FAR void *arg)
    */
 
   net_lock();
+
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached */
+
+  priv->radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
 
   /* Do nothing if the network is not yet UP */
 
@@ -2752,7 +2775,6 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   FAR struct spirit_driver_s *priv;
   FAR struct radio_driver_s *radio;
   FAR struct net_driver_s *dev;
-  FAR uint8_t *pktbuf;
   int ret;
 
   /* Allocate a driver state structure instance */
@@ -2762,16 +2784,6 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
     {
       wlerr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
-    }
-
-  /* Allocate a packet buffer */
-
-  pktbuf = (uint8_t *)kmm_zalloc(CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE);
-  if (priv == NULL)
-    {
-      wlerr("ERROR: Failed to allocate a packet buffer\n");
-      ret = -ENOMEM;
-      goto errout_with_alloc;
     }
 
   /* Attach the interface, lower driver, and devops */
@@ -2798,7 +2810,6 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   /* Initialize the common network device fields */
 
   dev                 = &radio->r_dev;
-  dev->d_buf          = pktbuf;            /* Single packet buffer */
   dev->d_ifup         = spirit_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = spirit_ifdown;     /* I/F down callback */
   dev->d_txavail      = spirit_txavail;    /* New TX data callback */
@@ -2839,7 +2850,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       wlerr("ERROR: Failed to attach interrupt: %d\n", ret);
-      goto errout_with_pktbuf;
+      goto errout_with_alloc;
     }
 
   /* Enable Radio IRQ */
@@ -2849,11 +2860,6 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
 errout_with_attach:
   (void)lower->attach(lower, NULL, NULL);
-
-errout_with_pktbuf:
-#if 0
-  kmm_free(pktbuf);
-#endif
 
 errout_with_alloc:
   kmm_free(priv);

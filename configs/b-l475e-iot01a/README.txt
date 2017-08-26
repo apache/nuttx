@@ -610,7 +610,17 @@ Configuration sub-directories
         unnecessarily busy.  There is some prototype code to do just this
         in the driver, but does not seem to work.
 
-      2017-08-24:  There is only a single buffer for reassemblying larger
-        packets.  This could be an important issue for the hub configuration
+      2017-08-26:  There was only a single buffer for reassemblying larger
+        packets.  This could be a problem issue for the hub configuration
         which really needs the capability concurrently reassemble multiple
-        incoming streams.
+        incoming streams.  The design was extended to support multiple
+        reassembly buffers.
+
+        Initial testing shows the same basic behavior as noted before:
+        The UDP test works and TCP test (usually) works.  There are,
+        however, are errors in reported by the hub in the TCP test.
+        Occassionally the test will hang when ther server echoes the data
+        back to the client.  These errors are presumably the result of ACKs
+        from the receiver colliding with frames from the sender.
+
+        Needs more investigation.
