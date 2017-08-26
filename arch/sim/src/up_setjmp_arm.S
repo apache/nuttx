@@ -2,10 +2,10 @@
  * arch/sim/src/up_setjmp_arm.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Nickolay Semyonov (RPI) <snob@wolpike.com>
  *
- * Extracted from the MUSL C-library by Bitbucket user nbkolchin.  The MUSL
- * C library has a compatible MIT license and is released here under the
- * NuttX 3-clause BSD license:
+ * Extracted from the MUSL C-library.  The MUSL C library has a compatible
+ * MIT license and is released here under the NuttX 3-clause BSD license:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

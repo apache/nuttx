@@ -108,7 +108,7 @@ static bool sixlowpan_compare_fragsrc(FAR struct sixlowpan_reassbuf_s *reass,
 
   if (fragsrc->nv_addrlen == reass->rb_fragsrc.nv_addrlen)
     {
-      /* The are the same size, return the address comparisson */
+      /* The are the same size, return the address comparison */
 
       return (memcmp(fragsrc->nv_addr, reass->rb_fragsrc.nv_addr,
                      fragsrc->nv_addrlen) == 0);
