@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip.h
+ * arch/arm/src/lc823450/lc823450_mmcl.h
  *
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,26 +33,14 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LC823450_CHIP_H
-#define _ARCH_ARM_SRC_LC823450_CHIP_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <sys/types.h>
-#include <arch/lc823450/chip.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_MMCL_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_MMCL_H
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
 
 /****************************************************************************
  * Public Data
@@ -68,14 +55,12 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
+int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd);
+int mmcl_uninitialize(FAR const char *devname);
+int mmcl_createpartition(int minor, int number, FAR struct mtd_dev_s *mtd);
 
 #if defined(__cplusplus)
 }
@@ -83,4 +68,4 @@ extern "C"
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_MMCL_H */

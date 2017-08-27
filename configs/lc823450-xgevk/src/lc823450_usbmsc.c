@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip.h
+ * configs/lc823450-xgevk/src/lc823450_usbmsc.c
  *
- *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
+ *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,53 +33,16 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LC823450_CHIP_H
-#define _ARCH_ARM_SRC_LC823450_CHIP_H
-
 /****************************************************************************
- * Included Files
+ * Name: board_usbmsc_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
+ *
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <arch/lc823450/chip.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+int board_usbmsc_initialize(int port)
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-
-#if defined(__cplusplus)
+  return 0;
 }
-#endif
-#undef EXTERN
-
-#endif /* __ASSEMBLY__ */
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */

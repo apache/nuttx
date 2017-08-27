@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip.h
+ * arch/arm/src/lc823450/lc823450_mtd.h
  *
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,26 +33,56 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LC823450_CHIP_H
-#define _ARCH_ARM_SRC_LC823450_CHIP_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_MTD_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_MTD_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
-#include <arch/lc823450/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* Partition #1: IPL2
+ * Partition #2: IPL2 config
+ * Partition #3: recovery kernel
+ * Partition #4: normal kernel
+ * Partition #5: etc
+ * Partition #6: rootfs
+ * Partition #7: log
+ * Partition #8: db
+ * Partition #9: cache
+ * Partition #10: contents
+ */
+#define LC823450_NPARTS         10        /* Number of partitions             */
+#define LC823450_PART1_START    0         /* Start sector of partition 1      */
+#define LC823450_PART1_NBLOCKS  1024      /* Number of sectors of partition 1 */
+#define LC823450_PART2_START    (LC823450_PART1_START + LC823450_PART1_NBLOCKS)
+#define LC823450_PART2_NBLOCKS  1024
+#define LC823450_PART3_START    (LC823450_PART2_START + LC823450_PART2_NBLOCKS)
+#define LC823450_PART3_NBLOCKS  1024
+#define LC823450_PART4_START    (LC823450_PART3_START + LC823450_PART3_NBLOCKS)
+#define LC823450_PART4_NBLOCKS  1024
+#define LC823450_PART5_START    (LC823450_PART4_START + LC823450_PART4_NBLOCKS)
+#define LC823450_PART5_NBLOCKS  32768
+#define LC823450_PART6_START    (LC823450_PART5_START + LC823450_PART5_NBLOCKS)
+#define LC823450_PART6_NBLOCKS  131072 
+#define LC823450_PART7_START    (LC823450_PART6_START + LC823450_PART6_NBLOCKS)
+#define LC823450_PART7_NBLOCKS  32768
+#define LC823450_PART8_START    (LC823450_PART7_START + LC823450_PART7_NBLOCKS)
+#define LC823450_PART8_NBLOCKS  262144
+#define LC823450_PART9_START    (LC823450_PART8_START + LC823450_PART8_NBLOCKS)
+#define LC823450_PART9_NBLOCKS  139264
+#define LC823450_PART10_START   (LC823450_PART9_START + LC823450_PART9_NBLOCKS)
+#define LC823450_PART10_NBLOCKS  0      /* 0 means all remaining sectors     */
 
-#ifndef __ASSEMBLY__
-
+#if CONFIG_MTD_CP_STARTBLOCK != LC823450_PART10_START
+#error "Start sector of contents patrition missmatched"
+#endif
 
 /****************************************************************************
  * Public Data
@@ -68,19 +97,14 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
+int lc823450_mtd_initialize(uint32_t devno);
 
 #if defined(__cplusplus)
 }
 #endif
 #undef EXTERN
 
-#endif /* __ASSEMBLY__ */
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_MTD_H */

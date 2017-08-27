@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip.h
+ * arch/arm/src/lc823450/lc823450_sdc.h
  *
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,26 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LC823450_CHIP_H
-#define _ARCH_ARM_SRC_LC823450_CHIP_H
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <sys/types.h>
-#include <arch/lc823450/chip.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_SDC_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_SDC_H
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
 
 /****************************************************************************
  * Public Data
@@ -68,14 +56,30 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
+int lc823450_sdc_refversion(void);
+int lc823450_sdc_clearcardinfo(uint32_t ch);
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+int lc823450_sdc_initialize(uint32_t ch);
+int lc823450_sdc_finalize(uint32_t ch);
+int lc823450_sdc_checkcarddetect(uint32_t ch);
+int lc823450_sdc_identifycard(uint32_t ch);
+int lc823450_sdc_setclock(uint32_t ch, uint32_t limitClk, uint32_t sysClk);
+int lc823450_sdc_refmediatype(uint32_t ch);
+int lc823450_sdc_getcardsize(uint32_t ch, unsigned long *pSecNum, unsigned long *pSecSize);
 
+int lc823450_sdc_readsector(uint32_t ch, unsigned long addr, unsigned short cnt,
+                            void *pbuf, unsigned long type);
+int lc823450_sdc_writesector(uint32_t ch, unsigned long addr, unsigned short cnt,
+                             void *pbuf, unsigned long type);
+int lc823450_sdc_checktrim(uint32_t ch);
+int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt);
+int lc823450_sdc_cachectl(uint32_t ch, int ctrl);
+int lc823450_sdc_changespeedmode(uint32_t ch, int mode);
+int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length);
+int lc823450_sdc_locked(void);
 
 #if defined(__cplusplus)
 }
@@ -83,4 +87,4 @@ extern "C"
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_SDC_H */

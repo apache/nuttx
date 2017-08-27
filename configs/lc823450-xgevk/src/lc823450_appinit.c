@@ -45,6 +45,10 @@
 #include <nuttx/board.h>
 #include <nuttx/i2c/i2c_master.h>
 
+#ifdef CONFIG_MTD
+#  include "lc823450_mtd.h"
+#endif
+
 #include "lc823450_i2c.h"
 #include "lc823450-xgevk.h"
 
@@ -143,7 +147,7 @@ int board_app_initialize(uintptr_t arg)
 
   lc823450_i2ctool();
 
-#ifdef CONFIG_MTD_LC823450
+#ifdef CONFIG_LC823450_MTD
   /* Initialize eMMC */
 
   int ret = lc823450_mtd_initialize(CONFIG_MTD_DEVNO_EMMC);
@@ -162,7 +166,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif /* CONFIG_LC823450_SDIF_SDC */
 
-#endif /* CONFIG_MTD_LC823450 */
+#endif /* CONFIG_LC823450_MTD */
 
 #ifndef CONFIG_BOARD_INITIALIZE
   /* Perform board initialization */

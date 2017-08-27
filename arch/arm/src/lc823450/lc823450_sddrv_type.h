@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip.h
+ * arch/arm/src/lc823450/lc823450_sddrv_type.h
  *
+ *   Copyright (C) 2014-2015 ON Semiconductor. All rights reserved.
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,53 +34,65 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LC823450_CHIP_H
-#define _ARCH_ARM_SRC_LC823450_CHIP_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <sys/types.h>
-#include <arch/lc823450/chip.h>
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_SDDRV_TYPE_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_SDDRV_TYPE_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef NULL
+#define NULL ( (void * ) 0 )
+#endif
+
+#define TRUE_T        (1)       /* true */
+#define FALSE_T       (0)       /* false */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#ifndef SI_8
+typedef signed char SI_8;
+#endif
+#ifndef UI_8
+typedef unsigned char UI_8;
 #endif
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-
-#if defined(__cplusplus)
-}
+#ifndef SI_16
+typedef signed short SI_16;
 #endif
-#undef EXTERN
+#ifndef UI_16
+typedef unsigned short UI_16;
+#endif
 
-#endif /* __ASSEMBLY__ */
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */
+#ifndef SI_32
+typedef signed long SI_32;
+#endif
+#ifndef UI_32
+typedef unsigned long UI_32;
+#endif
+
+#ifndef SI_64
+typedef signed long long SI_64;
+#endif
+#ifndef UI_64
+typedef unsigned long long UI_64;
+#endif
+
+#ifndef SINT_T
+typedef signed int SINT_T;
+#endif
+#ifndef UINT_T
+typedef unsigned int UINT_T;
+#endif
+
+#ifndef CHAR_T
+typedef char CHAR_T;
+#endif
+
+#ifndef BOOL_T
+typedef int BOOL_T;
+#endif
+
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_SDDRV_TYPE_H */

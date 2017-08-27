@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lc823450/chip.h
+ * configs/lc823450-xgevk/src/lc823450_sdif.c
  *
- *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
+ *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,53 +33,29 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_ARM_SRC_LC823450_CHIP_H
-#define _ARCH_ARM_SRC_LC823450_CHIP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <arch/lc823450/chip.h>
+#include <nuttx/config.h>
+#include <nuttx/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+#ifndef CONFIG_HOTPLUG_SDC
+
+void sdif_powerctrl(bool on)
 {
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-
-#if defined(__cplusplus)
 }
-#endif
-#undef EXTERN
 
-#endif /* __ASSEMBLY__ */
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */
+#endif
