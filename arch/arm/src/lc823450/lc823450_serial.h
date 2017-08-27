@@ -41,6 +41,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+
 #define LC823450_UART0_REGBASE  0x4008b000
 #define LC823450_UART1_REGBASE  0x4008c000
 #define LC823450_UART2_REGBASE  0x4008d000
