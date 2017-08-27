@@ -494,16 +494,6 @@ enum stm32_outputs_e
   HRTIM_OUT_TIME_CH2 = (1 << 9)
 };
 
-/* DAC synchronization event */
-
-enum stm32_hrtim_dacsync_e
-{
-  HRTIM_DACSYNC_DIS,
-  HRTIM_DACSYNC_1,
-  HRTIM_DACSYNC_2,
-  HRTIM_DACSYNC_3
-};
-
 /* HRTIM Deadtime Locks */
 
 enum stm32_hrtim_deadtime_lock_e
@@ -665,14 +655,14 @@ enum stm32_hrtim_adc_trq24_e
   HRTIM_ADCTRG24_ERST  = (1 << 31),
 };
 
-/* HRTIM DAC synchronization */
+/* HRTIM DAC synchronization events */
 
 enum stm32_hrtim_dac_e
 {
-  HRTIM_DAC_SYNC_DIS = 0,
-  HRTIM_DAC_SYNC_1   = 1,
-  HRTIM_DAC_SYNC_2   = 2,
-  HRTIM_DAC_SYNC_3   = 3
+  HRTIM_DAC_TRIG_DIS = 0,
+  HRTIM_DAC_TRIG1    = 1,
+  HRTIM_DAC_TRIG2    = 2,
+  HRTIM_DAC_TRIG3    = 3
 };
 
 /* HRTIM Master Timer interrupts  */

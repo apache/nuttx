@@ -92,10 +92,10 @@
 #define SYSCFG_CFGR1_TIM16_DMARMP      (1 << 11) /* Bit 11: TIM16 DMA request remapping bit */
 #define SYSCFG_CFGR1_TIM17_DMARMP      (1 << 12) /* Bit 12: TIM17 DMA request remapping bit */
 #define SYSCFG_CFGR1_TIM6_DMARMP       (1 << 13) /* Bit 13: TIM6 DMA remap, or */
-#define SYSCFG_CFGR1_DAC1_DMARMP       (1 << 13) /* Bit 13: DAC channel DMA remap */
+#define SYSCFG_CFGR1_DAC1CH1_DMARMP    (1 << 13) /* Bit 13: DAC1 channel1 DMA remap */
 #define SYSCFG_CFGR1_TIM7_DMARMP       (1 << 14) /* Bit 14: TIM7 DMA remap */
-#define SYSCFG_CFGR1_DAC2CH2_DMARMP    (1 << 14) /* Bit 14: DAC channel2 DMA remap */
-#define SYSCFG_CFGR1_DAC2CH1_DMARMP    (1 << 15) /* Bit 14: DAC channel1 DMA remap */
+#define SYSCFG_CFGR1_DAC1CH2_DMARMP    (1 << 14) /* Bit 14: DAC1 channel2 DMA remap */
+#define SYSCFG_CFGR1_DAC2CH1_DMARMP    (1 << 15) /* Bit 15: DAC2 channel1 DMA remap */
 #define SYSCFG_CFGR1_I2C_PBXFMP_SHIFT  (16)      /* Bits 16-19: Fast Mode Plus (FM+) driving capability */
 #define SYSCFG_CFGR1_I2C_PBXFMP_MASK   (15 << SYSCFG_CFGR1_I2C_PBXFMP_SHIFT)
 #define SYSCFG_CFGR1_I2C1_FMP          (1 << 20) /* Bit 20: I2C1 fast mode Plus driving capability */
@@ -176,7 +176,35 @@
 #define SYSCFG_CFGR2_SRAM_PEF         (1 << 8)  /* Bit 8: SRAM parity error */
 
 /* SYSCFG configuration register 3 */
-/* TODO */
+
+#define SYSCFG_CFGR3_SPI1_RX_DMA_RMP_SHIFT   (0)  /* Bits 0-1: SPI1_RX_DMA remap */
+#define SYSCFG_CFGR3_SPI1_RX_DMA_RMP_MASK    (3 << SYSCFG_CFGR3_SPI1_RX_DMA_RMP_SHIFT)
+#  define SYSCFG_CFGR3_SPI1_RX_DMA_RMP_0     (0 << SYSCFG_CFGR3_SPI1_RX_DMA_RMP_SHIFT) /* 00: SPI1_RX mapped on DMA1CH2 */
+#  define SYSCFG_CFGR3_SPI1_RX_DMA_RMP_1     (1 << SYSCFG_CFGR3_SPI1_RX_DMA_RMP_SHIFT) /* 01: SPI1_RX mapped on DMA1CH2 */
+#  define SYSCFG_CFGR3_SPI1_RX_DMA_RMP_2     (2 << SYSCFG_CFGR3_SPI1_RX_DMA_RMP_SHIFT) /* 10: SPI1_RX mapped on DMA1CH6 */
+#  define SYSCFG_CFGR3_SPI1_RX_DMA_RMP_3     (3 << SYSCFG_CFGR3_SPI1_RX_DMA_RMP_SHIFT) /* 11: SPI1_RX mapped on DMA1CH2 */
+#define SYSCFG_CFGR3_SPI1_TX_DMA_RMP_SHIFT   (2)  /* Bits 2-3: SPI1_TX_DMA remap */
+#define SYSCFG_CFGR3_SPI1_TX_DMA_RMP_MASK    (3 << SYSCFG_CFGR3_SPI1_TX_DMA_RMP_SHIFT)
+#  define SYSCFG_CFGR3_SPI1_TX_DMA_RMP_0     (0 << SYSCFG_CFGR3_SPI1_TX_DMA_RMP_SHIFT) /* 00: SPI1_TX mapped on DMA1CH3 */
+#  define SYSCFG_CFGR3_SPI1_TX_DMA_RMP_1     (1 << SYSCFG_CFGR3_SPI1_TX_DMA_RMP_SHIFT) /* 01: SPI1_TX mapped on DMA1CH5 */
+#  define SYSCFG_CFGR3_SPI1_TX_DMA_RMP_2     (2 << SYSCFG_CFGR3_SPI1_TX_DMA_RMP_SHIFT) /* 10: SPI1_TX mapped on DMA1CH7 */
+#  define SYSCFG_CFGR3_SPI1_TX_DMA_RMP_3     (3 << SYSCFG_CFGR3_SPI1_TX_DMA_RMP_SHIFT) /* 11: SPI1_TX mapped on DMA1CH3 */
+#define SYSCFG_CFGR3_I2C1_RX_DMA_RMP_SHIFT   (4)  /* Bits 4-5: I2C1_RX_DMA remap */
+#define SYSCFG_CFGR3_I2C1_RX_DMA_RMP_MASK    (3 << SYSCFG_CFGR3_I2C1_RX_DMA_RMP_SHIFT)
+#  define SYSCFG_CFGR3_I2C1_RX_DMA_RMP_0     (0 << SYSCFG_CFGR3_I2C1_RX_DMA_RMP_SHIFT) /* 00: I2C1_RX mapped on DMA1CH7 */
+#  define SYSCFG_CFGR3_I2C1_RX_DMA_RMP_1     (1 << SYSCFG_CFGR3_I2C1_RX_DMA_RMP_SHIFT) /* 01: I2C1_RX mapped on DMA1CH3 */
+#  define SYSCFG_CFGR3_I2C1_RX_DMA_RMP_2     (2 << SYSCFG_CFGR3_I2C1_RX_DMA_RMP_SHIFT) /* 10: I2C1_RX mapped on DMA1CH5 */
+#  define SYSCFG_CFGR3_I2C1_RX_DMA_RMP_3     (3 << SYSCFG_CFGR3_I2C1_RX_DMA_RMP_SHIFT) /* 11: I2C1_RX mapped on DMA1CH7 */
+#define SYSCFG_CFGR3_I2C1_TX_DMA_RMP_SHIFT   (6)  /* Bits 6-7: I2C1_TX_DMA remap */
+#define SYSCFG_CFGR3_I2C1_TX_DMA_RMP_MASK    (3 << SYSCFG_CFGR3_I2C1_TX_DMA_RMP_SHIFT)
+#  define SYSCFG_CFGR3_I2C1_TX_DMA_RMP_0     (0 << SYSCFG_CFGR3_I2C1_TX_DMA_RMP_SHIFT) /* 00: I2C1_TX mapped on DMA1CH6 */
+#  define SYSCFG_CFGR3_I2C1_TX_DMA_RMP_1     (1 << SYSCFG_CFGR3_I2C1_TX_DMA_RMP_SHIFT) /* 01: I2C1_TX mapped on DMA1CH2 */
+#  define SYSCFG_CFGR3_I2C1_TX_DMA_RMP_2     (2 << SYSCFG_CFGR3_I2C1_TX_DMA_RMP_SHIFT) /* 10: I2C1_TX mapped on DMA1CH4 */
+#  define SYSCFG_CFGR3_I2C1_TX_DMA_RMP_3     (3 << SYSCFG_CFGR3_I2C1_TX_DMA_RMP_SHIFT) /* 11: I2C1_TX mapped on DMA1CH6 */
+#define SYSCFG_CFGR3_ADC2_DMA_RMP            (8)  /* Bits 8: ADC2 mapped on DMA1CH1 remap */
+#define SYSCFG_CFGR3_DAC1_TRIG3_RMP          (1 << 16)  /* Bit 16: HRTIM1_DAC1_TRIG1 remap */
+#define SYSCFG_CFGR3_DAC1_TRIG3_RMP          (1 << 16)  /* Bit 16: HRTIM1_DAC1_TRIG1 remap */
+#define SYSCFG_CFGR3_DAC1_TRIG5_RMP          (1 << 17)  /* Bit 17: HRTIM1_DAC1_TRIG2 remap */
 
 #endif /* CONFIG_STM32_STM32F33XX */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F33XXX_SYSCFG_H */

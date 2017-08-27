@@ -67,8 +67,8 @@ static int     comp_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int     comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
-#endif
 static int     comp_notify(FAR struct comp_dev_s *dev, uint8_t val);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -90,10 +90,12 @@ static const struct file_operations comp_fops =
 #endif
 };
 
+#ifndef CONFIG_DISABLE_POLL
 static const struct comp_callback_s g_comp_callback =
   {
     comp_notify   /* au_notify */
   };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -141,14 +143,13 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
         }
     }
 }
-#else
-#  define comp_pollnotify(dev,event)
 #endif
 
 /****************************************************************************
  * Name: comp_semtake
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_POLL
 static void comp_semtake(FAR sem_t *sem)
 {
   while (sem_wait(sem) != 0)
@@ -160,6 +161,7 @@ static void comp_semtake(FAR sem_t *sem)
       ASSERT(get_errno() == EINTR);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: comp_poll
@@ -241,6 +243,7 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_POLL
 static int comp_notify(FAR struct comp_dev_s *dev, uint8_t val)
 {
   /* TODO: store values in FIFO? */
@@ -252,6 +255,7 @@ static int comp_notify(FAR struct comp_dev_s *dev, uint8_t val)
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: comp_open
@@ -377,13 +381,16 @@ static ssize_t comp_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
   /* If non-blocking read, read the value immediately and return. */
 
+#ifndef CONFIG_DISABLE_POLL
   if (filep->f_oflags & O_NONBLOCK)
+#endif
     {
       ret = dev->ad_ops->ao_read(dev);
       buffer[0] = (uint8_t)ret;
       return 1;
     }
 
+#ifndef CONFIG_DISABLE_POLL
   ret = sem_wait(&dev->ad_readsem);
   if (ret < 0)
     {
@@ -392,7 +399,9 @@ static ssize_t comp_read(FAR struct file *filep, FAR char *buffer, size_t buflen
     }
 
   buffer[0] = dev->val;
+
   return 1;
+#endif
 }
 
 /****************************************************************************
@@ -437,6 +446,7 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
 
   DEBUGASSERT(dev->ad_ops != NULL);
 
+#ifndef CONFIG_DISABLE_POLL
   if (dev->ad_ops->ao_bind != NULL)
     {
       ret = dev->ad_ops->ao_bind(dev, &g_comp_callback);
@@ -446,6 +456,7 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
           return ret;
         }
     }
+#endif
 
   /* Register the COMP character driver */
 

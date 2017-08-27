@@ -59,12 +59,54 @@
 
 #warning "HRTIM UNDER DEVELOPMENT !"
 
+#if defined(CONFIG_STM32_HRTIM_TIMA_PWM) || defined(CONFIG_STM32_HRTIM_TIMA_DAC) || \
+    defined(CONFIG_STM32_HRTIM_TIMA_CAP) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ)
+#  ifndef CONFIG_STM32_HRTIM_TIMA
+#    error "CONFIG_STM32_HRTIM_TIMA must be set"
+#  endif
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIMB_PWM) || defined(CONFIG_STM32_HRTIM_TIMB_DAC) || \
+    defined(CONFIG_STM32_HRTIM_TIMB_CAP) || defined(CONFIG_STM32_HRTIM_TIMB_IRQ)
+#  ifndef CONFIG_STM32_HRTIM_TIMB
+#    error "CONFIG_STM32_HRTIM_TIMB must be set"
+#  endif
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIMC_PWM) || defined(CONFIG_STM32_HRTIM_TIMC_DAC) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_CAP) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ)
+#  ifndef CONFIG_STM32_HRTIM_TIMC
+#    error "CONFIG_STM32_HRTIM_TIMC must be set"
+#  endif
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIMD_PWM) || defined(CONFIG_STM32_HRTIM_TIMD_DAC) || \
+    defined(CONFIG_STM32_HRTIM_TIMD_CAP) || defined(CONFIG_STM32_HRTIM_TIMD_IRQ)
+#  ifndef CONFIG_STM32_HRTIM_TIMD
+#    error "CONFIG_STM32_HRTIM_TIMD must be set"
+#  endif
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIME_PWM) || defined(CONFIG_STM32_HRTIM_TIME_DAC) || \
+    defined(CONFIG_STM32_HRTIM_TIME_CAP) || defined(CONFIG_STM32_HRTIM_TIME_IRQ)
+#  ifndef CONFIG_STM32_HRTIM_TIME
+#    error "CONFIG_STM32_HRTIM_TIME must be set"
+#  endif
+#endif
+
 #ifdef HRTIM_HAVE_ADC
 #  error HRTIM ADC Triggering not supported yet
 #endif
 
-#ifdef CONFIG_STM32_HRTIM_DAC
-#  error HRTIM DAC Triggering not supported yet
+#if defined(CONFIG_STM32_HRTIM_DAC)
+#if !defined(CONFIG_STM32_HRTIM_MASTER_DAC) && !defined(CONFIG_STM32_HRTIM_TIMA_DAC) && \
+  !defined(CONFIG_STM32_HRTIM_TIMB_DAC) && !defined(CONFIG_STM32_HRTIM_TIMC_DAC) && \
+  !defined(CONFIG_STM32_HRTIM_TIMD_DAC) && !defined(CONFIG_STM32_HRTIM_TIME_DAC)
+#    warning "CONFIG_STM32_HRTIM_DAC enabled but no timer selected"
+#  endif
+#endif
+#if defined(CONFIG_STM32_HRTIM_MASTER_DAC) || defined(CONFIG_STM32_HRTIM_TIMA_DAC) || \
+  defined(CONFIG_STM32_HRTIM_TIMB_DAC) || defined(CONFIG_STM32_HRTIM_TIMC_DAC) || \
+  defined(CONFIG_STM32_HRTIM_TIMD_DAC) || defined(CONFIG_STM32_HRTIM_TIME_DAC)
+#  ifndef CONFIG_STM32_HRTIM_DAC
+#    error "CONFIG_STM32_HRTIM_DAC must be set"
+#  endif
 #endif
 
 #ifdef HRTIM_HAVE_CAPTURE
@@ -98,57 +140,74 @@
 /* HRTIM default configuration **********************************************/
 
 #ifndef HRTIM_TIMER_MASTER
+#  warning "HRTIM_MASTER_PRESCALER is not set. Set the default value HRTIM_PRESCALER_2"
 #  define HRTIM_MASTER_PRESCALER HRTIM_PRESCALER_2
 #endif
 
-#ifndef HRTIM_MASTER_MODE
+#if defined(CONFIG_STM32_HRTIM_MASTER) && !defined(HRTIM_MASTER_MODE)
+#  warning "HRTIM_MASTER_MODE is not set. Set the default value 0"
 #  define HRTIM_MASTER_MODE 0
 #endif
-#ifndef HRTIM_TIMA_MODE
+#if defined(CONFIG_STM32_HRTIM_TIMA) && !defined( HRTIM_TIMA_MODE)
+#  warning "HRTIM_TIMA_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMA_MODE 0
 #endif
-#ifndef HRTIM_TIMB_MODE
+#if defined(CONFIG_STM32_HRTIM_TIMB) && !defined(HRTIM_TIMB_MODE)
+#  warning "HRTIM_TIMB_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMB_MODE 0
 #endif
-#ifndef HRTIM_TIMC_MODE
+#if defined(CONFIG_STM32_HRTIM_TIMC) && !defined(HRTIM_TIMC_MODE)
+#  warning "HRTIM_TIMC_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMC_MODE 0
 #endif
-#ifndef HRTIM_TIMD_MODE
+#if defined(CONFIG_STM32_HRTIM_TIMD) && !defined(HRTIM_TIMD_MODE)
+#  warning "HRTIM_TIMD_MODE is not set. Set the default value 0"
 #  define HRTIM_TIMD_MODE 0
 #endif
-#ifndef HRTIM_TIME_MODE
+#if defined(CONFIG_STM32_HRTIM_TIME) && !defined(HRTIM_TIME_MODE)
+#  warning "HRTIM_TIME_MODE is not set. Set the default value 0"
 #  define HRTIM_TIME_MODE 0
 #endif
 
-#ifndef HRTIM_TIMA_UPDATE
+#if defined(CONFIG_STM32_HRTIM_TIMA) && !defined( HRTIM_TIMA_UPDATE)
+#  warning "HRTIM_TIMA_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMA_UPDATE 0
 #endif
-#ifndef HRTIM_TIMB_UPDATE
+#if defined(CONFIG_STM32_HRTIM_TIMB) && !defined(HRTIM_TIMB_UPDATE)
+#  warning "HRTIM_TIMB_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMB_UPDATE 0
 #endif
-#ifndef HRTIM_TIMC_UPDATE
+#if defined(CONFIG_STM32_HRTIM_TIMC) && !defined(HRTIM_TIMC_UPDATE)
+#  warning "HRTIM_TIMC_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMC_UPDATE 0
 #endif
-#ifndef HRTIM_TIMD_UPDATE
+#if defined(CONFIG_STM32_HRTIM_TIMD) && !defined(HRTIM_TIMD_UPDATE)
+#  warning "HRTIM_TIMD_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMD_UPDATE 0
 #endif
-#ifndef HRTIM_TIME_UPDATE
+#if defined(CONFIG_STM32_HRTIM_TIME) && !defined(HRTIM_TIME_UPDATE)
+#  warning "HRTIM_TIME_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIME_UPDATE 0
 #endif
 
-#ifndef HRTIM_TIMA_RESET
+#if defined(CONFIG_STM32_HRTIM_TIMA) && !defined( HRTIM_TIMA_RESET)
+#  warning "HRTIM_TIMA_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMA_RESET 0
 #endif
-#ifndef HRTIM_TIMB_RESET
+#if defined(CONFIG_STM32_HRTIM_TIMB) && !defined(HRTIM_TIMB_RESET)
+#  warning "HRTIM_TIMB_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMB_RESET 0
 #endif
-#ifndef HRTIM_TIMC_RESET
+#if defined(CONFIG_STM32_HRTIM_TIMC) && !defined(HRTIM_TIMC_RESET)
+#  warning "HRTIM_TIMC_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMC_RESET 0
 #endif
-#ifndef HRTIM_TIMD_RESET
+#if defined(CONFIG_STM32_HRTIM_TIMD) && !defined(HRTIM_TIMD_RESET)
+#  warning "HRTIM_TIMD_RESET is not set. Set the default value 0"
 #  define HRTIM_TIMD_RESET 0
 #endif
-#ifndef HRTIM_TIME_RESET
+#if defined(CONFIG_STM32_HRTIM_TIME) && !defined(HRTIM_TIME_RESET)
+#  warning "HRTIM_TIME_RESET is not set. Set the default value 0"
 #  define HRTIM_TIME_RESET 0
 #endif
 
@@ -508,7 +567,7 @@ static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev, uint16_t outputs,
 #ifdef HRTIM_HAVE_ADC
 static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv);
 #endif
-#ifdef HRTIM_HAVE_DAC
+#ifdef CONFIG_STM32_HRTIM_DAC
 static int hrtim_dac_config(FAR struct stm32_hrtim_s *priv);
 #endif
 #ifdef HRTIM_HAVE_FAULTS
@@ -573,13 +632,18 @@ static struct stm32_hrtim_tim_s g_master =
   .tim =
   {
     .base  = STM32_HRTIM1_MASTER_BASE,
+
+    /* If MASTER is disabled, we need only MASTER base */
+
+#ifdef CONFIG_STM32_HRTIM_MASTER
     .pclk  = HRTIM_CLOCK/HRTIM_MASTER_PRESCALER,
     .mode  = HRTIM_MASTER_MODE,
-#ifdef CONFIG_STM32_HRTIM_MASTER_DAC
+#  ifdef CONFIG_STM32_HRTIM_MASTER_DAC
     .dac   = HRTIM_MASTER_DAC,
-#endif
-#ifdef CONFIG_STM32_HRTIM_MASTER_IRQ
+#  endif
+#  ifdef CONFIG_STM32_HRTIM_MASTER_IRQ
     .irq   = HRTIM_IRQ_MASTER
+#  endif
 #endif
   },
   .priv = NULL,
@@ -1688,11 +1752,13 @@ static int hrtim_tim_clocks_config(FAR struct stm32_hrtim_s *priv)
 
   /* Configure Master Timer clock */
 
+#ifdef CONFIG_STM32_HRTIM_MASTER
   ret = hrtim_tim_clock_config(priv, HRTIM_TIMER_MASTER, HRTIM_MASTER_PRESCALER);
   if (ret < 0)
     {
       goto errout;
     }
+#endif
 
   /* Configure Timer A clock */
 
@@ -2213,7 +2279,7 @@ static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
 }
 #endif
 
-#ifdef HRTIM_HAVE_DAC
+#ifdef CONFIG_STM32_HRTIM_DAC
 
 /****************************************************************************
  * Name: hrtim_tim_dac_cfg
@@ -2231,7 +2297,7 @@ static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
  *
  ****************************************************************************/
 
-static int hrtim_tim_dac_cfg(FAS struct stm32_hrtim_s *priv, uint8_t timer,
+static int hrtim_tim_dac_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                              uint8_t dac)
 {
   FAR struct stm32_hrtim_tim_s *tim;
@@ -2264,36 +2330,36 @@ static int hrtim_tim_dac_cfg(FAS struct stm32_hrtim_s *priv, uint8_t timer,
 
 static int hrtim_dac_config(FAR struct stm32_hrtim_s *priv)
 {
-  FAR struct stm32_hrtim_slave_priv_s *slave_priv;
+  FAR struct stm32_hrtim_timcmn_s *tim;
 
 #ifdef CONFIG_STM32_HRTIM_MASTER_DAC
-  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->master->priv;
-  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_MASTER, dac);
+  tim = (struct stm32_hrtim_timcmn_s*)priv->master;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_MASTER, tim->dac);
 #endif
 
 #ifdef CONFIG_STM32_HRTIM_TIMA_DAC
-  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->tima->priv;
-  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMA, dac);
+  tim = (struct stm32_hrtim_timcmn_s*)priv->tima;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMA, tim->dac);
 #endif
 
 #ifdef CONFIG_STM32_HRTIM_TIMB_DAC
-  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->timb->priv;
-  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMB, dac);
+  tim = (struct stm32_hrtim_timcmn_s*)priv->timb;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMB, tim->dac);
 #endif
 
 #ifdef CONFIG_STM32_HRTIM_TIMC_DAC
-  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->timc->priv;
-  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMC, dac);
+  tim = (struct stm32_hrtim_timcmn_s*)priv->timc;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMC, tim->dac);
 #endif
 
 #ifdef CONFIG_STM32_HRTIM_TIMD_DAC
-  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->timd->priv;
-  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMD, dac);
+  tim = (struct stm32_hrtim_timcmn_s*)priv->timd;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIMD, tim->dac);
 #endif
 
 #ifdef CONFIG_STM32_HRTIM_TIME_DAC
-  slave_priv = (struct stm32_hrtim_slave_priv_s*)priv->time->priv;
-  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIME, dac);
+  tim = (struct stm32_hrtim_timcmn_s*)priv->time;
+  hrtim_tim_dac_cfg(priv, HRTIM_TIMER_TIME, tim->dac);
 #endif
 
   return OK;
@@ -3338,7 +3404,7 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
 
   /* Configure DAC synchronization */
 
-#ifdef HRTIM_HAVE_DAC
+#ifdef CONFIG_STM32_HRTIM_DAC
   ret = hrtim_dac_config(priv);
   if (ret != OK)
     {
@@ -3382,7 +3448,9 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
 
   /* Enable Master Timer */
 
+#ifdef CONFIG_STM32_HRTIM_MASTER
   regval |= HRTIM_MCR_MCEN;
+#endif
 
   /* Enable Slave Timers */
 

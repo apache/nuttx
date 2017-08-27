@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -60,6 +61,7 @@
 #include "stm32_dac.h"
 #include "stm32_rcc.h"
 #include "stm32_dma.h"
+#include "stm32_syscfg.h"
 
 #ifdef CONFIG_DAC
 
@@ -331,6 +333,12 @@
 #  define DAC1CH1_TSEL_VALUE DAC_CR_TSEL_SW
 #endif
 
+#if defined(NEED_TIM2) || defined(NEED_TIM3) || defined(NEED_TIM4) || \
+    defined(NEED_TIM5) || defined(NEED_TIM6) || defined(NEED_TIM7) || \
+    defined(NEED_TIM8)
+#  define HAVE_TIMER
+#endif
+
 #ifdef CONFIG_STM32_DAC1CH2_DMA
 #  if defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG1)
 #    ifndef CONFIG_STM32_HRTIM_DAC
@@ -467,20 +475,20 @@
 
 #define TIM_INDEX_HRTIM 255
 
-#if defined(DAC1_HRTIM) || defined(DAC2_HRTIM) || defined(DAC3_HRTIM)
+#if defined(DAC1CH1_HRTIM) || defined(DAC1CH2_HRTIM) || defined(DAC2CH1_HRTIM)
 #  define HAVE_HRTIM
 #endif
 
+/* DMA buffers default size */
+
 #ifndef CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE
-#  define CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE 256
+#  error "DAC1CH1 buffer size must be provided"
 #endif
-
 #ifndef CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE
-#  define CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE 256
+#  error "DAC1CH2 buffer size must be provided"
 #endif
-
 #ifndef CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE
-#  define CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE 256
+#  error "DAC2CH1 buffer size must be provided"
 #endif
 
 /* Calculate timer divider values based upon DACn_TIMER_PCLK_FREQUENCY and
@@ -534,8 +542,10 @@ struct stm32_chan_s
   uint16_t   dmachan;    /* DMA channel needed by this DAC */
   uint16_t   buffer_len; /* DMA buffer length */
   DMA_HANDLE dma;        /* Allocated DMA channel */
+#  ifdef HAVE_TIMER
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
+#  endif
   uint16_t   *dmabuffer; /* DMA transfer buffer */
 #endif
 };
@@ -545,10 +555,12 @@ struct stm32_chan_s
  ****************************************************************************/
 /* DAC Register access */
 
-#ifdef HAVE_DMA
+#ifdef HAVE_TIMER
 static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset);
 static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
                            uint32_t value);
+static void     tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
+                              uint32_t clearbits, uint32_t setbits);
 #endif
 
 /* Interrupt handler */
@@ -569,7 +581,12 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 /* Initialization */
 
 #ifdef HAVE_DMA
+#  ifdef HAVE_TIMER
 static int  dac_timinit(FAR struct stm32_chan_s *chan);
+#  endif
+static int  dma_remap(FAR struct stm32_chan_s *chan);
+static void dma_bufferinit(FAR struct stm32_chan_s *chan, uint16_t* buffer,
+                           uint16_t len);
 #endif
 static int  dac_chaninit(FAR struct stm32_chan_s *chan);
 static int  dac_blockinit(void);
@@ -613,14 +630,11 @@ static struct stm32_chan_s g_dac1ch1priv =
   .dmachan    = DAC1CH1_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE,
   .dmabuffer  = dac1ch1_buffer,
+  .tsel       = DAC1CH1_TSEL_VALUE,
 #  ifdef DAC1CH1_HRTIM
   .timer      = TIM_INDEX_HRTIM,
-  .tsel       = 0,
-  .tbase      = 0,
-  .tfrequency = 0,
 #  else
   .timer      = CONFIG_STM32_DAC1CH1_TIMER,
-  .tsel       = DAC1CH1_TSEL_VALUE,
   .tbase      = DAC1CH1_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY,
 #  endif
@@ -634,7 +648,6 @@ static struct dac_dev_s g_dac1ch1dev =
 };
 #endif  /* CONFIG_STM32_DAC1CH1 */
 
-#if STM32_NDAC > 1
 #ifdef CONFIG_STM32_DAC1CH2
 /* Channel 2: DAC1 channel 2 */
 
@@ -653,14 +666,11 @@ static struct stm32_chan_s g_dac1ch2priv =
   .dmachan    = DAC1CH2_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE,
   .dmabuffer  = dac1ch2_buffer,
+  .tsel       = DAC1CH2_TSEL_VALUE,
 #  ifdef DAC1CH2_HRTIM
   .timer      = TIM_INDEX_HRTIM,
-  .tsel       = 0,
-  .tbase      = 0,
-  .tfrequency = 0,
 #  else
   .timer      = CONFIG_STM32_DAC1CH2_TIMER,
-  .tsel       = DAC1CH2_TSEL_VALUE,
   .tbase      = DAC1CH2_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY,
 #  endif
@@ -673,7 +683,6 @@ static struct dac_dev_s g_dac1ch2dev =
   .ad_priv = &g_dac1ch2priv,
 };
 #endif  /* CONFIG_STM32_DAC1CH2 */
-#endif  /* STM32_NDAC > 1 */
 
 #endif  /* CONFIG_STM32_DAC1 */
 
@@ -696,14 +705,11 @@ static struct stm32_chan_s g_dac2ch1priv =
   .dmachan    = DAC2CH1_DMA_CHAN,
   .buffer_len = CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE,
   .dmabuffer  = dac2ch1_buffer,
+  .tsel       = DAC2CH1_TSEL_VALUE,
 #  ifdef DAC2CH1_HRTIM
   .timer      = TIM_INDEX_HRTIM,
-  .tsel       = 0,
-  .tbase      = 0,
-  .tfrequency = 0,
 #  else
   .timer      = CONFIG_STM32_DAC2CH1_TIMER,
-  .tsel       = DAC2CH1_TSEL_VALUE,
   .tbase      = DAC2CH1_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY,
 #  endif
@@ -758,6 +764,8 @@ static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
   modifyreg32(chan->cr, clearbits << shift, setbits << shift);
 }
 
+#ifdef HAVE_TIMER
+
 /****************************************************************************
  * Name: tim_getreg
  *
@@ -773,12 +781,10 @@ static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
  *
  ****************************************************************************/
 
-#ifdef HAVE_DMA
 static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
 {
   return getreg32(chan->tbase + offset);
 }
-#endif
 
 /****************************************************************************
  * Name: tim_putreg
@@ -795,13 +801,11 @@ static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
  *
  ****************************************************************************/
 
-#ifdef HAVE_DMA
 static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
                        uint32_t value)
 {
   putreg32(value, chan->tbase + offset);
 }
-#endif
 
 /****************************************************************************
  * Name: tim_modifyreg
@@ -820,13 +824,12 @@ static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-#ifdef HAVE_DMA
 static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
                           uint32_t clearbits, uint32_t setbits)
 {
   modifyreg32(chan->tbase + offset, clearbits, setbits);
 }
-#endif
+#endif  /* HAVE_TIMER */
 
 /****************************************************************************
  * Name: dac_interrupt
@@ -1019,7 +1022,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
   /* Reset counters (generate an update). Only when timer is not HRTIM */
 
-#ifdef HAVE_DMA
+#ifdef HAVE_TIMER
   if (chan->timer != TIM_INDEX_HRTIM)
     {
       tim_modifyreg(chan, STM32_BTIM_EGR_OFFSET, 0, ATIM_EGR_UG);
@@ -1043,7 +1046,115 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
 static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
-  return -ENOTTY;
+  FAR struct stm32_chan_s *chan = dev->ad_priv;
+  int ret = OK;
+
+  switch (cmd)
+    {
+#ifdef HAVE_DMA
+      case IO_DMABUFFER_INIT:
+        {
+          uint16_t *buffer = (uint16_t *)arg;
+
+          /* The caller is responsible for providing buffer with
+           * suitable length equal to CONFIG_STM32_DACxCHy_DMA_BUFFER_SIZE
+           */
+
+          dma_bufferinit(chan, buffer, chan->buffer_len * sizeof(buffer));
+          break;
+        }
+#endif
+
+      default:
+        {
+          aerr("ERROR: Unknown cmd: %d\n", cmd);
+          ret = -ENOTTY;
+          break;
+        }
+    }
+
+  return ret;
+}
+
+#ifdef HAVE_DMA
+
+/****************************************************************************
+ * Name: dma_bufferinit
+ ****************************************************************************/
+
+static void dma_bufferinit(FAR struct stm32_chan_s *chan, uint16_t* buffer,
+                           uint16_t len)
+{
+  memcpy(chan->dmabuffer, buffer, len);
+}
+
+/****************************************************************************
+ * Name: dma_remap
+ ****************************************************************************/
+
+static int dma_remap(FAR struct stm32_chan_s *chan)
+{
+#if defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
+  uint32_t regval = 0;
+
+  switch (chan->intf)
+    {
+      case 0:
+        {
+          /* Remap DMA1CH3 to DAC1CH1 */
+
+          regval |= SYSCFG_CFGR1_DAC1CH1_DMARMP;
+
+         /* Remap DAC trigger for STM32F33XX if needed */
+
+#  ifdef CONFIG_STM32_STM32F33XX
+#    if defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG1)
+          modifyreg32(STM32_SYSCFG_CFGR3, 0, SYSCFG_CFGR3_DAC1_TRIG3_RMP);
+#    elif defined(CONFIG_STM32_DAC1CH1_HRTIM_TRG2)
+          modifyreg32(STM32_SYSCFG_CFGR3, 0, SYSCFG_CFGR3_DAC1_TRIG5_RMP);
+#    endif
+#  endif
+          break;
+        }
+
+      case 1:
+        {
+          /* Remap DMA1CH4 to DAC1CH2 */
+
+          regval |= SYSCFG_CFGR1_DAC1CH2_DMARMP;
+
+          /* Remap DAC trigger for STM32F33XX if needed */
+
+#  ifdef CONFIG_STM32_STM32F33XX
+#    if defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG1)
+          modifyreg32(STM32_SYSCFG_CFGR3, 0, SYSCFG_CFGR3_DAC1_TRIG3_RMP);
+#    elif defined(CONFIG_STM32_DAC1CH2_HRTIM_TRG2)
+          modifyreg32(STM32_SYSCFG_CFGR3, 0, SYSCFG_CFGR3_DAC1_TRIG5_RMP);
+#    endif
+#  endif
+          break;
+        }
+
+      case 2:
+        {
+          /* Remap DMA1CH5 to DAC2CH1 */
+
+          regval |= SYSCFG_CFGR1_DAC2CH1_DMARMP;
+          break;
+        }
+
+      default:
+        {
+          return -EINVAL;
+        }
+    }
+
+  modifyreg32(STM32_SYSCFG_BASE, 0, regval);
+
+#endif
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1061,7 +1172,7 @@ static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifdef HAVE_DMA
+#ifdef HAVE_TIMER
 static int dac_timinit(FAR struct stm32_chan_s *chan)
 {
   uint32_t pclk;
@@ -1070,17 +1181,6 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
   uint32_t reload;
   uint32_t regaddr;
   uint32_t setbits;
-
-  /* Do nothing if HRTIM is selected as trigger.
-   * All necessary configuration is done in the HRTIM driver.
-   */
-
-#ifdef HAVE_HRTIM
-  if (chan->timer == TIM_INDEX_HRTIM)
-    {
-      return OK;
-    }
-#endif
 
   /* Configure the time base: Timer period, prescaler, clock division,
    * counter mode (up).
@@ -1226,6 +1326,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
   return OK;
 }
 #endif
+#endif  /* HAVE_DMA */
 
 /****************************************************************************
  * Name: dac_chaninit
@@ -1293,6 +1394,10 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
 
   if (chan->hasdma)
     {
+      /* Remap DMA request if necessary*/
+
+      dma_remap(chan);
+
       /* Yes.. DAC trigger enable */
 
       stm32_dac_modify_cr(chan, 0, DAC_CR_TEN);
@@ -1306,14 +1411,22 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
           return -EBUSY;
         }
 
-      /* Configure the timer that supports the DMA operation */
+      /* Configure the timer that supports the DMA operation
+       * Do nothing if HRTIM is selected as trigger.
+       * All necessary configuration is done in the HRTIM driver.
+       */
 
-      ret = dac_timinit(chan);
-      if (ret < 0)
+#ifdef HAVE_TIMER
+      if (chan->timer != TIM_INDEX_HRTIM)
         {
-          aerr("ERROR: Failed to initialize the DMA timer: %d\n", ret);
-          return ret;
+          ret = dac_timinit(chan);
+          if (ret < 0)
+            {
+              aerr("ERROR: Failed to initialize the DMA timer: %d\n", ret);
+              return ret;
+            }
         }
+#endif
     }
 #endif
 

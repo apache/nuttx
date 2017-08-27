@@ -590,10 +590,6 @@ config STM32F0_HAVE_FSMC
 	bool
 	default n
 
-config STM32F0_HAVE_HRTIM1
-	bool
-	default n
-
 config STM32F0_HAVE_USART3
 	bool
 	default n
@@ -949,11 +945,6 @@ config STM32F0_HASH
 	bool "HASH"
 	default n
 	depends on STM32F0_STM32F207 || STM32F0_STM32F40XX
-
-config STM32F0_HRTIM1
-	bool "HRTIM1"
-	default n
-	depends on STM32F0_HAVE_HRTIM1
 
 config STM32F0_I2C1
 	bool "I2C1"
