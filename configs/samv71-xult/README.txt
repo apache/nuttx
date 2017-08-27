@@ -1956,10 +1956,11 @@ Configuration sub-directories
         The SPI signals look clean on the board and the MRF24J40 seems
         fully functional.
 
-      2017-08-24:  There is only a single buffer for reassemblying larger
-        packets.  This could be an important issue for the hub configuration
+      2017-08-26:  There was only a single buffer for reassemblying larger
+        packets.  This could be a problem issue for the hub configuration
         which really needs the capability concurrently reassemble multiple
-        incoming streams.
+        incoming streams.  The design was extended to support multiple
+        reassembly buffers but additional testing is needed.
 
   mxtxplnd:
 

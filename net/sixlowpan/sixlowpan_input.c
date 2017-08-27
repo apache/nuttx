@@ -54,10 +54,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
-#  include "nuttx/clock.h"
-#endif
-
+#include "nuttx/mm/iob.h"
 #include "nuttx/net/netdev.h"
 #include "nuttx/net/radiodev.h"
 #include "nuttx/net/ip.h"
@@ -81,10 +78,6 @@
 
 #define INPUT_PARTIAL  0 /* Frame processed successful, packet incomplete */
 #define INPUT_COMPLETE 1 /* Frame processed successful, packet complete */
-
-/* Re-assembly timeout in clock ticks */
-
-#define NET_6LOWPAN_TIMEOUT SEC2TICK(CONFIG_NET_6LOWPAN_MAXAGE)
 
 /* This is the size of a buffer large enough to hold the largest uncompressed
  * HC06 or HC1 headers.
@@ -131,50 +124,6 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sixlowpan_compare_fragsrc
- *
- * Description:
- *   Check if the fragment that we just received is from the same source as
- *   the previosly received fragements.
- *
- * Input Parameters:
- *   radio    - Radio network device driver state instance
- *   metadata - Characteristics of the newly received frame
- *
- * Returned Value:
- *   true if the sources are the same.
- *
- ****************************************************************************/
-
-static bool sixlowpan_compare_fragsrc(FAR struct radio_driver_s *radio,
-                                      FAR const void *metadata)
-{
-  struct netdev_varaddr_s fragsrc;
-  int ret;
-
-  /* Extract the source address from the 'metadata' */
-
-  ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
-  if (ret < 0)
-    {
-      nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
-      return false;
-    }
-
-  /* The addresses cannot match if they are not the same size */
-
-  if (fragsrc.nv_addrlen == radio->r_fragsrc.nv_addrlen)
-    {
-      /* The are the same sizer, return the address comparisson */
-
-      return (memcmp(fragsrc.nv_addr, radio->r_fragsrc.nv_addr,
-                     fragsrc.nv_addrlen) == 0);
-    }
-
-  return false;
-}
 
 /****************************************************************************
  * Name: sixlowpan_compress_ipv6hdr
@@ -311,14 +260,15 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
   int reqsize;                /* Required buffer size */
   int hdrsize;                /* Size of the IEEE802.15.4 header */
+  int ret;
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
+  FAR struct sixlowpan_reassbuf_s *reass;
+  struct netdev_varaddr_s fragsrc;
   FAR uint8_t *fragptr;       /* Pointer to the fragmentation header */
   bool isfrag        = false;
   bool isfirstfrag   = false;
   uint16_t fragtag   = 0;     /* Tag of the fragment */
-  systime_t elapsed;          /* Elapsed time */
-  int ret;
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Get a pointer to the payload following the IEEE802.15.4 frame header(s).
@@ -359,166 +309,119 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
         ninfo("FRAG1: fragsize=%d fragtag=%d fragoffset=%d\n",
               fragsize, fragtag, fragoffset);
 
+        /* Drop any zero length fragments */
+
+        if (fragsize == 0)
+          {
+            nwarn("WARNING: Dropping zero-length 6LoWPAN fragment\n");
+            return INPUT_PARTIAL;
+          }
+
+        /* Drop the packet if it cannot fit into the d_buf */
+
+        if (fragsize > CONFIG_NET_6LOWPAN_MTU)
+          {
+            nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_MTU\n");
+            return -ENOSPC;
+          }
+
+        /* Extract the source address from the 'metadata'. */
+
+        ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
+        if (ret < 0)
+          {
+            nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+            return ret;
+          }
+
+        /* Allocate a new reassembly buffer */
+
+        reass = sixlowpan_reass_allocate(fragtag, &fragsrc);
+        if (reass == NULL)
+          {
+            nerr("ERROR: Failed to allocate a reassembly buffer\n");
+            return -ENOMEM;
+          }
+
+        radio->r_dev.d_buf = reass->rb_buf;
+        radio->r_dev.d_len = 0;
+        reass->rb_pktlen   = fragsize;
+
         /* Indicate the first fragment of the reassembly */
 
-        isfirstfrag     = true;
-        isfrag          = true;
+        bptr               = reass->rb_buf;
+        isfirstfrag        = true;
+        isfrag             = true;
       }
       break;
 
     case SIXLOWPAN_DISPATCH_FRAGN:
       {
-        /* Set offset, tag, size.  Offset is in units of 8 bytes. */
+        /* Get offset, tag, size.  Offset is in units of 8 bytes. */
 
         fragoffset      = fragptr[SIXLOWPAN_FRAG_OFFSET];
         fragtag         = GETUINT16(fragptr, SIXLOWPAN_FRAG_TAG);
         fragsize        = GETUINT16(fragptr, SIXLOWPAN_FRAG_DISPATCH_SIZE) & 0x07ff;
         g_frame_hdrlen += SIXLOWPAN_FRAGN_HDR_LEN;
 
+        /* Extract the source address from the 'metadata'. */
+
+        ret = sixlowpan_extract_srcaddr(radio, metadata, &fragsrc);
+        if (ret < 0)
+          {
+            nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
+            return ret;
+          }
+
+        /* Find the existing reassembly buffer with the same tag and source address */
+
+        reass = sixlowpan_reass_find(fragtag, &fragsrc);
+        if (reass == NULL)
+          {
+            nerr("ERROR: Failed to find a reassembly buffer for tag=%04x\n",
+                 fragtag);
+            return -ENOENT;
+          }
+
+       if (fragsize != reass->rb_pktlen)
+        {
+          /* The packet is a fragment but its size does not match. */
+
+          nwarn("WARNING: Dropping 6LoWPAN packet.  Bad fragsize: %u vs &u\n",
+                fragsize, reass->rb_pktlen);
+          ret = -EPERM;
+          goto errout_with_reass;
+        }
+
+        radio->r_dev.d_buf  = reass->rb_buf;
+        radio->r_dev.d_len  = 0;
+
         ninfo("FRAGN: fragsize=%d fragtag=%d fragoffset=%d\n",
               fragsize, fragtag, fragoffset);
-        ninfo("FRAGN: r_accumlen=%d paysize=%u fragsize=%u\n",
-              radio->r_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
+        ninfo("FRAGN: rb_accumlen=%d paysize=%u fragsize=%u\n",
+              reass->rb_accumlen, iob->io_len - g_frame_hdrlen, fragsize);
 
         /* Indicate that this frame is a another fragment for reassembly */
 
-        isfrag          = true;
+        bptr   = g_bitbucket;
+        isfrag = true;
       }
       break;
 
     /* Not a fragment */
 
     default:
+      /* We still need a packet buffer.  But in this case, the driver should
+       * have provided one.
+       */
+
+      DEBUGASSERT(radio->r_dev.d_buf != NULL);
+      reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
+      bptr  = reass->rb_buf;
       break;
     }
-
-  /* Check if we are currently reassembling a packet */
-
-  bptr = radio->r_dev.d_buf;
-  if (radio->r_accumlen > 0)
-    {
-      /* If reassembly timed out, cancel it */
-
-      elapsed = clock_systimer() - radio->r_time;
-      if (elapsed > NET_6LOWPAN_TIMEOUT)
-        {
-          nwarn("WARNING: Reassembly timed out\n");
-          radio->r_pktlen   = 0;
-          radio->r_accumlen = 0;
-        }
-
-      /* In this case what we expect is that the next frame will hold the
-       * next FRAGN of the sequence.  We have to handle a few exeptional
-       * cases that we need to handle:
-       *
-       * 1. If we are currently reassembling a packet, but have just received
-       *    the first fragment of another packet. We can either ignore it and
-       *    hope to receive the rest of the under-reassembly packet fragments,
-       *    or we can discard the previous packet altogether, and start
-       *    reassembling the new packet.  Here we discard the previous packet,
-       *    and start reassembling the new packet.
-       * 2. The new frame is not a fragment.  We should be able to handle this
-       *    case, but we cannot because that would require two packet buffers.
-       *    It could be handled with a more extensive design.
-       * 3. The fragment came from a different sender.  What would this mean?
-       *
-       */
-
-      else if (!isfrag)
-        {
-          /* Discard the partially assembled packet */
-
-          nwarn("WARNING: Non-fragment frame received during reassembly\n");
-          radio->r_pktlen   = 0;
-          radio->r_accumlen = 0;
-        }
-
-      /* It is a fragment of some kind.  Drop any zero length fragments */
-
-      else if (fragsize == 0)
-        {
-          nwarn("WARNING: Dropping zero-length 6LoWPAN fragment\n");
-          return INPUT_PARTIAL;
-        }
-
-      /* A non-zero, first fragement received while we are in the middle of
-       * rassembly.  Discard the partially assembled packet and start over.
-       */
-
-      else if (isfirstfrag)
-        {
-          nwarn("WARNING: First fragment frame received during reassembly\n");
-          radio->r_pktlen   = 0;
-          radio->r_accumlen = 0;
-        }
-
-      /* Verify that this fragment is part of that reassembly sequence */
-
-      else if (fragsize != radio->r_pktlen || radio->r_reasstag != fragtag  ||
-               !sixlowpan_compare_fragsrc(radio, metadata))
-        {
-          /* The packet is a fragment that does not belong to the packet
-           * being reassembled or the packet is not a fragment.
-           */
-
-          nwarn("WARNING: Dropping 6LoWPAN packet that is not a fragment of "
-                "the packet currently being reassembled\n");
-          return -EPERM;
-        }
-      else
-        {
-          /* Looks good.  We are currently processing a reassembling sequence
-           * and we recieved a valid FRAGN fragment.  Redirect the header
-           * uncompression to our bitbucket.
-           */
-
-          bptr = g_bitbucket;
-        }
-    }
-
-  /* There is no reassembly in progress. Check if we received a fragment */
-
-  else if (isfrag)
-    {
-      /* Another case that we have to handle is if a FRAGN fragment of a
-       * reassembly is received, but we are not currently reassembling a
-       * packet. I think we have no choice but to drop the packet in this
-       * case.
-       */
-
-      if (!isfirstfrag)
-        {
-          nwarn("WARNING: FRAGN 6LoWPAN fragment while not reassembling\n");
-          return -EPERM;
-        }
-
-      /* Drop the packet if it cannot fit into the d_buf */
-
-      if (fragsize > CONFIG_NET_6LOWPAN_MTU)
-        {
-          nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_MTU\n");
-          return -ENOSPC;
-        }
-
-      radio->r_pktlen   = fragsize;
-      radio->r_reasstag = fragtag;
-      radio->r_time     = clock_systimer();
-
-      ninfo("Starting reassembly: r_pktlen %u, r_reasstag %d\n",
-            radio->r_pktlen, radio->r_reasstag);
-
-      /* Extract the source address from the 'metadata'.  NOTE that the size
-       * of the source address may be different than our local, destination
-       * address.
-       */
-
-      ret = sixlowpan_extract_srcaddr(radio, metadata, &radio->r_fragsrc);
-      if (ret < 0)
-        {
-          nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
-          return ret;
-        }
-    }
+#else
+  bptr  = radio->r_dev.d_buf;
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Process next dispatch and headers */
@@ -553,7 +456,8 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
       /* Unknown or unsupported header */
 
       nwarn("WARNING: Unknown dispatch: %u\n",  hc1[SIXLOWPAN_HC1_DISPATCH]);
-      return -ENOSYS;
+      ret = -ENOSYS;
+      goto errout_with_reass;
     }
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
@@ -565,7 +469,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
        * begin placing the data payload.
        */
 
-      radio->r_boffset = g_uncomp_hdrlen;
+      reass->rb_boffset = g_uncomp_hdrlen;
     }
 
   /* No.. is this a subsequent fragment in the same sequence? */
@@ -576,7 +480,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
        * we began placing payload data.
        */
 
-      g_uncomp_hdrlen = radio->r_boffset;
+      g_uncomp_hdrlen = reass->rb_boffset;
     }
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 
@@ -591,7 +495,8 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
     {
       nwarn("WARNING: Packet dropped due to payload (%u) > packet buffer (%u)\n",
             paysize, CONFIG_NET_6LOWPAN_MTU);
-      return -ENOSPC;
+      ret = -ENOSPC;
+      goto errout_with_reass;
     }
 
   /* Sanity-check size of incoming packet to avoid buffer overflow */
@@ -602,14 +507,15 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
       nwarn("WARNING: Required buffer size: %u+%u+%u=%u Available=%u\n",
             g_uncomp_hdrlen, (fragoffset << 3), paysize,
             reqsize, CONFIG_NET_6LOWPAN_MTU);
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout_with_reass;
     }
 
   memcpy(radio->r_dev.d_buf + g_uncomp_hdrlen + (fragoffset << 3),
          fptr + g_frame_hdrlen, paysize);
 
 #ifdef CONFIG_NET_6LOWPAN_FRAG
-  /* Update radio->r_accumlen if the frame is a fragment, radio->r_pktlen
+  /* Update reass->rb_accumlen if the frame is a fragment, reass->rb_pktlen
    * otherwise.
    */
 
@@ -621,36 +527,49 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
        * bytes at the end. We must be liberal in what we accept.
        */
 
-      radio->r_accumlen = g_uncomp_hdrlen + (fragoffset << 3) + paysize;
+      reass->rb_accumlen = g_uncomp_hdrlen + (fragoffset << 3) + paysize;
     }
   else
     {
-      radio->r_pktlen = paysize + g_uncomp_hdrlen;
+      reass->rb_pktlen = paysize + g_uncomp_hdrlen;
     }
 
   /* If we have a full IP packet in sixlowpan_buf, deliver it to
    * the IP stack
    */
 
-  ninfo("r_accumlen=%d r_pktlen=%d paysize=%d\n",
-         radio->r_accumlen, radio->r_pktlen, paysize);
+  ninfo("rb_accumlen=%d rb_pktlen=%d paysize=%d\n",
+         reass->rb_accumlen, reass->rb_pktlen, paysize);
 
-  if (radio->r_accumlen == 0 || radio->r_accumlen >= radio->r_pktlen)
+  if (reass->rb_accumlen == 0 || reass->rb_accumlen >= reass->rb_pktlen)
     {
-      ninfo("IP packet ready (length %d)\n", radio->r_pktlen);
+      ninfo("IP packet ready (length %d)\n", reass->rb_pktlen);
 
-      radio->r_dev.d_len = radio->r_pktlen;
-      radio->r_pktlen    = 0;
-      radio->r_accumlen  = 0;
+      radio->r_dev.d_buf  = reass->rb_buf;
+      radio->r_dev.d_len  = reass->rb_pktlen;
+      reass->rb_active    = false;
+      reass->rb_pktlen    = 0;
+      reass->rb_accumlen  = 0;
       return INPUT_COMPLETE;
     }
 
+  radio->r_dev.d_buf  = NULL;
+  radio->r_dev.d_len  = 0;
   return INPUT_PARTIAL;
+
+errout_with_reass:
+  sixlowpan_reass_free(reass);
+  return ret;
+
 #else
   /* Deliver the packet to the IP stack */
 
   radio->r_dev.d_len = paysize + g_uncomp_hdrlen;
   return INPUT_COMPLETE;
+
+errout_with_reass:
+  return ret;
+
 #endif /* CONFIG_NET_6LOWPAN_FRAG */
 }
 
@@ -670,6 +589,11 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
 static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
 {
+#ifdef CONFIG_NET_6LOWPAN_FRAG
+  FAR struct sixlowpan_reassbuf_s *reass;
+#endif
+  int ret;
+
   sixlowpan_dumpbuffer("Incoming packet",
                        (FAR const uint8_t *)IPv6BUF(&radio->r_dev),
                        radio->r_dev.d_len);
@@ -691,7 +615,17 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
    * be set to zero.  Oddly, ipv6_input() will return OK in this case.
    */
 
-  return ipv6_input(&radio->r_dev);
+  ret = ipv6_input(&radio->r_dev);
+
+#ifdef CONFIG_NET_6LOWPAN_FRAG
+  /* Free the reassemby buffer */
+
+  reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
+  DEBUGASSERT(reass != NULL);
+  sixlowpan_reass_free(reass);
+#endif
+
+  return ret;
 }
 
 /****************************************************************************

@@ -103,11 +103,12 @@
 
 #ifdef CONFIG_STM32L4_DAC1_DMA
 #  if !defined(CONFIG_STM32L4_DAC1_TIMER)
-#    warning "A timer number must be specificed in CONFIG_STM32L4_DAC1_TIMER"
+#    warning "A timer number must be specified in CONFIG_STM32L4_DAC1_TIMER"
 #    undef CONFIG_STM32L4_DAC1_DMA
 #    undef CONFIG_STM32L4_DAC1_TIMER_FREQUENCY
-#  elif !defined(CONFIG_STM32L4_DAC1_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specificed in CONFIG_STM32L4_DAC1_TIMER_FREQUENCY"
+#  elif !defined(CONFIG_STM32L4_DAC1_TIMER_FREQUENCY) || \
+        (CONFIG_STM32L4_DAC1_TIMER_FREQUENCY < 1)
+#    warning "A timer frequency (>0) must be specified in CONFIG_STM32L4_DAC1_TIMER_FREQUENCY"
 #    undef CONFIG_STM32L4_DAC1_DMA
 #    undef CONFIG_STM32L4_DAC1_TIMER
 #  endif
@@ -115,11 +116,12 @@
 
 #ifdef CONFIG_STM32L4_DAC2_DMA
 #  if !defined(CONFIG_STM32L4_DAC2_TIMER)
-#    warning "A timer number must be specificed in CONFIG_STM32L4_DAC2_TIMER"
+#    warning "A timer number must be specified in CONFIG_STM32L4_DAC2_TIMER"
 #    undef CONFIG_STM32L4_DAC2_DMA
 #    undef CONFIG_STM32L4_DAC2_TIMER_FREQUENCY
-#  elif !defined(CONFIG_STM32L4_DAC2_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specificed in CONFIG_STM32L4_DAC2_TIMER_FREQUENCY"
+#  elif !defined(CONFIG_STM32L4_DAC2_TIMER_FREQUENCY) || \
+        (CONFIG_STM32L4_DAC2_TIMER_FREQUENCY < 1)
+#    warning "A timer frequency (>0) must be specified in CONFIG_STM32L4_DAC2_TIMER_FREQUENCY"
 #    undef CONFIG_STM32L4_DAC2_DMA
 #    undef CONFIG_STM32L4_DAC2_TIMER
 #  endif
@@ -269,7 +271,7 @@
 #endif
 
 /* Calculate timer divider values based upon DACn_TIMER_PCLK_FREQUENCY and
- * CONFIG_STM32_DACn_TIMER_FREQUENCY.
+ * CONFIG_STM32L4_DACn_TIMER_FREQUENCY.
  */
 
 #warning "Missing Logic"
@@ -312,6 +314,7 @@ struct stm32_chan_s
   DMA_HANDLE dma;        /* Allocated DMA channel */
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
+  int        result;     /* DMA result */
   uint16_t   dmabuffer[CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
 #endif
 };
@@ -323,9 +326,10 @@ struct stm32_chan_s
 /* DAC Register access */
 
 #ifdef HAVE_DMA
-static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset);
-static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
-                           uint32_t value);
+static inline void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
+                              uint32_t value);
+static inline void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
+                                 uint32_t clearbits, uint32_t setbits);
 #endif
 
 /* DAC methods */
@@ -457,7 +461,7 @@ static struct stm32_dac_s g_dacblock;
  *   Modify the contents of the DAC control register.
  *
  * Input Parameters:
- *   priv - Driver state instance
+ *   chan - A reference to the DAC channel state data
  *   clearbits - Bits in the control register to be cleared
  *   setbits - Bits in the control register to be set
  *
@@ -485,35 +489,13 @@ static inline void stm32l4_dac_modify_cr(FAR struct stm32_chan_s *chan,
 }
 
 /****************************************************************************
- * Name: tim_getreg
- *
- * Description:
- *   Read the value of an DMA timer register.
- *
- * Input Parameters:
- *   chan - A reference to the DAC block status
- *   offset - The offset to the register to read
- *
- * Returned Value:
- *   The current contents of the specified register
- *
- ****************************************************************************/
-
-#ifdef HAVE_DMA
-static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
-{
-  return getreg32(chan->tbase + offset);
-}
-#endif
-
-/****************************************************************************
  * Name: tim_putreg
  *
  * Description:
  *   Read the value of an DMA timer register.
  *
  * Input Parameters:
- *   chan - A reference to the DAC block status
+ *   chan - A reference to the DAC channel state data
  *   offset - The offset to the register to read
  *
  * Returned Value:
@@ -522,8 +504,8 @@ static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
-                       uint32_t value)
+static inline void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
+                              uint32_t value)
 {
   putreg32(value, chan->tbase + offset);
 }
@@ -536,7 +518,7 @@ static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
  *   Modify the value of an DMA timer register.
  *
  * Input Parameters:
- *   priv - Driver state instance
+ *   chan - A reference to the DAC channel state data
  *   offset - The timer register offset
  *   clearbits - Bits in the control register to be cleared
  *   setbits - Bits in the control register to be set
@@ -547,8 +529,8 @@ static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
-                          uint32_t clearbits, uint32_t setbits)
+static inline void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
+                                 uint32_t clearbits, uint32_t setbits)
 {
   modifyreg32(chan->tbase + offset, clearbits, setbits);
 }
@@ -659,6 +641,48 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
 #ifdef HAVE_DMA
 static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 {
+  struct stm32_chan_s *chan = (struct stm32_chan_s *)arg;
+  struct dac_dev_s    *dev;
+
+  DEBUGASSERT(chan);
+
+#ifdef CONFIG_STM32L4_DAC1
+  if (chan->intf == 0)
+    {
+      dev = &g_dac1dev;
+    }
+#if STM32L4_NDAC > 1
+  else if (chan->intf == 1)
+    {
+      dev = &g_dac2dev;
+    }
+#endif
+  else
+#endif /* CONFIG_STM32L4_DAC1 */
+#ifdef CONFIG_STM32L4_DAC2
+  if (chan->intf == 2)
+    {
+      dev = &g_dac3dev;
+    }
+  else
+#endif
+    {
+      DEBUGPANIC();
+    }
+
+  DEBUGASSERT(dev->ad_priv == chan);
+
+  /* Report the result of the transfer only if the TX callback has not already
+   * reported an error.
+   */
+
+  if (chan->result == -EBUSY)
+    {
+      /* Save the result of the transfer if no error was previously reported. */
+
+      chan->result = (isr & DMA_CHAN_TEIF_BIT) ? -EIO : OK;
+      dac_txdone(dev);
+    }
 }
 #endif
 
@@ -705,8 +729,9 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
       stm32l4_dmasetup(chan->dma, chan->dro, (uint32_t)chan->dmabuffer,
                        CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE, DAC_DMA_CONTROL_WORD);
 
-      /* Enable DMA */
+      /* Start the DMA */
 
+      chan->result = -EBUSY;
       stm32l4_dmastart(chan->dma, dac_dmatxcallback, chan, false);
 
       /* Enable DMA for DAC Channel */
@@ -777,7 +802,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
    * counter mode (up).
    */
 
-  /* Enable the timer.  At most, two of the following cases (pluse the
+  /* Enable the timer.  At most, two of the following cases (plus the
    * default) will be enabled
    */
 
@@ -1004,6 +1029,7 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       if (ret < 0)
         {
           aerr("ERROR: Failed to initialize the DMA timer: %d\n", ret);
+          stm32l4_dmafree(chan->dma);
           return ret;
         }
     }

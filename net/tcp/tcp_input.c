@@ -48,6 +48,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
@@ -342,9 +343,12 @@ found:
 #endif
 
           /* We must free this TCP connection structure; this connection
-           * will never be established.
+           * will never be established.  There should only be one reference
+           * on this connection when we allocated for the connection.
            */
 
+          DEBUGASSERT(conn->crefs == 1);
+          conn->crefs = 0;
           tcp_free(conn);
         }
       else

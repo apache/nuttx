@@ -132,7 +132,7 @@
 #  define JB_SP    JB_RSP
 #  define JB_PC    JB_RSI
 
-#else
+#elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
 
 #  ifdef __ASSEMBLY__
@@ -152,7 +152,10 @@
 #    define JB_PC  (5)
 
 #  endif /* __ASSEMBLY__ */
-#endif /* CONFIG_HOST_X86_64 && !CONFIG_SIM_M32 */
+#elif defined(CONFIG_HOST_ARM)
+#  define JB_SP 8
+#  define JB_PC 9
+#endif
 
 /* Simulated Heap Definitions **********************************************/
 /* Size of the simulated heap */

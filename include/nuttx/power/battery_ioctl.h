@@ -2,7 +2,7 @@
  * include/nuttx/power/battery_ioctl.h
  * NuttX Battery IOCTLs definition
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,5 +60,35 @@
 #define BATIOC_CURRENT       _BATIOC(0x0005)
 #define BATIOC_INPUT_CURRENT _BATIOC(0x0006)
 #define BATIOC_CAPACITY      _BATIOC(0x0007)
+#define BATIOC_OPERATE       _BATIOC(0x0008)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct batio_operate_msg_s
+{
+  uint8_t operate_type; /* Really enum batio_operate_e */
+  union
+  {
+    uint32_t u32;
+    uint8_t  u8[8];
+  };
+};
+
+#if defined(CONFIG_I2C_BQ2429X)
+enum batio_operate_e
+{
+  BATIO_OPRTN_NOP = 0,
+  BATIO_OPRTN_BOOST,
+  BATIO_OPRTN_CHARGE,
+  BATIO_OPRTN_EN_TERM,
+  BATIO_OPRTN_HIZ,
+  BATIO_OPRTN_SYSOFF,
+  BATIO_OPRTN_RESET,
+  BATIO_OPRTN_WDOG,
+  BATIO_OPRTN_END
+};
+#endif
 
 #endif /* __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H */

@@ -1,8 +1,11 @@
 /****************************************************************************
- * net/sixlowpan/sixlowpan_initialize.c
+ * arch/sim/src/up_setjmp_arm.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Nickolay Semyonov (RPI) <snob@wolpike.com>
+ *
+ * Extracted from the MUSL C-library.  The MUSL C library has a compatible
+ * MIT license and is released here under the NuttX 3-clause BSD license:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,53 +36,68 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+.syntax unified
+.global up_setjmp
+.type up_setjmp,%function
+up_setjmp:
+	mov ip,r0
+	stmia ip!,{v1,v2,v3,v4,v5,v6,sl,fp}
+	mov r2,sp
+	stmia ip!,{r2,lr}
+	mov r0,#0
 
-#include <nuttx/config.h>
+#if 0
+	adr r1,1f
+	ldr r2,1f
+	ldr r1,[r1,r2]
 
-#include "sixlowpan/sixlowpan.h"
-#include "sixlowpan/sixlowpan_internal.h"
-
-#ifdef CONFIG_NET_6LOWPAN
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sixlowpan_initialize
- *
- * Description:
- *   sixlowpan_initialize() is called during OS initialization at power-up
- *   reset.  It is called from the common net_setup() function.
- *   sixlowpan_initialize() configures 6LoWPAN networking data structures.
- *   It is called prior to platform-specific driver initialization so that
- *   the 6LoWPAN networking subsystem is prepared to deal with network
- *   driver initialization actions.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void sixlowpan_initialize(void)
-{
-#ifdef  CONFIG_NET_6LOWPAN_FRAG
-  /* Initialize the reassembly buffer allocator */
-
-  sixlowpan_reass_initialize();
+	tst r1,#0x260
+	beq 3f
+	tst r1,#0x20
+	beq 2f
+	stc p2, cr4, [ip], #48
+2:	tst r1,#0x40
+	beq 2f
+	.fpu vfp
+	vstmia ip!, {d8-d15}
+	.fpu softvfp
+	.eabi_attribute 10, 0
+	.eabi_attribute 27, 0
+2:	tst r1,#0x200
+	beq 3f
+	stcl p1, cr10, [ip], #8
+	stcl p1, cr11, [ip], #8
+	stcl p1, cr12, [ip], #8
+	stcl p1, cr13, [ip], #8
+	stcl p1, cr14, [ip], #8
+	stcl p1, cr15, [ip], #8
 #endif
+3:	bx lr
 
-#ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-  /* Initialize HC06 data data structures */
+.syntax unified
+.global up_longjmp
+.type up_longjmp,%function
+up_longjmp:
+	mov ip,r0
+	movs r0,r1
+	moveq r0,#1
+	ldmia ip!, {v1,v2,v3,v4,v5,v6,sl,fp}
+	ldmia ip!, {r2,lr}
+	mov sp,r2
 
-  sixlowpan_hc06_initialize();
+#if 0
+	.fpu vfp
+	vldmia ip!, {d8-d15}
+	.fpu softvfp
+	.eabi_attribute 10, 0
+	.eabi_attribute 27, 0
+2:	tst r1,#0x200
+	beq 3f
+	ldcl p1, cr10, [ip], #8
+	ldcl p1, cr11, [ip], #8
+	ldcl p1, cr12, [ip], #8
+	ldcl p1, cr13, [ip], #8
+	ldcl p1, cr14, [ip], #8
+	ldcl p1, cr15, [ip], #8
 #endif
-}
-
-#endif /* CONFIG_NET_6LOWPAN */
+3:	bx lr

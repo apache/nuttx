@@ -997,7 +997,7 @@ Tickless OS
   will have an error of 0.6%  and will have inaccuracies that will
   effect the time due to long term error build-up.
 
-  Using the slow clock clock input, the Tickless support is functional,
+  Using the slow clock input, the Tickless support is functional,
   however, there are inaccuracies  in delays.  For example,
 
     nsh> sleep 10
@@ -1318,7 +1318,7 @@ Configuration sub-directories
 
   mrf24j40-starhub
 
-    This configuration implement a hub node in a 6LoWPAN start network.
+    This configuration implements a hub node in a 6LoWPAN start network.
     It is intended for the us the mrf24j40-starpoint configuration with
     the clicker2-stm32 configurations.  Essentially, the SAME70 Xplained
     plays the roll of the hub in the configuration and the clicker2-stm32
@@ -1383,10 +1383,11 @@ Configuration sub-directories
 
         No significant functional testing has yet been performed.
 
-      2017-08-24:  There is only a single buffer for reassemblying larger
-        packets.  This could be an important issue for the hub configuration
+      2017-08-26:  There was only a single buffer for reassemblying larger
+        packets.  This could be a problem issue for the hub configuration
         which really needs the capability concurrently reassemble multiple
-        incoming streams.
+        incoming streams.  The design was extended to support multiple
+        reassembly buffers but have not yet been verified on this platform.
 
   netnsh:
 

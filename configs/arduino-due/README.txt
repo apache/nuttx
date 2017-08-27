@@ -2,8 +2,15 @@ README
 ^^^^^^
 
   This README discusses issues unique to NuttX configurations for the
-  Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84
-  MHz.
+  Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84 MHz.
+
+  NOTE:  If found that newer Arduino Due board differ from the older boards
+  mine:  Mine has the 32.768 slow clock crystal and associated caps installed.
+  the newer boards do not.  This can cause a hang in the SAM startup code
+  where it waits for the slow crystal input to lock on.
+
+  Options:  (1) Solder a 32.768 KHz crystal and associated caps on board or,
+  (2) disable the function sam_setupsupc() in sam_clockconfig.c
 
   Supported Shields
   -----------------

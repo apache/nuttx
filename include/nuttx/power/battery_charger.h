@@ -60,6 +60,7 @@
  *
  *   CONFIG_I2C - I2C support *may* be needed
  *   CONFIG_I2C_BQ2425X - The BQ2425x driver must be explicitly selected.
+ *   CONFIG_I2C_BQ2429X - The BQ2429x driver must be explicitly selected.
  */
 
 /* IOCTL Commands ***********************************************************/
@@ -84,6 +85,8 @@
  *   Input value:  An int defining the current value.
  * BATIOC_INPUT_CURRENT - Define the input current limit of power supply.
  *   Input value:  An int defining the input current limit value.
+ * BATIOC_OPERATE - Perform miscellaneous, device-specific charger operation.
+ *   Input value:  An uintptr_t that can hold a pointer to struct batio_operate_msg_s.
  */
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
@@ -151,6 +154,10 @@ struct battery_charger_operations_s
   /* Set the input current limit of power supply */
 
   int (*input_current)(struct battery_charger_dev_s *dev, int value);
+
+  /* Do device specific operation */
+
+  int (*operate)(struct battery_charger_dev_s *dev, uintptr_t param);
 };
 
 /* This structure defines the battery driver state structure */
@@ -207,11 +214,11 @@ int battery_charger_register(FAR const char *devpath,
  *
  * Description:
  *   Initialize the BQ2425X battery driver and return an instance of the
- *   lower_half interface that may be used with battery_charger_register();
+ *   lower-half interface that may be used with battery_charger_register().
  *
  *   This driver requires:
  *
- *   CONFIG_BATTERY_CHARGER - Upper half battery fuel gauge driver support
+ *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
  *   CONFIG_I2C - I2C support
  *   CONFIG_I2C_BQ2425X - And the driver must be explictly selected.
  *
@@ -232,6 +239,55 @@ int battery_charger_register(FAR const char *devpath,
 
 struct i2c_master_s;
 FAR struct battery_charger_dev_s *bq2425x_initialize(FAR struct i2c_master_s *i2c,
+                                                     uint8_t addr,
+                                                     uint32_t frequency,
+                                                     int current);
+#endif
+
+/****************************************************************************
+ * Name: bq2429x_initialize
+ *
+ * Description:
+ *   Initialize the BQ2429X (BQ24series LiIon Charger with USB OTG boost 5V)
+ *   battery driver and return an instance of the lower-half interface that
+ *   may be used with battery_charger_register().
+ *
+ * This is for:
+ *   BQ24296M VQFN24
+ *   BQ24296 VQFN24
+ *   BQ24297
+ *   BQ24298
+ * Possibly similar:
+ *   BQ24262
+ *   BQ24259
+ *   BQ24292I BQ24295 B
+ * Possibly the following:
+ *   BQ24260/1/2   Vin-14V
+ *   BQ24190       Vin=17V
+ *
+ *   This driver requires:
+ *
+ *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
+ *   CONFIG_I2C - I2C support
+ *   CONFIG_I2C_BQ2429X - And the driver must be explictly selected.
+ *
+ * Input Parameters:
+ *   i2c       - An instance of the I2C interface to use to communicate with
+ *               the BQ2429X
+ *   addr      - The I2C address of the BQ2429X (Better be 0x6B).
+ *   frequency - The I2C frequency
+ *   current   - The input current our power-supply can offer to charger
+ *
+ * Returned Value:
+ *   A pointer to the initialized battery driver instance.  A NULL pointer
+ *   is returned on a failure to initialize the BQ2429X lower half.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_BQ2429X)
+
+struct i2c_master_s;
+FAR struct battery_charger_dev_s *bq2429x_initialize(FAR struct i2c_master_s *i2c,
                                                      uint8_t addr,
                                                      uint32_t frequency,
                                                      int current);

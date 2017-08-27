@@ -160,7 +160,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
   FAR struct battery_charger_dev_s *dev  = inode->i_private;
   int ret;
 
-  /* Inforce mutually exclusive access to the battery driver */
+  /* Enforce mutually exclusive access to the battery driver */
 
   ret = sem_wait(&dev->batsem);
   if (ret < 0)
@@ -168,7 +168,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
       return -errno; /* Probably EINTR */
     }
 
-  /* Procss the IOCTL command */
+  /* Process the IOCTL command */
 
   ret = -EINVAL;  /* Assume a bad argument */
   switch (cmd)
@@ -235,6 +235,16 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
             {
               amps = *ampsp;
               ret = dev->ops->input_current(dev, amps);
+            }
+        }
+        break;
+
+      case BATIOC_OPERATE:
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->operate(dev, (uintptr_t)arg);
             }
         }
         break;

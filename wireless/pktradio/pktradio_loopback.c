@@ -51,6 +51,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/radiodev.h>
@@ -130,7 +131,9 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-static uint8_t g_iobuffer[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
+#ifdef CONFIG_NET_6LOWPAN
+static struct sixlowpan_reassbuf_s g_iobuffer;
+#endif
 
 static uint8_t g_mac_addr[CONFIG_PKTRADIO_ADDRLEN] =
 {
@@ -346,6 +349,10 @@ static int lo_loopback(FAR struct net_driver_s *dev)
           priv->lo_tail = NULL;
         }
 
+      /* Make sure the our single packet buffer is attached */
+
+      priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
+
       /* Return the next frame to the network */
 
       ninfo("Send frame %p to the network:  Offset=%u Length=%u\n",
@@ -420,6 +427,15 @@ static void lo_poll_work(FAR void *arg)
   /* Perform the poll */
 
   net_lock();
+
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached */
+
+  priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
+  /* And perform the poll */
+
   (void)devif_timer(&priv->lo_radio.r_dev, lo_loopback);
 
   /* Setup the watchdog poll timer again */
@@ -576,6 +592,13 @@ static void lo_txavail_work(FAR void *arg)
   if (priv->lo_bifup)
     {
       /* If so, then poll the network for new XMIT data */
+#ifdef CONFIG_NET_6LOWPAN
+      /* Make sure the our single packet buffer is attached */
+
+      priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
+      /* Then perform the poll */
 
       (void)devif_poll(&priv->lo_radio.r_dev, lo_loopback);
     }
@@ -1009,7 +1032,6 @@ int pktradio_loopback(void)
 #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = lo_ioctl;         /* Handle network IOCTL commands */
 #endif
-  dev->d_buf          = g_iobuffer;       /* Attach the IO buffer */
   dev->d_private      = (FAR void *)priv; /* Used to recover private state from dev */
 
   /* Set the network mask and advertise our MAC-based IP address */

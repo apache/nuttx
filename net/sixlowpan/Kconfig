@@ -12,6 +12,40 @@ config NET_6LOWPAN_FRAG
 		CONFIG_NET_6LOWPAN_FRAG specifies if 6lowpan fragmentation should be
 		used or not. Fragmentation is on by default.
 
+config NET_6LOWPAN_NREASSBUF
+	int "Number of preallocated reassembly buffers"
+	default 2
+	depends on NET_6LOWPAN_FRAG
+	---help---
+		Large IPv6 packets will be fragmented by 6LoWPAN into multiple
+		frames and reconstitued into a reassembly buffer on the receiving
+		side.  Each concurrent reassembly requires one buffer.  Reassembly
+		buffers are large:  The size of the 6LoWPAN MTU plus some overhead
+		for the reassembly state.
+
+		Some reassembly buffers may be preallocated; some may be allocated
+		dynamically from the stack.  The former require more static memory
+		usage; the later require additional CPU cycles to perform the
+		allocation and may effect deterministic behavior.  So this is a
+		trade-off between resources and performance.  If the number of pre-
+		allocated reassembly buffers are exhausted, the reassembly will
+		continue with dynamically allocated reassembly buffers.
+
+		This behavior can be changed with CONFIG_NET_6LOWPAN_REASS_STATIC
+
+config NET_6LOWPAN_REASS_STATIC
+	bool "Static reassembly buffers"
+	default n
+	depends on NET_6LOWPAN_FRAG
+	---help---
+		By default, reassembly buffers may be allocated dynamically from the
+		stack when all of the statically allocation reassembly buffers are
+		in use.  This will equire additional CPU cycles to perform the
+		allocation and may effect deterministic behavior.  This option may
+		be selected to suppress all dynamica allocation of reassembly
+		buffers.  In that case, only static reassembly buffers are available;
+		when those are exhausted, frames that require reassembly will be lost.
+
 config NET_6LOWPAN_FRAMELEN
 	int "Max Radio Frame Size"
 	default 127
