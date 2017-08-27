@@ -110,10 +110,13 @@ HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 
-ifeq ($(CONFIG_MTD_LC823450),y)
+ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
 ARCH_LIBS += -lSdDr_patch_es2
 ARCH_LIBPATHS += -L"$(TOPDIR)/arch/arm/src/lc823450"
-ARCH_LIBS += $(ARCH_LIBS_OPT)--just-symbols=$(TOPDIR)/arch/arm/src/lc823450/rom_symbols.txt
+endif
+
+ifeq ($(CONFIG_LC823450_SDIF),y)
+ARCH_LIBS += $(ARCH_LIBS_OPT)--just-symbols=$(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld
 LDFLAGS +=--no-wchar-size-warning
 endif
 

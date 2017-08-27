@@ -73,8 +73,33 @@ nxhello_main: Screen resolution (128,48)
 nxhello_hello: Position (31,20)
 nxhello_main: Close NX
 
+5. eMMC can be accessed via /dev/mtdblock0pX
+
+nsh> mkfatfs -F 32 /dev/mtdblock0p10
+nsh> mount -t vfat /dev/mtdblock0p10 /mnt/sd0
+nsh> df
+  Block  Number
+  Size   Blocks     Used Available Mounted on
+ 16384   453025        2    453023 /mnt/sd0
+     0        0        0         0 /proc
+nsh> ls /mnt/sd0
+/mnt/sd0:
+nsh> ps > /mnt/sd0/ps.txt
+nsh> ls /mnt/sd0
+/mnt/sd0:
+ ps.txt
+
+Micro SD slot on the board can be used via /dev/mtdblock1.
+Please note that card hotplugging is not supported.
+
+6. USB Mass Storage Class support
+
+nsh> msconn
+nsh> msdis
+
+
 TODO
 ^^^^
 
 The following peripherals will be supported.
-eMMC, uSD, USB, ADC, Audio, etc.
+ADC, Audio, etc.
