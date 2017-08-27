@@ -82,6 +82,10 @@ config LC823450_SDIF
 
 if LC823450_SDIF
 
+config LC823450_SDIF_PATCH
+	bool "SD/eMMC driver patch support"
+	default n
+
 config LC823450_SDIF_SDC
 	bool "SD card support"
 	default n
@@ -92,6 +96,65 @@ config LC823450_SDC_DMA
 	select ARCH_DMA
 
 endif
+
+config LC823450_MTD
+	bool "LC823450 MTD devices"
+	default n
+	select MTD_PARTITION
+	---help---
+		Build support for LC823450 MTD eMMC/uSD
+
+if LC823450_MTD
+
+config MTD_DEV_MAX
+	int "Max MTD devices"
+	default 2
+
+config MTD_DEVNO_EMMC
+	int "Device No. for eMMC"
+	default 0
+
+config MTD_DEVNO_SDC
+	int "Device No. for SD"
+	default 1
+
+config MTD_DEVPATH0
+	string "Device path for eMMC"
+	default "/dev/mtdblock0"
+
+config MTD_DEVPATH1
+	string "Device path for SD"
+	default "/dev/mtdblock1"
+
+config MTD_CONFIG_DEVPATH
+	string "Device path for config"
+	default "/dev/mtdblock0p2"
+
+config MTD_ETC_DEVPATH
+	string "Device path for etc"
+	default "/dev/mtdblock0p5"
+
+config MTD_SYSTEM_DEVPATH
+	string "Device path for system"
+	default "/dev/mtdblock0p6"
+
+config MTD_LOG_DEVPATH
+	string "Device path for log"
+	default "/dev/mtdblock0p7"
+
+config MTD_CACHE_DEVPATH
+	string "Device path for cache"
+	default "/dev/mtdblock0p9"
+
+config MTD_CP_DEVPATH
+	string "Device path for content on eMMC"
+	default "/dev/mtdblock0p10"
+
+config MTD_CP_STARTBLOCK
+	int "Start block for content on eMMC"
+	default 602112
+
+endif # LC823450 MTD
 
 config LC823450_I2C_TIMEOSEC
 	int "I2C timeout (sec)"

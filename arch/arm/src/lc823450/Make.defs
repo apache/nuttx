@@ -176,3 +176,8 @@ endif
 ifeq ($(CONFIG_LC823450_SDRAM), y)
 CHIP_CSRCS += lc823450_sdram.c
 endif
+
+ifeq ($(CONFIG_LC823450_MTD),y)
+CHIP_CSRCS += lc823450_mtd.c
+CHIP_CSRCS += lc823450_mmcl.c
+endif
