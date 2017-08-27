@@ -321,12 +321,12 @@ int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd)
 {
   struct mmcl_dev_s *dev;
   const char *devname[CONFIG_MTD_DEV_MAX] =
-    {
-      CONFIG_MTD_DEVPATH0,
+  {
+    CONFIG_MTD_DEVPATH0,
 #if CONFIG_MTD_DEV_MAX > 1
-      CONFIG_MTD_DEVPATH1,
+    CONFIG_MTD_DEVPATH1,
 #endif
-    };
+  };
   int ret = -ENOMEM;
 
   /* Sanity check */

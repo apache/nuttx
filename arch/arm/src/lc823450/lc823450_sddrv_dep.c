@@ -85,7 +85,6 @@ static sem_t SemWWait[2];
 
 static uint64_t _sddep_timeout = (10 * 100); /* 10sec (in tick) */
 
-
 #ifndef CONFIG_HOTPLUG_SDC
 extern void sdif_powerctrl(bool);
 #endif
@@ -102,12 +101,15 @@ static int _get_ch_from_cfg(SdDrCfg *cfg)
       case SDIF0_BASE:
         ch = 0;
         break;
+
       case SDIF1_BASE:
         ch = 1;
         break;
+
       default:
         ASSERT(false);
     }
+
   return ch;
 }
 
@@ -152,8 +154,8 @@ SINT_T sddep0_hw_init(SdDrCfg *cfg)
   /* set EMMC */
 
   modifyreg32(SDCTL,
-                0,
-                SDCTL_COREVLT | SDCTL_MMCVLT0_18V | SDCTL_SDMMC0_MMC);
+              0,
+              SDCTL_COREVLT | SDCTL_MMCVLT0_18V | SDCTL_SDMMC0_MMC);
 
 
   /* pull-up SDCMD0/SDAT00-03 */
@@ -176,6 +178,8 @@ SINT_T sddep0_hw_init(SdDrCfg *cfg)
 #ifdef CONFIG_LC823450_SDIF_SDC
 SINT_T sddep1_hw_init(SdDrCfg *cfg)
 {
+  int i;
+
   /* wait 15ms */
 
   usleep(15000);
@@ -185,7 +189,6 @@ SINT_T sddep1_hw_init(SdDrCfg *cfg)
   /* pull up SDCMD1/SDDATA10-13 which correspond to GPIO23-27 */
   /* NOTE: SDCLK1 is not changed (i.e. none) */
 
-  int i;
   for (i = 3; i <= 7; i++)
     {
       lc823450_gpio_config(GPIO_PORT2 | (GPIO_PIN0 + i) |
@@ -334,6 +337,7 @@ SINT_T sddep_wait(UI_32 ms, SdDrCfg *cfg)
       usleep(ms * 1000);
     }
 #endif
+
   return 0;
 }
 
@@ -373,6 +377,7 @@ SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status, SdDrCfg *cfg)
         }
       (void)sched_yield();
     }
+
   return ret;
 }
 

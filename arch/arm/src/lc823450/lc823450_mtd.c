@@ -316,6 +316,7 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct lc823450_mtd_dev_s *priv = (FAR struct lc823450_mtd_dev_s *)dev;
   FAR struct mtd_geometry_s *geo;
   FAR void **ppv;
+
   finfo("cmd=%xh, arg=%xh\n", cmd, arg);
 
   mtd_semtake(&priv->sem);
@@ -343,6 +344,7 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             geo->neraseblocks = priv->nblocks;
             ret = OK;
           }
+
         finfo("blocksize=%d erasesize=%d neraseblocks=%d\n", geo->blocksize,
               geo->erasesize, geo->neraseblocks);
         break;
@@ -364,7 +366,9 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         finfo("MTDIOC_BULKERASE\n");
+
         /* Erase the entire device */
+
         ret = OK;
         break;
 
@@ -400,6 +404,7 @@ static int mtd_mediainitialize(FAR struct lc823450_mtd_dev_s *dev)
   unsigned long nblocks;
   unsigned long blocksize;
   uint32_t sysclk = lc823450_get_ahb();
+
   finfo("enter\n");
 
   mtd_semtake(&dev->sem);
@@ -447,11 +452,11 @@ static int mtd_mediainitialize(FAR struct lc823450_mtd_dev_s *dev)
 
       ret = lc823450_sdc_changespeedmode(dev->channel, 1);
 
-    if (0 == ret)
-      {
-        ret = lc823450_sdc_setclock(dev->channel, 40000000, sysclk);
-        finfo("ch=%d HS mode ret=%d \n", dev->channel, ret);
-      }
+      if (0 == ret)
+        {
+          ret = lc823450_sdc_setclock(dev->channel, 40000000, sysclk);
+          finfo("ch=%d HS mode ret=%d \n", dev->channel, ret);
+        }
     }
 
 #ifdef CONFIG_LC823450_SDC_UHS1
@@ -464,6 +469,7 @@ get_card_size:
       finfo("ERROR: No media found\n");
       goto exit_with_error;
     }
+
   finfo("blocksize=%d nblocks=%d\n", blocksize, nblocks);
 
   dev->nblocks = nblocks;
@@ -502,7 +508,8 @@ static FAR struct mtd_dev_s *lc823450_mtd_allocdev(uint32_t channel)
 
   /* Create an instance of the LC823450 MTD device state structure */
 
-  priv = (FAR struct lc823450_mtd_dev_s *)kmm_zalloc(sizeof(struct lc823450_mtd_dev_s));
+  priv = (FAR struct lc823450_mtd_dev_s *)
+    kmm_zalloc(sizeof(struct lc823450_mtd_dev_s));
   if (!priv)
     {
       finfo("Failed to allocate the LC823450 MTD devicestructure\n");
@@ -668,13 +675,14 @@ int lc823450_mtd_initialize(uint32_t devno)
         }
 
       ret = mmcl_createpartition(devno, partno, g_mtdpart[i]);
-    if (ret < 0)
-      {
-        finfo("%s(): mmcl_initialize part%d failed: %d\n", __func__, partno, ret);
-        mtd_semgive(&g_sem);
-        DEBUGASSERT(0);
-        return ret;
-      }
+      if (ret < 0)
+        {
+          finfo("%s(): mmcl_initialize part%d failed: %d\n",
+                __func__, partno, ret);
+          mtd_semgive(&g_sem);
+          DEBUGASSERT(0);
+          return ret;
+        }
     }
 
   mtd_semgive(&g_sem);

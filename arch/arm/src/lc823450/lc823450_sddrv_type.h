@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #ifndef NULL
-#define NULL ( (void * ) 0 )
+#  define NULL        ((void * ) 0)
 #endif
 
 #define TRUE_T        (1)       /* true */

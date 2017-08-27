@@ -58,6 +58,7 @@
  * Partition #9: cache
  * Partition #10: contents
  */
+
 #define LC823450_NPARTS         10        /* Number of partitions             */
 #define LC823450_PART1_START    0         /* Start sector of partition 1      */
 #define LC823450_PART1_NBLOCKS  1024      /* Number of sectors of partition 1 */
@@ -81,7 +82,7 @@
 #define LC823450_PART10_NBLOCKS  0      /* 0 means all remaining sectors     */
 
 #if CONFIG_MTD_CP_STARTBLOCK != LC823450_PART10_START
-#error "Start sector of contents patrition missmatched"
+#  error "Start sector of contents patrition missmatched"
 #endif
 
 /****************************************************************************

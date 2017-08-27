@@ -41,14 +41,14 @@
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_MAXENDPOINTS
-#define LC823450_NLOGENDPOINTS        CONFIG_USBDEV_MAXENDPOINTS
+#  define LC823450_NLOGENDPOINTS        CONFIG_USBDEV_MAXENDPOINTS
 #else /* CONFIG_USBDEV_MAXENDPOINTS */
-#define LC823450_NLOGENDPOINTS        (16)          /* ep0-15 */
+#  define LC823450_NLOGENDPOINTS        (16)          /* ep0-15 */
 #endif /* CONFIG_USBDEV_MAXENDPOINTS */
 #define LC823450_NPHYSENDPOINTS       (LC823450_NLOGENDPOINTS * 2)
 
-
 /* Register define */
+
 #define USBDEV_BASE             0x40010000
 
 #define USB_CONF                (USBDEV_BASE + 0x0000)

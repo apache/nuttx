@@ -86,7 +86,8 @@ static sem_t _sdc_sem[2] =
 static SdDrCfg SdCh0;
 static SdDrCfg SdCh1;
 
-static SdDrCfg *cfg[2] = {
+static SdDrCfg *cfg[2] =
+{
   &SdCh0,
   &SdCh1
 };
@@ -101,7 +102,6 @@ static uint8_t   _sec_cache_enabled;
 static uint32_t  _sec_cache[512/4];
 static uint32_t  _sec_cache_add = 0xffffffff;
 #endif
-
 
 /****************************************************************************
  * Public Data
@@ -122,8 +122,10 @@ extern void   sddep_voltage_switch(SdDrCfg *cfg);
 extern void   sddep_set_clk(SdDrCfg *);
 extern SINT_T sddep_wait(UI_32, SdDrCfg *);
 extern SINT_T sddep_wait_status(UI_32 req, UI_32 *status, SdDrCfg *cfg);
-extern SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg);
-extern SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg);
+extern SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type,
+                         SdDrCfg *cfg);
+extern SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
+                          SdDrCfg *cfg);
 
 /****************************************************************************
  * Private Functions
@@ -186,7 +188,6 @@ static void lc823450_sdc_access_led(uint32_t ch, unsigned long sector)
 #  define lc823450_sdc_access_led(a,b)
 #endif
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -221,6 +222,8 @@ int lc823450_sdc_clearcardinfo(uint32_t ch)
 
 int lc823450_sdc_initialize(uint32_t ch)
 {
+  int ret;
+
   /* Only ES2 is supported */
 
   ASSERT(1 == cpu_ver);
@@ -267,7 +270,7 @@ int lc823450_sdc_initialize(uint32_t ch)
 
   mcinfo("++++ start \n");
   _sdc_semtake(&_sdc_sem[ch]);
-  int ret = SdDrInitialize(cfg[ch]);
+  ret = SdDrInitialize(cfg[ch]);
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("---- end ret=%d \n", ret);
 
@@ -280,11 +283,14 @@ int lc823450_sdc_initialize(uint32_t ch)
 
 int lc823450_sdc_finalize(uint32_t ch)
 {
+  int ret;
+
   mcinfo("++++ start ch=%ld \n", ch);
   _sdc_semtake(&_sdc_sem[ch]);
-  int ret = SdDrFinalize(cfg[ch]);
+  ret = SdDrFinalize(cfg[ch]);
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("---- end ret=%d \n", ret);
+
   return ret;
 }
 
@@ -294,10 +300,12 @@ int lc823450_sdc_finalize(uint32_t ch)
 
 int lc823450_sdc_identifycard(uint32_t ch)
 {
+  int ret;
+
   mcinfo("++++ start \n");
   _sdc_semtake(&_sdc_sem[ch]);
 
-  int ret = SdDrIdentifyCard(cfg[ch]);
+  ret = SdDrIdentifyCard(cfg[ch]);
 
 #ifdef CONFIG_LC823450_SDC_CACHE
   if (ch)
@@ -318,14 +326,16 @@ int lc823450_sdc_identifycard(uint32_t ch)
 
 int lc823450_sdc_setclock(uint32_t ch, uint32_t limitClk, uint32_t sysClk)
 {
+  int ret;
+
   mcinfo("++++ start ch=%ld limitClk=%ld sysClk=%ld\n", ch, limitClk, sysClk);
   _sdc_semtake(&_sdc_sem[ch]);
-  int ret = SdDrSetClock(limitClk, sysClk, cfg[ch]);
+  ret = SdDrSetClock(limitClk, sysClk, cfg[ch]);
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("---- end ret=%d \n", ret);
+
   return ret;
 }
-
 
 /****************************************************************************
  * Name: lc823450_sdc_refmediatype
@@ -335,11 +345,14 @@ int lc823450_sdc_setclock(uint32_t ch, uint32_t limitClk, uint32_t sysClk)
 
 int lc823450_sdc_refmediatype(uint32_t ch)
 {
+  int ret;
+
   mcinfo("++++ start \n");
   _sdc_semtake(&_sdc_sem[ch]);
-  int ret = SdDrRefMediaType(cfg[ch]);
+  ret = SdDrRefMediaType(cfg[ch]);
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("---- end ret=%d \n", ret);
+
   return ret;
 }
 
@@ -350,10 +363,12 @@ int lc823450_sdc_refmediatype(uint32_t ch)
 int lc823450_sdc_getcardsize(uint32_t ch,
                              unsigned long *pSecNum, unsigned long *pSecSize)
 {
+  int ret;
+
   mcinfo("++++ start \n");
   _sdc_semtake(&_sdc_sem[ch]);
 
-  int ret = SdDrGetCardSize(pSecNum, pSecSize, cfg[ch]);
+  ret = SdDrGetCardSize(pSecNum, pSecSize, cfg[ch]);
 
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("---- end ret=%d \n", ret);
@@ -368,14 +383,14 @@ int lc823450_sdc_readsector(uint32_t ch,
                             unsigned long addr, unsigned short cnt,
                             void *pbuf, unsigned long type)
 {
+  int ret = 0;
+  int i = 0;
+
   _sdc_semtake(&_sdc_sem[ch]);
 
 #ifdef CONFIG_LC823450_SDC_LOG
   mcinfo("++++ start ch=%d, addr=%ld, cnt=%d \n", ch, addr, cnt);
 #endif
-
-  int ret = 0;
-  int i = 0;
 
 #ifdef CONFIG_LC823450_SDC_CACHE
   if (ch && _sec_cache_enabled && 1 == cnt && addr == _sec_cache_add)
@@ -402,7 +417,9 @@ int lc823450_sdc_readsector(uint32_t ch,
         {
           break;
         }
-        mcinfo("ret=%d ch=%d add=%ld cnt=%d i=%d \n", ret, ch, addr, cnt, i);
+
+      mcinfo("ret=%d ch=%d add=%ld cnt=%d i=%d \n",
+             ret, ch, addr, cnt, i);
     }
 
 #ifdef CONFIG_LC823450_SDC_CACHE
@@ -417,6 +434,7 @@ int lc823450_sdc_readsector(uint32_t ch,
               _sec_cache_enabled = 1;
             }
         }
+
       if (_sec_cache_enabled)
         {
           if (1 == cnt && 0 == ret)
@@ -447,6 +465,8 @@ int lc823450_sdc_writesector(uint32_t ch,
                              unsigned long addr, unsigned short cnt,
                              void *pbuf, unsigned long type)
 {
+  int ret;
+
   _sdc_semtake(&_sdc_sem[ch]);
 
 #ifdef CONFIG_LC823450_SDC_LOG
@@ -466,7 +486,7 @@ int lc823450_sdc_writesector(uint32_t ch,
   sched_add_bo((uint64_t)cnt);
 #endif
 
-  int ret = SdDrWriteSector(addr, cnt, pbuf, type, cfg[ch]);
+  ret = SdDrWriteSector(addr, cnt, pbuf, type, cfg[ch]);
 
   if (0 > ret)
     {
@@ -494,6 +514,8 @@ int lc823450_sdc_checktrim(uint32_t ch)
 
 int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt)
 {
+  int ret;
+
   _sdc_semtake(&_sdc_sem[ch]);
 
 #ifdef CONFIG_LC823450_SDC_LOG
@@ -506,8 +528,7 @@ int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt)
   sched_add_bt((uint64_t)cnt);
 #endif
 
-  int ret = SdDrEraseSeq(0x00000001, addr, cnt, cfg[ch]);
-
+  ret = SdDrEraseSeq(0x00000001, addr, cnt, cfg[ch]);
   if (0 > ret)
     {
       mcinfo("ret=%d ch=%d add=%ld cnt=%d \n", ret, ch, addr, cnt);
@@ -525,10 +546,12 @@ int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt)
 
 int lc823450_sdc_cachectl(uint32_t ch, int ctrl)
 {
+  int ret;
+
   mcinfo("++++ ch=%d, ctrl=%d \n", ch, ctrl);
   _sdc_semtake(&_sdc_sem[ch]);
 
-  int ret = SdDrCacheCtrl(ctrl, cfg[ch]);
+  ret = SdDrCacheCtrl(ctrl, cfg[ch]);
 
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("----  end ret=%d \n", ret);
@@ -541,10 +564,12 @@ int lc823450_sdc_cachectl(uint32_t ch, int ctrl)
 
 int lc823450_sdc_changespeedmode(uint32_t ch, int mode)
 {
+  int ret;
+
   mcinfo("++++ ch=%d, mode=%d \n", ch, mode);
   _sdc_semtake(&_sdc_sem[ch]);
 
-  int ret = SdDrChangeSpeedMode(mode, cfg[ch]);
+  ret = SdDrChangeSpeedMode(mode, cfg[ch]);
 
   if (0 == ret)
     {
@@ -575,22 +600,27 @@ int lc823450_sdc_changespeedmode(uint32_t ch, int mode)
 
 int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length)
 {
+  uint8_t cid[16];
+  int ret;
+
   mcinfo("++++ ch=%d \n", ch);
   _sdc_semtake(&_sdc_sem[ch]);
 
-  uint8_t cid[16];
-  int ret = SdDrGetCid((UI_32 *)cid, cfg[ch]);
+  ret = SdDrGetCid((UI_32 *)cid, cfg[ch]);
 
   if (0 == ret && length >= (2 * sizeof(cid) + 1))
     {
       int i;
+
       for (i = 15; i >= 0; i--)
         {
           snprintf(cidstr, 3, "%02x", cid[i]);
           cidstr += 2;
         }
+
       *cidstr = '\0';
     }
+
   _sdc_semgive(&_sdc_sem[ch]);
   mcinfo("----  end ret=%d \n", ret);
   return ret;
@@ -602,7 +632,10 @@ int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length)
 
 int lc823450_sdc_locked(void)
 {
-  int i, val, ret;
+  int val;
+  int ret;
+  int i;
+
   ret = 0;
 
   for (i = 0; i < 2; i++)
@@ -614,6 +647,6 @@ int lc823450_sdc_locked(void)
           break;
         }
     }
+
   return ret;
 }
-
