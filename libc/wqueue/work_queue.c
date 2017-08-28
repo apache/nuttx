@@ -91,10 +91,6 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 {
   DEBUGASSERT(work != NULL);
 
-  /* Cancel any pending work in the work stucture */
-
-  work_cancel(qid, work);
-
   /* Get exclusive access to the work queue */
 
   while (work_lock() < 0);
@@ -154,6 +150,10 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   if (qid == USRWORK)
     {
+      /* Cancel any pending work in the work stucture */
+
+      work_cancel(qid, work);
+
       return work_qqueue(&g_usrwork, work, worker, arg, delay);
     }
   else
