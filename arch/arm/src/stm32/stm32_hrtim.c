@@ -129,10 +129,6 @@
 #  error HRTIM Interrupts not supported yet
 #endif
 
-#ifdef CONFIG_STM32_HRTIM_DMA
-#  error HRTIM DMA not supported yet
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -316,6 +312,9 @@ struct stm32_hrtim_timcmn_s
   uint16_t irq;                 /* interrupts configuration */
 #endif
 #ifdef CONFIG_STM32_HRTIM_DMA
+  uint16_t dma;
+#endif
+#ifdef CONFIG_STM32_HRTIM_DMABURST
   uint32_t dmaburst;
 #endif
 };
@@ -570,6 +569,11 @@ static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv);
 #ifdef CONFIG_STM32_HRTIM_DAC
 static int hrtim_dac_config(FAR struct stm32_hrtim_s *priv);
 #endif
+#ifdef CONFIG_STM32_HRTIM_DMA
+static int hrtim_dma_cfg(FAR struct stm32_hrtim_s *priv);
+static int hrtim_tim_dma_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                             uint16_t dma);
+#endif
 #ifdef HRTIM_HAVE_FAULTS
 static int hrtim_faults_config(FAR struct stm32_hrtim_s *priv);
 static int hrtim_flt_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index);
@@ -642,7 +646,10 @@ static struct stm32_hrtim_tim_s g_master =
     .dac   = HRTIM_MASTER_DAC,
 #  endif
 #  ifdef CONFIG_STM32_HRTIM_MASTER_IRQ
-    .irq   = HRTIM_IRQ_MASTER
+    .irq   = HRTIM_MASTER_IRQ
+#  endif
+#  ifdef CONFIG_STM32_HRTIM_MASTER_DMA
+    .dma   = HRTIM_MASTER_DMA
 #  endif
 #endif
   },
@@ -713,7 +720,10 @@ static struct stm32_hrtim_tim_s g_tima =
     .dac   = HRTIM_TIMA_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMA_IRQ
-    .irq   = HRTIM_IRQ_TIMA,
+    .irq   = HRTIM_TIMA_IRQ,
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMA_DMA
+    .dma   = HRTIM_TIMA_DMA
 #endif
   },
   .priv = &g_tima_priv
@@ -784,7 +794,10 @@ static struct stm32_hrtim_tim_s g_timb =
     .dac   = HRTIM_TIMB_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMB_IRQ
-    .irq   = HRTIM_IRQ_TIMB,
+    .irq   = HRTIM_TIMB_IRQ,
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMB_DMA
+    .dma   = HRTIM_TIMB_DMA
 #endif
   },
   .priv = &g_timb_priv
@@ -855,7 +868,10 @@ static struct stm32_hrtim_tim_s g_timc =
     .dac   = HRTIM_TIMC_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMC_IRQ
-    .irq   = HRTIM_IRQ_TIMC,
+    .irq   = HRTIM_TIMC_IRQ,
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMC_DMA
+    .dma   = HRTIM_TIMC_DMA
 #endif
   },
   .priv = &g_timc_priv
@@ -926,7 +942,10 @@ static struct stm32_hrtim_tim_s g_timd =
     .dac   = HRTIM_TIMD_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMD_IRQ
-    .irq   = HRTIM_IRQ_TIMD,
+    .irq   = HRTIM_TIMD_IRQ,
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMD_DMA
+    .dma   = HRTIM_TIMD_DMA
 #endif
   },
   .priv = &g_timd_priv
@@ -997,7 +1016,10 @@ static struct stm32_hrtim_tim_s g_time =
     .dac   = HRTIM_TIME_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME_IRQ
-    .irq   = HRTIM_IRQ_TIME,
+    .irq   = HRTIM_TIME_IRQ,
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIME_DMA
+    .dma   = HRTIM_TIME_DMA
 #endif
   },
   .priv = &g_time_priv
@@ -2366,6 +2388,85 @@ static int hrtim_dac_config(FAR struct stm32_hrtim_s *priv)
 }
 #endif
 
+#ifdef CONFIG_STM32_HRTIM_DMA
+
+/****************************************************************************
+ * Name: hrtim_dma_cfg
+ ****************************************************************************/
+
+static int hrtim_tim_dma_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
+                             uint16_t dma)
+{
+  int ret = OK;
+  uint32_t regval = 0;
+
+  if (timer == HRTIM_TIMER_MASTER)
+    {
+      /* Master support first 7 DMA requests */
+
+      if (dma > 0x7F)
+        {
+          tmrerr("ERROR: invalid DMA requests 0x%04X for timer %d\n", dma,
+                 timer);
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+  else
+    {
+      if (dma & HRTIM_DMA_SYNC)
+        {
+          tmrerr("ERROR: timer %d does not support 0x%04X DMA request\n",
+                 timer, HRTIM_DMA_SYNC);
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+
+  /* DMA configuration occupies upper half of the DIER register */
+
+  regval = dma << 16;
+
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_DIER_OFFSET, regval);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: hrtim_dma_cfg
+ ****************************************************************************/
+
+static int hrtim_dma_cfg(FAR struct stm32_hrtim_s *priv)
+{
+#ifdef CONFIG_STM32_HRTIM_MASTER_DMA
+  hrtim_tim_dma_cfg(priv, HRTIM_TIMER_MASTER, priv->master->tim.dma);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMA_DMA
+  hrtim_tim_dma_cfg(priv, HRTIM_TIMER_TIMA, priv->tima->tim.dma);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMB_DMA
+  hrtim_tim_dma_cfg(priv, HRTIM_TIMER_TIMB, priv->timb->tim.dma);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMC_DMA
+  hrtim_tim_dma_cfg(priv, HRTIM_TIMER_TIMC, priv->timc->tim.dma);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMD_DMA
+  hrtim_tim_dma_cfg(priv, HRTIM_TIMER_TIMD, priv->timd->tim.dma);
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIME_DMA
+  hrtim_tim_dma_cfg(priv, HRTIM_TIMER_TIME, priv->time->tim.dma);
+#endif
+
+  return OK;
+}
+#endif  /* CONFIG_STM32_HRTIM_DAM */
+
 #ifdef HRTIM_HAVE_FAULTS
 
 /****************************************************************************
@@ -2869,7 +2970,7 @@ static int hrtim_events_config(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif
+#endif  /* HRTIM_HAVE_FAULTS */
 
 /****************************************************************************
  * Name: hrtim_irq_config
@@ -2896,7 +2997,7 @@ void hrtim_irq_ack(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
 {
 #warning "hrtim_irq_ack: missing logic"
 }
-#endif
+#endif  /* HRTIM_HAVE_INTERRUPTS */
 
 /****************************************************************************
  * Name: hrtim_tim_mode_set
@@ -3442,6 +3543,15 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
   if (ret != OK)
     {
       tmrerr("ERROR: HRTIM IRQ configuration failed!\n");
+      goto errout;
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_DMA
+  ret = hrtim_dma_cfg(priv);
+  if (ret != OK)
+    {
+      tmrerr("ERROR: HRTIM DMA configuration failed!\n");
       goto errout;
     }
 #endif
