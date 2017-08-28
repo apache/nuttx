@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/************************************************************************************
  * arch/arm/src/stm32l4/chip/stm32l4_tim.h
  *
  *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
@@ -32,16 +32,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_TIM_H
 #define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_TIM_H
 
-/****************************************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ************************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *****************************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
 
@@ -127,7 +127,7 @@
 #define STM32L4_LPTIM_CNT_OFFSET    0x001c  /* Counter (16-bit) */
 #define STM32L4_LPTIM_OR_OFFSET     0x001c  /* Options Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses ***************************************************************/
 
 /* Advanced Timers - TIM1 and TIM8 */
 
@@ -341,7 +341,7 @@
 #define STM32L4_TIM7_PSC            (STM32L4_TIM7_BASE+STM32L4_BTIM_PSC_OFFSET)
 #define STM32L4_TIM7_ARR            (STM32L4_TIM7_BASE+STM32L4_BTIM_ARR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ****************************************************/
 
 /* Control register 1 */
 
@@ -671,6 +671,7 @@
 #define ATIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 Complementary output polarity */
 #define ATIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable */
 #define ATIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity */
+#define ATIM_CCER_CC4NP           (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
 #define ATIM_CCER_CC5E            (1 << 16) /* Bit 16: Capture/Compare 5 output enable */
 #define ATIM_CCER_CC5P            (1 << 17) /* Bit 17: Capture/Compare 5 output Polarity */
 #define ATIM_CCER_CC6E            (1 << 20) /* Bit 20: Capture/Compare 6 output enable */

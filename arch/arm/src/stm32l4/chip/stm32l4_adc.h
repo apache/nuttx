@@ -373,6 +373,10 @@
 #define ADC_TR3_HT_SHIFT             (16)     /* Bits 16-23: Analog watchdog 3 higher threshold */
 #define ADC_TR3_HT_MASK              (0xff << ADC_TR3_HT_SHIFT)
 
+/* Offset between SQ bits */
+
+#define ADC_SQ_OFFSET                (6)
+
 /* ADC regular sequence register 1 */
 
 #define ADC_SQR1_L_SHIFT             (0)         /* Bits 0-3:   Regular channel sequence length */
@@ -385,6 +389,10 @@
 #define ADC_SQR1_SQ3_MASK            (0x1f << ADC_SQR1_SQ3_SHIFT)
 #define ADC_SQR1_SQ4_SHIFT           (24)        /* Bits 24-28: 4th conversion in regular sequence */
 #define ADC_SQR1_SQ4_MASK            (0x1f << ADC_SQR1_SQ4_SHIFT)
+#define ADC_SQR1_RESERVED            (0xe0820830)
+#define ADC_SQR1_FIRST               (1)
+#define ADC_SQR1_LAST                (4)
+#define ADC_SQR1_SQ_OFFSET           (1*ADC_SQ_OFFSET)
 
 /* ADC regular sequence register 2 */
 
@@ -398,6 +406,10 @@
 #define ADC_SQR2_SQ8_MASK            (0x1f << ADC_SQR2_SQ8_SHIFT)
 #define ADC_SQR2_SQ9_SHIFT           (24)        /* Bits 24-28: 9th conversion in regular sequence */
 #define ADC_SQR2_SQ9_MASK            (0x1f << ADC_SQR2_SQ9_SHIFT )
+#define ADC_SQR2_RESERVED            (0xe0820820)
+#define ADC_SQR2_FIRST               (5)
+#define ADC_SQR2_LAST                (9)
+#define ADC_SQR2_SQ_OFFSET           (0)
 
 /* ADC regular sequence register 3 */
 
@@ -410,7 +422,11 @@
 #define ADC_SQR3_SQ13_SHIFT          (18)        /* Bits 18-22: 13th conversion in regular sequence */
 #define ADC_SQR3_SQ13_MASK           (0x1f << ADC_SQR3_SQ13_SHIFT)
 #define ADC_SQR3_SQ14_SHIFT          (24)        /* Bits 24-28: 14th conversion in regular sequence */
-#define ADC_SQR3_SQ14_MASK           (0x1f << ADC_SQR3_SQ14_SHIFT )
+#define ADC_SQR3_SQ14_MASK           (0x1f << ADC_SQR3_SQ14_SHIFT)
+#define ADC_SQR3_RESERVED            (0xe0820820)
+#define ADC_SQR3_FIRST               (10)
+#define ADC_SQR3_LAST                (14)
+#define ADC_SQR3_SQ_OFFSET           (0)
 
 /* ADC regular sequence register 4 */
 
@@ -418,6 +434,10 @@
 #define ADC_SQR4_SQ15_MASK           (0x1f << ADC_SQR4_SQ15_SHIFT)
 #define ADC_SQR4_SQ16_SHIFT          (6)         /* Bits 6-10:  15th conversion in regular sequence */
 #define ADC_SQR4_SQ16_MASK           (0x1f << ADC_SQR4_SQ16_SHIFT)
+#define ADC_SQR4_RESERVED            (0xfffff820)
+#define ADC_SQR4_FIRST               (15)
+#define ADC_SQR4_LAST                (16)
+#define ADC_SQR4_SQ_OFFSET           (0)
 
 /* ADC regular data register */
 

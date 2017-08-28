@@ -43,7 +43,7 @@ CRC      : TODO (configurable polynomial)
 WWDG     : TODO
 IWDG     : works
 MMCSD    : TODO
-ADC      : TODO
+ADC      : Code written, to be tested
 DAC      : Code written, to be tested
 DMA2D    : TODO (Chrom-Art Accelerator for image manipulation)
 

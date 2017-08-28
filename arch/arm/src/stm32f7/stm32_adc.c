@@ -1020,7 +1020,7 @@ static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable)
  *   reset values. It could set all the ADCs configured.
  *
  * Input Parameters:
- *   regaddr - The register to read
+ *   priv  - A reference to the ADC block status
  *   reset - Condition, set or reset
  *
  * Returned Value:
