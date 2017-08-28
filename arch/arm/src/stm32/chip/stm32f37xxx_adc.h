@@ -183,8 +183,8 @@
 #define ADC_SMPR1_SMP16_MASK         (7 << ADC_SMPR1_SMP16_SHIFT)
 #define ADC_SMPR1_SMP17_SHIFT        (21)      /* Bits 21-23: Channel 17 Sample time selection */
 #define ADC_SMPR1_SMP17_MASK         (7 << ADC_SMPR1_SMP17_SHIFT)
-#define ADC_SMPR1_SMP18_SHIFT        (21)      /* Bits 24-26: Channel 18 Sample time selection */
-#define ADC_SMPR1_SMP18_MASK         (7 << ADC_SMPR1_SMP17_SHIFT)
+#define ADC_SMPR1_SMP18_SHIFT        (24)      /* Bits 24-26: Channel 18 Sample time selection */
+#define ADC_SMPR1_SMP18_MASK         (7 << ADC_SMPR1_SMP18_SHIFT)
 
 /* ADC sample time register 2 */
 
