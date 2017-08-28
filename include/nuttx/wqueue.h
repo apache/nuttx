@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/wqueue.h
  *
- *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -338,12 +338,12 @@ int work_usrstart(void);
  *   Queue work to be performed at a later time.  All queued work will be
  *   performed on the worker thread of execution (not the caller's).
  *
- *   The work structure is allocated by caller, but completely managed by
- *   the work queue logic.  The caller should never modify the contents of
- *   the work queue structure; the caller should not call work_queue()
- *   again until either (1) the previous work has been performed and removed
- *   from the queue, or (2) work_cancel() has been called to cancel the work
- *   and remove it from the work queue.
+ *   The work structure is allocated and must be initialized to all zero by
+ *   the caller.  Otherwise, the work structure is completely managed by the
+ *   work queue logic.  The caller should never modify the contents of the
+ *   work queue structure directly.  If work_queue() is called before the
+ *   previous work as been performed and removed from the queue, then any
+ *   pending work will be canceled and lost.
  *
  * Input parameters:
  *   qid    - The work queue ID

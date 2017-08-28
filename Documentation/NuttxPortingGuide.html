@@ -2954,7 +2954,10 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
   Queue work to be performed at a later time.  All queued work will be performed on the worker thread of execution (not the caller's).
 </p>
 <p>
-  The work structure is allocated by caller, but completely managed by the work queue logic.  The caller should never modify the contents of the work queue structure; the caller should not call  <code>work_queue()</code> again until either (1) the previous work has been performed and removed from the queue, or (2) <code>work_cancel()</code> has been called to cancel the work and remove it from the work queue.
+  The work structure is allocated and must be initialized to all zero by the caller.
+  Otherwise, the work structure is completely managed by the work queue logic.
+  The caller should never modify the contents of the work queue structure directly.
+  If <code>work_queue()</code> is called before the previous work as been performed and removed from the queue, then any pending work will be canceled and lost.
 </p>
 <p>
   <b>Input Parameters</b>:
