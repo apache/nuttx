@@ -530,6 +530,43 @@ static inline void rcc_enableapb2(void)
 }
 
 /****************************************************************************
+ * Name: rcc_enableccip
+ *
+ * Description:
+ *   Set peripherals independent clock configuration.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableccip(void)
+{
+  uint32_t regval;
+
+  /* Certain peripherals have no clock selected even when their enable bit is
+   * set. Set some defaults in the CCIPR register so those peripherals
+   * will at least have a clock.
+   */
+
+  regval = getreg32(STM32L4_RCC_CCIPR);
+
+#if defined(STM32L4_USE_CLK48)
+  /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
+   * and then we can also do away with STM32L4_USE_CLK48, and give better
+   * warning messages.
+   */
+
+  regval |= STM32L4_CLK48_SEL;
+#endif
+
+#if defined(CONFIG_STM32L4_ADC1) || defined(CONFIG_STM32L4_ADC2) || defined(CONFIG_STM32L4_ADC3)
+  /* Select SYSCLK as ADC clock source */
+
+  regval |= RCC_CCIPR_ADCSEL_SYSCLK;
+#endif
+
+  putreg32(regval, STM32L4_RCC_CCIPR);
+}
+
+/****************************************************************************
  * Name: stm32l4_stdclockconfig
  *
  * Description:
@@ -858,21 +895,6 @@ static void stm32l4_stdclockconfig(void)
       putreg32(regval, STM32L4_RCC_CR);
 #  endif
 #endif
-
-#if defined(STM32L4_USE_CLK48)
-      /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
-       * and then we can also do away with STM32L4_USE_CLK48, and give better
-       * warning messages
-       *
-       * XXX sanity if our STM32L4_CLK48_SEL is YYY then we need to have already
-       * enabled ZZZ
-       */
-
-      regval  = getreg32(STM32L4_RCC_CCIPR);
-      regval &= RCC_CCIPR_CLK48SEL_MASK;
-      regval |= STM32L4_CLK48_SEL;
-      putreg32(regval, STM32L4_RCC_CCIPR);
-#endif
     }
 }
 #endif
@@ -883,6 +905,7 @@ static void stm32l4_stdclockconfig(void)
 
 static inline void rcc_enableperipherals(void)
 {
+  rcc_enableccip();
   rcc_enableahb1();
   rcc_enableahb2();
   rcc_enableahb3();
