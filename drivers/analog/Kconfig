@@ -33,6 +33,13 @@ config ADC_FIFOSIZE
 		this is a ring buffer, the actual number of bytes that can be
 		retained in buffer is (ADC_FIFOSIZE - 1).
 
+config ADC_NPOLLWAITERS
+	int "Number of poll waiters"
+	default 2
+	depends on !DISABLE_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll.
+
 config ADC_ADS1242
 	bool "TI ADS1242 support"
 	default n
