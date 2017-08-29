@@ -222,13 +222,19 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      /* Report not connected */
-
       nwarn("WARNING: Lost connection\n");
 
-      tcp_lost_connection(pstate->snd_sock, flags);
+      /* Report not connected */
+
+      tcp_lost_connection(pstate->snd_sock, pstate->snd_ackcb, flags);
       pstate->snd_sent = -ENOTCONN;
     }
+
+  /* Prohibit further callbacks */
+
+  pstate->snd_ackcb->flags = 0;
+  pstate->snd_ackcb->priv  = NULL;
+  pstate->snd_ackcb->event = NULL;
 
   /* Wake up the waiting thread */
 
@@ -344,11 +350,11 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      /* Report not connected */
-
       nwarn("WARNING: Lost connection\n");
 
-      tcp_lost_connection(pstate->snd_sock, flags);
+      /* Report not connected */
+
+      tcp_lost_connection(pstate->snd_sock, pstate->snd_datacb, flags);
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }

@@ -439,11 +439,11 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      /* Report not connected */
-
       ninfo("Lost connection\n");
 
-      tcp_lost_connection(sinfo->s_sock, flags);
+      /* Report the disconnection event to all socket clones */
+
+      tcp_lost_connection(sinfo->s_sock, sinfo->s_cb, flags);
       sinfo->s_result = -ENOTCONN;
       goto end_wait;
     }

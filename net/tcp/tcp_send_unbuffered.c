@@ -396,11 +396,11 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      /* Report not connected */
-
       ninfo("Lost connection\n");
 
-      tcp_lost_connection(pstate->snd_sock, flags);
+      /* Report not connected */
+
+      tcp_lost_connection(pstate->snd_sock, pstate->snd_cb, flags);
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }

@@ -73,8 +73,8 @@ struct tcp_poll_s
  * Name: tcp_poll_interrupt
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
- *   TCP receive operation via by the device interface layer.
+ *   This function is called to perform the actual TCP receive operation via
+ *   the device interface layer.
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
@@ -124,14 +124,20 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           /* Mark that the connection has been lost */
 
-          tcp_lost_connection(info->psock, flags);
+          tcp_lost_connection(info->psock, pstate->cb, flags);
           eventset |= (POLLERR | POLLHUP);
         }
 
       /* Awaken the caller of poll() if requested event occurred. */
 
-      if (eventset)
+      if (eventset != 0)
         {
+          /* Stop further callbacks */
+
+          pstate->cb->flags   = 0;
+          pstate->cb->priv    = NULL;
+          pstate->cb->event   = NULL;
+
           info->fds->revents |= eventset;
           sem_post(info->fds->sem);
         }

@@ -302,11 +302,12 @@ int tcp_start_monitor(FAR struct socket *psock)
  * Name: tcp_stop_monitor
  *
  * Description:
- *   Stop monitoring TCP connection changes for a given socket.  This is part
- *   of a graceful shutdown.
+ *   Stop monitoring TCP connection changes for a sockets associated with
+ *   a given TCP connection stucture.
  *
  * Input Parameters:
  *   conn - The TCP connection of interest
+ *   flags    Set of disconnection events
  *
  * Returned Value:
  *   None
@@ -317,24 +318,27 @@ int tcp_start_monitor(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-void tcp_stop_monitor(FAR struct tcp_conn_s *conn)
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
 {
   DEBUGASSERT(conn != NULL);
 
   /* Stop the network monitor */
 
-  tcp_shutdown_monitor(conn, TCP_CLOSE);
+  tcp_shutdown_monitor(conn, flags);
 }
 
 /****************************************************************************
  * Name: tcp_lost_connection
  *
  * Description:
- *   Called when a loss-of-connection event has occurred.  This is for an
- *   unexpected disconnection of some sort from the host.
+ *   Called when a loss-of-connection event has been detected by network
+ *   "interrupt" handling logic.  Perform operations like tcp_stop_monitor
+ *   but (1) explicitly amek this socket and (2) disable further callbacks
+ *   the "interrupt handler".
  *
  * Parameters:
  *   psock - The TCP socket structure associated.
+ *   cb    - devif callback structure
  *   flags - Set of connection events events
  *
  * Returned Value:
@@ -346,11 +350,26 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-void tcp_lost_connection(FAR struct socket *psock, uint16_t flags)
+void tcp_lost_connection(FAR struct socket *psock,
+                         FAR struct devif_callback_s *cb, uint16_t flags)
 {
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
-  /* Stop the network monitor */
+  /* Nullify the callback structure so that recursive callbacks are not
+   * received by the "interrupt handler" due to disconnection processing.
+   */
+
+  cb->flags = 0;
+  cb->priv  = NULL;
+  cb->event = NULL;
+
+  /* Make sure that this socket is explicitly marked.  It may not bet a
+   * callback due to the above nullification.
+   */
+
+  tcp_close_connection(psock, flags);
+
+  /* Then stop the network monitor */
 
   tcp_shutdown_monitor((FAR struct tcp_conn_s *)psock->s_conn, flags);
 }

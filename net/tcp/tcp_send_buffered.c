@@ -515,7 +515,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, flags);
+          tcp_lost_connection(psock, psock->s_sndcb, flags);
         }
 
       /* Free write buffers and terminate polling */
@@ -1030,14 +1030,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Allocate resources to receive a callback */
 
-      if (!psock->s_sndcb)
+      if (psock->s_sndcb == NULL)
         {
           psock->s_sndcb = tcp_callback_alloc(conn);
         }
 
       /* Test if the callback has been allocated */
 
-      if (!psock->s_sndcb)
+      if (psock->s_sndcb == NULL)
         {
           /* A buffer allocation error occurred */
 

@@ -737,15 +737,9 @@ static uint16_t inet_tcp_interrupt(FAR struct net_driver_s *dev,
         {
           ninfo("Lost connection\n");
 
-          /* Stop further callbacks */
-
-          pstate->ir_cb->flags   = 0;
-          pstate->ir_cb->priv    = NULL;
-          pstate->ir_cb->event   = NULL;
-
           /* Handle loss-of-connection event */
 
-          tcp_lost_connection(pstate->ir_sock, flags);
+          tcp_lost_connection(pstate->ir_sock, pstate->ir_cb, flags);
 
           /* Check if the peer gracefully closed the connection. */
 

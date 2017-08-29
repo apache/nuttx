@@ -152,7 +152,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
     {
       /* Failed to connect. Stop the connection event monitor */
 
-      tcp_stop_monitor(conn);
+      tcp_stop_monitor(conn, TCP_CLOSE);
     }
 }
 
@@ -411,7 +411,7 @@ int psock_tcp_connect(FAR struct socket *psock,
                * happen in this context, but just in case...
                */
 
-              tcp_lost_connection(psock, TCP_ABORT);
+              tcp_stop_monitor(psock->s_conn, TCP_ABORT);
             }
         }
     }

@@ -557,10 +557,12 @@ int tcp_start_monitor(FAR struct socket *psock);
  * Name: tcp_stop_monitor
  *
  * Description:
- *   Stop monitoring TCP connection changes for a given socket
+ *   Stop monitoring TCP connection changes for a sockets associated with
+ *   a given TCP connection stucture.
  *
  * Input Parameters:
  *   conn - The TCP connection of interest
+ *   flags    Set of disconnection events
  *
  * Returned Value:
  *   None
@@ -571,27 +573,33 @@ int tcp_start_monitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-void tcp_stop_monitor(FAR struct tcp_conn_s *conn);
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
  * Name: tcp_lost_connection
  *
  * Description:
- *   Called when a loss-of-connection event has occurred.
+ *   Called when a loss-of-connection event has been detected by network
+ *   "interrupt" handling logic.  Perform operations like tcp_stop_monitor
+ *   but (1) explicitly amek this socket and (2) disable further callbacks
+ *   the "interrupt handler".
  *
  * Parameters:
- *   psock    The TCP socket structure associated.
- *   flags    Set of connection events events
+ *   psock - The TCP socket structure associated.
+ *   cb    - devif callback structure
+ *   flags - Set of connection events events
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
- *   The caller holds the network lock.
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
  *
  ****************************************************************************/
 
-void tcp_lost_connection(FAR struct socket *psock, uint16_t flags);
+void tcp_lost_connection(FAR struct socket *psock,
+                         FAR struct devif_callback_s *cb, uint16_t flags);
 
 /****************************************************************************
  * Name: tcp_ipv4_select
