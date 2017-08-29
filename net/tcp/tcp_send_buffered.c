@@ -121,7 +121,7 @@
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -223,7 +223,7 @@ static inline void psock_lost_connection(FAR struct socket *psock,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -275,7 +275,7 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
  *          the network device is not Ethernet).
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -336,7 +336,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

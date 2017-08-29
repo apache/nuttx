@@ -206,7 +206,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
  *   connection to be used with the provided Ethernet header
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level
+ *   This function is called from network logic at interrupt level
  *
  ****************************************************************************/
 
@@ -246,7 +246,7 @@ FAR struct pkt_conn_s *pkt_active(struct eth_hdr_s *buf)
  *   Traverse the list of allocated packet connections
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level (or with
+ *   This function is called from network logic at interrupt level (or with
  *   interrupts disabled).
  *
  ****************************************************************************/

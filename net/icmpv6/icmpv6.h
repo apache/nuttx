@@ -133,7 +133,7 @@ struct net_driver_s; /* Forward reference */
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -189,7 +189,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr);
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   The network is locked.
  *
  ****************************************************************************/
 

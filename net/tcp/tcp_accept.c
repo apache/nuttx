@@ -88,7 +88,7 @@ struct accept_s
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -158,7 +158,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

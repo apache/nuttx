@@ -110,7 +110,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   The network is locked.
  *
  ****************************************************************************/
 

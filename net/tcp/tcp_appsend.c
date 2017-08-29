@@ -76,7 +76,7 @@
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -201,7 +201,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   None
  *
  * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
+ *   The network is locked.
  *
  ****************************************************************************/
 

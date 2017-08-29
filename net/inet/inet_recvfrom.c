@@ -551,7 +551,7 @@ static int inet_recvfrom_timeout(struct inet_recvfrom_s *pstate)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

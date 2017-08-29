@@ -378,8 +378,8 @@ void arp_notify(in_addr_t ipaddr);
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions
- *   Interrupts are disabled; Returned value will become unstable when
- *   interrupts are re-enabled or if any other network APIs are called.
+ *   The network is locked; Returned value will become unstable when the
+ *   network is unlocked or if any other network APIs are called.
  *
  ****************************************************************************/
 

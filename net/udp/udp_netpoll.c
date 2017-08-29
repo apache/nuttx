@@ -84,7 +84,7 @@ struct udp_poll_s
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

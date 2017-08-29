@@ -123,7 +123,7 @@ struct icmpv6_ping_s
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -246,7 +246,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
  *   Modified value of the input flags
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

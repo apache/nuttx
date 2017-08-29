@@ -104,7 +104,7 @@ struct tcp_close_s
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

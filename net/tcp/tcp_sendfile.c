@@ -127,7 +127,7 @@ struct sendfile_s
  *   TRUE:timeout FALSE:no timeout
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -269,7 +269,7 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -323,7 +323,7 @@ static inline bool sendfile_addrcheck(FAR struct tcp_conn_s *conn)
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 

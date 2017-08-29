@@ -245,7 +245,7 @@ static uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
  *   used within the provided UDP header
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level
+ *   This function is called from network logic at interrupt level
  *
  ****************************************************************************/
 
@@ -337,7 +337,7 @@ static inline FAR struct udp_conn_s *
  *   used within the provided UDP header
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level
+ *   This function is called from network logic at interrupt level
  *
  ****************************************************************************/
 
@@ -534,7 +534,7 @@ void udp_free(FAR struct udp_conn_s *conn)
  *   connection to be used within the provided UDP header
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level
+ *   This function is called from network logic at interrupt level
  *
  ****************************************************************************/
 
@@ -567,7 +567,7 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
  *   Traverse the list of allocated UDP connections
  *
  * Assumptions:
- *   This function is called from UIP logic at interrupt level (or with
+ *   This function is called from network logic at interrupt level (or with
  *   interrupts disabled).
  *
  ****************************************************************************/
