@@ -28,7 +28,7 @@ Status
   But I was initially able to load FLASH and debug using a Segger J-Link
   connected to the board as described below.  But I think that some of
   my initial code loads put the TMS570 in bad state (or worse).  Now
-  the NERROR LED is on.  When I attempt to problem the FLASH, the J-Link
+  the NERROR LED is on.  When I attempt to program the FLASH, the J-Link
   software complains that the CPU is running too slowly and then times
   out trying to erase the FLASH.
 

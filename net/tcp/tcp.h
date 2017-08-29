@@ -529,6 +529,69 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: tcp_start_monitor
+ *
+ * Description:
+ *   Set up to receive TCP connection state changes for a given socket
+ *
+ * Input Parameters:
+ *   psock - The socket of interest
+ *
+ * Returned Value:
+ *   On success, tcp_start_monitor returns OK; On any failure,
+ *   tcp_start_monitor will return a negated errno value.  The only failure
+ *   that can occur is if the socket has already been closed and, in this
+ *   case, -ENOTCONN is returned.
+ *
+ * Assumptions:
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
+ *
+ ****************************************************************************/
+
+int tcp_start_monitor(FAR struct socket *psock);
+
+/****************************************************************************
+ * Name: tcp_stop_monitor
+ *
+ * Description:
+ *   Stop monitoring TCP connection changes for a given socket
+ *
+ * Input Parameters:
+ *   conn - The TCP connection of interest
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
+ *
+ ****************************************************************************/
+
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_lost_connection
+ *
+ * Description:
+ *   Called when a loss-of-connection event has occurred.
+ *
+ * Parameters:
+ *   psock    The TCP socket structure associated.
+ *   flags    Set of connection events events
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller holds the network lock.
+ *
+ ****************************************************************************/
+
+void tcp_lost_connection(FAR struct socket *psock, uint16_t flags);
+
+/****************************************************************************
  * Name: tcp_ipv4_select
  *
  * Description:

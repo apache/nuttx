@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/inet/net_monitor.c
+ * net/tcp/tcp_monitor.c
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,9 +47,8 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
-#include "tcp/tcp.h"
 #include "socket/socket.h"
-#include "inet/inet.h"
+#include "tcp/tcp.h"
 
 #ifdef NET_TCP_HAVE_STACK
 
@@ -193,7 +192,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: net_startmonitor
+ * Name: tcp_start_monitor
  *
  * Description:
  *   Set up to receive TCP connection state changes for a given socket
@@ -202,8 +201,8 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
  *   psock - The socket of interest
  *
  * Returned Value:
- *   On success, net_startmonitor returns OK; On any failure,
- *   net_startmonitor will return a negated errno value.  The only failure
+ *   On success, tcp_start_monitor returns OK; On any failure,
+ *   tcp_start_monitor will return a negated errno value.  The only failure
  *   that can occur is if the socket has already been closed and, in this
  *   case, -ENOTCONN is returned.
  *
@@ -213,7 +212,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int net_startmonitor(FAR struct socket *psock)
+int tcp_start_monitor(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn;
   FAR struct devif_callback_s *cb;
@@ -275,7 +274,7 @@ int net_startmonitor(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: net_stopmonitor
+ * Name: tcp_stop_monitor
  *
  * Description:
  *   Stop monitoring TCP connection changes for a given socket
@@ -292,7 +291,7 @@ int net_startmonitor(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-void net_stopmonitor(FAR struct tcp_conn_s *conn)
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn)
 {
   DEBUGASSERT(conn);
 
@@ -313,7 +312,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: net_lostconnection
+ * Name: tcp_lost_connection
  *
  * Description:
  *   Called when a loss-of-connection event has occurred.
@@ -331,7 +330,7 @@ void net_stopmonitor(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-void net_lostconnection(FAR struct socket *psock, uint16_t flags)
+void tcp_lost_connection(FAR struct socket *psock, uint16_t flags)
 {
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
@@ -342,7 +341,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
 
   /* Stop the network monitor */
 
-  net_stopmonitor((FAR struct tcp_conn_s *)psock->s_conn);
+  tcp_stop_monitor((FAR struct tcp_conn_s *)psock->s_conn);
   net_unlock();
 }
 

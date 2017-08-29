@@ -400,7 +400,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
       ninfo("Lost connection\n");
 
-      net_lostconnection(pstate->snd_sock, flags);
+      tcp_lost_connection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }

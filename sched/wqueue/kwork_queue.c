@@ -151,7 +151,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   /* Cancel any pending work in the work stucture */
 
-  work_cancel(qid, work);
+  (void)work_cancel(qid, work);
 
   /* Then queue the new work */
 

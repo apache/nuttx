@@ -745,7 +745,7 @@ static uint16_t inet_tcp_interrupt(FAR struct net_driver_s *dev,
 
           /* Handle loss-of-connection event */
 
-          net_lostconnection(pstate->ir_sock, flags);
+          tcp_lost_connection(pstate->ir_sock, flags);
 
           /* Check if the peer gracefully closed the connection. */
 

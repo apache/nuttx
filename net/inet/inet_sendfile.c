@@ -227,7 +227,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
       nwarn("WARNING: Lost connection\n");
 
-      net_lostconnection(pstate->snd_sock, flags);
+      tcp_lost_connection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
     }
 
@@ -349,7 +349,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
       nwarn("WARNING: Lost connection\n");
 
-      net_lostconnection(pstate->snd_sock, flags);
+      tcp_lost_connection(pstate->snd_sock, flags);
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }

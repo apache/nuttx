@@ -443,7 +443,7 @@ static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
 
       ninfo("Lost connection\n");
 
-      net_lostconnection(sinfo->s_sock, flags);
+      tcp_lost_connection(sinfo->s_sock, flags);
       sinfo->s_result = -ENOTCONN;
       goto end_wait;
     }

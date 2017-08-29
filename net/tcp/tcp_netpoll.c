@@ -124,7 +124,7 @@ static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         {
           /* Mark that the connection has been lost */
 
-          net_lostconnection(info->psock, flags);
+          tcp_lost_connection(info->psock, flags);
           eventset |= (POLLERR | POLLHUP);
         }
 

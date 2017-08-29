@@ -163,7 +163,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
     {
       /* Failed to connect. Stop the connection event monitor */
 
-      net_stopmonitor(conn);
+      tcp_stop_monitor(conn);
     }
 }
 #endif /* NET_TCP_HAVE_STACK */
@@ -413,16 +413,16 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
            * the state of the connection up the connection event monitor.
            */
 
-          ret = net_startmonitor(psock);
+          ret = tcp_start_monitor(psock);
           if (ret < 0)
             {
-              /* net_startmonitor() can only fail on certain race
+              /* tcp_start_monitor() can only fail on certain race
                * conditions where the connection was lost just before
                * this function was called.  That is not expected to
                * happen in this context, but just in case...
                */
 
-              net_lostconnection(psock, TCP_ABORT);
+              tcp_lost_connection(psock, TCP_ABORT);
             }
         }
     }

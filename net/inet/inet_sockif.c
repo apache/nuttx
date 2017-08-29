@@ -712,10 +712,10 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
     * socket
     */
 
-  ret = net_startmonitor(newsock);
+  ret = tcp_start_monitor(newsock);
   if (ret < 0)
     {
-      /* net_startmonitor() can only fail on certain race conditions where
+      /* tcp_start_monitor() can only fail on certain race conditions where
        * the connection was lost just before this function was called.  Undo
        * everything we have done and return a failure.
        */

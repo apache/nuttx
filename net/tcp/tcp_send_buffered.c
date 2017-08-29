@@ -515,7 +515,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
         {
           /* Report not connected */
 
-          net_lostconnection(psock, flags);
+          tcp_lost_connection(psock, flags);
         }
 
       /* Free write buffers and terminate polling */

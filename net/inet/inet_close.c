@@ -508,7 +508,7 @@ int inet_close(FAR struct socket *psock)
 
               /* Stop the network monitor */
 
-              net_stopmonitor(conn);
+              tcp_stop_monitor(conn);
             }
           else
             {
