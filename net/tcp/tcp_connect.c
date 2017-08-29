@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/inet/inet_connect.c
+ * net/tcp/tcp_connect.c
  *
  *   Copyright (C) 2007-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,19 +56,15 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
-#include "inet/inet.h"
+#include "tcp/tcp.h"
 
-#ifdef CONFIG_NET
+#ifdef NET_TCP_HAVE_STACK
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 struct tcp_connect_s
 {
   FAR struct tcp_conn_s  *tc_conn;    /* Reference to TCP connection structure */
@@ -77,13 +73,11 @@ struct tcp_connect_s
   sem_t tc_sem;                       /* Semaphore signals recv completion */
   int tc_result;                      /* OK on success, otherwise a negated errno. */
 };
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
@@ -91,18 +85,15 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
 static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags);
-static inline int psock_tcp_connect(FAR struct socket *psock,
-                                    FAR const struct sockaddr *addr);
-#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-/****************************************************************************
+
+ /****************************************************************************
  * Name: psock_setup_callbacks
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate)
 {
@@ -138,13 +129,11 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   return ret;
 }
-#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_teardown_callbacks
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                      int status)
 {
@@ -166,7 +155,6 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
       tcp_stop_monitor(conn);
     }
 }
-#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: psock_connect_interrupt
@@ -188,7 +176,6 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags)
@@ -318,7 +305,10 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
 
   return flags;
 }
-#endif /* NET_TCP_HAVE_STACK */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: psock_tcp_connect
@@ -338,9 +328,8 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
-static inline int psock_tcp_connect(FAR struct socket *psock,
-                                    FAR const struct sockaddr *addr)
+int psock_tcp_connect(FAR struct socket *psock,
+                      FAR const struct sockaddr *addr)
 {
   struct tcp_connect_s state;
   int                  ret = OK;
@@ -430,120 +419,5 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
   net_unlock();
   return ret;
 }
+
 #endif /* NET_TCP_HAVE_STACK */
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: inet_connect
- *
- * Description:
- *   inet_connect() connects the local socket referred to by the structure
- *   'psock' to the address specified by 'addr'. The addrlen argument
- *   specifies the size of 'addr'.  The format of the address in 'addr' is
- *   determined by the address space of the socket 'psock'.
- *
- *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
- *   to which datagrams are sent by default, and the only address from which
- *   datagrams are received. If the socket is of type SOCK_STREAM or
- *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
- *   that is bound to the address specified by 'addr'.
- *
- *   Generally, connection-based protocol sockets may successfully
- *   inet_connect() only once; connectionless protocol sockets may use
- *   inet_connect() multiple times to change their association.
- *   Connectionless sockets may dissolve the association by connecting to
- *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
- *
- * Parameters:
- *   psock     Pointer to a socket structure initialized by psock_socket()
- *   addr      Server address (form depends on type of socket)
- *   addrlen   Length of actual 'addr'
- *
- * Returned Value:
- *   0 on success; a negated errno value on failue.  See connect() for the
- *   list of appropriate errno values to be returned.
- *
- ****************************************************************************/
-
-int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
-                 socklen_t addrlen)
-{
-  FAR const struct sockaddr_in *inaddr = (FAR const struct sockaddr_in *)addr;
-
-  /* Verify that a valid address has been provided */
-
-  switch (inaddr->sin_family)
-    {
-#ifdef CONFIG_NET_IPv4
-    case AF_INET:
-      {
-        if (addrlen < sizeof(struct sockaddr_in))
-          {
-            return -EBADF;
-          }
-      }
-      break;
-#endif
-
-#ifdef CONFIG_NET_IPv6
-    case AF_INET6:
-      {
-        if (addrlen < sizeof(struct sockaddr_in6))
-          {
-            return -EBADF;
-          }
-      }
-      break;
-#endif
-
-    default:
-      DEBUGPANIC();
-      return -EAFNOSUPPORT;
-    }
-
-  /* Perform the connection depending on the protocol type */
-
-  switch (psock->s_type)
-    {
-#if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
-      case SOCK_STREAM:
-        {
-          /* Verify that the socket is not already connected */
-
-          if (_SS_ISCONNECTED(psock->s_flags))
-            {
-              return -EISCONN;
-            }
-
-          /* It's not ... Connect the TCP/IP socket */
-
-          return psock_tcp_connect(psock, addr);
-        }
-#endif /* CONFIG_NET_TCP */
-
-#if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
-      case SOCK_DGRAM:
-        {
-          int ret = udp_connect(psock->s_conn, addr);
-          if (ret < 0 || addr == NULL)
-            {
-              psock->s_flags &= ~_SF_CONNECTED;
-            }
-          else
-            {
-              psock->s_flags |= _SF_CONNECTED;
-            }
-
-          return ret;
-        }
-#endif /* CONFIG_NET_UDP */
-
-      default:
-        return -EBADF;
-    }
-}
-
-#endif /* CONFIG_NET */

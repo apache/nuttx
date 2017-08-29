@@ -158,67 +158,6 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 #endif
 
 /****************************************************************************
- * Name: inet_connect
- *
- * Description:
- *   inet_connect() connects the local socket referred to by the structure
- *   'psock' to the address specified by 'addr'. The addrlen argument
- *   specifies the size of 'addr'.  The format of the address in 'addr' is
- *   determined by the address space of the socket 'psock'.
- *
- *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
- *   to which datagrams are sent by default, and the only address from which
- *   datagrams are received. If the socket is of type SOCK_STREAM or
- *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
- *   that is bound to the address specified by 'addr'.
- *
- *   Generally, connection-based protocol sockets may successfully
- *   inet_connect() only once; connectionless protocol sockets may use
- *   inet_connect() multiple times to change their association.
- *   Connectionless sockets may dissolve the association by connecting to
- *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
- *
- * Parameters:
- *   psock     Pointer to a socket structure initialized by psock_socket()
- *   addr      Server address (form depends on type of socket)
- *   addrlen   Length of actual 'addr'
- *
- * Returned Value:
- *   0 on success; a negated errno value on failue.  See connect() for the
- *   list of appropriate errno values to be returned.
- *
- ****************************************************************************/
-
-int inet_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
-                 socklen_t addrlen);
-
-/****************************************************************************
- * Name: inet_sendfile
- *
- * Description:
- *   The inet_sendfile() call may be used only when the INET socket is in a
- *   connected state (so that the intended recipient is known).
- *
- * Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is returned.  See sendfile() for a list
- *   appropriate error return values.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP) && \
-    !defined(CONFIG_NET_TCP_NO_STACK)
-ssize_t inet_sendfile(FAR struct socket *psock, FAR struct file *infile,
-                      FAR off_t *offset, size_t count);
-#endif
-
-/****************************************************************************
  * Name: inet_recvfrom
  *
  * Description:

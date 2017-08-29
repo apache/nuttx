@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/inet/inet_sendfile.c
+ * net/tcp/tcp_sendfile.c
  *
  *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
  *   Copyright (C) 2007-2017 Gregory Nutt. All rights reserved.
@@ -68,9 +68,8 @@
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
-#include "tcp/tcp.h"
-#include "inet/inet.h"
 #include "socket/socket.h"
+#include "tcp/tcp.h"
 
 #if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP) && \
     defined(NET_TCP_HAVE_STACK)
@@ -528,10 +527,10 @@ static inline void sendfile_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_sendfile
+ * Name: tcp_sendfile
  *
  * Description:
- *   The inet_sendfile() call may be used only when the INET socket is in a
+ *   The tcp_sendfile() call may be used only when the INET socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -547,7 +546,7 @@ static inline void sendfile_txnotify(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-ssize_t inet_sendfile(FAR struct socket *psock, FAR struct file *infile,
+ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
                       FAR off_t *offset, size_t count)
 {
   FAR struct tcp_conn_s *conn;

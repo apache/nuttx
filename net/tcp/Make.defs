@@ -40,12 +40,16 @@ ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
 
 # Socket layer
 
-SOCK_CSRCS += tcp_accept.c
+SOCK_CSRCS += tcp_connect.c tcp_accept.c
 
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 SOCK_CSRCS += tcp_send_buffered.c
 else
 SOCK_CSRCS += tcp_send_unbuffered.c
+endif
+
+ifeq ($(CONFIG_NET_SENDFILE),y)
+SOCK_CSRCS += tcp_sendfile.c
 endif
 
 ifneq ($(CONFIG_DISABLE_POLL),y)

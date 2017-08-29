@@ -529,6 +529,27 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: psock_tcp_connect
+ *
+ * Description:
+ *   Perform a TCP connection
+ *
+ * Parameters:
+ *   psock - A reference to the socket structure of the socket to be connected
+ *   addr  - The address of the remote server to connect to
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+int psock_tcp_connect(FAR struct socket *psock,
+                      FAR const struct sockaddr *addr);
+
+/****************************************************************************
  * Name: tcp_start_monitor
  *
  * Description:
@@ -833,6 +854,31 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
 
 void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len);
+
+/****************************************************************************
+ * Name: tcp_sendfile
+ *
+ * Description:
+ *   The tcp_sendfile() call may be used only when the INET socket is in a
+ *   connected state (so that the intended recipient is known).
+ *
+ * Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is returned.  See sendfile() for a list
+ *   appropriate error return values.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SENDFILE
+ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
+                      FAR off_t *offset, size_t count);
+#endif
 
 /****************************************************************************
  * Name: tcp_reset
