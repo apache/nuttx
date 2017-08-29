@@ -82,9 +82,9 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                      int status);
-static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
-                                        FAR void *pvconn, FAR void *pvpriv,
-                                        uint16_t flags);
+static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvconn,
+                                           FAR void *pvpriv, uint16_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -118,12 +118,12 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
   pstate->tc_cb = tcp_callback_alloc(conn);
   if (pstate->tc_cb)
     {
-      /* Set up the connection "interrupt" handler */
+      /* Set up the connection event handler */
 
       pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
                                 TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
       pstate->tc_cb->priv    = (FAR void *)pstate;
-      pstate->tc_cb->event   = psock_connect_interrupt;
+      pstate->tc_cb->event   = psock_connect_eventhandler;
       ret                    = OK;
     }
 
@@ -139,7 +139,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
 {
   FAR struct tcp_conn_s *conn = pstate->tc_conn;
 
-  /* Make sure that no further interrupts are processed */
+  /* Make sure that no further events are processed */
 
   tcp_callback_free(conn, pstate->tc_cb);
   pstate->tc_cb = NULL;
@@ -157,14 +157,14 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
 }
 
 /****************************************************************************
- * Name: psock_connect_interrupt
+ * Name: psock_connect_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
- *   connection operation via by the lower, device interfacing layer.
+ *   This function is called to perform the actual connection operation via
+ *   by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that reported the event
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -172,13 +172,13 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *   The new flags setting
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
-                                        FAR void *pvconn, FAR void *pvpriv,
-                                        uint16_t flags)
+static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvconn,
+                                           FAR void *pvpriv, uint16_t flags)
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
@@ -324,7 +324,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -389,7 +389,7 @@ int psock_tcp_connect(FAR struct socket *psock,
               ret = state.tc_result;
             }
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           psock_teardown_callbacks(&state, ret);
         }

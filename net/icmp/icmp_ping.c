@@ -127,7 +127,7 @@ static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
 }
 
 /****************************************************************************
- * Name: ping_interrupt
+ * Name: ping_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -144,12 +144,13 @@ static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
  *   Modified value of the input flags
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                               FAR void *pvpriv, uint16_t flags)
+static uint16_t ping_eventhandler(FAR struct net_driver_s *dev,
+                                  FAR void *conn,
+                                  FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvpriv;
   FAR uint8_t *ptr;
@@ -385,7 +386,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
     {
       state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY | NETDEV_DOWN);
       state.png_cb->priv    = (FAR void *)&state;
-      state.png_cb->event   = ping_interrupt;
+      state.png_cb->event   = ping_eventhandler;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 
       /* Notify the device driver of the availability of TX data */

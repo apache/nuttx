@@ -171,7 +171,7 @@ static inline void pkt_recvfrom_sender(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: pkt_recvfrom_interrupt
+ * Name: pkt_recvfrom_eventhandler
  *
  * Description:
  *
@@ -183,9 +183,9 @@ static inline void pkt_recvfrom_sender(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t pkt_recvfrom_interrupt(FAR struct net_driver_s *dev,
-                                      FAR void *pvconn, FAR void *pvpriv,
-                                      uint16_t flags)
+static uint16_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
+                                          FAR void *pvconn,
+                                          FAR void *pvpriv, uint16_t flags)
 {
   struct pkt_recvfrom_s *pstate = (struct pkt_recvfrom_s *)pvpriv;
 
@@ -423,7 +423,7 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       state.pr_cb->flags  = (PKT_NEWDATA | PKT_POLL);
       state.pr_cb->priv   = (FAR void *)&state;
-      state.pr_cb->event  = pkt_recvfrom_interrupt;
+      state.pr_cb->event  = pkt_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  (1) net_lockedwait will also terminate if a signal

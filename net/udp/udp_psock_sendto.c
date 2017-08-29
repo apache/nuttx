@@ -200,7 +200,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Name: sendto_interrupt
+ * Name: sendto_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -220,8 +220,9 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t sendto_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                                 FAR void *pvpriv, uint16_t flags)
+static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *conn, FAR void *pvpriv,
+                                    uint16_t flags)
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
@@ -449,7 +450,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     {
       state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
       state.st_cb->priv    = (FAR void *)&state;
-      state.st_cb->event   = sendto_interrupt;
+      state.st_cb->event   = sendto_eventhandler;
 
       /* Notify the device driver of the availability of TX data */
 

@@ -86,12 +86,12 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_send_interrupt
+ * Name: psock_send_eventhandler
  ****************************************************************************/
 
-static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
-                                     FAR void *pvconn,
-                                     FAR void *pvpriv, uint16_t flags)
+static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
+                                        FAR void *pvconn,
+                                        FAR void *pvpriv, uint16_t flags)
 {
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
@@ -271,7 +271,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
           state.snd_cb->flags = PKT_POLL;
           state.snd_cb->priv  = (FAR void *)&state;
-          state.snd_cb->event = psock_send_interrupt;
+          state.snd_cb->event = psock_send_eventhandler;
 
           /* Notify the device driver that new TX data is available. */
 

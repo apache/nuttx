@@ -609,7 +609,7 @@ static inline void inet_tcp_sender(FAR struct net_driver_s *dev,
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
- * Name: inet_tcp_interrupt
+ * Name: inet_tcp_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -629,9 +629,9 @@ static inline void inet_tcp_sender(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef NET_TCP_HAVE_STACK
-static uint16_t inet_tcp_interrupt(FAR struct net_driver_s *dev,
-                                   FAR void *pvconn, FAR void *pvpriv,
-                                   uint16_t flags)
+static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvconn, FAR void *pvpriv,
+                                      uint16_t flags)
 {
   FAR struct inet_recvfrom_s *pstate = (struct inet_recvfrom_s *)pvpriv;
 
@@ -961,7 +961,7 @@ static void inet_udp_terminate(FAR struct inet_recvfrom_s *pstate, int result)
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Name: inet_udp_interrupt
+ * Name: inet_udp_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -981,9 +981,9 @@ static void inet_udp_terminate(FAR struct inet_recvfrom_s *pstate, int result)
  ****************************************************************************/
 
 #ifdef NET_UDP_HAVE_STACK
-static uint16_t inet_udp_interrupt(FAR struct net_driver_s *dev,
-                                   FAR void *pvconn, FAR void *pvpriv,
-                                   uint16_t flags)
+static uint16_t inet_udp_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvconn, FAR void *pvpriv,
+                                      uint16_t flags)
 {
   FAR struct inet_recvfrom_s *pstate = (FAR struct inet_recvfrom_s *)pvpriv;
 
@@ -1266,7 +1266,7 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
 
           state.ir_cb->flags   = (UDP_NEWDATA | UDP_POLL | NETDEV_DOWN);
           state.ir_cb->priv    = (FAR void *)&state;
-          state.ir_cb->event   = inet_udp_interrupt;
+          state.ir_cb->event   = inet_udp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
            * to occur. NOTES:  (1) net_lockedwait will also terminate if a
@@ -1443,7 +1443,7 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
         {
           state.ir_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
           state.ir_cb->priv    = (FAR void *)&state;
-          state.ir_cb->event   = inet_tcp_interrupt;
+          state.ir_cb->event   = inet_tcp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
            * to occur.

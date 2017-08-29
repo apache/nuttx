@@ -222,8 +222,8 @@ void devif_forward(FAR struct forward_s *fwd);
  *   network device, but must be forwarded on another network device.
  *
  *   Set up to forward the packet on the specified device.  This function
- *   will set up a send "interrupt" handler that will perform the actual
- *   send asynchronously and must return without waiting for the send to
+ *   will set up a send event handler that will perform the actual send
+ *   asynchronously and must return without waiting for the send to
  *   complete.
  *
  * Input Parameters:

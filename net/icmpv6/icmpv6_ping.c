@@ -229,7 +229,7 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: ping_interrupt
+ * Name: ping_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -250,8 +250,9 @@ static void icmpv6_echo_request(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                               FAR void *pvpriv, uint16_t flags)
+static uint16_t ping_eventhandler(FAR struct net_driver_s *dev,
+                                  FAR void *conn,
+                                  FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmpv6_ping_s *pstate = (struct icmpv6_ping_s *)pvpriv;
 
@@ -460,7 +461,7 @@ int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
     {
       state.png_cb->flags   = (ICMPv6_POLL | ICMPv6_ECHOREPLY);
       state.png_cb->priv    = (FAR void *)&state;
-      state.png_cb->event   = ping_interrupt;
+      state.png_cb->event   = ping_eventhandler;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 
       /* Notify the device driver of the availability of TX data */

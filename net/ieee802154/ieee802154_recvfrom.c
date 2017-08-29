@@ -203,7 +203,7 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
 }
 
 /****************************************************************************
- * Name: ieee802154_recvfrom_interrupt
+ * Name: ieee802154_recvfrom_eventhandler
  *
  * Description:
  *
@@ -216,9 +216,10 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
  *
  ****************************************************************************/
 
-static uint16_t ieee802154_recvfrom_interrupt(FAR struct net_driver_s *dev,
-                                              FAR void *pvconn, FAR void *pvpriv,
-                                              uint16_t flags)
+static uint16_t ieee802154_recvfrom_eventhandler(FAR struct net_driver_s *dev,
+                                                 FAR void *pvconn,
+                                                 FAR void *pvpriv,
+                                                 uint16_t flags)
 {
   FAR struct ieee802154_recvfrom_s *pstate;
   FAR struct radio_driver_s *radio;
@@ -393,7 +394,7 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
     {
       state.ir_cb->flags  = (IEEE802154_NEWDATA | IEEE802154_POLL);
       state.ir_cb->priv   = (FAR void *)&state;
-      state.ir_cb->event  = ieee802154_recvfrom_interrupt;
+      state.ir_cb->event  = ieee802154_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  (1) net_lockedwait will also terminate if a signal

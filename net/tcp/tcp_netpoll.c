@@ -70,7 +70,7 @@ struct tcp_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_poll_interrupt
+ * Name: tcp_poll_eventhandler
  *
  * Description:
  *   This function is called to perform the actual TCP receive operation via
@@ -89,8 +89,9 @@ struct tcp_poll_s
  *
  ****************************************************************************/
 
-static uint16_t tcp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                                   FAR void *pvpriv, uint16_t flags)
+static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *conn,
+                                      FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_poll_s *info = (FAR struct tcp_poll_s *)pvpriv;
 
@@ -216,7 +217,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_DISCONN_EVENTS);
   cb->priv     = (FAR void *)info;
-  cb->event    = tcp_poll_interrupt;
+  cb->event    = tcp_poll_eventhandler;
 
   /* Save the reference in the poll info structure as fds private as well
    * for use during poll teardown as well.

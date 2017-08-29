@@ -272,7 +272,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Name: tcpsend_interrupt
+ * Name: tcpsend_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -291,9 +291,9 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
-                                  FAR void *pvconn,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
+                                     FAR void *pvconn,
+                                     FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
@@ -826,7 +826,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
           state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
                                    TCP_DISCONN_EVENTS);
           state.snd_cb->priv    = (FAR void *)&state;
-          state.snd_cb->event   = tcpsend_interrupt;
+          state.snd_cb->event   = tcpsend_eventhandler;
 
           /* Notify the device driver of the availability of TX data */
 

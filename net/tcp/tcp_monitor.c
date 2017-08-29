@@ -379,10 +379,11 @@ void tcp_close_monitor(FAR struct socket *psock)
    */
 
   /* REVISIT:  The following logic won't work:  There is no way to compare
-   * psocks to check for a match.  This could only be an issue if the same
-   * socket were being used on one thread, but then closed on another.
-   * Some redesign would be required to find only those event handlers that 
-   * re waiting specifically for this socket (vs. a dup of this this socket)
+   * psocks to check for a match.  This missing logic could only be an issue
+   * if the same socket were being used on one thread, but then closed on
+   * another.  Some redesign would be required to find only those event
+   * handlers that are waiting specifically for this socket (vs. a dup of
+   * this socket)
    */
 
 #if 0
@@ -401,9 +402,9 @@ void tcp_close_monitor(FAR struct socket *psock)
  *
  * Description:
  *   Called when a loss-of-connection event has been detected by network
- *   "interrupt" handling logic.  Perform operations like tcp_stop_monitor
- *   but (1) explicitly amek this socket and (2) disable further callbacks
- *   the "interrupt handler".
+ *   event handling logic.  Perform operations like tcp_stop_monitor but (1)
+ *   explicitly mark this socket and (2) disable further callbacks the to the
+ *   event handler.
  *
  * Parameters:
  *   psock - The TCP socket structure whose connection was lost.
@@ -425,7 +426,7 @@ void tcp_lost_connection(FAR struct socket *psock,
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
   /* Nullify the callback structure so that recursive callbacks are not
-   * received by the "interrupt handler" due to disconnection processing.
+   * received by the event handler due to disconnection processing.
    */
 
   cb->flags = 0;

@@ -110,12 +110,12 @@ static void icmpv6_router_terminate(FAR struct icmpv6_router_s *state,
 }
 
 /****************************************************************************
- * Name: icmpv6_router_interrupt
+ * Name: icmpv6_router_eventhandler
  ****************************************************************************/
 
-static uint16_t icmpv6_router_interrupt(FAR struct net_driver_s *dev,
-                                        FAR void *pvconn,
-                                        FAR void *priv, uint16_t flags)
+static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvconn,
+                                           FAR void *priv, uint16_t flags)
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
@@ -240,7 +240,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   state.snd_advertise = advertise;
   state.snd_cb->flags = (ICMPv6_POLL | NETDEV_DOWN);
   state.snd_cb->priv  = (FAR void *)&state;
-  state.snd_cb->event = icmpv6_router_interrupt;
+  state.snd_cb->event = icmpv6_router_eventhandler;
 
   /* Notify the device driver that new TX data is available. */
 

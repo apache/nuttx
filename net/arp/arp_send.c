@@ -94,12 +94,12 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
 }
 
 /****************************************************************************
- * Name: arp_send_interrupt
+ * Name: arp_send_eventhandler
  ****************************************************************************/
 
-static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
-                                   FAR void *pvconn,
-                                   FAR void *priv, uint16_t flags)
+static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvconn,
+                                      FAR void *priv, uint16_t flags)
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;
 
@@ -332,7 +332,7 @@ int arp_send(in_addr_t ipaddr)
       state.snd_result    = -EBUSY;
       state.snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
       state.snd_cb->priv  = (FAR void *)&state;
-      state.snd_cb->event = arp_send_interrupt;
+      state.snd_cb->event = arp_send_eventhandler;
 
       /* Notify the device driver that new TX data is available.
        * NOTES: This is in essence what netdev_ipv4_txnotify() does, which

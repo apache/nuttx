@@ -523,7 +523,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
  *   None
  *
  * Assumptions:
- *   Running at the interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -603,9 +603,9 @@ void tcp_close_monitor(FAR struct socket *psock);
  *
  * Description:
  *   Called when a loss-of-connection event has been detected by network
- *   "interrupt" handling logic.  Perform operations like tcp_stop_monitor
- *   but (1) explicitly amek this socket and (2) disable further callbacks
- *   the "interrupt handler".
+ *   event handling logic.  Perform operations like tcp_stop_monitor but
+ *   (1) explicitly mark this socket and (2) disable further callbacks
+ *   the event handler.
  *
  * Parameters:
  *   psock - The TCP socket structure associated.
@@ -777,7 +777,7 @@ void tcp_listen_initialize(void);
  *   Return the connection listener for connections on this port (if any)
  *
  * Assumptions:
- *   Called at interrupt level
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -1129,11 +1129,11 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
  * Name: tcp_backlogavailable
  *
  * Description:
- *  Called from poll().  Before waiting for a new connection, poll will
- *  call this API to see if there are pending connections in the backlog.
+ *   Called from poll().  Before waiting for a new connection, poll will
+ *   call this API to see if there are pending connections in the backlog.
  *
  * Assumptions:
- *   Called from normal user code, but with interrupts disabled,
+ *   Thne network is locked.
  *
  ****************************************************************************/
 
@@ -1147,11 +1147,11 @@ bool tcp_backlogavailable(FAR struct tcp_conn_s *conn);
  * Name: tcp_backlogremove
  *
  * Description:
- *  Called from accept().  Before waiting for a new connection, accept will
- *  call this API to see if there are pending connections in the backlog.
+ *   Called from accept().  Before waiting for a new connection, accept will
+ *   call this API to see if there are pending connections in the backlog.
  *
  * Assumptions:
- *   Called from normal user code, but with interrupts disabled,
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1289,9 +1289,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *     An invalid descriptor was specified.
  *   -ENOTCONN
  *     The socket is not connected.
- *
- * Assumptions:
- *   Not running at the interrupt level
  *
  ****************************************************************************/
 

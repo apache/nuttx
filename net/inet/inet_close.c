@@ -137,7 +137,7 @@ static inline int tcp_close_timeout(FAR struct tcp_close_s *pstate)
 #endif /* NET_TCP_HAVE_STACK && CONFIG_NET_SOLINGER */
 
 /****************************************************************************
- * Name: tcp_close_interrupt
+ * Name: tcp_close_eventhandler
  *
  * Description:
  *   Handle network callback events.
@@ -154,9 +154,9 @@ static inline int tcp_close_timeout(FAR struct tcp_close_s *pstate)
  ****************************************************************************/
 
 #ifdef NET_TCP_HAVE_STACK
-static uint16_t tcp_close_interrupt(FAR struct net_driver_s *dev,
-                                    FAR void *pvconn, FAR void *pvpriv,
-                                    uint16_t flags)
+static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
+                                       FAR void *pvconn, FAR void *pvpriv,
+                                       uint16_t flags)
 {
 #ifdef CONFIG_NET_SOLINGER
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
@@ -362,7 +362,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       /* Set up to receive TCP data event callbacks */
 
       state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
-      state.cl_cb->event = tcp_close_interrupt;
+      state.cl_cb->event = tcp_close_eventhandler;
 
 #ifdef CONFIG_NET_SOLINGER
       /* Check for a lingering close */

@@ -69,7 +69,7 @@ struct udp_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_poll_interrupt
+ * Name: udp_poll_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -88,8 +88,9 @@ struct udp_poll_s
  *
  ****************************************************************************/
 
-static uint16_t udp_poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                                   FAR void *pvpriv, uint16_t flags)
+static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *conn,
+                                      FAR void *pvpriv, uint16_t flags)
 {
   FAR struct udp_poll_s *info = (FAR struct udp_poll_s *)pvpriv;
 
@@ -221,7 +222,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   cb->flags    = 0;
   cb->priv     = (FAR void *)info;
-  cb->event    = udp_poll_interrupt;
+  cb->event    = udp_poll_eventhandler;
 
   if ((info->fds->events & POLLOUT) != 0)
     {

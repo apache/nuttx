@@ -186,7 +186,7 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 #endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
- * Name: ipfwd_interrupt
+ * Name: ipfwd_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -206,8 +206,8 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
  *
  ****************************************************************************/
 
-static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
-                                FAR void *pvpriv, uint16_t flags)
+static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev, FAR void *conn,
+                                   FAR void *pvpriv, uint16_t flags)
 {
   FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
 
@@ -231,9 +231,9 @@ static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
         }
 
       /* Check if the outgoing packet is available.  It may have been claimed
-       * by a sendto interrupt serving a different thread -OR- if the output
-       * buffer currently contains unprocessed incoming data.  In these cases
-       * we will just have to wait for the next polling cycle.
+       * by a sendto event handler serving a different thread -OR- if the
+       * output buffer currently contains unprocessed incoming data.  In
+       * these cases we will just have to wait for the next polling cycle.
        */
 
       else if (dev->d_sndlen > 0 || (flags & IPFWD_NEWDATA) != 0)
@@ -309,8 +309,8 @@ static uint16_t ipfwd_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
  *   network device, but must be forwarded on another network device.
  *
  *   Set up to forward the packet on the specified device.  This function
- *   will set up a send "interrupt" handler that will perform the actual
- *   send asynchronously and must return without waiting for the send to
+ *   will set up a send  event handler that will perform the actual send
+ *   asynchronously and must return without waiting for the send to
  *   complete.
  *
  * Input Parameters:
@@ -335,7 +335,7 @@ int ipfwd_forward(FAR struct forward_s *fwd)
     {
       fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
       fwd->f_cb->priv    = (FAR void *)fwd;
-      fwd->f_cb->event   = ipfwd_interrupt;
+      fwd->f_cb->event   = ipfwd_eventhandler;
 
       /* Notify the device driver of the availability of TX data */
 

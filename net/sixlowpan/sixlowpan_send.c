@@ -135,7 +135,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
 }
 
 /****************************************************************************
- * Name: send_interrupt
+ * Name: send_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -154,9 +154,9 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  *
  ****************************************************************************/
 
-static uint16_t send_interrupt(FAR struct net_driver_s *dev,
-                               FAR void *pvconn,
-                               FAR void *pvpriv, uint16_t flags)
+static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
+                                  FAR void *pvconn,
+                                  FAR void *pvpriv, uint16_t flags)
 {
   FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
 
@@ -310,7 +310,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
           sinfo.s_cb->flags = (NETDEV_DOWN | WPAN_POLL);
           sinfo.s_cb->priv  = (FAR void *)&sinfo;
-          sinfo.s_cb->event = send_interrupt;
+          sinfo.s_cb->event = send_eventhandler;
 
           /* Notify the IEEE802.15.4 MAC that we have data to send. */
 

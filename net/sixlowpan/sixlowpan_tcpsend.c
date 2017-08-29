@@ -322,7 +322,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
 }
 
 /****************************************************************************
- * Name: tcp_send_interrupt
+ * Name: tcp_send_eventhandler
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -342,9 +342,9 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  *
  ****************************************************************************/
 
-static uint16_t tcp_send_interrupt(FAR struct net_driver_s *dev,
-                                   FAR void *pvconn,
-                                   FAR void *pvpriv, uint16_t flags)
+static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvconn,
+                                      FAR void *pvpriv, uint16_t flags)
 {
   FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
@@ -682,7 +682,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           sinfo.s_cb->flags = (NETDEV_DOWN | TCP_ACKDATA | TCP_REXMIT |
                                TCP_DISCONN_EVENTS | WPAN_POLL);
           sinfo.s_cb->priv  = (FAR void *)&sinfo;
-          sinfo.s_cb->event = tcp_send_interrupt;
+          sinfo.s_cb->event = tcp_send_eventhandler;
 
           /* There is no outstanding, unacknowledged data after this
            * initial sequence number.

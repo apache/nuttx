@@ -283,12 +283,13 @@ void ieee802154_meta_data(FAR struct radio_driver_s *radio,
 }
 
 /****************************************************************************
- * Name: ieee802154_sendto_interrupt
+ * Name: ieee802154_sendto_eventhandler
  ****************************************************************************/
 
-static uint16_t ieee802154_sendto_interrupt(FAR struct net_driver_s *dev,
-                                            FAR void *pvconn,
-                                            FAR void *pvpriv, uint16_t flags)
+static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
+                                               FAR void *pvconn,
+                                               FAR void *pvpriv,
+                                               uint16_t flags)
 {
   FAR struct radio_driver_s *radio;
   FAR struct ieee802154_sendto_s *pstate;
@@ -514,7 +515,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
 
           state.is_cb->flags = PKT_POLL;
           state.is_cb->priv  = (FAR void *)&state;
-          state.is_cb->event = ieee802154_sendto_interrupt;
+          state.is_cb->event = ieee802154_sendto_eventhandler;
 
           /* Notify the device driver that new TX data is available. */
 

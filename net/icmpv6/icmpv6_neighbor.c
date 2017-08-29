@@ -95,12 +95,12 @@ struct icmpv6_neighbor_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmpv6_neighbor_interrupt
+ * Name: icmpv6_neighbor_eventhandler
  ****************************************************************************/
 
-static uint16_t icmpv6_neighbor_interrupt(FAR struct net_driver_s *dev,
-                                          FAR void *pvconn,
-                                          FAR void *priv, uint16_t flags)
+static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
+                                             FAR void *pvconn,
+                                             FAR void *priv, uint16_t flags)
 {
   FAR struct icmpv6_neighbor_s *state = (FAR struct icmpv6_neighbor_s *)priv;
 
@@ -345,7 +345,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       state.snd_sent      = false;
       state.snd_cb->flags = ICMPv6_POLL;
       state.snd_cb->priv  = (FAR void *)&state;
-      state.snd_cb->event = icmpv6_neighbor_interrupt;
+      state.snd_cb->event = icmpv6_neighbor_eventhandler;
 
       /* Notify the device driver that new TX data is available. */
 

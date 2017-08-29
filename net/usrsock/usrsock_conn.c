@@ -264,7 +264,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
   pstate->cb = devif_callback_alloc(NULL, &conn->list);
   if (pstate->cb)
     {
-      /* Set up the connection "interrupt" handler */
+      /* Set up the connection event handler */
 
       pstate->cb->flags = flags;
       pstate->cb->priv  = (FAR void *)pstate;
