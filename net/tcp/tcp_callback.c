@@ -193,12 +193,11 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * callback.
    */
 
-  if (((flags & TCP_CONN_EVENTS) != 0) && conn->connection_event)
+  if ((flags & TCP_CONN_EVENTS) != 0)
     {
-      /* Perform the callback */
+      /* Perform the callback disconnect callbacks */
 
-      flags = conn->connection_event(dev, conn, conn->connection_private,
-                                     flags);
+      flags = devif_conn_event(dev, conn, flags, conn->connevents);
     }
 
   return flags;

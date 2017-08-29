@@ -56,8 +56,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void connection_closed(FAR struct socket *psock, uint16_t flags);
-static uint16_t connection_event(FAR struct net_driver_s *dev,
+static void tcp_close_connection(FAR struct socket *psock, uint16_t flags);
+static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
                                  FAR void *pvconn, FAR void *pvpriv,
                                  uint16_t flags);
 
@@ -66,7 +66,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: connection_closed
+ * Name: tcp_close_connection
  *
  * Description:
  *   Called when a loss-of-connection event has occurred.
@@ -83,7 +83,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void connection_closed(FAR struct socket *psock, uint16_t flags)
+static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
 {
   /* These loss-of-connection events may be reported:
    *
@@ -121,7 +121,7 @@ static void connection_closed(FAR struct socket *psock, uint16_t flags)
 }
 
 /****************************************************************************
- * Name: connection_event
+ * Name: tcp_disconnect_event
  *
  * Description:
  *   Some connection related event has occurred
@@ -139,13 +139,13 @@ static void connection_closed(FAR struct socket *psock, uint16_t flags)
  *
  ****************************************************************************/
 
-static uint16_t connection_event(FAR struct net_driver_s *dev,
-                                 FAR void *pvconn, FAR void *pvpriv,
-                                 uint16_t flags)
+static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
+                                     FAR void *pvconn, FAR void *pvpriv,
+                                     uint16_t flags)
 {
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
-  if (psock)
+  if (psock != NULL)
     {
       ninfo("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
 
@@ -155,7 +155,7 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          connection_closed(psock, flags);
+          tcp_close_connection(psock, flags);
         }
 
       /* TCP_CONNECTED: The socket is successfully connected */
@@ -189,8 +189,50 @@ static uint16_t connection_event(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Name: tcp_shutdown_monitor
+ *
+ * Description:
+ *   Stop monitoring TCP connection changes for a given socket.
+ *
+ * Input Parameters:
+ *   conn  - The TCP connection of interest
+ *   flags - Indicates the type of shutdown.  TCP_CLOSE or TCP_ABORT
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The caller holds the network lock (if not, it will be locked momentarily
+ *   by this function).
+ *
+ ****************************************************************************/
+
+void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
+{
+  DEBUGASSERT(conn);
+
+  /* Perform callbacks to assure that all sockets, including dup'ed copies,
+   * are informed of the loss of connection event.
+   */
+
+  net_lock();
+  (void)tcp_callback(conn->dev, conn, flags);
+
+  /* Free all allocated connection event callback structure s*/
+
+  while (conn->connevents != NULL)
+    {
+      devif_conn_callback_free(conn->dev, conn->connevents,
+                               &conn->connevents);
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: tcp_start_monitor
  *
@@ -231,13 +273,7 @@ int tcp_start_monitor(FAR struct socket *psock)
     {
       /* Invoke the TCP_CLOSE connection event now */
 
-      (void)connection_event(NULL, conn, psock, TCP_CLOSE);
-
-      /* Make sure that the monitor is stopped */
-
-      conn->connection_private = NULL;
-      conn->connection_devcb   = NULL;
-      conn->connection_event   = NULL;
+      tcp_shutdown_monitor(conn, TCP_CLOSE);
 
       /* And return -ENOTCONN to indicate the monitor was not started
        * because the socket was already disconnected.
@@ -247,27 +283,17 @@ int tcp_start_monitor(FAR struct socket *psock)
       return -ENOTCONN;
     }
 
-  DEBUGASSERT(conn->connection_event == NULL &&
-              conn->connection_devcb == NULL);
-
   /* Allocate a callback structure that we will use to get callbacks if
    * the network goes down.
    */
 
-  cb = tcp_monitor_callback_alloc(conn);
+  cb = devif_callback_alloc(conn->dev, &conn->connevents);
   if (cb != NULL)
     {
-      cb->event = connection_event;
+      cb->event = tcp_disconnect_event;
       cb->priv  = (FAR void *)psock;
-      cb->flags = NETDEV_DOWN;
+      cb->flags = TCP_DISCONN_EVENTS;
     }
-
-  conn->connection_devcb = cb;
-
-  /* Set up to receive callbacks on connection-related events */
-
-  conn->connection_private = (FAR void *)psock;
-  conn->connection_event   = connection_event;
 
   net_unlock();
   return OK;
@@ -277,7 +303,8 @@ int tcp_start_monitor(FAR struct socket *psock)
  * Name: tcp_stop_monitor
  *
  * Description:
- *   Stop monitoring TCP connection changes for a given socket
+ *   Stop monitoring TCP connection changes for a given socket.  This is part
+ *   of a graceful shutdown.
  *
  * Input Parameters:
  *   conn - The TCP connection of interest
@@ -293,33 +320,23 @@ int tcp_start_monitor(FAR struct socket *psock)
 
 void tcp_stop_monitor(FAR struct tcp_conn_s *conn)
 {
-  DEBUGASSERT(conn);
+  DEBUGASSERT(conn != NULL);
 
-  /* Free any allocated device event callback structure */
+  /* Stop the network monitor */
 
-  net_lock();
-  if (conn->connection_devcb)
-    {
-      tcp_monitor_callback_free(conn, conn->connection_devcb);
-    }
-
-  /* Nullify all connection event data */
-
-  conn->connection_private = NULL;
-  conn->connection_devcb   = NULL;
-  conn->connection_event   = NULL;
-  net_unlock();
+  tcp_shutdown_monitor(conn, TCP_CLOSE);
 }
 
 /****************************************************************************
  * Name: tcp_lost_connection
  *
  * Description:
- *   Called when a loss-of-connection event has occurred.
+ *   Called when a loss-of-connection event has occurred.  This is for an
+ *   unexpected disconnection of some sort from the host.
  *
  * Parameters:
- *   psock    The TCP socket structure associated.
- *   flags    Set of connection events events
+ *   psock - The TCP socket structure associated.
+ *   flags - Set of connection events events
  *
  * Returned Value:
  *   None
@@ -334,15 +351,9 @@ void tcp_lost_connection(FAR struct socket *psock, uint16_t flags)
 {
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
-  /* Close the connection */
-
-  net_lock();
-  connection_closed(psock, flags);
-
   /* Stop the network monitor */
 
-  tcp_stop_monitor((FAR struct tcp_conn_s *)psock->s_conn);
-  net_unlock();
+  tcp_shutdown_monitor((FAR struct tcp_conn_s *)psock->s_conn, flags);
 }
 
 #endif /* NET_TCP_HAVE_STACK */

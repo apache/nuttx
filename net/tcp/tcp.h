@@ -74,15 +74,6 @@
 #define tcp_callback_free(conn,cb) \
   devif_conn_callback_free((conn)->dev, (cb), &(conn)->list)
 
-/* These macros allocate and free callback structures used for receiving
- * notifications of device-related events.
- */
-
-#define tcp_monitor_callback_alloc(conn) \
-  devif_callback_alloc((conn)->dev, NULL)
-#define tcp_monitor_callback_free(conn,cb) \
-  devif_conn_callback_free((conn)->dev, (cb), NULL)
-
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
 
@@ -231,6 +222,14 @@ struct tcp_conn_s
 
   FAR struct devif_callback_s *list;
 
+  /* connevents is a list of callbacks for each socket the uses this
+   * connection (there can be more that one in the event that the the socket
+   * was dup'ed).  It is used with the network monitor to handle
+   * asynchronous loss-of-connection events.
+   */
+
+  FAR struct devif_callback_s *connevents;
+
   /* accept() is called when the TCP logic has created a connection
    *
    *   accept_private: This is private data that will be available to the
@@ -241,24 +240,6 @@ struct tcp_conn_s
 
   FAR void *accept_private;
   int (*accept)(FAR struct tcp_conn_s *listener, FAR struct tcp_conn_s *conn);
-
-  /* connection_event() is called on any of the subset of connection-related
-   * events.
-   *
-   *   connection_private: This is private data that will be available to
-   *     the connection_event() handler when it is invoked with a point to
-   *     this structure as an argument.
-   *   connection_devcb: this is the allocated callback structure that is
-   *     used to
-   *   connection_event: This is the pointer to the connection event
-   *     handler.
-   */
-
-  FAR void *connection_private;
-  FAR struct devif_callback_s *connection_devcb;
-  uint16_t (*connection_event)(FAR struct net_driver_s *dev,
-                               FAR void *pvconn, FAR void *pvpriv,
-                               uint16_t flags);
 };
 
 /* This structure supports TCP write buffering */
