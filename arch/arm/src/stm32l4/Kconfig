@@ -3254,7 +3254,7 @@ config STM32L4_DAC1_DMA
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
 		provided to support the DMA transfer.  The DMA transfer could be
-		supported by and EXTI trigger, but this feature is not currently
+		supported by an EXTI trigger, but this feature is not currently
 		supported by the driver.
 
 if STM32L4_DAC1_DMA
@@ -3268,6 +3268,10 @@ config STM32L4_DAC1_TIMER_FREQUENCY
 	default 100
 	---help---
 		DAC1 output frequency.  Default:  100Hz
+
+config STM32L4_DAC1_DMA_BUFFER_SIZE
+	int "DAC1 DMA buffer size"
+	default 1
 
 endif
 
@@ -3285,7 +3289,7 @@ config STM32L4_DAC2_DMA
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
 		provided to support the DMA transfer.  The DMA transfer could be
-		supported by and EXTI trigger, but this feature is not currently
+		supported by an EXTI trigger, but this feature is not currently
 		supported by the driver.
 
 if STM32L4_DAC2_DMA
@@ -3301,6 +3305,10 @@ config STM32L4_DAC2_TIMER_FREQUENCY
 	---help---
 		DAC2 output frequency.  Default:  100Hz
 
+config STM32L4_DAC2_DMA_BUFFER_SIZE
+	int "DAC2 DMA buffer size"
+	default 1
+
 endif
 
 config STM32L4_DAC2_OUTPUT_ADC
@@ -3309,11 +3317,6 @@ config STM32L4_DAC2_OUTPUT_ADC
 	default n
 	---help---
 		Route DAC2 output to ADC input instead of external pin.
-
-config STM32L4_DAC_DMA_BUFFER_SIZE
-	int "DAC DMA buffer size"
-	depends on STM32L4_DAC1_DMA || STM32L4_DAC2_DMA
-	default 256
 
 endmenu
 

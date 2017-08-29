@@ -95,13 +95,16 @@
 #  endif
 #endif
 
-/* If DMA is selected, then a timer and output frequency must also be
- * provided to support the DMA transfer.  The DMA transfer could be
- * supported by and EXTI trigger, but this feature is not currently
+/* If DMA is selected, then a buffer, a timer and output frequency must
+ * also be provided to support the DMA transfer.  The DMA transfer could be
+ * supported by an EXTI trigger, but this feature is not currently
  * supported by the driver.
  */
 
 #ifdef CONFIG_STM32L4_DAC1_DMA
+#  if !defined(CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE) || CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE < 1
+#    define CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE 1
+#  endif
 #  if !defined(CONFIG_STM32L4_DAC1_TIMER)
 #    warning "A timer number must be specified in CONFIG_STM32L4_DAC1_TIMER"
 #    undef CONFIG_STM32L4_DAC1_DMA
@@ -115,6 +118,9 @@
 #endif
 
 #ifdef CONFIG_STM32L4_DAC2_DMA
+#  if !defined(CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE) || CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE < 1
+#    define CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE 1
+#  endif
 #  if !defined(CONFIG_STM32L4_DAC2_TIMER)
 #    warning "A timer number must be specified in CONFIG_STM32L4_DAC2_TIMER"
 #    undef CONFIG_STM32L4_DAC2_DMA
@@ -266,10 +272,6 @@
 #  define DAC2_TSEL_VALUE DAC_CR_TSEL_SW
 #endif
 
-#if !defined(CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE) || CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE < 1
-#  define CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE 256
-#endif
-
 /* Calculate timer divider values based upon DACn_TIMER_PCLK_FREQUENCY and
  * CONFIG_STM32L4_DACn_TIMER_FREQUENCY.
  */
@@ -311,12 +313,13 @@ struct stm32_chan_s
   uint32_t   tsel;       /* CR trigger select value */
 #ifdef HAVE_DMA
   uint16_t   dmachan;    /* DMA channel needed by this DAC */
+  uint16_t   buffer_len; /* DMA buffer length */
   DMA_HANDLE dma;        /* Allocated DMA channel */
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
   int        result;     /* DMA result */
-  uint16_t   dmapos;     /* Position in dmabuffer where to write new value */
-  uint16_t   dmabuffer[CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
+  uint16_t   buffer_pos; /* Position in dmabuffer where to write new value */
+  uint16_t   *dmabuffer; /* DMA transfer buffer */
 #endif
 };
 
@@ -367,6 +370,10 @@ static const struct dac_ops_s g_dacops =
 #ifdef CONFIG_STM32L4_DAC1
 /* Channel 1 */
 
+#ifdef CONFIG_STM32L4_DAC1_DMA
+static uint16_t dac1_dmabuffer[CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE];
+#endif
+
 static struct stm32_chan_s g_dac1priv =
 {
   .intf       = 0,
@@ -382,6 +389,8 @@ static struct stm32_chan_s g_dac1priv =
 #ifdef CONFIG_STM32L4_DAC1_DMA
   .hasdma     = 1,
   .dmachan    = DAC1_DMA_CHAN,
+  .buffer_len = CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE,
+  .dmabuffer  = dac1_dmabuffer,
   .timer      = CONFIG_STM32L4_DAC1_TIMER,
   .tsel       = DAC1_TSEL_VALUE,
   .tbase      = DAC1_TIMER_BASE,
@@ -400,6 +409,10 @@ static struct dac_dev_s g_dac1dev =
  * the DAC1 second output channel.
  */
 
+#ifdef CONFIG_STM32L4_DAC2_DMA
+static uint16_t dac2_dmabuffer[CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE];
+#endif
+
 static struct stm32_chan_s g_dac2priv =
 {
   .intf       = 1,
@@ -415,6 +428,8 @@ static struct stm32_chan_s g_dac2priv =
 #ifdef CONFIG_STM32L4_DAC2_DMA
   .hasdma     = 1,
   .dmachan    = DAC2_DMA_CHAN,
+  .buffer_len = CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE,
+  .dmabuffer  = dac2_dmabuffer,
   .timer      = CONFIG_STM32L4_DAC2_TIMER,
   .tsel       = DAC2_TSEL_VALUE,
   .tbase      = DAC2_TIMER_BASE,
@@ -749,11 +764,11 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
        *
        * In real use it would be better to initialize dmabuffer with desired pattern
        * beforehand. If want to write just one value at a time with DMA, set
-       * CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE to 1.
+       * the buffer size to 1.
        */
 
-      chan->dmabuffer[chan->dmapos] = (uint16_t)msg->am_data;
-      chan->dmapos = (chan->dmapos + 1) % CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE;
+      chan->dmabuffer[chan->buffer_pos] = (uint16_t)msg->am_data;
+      chan->buffer_pos = (chan->buffer_pos + 1) % chan->buffer_len;
 
       /* Configure the DMA stream/channel.
        *
@@ -772,7 +787,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
        */
 
       stm32l4_dmasetup(chan->dma, chan->dro, (uint32_t)chan->dmabuffer,
-                       CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE, DAC_DMA_CONTROL_WORD);
+                       chan->buffer_len, DAC_DMA_CONTROL_WORD);
 
       /* Start the DMA */
 
