@@ -3271,6 +3271,13 @@ config STM32L4_DAC1_TIMER_FREQUENCY
 
 endif
 
+config STM32L4_DAC1_OUTPUT_ADC
+	bool "DAC1 output to ADC"
+	depends on STM32L4_DAC1
+	default n
+	---help---
+		Route DAC1 output to ADC input instead of external pin.
+
 config STM32L4_DAC2_DMA
 	bool "DAC2 DMA"
 	depends on STM32L4_DAC2
@@ -3296,8 +3303,16 @@ config STM32L4_DAC2_TIMER_FREQUENCY
 
 endif
 
+config STM32L4_DAC2_OUTPUT_ADC
+	bool "DAC2 output to ADC"
+	depends on STM32L4_DAC2
+	default n
+	---help---
+		Route DAC2 output to ADC input instead of external pin.
+
 config STM32L4_DAC_DMA_BUFFER_SIZE
 	int "DAC DMA buffer size"
+	depends on STM32L4_DAC1_DMA || STM32L4_DAC2_DMA
 	default 256
 
 endmenu

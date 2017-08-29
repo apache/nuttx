@@ -266,7 +266,7 @@
 #  define DAC2_TSEL_VALUE DAC_CR_TSEL_SW
 #endif
 
-#ifndef CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE
+#if !defined(CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE) || CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE < 1
 #  define CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE 256
 #endif
 
@@ -315,6 +315,7 @@ struct stm32_chan_s
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
   int        result;     /* DMA result */
+  uint16_t   dmapos;     /* Position in dmabuffer where to write new value */
   uint16_t   dmabuffer[CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
 #endif
 };
@@ -486,6 +487,38 @@ static inline void stm32l4_dac_modify_cr(FAR struct stm32_chan_s *chan,
 
   shift = (chan->intf & 1) << 4;
   modifyreg32(chan->cr, clearbits << shift, setbits << shift);
+}
+
+/****************************************************************************
+ * Name: stm32l4_dac_modify_mcr
+ *
+ * Description:
+ *   Modify the contents of the DAC mode register.
+ *
+ * Input Parameters:
+ *   chan - A reference to the DAC channel state data
+ *   clearbits - Bits in the control register to be cleared
+ *   setbits - Bits in the control register to be set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void stm32l4_dac_modify_mcr(FAR struct stm32_chan_s *chan,
+                                          uint32_t clearbits, uint32_t setbits)
+{
+  unsigned int shift;
+
+  /* DAC1 channels 1 and 2 share the STM32L4_DAC_MCR control register.
+   * Bit 0 of the interface number provides the correct shift.
+   *
+   *   Bit 0 = 0: Shift = 0
+   *   Bit 0 = 1: Shift = 16
+   */
+
+  shift = (chan->intf & 1) << 4;
+  modifyreg32(STM32L4_DAC_MCR, clearbits << shift, setbits << shift);
 }
 
 /****************************************************************************
@@ -710,6 +743,18 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 #ifdef HAVE_DMA
   if (chan->hasdma)
     {
+      /* Copy the value to circular buffer. Since dmabuffer is initialized to zero,
+       * writing e.g. monotonously increasing values creates a continuosly repeating
+       * ramp-effect, alternating with periods of zero output.
+       *
+       * In real use it would be better to initialize dmabuffer with desired pattern
+       * beforehand. If want to write just one value at a time with DMA, set
+       * CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE to 1.
+       */
+
+      chan->dmabuffer[chan->dmapos] = (uint16_t)msg->am_data;
+      chan->dmapos = (chan->dmapos + 1) % CONFIG_STM32L4_DAC_DMA_BUFFER_SIZE;
+
       /* Configure the DMA stream/channel.
        *
        * - Channel number
@@ -1001,7 +1046,28 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       DAC_CR_WAVE_DISABLED;  /* Set no noise */
   stm32l4_dac_modify_cr(chan, clearbits, setbits);
 
-  /* TODO: Enable output buffer? */
+  /* Enable output buffer or route DAC output to on-chip peripherals (ADC) */
+
+  clearbits = DAC_MCR_MODE1_MASK;
+#if defined(CONFIG_STM32L4_DAC1_OUTPUT_ADC)
+  if (chan->intf == 0)
+    {
+      setbits = DAC_MCR_MODE_IN;
+    }
+  else
+#endif
+#if defined(CONFIG_STM32L4_DAC2_OUTPUT_ADC)
+  if (chan->intf == 1)
+    {
+      setbits = DAC_MCR_MODE_IN;
+    }
+  else
+#endif
+    {
+      setbits = DAC_MCR_MODE_EXTBUF;
+    }
+
+  stm32l4_dac_modify_mcr(chan, clearbits, setbits);
 
 #ifdef HAVE_DMA
   /* Determine if DMA is supported by this channel */

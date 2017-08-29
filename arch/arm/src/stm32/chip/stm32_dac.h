@@ -157,7 +157,7 @@
 #  define DAC_CR_WAVE_TRIANGLE   (2 << DAC_CR_WAVE_SHIFT) /* Triangle wave generation enabled */
 #define DAC_CR_MAMP_SHIFT        (8)       /* Bits 8-11: DAC channel mask/amplitude selector */
 #define DAC_CR_MAMP_MASK         (15 << DAC_CR_MAMP_SHIFT)
-#  define DAC_CR_MAMP_AMP1       (0 << DAC_CR_MAMP1_SHIFT) /* Unmask bit0 of LFSR/triangle amplitude=1 */
+#  define DAC_CR_MAMP_AMP1       (0 << DAC_CR_MAMP_SHIFT)  /* Unmask bit0 of LFSR/triangle amplitude=1 */
 #  define DAC_CR_MAMP_AMP3       (1 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[1:0] of LFSR/triangle amplitude=3 */
 #  define DAC_CR_MAMP_AMP7       (2 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[2:0] of LFSR/triangle amplitude=7 */
 #  define DAC_CR_MAMP_AMP15      (3 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[3:0] of LFSR/triangle amplitude=15 */
