@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_callback.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
-
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
@@ -52,6 +50,8 @@
 
 #include "devif/devif.h"
 #include "tcp/tcp.h"
+
+#ifdef NET_TCP_HAVE_STACK
 
 /****************************************************************************
  * Private Functions
@@ -279,4 +279,4 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
 }
 #endif /* CONFIG_NET_TCP_READAHEAD */
 
-#endif /* CONFIG_NET && CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */

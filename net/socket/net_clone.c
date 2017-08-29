@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <sys/socket.h>
 #include <errno.h>
@@ -48,7 +47,10 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/udp.h>
 
+#include "tcp/tcp.h"
 #include "socket/socket.h"
+
+#ifdef CONFIG_NET
 
 /****************************************************************************
  * Public Functions
@@ -100,6 +102,15 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 
   DEBUGASSERT(psock2->s_sockif != NULL && psock2->s_sockif->si_addref != NULL);
   psock2->s_sockif->si_addref(psock2);
+
+#ifdef NET_TCP_HAVE_STACK
+  /* For connected socket types, it is necessary to also start the network monitor so
+   * that the newly cloned socket can receive a notification if the network connection
+   * is lost.
+   */
+
+  ret = tcp_start_monitor(psock2);
+#endif
 
   net_unlock();
   return ret;

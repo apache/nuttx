@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <stdint.h>
 #include <assert.h>
@@ -357,5 +356,3 @@ void tcp_lost_connection(FAR struct socket *psock, uint16_t flags)
 }
 
 #endif /* NET_TCP_HAVE_STACK */
-
-#endif /* CONFIG_NET && CONFIG_NET_TCP */
