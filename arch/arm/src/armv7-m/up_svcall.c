@@ -294,7 +294,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
            * unprivileged mode.
            */
 
-          regs[REG_PC]         = (uint32_t)USERSPACE->task_startup;
+          regs[REG_PC]         = (uint32_t)USERSPACE->task_startup & ~1;
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
           /* Change the parameter ordering to match the expectation of struct
@@ -326,7 +326,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
            * unprivileged mode.
            */
 
-          regs[REG_PC]         = (uint32_t)USERSPACE->pthread_startup;
+          regs[REG_PC]         = (uint32_t)USERSPACE->pthread_startup & ~1;
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
           /* Change the parameter ordering to match the expectation of struct
@@ -367,7 +367,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
            * unprivileged mode.
            */
 
-          regs[REG_PC]         = (uint32_t)USERSPACE->signal_handler;
+          regs[REG_PC]         = (uint32_t)USERSPACE->signal_handler & ~1;
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
           /* Change the parameter ordering to match the expectation of struct
@@ -405,7 +405,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
 
-          regs[REG_PC]         = rtcb->xcp.sigreturn;
+          regs[REG_PC]         = rtcb->xcp.sigreturn & ~1;
           regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
           rtcb->xcp.sigreturn  = 0;
         }
@@ -439,7 +439,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           rtcb->xcp.syscall[index].excreturn  = regs[REG_EXC_RETURN];
           rtcb->xcp.nsyscalls  = index + 1;
 
-          regs[REG_PC]         = (uint32_t)dispatch_syscall;
+          regs[REG_PC]         = (uint32_t)dispatch_syscall & ~1;
           regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
           /* Offset R0 to account for the reserved values */
