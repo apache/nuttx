@@ -49,7 +49,7 @@
 #include "nucleo-f072rb.h"
 
 /****************************************************************************
- * Pre-processor Defintiionis
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER

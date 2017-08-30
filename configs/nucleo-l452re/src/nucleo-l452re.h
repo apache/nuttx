@@ -129,6 +129,36 @@
  * Public Functions
  ****************************************************************************/
 
+/************************************************************************************
+ * Name: stm32l4_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+int stm32l4_adc_setup(void);
+
+/************************************************************************************
+ * Name: stm32l4_adc_measure_voltages
+ *
+ * Description:
+ *   Read internal reference voltage, internal VBAT and one external voltage.
+ *
+ ************************************************************************************/
+
+int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext);
+
+/************************************************************************************
+ * Name: stm32l4_dac_setup
+ *
+ * Description:
+ *   Initialize DAC and register the DAC driver.
+ *
+ ************************************************************************************/
+
+int stm32l4_dac_setup(void);
+
 /****************************************************************************
  * Name: stm32_bringup
  *

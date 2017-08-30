@@ -62,7 +62,7 @@
  * is we set aside more DMA channels/streams.
  */
 
-/* Values defined in arch/arm/src/stm32l4/chip/stm32l4x6xx_dma.h */
+/* Values defined in arch/arm/src/stm32l4/chip/stm32l4x3xx_dma.h */
 
 #define DMACHAN_SDMMC DMACHAN_SDMMC_1     /* 2 choices */
 
@@ -72,6 +72,10 @@
 /* UART RX DMA configurations */
 
 #define DMACHAN_USART1_RX DMACHAN_USART1_RX_2
+
+/* ADC */
+
+#define ADC1_DMA_CHAN DMACHAN_ADC1_1
 
 /* Alternate function pin selections ************************************************/
 

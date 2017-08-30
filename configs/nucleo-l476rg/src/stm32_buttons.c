@@ -71,7 +71,7 @@ void board_button_initialize(void)
    * also configured for the pin.
    */
 
-  stm32_configgpio(GPIO_BTN_USER);
+  stm32l4_configgpio(GPIO_BTN_USER);
 }
 
 /****************************************************************************
@@ -84,7 +84,7 @@ uint32_t board_buttons(void)
    * pressed.
    */
 
-  bool released = stm32_gpioread(GPIO_BTN_USER);
+  bool released = stm32l4_gpioread(GPIO_BTN_USER);
   return !released;
 }
 
@@ -117,7 +117,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   if (id == BUTTON_USER)
     {
-      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
+      ret = stm32l4_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
     }
 
   return ret;
