@@ -5001,12 +5001,12 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 </ul>
 <p>
   <b>Usage Note</b>:
-  When reading from the the CAN multiple messages may be returned, depending on (1) the size the returned can messages, and (2) the size of the buffer provided to receive CAN messages.
+  When reading from the CAN driver multiple messages may be returned, depending on (1) the size the returned can messages, and (2) the size of the buffer provided to receive CAN messages.
   <i>Never assume that a single message will be returned</i>... if you do this, <i>you will lose CAN data</i> under conditions where your read buffer can hold more than one small message.
   Below is an example about how you should think of the CAN read operation:
 </p>
 <ul><pre>
-#define BUFLEN 128
+#define BUFLEN 128  /* Arbitrary size of the CAN RX buffer */
 
 FAR struct can_msg_s *msg;
 char rxbuffer[BUFLEN];
