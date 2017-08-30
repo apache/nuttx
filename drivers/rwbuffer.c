@@ -752,7 +752,6 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
 ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
                  size_t nblocks, FAR uint8_t *rdbuffer)
 {
-  size_t remaining;
   int ret = OK;
 
   finfo("startblock=%ld nblocks=%ld rdbuffer=%p\n",
@@ -782,6 +781,8 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
 #endif
 
 #ifdef CONFIG_DRVR_READAHEAD
+  size_t remaining;
+
   if (rwb->rhmaxblocks > 0)
     {
       /* Loop until we have read all of the requested blocks */
