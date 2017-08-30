@@ -89,7 +89,7 @@ void stm32l4_spiinitialize(void)
   stm32l4_configgpio(GPIO_SPI_CS_SD_CARD);
 #endif
 
-  _info("SPI1 initialized\n");
+  spiinfo("SPI1 initialized\n");
 #endif
 
 #ifdef CONFIG_STM32L4_SPI2
@@ -99,7 +99,7 @@ void stm32l4_spiinitialize(void)
 
   /* Setup CS, EN & IRQ line IOs */
 
-  _info("SPI2 initialized\n");
+  spiinfo("SPI2 initialized\n");
 #endif
 }
 

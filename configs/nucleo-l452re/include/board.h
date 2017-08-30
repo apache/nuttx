@@ -219,7 +219,6 @@
 #define ADC1_MEASURE_CHANNEL        9
 #define GPIO_MEASURE_ADC            (GPIO_ADC1_IN9)
 
-
 /* Quadrature encoder
  * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
  */

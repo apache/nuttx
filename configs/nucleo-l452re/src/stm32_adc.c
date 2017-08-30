@@ -61,6 +61,7 @@
 /* STM32 chip specific calibration values *******************************************/
 
 /* Voltage used for calibration of internal analog reference voltage (Vrefint) */
+
 #if defined(CONFIG_ARCH_CHIP_STM32F7) \
  || defined(CONFIG_ARCH_CHIP_STM32F4) \
  || defined(CONFIG_ARCH_CHIP_STM32F0)
@@ -78,6 +79,7 @@
  * should nevertheless be verified from data-sheet when porting this
  * file to a new chip.
  */
+
 #if defined(CONFIG_ARCH_CHIP_STM32F7)
 #  define STM32_VREFINT_CAL (*(uint16_t *)((uint32_t)0x1ff0f44a))
 #elif defined(CONFIG_ARCH_CHIP_STM32F4)
@@ -93,9 +95,11 @@
 /* Internal temperature sensor calibration locations. Taken from
  * STM32L452 datasheet.
  */
+
 #if defined(CONFIG_ARCH_CHIP_STM32L4)
 
 /* TS ADC raw data acquired at a temperature of 30 °C (± 5 °C) */
+
 #  define STM32_TSENSE_TSCAL1 (*(int16_t *)((uint32_t)0x1fff75a8))
 
 /* TS ADC raw data acquired at a temperature of 130 °C (± 5 °C) */
@@ -167,7 +171,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
   fd = open("/dev/adc0", O_RDONLY);
   if (fd < 0)
     {
-      _err("Cannot open ADC converter\n");
+      aerr("ERROR: Cannot open ADC converter\n");
       ret = fd;
       goto out;
     }
@@ -175,7 +179,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
   ret = ioctl(fd, ANIOC_TRIGGER, 0);
   if (ret < 0)
     {
-      _err("Cannot trigger ADC conversion\n");
+      aerr("ERROR: Cannot trigger ADC conversion\n");
       goto out_close;
     }
 
@@ -186,16 +190,16 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
       ret = -errval;
       if (errval != EINTR)
         {
-          _err("read failed: %d\n", errval);
+          aerr("ERROR: read failed: %d\n", errval);
           goto out_close;
         }
 
-      _info("Interrupted read...\n");
+      ainfo("Interrupted read...\n");
       goto out_close;
     }
   else if (nbytes == 0)
     {
-      _err("No data read\n");
+      aerr("ERROR: No data read\n");
       ret = ERROR;
       goto out_close;
     }
@@ -203,20 +207,20 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
   nsamples = nbytes / sizeof(struct adc_msg_s);
   if (nsamples * sizeof(struct adc_msg_s) != nbytes)
     {
-      _info("Read size=%ld is not a multiple of sample size=%d, Ignoring\n",
+      ainfo("Read size=%ld is not a multiple of sample size=%d, Ignoring\n",
             (long)nbytes, sizeof(struct adc_msg_s));
     }
   else
     {
       int i;
       int32_t tsense;
-      _info("Sample (nsamples = %d):\n", nsamples);
+      ainfo("Sample (nsamples = %d):\n", nsamples);
 
       *vrefint = *vbat = *vext = 0;
 
       for (i = 0; i < nsamples ; i++)
         {
-          _info("%d: channel: %d value: %d\n",
+          ainfo("%d: channel: %d value: %d\n",
                 i+1, sample[i].am_channel, sample[i].am_data);
 
           /* Add the raw value to entropy pool. */
@@ -229,8 +233,9 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
                 /* Calculate corrected Vrefint with factory calibration value. */
 
                 *vrefint = STM32_VREFINT_MVOLTS * STM32_VREFINT_CAL / sample[i].am_data;
-                _info("VREFINT: %d -> %u mV\n", sample[i].am_data, *vrefint);
+                ainfo("VREFINT: %d -> %u mV\n", sample[i].am_data, *vrefint);
                 break;
+
               case ADC1_INTERNAL_TSENSE_CHANNEL:
                 /* Calculate final temperature. Sensor precision is ±2 °C,
                  * so it does not matter much if we use integer type here.
@@ -238,18 +243,21 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
 
                 tsense = (110 - 30) * (sample[i].am_data - STM32_TSENSE_TSCAL1)
                                     / (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1) + 30;
-                _info("TSENSE: %d -> %d °C\n", sample[i].am_data, tsense);
+                ainfo("TSENSE: %d -> %d °C\n", sample[i].am_data, tsense);
                 break;
+
               case ADC1_INTERNAL_VBATDIV3_CHANNEL:
                 *vbat = 3 * sample[i].am_data;
-                _info("VBAT/3: %d -> %u mV\n", sample[i].am_data, *vbat);
+                ainfo("VBAT/3: %d -> %u mV\n", sample[i].am_data, *vbat);
                 break;
+
               case ADC1_MEASURE_CHANNEL:
                 *vext = sample[i].am_data;
-                _info("External channel: %d\n", *vext);
+                ainfo("External channel: %d\n", *vext);
                 break;
+
               default:
-                _err("ADC got value from unknown channel %d\n", sample[i].am_channel);
+                aerr("ERROR: ADC got value from unknown channel %d\n", sample[i].am_channel);
                 break;
             }
         }
@@ -289,7 +297,7 @@ int stm32l4_adc_setup(void)
       g_adc = stm32l4_adc_initialize(1, g_chanlist, ADC1_NCHANNELS);
       if (g_adc == NULL)
         {
-          _err("Failed to get ADC interface\n");
+          aerr("ERROR: Failed to get ADC interface\n");
           return -ENODEV;
         }
 
@@ -298,7 +306,7 @@ int stm32l4_adc_setup(void)
       ret = adc_register("/dev/adc0", g_adc);
       if (ret < 0)
         {
-          _err("adc_register failed: %d\n", ret);
+          aerr("ERROR: adc_register failed: %d\n", ret);
           return ret;
         }
 #endif

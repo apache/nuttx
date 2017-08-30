@@ -74,7 +74,7 @@ int stm32l4_dac_setup(void)
       g_dac = stm32l4_dacinitialize(0);
       if (g_dac == NULL)
         {
-          _err("Failed to get DAC interface\n");
+          aerr("ERROR: Failed to get DAC interface\n");
           return -ENODEV;
         }
 
@@ -83,7 +83,7 @@ int stm32l4_dac_setup(void)
       ret = dac_register("/dev/dac0", g_dac);
       if (ret < 0)
         {
-          _err("dac_register failed: %d\n", ret);
+          aerr("ERROR: dac_register failed: %d\n", ret);
           return ret;
         }
 #endif
