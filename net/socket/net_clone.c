@@ -118,7 +118,10 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
    * is lost.
    */
 
-  ret = tcp_start_monitor(psock2);
+  if (psock2->s_type == SOCK_STREAM)
+    {
+      ret = tcp_start_monitor(psock2);
+    }
 #endif
 
   net_unlock();
