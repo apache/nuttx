@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 20, 2017</p>
+      <p>Last Updated: August 30, 2017</p>
     </td>
   </tr>
 </table>
@@ -4999,6 +4999,45 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     Platform-specific CAN drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> CAN peripheral devices.
   </li>
 </ul>
+<p>
+  <b>Usage Note</b>:
+  When reading from the the CAN multiple messages may be returned, depending on (1) the size the returned can messages, and (2) the size of the buffer provided to receive CAN messages.
+  <i>Never assume that a single message will be returned</i>... if you do this, <i>you will lose CAN data</i> under conditions where your read buffer can hold more than one small message.
+  Below is an example about how you should think of the CAN read operation:
+</p>
+<ul><pre>
+#define BUFLEN 128
+
+FAR struct can_msg_s *msg;
+char rxbuffer[BUFLEN];
+ssize_t nread;
+int nbytes;
+int msglen
+int i;
+
+/* Read messages into the RX buffer */
+
+nread = read(fd, rxbuffer, BUFLEN);
+
+/* Check for read errors */
+...
+
+/* Process each message in the RX buffer */
+
+for (i = 0; i &lt;= nread - CAN_MSGLEN(0); i += msglen)
+{
+  /* Get the next message from the RX buffer */
+
+  msg    = (FAR struct can_msg_s *)&amp;rxbuffer[i];
+  nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+  msglen = CAN_MSGLEN(nbytes);
+
+  DEBUGASSERT(i + msglen &lt; BUFLEN);
+
+  /* Process the next CAN message */
+  ...
+}
+</pre></ul>
 
 <h3><a name="quadencoder">6.1.6 Quadrature Encoder Drivers</a></h3>
 <p>
