@@ -73,6 +73,12 @@
 
 #define DMACHAN_USART1_RX DMACHAN_USART1_RX_2
 
+/* ADC */
+
+#define ADC1_DMA_CHAN DMACHAN_ADC1_1
+#define ADC2_DMA_CHAN DMACHAN_ADC2_2
+#define ADC3_DMA_CHAN DMACHAN_ADC3_2
+
 /* Alternate function pin selections ************************************************/
 
 /* USART1:

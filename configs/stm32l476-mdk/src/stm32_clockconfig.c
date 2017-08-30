@@ -222,18 +222,5 @@ void stm32l4_board_clockconfig(void)
   stm32l4_pwr_enableclk(true);
   stm32l4_rcc_enablelse();
 #endif
-
-  /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
-   * and then we can also do away with STM32L4_USE_CLK48, and give better
-   * warning messages
-   *
-   * XXX sanity if our STM32L4_CLK48_SEL is YYY then we need to have already
-   * enabled ZZZ
-   */
-
-  regval  = getreg32(STM32L4_RCC_CCIPR);
-  regval &= RCC_CCIPR_CLK48SEL_MASK;
-  regval |= STM32L4_CLK48_SEL;
-  putreg32(regval, STM32L4_RCC_CCIPR);
 }
 #endif

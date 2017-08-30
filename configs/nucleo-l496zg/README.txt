@@ -2,9 +2,7 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the STMicro
-Nucleo-144 board.  See
-
-http://www.st.com/content/ccc/resource/technical/document/data_brief/group0/7b/df/1d/e9/64/55/43/8d/DM00247910/files/DM00247910.pdf/jcr:content/translations/en.DM00247910.pdf
+Nucleo-144 board for STM32L4 chips.
 
 Contents
 ========
@@ -40,7 +38,7 @@ LQFP144 package.  Variants include
 
   ------------- ------------------
 
-This directory supports the L4 variants of Nucleo-144
+This directory supports the STM32L4 variants of Nucleo-144.
 
 Please read the User Manual UM2179: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
@@ -218,97 +216,64 @@ Flashing RED - In the event of a fatal crash, all other LEDs will be
 
 Serial Consoles
 ===============
-< Section needs updating >
 
-  USART6 (CONFIG_NUCLEO_CONSOLE_ARDUINO)
+  USART3
   ------
-                STM32F7
-    ARDUIONO FUNCTION  GPIO
-    -- ----- --------- -----
-    DO RX    USART6_RX PG9
-    D1 TX    USART6_TX PG14
-    -- ----- --------- -----
 
-  You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL
-
-    Nucleo 144           FTDI TTL-232R-3V3
-    -------------       -------------------
-    TXD - D1-TXD   -    RXD - Pin 5 (Yellow)
-    RXD - D0-RXD   -    TXD - Pin 4 (Orange)
-    GND   GND      -    GND   Pin 1  (Black)
-    -------------       -------------------
-
-    *Note you will be reverse RX/TX
-
-  Use make menuconfig to configure USART6 as the console:
-
-    CONFIG_STM32F7_USART6=y
-    CONFIG_USARTs_SERIALDRIVER=y
-    CONFIG_USARTS_SERIAL_CONSOLE=y
-    CONFIG_USART6_RXBUFSIZE=256
-    CONFIG_USART6_TXBUFSIZE=256
-    CONFIG_USART6_BAUD=115200
-    CONFIG_USART6_BITS=8
-    CONFIG_USART6_PARITY=0
-    CONFIG_USART6_2STOP=0
-
-  USART8 (CONFIG_NUCLEO_CONSOLE_MORPHO)
-  ------
+  Default board is configured to use USART3 as console.
 
   Pins and Connectors:
+
     FUNC GPIO  Connector
                    Pin NAME
     ---- ---   ------- ----
-    TXD: PE1   CN11-61, PE1
-    RXD: PE0   CN12-64, PE0
-               CN10-33, D34
+    TXD: PC4   CN8-9,  A4
+    RXD: PC5   CN8-11, A5
     ---- ---   ------- ----
-
 
   You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL
 
     Nucleo 144           FTDI TTL-232R-3V3
     -------------       -------------------
-    TXD - CN11-61   -   RXD - Pin 5 (Yellow)
-    RXD - CN12-64   -   TXD - Pin 4 (Orange)
-    GND   CN12-63   -   GND   Pin 1  (Black)
+    TXD - CN8-9     -   RXD - Pin 5 (Yellow)
+    RXD - CN8-11    -   TXD - Pin 4 (Orange)
+    GND             -   GND   Pin 1  (Black)
     -------------       -------------------
 
     *Note you will be reverse RX/TX
 
-  Use make menuconfig to configure USART8 as the console:
+  Use make menuconfig to configure USART3 as the console:
 
-    CONFIG_STM32L4_UART8=y
-    CONFIG_UART8_SERIALDRIVER=y
-    CONFIG_UART8_SERIAL_CONSOLE=y
-    CONFIG_UART8_RXBUFSIZE=256
-    CONFIG_UART8_TXBUFSIZE=256
-    CONFIG_UART8_BAUD=115200
-    CONFIG_UART8_BITS=8
-    CONFIG_UART8_PARITY=0
-    CONFIG_UART8_2STOP=0
+    CONFIG_STM32L4_USART3=y
+    CONFIG_USART3_SERIALDRIVER=y
+    CONFIG_USART3_SERIAL_CONSOLE=y
+    CONFIG_USART3_RXBUFSIZE=256
+    CONFIG_USART3_TXBUFSIZE=256
+    CONFIG_USART3_BAUD=115200
+    CONFIG_USART3_BITS=8
+    CONFIG_USART3_PARITY=0
+    CONFIG_USART3_2STOP=0
 
-  Virtual COM Port (CONFIG_NUCLEO_CONSOLE_VIRTUAL)
+  USART2
+  ------
+
+  USART 2 could be used as console as well.
+
+  Virtual COM Port
   ----------------
-  Yet another option is to use USART3 and the USB virtual COM port.  This
+  Yet another option is to use LPUART1 and the USB virtual COM port.  This
   option may be more convenient for long term development, but is painful
-  to use during board bring-up.
+  to use during board bring-up. However as LPUART peripheral has not been
+  implemented for STM32L4, this cannot currently be used.
 
   Solder Bridges.  This configuration requires:
 
-    PD8 USART3 TX SB5 ON and SB7 OFF (Default)
-    PD9 USART3 RX SB6 ON and SB4 OFF (Default)
-
-  Configuring USART3 is the same as given above but add the S and #3.
-
-  Question:  What BAUD should be configure to interface with the Virtual
-  COM port?  115200 8N1?
+    PG7 LPUART1 TX SB131 ON and SB195 OFF (Default)
+    PG8 LPUART1 RX SB130 ON and SB193 OFF (Default)
 
   Default
   -------
-  As shipped, SB4 and SB7 are open and SB5 and SB6 closed, so the
-  virtual COM port is enabled.
-
+  As shipped, the virtual COM port is enabled.
 
 SPI
 ---
@@ -320,7 +285,7 @@ SPI
 
 SDIO
 ----
-  To test the SD performace one can use a SparkFun microSD Sniffer
+  To test the SD performance one can use a SparkFun microSD Sniffer
   from https://www.sparkfun.com/products/9419 or similar board
   and connect it as follows:
 
@@ -371,8 +336,8 @@ nsh:
      CONFIG_HOST_LINUX=y                     : Builds under Linux
      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
 
-  3. Although the default console is USART3 (which would correspond to
+  3. Although the default console is LPUART1 (which would correspond to
      the Virtual COM port) I have done all testing with the console
-     device configured for UART8 (see instruction above under "Serial
+     device configured for USART3 (see instruction above under "Serial
      Consoles).
 

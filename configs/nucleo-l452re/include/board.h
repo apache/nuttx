@@ -73,6 +73,10 @@
 
 #define DMACHAN_USART1_RX DMACHAN_USART1_RX_2
 
+/* ADC */
+
+#define ADC1_DMA_CHAN DMACHAN_ADC1_1
+
 /* Alternate function pin selections ************************************************/
 
 /* USART1:
@@ -208,6 +212,14 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
+/* ADC measurements
+ * Default is ADC1_IN9 (PA4) connected to CN8-connector pin 3, A2.
+ */
+
+#define ADC1_MEASURE_CHANNEL        9
+#define GPIO_MEASURE_ADC            (GPIO_ADC1_IN9)
+
+
 /* Quadrature encoder
  * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
  */
@@ -251,6 +263,7 @@ extern "C"
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+
 /************************************************************************************
  * Name: stm32l4_board_initialize
  *

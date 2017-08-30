@@ -329,5 +329,4 @@ Configurations
          CONFIG_HAVE_CXXINITIALIZE=y
          CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
 
-       And also support fo C++ constructors under
-       apps/platform/nucleo-stm32f072rb.
+       And also support for C++ constructors under apps/platform.

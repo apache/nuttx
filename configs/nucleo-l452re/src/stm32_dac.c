@@ -1,8 +1,8 @@
-/************************************************************************************
- * configs/nucleo-l432kc/src/stm32_adc.c
+/*****************************************************************************
+ * configs/nucleo-l452re/src/stm32_dac.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
+ *   Authors: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,106 +38,57 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/analog/adc.h>
+#include <nuttx/analog/dac.h>
 #include <arch/board/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
-
-#include "stm32l4_pwm.h"
-#include "nucleo-l432kc.h"
-
-#ifdef CONFIG_STM32L4_ADC1
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* The number of ADC channels in the conversion list */
-
-#ifdef CONFIG_ADC_DMA
-#  define ADC1_NCHANNELS 2
-#else
-#  define ADC1_NCHANNELS 1
-#endif
+#include "stm32l4_gpio.h"
+#include "stm32l4_dac.h"
+#include "nucleo-l452re.h"
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-/* Identifying number of each ADC channel. */
 
-#ifdef CONFIG_ADC_DMA
-
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {1, 2};
-
-/* Configurations of pins used byte each ADC channels */
-
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1, GPIO_ADC1_IN2};
-
-#else
-/* Without DMA, only a single channel can be supported */
-
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {1};
-
-/* Configurations of pins used byte each ADC channels */
-
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};
-
-#endif /* CONFIG_ADC_DMA */
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+static struct dac_dev_s *g_dac;
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32l4_adc_setup
- *
- * Description:
- *   Initialize ADC and register the ADC driver.
- *
+ * Name: stm32l4_dac_setup
  ************************************************************************************/
 
-int stm32l4_adc_setup(void)
+int stm32l4_dac_setup(void)
 {
-  struct adc_dev_s *adc;
-  int ret;
-  int i;
+  static bool initialized = false;
 
-  /* Configure the pins as analog inputs for the selected channels */
-
-  for (i = 0; i < ADC1_NCHANNELS; i++)
+  if (!initialized)
     {
-      stm32l4_configgpio(g_adc1_pinlist[i]);
-    }
+#ifdef CONFIG_STM32L4_DAC1
+      int ret;
 
-  /* Call stm32l4_adc_initialize() to get an instance of the ADC interface */
+      g_dac = stm32l4_dacinitialize(0);
+      if (g_dac == NULL)
+        {
+          _err("Failed to get DAC interface\n");
+          return -ENODEV;
+        }
 
-  adc = stm32l4_adc_initialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
-  if (adc == NULL)
-    {
-      aerr("ERROR: Failed to get ADC interface\n");
-      return -ENODEV;
-    }
+      /* Register the DAC driver at "/dev/dac0" */
 
-  /* Register the ADC driver at "/dev/adc0" */
-
-  ret = adc_register("/dev/adc0", adc);
-  if (ret < 0)
-    {
-      aerr("ERROR: adc_register failed: %d\n", ret);
-      return ret;
+      ret = dac_register("/dev/dac0", g_dac);
+      if (ret < 0)
+        {
+          _err("dac_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+      initialized = true;
     }
 
   return OK;
 }
-
-#endif /* CONFIG_STM32L4_ADC1 */

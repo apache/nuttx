@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f3x1re/src/stm32_ajoystick.c
+ * configs/nucleo-l476rg/src/stm32_ajoystick.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -62,8 +62,8 @@
 #  if !defined(CONFIG_ADC)
 #    error CONFIG_ADC is required for the Itead joystick
 #    undef CONFIG_AJOYSTICK
-#  elif !defined(CONFIG_STM32_ADC1)
-#    error CONFIG_STM32_ADC1 is required for Itead joystick
+#  elif !defined(CONFIG_STM32L4_ADC1)
+#    error CONFIG_STM32L4_ADC1 is required for Itead joystick
 #    undef CONFIG_AJOYSTICK
 #  endif
 #endif /* CONFIG_AJOYSTICK */
@@ -305,7 +305,7 @@ static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
        * button is pressed.
        */
 
-      if (!stm32_gpioread(g_joygpio[i]))
+      if (!stm32l4_gpioread(g_joygpio[i]))
         {
           ret |= (1 << i);
         }
@@ -375,8 +375,8 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                iinfo("GPIO %d: rising: %d falling: %d\n",
                       i, rising, falling);
 
-               (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
-                                        true, ajoy_interrupt, NULL);
+               (void)stm32l4_gpiosetevent(g_joygpio[i], rising, falling,
+                                          true, ajoy_interrupt, NULL);
              }
         }
     }
@@ -402,7 +402,7 @@ static void ajoy_disable(void)
   flags = up_irq_save();
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
-      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
+      (void)stm32l4_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
     }
 
   up_irq_restore(flags);
@@ -481,14 +481,14 @@ int board_ajoy_initialize(void)
 
   /* Configure the GPIO pins as interrupting inputs.  NOTE: This is
    * unnecessary for interrupting pins since it will also be done by
-   * stm32_gpiosetevent().
+   * stm32l4_gpiosetevent().
    */
 
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
       /* Configure the PIO as an input */
 
-      stm32_configgpio(g_joygpio[i]);
+      stm32l4_configgpio(g_joygpio[i]);
     }
 
   /* Register the joystick device as /dev/ajoy0 */

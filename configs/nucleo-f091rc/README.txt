@@ -95,7 +95,7 @@ Serial Console
 
   TTL to RS-232 converter connection:
 
-    Nucleo CN10 STM32F072RB
+    Nucleo CN10 STM32F091RC
     ----------- ------------
     Pin 21 PA9  USART1_TX   *Warning you make need to reverse RX/TX on
     Pin 33 PA10 USART1_RX    some RS-232 converters
@@ -281,7 +281,7 @@ Configurations
          40231      92    1208   41531    a23b nuttx
 
        Those additional features cost about 8KiB FLASH.  I believe that is a
-       good use of the STM32F072RB's FLASH, but if you interested in the
+       good use of the STM32F091RC's FLASH, but if you interested in the
        more minimal configuration, here is what was changed:
 
        Removed
@@ -315,5 +315,4 @@ Configurations
          CONFIG_HAVE_CXXINITIALIZE=y
          CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
 
-       And also support fo C++ constructors under
-       apps/platform/nucleo-stm32f072rb.
+       And also support for C++ constructors under apps/platform.
