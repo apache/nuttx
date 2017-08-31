@@ -338,7 +338,6 @@ void up_addregion(void)
   /* Add the AHB SRAM user heap region. */
 
   kumm_addregion((FAR void *)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
-
 #endif
 
 #if CONFIG_MM_REGIONS >= 3
