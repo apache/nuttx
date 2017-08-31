@@ -365,7 +365,7 @@ static inline void up_heap_color(FAR void *start, size_t size)
  * Name: mem_addregion
  *
  * Description:
- *   Add one memory region to the kernel heap
+ *   Add one memory region to the user heap
  *
  ****************************************************************************/
 
@@ -374,7 +374,7 @@ static void mem_addregion(FAR void *region_start, size_t region_size)
 {
   if (g_mem_region_next <= CONFIG_MM_REGIONS)
     {
-      kmm_addregion(region_start, region_size);
+      kumm_addregion(region_start, region_size);
       g_mem_region_next++;
     }
 }
@@ -536,6 +536,8 @@ void up_addregion(void)
   g_mem_region_next = 2;
 
 #ifdef MM_USE_LOCSRAM_BANK1
+  /* Add the SRAM to the user heap */
+
   mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
@@ -546,6 +548,8 @@ void up_addregion(void)
 #endif
 
 #ifdef MM_USE_AHBSRAM_BANK0
+  /* Add the SRAM to the user heap */
+
   mem_addregion((FAR void *)LPC43_AHBSRAM_BANK0_BASE, LPC43_AHBSRAM_BANK0_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
@@ -556,6 +560,8 @@ void up_addregion(void)
 #endif
 
 #ifdef MM_USE_AHBSRAM_BANK1
+  /* Add the SRAM to the user heap */
+
   mem_addregion((FAR void *)LPC43_AHBSRAM_BANK1_BASE, LPC43_AHBSRAM_BANK1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
@@ -566,6 +572,8 @@ void up_addregion(void)
 #endif
 
 #ifdef MM_USE_AHBSRAM_BANK2
+  /* Add the SRAM heap to the user heap */
+
   mem_addregion((FAR void *)MM_DMAREGION_BASE, MM_DMAREGION_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
@@ -576,20 +584,52 @@ void up_addregion(void)
 #endif
 
 #ifdef MM_USE_EXTSDRAM0
+  /* Add the SDRAM to the user heap */
+
   mem_addregion((FAR void *)MM_EXTSDRAM0_REGION, MM_EXTSDRAM0_SIZE);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SDRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)MM_EXTSDRAM0_REGION, MM_EXTSDRAM0_SIZE);
+#endif
 #endif
 
 #ifdef MM_USE_EXTSDRAM1
+  /* Add the SDRAM to the user heap */
+
   mem_addregion((FAR void *)MM_EXTSDRAM1_REGION, MM_EXTSDRAM1_SIZE);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SDRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)MM_EXTSDRAM1_REGION, MM_EXTSDRAM1_SIZE);
+#endif
 #endif
 
 #ifdef MM_USE_EXTSDRAM2
+  /* Add the SDRAM to the user heap */
+
   mem_addregion((FAR void *)MM_EXTSDRAM2_REGION, MM_EXTSDRAM2_SIZE);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SDRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)MM_EXTSDRAM2_REGION, MM_EXTSDRAM2_SIZE);
+#endif
 #endif
 
 #ifdef MM_USE_EXTSDRAM3
+  /* Add the SDRAM to the user heap */
+
   mem_addregion((FAR void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SDRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
 #endif
 #endif
+#endif /* MM_HAVE_REGION */
 }
 #endif
