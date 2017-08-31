@@ -63,6 +63,27 @@
  ****************************************************************************/
 
 /* Configuration ********************************************************/
+/* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a
+ * single heap access with the standard allocations (malloc/free).  This
+ * heap is referred to as the user heap.  In the protected build
+ * (CONFIG_BUILD_PROTECTED=y) where an MPU is used to protect a region of
+ * otherwise flat memory, there will be two allocators:  One that allocates
+ * protected (kernel) memory and one that allocates unprotected (user)
+ * memory.  These are referred to as the kernel and user heaps,
+ * respectively.
+ *
+ * The ARM has no MPU but does have an MMU.  With this MMU, it can support
+ * the kernel build (CONFIG_BUILD_KERNEL=y).  In this configuration, there
+ * is one kernel heap but multiple user heaps:  One per task group.  However,
+ * in this case, we need only be concerned about initializing the single
+ * kernel heap here.
+ */
+
+#if defined(CONFIG_BUILD_KERNEL)
+#  define MM_ADDREGION kmm_addregion
+#else
+#  define MM_ADDREGION umm_addregion
+#endif
 
 /* Some sanity checking.  If external memory regions are defined, verify
  * that CONFIG_MM_REGIONS is set to match, exactly, the number of external
@@ -143,14 +164,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -198,15 +211,15 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 void up_addregion(void)
 {
 #if defined(CONFIG_LPC31_EXTSRAM0) && defined(CONFIG_LPC31_EXTSRAM0HEAP)
-  kmm_addregion((FAR void *)LPC31_EXTSRAM0_VSECTION, CONFIG_LPC31_EXTSRAM0SIZE);
+  MM_ADDREGION((FAR void *)LPC31_EXTSRAM0_VSECTION, CONFIG_LPC31_EXTSRAM0SIZE);
 #endif
 
 #if defined(CONFIG_LPC31_EXTSRAM1) && defined(CONFIG_LPC31_EXTSRAM1HEAP)
-  kmm_addregion((FAR void *)LPC31_EXTSRAM1_VSECTION, CONFIG_LPC31_EXTSRAM1SIZE);
+  MM_ADDREGION((FAR void *)LPC31_EXTSRAM1_VSECTION, CONFIG_LPC31_EXTSRAM1SIZE);
 #endif
 
 #if defined(CONFIG_LPC31_EXTDRAM) && defined(CONFIG_LPC31_EXTDRAMHEAP)
-  kmm_addregion((FAR void *)LPC31_EXTSDRAM_VSECTION, CONFIG_LPC31_EXTDRAMSIZE);
+  MM_ADDREGION((FAR void *)LPC31_EXTSDRAM_VSECTION, CONFIG_LPC31_EXTDRAMSIZE);
 #endif
 }
 #endif

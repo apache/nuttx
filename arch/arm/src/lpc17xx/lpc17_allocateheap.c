@@ -178,14 +178,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -339,25 +331,42 @@ void up_addregion(void)
 
   /* Yes.. allow user-mode access to the AHB SRAM user heap memory */
 
-   lpc17_mpu_uheap((uintptr_t)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
+  lpc17_mpu_uheap((uintptr_t)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
 
 #endif
 
   /* Add the AHB SRAM user heap region. */
 
-   kumm_addregion((FAR void *)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
+  kumm_addregion((FAR void *)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
 
 #endif
 
 #if CONFIG_MM_REGIONS >= 3
 #if defined(CONFIG_LPC17_EXTDRAM) && defined(CONFIG_LPC17_EXTDRAMHEAP)
-  kmm_addregion((FAR void *)LPC17_EXTDRAM_CS0, CONFIG_LPC17_EXTDRAMSIZE);
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to external DRAM heap memory */
+
+  lpc17_mpu_uheap((uintptr_t)LPC17_EXTDRAM_CS0, CONFIG_LPC17_EXTDRAMSIZE);
+
 #endif
+  /* Add external DRAM heap memory to the user heap */
+
+  kumm_addregion((FAR void *)LPC17_EXTDRAM_CS0, CONFIG_LPC17_EXTDRAMSIZE);
+#endif
+
 #if !defined(CONFIG_LPC17_EXTDRAMHEAP) || (CONFIG_MM_REGIONS >= 4)
 #if defined(CONFIG_LPC17_EXTSRAM0) && defined(CONFIG_LPC17_EXTSRAM0HEAP)
-  kmm_addregion((FAR void *)LPC17_EXTSRAM_CS0, CONFIG_LPC17_EXTSRAM0SIZE);
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to external SRAM heap memory */
+
+  lpc17_mpu_uheap((uintptr_t)LPC17_EXTSRAM_CS0, CONFIG_LPC17_EXTSRAM0SIZE);
+
+#endif
+  /* Add external SRAM heap memory to the user heap */
+
+  kumm_addregion((FAR void *)LPC17_EXTSRAM_CS0, CONFIG_LPC17_EXTSRAM0SIZE);
 #endif
 #endif
-#endif
+#endif /* CONFIG_MM_REGIONS >= 3 */
 }
 #endif

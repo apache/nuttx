@@ -53,18 +53,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -107,11 +95,12 @@ void up_addregion(void)
    */
 
 #if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
-#  if (CONFIG_RAM_NUTTXENTRY & 0xffff0000) != CONFIG_RAM_VSTART
+#if (CONFIG_RAM_NUTTXENTRY & 0xffff0000) != CONFIG_RAM_VSTART
   uint32_t start = CONFIG_RAM_VSTART + 0x1000;
   uint32_t end   = (CONFIG_RAM_NUTTXENTRY & 0xffff0000);
+
   kmm_addregion((FAR void *)start, end - start);
-#  endif
+#endif
 #endif
 
   /* Check for any additional memory regions */
