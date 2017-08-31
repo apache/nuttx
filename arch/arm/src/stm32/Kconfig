@@ -2832,6 +2832,14 @@ config STM32_FLASH_PREFETCH
 		on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
 		properly and enabling this option may interfere with ADC accuracy.
 
+config STM32_FLASH_NONBLOCKING
+	bool "Remove Blocking operation in FLASH driver"
+	default n
+	---help---
+		Enable this on single task platforms to conserve code space.
+		It removes the sem_wait and post operations that are not
+		needed in a single task environment.
+
 config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
 	bool "Workaround for FLASH data cache corruption"
 	default n
