@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_allocateheap.c
  *
- *   Copyright (C) 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,12 @@
 
 #include <arch/board/board.h>
 
+#include "mpu.h"
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "lpc43_mpuinit.h"
 #include "lpc43_emacram.h"
 #include "lpc43_usbram.h"
 
@@ -342,6 +344,31 @@ static uint8_t g_mem_region_next = 0;
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: up_heap_color
+ *
+ * Description:
+ *   Set heap memory to a known, non-zero state to checking heap usage.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HEAP_COLORATION
+static inline void up_heap_color(FAR void *start, size_t size)
+{
+  memset(start, HEAP_COLOR, size);
+}
+#else
+#  define up_heap_color(start,size)
+#endif
+
+/****************************************************************************
+ * Name: mem_addregion
+ *
+ * Description:
+ *   Add one memory region to the kernel heap
+ *
+ ****************************************************************************/
+
 #ifdef MM_HAVE_REGION
 static void mem_addregion(FAR void *region_start, size_t region_size)
 {
@@ -370,16 +397,126 @@ static void mem_addregion(FAR void *region_start, size_t region_size)
  *   If a protected kernel-space heap is provided, the kernel heap must be
  *   allocated (and protected) by an analogous up_allocate_kheap().
  *
+ *   The following memory map is assumed for the flat build:
+ *
+ *     .data region.  Size determined at link time.
+ *     .bss  region  Size determined at link time.
+ *     IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Heap.  Extends to the end of SRAM.
+ *
+ *   The following memory map is assumed for the kernel build:
+ *
+ *     Kernel .data region.  Size determined at link time.
+ *     Kernel .bss  region  Size determined at link time.
+ *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Padding for alignment
+ *     User .data region.  Size determined at link time.
+ *     User .bss region  Size determined at link time.
+ *     Kernel heap.  Size determined by CONFIG_MM_KERNEL_HEAPSIZE.
+ *     User heap.  Extends to the end of SRAM.
+ *
  ****************************************************************************/
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  /* Start with the first SRAM region */
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = CONFIG_RAM_END - ubase;
+  int       log2;
+
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((CONFIG_RAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = CONFIG_RAM_END - usize;
+
+  /* Return the user-space heap settings */
+
+  board_autoled_on(LED_HEAPALLOCATE);
+  *heap_start = (FAR void *)ubase;
+  *heap_size  = usize;
+
+  /* Colorize the heap for debug */
+
+  up_heap_color((FAR void *)ubase, usize);
+
+  /* Allow user-mode access to the user heap memory */
+
+  lpc43_mpu_uheap((uintptr_t)ubase, usize);
+
+#else
+  /* Return the heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = CONFIG_RAM_END - g_idle_topstack;
+  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
+
+  /* Colorize the heap for debug */
+
+  up_heap_color(*heap_start, *heap_size);
+#endif
 }
+
+/****************************************************************************
+ * Name: up_allocate_kheap
+ *
+ * Description:
+ *   This function will be called to dynamically set aside the heap region.
+ *
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
+ *   size of the unprotected, user-space heap.
+ *
+ *   If a protected kernel-space heap is provided, the kernel heap must be
+ *   allocated (and protected) by an analogous up_allocate_kheap().
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+{
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = CONFIG_RAM_END - ubase;
+  int       log2;
+
+  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the SRAM1_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((CONFIG_RAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = CONFIG_RAM_END - usize;
+
+  /* Return the kernel heap settings (i.e., the part of the heap region
+   * that was not dedicated to the user heap).
+   */
+
+  *heap_start = (FAR void *)USERSPACE->us_bssend;
+  *heap_size  = usize;
+}
+#endif
 
 /****************************************************************************
  * Name: up_addregion
@@ -398,37 +535,61 @@ void up_addregion(void)
 
   g_mem_region_next = 2;
 
-#  ifdef MM_USE_LOCSRAM_BANK1
+#ifdef MM_USE_LOCSRAM_BANK1
   mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
-#  endif
 
-#  ifdef MM_USE_AHBSRAM_BANK0
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)LPC43_LOCSRAM_BANK1_BASE, LPC43_LOCSRAM_BANK1_SIZE);
+#endif
+#endif
+
+#ifdef MM_USE_AHBSRAM_BANK0
   mem_addregion((FAR void *)LPC43_AHBSRAM_BANK0_BASE, LPC43_AHBSRAM_BANK0_SIZE);
-#  endif
 
-#  ifdef MM_USE_AHBSRAM_BANK1
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)LPC43_AHBSRAM_BANK0_BASE, LPC43_AHBSRAM_BANK0_SIZE);
+#endif
+#endif
+
+#ifdef MM_USE_AHBSRAM_BANK1
   mem_addregion((FAR void *)LPC43_AHBSRAM_BANK1_BASE, LPC43_AHBSRAM_BANK1_SIZE);
-#  endif
 
-#  ifdef MM_USE_AHBSRAM_BANK2
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)LPC43_AHBSRAM_BANK1_BASE, LPC43_AHBSRAM_BANK1_SIZE);
+#endif
+#endif
+
+#ifdef MM_USE_AHBSRAM_BANK2
   mem_addregion((FAR void *)MM_DMAREGION_BASE, MM_DMAREGION_SIZE);
-#  endif
 
-#  ifdef MM_USE_EXTSDRAM0
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Allow user-mode access to the SRAM heap */
+
+  lpc43_mpu_uheap((uintptr_t)MM_DMAREGION_BASE, MM_DMAREGION_SIZE);
+#endif
+#endif
+
+#ifdef MM_USE_EXTSDRAM0
   mem_addregion((FAR void *)MM_EXTSDRAM0_REGION, MM_EXTSDRAM0_SIZE);
-#  endif
+#endif
 
-#  ifdef MM_USE_EXTSDRAM1
+#ifdef MM_USE_EXTSDRAM1
   mem_addregion((FAR void *)MM_EXTSDRAM1_REGION, MM_EXTSDRAM1_SIZE);
-#  endif
+#endif
 
-#  ifdef MM_USE_EXTSDRAM2
+#ifdef MM_USE_EXTSDRAM2
   mem_addregion((FAR void *)MM_EXTSDRAM2_REGION, MM_EXTSDRAM2_SIZE);
-#  endif
+#endif
 
-#  ifdef MM_USE_EXTSDRAM3
+#ifdef MM_USE_EXTSDRAM3
   mem_addregion((FAR void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
-#  endif
+#endif
 #endif
 }
 #endif
