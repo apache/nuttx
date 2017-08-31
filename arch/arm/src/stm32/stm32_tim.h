@@ -61,6 +61,7 @@
 #define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
 #define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
 #define STM32_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
+#define STM32_TIM_SETCOUNTER(d,c)       ((d)->ops->setcounter(d,c))
 #define STM32_TIM_GETWIDTH(d)           ((d)->ops->getwidth(d))
 #define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
 #define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
@@ -164,6 +165,7 @@ struct stm32_tim_ops_s
   int  (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
   void (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint32_t period);
   uint32_t (*getcounter)(FAR struct stm32_tim_dev_s *dev);
+  void (*setcounter)(FAR struct stm32_tim_dev_s *dev, uint32_t count);
 
   /* General and Advanced Timers Adds */
 

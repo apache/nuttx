@@ -339,6 +339,7 @@ static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period);
 static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev);
+static void stm32_tim_setcounter(FAR struct stm32_tim_dev_s *dev, uint32_t count);
 static int  stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev);
 static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                  stm32_tim_channel_t mode);
@@ -362,6 +363,7 @@ static const struct stm32_tim_ops_s stm32_tim_ops =
   .setclock   = stm32_tim_setclock,
   .setperiod  = stm32_tim_setperiod,
   .getcounter = stm32_tim_getcounter,
+  .setcounter = stm32_tim_setcounter,
   .getwidth   = stm32_tim_getwidth,
   .setchannel = stm32_tim_setchannel,
   .setcompare = stm32_tim_setcompare,
@@ -906,6 +908,24 @@ static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
   return stm32_tim_getwidth(dev) > 16 ?
     stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET) :
     (uint32_t)stm32_getreg16(dev, STM32_BTIM_CNT_OFFSET);
+}
+
+/************************************************************************************
+ * Name: stm32_tim_setcounter
+ ************************************************************************************/
+
+static void stm32_tim_setcounter(FAR struct stm32_tim_dev_s *dev, uint32_t count)
+{
+  DEBUGASSERT(dev != NULL);
+
+  if (stm32_tim_getwidth(dev) > 16)
+    {
+      stm32_putreg32(dev, STM32_BTIM_CNT_OFFSET, count);
+    }
+  else
+    {
+      stm32_putreg16(dev, STM32_BTIM_CNT_OFFSET, (uint16_t)count);
+    }
 }
 
 /************************************************************************************
