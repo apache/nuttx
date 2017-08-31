@@ -903,7 +903,9 @@ static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
 static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
-  return stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET);
+  return stm32_tim_getwidth(dev) > 16 ?
+    stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET) :
+    (uint32_t)stm32_getreg16(dev, STM32_BTIM_CNT_OFFSET);
 }
 
 /************************************************************************************
