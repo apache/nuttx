@@ -100,29 +100,23 @@
  * Private Data
  ************************************************************************************/
 
-#if !defined(CONFIG_STM32_FLASH_NONBLOCKING)
 static sem_t g_sem = SEM_INITIALIZER(1);
-#endif
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 
-static inline void sem_lock(void)
+static void sem_lock(void)
 {
-#if !defined(CONFIG_STM32_FLASH_NONBLOCKING)
   while (sem_wait(&g_sem) < 0)
     {
       DEBUGASSERT(errno == EINTR);
     }
-#endif
 }
 
 static inline void sem_unlock(void)
 {
-#if !defined(CONFIG_STM32_FLASH_NONBLOCKING)
   sem_post(&g_sem);
-#endif
 }
 
 #if !defined(CONFIG_STM32_STM32L15XX)
