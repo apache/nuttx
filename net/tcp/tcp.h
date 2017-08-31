@@ -1074,7 +1074,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
  *   the listen arguments.
  *
  * Assumptions:
- *   Called from normal user code. Interrupts may be disabled.
+ *   Called from network socket logic.  The network may or may not be locked.
  *
  ****************************************************************************/
 
@@ -1095,7 +1095,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg);
  *   is freed that has pending connections.
  *
  * Assumptions:
- *   Called from network stack logic with the network stack locked
+ *   Called from network socket logic with the network stack locked
  *
  ****************************************************************************/
 

@@ -741,6 +741,9 @@ static int inet_connect(FAR struct socket *psock,
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
  *   value.  See accept() for a desrciption of the approriate error value.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
@@ -810,9 +813,8 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 #ifdef CONFIG_NET_TCP
 #ifdef NET_TCP_HAVE_STACK
-  /* Perform the local accept operation (with the network locked) */
+  /* Perform the local accept operation (the network locked must be locked) */
 
-  net_lock();
   ret = psock_tcp_accept(psock, addr, addrlen, &newsock->s_conn);
   if (ret < 0)
     {
@@ -835,7 +837,6 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       goto errout_after_accept;
     }
 
-  net_unlock();
   return OK;
 
 errout_after_accept:

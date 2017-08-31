@@ -153,6 +153,8 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   /* Let the address family's accept() method handle the operation */
 
   DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_accept != NULL);
+
+  net_lock();
   ret = psock->s_sockif->si_accept(psock, addr, addrlen, newsock);
   if (ret < 0)
     {
@@ -165,6 +167,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   newsock->s_flags |= _SF_CONNECTED;
   newsock->s_flags &= ~_SF_CLOSED;
+  net_unlock();
 
   leave_cancellation_point();
   return OK;

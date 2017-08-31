@@ -313,6 +313,9 @@ static int ieee802154_connect(FAR struct socket *psock,
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
  *   value.  See accept() for a desrciption of the approriate error value.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 static int ieee802154_accept(FAR struct socket *psock,

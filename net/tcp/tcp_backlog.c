@@ -64,7 +64,7 @@
  *   the listen arguments.
  *
  * Assumptions:
- *   Called from normal user code. Interrupts may be disabled.
+ *   Called from normal task logic.  The network may or may not be locked.
  *
  ****************************************************************************/
 
@@ -129,7 +129,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may
    * actually be NULL if nblg is <= 0;  In that case, we are disabling backlog
-   * support.  Since interrupts are disabled, destroying the old backlog and
+   * support.  Since the network is locked, destroying the old backlog and
    * replace it with the new is an atomic operation
    */
 
@@ -149,8 +149,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
  *   is freed that has pending connections.
  *
  * Assumptions:
- *   The caller has disabled interrupts so that there can be no conflict
- *   with ongoing, interrupt driven activity
+ *   Called from network socket logic with the network locked
  *
  ****************************************************************************/
 
@@ -211,7 +210,7 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
  *  function adds the new connection to the backlog.
  *
  * Assumptions:
- *   Called from the interrupt level with interrupts disabled
+ *   Called from network socket logic with the network locked
  *
  ****************************************************************************/
 
@@ -264,7 +263,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
  *  call this API to see if there are pending connections in the backlog.
  *
  * Assumptions:
- *   Called from normal user code, but with interrupts disabled,
+ *   Called from network socket logic with the network locked
  *
  ****************************************************************************/
 
@@ -283,7 +282,7 @@ bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
  *  call this API to see if there are pending connections in the backlog.
  *
  * Assumptions:
- *   Called from normal user code, but with interrupts disabled,
+ *   Called from network socket logic with the network locked
  *
  ****************************************************************************/
 
@@ -333,7 +332,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
  *  to remove the defunct connection from the list.
  *
  * Assumptions:
- *   Called from the interrupt level with interrupts disabled
+ *   Called from network socket logic with the network locked
  *
  ****************************************************************************/
 

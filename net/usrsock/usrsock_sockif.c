@@ -297,6 +297,9 @@ int usrsock_sockif_listen(FAR struct socket *psock, int backlog)
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
  *   value.  See accept() for a desrciption of the approriate error value.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 static int usrsock_sockif_accept(FAR struct socket *psock,

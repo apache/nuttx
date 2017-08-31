@@ -567,6 +567,9 @@ static int local_connect(FAR struct socket *psock,
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
  *   value.  See accept() for a desrciption of the approriate error value.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_NET_LOCAL_STREAM

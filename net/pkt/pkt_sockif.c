@@ -308,6 +308,9 @@ static int pkt_connect(FAR struct socket *psock,
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
  *   value.  See accept() for a desrciption of the approriate error value.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
