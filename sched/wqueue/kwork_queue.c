@@ -94,12 +94,25 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 
   DEBUGASSERT(work != NULL && worker != NULL);
 
-  /* First, initialize the work structure.  This must be done with interrupts
-   * disabled.  This permits this function to be called from with task logic
-   * or interrupt handlers.
+  /* Interrupts are disabled so that this logic can be called from with task
+   * logic or ifrom nterrupt handling logic.
    */
 
-  flags        = enter_critical_section();
+  flags = enter_critical_section();
+
+  /* Is there already pending work? */
+
+  if (work->worker != NULL)
+    {
+      /* Remove the entry from the work queue.  It will re requeued at the
+       * end of the work queue.
+       */
+
+      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
+    }
+
+  /* Initialize the work structure. */
+
   work->worker = worker;           /* Work callback. non-NULL means queued */
   work->arg    = arg;              /* Callback argument */
   work->delay  = delay;            /* Delay until work performed */
@@ -149,11 +162,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, systime_t delay)
 {
-  /* Cancel any pending work in the work stucture */
-
-  (void)work_cancel(qid, work);
-
-  /* Then queue the new work */
+  /* Queue the new work */
 
 #ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)

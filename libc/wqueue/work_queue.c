@@ -95,6 +95,17 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   while (work_lock() < 0);
 
+  /* Is there already pending work? */
+
+  if (work->worker != NULL)
+    {
+      /* Remove the entry from the work queue.  It will re requeued at the
+       * end of the work queue.
+       */
+
+      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
+    }
+
   /* Initialize the work structure */
 
   work->worker = worker;           /* Work callback. non-NULL means queued */
@@ -150,12 +161,6 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   if (qid == USRWORK)
     {
-      /* Cancel any pending work in the work stucture */
-
-      (void)work_cancel(qid, work);
-
-      /* Then queue the new work */
-
       return work_qqueue(&g_usrwork, work, worker, arg, delay);
     }
   else
