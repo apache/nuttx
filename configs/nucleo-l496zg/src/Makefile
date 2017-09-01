@@ -61,6 +61,10 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
+ifeq ($(CONFIG_DAC),y)
+CSRCS += stm32_dac.c
+endif
+
 ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_sdio.c
 endif
