@@ -48,6 +48,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+#include <poll.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -74,6 +75,10 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     bch_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int     bch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                 bool setup);
+#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     bch_unlink(FAR struct inode *inode);
 #endif
@@ -91,7 +96,7 @@ const struct file_operations bch_fops =
   bch_seek,    /* seek */
   bch_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0          /* poll */
+  , bch_poll   /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , bch_unlink /* unlink */
@@ -101,6 +106,27 @@ const struct file_operations bch_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bch_poll
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int bch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                    bool setup)
+{
+  if (setup)
+    {
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
+      if (fds->revents != 0)
+        {
+          sem_post(fds->sem);
+        }
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: bch_open
