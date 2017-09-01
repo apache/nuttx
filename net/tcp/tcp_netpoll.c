@@ -125,7 +125,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Mark that the connection has been lost */
 
-          tcp_lost_connection(info->psock, pstate->cb, flags);
+          tcp_lost_connection(info->psock, info->cb, flags);
           eventset |= (POLLERR | POLLHUP);
         }
 
@@ -135,9 +135,9 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Stop further callbacks */
 
-          pstate->cb->flags   = 0;
-          pstate->cb->priv    = NULL;
-          pstate->cb->event   = NULL;
+          info->cb->flags   = 0;
+          info->cb->priv    = NULL;
+          info->cb->event   = NULL;
 
           info->fds->revents |= eventset;
           sem_post(info->fds->sem);
