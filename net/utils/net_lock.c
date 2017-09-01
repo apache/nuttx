@@ -232,6 +232,16 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
           ret = sem_wait(sem);
         }
 
+      /* Check for errors from sem_wait() (should only be EINTR)
+       * REVISIT:  errno really should not be used within the OS
+       */
+
+      if (ret < 0)
+        {
+          ret = -get_errno();
+          DEBUGASSERT(ret < 0);
+        }
+
       /* Recover the network lock at the proper count */
 
       _net_takesem();
@@ -241,15 +251,18 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
   else
     {
       ret = sem_wait(sem);
+
+      /* Check for errors from sem_wait() (should only be EINTR)
+       * REVISIT:  errno really should not be used within the OS
+       */
+
+      if (ret < 0)
+        {
+          ret = -get_errno();
+          DEBUGASSERT(ret < 0);
+        }
     }
 
-  /* REVISIT:  errno really should not be used within the OS */
-
-  if (ret < 0)
-    {
-      ret = -get_errno();
-      DEBUGASSERT(ret < 0);
-    }
 
   sched_unlock();
   leave_critical_section(flags);
