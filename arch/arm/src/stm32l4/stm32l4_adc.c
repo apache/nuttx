@@ -1253,8 +1253,9 @@ static int adc_setup(FAR struct adc_dev_s *dev)
             ADC_CCR_TSEN | ADC_CCR_VBATEN;
   setbits = ADC_CCR_PRESC_NOT_DIV;
 
-  /* REVISIT: there is no way to select DAC1 or DAC2 output here on
-   * STM32L4X3 devices where they are multiplexed with ADC1 TSEN and VBAT.
+  /* On STM32L4X3 devices DAC1 and DAC2 outputs are multiplexed with ADC1 TS and VBAT.
+   * adc_internal() knows about this and does not set TSEN or VBATEN bits if configuration
+   * has requested DAC output to be connected to ADC.
    */
 
   adc_internal(priv, &setbits);
@@ -1434,11 +1435,14 @@ static bool adc_internal(FAR struct stm32_dev_s * priv, uint32_t *adc_ccr)
                     break;
 
                   case 17:
+#if !(defined(CONFIG_STM32L4_STM32L4X3) && defined(CONFIG_STM32L4_DAC1_OUTPUT_ADC))
                     *adc_ccr |= ADC_CCR_TSEN;
+#endif
                     break;
-
                   case 18:
+#if !(defined(CONFIG_STM32L4_STM32L4X3) && defined(CONFIG_STM32L4_DAC2_OUTPUT_ADC))
                     *adc_ccr |= ADC_CCR_VBATEN;
+#endif
                     break;
                 }
             }
