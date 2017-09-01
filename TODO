@@ -229,7 +229,19 @@ o Task/Scheduler (sched/)
                Changes like that could clean up some of this internal
                craziness.  The condition variable change described above is
                really a "bandaid" to handle the case that sem_wait() is a
-               cancellation point.
+               cancellation point.  Also will need to revisit previous changes
+               like:
+
+                 commit b4747286b19d3b15193b2a5e8a0fe48fa0a8638c
+                 Author: Juha Niskanen (Haltian) <juha.niskanen@haltian.com>
+                 Date:   Tue Apr 11 11:03:25 2017 -0600
+
+                     Add logic to disable cancellation points within the OS.
+                     This is useful when an internal OS function that is NOT
+                     a cancellation point calls an OS function which is a
+                     cancellation point.  In that case, irrecoverable states
+                     may occur if the cancellation is within the OS.
+
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design
                could be improved and made a little more efficient with this

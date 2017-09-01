@@ -268,7 +268,13 @@ void net_initialize(void);
  * Name: net_lock
  *
  * Description:
- *   Take the lock
+ *   Take the network lock
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   None
  *
  ****************************************************************************/
 
@@ -278,7 +284,13 @@ void net_lock(void);
  * Name: net_unlock
  *
  * Description:
- *   Release the lock.
+ *   Release the network lock.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   None
  *
  ****************************************************************************/
 
@@ -296,9 +308,8 @@ void net_unlock(void);
  *   abstime - The absolute time to wait until a timeout is declared.
  *
  * Returned value:
- *   The returned value is the same as sem_timedwait():  Zero (OK) is
- *   returned on success; -1 (ERROR) is returned on a failure with the
- *   errno value set appropriately.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -309,15 +320,14 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
  * Name: net_lockedwait
  *
  * Description:
- *   Atomically wait for sem while temporarily releasing lock on the network.
+ *   Atomically wait for sem while temporarily releasing the network lock.
  *
  * Input Parameters:
  *   sem - A reference to the semaphore to be taken.
  *
  * Returned value:
- *   The returned value is the same as sem_wait():  Zero (OK) is returned
- *   on success; -1 (ERROR) is returned on a failure with the errno value
- *   set appropriately.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 

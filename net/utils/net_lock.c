@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/net_lock.c
  *
- *   Copyright (C) 2011-2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,8 @@ static unsigned int g_count   = 0;
  * Name: _net_takesem
  *
  * Description:
- *   Take the semaphore
+ *   Take the semaphore, waiting indefinitely.
+ *   REVISIT: Should this return if -EINTR?
  *
  ****************************************************************************/
 
@@ -85,7 +86,7 @@ static void _net_takesem(void)
        * awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      DEBUGASSERT(get_errno() == EINTR);
     }
 }
 
@@ -110,7 +111,13 @@ void net_lockinitialize(void)
  * Name: net_lock
  *
  * Description:
- *   Take the lock
+ *   Take the network lock
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   None
  *
  ****************************************************************************/
 
@@ -143,7 +150,13 @@ void net_lock(void)
  * Name: net_unlock
  *
  * Description:
- *   Release the lock.
+ *   Release the network lock.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   None
  *
  ****************************************************************************/
 
@@ -181,9 +194,8 @@ void net_unlock(void)
  *   abstime - The absolute time to wait until a timeout is declared.
  *
  * Returned value:
- *   The returned value is the same as sem_wait() or sem_timedwait():  Zero
- *   (OK) is returned on success; -1 (ERROR) is returned on a failure with
- *   the errno value set appropriately.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -231,6 +243,14 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
       ret = sem_wait(sem);
     }
 
+  /* REVISIT:  errno really should not be used within the OS */
+
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      DEBUGASSERT(ret < 0);
+    }
+
   sched_unlock();
   leave_critical_section(flags);
   return ret;
@@ -240,15 +260,14 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
  * Name: net_lockedwait
  *
  * Description:
- *   Atomically wait for sem while temporarily releasing g_netlock.
+ *   Atomically wait for sem while temporarily releasing the network lock.
  *
  * Input Parameters:
  *   sem - A reference to the semaphore to be taken.
  *
  * Returned value:
- *   The returned value is the same as sem_wait():  Zero (OK) is returned
- *   on success; -1 (ERROR) is returned on a failure with the errno value
- *   set appropriately.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
