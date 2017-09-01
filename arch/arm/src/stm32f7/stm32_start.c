@@ -237,7 +237,11 @@ static inline void stm32_tcmenable(void)
   /* Enabled/disabled DTCM */
 
 #ifdef CONFIG_ARMV7M_DTCM
-  regval  = NVIC_TCMCR_EN | NVIC_TCMCR_RMW | NVIC_TCMCR_RETEN;
+  /* As DTCM RAM on STM32F7 does not have ECC, so do not enable
+   * read-modify-write.
+   */
+
+  regval  = NVIC_TCMCR_EN | NVIC_TCMCR_RETEN;
 #else
   regval  = getreg32(NVIC_DTCMCR);
   regval &= ~NVIC_TCMCR_EN;
