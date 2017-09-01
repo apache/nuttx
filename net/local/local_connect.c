@@ -127,6 +127,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
                                        bool nonblock)
 {
   int ret;
+  int sval;
 
   /* Has server backlog been reached?
    * NOTE: The backlog will be zero if listen() has never been called by the
@@ -182,7 +183,12 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   dq_addlast(&client->lc_node, &server->u.server.lc_waiters);
   client->lc_state = LOCAL_STATE_ACCEPT;
   local_accept_pollnotify(server, POLLIN);
-  _local_semgive(&server->lc_waitsem);
+
+  if (sem_getvalue(&server->lc_waitsem, &sval) >= 0 && sval < 1)
+    {
+      _local_semgive(&server->lc_waitsem);
+    }
+
   net_unlock();
 
   /* Wait for the server to accept the connections */
