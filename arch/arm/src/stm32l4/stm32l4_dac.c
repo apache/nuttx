@@ -67,7 +67,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* Up to 2 DAC interfaces for up to 3 channels are supported */
+/* Up to 1 DAC interface for up to 2 channels are supported */
+
+#if STM32L4_NDAC > 2
+#  warning "Extra DAC channels. Only DAC1 and DAC2 are supported"
+#endif
 
 #if STM32L4_NDAC < 2
 #  undef CONFIG_STM32L4_DAC2
@@ -86,14 +90,6 @@
 #if defined(CONFIG_STM32L4_DAC1) || defined(CONFIG_STM32L4_DAC2)
 
 /* DMA configuration. */
-
-#if defined(CONFIG_STM32L4_DAC1_DMA) || defined(CONFIG_STM32L4_DAC2_DMA)
-#  if !defined(CONFIG_STM32L4_DMA1)
-#    warning "STM32L4 DAC DMA support requires CONFIG_STM32L4_DMA1"
-#    undef CONFIG_STM32L4_DAC1_DMA
-#    undef CONFIG_STM32L4_DAC2_DMA
-#  endif
-#endif
 
 /* If DMA is selected, then a buffer, a timer and output frequency must
  * also be provided to support the DMA transfer.  The DMA transfer could be
@@ -133,15 +129,28 @@
 #  endif
 #endif
 
-/* DMA *********************************************************************/
+/* Select DMA channels, favor DMA1 if configured. */
 
 #undef HAVE_DMA
-#if defined(CONFIG_STM32L4_DAC1_DMA) || defined(CONFIG_STM32L4_DAC2_DMA)
-#   define HAVE_DMA        1
-#   define DAC_DMA         1
-#   define DAC1_DMA_CHAN   DMACHAN_DAC1_1
-#   define DAC2_DMA_CHAN   DMACHAN_DAC1_2
+#ifdef CONFIG_STM32L4_DAC1_DMA
+#  if defined(CONFIG_STM32L4_DMA1)
+#    define DAC1_DMA_CHAN   DMACHAN_DAC1_1
+#  elif defined(CONFIG_STM32L4_DMA2)
+#    define DAC1_DMA_CHAN   DMACHAN_DAC1_2
+#  else
+#    error "No DMA channel for DAC1"
+#  endif
 #endif
+#ifdef CONFIG_STM32L4_DAC2_DMA
+#  if defined(CONFIG_STM32L4_DMA1)
+#    define DAC2_DMA_CHAN   DMACHAN_DAC2_1
+#  elif defined(CONFIG_STM32L4_DMA2)
+#    define DAC2_DMA_CHAN   DMACHAN_DAC2_2
+#  else
+#    error "No DMA channel for DAC2"
+#  endif
+#endif
+#define HAVE_DMA
 
 /* Timer configuration.  The STM32L4 supports 8 different trigger for DAC
  * output:
@@ -351,7 +360,7 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 static int  dac_timinit(FAR struct stm32_chan_s *chan);
 #endif
 static int  dac_chaninit(FAR struct stm32_chan_s *chan);
-static int  dac_blockinit(void);
+static void dac_blockinit(void);
 
 /****************************************************************************
  * Private Data
@@ -371,26 +380,20 @@ static const struct dac_ops_s g_dacops =
 /* Channel 1 */
 
 #ifdef CONFIG_STM32L4_DAC1_DMA
-static uint16_t dac1_dmabuffer[CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE];
+uint16_t stm32l4_dac1_dmabuffer[CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE];
 #endif
 
 static struct stm32_chan_s g_dac1priv =
 {
   .intf       = 0,
-#if STM32L4_NDAC < 3
   .pin        = GPIO_DAC1_OUT,
   .dro        = STM32L4_DAC_DHR12R1,
   .cr         = STM32L4_DAC_CR,
-#else
-  .pin        = GPIO_DAC1_OUT1,
-  .dro        = STM32L4_DAC1_DHR12R1,
-  .cr         = STM32L4_DAC1_CR,
-#endif
 #ifdef CONFIG_STM32L4_DAC1_DMA
   .hasdma     = 1,
   .dmachan    = DAC1_DMA_CHAN,
   .buffer_len = CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE,
-  .dmabuffer  = dac1_dmabuffer,
+  .dmabuffer  = stm32l4_dac1_dmabuffer,
   .timer      = CONFIG_STM32L4_DAC1_TIMER,
   .tsel       = DAC1_TSEL_VALUE,
   .tbase      = DAC1_TIMER_BASE,
@@ -404,32 +407,26 @@ static struct dac_dev_s g_dac1dev =
   .ad_priv = &g_dac1priv,
 };
 
-#if STM32L4_NDAC > 1
-/* Channel 2: Note that some STM32L4 chips don't have
- * the DAC1 second output channel.
- */
+#endif /* CONFIG_STM32L4_DAC1 */
+
+#ifdef CONFIG_STM32L4_DAC2
+/* Channel 2 */
 
 #ifdef CONFIG_STM32L4_DAC2_DMA
-static uint16_t dac2_dmabuffer[CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE];
+uint16_t stm32l4_dac2_dmabuffer[CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE];
 #endif
 
 static struct stm32_chan_s g_dac2priv =
 {
   .intf       = 1,
-#if STM32L4_NDAC < 3
   .pin        = GPIO_DAC2_OUT,
   .dro        = STM32L4_DAC_DHR12R2,
   .cr         = STM32L4_DAC_CR,
-#else
-  .pin        = GPIO_DAC1_OUT2,
-  .dro        = STM32L4_DAC1_DHR12R2,
-  .cr         = STM32L4_DAC1_CR,
-#endif
 #ifdef CONFIG_STM32L4_DAC2_DMA
   .hasdma     = 1,
   .dmachan    = DAC2_DMA_CHAN,
   .buffer_len = CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE,
-  .dmabuffer  = dac2_dmabuffer,
+  .dmabuffer  = stm32l4_dac2_dmabuffer,
   .timer      = CONFIG_STM32L4_DAC2_TIMER,
   .tsel       = DAC2_TSEL_VALUE,
   .tbase      = DAC2_TIMER_BASE,
@@ -442,27 +439,8 @@ static struct dac_dev_s g_dac2dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac2priv,
 };
-#endif
 
-#endif /* CONFIG_STM32L4_DAC1 */
-
-#ifdef CONFIG_STM32L4_DAC2
-/* Channel 3: Does not actually exit in any current STM32L4 */
-
-static struct stm32_chan_s g_dac3priv =
-{
-  .intf       = 2,
-  .pin        = GPIO_DAC2_OUT1,
-  .dro        = STM32L4_DAC2_DHR12R1,
-  .cr         = STM32L4_DAC2_CR,
-};
-
-static struct dac_dev_s g_dac3dev =
-{
-  .ad_ops  = &g_dacops,
-  .ad_priv = &g_dac3priv,
-};
-#endif
+#endif /* CONFIG_STM32L4_DAC2 */
 
 static struct stm32_dac_s g_dacblock;
 
@@ -491,10 +469,10 @@ static inline void stm32l4_dac_modify_cr(FAR struct stm32_chan_s *chan,
 {
   unsigned int shift;
 
-  /* DAC1 channels 1 and 2 share the STM32L4_DAC[1]_CR control register.  DAC2
-   * channel 1 (and perhaps channel 2) uses the STM32L4_DAC2_CR control
-   * register.  In either case, bit 0 of the interface number provides the
-   * correct shift.
+  /* DAC channels 1 and 2 share the STM32L4_DAC[1]_CR control register. If
+   * future chips have DAC channel 3 (and perhaps channel 4) they likely have
+   * their own register like in STM32. In either case, bit 0 of the interface
+   * number provides the correct shift.
    *
    *   Bit 0 = 0: Shift = 0
    *   Bit 0 = 1: Shift = 16
@@ -525,7 +503,7 @@ static inline void stm32l4_dac_modify_mcr(FAR struct stm32_chan_s *chan,
 {
   unsigned int shift;
 
-  /* DAC1 channels 1 and 2 share the STM32L4_DAC_MCR control register.
+  /* DAC channels 1 and 2 share the STM32L4_DAC_MCR control register.
    * Bit 0 of the interface number provides the correct shift.
    *
    *   Bit 0 = 0: Shift = 0
@@ -694,28 +672,21 @@ static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 
   DEBUGASSERT(chan);
 
+  switch (chan->intf)
+    {
 #ifdef CONFIG_STM32L4_DAC1
-  if (chan->intf == 0)
-    {
-      dev = &g_dac1dev;
-    }
-#if STM32L4_NDAC > 1
-  else if (chan->intf == 1)
-    {
-      dev = &g_dac2dev;
-    }
+      case 0:
+        dev = &g_dac1dev;
+        break;
 #endif
-  else
-#endif /* CONFIG_STM32L4_DAC1 */
 #ifdef CONFIG_STM32L4_DAC2
-  if (chan->intf == 2)
-    {
-      dev = &g_dac3dev;
-    }
-  else
+      case 1:
+        dev = &g_dac2dev;
+        break;
 #endif
-    {
-      DEBUGPANIC();
+      default:
+        DEBUGPANIC();
+        break;
     }
 
   DEBUGASSERT(dev->ad_priv == chan);
@@ -762,9 +733,10 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
        * writing e.g. monotonously increasing values creates a continuosly repeating
        * ramp-effect, alternating with periods of zero output.
        *
-       * In real use it would be better to initialize dmabuffer with desired pattern
-       * beforehand. If want to write just one value at a time with DMA, set
-       * the buffer size to 1.
+       * In real use it the dmabuffer should be initialized with a desired pattern
+       * beforehand, followed by a single dummy write to initiate circular DMA. If want
+       * to write just one value at a time with DMA, set the buffer size to 1 (mostly
+       * useful for just testing the functionality).
        */
 
       chan->dmabuffer[chan->buffer_pos] = (uint16_t)msg->am_data;
@@ -1131,11 +1103,10 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
  * Input Parameters:
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static int dac_blockinit(void)
+static void dac_blockinit(void)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -1144,46 +1115,25 @@ static int dac_blockinit(void)
 
   if (g_dacblock.init)
     {
-      /* Yes.. then return success  We only have to do this once */
-
-      return OK;
+      return;
     }
 
   /* Put the entire DAC block in reset state */
 
   flags   = enter_critical_section();
   regval  = getreg32(STM32L4_RCC_APB1RSTR1);
-#if STM32L4_NDAC < 2
   regval |= RCC_APB1RSTR1_DAC1RST;
-#else
-#ifdef CONFIG_STM32L4_DAC1
-  regval |= RCC_APB1RSTR1_DAC1RST;
-#endif
-#ifdef CONFIG_STM32L4_DAC2
-  regval |= RCC_APB1RSTR1_DAC2RST;
-#endif
-#endif
   putreg32(regval, STM32L4_RCC_APB1RSTR1);
 
   /* Take the DAC out of reset state */
 
-#if STM32L4_NDAC < 2
   regval &= ~RCC_APB1RSTR1_DAC1RST;
-#else
-#ifdef CONFIG_STM32L4_DAC1
-  regval &= ~RCC_APB1RSTR1_DAC1RST;
-#endif
-#ifdef CONFIG_STM32L4_DAC2
-  regval &= ~RCC_APB1RSTR1_DAC2RST;
-#endif
-#endif
   putreg32(regval, STM32L4_RCC_APB1RSTR1);
   leave_critical_section(flags);
 
   /* Mark the DAC block as initialized */
 
   g_dacblock.init = 1;
-  return OK;
 }
 
 /****************************************************************************
@@ -1214,44 +1164,29 @@ FAR struct dac_dev_s *stm32l4_dacinitialize(int intf)
   FAR struct stm32_chan_s *chan;
   int ret;
 
+  switch (intf)
+    {
 #ifdef CONFIG_STM32L4_DAC1
-  if (intf == 0)
-    {
-      ainfo("DAC1-1 Selected\n");
-      dev = &g_dac1dev;
-    }
-#if STM32L4_NDAC > 1
-  else if (intf == 1)
-    {
-      ainfo("DAC1-2 Selected\n");
-      dev = &g_dac2dev;
-    }
+      case 0:
+        ainfo("DAC1-1 Selected\n");
+        dev = &g_dac1dev;
+        break;
 #endif
-  else
-#endif /* CONFIG_STM32L4_DAC1 */
 #ifdef CONFIG_STM32L4_DAC2
-  if (intf == 2)
-    {
-      ainfo("DAC2-1 Selected\n");
-      dev = &g_dac3dev;
-    }
-  else
+      case 1:
+        ainfo("DAC1-2 Selected\n");
+        dev = &g_dac2dev;
+        break;
 #endif
-    {
-      aerr("ERROR: No such DAC interface: %d\n", intf);
-      errno = ENODEV;
-      return NULL;
+      default:
+        aerr("ERROR: No such DAC interface: %d\n", intf);
+        errno = ENODEV;
+        return NULL;
     }
 
   /* Make sure that the DAC block has been initialized */
 
-  ret = dac_blockinit();
-  if (ret < 0)
-    {
-      aerr("ERROR: Failed to initialize the DAC block: %d\n", ret);
-      errno = -ret;
-      return NULL;
-    }
+  dac_blockinit();
 
   /* Configure the selected DAC channel */
 
