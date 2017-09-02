@@ -493,13 +493,13 @@
 
 /* DMA buffers default size */
 
-#ifndef CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE
+#if !defined(CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE) && defined(CONFIG_STM32_DAC1CH1_DMA)
 #  error "DAC1CH1 buffer size must be provided"
 #endif
-#ifndef CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE
+#if !defined(CONFIG_STM32_DAC1CH2_DMA_BUFFER_SIZE) && defined(CONFIG_STM32_DAC1CH2_DMA)
 #  error "DAC1CH2 buffer size must be provided"
 #endif
-#ifndef CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE
+#if !defined(CONFIG_STM32_DAC2CH1_DMA_BUFFER_SIZE) && defined(CONFIG_STM32_DAC2CH1_DMA)
 #  error "DAC2CH1 buffer size must be provided"
 #endif
 
