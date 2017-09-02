@@ -73,7 +73,7 @@ static FAR struct tcp_conn_s *tcp_listenports[CONFIG_NET_MAX_LISTENPORTS];
  *   Return the connection listener for connections on this port (if any)
  *
  * Assumptions:
- *   Called at interrupt level
+ *   This function is called from network logic with the nework locked.
  *
  ****************************************************************************/
 
@@ -183,8 +183,8 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
   int ndx;
   int ret;
 
-  /* This must be done with interrupts disabled because the listener table
-   * is accessed from interrupt level as well.
+  /* This must be done with network locked because the listener table
+   * is accessed from event processing logic as well.
    */
 
   net_lock();
@@ -237,7 +237,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
  *   Return true is there is a listener for the specified port
  *
  * Assumptions:
- *   Called at interrupt level
+ *   This function is called from network logic with the nework locked.
  *
  ****************************************************************************/
 
@@ -270,9 +270,9 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *listener;
   int ret = ERROR;
 
-  /* The interrupt logic has already allocated and initialized a TCP
-   * connection -- now check there if is an application in place to accept the
-   * connection.
+  /* The event processing logic has already allocated and initialized a TCP
+   * connection -- now check there if is an application in place to accept
+   * the connection.
    */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)

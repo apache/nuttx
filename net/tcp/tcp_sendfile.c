@@ -90,7 +90,7 @@
  ****************************************************************************/
 
 /* This structure holds the state of the send operation until it can be
- * operated upon from the interrupt level.
+ * operated upon from the driver poll event.
  */
 
 struct sendfile_s
@@ -311,11 +311,11 @@ static inline bool sendfile_addrcheck(FAR struct tcp_conn_s *conn)
  * Name: sendfile_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
- *   send operation when polled by the lower, device interfacing layer.
+ *   This function is called to perform the actual send operation when
+ *   polled by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -609,9 +609,9 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure.  This is done with the network
+   * locked because we don't want anything to happen until we are
+   * ready.
    */
 
   net_lock();

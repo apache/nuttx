@@ -123,7 +123,6 @@ EXTERN in_addr_t g_ipv4_allrouters;
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Defined in igmp_init.c ***************************************************/
 /****************************************************************************
  * Name:  igmp_initialize
  *
@@ -145,41 +144,21 @@ void igmp_initialize(void);
 
 void igmp_devinit(FAR struct net_driver_s *dev);
 
-/* Defined in igmp_input.c **************************************************/
 /****************************************************************************
  * Name:  igmp_input
  *
  * Description:
  *   An IGMP packet has been received.
  *
- * NOTE: This is most likely executing from an interrupt handler.
- *
  ****************************************************************************/
 
 void igmp_input(struct net_driver_s *dev);
-
-/* Defined in igmp_group.c **************************************************/
-/****************************************************************************
- * Name:  igmp_grpinit
- *
- * Description:
- *   One-time initialization of group data.
- *
- * Assumptions:
- *   Called only during early boot phases (pre-multitasking).
- *
- ****************************************************************************/
-
-void igmp_grpinit(void);
 
 /****************************************************************************
  * Name:  igmp_grpalloc
  *
  * Description:
  *   Allocate a new group from heap memory.
- *
- * Assumptions:
- *   May be called from either user or interrupt level processing.
  *
  ****************************************************************************/
 
@@ -191,9 +170,6 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
  *
  * Description:
  *   Find an existing group.
- *
- * Assumptions:
- *   May be called from either user or interrupt level processing.
  *
  ****************************************************************************/
 
@@ -207,9 +183,6 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
  *   Find an existing group.  If not found, create a new group for the
  *   address.
  *
- * Assumptions:
- *   May be called from either user or interrupt level processing.
- *
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
@@ -221,23 +194,16 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
  * Description:
  *   Release a previously allocated group.
  *
- * Assumptions:
- *   May be called from either user or interrupt level processing.
- *
  ****************************************************************************/
 
 void igmp_grpfree(FAR struct net_driver_s *dev,
                   FAR struct igmp_group_s *group);
 
-/* Defined in igmp_msg.c ****************************************************/
 /****************************************************************************
  * Name: igmp_schedmsg
  *
  * Description:
  *   Schedule a message to be send at the next driver polling interval.
- *
- * Assumptions:
- *   This function may be called in most any context.
  *
  ****************************************************************************/
 
@@ -250,15 +216,10 @@ void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
  *   Schedule a message to be send at the next driver polling interval and
  *   block, waiting for the message to be sent.
  *
- * Assumptions:
- *   This function cannot be called from an interrupt handler (if you try it,
- *   net_lockedwait will assert).
- *
  ****************************************************************************/
 
 void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
 
-/* Defined in igmp_poll.c ***************************************************/
 /****************************************************************************
  * Name:  igmp_poll
  *
@@ -269,15 +230,10 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
  * Returned Value:
  *   Returns a non-zero value if a IGP message is sent.
  *
- * Assumptions:
- *   This function is called from the driver polling logic... probably within
- *   an interrupt handler.
- *
  ****************************************************************************/
 
 void igmp_poll(FAR struct net_driver_s *dev);
 
-/* Defined in igmp_send.c ***************************************************/
 /****************************************************************************
  * Name: igmp_send
  *
@@ -302,7 +258,6 @@ void igmp_poll(FAR struct net_driver_s *dev);
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
                   FAR in_addr_t *dest);
 
-/* Defined in igmp_join.c ***************************************************/
 /****************************************************************************
  * Name:  igmp_joingroup
  *
@@ -321,15 +276,11 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
  *   as if a Group-Specific Query was received for that group, and set a
  *   timer appropriately)."
  *
- * Assumptions:
- *   This function cannot be called from interrupt handling logic!
- *
  ****************************************************************************/
 
 int igmp_joingroup(FAR struct net_driver_s *dev,
                    FAR const struct in_addr *grpaddr);
 
-/* Defined in igmp_leave.c **************************************************/
 /****************************************************************************
  * Name:  igmp_leavegroup
  *
@@ -353,23 +304,16 @@ int igmp_joingroup(FAR struct net_driver_s *dev,
  *   has left the group, but it does no harm to address the message to the
  *   group."
  *
- * Assumptions:
- *   This function cannot be called from interrupt handling logic!
- *
  ****************************************************************************/
 
 int igmp_leavegroup(FAR struct net_driver_s *dev,
                     FAR const struct in_addr *grpaddr);
 
-/* Defined in igmp_timer.c **************************************************/
 /****************************************************************************
  * Name:  igmp_startticks and igmp_starttimer
  *
  * Description:
  *   Start the IGMP timer with differing time units (ticks or deciseconds).
- *
- * Assumptions:
- *   This function may be called from most any context.
  *
  ****************************************************************************/
 
@@ -384,15 +328,13 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
  *   value. If maxticks > ticks-remaining, then (1) cancel the timer (to
  *   avoid race conditions) and return true.
  *
- * Assumptions:
- *   This function may be called from most any context.  If true is returned
- *   then the caller must call igmp_startticks() to restart the timer
+ *   If true is returned then the caller must call igmp_startticks() to
+ *    restart the timer
  *
  ****************************************************************************/
 
 bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks);
 
-/* Defined in igmp_mcastmac *************************************************/
 /****************************************************************************
  * Name:  igmp_addmcastmac
  *

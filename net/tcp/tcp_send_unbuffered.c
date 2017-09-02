@@ -92,7 +92,7 @@
  ****************************************************************************/
 
 /* This structure holds the state of the send operation until it can be
- * operated upon from the interrupt level.
+ * operated upon when the TX poll event occurs.
  */
 
 struct send_s
@@ -167,7 +167,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
  *   nothing.
  *
  * Parameters:
- *   dev    - The structure of the network driver that caused the interrupt
+ *   dev    - The structure of the network driver that caused the event
  *   pstate - sendto state structure
  *
  * Returned Value:
@@ -275,11 +275,11 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  * Name: tcpsend_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
- *   send operation when polled by the lower, device interfacing layer.
+ *   This function is called to perform the actual send operation when
+ *   polled by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -406,7 +406,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Check if the outgoing packet is available (it may have been claimed
-   * by a sendto interrupt serving a different thread).
+   * by a sendto event serving a different thread).
    */
 
 #if 0 /* We can't really support multiple senders on the same TCP socket */
@@ -780,9 +780,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   /* Perform the TCP send operation */
 
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure.  This is done with the network
+   * locked because we don't want anything to happen until we are
+   * ready.
    */
 
   net_lock();
@@ -832,15 +832,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           send_txnotify(psock, conn);
 
-          /* Wait for the send to complete or an error to occur:  NOTES: (1)
-           * net_lockedwait will also terminate if a signal is received, (2) interrupts
-           * may be disabled!  They will be re-enabled while the task sleeps and
-           * automatically re-enabled when the task restarts.
+          /* Wait for the send to complete or an error to occur:  NOTES:
+           * net_lockedwait will also terminate if a signal is received.
            */
 
           ret = net_lockedwait(&state.snd_sem);
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           tcp_callback_free(conn, state.snd_cb);
         }

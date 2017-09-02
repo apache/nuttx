@@ -216,7 +216,7 @@ static inline void psock_lost_connection(FAR struct socket *psock,
  *   nothing.
  *
  * Parameters:
- *   dev   - The structure of the network driver that caused the interrupt
+ *   dev   - The structure of the network driver that caused the event
  *   psock - Socket state structure
  *
  * Returned Value:
@@ -324,11 +324,11 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  * Name: psock_send_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
- *   send operation when polled by the lower, device interfacing layer.
+ *   This function is called to perform the actual send operation when
+ *   polled by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -674,7 +674,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Check if the outgoing packet is available (it may have been claimed
-   * by a sendto interrupt serving a different thread).
+   * by a sendto event serving a different thread).
    */
 
   if (dev->d_sndlen > 0)
@@ -1138,9 +1138,6 @@ errout:
  *     An invalid descriptor was specified.
  *   -ENOTCONN
  *     The socket is not connected.
- *
- * Assumptions:
- *   Not running at the interrupt level
  *
  ****************************************************************************/
 

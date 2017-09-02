@@ -70,7 +70,8 @@ static uint32_t g_tcpsequence;
  *   Set the TCP/IP sequence number
  *
  * Assumptions:
- *   This function may called from the interrupt level
+ *   This function must be called with the network locked if seqno refers
+ *   to a shared, global resource.
  *
  ****************************************************************************/
 
@@ -91,7 +92,8 @@ void tcp_setsequence(FAR uint8_t *seqno, uint32_t value)
  *   Get the TCP/IP sequence number
  *
  * Assumptions:
- *   This function may called from the interrupt level
+ *   This function must be called with the network locked if seqno refers
+ *   to a shared, global resource.
  *
  ****************************************************************************/
 
@@ -115,7 +117,8 @@ uint32_t tcp_getsequence(FAR uint8_t *seqno)
  *   Add the length to get the next TCP sequence number.
  *
  * Assumptions:
- *   This function may called from the interrupt level
+ *   This function must be called with the network locked if seqno refers
+ *   to a shared, global resource.
  *
  ****************************************************************************/
 
@@ -132,7 +135,8 @@ uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len)
  *   established.
  *
  * Assumptions:
- *   This function may called from the interrupt level
+ *   This function must be called with the network locked if seqno refers
+ *   to a shared, global resource.
  *
  ****************************************************************************/
 
@@ -148,7 +152,7 @@ void tcp_initsequence(FAR uint8_t *seqno)
  *   Increment the TCP/IP sequence number
  *
  * Assumptions:
- *   This function is called from the interrupt level
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 

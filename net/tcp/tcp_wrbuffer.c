@@ -177,7 +177,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
  *   buffered data.
  *
  * Assumptions:
- *   Called from interrupt level with interrupts disabled.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 

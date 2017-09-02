@@ -88,10 +88,6 @@ void igmp_initialize(void)
 
   net_ipaddr(g_ipv4_allrouters, 224, 0, 0, 2);
   net_ipaddr(g_ipv4_allsystems, 224, 0, 0, 1);
-
-  /* Initialize the group allocation logic */
-
-  igmp_grpinit();
 }
 
 /****************************************************************************

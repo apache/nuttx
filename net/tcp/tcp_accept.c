@@ -62,7 +62,7 @@
 struct accept_s
 {
   FAR struct socket     *acpt_sock;       /* The accepting socket */
-  sem_t                  acpt_sem;        /* Wait for interrupt event */
+  sem_t                  acpt_sem;        /* Wait for driver event */
   FAR struct sockaddr   *acpt_addr;       /* Return connection address */
   FAR socklen_t         *acpt_addrlen;    /* Return length of address */
   FAR struct tcp_conn_s *acpt_newconn;    /* The accepted connection */
@@ -148,7 +148,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
  * Name: accept_eventhandler
  *
  * Description:
- *   Receive interrupt level callbacks when connections occur
+ *   Receive event callbacks when connections occur
  *
  * Parameters:
  *   listener The connection structure of the listener
@@ -270,9 +270,9 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       /* Perform the TCP accept operation */
 
-      /* Initialize the state structure.  This is done with interrupts
-       * disabled because we don't want anything to happen until we
-       * are ready.
+      /* Initialize the state structure.  This is done with the network
+       * locked because we don't want anything to happen until we are
+       * ready.
        */
 
       state.acpt_sock       = psock;
@@ -293,10 +293,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       conn->accept_private  = (FAR void *)&state;
       conn->accept          = accept_eventhandler;
 
-      /* Wait for the send to complete or an error to occur:  NOTES: (1)
-       * net_lockedwait will also terminate if a signal is received, (2)
-       * interrupts may be disabled!  They will be re-enabled while the
-       * task sleeps and automatically re-enabled when the task restarts.
+      /* Wait for the send to complete or an error to occur:  NOTES:
+       * net_lockedwait will also terminate if a signal is received.
        */
 
       ret = net_lockedwait(&state.acpt_sem);
@@ -315,7 +313,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           DEBUGASSERT(ret < 0);
         }
 
-      /* Make sure that no further interrupts are processed */
+      /* Make sure that no further events are processed */
 
       conn->accept_private = NULL;
       conn->accept         = NULL;

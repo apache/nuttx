@@ -3,8 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "IGMPv2 Client Support"
-
 config NET_IGMP
 	bool "IGMPv2 client support"
 	default n
@@ -14,12 +12,4 @@ config NET_IGMP
 
 if NET_IGMP
 
-config PREALLOC_IGMPGROUPS
-	int "Number of pre-allocated IGMP groups"
-	default 4
-	---help---
-		Pre-allocated IGMP groups are used only if needed from interrupt
-		level group created (by the IGMP server). Default: 4.
-
 endif # NET_IGMP
-endmenu # IGMPv2 Client Support

@@ -67,7 +67,7 @@
  * Assumptions:
  * - The caller has checked that TCP_NEWDATA is set in flags and that is no
  *   other handler available to process the incoming data.
- * - This function is called at the interrupt level with interrupts disabled.
+ * - This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -139,7 +139,7 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   Inform the application holding the TCP socket of a change in state.
  *
  * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 
@@ -225,7 +225,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  * Assumptions:
  * - The caller has checked that TCP_NEWDATA is set in flags and that is no
  *   other handler available to process the incoming data.
- * - This function is called at the interrupt level with interrupts disabled.
+ * - This function must be called with the network locked.
  *
  ****************************************************************************/
 

@@ -106,7 +106,7 @@
  *   |  < current timer) |
  *   +-------------------+
  *
- * NOTE: This is most likely executing from an interrupt handler.
+ * NOTE: The network must be locked.
  *
  ****************************************************************************/
 

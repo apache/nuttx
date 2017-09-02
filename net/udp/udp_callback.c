@@ -296,7 +296,7 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
  *   OK if packet has been processed, otherwise ERROR.
  *
  * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
+ *   This function must be called with the network locked.
  *
  ****************************************************************************/
 

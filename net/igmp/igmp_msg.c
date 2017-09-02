@@ -88,10 +88,6 @@ void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
  *   Schedule a message to be send at the next driver polling interval and
  *   block, waiting for the message to be sent.
  *
- * Assumptions:
- *   This function cannot be called from an interrupt handler (if you try it,
- *   net_lockedwait will assert).
- *
  ****************************************************************************/
 
 void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)

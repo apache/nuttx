@@ -119,9 +119,6 @@
  *   |  < current timer) |
  *   +-------------------+
  *
- * Assumptions:
- *   This function cannot be called from interrupt handling logic!
- *
  ****************************************************************************/
 
 int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)

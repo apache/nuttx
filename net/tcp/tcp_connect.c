@@ -362,10 +362,8 @@ int psock_tcp_connect(FAR struct socket *psock,
       if (ret >= 0)
         {
           /* Wait for either the connect to complete or for an error/timeout
-           * to occur. NOTES:  (1) net_lockedwait will also terminate if a signal
-           * is received, (2) interrupts may be disabled!  They will be re-
-           * enabled while the task sleeps and automatically re-disabled
-           * when the task restarts.
+           * to occur. NOTES:  net_lockedwait will also terminate if a signal
+           * is received.
            */
 
           ret = net_lockedwait(&state.tc_sem);

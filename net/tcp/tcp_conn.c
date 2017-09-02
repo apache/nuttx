@@ -312,7 +312,7 @@ static int tcp_selectport(uint8_t domain, FAR const union ip_addr_u *ipaddr,
  *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from network logic at interrupt level
+ *   This function is called from network logic with the nework locked.
  *
  ****************************************************************************/
 
@@ -379,8 +379,8 @@ static inline FAR struct tcp_conn_s *
  *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from network logic at interrupt level
- *
+ *   This function is called from network logic with the nework locked.
+4 *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
@@ -611,8 +611,8 @@ void tcp_initialize(void)
  * Description:
  *   Find a free TCP/IP connection structure and allocate it
  *   for use.  This is normally something done by the implementation of the
- *   socket() API but is also called from the interrupt level when a TCP
- *   packet is received while "listening"
+ *   socket() API but is also called from the even procressing lock when a
+ *   TCP packet is received while "listening"
  *
  ****************************************************************************/
 
@@ -620,9 +620,9 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 {
   FAR struct tcp_conn_s *conn;
 
-  /* Because this routine is called from both interrupt level and
-   * and from user level, we have not option but to disable interrupts
-   * while accessing g_free_tcp_connections[];
+  /* Because this routine is called from both event processing (with the
+   * network locked) and and from user level.  Make sure that the network
+   * locked in any cased while accessing g_free_tcp_connections[];
    */
 
   net_lock();
@@ -737,8 +737,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
 
-  /* Because g_free_tcp_connections is accessed from user level and interrupt
-   * level, code, it is necessary to keep interrupts disabled during this
+  /* Because g_free_tcp_connections is accessed from user level and event
+   * processing logic, it is necessary to keep the newtork locked during this
    * operation.
    */
 
@@ -819,7 +819,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
  *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from network logic at interrupt level
+ *   This function is called from network logic with the nework locked.
  *
  ****************************************************************************/
 
@@ -852,8 +852,7 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
  *   Traverse the list of active TCP connections
  *
  * Assumptions:
- *   This function is called from network logic at interrupt level (or with
- *   interrupts disabled).
+ *   This function is called from network logic with the nework locked.
  *
  ****************************************************************************/
 
@@ -873,12 +872,12 @@ FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn)
  * Name: tcp_alloc_accept
  *
  * Description:
- *    Called when driver interrupt processing matches the incoming packet
+ *    Called when driver event processing matches the incoming packet
  *    with a connection in LISTEN. In that case, this function will create
  *    a new connection and initialize it to send a SYNACK in return.
  *
  * Assumptions:
- *   This function is called from network logic at interrupt level
+ *   This function is called from network logic with the nework locked.
  *
  ****************************************************************************/
 
