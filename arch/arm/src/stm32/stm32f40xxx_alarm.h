@@ -77,8 +77,8 @@ struct alm_setalarm_s
 
 struct alm_rdalarm_s
 {
-  int as_id;                    /* enum alm_id_e */
-  FAR struct rtc_time *as_time; /* Argument for storing ALARM RTC time */
+  int ar_id;                    /* enum alm_id_e */
+  FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
 };
 
 /****************************************************************************

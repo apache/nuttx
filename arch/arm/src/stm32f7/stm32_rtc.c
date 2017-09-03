@@ -1624,15 +1624,15 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
   int ret = -EINVAL;
 
   ASSERT(alminfo != NULL);
-  DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
+  DEBUGASSERT(RTC_ALARM_LAST > alminfo->ar_id);
 
-  switch (alminfo->as_id)
+  switch (alminfo->ar_id)
     {
       case RTC_ALARMA:
         {
           alarmreg = STM32_RTC_ALRMAR;
           ret = stm32_rtc_getalarmdatetime(alarmreg,
-                                           (struct tm *)alminfo->as_time);
+                                           (struct tm *)alminfo->ar_time);
         }
         break;
 
@@ -1640,12 +1640,12 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
         {
           alarmreg = STM32_RTC_ALRMBR;
           ret = stm32_rtc_getalarmdatetime(alarmreg,
-                                          (struct tm *)alminfo->as_time);
+                                          (struct tm *)alminfo->ar_time);
         }
         break;
 
       default:
-        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);
         break;
     }
 

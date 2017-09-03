@@ -533,8 +533,8 @@ static int stm32l4_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
       sched_lock();
 
-      lowerinfo.as_id = alarminfo->id;
-      lowerinfo.as_time = alarminfo->time;
+      lowerinfo.ar_id = alarminfo->id;
+      lowerinfo.ar_time = alarminfo->time;
 
       ret = stm32l4_rtc_rdalarm(&lowerinfo);
 
