@@ -6569,26 +6569,36 @@ config STM32_HAVE_RTC_SUBSECONDS
 	select ARCH_HAVE_RTC_SUBSECONDS
 	default n
 
+menu "RTC Configuration"
+	depends on RTC
+
 config RTC_MAGIC_REG
-	int "The BKP register used to store/check the Magic value to determine if RTC is set already"
+	int "BKP register"
 	default 0
 	range  0 19
-	depends on RTC && !STM32_HAVE_RTC_COUNTER
+	depends on !STM32_HAVE_RTC_COUNTER
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
 
 config RTC_MAGIC
-	hex "Value used as Magic to determine if RTC is already setup"
+	hex "RTC Magic 1"
 	default 0xfacefeee
-	depends on RTC && !STM32_HAVE_RTC_COUNTER
+	depends on !STM32_HAVE_RTC_COUNTER
+	---help---
+		Value used as Magic to determine if the RTC is already setup
 
 config RTC_MAGIC_TIME_SET
-	hex "Value used as Magic to determine if RTC is setup and have time set"
+	hex "RTC Magic 2"
 	default 0xfacefeef
-	depends on RTC && !STM32_HAVE_RTC_COUNTER
+	depends on !STM32_HAVE_RTC_COUNTER
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
 
 choice
 	prompt "RTC clock source"
 	default RTC_LSECLOCK
-	depends on RTC
 
 config RTC_LSECLOCK
 	bool "LSE clock"
@@ -6605,7 +6615,8 @@ config RTC_HSECLOCK
 	---help---
 		Drive the RTC with the HSE clock, divided down to 1MHz.
 
-endchoice
+endchoice # RTC clock source
+endmenu # RTC configuration
 
 menu "Ethernet MAC configuration"
 	depends on STM32_ETHMAC
