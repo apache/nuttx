@@ -584,4 +584,43 @@ int kinetis_rtc_cancelalarm(void)
 }
 #endif
 
+/************************************************************************************
+ * Name: kinetis_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int kinetis_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
+{
+  int ret = -EINVAL;
+
+  ASSERT(alminfo != NULL);
+
+  switch (alminfo->ar_id)
+    {
+      case RTC_ALARMA:
+        {
+#warning Missing logic
+          ret = -ENOSYS;
+        }
+        break;
+
+      default:
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);
+        break;
+    }
+
+  return ret;
+}
+#endif
+
 #endif /* KINETIS_RTC */
