@@ -116,6 +116,8 @@ static int stm32l4_setrelative(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct lower_setrelative_s *alarminfo);
 static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
+static int stm32l4_rdalarm(FAR struct rtc_lowerhalf_s *lower,
+                         FAR struct lower_rdalarm_s *alarminfo);
 #endif
 
 /****************************************************************************
@@ -133,6 +135,7 @@ static const struct rtc_ops_s g_rtc_ops =
   .setalarm    = stm32l4_setalarm,
   .setrelative = stm32l4_setrelative,
   .cancelalarm = stm32l4_cancelalarm,
+  .rdalarm     = stm32l4_rdalarm,
 #endif
 #ifdef CONFIG_RTC_IOCTL
   .ioctl       = NULL,
@@ -491,6 +494,52 @@ static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
     }
 
   sem_post(&priv->devsem);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_rdalarm
+ *
+ * Description:
+ *   Query the RTC alarm.
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *   alarminfo - Provided information needed to query the alarm
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static int stm32l4_rdalarm(FAR struct rtc_lowerhalf_s *lower,
+                           FAR struct lower_rdalarm_s *alarminfo)
+{
+  struct alm_rdalarm_s lowerinfo;
+  int ret = -EINVAL;
+
+  ASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
+  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+
+  if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
+    {
+      /* Disable pre-emption while we do this so that we don't have to worry
+       * about being suspended and working on an old time.
+       */
+
+      sched_lock();
+
+      lowerinfo.as_id = alarminfo->id;
+      lowerinfo.as_time = alarminfo->time;
+
+      ret = stm32l4_rtc_rdalarm(&lowerinfo);
+
+      sched_unlock();
+    }
 
   return ret;
 }

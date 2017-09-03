@@ -529,6 +529,40 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+
+    /* RTC_RD_ALARM query the alarm.
+     *
+     * Argument: A writable reference to the queried alarm.
+     *
+     */
+
+    case RTC_RD_ALARM:
+      {
+        FAR struct rtc_rdalarm_s *alarmquery =
+          (FAR struct rtc_rdalarm_s *)((uintptr_t)arg);
+        FAR struct rtc_alarminfo_s *upperinfo;
+        struct lower_rdalarm_s lowerinfo;
+        int alarmid;
+
+        DEBUGASSERT(alarmquery != NULL);
+        alarmid = alarmquery->id;
+        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+
+        /* Is the alarm active? */
+
+        upperinfo = &upper->alarminfo[alarmid];
+        alarmquery->active = upperinfo->active;
+
+        lowerinfo.id = alarmid;
+        lowerinfo.priv = (FAR void *)upper;
+        lowerinfo.time = (FAR struct rtc_time *)&alarmquery->time;
+
+        if (ops->rdalarm)
+          {
+            ret = ops->rdalarm(upper->lower, &lowerinfo);
+          }
+      }
+      break;
 #endif /* CONFIG_RTC_ALARM */
 
     /* Forward any unrecognized IOCTLs to the lower half driver... they

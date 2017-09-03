@@ -86,6 +86,14 @@ struct alm_setalarm_s
   FAR void *as_arg;            /* Argument for callback */
 };
 
+/* Structure used to pass parameters to query an alarm */
+
+struct alm_rdalarm_s
+{
+  int as_id;                   /* enum alm_id_e */
+  FAR struct rtc_time *as_time;/* Argument for storing ALARM RTC time */
+};
+
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
