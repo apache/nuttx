@@ -177,6 +177,7 @@ static int kinetis_rtc_interrupt(int irq, void *context, FAR void *arg)
  uint16_t rtc_sr;
 
   /* if alarm */
+
   rtc_sr = getreg32( KINETIS_RTC_SR);
   if (rtc_sr & RTC_SR_TAF )
     {
@@ -264,7 +265,7 @@ int up_rtc_irq_attach(void)
       /* Clear TAF if pending */
 
       rtc_sr = getreg32( KINETIS_RTC_SR);
-      if (rtc_sr & RTC_SR_TAF )
+      if ((rtc_sr & RTC_SR_TAF) != 0)
         {
           putreg32(0, KINETIS_RTC_TAR);
         }
@@ -438,7 +439,9 @@ time_t up_rtc_time(void)
 int up_rtc_gettime(FAR struct timespec *tp)
 {
   irqstate_t flags;
-  uint32_t seconds, prescaler, prescaler2;
+  uint32_t seconds;
+  uint32_t prescaler;
+  uint32_t prescaler2;
 
   /* Get prescaler and seconds register. this is in a loop which ensures that
    * registers will be re-read if during the reads the prescaler has
@@ -482,7 +485,8 @@ int up_rtc_gettime(FAR struct timespec *tp)
 int up_rtc_settime(FAR const struct timespec *tp)
 {
   irqstate_t flags;
-  uint32_t seconds, prescaler;
+  uint32_t seconds;
+  uint32_t prescaler;
 
   seconds = tp->tv_sec;
   prescaler = tp->tv_nsec * (CONFIG_RTC_FREQUENCY / 1000000000);
@@ -573,8 +577,7 @@ int kinetis_rtc_cancelalarm(void)
 
       /* Unset the alarm */
 
-      putreg32(0, KINETIS_RTC_IER);     /* disable alarm interrupt */
-
+      putreg32(0, KINETIS_RTC_IER);     /* Disable alarm interrupt */
       return OK;
     }
   else
@@ -591,7 +594,7 @@ int kinetis_rtc_cancelalarm(void)
  *   Query an alarm configured in hardware.
  *
  * Input Parameters:
- *  alminfo - Information about the alarm configuration.
+ *  tp - Location to return the timer match register.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -599,27 +602,13 @@ int kinetis_rtc_cancelalarm(void)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int kinetis_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
+int kinetis_rtc_rdalarm(FAR struct timespec *tp)
 {
-  int ret = -EINVAL;
+  DEBUGASSERT(tp != NULL);
 
-  ASSERT(alminfo != NULL);
-
-  switch (alminfo->ar_id)
-    {
-      case RTC_ALARMA:
-        {
-#warning Missing logic
-          ret = -ENOSYS;
-        }
-        break;
-
-      default:
-        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);
-        break;
-    }
-
-  return ret;
+  tp->tv_sec = getreg32(KINETIS_RTC_TAR);
+  tp->tv_nsec = 0;
+  return OK;
 }
 #endif
 

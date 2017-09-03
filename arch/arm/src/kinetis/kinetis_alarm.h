@@ -84,14 +84,6 @@ struct alm_setalarm_s
   FAR void *as_arg;   /* Argument for callback */
 };
 
-/* Structure used to pass parameters to query an alarm */
-
-struct alm_rdalarm_s
-{
-  int ar_id;                   /* enum alm_id_e */
-  FAR struct rtc_time *ar_time;/* Argument for storing ALARM RTC time */
-};
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -129,14 +121,14 @@ int kinetis_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
  *   Query an alarm configured in hardware.
  *
  * Input Parameters:
- *  alminfo - Information about the alarm configuration.
+ *  tp - Location to return the timer match register.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ************************************************************************************/
 
-int kinetis_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
+int kinetis_rtc_rdalarm(FAR struct timespec *tp);
 
 /****************************************************************************
  * Name: kinetis_rtc_cancelalarm

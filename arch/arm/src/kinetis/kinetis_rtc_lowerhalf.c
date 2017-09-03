@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <time.h>
 #include <string.h>
 #include <errno.h>
 
@@ -515,7 +516,7 @@ static int kinetis_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 static int kinetis_rdalarm(FAR struct rtc_lowerhalf_s *lower,
                            FAR struct lower_rdalarm_s *alarminfo)
 {
-  struct alm_rdalarm_s lowerinfo;
+  struct timespec ts;
   int ret = -EINVAL;
 
   ASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
@@ -528,12 +529,15 @@ static int kinetis_rdalarm(FAR struct rtc_lowerhalf_s *lower,
        */
 
       sched_lock();
+      ret = kinetis_rtc_rdalarm(&ts);
 
-      lowerinfo.ar_id   = alarminfo->id;
-      lowerinfo.ar_time = alarminfo->time;
-
-      ret = kinetis_rtc_rdalarm(&lowerinfo);
-
+#ifdef CONFIG_LIBC_LOCALTIME
+      (void)localtime_r((FAR const time_t *)&ts.tv_sec,
+                        (FAR struct tm *)alarminfo->time);
+#else
+      (void)gmtime_r((FAR const time_t *)&ts.tv_sec,
+                     (FAR struct tm *)alarminfo->time);
+#endif
       sched_unlock();
     }
 
