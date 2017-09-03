@@ -65,41 +65,55 @@
 #if defined(CONFIG_STM32_HRTIM_TIMA_PWM) || defined(CONFIG_STM32_HRTIM_TIMB_PWM) || \
     defined(CONFIG_STM32_HRTIM_TIMC_PWM) || defined(CONFIG_STM32_HRTIM_TIMD_PWM) || \
     defined(CONFIG_STM32_HRTIM_TIME_PWM)
-#  define HRTIM_HAVE_PWM 1
+#   ifndef CONFIG_STM32_HRTIM_PWM
+#     error "CONFIG_STM32_HRTIM_PWM must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_TIMA_CAP) || defined(CONFIG_STM32_HRTIM_TIMB_CAP) || \
     defined(CONFIG_STM32_HRTIM_TIMC_CAP) || defined(CONFIG_STM32_HRTIM_TIMD_CAP) || \
     defined(CONFIG_STM32_HRTIM_TIME_CAP)
-#  define HRTIM_HAVE_CAPTURE 1
+#   ifndef CONFIG_STM32_HRTIM_CAPTURE
+#     error "CONFIG_STM32_HRTIM_CAPTURE must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_TIMA_DT) || defined(CONFIG_STM32_HRTIM_TIMB_DT) || \
     defined(CONFIG_STM32_HRTIM_TIMC_DT) || defined(CONFIG_STM32_HRTIM_TIMD_DT) || \
     defined(CONFIG_STM32_HRTIM_TIME_DT)
-#  define HRTIM_HAVE_DEADTIME 1
+#   ifndef CONFIG_STM32_HRTIM_DEADTIME
+#     error "CONFIG_STM32_HRTIM_DEADTIME must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_TIMA_CHOP) || defined(CONFIG_STM32_HRTIM_TIMB_CHOP) || \
     defined(CONFIG_STM32_HRTIM_TIMC_CHOP) || defined(CONFIG_STM32_HRTIM_TIMD_CHOP) || \
     defined(CONFIG_STM32_HRTIM_TIME_CHOP)
-#  define HRTIM_HAVE_CHOPPER 1
+#   ifndef CONFIG_STM32_HRTIM_CHOPPER
+#     error "CONFIG_STM32_HRTIM_CHOPPER must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_TIMA_BURST) || defined(CONFIG_STM32_HRTIM_TIMB_BURST) || \
     defined(CONFIG_STM32_HRTIM_TIMC_BURST) || defined(CONFIG_STM32_HRTIM_TIMD_BURST) || \
     defined(CONFIG_STM32_HRTIM_TIME_BURST)
-#  define HRTIM_HAVE_BURST_MODE 1
+#   ifndef CONFIG_STM32_HRTIM_BURST
+#     error "CONFIG_STM32_HRTIM_BURST must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_SCOUT) || defined(CONFIG_STM32_HRTIM_SCIN)
-#  define HRTIM_HAVE_SYNC 1
+#   ifndef CONFIG_STM32_HRTIM_SYNC
+#     error "CONFIG_STM32_HRTIM_SYNC must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_FAULT1) || defined(CONFIG_STM32_HRTIM_FAULT2) || \
     defined(CONFIG_STM32_HRTIM_FAULT3) || defined(CONFIG_STM32_HRTIM_FAULT4) || \
     defined(CONFIG_STM32_HRTIM_FAULT5)
-#  define HRTIM_HAVE_FAULTS 1
+#   ifndef CONFIG_STM32_HRTIM_FAULTS
+#     error "CONFIG_STM32_HRTIM_FAULTS must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_EEV1) || defined(CONFIG_STM32_HRTIM_EEV2) || \
@@ -107,19 +121,25 @@
     defined(CONFIG_STM32_HRTIM_EEV5) || defined(CONFIG_STM32_HRTIM_EEV6) || \
     defined(CONFIG_STM32_HRTIM_EEV7) || defined(CONFIG_STM32_HRTIM_EEV8) || \
     defined(CONFIG_STM32_HRTIM_EEV9) || defined(CONFIG_STM32_HRTIM_EEV10)
-#  define HRTIM_HAVE_EEV 1
+#   ifndef CONFIG_STM32_HRTIM_EVENTS
+#     error "CONFIG_STM32_HRTIM_EVENTS must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_MASTER_IRQ) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMB_IRQ) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMD_IRQ) || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
     defined(CONFIG_STM32_HRTIM_CMN_IRQ)
-#  define HRTIM_HAVE_INTERRUPTS 1
+#   ifndef CONFIG_STM32_HRTIM_INTERRUPTS
+#     error "CONFIG_STM32_HRTIM_INTERRUPTS must be set"
+#   endif
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_ADC_TRG1) || defined(CONFIG_STM32_HRTIM_ADC_TRG2) || \
     defined(CONFIG_STM32_HRTIM_ADC_TRG3) || defined(CONFIG_STM32_HRTIM_ADC_TRG4)
-#  define HRTIM_HAVE_ADC 1
+#   ifndef CONFIG_STM32_HRTIM_ADC
+#     error "CONFIG_STM32_HRTIM_ADC must be set"
+#   endif
 #endif
 
 /* TIMX PWM configuration checking */
@@ -716,21 +736,105 @@ enum stm32_irq_cmn_e
 
 enum stm32_hrtim_dma_e
 {
-  HRTIM_DMA_CMP1   = (1 << 0), /* Common: Compare 1 DMA request */
-  HRTIM_DMA_CMP2   = (1 << 1), /* Common: Compare 2 DMA request */
-  HRTIM_DMA_CMP3   = (1 << 2), /* Common: Compare 3 DMA request */
-  HRTIM_DMA_CMP4   = (1 << 3), /* Common:Compare 4 DMA request */
-  HRTIM_DMA_REP    = (1 << 4), /* Common: Repetition DMA request */
-  HRTIM_DMA_SYNC   = (1 << 5), /* Master: Sync Input DMA request */
-  HRTIM_DMA_UPD    = (1 << 6), /* Common: Update DMA reques */
-  HRTIM_DMA_CPT1   = (1 << 7), /* Slaves: Capture 1 DMA reques */
-  HRTIM_DMA_CPT2   = (1 << 8), /* Slaves: Capture 2 DMA reques */
-  HRTIM_DMA_SET1   = (1 << 9), /* Slaves: Output 1 Set DMA reques */
+  HRTIM_DMA_CMP1   = (1 << 0),  /* Common: Compare 1 DMA request */
+  HRTIM_DMA_CMP2   = (1 << 1),  /* Common: Compare 2 DMA request */
+  HRTIM_DMA_CMP3   = (1 << 2),  /* Common: Compare 3 DMA request */
+  HRTIM_DMA_CMP4   = (1 << 3),  /* Common:Compare 4 DMA request */
+  HRTIM_DMA_REP    = (1 << 4),  /* Common: Repetition DMA request */
+  HRTIM_DMA_SYNC   = (1 << 5),  /* Master: Sync Input DMA request */
+  HRTIM_DMA_UPD    = (1 << 6),  /* Common: Update DMA reques */
+  HRTIM_DMA_CPT1   = (1 << 7),  /* Slaves: Capture 1 DMA reques */
+  HRTIM_DMA_CPT2   = (1 << 8),  /* Slaves: Capture 2 DMA reques */
+  HRTIM_DMA_SET1   = (1 << 9),  /* Slaves: Output 1 Set DMA reques */
   HRTIM_DMA_RST1   = (1 << 10), /* Slaves: Output 1 Reset DMA reques */
   HRTIM_DMA_SET2   = (1 << 11), /* Slaves: Output 2 Set DMA reques */
   HRTIM_DMA_RST2   = (1 << 12), /* Slaves: Output 2 Reset DMA reques */
   HRTIM_DMA_RST    = (1 << 13), /* Slaves: Reset DMA reques */
   HRTIM_DMA_DLYPRT = (1 << 14)  /* Slaves: Delayed Protection DMA reques */
+};
+
+/* HRTIM Output IDLE state */
+
+enum stm32_hrtim_idle_state
+{
+  HRTIM_IDLE_INACTIVE = 0,      /* Output inactive during IDLE state */
+  HRTIM_IDLE_ACTIVE   = 1       /* Output active during IDLE state */
+};
+
+/* HRTIM Burst Mode clock source */
+
+enum stm32_hrtim_burst_source_e
+{
+  HRTIM_BURST_CLOCK_MASTER = 0,  /* Master timer counter reset/roll-over */
+  HRTIM_BURST_CLOCK_TIMA   = 1,  /* Timer A counter reset/roll-over */
+  HRTIM_BURST_CLOCK_TIMB   = 2,  /* Timer B counter reset/roll-over */
+  HRTIM_BURST_CLOCK_TIMC   = 3,  /* Timer C counter reset/roll-over */
+  HRTIM_BURST_CLOCK_TIMD   = 4,  /* Timer D counter reset/roll-over */
+  HRTIM_BURST_CLOCK_TIME   = 5,  /* Timer E counter reset/roll-over */
+  HRTIM_BURST_CLOCK_EV1    = 6,  /* On-chip Event 1 */
+  HRTIM_BURST_CLOCK_EV2    = 7,  /* On-chip Event 2 */
+  HRTIM_BURST_CLOCK_EV3    = 8,  /* On-chip Event 3 */
+  HRTIM_BURST_CLOCK_EV4    = 9,  /* On-chip Event 4 */
+  HRTIM_BURST_CLOCK_HRTIM  = 10  /* Prescaled f_HRTIM clock */
+};
+
+/* HRTIM Burst Mode prescaler for fHRTIM clock */
+
+enum stm32_hrtim_burst_precaler_e
+{
+  HRTIM_BURST_PRESCALER_0     = 0,
+  HRTIM_BURST_PRESCALER_2     = 1,
+  HRTIM_BURST_PRESCALER_4     = 2,
+  HRTIM_BURST_PRESCALER_8     = 3,
+  HRTIM_BURST_PRESCALER_16    = 4,
+  HRTIM_BURST_PRESCALER_32    = 5,
+  HRTIM_BURST_PRESCALER_64    = 6,
+  HRTIM_BURST_PRESCALER_128   = 7,
+  HRTIM_BURST_PRESCALER_256   = 8,
+  HRTIM_BURST_PRESCALER_512   = 9,
+  HRTIM_BURST_PRESCALER_1024  = 10,
+  HRTIM_BURST_PRESCALER_2048  = 11,
+  HRTIM_BURST_PRESCALER_4096  = 12,
+  HRTIM_BURST_PRESCALER_8192  = 13,
+  HRTIM_BURST_PRESCALER_16384 = 14,
+  HRTIM_BURST_PRESCALER_32768 = 15
+};
+
+/* HRTIM Burst Mode triggers  */
+
+enum stm32_hrtim_burst_triggers_e
+{
+  HRTIM_BURST_TRG_MSTRST  = (1 << 1),
+  HRTIM_BURST_TRG_MSTREP  = (1 << 2),
+  HRTIM_BURST_TRG_MSTCMP1 = (1 << 3),
+  HRTIM_BURST_TRG_MSTCMP2 = (1 << 4),
+  HRTIM_BURST_TRG_MSTCMP3 = (1 << 5),
+  HRTIM_BURST_TRG_MSTCMP4 = (1 << 6),
+  HRTIM_BURST_TRG_TARST   = (1 << 7),
+  HRTIM_BURST_TRG_TAREP   = (1 << 8),
+  HRTIM_BURST_TRG_TACMP1  = (1 << 9),
+  HRTIM_BURST_TRG_TACMP2  = (1 << 10),
+  HRTIM_BURST_TRG_TBRST   = (1 << 11),
+  HRTIM_BURST_TRG_TBREP   = (1 << 12),
+  HRTIM_BURST_TRG_TBCMP1  = (1 << 13),
+  HRTIM_BURST_TRG_TBCMP2  = (1 << 14),
+  HRTIM_BURST_TRG_TCRST   = (1 << 15),
+  HRTIM_BURST_TRG_TCREP   = (1 << 16),
+  HRTIM_BURST_TRG_TCCMP1  = (1 << 17),
+  HRTIM_BURST_TRG_TCCMP2  = (1 << 18),
+  HRTIM_BURST_TRG_TDRST   = (1 << 19),
+  HRTIM_BURST_TRG_TDREP   = (1 << 20),
+  HRTIM_BURST_TRG_TDCMP1  = (1 << 21),
+  HRTIM_BURST_TRG_TDCMP2  = (1 << 22),
+  HRTIM_BURST_TRG_TERST   = (1 << 23),
+  HRTIM_BURST_TRG_TEREP   = (1 << 24),
+  HRTIM_BURST_TRG_TECMP1  = (1 << 25),
+  HRTIM_BURST_TRG_TECMP2  = (1 << 26),
+  HRTIM_BURST_TRG_TAEEV7  = (1 << 27),
+  HRTIM_BURST_TRG_TDEEV8  = (1 << 28),
+  HRTIM_BURST_TRG_EEV7    = (1 << 29),
+  HRTIM_BURST_TRG_EEV8    = (1 << 30),
+  HRTIM_BURST_TRG_OCHPEV  = (1 << 31),
 };
 
 /* HRTIM vtable */
@@ -744,12 +848,19 @@ struct stm32_hrtim_ops_s
   uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                       uint8_t index);
-#ifdef HRTIM_HAVE_INTERRUPTS
+#ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   void (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
 #endif
-#ifdef HRTIM_HAVE_PWM
+#ifdef CONFIG_STM32_HRTIM_PWM
   int (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
                         bool state);
+#endif
+#ifdef CONFIG_STM32_HRTIM_BURST
+  int (*burst_enable)(FAR struct hrtim_dev_s *dev, bool state);
+  int (*burst_cmp_set)(FAR struct hrtim_dev_s *dev, uint16_t cmp);
+  int (*burst_per_set)(FAR struct hrtim_dev_s *dev, uint16_t per);
+  uint16_t (*burst_cmp_get)(FAR struct hrtim_dev_s *dev);
+  uint16_t (*burst_per_get)(FAR struct hrtim_dev_s *dev);
 #endif
 };
 
@@ -808,7 +919,9 @@ FAR struct hrtim_dev_s* stm32_hrtiminitialize(void);
  * Name: hrtim_register
  ****************************************************************************/
 
+#ifndef CONFIG_STM32_HRTIM_DISABLE_CHARDRV
 int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

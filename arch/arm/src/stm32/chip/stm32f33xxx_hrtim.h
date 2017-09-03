@@ -1030,36 +1030,41 @@
 
 /* Timer X Output Register */
 
-#define HRTIM_TIMOUT_POL1             (1 << 1) /* Bit 1 */
-#define HRTIM_TIMOUT_IDLEM1           (1 << 2) /* Bit 2 */
-#define HRTIM_TIMOUT_IDLES1           (1 << 3) /* Bit 3 */
-#define HRTIM_TIMOUT_FAULT1_SHIFT     4        /* Bit 4-5 */
+#define HRTIM_TIMOUT_POL1             (1 << 1) /* Bit 1: Output 1 polarity */
+#define HRTIM_TIMOUT_IDLEM1           (1 << 2) /* Bit 2: Output 1 IDLE mode */
+#define HRTIM_TIMOUT_IDLES1           (1 << 3) /* Bit 3: Output 1 IDLE state*/
+#define HRTIM_TIMOUT_FAULT1_SHIFT     4        /* Bit 4-5: Output 1 Fault state */
 #define HRTIM_TIMOUT_FAULT1_MASK      (3 << HRTIM_TIMOUT_FAULT1_SHIFT)
-#  define HRTIM_TIMOUT_FAULT1_0       (0 << HRTIM_TIMOUT_FAULT1_SHIFT)
-#  define HRTIM_TIMOUT_FAULT1_1       (1 << HRTIM_TIMOUT_FAULT1_SHIFT)
-#  define HRTIM_TIMOUT_FAULT1_2       (2 << HRTIM_TIMOUT_FAULT1_SHIFT)
-#  define HRTIM_TIMOUT_FAULT1_3       (3 << HRTIM_TIMOUT_FAULT1_SHIFT)
-#define HRTIM_TIMOUT_CHP1             (1 << 3) /* Bit 1 */
-#define HRTIM_TIMOUT_DIDL1            (1 << 3) /* Bit 1 */
-#define HRTIM_TIMOUT_DTEN             (1 << 3) /* Bit 1 */
-#define HRTIM_TIMOUT_DLYPRTEN         (1 << 3) /* Bit 1 */
-#define HRTIM_TIMOUT_DLYPRT_SHIFT     10       /* Bits 10-12*/
+#  define HRTIM_TIMOUT_FAULT1_0       (0 << HRTIM_TIMOUT_FAULT1_SHIFT) /* 00: No action */
+#  define HRTIM_TIMOUT_FAULT1_1       (1 << HRTIM_TIMOUT_FAULT1_SHIFT) /* 01: Active */
+#  define HRTIM_TIMOUT_FAULT1_2       (2 << HRTIM_TIMOUT_FAULT1_SHIFT) /* 10: Inactive */
+#  define HRTIM_TIMOUT_FAULT1_3       (3 << HRTIM_TIMOUT_FAULT1_SHIFT) /* 11: High-Z */
+#define HRTIM_TIMOUT_CHP1             (1 << 6) /* Bit 6: Output 1 Chopper enable */
+#define HRTIM_TIMOUT_DIDL1            (1 << 7) /* Bit 7: Output 1 Deadtime upon burst mode IDLE entry */
+#define HRTIM_TIMOUT_DTEN             (1 << 8) /* Bit 8: Deadtime enable */
+#define HRTIM_TIMOUT_DLYPRTEN         (1 << 9) /* Bit 9: Delayed Protection enable */
+#define HRTIM_TIMOUT_DLYPRT_SHIFT     10       /* Bits 10-12: Delayed Protection*/
 #define HRTIM_TIMOUT_DLYPRT_MASK      (3 << HRTIM_TIMOUT_DLYPRT_SHIFT)
-#  define HRTIM_TIMOUT_DLYPRT_0        (0 << HRTIM_TIMOUT_DLYPRT_SHIFT)
-#  define HRTIM_TIMOUT_DLYPRT_1        (1 << HRTIM_TIMOUT_DLYPRT_SHIFT)
-#  define HRTIM_TIMOUT_DLYPRT_2        (2 << HRTIM_TIMOUT_DLYPRT_SHIFT)
-#  define HRTIM_TIMOUT_DLYPRT_3        (3 << HRTIM_TIMOUT_DLYPRT_SHIFT)
-#define HRTIM_TIMOUT_POL2             (1 << 17) /* Bit 17 */
-#define HRTIM_TIMOUT_IDLEM2           (1 << 18) /* Bit 18 */
-#define HRTIM_TIMOUT_IDLES2           (1 << 19) /* Bit 19 */
-#define HRTIM_TIMOUT_FAULT2_SHIFT     20        /* Bit 20-21 */
+#  define HRTIM_TIMOUT_DLYPRT_0        (0 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 000: */
+#  define HRTIM_TIMOUT_DLYPRT_1        (1 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 001: */
+#  define HRTIM_TIMOUT_DLYPRT_2        (2 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 010: */
+#  define HRTIM_TIMOUT_DLYPRT_3        (3 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 011: */
+#  define HRTIM_TIMOUT_DLYPRT_4        (4 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 100: */
+#  define HRTIM_TIMOUT_DLYPRT_5        (5 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 101: */
+#  define HRTIM_TIMOUT_DLYPRT_6        (6 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 110: */
+#  define HRTIM_TIMOUT_DLYPRT_7        (7 << HRTIM_TIMOUT_DLYPRT_SHIFT) /* 111: */
+                                                /* Bit 12-16: Resered  */
+#define HRTIM_TIMOUT_POL2             (1 << 17) /* Bit 17: Output 2 polarity */
+#define HRTIM_TIMOUT_IDLEM2           (1 << 18) /* Bit 18: Output 2 IDLE mode */
+#define HRTIM_TIMOUT_IDLES2           (1 << 19) /* Bit 19: Output 2 IDLE state */
+#define HRTIM_TIMOUT_FAULT2_SHIFT     20        /* Bit 20-21: Output 2 Fault state */
 #define HRTIM_TIMOUT_FAULT2_MASK      (3 << HRTIM_TIMOUT_FAULT2_SHIFT)
-#  define HRTIM_TIMOUT_FAULT2_0        (0 << HRTIM_TIMOUT_FAULT2_SHIFT)
-#  define HRTIM_TIMOUT_FAULT2_1        (1 << HRTIM_TIMOUT_FAULT2_SHIFT)
-#  define HRTIM_TIMOUT_FAULT2_2        (2 << HRTIM_TIMOUT_FAULT2_SHIFT)
-#  define HRTIM_TIMOUT_FAULT2_3        (3 << HRTIM_TIMOUT_FAULT2_SHIFT)
-#define HRTIM_TIMOUT_CHP2             (1 << 22) /* Bit 22 */
-#define HRTIM_TIMOUT_DIDL2            (1 << 23) /* Bit 23 */
+#  define HRTIM_TIMOUT_FAULT2_0       (0 << HRTIM_TIMOUT_FAULT2_SHIFT) /* 00: No action*/
+#  define HRTIM_TIMOUT_FAULT2_1       (1 << HRTIM_TIMOUT_FAULT2_SHIFT) /* 01: Active */
+#  define HRTIM_TIMOUT_FAULT2_2       (2 << HRTIM_TIMOUT_FAULT2_SHIFT) /* 10: Inactive */
+#  define HRTIM_TIMOUT_FAULT2_3       (3 << HRTIM_TIMOUT_FAULT2_SHIFT) /* 11: High-Z*/
+#define HRTIM_TIMOUT_CHP2             (1 << 22) /* Bit 22: Output 2 Chopper enable */
+#define HRTIM_TIMOUT_DIDL2            (1 << 23) /* Bit 23: Output 2 Deadtime upon burst mode IDLE entry */
 
 /* Timer X Fault Register */
 

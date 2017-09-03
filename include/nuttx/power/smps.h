@@ -190,6 +190,7 @@ struct smps_s
   struct smps_limits_s       limits;  /* SMPS absolute limits */
   struct smps_params_s       param;   /* SMPS settings */
   struct smps_state_s        state;   /* SMPS state */
+  FAR void                   *priv;   /* Private data */
 };
 
 /* SMPS operations used to call from the upper-half, generic SMPS driver
