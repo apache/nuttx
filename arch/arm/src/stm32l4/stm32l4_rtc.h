@@ -209,6 +209,22 @@ bool stm32l4_rtc_havesettime(void);
 
 int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
+/************************************************************************************
+ * Name: stm32l4_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
+
 /****************************************************************************
  * Name: stm32l4_rtc_cancelalarm
  *
