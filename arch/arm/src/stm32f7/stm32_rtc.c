@@ -817,6 +817,50 @@ rtchw_set_alrmbr_exit:
 }
 #endif
 
+/************************************************************************************
+ * Name: stm32_rtc_getalarmdatetime
+ *
+ * Description:
+ *   Get the current date and time for a RTC alarm.
+ *
+ * Input Parameters:
+ *   reg - RTC alarm register
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
+{
+  uint32_t data, tmp;
+
+  ASSERT(tp != NULL);
+
+  /* Sample the data time register. */
+
+  data = getreg32(reg);
+
+  /* Convert the RTC time to fields in struct tm format.  All of the STM32
+   * All of the ranges of values correspond between struct tm and the time
+   * register.
+   */
+
+  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
+  tp->tm_sec = rtc_bcd2bin(tmp);
+
+  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
+  tp->tm_min = rtc_bcd2bin(tmp);
+
+  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
+  tp->tm_hour = rtc_bcd2bin(tmp);
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1556,50 +1600,6 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
 errout_with_wprunlock:
   rtc_wprlock();
   return ret;
-}
-#endif
-
-#ifdef CONFIG_RTC_ALARM
-/************************************************************************************
- * Name: stm32_rtc_getalarmdatetime
- *
- * Description:
- *   Get the current date and time for a RTC alarm.
- *
- * Input Parameters:
- *   reg - RTC alarm register
- *   tp - The location to return the high resolution time value.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ************************************************************************************/
-
-int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
-{
-  uint32_t data, tmp;
-
-  ASSERT(tp != NULL);
-
-  /* Sample the data time register. */
-
-  data = getreg32(reg);
-
-  /* Convert the RTC time to fields in struct tm format.  All of the STM32
-   * All of the ranges of values correspond between struct tm and the time
-   * register.
-   */
-
-  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
-  tp->tm_sec = rtc_bcd2bin(tmp);
-
-  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
-  tp->tm_min = rtc_bcd2bin(tmp);
-
-  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
-  tp->tm_hour = rtc_bcd2bin(tmp);
-
-  return OK;
 }
 #endif
 
