@@ -595,11 +595,11 @@ static void rtc_resume(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32_rtc_alarm_handler(int irq, void *context)
+static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
 {
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
-  FAR void *arg;
+  FAR void *cbarg;
   uint32_t isr;
   uint32_t cr;
   int ret = OK;
@@ -619,12 +619,12 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
               /* Alarm A callback */
 
               cb  = cbinfo->ac_cb;
-              arg = (FAR void *)cbinfo->ac_arg;
+              cbarg = (FAR void *)cbinfo->ac_arg;
 
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
 
-              cb(arg, RTC_ALARMA);
+              cb(cbarg, RTC_ALARMA);
             }
 
           isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRAF;
@@ -644,12 +644,12 @@ static int stm32_rtc_alarm_handler(int irq, void *context)
               /* Alarm B callback */
 
               cb  = cbinfo->ac_cb;
-              arg = (FAR void *)cbinfo->ac_arg;
+              cbarg = (FAR void *)cbinfo->ac_arg;
 
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
 
-              cb(arg, RTC_ALARMB);
+              cb(cbarg, RTC_ALARMB);
             }
 
           isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRBF;
@@ -1555,6 +1555,100 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
 
 errout_with_wprunlock:
   rtc_wprlock();
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_RTC_ALARM
+/************************************************************************************
+ * Name: stm32_rtc_getalarmdatetime
+ *
+ * Description:
+ *   Get the current date and time for a RTC alarm.
+ *
+ * Input Parameters:
+ *   reg - RTC alarm register
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
+{
+  uint32_t data, tmp;
+
+  ASSERT(tp != NULL);
+
+  /* Sample the data time register. */
+
+  data = getreg32(reg);
+
+  /* Convert the RTC time to fields in struct tm format.  All of the STM32
+   * All of the ranges of values correspond between struct tm and the time
+   * register.
+   */
+
+  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
+  tp->tm_sec = rtc_bcd2bin(tmp);
+
+  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
+  tp->tm_min = rtc_bcd2bin(tmp);
+
+  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
+  tp->tm_hour = rtc_bcd2bin(tmp);
+
+  return OK;
+}
+#endif
+
+/************************************************************************************
+ * Name: stm32_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
+{
+  rtc_alarmreg_t alarmreg;
+  int ret = -EINVAL;
+
+  ASSERT(alminfo != NULL);
+  DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
+
+  switch (alminfo->as_id)
+    {
+      case RTC_ALARMA:
+        {
+          alarmreg = STM32_RTC_ALRMAR;
+          ret = stm32_rtc_getalarmdatetime(alarmreg,
+                                           (struct tm *)alminfo->as_time);
+        }
+        break;
+
+      case RTC_ALARMB:
+        {
+          alarmreg = STM32_RTC_ALRMBR;
+          ret = stm32_rtc_getalarmdatetime(alarmreg,
+                                          (struct tm *)alminfo->as_time);
+        }
+        break;
+
+      default:
+        rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
+        break;
+    }
+
   return ret;
 }
 #endif

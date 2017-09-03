@@ -71,8 +71,8 @@ typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
 
 enum alm_id_e
 {
-  RTC_ALARMA = 0,              /* RTC ALARM A */
-  RTC_ALARMB,                  /* RTC ALARM B */
+  RTC_ALARMA = 0,               /* RTC ALARM A */
+  RTC_ALARMB,                   /* RTC ALARM B */
   RTC_ALARM_LAST
 };
 
@@ -80,18 +80,18 @@ enum alm_id_e
 
 struct alm_setalarm_s
 {
-  int as_id;                   /* enum alm_id_e */
-  struct tm as_time;           /* Alarm expiration time */
-  alm_callback_t as_cb;        /* Callback (if non-NULL) */
-  FAR void *as_arg;            /* Argument for callback */
+  int as_id;                    /* enum alm_id_e */
+  struct tm as_time;            /* Alarm expiration time */
+  alm_callback_t as_cb;         /* Callback (if non-NULL) */
+  FAR void *as_arg;             /* Argument for callback */
 };
 
 /* Structure used to pass parameters to query an alarm */
 
 struct alm_rdalarm_s
 {
-  int as_id;                   /* enum alm_id_e */
-  FAR struct rtc_time *as_time;/* Argument for storing ALARM RTC time */
+  int as_id;                    /* enum alm_id_e */
+  FAR struct rtc_time *as_time; /* Argument for storing ALARM RTC time */
 };
 
 #endif /* CONFIG_RTC_ALARM */
