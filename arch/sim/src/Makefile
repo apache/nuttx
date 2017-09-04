@@ -47,13 +47,9 @@ ifeq ($(CONFIG_SIM_M32),y)
 else
   ASRCS += up_setjmp64.S
 endif
-endif
-
-ifeq ($(CONFIG_HOST_X86_64),y)
+else ifeq ($(CONFIG_HOST_X86),y)
   ASRCS += up_setjmp32.S
-endif
-
-ifeq ($(CONFIG_HOST_ARM),y)
+else ifeq ($(CONFIG_HOST_ARM),y)
   ASRCS += up_setjmp_arm.S
 endif
 
