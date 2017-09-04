@@ -553,7 +553,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
     }
 
   /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have set errno appropriately.
+   * this case, net_lockedwait will have returned negated errno appropriately.
    */
 
   if (ret < 0)

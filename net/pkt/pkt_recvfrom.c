@@ -296,8 +296,6 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
 
 static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
 {
-  int save_errno = get_errno(); /* In case something we do changes it */
-
   /* Check for a error/timeout detected by the interrupt handler.  Errors are
    * signaled by negative errno values for the rcv length
    */
@@ -312,12 +310,12 @@ static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
     }
 
   /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have set errno appropriately.
+   * this case, net_lockedwait will have returned negated errno appropriately.
    */
 
   if (result < 0)
     {
-      return -save_errno;
+      return result;
     }
 
   return pstate->pr_recvlen;

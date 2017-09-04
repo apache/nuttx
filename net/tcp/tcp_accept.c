@@ -298,20 +298,6 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        */
 
       ret = net_lockedwait(&state.acpt_sem);
-      if (ret < 0)
-        {
-          /* The value returned by net_lockedwait() the same as the value
-           * returned by sem_wait():  Zero (OK) is returned on success; -1
-           * (ERROR) is returned on a failure with the errno value set
-           * appropriately.
-           *
-           * We have to preserve the errno value here because it may be
-           * altered by intervening operations.
-           */
-
-          ret = -get_errno();
-          DEBUGASSERT(ret < 0);
-        }
 
       /* Make sure that no further events are processed */
 
@@ -335,8 +321,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         }
 
       /* If net_lockedwait failed, then we were probably reawakened by a
-       * signal. In this case, logic above will have set 'ret' to the
-       * errno value returned by net_lockedwait().
+       * signal.  In this case, net_lockedwait will have returned negated
+       * errno appropriately.
        */
 
       if (ret < 0)

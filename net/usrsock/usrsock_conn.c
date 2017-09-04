@@ -85,15 +85,17 @@ static dq_queue_t g_active_usrsock_connections;
 
 static void _usrsock_semtake(FAR sem_t *sem)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
-  while (net_lockedwait(sem) != 0)
+  while ((ret = net_lockedwait(sem)) < 0)
     {
       /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(ret == -EINTR);
     }
 }
 

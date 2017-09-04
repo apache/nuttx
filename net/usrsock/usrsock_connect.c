@@ -228,13 +228,13 @@ int usrsock_connect(FAR struct socket *psock,
     {
       /* Wait for completion of request (or signal). */
 
-      if (net_lockedwait(&state.recvsem) != OK)
+      ret = net_lockedwait(&state.recvsem);
+      if (ret < 0)
         {
-          DEBUGASSERT(*get_errno_ptr() == EINTR);
+          DEBUGASSERT(ret == -EINTR);
 
           /* Wait interrupted, exit early. */
 
-          ret = -EINTR;
           goto errout_teardown;
         }
 

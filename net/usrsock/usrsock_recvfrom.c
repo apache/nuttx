@@ -371,22 +371,18 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
           /* Wait for receive-avail (or abort, or timeout, or signal). */
 
-          ret = 0;
-          if (net_timedwait(&state.reqstate.recvsem, ptimeo) != OK)
+          ret = net_timedwait(&state.reqstate.recvsem, ptimeo);
+          if (ret < 0)
             {
-              ret = *get_errno_ptr();
-
-              if (ret == ETIMEDOUT)
+              if (ret == -ETIMEDOUT)
                 {
                   ninfo("recvfrom timedout\n");
 
                   ret = -EAGAIN;
                 }
-              else if (ret == EINTR)
+              else if (ret == -EINTR)
                 {
                   ninfo("recvfrom interrupted\n");
-
-                  ret = -EINTR;
                 }
               else
                 {
@@ -448,9 +444,9 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         {
           /* Wait for completion of request. */
 
-          while (net_lockedwait(&state.reqstate.recvsem) != OK)
+          while ((ret = net_lockedwait(&state.reqstate.recvsem)) < 0)
             {
-              DEBUGASSERT(*get_errno_ptr() == EINTR);
+              DEBUGASSERT(ret == -EINTR);
             }
 
           ret = state.reqstate.result;

@@ -334,22 +334,18 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
 
           /* Wait for send-ready (or abort, or timeout, or signal). */
 
-          ret = 0;
-          if (net_timedwait(&state.recvsem, ptimeo) != OK)
+          ret = net_timedwait(&state.recvsem, ptimeo);
+          if (ret < 0)
             {
-              ret = *get_errno_ptr();
-
-              if (ret == ETIMEDOUT)
+              if (ret == -ETIMEDOUT)
                 {
                   ninfo("sendto timedout\n");
 
                   ret = -EAGAIN;
                 }
-              else if (ret == EINTR)
+              else if (ret == -EINTR)
                 {
                   ninfo("sendto interrupted\n");
-
-                  ret = -EINTR;
                 }
               else
                 {
@@ -404,9 +400,9 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
         {
           /* Wait for completion of request. */
 
-          while (net_lockedwait(&state.recvsem) != OK)
+          while ((ret = net_lockedwait(&state.recvsem)) < 0)
             {
-              DEBUGASSERT(*get_errno_ptr() == EINTR);
+              DEBUGASSERT(ret == -EINTR);
             }
 
           ret = state.result;

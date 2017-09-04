@@ -705,7 +705,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           ret = net_lockedwait(&sinfo.s_waitsem);
           if (ret < 0)
             {
-              sinfo.s_result = -get_errno();
+              sinfo.s_result = ret;
             }
 
           /* Make sure that no further interrupts are processed */

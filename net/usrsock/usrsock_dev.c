@@ -1026,9 +1026,7 @@ static int usrsockdev_close(FAR struct file *filep)
       ret = net_timedwait(&dev->req.sem, &abstime);
       if (ret < 0)
         {
-          ret = *get_errno_ptr();
-
-          if (ret != ETIMEDOUT && ret != EINTR)
+          if (ret != -ETIMEDOUT && ret != -EINTR)
             {
               ninfo("net_timedwait errno: %d\n", ret);
               DEBUGASSERT(false);
@@ -1179,6 +1177,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 {
   FAR struct usrsockdev_s *dev = conn->dev;
   FAR struct usrsock_request_common_s *req_head = iov[0].iov_base;
+  int ret;
 
   if (!dev)
     {
@@ -1209,9 +1208,9 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Set outstanding request for daemon to handle. */
 
-  while (net_lockedwait(&dev->req.sem) != OK)
+  while ((ret = net_lockedwait(&dev->req.sem)) < 0)
     {
-      DEBUGASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(ret == -EINTR);
     }
 
   if (usrsockdev_is_opened(dev))
@@ -1228,9 +1227,9 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
       /* Wait ack for request. */
 
-      while (net_lockedwait(&dev->req.acksem) != OK)
+      while ((ret = net_lockedwait(&dev->req.acksem)) < 0)
         {
-          DEBUGASSERT(*get_errno_ptr() == EINTR);
+          DEBUGASSERT(ret == -EINTR);
         }
     }
   else

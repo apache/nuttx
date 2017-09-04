@@ -327,7 +327,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           ret = net_lockedwait(&sinfo.s_waitsem);
           if (ret < 0)
             {
-              sinfo.s_result = -get_errno();
+              sinfo.s_result = ret;
             }
 
           /* Make sure that no further interrupts are processed */

@@ -204,9 +204,9 @@ int usrsock_bind(FAR struct socket *psock,
     {
       /* Wait for completion of request. */
 
-      while (net_lockedwait(&state.recvsem) != OK)
+      while ((ret = net_lockedwait(&state.recvsem)) < 0)
         {
-          DEBUGASSERT(*get_errno_ptr() == EINTR);
+          DEBUGASSERT(ret == -EINTR);
         }
 
       ret = state.result;

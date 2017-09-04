@@ -173,9 +173,9 @@ int usrsock_close(FAR struct usrsock_conn_s *conn)
     {
       /* Wait for completion of request. */
 
-      while (net_lockedwait(&state.recvsem) != OK)
+      while ((ret = net_lockedwait(&state.recvsem)) < OK)
         {
-          DEBUGASSERT(*get_errno_ptr() == EINTR);
+          DEBUGASSERT(ret == -EINTR);
         }
 
       ret = state.result;

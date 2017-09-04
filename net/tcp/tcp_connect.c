@@ -372,13 +372,9 @@ int psock_tcp_connect(FAR struct socket *psock,
 
           (void)sem_destroy(&state.tc_sem);
 
-          /* If net_lockedwait failed, recover the negated error (probably -EINTR) */
+          /* If net_lockedwait failed, negated errno was returned. */
 
-          if (ret < 0)
-            {
-              ret = -get_errno();
-            }
-          else
+          if (ret >= 0)
             {
               /* If the wait succeeded, then get the new error value from
                * the state structure

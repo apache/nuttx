@@ -246,9 +246,9 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
     {
       /* Wait for completion of request. */
 
-      while (net_lockedwait(&state.reqstate.recvsem) != OK)
+      while ((ret = net_lockedwait(&state.reqstate.recvsem)) < 0)
         {
-          DEBUGASSERT(*get_errno_ptr() == EINTR);
+          DEBUGASSERT(ret == -EINTR);
         }
 
       ret = state.reqstate.result;

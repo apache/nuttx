@@ -89,16 +89,20 @@ static dq_queue_t g_active_pkt_connections;
 
 static inline void _pkt_semtake(sem_t *sem)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
-  while (net_lockedwait(sem) != 0)
+  while ((ret = net_lockedwait(sem)) < 0)
     {
       /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(get_errno() == EINTR);
+      DEBUGASSERT(ret == -EINTR);
     }
+
+  UNUSED(ret);
 }
 
 #define _pkt_semgive(sem) sem_post(sem)

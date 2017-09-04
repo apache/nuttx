@@ -145,7 +145,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
    * buffer
    */
 
-  DEBUGVERIFY(net_lockedwait(&g_wrbuffer.sem));
+  DEBUGVERIFY(net_lockedwait(&g_wrbuffer.sem)); /* TODO: Handle EINTR. */
 
   /* Now, we are guaranteed to have a write buffer structure reserved
    * for us in the free list.

@@ -59,16 +59,20 @@
 
 static void _net_semtake(FAR struct socketlist *list)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
-  while (net_lockedwait(&list->sl_sem) != 0)
+  while ((ret = net_lockedwait(&list->sl_sem)) < 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(get_errno() == EINTR);
+      DEBUGASSERT(ret == -EINTR);
     }
+
+  UNUSED(ret);
 }
 
 #define _net_semgive(list) sem_post(&list->sl_sem)

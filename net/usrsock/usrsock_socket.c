@@ -195,6 +195,7 @@ int usrsock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   struct usrsock_reqstate_s state = {};
   FAR struct usrsock_conn_s *conn;
   int err;
+  int ret;
 
   /* Allocate the usrsock socket connection structure and save in the new
    * socket instance.
@@ -230,9 +231,9 @@ int usrsock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   /* Wait for completion of request. */
 
-  while (net_lockedwait(&state.recvsem) != OK)
+  while ((ret = net_lockedwait(&state.recvsem)) < 0)
     {
-      DEBUGASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(ret == -EINTR);
     }
 
   if (state.result < 0)
