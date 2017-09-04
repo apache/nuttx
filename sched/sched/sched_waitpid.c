@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_waitpid.c
  *
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -355,27 +355,33 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
     }
   else if (pid != (pid_t)-1)
     {
-      /* Get the TCB corresponding to this PID and make sure that the
-       * thread it is our child.
+      /* Get the TCB corresponding to this PID.  NOTE: If the child has
+       * already exited, then the PID will not map to a valid TCB.
        */
 
       ctcb = sched_gettcb(pid);
+      if (ctcb != NULL)
+        {
+          /* Make sure that the thread it is our child. */
 
 #ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+          if (ctcb->group->tg_pgid != rtcb->group->tg_gid)
 #else
-      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
+          if (ctcb->group->tg_ppid != rtcb->pid)
 #endif
-        {
-          errcode = ECHILD;
-          goto errout_with_errno;
+            {
+              errcode = ECHILD;
+              goto errout_with_errno;
+            }
         }
 
-      /* Does this task retain child status? */
+      /* The child task is ours or it is no longer active.  Does the parent
+       * task retain child status?
+       */
 
       if (retains)
         {
-          /* Check if this specific pid has allocated child status? */
+          /* Yes.. Check if this specific pid has allocated child status? */
 
           if (group_findchild(rtcb->group, pid) == NULL)
             {
@@ -537,6 +543,17 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
           *stat_loc = info.si_status << 8;
           pid = info.si_pid;
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+          if (retains)
+            {
+              /* Discard the child entry */
+
+              (void)group_removechild(rtcb->group, child->ch_pid);
+              group_freechild(child);
+            }
+#endif /* CONFIG_SCHED_CHILD_STATUS */
+
           break;
         }
     }
