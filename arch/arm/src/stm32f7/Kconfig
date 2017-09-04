@@ -882,6 +882,16 @@ config STM32F7_FLASH_OVERRIDE_I
 
 endchoice # "Override Flash Size Designator"
 
+config STM32F7_FLASH_ART_ACCELERATOR
+	bool "Flash ART Accelerator"
+	default n
+	---help---
+		ART Accelerator on the flash memory ITCM interface accelerates code execution
+		with a system of instruction prefetch and cache lines.
+
+		Enable if code and/or read-only data is accessed through ITCM bus instead of
+		AXIM bus.
+
 menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
@@ -1880,7 +1890,7 @@ endchoice #"RTC clock source"
 endmenu # RTC Configuration
 
 config STM32F7_CUSTOM_CLOCKCONFIG
-		bool "Custom clock configuration"
+	bool "Custom clock configuration"
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
