@@ -15390,4 +15390,1344 @@
 	  configurations).  NOTE: Not yet intregated into the build system
 	  (2017-06-02).
 
-7.22 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.22 2017-09-06 Gregory Nutt <gnutt@nuttx.org>
+
+	* Fix ELF loader up_checkarch on ARM arch.  From Cristian Condurache
+	  (2017-05-09).
+	* Kinetis:  Disable MPU when not in protected mode.  The hardware reset
+	  state of the the MPU precludes any bus masters other then DMA access
+	  to memory. Unfortunately USB and SDHC have there own DMA and will not
+	  have access to memory in the default reset state.  This change
+	  disabled the MPU if present on system startup.  From David Sidrane
+	  (2017-06-02).
+	* Kinetis:  teensy-3.x Define USBOTG-FS Read from FLASH access in board
+	  config.  Allow the board config to define the USBOTG-FS to have Read
+	  access to FLASH.  From David Sidrane (2017-06-02).
+	* Kinetis:  usbdev clean up ensuring proper use of HW.  Remove magic
+	  numbers from code, documented the use of undocumented bits.  Remove
+	  comments and code that were not appropriate for this hardware.
+	  Removed ifdef that's that were always compiled and removed code
+	  blocks that were never compiled.  Ensure proper access order to
+	  hardware.  Per the reference manual: disable endpoints prior to
+	  configuring buffer descriptor, then enable endpoints Reorganize
+	  interrupt processing order to offload data after processing errors.
+	  Reorganize initialization so that there is a clear initialization
+	  phase, reset phase for both the hardware and software structures.  By
+	  breaking the initialization into smaller pieces, the reset interrupt
+	  only resets the resources within the controller that should be reset.
+	  Rework suspend and resume logic so they perform properly. Made attach
+	  and detach functions optional. As they do not make sense for a bus
+	  powered device.  Ensured the calls to up_usbinitalize
+	  up_usbuninitalize do not violate the USB spec.  From David Sidrane
+	  (2017-06-02).
+	* WIP: wireless/ieee802154: More work on association/beacon-enabled
+	  networks.  From Anthony Merlino (2017-06-02).
+	* We developed a huge Changeset over a year ago to make USB Composite
+	  configuration dynamical and be able to instanciate the CDCACM
+	  multiple times inside this device.  We use this feature to switch
+	  between one in normal and up to three CDCACMs in maintenance boot.
+	  The control path starts in boardctl.c where the configuration for the
+	  device is constructed.  There are still a few issues which I'll ask
+	  you to have a look at before this beast can be merged.  (1) To be
+	  able to construct the data dynamically I have changed some
+	  USB-Structs to be packed. Maybe there are additional structs to
+	  change (just for completeness – not for current functionality). (2)
+	  I've added the Macro COMPILE_TIME_ASSERTION two times (in
+	  usbmsc_desc.c and in cdcacm_desc.c) to stay private. Maybe you’ll
+	  find a better place. It’s used to check the size of the structs
+	  against the assumptions.  (3) I've changed the interface for some
+	  USB-Functions to receive also the dynamic configuration. Maybe this
+	  can be done more elegant.  (4) The original NuttX (without the patch)
+	  seems to have problems with a Composite device holding a CDCACM and
+	  an MSC. The USB SET CONFIGURATION request does not to work at all.
+	  This makes the test fail under Windows and under Linux. Applying this
+	  patch doesn’t change anything – because it only changes the
+	  configuration – not the behavior. Maybe you’ll have a look at
+	  this problem before applying the patch.  From Frank Benkert
+	  (2017-06-01).
+	* power: battery_charger: add ioctl for charging input current.  From
+	  Juha Niskanen (2017-06-06).
+	* MTD FLASH drivers:  The byte write method of several drivers had a
+	  cloned error:  It was not locking the bus while performing byte write
+	  operations (2017-06-06).
+	* Kinetis:sim ensure isolation of clock dividers for 0 value case.
+	  This fixes a bug were a SoC does not have a clockdivN register and
+	  passes a 0 for the init value. This prevents overflow of the 0
+	  decremented to -1 (0xffffffff) spilling over to other clockdivN
+	  feilds.  From David Sidrane (2017-06-06).
+	* teensy-3.x:Removed call to khci_usbattach.  The call is not need by
+	  the driver if CONFIG_USBDEV_BUSPOWERED=y.  The class register will
+	  enable the soft connect pull up. The khci_usbattach call only set a
+	  flag, and that  flag is only tested in the class register. On a USB
+	  powered device if we are running we are attached.  From David Sidrane
+	  (2017-06-06).
+	* teensy-3.x:Refreshed config and made board self powered.  From David
+	  Sidrane (2017-06-06).
+	* Kinetis:USB-FS driver.  Removed the notion of attached. The
+	  khci_usbattach is call early in the init either in board_initalize or
+	  in board_app_initalize. In either case it is always done prior to the
+	  the class register.  Therefore the khci_usbattach call only set a
+	  flag, and that flag is only tested in the class register. The class
+	  register will enable the soft connect pull up.  From David Sidrane
+	  (2017-06-06).
+	* Kinetis:Fixed waning for kinetis_mpudisable. Missing header file
+	  added.  From David Sidrane (2017-06-06).
+	* STM32L4:  Ad support for the STM32L475 family.  Incomplete -- still
+	  needs pinmap, rcc, otgfs, syscfg (2017-06-08).
+	* STM32L4:  Add L475 syscfg register definitions (2017-06-08).
+	* STM32L4:  Add STM32L475 RCC definitions/logic (2017-06-08).
+	* STM32L4: Add STM32L475 OTGFS header file.  Not fully reviewed
+	  (2017-06-08).
+	* STM32L4: Add STM32L475 pinmap.  Initial cut is just the the L476
+	  pinmap with unsupported devices removed (2017-06-08).
+	* configs/stm32f103-minumum SPI: SPIDEV_WIRELESS used when this has
+	  changed to SPIDEV_CONTACTLESS. From Nicolas Estibals (2017-06-08).
+	* stm32f103-minimum: dd GPIO device driver example for
+	  STM32F103-Minimum.  This chang eadds the initialization needed by
+	  stm32f103-minimum board to support the NuttX GPIO Subsystem.  From
+	  Alan Carvalho de Assis (2017-06-08).
+	* STM32L4:  Remove some C++ style comments (2017-06-08).
+	* configs/:  a few more places where SPIDEV_WIRELELSS should be
+	  SPIDEV_CONTACTLESS (2017-06-08).
+	* kinetis: lpserial fixed header inclusion.  From David Sidrane
+	  (2017-06-08).
+	* Kinetis:  SPI driver.  From David Sidrane (2017-06-08).
+	* Fix C++ __guard implementation for ARM.  The standard C++ ABI that
+	  most platforms follow defines __guard to be 64 bits.  The existing
+	  implementation of libxx_cxa_guard.cxx follows this.  However, the
+	  32-bit ARM C++ ABI defines it as 32 bits instead, and changes the
+	  meaning slightly so only the lowest bit is used. This matters because
+	  GCC creates guard symbols without regards to what libxx_cxa_guard.cxx
+	  says.  So on ARM, gcc allocates 4 bytes, but __cxa_guard_release
+	  writes 8 bytes, zeroing out another unlucky variable nearby. Fix it
+	  by special-casing 32-bit ARM in libxx_cxa_guard.  From Jim Paris
+	  (2017-06-09).
+	* vfs/poll: fix timeout calculation.  From Jim Paris (2017-06-09).
+	* stm32f103-minimum: Fix a small BUG when reading from output pin.  We
+	  need a different read_ops to read from output pin. This patch fixes
+	  the issue.  From Alan Carvalho de Assis (2017-06-09).
+	* testbuild:Added -x to fail build on errors for CI.  On CI we want to
+	  know ASAP of a failure. This adds the -x (exit on build failures)
+	  option to faclitate that behavior.  Use ${MAKE} ${MAKE_FLAGS} for
+	  make invocation.  When -x is provided change MAKE_FLAGS to --silent
+	  --no-print-directory and set -e.  Ignore exit status when using grep
+	  for checking for CONFIG_NXWM=y.  From David Sidrane (2017-06-10).
+	* stm32f103-minimum: Use separated read_ops for GPIO interrupt pins.
+	  From Alan Carvalho de Assis (2017-06-11).
+	* STM32F33: Fix hrtim definitions, Add beginning of HRTIM driver.  From
+	  Mateusz Szafoni (2017-06-11).
+	* STM32 HRTIM: add character driver.  From Mateusz Szafoni
+	  (2017-06-11).
+	* nucleo-f334r8: add HRTIM initialization.  From Mateusz Szafoni
+	  (2017-06-11).
+	* i.MX6: Fix a wrong parameter passed when calling irq_attach() in
+	  imx_serial.c.  From Masayuki Ishikawa (2017-06-12).
+	* Based on the last PR, review all serial driver vector attachment.
+	  Found one additional error and updated all relevant drivers to
+	  current interrupt parameter passing (2017-06-12).
+	* gethostbyname_r: Fix check for space in buffer (2017-06-12).
+	* MTD M2PX: If we READ while a write/erase is pending, the command is
+	  ignored and the write/erase continues. If we dont catch this
+	  situation we will return garbage to the user because the flash will
+	  not execute the command.  So READ MUST wait for write completion, and
+	  before that, the bus must be locked since it's a precondition to
+	  calling waitwritecomplete().  From Sebastien Lorquet (2017-06-12).
+	* MTD FLASH driver: Clone Sebastien Lorquet's m25px change to at25,
+	  is25xp, ramtron, and sst25xx (2017-06-12).
+	* STM32 HRTIM: GPIOs configuration + EEV and FAULT strucutres.  From
+	  Mateusz Szafoni (2017-06-12).
+	* stm32/stm32l4 PWM: While attempting to output a 70 MHz square wave
+	  from the timer output of a STM32 clocked at 140 MHz (which works fine
+	  in baremetal C), I stumbled on what I believe to be an error in
+	  arch/arm/src/stm32/stm32_pwm.c.  Line 1304 we are told that: reload =
+	  timclk / info->frequency;  which I belive to be incorrect, it should
+	  be:  reload = timclk / info->frequency - 1; since starting to count
+	  from 0, if I want to output half of the TIM clock, I must count to 1
+	  and not to 2.  Surely enough, the original code did output 140/3=47
+	  MHz, while this correction does allow the output up to 70 MHz.  I am
+	  not sure this affects most users generating slow PWM (e.g. PX4) but
+	  for frequencies close to the PCLK, indeed the difference becomes
+	  significant.  From JM (2017-06-13).
+	* mtd/w25: add missing locking and fix SPI_SELECT usage for
+	  w25_unprotect.  From Jussi Kivilinna (2017-06-13).
+	* mtd/w25: wait for BUSY flag to clear in w25_readid and w25_unprotect.
+	  W25Q128 datasheet says that all instructions expect 'Read Status
+	  Register' and 'Erase/Program Suspend' are ignored when BUSY flag in
+	  status register is '1'. Therefore wait for busy flag to clear in
+	  w25_readid() and w25_unprotect().  From Jussi Kivilinna
+	  (2017-06-13).
+	* freedom-k66f:  Use SPI driver.  Initalize SPI1 on connector J6. No
+	  real use, as of yet.  From David Sidrane (2017-06-13).
+	* pthreads:  Move functions from sched/pthreads to libc/pthreads.
+	  These functions just coordinate other OS interface calls but are not
+	  a fundamental OS interfaces and, hence, do not belong within the OS:
+	  pthread_yield(), pthread_once(), pthread_cond_init(),
+	  pthread_cond_destroy(), pthread_barrier_init(),
+	  pthread_barrier_destroy(), and pthread_barrier_wait() (2017-06-14).
+	* multiple fixes for stm32f1xx RTC clock:  (1) compile issues because
+	  of missing RTC_MAGIC #defines, (2) missing functionality based on
+	  RTC_MAGIC in RTC based on stm32_rtcounter.c, (3) IRQ setup from
+	  up_rtc_initialize was later reset in up_irqinitialize, (4) write
+	  access to backup registers without enabling access to backup domain,
+	  (5) possible races in set/cancel alarm.  tested with STM32F103C8
+	  only.  device now wakes up from forced STANDBY mode by alarm.  From
+	  Leif Jakob (2017-06-14).
+	* stm32f103-minimum: Fix compiler error in MCP2415 logic (2017-06-14).
+	* Fixed ARMv7-M Toolchain setting.  Cortex-M4 only have Single
+	  Precision FPU.  From Hidetaka Takano (2017-06-14).
+	* wireless/ieee802154: Lots of fixes, cleanup, new functionality.
+	  Functional.  From Anthony Merlino (2017-06-14).
+	* Fixed ARMv7-M Toolchain definition for Cortex-M4.  From Hidetaka
+	  Takano (2017-06-15).
+	* Improve configure.sh behavior:  (1) enable to call from top
+	  directory. (2) enable to designate direct path for config.  (3)
+	  install .gdbinit if the target has.  From Hidetaka Takano
+	  (2017-06-15).
+	* Update tools/configure.c to same functionality as configure.sh.  Add
+	  an array of optional file names.  Currently, .gdbinit is the only
+	  optional file but other things like IDE-specific project files might
+	  need to be copied as well (2017-06-15).
+	* STM32 HRTIM: outputs enable, period and compare functions, cosmetics.
+	  From Mateusz Szafoni (2017-06-15).
+	* tool/configure will now copy Eclipse project files if they are
+	  present in the board directory file (2017-06-15).
+	* configs/.gitignore:  Make sure that any .gdbinit, .project, or
+	  .cproject files are ignore so that they are less likely to be
+	  included in a patch or PR (2017-06-15).
+	* wireless/ieee802154: Fixes issue with wrong information being sent in
+	  a rejected association response frame.  From Anthony Merlino
+	  (2017-06-15).
+	* wireless/ieee802154: Fixes issue with wrong information being sent in
+	  a rejected association response frame.  From Anthony Merlino
+	  (2017-06-15).
+	* Rename configs/mrf24j40-radio to mrf24j40-mac (2017-06-15).
+	* clicker2-stm32: Add a configuratino that will, eventually, be used
+	  for 6loWPAN testing (2017-06-15).
+	* Fix a typo.  And typo in Kconfig file is reflect in all defconfig
+	  files (2017-06-15).
+	* SAMv7:  TWIHS driver add reference counting. From David Sidrane
+	  (2017-06-15).
+	* STM32 HRTIM: structures for deadtime and chopper, cosmetics.  From
+	  Mateusz Szafoni (2017-06-16).
+	* Clicker2-STM32:  Enable RAMLOG in mrf24j40-6lowpan configuration.
+	  Update README (2017-06-16).
+	* STM32 F4 FLASH:  Enable/disable the flash write protection on any
+	  sector.  I have verified it to work on the stm32f427.  From Sebastien
+	  Lorquet (2017-06-16).
+	* STM32 SPI/I2S:  Back out a bad pin mapping change from
+	  4ab2a3661ea57211f4ae12fe21c5de3454ba0ef2.  Try to staighten out some
+	  I2C3 and SPI3 pin configuration stuff (2017-06-16).
+	* Clicker2-stm32:  Allow both IEEE 802.15.4 MAC character and network
+	  devices to be registered (2017-06-16).
+	* Clicker2-STM32:  Enable networking and 6loWPAN in the
+	  mrf24j40-6lowpan configuration.  Fix a couple of new 6loWPAN compile
+	  issues revealed by this new configuration (2017-06-16).
+	* Merge remote-tracking branch 'origin/master' into ieee802154
+	  (2017-06-16).
+	* clicker2-stm32: mrf24j40-6lowpan configuration needs to enabled the
+	  ieee 802.15.4 MAC network device as well (2017-06-16).
+	* stm32:flash add CONFIG_STM32_STM32F469 to list defining OPTCR1.  From
+	  David Sidrane (2017-06-17).
+	* ieee802.15.4 loopback:  Better simulation addressing: sort, extended,
+	  panid, and IP address conversion (2017-06-17).
+	* ieee802154 MAC: Fix a warning when compiled for a target with 64-bit
+	  addressing (2017-06-17).
+	* Update some 6loWPAN configurations based on changes to NSH Kconfig
+	  (2017-06-17).
+	* wireless/ieee802154: Fixes ordering of strings associated with
+	  changed enum.  From Anthony Merlino (2017-06-17).
+	* wireless/ieee802154: Renames mac802154_poll to mac802154_radiopoll to
+	  be more obvious.  Merges shared logic for sending data request
+	  commands.  Minor improvements and simplified logic.  From Anthony
+	  Merlino (2017-06-17).
+	* STM32 HRTIM: Faults and events configuration, timers mode
+	  configuration, add hrtim ops, ADC triggering and DAC synch events.
+	  From Mateusz Szafoni (2017-06-18).
+	* Add RFC6775 header file (2017-06-18).
+	* rfc6775:  Fix header, add references, correct naming.  This is NOT
+	  ICMPv6, but part of 6LoWPAN that acts like ICMPv6 (2017-06-18).
+	* wireless/ieee802154: Renames Kconfig option, adds option for
+	  unimplemented receiver priority.  From Anthony Merlino (2017-06-18).
+	* STM32 HRTIM:  Fix initialization bug, minor changes.  Remove unneeded
+	  definitions.  From Mateusz Szafoni (2017-06-18).
+	* IEEE 802.15.4 MAC: Add list management and prioritization logic that
+	  will permit the MAC layer to support bound multiple clients
+	  (2017-06-18).
+	* ieee 802.15.4:  Need counting protection on the logic that releases
+	  the notification resources.  Otherwise, notification handlers may be
+	  operating with a stale pointer (2017-06-18).
+	* IEEE 802.15.4 Network Driver:  Add logic to setup the network mask,
+	  update the MAC-based IPv6 addressing when the network is brought up.
+	  The idea is that addressing changes are supposed to occur only while
+	  the network is down but won't take effect until the network is up
+	  again (2017-06-18).
+	* Swithches IEEE 802.15.4 based code to using byte arrays instead of
+	  uint16_t values for short address and PAN ID.  From Anthony Merlino
+	  (2017-06-19).
+	* Throw error when error happens in the tcp_listen function.  From
+	  Roland Takacs (2017-06-19).
+	* Support listening sockets in the getsockname() function.  From Roland
+	  Takacs (2017-06-19).
+	* IEEE 802.15.4/6LoWPAN: Correct one more usage of saddr; also update a
+	  README and the TODO list (2017-06-19).
+	* STM32 ADC: invalidate dma buffer before use.  Missing invalidation
+	  caused old samples being fetched from cache.  From Jussi Kivilinna
+	  (2017-06-19).
+	* Enable UDP example in clicker1-stm32/mrf24j40-6lowpan example, make
+	  sure that CONFIG_EXAMPLES_UDP_NETINIT is set in all other
+	  examples/udp configurations (2017-06-19).
+	* Use struct instead of pointer to the struct as sizeof argument in
+	  memset in usbmsc.c.  Otherwise it leads to error: argument to
+	  'sizeof' in 'memset' call is the same pointer type 'struct
+	  usbmsc_lun_s *' as the destination.  From Oleg Evseev (2017-06-19).
+	* /configs/clicker2-stm32/mrf24j40-6lowpan: Enables both client and
+	  server UDP tests on the target; Update a README file (2017-06-19).
+	* wireless/ieee802154: Cleans up some endianness issues and fixes poll
+	  request issue.  From Anthony Merlino (2017-06-19).
+	* STM32 L4: Set I2C SDA and SCL pins to open drain mode.  From Pekka
+	  Ervasti (2017-06-20).
+	* STM32 L4: I2C4 was writing to wrong RCC registers.  From Juha
+	  Niskanen (2017-06-20).
+	* STM32 F7: Set I2C4 SDA and SCL pins to open drain mode.  From Juha
+	  Niskanen (2017-06-20).
+	* 6LoWPAN: Add debug statements; Update configuration, need to specific
+	  6LoWPAN compatible port numbers (2017-06-20).
+	* mac802154_req_data() can return without releasing the exclsem
+	  (2017-06-20).
+	* STM32:  Allow clock frequencies > 168 Mhz on stm32f427/429.  We need
+	  to enable the power overdrive for this case.  This patch allows the
+	  required bits to be set in proper sequence.  It also modifies the
+	  local register access operations to allow more than 16-bit registers.
+	  From Sebastien Lorquet  (2017-06-20).
+	* Kinetis:I2C driver added I2C3, reference counting and reset.
+	  Refactored the driver to support reference counting and reset added
+	  I2C3. From David Sidrane (2017-06-20).
+	* ieee802154 network driver now retries if ieee802154_req_data()
+	  returns EINTR.  In clicker2-stm32 6LoWPAN configuration, increased
+	  the number of TX descriptors to match then number of IOBs
+	  (2017-06-20).
+	* Kinetis:I2C fixed mis-placed kinetis_i2c_endwait.  Fixed accedently
+	  replaced post with wait.  From David Sidrane (2017-06-20).
+	* ieee802154_req_data:  Don't modify the IOB until we are certain that
+	  no EINTR errors will occur.  Otherwise, the retry will fail
+	  (2017-06-20).
+	* ieee802154 MAC: Free allocated TX descriptor if an error occurs after
+	  the descriptor has been allocated (2017-06-20).
+	* ieee802154: Adds some missing elements to start support for
+	  beacon-enabled networks.  From Anthony Merlino (2017-06-20).
+	* ieee802154: Fixes Kconfig naming for number of TX desc and number of
+	  notifications.  From Anthony Merlino (2017-06-21).
+	* pthread_mutex_unlock():  Missing check for the case where
+	  pthread_mutex_lock() is called when the mutex is not locked.  In that
+	  case, it would increment the underlying semaphore avove 1.  This is
+	  the fix for a problem noted by initialkjc@yahoo.com (2017-06-21).
+	* Missing option to select CONFIG_MAC802154_NNOTIF in Kconfig
+	  (2017-06-21).
+	* clicker2-stm32/mrf24j40-6lowpan:  Network now runs on LP work queue
+	  (2017-06-21).
+	* STM32 L4 DMA: Correct USART3_RX bad channel definition.  From Juha
+	  Niskanen (2017-06-21).
+	* 6LoWPAN: Correct an error in calculating the location of the UDP
+	  header (2017-06-21).
+	* wireless/ieee802154: Minor naming change to align better with coding
+	  guidelines.  From Anthony Merlino (2017-06-21).
+	* mrf24j40:  Fix a warning (which is actually an error) (2017-06-21).
+	* 6LoWPAN: Correct a few addressing issues.  The apps/examples/udp test
+	  now appears to be fully functional.  Also reserve two bytes at the
+	  end of the frame for the FCS (2017-06-21).
+	* Do not search net device when all-zeros address is used.  From Roland
+	  Takacs (2017-06-22).
+	* Fix problems in last commit noted by Jeongchan Kim:  last change
+	  returned -EINVAL vs EINVAL; Treat the case where the mutex is already
+	  unlocked just like the case where the mutex is held by another thread
+	  -- return EPERM (2017-06-22).
+	* Logic of a353602aa9cc50ed958df11af35e3972101b5f40 only applies if
+	  CONFIG_NETDEV_MULTINIC (2017-06-22).
+	* 6LoWPAN: Fixes needed when extended addressing is enabled.  Currently
+	  breaks short addressing.  Loopback driver needs to initialize the MAC
+	  meta data; Address decompression logic must have the MAC address to
+	  handle the most common compression cases.  Fix a src/dest address
+	  confusion.  Fix yet another addressing problem.  That does it.
+	  Several recent, proper bugfixes unmasked a few errors in the 6LoWPAN
+	  logic.  But I think full functionality is restored (2017-06-22).
+	* ieee802154: Stubs out some SCAN.request code.  From Anthony Merlino
+	  (2017-06-22).
+	* drivers/net/tun.c: Use critical section instead of semaphore in
+	  tun_ifdown().  From Masayuki Ishikawa (2017-06-23).
+	* netdb:  Fixed buffer size used for sending DNS queries should depend
+	  on the configured DNS name size.  From Ritjaina (2017-06-23).
+	* 6LoWPAN: Add missing IPv6 address creation to HC1 decode logic. Fix a
+	  typo in an index that prevented use with HC1 and extended addresses
+	  (2017-06-23).
+	* clicker2-stm32/mrg24j40-6lowpan: Add apps/examples/nettest.  Refresh
+	  all configurations that enable the nettest (2017-06-23).
+	* configs/sim/sixlowpan:  Disable I2C tool.  Not so useful in a
+	  simulation (2017-06-23).
+	* 6LoWPAN: TCP logic was not obeying MTU packet size limitations.
+	  Other TCP-specific issues also fixed.  There remains a major
+	  outstanding issue with ACK handling.  Handle case where the local
+	  address is zero (listen socket).  Major re-architecting of TCP logic
+	  to properly handle TCP stuf like ACKs and TPC windowing which were
+	  not properly covered in the initial design.  Still does not work;
+	  hangs waiting of ACKs.Various fixes for a clean build if either TCP
+	  or UDP are disabled.  Given the current state of TCP, it is
+	  recommended that you disable TCP.  HC06, copy TCP header as though it
+	  were data.  Modify the the way TCP headers are transferred -- yet
+	  again.  TCP packet reassembly now seems to work OK, but no there now
+	  does not seem to be a listener on the port (2017-06-24).
+	* IEEE802.15.4: Update RX statistics in network driver (2017-06-25).
+	* 6LoWPAN TCP: Fix more ACK handling, fix some callback flag settings.
+	  Now the TCP test appears fully functional on 6LoWPAN (2017-06-25).
+	* ieee802154: Finishes transmission of beacon frames, and performing a
+	  passive scan.  From Anthony Merlino (2017-06-25).
+	* ieee80215: starts adding support for beacon-enabled networking.  From
+	  Anthony Merlino (2017-06-26).
+	* STM32L4 serial: Allow configuring Rx DMA buffer size.  From Juha
+	  Niskanen (2017-06-26).
+	* stm32f33xxx_rcc: cleanup + move hrtim clock source selection.  fix
+	  typo in stm32f33xxx_rcc.h.  From Mateusz Szafoni (2017-06-26).
+	* STM32L4 serial: Allow configuring Rx DMA buffer size.  From Juha
+	  Niskanen (2017-06-26).
+	* 6LoWPAN:  Fix duplicate and bad memcpy in loopback driver
+	  (2017-06-26).
+	* Beacon logic:  Damage control.  Looks like something went wrong with
+	  the PR merge (2017-06-26).
+	* ieee802154: Renames mac802154_indalloc to ieee802154_indalloc since
+	  the functions are ieee802154 scoped functions.  Improves notification
+	  freeing functionality.  Each notification now has a number of
+	  clients.  When the last client calls free, the notification is freed
+	  back to the pool.  From Anthony Merlino (2017-06-26).
+	* Clicker2-STM32:  Add support for the Telnet client to the
+	  mrf24j40-6lowpan configuration.  Useless at the moment because the
+	  NuttX telnet daemon does not yet support IPv6 (2017-06-27).
+	* ieee802154: Supports get request for coordinator address.  From
+	  Anthony Merlino (2017-06-27).
+	* ieee802154: Finishes beacon association functionality.  From Anthony
+	  Merlino (2017-06-27).
+	* smart: fix wrong freeing of device structure and use-after-free
+	  issues on error paths.  From Jussi Kivilinna (2017-06-28).
+	* net/: IPv6 packet input, Improve checks that the packet is destined
+	  for us.  There might be some odd things that can happen in certain
+	  forwarding scenarios (2017-06-28).
+	* Fix -Werror=implicit-fallthrough on gcc7.  From Julien Lecoeur
+	  (2017-06-28).
+	* Fix warning implicit-fallthrough with arm-none-eabi-gcc 7.  From
+	  Julien Lecoeur (2017-06-28).
+	* 6LoWPAN:  Add configurable support for 6LoWPAN star topology.  With
+	  this change, the endpoints which are the 'points' of the star will
+	  forward all traffic to the coordinator.  The coordinator is assumed
+	  to be the 'hub' of the star.  This function also implements IPv6
+	  forwarding.  That forwarding implementation is minimal, just enough
+	  to support the forwarding requirements of the star hub node
+	  (2017-06-28).
+	* Clicker2-STM32 + net/:  Add configurations to support the endpoint
+	  and hub roles in a star topology.  Fix various things that broke when
+	  IPv6 forwarding was enabled (2017-06-29).
+	* 6LowPan:  Change how the destination node address is handled in the
+	  start endpoint configuration.   When the star endpoint sent the IPv6
+	  destination address, the HC06 compression logic elided the address --
+	  meaning that it could be reconstructed by the recipient based on the
+	  receiver's assigned short address.  However, when intercepted by the
+	  hub, the uncompressed address does not know the short address of the
+	  recipient and instead uses the short address of the hub.  This means
+	  two things:  (1) it looks like  the hub address is the destination
+	  address, and (2) the uncompressed UDP packet has a bad checksum.
+	  This change assures that the destination IPv6 address is not elided
+	  in the case of the star endpoint configuration (2017-06-30).
+	* 6LoWPAN: Fix a misconception about HC06 16-bit IPv6 address
+	  compression (2017-06-30).
+	* 6LoWPAN fix compile issue in star hub configuration (2017-06-30).
+	* This change backs out the 'misconception' fix of
+	  76e6dba2e4bfab9515bef2866c5c59fd2a2f0fa0 and reimplements it in a way
+	  that actually seems to work (2017-06-30).
+	* ieee802154: Random fixes to get beacon-enabled networking more
+	  stable.  From Anthony Merlino (2017-06-30).
+	* 6LoWPAN:  TCP send logic was returning a failure in one case when, in
+	  fact, the send was successful (2017-06-01).
+	* include/nuttx/net and net/: Move private prototype of
+	  netdev_foreach() from the public include/nuttx/net/net.h to the
+	  private net/netdev/ndetdev.h header file where it belongs
+	  (2017-07-01).
+	* ieee802154: Cleans up some wireless logging.  Fixes resp_waittime
+	  field in ieee802154_macattr_u.  Supports multiple incoming superframe
+	  events.  From Anthony Merlino (2017-07-01).
+	* Initial clang compile.  From Goran Mekić (2017-07-01).
+	* Add CLANG definitions in Kconfig and Toolchain.defs (2017-07-02).
+	* samv71-xult: Add support for the MRF24J40 radio and create a
+	  mrf24j40-starhub configuration.  A few fixes to IPv6 and 6LoWPAN were
+	  required to have 6LoWPAN and Ethernet coexisting.  Untested and
+	  expect some complexity in the bring-up.  Put the serial console on
+	  UART3, i.e., on a Arduino serial shield.  Add missing MRF24J40
+	  bring-up logic (2017-07-02).
+	* stm32f4 discovery: Add logic to register the button driver and the
+	  user led driver if so configured.  From Jan Pobrislo (2017-07-02).
+	* samv71-xult: Fix SP0 vs. TWHS0 in mrf24j40-starhub/defconfig; fix
+	  copy-paste errors in SPI initialization logic.  Fix a typo in
+	  MRF24J40 initialization (2017-07-02).
+	* drivers/wireless/ieee802154: Moved radios to individual
+	  sub-directories.  From Anthony Merlino (2017-07-03).
+	* stm32f40xxx_rtcc ISR register and write protection fix.  From Eetu
+	  Nevalainen (2017-07-03).
+	* samv71-xult/mrf24j40-starhub:  Disabled CONFIG_BOARD_INITIALIZE;
+	  Correct MRF24J40 interrupt edge.  Fix MRF24J40 interrupt pin.  Should
+	  have pull-ups on interrupting inputs.   Reset pins backward.  Add
+	  reset logic (but comment out because it is not necessary)
+	  (2017-07-03).
+	* Add some partial IP forwarding logic.  Add some fragments of TCP
+	  forwarding logic (2017-07-03).
+	* IPv6 forwarding logic must decrement the TTL and drop the packet if
+	  the hop limit is exceeded (2017-07-04).
+	* IP forwarding.  Adds a little more structure to handle passing
+	  packets received on one network device to another network device.
+	  Logic is still incomplete (2017-07-04).
+	* UDP networking:  The TTL (time to live) was not being set in the IPv4
+	  or IPv6 header unless the UDP socket was bound (2017-07-04).
+	* SAME70-Xplained:  Add MRF24J40 support (2017-07-04).
+	* I've found that the interrupts aren't enabled since nothing updates
+	  them after btn_poll() marks the file descriptor structure as being
+	  polling. I've managed to make it work with this change.  From Jan
+	  Pobrislo (2017-07-04).
+	* include/nuttx/input:  Remove bogus, obsolete keypad.h header file
+	  (2017-07-04).
+	* net/udp:  Fix a copy-paste error that could effect networking when
+	  both IPv4 and IPv6 are enabled (2017-07-05).
+	* configs/Board.mk:  Remove comment form end of line. In windows native
+	  build, it appears to be trying to make that an extra parameter to the
+	  AR command.  From Jeff (2017-07-05).
+	* IP Forwarding: Flesh out TCP, UDP, and ICMPv6 packet forwarding
+	  logic.  In checking if the Ethernet MAC address is in the
+	  ARP/Neighbor table, add an additional check to skip in the case of
+	  CONFIG_NET_MULTILINK and the devices is not an Ethernet device.  Add
+	  IPv4 packet forwarding logic.  Initial commit is an untested clone of
+	  the IPv6 forwarding logic with a few minor logic changes for IPv4
+	  (2017-07-05).
+	* IP forwarding: Add optional support to forward broadcast and
+	  multicast packets.  Add missing ICMP support (2017-07-06).
+	* FS: Remove DEBUGASSERT() in block_proxy() because the flags are
+	  cleared later.  From Masayuki Ishikawa (2017-07-06).
+	* Eliminate a warning with arm-none-eabi-gcc 7.1.0.  From Julien
+	  Lecoeur (2017-07-06).
+	* In arch/arm/src/stm32/Kconfig when the CPU is a STM32F4, some
+	  STM32_HAVE_xx with xx = {OTGFS, TIM3, TIM4, SPI3, I2S3, I2C3} are
+	  selected by default. But for F410 these peripherals are absent. This
+	  change add tests to check if the target CPU is an F410 or not and
+	  selects according to the situation.  This also adds a select for
+	  STM32_HAVE_DAC1 present on this STM32 flavor.  From Gwenhael
+	  Goavec-Merou (2017-07-06).
+	* Rename CONFIG_STM32_STM32F40XX to CONFIG_STM32_STM32FXXXX since it is
+	  used by F4 parts other than F40x (2017-07-06).
+	* STM32 Kconfig: 'unfold' some of the dependencies to provide better
+	  long term configuration support.  This also effective reverts the
+	  recent 15b85738e7b5b9df6377f56e2a6a629346f87964 (2017-07-06).
+	* ICMPv6:  Fix so that ICMPv6 can be used with 6LoWPAN (2017-07-06).
+	* IPv6 Neighbor: Update table format to support IEEE 802.15.4 MAC
+	  addresses (2017-07-06).
+	* configs/Board.mk:  Remove quotes from CONFIG_ARCH_FAMILY.  Causes
+	  problems with Windows native build.  From Jeff (2017-07-06).
+	* IP forwarding design simplication; might save some memory.  Also fix
+	  some compile issues introduce with last commit in MULTINIC
+	  configration (2017-07-06).
+	* IP Forwarding: Another IP forwarding design simplification:  Remove
+	  an unnecessary field from state structure (2017-07-06).
+	* ICMPv6:  Fix an address size calculation that was bungled in a recent
+	  commit (2017-07-06).
+	* Networking:  Improve naming and simplify some logic of previous
+	  commit (2017-07-07).
+	* Networking:  Correct some issues that prevent TCP from working
+	  correctly when both IPv4 and IPv6 are enabled (2017-07-07).
+	* Add definitions that will permit TUN-only networking (2017-07-07).
+	* Move TUN ioctl commnd to include/nuttx/net/ioctl.h so that it will
+	  always be unique.  It a error in netdev_register: it was not handling
+	  device names properly when TUN is the only network device
+	  (2017-07-07).
+	* sim/ipforward:  Add an IP forwarding configuration using TUN devices
+	  and apps/examples/tun (2017-07-07).
+	* In TUN driver, do all polling on worker thread.  Otherwise, the stack
+	  gets very deep (2017-07-07).
+	* IP forwarding:  Major rearchitecting of the outgoing portion of the
+	  IP forwarding logic necessary into to properly received
+	  device-related forwarding events (2017-07-07).
+	* ieee802154: Changes mac locking/unlocking to aid in debugging.  From
+	  Anthony Merlino (2017-07-07).
+	* IP forwarding:  Remove some unnecessary data structure definitions
+	  (2017-07-07).
+	* Makefile.unix: Add savedefconfig target.  From Gwenhael Goavec-Merou
+	  (2017-07-08).
+	* Add Gwenhael's change to Makefile.win and update README.txt to
+	  described the new make target (2017-07-08).
+	* IP forwarding:  Two bugfixes (1) IPFWD poll event must be unique and
+	  different from other device poll events otherwise, some other waiting
+	  task might get the poll, (2) Add logic necessary to forward 6LoWPAN
+	  packets (2017-07-08).
+	* net/procfs:  Fix some spacing when both IPv6 and IPv4 are enabled
+	  (2017-07-08).
+	* Networking routing tables: Fix a compilation error when IPv6 and
+	  routing are enabled (2017-07-08).
+	* ICMPv6:  Add 6LoWPAN and IP forwarding support (2017-07-09).
+	* configs/b-l475e-iot01a:  Add basic support for the STMicro
+	  b-l475e-iot01a board.  From Simon Piriou (2017-07-09).
+	* IP Forwarding:  Fix a compile problem when IP forwarding of broadcast
+	  messages is enabled (2017-07-09).
+	* ieee802154: mac802154_purge_timeout was not unlocking MAC before
+	  returning.  From Anthony Merlino (2017-07-09).
+	* ieee802154: Minor bug fix.  Purging of indirect transaction was not
+	  unlocking MAC.  From Anthony Merlino (2017-07-09).
+	* Makefile.*: Add CONFIG_ARCH_CHIP_* definitions to defconfig in
+	  savedefconfig target.  Last of the conversions of defconfig files to
+	  compressed format (2017-07-09).
+	* ieee802154: Improves internal timer logic to handle work serially.
+	  Before, the MAC timer used a watchdog to schedule work with the high
+	  priority worker queue.  However, since everything in the MAC is
+	  supposed to be serialized through the use of the high priority work
+	  queue, but the timer uses a watchdog, there are some unintended
+	  consequences. To simplify, we now use the delayed work feature of the
+	  work queue.  From Anthony Merlino (2017-07-09).
+	* Update configure.sh, configure.bat, configure.c:  With compressed
+	  format, part of the installation requires that we run 'make
+	  olddefconfig' to restore the uncompressed defconfig format.  Also,
+	  while I was at it, I also added options to select host platform on
+	  configure command line (2017-07-10).
+	* tools/refresh.sh: Now runs make savedefconfig before copying the new
+	  defconfig file in place;  Also, added a new option --defaults.  Since
+	  the number of defaults that you now have to answer is so large, the
+	  option lets you just accept the default values.  So it works just
+	  like --slilent but still prompts you for the decision to save or
+	  discard the new defconfig file (2017-07-10).
+	* tools/tesbuild.sh: Fix missing $ before variable name (2017-07-10).
+	* configs/clicker2-stm32: Adds support for per-function-call stack
+	  checking.  From Anthony Merlino (2017-07-10).
+	* drivers/wireless/ieee802154/mrf24j40: Minor timing fix. Matches
+	  recommended value in datasheet.  Splits up driver into multiple files
+	  to make it easier to navigate.  Fixes issue with non-beacon enabled
+	  mode.  From Anthony Merlino (2017-07-10).
+	* IP Forwaring.  Fix some errors in ipforwar.h when
+	  CONFIG_NET_STATISTICS is enabled, but CONFIG_NETDEV_MULTINIC is not.
+	  Add some forward references that are needed when
+	  CONFIG_NETDEV_MULTINIC is not enabled. ipfwd_dropstats needs to
+	  include errno.h (2017-07-10).
+	* STM32 TIM3/4 are always 16-bits; never 32-bits.  Noted by Eetu
+	  Nevalainen. (2017-07-10).
+	* Build System:  It is no longer necessary to have a unique Make.defs
+	  file for each configuration.  A board may share a common Make.defs
+	  file in the scripts directory.  Some duplicate Make.defs files
+	  removed; Some common Make.defs file moved to the scripts/
+	  sub-directory (2017-07-10).
+	* configs/clicker2-stm32/mrf24j40-mac: Updates stack size to 2048 to
+	  avoid random stack overflows when logging is enabled.  From Anthony
+	  Merlino (2017-07-10).
+	* Add small hello example for stm32f103-minimum board.  From Alan
+	  Carvalho de Assis (2017-07-10).
+	* ieee802154: Many small bug fixes clean-ups that help stabilize the
+	  functionality.  From Anthony Merlino (2017-07-10).
+	* SAML21 I2C driver.  Developed for and contributed with permissin from
+	  Filament company.  From Alan Carvalho de Assis (2017-07-11).
+	* SAMD/L21 I2C:  Another update... needs to use
+	  enter/leave_critical_section vs. old irqsave/restore (2017-07-11).
+	* Remove duplicate Make.defs files in configs/.  Move remaining, common
+	  Make.defs files to board/scripts directory (2017-07-11).
+	* SAMD21:  Fix some SPI-related issues.  From Matt Thompson
+	  (2017-07-11).
+	* ICMPv6 w/Autoconfiguration:  Fix a compile issue introduced with
+	  recent change for 6LoWPAN support (2017-07-11).
+	* sockets: Coding fix fix + minor structuring for forthcoming socket
+	  interface logic (2017-07-11).
+	* drivers/wireless/ieee802154/mrf24j40/: Fixes bug causing radio to
+	  cease transmitting.  From Anthony Merlino (2017-07-11).
+	* ieee802154: Notify radio layer of changes in devmode.  From Anthony
+	  Merlino (2017-07-12).
+	* drivers/mrf24j40: Hook in setdevmode from newly added radio attribute
+	  setting.  From Anthony Merlino (2017-07-12).
+	* ieee802154: Set devmode to endpoint on MAC layer reset.  From Anthony
+	  Merlino (2017-07-12).
+	* I was having issues with the bus freezing up .. slaves holding SDL
+	  low.. so I rewrote a good portion of the interrupt logic based on the
+	  application notes from Atmel.  One major improvement is using the
+	  RXNACK flag in the STATUS register, which indicates that no device
+	  responded to an address packet. Assuming that the chip will always
+	  give an interrupt status, I believe it's possible to eliminate the
+	  timer as well.  From Matt Thompson (2017-07-12).
+	* SAMD/L21:  Add a USB driver.  Developed for Filament Inc. by Offcode,
+	  LTD.  From Janne Rosberg (2017-07-12).
+	* drivers/mrf24j40: Adds header guards to mrf24j40_reg.h.  From Anthony
+	  Merlino (2017-07-12).
+	* C library:  Fix an error in mkstemp() the could result in an infinite
+	  loop.  From Alan Carvalho de Assis (2017-07-12).
+	* SAMD/L21:  Need to preserve errno value across syslog() call
+	  (2017-07-12).
+	* SocketI/F:  Initial steps to add a socket interface to the
+	  networking.  Each address family will have an interface that
+	  describes how to perform socket operations on that address family.
+	  Currently only a couple of methods are defined in the table as a
+	  proof of concept.  More to come.  Currently there are only tables for
+	  the INET/INET6 family, the Unix LOCAL family, and the raw PACKET
+	  family.  Hopefully there will be AF_IEEE802154 and AF_BLUETOOTH
+	  comming down the pike.  Add recvfrom() method to interface
+	  (2017-07-12).
+	* ieee802154: Fixes setting devmode logic.  From Anthony Merlino
+	  (2017-07-13).
+	* drivers/mrf24j40: Fixes issues with sleeping for beacon enabled
+	  networking.  From Anthony Merlino (2017-07-13).
+	* Fixes timing issues for beacon enabled coordinators and endpoints.
+	  From Anthony Merlino (2017-07-13).
+	* Socket I/F: Added bind(), connect(), listen(), accept(), close(),
+	  addref() and sockcaps() interfaces (2017-07-13).
+	* ieee802154: Fixes issue with association on beacon-enabled
+	  networking.  From Anthony Merlino (2017-07-13).
+	* drivers/wireless/mrf24j40: Fixes math error for calculating sleep
+	  count values.  From Anthony Merlino (2017-07-13).
+	* STM32 F7 Ethernet:  Fix typo in header; Add memory sync barrier
+	  between writing to DMA TX descriptor and restarting DMA TX. Avoid
+	  calling work_queue on pollwork if it's already queued, just skip a
+	  poll cycle instead.  Nucleo-144: Fix RMII TXD1 signal, connected to
+	  PB13 not to PG14.  From savinz (2017-07-14).
+	* Socket I/F: Added getsockname() interfaces.  Add address family
+	  support for poll() and sendfile() (2017-07-14).
+	* tools/refresh.sh:  Update so that it can find the Make.defs file in
+	  the new location (2017-07-15).
+	* Numerous fixes, updates generalizations needed in order to merge
+	  Frank Berkert's massive USB composite change of June 1 into master.
+	  Too many changes to summarize adequately here (2017-07-16).
+	* Makefile.win would only create uboot images for ARM.  MIPS support
+	  also needed.  From Lwazi Dube (2017-07-16).
+	* IEEE 802.15.4 MAC:  Disable option to select interrupt-level meta
+	  data allocator (2017-07-16).
+	* ieee802154: Adds retry count to tx descriptor.  Renames ack_wait_dur
+	  to ack_waitdur and removes it from private mac struct.  From Anthony
+	  Merlino (2017-07-16).
+	* STM32 F7: I2C4_SDA can also be on GPIO PB7.  From Titus von Boxberg
+	  (2017-07-16).
+	* STM32 F7:  Definitions for I2C4, SDMMC2.  Adapted RAM start / size to
+	  internal SRAM.  From Titus von Boxberg (2017-07-16).
+	* Networking: When upd_input() cannot process a packet, it returns
+	  ERROR so that network drivers may try calling ipv4_input() later.  In
+	  this case, it must also set d_len to zero.  Otherwise, all network
+	  drivers will assume tht there is also an outgoing packet.  This
+	  results in a gratuitous ARP (2017-07-17).
+	* STM32 F7:  do not enforce CONFIG_STM32_CCMEXCLUDE for
+	  CONFIG_ARCH_CHIP_STM32F7, macro rename STM32 -> STM32F7, #include
+	  corrections.  renamed STM32_LCDTFT_BASE to STM32_LTDC_BASE for
+	  consistency.   macro rename STM32 -> STM32F7.  initial
+	  (dysfunctional) lcd configuration (from STM32).  From Titus von
+	  Boxberg (2017-07-17).
+	* STM32 F7:  option for DSI output, inconsistency: the stm32f746 does
+	  not feature a DSI interface.  compileable with LTDC_INTERFACE and
+	  LTDC_USE_DSI.  From Titus von Boxberg (2017-07-18).
+	* ieee802154:  Adds special attribute that can be used to perform a
+	  regdump of the radio.  Sets txdesc retrycount to the maxretries MAC
+	  attribute when allocated.  From Anthony Merlino (2017-07-18).
+	* STM32 F7: Added functions for DSI clock source selection.  From Titus
+	  von Boxberg (2017-07-18).
+	* Network poll:  Remove logic conditioned on non-existent HAVE_NET_POLL
+	  (2017-07-19).
+	* CDC/ACM.  Fix several known problems resulting from merge of USB
+	  composite device.  That merge now breaks some of the non-composite
+	  USB devices.  These fixes are for CDC/ACM (2017-07-19).
+	* SAMD21:  Changes needed to get USB working.  From Matt Thompson
+	  (2017-07-19).
+	* Initial port to STM32F769I-DISCO.  From Titus von Boxberg
+	  (2017-07-20).
+	* libc/math:  Fix wrong ouput in modf() API.  The sign of integral part
+	  given by the modf() should be same as sign of input.  But for inputs
+	  between 0 and 1, the sign of integral part was not same as sign of
+	  input.  From Lokesh B V (2017-07-20).
+	* libc/math: Fix wrong ouput in ceil() API.  Ex:for input x = 1.0, the
+	  ouput should be 1.0, but the ouput was 2.0.    From Lokesh B V
+	  (2017-07-20).
+	* USB device:  Rename usbdev_description_s to usbdev_devinfo_s to avoid
+	  any more confusion of naming with device descriptions in the future.
+	  Instances of usbdev_devinfo_s are now called devinfo vs devdesc when
+	  is a bad naming collision (2017-07-20).
+	* USB MSC: Add missing logic to define endpoints.  The composite
+	  changes broke the the non-composite, USB MSC only case because it
+	  omitted the critical setup when USB MSC was not part of the composite
+	  (2017-07-20).
+	* libc/stdlib: (1) Fix an error in mkstemp() the could result in an
+	  infinite loop.  (2)  Fix for wrong output in some cases.  For
+	  Example: (a) input: "FILEXX", output: "FILE00" and repeats same
+	  output for further invocations of mkstemp(). But, the ouput has to be
+	  FILE01, FILE02, ...., FILEZZ. (b) input: "FILEXXXXXX", output:
+	  "FILE100000", for next invocation "FILE200000" and so on.  But it's
+	  good, if the ouput goes like FILE000001, FILE000002, ..., FILE000101,
+	  ...  From Lokesh B V (2017-07-21).
+	* configs: add stm32f334-disco basic support.  From Mateusz Szafoni
+	  (2017-07-21).
+	* USB composite:  Remove references to CDC/ACM and USB MSC from
+	  composite logic.  They are no longer coupled (2017-07-21).
+	* nucleo-f334r8: UART2 is default serial port (STLINK Virtual Port).
+	  From Mateusz Szafoni (2017-07-22).
+	* STM32 HRTIM: add slave timers private data, fix some bad definitions,
+	  some assertions.  From Mateusz Szafoni (2017-07-22).
+	* b-l475e-iot01a: Add initial, unverified support for the
+	  SPSRGF/Spirit1 module.  Add a configuration for testing sprit radio
+	  (2017-07-22).
+	* epoll: fix epoll_wait function.  From Simon Piriou (2017-07-22).
+	* sim arch: Add non blocking read to devconsole driver.  From Simon
+	  Piriou (2017-07-22).
+	* sim arch: poll for TX frames to speed up driver.  From Simon Piriou
+	  (2017-07-22).
+	* sim arch: fix mkdir issue in GNU target.  From Simon Piriou
+	  (2017-07-22).
+	* drivers:  add generic upper-half driver for SMPS.  From Mateusz
+	  Szafoni (2017-07-23).
+	* Add power-related debug output (2017-07-23).
+	* Move SMPS driver to drivers/power (and header to
+	  include/nuttx/power).  Rename debug to IOCTLs to more general power
+	  naming; create a separate file to coordinate power-related IOCTL
+	  commands (2017-07-23).
+	* STM32 F7: enable APB2 DSI clock.  From Titus von Boxberg
+	  (2017-07-26).
+	* drivers/leds: Add support for inverted LEDS.  See common anode RGB
+	  LED discussion in the Yahoo group.  From Jeff (2017-07-27).
+	* drivers/analog:  Fix some data alignment issues in the ADC driver
+	  (2017-07-27).
+	* STM32 F7: added missing config option for register value debugging.
+	  From Titus von Boxberg (2017-07-27).
+	* STM32 F7: No FSMC, only FMC for STM32F7.  From Titus von Boxberg
+	  (2017-07-27).
+	* sig_timedwait:  Pending signal structure used after it has been
+	  releasd.  From anonymous Bitbucket Issue 59 (2017-07-27).
+	* Add driver for LTC4151 current and voltage monitor.  From Giorgio
+	  Groß (2017-07-28).
+	* drivers/leds: Lightness correction for RGB LED driver.  From Jeff
+	  (2017-07-28).
+	* We discovered a problem with the samv7 mcan driver which results,
+	  under some circumstances, in a very high CPU load.  The problem
+	  occurs, and is easily reproducible, if the device is connected to a
+	  CAN network with a wrongly configured CAN speed (baud rate). In our
+	  tests we set the CAN speed of the device to 1000000 and the speed of
+	  the other CAN nodes to 500000. The device is restarted and sends a
+	  CANopen "bootup message" to the CAN network. This results in huge
+	  amount of errors messages on the CAN bus, probably because of the CAN
+	  feature for acknowledging error messages. The error messages can’t
+	  be read by the device because of the misconfigured CAN speed, instead
+	  the CAN chip reports lots of errors, which are reported to the
+	  application which uses the CAN driver (CONFIG_CAN_ERRORS is enabled).
+	  The CAN errors are reported from the CAN chip via interrupts and thus
+	  the interrupt load is very high in this scenario. To fix the problem
+	  the driver now disables each RX error interrupt after it is occurred.
+	  The RX error interrupts are turned back on if at least one CAN
+	  message is received successfully.  From Stefan Kolb (2017-07-28).
+	* tcdrain implementation based on a new term ioctl.  From Sebastien
+	  Lorquet (2017-07-28).
+	* Spirit Network Driver:  Create build directories, Add radio
+	  initialization, interrupt handling logic, packet transmissin and
+	  reception logic.  Add some hooks that will eventually support address
+	  filtering (2017-07-28).
+	* STM32 F7: HEAP2 depends on CONFIG_ARCH_HAVE_HEAP2, not on particular
+	  FMC RAM type.  From Titus von Boxberg (2017-07-28).
+	* STM32 F7:  No board specific dithering values used; corrected
+	  dithering init.  Corrected LIPOS/LIPCR calculation.  Change only
+	  polarity bits in LTDC_GCR.  From Titus von Boxberg (2017-07-29).
+	* STM32_RCC_DCKCFGR2 has nothing to do with PLLI2S; PLLI2S is not
+	  dependent on LTDC, instead on SAICLK1/2 generated from PLLI2S.  From
+	  Titus von Boxberg (2017-07-29).
+	* To use an external oscillator module (not just a crystal) with the
+	  STM32F4, one needs to enable the HSEBYP bit in the RCC_CR register.
+	  This change allows an integrator to define STM32_RCC_CR_HSEBYP in
+	  their board.h file if they want this configuration.  From Jeff
+	  (2017-07-30).
+	* 6LoWPAN PktRadio:  Some initial changes to support raw packet radios
+	  without IEEE 802.15.4 with 6LoWPAN. Add missing MetaData-related
+	  prototypes and initialization logic.  Perform a major renaming to
+	  make room in the 6LoWPAN name space for packet radios.  Replace
+	  metadata input parameter type from struct ieee802154_data_ind_s to
+	  void*.  This permits radios with different MAC metadata to interact
+	  with 6LoWPAN.  Includes many changes to handle variable length radio
+	  addresses.  No longer just short and exteneded; any length.Remove
+	  explicit type struct ieee802154_frame_meta_s from derive interface
+	  methods.  Replace with a opaque void * type so that other radio meta
+	  data structures may use the interfaces.  Add a new radion interface
+	  to get properties of the radio.  Spirit:  Finish packet I/O interface
+	  with the network.  Fix case where source and destination IP address
+	  were backward.  Fix some compile issues when star topology support is
+	  enabled. Condition out some types that depend on definitions that are
+	  only available with 6LoWPAN is enabled (2017-07-30).
+	* STM32L4 PWR: correct PWR_SR2 REGLPS and REGLPF bits, add port I
+	  registers.  Also remove duplicate section from Kconfig.  From Juha
+	  Niskanen (2017-07-31).
+	* STM32L1:  Add base address for TIM11.  From Juha Niskanen
+	  (2017-07-31).
+	* net/local: fix accept for local stream sockets.  From Jussi Kivilinna
+	  (2017-07-31).
+	* network: Move USRSOCK specific code from from inet_sockif to
+	  usrsock_sockif.  Fix USRSOCK to work with recent changes to
+	  networking layer.  From Jussi Kivilinna (2017-07-31).
+	* PktRadio/6LoWPAN: Add a loopback driver for testing on the simulator.
+	  Fix more issues related to single byte radio addressing.  Some
+	  initial fixes resulting for early testing with loopback device
+	  (2017-07-31).
+	* Simulator: Protect a few more NuttX symbols from collisions with host
+	  symbols (2017-07-31).
+	* STM32 F7: added function for reset.  From Titus von Boxberg
+	  (2017-07-31).
+	* IoT Board/Spirit:  Fix a few issues that interfered with testing.
+	  Move console to the VCOM port (USART) for all configurations.  Rename
+	  the spirit-mac configuration to spirit-6lowpan.  Add lots of debug
+	  output the spirit network driver (2017-07-31).
+	* drivers/serial/serial.c:  Add support for TCFLUSH.  From Sebastien
+	  Lorquet (2017-08-01).
+	* Fixes for compilation of stm32f746g-disco.  From Ivan Ucherdzhiev
+	  (2017-08-01).
+	* stm32f746g-disco:  Make the initialization logic identical to the
+	  standard way that is done for all other board (2017-08-01).
+	* serial.c:  Finish implementation of TCDRAIN.  Based partly on logic
+	  from Sebastien Lorquet (2017-08-01).
+	* serial.c:  Use common TX drain logic when closing a driver as with
+	  the TCDRAIN IOCTL (2017-08-01).
+	* Spirit network driver:  Network driver needs to setup IP address
+	  based on configured node address.  If no node address is provided,
+	  then it will use a default.  Make sure device is in READY state after
+	  reset and before changing to STANDBY.  Add a function to wait for a
+	  state change with a timeout (2017-08-01).
+	* network procfs:  Fix so that PktRadio address are shown correctly
+	  (2017-08-01).
+	* arch/arm/src/lc823450: Initial support for ON Semiconductor LC823450.
+	  From Masayuki Ishikawa (2017-08-02).
+	* configs/lc823450-xgevk: LC823450-XGEVK board support.  From Masayuki
+	  Ishikawa (2017-08-02).
+	* b-l475e-iot91a:  Add apps/examples/nettest and eamples/udp to Spirit1
+	  configuration.  Add telnet support.  fix driver statistics
+	  configuration (2017-08-02).
+	* Networking: Add support for some packet radio IOCTL commands
+	  (2017-08-02).
+	* b-l475e-iot01a: crude update to +CONFIG_BOARD_LOOPSPERMSEC.  Not
+	  precise but on assertions no flashes at approximately the correct
+	  rate (2Hz) (2017-08-02).
+	* Fix for stm32f746g-disco board for button support with interrupt.
+	  This change is tested with buttons app example and it is working with
+	  interrupts (signals). I tried the test with polling but at this point
+	  it doesn't work.  From Ivan Ucherdzhiev (2017-08-02).
+	* configs/stm32f746g-disco:  Remove inclusion of STM32-specific header
+	  files from board.h (2017-08-02).
+	* Spirit1 network driver:   Remove extra clear of pending interrupts,
+	  could cause missing interrupts.  Fix a deadlock.  Also several other
+	  design improvements to eliminate corner cases (2017-08-03).
+	* poll: fix poll for regular files and block devices.  Open Group
+	  documentation says that poll (and select) support regular files and
+	  that 'Regular files shall always poll TRUE for reading and writing'.
+	  From Jussi Kivilinna (2017-08-03).
+	* mm_mallinfo: do heap end debug assert check with heap semaphore held.
+	  From Jussi Kivilinna (2017-08-03).
+	* Spirit1 network driver:  Modify reg needs to toggle CS to get the
+	  correct status.  Make sprit_unlock an inline function.  Tx timeout
+	  should run on the HP work queue (2017-08-03).
+	* Simulator:  x86 stack needs to be aligned to 16-byte boundaries
+	  (2017-08-04).
+	* drivers: handle I2C_TRANSFER return value consistently.  Some I2C
+	  peripherals transfers return zero on success, others number of
+	  completed transfers.  Make drivers robust against this.  From Juha
+	  Niskanen (2017-08-04).
+	* syslog: Add option to use the CLOCK_MONOTONIC for time stamping.
+	  From Jussi Kivilinna (2017-08-04).
+	* RAMTRON: Add support for splitting block writes in chunks.  Some
+	  Re-RAMs like MB85AS4MT have a write buffer size limitation.  From
+	  Boris Astardzhiev (2017-08-04).
+	* Spirit1 network driver:  Correct setting of the length width field;
+	  Add multicast and broadcast addresses to radio properties.  Convert
+	  network driver to use STack packets vs. Basic packets.  We need to
+	  use the STack packets in order to provide the source address
+	  (2017-08-04).
+	* tools/mkdeps.c:  Eliminate a warning. MAX_PATH may already be defined
+	  in included system files.  From Jeff (2017-08-04).
+	* Spirit1 network drvier: Increase number of retries if there is no
+	  acknowledgement; Add interrupt handling for the case where the max
+	  number of retries expires.  Fix some badly implemented queue
+	  management code.  With these changes the basic UDP and TCP tests
+	  work.  Enable AutoACK, TX retries, and RX timeouts in the network
+	  driver (2017-08-04).
+	* B-L475E-IOT01A: Make spirit-6lowpan configuration match what is
+	  currently under test:  Enable multicast, broadcast, but disable CRC
+	  support.  Currently CRCs are not working right (2017-08-04).
+	* b-l475e-iot01a:  Add configurations to support a star topology
+	  (2017-08-05).
+	* Spirit + 6LoWPAN:  In STAR configuration, Spirit must use a
+	  configured well known hub address.  6LoWPAN cannot assume that the
+	  PAN coordinator is the STAR hub; it must ask the radio to provide it
+	  with the address of the star hub (2017-08-05).
+	* IEEE 802.15.4 network driver:  Fix more compile issues that only show
+	  up when CONFIG_NET_STARPOINT is defined (2017-08-05).
+	* STM32F746-Disco:  Add ADC3 support.  From Ivan Ucherdzhiev
+	  (2017-08-05).
+	* Spirit Network Driver:  Attempts to eliminate RX FIFO errors.  Reduce
+	  max packet length to avoid an errata.  Reducing the packet length had
+	  no effect on eliminating RX FIFO errors.  Add support for watermark
+	  interrupts on RX FIFO.  Restructure threading to reduce locking.
+	  Still get a few RX FIFO errors (2017-08-06).
+	* STM32F103-Minimum: Add support for SmartFS on Winbond W25 SPI NOR
+	  Flash.  From Alan Carvalho de Assis (2017-08-06).
+	* MTD: Add driver for Macronix QuadSPI flash memory.  From Simon Piriou
+	  (2017-08-06).
+	* b-l475e-iot01a: add basic support for external Macronix QuadSPI flash
+	  memory.  From Simon Piriou (2017-08-06).
+	* Spirit radio:  Dropping packet size to 94 seems to fix problem with
+	  CRC failures (2017-08-06).
+	* STM32F103-Minimum: (1) Enable CONFIG_MTD_PARTITION in Kconfig if
+	  flash partition is enabled and (2) Update the README.txt file with
+	  info needed to get SmartFS working.  From Alan Carvalho de Assis
+	  (2017-08-06).
+	* 6LoWPAN:  When obtaining the radio MAC address from the IP address,
+	  handle the special case of broadcast and multicast address
+	  (2017-08-06).
+	* Networking: Move INET socket interface out of net/sockets to its own
+	  directory net/inet (2017-08-06).
+	* Spirit network driver:  TX timeout was never being cancelled!  Also
+	  reviewed and cleaned up all error handling logic (2017-08-06).
+	* sched/: Fix return value in sched_setaffinity().  From Masayuki
+	  Ishikawa (2017-08-07).
+	* Spirit bugfixes:  Was hanging occasionally because there was no
+	  mechanism to restart the poll timer if poll was not performed because
+	  Spirit ws busy.  Fixed by not checking if Spirit is busy.  The TX
+	  poll can be performed asynchronouly while spirit is busy; any
+	  outgoing data will queued until Spirit is ready. Fixed handling of a
+	  timeout condition.  Failure to transmition to the TX state would fail
+	  (timeout) if in a race condition Spirit already committed to the RX
+	  state.  The driver needs to recover the state properly and avoid
+	  debug assertions in this event (2017-08-07).
+	* STM32 USB:  I'm working on bringing up USB full-speed support on
+	  STM32F405.  My board does not include a USB power switch, VBus
+	  sensing, over current detection, or ID pin.  This commit add a
+	  config STM32_OTGFS_VBUS_ CONTROL which lets us selectively disable
+	  VBus sensing and control.  I also sneaked in a change to disable the
+	  configgpio call for the ID pin, which is only used in OTG mode which
+	  isn't supported yet.  The only pins that need to be initialized
+	  should be OTGFS_DP and OTGFS_DM.  These changes let a USB mouse
+	  enumerate on my platform if it's plugged in on power-up.  Plugging,
+	  unplugging, clicking, or moving the mouse cause NSH to stop
+	  responding.  Because I'm using the ramlog, I don't have useful debug
+	  messaging yet, so there's a lot more work I have to do to
+	  troubleshoot it or get my JTAG debugging set up, but these patches
+	  shouldn't hurt anything.  I'm hoping my issue is something simple I
+	  overlooked in configuration.  From Jeff (2017-08-07).
+	* I discovered while working on the SAMV7 mcan driver that the
+	  implementation of the CAN error handling is suboptimal. In the
+	  current implementation the many errors are implemented as pending
+	  errors.  But those errors are not pending, the errors occurred and
+	  are gone directly afterwards. This commit changes the described
+	  behavior and simplifies the handling of CAN errors.  From Stefan Kolb
+	  (2017-08-07).
+	* IPv6:  Remove comparisons to the address with all ones set.  IPv6
+	  does not support broadcast addresses and certainly not in that form.
+	  Replace with multicast addresses beginning with 0xff02 (2017-08-07).
+	* ICMPv6: Support source link-layer address option in RA.  From
+	  Masayuki Ishikawa (2017-08-08).
+	* libm:  Port gamma() and lgamma() from FreeBSD to NuttX.  From Alan
+	  Carvalho de Assis (2017-08-08).
+	* B-L475-IOT01A: Enable UDP broadcast test in the spirit-starhub
+	  configuration (2017-08-08).
+	* Spirit Radio:  Add support for CSMA backoff count reached interrupt
+	  (2017-08-08).
+	* STM32F4-Discovery:  Add a configuration for testing libc++.  From
+	  Alan Carvalho de Assis (2017-08-08).
+	* Remove CONFIG_NET_MULTILINK.  This increases code size by a little,
+	  but greatly reduces the complexity of the network code (2017-08-08).
+	* Networking:  Fix netdev_dev_lladdrsize().  In some configurations, it
+	  could return the wrong size for the address of a packet radio
+	  (2017-08-08).
+	* Fix IPv6 loopback driver that depended on the removed
+	  g_ipv6_allonesaddr.  Noted by Masayuki Ishikawa (2017-08-09).
+	* Networking: Fix typo for 802.11 devices in netdev_register().  Was
+	  being masked before because depended on CONFIG_NET_MULTLINK
+	  (2017-08-09).
+	* Networking:  Fix a compilation issue with
+	  CONFIG_NET_ICMPv6_AUTOCONF=y.  From  Masayuki Ishikawa (2017-08-09).
+	* Update NSH documentation to show new usage for addroute and delroute
+	  (2017-08-10).
+	* cwchar:  Use CONFIG_LIBC_WCHAR to only export the wc/mb functions.
+	  When a build does not want to use wide or multibyte char
+	  CONFIG_LIBC_WCHAR is not set. Therefore we should to only export the
+	  wc/mb functions when defined.  Regardless of the stat of
+	  CONFIG_LIBC_WCHAR the non mb/wc  definitions such as mbstate_t,
+	  wint_t, wctype_t need to be exported.  From David Sidrane
+	  (2017-08-10).
+	* inet_ntop:  Was printing negative values for fields >127
+	  (2017-08-11).
+	* procfs:  Add support for routing tables at proc/net/route
+	  (2017-08-11).
+	* Unify GCC/Clang config.  From Goran Mekić (2017-08-12).
+	* procfs routing table:  Don't print the IPv4 routing table header if
+	  the table is empty.  Fix a couple of places where CONFIG_NET_IPv4 was
+	  used wehre IPv6 was intended (not noticed now because I am testing
+	  with both enabled) (2017-08-12).
+	* C++: Compilation with recent C++ compiler needs an overloaded delete
+	  operator that includes a size_t size argument (2017-08-12).
+	* ARM: The older ARM7 and ARM9 configurations were determining CFLAGS
+	  based on the GCC version 4.x.x or not.  That needx to be extended for
+	  5.x.x and 6.x.x which also behave like 4.x.x (2017-08-12).
+	* STM32F7: Some STM32F7 builds failed in build testing due to undefined
+	  STM32_SRAM1_BASE.  I think that is because stm32_allocateheap.c was
+	  not including chip/stm32_memorymap.h (2017-08-13).
+	* Fix ESP32 gpio enable reg and default UART pin. Vodify default uart
+	  pin for ESP-WROOM-32. Fix gpio enable reg.  From Sungki Kim
+	  (2017-08-13).
+	* stm32/stm32f0:  Fix some funny shifts in DAC header files.  From Juha
+	  Niskanen (2017-08-14).
+	* STM32L4 COMP:  Input minus pin extended selection.  From Juha
+	  Niskanen (2017-08-14).
+	* STM32L4 DAC:  Port from STM32.  Add ADC register definitions.  Note
+	  that this does not address the somewhat confusing relation between
+	  STM32L4_NDACS and DAC2 config macros that comes from original STM32
+	  code.  From Juha Niskanen (2017-08-14).
+	* libxx:  New sized delete operators are only for C++14 and above
+	  (2017-08-14).
+	* Miscellaneous fixes from astyle tool.  Noted by Arjun Hary
+	  (2017-08-14).
+	* SAMv71-XULT: Fix MRF24J40 interrupt GPIO number (2017-08-15).
+	* Clicker2:  Configure EDBG SPI CS just to make that it is disabled
+	  (2017-08-15).
+	* STM32L476VG Discovery:  Add a knsh configuration that may be used to
+	  test the PROTECTED build mode (2017-08-17).
+	* stm32f7:DMA correct comments and document stm32_dmacapable.  Updated
+	  comment to proper refernce manual for STM32F7 not STM32F4.  Added
+	  stm32_dmacapable input paramaters documentation.  From David Sidrane
+	  (2017-08-17).
+	* STM32 F7: DMA add dcache alignment check in stm32_dmacapable.  In the
+	  case dcache write-buffed mode is used (not write-through) buffer
+	  alignment is required for DMA transfers because  a)
+	  arch_invalidate_dcache could lose buffered writes data and b)
+	  arch_flush_dcache could corrupt adjacent memory if the maddr and the
+	  mend+1, the next next address are not on ARMV7M_DCACHE_LINESIZE
+	  boundaries.  From David Sidrane (2017-08-17).
+	* STM32 F7: SDMMC remove widebus limitation on DMA.  There is no
+	  documantation for the STM32F7 that limits DMA on 1 bit vrs 4 bit
+	  mode.  From David Sidrane (2017-08-17).
+	* dcache write-buffed mode is used (not write-through) buffer alignment
+	  is required for DMA transfers because a) arch_invalidate_dcache could
+	  lose buffered writes data and b) arch_flush_dcache could corrupt
+	  adjacent memory if the buffer and the bufflen, are not on
+	  ARMV7M_DCACHE_LINESIZE boundaries.  From David Sidrane (2017-08-17).
+	* STM32 F7: SDMMC add dcache alignment check in dma{recv|send}setup.
+	  In the case where CONFIG_SDIO_PREFLIGHT is not used and
+	* drivers/sensors: Add support to HC-SR04 distance sensor.  From Alan
+	  Carvalho de Assis (2017-08-17).
+	* PF_IEEE802154 address family:  With this commit PF_IEEE802154 address
+	  family is basically functional.  More testing is needed, of course:
+	  Finishes up socket interfaces connect() sendto(), recvfrom(), and
+	  bind() logic.  Special initialization, device lookup, driver poll,
+	  and frame input logic.  Add configs/sim configuration for testing
+	  (2017-08-19).
+	* STM32 COMP: add default INM configuration and some missing
+	  COMP1,3,5,7 code.  From Mateusz Szafoni (2017-08-20).
+	* 6LoWPAN/PF_IEEE802154:  Created radiodev.h and renamed various
+	  structures to provide a better separation between 6LoWPAN networking
+	  and PF_IEEE802154 address family (2017-08-20).
+	* STM32 DAC: fix some configuration logic. When STM32_NDAC is greather
+	  than 1, then second channel is always DAC1OUT2.  From Mateusz Szafoni
+	  (2017-08-20).
+	* PF_IEEE802154 address family:  IEEE 802.15.4 network device: Make
+	  same changes as per loopback device so that it will build with
+	  PF_IEEE802154 but without 6LoWPAN.  More fixes to device registration
+	  and to IEEE 802.15.4 loopback driver for PF_IEEE802154 without
+	  6LoWPAN.  Changes to conditional compilation so that PF_IEEE802154
+	  can build without 6LoWPAN (2017-08-20).
+	* drivers/net/tun.c:  Currently cannot support TAP mode unless Ethenet
+	  is enabled (2017-08-20).
+	* PktRadio loopback driver:  Fix compile problem by removing
+	  inappropriate const storage class (2017-08-20).
+	* Networking:  Remove driver based backlog support.  This affects the
+	  entire network, but is used by only one driver.  The only supported
+	  RX backlog is now via common read-ahead buffering (2017-08-21).
+	* PF_IEEE802154 socket family:  (1) Improve some backlog counting
+	  logic; add more assertions to catch cases where the backlog count
+	  might deviate from the actual backlog. (2) Add a maximum backlog
+	  option.  This will prevent overrun of the RX frame queue if many
+	  frames are received from the radio, but no application is receiving
+	  the queued data. (3) On input, there may be a list of frames
+	  provided, not just one.  When closed() and connection is freed, also
+	  need to free any frames remaining in the RX queue (2017-08-21).
+	* Network procfs: Add support for network procfs statistics when
+	  nothing is enabled but PF_IEEE802154 (2017-08-21).
+	* STM32 DAC:  Add support for HRTIM triggering.  Separate dma buffer
+	  configuration for channels.  From Mateusz Szafoni (2017-08-21).
+	* ENCX24J600:  Fix some warnings.  Update interface to use newer
+	  parameter passing to interrupt handlers (2017-08-21).
+	* ENC28J60: Update interface to use newer parameter passing to
+	  interrupt handlers (2017-08-21).
+	* drivers/analog/comp: add poll support.  From Pekka Ervasti
+	  (2017-08-22).
+	* STM32L4 COMP:  Bind to upper half comp driver.  From Pekka Ervasti
+	  (2017-08-22).
+	* STM32L4 ADC: correct EXTSEL macros.  From Juha Niskanen
+	  (2017-08-22).
+	* drivers/lcd: ssd1306:  (1) Separate lcd_dev_s setup to separate
+	  object.  g_oleddev takes 1 KiB because framebuffer and was allocated
+	  to .data section because of lcd_dev_s function pointer setup. Move
+	  lcd_dev_s setup out, so that g_oleddev goes to .bss and avoid wasting
+	  ROM. (2) Fix memory corruption caused by ssd1306_getrun().
+	  ssd1306_getrun was writing one extra byte (with value 0) past target
+	  buffer when pixlen is multiple of 8. When pixlen was not multiple of
+	  8, last byte of buffer was fully cleared, instead of modifying only
+	  the (pixlen % 8) bits of last byte.  (3) Add support for board power
+	  control.  ThingseeOne has regulator for controlling display power
+	  on/off.  Patch adds support for board based power control to SSD1306
+	  driver. (4) Add DD-12864WO-4A/SSD1309 support to SSD1306 driver.
+	  From Jussi Kivilinna (2017-08-22).
+	* Network procfs: procfs/net_procfs_route.c building error occur if
+	  CONFIG_NET_ROUTE is enabled.  Fix suggested by Aleksandr Kazantsev
+	  (2017-08-22).
+	* Networking:  Fix ompile error if Unix domain sockets selected
+	  (2017-08-23).
+	* STM32L4 TIM: TIM15,16,17 are always in APB2.  From Juha Niskanen
+	  (2017-08-25).
+	* STM32L4 DAC: report transfer as completed in DMA callback.  Without
+	  this even O_NONBLOCK writes block the calling task if DAC was using
+	  DMA.  From Juha Niskanen (2017-08-25).
+	* STM32L4 COMP: comparators share RCC enable bit with SYSCFG.  From
+	  Juha Niskanen (2017-08-25).
+	* power: add driver for TI bq2429x battery charger.  TODO: Untested.
+	  Does not have poll() support.  From Juha Niskanen (2017-08-25).
+	* 6LoWPAN:  The original, Contiki-based design used only a single
+	  buffer for reassemblying larger packets.  This could be a problem
+	  issue for hub configurations which really need the capability
+	  concurrently reassemble multiple incoming streams concurrently.
+	  These was also a design issue in that the reassembly buffer could be
+	  corrupted by outgoing packets.  The design was extended to support
+	  multiple reassembly buffers, each associated with the reassembly tag
+	  and source address.  This assures that there can be be no corruption
+	  of the reassembly once it has started (2017-08-26).
+	* Simulator:  Adds necessary functionality to build Simulator under ARM
+	  Linux. Tested only on Raspberry3. Currently setjmp/longjmp do not
+	  save/restore floating point registers.  From Nickolay Semyonov
+	  (2017-08-26).
+	* fs: FS_AUTOMOUNTER should depend on SCHED_LPWORK.  From Nickolay
+	  Semyonov (2017-08-26).
+	* configs/lc823450-xgevk: Add eMMC/SD and USB support.  From Masayuki
+	  Ishikawa (2017-08-27).
+	* LC823450: eMMC/SD and USB support for LC823450.  From Masayuki
+	  Ishikawa (2017-08-27).
+	* drivers/analog/comp.c:  Fix compilation errors when poll disabled.
+	  From Mateusz Szafoni (2017-08-27).
+	* stm32_dac.c: conditional logic for timer triggering, fix TSEL
+	  configuration when HRTIM, DMA request remapping, Add DMA buffers
+	  initialization logic.  From Mateusz Szafoni (2017-08-27).
+	* STM32 HRTIM: Fix DAC triggers configuration, Add missing master timer
+	  logic, enable DAC triggering.  From Mateusz Szafoni (2017-08-27).
+	* STM32F33: missing SYSCFG CFGR3 definitions.  From Mateusz Szafoni
+	  (2017-08-27).
+	* STM32 DAC: support external triggering for DMA transfer.  From
+	  Mateusz Szafoni (2017-08-27).
+	* ARM: Add support for STM32F433RC.  From Alan Carvalho de Assis
+	  (2017-08-27).
+	* STM32L4 RCC:  Enable ADC clock source.  From Juha Niskanen
+	  (2017-08-28).
+	* drivers: analog: adc:  Add poll support.  From Juha Niskanen
+	  (2017-08-28).
+	* STM32, STM32L4, STM32F7 ADC: fix channel 18 sample time.  Frpm Juha
+	  Niskanen (2017-08-28).
+	* STM32L4 ADC: implement peripheral.  From Juha Niskanen (2017-08-28).
+	* work_queue() must cancel existing work prior to queuing new work,
+	  otherwise the work queue list structure can become corrupted.
+	  Problem noted by Pascal Speck (2017-08-28).
+	* STM32 HRTIM:  Add DMA configuration. From Mateusz Szafoni
+	  (2017-08-28).
+	* Networking:  Move TCP specific files from inet/ to tcp/.  There is
+	  another TCP-specific logic in inet/ that should be moved sometime,
+	  but those are more entangled (2017-08-29).
+	* Networking:  TCP disconnection callbacks are not retained in a list.
+	  This will support mutiple callbacks per lower-level TCP connection
+	  structure.  That is necessary for the cae where a socket is dup'ed
+	  and shares the same lower-level connection structure.  NOTE:  There
+	  still needs to be a call to tcp_start_monitor() when the socket is
+	  dup'ed (2017-08-29).
+	* Networking:  Start the network monitor for a socket when a TCP socket
+	  is dup'ed (2017-08-29).
+	* Networking:  A placeholder for some missing logic in the previous
+	  change related to monitoring network status for dup'ed sockets.  If
+	  one of the dup'ed socket's is closed, then network monitor resources
+	  associated with that one socket must be recovered.  Also, in the
+	  event that socket is being used on one thread, but then closed on
+	  another, any threads waiting for events from the socket should be
+	  informed of the closure.  That latter requirement is not implemented
+	  because current data structures do not support it (2017-08-29).
+	* Networking:  Clean up some naming that has bothered me for a long
+	  time... There are no interrupts and no interrupt handlers in the
+	  network.  There are events and event handler (there used to to be
+	  interrupt logic in there years ago but that is long, long gone)
+	  (2017-08-29).
+	* configs: update STM32L4 configs for ADC changes.  From Juha Niskanen
+	  (2017-08-30).
+	* configs: update STM32L4 configs for ADC changes.  From Juha Niskanen
+	  (2017-08-30).
+	* Porting Guide:  Add usage tip for reading CAN messages from the CAN
+	  driver without losing message (2017-08-30).
+	* Networking:  socket dup() conditional operation was missing the test
+	  for the condition (2017-08-30).
+	* ARMv7-M syscall logic:  Clear bit 0 in PC settings.  Bit 0 is the
+	  thumb mode indication and should not be set in the PC.  This extra
+	  bit has not caused problems in the past, but seeing it set in the PC
+	  is unnerving (2017-08-30).
+	* Networking:  Fix a race condition.  The accept() operation is
+	  performed with the network locked.  However, the network is unlocked
+	  BEFORE the connected state is set.  Therefore, a context switch may
+	  occur and the socket may no longer be connected when it is marked so.
+	  Noted by Pascal Speck (2017-08-31).
+	* Work queue:  In a recent change for a problem noted by Pascal Speck,
+	  it was noted (again by Pascal Speck) that the cancellation of
+	  existing work and replacement with new work must be atomic.  Thanks,
+	  Pascal (2017-08-31).
+	* LPC43xx: Modify up_allocate_(k)heap() to support PROTECTED mode.
+	  From Alan Carvalho de Assis (2017-08-31).
+	* STM32 Timer:  Add the set counter function for stm32 timers.  From
+	  Sergey Ustinov (2017-08-31).
+	* configs/Bambino: Add protected mode configuration to Bambino board.
+	  From Alan Carvalho de Assis (2017-08-31).
+	* STM32L4 DAC: add option for routing DAC output to ADC.  Actually
+	  write something to the DAC DMA buffer.  From Juha Niskanen
+	  (2017-08-29).
+	* STM32L4 DAC: separate DMA buffer configuration for channels. From
+	  Juha Niskanen (2017-08-29).
+	* STM32L4 DAC: Fix naming so that DAC1 and DAC2 always refer to
+	  channels 1 and 2.  User should not be bothered by details like how
+	  many IP blocks there are. As no current STM32L4 has second DAC block
+	  (channel 3), remove support for such hypothetical hardware. DMA
+	  channels corrected.  From Juha Niskanen (2017-09-01).
+	* configs/nucleo-l496zg: add DAC and missing TIM frequencies.  From
+	  Juha Niskanen (2017-09-01).
+	* Networking: net_timedwait() and net_lockedwait() no longer return
+	  errors via errno but returned negated errno values like other
+	  internal OS functions (2017-09-01).
+	* Networking: Fix net_lock returning ERROR when instead of real error
+	  code on failure.  From Jussi Kivilinna (2017-09-01).
+	* net/local:  Fix server lc_waitsem overflow.  From Jussi Kivilinna
+	  (2017-09-01).
+	* drivers/bch:  Add poll support.  From Jussi Kivilinna (2017-09-01).
+	* STM32 F7: do not enable read-modify-write on DTCM.  "AN 4667 -
+	  STM32F7 Series system architecture and performance" recommends to
+	  disable read-modify-write on DTCM: "If the DTCM-RAM is used as data
+	  location and the variables used are byte or/and halfword types, since
+	  there is no ECC management in this RAM on the STM32F7 Series, it is
+	  recommended to disable the read-modify-write of the DTCM-RAM in the
+	  DTCM interface (inthe DTCMCR register) to increase the performance."
+	  From Jussi Kivilinna (2017-09-01).
+	* Networking:  IGMP: Remove special support for interrupt level
+	  processing (there is none) and fix some timer cancellation logic.  In
+	  many files, correct comments.  There is no interrupt level processing
+	  in the networking layer (2017-09-02).
+	* stm32_dac.c: fix compilation when DMA disabled for channel.  From
+	  Mateusz Szafoni (2017-09-02).
+	* Extend the RTC framework with an alarm read ioctl (RTC_RD_ALARM).
+	  Through it consumer could get configuration settings about previously
+	  scheduled hardware alarms (active status, hours, minutes, seconds).
+	  From Boris Astardzhiev (2017-09-03).
+	* STM32 F7: Port Boris Astardzhiev's RTC change for STM32L4 to STM32F7
+	  (2017-09-03).
+	* STM32: Port Boris Astardzhiev's RTC change for STM32L4 to STM32
+	  (2017-09-03).
+	* Kinetis: Unverified implementation of the alarm read function.
+	  Pretty simple because the Kinetis RTC is just a 1Hz counter
+	  (2017-09-03).
+	* STM32 HRTIM: add burst mode configuration, rename some definitions.
+	  From Mateusz Szafoni (2017-09-03).
+	* Update net_timedwait() and net_lockedwait() call sites to handle
+	  negated errno in return value.  From Jussi Kivilinna (2017-09-04).
+	* stm32f7:  Add new configuration option for enabling flash ART
+	  Accelerator and flash prefetcher.  From Jussi Kivilinna
+	  (2017-09-04).
+	* Simulation:  Fix building 32-bit simulation on 32-bit X86.  From
+	  Jussi Kivilinna (2017-09-04).
+	* waitpid():  Corrects two problems when
+	  CONFIG_SCHED_HAVE_PARENT+CONFIG_SCHED_CHILD_STATUS are enabled:  (1)
+	  Was erroring out if the waited for task had already exited, and (2)
+	  was not freeing resources when a wait was completed.  From Boris
+	  Astardzhiev (2017-09-04).
+
+7.23 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>
