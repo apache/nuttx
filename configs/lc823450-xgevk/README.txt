@@ -12,7 +12,7 @@ LC823450 related documents are available at
   http://www.onsemi.com/PowerSolutions/supportDoc.do?type=AppNotes&rpn=LC823450
 
 This port is intended to test LC823450 features including SMP.
-Supported peripherals are UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD.
+Supported peripherals are UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, and USB device.
 
 Settings
 ^^^^^^^^

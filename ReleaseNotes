@@ -14611,9 +14611,9 @@ Additional new features and extended functionality:
 
     * Wireless Networking/Wireless Drivers:
 
-      - IEEE 802.15.4 MAC / MRF234j60 Driver:  Extensive updates for
+      - IEEE 802.15.4 MAC / MRF24J60 Driver:  Extensive updates for
         association/beacon-enabled networks.  From Anthony Merlino.
-      - IEEE 802.15.4 MAC / MRF234j60 Driver:  Hook in setdevmode from newly
+      - IEEE 802.15.4 MAC / MRF24J60 Driver:  Hook in setdevmode from newly
         added radio attribute setting.  From Anthony Merlino.
       - IEEE 802.15.4 MAC: Supports get request for coordinator address.  From
         Anthony Merlino.
@@ -14839,9 +14839,9 @@ Additional new features and extended functionality:
         Juha Niskanen.
       - STM32 L4 ADC:  Implement peripheral.  From Juha Niskanen.
       - STM32 F7:  Definitions for I2C4, SDMMC2.  Adapted RAM start / size to
+        internal SRAM.  From Titus von Boxberg.
       - STM32 F7 I2C4:  I2C4_SDA can also be on GPIO PB7.  From Titus von
         Boxberg.
-        internal SRAM.  From Titus von Boxberg.
       - STM32 F7 LTDC:  Option for DSI output, inconsistency: the stm32f746
         does not feature a DSI interface.  compilable with LTDC_INTERFACE and
         LTDC_USE_DSI.  From Titus von Boxberg.
