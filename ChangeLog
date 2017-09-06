@@ -15786,8 +15786,6 @@
 	  Niskanen (2017-06-26).
 	* stm32f33xxx_rcc: cleanup + move hrtim clock source selection.  fix
 	  typo in stm32f33xxx_rcc.h.  From Mateusz Szafoni (2017-06-26).
-	* STM32L4 serial: Allow configuring Rx DMA buffer size.  From Juha
-	  Niskanen (2017-06-26).
 	* 6LoWPAN:  Fix duplicate and bad memcpy in loopback driver
 	  (2017-06-26).
 	* Beacon logic:  Damage control.  Looks like something went wrong with
@@ -15824,7 +15822,7 @@
 	  and hub roles in a star topology.  Fix various things that broke when
 	  IPv6 forwarding was enabled (2017-06-29).
 	* 6LowPan:  Change how the destination node address is handled in the
-	  start endpoint configuration.   When the star endpoint sent the IPv6
+	  star endpoint configuration.   When the star endpoint sent the IPv6
 	  destination address, the HC06 compression logic elided the address --
 	  meaning that it could be reconstructed by the recipient based on the
 	  receiver's assigned short address.  However, when intercepted by the
@@ -16456,7 +16454,7 @@
 	* STM32F7: Some STM32F7 builds failed in build testing due to undefined
 	  STM32_SRAM1_BASE.  I think that is because stm32_allocateheap.c was
 	  not including chip/stm32_memorymap.h (2017-08-13).
-	* Fix ESP32 gpio enable reg and default UART pin. Vodify default uart
+	* Fix ESP32 gpio enable reg and default UART pin. Modify default uart
 	  pin for ESP-WROOM-32. Fix gpio enable reg.  From Sungki Kim
 	  (2017-08-13).
 	* stm32/stm32f0:  Fix some funny shifts in DAC header files.  From Juha
@@ -16496,7 +16494,7 @@
 	  adjacent memory if the buffer and the bufflen, are not on
 	  ARMV7M_DCACHE_LINESIZE boundaries.  From David Sidrane (2017-08-17).
 	* STM32 F7: SDMMC add dcache alignment check in dma{recv|send}setup.
-	  In the case where CONFIG_SDIO_PREFLIGHT is not used and
+	  In the case where CONFIG_SDIO_PREFLIGHT is not used.
 	* drivers/sensors: Add support to HC-SR04 distance sensor.  From Alan
 	  Carvalho de Assis (2017-08-17).
 	* PF_IEEE802154 address family:  With this commit PF_IEEE802154 address
