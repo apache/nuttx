@@ -1530,12 +1530,64 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
 static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  uint32_t regval;
+  uint32_t tmp;
   int ret = OK;
 
   switch (cmd)
     {
       case ANIOC_TRIGGER:
         adc_startconv(priv, true);
+        break;
+
+      case ANIOC_WDOG_UPPER: /* Set watchdog upper threshold */
+        {
+          regval = adc_getreg(priv, STM32L4_ADC_TR1_OFFSET);
+
+          /* Verify new upper threshold greater than lower threshold */
+
+          tmp = (regval & ADC_TR1_LT_MASK) >> ADC_TR1_LT_SHIFT;
+          if (arg < tmp)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* Set the watchdog threshold register */
+
+          regval &= ~ADC_TR1_HT_MASK;
+          regval |= ((arg << ADC_TR1_HT_SHIFT) & ADC_TR1_HT_MASK);
+          adc_putreg(priv, STM32L4_ADC_TR1_OFFSET, regval);
+
+          /* Ensure analog watchdog is enabled */
+
+          adc_wdog_enable(priv);
+        }
+        break;
+
+      case ANIOC_WDOG_LOWER: /* Set watchdog lower threshold */
+        {
+          regval = adc_getreg(priv, STM32L4_ADC_TR1_OFFSET);
+
+          /* Verify new lower threshold less than upper threshold */
+
+          tmp = (regval & ADC_TR1_HT_MASK) >> ADC_TR1_HT_SHIFT;
+          if (arg > tmp)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* Set the watchdog threshold register */
+
+          regval &= ~ADC_TR1_LT_MASK;
+          regval |= ((arg << ADC_TR1_LT_SHIFT) & ADC_TR1_LT_MASK);
+          adc_putreg(priv, STM32L4_ADC_TR1_OFFSET, regval);
+
+          /* Ensure analog watchdog is enabled */
+
+          adc_wdog_enable(priv);
+        }
         break;
 
       default:

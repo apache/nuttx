@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/ioctl.h
+ * include/nuttx/sensors/ioctl.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

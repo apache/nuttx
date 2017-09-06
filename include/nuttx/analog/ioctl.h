@@ -58,9 +58,15 @@
 #define ANIOC_TRIGGER     _ANIOC(0x0001)  /* Trigger one conversion
                                            * IN: None
                                            * OUT: None */
+#define ANIOC_WDOG_UPPER  _ANIOC(0x0002)  /* Set upper threshold for watchdog
+                                           * IN: Threshold value
+                                           * OUT: None */
+#define ANIOC_WDOG_LOWER  _ANIOC(0x0003)  /* Set lower threshold for watchdog
+                                           * IN: Threshold value
+                                           * OUT: None */
 
 #define AN_FIRST           0x0001         /* First common command */
-#define AN_NCMDS           1              /* Two common commands */
+#define AN_NCMDS           3              /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half QE driver to the lower-half QE driver via the ioctl()
@@ -69,7 +75,7 @@
  * command numbers from overlapping.
  */
 
-/* See include/nuttx/sensors/ads1242.h */
+/* See include/nuttx/analog/ads1242.h */
 
 #define AN_ADS2142_FIRST   (AN_FIRST + AN_NCMDS)
 #define AN_ADS2142_NCMDS   6
