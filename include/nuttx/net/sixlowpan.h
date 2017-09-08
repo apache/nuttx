@@ -182,17 +182,25 @@
 #define SIXLOWPAN_IPHC_CID                0x80  /* Bit 8: Context identifier extension */
 #define SIXLOWPAN_IPHC_SAC                0x40  /* Bit 9: Source address compression */
 #define SIXLOWPAN_IPHC_SAM_MASK           0x30  /* Bits 10-11: Source address mode */
-#  define SIXLOWPAN_IPHC_SAM_128          0x00  /*   128-bits */
-#  define SIXLOWPAN_IPHC_SAM_64           0x10  /*   64-bits */
-#  define SIXLOWPAN_IPHC_SAM_16           0x20  /*   16-bits */
-#  define SIXLOWPAN_IPHC_SAM_0            0x30  /*   0-bits */
+#  define SIXLOWPAN_IPHC_SAM_128          0x00  /*   128-bits   */
+#  define SIXLOWPAN_IPHC_SAM_64           0x10  /*   64-bits    */
+#  define SIXLOWPAN_IPHC_SAM_16           0x20  /*   16-bits    */
+#  define SIXLOWPAN_IPHC_SAM_0            0x30  /*   0-bits     */
 #define SIXLOWPAN_IPHC_M                  0x08  /* Bit 12: Multicast compression */
 #define SIXLOWPAN_IPHC_DAC                0x04  /* Bit 13: Destination address compression */
 #define SIXLOWPAN_IPHC_DAM_MASK           0x03  /* Bits 14-15: Destination address mode */
-#  define SIXLOWPAN_IPHC_DAM_128          0x00  /*   128-bits */
-#  define SIXLOWPAN_IPHC_DAM_64           0x01  /*   64-bits */
-#  define SIXLOWPAN_IPHC_DAM_16           0x02  /*   16-bits */
-#  define SIXLOWPAN_IPHC_DAM_0            0x03  /*   0-bits */
+                                                /* M=0 DAC=0/1: */
+#  define SIXLOWPAN_IPHC_DAM_128          0x00  /*   128-bits   */
+#  define SIXLOWPAN_IPHC_DAM_64           0x01  /*   64-bits    */
+#  define SIXLOWPAN_IPHC_DAM_16           0x02  /*   16-bits    */
+#  define SIXLOWPAN_IPHC_DAM_0            0x03  /*   0-bits     */
+                                                /* M=1 DAC=0:   */
+#  define SIXLOWPAN_IPHC_MDAM_128         0x00  /*   128-bits   */
+#  define SIXLOWPAN_IPHC_MDAM_48          0x01  /*   48-bits: ffxx::00xx:xxxx:xxxx  */
+#  define SIXLOWPAN_IPHC_MDAM_32          0x02  /*   16-bits: ffxx::00xx:xxxx  */
+#  define SIXLOWPAN_IPHC_MDAM_8           0x03  /*   8-bits:  ff02::00xx */
+                                                /* M=1 DAC=1:   */
+#  define SIXLOWPAN_IPHC_MDDAM_48         0x00  /*   48-bits: ffxx:xxll:pppp:pppp:pppp:pppp:xxxx:xxxx */
 
 #define SIXLOWPAN_IPHC_SAM_BIT            4
 #define SIXLOWPAN_IPHC_DAM_BIT            0

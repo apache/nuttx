@@ -844,7 +844,7 @@ pf_ieee802154
 pktradio
 
   This configuration is identical to the 'sixlowpan configuration
-  described below EXCEPT that is uses the genericl packet radio
+  described below EXCEPT that is uses the generic packet radio
   loopback network device.
 
 sixlowpan
