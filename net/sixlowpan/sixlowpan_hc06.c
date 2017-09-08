@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_hc06.c
- * 6lowpan HC06 implementation (draft-ietf-6lowpan-hc-06)
+ * 6lowpan HC06 implementation (draft-ietf-6lowpan-hc-06, updated to RFC
+ * 6282)
  *
  *   Copyright (C) 2017, Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -611,8 +612,15 @@ void sixlowpan_hc06_initialize(void)
  *   This function is called by the 6lowpan code to create a compressed
  *   6lowpan packet in the frame buffer from a full IPv6 packet.
  *
- *     HC-06 (draft-ietf-6lowpan-hc, version 6)
- *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06
+ *     HC-06:
+ *
+ *     Originally draft-ietf-6lowpan-hc, version 6:
+ *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06,
+ *
+ *   Updated to:
+ *
+ *     RFC 6282:
+ *     https://tools.ietf.org/html/rfc6282
  *
  *   NOTE: sixlowpan_compresshdr_hc06() does not support ISA100_UDP header
  *   compression

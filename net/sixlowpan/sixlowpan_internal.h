@@ -424,8 +424,15 @@ void sixlowpan_hc06_initialize(void);
  *   6lowpan packet in the packetbuf buffer from a full IPv6 packet in the
  *   uip_buf buffer.
  *
- *     HC-06 (draft-ietf-6lowpan-hc, version 6)
- *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06
+ *     HC-06:
+ *
+ *     Originally draft-ietf-6lowpan-hc, version 6:
+ *     http://tools.ietf.org/html/draft-ietf-6lowpan-hc-06,
+ *
+ *   Updated to:
+ *
+ *     RFC 6282:
+ *     https://tools.ietf.org/html/rfc6282
  *
  *   NOTE: sixlowpan_compresshdr_hc06() does not support ISA100_UDP header
  *   compression

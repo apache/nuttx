@@ -1,6 +1,6 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_input.c
- * 6LoWPAN implementation (RFC4944 and draft-ietf-6LoWPAN-hc-06)
+ * 6LoWPAN implementation (RFC 4944 and RFC 6282)
  *
  *   Copyright (C) 2017, Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
