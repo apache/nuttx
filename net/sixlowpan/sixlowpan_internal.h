@@ -372,7 +372,7 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
  *   ipv6    - IPv6 header followed by TCP or UDP header.
  *   buf     - Beginning of the packet packet to send (with IPv6 + protocol
  *             headers)
- *   buflen  - Length of data to send (include IPv6 and protocol headers)
+ *   buflen  - Length of data to send (includes IPv6 and protocol headers)
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:
