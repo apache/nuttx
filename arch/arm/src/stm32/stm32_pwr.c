@@ -105,12 +105,6 @@ static inline void stm32_pwr_modifyreg32(uint8_t offset, uint32_t clearbits,
   modifyreg32(STM32_PWR_BASE + (uint32_t)offset, clearbits, setbits);
 }
 
-static inline void stm32_pwr_modifyreg16(uint8_t offset, uint32_t clearbits,
-                                         uint32_t setbits)
-{
-  modifyreg16(STM32_PWR_BASE + (uint32_t)offset, clearbits, setbits);
-}
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -314,13 +308,13 @@ int stm32_pwr_enablewkup(enum stm32_pwr_wupin_e wupin, bool wupon)
     {
       /* Enable the wakeup pin by setting the bit in the CSR. */
 
-      stm32_pwr_modifyreg16(STM32_PWR_CSR_OFFSET, 0, pinmask);
+      stm32_pwr_modifyreg32(STM32_PWR_CSR_OFFSET, 0, pinmask);
     }
   else
     {
       /* Disable the wakeup pin by clearing the bit in the CSR. */
 
-      stm32_pwr_modifyreg16(STM32_PWR_CSR_OFFSET, pinmask, 0);
+      stm32_pwr_modifyreg32(STM32_PWR_CSR_OFFSET, pinmask, 0);
     }
 
   return OK;

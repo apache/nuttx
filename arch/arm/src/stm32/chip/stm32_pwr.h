@@ -166,8 +166,8 @@
 
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
     defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
-#  define PWR_CSR_ODRDY        (1 << 16) /* Over Drive generator ready */
-#  define PWR_CSR_ODSWRDY      (1 << 17) /* Over Drive Switch ready */
+#  define PWR_CSR_ODRDY        (1 << 16) /* Git 16: Over Drive generator ready */
+#  define PWR_CSR_ODSWRDY      (1 << 17) /* Bit 17: Over Drive Switch ready */
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_PWR_H */
