@@ -624,3 +624,11 @@ Configuration sub-directories
         from the receiver colliding with frames from the sender.
 
         Needs more investigation.
+
+      2017-09-08:  The HC06 all nodes address decode problem mentioned on
+        2017-08-08 has been corrected.  The behavior in the test case has
+        not yet been reverified.  I suspect that there made to some radio
+        configuration problems that are causing the RX FIFO errors and the
+        strange broadcast behavior.  I recently got an STEVAL-IDS001V5M
+        sniffer that should tell me what is going on.  But I have not yet
+        had sufficient free time to continue this testing.
