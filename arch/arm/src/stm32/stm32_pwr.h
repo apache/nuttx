@@ -64,6 +64,21 @@ extern "C"
 #endif
 
 /************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/* Identify MCU-specific wakeup pin.  Different STM32 parts support differing
+ * numbers of wakeup pins.
+ */
+
+enum stm32_pwr_wupin_e
+{
+ PWR_WUPIN_1 = 0,  /* Wake-up pin 1 (all parts) */
+ PWR_WUPIN_2,      /* Wake-up pin 2 */
+ PWR_WUPIN_3       /* Wake-up pin 3 */
+};
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -126,6 +141,25 @@ void stm32_pwr_initbkp(bool writable);
  ************************************************************************************/
 
 void stm32_pwr_enablebkp(bool writable);
+
+/************************************************************************************
+ * Name: stm32_pwr_enablewkup
+ *
+ * Description:
+ *   Enables the WKUP pin.
+ *
+ * Input Parameters:
+ *   wupin - Selects the WKUP pin to enable/disable
+ *   wupon - state to set it to
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned on any
+ *   failure.  The only cause of failure is if the selected MCU does not support
+ *   the requested wakeup pin.
+ *
+ ************************************************************************************/
+
+int stm32_pwr_enablewkup(enum stm32_pwr_wupin_e wupin, bool wupon);
 
 /************************************************************************************
  * Name: stm32_pwr_enablebreg

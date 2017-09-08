@@ -58,26 +58,57 @@
  * Private Data
  ************************************************************************************/
 
+/* Wakeup Pin Definitions:  See chip/stm32_pwr.h */
+
+#undef HAVE_PWR_WKUP2
+#undef HAVE_PWR_WKUP3
+
+#if defined(CONFIG_STM32_STM32F30XX)
+#  define HAVE_PWR_WKUP2  1
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX)
+#  define HAVE_PWR_WKUP2  1
+#  define HAVE_PWR_WKUP3  1
+#endif
+
+/* Thr parts only support a single Wake-up pin do not include the numeric suffix
+ * in the naming.
+ */
+
+#ifndef PWR_CSR_EWUP1
+#  define PWR_CSR_EWUP1 PWR_CSR_EWUP
+#endif
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
 static uint16_t g_bkp_writable_counter = 0;
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 
-static inline uint32_t stm32_pwr_getreg(uint8_t offset)
+static inline uint32_t stm32_pwr_getreg32(uint8_t offset)
 {
   return getreg32(STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32_pwr_putreg(uint8_t offset, uint32_t value)
+static inline void stm32_pwr_putreg32(uint8_t offset, uint32_t value)
 {
   putreg32(value, STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32_pwr_modifyreg(uint8_t offset, uint32_t clearbits,
-                                       uint32_t setbits)
+static inline void stm32_pwr_modifyreg32(uint8_t offset, uint32_t clearbits,
+                                         uint32_t setbits)
 {
   modifyreg32(STM32_PWR_BASE + (uint32_t)offset, clearbits, setbits);
+}
+
+static inline void stm32_pwr_modifyreg16(uint8_t offset, uint32_t clearbits,
+                                         uint32_t setbits)
+{
+  modifyreg16(STM32_PWR_BASE + (uint32_t)offset, clearbits, setbits);
 }
 
 /************************************************************************************
@@ -118,7 +149,7 @@ void stm32_pwr_enablesdadc(uint8_t sdadc)
         break;
     }
 
-  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, setbits);
+  stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, 0, setbits);
 
 }
 #endif
@@ -147,9 +178,9 @@ void stm32_pwr_initbkp(bool writable)
 
   /* Make the HW not writable */
 
-  regval = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval = stm32_pwr_getreg32(STM32_PWR_CR_OFFSET);
   regval &= ~PWR_CR_DBP;
-  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+  stm32_pwr_putreg32(STM32_PWR_CR_OFFSET, regval);
 
   /* Make the reference count agree */
 
@@ -187,7 +218,7 @@ void stm32_pwr_enablebkp(bool writable)
 
   /* Get the current state of the STM32 PWR control register */
 
-  regval      = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval      = stm32_pwr_getreg32(STM32_PWR_CR_OFFSET);
   waswritable = ((regval & PWR_CR_DBP) != 0);
 
   if (writable)
@@ -207,14 +238,14 @@ void stm32_pwr_enablebkp(bool writable)
       /* Disable backup domain access */
 
       regval &= ~PWR_CR_DBP;
-      stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+      stm32_pwr_putreg32(STM32_PWR_CR_OFFSET, regval);
     }
   else if (!waswritable && g_bkp_writable_counter > 0)
     {
       /* Enable backup domain access */
 
       regval |= PWR_CR_DBP;
-      stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+      stm32_pwr_putreg32(STM32_PWR_CR_OFFSET, regval);
 
       wait = true;
     }
@@ -227,6 +258,72 @@ void stm32_pwr_enablebkp(bool writable)
 
       up_udelay(4);
     }
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_enablewkup
+ *
+ * Description:
+ *   Enables the WKUP pin.
+ *
+ * Input Parameters:
+ *   wupin - Selects the WKUP pin to enable/disable
+ *   wupon - state to set it to
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned on any
+ *   failure.  The only cause of failure is if the selected MCU does not support
+ *   the requested wakeup pin.
+ *
+ ************************************************************************************/
+
+int stm32_pwr_enablewkup(enum stm32_pwr_wupin_e wupin, bool wupon)
+{
+  uint16_t pinmask;
+
+  /* Select the PWR_CSR bit associated with the requested wakeup pin */
+
+  switch (wupin)
+    {
+      case PWR_WUPIN_1:    /* Wake-up pin 1 (all parts) */
+        pinmask = PWR_CSR_EWUP1;
+        break;
+
+#ifdef HAVE_PWR_WKUP2
+      case PWR_WUPIN_2:    /* Wake-up pin 2 */
+        pinmask = PWR_CSR_EWUP2;
+        break;
+#endif
+
+#ifdef HAVE_PWR_WKUP3
+      case PWR_WUPIN_3:     /* Wake-up pin 3 */
+        pinmask = PWR_CSR_EWUP3;
+        break;
+#endif
+
+      default:
+        return -EINVAL;
+    }
+
+  /* Set/clear the the wakeup pin enable bit in the CSR.  This must be done
+   * within a critical section because the CSR is shared with other functions
+   * that may be running concurrently on another thread.
+   */
+
+  if (wupon)
+    {
+      /* Enable the wakeup pin by setting the bit in the CSR. */
+
+      stm32_pwr_modifyreg16(STM32_PWR_CSR_OFFSET, 0, pinmask);
+    }
+  else
+    {
+      /* Disable the wakeup pin by clearing the bit in the CSR. */
+
+      stm32_pwr_modifyreg16(STM32_PWR_CSR_OFFSET, pinmask, 0);
+    }
+
+  return OK;
 }
 
 /************************************************************************************
@@ -253,14 +350,14 @@ void stm32_pwr_enablebreg(bool regon)
 {
   uint16_t regval;
 
-  regval  = stm32_pwr_getreg(STM32_PWR_CSR_OFFSET);
+  regval  = stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET);
   regval &= ~PWR_CSR_BRE;
   regval |= regon ? PWR_CSR_BRE : 0;
-  stm32_pwr_putreg(STM32_PWR_CSR_OFFSET, regval);
+  stm32_pwr_putreg32(STM32_PWR_CSR_OFFSET, regval);
 
   if (regon)
     {
-      while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_BRR) == 0);
+      while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_BRR) == 0);
     }
 }
 #endif
@@ -297,14 +394,14 @@ void stm32_pwr_setvos(uint16_t vos)
    * 4. Poll VOSF bit of in PWR_CSR register. Wait until it is reset to 0.
    */
 
-  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
+  while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
 
-  regval  = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval  = stm32_pwr_getreg32(STM32_PWR_CR_OFFSET);
   regval &= ~PWR_CR_VOS_MASK;
   regval |= (vos & PWR_CR_VOS_MASK);
-  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+  stm32_pwr_putreg32(STM32_PWR_CR_OFFSET, regval);
 
-  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
+  while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
 }
 
 /************************************************************************************
@@ -332,13 +429,13 @@ void stm32_pwr_setpvd(uint16_t pls)
 
   /* Set PLS */
 
-  regval = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
+  regval = stm32_pwr_getreg32(STM32_PWR_CR_OFFSET);
   regval &= ~PWR_CR_PLS_MASK;
   regval |= (pls & PWR_CR_PLS_MASK);
 
   /* Write value to register */
 
-  stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
+  stm32_pwr_putreg32(STM32_PWR_CR_OFFSET, regval);
 }
 
 /************************************************************************************
@@ -353,7 +450,7 @@ void stm32_pwr_enablepvd(void)
 {
   /* Enable PVD by setting the PVDE bit in PWR_CR register. */
 
-  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_PVDE);
+  stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, 0, PWR_CR_PVDE);
 }
 
 /************************************************************************************
@@ -368,7 +465,7 @@ void stm32_pwr_disablepvd(void)
 {
   /* Disable PVD by clearing the PVDE bit in PWR_CR register. */
 
-  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, PWR_CR_PVDE, 0);
+  stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, PWR_CR_PVDE, 0);
 }
 
 #endif /* CONFIG_STM32_ENERGYLITE */
@@ -391,24 +488,24 @@ void stm32_pwr_enableoverdrive(bool state)
 
   if (state)
     {
-      stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_ODEN);
+      stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, 0, PWR_CR_ODEN);
     }
   else
     {
-      stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, PWR_CR_ODEN, 0);
+      stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, PWR_CR_ODEN, 0);
     }
 
   /* Wait for overdrive ready */
 
-  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_ODRDY) == 0);
+  while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_ODRDY) == 0);
 
   /* Set ODSWEN to switch to this new state*/
 
-  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_ODSWEN);
+  stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, 0, PWR_CR_ODSWEN);
 
   /* Wait for completion */
 
-  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_ODSWRDY) == 0);
+  while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_ODSWRDY) == 0);
 }
 #endif
 
