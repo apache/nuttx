@@ -94,7 +94,7 @@
  *        SEM_VALUE_MAX.
  *
  * Return Value:
- *   A pointer to sem_t or -1 (ERROR) if unsuccessful.
+ *   A pointer to sem_t or SEM_FAILED if unsuccessful.
  *
  * Assumptions:
  *
@@ -257,7 +257,7 @@ errout_with_lock:
   RELEASE_SEARCH(&desc);
   set_errno(errcode);
   sched_unlock();
-  return (FAR sem_t *)ERROR;
+  return SEM_FAILED;
 }
 
 #endif /* CONFIG_FS_NAMED_SEMAPHORES */

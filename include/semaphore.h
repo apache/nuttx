@@ -49,6 +49,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Value returned by sem_open() in the event of a failure. */
+
+#define SEM_FAILED ((FAR sem_t *)NULL)
+
 /* Bit definitions for the struct sem_s flags field */
 
 #define PRIOINHERIT_FLAGS_DISABLE (1 << 0)  /* Bit 0: Priority inheritance

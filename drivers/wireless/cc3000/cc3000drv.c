@@ -192,7 +192,7 @@ static void *unsoliced_thread_func(void *parameter)
   DEBUGASSERT(SEM_NAMELEN == QUEUE_NAMELEN);
   snprintf(buff, SEM_NAMELEN, SEM_FORMAT, minor);
   spiconf.done = sem_open(buff, O_RDONLY);
-  DEBUGASSERT(spiconf.done != (sem_t *)-1);
+  DEBUGASSERT(spiconf.done != SEM_FAILED);
 
   sem_post(&spiconf.unsoliced_thread_wakesem);
 
