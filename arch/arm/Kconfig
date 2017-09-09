@@ -315,18 +315,75 @@ endchoice
 config ARCH_ARM7TDMI
 	bool
 	default n
-
-config ARCH_ARM926EJS
-	bool
-	default n
-	select ARCH_HAVE_MMU
-	select ARCH_USE_MMU
+	---help---
+		The Arm7TDMI-S is an excellent workhorse processor capable of a wide
+		array of applications. Traditionally used in mobile handsets, the
+		processor is now broadly in many non-mobile applications.
 
 config ARCH_ARM920T
 	bool
 	default n
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
+	---help---
+		The ARM9 processor family is built around the ARM9TDMI processor and
+		incorporates the 16-bit Thumb instruction set. The ARM9 Thumb family
+		includes the ARM920T and ARM922T cached processor macrocells:
+
+		- Dual 16k caches for applications running Symbian OS, Palm OS,
+		  Linux and Windows CE,
+		- Dual 8k caches for applications running Symbian OS, Palm OS, Linux
+		  and Windows CE Applications
+
+config ARCH_ARM926EJS
+	bool
+	default n
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	---help---
+		Arm926EJ-S is the entry point processor capable of supporting full
+		Operating Systems including Linux, WindowsCE, and Symbian.
+
+		The ARM9E processor family enables single processor solutions for
+		microcontroller, DSP and Java applications. The ARM9E family of
+		products are DSP-enhanced 32-bit RISC processors, for applications
+		requiring a mix of DSP and microcontroller performance. The family
+		includes the ARM926EJ-S, ARM946E-S, ARM966E-S, and ARM968E-S
+		processor macrocells. They include signal processing extensions to
+		enhance 16-bit fixed point performance using a single-cycle 32 x 16
+		multiply-accumulate (MAC) unit, and implement the 16-bit Thumb
+		instruction set. The ARM926EJ-S processor also includes ARM Jazelle
+		technology which enables the direct execution of Java bytecodes in
+		hardware.
+
+config ARCH_ARM1136J
+	bool
+	default n
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	---help---
+		Arm1136J(F)-S is very similar to Arm926EJ-S, but includes an
+		extended pipeline, basic SIMD (Single Instruction Multiple Data)
+		instructions, and improved frequency and performance.
+
+config ARCH_ARM1156T2
+	bool
+	default n
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	---help---
+		Arm1156T2(F)-S is the highest-performance processor in the real-time
+		Classic Arm family.
+
+config ARCH_ARM1176JZ
+	bool
+	default n
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	---help---
+		Arm1176JZ(F)-S is the highest-performance single-core processor in
+		the Classic Arm family. It also introduced TrustZone technology to
+		enable secure execution outside of the reach of malicious code.
 
 config ARCH_CORTEXM0
 	bool
