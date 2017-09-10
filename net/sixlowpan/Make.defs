@@ -41,6 +41,7 @@ ifeq ($(CONFIG_NET_6LOWPAN),y)
 
 NET_CSRCS += sixlowpan_initialize.c sixlowpan_globals.c sixlowpan_utils.c
 NET_CSRCS += sixlowpan_input.c sixlowpan_framer.c sixlowpan_framelist.c
+NET_CSRCS += sixlowpan_reassbuf.c
 
 ifeq ($(CONFIG_NET_TCP),y)
 NET_CSRCS += sixlowpan_tcpsend.c
@@ -66,10 +67,6 @@ endif
 
 ifeq ($(CONFIG_NET_6LOWPAN_COMPRESSION_HC06),y)
 NET_CSRCS += sixlowpan_hc06.c
-endif
-
-ifeq ($(CONFIG_NET_6LOWPAN_FRAG),y)
-NET_CSRCS += sixlowpan_reassbuf.c
 endif
 
 # Include the sixlowpan directory in the build

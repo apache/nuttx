@@ -704,9 +704,7 @@ int sixlowpan_extract_destaddr(FAR struct radio_driver_s *radio,
  *
  ****************************************************************************/
 
-#ifdef  CONFIG_NET_6LOWPAN_FRAG
 void sixlowpan_reass_initialize(void);
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
 /****************************************************************************
  * Name: sixlowpan_reass_allocate
@@ -733,11 +731,9 @@ void sixlowpan_reass_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef  CONFIG_NET_6LOWPAN_FRAG
 FAR struct sixlowpan_reassbuf_s *
   sixlowpan_reass_allocate(uint16_t reasstag,
                            FAR const struct netdev_varaddr_s *fragsrc);
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
 /****************************************************************************
  * Name: sixlowpan_reass_find
@@ -758,11 +754,9 @@ FAR struct sixlowpan_reassbuf_s *
  *
  ****************************************************************************/
 
-#ifdef  CONFIG_NET_6LOWPAN_FRAG
 FAR struct sixlowpan_reassbuf_s *
   sixlowpan_reass_find(uint16_t reasstag,
                        FAR const struct netdev_varaddr_s *fragsrc);
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
 /****************************************************************************
  * Name: sixlowpan_reass_free
@@ -784,9 +778,7 @@ FAR struct sixlowpan_reassbuf_s *
  *
  ****************************************************************************/
 
-#ifdef  CONFIG_NET_6LOWPAN_FRAG
 void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass);
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
 #endif /* CONFIG_NET_6LOWPAN */
 #endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

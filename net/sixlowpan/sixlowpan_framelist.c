@@ -385,11 +385,9 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
   FAR uint8_t *fptr;
   int framer_hdrlen;
   struct netdev_varaddr_s bcastmac;
-#ifdef CONFIG_NET_6LOWPAN_FRAG
   uint16_t pktlen;
   uint16_t paysize;
   uint16_t outlen = 0;
-#endif
   uint8_t protosize;
   int ret;
 
@@ -501,7 +499,6 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
 
   if (buflen > (SIXLOWPAN_FRAMELEN - g_frame_hdrlen - protosize))
     {
-#ifdef CONFIG_NET_6LOWPAN_FRAG
       /* qhead will hold the generated frame list; frames will be
        * added at qtail.
        */
@@ -705,13 +702,6 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
       /* Update the datagram TAG value */
 
       reass->rb_dgramtag++;
-#else
-      nerr("ERROR: Packet too large: %d\n", buflen);
-      nerr("       Cannot to be sent without fragmentation support\n");
-      nerr("       dropping packet\n");
-
-      return -E2BIG;
-#endif
     }
   else
     {

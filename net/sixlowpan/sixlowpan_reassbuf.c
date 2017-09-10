@@ -52,8 +52,6 @@
 
 #include "sixlowpan_internal.h"
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -454,5 +452,3 @@ void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass)
 #endif
     }
 }
-
-#endif /* CONFIG_NET_6LOWPAN_FRAG */

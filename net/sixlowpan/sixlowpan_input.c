@@ -115,11 +115,9 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
 /* This big buffer could be avoided with a little more effort */
 
 static uint8_t g_bitbucket[UNCOMP_MAXHDR];
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -252,24 +250,21 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
 static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
                                    FAR const void *metadata, FAR struct iob_s *iob)
 {
+  FAR struct sixlowpan_reassbuf_s *reass;
+  struct netdev_varaddr_s fragsrc;
   FAR uint8_t *fptr;          /* Convenience pointer to beginning of the frame */
   FAR uint8_t *bptr;          /* Used to redirect uncompressed header to the bitbucket */
   FAR uint8_t *hc1;           /* Convenience pointer to HC1 data */
+  FAR uint8_t *fragptr;       /* Pointer to the fragmentation header */
   uint16_t fragsize  = 0;     /* Size of the IP packet (read from fragment) */
   uint16_t paysize;           /* Size of the data payload */
+  uint16_t fragtag   = 0;     /* Tag of the fragment */
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
+  bool isfrag        = false; /* true: Frame is a fragment */
+  bool isfirstfrag   = false; /* true: Frame is the first fragement of the series */
   int reqsize;                /* Required buffer size */
   int hdrsize;                /* Size of the IEEE802.15.4 header */
   int ret;
-
-#ifdef CONFIG_NET_6LOWPAN_FRAG
-  FAR struct sixlowpan_reassbuf_s *reass;
-  struct netdev_varaddr_s fragsrc;
-  FAR uint8_t *fragptr;       /* Pointer to the fragmentation header */
-  bool isfrag        = false;
-  bool isfirstfrag   = false;
-  uint16_t fragtag   = 0;     /* Tag of the fragment */
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Get a pointer to the payload following the IEEE802.15.4 frame header(s).
    * This size includes both fragmentation and FCF headers.
@@ -287,7 +282,6 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   g_uncomp_hdrlen = 0;
   g_frame_hdrlen  = hdrsize;
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Since we don't support the mesh and broadcast header, the first header
    * we look for is the fragmentation header.  NOTE that g_frame_hdrlen
    * already includes the fragementation header, if presetn.
@@ -420,9 +414,6 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
       bptr  = reass->rb_buf;
       break;
     }
-#else
-  bptr  = radio->r_dev.d_buf;
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Process next dispatch and headers */
 
@@ -460,7 +451,6 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
       goto errout_with_reass;
     }
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Is this the first fragment is a sequence? */
 
   if (isfirstfrag)
@@ -482,7 +472,6 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
       g_uncomp_hdrlen = reass->rb_boffset;
     }
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 
   /* Copy "payload" from the frame buffer to the IEEE802.15.4 MAC driver's
    * packet buffer, d_buf.  If this frame is a first fragment or not part of
@@ -514,7 +503,6 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   memcpy(radio->r_dev.d_buf + g_uncomp_hdrlen + (fragoffset << 3),
          fptr + g_frame_hdrlen, paysize);
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Update reass->rb_accumlen if the frame is a fragment, reass->rb_pktlen
    * otherwise.
    */
@@ -560,17 +548,6 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 errout_with_reass:
   sixlowpan_reass_free(reass);
   return ret;
-
-#else
-  /* Deliver the packet to the IP stack */
-
-  radio->r_dev.d_len = paysize + g_uncomp_hdrlen;
-  return INPUT_COMPLETE;
-
-errout_with_reass:
-  return ret;
-
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 }
 
 /****************************************************************************
@@ -589,9 +566,7 @@ errout_with_reass:
 
 static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
 {
-#ifdef CONFIG_NET_6LOWPAN_FRAG
   FAR struct sixlowpan_reassbuf_s *reass;
-#endif
   int ret;
 
   sixlowpan_dumpbuffer("Incoming packet",
@@ -617,13 +592,11 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
 
   ret = ipv6_input(&radio->r_dev);
 
-#ifdef CONFIG_NET_6LOWPAN_FRAG
   /* Free the reassemby buffer */
 
   reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
   DEBUGASSERT(reass != NULL);
   sixlowpan_reass_free(reass);
-#endif
 
   return ret;
 }

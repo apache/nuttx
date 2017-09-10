@@ -382,7 +382,6 @@ struct sixlowpan_reassbuf_s
 
   FAR struct sixlowpan_reassbuf_s *rb_flink;
 
-#if CONFIG_NET_6LOWPAN_FRAG
   /* Fragmentation is handled frame by frame and requires that certain
    * state information be retained from frame to frame.  That additional
    * information follows the externally visible packet buffer.
@@ -439,7 +438,6 @@ struct sixlowpan_reassbuf_s
    */
 
   systime_t rb_time;
-#endif /* CONFIG_NET_6LOWPAN_FRAG */
 };
 
 /****************************************************************************
