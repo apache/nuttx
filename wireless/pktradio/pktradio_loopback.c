@@ -97,7 +97,7 @@
 
 /* Fake value for MAC header length */
 
-#if CONFIG_NET_6LOWPAN_FRAMELEN > 40
+#if CONFIG_IOB_BUFSIZE > 40
 #  define MAC_HDRLEN   4
 #else
 #  define MAC_HDRLEN   0
@@ -961,8 +961,8 @@ static int lo_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen  = CONFIG_PKTRADIO_ADDRLEN;     /* Length of an address */
-  properties->sp_framelen = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
+  properties->sp_addrlen  = CONFIG_PKTRADIO_ADDRLEN; /* Length of an address */
+  properties->sp_framelen = CONFIG_IOB_BUFSIZE;      /* Fixed frame length */
 
   /* Multicast address */
 

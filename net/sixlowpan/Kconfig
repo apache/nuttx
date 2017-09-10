@@ -37,15 +37,6 @@ config NET_6LOWPAN_REASS_STATIC
 		buffers.  In that case, only static reassembly buffers are available;
 		when those are exhausted, frames that require reassembly will be lost.
 
-config NET_6LOWPAN_FRAMELEN
-	int "Max Radio Frame Size"
-	default 127
-	range 1 999999
-	---help---
-		Wireless devices use a variety of frame sizes.  For IEEE 802.15.4
-		radios, this should be 127 bytes.  However, some IEEE 802.15.4
-		radios may support non-standard frame lengths.
-
 choice
 	prompt "6LoWPAN Compression"
 	default NET_6LOWPAN_COMPRESSION_HC06

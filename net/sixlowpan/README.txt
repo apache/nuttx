@@ -93,9 +93,9 @@ Optimal 6LoWPAN Configuration
 4. To be compressable, port numbers must be in the range 0xf0b0-0xf0bf,
    hexadecimal.  That is 61616-61631 decimal.
 
-5. IOBs: Must be big enough to hold one IEEE802.15.4 frame (CONFIG_NET_6LOWPAN_FRAMELEN,
-   typically 127).  There must be enough IOBs to decompose the largest IPv6
-   packet (CONFIG_NET_6LOWPAN_MTU, default 1294, plus per frame overhead).
+5. IOBs: Must be big enough to hold one IEEE802.15.4 frame (typically 127).
+   There must be enough IOBs to decompose the largest IPv6 packet
+   (CONFIG_NET_6LOWPAN_MTU, default 1294, plus per frame overhead).
 
 Fragmentation Headers
 ---------------------

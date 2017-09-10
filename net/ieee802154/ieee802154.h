@@ -76,13 +76,9 @@
 
 #define IEEE802154_MAC_FCSSIZE  2
 
-/* This, then, is the usable size of the frame...
- * REVISIT: Too many frame length definitions
- */
+/* This, then, is the usable size of the frame... */
 
-#if defined(CONFIG_NET_6LOWPAN_FRAMELEN)
-#  define IEEE802_MAX_FRAMELEN CONFIG_NET_6LOWPAN_FRAMELEN
-#elif defined(CONFIG_NET_IEEE802154_FRAMELEN)
+#if defined(CONFIG_NET_IEEE802154_FRAMELEN)
 #  define IEEE802_MAX_FRAMELEN CONFIG_NET_IEEE802154_FRAMELEN
 #else
 #  define IEEE802_MAX_FRAMELEN IEEE802154_MAC_STDFRAME
