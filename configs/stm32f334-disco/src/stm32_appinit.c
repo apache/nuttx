@@ -96,6 +96,7 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
+#ifndef CONFIG_DRIVERS_POWERLED
 #ifdef HAVE_LEDS
   /* Register the LED driver */
 
@@ -154,6 +155,17 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_hrtim_setup failed: %d\n", ret);
+    }
+#endif
+#endif
+
+#ifdef CONFIG_DRIVERS_POWERLED
+  /* Initialize powerled and register the powerled driver */
+
+  ret = stm32_powerled_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_powerled_setup failed: %d\n", ret);
     }
 #endif
 

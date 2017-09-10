@@ -594,11 +594,11 @@ static int hrtim_tim_dma_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv);
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
-int hrtim_burst_enable(FAR struct hrtim_dev_s *dev, bool state);
-int hrtim_burst_cmp_update(FAR struct hrtim_dev_s *dev, uint16_t cmp);
-int hrtim_burst_per_update(FAR struct hrtim_dev_s *dev, uint16_t per);
-uint16_t hrtim_burst_cmp_get(FAR struct hrtim_dev_s *dev);
-uint16_t hrtim_burst_per_get (FAR struct hrtim_dev_s *dev);
+static int hrtim_burst_enable(FAR struct hrtim_dev_s *dev, bool state);
+static int hrtim_burst_cmp_update(FAR struct hrtim_dev_s *dev, uint16_t cmp);
+static int hrtim_burst_per_update(FAR struct hrtim_dev_s *dev, uint16_t per);
+static uint16_t hrtim_burst_cmp_get(FAR struct hrtim_dev_s *dev);
+static uint16_t hrtim_burst_per_get(FAR struct hrtim_dev_s *dev);
 static int hrtim_burst_config(FAR struct stm32_hrtim_s *priv);
 #endif
 #ifdef CONFIG_STM32_HRTIM_FAULTS
@@ -669,7 +669,7 @@ static struct stm32_hrtim_tim_s g_master =
     /* If MASTER is disabled, we need only MASTER base */
 
 #ifdef CONFIG_STM32_HRTIM_MASTER
-    .pclk  = HRTIM_CLOCK/HRTIM_MASTER_PRESCALER,
+    .pclk  = HRTIM_CLOCK/(HRTIM_MASTER_PRESCALER+1),
     .mode  = HRTIM_MASTER_MODE,
 #  ifdef CONFIG_STM32_HRTIM_MASTER_DAC
     .dac   = HRTIM_MASTER_DAC,
@@ -760,7 +760,7 @@ static struct stm32_hrtim_tim_s g_tima =
   .tim =
   {
     .base  = STM32_HRTIM1_TIMERA_BASE,
-    .pclk  = HRTIM_CLOCK/HRTIM_TIMA_PRESCALER,
+    .pclk  = HRTIM_CLOCK/(HRTIM_TIMA_PRESCALER+1),
     .mode  = HRTIM_TIMA_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMA_DAC
     .dac   = HRTIM_TIMA_DAC,
@@ -851,7 +851,7 @@ static struct stm32_hrtim_tim_s g_timb =
   .tim =
   {
     .base  = STM32_HRTIM1_TIMERB_BASE,
-    .pclk  = HRTIM_CLOCK/HRTIM_TIMB_PRESCALER,
+    .pclk  = HRTIM_CLOCK/(HRTIM_TIMB_PRESCALER+1),
     .mode  = HRTIM_TIMB_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMB_DAC
     .dac   = HRTIM_TIMB_DAC,
@@ -942,7 +942,7 @@ static struct stm32_hrtim_tim_s g_timc =
   .tim =
   {
     .base  = STM32_HRTIM1_TIMERC_BASE,
-    .pclk  = HRTIM_CLOCK/HRTIM_TIMC_PRESCALER,
+    .pclk  = HRTIM_CLOCK/(HRTIM_TIMC_PRESCALER+1),
     .mode  = HRTIM_TIMC_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMC_DAC
     .dac   = HRTIM_TIMC_DAC,
@@ -1033,7 +1033,7 @@ static struct stm32_hrtim_tim_s g_timd =
   .tim =
   {
     .base  = STM32_HRTIM1_TIMERD_BASE,
-    .pclk  = HRTIM_CLOCK/HRTIM_TIMD_PRESCALER,
+    .pclk  = HRTIM_CLOCK/(HRTIM_TIMD_PRESCALER+1),
     .mode  = HRTIM_TIMD_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMD_DAC
     .dac   = HRTIM_TIMD_DAC,
@@ -1124,7 +1124,7 @@ static struct stm32_hrtim_tim_s g_time =
   .tim =
   {
     .base  = STM32_HRTIM1_TIMERE_BASE,
-    .pclk  = HRTIM_CLOCK/HRTIM_TIME_PRESCALER,
+    .pclk  = HRTIM_CLOCK/(HRTIM_TIME_PRESCALER+1),
     .mode  = HRTIM_TIME_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIME_DAC
     .dac   = HRTIM_TIME_DAC,
@@ -2655,7 +2655,7 @@ static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv)
  * Name: hrtim_burst_enable
  ****************************************************************************/
 
-int hrtim_burst_enable(FAR struct hrtim_dev_s *dev, bool state)
+static int hrtim_burst_enable(FAR struct hrtim_dev_s *dev, bool state)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
 
@@ -2679,7 +2679,7 @@ int hrtim_burst_enable(FAR struct hrtim_dev_s *dev, bool state)
  * Name: hrtim_burst_cmp_update
  ****************************************************************************/
 
-int hrtim_burst_cmp_update(FAR struct hrtim_dev_s *dev, uint16_t cmp)
+static int hrtim_burst_cmp_update(FAR struct hrtim_dev_s *dev, uint16_t cmp)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
 
@@ -2692,7 +2692,7 @@ int hrtim_burst_cmp_update(FAR struct hrtim_dev_s *dev, uint16_t cmp)
  * Name: hrtim_burst_per_update
  ****************************************************************************/
 
-int hrtim_burst_per_update(FAR struct hrtim_dev_s *dev, uint16_t per)
+static int hrtim_burst_per_update(FAR struct hrtim_dev_s *dev, uint16_t per)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
 
@@ -2705,7 +2705,7 @@ int hrtim_burst_per_update(FAR struct hrtim_dev_s *dev, uint16_t per)
  * Name: hrtim_burst_cmp_get
  ****************************************************************************/
 
-uint16_t hrtim_burst_cmp_get(FAR struct hrtim_dev_s *dev)
+static uint16_t hrtim_burst_cmp_get(FAR struct hrtim_dev_s *dev)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
 
@@ -2716,7 +2716,7 @@ uint16_t hrtim_burst_cmp_get(FAR struct hrtim_dev_s *dev)
  * Name: hrtim_burst_per_get
  ****************************************************************************/
 
-uint16_t hrtim_burst_per_get(FAR struct hrtim_dev_s *dev)
+static uint16_t hrtim_burst_per_get(FAR struct hrtim_dev_s *dev)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
 

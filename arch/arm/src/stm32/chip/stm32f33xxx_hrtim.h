@@ -1206,7 +1206,7 @@
 /* Common Burst Mode Control Register */
 
 #define HRTIM_BMCR_BME                  (1 << 0) /* Bit 0: Burst Mode Enable */
-#define HRTIM_BMCR_BMOM                 (1 << 0) /* Bit 1: Burst Mode Operating Mode */
+#define HRTIM_BMCR_BMOM                 (1 << 1) /* Bit 1: Burst Mode Operating Mode */
 #define HRTIM_BMCR_BMCLK_SHIFT          2        /* Bits 2-5: Burst Mode Clock Source */
 #define HRTIM_BMCR_BMCLK_MASK           (15 << HRTIM_BMCR_BMCLK_SHIFT)
 #  define HRTIM_BMCR_BMCLK_0            (0 << HRTIM_BMCR_BMCLK_SHIFT) /* 0000: Master Timer Counter Reset/roll-over */

@@ -64,6 +64,18 @@ POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$
 
 endif
 
+# Add powerled support
+
+ifeq ($(CONFIG_DRIVERS_POWERLED),y)
+
+CSRCS += powerled.c
+
+POWER_DEPPATH := --dep-path power
+POWER_VPATH := :power
+POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+
+endif
+
 # Add battery charger drivers
 
 ifeq ($(CONFIG_BATTERY_CHARGER),y)

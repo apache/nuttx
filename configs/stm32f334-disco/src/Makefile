@@ -52,16 +52,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_ADC),y)
-CSRCS += stm32_adc.c
-endif
-
 ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
-endif
-
-ifeq ($(CONFIG_DAC),y)
-CSRCS += stm32_dac.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
@@ -76,16 +68,8 @@ ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif
 
-ifeq ($(CONFIG_HRTIM),y)
-CSRCS += stm32_hrtim.c
-endif
-
-ifeq ($(CONFIG_COMP),y)
-CSRCS += stm32_comp.c
-endif
-
-ifeq ($(CONFIG_OPAMP),y)
-CSRCS += stm32_opamp.c
+ifeq ($(CONFIG_DRIVERS_POWERLED),y)
+CSRCS += stm32_powerled.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

@@ -782,7 +782,7 @@ enum stm32_hrtim_burst_source_e
 
 enum stm32_hrtim_burst_precaler_e
 {
-  HRTIM_BURST_PRESCALER_0     = 0,
+  HRTIM_BURST_PRESCALER_1     = 0,
   HRTIM_BURST_PRESCALER_2     = 1,
   HRTIM_BURST_PRESCALER_4     = 2,
   HRTIM_BURST_PRESCALER_8     = 3,

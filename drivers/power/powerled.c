@@ -1,6 +1,6 @@
 /****************************************************************************
- * drivers/power/smps.c
- * Upper-half, character driver for SMPS (switched-mode power supply)
+ * drivers/power/powerled.c
+ * Upper-half, character driver for high power LED driver.
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -51,7 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/power/smps.h>
+#include <nuttx/power/powerled.h>
 
 #include <nuttx/irq.h>
 
@@ -59,26 +59,22 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     smps_open(FAR struct file *filep);
-static int     smps_close(FAR struct file *filep);
-static ssize_t smps_read(FAR struct file *filep, FAR char *buffer,
-                         size_t buflen);
-static ssize_t smps_write(FAR struct file *filep, FAR const char *buffer,
-                          size_t buflen);
-static int     smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     powerled_open(FAR struct file *filep);
+static int     powerled_close(FAR struct file *filep);
+static int     powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations smps_fops =
+static const struct file_operations powerled_fops =
 {
-  smps_open,                    /* open */
-  smps_close,                   /* close */
-  smps_read,                    /* read */
-  smps_write,                   /* write */
+  powerled_open,                /* open */
+  powerled_close,               /* close */
+  NULL,                         /* read */
+  NULL,                         /* write */
   NULL,                         /* seek */
-  smps_ioctl                    /* ioctl */
+  powerled_ioctl                /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , NULL                        /* poll */
 #endif
@@ -92,17 +88,17 @@ static const struct file_operations smps_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: smps_open
+ * Name: powerled_open
  *
  * Description:
- *   This function is called whenever the SMPS device is opened.
+ *   This function is called whenever the POWERLED device is opened.
  *
  ****************************************************************************/
 
-static int smps_open(FAR struct file *filep)
+static int powerled_open(FAR struct file *filep)
 {
   FAR struct inode      *inode = filep->f_inode;
-  FAR struct smps_dev_s *dev   = inode->i_private;
+  FAR struct powerled_dev_s *dev   = inode->i_private;
   uint8_t                tmp;
   int                    ret   = OK;
 
@@ -154,18 +150,18 @@ static int smps_open(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: smps_close
+ * Name: powerled_close
  *
  * Description:
- *   This routine is called when the SMPS device is closed.
+ *   This routine is called when the POWERLED device is closed.
  *   It waits for the last remaining data to be sent.
  *
  ****************************************************************************/
 
-static int smps_close(FAR struct file *filep)
+static int powerled_close(FAR struct file *filep)
 {
   FAR struct inode     *inode = filep->f_inode;
-  FAR struct smps_dev_s *dev   = inode->i_private;
+  FAR struct powerled_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
   int                   ret = OK;
 
@@ -190,10 +186,10 @@ static int smps_close(FAR struct file *filep)
 
           dev->ocount = 0;
 
-          /* Free the IRQ and disable the SMPS device */
+          /* Free the IRQ and disable the POWERLED device */
 
           flags = enter_critical_section();       /* Disable interrupts */
-          dev->ops->shutdown(dev);               /* Disable the SMPS */
+          dev->ops->shutdown(dev);               /* Disable the POWERLED */
           leave_critical_section(flags);
 
           sem_post(&dev->closesem);
@@ -204,96 +200,43 @@ static int smps_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: smps_read
- ****************************************************************************/
-
-static ssize_t smps_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
-{
-  return 1;
-}
-
-/****************************************************************************
- * Name: smps_write
- ****************************************************************************/
-
-static ssize_t smps_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
-{
-  return 1;
-}
-
-/****************************************************************************
- * Name: smps_ioctl
+ * Name: powerled_ioctl
 ****************************************************************************/
 
-static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode    = filep->f_inode;
-  FAR struct smps_dev_s *dev = inode->i_private;
-  FAR struct smps_s *smps    = (FAR struct smps_s *)dev->priv;
+  FAR struct powerled_dev_s *dev = inode->i_private;
+  FAR struct powerled_s *powerled    = (FAR struct powerled_s *)dev->priv;
   int ret;
 
   switch (cmd)
     {
       case PWRIOC_START:
         {
-          /* Allow SMPS start only when some limits available
-           * and strucutre is locked.
-           * REVISIT: not sure if it is needed here
-           */
 
-          if ((smps->limits.lock == false) ||
-              (smps->limits.v_in <= 0 && smps->limits.v_out <= 0 &&
-               smps->limits.i_in <= 0 && smps->limits.i_out <= 0 &&
-               smps->limits.p_in <= 0 && smps->limits.p_out <= 0 ))
+          /* Allow powerled start only when limits set and structure is locked */
+
+          if (powerled->limits.lock == false ||
+              powerled->limits.current <= 0)
             {
-              pwrerr("ERROR: SMPS limits data must be set"
-                     " and locked before SMPS start\n");
+              pwrerr("ERROR: powerled limits must be set"
+                     " and locked before start\n");
 
               ret = -EPERM;
               goto errout;
             }
 
-          /* Check SMPS mode */
+          /* Check powerled mode */
 
-          if (smps->opmode == SMPS_OPMODE_INIT)
+          if (powerled->opmode != POWERLED_OPMODE_CONTINUOUS &&
+              powerled->opmode != POWERLED_OPMODE_FLASH)
             {
-              pwrerr("ERROR: SMPS operation mode not specified\n");
+              pwrerr("ERROR: unsupported powerled mode!");
 
               ret = -EPERM;
               goto errout;
             }
-
-          /* When constan current mode, then output current must be provided */
-
-          if (smps->opmode == SMPS_OPMODE_CC && smps->param.i_out <= 0)
-            {
-              pwrerr("ERROR: CC selected but i_out not specified!\n");
-
-              ret = -EPERM;
-              goto errout;
-            }
-
-          /* When constan voltage mode, then output voltage must be provided */
-
-          if (smps->opmode == SMPS_OPMODE_CV && smps->param.v_out <= 0)
-            {
-              pwrerr("ERROR: CV selected but v_out not specified!\n");
-
-              ret = -EPERM;
-              goto errout;
-            }
-
-          /* When constan power mode, then output power must be provided */
-
-          if (smps->opmode == SMPS_OPMODE_CP && smps->param.p_out <= 0)
-            {
-              pwrerr("ERROR: CP selected but p_out not specified!\n");
-
-              ret = -EPERM;
-              goto errout;
-            }
-
-          /* REVISIT: something else ?? */
 
           /* Finally, call start from lower-half driver */
 
@@ -329,18 +272,18 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWRIOC_SET_LIMITS:
         {
-          FAR struct smps_limits_s *limits =
-            (FAR struct smps_limits_s *)((uintptr_t)arg);
+          FAR struct powerled_limits_s *limits =
+            (FAR struct powerled_limits_s *)((uintptr_t)arg);
 
-          if (smps->limits.lock == true)
+          if (powerled->limits.lock == true)
             {
-              pwrerr("ERROR: SMPS limits locked!\n");
+              pwrerr("ERROR: PWRRLED limits locked!\n");
 
               ret = -EPERM;
               goto errout;
             }
 
-          /* NOTE: this call must set the smps_limits_s structure */
+          /* NOTE: this call must set the powerled_limits_s structure */
 
           ret = dev->ops->limits_set(dev, limits);
           if (ret != OK)
@@ -352,8 +295,8 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWRIOC_GET_STATE:
         {
-          FAR struct smps_state_s *state =
-            (FAR struct smps_state_s *)((uintptr_t)arg);
+          FAR struct powerled_state_s *state =
+            (FAR struct powerled_state_s *)((uintptr_t)arg);
 
           ret = dev->ops->state_get(dev, state);
           if (ret != OK)
@@ -401,62 +344,26 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWRIOC_SET_PARAMS:
         {
-          FAR struct smps_params_s *params =
-            (FAR struct smps_params_s *)((uintptr_t)arg);
+          FAR struct powerled_params_s *params =
+            (FAR struct powerled_params_s *)((uintptr_t)arg);
 
-          if (smps->param.lock == true)
+          if (powerled->param.lock == true)
             {
-              pwrerr("ERROR: SMPS params locked!\n");
+              pwrerr("ERROR: powerled params locked!\n");
 
               ret = -EPERM;
               goto errout;
             }
 
-          if ((smps->limits.lock == false) ||
-              (smps->limits.v_in <= 0 && smps->limits.v_out <= 0 &&
-               smps->limits.i_in <= 0 && smps->limits.i_out <= 0 &&
-               smps->limits.p_in <= 0 && smps->limits.p_out <= 0 ))
+          if (params->brightness < 0.0 || params->brightness > 100.0 ||
+              params->frequency < 0.0 || params->duty < 0.0 || params->duty > 100.0)
             {
-              pwrerr("ERROR: limits must be set prior to params!\n");
+              pwrerr("ERROR: powerled invalid parameters %f %f %f\n",
+                     params->brightness, params->frequency, params->duty);
 
               ret = -EPERM;
               goto errout;
             }
-
-          /* Check output voltage configuration */
-
-          if (smps->limits.v_out > 0 && params->v_out > smps->limits.v_out)
-            {
-              pwrerr("ERROR: params->v_out > limits.v_out: %d > %d\n",
-                     params->v_out, smps->limits.v_out);
-
-              ret = -EPERM;
-              goto errout;
-            }
-
-          /* Check output current configuration */
-
-          if (smps->limits.i_out > 0 && params->i_out > smps->limits.i_out)
-            {
-              pwrerr("ERROR: params->i_out > limits.i_out: %d > %d\n",
-                     params->i_out, smps->limits.i_out);
-
-              ret = -EPERM;
-              goto errout;
-            }
-
-          /* Check output power configuration */
-
-          if (smps->limits.p_out > 0 && params->p_out > smps->limits.p_out)
-            {
-              pwrerr("ERROR: params->p_out > limits.p_out: %d > %d\n",
-                     params->p_out, smps->limits.p_out);
-
-              ret = -EPERM;
-              goto errout;
-            }
-
-          /* TODO: limits */
 
           ret = dev->ops->params_set(dev, params);
           if (ret != OK)
@@ -483,10 +390,10 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: smps_register
+ * Name: powerled_register
  ****************************************************************************/
 
-int smps_register(FAR const char *path, FAR struct smps_dev_s *dev, FAR void *lower)
+int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev, FAR void *lower)
 {
   int ret;
 
@@ -520,13 +427,13 @@ int smps_register(FAR const char *path, FAR struct smps_dev_s *dev, FAR void *lo
 
   sem_init(&dev->closesem, 0, 1);
 
-  /* Connect SMPS driver with lower level interface */
+  /* Connect POWERLED driver with lower level interface */
 
   dev->lower = lower;
 
-  /* Register the SMPS character driver */
+  /* Register the POWERLED character driver */
 
-  ret = register_driver(path, &smps_fops, 0444, dev);
+  ret = register_driver(path, &powerled_fops, 0444, dev);
   if (ret < 0)
     {
       sem_destroy(&dev->closesem);

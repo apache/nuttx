@@ -211,44 +211,51 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_3 /* PB4 */
 #define GPIO_USART2_TX GPIO_USART2_TX_3 /* PB3 */
 
-/* COMP */
+/* Board configuration for powerled example */
 
-/* OPAMP */
+/* - Set HRTIM TIMC output 1 on PERIOD
+ * - Reset HRTIM TIMC output 1 on HRTIM EEV2.
+ * - HRTIM EEV2 is connected to COMP4 output which works as current limit.
+ * - COMP4 inverting input is connected to DAC1CH1 output.
+ * - COMP4 non-inverting input is connceted to current sense resitor (1 Ohm).
+ * - DAC1CH1 DMA transfer is triggered by HRTIM TIMC events, which is used
+ *   to provide slope compensation
+ */
 
-#define OPAMP2_VMSEL OPAMP2_VMSEL_PC5
-#define OPAMP2_VPSEL OPAMP2_VPSEL_PB14
+#if defined(CONFIG_EXAMPLES_POWERLED)
 
-/* HRTIM */
+/* Comparators configuration ************************************************/
 
-#define HRTIM_TIMA_PRESCALER 2
+#define COMP4_INM  COMP_INMSEL_DAC1CH1
 
-#define HRTIM_TIMA_CH1_SET HRTIM_OUT_SET_CMP1
-#define HRTIM_TIMA_CH1_RST HRTIM_OUT_RST_PER
-#define HRTIM_TIMA_CH2_SET HRTIM_OUT_SET_PER
-#define HRTIM_TIMA_CH2_RST HRTIM_OUT_RST_CMP1
+/* HRTIM configuration ******************************************************/
 
-#define HRTIM_FAULT_SAMPLING 0
-#define HRTIM_FAULT1_POL     0
-#define HRTIM_FAULT1_SRC     0
-#define HRTIM_FAULT1_FILTER  0
-#define HRTIM_FAULT1_LOCK    0
+#define HRTIM_TIMC_PRESCALER      HRTIM_PRESCALER_1
+#define HRTIM_TIMC_MODE           HRTIM_MODE_CONT
+#define HRTIM_TIMC_DMA            (HRTIM_DMA_REP|HRTIM_DMA_CMP1|HRTIM_DMA_CMP2| \
+                                  HRTIM_DMA_CMP3|HRTIM_DMA_CMP4)
+#define HRTIM_TIMC_CH1_SET        HRTIM_OUT_SET_PER
+#define HRTIM_TIMC_CH1_RST        HRTIM_OUT_RST_EXTEVNT2
+#define HRTIM_TIMC_CH1_IDLE_STATE HRTIM_IDLE_INACTIVE
 
-#define HRTIM_EEV_SAMPLING   0
-#define HRTIM_EEV1_FILTER    0
-#define HRTIM_EEV1_SRC       0
-#define HRTIM_EEV1_POL       0
-#define HRTIM_EEV1_SEN       0
-#define HRTIM_EEV1_MODE      0
+#define HRTIM_EEV_SAMPLING        HRTIM_EEV_SAMPLING_d1
+#define HRTIM_EEV2_SRC            HRTIM_EEV_SRC_ANALOG
+#define HRTIM_EEV2_FILTER         HRTIM_EEV_DISABLE
+#define HRTIM_EEV2_POL            HRTIM_EEV_POL_HIGH
+#define HRTIM_EEV2_SEN            HRTIM_EEV_SEN_LEVEL
+#define HRTIM_EEV2_MODE           HRTIM_EEV_MODE_FAST
 
-#define HRTIM_ADC_TRG1 HRTIM_ADCTRG13_MC1
-
-#define HRTIM_TIMA_DAC  0
+#define HRTIM_BURST_CLOCK         HRTIM_BURST_CLOCK_HRTIM
+#define HRTIM_BURST_PRESCALER     HRTIM_BURST_PRESCALER_1
+#define HRTIM_BURST_TRIGGERS      0
 
 /* DMA channels *************************************************************/
-/* ADC */
 
-#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
-#define ADC2_DMA_CHAN DMACHAN_ADC2_1   /* DMA1_CH2 */
+/* DAC */
+
+#define DAC1CH1_DMA_CHAN     DMACHAN_HRTIM1_C
+
+#endif  /* CONFIG_EXAMPLES_POWERLED */
 
 /****************************************************************************
  * Public Data
