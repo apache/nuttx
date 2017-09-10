@@ -509,6 +509,40 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
 }
 
 /****************************************************************************
+ * Name: sixlowpan_radio_framelen
+ *
+ * Description:
+ *   Get the maximum frame length supported by radio network drvier.
+ *
+ * Input parameters:
+ *   radio - Reference to a radio network driver state instance.
+ *
+ * Returned Value:
+ *   A non-negative, maximum frame lengthis returned on success;  A negated
+ *   errno valueis returned on any failure.
+ *
+ ****************************************************************************/
+
+int sixlowpan_radio_framelen(FAR struct radio_driver_s *radio)
+{
+  struct radiodev_properties_s properties;
+  int ret;
+
+  /* Only the radio driver knows the correct max frame length supported by
+   * the radio.
+   */
+
+  DEBUGASSERT(radio->r_properties != NULL);
+  ret = radio->r_properties(radio, &properties);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return (int)properties.sp_framelen;
+}
+
+/****************************************************************************
  * Name: sixlowpan_src_panid
  *
  * Description:

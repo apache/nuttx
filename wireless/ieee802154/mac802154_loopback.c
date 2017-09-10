@@ -1005,8 +1005,8 @@ static int lo_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen = LO_ADDRSIZE;  /* Length of an address */
-  properties->sp_pktlen  = LO_FRAMELEN;  /* Fixed frame length */
+  properties->sp_addrlen  = LO_ADDRSIZE;  /* Length of an address */
+  properties->sp_framelen = LO_FRAMELEN;  /* Fixed frame length */
 
   /* Multicast address (uses broadcast address)
    *

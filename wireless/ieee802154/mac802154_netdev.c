@@ -1159,8 +1159,8 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen = MACNET_ADDRSIZE;  /* Length of an address */
-  properties->sp_pktlen  = MACNET_FRAMELEN;  /* Fixed frame length */
+  properties->sp_addrlen  = MACNET_ADDRSIZE;  /* Length of an address */
+  properties->sp_framelen = MACNET_FRAMELEN;  /* Fixed frame length */
 
   /* Multicast address (uses broadcast address)
    *

@@ -50,7 +50,7 @@
  * -Add compression options to UDP, currently only supports
  *  both ports compressed or both ports elided
  * -Verify TC/FL compression works
- * -Add stateless multicast option
+ * -Add multicast support for M=1 and DAC=1
  */
 
 /****************************************************************************

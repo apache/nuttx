@@ -961,8 +961,8 @@ static int lo_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen = CONFIG_PKTRADIO_ADDRLEN;     /* Length of an address */
-  properties->sp_pktlen  = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
+  properties->sp_addrlen  = CONFIG_PKTRADIO_ADDRLEN;     /* Length of an address */
+  properties->sp_framelen = CONFIG_NET_6LOWPAN_FRAMELEN; /* Fixed frame length */
 
   /* Multicast address */
 

@@ -2403,8 +2403,8 @@ static int spirit_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen = 1;                    /* Length of an address */
-  properties->sp_pktlen  = CONFIG_SPIRIT_PKTLEN; /* Fixed packet length */
+  properties->sp_addrlen  = 1;                    /* Length of an address */
+  properties->sp_framelen = CONFIG_SPIRIT_PKTLEN; /* Fixed packet length */
 
   /* Multicast address */
 
