@@ -67,9 +67,6 @@ struct fb_chardev_s
   FAR struct fb_vtable_s *vtable; /* Framebuffer interface */
   FAR void *fbmem;                /* Start of frame buffer memory */
   size_t fblen;                   /* Size of the framebuffer */
-  fb_coord_t xres;                /* Horizontal resolution in pixel columns */
-  fb_coord_t yres;                /* Vertical resolution in pixel rows */
-  fb_coord_t stride;              /* Length of a line in bytes */
   uint8_t plane;                  /* Video plan number */
   uint8_t bpp;                    /* Bits per pixel */
 };
@@ -467,7 +464,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int fb_register(int display, int plane)
 {
   FAR struct fb_chardev_s *fb;
-  struct fb_videoinfo_s vinfo;
   struct fb_planeinfo_s pinfo;
   char devname[16];
   int ret;
@@ -501,17 +497,6 @@ int fb_register(int display, int plane)
 
   /* Initialize the frame buffer instance. */
 
-  DEBUGASSERT(fb->vtable->getvideoinfo != NULL);
-  ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
-  if (ret < 0)
-    {
-      gerr("ERROR: getvideoinfo() failed: %d\n", ret);
-      goto errout_with_fb;
-    }
-
-  fb->xres = vinfo.xres;
-  fb->yres = vinfo.yres;
-  
   DEBUGASSERT(fb->vtable->getplaneinfo != NULL);
   ret = fb->vtable->getplaneinfo(fb->vtable, plane, &pinfo);
   if (ret < 0)
@@ -522,7 +507,6 @@ int fb_register(int display, int plane)
 
   fb->fbmem  = pinfo.fbmem;
   fb->fblen  = pinfo.fblen;
-  fb->stride = pinfo.stride;
   fb->bpp    = pinfo.bpp;
 
   /* Register the framebuffer device */
