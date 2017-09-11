@@ -48,6 +48,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxglib.h>
 #include <nuttx/video/fb.h>
 
 /****************************************************************************
@@ -414,6 +416,23 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(cursor != 0 && fb->vtable != NULL &&
                       fb->vtable->setcursor != NULL);
           ret = fb->vtable->setcursor(fb->vtable, cursor);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NX_UPDATE
+      case FBIO_UPDATE:  /* Get video plane info */
+        {
+          FAR struct nxgl_rect_s *rect =
+            (FAR struct nxgl_rect_s *)((uintptr_t)arg);
+          struct fb_planeinfo_s pinfo;
+
+          DEBUGASSERT(fb->vtable != NULL && fb->vtable->getplaneinfo != NULL);
+          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
+          if (ret >= 0)
+            {
+               nx_notify_rectangle(&pinfo, rect);
+            }
         }
         break;
 #endif

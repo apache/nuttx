@@ -211,6 +211,10 @@
 #  define FBIOPUT_CURSOR   _FBIOC(0x0006)  /* Set cursor attibutes */
                                            /* Argument: read-only struct fb_setcursor_s */
 #endif
+#ifdef CONFIG_NX_UPDATE
+#  define FBIO_UPDATE      _FBIOC(0x0007)  /* Update a rectangular region in the framebuffer */
+                                           /* Argument: read-only struct nxgl_rect_s */
+#endif
 
 /****************************************************************************
  * Public Types
