@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -190,6 +191,27 @@
 #define FB_CUR_XOR         0x10        /* Use XOR vs COPY ROP on image */
 #endif
 
+/* FB character driver IOCTL commands ***************************************/
+
+/* ioctls */
+
+#define FBIOGET_VIDEOINFO  _FBIOC(0x0001)  /* Get color plane info */
+                                           /* Argument: writable struct fb_videoinfo_s */
+#define FBIOGET_PLANEINFO  _FBIOC(0x0002)  /* Get video plane info */
+                                           /* Argument: writable struct fb_planeinfo_s */
+#ifdef CONFIG_FB_CMAP
+#  define FBIOGET_CMAP     _FBIOC(0x0003)  /* Get RGB color mapping */
+                                           /* Argument: writable struct fb_cmap_s */
+#  define FBIOPUT_CMAP     _FBIOC(0x0004)  /* Put RGB color mapping */
+                                           /* Argument: read-only struct fb_cmap_s */
+#endif
+#ifdef CONFIG_FB_HWCURSOR
+#  define FBIOGET_CURSOR   _FBIOC(0x0005)  /* Get cursor attributes */
+                                           /* Argument: writable struct fb_cursorattrib_s */
+#  define FBIOPUT_CURSOR   _FBIOC(0x0006)  /* Set cursor attibutes */
+                                           /* Argument: read-only struct fb_setcursor_s */
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -307,8 +329,8 @@ struct fb_setcursor_s
 };
 #endif
 
-/* The framebuffer "driver" under NuttX is not a driver at all, but simply
- * a driver "object" that is accessed through the following vtable:
+/* The framebuffer "object" is accessed through within the OS via
+ * the following vtable:
  */
 
 struct fb_vtable_s
@@ -322,22 +344,22 @@ struct fb_vtable_s
   int (*getplaneinfo)(FAR struct fb_vtable_s *vtable, int planeno,
                       FAR struct fb_planeinfo_s *pinfo);
 
+#ifdef CONFIG_FB_CMAP
   /* The following are provided only if the video hardware supports RGB
    * color mapping
    */
 
-#ifdef CONFIG_FB_CMAP
   int (*getcmap)(FAR struct fb_vtable_s *vtable,
                  FAR struct fb_cmap_s *cmap);
   int (*putcmap)(FAR struct fb_vtable_s *vtable,
                  FAR const struct fb_cmap_s *cmap);
 #endif
 
+#ifdef CONFIG_FB_HWCURSOR
   /* The following are provided only if the video hardware supports a
    * hardware cursor.
    */
 
-#ifdef CONFIG_FB_HWCURSOR
   int (*getcursor)(FAR struct fb_vtable_s *vtable,
                    FAR struct fb_cursorattrib_s *attrib);
   int (*setcursor)(FAR struct fb_vtable_s *vtable,

@@ -90,6 +90,7 @@
 #define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
 #define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
 #define _PWRBASE        (0x2700) /* Power-related ioctl commands */
+#define _FBIOCBASE      (0x2800) /* Frame buffer character driver ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -431,8 +432,13 @@
 
 /* Power-Related IOCTLs *****************************************************/
 
-#define _PWRIOCVALID(c)   (_IOC_TYPE(c)==_SMPS_BASE)
+#define _PWRIOCVALID(c)   (_IOC_TYPE(c)==_PWRBASE)
 #define _PWRIOC(nr)       _IOC(_PWRBASE,nr)
+
+/* Frame buffer character drivers *******************************************/
+
+#define _FBIOCVALID(c)   (_IOC_TYPE(c)==_FBIOCBASE)
+#define _FBIOC(nr)       _IOC(_FBIOCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

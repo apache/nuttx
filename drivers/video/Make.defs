@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/ov2640/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,10 @@
 # Include video drivers
 
 ifeq ($(CONFIG_VIDEO_DEVICES),y)
+
+ifeq ($(CONFIG_VIDEO_FB),y)
+  CSRCS += fb.c
+endif
 
 # These video drivers depend on I2C support
 

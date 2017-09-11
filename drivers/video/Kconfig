@@ -3,6 +3,10 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config VIDEO_FB
+	bool "Framebuffer character driver"
+	default n
+
 config VIDEO_OV2640
 	bool "OV2640 camera chip"
 	default n
