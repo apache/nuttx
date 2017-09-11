@@ -262,7 +262,9 @@
 
 #define SIXLOWPAN_MAC_STDFRAME 127
 
-/* Space for a two byte FCS must be reserved at the end of the frame */
+/* Space for a two byte FCS must be reserved at the end of the frame.
+ * REVISIT:  True for IEEE 802.15.4, but not for some other packet radios.
+ */
 
 #define SIXLOWPAN_MAC_FCSSIZE  2
 

@@ -16,6 +16,7 @@ source drivers/wireless/ieee802154/mrf24j40/Kconfig
 config IEEE802154_AT86RF233
 	bool "ATMEL RF233 IEEE 802.15.4 transceiver"
 	default n
+	depends on EXPERIMENTAL
 	---help---
 		This selection enables support for the Atmel RF233 device.
 
