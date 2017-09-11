@@ -62,17 +62,17 @@ bool sched_verifytcb(FAR struct tcb_s *tcb)
   /* Return true if the PID hashes to this TCB.  This will catch the case
    * where the task associated with the TCB has terminated (note that
    * sched_releasedtcb() will nullify the TCB field in that case).  The
-   * following logic will also detect the case where the task assocated
+   * following logic will also detect the case where the task associated
    * with the TCB has terminated and another task has been started with a
    * different TCB but with a PID hashing to the same entry.
    *
    * NOTE: In the event that the TCB has terminated, the 'tcb' parameter
    * will point at either a stale or a re-allocated memory allocation.  The
    * PID fetched by the use of the bad pointer(tcb->pid) should not cause
-   * any memory faults (at least in the FLAT or PROTECTED builds) because
-   * we do at least know that the pointer refers to valid memory and the
-   * hash macro, PIDHASH(), will return a valid, in-range index into the
-   * g_pidhash[] table.
+   * any memory faults because we do at least know that the pointer refers
+   * to valid memory in the kernel address space and that the hash macro,
+   * PIDHASH(), will return a valid, in-range index into the g_pidhash[]
+   * table.
    *
    * REVISIT:  This logic will not, however, catch the case where the task
    * originally associated with the TCB has terminated, but a new task was
