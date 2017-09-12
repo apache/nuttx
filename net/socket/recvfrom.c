@@ -159,13 +159,13 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  leave_cancellation_point();
   if (ret < 0)
     {
       errcode = -ret;
       goto errout;
     }
 
+  leave_cancellation_point();
   return ret;
 
 errout:

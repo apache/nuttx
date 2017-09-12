@@ -320,7 +320,6 @@ static int lc823450_adc_isr(int irq, void *context, FAR void *arg)
 }
 #endif
 
-
 /****************************************************************************
  * Name: lc823450_adc_bind
  *
