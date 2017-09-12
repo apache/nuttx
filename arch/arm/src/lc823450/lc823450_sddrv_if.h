@@ -101,66 +101,71 @@
 #ifndef __ASSEMBLY__
 
 /* SD specific info */
-typedef struct t_SdInfo
+
+struct SdInfo_s
 {
-  UI_32 mScr[2];
-  UI_32 mSdStatus[16];
-} SdInfo;
+  UI_32 scr[2];
+  UI_32 sdstatus[16];
+};
 
 /* MMC specific info */
-typedef struct t_MmcInfo
-{
-  UI_32 mExtCsd_CACHE_SIZE;               /* ExtCsd [252:249] */
-  UI_32 mExtCsd_SEC_COUNT;                /* ExtCsd [215:212] */
 
-  UI_8  mExtCsd_SEC_FEATURE_SUPPORT;      /* ExtCsd [231] */
-  UI_8  mExtCsd_BOOT_SIZE_MULT;           /* ExtCsd [226] */
-  UI_8  mExtCsd_DEVICE_TYPE;              /* ExtCsd [196] */
-  UI_8  mExtCsd_HS_TIMING;                /* ExtCsd [185] */
-  UI_8  mExtCsd_PARTITION_CONFIG;         /* ExtCsd [179] */
-  UI_8  mExtCsd_BOOT_CONFIG_PROT;         /* ExtCsd [178] */
-  UI_8  mExtCsd_BOOT_BUS_WIDTH;           /* ExtCsd [177] */
-  UI_8  mExtCsd_CACHE_CTRL;               /* ExtCsd [ 33] */
-} MmcInfo;
+struct MmcInfo_s
+{
+  UI_32 extcsd_cache_size;               /* ExtCsd [252:249] */
+  UI_32 extcsd_sec_count;                /* ExtCsd [215:212] */
+
+  UI_8  extcsd_sec_feature_support;      /* ExtCsd [231] */
+  UI_8  extcsd_boot_size_mult;           /* ExtCsd [226] */
+  UI_8  extcsd_device_type;              /* ExtCsd [196] */
+  UI_8  extcsd_hs_timing;                /* ExtCsd [185] */
+  UI_8  extcsd_partition_config;         /* ExtCsd [179] */
+  UI_8  extcsd_boot_config_prot;         /* ExtCsd [178] */
+  UI_8  extcsd_boot_bus_width;           /* ExtCsd [177] */
+  UI_8  extcsd_cache_ctrl;               /* ExtCsd [ 33] */
+};
 
 /* SdDr configuration */
-typedef struct t_SdDrCfg
-{
-  UI_32 mRegBase;         /* SD Host I/F register base address */
-  UI_32 mSysClk;          /* System Clock */
-  UI_32 mDetectTime;      /* Card detection time */
-  UI_32 mSetting;         /* WP CD settings */
-  void *mWorkBuf;         /* Work buffer (512 byte) */
 
-  SINT_T (*mDepHwInit)(struct t_SdDrCfg *);
-  SINT_T (*mDepHwExit)(struct t_SdDrCfg *);
-  SINT_T (*mDepOsInit)(struct t_SdDrCfg *);
-  SINT_T (*mDepOsExit)(struct t_SdDrCfg *);
-  void   (*mDepSetClk)(struct t_SdDrCfg *);
-  SINT_T (*mDepWait)(UI_32, struct t_SdDrCfg *);
-  SINT_T (*mDepWaitStatus)(UI_32 req, UI_32 *status, struct t_SdDrCfg *cfg);
-  SINT_T (*mDepReadData)(void *src, void *dst, UI_32 size, SINT_T type, struct t_SdDrCfg *cfg);
-  SINT_T (*mDepWriteData)(void *src, void *dst, UI_32 size, SINT_T type, struct t_SdDrCfg *cfg);
-  void   (*mDepVoltageSwitch)(struct t_SdDrCfg *);
+struct SdDrCfg_s
+{
+  UI_32 regbase;         /* SD Host I/F register base address */
+  UI_32 sysclk;          /* System Clock */
+  UI_32 detecttime;      /* Card detection time */
+  UI_32 setting;         /* WP CD settings */
+  void  *workbuf;        /* Work buffer (512 byte) */
+
+  SINT_T (*dephwinit)(struct SdDrCfg_s *);
+  SINT_T (*dephwexit)(struct SdDrCfg_s *);
+  SINT_T (*deposinit)(struct SdDrCfg_s *);
+  SINT_T (*deposexit)(struct SdDrCfg_s *);
+  void   (*depsetclk)(struct SdDrCfg_s *);
+  SINT_T (*depwait)(UI_32, struct SdDrCfg_s *);
+  SINT_T (*depwaitstatus)(UI_32 req, UI_32 *status, struct SdDrCfg_s *cfg);
+  SINT_T (*depreaddata)(void *src, void *dst, UI_32 size, SINT_T type,
+                        struct SdDrCfg_s *cfg);
+  SINT_T (*depwritedata)(void *src, void *dst, UI_32 size, SINT_T type,
+                         struct SdDrCfg_s *cfg);
+  void   (*depvoltageswitch)(struct SdDrCfg_s *);
 
   /* To here, external members to be set */
   /* From here, internal mermbers (no need to set) */
 
-  UI_32 mInfo;            /* Misc info (e.g. driver state) */
-  UI_32 mSecNum;          /* The number of sectors */
-  UI_32 mLimitSdClk;      /* Max SD clock */
-  UI_32 mClkDiv;          /* Clock divider */
-  UI_32 mEraseTmOut;      /* Timeout for Erase/Trim */
-  UI_32 mCid[4];          /* CID */
-  UI_32 mCsd[4];          /* CSD */
+  UI_32 info;            /* Misc info (e.g. driver state) */
+  UI_32 secnum;          /* The number of sectors */
+  UI_32 limitsdclk;      /* Max SD clock */
+  UI_32 clkdiv;          /* Clock divider */
+  UI_32 erasetmout;      /* Timeout for Erase/Trim */
+  UI_32 cid[4];          /* CID */
+  UI_32 csd[4];          /* CSD */
 
   union {
-    SdInfo  Sd;     /* SD specific info */
-    MmcInfo Mmc;    /* MMC specific info */
-  } mEx;
+    struct SdInfo_s  sd;     /* SD specific info */
+    struct MmcInfo_s mmc;    /* MMC specific info */
+  } ex;
 
-  UI_32 mReserved;
-} SdDrCfg;
+  UI_32 reserved;
+};
 
 
 /****************************************************************************
@@ -181,63 +186,68 @@ extern "C"
  ****************************************************************************/
 
 SINT_T SdDrRefVersion(void);
-SINT_T SdDrInitialize(SdDrCfg *cfg);
-SINT_T SdDrFinalize(SdDrCfg *cfg);
-SINT_T SdDrIdentifyCard(SdDrCfg *cfg);
-SINT_T SdDrCheckCardIdentify(SdDrCfg *cfg);
-SINT_T SdDrCheckWriteEnable(SdDrCfg *cfg);
-SINT_T SdDrCheckCardDetect(SdDrCfg *cfg);
-SINT_T SdDrCheckCardRemoved(SdDrCfg *cfg);
-SINT_T SdDrGetCardSize(UI_32 *secNum, UI_32 *secSize, SdDrCfg *cfg);
-SINT_T SdDrGetCid(UI_32 *cid, SdDrCfg *cfg);
-SINT_T SdDrGetCsd(UI_32 *csd, SdDrCfg *cfg);
-SINT_T SdDrGetScr(UI_32 *scr, SdDrCfg *cfg);
-SINT_T SdDrGetExtCsd(UI_32 *extCsd, SdDrCfg *cfg);
-SINT_T SdDrClearCardInfo(SdDrCfg *cfg);
+SINT_T SdDrInitialize(struct SdDrCfg_s *cfg);
+SINT_T SdDrFinalize(struct SdDrCfg_s *cfg);
+SINT_T SdDrIdentifyCard(struct SdDrCfg_s *cfg);
+SINT_T SdDrCheckCardIdentify(struct SdDrCfg_s *cfg);
+SINT_T SdDrCheckWriteEnable(struct SdDrCfg_s *cfg);
+SINT_T SdDrCheckCardDetect(struct SdDrCfg_s *cfg);
+SINT_T SdDrCheckCardRemoved(struct SdDrCfg_s *cfg);
+SINT_T SdDrGetCardSize(UI_32 *secnum, UI_32 *secsize, struct SdDrCfg_s *cfg);
+SINT_T SdDrGetCid(UI_32 *cid, struct SdDrCfg_s *cfg);
+SINT_T SdDrGetCsd(UI_32 *csd, struct SdDrCfg_s *cfg);
+SINT_T SdDrGetScr(UI_32 *scr, struct SdDrCfg_s *cfg);
+SINT_T SdDrGetExtCsd(UI_32 *extcsd, struct SdDrCfg_s *cfg);
+SINT_T SdDrClearCardInfo(struct SdDrCfg_s *cfg);
 SINT_T SdDrReadSector(UI_32 addr, UI_32 cnt, void *buf, SINT_T type,
-          SdDrCfg *cfg);
+                      struct SdDrCfg_s *cfg);
 SINT_T SdDrWriteSector(UI_32 addr, UI_32 cnt, void *buf, SINT_T type,
-           SdDrCfg *cfg);
-SINT_T SdDrEraseSector(UI_32 addr, UI_32 cnt, SdDrCfg *cfg);
-SINT_T SdDrSetClock(UI_32 limitClk, UI_32 sysClk, SdDrCfg *cfg);
-SINT_T SdDrChangeSpeedMode(SINT_T mode, SdDrCfg *cfg);
-SINT_T SdDrRefMediaType(SdDrCfg *cfg);
-SINT_T SdDrSleep(SdDrCfg *cfg);
-SINT_T SdDrAwake(SdDrCfg *cfg);
-SINT_T SdDrSelectAccessPartition(UI_32 partNumber, SdDrCfg *cfg);
-SINT_T SdDrConfigBootMode(SINT_T enable, SINT_T ack, UI_32 bootPartNumber,
-        UI_32 bootBusWidth, SdDrCfg *cfg);
-SINT_T SdDrGetPartitionSize(UI_32 partNumber, UI_32 *secNum, SdDrCfg *cfg);
+                       struct SdDrCfg_s *cfg);
+SINT_T SdDrEraseSector(UI_32 addr, UI_32 cnt, struct SdDrCfg_s *cfg);
+SINT_T SdDrSetClock(UI_32 limitclk, UI_32 sysclk, struct SdDrCfg_s *cfg);
+SINT_T SdDrChangeSpeedMode(SINT_T mode, struct SdDrCfg_s *cfg);
+SINT_T SdDrRefMediaType(struct SdDrCfg_s *cfg);
+SINT_T SdDrSleep(struct SdDrCfg_s *cfg);
+SINT_T SdDrAwake(struct SdDrCfg_s *cfg);
+SINT_T SdDrSelectAccessPartition(UI_32 partnumber, struct SdDrCfg_s *cfg);
+SINT_T SdDrConfigBootMode(SINT_T enable, SINT_T ack, UI_32 bootpartnumber,
+                          UI_32 bootbuswidth, struct SdDrCfg_s *cfg);
+SINT_T SdDrGetPartitionSize(UI_32 partnumber, UI_32 *secNum,
+                            struct SdDrCfg_s *cfg);
 
-SINT_T SdDrCheckSDXC(SdDrCfg *cfg);
+SINT_T SdDrCheckSDXC(struct SdDrCfg_s *cfg);
 
-SINT_T SdDrEraseSeq(UI_32 type, UI_32 addr, UI_32 cnt, SdDrCfg *cfg);
+SINT_T SdDrEraseSeq(UI_32 type, UI_32 addr, UI_32 cnt, struct SdDrCfg_s *cfg);
 
-#define SdDrTrimSector(addr,cnt,cfg)   SdDrEraseSeq(0x00000001,addr,cnt,cfg)
-#define SdDrSTrimSector1(addr,cnt,cfg) SdDrEraseSeq(0x80000001,addr,cnt,cfg)
-#define SdDrSTrimSector2(cfg)          SdDrEraseSeq(0x80008000,   0,  1,cfg)
+#define SdDrTrimSector(addr, cnt, cfg) \
+  SdDrEraseSeq(0x00000001, addr, cnt, cfg)
+#define SdDrSTrimSector1(addr, cnt, cfg) \
+  SdDrEraseSeq(0x80000001, addr, cnt, cfg)
+#define SdDrSTrimSector2(cfg) \
+  SdDrEraseSeq(0x80008000,    0,   1, cfg)
 
 SINT_T SdDrGeneralCommand(SINT_T arg, UI_32 size, void *buf, SINT_T type,
-                          SdDrCfg *cfg);
-SINT_T SdDrCacheCtrl(SINT_T ctrl, SdDrCfg *cfg);
+                          struct SdDrCfg_s *cfg);
+SINT_T SdDrCacheCtrl(SINT_T ctrl, struct SdDrCfg_s *cfg);
 
 
 
 #define SDDR_SUPPORT_TRIM(cfg) \
   ((SdDrRefMediaType(cfg) == SDDR_MEDIA_TYPE_MMC) ? \
-   (((cfg)->mEx.Mmc.mExtCsd_SEC_FEATURE_SUPPORT&(1UL << 4)) ? 1 : 0) : 0)
+   (((cfg)->ex.mmc.extcsd_sec_feature_support & (1UL << 4)) ? 1 : 0) : 0)
 
 #define SDDR_SUPPORT_CACHE(cfg) \
   ((SdDrRefMediaType(cfg) == SDDR_MEDIA_TYPE_MMC) ? \
-   ((cfg)->mEx.Mmc.mExtCsd_CACHE_SIZE ? 1:0) : 0)
+   ((cfg)->ex.mmc.extcsd_cache_size ? 1:0) : 0)
 
-SINT_T SdDrBkopsGetStatus(SdDrCfg *cfg);
-SINT_T SdDrBkopsEnable(SINT_T ena, SdDrCfg *cfg);
-SINT_T SdDrBkopsStart(SdDrCfg *cfg);
-SINT_T SdDrHpiEnable(SINT_T ena, SdDrCfg *cfg);
-SINT_T SdDrHpiExec(SINT_T check, SdDrCfg *cfg);
+SINT_T SdDrBkopsGetStatus(struct SdDrCfg_s *cfg);
+SINT_T SdDrBkopsEnable(SINT_T ena, struct SdDrCfg_s *cfg);
+SINT_T SdDrBkopsStart(struct SdDrCfg_s *cfg);
+SINT_T SdDrHpiEnable(SINT_T ena, struct SdDrCfg_s *cfg);
+SINT_T SdDrHpiExec(SINT_T check, struct SdDrCfg_s *cfg);
 
-SINT_T fixedSdDrReadSector(UI_32 addr, UI_32 cnt, void *buf, SINT_T type, SdDrCfg *cfg);
+SINT_T fixedSdDrReadSector(UI_32 addr, UI_32 cnt, void *buf, SINT_T type,
+                           struct SdDrCfg_s *cfg);
 
 UI_32 sdif_get_status(UI_32);
   

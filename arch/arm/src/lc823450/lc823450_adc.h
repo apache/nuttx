@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_sdc.h
+ * arch/arm/src/lc823450/chip/lc823450_adc.h
  *
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,60 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LC823450_LC823450_SDC_H
-#define __ARCH_ARM_SRC_LC823450_LC823450_SDC_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_ADC_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_ADC_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
+
+/* Register Addresses *******************************************************/
+
+#define ADC_REGBASE 0x40087000
+#define rADC0DT     (ADC_REGBASE + 0x00)
+#define rADC1DT     (ADC_REGBASE + 0x04)
+#define rADC2DT     (ADC_REGBASE + 0x08)
+#define rADC3DT     (ADC_REGBASE + 0x0C)
+#define rADC4DT     (ADC_REGBASE + 0x10)
+#define rADC5DT     (ADC_REGBASE + 0x14)
+#define rADCCTL     (ADC_REGBASE + 0x28)
+#define rADCSTS     (ADC_REGBASE + 0x2C)
+#define rADCSMPL    (ADC_REGBASE + 0x30)
+#define rADCSTBY    (ADC_REGBASE + 0x34)
+
+/* Register Bitfield Definitions ********************************************/
+
+/* ADC Control Register */
+
+#define rADCCTL_fADCNTNU        (1 << 9)  /* Bit 9: ADC continuous conversion enable */
+#define rADCCTL_fADACT          (1 << 8)  /* Bit 8: ADC activate enable */
+#define rADCCTL_fADCHSCN        (1 << 7)  /* Bit 7: ADC channel scan enable */
+
+#define rADCCTL_fADCNVCK_SHIFT  (4)
+#define rADCCTL_fADCNVCK_DIV2   (0 << rADCCTL_fADCNVCK_SHIFT)
+#define rADCCTL_fADCNVCK_DIV4   (1 << rADCCTL_fADCNVCK_SHIFT)
+#define rADCCTL_fADCNVCK_DIV8   (2 << rADCCTL_fADCNVCK_SHIFT)
+#define rADCCTL_fADCNVCK_DIV16  (3 << rADCCTL_fADCNVCK_SHIFT)
+#define rADCCTL_fADCNVCK_DIV32  (4 << rADCCTL_fADCNVCK_SHIFT)
+#define rADCCTL_fADCNVCK_DIV64  (5 << rADCCTL_fADCNVCK_SHIFT)
+
+#define rADCCTL_fADCHST_SHIFT   (0)
+
+/* ADC Status Register */
+
+#define rADCSTS_fADCMPL         (1 << 0)  /* Bit 0: ADC Conversion Completion Flag */
+
+/* ADC Standby Register */
+
+#define rADCSTBY_STBY           (1 << 0)    /* Bit 0: Standby enable */
 
 /****************************************************************************
  * Public Types
@@ -58,27 +111,7 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
-int lc823450_sdc_refversion(void);
-int lc823450_sdc_clearcardinfo(uint32_t ch);
-
-int lc823450_sdc_initialize(uint32_t ch);
-int lc823450_sdc_finalize(uint32_t ch);
-int lc823450_sdc_checkcarddetect(uint32_t ch);
-int lc823450_sdc_identifycard(uint32_t ch);
-int lc823450_sdc_setclock(uint32_t ch, uint32_t limitclk, uint32_t sysclk);
-int lc823450_sdc_refmediatype(uint32_t ch);
-int lc823450_sdc_getcardsize(uint32_t ch, unsigned long *psecnum,
-                             unsigned long *psecsize);
-int lc823450_sdc_readsector(uint32_t ch, unsigned long addr, unsigned short cnt,
-                            void *pbuf, unsigned long type);
-int lc823450_sdc_writesector(uint32_t ch, unsigned long addr, unsigned short cnt,
-                             void *pbuf, unsigned long type);
-int lc823450_sdc_checktrim(uint32_t ch);
-int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt);
-int lc823450_sdc_cachectl(uint32_t ch, int ctrl);
-int lc823450_sdc_changespeedmode(uint32_t ch, int mode);
-int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length);
-int lc823450_sdc_locked(void);
+FAR struct adc_dev_s *lc823450_adcinitialize(void);
 
 #if defined(__cplusplus)
 }
@@ -86,4 +119,4 @@ int lc823450_sdc_locked(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LC823450_LC823450_SDC_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_ADC_H */

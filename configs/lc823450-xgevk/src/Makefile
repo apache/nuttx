@@ -48,6 +48,10 @@ ifeq ($(CONFIG_LC823450_SDIF),y)
 CSRCS += lc823450_sdif.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += lc823450_adc.c
+endif
+
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lc823450_usbmsc.c
 endif

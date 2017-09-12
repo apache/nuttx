@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_sdc.h
+ * arch/arm/src/lc823450/lc823450_wdt.h
  *
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,20 +34,27 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LC823450_LC823450_SDC_H
-#define __ARCH_ARM_SRC_LC823450_LC823450_SDC_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_WDT_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_WDT_H
 
 /****************************************************************************
- * Public Types
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include "chip.h"
+
+#ifdef CONFIG_WATCHDOG
+
+/****************************************************************************
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
@@ -58,32 +66,17 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
-int lc823450_sdc_refversion(void);
-int lc823450_sdc_clearcardinfo(uint32_t ch);
+int lc823450_wdt_initialize(void);
 
-int lc823450_sdc_initialize(uint32_t ch);
-int lc823450_sdc_finalize(uint32_t ch);
-int lc823450_sdc_checkcarddetect(uint32_t ch);
-int lc823450_sdc_identifycard(uint32_t ch);
-int lc823450_sdc_setclock(uint32_t ch, uint32_t limitclk, uint32_t sysclk);
-int lc823450_sdc_refmediatype(uint32_t ch);
-int lc823450_sdc_getcardsize(uint32_t ch, unsigned long *psecnum,
-                             unsigned long *psecsize);
-int lc823450_sdc_readsector(uint32_t ch, unsigned long addr, unsigned short cnt,
-                            void *pbuf, unsigned long type);
-int lc823450_sdc_writesector(uint32_t ch, unsigned long addr, unsigned short cnt,
-                             void *pbuf, unsigned long type);
-int lc823450_sdc_checktrim(uint32_t ch);
-int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt);
-int lc823450_sdc_cachectl(uint32_t ch, int ctrl);
-int lc823450_sdc_changespeedmode(uint32_t ch, int mode);
-int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length);
-int lc823450_sdc_locked(void);
+#ifdef CONFIG_WATCHDOG_WORK
+void lc823450_wdg_work_enable(int en);
+#endif
 
+#undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LC823450_LC823450_SDC_H */
+#endif /* CONFIG_WATCHDOG */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_WDT_H */

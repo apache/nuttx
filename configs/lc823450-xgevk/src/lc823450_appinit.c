@@ -143,6 +143,16 @@ static void lc823450_i2ctool(void)
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#ifdef CONFIG_ADC
+  ret = lc823450_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lc82450_adc_setup failed: %d\n", ret);
+    }
+#endif
+
   /* Register I2C drivers on behalf of the I2C tool */
 
   lc823450_i2ctool();
@@ -150,7 +160,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_LC823450_MTD
   /* Initialize eMMC */
 
-  int ret = lc823450_mtd_initialize(CONFIG_MTD_DEVNO_EMMC);
+  ret = lc823450_mtd_initialize(CONFIG_MTD_DEVNO_EMMC);
   if (ret != OK)
     {
       syslog(LOG_ERR, "Failed to initialize eMMC: ret=%d\n", ret);

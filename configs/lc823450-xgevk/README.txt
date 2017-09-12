@@ -12,7 +12,8 @@ LC823450 related documents are available at
   http://www.onsemi.com/PowerSolutions/supportDoc.do?type=AppNotes&rpn=LC823450
 
 This port is intended to test LC823450 features including SMP.
-Supported peripherals are UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, and USB device.
+Supported peripherals:
+UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, USB, WDT, ADC.
 
 Settings
 ^^^^^^^^
@@ -97,8 +98,39 @@ Please note that card hotplugging is not supported.
 nsh> msconn
 nsh> msdis
 
+7. ADC
+
+nsh> adc
+adc_main: g_adcstate.count: 1
+adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+Sample:
+1: channel: 0 value: 366
+2: channel: 1 value: 691
+3: channel: 2 value: 752
+4: channel: 3 value: 963
+5: channel: 4 value: 6
+6: channel: 5 value: 0
+
+8. WDT
+
+nsh> wdog
+  ping elapsed=0
+  ping elapsed=500
+  ping elapsed=1000
+  ping elapsed=1500
+  ping elapsed=2000
+  ping elapsed=2500
+  ping elapsed=3000
+  ping elapsed=3500
+  ping elapsed=4000
+  ping elapsed=4500
+  NO ping elapsed=5000
+  NO ping elapsed=5500
+  NO ping elapsed=6000
+
+
 TODO
 ^^^^
 
-The following peripherals will be supported.
-ADC, Audio, etc.
+The following features will be supported.
+IPL2 (eMMC boot), Audio, etc.

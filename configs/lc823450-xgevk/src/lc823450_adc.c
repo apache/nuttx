@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/src/lc823450_bringup.c
+ * configs/lc823450-xgevk/src/lc823450_adc.c
  *
  *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -39,53 +39,39 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/mount.h>
+#include <errno.h>
+#include <debug.h>
 
-#include <stdbool.h>
-#include <syslog.h>
+#include <nuttx/board.h>
+#include <nuttx/analog/adc.h>
+#include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
 #include "lc823450-xgevk.h"
+#include "lc823450_adc.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lc823450_bringup
+/************************************************************************************
+ * Name: lc823450_adc_setup
  *
  * Description:
- *   Bring up board features
+ *   Initialize ADC and register the ADC driver.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int lc823450_bringup(void)
+int lc823450_adc_setup(void)
 {
-  int ret;
+  struct adc_dev_s *adc;
 
-#ifdef CONFIG_WATCHDOG
-  lc823450_wdt_initialize();
-#endif
+  /* Call lc823450_adcinitialize() to get an instance of the ADC interface */
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+  adc = lc823450_adcinitialize();
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
+  if (adc == NULL)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      aerr("ERROR: Failed to get ADC interface\n");
+      return -ENODEV;
     }
-#endif
 
-#ifdef CONFIG_BMA250
-  lc823450_bma250initialize("/dev/accel");
-#endif
-
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
-
-  UNUSED(ret);
   return OK;
 }

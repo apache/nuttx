@@ -77,10 +77,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_SDC_DMA
-static DMA_HANDLE hrDma[2];
-static sem_t SemRWait[2];
-static DMA_HANDLE hwDma[2];
-static sem_t SemWWait[2];
+static DMA_HANDLE _hrdma[2];
+static sem_t      _sem_rwait[2];
+static DMA_HANDLE _hwdma[2];
+static sem_t      _sem_wwait[2];
 #endif /* CONFIG_LC823450_SDC_DMA */
 
 static uint64_t _sddep_timeout = (10 * 100); /* 10sec (in tick) */
@@ -93,10 +93,10 @@ extern void sdif_powerctrl(bool);
  * Name: _get_ch_from_cfg
  ****************************************************************************/
 
-static int _get_ch_from_cfg(SdDrCfg *cfg)
+static int _get_ch_from_cfg(struct SdDrCfg_s *cfg)
 {
   int ch = -1;
-  switch (cfg->mRegBase)
+  switch (cfg->regbase)
     {
       case SDIF0_BASE:
         ch = 0;
@@ -145,7 +145,7 @@ static void _sddep_semtake(FAR sem_t *sem)
  * Name: sddep0_hw_init
  ****************************************************************************/
 
-SINT_T sddep0_hw_init(SdDrCfg *cfg)
+SINT_T sddep0_hw_init(struct SdDrCfg_s *cfg)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -176,7 +176,7 @@ SINT_T sddep0_hw_init(SdDrCfg *cfg)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_SDIF_SDC
-SINT_T sddep1_hw_init(SdDrCfg *cfg)
+SINT_T sddep1_hw_init(struct SdDrCfg_s *cfg)
 {
   int i;
 
@@ -209,7 +209,7 @@ SINT_T sddep1_hw_init(SdDrCfg *cfg)
  * Name: sddep0_hw_exit
  ****************************************************************************/
 
-SINT_T sddep0_hw_exit(SdDrCfg *cfg)
+SINT_T sddep0_hw_exit(struct SdDrCfg_s *cfg)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -226,7 +226,7 @@ SINT_T sddep0_hw_exit(SdDrCfg *cfg)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_SDIF_SDC
-SINT_T sddep1_hw_exit(SdDrCfg *cfg)
+SINT_T sddep1_hw_exit(struct SdDrCfg_s *cfg)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -268,7 +268,7 @@ SINT_T sddep1_hw_exit(SdDrCfg *cfg)
  * Name: sddep_voltage_switch
  ****************************************************************************/
 
-void sddep_voltage_switch(SdDrCfg *cfg)
+void sddep_voltage_switch(struct SdDrCfg_s *cfg)
 {
 #ifdef CONFIG_LC823450_SDC_UHS1
   /* GPIO06=H 1.8v */
@@ -283,15 +283,15 @@ void sddep_voltage_switch(SdDrCfg *cfg)
  * Name: sddep_os_init
  ****************************************************************************/
 
-SINT_T sddep_os_init(SdDrCfg *cfg)
+SINT_T sddep_os_init(struct SdDrCfg_s *cfg)
 {
   int ch = _get_ch_from_cfg(cfg);
 
 #ifdef CONFIG_LC823450_SDC_DMA
-  hrDma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  sem_init(&SemRWait[ch], 0, 0);
-  hwDma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  sem_init(&SemWWait[ch], 0, 0);
+  _hrdma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
+  sem_init(&_sem_rwait[ch], 0, 0);
+  _hwdma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
+  sem_init(&_sem_wwait[ch], 0, 0);
 #endif /* CONFIG_LC823450_SDC_DMA */
   return 0;
 }
@@ -300,7 +300,7 @@ SINT_T sddep_os_init(SdDrCfg *cfg)
  * Name: sddep_os_exit
  ****************************************************************************/
 
-SINT_T sddep_os_exit(SdDrCfg *cfg)
+SINT_T sddep_os_exit(struct SdDrCfg_s *cfg)
 {
   return 0;
 }
@@ -309,21 +309,21 @@ SINT_T sddep_os_exit(SdDrCfg *cfg)
  * Name: sddep_set_clk
  ****************************************************************************/
 
-void sddep_set_clk(SdDrCfg *cfg)
+void sddep_set_clk(struct SdDrCfg_s *cfg)
 {
-  if (cfg->mClkDiv == 1)
+  if (cfg->clkdiv == 1)
     {
       DEBUG_PRINT("clock div = 1\n");
     }
 
-  DEBUG_PRINT("clock = %d Hz\n", cfg->mSysClk / cfg->mClkDiv);
+  DEBUG_PRINT("clock = %d Hz\n", cfg->sysclk / cfg->clkdiv);
 }
 
 /****************************************************************************
  * Name: sddep_wait
  ****************************************************************************/
 
-SINT_T sddep_wait(UI_32 ms, SdDrCfg *cfg)
+SINT_T sddep_wait(UI_32 ms, struct SdDrCfg_s *cfg)
 {
 #ifdef CONFIG_HRT_TIMER
   up_hrttimer_usleep(ms * 1000);
@@ -356,7 +356,8 @@ uint64_t sddep_set_timeout(uint64_t t)
  * Name: sddep_wait_status
  ****************************************************************************/
 
-SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status, SdDrCfg *cfg)
+SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status,
+                         struct SdDrCfg_s *cfg)
 {
   systime_t tick0 = clock_systimer();
   int ret = 0;
@@ -364,7 +365,7 @@ SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status, SdDrCfg *cfg)
   while (1)
     {
       systime_t tick1 = clock_systimer();
-      *status = sdif_get_status(cfg->mRegBase);
+      *status = sdif_get_status(cfg->regbase);
       if (req_status & (*status))
         {
           break;
@@ -385,7 +386,8 @@ SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status, SdDrCfg *cfg)
  * Name: sddep_read
  ****************************************************************************/
 
-SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
+SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type,
+                  struct SdDrCfg_s *cfg)
 {
 #ifdef CONFIG_LC823450_SDC_DMA
   int ch = _get_ch_from_cfg(cfg);
@@ -393,7 +395,7 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
     {
       case SDDR_RW_INC_WORD:
       case SDDR_RW_NOINC_WORD:
-        lc823450_dmasetup(hrDma[ch],
+        lc823450_dmasetup(_hrdma[ch],
                           LC823450_DMA_SRCWIDTH_WORD |
                           LC823450_DMA_DSTWIDTH_WORD |
                           (type == SDDR_RW_INC_WORD ? LC823450_DMA_DSTINC : 0),
@@ -402,7 +404,7 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
 
       case SDDR_RW_INC_HWORD:
       case SDDR_RW_NOINC_HWORD:
-        lc823450_dmasetup(hrDma[ch],
+        lc823450_dmasetup(_hrdma[ch],
                           LC823450_DMA_SRCWIDTH_WORD |
                           LC823450_DMA_DSTWIDTH_HWORD |
                           (type == SDDR_RW_INC_HWORD ? LC823450_DMA_DSTINC : 0),
@@ -411,7 +413,7 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
 
       case SDDR_RW_INC_BYTE:
       case SDDR_RW_NOINC_BYTE:
-        lc823450_dmasetup(hrDma[ch],
+        lc823450_dmasetup(_hrdma[ch],
                           LC823450_DMA_SRCWIDTH_WORD |
                           LC823450_DMA_DSTWIDTH_BYTE |
                           (type == SDDR_RW_INC_BYTE ? LC823450_DMA_DSTINC : 0),
@@ -419,13 +421,13 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
         break;
     }
 
-  lc823450_dmastart(hrDma[ch], dma_callback, &SemRWait[ch]);
-  _sddep_semtake(&SemRWait[ch]);
+  lc823450_dmastart(_hrdma[ch], dma_callback, &_sem_rwait[ch]);
+  _sddep_semtake(&_sem_rwait[ch]);
   return 0;
 #else
   SINT_T i;
   UI_32 *p = (UI_32 *)src;
-  UI_32 *buf = cfg->mWorkBuf;
+  UI_32 *buf = cfg->workbuf;
 
   for (i = 0; i < size/sizeof(UI_32); i++)
     {
@@ -473,7 +475,8 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
  * Name: sddep_write
  ****************************************************************************/
 
-SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
+SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
+                   struct SdDrCfg_s *cfg)
 {
 #ifdef CONFIG_LC823450_SDC_DMA
   int ch = _get_ch_from_cfg(cfg);
@@ -481,7 +484,7 @@ SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
     {
       case SDDR_RW_INC_WORD:
       case SDDR_RW_NOINC_WORD:
-        lc823450_dmasetup(hwDma[ch],
+        lc823450_dmasetup(_hwdma[ch],
                           LC823450_DMA_SRCWIDTH_WORD |
                           LC823450_DMA_DSTWIDTH_WORD |
                           (type == SDDR_RW_INC_WORD ? LC823450_DMA_SRCINC : 0),
@@ -490,7 +493,7 @@ SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
 
       case SDDR_RW_INC_HWORD:
       case SDDR_RW_NOINC_HWORD:
-        lc823450_dmasetup(hwDma[ch],
+        lc823450_dmasetup(_hwdma[ch],
                           LC823450_DMA_SRCWIDTH_HWORD |
                           LC823450_DMA_DSTWIDTH_WORD |
                           (type == SDDR_RW_INC_HWORD ? LC823450_DMA_SRCINC : 0),
@@ -499,20 +502,22 @@ SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type, SdDrCfg *cfg)
 
       case SDDR_RW_INC_BYTE:
       case SDDR_RW_NOINC_BYTE:
-        lc823450_dmasetup(hwDma[ch],
+        lc823450_dmasetup(_hwdma[ch],
                           LC823450_DMA_SRCWIDTH_BYTE |
                           LC823450_DMA_DSTWIDTH_WORD |
                           (type == SDDR_RW_INC_BYTE ? LC823450_DMA_SRCINC : 0),
                           (uint32_t)src, (uint32_t)dst, size);
         break;
     }
-    lc823450_dmastart(hwDma[ch], dma_callback, &SemWWait[ch]);
-    _sddep_semtake(&SemWWait[ch]);
-    return 0;
+
+  lc823450_dmastart(_hwdma[ch], dma_callback, &_sem_wwait[ch]);
+  _sddep_semtake(&_sem_wwait[ch]);
+  return 0;
+
 #else
   SINT_T i;
   UI_32 *p = (UI_32 *)dst;
-  UI_32 *buf = cfg->mWorkBuf;
+  UI_32 *buf = cfg->workbuf;
 
   switch (type)
     {

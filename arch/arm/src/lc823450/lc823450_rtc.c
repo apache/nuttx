@@ -108,6 +108,21 @@
 #define RTC_VDET_VDET       0x01
 #define RTC_RTCINTCNT       (RTC_REGBASE + 0x070)
 
+#ifndef timespec_sub
+#define timespec_sub(a, b, c)   /* c = a - b */ \
+  do \
+    {\
+      (c)->tv_nsec = (a)->tv_nsec - (b)->tv_nsec; \
+      (c)->tv_sec = (a)->tv_sec - (b)->tv_sec; \
+      if ((c)->tv_nsec < 0) \
+        {\
+          (c)->tv_nsec += (1000 * 1000 * 1000); \
+          (c)->tv_sec--; \
+        }\
+    }\
+  while (0)
+#endif /* timespec_sub */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -147,6 +162,11 @@ static struct pm_callback_s pm_cb =
 #ifdef CONFIG_RTC_DIV
 static int cboot = 1;
 #endif /* CONFIG_RTC_DIV */
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+static struct timespec lastupdate_mono;
+static struct timespec lastupdate_rtc;
+#endif
 
 /****************************************************************************
  * Public Data
@@ -542,6 +562,11 @@ int up_rtc_settime(FAR const struct timespec *ts)
   up_rtc_set_default_datetime(tp);
 #endif /* CONFIG_RTC_SAVE_DEFAULT */
 
+#ifdef CONFIG_CLOCK_MONOTONIC
+  clock_gettime(CLOCK_MONOTONIC, &lastupdate_mono);
+  lastupdate_rtc = *ts;
+#endif
+
   /* Start rtc update */
 
   putreg8(0, RTC_RTCINT);
@@ -649,6 +674,22 @@ int up_rtc_cancelalarm(void)
 int up_rtc_getrawtime(FAR struct timespec *ts)
 {
   struct tm tm;
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+  struct timespec now, diff;
+
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  timespec_sub(&now, &lastupdate_mono, &diff);
+
+  if (lastupdate_rtc.tv_sec != 0 && diff.tv_sec < 1)
+    {
+      /* Can not read RTC value until the end of first count (<1s)  */
+
+      *ts = lastupdate_rtc;
+      return 0;
+    }
+#endif
+
   tm.tm_sec  = getreg8(RTC_SEC);
   tm.tm_min  = getreg8(RTC_MIN);
   tm.tm_hour = getreg8(RTC_HOUR);
