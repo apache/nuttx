@@ -2996,7 +2996,7 @@ Audio Support
 
     Drivers -> Audio
       CONFIG_I2S=y                          : General I2S support
-      CONFIG_AUDIO_DEVICES=y                : Audio device support
+      CONFIG_DRIVERS_AUDIO=y                : Audio device support
       CONFIG_AUDIO_WM8904=y                 : Build WM8904 driver character driver
 
     Board Selection

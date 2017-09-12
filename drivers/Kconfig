@@ -255,7 +255,7 @@ if ANALOG
 source drivers/analog/Kconfig
 endif # ANALOG
 
-menuconfig AUDIO_DEVICES
+menuconfig DRIVERS_AUDIO
 	bool "Audio Device Support"
 	default n
 	---help---
@@ -266,9 +266,9 @@ menuconfig AUDIO_DEVICES
 		NOTE: All of these drivers depend on support from the audio subsystem
 		enabled with the AUDIO selection.
 
-if AUDIO_DEVICES
+if DRIVERS_AUDIO
 source drivers/audio/Kconfig
-endif # AUDIO_DEVICES
+endif # DRIVERS_AUDIO
 
 menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"

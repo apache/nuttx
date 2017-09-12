@@ -2643,7 +2643,7 @@ I2S Audio Support
 
     Drivers -> Audio
       CONFIG_I2S=y                     : General I2S support
-      CONFIG_AUDIO_DEVICES=y           : Audio device support
+      CONFIG_DRIVERS_AUDIO=y           : Audio device support
       CONFIG_AUDIO_I2SCHAR=y           : Build I2S character driver
 
     The following describes how I have the test application at
