@@ -1840,6 +1840,20 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    * the ISR cycle to handle the sending/receiving of the messages.
    */
 
+  /* First check for errors */
+
+  if ((status & I2C_SR1_ERRORMASK) != 0)
+    {
+      stm32_i2c_traceevent(priv, I2CEVENT_ERROR, status & I2C_SR1_ERRORMASK);
+
+      /* Clear interrupt flags */
+
+      stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
+
+      priv->dcnt = -1;
+      priv->msgc = 0;
+    }
+
   if (priv->dcnt == -1 && priv->msgc == 0)
     {
       i2cinfo("Shutting down I2C ISR\n");
