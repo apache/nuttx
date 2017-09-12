@@ -46,6 +46,7 @@
 
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
@@ -55,6 +56,29 @@
 
 #ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
 int trv_mount_world(int minor, FAR const char *mountpoint);
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#define NEED_FRAMEBUFFER 1
+
+/* If we are using the X11 touchscreen simulation, then the frame buffer
+ * initialization happens in board_tsc_setup.  Otherwise, we will need to
+ * do that here.
+ */
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+#  undef NEED_FRAMEBUFFER
+#endif
+
+/* Currently the only case we need to initialize the framebuffer here is
+ * when we are testing the framebuffer character driver.
+ */
+
+#ifndef CONFIG_VIDEO_FB
+#  undef NEED_FRAMEBUFFER
 #endif
 
 /****************************************************************************
@@ -74,9 +98,7 @@ int sim_bringup(void)
 #ifdef CONFIG_ONESHOT
   FAR struct oneshot_lowerhalf_s *oneshot;
 #endif
-#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_ONESHOT)
   int ret;
-#endif
 
 #ifdef CONFIG_LIB_ZONEINFO_ROMFS
   /* Mount the TZ database */
@@ -96,7 +118,7 @@ int sim_bringup(void)
   oneshot = oneshot_initialize(0, 0);
   if (oneshot == NULL)
     {
-      _err("ERROR: oneshot_initialize faile\n");
+      syslog(LOG_ERR, "ERROR: oneshot_initialize faile\n");
     }
   else
     {
@@ -111,8 +133,8 @@ int sim_bringup(void)
       ret = oneshot_register("/dev/oneshot", oneshot);
       if (ret < 0)
         {
-          _err("ERROR: Failed to register oneshot at /dev/oneshot: %d\n",
-               ret);
+          syslog(LOG_ERR, "ERROR: Failed to register oneshot at /dev/oneshot: %d\n",
+                 ret);
         }
 #endif
     }
@@ -136,8 +158,18 @@ int sim_bringup(void)
   ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      _err("ERROR: Failed to mount procfs at %s: %d\n",
-           SIM_PROCFS_MOUNTPOINT, ret);
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             SIM_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef NEED_FRAMEBUFFER
+  /* Initialize and register the simulated framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
 #endif
 
@@ -147,7 +179,7 @@ int sim_bringup(void)
   ret = ieee8021514_loopback();
   if (ret < 0)
     {
-      _err("ERROR: ieee8021514_loopback() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: ieee8021514_loopback() failed: %d\n", ret);
     }
 #endif
 
@@ -157,9 +189,10 @@ int sim_bringup(void)
   ret = pktradio_loopback();
   if (ret < 0)
     {
-      _err("ERROR: pktradio_loopback() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: pktradio_loopback() failed: %d\n", ret);
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }

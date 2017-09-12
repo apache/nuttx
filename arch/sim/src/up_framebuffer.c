@@ -44,7 +44,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxglib.h>
 #include <nuttx/video/fb.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -423,3 +426,24 @@ void up_fbuninitialize(int display)
 {
 }
 
+/****************************************************************************
+ * Name: nx_notify_rectangle
+ *
+ * Description:
+ *   Must be provided if CONFIG_NX_UPDATE is enabled
+ *
+ * Input Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_UPDATE
+void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
+                         FAR const struct nxgl_rect_s *rect)
+{
+}
+#endif

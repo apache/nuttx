@@ -178,7 +178,7 @@
 #define FB_FMT_CXY1        60          /* BPP=12 */
 #define FB_FMT_CXY2        61          /* BPP=16 */
 
-#define FB_ISYUVPLANAR(f)  ((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
+#define FB_ISYUVPLANAR(f)  (((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
 #define FB_ISYUV(f)        (FB_ISYUVPACKED(f) || FB_ISYUVPLANAR(f))
 
 /* Hardware cursor control **************************************************/
@@ -446,6 +446,31 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane);
  ****************************************************************************/
 
 void up_fbuninitialize(int display);
+
+/****************************************************************************
+ * Name: fb_register
+ *
+ * Description:
+ *   Register the framebuffer character device at /dev/fbN where N is the
+ *   display number if the devices supports only a single plane.  If the
+ *   hardware supports multile color planes, then the device will be
+ *   registered at /dev/fbN-M where N is the again display number but M is
+ *   the display plane.
+ *
+ * Input Parameters:
+ *   display - The display number for the case of boards supporting multiple
+ *             displays or for hardware that supports supports multile
+ *             layers (each layer is consider a display).  Typically zero.
+ *   plane   - Identifies the color plane on hardware that supports separate
+ *             framebuffer "planes" for each color component.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int fb_register(int display, int plane);
 
 #undef EXTERN
 #ifdef __cplusplus
