@@ -124,16 +124,11 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   DEBUGASSERT(psock != NULL && buf != NULL);
 
-  /* Treat as a cancellation point */
-
-  (void)enter_cancellation_point();
-
   /* Let the address family's send() method handle the operation */
 
   DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
   ret = psock->s_sockif->si_send(psock, buf, len, flags);
 
-  leave_cancellation_point();
   if (ret < 0)
     {
       nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %d\n", ret);
