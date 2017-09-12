@@ -270,15 +270,15 @@ if AUDIO_DEVICES
 source drivers/audio/Kconfig
 endif # AUDIO_DEVICES
 
-menuconfig VIDEO_DEVICES
+menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"
 	default n
 	---help---
 		Enable support for video device drivers.
 
-if VIDEO_DEVICES
+if DRIVERS_VIDEO
 source drivers/video/Kconfig
-endif # VIDEO_DEVICES
+endif # DRIVERS_VIDEO
 
 menuconfig BCH
 	bool "Block-to-Character (BCH) Support"

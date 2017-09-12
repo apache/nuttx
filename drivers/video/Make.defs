@@ -35,7 +35,7 @@
 
 # Include video drivers
 
-ifeq ($(CONFIG_VIDEO_DEVICES),y)
+ifeq ($(CONFIG_DRIVERS_VIDEO),y)
 
 ifeq ($(CONFIG_VIDEO_FB),y)
   CSRCS += fb.c
