@@ -2303,7 +2303,6 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
                               int count)
 {
   FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  stm32_i2c_sem_wait(priv);   /* Ensure that address or flags don't change meanwhile */
   uint32_t status = 0;
 #ifdef I2C1_FSMC_CONFLICT
   uint32_t ahbenr;
@@ -2311,6 +2310,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
   int ret = 0;
 
   DEBUGASSERT(count);
+  stm32_i2c_sem_wait(priv);   /* Ensure that address or flags don't change meanwhile */
 
 #ifdef CONFIG_STM32_I2C_DMA
   /* stop DMA just in case */
