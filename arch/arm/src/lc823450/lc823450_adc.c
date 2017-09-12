@@ -242,6 +242,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
           break;
         }
     }
+
   DEBUGASSERT(i < 6);
 
   /* Setup ADC channels */

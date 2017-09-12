@@ -159,7 +159,8 @@ struct SdDrCfg_s
   UI_32 cid[4];          /* CID */
   UI_32 csd[4];          /* CSD */
 
-  union {
+  union
+  {
     struct SdInfo_s  sd;     /* SD specific info */
     struct MmcInfo_s mmc;    /* MMC specific info */
   } ex;

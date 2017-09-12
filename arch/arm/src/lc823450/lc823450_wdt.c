@@ -542,7 +542,7 @@ int lc823450_wdt_initialize(void)
   modifyreg32(MCLKCNTEXT1, 0,
               MCLKCNTEXT1_PTM0C_CLKEN | MCLKCNTEXT1_PTM0_CLKEN);
   modifyreg32(MRSTCNTEXT1, 0, MRSTCNTEXT1_PTM0_RSTB);
-  
+
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
   /* Attach our WDT interrupt handler (But don't enable it yet) */
 
