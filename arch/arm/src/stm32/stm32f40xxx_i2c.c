@@ -2018,6 +2018,20 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    * the ISR cycle to handle the sending/receiving of the messages.
    */
 
+  /* First check for errors */
+
+  if ((status & I2C_SR1_ERRORMASK) != 0)
+    {
+      stm32_i2c_traceevent(priv, I2CEVENT_ERROR, status & I2C_SR1_ERRORMASK);
+
+      /* Clear interrupt flags */
+
+      stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
+
+      priv->dcnt = -1;
+      priv->msgc = 0;
+    }
+
   if (priv->dcnt == -1 && priv->msgc == 0)
     {
       i2cinfo("Shutting down I2C ISR\n");
@@ -2289,7 +2303,6 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
                               int count)
 {
   FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  stm32_i2c_sem_wait(priv);   /* Ensure that address or flags don't change meanwhile */
   uint32_t status = 0;
 #ifdef I2C1_FSMC_CONFLICT
   uint32_t ahbenr;
@@ -2297,6 +2310,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
   int ret = 0;
 
   DEBUGASSERT(count);
+  stm32_i2c_sem_wait(priv);   /* Ensure that address or flags don't change meanwhile */
 
 #ifdef CONFIG_STM32_I2C_DMA
   /* stop DMA just in case */

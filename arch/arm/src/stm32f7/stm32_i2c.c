@@ -57,7 +57,7 @@
  *      Fast-mode (up to 400 kHz)
  *      Fast-mode Plus (up to 1 MHz)
  *      fI2CCLK clock source selection is based on STM32_RCC_DCKCFGR2_I2CxSRC
- *      being set to HSI and the calulations are based on STM32_HSI_FREQUENCY
+ *      being set to HSI and the calculations are based on STM32_HSI_FREQUENCY
  *      of 16mHz
  *
  *  - Multiple instances (shared bus)
