@@ -3369,6 +3369,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       default:
         nerr("ERROR: Unrecognized PHY status setting\n");
 
+        /* Falls through */
+
       case CONFIG_STM32F7_PHYSR_10HD:
         priv->fduplex = 0;
         priv->mbps100 = 0;

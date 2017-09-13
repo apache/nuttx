@@ -246,9 +246,11 @@ static int stm32_interrupt(int irq, void *context, FAR void *arg)
 
 static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
 {
-  if (sem_wait(&g_rngdev.rd_devsem) != OK)
+  int ret;
+
+  if (sem_wait(&g_rngdev.rd_devsem) < 0)
     {
-      return -errno;
+      return -get_errno();
     }
   else
     {
@@ -272,13 +274,17 @@ static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
 
       /* Wait until the buffer is filled */
 
-      sem_wait(&g_rngdev.rd_readsem);
+      ret = sem_wait(&g_rngdev.rd_readsem);
+      if (ret < 0)
+        {
+          ret = -get_errno();
+        }
 
       /* Free RNG for next use */
 
       sem_post(&g_rngdev.rd_devsem);
 
-      return buflen;
+      return ret < 0 ? ret : buflen;
     }
 }
 
