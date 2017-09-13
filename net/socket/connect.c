@@ -145,6 +145,14 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       goto errout;
     }
 
+  /* Make sure that an address was provided */
+
+  if (addr == NULL)
+    {
+      errcode = EFAULT;
+      goto errout;
+    }
+
   /* Let the address family's connect() method handle the operation */
 
   DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_connect != NULL);

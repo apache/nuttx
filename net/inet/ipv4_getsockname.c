@@ -98,6 +98,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       return -ENOSYS;
     }
 
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   /* Set the port number */
 
   switch (psock->s_type)
@@ -170,6 +171,9 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   /* Return success */
 
   return OK;
+#else
+  return -EOPNOTSUPP;
+#endif
 }
 
 #endif /* CONFIG_NET_IPv4 */

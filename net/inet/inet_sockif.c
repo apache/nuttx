@@ -615,9 +615,10 @@ int inet_listen(FAR struct socket *psock, int backlog)
  *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
  *
  * Parameters:
- *   psock     Pointer to a socket structure initialized by psock_socket()
- *   addr      Server address (form depends on type of socket)
- *   addrlen   Length of actual 'addr'
+ *   psock   - Pointer to a socket structure initialized by psock_socket()
+ *   addr    - Server address (form depends on type of socket).  The upper
+ *             socket layer has verified that this address is non-NULL.
+ *   addrlen - Length of actual 'addr'
  *
  * Returned Value:
  *   0 on success; a negated errno value on failue.  See connect() for the
@@ -685,7 +686,7 @@ static int inet_connect(FAR struct socket *psock,
       case SOCK_DGRAM:
         {
           int ret = udp_connect(psock->s_conn, addr);
-          if (ret < 0 || addr == NULL)
+          if (ret < 0)
             {
               psock->s_flags &= ~_SF_CONNECTED;
             }
