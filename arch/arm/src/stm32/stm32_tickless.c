@@ -872,8 +872,8 @@ int up_timer_start(FAR const struct timespec *ts)
   uint32_t count;
   irqstate_t flags;
 
-  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-         handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  tmrinfo("ts=(%lu, %lu)\n",
+          (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
   DEBUGASSERT(ts);
   DEBUGASSERT(g_tickless.tch);
 
