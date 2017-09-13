@@ -231,7 +231,7 @@ static uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
           g_last_udp_port = 4096;
         }
     }
-  while (udp_find_conn(domain, u, htons(g_last_udp_port)));
+  while (udp_find_conn(domain, u, htons(g_last_udp_port)) != NULL);
 
   /* Initialize and return the connection structure, bind it to the
    * port number
@@ -661,12 +661,16 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
       /* Is any other UDP connection already bound to this address and port? */
 
-      if (!udp_find_conn(conn->domain, &conn->u, portno))
+      if (udp_find_conn(conn->domain, &conn->u, portno) == NULL)
         {
           /* No.. then bind the socket to the port */
 
           conn->lport = portno;
           ret         = OK;
+        }
+      else
+        {
+          ret         = -EADDRINUSE;
         }
 
       net_unlock();
