@@ -72,6 +72,10 @@ ifeq ($(CONFIG_SENSORS_MAX31855),y)
 CSRCS += stm32_max31855.c
 endif
 
+ifeq ($(CONFIG_STM32F4DISCO_LIS3DSH),y)
+CSRCS += stm32_lis3dsh.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MAX6675),y)
 CSRCS += stm32_max6675.c
 endif
