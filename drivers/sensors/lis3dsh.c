@@ -62,9 +62,9 @@
 
 struct lis3dsh_sensor_data_s
 {
-  int16_t x_acc;              /* Measurement result for x axis */
-  int16_t y_acc;              /* Measurement result for y axis */
-  int16_t z_acc;              /* Measurement result for z axis */
+  int16_t x_acc;                       /* Measurement result for x axis */
+  int16_t y_acc;                       /* Measurement result for y axis */
+  int16_t z_acc;                       /* Measurement result for z axis */
 };
 
 struct lis3dsh_dev_s
@@ -310,7 +310,12 @@ static int lis3dsh_interrupt_handler(int irq, FAR void *context)
 
   /* Find out which device caused the interrupt */
 
-  for (priv = g_lis3dsh_list; priv && priv->config->irq != irq; priv = priv->flink);
+  for (priv = g_lis3dsh_list;
+       priv && priv->config->irq != irq;
+       priv = priv->flink);
+    {
+    }
+
   DEBUGASSERT(priv != NULL);
 
   /* Task the worker with retrieving the latest sensor data. We should not do

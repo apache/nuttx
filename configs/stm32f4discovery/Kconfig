@@ -28,16 +28,16 @@ config STM32F4DISCO_QETIMER
 	depends on QENCODER
 
 config STM32F4DISCO_LIS3DSH
-    bool "Enable LIS3DSH driver for the IMU on STM32F4Discovery (rev. MB997C)"
-    default n
-    depends on SPI
-    depends on LIS3DSH
-    default n
-    ---help---
-        Select to create a LIS3DSH driver instance for the builtin accelerometer of
-        STM32F4Discovery. Provides /dev/acc0 device file.
-        Also see apps/examples/lis3dsh_reader.
-        The LIS3DSH is available on the STM32F4Discovery rev. MB997C (see the board manual).
+	bool "Enable LIS3DSH driver for the IMU on STM32F4Discovery (rev. MB997C)"
+	default n
+	depends on SPI
+	depends on LIS3DSH
+	default n
+	---help---
+		Select to create a LIS3DSH driver instance for the builtin accelerometer of
+		STM32F4Discovery. Provides /dev/acc0 device file.
+		Also see apps/examples/lis3dsh_reader.
+		The LIS3DSH is available on the STM32F4Discovery rev. MB997C (see the board manual).
 
 config PM_BUTTONS
 	bool "PM button support"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f4discovery/src/stm32_bringup.c
  *
- *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,10 +76,6 @@
 #  include <nuttx/timers/rtc.h>
 #  include "stm32_rtc.h"
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -266,10 +262,18 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_SENSORS_MAX31855
   ret = stm32_max31855initialize("/dev/temp0");
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max31855initialize failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_SENSORS_MAX6675
   ret = stm32_max6675initialize("/dev/temp0");
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_FS_PROCFS
@@ -285,8 +289,11 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_SENSORS_XEN1210
   ret = xen1210_archinitialize(0);
+  if (ret < 0)
+    {
+      serr("ERROR:  xen1210_archinitialize failed: %d\n", ret);
+    }
 #endif
-
 
 #ifdef CONFIG_STM32F4DISCO_LIS3DSH
   /* Create a lis3dsh driver instance fitting the chip built into stm32f4discovery */
@@ -297,7 +304,6 @@ int stm32_bringup(void)
       serr("ERROR: Failed to initialize LIS3DSH driver: %d\n", ret);
     }
 #endif
-
 
   return ret;
 }
