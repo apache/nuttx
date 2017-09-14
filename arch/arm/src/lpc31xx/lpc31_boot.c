@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc31xx/lpc31_boot.c
  *
- *   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
  */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static const struct section_mapping_s section_mapping[] =
+static const struct section_mapping_s g_section_mapping[] =
 {
   { LPC31_SHADOWSPACE_PSECTION, LPC31_SHADOWSPACE_VSECTION,
     LPC31_SHADOWSPACE_MMUFLAGS, LPC31_SHADOWSPACE_NSECTIONS},
@@ -127,7 +127,7 @@ static const struct section_mapping_s section_mapping[] =
     LPC31_NAND_MMUFLAGS, LPC31_NAND_NSECTIONS},
 #endif
 };
-#define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
+#define NMAPPINGS (sizeof(g_section_mapping) / sizeof(struct section_mapping_s))
 #endif
 
 /************************************************************************************
@@ -183,11 +183,11 @@ static void up_setupmappings(void)
 
   for (i = 0; i < NMAPPINGS; i++)
     {
-      uint32_t sect_paddr = section_mapping[i].physbase;
-      uint32_t sect_vaddr = section_mapping[i].virtbase;
-      uint32_t mmuflags   = section_mapping[i].mmuflags;
+      uint32_t sect_paddr = g_section_mapping[i].physbase;
+      uint32_t sect_vaddr = g_section_mapping[i].virtbase;
+      uint32_t mmuflags   = g_section_mapping[i].mmuflags;
 
-      for (j = 0; j < section_mapping[i].nsections; j++)
+      for (j = 0; j < g_section_mapping[i].nsections; j++)
         {
           up_setlevel1entry(sect_paddr, sect_vaddr, mmuflags);
           sect_paddr += SECTION_SIZE;
