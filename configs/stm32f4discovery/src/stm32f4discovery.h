@@ -430,6 +430,19 @@ int stm32_bmp180initialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: stm32_lis3dshinitialize
+ *
+ * Description:
+ *   Called to configure SPI 1, and to register LIS3DSH and its external interrupt
+ *   for the stm32f4discovery board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F4DISCO_LIS3DSH
+int stm32_lis3dshinitialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:

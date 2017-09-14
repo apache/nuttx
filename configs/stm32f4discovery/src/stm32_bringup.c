@@ -287,5 +287,17 @@ int stm32_bringup(void)
   ret = xen1210_archinitialize(0);
 #endif
 
+
+#ifdef CONFIG_STM32F4DISCO_LIS3DSH
+  /* Create a lis3dsh driver instance fitting the chip built into stm32f4discovery */
+
+  ret = stm32_lis3dshinitialize("/dev/acc0");
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize LIS3DSH driver: %d\n", ret);
+    }
+#endif
+
+
   return ret;
 }
