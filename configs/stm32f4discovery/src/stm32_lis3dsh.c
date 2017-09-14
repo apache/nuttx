@@ -83,7 +83,11 @@
 int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config, xcpt_t interrupt_handler)
 {
     return stm32_gpiosetevent(GPIO_STM32F4DISCO_LIS3DSH_EXT0,
-                              true, false, false, interrupt_handler, NULL );
+                              true,
+                              false,
+                              false,
+                              interrupt_handler,
+                              NULL );
 }
 
 /************************************************************************************
@@ -118,14 +122,14 @@ int stm32_lis3dshinitialize(FAR const char *devpath)
 
   spi = stm32_spibus_initialize(1);
   if (!spi)
-  {
-    spiinfo("Failed to initialize SPI port\n");
-    ret = -ENODEV;
-  }
+    {
+      spiinfo("Failed to initialize SPI port\n");
+      ret = -ENODEV;
+    }
   else
-  {
-    ret = lis3dsh_register(devpath, spi, &acc0_config);
-  }
+    {
+      ret = lis3dsh_register(devpath, spi, &acc0_config);
+    }
 
   return ret;
 }
