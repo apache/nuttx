@@ -76,8 +76,6 @@ struct fb_chardev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static size_t  fb_pixel2byte(FAR struct fb_chardev_s *fb, size_t pixsize);
-
 static int     fb_open(FAR struct file *filep);
 static int     fb_close(FAR struct file *filep);
 static ssize_t fb_read(FAR struct file *filep, FAR char *buffer,
@@ -110,19 +108,6 @@ static const struct file_operations fb_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: fb_pixel2byte
- *
- * Description:
- *   Convert a value in units of pixels to units of bytes.
- *
- ****************************************************************************/
-
-static size_t fb_pixel2byte(FAR struct fb_chardev_s *fb, size_t pixsize)
-{
-  return (pixsize * fb->bpp) >> 3; /* Overflow possible? */
-}
 
 /****************************************************************************
  * Name: fb_open
@@ -174,7 +159,7 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get the start and size of the transfer */
 
-  start = fb_pixel2byte(fb, filep->f_pos);
+  start = filep->f_pos;
   if (start >= fb->fblen)
     {
       return 0;  /* Return end-of-file */
@@ -217,7 +202,7 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer, size_t l
 
   /* Get the start and size of the transfer */
 
-  start = fb_pixel2byte(fb, filep->f_pos);
+  start = filep->f_pos;
   if (start >= fb->fblen)
     {
       return -EFBIG;  /* Cannot extend the framebuffer */
