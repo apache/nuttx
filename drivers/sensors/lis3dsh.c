@@ -318,13 +318,15 @@ static int lis3dsh_interrupt_handler(int irq, FAR void *context)
    * SPI bus from within an interrupt.
    */
 
-  if(work_available(&priv->work)) {
-    ret = work_queue(HPWORK, &priv->work, lis3dsh_worker, priv, 0);
-    if (ret < 0) {
-        snerr("ERROR: Failed to queue work: %d\n", ret);
-        return ret;
+  if (work_available(&priv->work))
+    {
+      ret = work_queue(HPWORK, &priv->work, lis3dsh_worker, priv, 0);
+      if (ret < 0)
+        {
+          snerr("ERROR: Failed to queue work: %d\n", ret);
+          return ret;
+        }
     }
-  }
 
   return OK;
 }
