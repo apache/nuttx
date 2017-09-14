@@ -56,7 +56,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define GPIO_STM32F4DISCO_LIS3DSH_EXT0 (GPIO_INPUT|GPIO_FLOAT|GPIO_AF0|GPIO_SPEED_50MHz|GPIO_PORTE|GPIO_PIN0)
+#define GPIO_STM32F4DISCO_LIS3DSH_EXT0 \
+  (GPIO_INPUT|GPIO_FLOAT|GPIO_AF0|GPIO_SPEED_50MHz|GPIO_PORTE|GPIO_PIN0)
 
 /************************************************************************************
  * Private Functions
@@ -66,10 +67,12 @@
  * Name: attach_disc_lis3dsh
  *
  * Description:
- *   Attach the lis3dsh interrupt handler to PE0/EXT0 on the STM32F4 as wired on STM32F4Discovery
+ *   Attach the lis3dsh interrupt handler to PE0/EXT0 on the STM32F4 as wired
+ *   on STM32F4Discovery
  *
  * Input parameters:
- *   *config - The lis3dsh instance configuration data containing the IRQ number, device ID and interrupt handler
+ *   *config - The lis3dsh instance configuration data containing the IRQ number,
+ *     device ID and interrupt handler
  *   interrupt_handler - The interrupt handler to attach
  *   arg -
  *
@@ -77,8 +80,10 @@
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
-int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config, xcpt_t interrupt_handler) {
-    return stm32_gpiosetevent(GPIO_STM32F4DISCO_LIS3DSH_EXT0, true, false, false, interrupt_handler, NULL );
+int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config, xcpt_t interrupt_handler)
+{
+    return stm32_gpiosetevent(GPIO_STM32F4DISCO_LIS3DSH_EXT0,
+                              true, false, false, interrupt_handler, NULL );
 }
 
 /************************************************************************************
@@ -98,6 +103,7 @@ int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config, xcpt_t interrupt_ha
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
+ 
 int stm32_lis3dshinitialize(FAR const char *devpath)
 {
   static struct lis3dsh_config_s acc0_config;
@@ -105,17 +111,19 @@ int stm32_lis3dshinitialize(FAR const char *devpath)
   int ret;
 
   sninfo("Initializing LIS3DSH\n");
-
-  acc0_config.irq=22;  // Interrupt no. for PE0 (INT1 on LIS3DSH)
+  
+  acc0_config.irq=22;
   acc0_config.spi_devid=0;
   acc0_config.attach = &attach_disc_lis3dsh;
 
   spi = stm32_spibus_initialize(1);
-  if( !spi ) {
+  if (!spi)
+  {
     spiinfo("Failed to initialize SPI port\n");
     ret = -ENODEV;
   }
-  else {
+  else
+  {
     ret = lis3dsh_register(devpath, spi, &acc0_config);
   }
 
