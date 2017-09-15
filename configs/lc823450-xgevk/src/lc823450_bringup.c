@@ -45,6 +45,10 @@
 #include <stdbool.h>
 #include <syslog.h>
 
+#ifdef CONFIG_WATCHDOG
+#  include "lc823450_wdt.h"
+#endif
+
 #include "lc823450-xgevk.h"
 
 /****************************************************************************

@@ -81,6 +81,7 @@
 int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
   FAR struct net_driver_s *dev;
   in_addr_t lipaddr;
@@ -98,7 +99,6 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       return -ENOSYS;
     }
 
-#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   /* Set the port number */
 
   switch (psock->s_type)
