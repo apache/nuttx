@@ -362,7 +362,7 @@ Configurations
 
        1. Configure the Coordinator.  On coordinator device do:
 
-          nsh> i8 /dev/ieee0 startpan
+          nsh> i8 /dev/ieee0 startpan cd:ab
           nsh> i8 acceptassoc
 
        2. Assocate an endpoint device with the WPAN.  On the endpoint
@@ -432,10 +432,12 @@ Configurations
     5. IPv6 networking is enabled with TCP/IP, UDP, 6LoWPAN, and NSH
        Telnet support.
 
-    6. Configuration instructions:  Basic PAN configuration is the same as
-       for the ieee802154-mac configuration with the exception that after
-       the PAN has been configured with the i8sak utility, you must
-       explicity bring the network up on each node:
+    6. Configuration instructions:  Basic PAN configuration is similar to the
+       mrf24j40-mac configuration with the exception that you use the network
+       interface name 'wpan0'. This tells the i8sak app to use a socket
+       instead of a character device to perform the IOCTL operations with the
+       MAC. Additionally, after the PAN has been configured with the i8sak
+       utility, you must explicity bring the network up on each node:
 
          nsh> ifup wpan0
 
@@ -459,9 +461,9 @@ Configurations
        Cheat Sheet.  Here is a concise summary of all all the steps needed to
        run the UDP test (C=Coordinator; E=Endpoint):
 
-         C: nsh> i8 /dev/ieee0 startpan
-         C: nsh> 8 acceptassoc
-         E: nsh> i8 assoc
+         C: nsh> i8 wpan0 startpan cd:ab
+         C: nsh> i8 acceptassoc
+         E: nsh> i8 wpan0 assoc
          C: nsh> ifup wpan0
          C: nsh> ifconfig          <-- To get the <server-ip>
          E: nsh> ifup wpan0
@@ -491,9 +493,9 @@ Configurations
        Cheat Sheet.  Here is a concise summary of all all the steps needed to
        run the TCP test (C=Coordinator; E=Endpoint):
 
-         C: nsh> i8 /dev/ieee0 startpan
-         C: nsh> 8 acceptassoc
-         E: nsh> i8 assoc
+         C: nsh> i8 wpan0 startpan cd:ab
+         C: nsh> i8 acceptassoc
+         E: nsh> i8 wpan0 assoc
          C: nsh> ifup wpan0
          C: nsh> ifconfig          <-- To get the <server-ip>
          E: nsh> ifup wpan0
@@ -531,9 +533,9 @@ Configurations
        Cheat Sheet.  Here is a concise summary of all all the steps needed to
        run the TCP test (C=Coordinator; E=Endpoint):
 
-         C: nsh> i8 /dev/ieee0 startpan
-         C: nsh> 8 acceptassoc
-         E: nsh> i8 assoc
+         C: nsh> i8 wpan0 startpan
+         C: nsh> i8 acceptassoc
+         E: nsh> i8 wpan0 assoc
          C: nsh> ifup wpan0
          C: nsh> ifconfig           <-- To get the <server-ip>
          E: nsh> ifup wpan0
@@ -633,10 +635,10 @@ Configurations
        representing the two star endpoints and C: representing the
        coordinator/hub.
 
-         C:  nsh> i8 /dev/ieee0 startpan
-         C:  nsh> 8 acceptassoc
-         E1: nsh> i8 assoc
-         E2: nsh> i8 assoc
+         C:  nsh> i8 wpan0 startpan cd:ab
+         C:  nsh> i8 acceptassoc
+         E1: nsh> i8 wpan0 assoc
+         E2: nsh> i8 wpan0 assoc
          C:  nsh> ifup wpan0
          E1: nsh> ifup wpan0
          E1: nsh> ifconfig           <-- To get the IP address of E1 endpoint

@@ -264,8 +264,9 @@ int xbee_req_data(XBEEHANDLE xbee,
   int index;
   uint16_t apiframelen;
   uint8_t frametype;
-
+#ifdef CONFIG_DEBUG_ASSERTIONS
   int prevoffs = frame->io_offset;
+#endif
 
   /* Figure out how much room we need to place the API frame header */
 

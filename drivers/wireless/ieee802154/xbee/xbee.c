@@ -155,7 +155,7 @@ static void xbee_attnworker(FAR void *arg)
   FAR struct iob_s *iobhead = NULL;
   FAR struct iob_s *iob = NULL;
   FAR struct iob_s *previob = NULL;
-  uint16_t rxframelen;
+  uint16_t rxframelen = 0;
 
   DEBUGASSERT(priv);
   DEBUGASSERT(priv->spi);
@@ -911,7 +911,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
   FAR struct iob_s *iob;
   FAR struct iob_s *previob;
   FAR struct iob_s *iobhead;
-  uint16_t rxframelen;
+  uint16_t rxframelen = 0;
   int i;
 
   /* Get access to SPI bus, set relevant settings */
