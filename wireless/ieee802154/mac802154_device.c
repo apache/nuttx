@@ -52,7 +52,7 @@
 
 #include <nuttx/mm/iob.h>
 
-#include <nuttx/wireless/ieee802154/ieee802154_ioctl.h>
+#include <nuttx/wireless/ieee802154/ieee802154_device.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -120,9 +120,9 @@ struct mac802154_chardevice_s
 #ifndef CONFIG_DISABLE_SIGNALS
   /* MAC Service notification information */
 
-  bool notify_registered;
-  struct mac802154dev_notify_s md_notify;
-  pid_t md_notify_pid;
+  bool    md_notify_registered;
+  uint8_t md_notify_signo;
+  pid_t   md_notify_pid;
 
 #endif
 };
@@ -620,6 +620,8 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 {
   FAR struct inode *inode;
   FAR struct mac802154_chardevice_s *dev;
+  FAR union ieee802154_macarg_u *macarg =
+    (FAR union ieee802154_macarg_u *)((uintptr_t)arg);
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
@@ -637,47 +639,32 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
       return ret;
     }
 
-  /* Handle the ioctl command */
-
   switch (cmd)
     {
 #ifndef CONFIG_DISABLE_SIGNALS
-      /* Command:     MAC802154IOC_MLME_REGISTER, MAC802154IOC_MCPS_REGISTER
+      /* Command:     MAC802154IOC_NOTIFY_REGISTER
        * Description: Register to receive a signal whenever there is a
        *              event primitive sent from the MAC layer.
-       * Argument:    A read-only pointer to an instance of struct
-       *              mac802154dev_notify_s
+       * Argument:    The signal number to use.
        * Return:      Zero (OK) on success.  Minus one will be returned on
        *              failure with the errno value set appropriately.
        */
 
       case MAC802154IOC_NOTIFY_REGISTER:
         {
-          FAR struct mac802154dev_notify_s *notify =
-            (FAR struct mac802154dev_notify_s *)((uintptr_t)arg);
+          /* Save the notification events */
 
-          if (notify)
-            {
-              /* Save the notification events */
+          dev->md_notify_signo      = macarg->signo;
+          dev->md_notify_pid        = getpid();
+          dev->md_notify_registered = true;
 
-              dev->md_notify.mn_signo      = notify->mn_signo;
-              dev->md_notify_pid           = getpid();
-              dev->notify_registered = true;
-
-              ret = OK;
-            }
-          else
-            {
-              ret = -EINVAL;
-            }
+          ret = OK;
         }
         break;
 #endif
 
       case MAC802154IOC_GET_EVENT:
         {
-          FAR struct ieee802154_notif_s *usr_notif =
-            (FAR struct ieee802154_notif_s *)((uintptr_t)arg);
           FAR struct ieee802154_notif_s *notif;
 
           while (1)
@@ -692,7 +679,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
               if (notif != NULL)
                 {
-                  memcpy(usr_notif, notif, sizeof(struct ieee802154_notif_s));
+                  memcpy(&macarg->notif, notif, sizeof(struct ieee802154_notif_s));
 
                   /* Free the notification */
 
@@ -743,7 +730,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
       case MAC802154IOC_ENABLE_EVENTS:
         {
-          dev->enableevents = (bool)arg;
+          dev->enableevents = macarg->enable;
           ret = OK;
         }
         break;
@@ -782,7 +769,7 @@ static void mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
    * notifications.
    */
 
-  if (dev->enableevents && (dev->md_open != NULL || dev->notify_registered))
+  if (dev->enableevents && (dev->md_open != NULL || dev->md_notify_registered))
     {
       mac802154dev_pushevent(dev, notif);
 
@@ -797,15 +784,15 @@ static void mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
         }
 
 #ifndef CONFIG_DISABLE_SIGNALS
-      if (dev->notify_registered)
+      if (dev->md_notify_registered)
         {
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)notif->notiftype;
-          (void)sigqueue(dev->md_notify_pid, dev->md_notify.mn_signo, value);
+          (void)sigqueue(dev->md_notify_pid, dev->md_notify_signo, value);
 #else
-          (void)sigqueue(dev->md_notify_pid, dev->md_notify.mn_signo,
+          (void)sigqueue(dev->md_notify_pid, dev->md_notify_signo,
                          (FAR void *)notif->notiftype);
 #endif
         }
@@ -928,7 +915,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   dev->event_tail = NULL;
 
   dev->enableevents = true;
-  dev->notify_registered = false;
+  dev->md_notify_registered = false;
 
   /* Initialize the MAC callbacks */
 

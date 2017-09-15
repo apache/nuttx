@@ -1,6 +1,6 @@
 /************************************************************************************
- * include/nuttx/wireless/ieee802154/ieee802154_ioctl.h
- * IEEE802.15.4 character driver IOCTL commands
+ * include/nuttx/wireless/ieee802154/ieee802154_device.h
+ * IEEE802.15.4 character driver
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt
@@ -34,12 +34,8 @@
  *
  ************************************************************************************/
 
-/* This file includes common definitions to be used in all wireless character drivers
- * (when applicable).
- */
-
-#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_IOCTL_H
-#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_IOCTL_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_DEVICE_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_DEVICE_H
 
 /************************************************************************************
  * Included Files
@@ -56,20 +52,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* IEEE 802.15.4 MAC Character Driver IOCTL commands ********************************/
-
-#define MAC802154IOC_NOTIFY_REGISTER    _WLCIOC(IEEE802154_FIRST)
-#define MAC802154IOC_GET_EVENT          _WLCIOC(IEEE802154_FIRST+1)
-#define MAC802154IOC_ENABLE_EVENTS      _WLCIOC(IEEE802154_FIRST+2)
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
-
-struct mac802154dev_notify_s
-{
-  uint8_t mn_signo;       /* Signal number to use in the notification */
-};
 
 struct mac802154dev_txframe_s
 {
@@ -86,4 +71,4 @@ struct mac802154dev_rxframe_s
 };
 
 #endif /* CONFIG_WIRELESS_IEEE802154 */
-#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_IOCTL_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_DEVICE_H */

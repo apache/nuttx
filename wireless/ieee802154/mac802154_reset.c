@@ -86,6 +86,12 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
 
   if (resetattr)
     {
+      /* We do not reset the extended address. The extended address must be
+       * manually overwritten.
+       */
+
+      priv->radio->reset(priv->radio);
+
       priv->isassoc = false;            /* Not associated with a PAN */
       priv->trackingbeacon = false;     /* Not tracking beacon by default */
       priv->sfspec.assocpermit = false; /* Dev (if coord) not accepting assoc */
@@ -109,21 +115,22 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
 
       priv->trans_persisttime = 0x01F4;
 
-      /* Reset the Coordinator address */
+      /* Reset the short address and PAN ID. The extended address does not
+       * get reset but must be set at the radio layer again. The only time the
+       * MAC layer sets the extended address internally is immediately after
+       * this function is called in mac802154_create()
+       */
+
+      priv->addr.mode = IEEE802154_ADDRMODE_EXTENDED;
+      mac802154_seteaddr(priv, priv->addr.eaddr);
+      mac802154_setsaddr(priv, IEEE802154_SADDR_UNSPEC);
+      mac802154_setpanid(priv, IEEE802154_PANID_UNSPEC);
 
       priv->pandesc.coordaddr.mode = IEEE802154_ADDRMODE_NONE;
-      IEEE802154_PANIDCOPY(priv->pandesc.coordaddr.panid, &IEEE802154_PANID_UNSPEC);
-      IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, &IEEE802154_SADDR_UNSPEC);
-      IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, &IEEE802154_EADDR_UNSPEC);
+      mac802154_setcoordeaddr(priv, IEEE802154_EADDR_UNSPEC);
+      mac802154_setcoordsaddr(priv, IEEE802154_SADDR_UNSPEC);
 
-      /* Reset the device's address */
-
-      priv->addr.mode = IEEE802154_ADDRMODE_NONE;
-      IEEE802154_PANIDCOPY(priv->addr.panid, &IEEE802154_PANID_UNSPEC);
-      IEEE802154_SADDRCOPY(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC);
-      IEEE802154_EADDRCOPY(priv->addr.eaddr, &IEEE802154_EADDR_UNSPEC);
-
-      priv->radio->reset(priv->radio);
+      mac802154_setdevmode(priv, IEEE802154_DEVMODE_ENDPOINT);
 
       /* The radio is in control of certain attributes, but we keep a mirror
        * for easy access.  Copy in the radio's values now that they've been
@@ -133,9 +140,9 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
       priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
                             &attr);
       priv->max_frame_waittime = attr.mac.max_frame_waittime;
-
-      mac802154_setdevmode(priv, IEEE802154_DEVMODE_ENDPOINT);
     }
+
+  priv->nrxusers = 0;
 
   return OK;
 }

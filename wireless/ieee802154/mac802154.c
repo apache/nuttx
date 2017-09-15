@@ -344,7 +344,7 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
 
-  /* Save a copy of the destination addressing infromation into the tx descriptor.
+  /* Save a copy of the destination addressing information into the tx descriptor.
    * We only do this for commands to help with handling their progession.
    */
 
@@ -1384,8 +1384,7 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
             }
           else if (txdesc->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
             {
-              if (memcmp(&txdesc->destaddr.eaddr[0], &ind->src.eaddr[0],
-                         sizeof(IEEE802154_EADDRSIZE)) == 0)
+              if (IEEE802154_EADDRCMP(txdesc->destaddr.eaddr, ind->src.eaddr))
                 {
                   /* Remove the transaction from the queue */
 

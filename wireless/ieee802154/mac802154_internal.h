@@ -797,7 +797,7 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
 static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
                                          bool rxonidle)
 {
-  priv->rxonidle = true;
+  priv->rxonidle = rxonidle;
   if (priv->rxonidle)
     {
       mac802154_rxenable(priv);

@@ -96,11 +96,6 @@
 #define NRF24L01_FIRST      (CC3000_FIRST + CC3000_NCMDS)
 #define NRF24L01_NCMDS      14
 
-/* See include/nuttx/wireless/ieee802154/ieee802154_ioctl.h */
-
-#define IEEE802154_FIRST    (NRF24L01_FIRST + NRF24L01_NCMDS)
-#define IEEE802154_NCMDS    2
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/

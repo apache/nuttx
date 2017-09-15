@@ -70,12 +70,6 @@
 
 #  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
-#ifdef CONFIG_IEEE802154_MAC_DEV
-/* Include ieee802.15.4 character driver IOCTL definitions */
-
-#  include <nuttx/wireless/ieee802154/ieee802154_ioctl.h>
-#endif
-
 #endif /* CONFIG_WIRELESS_IEEE802154 */
 #endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 

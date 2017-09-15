@@ -549,6 +549,7 @@ int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
           attrval->phy.chan = dev->chan;
           ret = IEEE802154_STATUS_SUCCESS;
         }
+        break;
 
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
