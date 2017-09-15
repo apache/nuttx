@@ -339,6 +339,16 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef HAVE_XBEE
+  /* Configure XBee  */
+
+  ret = sam_xbee_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_xbee_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_ELF
   /* Initialize the ELF binary loader */
 

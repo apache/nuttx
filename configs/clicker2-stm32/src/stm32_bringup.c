@@ -163,6 +163,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_CLICKER2_STM32_MB1_XBEE) || defined(CONFIG_CLICKER2_STM32_MB2_XBEE)
+  /* Configure XBee wireless */
+
+  ret = stm32_xbee_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_xbee_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_BUTTONS
   /* Register the BUTTON driver */
 

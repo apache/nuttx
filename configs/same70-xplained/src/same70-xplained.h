@@ -64,6 +64,7 @@
 #define HAVE_PROGMEM_CHARDEV 1
 #define HAVE_I2CTOOL         1
 #define HAVE_MRF24J40        1
+#define HAVE_XBEE            1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -228,6 +229,29 @@
 
 #ifndef CONFIG_SAMV7_GPIOA_IRQ
 #  undef HAVE_MRF24J40
+#endif
+
+/* Check if the XBee is supported in this configuration */
+
+#ifndef CONFIG_IEEE802154_XBEE
+#  undef HAVE_XBEE
+#endif
+
+#ifndef CONFIG_SAME70XPLAINED_CLICKSHIELD
+#  undef HAVE_XBEE
+#endif
+
+#if !defined(CONFIG_SAME70XPLAINED_MB1_XBEE) && !defined(CONFIG_SAME70XPLAINED_MB2_XBEE) && \
+    !defined(CONFIG_SAME70XPLAINED_MB3_XBEE)
+#  undef HAVE_XBEE
+#endif
+
+#ifndef CONFIG_SAMV7_SPI0_MASTER
+#  undef HAVE_XBEE
+#endif
+
+#ifndef CONFIG_SAMV7_GPIOA_IRQ
+#  undef HAVE_XBEE
 #endif
 
 /* SAME70-XPLD GPIO Pin Definitions *************************************************/

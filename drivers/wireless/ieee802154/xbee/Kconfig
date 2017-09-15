@@ -1,0 +1,77 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if IEEE802154_XBEE
+
+config IEEE802154_XBEE_FREQUENCY
+	int "SPI Frequency for XBee Radio"
+	default 2000000
+	---help---
+		SPI SLCK frequency in Hz
+
+config XBEE_NETDEV_RECVRPRIO
+	int "Priority of frame receiver registerd with the MAC layer"
+	default 1
+	---help---
+		When the MAC layer receives an incoming data frame, it passes the frame
+		to registered receivers, in order of receiver priority, until one of the
+		receivers claim the frame.
+
+		An example case would be when 6LoWPAN and the MAC character driver are
+		enabled. Both have receivers registered with the MAC. The 6LoWPAN layer
+		should get assigned a higher priority than the character driver. In this
+		case, the 6LoWPAN receiver will receive the frame first. If the frame is
+		a 6LoWPAN frame, it will claim the frame and the MAC will not pass the
+		frame to any additional receivers. If it does not claim the frame, the
+		MAC layer will call the next highest priority receiver, in this case,
+		the MAC character driver (which should always be lowest priority since
+		it is a "catch-all" type receiver).
+
+choice
+	prompt "Work queue"
+	default XBEE_NETDEV_LPWORK if SCHED_LPWORK
+	default XBEE_NETDEV_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the XBee MAC network
+		driver.
+
+		WARNING!! The IEEE802.15.4 network device must never run on the same
+		work queue as does the IEEE 802.15.4 MAC.  That configuration will
+		cause deadlocks:  The network logic may be blocked on the work queue
+		waiting on resources that can only be freed by the MAC logic but the
+		MAC is unable to run because the work queue is blocked.  The
+		recommended configuration is:  Network on the LP work queue; MAC on HP
+		work queue.  Blocking on the HP work queue is a very bad thing in
+		any case.
+
+config XBEE_NETDEV_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config XBEE_NETDEV_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
+config XBEE_NNOTIF
+	int "Number or notification structures"
+	default 3
+	---help---
+		Configured number of notification strucures Default: 3
+
+		When various MAC management events occur, the MAC notifies the registered
+		receiver with an allocated notification structure indicating the event. The
+		events are primitives such as Association Indication etc.
+
+config XBEE_LOCK_VERBOSE
+	bool "Verbose logging related to XBee driver lock management"
+	default n
+	depends on DEBUG_WIRELESS_INFO
+	---help---
+		Enable verbose logging of XBee lock management. Default: false
+
+endif # IEEE802154_XBEE

@@ -215,6 +215,12 @@
 #define GPIO_MB2_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
 
+#define GPIO_MB1_XBEE_RST  (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
+
+#define GPIO_MB2_XBEE_RST  (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
+
 /* Interrupts
  *
  *   mikroBUS1 Interrupt: PE10-MB1_INT
@@ -226,6 +232,9 @@
 
 #define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
 #define GPIO_MB2_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN14)
+
+#define GPIO_MB1_XBEE_INT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
+#define GPIO_MB2_XBEE_INT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN14)
 
 #ifndef __ASSEMBLY__
 
@@ -311,6 +320,22 @@ int stm32_can_setup(void);
 
 #if defined(CONFIG_CLICKER2_STM32_MB1_BEE) || defined(CONFIG_CLICKER2_STM32_MB2_BEE)
 int stm32_mrf24j40_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_xbee_initialize
+ *
+ * Description:
+ *   Initialize the XBee device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_CLICKER2_STM32_MB1_XBEE) || defined(CONFIG_CLICKER2_STM32_MB2_XBEE)
+int stm32_xbee_initialize(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
