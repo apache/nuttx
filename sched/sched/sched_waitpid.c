@@ -305,7 +305,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   FAR struct tcb_s *rtcb = this_task();
   FAR struct tcb_s *ctcb;
 #ifdef CONFIG_SCHED_CHILD_STATUS
-  FAR struct child_status_s *child;
+  FAR struct child_status_s *child = NULL;
   bool retains;
 #endif
   FAR struct siginfo info;
@@ -547,6 +547,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 #ifdef CONFIG_SCHED_CHILD_STATUS
           if (retains)
             {
+              DEBUGASSERT(child != NULL);
+
               /* Discard the child entry */
 
               (void)group_removechild(rtcb->group, child->ch_pid);
