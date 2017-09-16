@@ -2,7 +2,7 @@
  * configs/open1788/src/open1788.h
  * arch/arm/src/board/open1788.n
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,10 +152,6 @@
 #define LPC17_IRQ_PENIRQ LPC17_IRQ_P2p15
 
 /************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
  * Public data
  ************************************************************************************/
 
@@ -164,6 +160,22 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: lpc17_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library via boardctl()
+ *
+ ****************************************************************************/
+
+int lpc17_bringup(void);
 
 /************************************************************************************
  * Name: open1788_sspdev_initialize

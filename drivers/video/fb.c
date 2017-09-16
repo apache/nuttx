@@ -517,6 +517,10 @@ int fb_register(int display, int plane)
   fb->fblen  = pinfo.fblen;
   fb->bpp    = pinfo.bpp;
 
+  /* Clear the framebuffer memory */
+
+  memset(pinfo.fbmem, 0, pinfo.fblen);
+
   /* Register the framebuffer device */
 
   if (nplanes < 2)

@@ -1,7 +1,7 @@
 ############################################################################
 # configs/open1788/src/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = lpc17_boardinitialize.c lpc17_ssp.c
+CSRCS = lpc17_boardinitialize.c lpc17_bringup.c lpc17_ssp.c
 
 ifeq ($(CONFIG_LPC17_EMC),y)
 ifeq ($(CONFIG_LPC17_EXTNOR),y)
@@ -56,7 +56,7 @@ ifeq ($(CONFIG_LPC17_LCD),y)
   CSRCS += lpc17_lcd.c
 endif
 
-ifeq ($(CONFIG_NSH_LIBRARY),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
   CSRCS += lpc17_appinit.c
 endif
 
