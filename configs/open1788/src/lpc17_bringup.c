@@ -183,7 +183,8 @@ static int nsh_waiter(int argc, char *argv[])
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      syslog(LOG_INFO, "nsh_waiter: %s\n", hport->connected ? "connected" : "disconnected");
+      syslog(LOG_INFO, "nsh_waiter: %s\n",
+             hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -348,6 +349,7 @@ static int nsh_usbhostinitialize(void)
                         (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
+
   return -ENODEV;
 }
 #else

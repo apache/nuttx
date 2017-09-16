@@ -56,6 +56,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual LEDs.
  *
