@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_tickless.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Ansync Labs. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Konstantin Berezenko <kpberezenko@gmail.com>
@@ -61,15 +61,15 @@
  *
  * This implementation uses one timer:  A free running timer to provide
  * the current time and a capture/compare channel for timed-events.
- * The STM32 has both 16-bit and 32-bit timers so to keep things consistent
- * we limit the timer counters to a 16-bit range.  BASIC timers that
- * are found on some STM32 chips (timers 6 and 7) are incompatible with this
- * implementation because they don't have capture/compare channels.  There
- * are two interrupts generated from our timer, the overflow interrupt which
- * drives the timing handler and the capture/compare interrupt which drives
- * the interval handler.  There are some low level timer control functions
- * implemented here because the API of stm32_tim.c does not provide adequate
- * control over capture/compare interrupts.
+ *
+ * BASIC timers that are found on some STM32 chips (timers 6 and 7) are
+ * incompatible with this implementation because they don't have capture/
+ * compare channels.  There are two interrupts generated from our timer,
+ * the overflow interrupt which drives the timing handler and the capture/
+ * compare interrupt which drives the interval handler.  There are some low
+ * level timer control functions implemented here because the API of
+ * stm32_tim.c does not provide adequate control over capture/compare
+ * interrupts.
  *
  ****************************************************************************/
 
@@ -96,6 +96,21 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Only TIM2 and TIM5 timers may be 32-bits in width
+ *
+ * Reference Table 2 of en.DM00042534.pdf
+ */
+
+#undef HAVE_32BIT_TICKLESS
+
+#if (CONFIG_STM32_TICKLESS_TIMER == 2 && \
+      !defined(STM32_STM32F10XX) && \
+      !defined(STM32_STM32L15XX)) \
+ || (CONFIG_STM32_TICKLESS_TIMER == 5 && \
+      !defined(STM32_STM32F10XX))
+ #define HAVE_32BIT_TICKLESS 1
+#endif
 
 /****************************************************************************
  * Private Types
@@ -548,15 +563,21 @@ void arm_timer_initialize(void)
 
   /* Set timer period */
 
+#ifdef HAVE_32BIT_TICKLESS
+  STM32_TIM_SETPERIOD(g_tickless.tch, UINT32_MAX);
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  g_oneshot_maxticks = UINT32_MAX;
+#endif
+#else
   STM32_TIM_SETPERIOD(g_tickless.tch, UINT16_MAX);
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  g_oneshot_maxticks = UINT16_MAX;
+#endif
+#endif
 
   /* Initialize the counter */
 
   STM32_TIM_SETMODE(g_tickless.tch, STM32_TIM_MODE_UP);
-
-#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  g_oneshot_maxticks = UINT16_MAX;
-#endif
 
   /* Start the timer */
 
@@ -657,9 +678,13 @@ int up_timer_gettime(FAR struct timespec *ts)
    *   seconds   = ticks * frequency
    *   usecs     = (ticks * USEC_PER_SEC) / frequency;
    */
-
+#ifdef HAVE_32BIT_TICKLESS
+  usec = ((((uint64_t)overflow << 32) + (uint64_t)counter) * USEC_PER_SEC) /
+         g_tickless.frequency;
+#else
   usec = ((((uint64_t)overflow << 16) + (uint64_t)counter) * USEC_PER_SEC) /
          g_tickless.frequency;
+#endif
 
   /* And return the value of the timer */
 
@@ -799,6 +824,7 @@ int up_timer_cancel(FAR struct timespec *ts)
       tmrinfo("period=%lu count=%lu\n",
              (unsigned long)period, (unsigned long)count);
 
+#ifndef HAVE_32BIT_TICKLESS
       if (count > period)
         {
           /* Handle rollover */
@@ -806,6 +832,9 @@ int up_timer_cancel(FAR struct timespec *ts)
           period += UINT16_MAX;
         }
       else if (count == period)
+#else
+      if (count >= period)
+#endif
         {
           /* No time remaining */
 
@@ -905,14 +934,17 @@ int up_timer_start(FAR const struct timespec *ts)
   count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
 
   tmrinfo("usec=%llu period=%08llx\n", usec, period);
-  DEBUGASSERT(period <= UINT16_MAX);
 
   /* Set interval compare value. Rollover is fine,
-   * channel will trigger on the next period.  (uint16_t) cast
-   * handles the overflow.
+   * channel will trigger on the next period.
    */
-
+#ifdef HAVE_32BIT_TICKLESS
+  DEBUGASSERT(period <= UINT32_MAX);
+  g_tickless.period = (uint32_t)(period + count);
+#else
+  DEBUGASSERT(period <= UINT16_MAX);
   g_tickless.period = (uint16_t)(period + count);
+#endif
 
   STM32_TIM_SETCOMPARE(g_tickless.tch, g_tickless.channel,
                        g_tickless.period);
