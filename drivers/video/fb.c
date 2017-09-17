@@ -415,7 +415,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
           if (ret >= 0)
             {
-               nx_notify_rectangle(((FAR NX_PLANEINFOTYPE *)&pinfo, rect);
+               nx_notify_rectangle((FAR NX_PLANEINFOTYPE *)&pinfo, rect);
             }
         }
         break;
