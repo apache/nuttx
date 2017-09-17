@@ -513,7 +513,7 @@ int up_fbinitialize(int display)
   ret = lcd->getvideoinfo(lcd, &vinfo);
   if (ret < 0)
     {
-      gerr("ERROR: getvideoinfo() failed: %d\n", ret);
+      lcderr("ERROR:  LCD getvideoinfo() failed: %d\n", ret);
       goto errout_with_lcd;
     }
 
@@ -524,7 +524,7 @@ int up_fbinitialize(int display)
   ret = lcd->getplaneinfo(lcd, VIDEO_PLANE, &priv->pinfo);
   if (ret < 0)
     {
-      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
+      lcderr("ERROR: LCD getplaneinfo() failed: %d\n", ret);
       goto errout_with_lcd;
     }
 
@@ -536,7 +536,7 @@ int up_fbinitialize(int display)
   priv->fbmem  = (FAR uint8_t *)kmm_zalloc(priv->fblen);
   if (priv->fbmem == NULL)
     {
-      gerr("ERROR: getplaneinfo() failed: %d\n", ret);
+      lcderr("ERROR: Failed to allocate frame buffer memory\n");
       ret = -ENOMEM;
       goto errout_with_lcd;
     }
