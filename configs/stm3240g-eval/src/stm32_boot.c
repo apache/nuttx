@@ -153,10 +153,10 @@ static int board_initthread(int argc, char *argv[])
    * but the initialization function must run in kernel space.
    */
 
-  ret = board_app_initialize(0);
+  ret = stm32_bringup();
   if (ret < 0)
     {
-      gerr("ERROR: board_app_initialize failed: %d\n", ret);
+      gerr("ERROR: stm32_bringup failed: %d\n", ret);
     }
 #endif
 
@@ -262,6 +262,8 @@ void board_initialize(void)
                          CONFIG_STM3240G_BOARDINIT_STACK, board_initthread,
                          NULL);
   ASSERT(server > 0);
+#else
+  (void)stm32_bringup();
 #endif
 }
 #endif

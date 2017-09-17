@@ -47,9 +47,11 @@
 # include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
+/* Logic in arch/arm/src and configs/ may need to include these file prior to
+ * including board.h:  stm32_rcc.h, stm32_sdio.h, stm32.h.  They cannot be included
+ * here because board.h is used in other contexts where the STM32 internal header
+ * files are not available.
+ */
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -939,6 +939,19 @@ Where <subdir> is one of the following:
     control the configuration.  See the section entitled "NuttX Configuration
     Tool" in the top-level README.txt file.
 
+  fb
+  --
+
+    A simple NSH configuration used for some basic (non-graphic) debug of
+    the framebuffer character driver at drivers/video/fb.c using test at
+    apps/examples/fb.  The STM3240G-EVAL LCD driver does not support a
+    framebuffer!  This configuration uses the LCD framebuffer front end at
+    drivers/lcd/lcd_framebuffer to convert the LCD interface into a
+    compatible framebuffer interface.
+
+    STATUS:
+    2017-09-17:  This configuration appears to be fully functional.
+
   knxwm:
   -----
     [WARNING:  This is a work in progress].

@@ -1728,7 +1728,8 @@ Configuration sub-directories
     STATUS:
     2017-09-17:  This configuration was completed.  The frame buffer driver
       is not yet functional.  I see the image only on the right side of the
-      LCD and the colors appear wrong.
+      LCD and the colors appear wrong.  NOTE that the similar configuration
+      for the STM3240G-EVAL is fully functional.
 
   knsh:
 
