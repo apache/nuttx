@@ -222,6 +222,10 @@ static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
 
   for (row = starty; row <= endy; row++)
     {
+      /* REVISIT: Some LCD hardware certain aligment requirements on DMA
+       * memory.
+       */
+
       pinfo->putrun(row, startx, run, width);
       run += priv->stride;
     }

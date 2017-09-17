@@ -42,7 +42,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <stdint.h>
+
+#include <arch/stm32/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -171,6 +174,22 @@ extern const uint16_t g_commonconfig[NCOMMON_CONFIG];
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
 
 /************************************************************************************
  * Name: stm32_spidev_initialize
