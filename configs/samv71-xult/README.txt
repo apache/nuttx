@@ -1706,12 +1706,6 @@ NOTES:
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
-     NOTE: As of this writing, there are issues with using this tool at
-     the -Os level of optimization.  This has not been proven to be a
-     compiler issue (as least not one that might not be fixed with a
-     well placed volatile qualifier).  However, in any event, it is
-     recommend that you use not more that -O2 optimization.
-
 Configuration sub-directories
 -----------------------------
 

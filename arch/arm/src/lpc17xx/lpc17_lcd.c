@@ -129,7 +129,7 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
 static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
              FAR struct fb_cursorattrib_s *attrib);
 static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_setcursor_s *setttings);
+             FAR struct fb_setcursor_s *settings);
 #endif
 
 /****************************************************************************
@@ -414,10 +414,10 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
 
 #ifdef CONFIG_FB_HWCURSOR
 static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
-                       FAR struct fb_setcursor_s *setttings)
+                       FAR struct fb_setcursor_s *settings)
 {
-  lcdinfo("vtable=%p setttings=%p\n", vtable, setttings);
-  if (vtable && setttings)
+  lcdinfo("vtable=%p settings=%p\n", vtable, settings);
+  if (vtable && settings)
     {
       lcdinfo("flags: %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)

@@ -230,10 +230,10 @@ typedef uint16_t fb_coord_t;
 
 struct fb_videoinfo_s
 {
- uint8_t    fmt;          /* see FB_FMT_*  */
- fb_coord_t xres;         /* Horizontal resolution in pixel columns */
- fb_coord_t yres;         /* Vertical resolution in pixel rows */
- uint8_t    nplanes;      /* Number of color planes supported */
+  uint8_t    fmt;         /* see FB_FMT_*  */
+  fb_coord_t xres;        /* Horizontal resolution in pixel columns */
+  fb_coord_t yres;        /* Vertical resolution in pixel rows */
+  uint8_t    nplanes;     /* Number of color planes supported */
 };
 
 /* This structure describes one color plane.  Some YUV formats may support

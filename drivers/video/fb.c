@@ -184,7 +184,8 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
  * Name: fb_write
  ****************************************************************************/
 
-static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
+                        size_t len)
 {
   FAR struct inode *inode;
   FAR struct fb_chardev_s *fb;

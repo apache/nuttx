@@ -56,6 +56,7 @@
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/video/fb.h>
 
 #include "sam_twihs.h"
 #include "samv71-xult.h"
@@ -548,6 +549,16 @@ int sam_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Initialization of the ELF loader failed: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the LCD framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
 #endif
 
