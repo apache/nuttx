@@ -245,6 +245,45 @@ Loading Code with the ISP Board
 CONFIGURATION
 =============
 
+  fb
+  --
+
+    A simple configuration used for some basic (non-graphic) debug of the
+    framebuffer character drivers using apps/examples/fb.  This
+    configuration enables SDRAM to hold the LCD framebuffer and enables
+    the LPC178x LCD driver in order to support the WaveShare 4.3 inch TFT
+    panel.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          see additional README.txt files in the NuttX tools repository
+          README.txt.
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This configuration uses the "GNU Tools for ARM Embedded Processors"
+       that is maintained by ARM:
+
+       https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
+
+       That toolchain selection can easily be reconfigured using
+       'make menuconfig'.  Here are the relevant current settings:
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y               : Window environment
+         CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+    3. In this configuration, the SDRAM is not added to heap but is
+       dedicated to supporting an LCD frame buffer at address 0xa0010000.
+
   knsh
   ----
     This is identical to the nsh configuration below except that NuttX
@@ -479,7 +518,8 @@ CONFIGURATION
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository./README.txt.
+          see additional README.txt files in the NuttX tools repository
+          README.txt.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
