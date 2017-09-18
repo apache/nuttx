@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/netinet/in.h
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,14 +128,17 @@
    (a)->s6_addr32[2] == 0 && \
    (a)->s6_addr32[3] == 0)
 
+#define IN6_IS_ADDR_V4COMPAT(a) \
+  ((a)->s6_addr32[0] == 0 && \
+   (a)->s6_addr32[1] == 0 && \
+   (a)->s6_addr32[2] == 0 && \
+   (a)->s6_addr32[3] != 0 && \
+   (a)->s6_addr32[3] != NTOHL(1))
+
 #define IN6_IS_ADDR_V4MAPPED(a) \
   ((a)->s6_addr32[0] == 0 && \
    (a)->s6_addr32[1] == 0 && \
    (a)->s6_addr32[2] == HTONL(0xffff))
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Type Definitions
