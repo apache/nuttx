@@ -250,6 +250,18 @@ int stm32_rgbled_setup(void);
 #endif
 
 /************************************************************************************
+ * Name: stm32_apa102init
+ *
+ * Description:
+ *   Initialize and register the APA102 LED Strip driver
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LEDS_APA102
+int stm32_apa102init(FAR const char *devpath);
+#endif
+
+/************************************************************************************
  * Name: stm32_mcp2515initialize
  *
  * Description:

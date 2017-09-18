@@ -194,6 +194,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LEDS_APA102
+  /* Configure and initialize the APA102 LED Strip. */
+
+  ret = stm32_apa102init("/dev/leddrv0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_apa102init() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RGBLED
   /* Configure and initialize the RGB LED. */
 
