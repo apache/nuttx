@@ -41,6 +41,13 @@ config USERLED_LOWER
 
 endif # USERLED
 
+config LEDS_APA102
+	bool "APA102 LED Strip"
+	default n
+	select SPI
+	---help---
+		Enable support for the APA102 LED Strip driver.
+
 config RGBLED
         bool "RGB LED Driver Support"
         default n

@@ -50,6 +50,12 @@ endif
   LEDVPATH = :leds
 endif
 
+ifeq ($(CONFIG_LEDS_APA102),y)
+  CSRCS += apa102.c
+  LEDDEPATH = --dep-path leds
+  LEDVPATH = :leds
+endif
+
 ifeq ($(CONFIG_RGBLED),y)
   CSRCS += rgbled.c
   LEDDEPATH = --dep-path leds
