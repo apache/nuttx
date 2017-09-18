@@ -50,6 +50,8 @@
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
+#include "udp/udp.h"
+#include "tcp/tcp.h"
 #include "inet/inet.h"
 
 #ifdef CONFIG_NET_IPv6
