@@ -440,13 +440,13 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Description:
  *   Register the framebuffer character device at /dev/fbN where N is the
  *   display number if the devices supports only a single plane.  If the
- *   hardware supports multile color planes, then the device will be
- *   registered at /dev/fbN-M where N is the again display number but M is
- *   the display plane.
+ *   hardware supports multiple color planes, then the device will be
+ *   registered at /dev/fbN-M where N is the again display number but M
+ *   is the display plane.
  *
  * Input Parameters:
  *   display - The display number for the case of boards supporting multiple
- *             displays or for hardware that supports supports multile
+ *             displays or for hardware that supports multiple
  *             layers (each layer is consider a display).  Typically zero.
  *   plane   - Identifies the color plane on hardware that supports separate
  *             framebuffer "planes" for each color component.

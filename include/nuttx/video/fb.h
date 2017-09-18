@@ -208,7 +208,7 @@
 #ifdef CONFIG_FB_HWCURSOR
 #  define FBIOGET_CURSOR   _FBIOC(0x0005)  /* Get cursor attributes */
                                            /* Argument: writable struct fb_cursorattrib_s */
-#  define FBIOPUT_CURSOR   _FBIOC(0x0006)  /* Set cursor attibutes */
+#  define FBIOPUT_CURSOR   _FBIOC(0x0006)  /* Set cursor attributes */
                                            /* Argument: read-only struct fb_setcursor_s */
 #endif
 #ifdef CONFIG_NX_UPDATE
@@ -257,16 +257,16 @@ struct fb_planeinfo_s
 #ifdef CONFIG_FB_CMAP
 struct fb_cmap_s
 {
- uint16_t  first;         /* Offset offset first color entry in tables */
- uint16_t  len;           /* Number of color entries  in tables */
+  uint16_t  first;        /* Offset offset first color entry in tables */
+  uint16_t  len;          /* Number of color entries  in tables */
 
- /* Tables of  color component.  Any may be NULL if not used */
+  /* Tables of  color component.  Any may be NULL if not used */
 
- uint8_t *red;            /* Table of 8-bit red values */
- uint8_t *green;          /* Table of 8-bit green values */
- uint8_t *blue;           /* Table of 8-bit blue values */
+  uint8_t *red;           /* Table of 8-bit red values */
+  uint8_t *green;         /* Table of 8-bit green values */
+  uint8_t *blue;          /* Table of 8-bit blue values */
 #ifdef CONFIG_FB_TRANSPARENCY
- uint8_t *transp;         /* Table of 8-bit transparency */
+  uint8_t *transp;        /* Table of 8-bit transparency */
 #endif
 };
 #endif
@@ -280,9 +280,9 @@ struct fb_cmap_s
 #ifdef CONFIG_FB_HWCURSORIMAGE
 struct fb_cursorimage_s
 {
- fb_coord_t     width;     /* Width of the cursor image in pixels */
- fb_coord_t     height     /* Height of the cursor image in pixels */
- const uint8_t *image;     /* Pointer to image data */
+  fb_coord_t     width;    /* Width of the cursor image in pixels */
+  fb_coord_t     height    /* Height of the cursor image in pixels */
+  const uint8_t *image;    /* Pointer to image data */
 };
 #endif
 
@@ -290,8 +290,8 @@ struct fb_cursorimage_s
 
 struct fb_cursorpos_s
 {
- fb_coord_t x;             /* X position in pixels */
- fb_coord_t y;             /* Y position in rows */
+  fb_coord_t x;            /* X position in pixels */
+  fb_coord_t y;            /* Y position in rows */
 };
 
 /* If the hardware supports setting the cursor size, then this structure
@@ -301,8 +301,8 @@ struct fb_cursorpos_s
 #ifdef CONFIG_FB_HWCURSORSIZE
 struct fb_cursorsize_s
 {
- fb_coord_t h;             /* Height in rows */
- fb_coord_t w;             /* Width in pixels */
+  fb_coord_t h;            /* Height in rows */
+  fb_coord_t w;            /* Width in pixels */
 };
 #endif
 
@@ -453,13 +453,13 @@ void up_fbuninitialize(int display);
  * Description:
  *   Register the framebuffer character device at /dev/fbN where N is the
  *   display number if the devices supports only a single plane.  If the
- *   hardware supports multile color planes, then the device will be
- *   registered at /dev/fbN-M where N is the again display number but M is
- *   the display plane.
+ *   hardware supports multiple color planes, then the device will be
+ *   registered at /dev/fbN-M where N is the again display number but M
+ *   is the display plane.
  *
  * Input Parameters:
  *   display - The display number for the case of boards supporting multiple
- *             displays or for hardware that supports supports multile
+ *             displays or for hardware that supports multiple
  *             layers (each layer is consider a display).  Typically zero.
  *   plane   - Identifies the color plane on hardware that supports separate
  *             framebuffer "planes" for each color component.
