@@ -134,8 +134,11 @@ static int ifconf_ipv4_callback(FAR struct net_driver_s *dev, FAR void *arg)
             * transferred is returned in ifc_len.
             */
 
-          strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
-          net_ipv4addr_copy(inaddr->sin_addr.s_addr, dev->d_ipaddr);
+           strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
+
+           inaddr->sin_family = AF_INET;
+           inaddr->sin_port   = 0;
+           net_ipv4addr_copy(inaddr->sin_addr.s_addr, dev->d_ipaddr);
          }
 
        /* Increment the size of the buffer in any event */
@@ -206,6 +209,9 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
             */
 
            strncpy(req->lifr_name, dev->d_ifname, IFNAMSIZ);
+
+           inaddr->sin6_family = AF_INET6;
+           inaddr->sin6_port   = 0;
            net_ipv6addr_copy(inaddr->sin6_addr.s6_addr16, dev->d_ipv6addr);
          }
 

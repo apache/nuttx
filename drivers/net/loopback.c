@@ -133,11 +133,9 @@ static int lo_ifup(FAR struct net_driver_s *dev);
 static int lo_ifdown(FAR struct net_driver_s *dev);
 static void lo_txavail_work(FAR void *arg);
 static int lo_txavail(FAR struct net_driver_s *dev);
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
+static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
-#endif
 #endif
 
 /****************************************************************************
@@ -455,7 +453,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   /* There is no multicast support in the loopback driver */
