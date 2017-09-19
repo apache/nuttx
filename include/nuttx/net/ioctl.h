@@ -82,50 +82,52 @@
 #define SIOCSIFHWADDR    _SIOC(0x0015)  /* Set hardware address */
 #define SIOCDIFADDR      _SIOC(0x0016)  /* Delete IP address (IPv4 and IPv6) */
 #define SIOCGIFCOUNT     _SIOC(0x0017)  /* Get number of devices */
+#define SIOCGIFCONF      _SIOC(0x0018)  /* Return an interface list (IPv4) */
+#define SIOCGLIFCONF     _SIOC(0x0019)  /* Return an interface list (IPv6) */
 
 /* Interface flags */
 
-#define SIOCSIFFLAGS     _SIOC(0x0018)  /* Sets the interface flags */
-#define SIOCGIFFLAGS     _SIOC(0x0019)  /* Gets the interface flags */
+#define SIOCSIFFLAGS     _SIOC(0x001a)  /* Sets the interface flags */
+#define SIOCGIFFLAGS     _SIOC(0x001b)  /* Gets the interface flags */
 
-#define SIOCGIPMSFILTER  _SIOC(0x001a)  /* Retrieve source filter addresses */
-#define SIOCSIPMSFILTER  _SIOC(0x001b)  /* Set source filter content */
+#define SIOCGIPMSFILTER  _SIOC(0x001c)  /* Retrieve source filter addresses */
+#define SIOCSIPMSFILTER  _SIOC(0x001d)  /* Set source filter content */
 
 /* ARP Table.  Argument is a reference to sruct arpreq as defined
  * include/nuttx/net/arp.h
  */
 
-#define SIOCSARP         _SIOC(0x001c)  /* Set an ARP mapping */
-#define SIOCDARP         _SIOC(0x001d)  /* Delete an ARP mapping */
-#define SIOCGARP         _SIOC(0x001e)  /* Get an ARP mapping */
+#define SIOCSARP         _SIOC(0x001e)  /* Set an ARP mapping */
+#define SIOCDARP         _SIOC(0x001f)  /* Delete an ARP mapping */
+#define SIOCGARP         _SIOC(0x0020)  /* Get an ARP mapping */
 
 /* Routing table.  Argument is a reference to struct rtentry as defined in
  * include/net/route.h
  */
 
-#define SIOCADDRT        _SIOC(0x001f)  /* Add an entry to the routing table */
-#define SIOCDELRT        _SIOC(0x0020)  /* Delete an entry from the routing table */
+#define SIOCADDRT        _SIOC(0x0021)  /* Add an entry to the routing table */
+#define SIOCDELRT        _SIOC(0x0022)  /* Delete an entry from the routing table */
 
 /* MDIO/MCD *****************************************************************/
 
-#define SIOCMIINOTIFY    _SIOC(0x0021)  /* Receive notificaion via signal on
+#define SIOCMIINOTIFY    _SIOC(0x0023)  /* Receive notificaion via signal on
                                          * PHY state change */
-#define SIOCGMIIPHY      _SIOC(0x0022)  /* Get address of MII PHY in use */
-#define SIOCGMIIREG      _SIOC(0x0023)  /* Get a MII register via MDIO */
-#define SIOCSMIIREG      _SIOC(0x0024)  /* Set a MII register via MDIO */
+#define SIOCGMIIPHY      _SIOC(0x0024)  /* Get address of MII PHY in use */
+#define SIOCGMIIREG      _SIOC(0x0025)  /* Get a MII register via MDIO */
+#define SIOCSMIIREG      _SIOC(0x0026)  /* Set a MII register via MDIO */
 
 /* Unix domain sockets ******************************************************/
 
-#define SIOCINQ          _SIOC(0x0025)  /* Returns the amount of queued unread
+#define SIOCINQ          _SIOC(0x0027)  /* Returns the amount of queued unread
                                          * data in the receive */
 
 /* TUN/TAP driver ***********************************************************/
 
-#define TUNSETIFF        _SIOC(0x0026)  /* Set TUN/TAP interface */
+#define TUNSETIFF        _SIOC(0x0028)  /* Set TUN/TAP interface */
 
 /* Telnet driver ************************************************************/
 
-#define SIOCTELNET       _SIOC(0x0027)  /* Create a Telnet sessions.
+#define SIOCTELNET       _SIOC(0x0029)  /* Create a Telnet sessions.
                                          * See include/nuttx/net/telnet.h */
 
 /****************************************************************************

@@ -177,6 +177,21 @@ struct lifreq
 #define lifr_mii_val_in       lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
 #define lifr_mii_val_out      lifr_ifru.lifru_mii_data.val_out /* PHY output data */
 
+/* Used only with the SIOCGLIFCONF IOCTL commnd*/
+
+struct lifconf
+{
+  size_t                      lifc_len;                 /* Size of buffer */
+  union
+  {
+    FAR char                 *lifcu_buf;                /* Buffer address */
+    FAR struct lifreq        *lifcu_req;                /* Array of ifreq structures */
+  } lifc_ifcu;
+};
+
+#define lifc_buf              lifc_ifcu.lifcu_buf       /* Buffer address */
+#define lifc_req              lifc_ifcu.lifcu_req       /* Array of ifreq structures */
+
 /* This is the I/F request that should be used with IPv4. */
 
 struct ifreq
@@ -212,6 +227,21 @@ struct ifreq
 #define ifr_mii_reg_num       ifr_ifru.ifru_mii_data.reg_num /* PHY register address */
 #define ifr_mii_val_in        ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
 #define ifr_mii_val_out       ifr_ifru.ifru_mii_data.val_out /* PHY output data */
+
+/* Used only with the SIOCGIFCONF IOCTL commnd*/
+
+struct ifconf
+{
+  size_t                      ifc_len;                   /* Size of buffer */
+  union
+  {
+    FAR char                 *ifcu_buf;                 /* Buffer address */
+    FAR struct ifreq         *ifcu_req;                 /* Array of ifreq structures */
+  } ifc_ifcu;
+};
+
+#define ifc_buf              ifc_ifcu.ifcu_buf          /* Buffer address */
+#define ifc_req              ifc_ifcu.ifcu_req          /* Array of ifreq structures */
 
 /*******************************************************************************************
  * Public Function Prototypes

@@ -345,6 +345,54 @@ int netdev_count(void);
 #endif
 
 /****************************************************************************
+ * Name: netdev_ipv4_ifconf
+ *
+ * Description:
+ *   Return the IPv4 configuration of each network adaptor
+ *
+ * Parameters:
+ *   ifc - A reference to the instance of struct ifconf in which to return
+ *         the information.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ * Assumptions:
+ *  The nework is locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+struct ifconf;  /* Forward reference */
+int netdev_ipv4_ifconf(FAR struct ifconf *ifc);
+#endif
+
+/****************************************************************************
+ * Name: netdev_ipv6_ifconf
+ *
+ * Description:
+ *   Return the IPv6 configuration of each network adaptor
+ *
+ * Parameters:
+ *   lifc - A reference to the instance of struct lifconf in which to return
+ *          the information.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ * Assumptions:
+ *  The nework is locked
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+struct lifconf;  /* Forward reference */
+int netdev_ipv6_ifconf(FAR struct lifconf *lifc);
+#endif
+
+/****************************************************************************
  * Name: netdev_dev_lladdrsize
  *
  * Description:

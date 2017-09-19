@@ -915,6 +915,22 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         }
         break;
 
+#ifdef CONFIG_NET_IPv4
+      case SIOCGIFCONF:  /* Return an interface list (IPv4) */
+        {
+          ret = netdev_ipv4_ifconf((FAR struct ifconf *)req);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      case SIOCGLIFCONF:  /* Return an interface list (IPv6) */
+        {
+          ret = netdev_ipv6_ifconf((FAR struct lifconf *)req);
+        }
+        break;
+#endif
+
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_PHY_IOCTL)
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
