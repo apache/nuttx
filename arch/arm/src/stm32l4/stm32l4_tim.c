@@ -246,9 +246,11 @@ static void stm32l4_tim_reload_counter(FAR struct stm32l4_tim_dev_s *dev);
 static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev);
 static void stm32l4_tim_disable(FAR struct stm32l4_tim_dev_s *dev);
 static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev);
-#if defined(HAVE_TIM1_GPIOCONFIG)||defined(HAVE_TIM2_GPIOCONFIG)||\
-    defined(HAVE_TIM3_GPIOCONFIG)||defined(HAVE_TIM4_GPIOCONFIG)||\
-    defined(HAVE_TIM5_GPIOCONFIG)||defined(HAVE_TIM8_GPIOCONFIG)
+#if defined(HAVE_TIM1_GPIOCONFIG) || defined(HAVE_TIM2_GPIOCONFIG) || \
+    defined(HAVE_TIM3_GPIOCONFIG) || defined(HAVE_TIM4_GPIOCONFIG) || \
+    defined(HAVE_TIM5_GPIOCONFIG) || defined(HAVE_TIM8_GPIOCONFIG) || \
+    defined(HAVE_TIM15_GPIOCONFIG) || defined(HAVE_TIM16_GPIOCONFIG) || \
+    defined(HAVE_TIM17_GPIOCONFIG)
 static void stm32l4_tim_gpioconfig(uint32_t cfg, stm32l4_tim_channel_t mode);
 #endif
 
@@ -524,9 +526,11 @@ static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev)
  * Name: stm32l4_tim_gpioconfig
  ************************************************************************************/
 
-#if defined(HAVE_TIM1_GPIOCONFIG)||defined(HAVE_TIM2_GPIOCONFIG)||\
-    defined(HAVE_TIM3_GPIOCONFIG)||defined(HAVE_TIM4_GPIOCONFIG)||\
-    defined(HAVE_TIM5_GPIOCONFIG)||defined(HAVE_TIM8_GPIOCONFIG)
+#if defined(HAVE_TIM1_GPIOCONFIG) || defined(HAVE_TIM2_GPIOCONFIG) || \
+    defined(HAVE_TIM3_GPIOCONFIG) || defined(HAVE_TIM4_GPIOCONFIG) || \
+    defined(HAVE_TIM5_GPIOCONFIG) || defined(HAVE_TIM8_GPIOCONFIG) || \
+    defined(HAVE_TIM15_GPIOCONFIG) || defined(HAVE_TIM16_GPIOCONFIG) || \
+    defined(HAVE_TIM17_GPIOCONFIG)
 static void stm32l4_tim_gpioconfig(uint32_t cfg, stm32l4_tim_channel_t mode)
 {
   /* TODO: Add support for input capture and bipolar dual outputs for TIM8 */
@@ -760,7 +764,7 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
   uint16_t ccmr_orig   = 0;
   uint16_t ccmr_val    = 0;
   uint16_t ccmr_mask   = 0xff;
-  uint16_t ccer_val    = stm32l4_getreg16(dev, STM32L4_GTIM_CCER_OFFSET);
+  uint16_t ccer_val;
   uint8_t  ccmr_offset = STM32L4_GTIM_CCMR1_OFFSET;
 
   DEBUGASSERT(dev != NULL);
@@ -774,6 +778,7 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
 
   /* Assume that channel is disabled and polarity is active high */
 
+  ccer_val = stm32l4_getreg16(dev, STM32L4_GTIM_CCER_OFFSET);
   ccer_val &= ~(3 << (channel << 2));
 
   /* This function is not supported on basic timers. To enable or

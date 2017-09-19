@@ -608,6 +608,12 @@ static inline void rcc_enableccip(void)
   regval |= RCC_CCIPR_ADCSEL_SYSCLK;
 #endif
 
+#ifdef CONFIG_STM32L4_DFSDM1
+  /* Select SYSCLK as DFSDM clock source */
+
+  regval |= RCC_CCIPR_DFSDMSEL_SYSCLK;
+#endif
+
   putreg32(regval, STM32L4_RCC_CCIPR);
 }
 

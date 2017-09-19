@@ -54,29 +54,30 @@
 #define STM32L4_BTIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
 #define STM32L4_BTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
 
-/* 16-/32-bit General Timers with DMA: TIM2, TM3, TIM4, and TIM5
- * TIM3 and 4 are 16-bit
- * TIM2 and 5 are 32-bit
+/* 16-/32-bit General Timers - TIM2, TIM3, TIM4, TIM5, and TIM15-17.
+ * TIM3 and 4 are 16-bit.
+ * TIM2 and 5 are 32-bit.
+ * TIM15, 16 and 17 are 16-bit.
  */
 
 #define STM32L4_GTIM_CR1_OFFSET     0x0000  /* Control register 1 (16-bit) */
-#define STM32L4_GTIM_CR2_OFFSET     0x0004  /* Control register 2 (16-bit, TIM2-5 only) */
-#define STM32L4_GTIM_SMCR_OFFSET    0x0008  /* Slave mode control register (16-bit, TIM2-5 only) */
+#define STM32L4_GTIM_CR2_OFFSET     0x0004  /* Control register 2 (16-bit) */
+#define STM32L4_GTIM_SMCR_OFFSET    0x0008  /* Slave mode control register (16-bit, TIM2-5,15 only) */
 #define STM32L4_GTIM_DIER_OFFSET    0x000c  /* DMA/Interrupt enable register (16-bit) */
 #define STM32L4_GTIM_SR_OFFSET      0x0010  /* Status register (16-bit) */
 #define STM32L4_GTIM_EGR_OFFSET     0x0014  /* Event generation register (16-bit) */
-#define STM32L4_GTIM_CCMR1_OFFSET   0x0018  /* Capture/compare mode register 1 (16-bit) */
-#define STM32L4_GTIM_CCMR2_OFFSET   0x001c  /* Capture/compare mode register 2 (16-bit, TIM2-5 only) */
+#define STM32L4_GTIM_CCMR1_OFFSET   0x0018  /* Capture/compare mode register 1 (32-bit) */
+#define STM32L4_GTIM_CCMR2_OFFSET   0x001c  /* Capture/compare mode register 2 (32-bit, TIM2-5 only) */
 #define STM32L4_GTIM_CCER_OFFSET    0x0020  /* Capture/compare enable register (16-bit) */
-#define STM32L4_GTIM_CNT_OFFSET     0x0024  /* Counter (16-bit* or 32-bit STM3240 TIM2 and 5 only) */
+#define STM32L4_GTIM_CNT_OFFSET     0x0024  /* Counter (16-bit or 32-bit TIM2/5) */
 #define STM32L4_GTIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
-#define STM32L4_GTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
-#define STM32L4_GTIM_CCR1_OFFSET    0x0034  /* Capture/compare register 1 (16-bit or 32-bit STM3240 TIM2/5 only) */
-#define STM32L4_GTIM_CCR2_OFFSET    0x0038  /* Capture/compare register 2 (16-bit TIM2-5 only or 32-bit STM32 F4 TIM2/5 or STM2 F3 TIM15 only) */
-#define STM32L4_GTIM_CCR3_OFFSET    0x003c  /* Capture/compare register 3 (16-bit TIM2-5 only or 32-bit STM32 F4 TIM2/5 only) */
-#define STM32L4_GTIM_CCR4_OFFSET    0x0040  /* Capture/compare register 4 (16-bit TIM2-5 only or 32-bit STM32 F4 TIM2/5 only) */
-#define STM32L4_GTIM_DCR_OFFSET     0x0048  /* DMA control register (16-bit, TIM2-5 only) */
-#define STM32L4_GTIM_DMAR_OFFSET    0x004c  /* DMA address for burst mode (16-bit, TIM2-5 only) */
+#define STM32L4_GTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit or 32-bit TIM2/5) */
+#define STM32L4_GTIM_CCR1_OFFSET    0x0034  /* Capture/compare register 1 (16-bit or 32-bit TIM2/5) */
+#define STM32L4_GTIM_CCR2_OFFSET    0x0038  /* Capture/compare register 2 (16-bit TIM2-5,15 only or 32-bit TIM2/5) */
+#define STM32L4_GTIM_CCR3_OFFSET    0x003c  /* Capture/compare register 3 (16-bit TIM2-5 only or 32-bit TIM2/5) */
+#define STM32L4_GTIM_CCR4_OFFSET    0x0040  /* Capture/compare register 4 (16-bit TIM2-5 only or 32-bit TIM2/5) */
+#define STM32L4_GTIM_DCR_OFFSET     0x0048  /* DMA control register (16-bit) */
+#define STM32L4_GTIM_DMAR_OFFSET    0x004c  /* DMA address for burst mode (16-bit) */
 #define STM32L4_GTIM_OR1_OFFSET     0x0050  /* Option register 1 */
 #define STM32L4_GTIM_OR2_OFFSET     0x0060  /* Option register 2 */
 
@@ -185,9 +186,10 @@
 #define STM32L4_TIM8_OR2            (STM32L4_TIM8_BASE+STM32L4_ATIM_OR2_OFFSET)
 #define STM32L4_TIM8_OR3            (STM32L4_TIM8_BASE+STM32L4_ATIM_OR3_OFFSET)
 
-/* 16-/32-bit General Timers - TIM2, TIM3, TIM4, and TIM5 with DMA.
+/* 16-/32-bit General Timers - TIM2, TIM3, TIM4, TIM5, and TIM15-17.
  * TIM3 and 4 are 16-bit.
- * TIM2 and 5 are 32-bit
+ * TIM2 and 5 are 32-bit.
+ * TIM15, 16 and 17 are 16-bit.
  */
 
 #define STM32L4_TIM2_CR1            (STM32L4_TIM2_BASE+STM32L4_GTIM_CR1_OFFSET)
@@ -292,7 +294,6 @@
 #define STM32L4_TIM16_SR            (STM32L4_TIM16_BASE+STM32L4_GTIM_SR_OFFSET)
 #define STM32L4_TIM16_EGR           (STM32L4_TIM16_BASE+STM32L4_GTIM_EGR_OFFSET)
 #define STM32L4_TIM16_CCMR1         (STM32L4_TIM16_BASE+STM32L4_GTIM_CCMR1_OFFSET)
-#define STM32L4_TIM16_CCMR2         (STM32L4_TIM16_BASE+STM32L4_GTIM_CCMR2_OFFSET)
 #define STM32L4_TIM16_CCER          (STM32L4_TIM16_BASE+STM32L4_GTIM_CCER_OFFSET)
 #define STM32L4_TIM16_CNT           (STM32L4_TIM16_BASE+STM32L4_GTIM_CNT_OFFSET)
 #define STM32L4_TIM16_PSC           (STM32L4_TIM16_BASE+STM32L4_GTIM_PSC_OFFSET)
@@ -310,7 +311,6 @@
 #define STM32L4_TIM17_SR            (STM32L4_TIM17_BASE+STM32L4_GTIM_SR_OFFSET)
 #define STM32L4_TIM17_EGR           (STM32L4_TIM17_BASE+STM32L4_GTIM_EGR_OFFSET)
 #define STM32L4_TIM17_CCMR1         (STM32L4_TIM17_BASE+STM32L4_GTIM_CCMR1_OFFSET)
-#define STM32L4_TIM17_CCMR2         (STM32L4_TIM17_BASE+STM32L4_GTIM_CCMR2_OFFSET)
 #define STM32L4_TIM17_CCER          (STM32L4_TIM17_BASE+STM32L4_GTIM_CCER_OFFSET)
 #define STM32L4_TIM17_CNT           (STM32L4_TIM17_BASE+STM32L4_GTIM_CNT_OFFSET)
 #define STM32L4_TIM17_PSC           (STM32L4_TIM17_BASE+STM32L4_GTIM_PSC_OFFSET)
@@ -706,7 +706,7 @@
 #  define ATIM_BDTR_LOCKOFF       (0 << ATIM_BDTR_LOCK_SHIFT) /* 00: LOCK OFF - No bit is write protected */
 #  define ATIM_BDTR_LOCK1         (1 << ATIM_BDTR_LOCK_SHIFT) /* 01: LOCK Level 1 protection */
 #  define ATIM_BDTR_LOCK2         (2 << ATIM_BDTR_LOCK_SHIFT) /* 10: LOCK Level 2 protection */
-#  define ATIM_BDTR_LOCK3         (3 << ATIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */ */
+#  define ATIM_BDTR_LOCK3         (3 << ATIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */
 #define ATIM_BDTR_OSSI            (1 << 10) /* Bit 10: Off-State Selection for Idle mode */
 #define ATIM_BDTR_OSSR            (1 << 11) /* Bit 11: Off-State Selection for Run mode */
 #define ATIM_BDTR_BKE             (1 << 12) /* Bit 12: Break enable */
@@ -885,15 +885,15 @@
 #define GTIM_SR_CC3OF             (1 << 11) /* Bit 11: Capture/Compare 3 Overcapture flag (TIM2-5 only) */
 #define GTIM_SR_CC4OF             (1 << 12) /* Bit 12: Capture/Compare 4 Overcapture flag (TIM2-5 only) */
 
-/* Event generation register (TIM2-5 and TIM9-14) */
+/* Event generation register (TIM2-5, TIM15-17) */
 
 #define GTIM_EGR_UG               (1 << 0)  /* Bit 0: Update generation */
 #define GTIM_EGR_CC1G             (1 << 1)  /* Bit 1: Capture/compare 1 generation */
-#define GTIM_EGR_CC2G             (1 << 2)  /* Bit 2: Capture/compare 2 generation (TIM2-5,9,12,&15 only) */
+#define GTIM_EGR_CC2G             (1 << 2)  /* Bit 2: Capture/compare 2 generation (TIM2-5,15 only) */
 #define GTIM_EGR_CC3G             (1 << 3)  /* Bit 3: Capture/compare 3 generation (TIM2-5 only) */
 #define GTIM_EGR_CC4G             (1 << 4)  /* Bit 4: Capture/compare 4 generation (TIM2-5 only) */
 #define GTIM_EGR_COMIG            (1 << 5)  /* Bit 5: Capture/Compare control update generation (TIM15-17 only) */
-#define GTIM_EGR_TG               (1 << 6)  /* Bit 6: Trigger generation (TIM2-5,9,12&16-17 only) */
+#define GTIM_EGR_TG               (1 << 6)  /* Bit 6: Trigger generation (TIM2-5,16-17 only) */
 #define GTIM_EGR_BG               (1 << 7)  /* Bit 7: Break generation (TIM15-17 only) */
 
 /* Capture/compare mode register 1 - Output compare mode (TIM2-5) */
@@ -1057,7 +1057,7 @@
 #  define GTIM_BDTR_LOCKOFF       (0 << GTIM_BDTR_LOCK_SHIFT) /* 00: LOCK OFF - No bit is write protected */
 #  define GTIM_BDTR_LOCK1         (1 << GTIM_BDTR_LOCK_SHIFT) /* 01: LOCK Level 1 protection */
 #  define GTIM_BDTR_LOCK2         (2 << GTIM_BDTR_LOCK_SHIFT) /* 10: LOCK Level 2 protection */
-#  define GTIM_BDTR_LOCK3         (3 << GTIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */ */
+#  define GTIM_BDTR_LOCK3         (3 << GTIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */
 #define GTIM_BDTR_OSSI            (1 << 10) /* Bit 10: Off-State Selection for Idle mode */
 #define GTIM_BDTR_OSSR            (1 << 11) /* Bit 11: Off-State Selection for Run mode */
 #define GTIM_BDTR_BKE             (1 << 12) /* Bit 12: Break enable */

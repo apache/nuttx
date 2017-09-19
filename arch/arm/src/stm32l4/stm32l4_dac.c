@@ -386,7 +386,11 @@ uint16_t stm32l4_dac1_dmabuffer[CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE];
 static struct stm32_chan_s g_dac1priv =
 {
   .intf       = 0,
+#ifdef CONFIG_STM32L4_DAC1_OUTPUT_ADC
+  .pin        = 0xffffffffU,
+#else
   .pin        = GPIO_DAC1_OUT,
+#endif
   .dro        = STM32L4_DAC_DHR12R1,
   .cr         = STM32L4_DAC_CR,
 #ifdef CONFIG_STM32L4_DAC1_DMA
@@ -419,7 +423,11 @@ uint16_t stm32l4_dac2_dmabuffer[CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE];
 static struct stm32_chan_s g_dac2priv =
 {
   .intf       = 1,
+#ifdef CONFIG_STM32L4_DAC2_OUTPUT_ADC
+  .pin        = 0xffffffffU,
+#else
   .pin        = GPIO_DAC2_OUT,
+#endif
   .dro        = STM32L4_DAC_DHR12R2,
   .cr         = STM32L4_DAC_CR,
 #ifdef CONFIG_STM32L4_DAC2_DMA
@@ -1011,7 +1019,10 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
    * should first be configured to analog (AIN)".
    */
 
-  stm32l4_configgpio(chan->pin);
+  if (chan->pin != 0xffffffffU)
+    {
+      stm32l4_configgpio(chan->pin);
+    }
 
   /* DAC channel configuration:
    *
@@ -1036,24 +1047,14 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
   /* Enable output buffer or route DAC output to on-chip peripherals (ADC) */
 
   clearbits = DAC_MCR_MODE1_MASK;
-#if defined(CONFIG_STM32L4_DAC1_OUTPUT_ADC)
-  if (chan->intf == 0)
-    {
-      setbits = DAC_MCR_MODE_IN;
-    }
-  else
-#endif
-#if defined(CONFIG_STM32L4_DAC2_OUTPUT_ADC)
-  if (chan->intf == 1)
-    {
-      setbits = DAC_MCR_MODE_IN;
-    }
-  else
-#endif
+  if (chan->pin != 0xffffffffU)
     {
       setbits = DAC_MCR_MODE_EXTBUF;
     }
-
+  else
+    {
+      setbits = DAC_MCR_MODE_IN;
+    }
   stm32l4_dac_modify_mcr(chan, clearbits, setbits);
 
 #ifdef HAVE_DMA

@@ -126,9 +126,11 @@ enum stm32l4_chanmode_e
 struct stm32l4_pwmchan_s
 {
   uint8_t channel;                     /* Timer output channel: {1,..4} */
-  uint32_t pincfg;                     /* Output pin configuration */
   enum stm32l4_chanmode_e mode;
-  uint32_t npincfg;                    /* Complementary output pin configuration (only TIM1/8 CH1-3)*/
+  uint32_t pincfg;                     /* Output pin configuration */
+  uint32_t npincfg;                    /* Complementary output pin configuration
+                                        * (only TIM1,8 CH1-3 and TIM15,16,17 CH1)
+                                        */
 };
 
 /* This structure represents the state of one PWM timer */
@@ -136,8 +138,8 @@ struct stm32l4_pwmchan_s
 struct stm32l4_pwmtimer_s
 {
   FAR const struct pwm_ops_s *ops;     /* PWM operations */
-  uint8_t timid;                       /* Timer ID {1,...,17} */
   struct stm32l4_pwmchan_s channels[PWM_NCHANNELS];
+  uint8_t timid;                       /* Timer ID {1,...,17} */
   uint8_t timtype;                     /* See the TIMTYPE_* definitions */
   enum stm32l4_timmode_e mode;
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -1106,7 +1108,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               ccenable |= ATIM_CCER_CC1E;
 
-              /* Conditionnaly enable the complementary output */
+              /* Conditionally enable the complementary output */
 
               if (compout)
                 {
@@ -1136,7 +1138,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               ccenable |= ATIM_CCER_CC2E;
 
-              /* Conditionnaly enable the complementary output */
+              /* Conditionally enable the complementary output */
 
               if (compout)
                 {
@@ -1166,7 +1168,7 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
 
               ccenable |= ATIM_CCER_CC3E;
 
-              /* Conditionnaly enable the complementary output */
+              /* Conditionally enable the complementary output */
 
               if (compout)
                 {
@@ -1284,7 +1286,8 @@ static int stm32l4pwm_timer(FAR struct stm32l4_pwmtimer_s *priv,
       stm32l4pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, bdtr);
     }
   else
-#if defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM15_PWM)
+#if defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM16_PWM) || \
+    defined(CONFIG_STM32L4_TIM17_PWM)
   if (priv->timtype == TIMTYPE_COUNTUP16)
     {
 

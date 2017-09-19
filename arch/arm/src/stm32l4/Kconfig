@@ -837,6 +837,10 @@ config STM32L4_DAC
 	bool
 	default n
 
+config STM32L4_DFSDM
+	bool
+	default n
+
 config STM32L4_DMA
 	bool
 	default n
@@ -3379,6 +3383,42 @@ config STM32L4_DAC2_OUTPUT_ADC
 	default n
 	---help---
 		Route DAC2 output to ADC input instead of external pin.
+
+endmenu
+
+menu "DFSDM Configuration"
+	depends on STM32L4_DFSDM1
+
+config STM32L4_DFSDM1_FLT0
+	bool "DFSDM1 Filter 0"
+	default n
+	select STM32L4_DFSDM
+
+config STM32L4_DFSDM1_FLT1
+	bool "DFSDM1 Filter 1"
+	default n
+	select STM32L4_DFSDM
+
+config STM32L4_DFSDM1_FLT2
+	bool "DFSDM1 Filter 2"
+	default n
+	depends on !STM32L4_STM32L4X3
+	select STM32L4_DFSDM
+
+config STM32L4_DFSDM1_FLT3
+	bool "DFSDM1 Filter 3"
+	default n
+	depends on !STM32L4_STM32L4X3
+	select STM32L4_DFSDM
+
+config STM32L4_DFSDM1_DMA
+	bool "DFSDM1 DMA"
+	depends on STM32L4_DFSDM
+	default n
+	---help---
+		If DMA is selected, then the DFSDM may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
 
 endmenu
 

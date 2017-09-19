@@ -135,6 +135,10 @@ ifeq ($(CONFIG_STM32L4_DAC),y)
 CHIP_CSRCS += stm32l4_dac.c
 endif
 
+ifeq ($(CONFIG_STM32L4_DFSDM),y)
+CHIP_CSRCS += stm32l4_dfsdm.c
+endif
+
 ifeq ($(CONFIG_STM32L4_DMA),y)
 CHIP_CSRCS += stm32l4_dma.c
 endif
