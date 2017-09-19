@@ -112,7 +112,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
           lipaddr           = tcp_conn->u.ipv4.laddr;
-          ripaddri          = tcp_conn->u.ipv4.raddr;
+          ripaddr           = tcp_conn->u.ipv4.raddr;
         }
         break;
 #endif
