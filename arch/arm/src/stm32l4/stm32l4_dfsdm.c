@@ -71,6 +71,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Sanity checking **********************************************************/
 
 #if !defined(CONFIG_STM32L4_DFSDM1_FLT0) && \
@@ -106,18 +107,23 @@
 /* DFSDM Filter interrupts **************************************************/
 
 /* These bits are same in FLRCR2 and FLTISR (FLTICR only has JOVR and ROVR) */
+
 #define DFSDM_INT_JEOC   DFSDM_FLTCR2_JEOCIE
 #define DFSDM_INT_REOC   DFSDM_FLTCR2_REOCIE
 #define DFSDM_INT_JOVR   DFSDM_FLTCR2_JOWRIE
 #define DFSDM_INT_ROVR   DFSDM_FLTCR2_ROWRIE
 #define DFSDM_INT_AWD    DFSDM_FLTCR2_AWDIE
 
-/* SCDIE and CKABIE are not in this, as the bits exist only in FLT0 filter CR2. */
+/* SCDIE and CKABIE are not in this, as the bits exist only in FLT0 filter
+ * CR2.
+ */
+
 #define DFSDM_INT_MASK (DFSDM_FLTCR2_JEOCIE | DFSDM_FLTCR2_REOCIE | \
                         DFSDM_FLTCR2_JOWRIE | DFSDM_FLTCR2_ROWRIE | \
                         DFSDM_FLTCR2_AWDIE)
 
 /* Similarly, this is missing SCDF and CKABF as special support is needed. */
+
 #define DFSDM_ISR_MASK (DFSDM_FLTISR_JEOCF | DFSDM_FLTISR_REOCF | \
                         DFSDM_FLTISR_JOVRF | DFSDM_FLTISR_ROVRF | \
                         DFSDM_FLTISR_AWDF)
@@ -570,6 +576,7 @@ static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg)
         tim_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
         tim_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
         tim_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
+
   if (priv->tbase == STM32L4_TIM1_BASE || priv->tbase == STM32L4_TIM8_BASE)
     {
       ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
@@ -662,6 +669,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
     {
       return ERROR;
     }
+
   /* EXTSEL selection: These bits select the external event used to trigger
    * the start of conversion of a regular group.  NOTE:
    *
@@ -746,6 +754,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
    *
    * Set the clock division to zero for all
    */
+
   clrbits = GTIM_CR1_DIR | GTIM_CR1_CMS_MASK | GTIM_CR1_CKD_MASK;
   setbits = GTIM_CR1_EDGE;
   tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, clrbits, setbits);
@@ -872,6 +881,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
     }
 
   /* Disable the Channel by resetting the CCxE Bit in the CCER register */
+
   ccer = tim_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
   ccer &= ~ccenable;
   tim_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
@@ -896,6 +906,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
   /* Reset the output polarity level of all channels (selects high
    * polarity)
    */
+
   ccer &= ~(ATIM_CCER_CC1P | ATIM_CCER_CC2P |
             ATIM_CCER_CC3P | ATIM_CCER_CC4P);
 
@@ -917,6 +928,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
                 ATIM_CCER_CC4NP);
 
       /* Reset the output compare and output compare N IDLE State */
+
       cr2 &= ~(ATIM_CR2_OIS1 | ATIM_CR2_OIS1N |
                ATIM_CR2_OIS2 | ATIM_CR2_OIS2N |
                ATIM_CR2_OIS3 | ATIM_CR2_OIS3N |
@@ -1050,6 +1062,7 @@ static void dfsdm_rccreset(FAR struct stm32_dev_s *priv, bool reset)
     {
       regval &= ~RCC_APB2RSTR_DFSDMRST;
     }
+
   putreg32(regval, STM32L4_RCC_APB2RSTR);
   leave_critical_section(flags);
 }
@@ -1080,8 +1093,8 @@ static void dfsdm_enable(FAR struct stm32_dev_s *priv)
  * Name: dfsdm_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -1301,6 +1314,7 @@ static void dfsdm_rxint(FAR struct adc_dev_s *dev, bool enable)
 
       regval &= ~DFSDM_INT_MASK;
     }
+
   dfsdm_putreg(priv, FLTCR2_OFFSET(priv), regval);
 }
 
@@ -1332,7 +1346,9 @@ static int dfsdm_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
     }
   else
     {
-      for (i = 0; i < priv->cchannels && priv->chanlist[i] != ch - 1; i++);
+      for (i = 0; i < priv->cchannels && priv->chanlist[i] != ch - 1; i++)
+        {
+        }
 
       if (i >= priv->cchannels)
         {
@@ -1583,6 +1599,7 @@ static int dfsdm_flt0_interrupt(int irq, FAR void *context, FAR void *arg)
  *   DFSDM filter interrupt handler
  *
  ****************************************************************************/
+
 #if defined(CONFIG_STM32L4_DFSDM1_FLT1)
 static int dfsdm_flt1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -1607,6 +1624,7 @@ static int dfsdm_flt1_interrupt(int irq, FAR void *context, FAR void *arg)
  *   DFSDM filter interrupt handler
  *
  ****************************************************************************/
+
 #if defined(CONFIG_STM32L4_DFSDM1_FLT2)
 static int dfsdm_flt2_interrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -1631,6 +1649,7 @@ static int dfsdm_flt2_interrupt(int irq, FAR void *context, FAR void *arg)
  *   DFSDM filter interrupt handler
  *
  ****************************************************************************/
+
 #if defined(CONFIG_STM32L4_DFSDM1_FLT3)
 static int dfsdm_flt3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
