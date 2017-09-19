@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/viewtool-stm32f107/src/stm32_appinit.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mount.h>
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
@@ -153,6 +154,17 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: rtc_driver_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to mount procfs at %s: %d\n",
+           STM32_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 
