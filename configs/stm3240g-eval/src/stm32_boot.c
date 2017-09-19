@@ -147,7 +147,6 @@ static int board_initthread(int argc, char *argv[])
 {
   int ret;
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.
@@ -158,7 +157,6 @@ static int board_initthread(int argc, char *argv[])
     {
       gerr("ERROR: stm32_bringup failed: %d\n", ret);
     }
-#endif
 
 #ifdef HAVE_NXSTART
   /* Initialize the NX server */
