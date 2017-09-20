@@ -46,7 +46,7 @@ CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  stm32_buttons.c
+CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
@@ -59,6 +59,9 @@ endif
 
 ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
+  ifeq ($(CONFIG_STM32L4_DFSDM),y)
+  CSRCS += stm32_dfsdm.c
+  endif
 endif
 
 ifeq ($(CONFIG_DAC),y)

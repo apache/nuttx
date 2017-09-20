@@ -152,8 +152,8 @@
  * parallel inputs to DFSDM_CHyDATINR register.
  */
 
-#define DFSDM_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \
-                                DMA_CCR_PSIZE_16BITS | \
+#define DFSDM_DMA_CONTROL_WORD (DMA_CCR_MSIZE_32BITS | \
+                                DMA_CCR_PSIZE_32BITS | \
                                 DMA_CCR_MINC | \
                                 DMA_CCR_CIRC)
 
@@ -1371,13 +1371,16 @@ static int dfsdm_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
   regval |= DFSDM_FLTCR1_RCH(priv->current);
   dfsdm_putreg(priv, FLTCR1_OFFSET(priv), regval);
 
-#if 0  /* TODO: for testing */
   /* Set CHCFGR1 input data configuration */
 
   regval  = dfsdm_getreg(priv, CHCFGR1_OFFSET(priv));
-  regval |= DFSDM_CHCFGR1_DATMPX_DATINR;
-  dfsdm_putreg(priv, CHCFGR1_OFFSET(priv), regval);
+#ifdef ADC_HAVE_DFSDM
+  regval |= DFSDM_CHCFGR1_DATMPX_ADC;
+#else
+  regval |= DFSDM_CHCFGR1_DATMPX_EXT;
+  // regval |= DFSDM_CHCFGR1_DATMPX_DATINR;
 #endif
+  dfsdm_putreg(priv, CHCFGR1_OFFSET(priv), regval);
 
   /* Enable the channel */
 
@@ -1488,7 +1491,7 @@ static int dfsdm_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 static int dfsdm_interrupt(FAR struct adc_dev_s *dev, uint32_t isr)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-  int32_t value;
+  uint32_t value;
 
   /* Identifies the interruption AWD or OVR */
 
@@ -1516,6 +1519,7 @@ static int dfsdm_interrupt(FAR struct adc_dev_s *dev, uint32_t isr)
       dfsdm_putreg(priv, FLTAWCFR_OFFSET(priv), DFSDM_INT_ROVR);
     }
 
+#if 0
   if ((isr & DFSDM_INT_JOVR) != 0)
     {
       awarn("WARNING: Injected conversion overrun has occurred!\n");
@@ -1524,6 +1528,7 @@ static int dfsdm_interrupt(FAR struct adc_dev_s *dev, uint32_t isr)
 
       dfsdm_putreg(priv, FLTAWCFR_OFFSET(priv), DFSDM_INT_JOVR);
     }
+#endif
 
   /* EOC: End of conversion */
 
@@ -1689,6 +1694,7 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 {
   FAR struct adc_dev_s   *dev  = (FAR struct adc_dev_s *)arg;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  uint32_t value;
   int i;
 
   /* Verify that the upper-half driver has bound its callback functions */
@@ -1699,7 +1705,10 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 
       for (i = 0; i < priv->nchannels; i++)
         {
-          priv->cb->au_receive(dev, priv->chanlist[priv->current], priv->dmabuffer[priv->current]);
+          value = priv->dmabuffer[priv->current];
+          value = (value & DFSDM_FLTRDATAR_RDATA_MASK) >> DFSDM_FLTRDATAR_RDATA_SHIFT;
+
+          priv->cb->au_receive(dev, priv->chanlist[priv->current], value);
           priv->current++;
           if (priv->current >= priv->nchannels)
             {

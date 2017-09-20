@@ -73,7 +73,7 @@
 #define STM32L4_ADC_OFR1_OFFSET        0x0060  /* ADC offset register 1 */
 #define STM32L4_ADC_OFR2_OFFSET        0x0064  /* ADC offset register 2 */
 #define STM32L4_ADC_OFR3_OFFSET        0x0068  /* ADC offset register 3 */
-#define STM32L4_ADC_OFR4_OFFSET        0x006c  /* ADC data offset register 4 */
+#define STM32L4_ADC_OFR4_OFFSET        0x006c  /* ADC offset register 4 */
 #define STM32L4_ADC_JDR1_OFFSET        0x0080  /* ADC injected data register 1 */
 #define STM32L4_ADC_JDR2_OFFSET        0x0084  /* ADC injected data register 2 */
 #define STM32L4_ADC_JDR3_OFFSET        0x0088  /* ADC injected data register 3 */
@@ -220,6 +220,7 @@
 
 #define ADC_CFGR_DMAEN               (1 << 0)  /* Bit 0: Direct memory access enable */
 #define ADC_CFGR_DMACFG              (1 << 1)  /* Bit 1: Direct memory access configuration */
+#define ADC_CFGR_DFSDMCFG            (1 << 2)  /* Bit 2: DFSDM mode configuration */
 #define ADC_CFGR_RES_SHIFT           (3)       /* Bits 3-4: Data resolution */
 #define ADC_CFGR_RES_MASK            (3 << ADC_CFGR_RES_SHIFT)
 #  define ADC_CFGR_RES_12BIT         (0 << ADC_CFGR_RES_SHIFT) /* 12-bit resolution */

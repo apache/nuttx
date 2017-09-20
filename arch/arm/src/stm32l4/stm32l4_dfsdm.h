@@ -89,6 +89,15 @@
 #  define DFSDM_HAVE_DMA  1
 #endif
 
+/* ADC output to DFSDM support */
+
+#undef ADC_HAVE_DFSDM
+#if defined(CONFIG_STM32L4_ADC1_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32L4_ADC2_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32L4_ADC3_OUTPUT_DFSDM)
+#  define ADC_HAVE_DFSDM
+#endif
+
 /* Timer configuration:  If a timer trigger is specified, then get
  * information about the timer.
  */

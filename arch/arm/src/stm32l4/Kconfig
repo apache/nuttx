@@ -3308,6 +3308,28 @@ config STM32L4_ADC3_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32L4_ADC1_OUTPUT_DFSDM
+	bool "ADC1 output to DFSDM"
+	depends on STM32L4_ADC1 && STM32L4_DFSDM1 && (STM32L4_STM32L496XX || \
+		   STM32L4_STM32L451XX || STM32L4_STM32L452XX || STM32L4_STM32L462XX)
+	default n
+	---help---
+		Route ADC1 output directly to DFSDM parallel inputs.
+
+config STM32L4_ADC2_OUTPUT_DFSDM
+	bool "ADC2 output to DFSDM"
+	depends on STM32L4_ADC2 && STM32L4_DFSDM1 && STM32L4_STM32L496XX
+	default n
+	---help---
+		Route ADC2 output directly to DFSDM parallel inputs.
+
+config STM32L4_ADC3_OUTPUT_DFSDM
+	bool "ADC3 output to DFSDM"
+	depends on STM32L4_ADC3 && STM32L4_DFSDM1 && STM32L4_STM32L496XX
+	default n
+	---help---
+		Route ADC3 output directly to DFSDM parallel inputs.
+
 endmenu
 
 menu "DAC Configuration"

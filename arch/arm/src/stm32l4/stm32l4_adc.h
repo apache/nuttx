@@ -120,6 +120,38 @@
 #if defined(CONFIG_STM32L4_ADC1) || defined(CONFIG_STM32L4_ADC2) || \
     defined(CONFIG_STM32L4_ADC3)
 
+/* ADC output to DFSDM support. Note that DFSDM and DMA are
+ * mutually exclusive.
+ */
+
+#undef ADC_HAVE_DFSDM
+#if defined(CONFIG_STM32L4_ADC1_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32L4_ADC2_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32L4_ADC3_OUTPUT_DFSDM)
+#  define ADC_HAVE_DFSDM
+#endif
+
+#if defined(CONFIG_STM32L4_ADC1_OUTPUT_DFSDM)
+#  define ADC1_HAVE_DFSDM 1
+#  undef  CONFIG_STM32L4_ADC1_DMA
+#else
+#  undef  ADC1_HAVE_DFSDM
+#endif
+
+#if defined(CONFIG_STM32L4_ADC2_OUTPUT_DFSDM)
+#  define ADC2_HAVE_DFSDM 1
+#  undef  CONFIG_STM32L4_ADC2_DMA
+#else
+#  undef  ADC2_HAVE_DFSDM
+#endif
+
+#if defined(CONFIG_STM32L4_ADC3_OUTPUT_DFSDM)
+#  define ADC3_HAVE_DFSDM 1
+#  undef  CONFIG_STM32L4_ADC3_DMA
+#else
+#  undef  ADC3_HAVE_DFSDM
+#endif
+
 /* DMA support */
 
 #undef ADC_HAVE_DMA

@@ -130,7 +130,18 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
+
+#ifdef CONFIG_STM32L4_DFSDM
+  /* Initialize DFSDM and register its filters as additional ADC devices. */
+
+  ret = stm32_dfsdm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_dfsdm_setup failed: %d\n", ret);
+    }
+
 #endif
+#endif /* CONFIG_ADC */
 
 #ifdef CONFIG_DAC
   /* Initialize DAC and register the DAC driver. */
