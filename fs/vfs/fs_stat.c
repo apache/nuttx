@@ -290,7 +290,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
       else
 #endif
 #if defined(CONFIG_FS_SHM)
-       if (INODE_IS_SHM(inode)) */
+       if (INODE_IS_SHM(inode))
         {
           buf->st_mode = S_IFSHM;
         }

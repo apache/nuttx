@@ -211,7 +211,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
     {
       /* We found a route.  Return the router address. */
 
-      net_ipv4addr_copy(*router, match.target);
+      net_ipv4addr_copy(*router, match.router);
     }
   else
     {
@@ -268,7 +268,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
     {
       /* We found a route.  Return the router address. */
 
-      net_ipv6addr_copy(router, match.target);
+      net_ipv6addr_copy(router, match.router);
     }
   else
     {
