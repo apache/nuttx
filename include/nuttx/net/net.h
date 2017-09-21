@@ -137,7 +137,7 @@ struct sock_intf_s
 #ifdef CONFIG_NET_SENDFILE
   CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
-                    size_t count)
+                    size_t count);
 #endif
   CODE ssize_t    (*si_recvfrom)(FAR struct socket *psock, FAR void *buf,
                     size_t len, int flags, FAR struct sockaddr *from,
