@@ -1250,12 +1250,24 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
   priv->status = status;
 
   /* Any new message should begin with "Start" condition
-   * Situation priv->msgc == 0 came from DMA RX handler and should be managed
+   * However there were 2 situations where that was not true
+   * Situation 1: priv->msgc == 0 came from DMA RX handler and should
+   * be managed
+   *
+   * Situation 2: If an error is injected that looks like a STOP the
+   * interrupt will be reentered with some status that will be incorrect. This
+   * will ensure that the error handler will clear the interrupt enables and
+   * return the error to the waiting task.
    */
 
   if (priv->dcnt == -1 && priv->msgc != 0 && (status & I2C_SR1_SB) == 0)
     {
+#ifdef CONFIG_STM32_I2C_DMA
       return OK;
+#else
+      priv->status |= I2C_SR1_TIMEOUT;
+      goto state_error;
+#endif
     }
 
   /* Check if this is a new transmission so to set up the
@@ -2026,6 +2038,9 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       /* Clear interrupt flags */
 
+#ifndef CONFIG_STM32_I2C_DMA
+state_error:
+#endif
       stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
 
       priv->dcnt = -1;
