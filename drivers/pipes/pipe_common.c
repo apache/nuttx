@@ -585,7 +585,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                   sem_post(&dev->d_rdsem);
                 }
 
-              /* Notify all poll/select waiters that they can write to the FIFO */
+              /* Notify all poll/select waiters that they can read from the FIFO */
 
               pipecommon_pollnotify(dev, POLLIN);
 
@@ -607,6 +607,10 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   sem_post(&dev->d_rdsem);
                 }
+
+              /* Notify all poll/select waiters that they can read from the FIFO */
+
+              pipecommon_pollnotify(dev, POLLIN);
             }
 
           last = nwritten;
