@@ -92,6 +92,9 @@ struct cdcacm_dev_s
   uint8_t nwrq;                        /* Number of queue write requests (in reqlist) */
   uint8_t nrdq;                        /* Number of queue read requests (in epbulkout) */
   uint8_t minor;                       /* The device minor number */
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+  uint8_t serialstate;                 /* State of the DSR/DCD */
+#endif
   bool    rxenabled;                   /* true: UART RX "interrupts" enabled */
   int16_t rxhead;                      /* Working head; used when rx int disabled */
 
@@ -155,6 +158,12 @@ static struct usbdev_req_s *cdcacm_allocreq(FAR struct usbdev_ep_s *ep,
                  uint16_t len);
 static void    cdcacm_freereq(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
+
+/* Flow Control ************************************************************/
+
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+static int     cdcacm_serialstate(FAR struct cdcacm_dev_s *priv);
+#endif
 
 /* Configuration ***********************************************************/
 
@@ -355,13 +364,13 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-      return -ENODEV;
+      return -EINVAL;
     }
 #endif
 
   flags = enter_critical_section();
 
-  /* Use our IN endpoint for the transfer */
+  /* Use our bulk IN endpoint for the transfer */
 
   ep = priv->epbulkin;
 
@@ -589,6 +598,104 @@ static void cdcacm_freereq(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
+ * Name: cdcacm_serialstate
+ *
+ * Description:
+ *   Send the serial state message.
+ *
+ * 1. Format and send a request header with:
+ *
+ *   bmRequestType:
+ *    USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
+ *    USB_REQ_RECIPIENT_INTERFACE
+ *   bRequest: ACM_SERIAL_STATE
+ *   wValue: 0
+ *   wIndex: 0
+ *   wLength: Length of data = 2
+ *
+ * 2. Followed by the notification data
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
+{
+  FAR struct usbdev_ep_s *ep;
+  FAR struct usbdev_req_s *req;
+  FAR struct cdcacm_req_s *reqcontainer;
+  FAR struct cdc_notification_s *notify;
+  irqstate_t flags;
+  int ret;
+
+  usbtrace(CDCACM_CLASSAPI_FLOWCONTROL, (uint16_t)priv->serialstate);
+
+  DEBUGASSERT(priv != NULL && priv->epintin != NULL);
+#ifdef CONFIG_DEBUG_FEATURES
+  if (priv == NULL || priv->epintin == NULL)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return -EINVAL;
+    }
+#endif
+
+  flags = enter_critical_section();
+
+  /* Use our interrupt IN endpoint for the transfer */
+
+  ep = priv->epintin;
+
+  /* Remove the next container from the request list */
+
+  reqcontainer = (FAR struct cdcacm_req_s *)sq_remfirst(&priv->reqlist);
+  if (reqcontainer == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout_with_flags;
+    }
+
+  /* Decrement the count of write requests */
+
+  priv->nwrq--;
+
+  /* Format the SerialState notifcation */
+
+  DEBUGASSERT(reqcontainer->req != NULL);
+  req                  = reqcontainer->req;
+
+  DEBUGASSERT(req->buf != NULL);
+  notify               = (FAR struct cdc_notification_s *)req->buf;
+
+  notify->type         = (USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
+                          USB_REQ_RECIPIENT_INTERFACE);
+  notify->notification = ACM_SERIAL_STATE;
+  notify->value[0]     = 0;
+  notify->value[1]     = 0;
+  notify->index[0]     = 0;
+  notify->index[1]     = 0;
+  notify->len[0]       = 2;
+  notify->len[1]       = 0;
+  notify->data[0]      = priv->serialstate;
+  notify->data[1]      = 0;
+
+  /* Then submit the request to the endpoint */
+
+  req->len             =  SIZEOF_NOTIFICATION_S(2);
+  req->priv            = reqcontainer;
+  req->flags           = USBDEV_REQFLAGS_NULLPKT;
+  ret                  = EP_SUBMIT(ep, req);
+
+  if (ret < 0)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL), (uint16_t)-ret);
+    }
+
+errout_with_flags:
+  leave_critical_section(flags);
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: cdcacm_resetconfig
  *
  * Description:
@@ -661,7 +768,7 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
   if (priv == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-      return -EIO;
+      return -EINVAL;
     }
 #endif
 
@@ -1274,7 +1381,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
   if (!driver || !dev || !ctrl)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-      return -EIO;
+      return -EINVAL;
      }
 #endif
 
@@ -1805,7 +1912,7 @@ static int cdcuart_setup(FAR struct uart_dev_s *dev)
   if (!dev || !dev->priv)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-      return -EIO;
+      return -EINVAL;
     }
 #endif
 
@@ -1941,7 +2048,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
    case CAIOC_GETCTRLLINE:
       {
         FAR int *ptr = (FAR int *)((uintptr_t)arg);
-        if (ptr)
+        if (ptr != NULL)
           {
             *ptr = priv->ctrlline;
           }
@@ -1952,6 +2059,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
     /* CAIOC_NOTIFY
      *   Send a serial state to the host via the Interrupt IN endpoint.
      *   Argument: int.  This includes the current state of the carrier
@@ -1961,27 +2069,13 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case CAIOC_NOTIFY:
       {
-        /* Not yet implemented.  I probably won't bother to implement until
-         * I comr up with a usage model that needs it.
-         *
-         * Here is what the needs to be done:
-         *
-         * 1. Format and send a request header with:
-         *
-         *   bmRequestType:
-         *    USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
-         *    USB_REQ_RECIPIENT_INTERFACE
-         *   bRequest: ACM_SERIAL_STATE
-         *   wValue: 0
-         *   wIndex: 0
-         *   wLength: Length of data
-         *
-         * 2. Followed by the notification data (in a separate packet)
-         */
+        DEBUGASSERT(arg < UINT8_MAX);
 
-        ret = -ENOSYS;
+        priv->serialstate = (uint8_t)arg;
+        ret = cdcacm_serialstate(priv);
       }
       break;
+#endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
@@ -2231,13 +2325,48 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
                                   unsigned int nbuffered, bool upper)
 {
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
-  /* Allocate a request */
-  /* Format the SerialState notification */
-  /* Submit the request on the Interrupt IN endpoint */
-#  warning Missing logic
+  FAR struct cdcacm_dev_s *priv;
+  int ret;
+
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (dev == NULL || dev->priv == NULL)
+    {
+       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+       return false;
+    }
 #endif
 
+  /* Extract reference to private data */
+
+  priv = (FAR struct cdcacm_dev_s *)dev->priv;
+
+  /* Set DSR (TX carrier) if the lower water mark has been crossed or clear it if the
+   * upper water mark has been crossed.
+   */
+
+  if (upper)
+    {
+      priv->serialstate &= ~CDCACM_UART_DSR;
+    }
+  else
+    {
+      priv->serialstate |= CDCACM_UART_DSR;
+    }
+
+  /* Set DCD in any event */
+
+  priv->serialstate |= CDCACM_UART_DCD;
+
+  /* And send the SerialState message */
+
+  ret = cdcacm_serialstate(priv);
+  return (ret >= 0 && upper);
+#else
+
   return false;
+#endif
 }
 #endif
 
@@ -2376,22 +2505,28 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   memset(priv, 0, sizeof(struct cdcacm_dev_s));
   sq_init(&priv->reqlist);
 
-  priv->minor              = minor;
+  priv->minor               = minor;
 
   /* Save the caller provided device description (composite only) */
 
   memcpy(&priv->devinfo, devinfo,
          sizeof(struct usbdev_devinfo_s));
 
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+  /* SerialState */
+
+  priv->serialstate         = (CDCACM_UART_DCD | CDCACM_UART_DSR);
+#endif
+
   /* Fake line status */
 
-  priv->linecoding.baud[0] = (115200) & 0xff;       /* Baud=115200 */
-  priv->linecoding.baud[1] = (115200 >> 8) & 0xff;
-  priv->linecoding.baud[2] = (115200 >> 16) & 0xff;
-  priv->linecoding.baud[3] = (115200 >> 24) & 0xff;
-  priv->linecoding.stop    = CDC_CHFMT_STOP1;       /* One stop bit */
-  priv->linecoding.parity  = CDC_PARITY_NONE;       /* No parity */
-  priv->linecoding.nbits   = 8;                     /* 8 data bits */
+  priv->linecoding.baud[0]  = (115200) & 0xff;       /* Baud=115200 */
+  priv->linecoding.baud[1]  = (115200 >> 8) & 0xff;
+  priv->linecoding.baud[2]  = (115200 >> 16) & 0xff;
+  priv->linecoding.baud[3]  = (115200 >> 24) & 0xff;
+  priv->linecoding.stop     = CDC_CHFMT_STOP1;       /* One stop bit */
+  priv->linecoding.parity   = CDC_PARITY_NONE;       /* No parity */
+  priv->linecoding.nbits    = 8;                     /* 8 data bits */
 
   /* Initialize the serial driver sub-structure */
 

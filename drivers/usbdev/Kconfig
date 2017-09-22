@@ -309,10 +309,17 @@ config CDCACM_CONSOLE
 config CDCACM_IFLOWCONTROL
 	bool "CDC/ACM RTS flow control"
 	default n
-	depends on EXPERIMENTAL
 	select SERIAL_IFLOWCONTROL
 	---help---
 		Enable CDC/ACM RTS flow control
+
+config CDCACM_OFLOWCONTROL
+	bool "CDC/ACM CTS flow control"
+	default n
+	depends on EXPERIMENTAL
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable CDC/ACM CTS flow control
 
 menuconfig CDCACM_COMPOSITE
 	bool "CDC/ACM composite support"

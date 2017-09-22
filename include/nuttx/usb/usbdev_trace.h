@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usb/usbdev_trace.h
  *
- *   Copyright (C) 2008, 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009-2010, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -198,6 +198,7 @@
 #define USBSER_TRACECLASSAPI_TXINT                   0x000a
 #define USBSER_TRACECLASSAPI_TXREADY                 0x000b
 #define USBSER_TRACECLASSAPI_TXEMPTY                 0x000c
+#define USBSER_TRACECLASSAPI_FLOWCONTROL             0x000d
 
 /* Values of the class error ID used by the USB serial driver */
 

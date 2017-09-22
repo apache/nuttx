@@ -84,6 +84,7 @@ static FAR const char *get_trstring(FAR const struct trace_msg_t *array,
         {
           return p->str;
         }
+
       p++;
     }
 

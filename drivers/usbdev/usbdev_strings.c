@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_strings.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,9 @@ const struct trace_msg_t g_usb_trace_strings_clsapi[] =
   TRACE_STR(USBSER_TRACECLASSAPI_TXINT),
   TRACE_STR(USBSER_TRACECLASSAPI_TXREADY),
   TRACE_STR(USBSER_TRACECLASSAPI_TXEMPTY),
+#if defined(CONFIG_CDCACM_IFLOWCONTROL)
+  TRACE_STR(USBSER_TRACECLASSAPI_FLOWCONTROL),
+#endif
 #endif
   TRACE_STR_END
 };
