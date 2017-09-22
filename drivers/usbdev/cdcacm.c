@@ -536,7 +536,7 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
       uart_datareceived(serdev);
     }
 
-  /* Return an error if the entire packet could not be transferred */
+  /* Return an overrun error if the entire packet could not be transferred */
 
   if (nbytes < reqlen)
     {
@@ -565,7 +565,7 @@ static struct usbdev_req_s *cdcacm_allocreq(FAR struct usbdev_ep_s *ep,
     {
       req->len = len;
       req->buf = EP_ALLOCBUFFER(ep, len);
-      if (!req->buf)
+      if (req->buf == NULL)
         {
           EP_FREEREQ(ep, req);
           req = NULL;
@@ -679,7 +679,7 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
 
   /* Then submit the request to the endpoint */
 
-  req->len             =  SIZEOF_NOTIFICATION_S(2);
+  req->len             = SIZEOF_NOTIFICATION_S(2);
   req->priv            = reqcontainer;
   req->flags           = USBDEV_REQFLAGS_NULLPKT;
   ret                  = EP_SUBMIT(ep, req);
@@ -1171,12 +1171,14 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->callback = cdcacm_rdcomplete;
     }
 
-  /* Pre-allocate write request containers and put in a free list.
-   * The buffer size should be larger than a full packet.  Otherwise,
+  /* Pre-allocate write request containers and put in a free list.  The
+   * buffer size should be larger than a full build IN packet.  Otherwise,
    * we will send a bogus null packet at the end of each packet.
    *
-   * Pick the larger of the max packet size and the configured request
-   * size.
+   * Pick the larger of the max packet size and the configured request size.
+   *
+   * NOTE: These write requests are sized for the bulk IN endpoint but are
+   * shared with interrupt IN endpoint which does not need a large buffer.
    */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
