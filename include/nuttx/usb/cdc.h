@@ -419,6 +419,8 @@
                                           * 105 and RS-232 signal RTS.
                                           */
 
+/* CDC/ACM friendly naming */
+
 #define CDCACM_UART_DTR         CDC_DTE_PRESENT
 #define CDCACM_UART_RTS         CDC_ACTIVATE_CARRIER
 
@@ -547,8 +549,20 @@
                                           * overrun in the device.
                                           */
 
+/* CDC/ACM friendly naming */
+
 #define CDCACM_UART_DCD          CDC_UART_RXCARRIER
 #define CDCACM_UART_DSR          CDC_UART_TXCARRIER
+
+/* "SerialState is used like a real interrupt status register. Once a notification has been
+ *  sent, the device will reset and reevaluate the different signals.  For the consistent
+ *  signals like carrier detect or transmission carrier, this will mean another notification
+ *  will not be generated until there is a state change.  For the irregular signals like
+ *  break, the incoming ring signal, or the overrun error state, this will reset their values
+ *  to zero and again will not send another notification until their state changes."
+ */
+
+#define CDC_UART_CONSISTENT     (CDC_UART_RXCARRIER | CDC_UART_TXCARRIER)
 
 /* Table 70: Call State Change Value Definitions */
 

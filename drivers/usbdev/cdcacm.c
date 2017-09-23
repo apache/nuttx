@@ -703,6 +703,10 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
     }
 
 errout_with_flags:
+  /* Reset all of the "irregular" notification */
+
+  priv->serialstate &= CDC_UART_CONSISTENT;
+
   leave_critical_section(flags);
   return ret;
 }
@@ -2117,7 +2121,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
         /* Report state of input flow control */
 
-        termiosp->c_lflag = (priv->iflow) ? CRTS_IFLOW : 0;
+        termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
 #endif
       }
       break;
