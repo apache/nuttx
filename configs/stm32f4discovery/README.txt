@@ -1349,7 +1349,7 @@ Where <subdir> is one of the following:
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART2.  Support for
+    Configuration enables the serial interfaces on USART2.  Support for
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected (see NOTES below).
 
@@ -1377,7 +1377,7 @@ Where <subdir> is one of the following:
 
        - Select the STM32F4DIS-BB baseboard in the board configuration
          menu
-       - Disable UART2 and select USART6 in the STM32 peripheral selection
+       - Disable USART2 and select USART6 in the STM32 peripheral selection
          menu
        - Select USART6 as the serial console at 115200 8N1 in the
          Drivers menus
@@ -1767,10 +1767,10 @@ Where <subdir> is one of the following:
     This is a configuration to test the Pseudo Terminal support for NuttX.
 
     To test it you will need two USB/Serial dongles. The first dongle as
-    usual will be used to main NSH console port in UART2 (PA2 and PA3) and
+    usual will be used to main NSH console port in USART2 (PA2 and PA3) and
     the second dongle you will connect to UART3 (PB10 and PB11).
 
-    In the main NSH console (in UART2) type: "pts_test &". It will create a
+    In the main NSH console (in USART2) type: "pts_test &". It will create a
     new console in UART3. Just press ENTER and start typing commands on it.
 
   testlibcxx
@@ -1822,14 +1822,14 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This configuration does have UART2 output enabled and set up as
+    3. This configuration does have USART2 output enabled and set up as
        the system logging device:
 
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
-       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
+       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 
        However, there is nothing to generate SYLOG output in the default
-       configuration so nothing should appear on UART2 unless you enable
+       configuration so nothing should appear on USART2 unless you enable
        some debug output or enable the USB monitor.
 
        NOTE:  Using the SYSLOG to get debug output has limitations.  Among
@@ -1841,7 +1841,7 @@ Where <subdir> is one of the following:
     4. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
-       emptied and dumped to the system logging device (UART2 in this
+       emptied and dumped to the system logging device (USART2 in this
        configuration):
 
        CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature

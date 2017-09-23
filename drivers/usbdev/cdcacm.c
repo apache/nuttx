@@ -536,7 +536,18 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
       uart_datareceived(serdev);
     }
 
-  /* Return an overrun error if the entire packet could not be transferred */
+  /* Return an overrun error if the entire packet could not be transferred.
+   *
+   * REVISIT:  In the case where RX flow control is enabled, there should
+   * be no data loss.  I could imagine some race conditions where dropping
+   * buffer like this could cause data loss even with RX flow control
+   * enabled.
+   *
+   * Perhaps packets should not be dropped if RX flow control is active;
+   * pehaps the packet should be buffered and used later when there is again
+   * space in the RX data buffer.  This could, of course, result in NAKing
+   * which is something that I want to avoid.
+   */
 
   if (nbytes < reqlen)
     {
