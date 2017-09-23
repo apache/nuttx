@@ -85,8 +85,8 @@ struct cdcacm_req_s
 
 struct cdcacm_dev_s
 {
-  FAR struct uart_dev_s    serdev;     /* Serial device structure */
-  FAR struct usbdev_s     *usbdev;     /* usbdev driver pointer */
+  FAR struct uart_dev_s serdev;        /* Serial device structure */
+  FAR struct usbdev_s *usbdev;         /* usbdev driver pointer */
 
   uint8_t config;                      /* Configuration number */
   uint8_t nwrq;                        /* Number of queue write requests (in reqlist) */
@@ -94,19 +94,21 @@ struct cdcacm_dev_s
   uint8_t minor;                       /* The device minor number */
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   uint8_t serialstate;                 /* State of the DSR/DCD */
+  bool iflow;                          /* True: input flow control is enabled */
+  bool upper;                          /* True: RX buffer is (nearly) full */
 #endif
-  bool    rxenabled;                   /* true: UART RX "interrupts" enabled */
+  bool rxenabled;                      /* true: UART RX "interrupts" enabled */
   int16_t rxhead;                      /* Working head; used when rx int disabled */
 
-  uint8_t                  ctrlline;   /* Buffered control line state */
-  struct cdc_linecoding_s  linecoding; /* Buffered line status */
-  cdcacm_callback_t        callback;   /* Serial event callback function */
+  uint8_t ctrlline;                    /* Buffered control line state */
+  struct cdc_linecoding_s linecoding;  /* Buffered line status */
+  cdcacm_callback_t callback;          /* Serial event callback function */
 
-  FAR struct usbdev_ep_s  *epintin;    /* Interrupt IN endpoint structure */
-  FAR struct usbdev_ep_s  *epbulkin;   /* Bulk IN endpoint structure */
-  FAR struct usbdev_ep_s  *epbulkout;  /* Bulk OUT endpoint structure */
+  FAR struct usbdev_ep_s *epintin;     /* Interrupt IN endpoint structure */
+  FAR struct usbdev_ep_s *epbulkin;    /* Bulk IN endpoint structure */
+  FAR struct usbdev_ep_s *epbulkout;   /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
-  struct sq_queue_s        reqlist;    /* List of write request containers */
+  struct sq_queue_s reqlist;           /* List of write request containers */
 
   struct usbdev_devinfo_s devinfo;
 
@@ -2106,12 +2108,26 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         termiosp->c_iflag = serdev->tc_iflag;
         termiosp->c_oflag = serdev->tc_oflag;
         termiosp->c_lflag = serdev->tc_lflag;
+        termiosp->c_cflag = CS8;
+
+#ifdef CONFIG_CDCACM_OFLOWCONTROL
+        /* Report state of output flow control */
+#  warning Missing logic
+#endif
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+        /* Report state of input flow control */
+
+        termiosp->c_lflag = (priv->iflow) ? CRTS_IFLOW : 0;
+#endif
       }
       break;
 
     case TCSETS:
       {
         struct termios *termiosp = (FAR struct termios *)arg;
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+        bool iflow;
+#endif
 
         if (!termiosp)
           {
@@ -2124,6 +2140,46 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         serdev->tc_iflag = termiosp->c_iflag;
         serdev->tc_oflag = termiosp->c_oflag;
         serdev->tc_lflag = termiosp->c_lflag;
+
+#ifdef CONFIG_CDCACM_OFLOWCONTROL
+        /* Handle changes to output flow control */
+#  warning Missing logic
+#endif
+
+#ifdef CONFIG_CDCACM_IFLOWCONTROL
+        /* Handle changes to input flow control */
+
+        iflow = ((termiosp->c_cflag & CRTS_IFLOW) != 0);
+        if (iflow != priv->iflow)
+          {
+            /* The input flow control state has changed.  Save the new
+             * flow control setting.
+             */
+
+            priv->iflow = iflow;
+
+            /* If flow control has been disabled, then we will need to
+             * make sure that DSR is set.
+             */
+
+            if (!iflow && (priv->serialstate & CDCACM_UART_DSR) == 0)
+              {
+                priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
+                ret = cdcacm_serialstate(priv);
+              }
+
+            /* If flow control has been enabled and the RX buffer is already
+             * (nearly) full, the we need to make sure the DSR is clear.
+             */
+
+            else if (priv->upper)
+              {
+                priv->serialstate &= ~CDCACM_UART_DSR;
+                priv->serialstate |= CDCACM_UART_DCD;
+                ret = cdcacm_serialstate(priv);
+              }
+          }
+#endif
       }
       break;
 #endif
@@ -2339,6 +2395,7 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 {
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   FAR struct cdcacm_dev_s *priv;
+  uint8_t mask;
   int ret;
 
   /* Sanity check */
@@ -2355,27 +2412,55 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 
   priv = (FAR struct cdcacm_dev_s *)dev->priv;
 
-  /* Set DSR (TX carrier) if the lower water mark has been crossed or clear it if the
-   * upper water mark has been crossed.
-   */
+  /* Is input flow control enabled? */
 
-  if (upper)
+  priv->upper = upper;
+  if (priv->iflow)
     {
-      priv->serialstate &= ~CDCACM_UART_DSR;
+      /* Yes.. Set DSR (TX carrier) if the lower water mark has been crossed
+       * or clear it if the upper water mark has been crossed.
+       */
+
+      mask = upper ? 0 : CDCACM_UART_DSR;
+
+      /* Don't do anything unless this results in a change in the setting of
+       * DSR.
+       */
+
+      if (((priv->serialstate ^ mask) & CDCACM_UART_DSR) != 0)
+        {
+           /* Set or clear DSR (set DCD in any case). */
+
+           priv->serialstate &= ~CDCACM_UART_DSR;
+           priv->serialstate |= (mask | CDCACM_UART_DCD);
+
+           /* And send the SerialState message */
+
+           ret = cdcacm_serialstate(priv);
+           return (ret >= 0 && upper);
+        }
+
+      /* Return true of DSR is not set */
+
+      return ((priv->serialstate & CDCACM_UART_DSR) == 0);
     }
   else
     {
-      priv->serialstate |= CDCACM_UART_DSR;
+      /* Flow control is disabled ... DSR must be set */
+
+      if ((priv->serialstate & CDCACM_UART_DSR) == 0)
+        {
+           /* Set DSR and DCD */
+
+           priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
+
+           /* And send the SerialState message */
+
+           (void)cdcacm_serialstate(priv);
+        }
+
+      return false;
     }
-
-  /* Set DCD in any event */
-
-  priv->serialstate |= CDCACM_UART_DCD;
-
-  /* And send the SerialState message */
-
-  ret = cdcacm_serialstate(priv);
-  return (ret >= 0 && upper);
 #else
 
   return false;
