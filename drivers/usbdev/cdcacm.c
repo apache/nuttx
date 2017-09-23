@@ -2162,22 +2162,33 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             priv->iflow = iflow;
 
-            /* If flow control has been disabled, then we will need to
-             * make sure that DSR is set.
-             */
+            /* Check if flow control has been disabled. */
 
-            if (!iflow && (priv->serialstate & CDCACM_UART_DSR) == 0)
+            if (!iflow)
               {
-                priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
-                ret = cdcacm_serialstate(priv);
+                /* Flow control has been disabled.  We need to make sure
+                 * that DSR is set unconditionally.
+                 */
+
+                if ((priv->serialstate & CDCACM_UART_DSR) == 0)
+                  {
+                    priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
+                    ret = cdcacm_serialstate(priv);
+                  }
               }
 
-            /* If flow control has been enabled and the RX buffer is already
+            /* Flow control has been enabled.  If the RX buffer is already
              * (nearly) full, the we need to make sure the DSR is clear.
+             *
+             * NOTE: Here we assume that DSR is set so we don't check its
+             * current value nor to we handle the case where we would set
+             * DSR because the RX buffer is (nearly) empty!
              */
 
             else if (priv->upper)
               {
+                /* In this transition, DSR should already be set */
+
                 priv->serialstate &= ~CDCACM_UART_DSR;
                 priv->serialstate |= CDCACM_UART_DCD;
                 ret = cdcacm_serialstate(priv);
