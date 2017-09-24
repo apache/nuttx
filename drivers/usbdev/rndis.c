@@ -1170,6 +1170,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
               ret = work_queue(HPWORK, &priv->rxwork, rndis_rxdispatch,
                                priv, 0);
               DEBUGASSERT(ret == 0);
+              UNUSED(ret);
 
               rndis_block_rx(priv);
               priv->rndis_host_tx_count++;
