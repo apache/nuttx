@@ -57,6 +57,10 @@ ifeq ($(CONFIG_USBDEV_TRACE_STRINGS),y)
   CSRCS += usbdev_strings.c
 endif
 
+ifeq ($(CONFIG_RNDIS),y)
+  CSRCS += rndis.c
+endif
+
 CSRCS += usbdev_trace.c usbdev_trprintf.c
 
 # Include USB device build support

@@ -659,3 +659,11 @@ config USBMSC_SCSI_STACKSIZE
 		is not tuned.
 
 endif
+
+menuconfig RNDIS
+	bool "RNDIS Ethernet-over-USB"
+	default n
+	---help---
+		References:
+		"MS-RNDIS: Remote Network Driver Interface Specification (RNDIS) Protocol"
+		"Remote NDIS To USB Mapping"
