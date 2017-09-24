@@ -2,7 +2,7 @@
  * net/icmpv6/icmpv6_radvertise.c
  * Send an ICMPv6 Router Advertisement
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -87,6 +87,37 @@ static const net_ipv6addr_t g_ipv6_prefix =
 };
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv6addr_mask
+ *
+ * Description:
+ *   Copy an IPv6 address under a mask
+ *
+ * Input Parameters:
+ *   dest  - Location to return the masked address
+ *   src   - The IPv6 address to mask
+ *   maksk - The address mask
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void ipv6addr_mask(FAR uint16_t *dest, FAR const uint16_t *src,
+                                 FAR const uint16_t *mask)
+{
+  int i;
+
+  for (i = 0; i < 8; ++i)
+    {
+      dest[i] = src[i] & mask[i];
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -96,11 +127,11 @@ static const net_ipv6addr_t g_ipv6_prefix =
  * Description:
  *   Send an ICMPv6 Router Advertisement
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -127,10 +158,10 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   /* Length excludes the IPv6 header */
 
   lladdrsize   = netdev_dev_lladdrsize(dev);
-  l3size       = sizeof(icmpv6_router_advertise_s) +
+  l3size       = sizeof(struct icmpv6_router_advertise_s) +
                  SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize) +
                  sizeof(struct icmpv6_mtu_s) +
-                 sizeof(icmpv6_prefixinfo_s);
+                 sizeof(struct icmpv6_prefixinfo_s);
 
   ipv6->len[0] = (l3size >> 8);
   ipv6->len[1] = (l3size & 0xff);
@@ -141,7 +172,12 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   /* Swap source for destination IP address, add our source IP address */
 
   net_ipv6addr_copy(ipv6->destipaddr, g_ipv6_allnodes);
-  net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
+
+  /* Source IP address must be set to link-local IP */
+
+  ipv6->srcipaddr[0] = HTONS(0xfe80);
+  memset(&ipv6->srcipaddr[1], 0, 4 * sizeof(uint16_t));
+  memcpy(&ipv6->srcipaddr[5], &dev->d_mac.ether.ether_addr_octet, sizeof(struct ether_addr));
 
   /* Set up the ICMPv6 Router Advertise response */
 
@@ -151,15 +187,13 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   adv->hoplimit     = 64;                      /* Current hop limit */
   adv->flags        = ICMPv6_RADV_FLAG_M;      /* Managed address flag. */
   adv->lifetime     = HTONS(1800);             /* Router lifetime */
-  adv->reachable[0] = 0;                       /* Reachable time */
-  adv->reachable[1] = 0;
-  adv->retrans[0]   = 0;                       /* Retransmission timer */
-  adv->retrans[1]   = 0;
+  adv->reachable    = 0;                       /* Reachable time */
+  adv->retrans      = 0;                       /* Retransmission timer */
 
   /* Set up the source address option */
 
   srcaddr           = (FAR struct icmpv6_srclladdr_s *)
-                      ((FAR uint8_t *)adv + sizeof(icmpv6_router_advertise_s));
+                      ((FAR uint8_t *)adv + sizeof(struct icmpv6_router_advertise_s));
   srcaddr->opttype  = ICMPv6_OPT_SRCLLADDR;
   srcaddr->optlen   = ICMPv6_OPT_OCTECTS(lladdrsize);
   memcpy(srcaddr->srclladdr, &dev->d_mac, lladdrsize);
@@ -168,30 +202,27 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 
   mtu               = (FAR struct icmpv6_mtu_s *)
                       ((FAR uint8_t *)srcaddr + SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize));
-  mtu               = &adv->mtu;
   mtu->opttype      = ICMPv6_OPT_MTU;
   mtu->optlen       = 1;
   mtu->reserved     = 0;
-  mtu->mtu[0]       = HTONS(CONFIG_NET_ETH_MTU >> 8);
-  mtu->mtu[1]       = HTONS(CONFIG_NET_ETH_MTU & 0xff);
+  mtu->mtu          = HTONL(CONFIG_NET_ETH_MTU);
 
   /* Set up the prefix option */
 
-  prefix            = (FAR struct icmpv6_prefixinfo_s *)
-                      ((FAR uint8_t *)mtu + sizeof(icmpv6_mtu_s));
-  prefix            = &adv->prefix;
-  prefix->opttype   = ICMPv6_OPT_MTU;
-  prefix->optlen    = 4;
-  prefix->preflen   = CONFIG_NET_ICMPv6_PREFLEN;
-  prefix->flags     = ICMPv6_PRFX_FLAG_L | ICMPv6_PRFX_FLAG_A;
+  prefix              = (FAR struct icmpv6_prefixinfo_s *)
+                        ((FAR uint8_t *)mtu + sizeof(struct icmpv6_mtu_s));
+  prefix->opttype     = ICMPv6_OPT_PREFIX;
+  prefix->optlen      = 4;
+  prefix->flags       = ICMPv6_PRFX_FLAG_L | ICMPv6_PRFX_FLAG_A;
+  prefix->vlifetime   = HTONL(2592000);
+  prefix->plifetime   = HTONL(604800);
+  prefix->reserved[0] = 0;
+  prefix->reserved[1] = 0;
 
-  prefix->vlifetime[0] = HTONS(2592000 >> 8);
-  prefix->vlifetime[1] = HTONS(2592000 & 0xff);
-  prefix->plifetime[0] = HTONS(604800 >> 8);
-  prefix->plifetime[1] = HTONS(604800 & 0xff);
-  prefix->reserved[0]  = 0;
-  prefix->reserved[1]  = 0;
-  net_ipv6addr_copy(prefix->prefix, g_ipv6_prefix);
+  /* Set the prefix and prefix length based on net driver IP and netmask */
+
+  prefix->preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+  ipv6addr_mask(prefix->prefix, dev->d_ipv6addr, dev->d_ipv6netmask);
 
   /* Calculate the checksum over both the ICMP header and payload */
 
@@ -200,7 +231,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 
   /* Set the size to the size of the IPv6 header and the payload size */
 
-  dev->d_len   = IPv6_HDRLEN + sizeof(struct icmpv6_router_advertise_s);
+  dev->d_len   = IPv6_HDRLEN + l3size;
 
 #ifdef CONFIG_NET_ETHERNET
   /* Add the size of the Ethernet header */
