@@ -412,6 +412,11 @@ configs/nucleo-f4x1re
   http://developer.mbed.org/platforms/ST-Nucleo-F411RE for more
   information about these boards.
 
+configs/nucleo-f410rb
+  NuttX configuration for the STMicro NucleoF410RB board from ST Micro.
+  This board features the STM32F410RB 100MHz Cortex-M4 with 128 KB Flash
+  and 32 KB SRAM.
+
 configs/nucleo-f303re
   STMicro ST Nucleo F303RE board.  Contributed by Paul Alexander Patience.
 

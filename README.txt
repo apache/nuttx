@@ -1716,6 +1716,8 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-f4x1re/
  |   |   `- README.txt
+ |   |- nucleo-f410rb
+ |   |   `- README.txt
  |   |- nucleo-l432kc/
  |   |   `- README.txt
  |   |- nucleo-l452re/
