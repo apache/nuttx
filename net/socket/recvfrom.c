@@ -128,7 +128,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 #endif
 
-  if (from != NULL && fromlen <= 0)
+  if (from != NULL && fromlen != NULL && *fromlen <= 0)
     {
       errcode = EINVAL;
       goto errout;

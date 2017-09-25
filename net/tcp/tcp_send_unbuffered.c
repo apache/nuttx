@@ -712,7 +712,7 @@ static inline void send_txnotify(FAR struct socket *psock,
 ssize_t psock_tcp_send(FAR struct socket *psock,
                        FAR const void *buf, size_t len)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  FAR struct tcp_conn_s *conn;
   struct send_s state;
   int errcode;
   int ret = OK;

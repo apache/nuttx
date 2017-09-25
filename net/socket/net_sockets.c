@@ -205,9 +205,7 @@ int sockfd_allocate(int minsd)
 
 void sock_release(FAR struct socket *psock)
 {
-#ifdef CONFIG_DEBUG_FEATURES
-  if (psock)
-#endif
+  if (psock != NULL)
     {
       /* Take the list semaphore so that there will be no accesses
        * to this socket structure.
@@ -221,7 +219,7 @@ void sock_release(FAR struct socket *psock)
            */
 
           _net_semtake(list);
-          if (psock && psock->s_crefs > 1)
+          if (psock->s_crefs > 1)
             {
               psock->s_crefs--;
             }
