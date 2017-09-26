@@ -640,8 +640,6 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
   irqstate_t flags;
   int ret;
 
-  usbtrace(CDCACM_CLASSAPI_FLOWCONTROL, (uint16_t)priv->serialstate);
-
   DEBUGASSERT(priv != NULL && priv->epintin != NULL);
 #ifdef CONFIG_DEBUG_FEATURES
   if (priv == NULL || priv->epintin == NULL)
@@ -650,6 +648,8 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
       return -EINVAL;
     }
 #endif
+
+  usbtrace(CDCACM_CLASSAPI_FLOWCONTROL, (uint16_t)priv->serialstate);
 
   flags = enter_critical_section();
 
