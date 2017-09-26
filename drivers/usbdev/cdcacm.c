@@ -53,6 +53,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wdog.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 
@@ -68,6 +69,16 @@
 #  include <nuttx/usb/composite.h>
 #  include "composite.h"
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* RX poll delay = 200 milliseconds. CLK_TCK is the number of clock ticks per
+ * second
+ */
+
+#define CDCACM_RXDELAY   (CLK_TCK / 5)
 
 /****************************************************************************
  * Private Types
@@ -114,6 +125,7 @@ struct cdcacm_dev_s
   FAR struct usbdev_ep_s *epbulkin;    /* Bulk IN endpoint structure */
   FAR struct usbdev_ep_s *epbulkout;   /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
+  WDOG_ID rxfailsafe;                  /* Failsafe timer to prevent RX stalls */
   struct sq_queue_s txfree;            /* Available write request containers */
   struct sq_queue_s rxpending;         /* Pending read request containers */
 
@@ -163,6 +175,7 @@ static int     cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 static int     cdcacm_requeue_rdrequest(FAR struct cdcacm_dev_s *priv,
                  FAR struct cdcacm_rdreq_s *rdcontainer);
 static int     cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv);
+static void    cdcacm_rxtimeout(int argc, wdparm_t arg1, ...);
 
 /* Request helpers *********************************************************/
 
@@ -606,6 +619,17 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
   irqstate_t flags;
   int ret = -EBUSY;
 
+  /* Note that the priv->rxpending queue, priv->rxenabled, priv->iflow may
+   * be modified by interrupt level processing and, hence, interrupts must
+   * be disabled throughout the following.
+   */
+
+  flags = enter_critical_section();
+
+  /* Cancel any pending failsafe timer */
+
+  wd_cancel(priv->rxfailsafe);
+
   /* If RX "interrupts" are enable and if input flow control is not in effect,
    * then pass the packet at the head of the pending RX packet list to the to
    * the upper serial layer.  Otherwise, let the packet continue to pend the
@@ -624,8 +648,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
        * disabled throughout the following.
        */
 
-      ret   = OK;
-      flags = enter_critical_section();
+      ret = OK;
 
       while (!sq_empty(&priv->rxpending))
         {
@@ -655,11 +678,48 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
           (void)sq_remfirst(&priv->rxpending);
           ret = cdcacm_requeue_rdrequest(priv, rdcontainer);
         }
-
-      leave_critical_section(flags);
     }
 
+  /* Restart the RX failsafe timer if there are RX packets in
+   * priv->rxpending.  This could happen if either RX "interrupts" are
+   * disable, RX flow control is in effect of if the upper serial drivers
+   * RX buffer is full and cannot accept additional data.
+   *
+   * If/when the timer expires, cdcacm_release_rxpending() will be called
+   * the timer handler (at interrupt level).
+   *
+   * The timer may not be necessary, but it is a failsafe to be certain
+   * that data cannot stall in priv->rxpending.
+   */
+
+  if (!sq_empty(&priv->rxpending))
+    {
+      (void)wd_start(priv->rxfailsafe, CDCACM_RXDELAY, cdcacm_rxtimeout,
+                     1, priv);
+    }
+
+  leave_critical_section(flags);
   return ret;
+}
+
+/****************************************************************************
+ * Name: cdcacm_rxtimeout
+ *
+ * Description:
+ *   Timer expiration handler.  Whenever cdcacm_release_rxpending()
+ *   terminates with  pending RX data in priv->rxpending, it will set a
+ *   timer to recheck the queued RX data can be processed later.  This
+ *   failsafe timer may not be necessary, but this reduces my  paranoia
+ *   about stalls in the RX pending FIFO .
+ *
+ ****************************************************************************/
+
+static void cdcacm_rxtimeout(int argc, wdparm_t arg1, ...)
+{
+  FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)arg1;
+
+  DEBUGASSERT(priv != NULL);
+  (void)cdcacm_release_rxpending(priv);
 }
 
 /****************************************************************************
@@ -2743,6 +2803,13 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
 
   memcpy(&priv->devinfo, devinfo,
          sizeof(struct usbdev_devinfo_s));
+
+  /* Allocate a failsafe time so that we can be assured that RX data
+   * can never stall in the priv->rxpending queue.
+   */
+
+  priv->rxfailsafe          = wd_create();
+  DEBUGASSERT(priv->rxfailsafe != NULL);
 
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   /* SerialState */
