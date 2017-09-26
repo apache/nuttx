@@ -254,16 +254,16 @@
  * SDMMC DMA is on DMA2
  *
  * SDMMC1 DMA
- *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
- *   DMAMAP_SDMMC1_2 = Channel 4, Stream 6
+ *   DMAMAP_SDMMC_1 = Channel 4, Stream 7
+ *   DMAMAP_SDMMC_2 = Channel 5, Stream 7
  *
  * SDMMC2 DMA
  *   DMAMAP_SDMMC2_1 = Channel 11, Stream 0
  *   DMAMAP_SDMMC3_2 = Channel 11, Stream 5
  */
 
-#define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
-#define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
+#define DMAMAP_SDMMC1  DMACHAN_SDMMC_1
+#define DMAMAP_SDMMC2  DMACHAN_SDMMC_2
 
 
 /* FLASH wait states
