@@ -8,16 +8,25 @@ menu "Routing Table Configuration"
 config NET_ROUTE
 	bool "Routing table support"
 	default n
+	depends on NET_IPv4 || NET_IPv6
 	---help---
 		Build in support for a routing table.  See include/net/route.h
 
 if NET_ROUTE
 
-config NET_MAXROUTES
-	int "Routing table size"
+config ROUTE_MAX_IPv4ROUTES
+	int "IPv4 routing table size"
 	default 4
+	depends on NET_IPv4
 	---help---
-		The size of the routing table (in entries).
+		The size of the IPv4 routing table (in entries).
+
+config ROUTE_MAX_IPv6ROUTES
+	int "IPv6 routing table size"
+	default 4
+	depends on NET_IPv6
+	---help---
+		The size of the IPv6 routing table (in entries).
 
 endif # NET_ROUTE
 endmenu # ARP Configuration

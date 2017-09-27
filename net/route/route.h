@@ -55,8 +55,12 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_NET_MAXROUTES
-#  define CONFIG_NET_MAXROUTES 4
+#ifndef CONFIG_ROUTE_MAX_IPv4ROUTES
+#  define CONFIG_ROUTE_MAX_IPv4ROUTES 4
+#endif
+
+#ifndef CONFIG_ROUTE_MAX_IPv6ROUTES
+#  define CONFIG_ROUTE_MAX_IPv6ROUTES 4
 #endif
 
 /****************************************************************************
@@ -106,7 +110,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* This is the routing table */
+/* These are the routing tables */
 
 #ifdef CONFIG_NET_IPv4
 EXTERN sq_queue_t g_ipv4_routes;
