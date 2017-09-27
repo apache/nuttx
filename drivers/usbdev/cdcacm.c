@@ -2534,16 +2534,19 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
 
       if (!priv->rxenabled)
         {
-          /* Yes.  During the time that RX interrupts are disabled,
-           * incoming packets were queued in priv->rxpending.  We must
-           * now free all of them (unless flow control becomes enabled)
-           */
-
-          (void)cdcacm_release_rxpending(priv);
-
           /* RX "interrupts are no longer disabled */
 
           priv->rxenabled = true;
+
+          /* During the time that RX interrupts was disabled, incoming
+           * packets were queued in priv->rxpending.  We must now process
+           * all of them (unless flow control becomes enabled)
+           *
+           * NOTE: This action may cause this function to be re-entered
+           * with enable == false.
+           */
+
+          (void)cdcacm_release_rxpending(priv);
         }
     }
 
@@ -2588,7 +2591,6 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 {
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   FAR struct cdcacm_dev_s *priv;
-  uint8_t mask;
   int ret;
 
   /* Sanity check */
@@ -2614,28 +2616,61 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
        * or clear it if the upper water mark has been crossed.
        */
 
-      mask = upper ? 0 : CDCACM_UART_DSR;
-
-      /* Don't do anything unless this results in a change in the setting of
-       * DSR.
-       */
-
-      if (((priv->serialstate ^ mask) & CDCACM_UART_DSR) != 0)
+      if (upper)
         {
-           /* Set or clear DSR (set DCD in any case). */
+          /* Don't do anything unless this results in a change in the
+           * setting of DSR.
+           */
 
-           priv->serialstate &= ~CDCACM_UART_DSR;
-           priv->serialstate |= (mask | CDCACM_UART_DCD);
+          if ((priv->serialstate & CDCACM_UART_DSR) != 0)
+            {
+              /* Clear DSR (set DCD in any case). */
 
-           /* And send the SerialState message */
+              priv->serialstate &= ~CDCACM_UART_DSR;
+              priv->serialstate |= CDCACM_UART_DCD;
 
-           ret = cdcacm_serialstate(priv);
-           return (ret >= 0 && upper);
+              /* And send the SerialState message */
+
+              ret = cdcacm_serialstate(priv);
+              if (ret >= 0)
+                {
+                  priv->iflow = true;
+                  return true;
+                }
+            }
         }
 
-      /* Return true of DSR is not set */
+      /* Lower watermark crossing.  Don't do anything unless this results in
+       * a change in the setting of DSR.
+       */
 
-      return ((priv->serialstate & CDCACM_UART_DSR) == 0);
+      else if ((priv->serialstate & CDCACM_UART_DSR) == 0)
+        {
+          /* Set DSR (set DCD in any case). */
+
+          priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
+
+          /* And send the SerialState message */
+
+          ret = cdcacm_serialstate(priv);
+          if (ret >= 0)
+            {
+              /* Needed by cdcacm_release_rxpending() */
+
+              priv->iflow = false;
+
+              /* During the time that flow control ws disabled,
+               * incoming packets were queued in priv->rxpending.  We
+               * must now process all of them (unless RX interrupts
+               * becomes enabled)
+               *
+               * NOTE: This action may cause this function to be re
+               * entered with upper == false.
+               */
+
+              (void)cdcacm_release_rxpending(priv);
+            }
+        }
     }
   else
     {
@@ -2651,9 +2686,12 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 
            (void)cdcacm_serialstate(priv);
         }
-
-      return false;
     }
+
+  /* Return true of DSR is not set */
+
+  priv->iflow = ((priv->serialstate & CDCACM_UART_DSR) == 0);
+  return priv->iflow;
 #else
 
   return false;
