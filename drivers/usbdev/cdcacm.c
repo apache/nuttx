@@ -472,6 +472,9 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
   FAR struct uart_buffer_s *recv;
   FAR struct usbdev_req_s *req;
   FAR uint8_t *reqbuf;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+  unsigned int watermark;
+#endif
   uint16_t reqlen;
   uint16_t currhead;
   uint16_t nexthead;
@@ -511,6 +514,12 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
       nexthead = 0;
     }
 
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+  /* Pre-calcuate the watermark level that we will need to test against. */
+
+  watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * recv->size) / 100;
+#endif
+
   /* Then copy data into the RX buffer until either: (1) all of the data has
    * been copied, or (2) the RX buffer is full.
    *
@@ -526,6 +535,53 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 
   while (nexthead != recv->tail && nbytes < reqlen)
     {
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
+      unsigned int nbuffered;
+
+      /* How many bytes are buffered */
+
+      if (recv->head >= recv->tail)
+        {
+          nbuffered = recv->head - recv->tail;
+        }
+      else
+        {
+          nbuffered = recv->size - recv->tail + recv->head;
+        }
+
+      /* Is the level now above the watermark level that we need to report? */
+
+      if (nbuffered >= watermark)
+        {
+          /* Let the lower level driver know that the watermark level has been
+           * crossed.  It will probably activate RX flow control.
+           */
+
+          if (cdcuart_rxflowcontrol(&priv->serdev, nbuffered, true))
+            {
+              /* Low-level driver activated RX flow control, exit loop now. */
+
+              break;
+            }
+        }
+#else
+      /* Check if RX buffer is full and allow serial low-level driver to pause
+       * processing. This allows proper utilization of hardware flow control.
+       */
+
+      if (nexthead == rxbuf->tail);
+        {
+          if (cdcuart_rxflowcontrol(&priv->serdev, recv->size, true))
+            {
+              /* Low-level driver activated RX flow control, exit loop now. */
+
+              break;
+            }
+        }
+#endif
+#endif
+
       /* Copy one byte to the head of the circular RX buffer */
 
       recv->buffer[currhead] = *reqbuf++;
@@ -631,10 +687,11 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   wd_cancel(priv->rxfailsafe);
 
-  /* If RX "interrupts" are enable and if input flow control is not in effect,
-   * then pass the packet at the head of the pending RX packet list to the to
-   * the upper serial layer.  Otherwise, let the packet continue to pend the
-   * priv->rxpending list until the upper serial layer is able to buffer it.
+  /* If RX "interrupts" are enabled and if input flow control is not in
+   * effect, then pass the packet at the head of the pending RX packet list
+   * to the upper serial layer.  Otherwise, let the packet continue to pend
+   * the priv->rxpending list until the upper serial layer is able to buffer
+   * it.
    */
 
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
@@ -2336,8 +2393,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             if (!iflow)
               {
-                irqstate_t flags = enter_critical_section();
-
                 /* Flow control has been disabled.  We need to make sure
                  * that DSR is set unconditionally.
                  */
@@ -2348,6 +2403,11 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                     ret = cdcacm_serialstate(priv);
                   }
 
+                /* Save the new flow control setting. */
+
+                priv->iflow   = false;
+                priv->iactive = false;
+
                 /* During the time that flow control was disabled, incoming
                  * packets were queued in priv->rxpending.  We must now
                  * process all of them (unless RX interrupts are also
@@ -2356,11 +2416,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
                 (void)cdcacm_release_rxpending(priv);
 
-                /* Save the new flow control setting. */
-
-                priv->iflow   = false;
-                priv->iactive = false;
-                leave_critical_section(flags);
               }
 
             /* Flow control has been enabled. */
@@ -2539,21 +2594,17 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
     {
       /* RX "interrupts" are enabled.  Is this a transition from disabled
        * to enabled state?
-       *
-       * We also need to check if input control flow is in effect. If so,
-       * then we should not call uart_datareceived() until both
-       * priv->rxenabled is true and priv->iactive are false.
        */
 
       if (!priv->rxenabled)
         {
-          /* RX "interrupts are no longer disabled */
+          /* Yes.. RX "interrupts are no longer disabled */
 
           priv->rxenabled = true;
 
           /* During the time that RX interrupts was disabled, incoming
            * packets were queued in priv->rxpending.  We must now process
-           * all of them (unless flow control becomes enabled)
+           * all of them (unless flow control is enabled)
            *
            * NOTE: This action may cause this function to be re-entered
            * with enable == false.
@@ -2563,8 +2614,8 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
         }
     }
 
-  /* RX "interrupts" are disabled.  Is this a transition from enabled
-   * to disabled state?
+  /* RX "interrupts" are disabled.  Nothing special needs to be done on a
+   * transition from the enabled to the disabled state.
    */
 
   else
@@ -2604,7 +2655,6 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 {
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   FAR struct cdcacm_dev_s *priv;
-  int ret;
 
   /* Sanity check */
 
@@ -2659,37 +2709,37 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
        * a change in the setting of DSR.
        */
 
-      else if ((priv->serialstate & CDCACM_UART_DSR) == 0)
+      else
         {
-          /* Set DSR (set DCD in any case). */
-
-          priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
-
-          /* And send the SerialState message.
-           * REVISIT: Error return case.  Would an error mean DSR is still
-           * clear?
+          /* Flow control is not active (Needed before calling
+           * cdcacm_release_rxpending())
            */
 
-          ret = cdcacm_serialstate(priv);
-          if (ret >= 0)
+          priv->iactive = false;
+
+          /* Set DSR if it is not alredy set */
+
+          if ((priv->serialstate & CDCACM_UART_DSR) == 0)
             {
-              /* Flow control is not active (Needed before calling
-               * cdcacm_release_rxpending())
+              priv->serialstate |= (CDCACM_UART_DSR | CDCACM_UART_DCD);
+
+              /* And send the SerialState message.
+               * REVISIT: Error return case.  Would an error mean DSR is
+               *  still clear?
                */
 
-              priv->iactive = false;
-
-              /* During the time that flow control ws disabled,
-               * incoming packets were queued in priv->rxpending.  We
-               * must now process all of them (unless RX interrupts
-               * becomes enabled)
-               *
-               * NOTE: This action may cause this function to be re
-               * entered with upper == false.
-               */
-
-              (void)cdcacm_release_rxpending(priv);
+              (void)cdcacm_serialstate(priv);
             }
+
+          /* During the time that flow control ws disabled, incoming packets
+           * were queued in priv->rxpending.  We must now process all of
+           * them (unless RX interrupts becomes enabled)
+           *
+           * NOTE: This action may cause this function to be re-entered with
+           * upper == false.
+           */
+
+          (void)cdcacm_release_rxpending(priv);
         }
     }
   else
