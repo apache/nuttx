@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_pread.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
   off_t savepos;
   off_t pos;
   ssize_t ret;
-  int errcode;
+  int errcode = 0;
 
   /* Perform the seek to the current position.  This will not move the
    * file pointer, but will return its current setting
@@ -93,19 +93,28 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
   /* Then perform the read operation */
 
   ret = file_read(filep, buf, nbytes);
-  errcode = get_errno();
+  if (ret < 0)
+    {
+      errcode = get_errno();
+      ret     = ERROR;
+    }
 
   /* Restore the file position */
 
   pos = file_seek(filep, savepos, SEEK_SET);
-  if (pos == (off_t)-1 && ret >= 0)
+  if (pos < 0 && ret >= 0)
     {
       /* This really should not fail */
 
-      return ERROR;
+      errcode = -pos;
+      ret     = ERROR;
     }
 
-  set_errno(errcode);
+  if (errcode != 0)
+    {
+      set_errno(errcode);
+    }
+
   return ret;
 }
 

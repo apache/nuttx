@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_lseek.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,8 @@
  *   whence   Defines how to use offset
  *
  * Return:
- *   The resulting offset on success.  -1 on failure withi errno set
- *   properly (see lseek comments).
+ *   The resulting offset on success.  A negated errno value is returned on
+ *   any failure (see lseek comments).
  *
  ****************************************************************************/
 
@@ -75,7 +75,6 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode;
   int ret;
-  int errcode = OK;
 
   DEBUGASSERT(filep);
   inode =  filep->f_inode;
@@ -87,8 +86,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
       ret = (int)inode->u.i_ops->seek(filep, offset, whence);
       if (ret < 0)
         {
-          errcode = -ret;
-          goto errout;
+          return ret;
         }
     }
   else
@@ -108,26 +106,19 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
               }
             else
               {
-                errcode = EINVAL;
-                goto errout;
+                return -EINVAL;
               }
             break;
 
           case SEEK_END:
-            errcode = ENOSYS;
-            goto errout;
+            return -ENOSYS;
 
           default:
-            errcode = EINVAL;
-            goto errout;
+            return -EINVAL;
         }
     }
 
   return filep->f_pos;
-
-errout:
-  set_errno(errcode);
-  return (off_t)ERROR;
 }
 
 /****************************************************************************
@@ -170,6 +161,7 @@ errout:
 off_t lseek(int fd, off_t offset, int whence)
 {
   FAR struct file *filep;
+  off_t newpos;
 
   /* Get the file structure corresponding to the file descriptor. */
 
@@ -183,7 +175,14 @@ off_t lseek(int fd, off_t offset, int whence)
 
   /* Then let file_seek do the real work */
 
-   return file_seek(filep, offset, whence);
+   newpos = file_seek(filep, offset, whence);
+   if (newpos < 0)
+     {
+       set_errno((int)-newpos);
+       return (off_t)ERROR;
+     }
+
+   return newpos;
 }
 
 #endif

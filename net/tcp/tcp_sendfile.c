@@ -394,9 +394,8 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
                           pstate->snd_foffset + pstate->snd_sent, SEEK_SET);
           if (ret < 0)
             {
-              int errcode = get_errno();
-              nerr("ERROR: Failed to lseek: %d\n", errcode);
-              pstate->snd_sent = -errcode;
+              nerr("ERROR: Failed to lseek: %d\n", ret);
+              pstate->snd_sent = ret;
               goto end_wait;
             }
 
