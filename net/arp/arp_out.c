@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp_out.c
  *
- *   Copyright (C) 2007-2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on uIP which also has a BSD style license:
@@ -186,12 +186,19 @@ void arp_out(FAR struct net_driver_s *dev)
     {
       /* Build the well-known IPv4 IGMP Ethernet address.  The first
        * three bytes are fixed; the final three variable come from the
-       * last three bytes of the IP address.
+       * last three bytes of the IPv4 address (network order).
+       *
+       * Address range : 01:00:5e:00:00:00 to 01:00:5e:7f:ff:ff
        */
 
-      FAR const uint8_t *ip = ((FAR uint8_t *)pip->eh_destipaddr) + 1;
-      memcpy(peth->dest,  g_multicast_ethaddr, 3);
-      memcpy(&peth->dest[3], ip, 3);
+      FAR const uint8_t *ip = (FAR uint8_t *)pip->eh_destipaddr;
+
+      peth->dest[0] = g_multicast_ethaddr[0];
+      peth->dest[1] = g_multicast_ethaddr[1];
+      peth->dest[2] = g_multicast_ethaddr[2];
+      peth->dest[3] = ip[2] & 0x7f;
+      peth->dest[4] = ip[3];
+      peth->dest[5] = ip[4];
     }
 #endif
   else
