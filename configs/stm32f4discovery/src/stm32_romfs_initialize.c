@@ -42,6 +42,7 @@
 
 #include <sys/mount.h>
 #include <sys/types.h>
+#include <stdint.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -51,18 +52,21 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #ifndef CONFIG_STM32_ROMFS
-#error "CONFIG_STM32_ROMFS must be defined"
+#  error "CONFIG_STM32_ROMFS must be defined"
 #else
 
 #ifndef CONFIG_STM32_ROMFS_IMAGEFILE
-#error "CONFIG_STM32_ROMFS_IMAGEFILE must be defined"
+#  error "CONFIG_STM32_ROMFS_IMAGEFILE must be defined"
 #endif
+
 #ifndef CONFIG_STM32_ROMFS_DEV_MINOR
-#error "CONFIG_STM32_ROMFS_DEV_MINOR must be defined"
+#  error "CONFIG_STM32_ROMFS_DEV_MINOR must be defined"
 #endif
+
 #ifndef CONFIG_STM32_ROMFS_MOUNTPOINT
-#error "CONFIG_STM32_ROMFS_MOUNTPOINT must be defined"
+#  error "CONFIG_STM32_ROMFS_MOUNTPOINT must be defined"
 #endif
 
 #define NSECTORS(size) (((size) + ROMFS_SECTOR_SIZE - 1)/ROMFS_SECTOR_SIZE)
@@ -76,6 +80,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 __asm__ (
     ".section .rodata\n"
     ".balign  16\n"
@@ -92,7 +97,7 @@ __asm__ (
 
 extern const char romfs_data_begin;
 extern const char romfs_data_end;
-extern const int romfs_data_size;
+extern const int  romfs_data_size;
 
 /****************************************************************************
  * Public Functions
@@ -106,30 +111,35 @@ extern const int romfs_data_size;
  *   Then mounts the block device as ROMFS filesystems.
  *
  * Returned Value:
- *   0 on success, <0 on error.
+ *   Zero (OK) on success, a negated errno value on error.
  *
  * Assumptions/Limitations:
  *   Memory addresses [&romfs_data_begin .. &romfs_data_begin) should contain
  *   ROMFS volume data, as included in the assembly snippet above (l. 84).
  *
  ****************************************************************************/
+
 int stm32_romfs_initialize(void)
 {
+  uintptr_t romfs_data_len
   int  ret;
 
   /* Create a ROM disk for the /etc filesystem */
-  long int romfs_data_len = &romfs_data_end - &romfs_data_begin;
+
+  romfs_data_len = (uintptr_t)&romfs_data_end - (uintptr_t)&romfs_data_begin;
+
   ret = romdisk_register(CONFIG_STM32_ROMFS_DEV_MINOR, &romfs_data_begin,
                          NSECTORS(romfs_data_len), ROMFS_SECTOR_SIZE);
   if (ret < 0)
     {
       ferr("ERROR: romdisk_register failed: %d\n", -ret);
-      return -1;
+      return ret;
     }
 
   /* Mount the file system */
+
   finfo("Mounting ROMFS filesystem at target=%s with source=%s\n",
-      CONFIG_STM32_ROMFS_MOUNTPOINT, MOUNT_DEVNAME);
+        CONFIG_STM32_ROMFS_MOUNTPOINT, MOUNT_DEVNAME);
 
   ret = mount(MOUNT_DEVNAME, CONFIG_STM32_ROMFS_MOUNTPOINT,
               "romfs", MS_RDONLY, NULL);
@@ -137,9 +147,10 @@ int stm32_romfs_initialize(void)
     {
       ferr("ERROR: mount(%s,%s,romfs) failed: %d\n",
            MOUNT_DEVNAME, CONFIG_STM32_ROMFS_MOUNTPOINT, errno);
-      return -1;
+      return ret;
     }
-  return 0;
+
+  return OK;
 }
 
 #endif /* CONFIG_STM32_ROMFS */

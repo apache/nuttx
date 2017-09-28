@@ -32,14 +32,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 #ifndef __CONFIGS_STM32F4DISCOVERY_SRC_STM32_ROMFS_H
 #define __CONFIGS_STM32F4DISCOVERY_SRC_STM32_ROMFS_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 #ifdef CONFIG_STM32_ROMFS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #define ROMFS_SECTOR_SIZE 64
 
 /****************************************************************************
@@ -53,8 +61,14 @@
  *   Registers built-in ROMFS image as block device and mounts it.
  *
  * Returned Value:
- *   0 on success, <0 on error.
+ *   Zero (OK) on success, a negated errno value on error.
+ *
+ * Assumptions/Limitations:
+ *   Memory addresses [&romfs_data_begin .. &romfs_data_begin) should contain
+ *   ROMFS volume data, as included in the assembly snippet above (l. 84).
+ *
  ****************************************************************************/
+
 int stm32_romfs_initialize(void);
 
 #endif /* CONFIG_STM32_ROMFS */
