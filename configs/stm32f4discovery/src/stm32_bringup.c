@@ -52,6 +52,7 @@
 #include <nuttx/binfmt/elf.h>
 
 #include "stm32.h"
+#include "stm32_romfs.h"
 
 #ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"
@@ -284,6 +285,15 @@ int stm32_bringup(void)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n",
            STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_ROMFS
+  ret = stm32_romfs_initialize();
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to mount romfs at %s: %d\n",
+           STM32_ROMFS_MOUNTPOINT, ret);
     }
 #endif
 
