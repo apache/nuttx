@@ -66,38 +66,32 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
   off_t savepos;
   off_t pos;
   ssize_t ret;
-  int errcode = 0;
 
   /* Perform the seek to the current position.  This will not move the
    * file pointer, but will return its current setting
    */
 
   savepos = file_seek(filep, 0, SEEK_CUR);
-  if (savepos == (off_t)-1)
+  if (savepos < 0)
     {
       /* file_seek might fail if this if the media is not seekable */
 
-      return ERROR;
+      return (ssize_t)savepos;
     }
 
   /* Then seek to the correct position in the file */
 
   pos = file_seek(filep, offset, SEEK_SET);
-  if (pos == (off_t)-1)
+  if (pos < 0)
     {
       /* This might fail is the offset is beyond the end of file */
 
-      return ERROR;
+      return (ssize_t)pos;
     }
 
   /* Then perform the write operation */
 
   ret = file_write(filep, buf, nbytes);
-  if (ret < 0)
-    {
-      errcode = get_errno();
-      ret     = ERROR;
-    }
 
   /* Restore the file position */
 
@@ -106,13 +100,7 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
     {
       /* This really should not fail */
 
-      errcode = -pos;
-      ret     = ERROR;
-    }
-
-  if (errcode != 0)
-    {
-      set_errno(errcode);
+      ret = (ssize_t)pos;
     }
 
   return ret;
@@ -168,6 +156,11 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
       /* Let file_pread do the real work */
 
       ret = file_pwrite(filep, buf, nbytes, offset);
+      if (ret < 0)
+        {
+          set_errno((int)-ret);
+          ret = ERROR;
+        }
     }
 
   (void)enter_cancellation_point();

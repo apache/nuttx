@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_write.c
  *
- *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,15 +71,12 @@
 ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
 {
   FAR struct inode *inode;
-  ssize_t ret;
-  int errcode;
 
   /* Was this file opened for write access? */
 
   if ((filep->f_oflags & O_WROK) == 0)
     {
-      errcode = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Is a driver registered? Does it support the write method? */
@@ -87,24 +84,12 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
   inode = filep->f_inode;
   if (!inode || !inode->u.i_ops || !inode->u.i_ops->write)
     {
-      errcode = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Yes, then let the driver perform the write */
 
-  ret = inode->u.i_ops->write(filep, buf, nbytes);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout;
-    }
-
-  return ret;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
+  return inode->u.i_ops->write(filep, buf, nbytes);
 }
 
 /****************************************************************************
@@ -208,6 +193,11 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
            */
 
           ret = file_write(filep, buf, nbytes);
+          if (ret < 0)
+            {
+              set_errno((int)-ret);
+              ret = ERROR;
+            }
         }
     }
 #endif

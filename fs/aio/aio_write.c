@@ -155,6 +155,13 @@ static void aio_write_worker(FAR void *arg)
                                  aiocbp->aio_nbytes,
                                  aiocbp->aio_offset);
         }
+
+      /* errno is not set */
+
+      if (nwritten < 0)
+        {
+          ferr("ERROR: file_write/file_pwrite failed: %d\n", nwritten);
+        }
     }
 #endif
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
@@ -172,22 +179,21 @@ static void aio_write_worker(FAR void *arg)
       nwritten = psock_send(aioc->u.aioc_psock,
                             (FAR const void *)aiocbp->aio_buf,
                             aiocbp->aio_nbytes, 0);
+      /* errno is set */
+
+      if (nwritten < 0)
+        {
+          int errcode = get_errno();
+          ferr("ERROR: psock_send failed: %d\n", errcode);
+          DEBUGASSERT(errcode > 0);
+          nwritten = -errcode;
+        }
     }
 #endif
 
-  /* Check the result of the write */
+  /* Save the result of the write */
 
-  if (nwritten < 0)
-    {
-      int errcode = get_errno();
-      ferr("ERROR: write/pwrite failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      aiocbp->aio_result = -errcode;
-    }
-  else
-    {
-      aiocbp->aio_result = nwritten;
-    }
+  aiocbp->aio_result = nwritten;
 
 #ifdef AIO_HAVE_FILEP
 errout:
