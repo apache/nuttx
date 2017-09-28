@@ -73,9 +73,9 @@ extern "C"
 
 enum stm32_pwr_wupin_e
 {
- PWR_WUPIN_1 = 0,  /* Wake-up pin 1 (all parts) */
- PWR_WUPIN_2,      /* Wake-up pin 2 */
- PWR_WUPIN_3       /* Wake-up pin 3 */
+  PWR_WUPIN_1 = 0,  /* Wake-up pin 1 (all parts) */
+  PWR_WUPIN_2,      /* Wake-up pin 2 */
+  PWR_WUPIN_3       /* Wake-up pin 3 */
 };
 
 /************************************************************************************
@@ -160,6 +160,26 @@ void stm32_pwr_enablebkp(bool writable);
  ************************************************************************************/
 
 int stm32_pwr_enablewkup(enum stm32_pwr_wupin_e wupin, bool wupon);
+
+/************************************************************************************
+ * Name: stm32_pwr_getsbf
+ *
+ * Description:
+ *   Return the standby flag.
+ *
+ ************************************************************************************/
+
+bool stm32_pwr_getsbf(void);
+
+/************************************************************************************
+ * Name: stm32_pwr_getwuf
+ *
+ * Description:
+ *   Return the wakeup flag.
+ *
+ ************************************************************************************/
+
+bool stm32_pwr_getwuf(void);
 
 /************************************************************************************
  * Name: stm32_pwr_enablebreg

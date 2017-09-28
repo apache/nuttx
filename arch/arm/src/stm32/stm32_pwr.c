@@ -144,7 +144,6 @@ void stm32_pwr_enablesdadc(uint8_t sdadc)
     }
 
   stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, 0, setbits);
-
 }
 #endif
 
@@ -318,6 +317,32 @@ int stm32_pwr_enablewkup(enum stm32_pwr_wupin_e wupin, bool wupon)
     }
 
   return OK;
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_getsbf
+ *
+ * Description:
+ *   Return the standby flag.
+ *
+ ************************************************************************************/
+
+bool stm32_pwr_getsbf(void)
+{
+  return (stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_SBF) != 0;
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_getwuf
+ *
+ * Description:
+ *   Return the wakeup flag.
+ *
+ ************************************************************************************/
+
+bool stm32_pwr_getwuf(void)
+{
+  return (stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_WUF) != 0;
 }
 
 /************************************************************************************
