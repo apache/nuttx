@@ -44,6 +44,8 @@
 
 #include "route/route.h"
 
+#if defined(CONFIG_ROUTE_IPv4_RAMROUTE) || defined(CONFIG_ROUTE_IPv6_RAMROUTE)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -229,4 +231,5 @@ FAR struct net_route_ipv6_entry_s *
   struct net_route_ipv6_queue_s *list);
 #endif
 
+#endif /* CONFIG_ROUTE_IPv4_RAMROUTE || CONFIG_ROUTE_IPv6_RAMROUTE */
 #endif /* __NET_ROUTE_RAMROUTE_H */

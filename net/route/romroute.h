@@ -44,6 +44,8 @@
 
 #include "route/route.h"
 
+#if defined(CONFIG_ROUTE_IPv4_ROMROUTE) || defined(CONFIG_ROUTE_IPv6_ROMROUTE)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -60,7 +62,7 @@ extern const unsigned int g_ipv4_nroutes;
 #endif
 
 #if defined(CONFIG_ROUTE_IPv6_ROMROUTE)
-/* The in-memory routing tables are represented as asimple array. */
+/* The in-memory routing tables are represented as a simple array. */
 
 extern struct net_route_ipv6_s g_ipv6_routes[];
 extern const unsigned int g_ipv6_nroutes;
@@ -70,4 +72,5 @@ extern const unsigned int g_ipv6_nroutes;
  * Public Functions
  ****************************************************************************/
 
+#endif /* CONFIG_ROUTE_IPv4_ROMROUTE || CONFIG_ROUTE_IPv6_ROMROUTE */
 #endif /* __NET_ROUTE_ROMROUTE_H */

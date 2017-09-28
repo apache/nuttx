@@ -50,7 +50,7 @@
 #include "route/ramroute.h"
 #include "route/route.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+#if defined(CONFIG_ROUTE_IPv4_RAMROUTE) || defined(CONFIG_ROUTE_IPv6_RAMROUTE)
 
 /****************************************************************************
  * Public Types
@@ -242,4 +242,4 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
 }
 #endif
 
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE  */
+#endif /* CONFIG_ROUTE_IPv4_RAMROUTE || CONFIG_ROUTE_IPv6_RAMROUTE  */

@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_NET_ROUTE),y)
 
-# General outing table support
+# General routing table support
 
 SOCK_CSRCS += net_initroute.c net_router.c netdev_router.c
 

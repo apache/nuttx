@@ -46,7 +46,7 @@
 #include "route/romroute.h"
 #include "route/route.h"
 
-#ifdef CONFIG_NET_ROUTE
+#if defined(CONFIG_ROUTE_IPv4_ROMROUTE) || defined(CONFIG_ROUTE_IPv6_ROMROUTE)
 
 /****************************************************************************
  * Public Functions
@@ -105,4 +105,4 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 }
 #endif
 
-#endif /* CONFIG_NET_ROUTE */
+#endif /* CONFIG_ROUTE_IPv4_ROMROUTE || CONFIG_ROUTE_IPv6_ROMROUTE */
