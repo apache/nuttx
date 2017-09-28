@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/route/net_delroute.c
+ * net/route/net_del_ramroute.c
  *
  *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,6 +47,7 @@
 #include <arpa/inet.h>
 #include <nuttx/net/ip.h>
 
+#include "route/ramroute.h"
 #include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
@@ -55,7 +56,7 @@
  * Public Types
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
 struct route_match_s
 {
   FAR struct net_route_ipv4_s *prev;     /* Predecessor in the list */
@@ -64,7 +65,7 @@ struct route_match_s
 };
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
 struct route_match_ipv6_s
 {
   FAR struct net_route_ipv6_s *prev;     /* Predecessor in the list */
@@ -92,7 +93,7 @@ struct route_match_ipv6_s
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
 static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
   FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
@@ -113,12 +114,12 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 
       if (match->prev)
         {
-          (void)sq_remafter((FAR sq_entry_t *)match->prev,
-                            (FAR sq_queue_t *)&g_ipv4_routes);
+          (void)ramroute_ipv4_remafter((FAR struct net_route_ipv4_entry_s *)match->prev,
+                                       &g_ipv4_routes);
         }
       else
         {
-          (void)sq_remfirst((FAR sq_queue_t *)&g_ipv4_routes);
+          (void)ramroute_ipv4_remfirst(&g_ipv4_routes);
         }
 
       /* And free the routing table entry by adding it to the free list */
@@ -137,7 +138,7 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 }
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
 static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 {
   FAR struct route_match_ipv6_s *match = (FAR struct route_match_ipv6_s *)arg;
@@ -166,12 +167,12 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 
       if (match->prev)
         {
-          (void)sq_remafter((FAR sq_entry_t *)match->prev,
-                            (FAR sq_queue_t *)&g_ipv6_routes);
+          (void)ramroute_ipv6_remafter((FAR struct net_route_ipv6_entry_s *)match->prev,
+                                        &g_ipv6_routes);
         }
       else
         {
-          (void)sq_remfirst((FAR sq_queue_t *)&g_ipv6_routes);
+          (void)ramroute_ipv6_remfirst(&g_ipv6_routes);
         }
 
       /* And free the routing table entry by adding it to the free list */
@@ -207,7 +208,7 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
 int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
 {
   struct route_match_s match;
@@ -224,7 +225,7 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
 }
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
 int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
 {
   struct route_match_ipv6_s match;

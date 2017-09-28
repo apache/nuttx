@@ -169,7 +169,7 @@ void net_setup(void)
 #ifdef CONFIG_NET_ROUTE
   /* Initialize the routing table */
 
-  net_initroute();
+  net_init_route();
 #endif
 
 #ifdef CONFIG_NET_USRSOCK

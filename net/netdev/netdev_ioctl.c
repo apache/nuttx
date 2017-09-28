@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -91,9 +90,25 @@
 #include "icmpv6/icmpv6.h"
 #include "route/route.h"
 
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration */
+
+#undef HAVE_WRITABLE_IPv4ROUTE
+#undef HAVE_WRITABLE_IPv6ROUTE
+
+#ifdef CONFIG_NET_ROUTE
+#  if defined(CONFIG_NET_IPv4) && !defined(CONFIG_ROUTE_IPv4_ROMROUTE)
+#    define HAVE_WRITABLE_IPv4ROUTE 1
+#  endif
+
+#  if defined(CONFIG_NET_IPv6) && !defined(CONFIG_ROUTE_IPv6_ROMROUTE)
+#    define HAVE_WRITABLE_IPv6ROUTE 1
+#  endif
+#endif
 
 /* This is really kind of bogus.. When asked for an IP address, this is
  * family that is returned in the ifr structure.  Probably could just skip
@@ -121,7 +136,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv4)
+#ifdef HAVE_WRITABLE_IPv4ROUTE
 static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
 {
   FAR struct sockaddr_in *addr;
@@ -149,7 +164,7 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
 
   return net_addroute_ipv4(target, netmask, router);
 }
-#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
+#endif /* HAVE_WRITABLE_IPv4ROUTE */
 
 /****************************************************************************
  * Name: ioctl_add_ipv6route
@@ -162,7 +177,7 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
+#ifdef HAVE_WRITABLE_IPv6ROUTE
 static int ioctl_add_ipv6route(FAR struct rtentry *rtentry)
 {
   FAR struct sockaddr_in6 *target;
@@ -187,7 +202,7 @@ static int ioctl_add_ipv6route(FAR struct rtentry *rtentry)
 
   return net_addroute_ipv6(target->sin6_addr.s6_addr16, netmask->sin6_addr.s6_addr16, router);
 }
-#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv6 */
+#endif /* HAVE_WRITABLE_IPv6ROUTE */
 
 /****************************************************************************
  * Name: ioctl_del_ipv4route
@@ -200,7 +215,7 @@ static int ioctl_add_ipv6route(FAR struct rtentry *rtentry)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv4)
+#ifdef HAVE_WRITABLE_IPv4ROUTE
 static int ioctl_del_ipv4route(FAR struct rtentry *rtentry)
 {
   FAR struct sockaddr_in *addr;
@@ -215,7 +230,7 @@ static int ioctl_del_ipv4route(FAR struct rtentry *rtentry)
 
   return net_delroute_ipv4(target, netmask);
 }
-#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv4 */
+#endif /* HAVE_WRITABLE_IPv4ROUTE */
 
 /****************************************************************************
  * Name: ioctl_del_ipv6route
@@ -228,7 +243,7 @@ static int ioctl_del_ipv4route(FAR struct rtentry *rtentry)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
+#ifdef HAVE_WRITABLE_IPv6ROUTE
 static int ioctl_del_ipv6route(FAR struct rtentry *rtentry)
 {
   FAR struct sockaddr_in6 *target;
@@ -239,7 +254,7 @@ static int ioctl_del_ipv6route(FAR struct rtentry *rtentry)
 
   return net_delroute_ipv6(target->sin6_addr.s6_addr16, netmask->sin6_addr.s6_addr16);
 }
-#endif /* CONFIG_NET_ROUTE && CONFIG_NET_IPv6 */
+#endif /* HAVE_WRITABLE_IPv6ROUTE */
 
 /****************************************************************************
  * Name: ioctl_get_ipv4addr
@@ -1223,7 +1238,11 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
           if (rtentry->rt_target->ss_family == AF_INET)
 #endif
             {
+#ifdef HAVE_WRITABLE_IPv4ROUTE
               ret = ioctl_add_ipv4route(rtentry);
+#else
+              ret = -EACCES;
+#endif
             }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -1232,7 +1251,11 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
           else
 #endif
             {
+#ifdef HAVE_WRITABLE_IPv6ROUTE
               ret = ioctl_add_ipv6route(rtentry);
+#else
+              ret = -EACCES;
+#endif
             }
 #endif /* CONFIG_NET_IPv6 */
         }
@@ -1252,7 +1275,11 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
           if (rtentry->rt_target->ss_family == AF_INET)
 #endif
             {
+#ifdef HAVE_WRITABLE_IPv4ROUTE
               ret = ioctl_del_ipv4route(rtentry);
+#else
+              ret = -EACCES;
+#endif
             }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -1261,7 +1288,11 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
           else
 #endif
             {
+#ifdef HAVE_WRITABLE_IPv6ROUTE
               ret = ioctl_del_ipv6route(rtentry);
+#else
+              ret = -EACCES;
+#endif
             }
 #endif /* CONFIG_NET_IPv6 */
         }

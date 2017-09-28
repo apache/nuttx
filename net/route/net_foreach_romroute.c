@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/queue/sq_remafter.c
+ * net/route/net_foreach_romroute.c
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,39 +37,72 @@
  * Included Files
  ****************************************************************************/
 
-#include <queue.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
+#include <arch/irq.h>
+
+#include "route/romroute.h"
+#include "route/route.h"
+
+#ifdef CONFIG_NET_ROUTE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sq_remafter
+ * Name: net_foreachroute_ipv4 and net_foreachroute_ipv6
  *
  * Description:
- *   sq_remafter removes the entry following 'node' from the'queue'  Returns
- *   a reference to the removed entry.
+ *   Traverse the routing table
+ *
+ * Parameters:
+ *   handler - Will be called for each route in the routing table.
+ *   arg     - An arbitrary value that will be passed tot he handler.
+ *
+ * Returned Value:
+ *   0 if in use; 1 if avaialble and the new entry was added
  *
  ****************************************************************************/
 
-FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, sq_queue_t *queue)
+#ifdef CONFIG_ROUTE_IPv4_ROMROUTE
+int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
 {
-  FAR sq_entry_t *ret = node->flink;
+  int ret = 0;
+  int i;
 
-  if (queue->head && ret)
+  /* Visit each entry in the routing table */
+
+  for (i = 0; ret == 0 && i < g_ipv4_nroutes; i++)
     {
-      if (queue->tail == ret)
-        {
-          queue->tail = node;
-          node->flink = NULL;
-        }
-      else
-        {
-          node->flink = ret->flink;
-        }
+      /* Call the handler. */
 
-      ret->flink = NULL;
+      ret  = handler(&g_ipv4_routes[i], arg);
     }
 
   return ret;
 }
+#endif
+
+#ifdef CONFIG_ROUTE_IPv6_ROMROUTE
+int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
+{
+  int ret = 0;
+  int i;
+
+  /* Visit each entry in the routing table */
+
+  for (i = 0; ret == 0 && i < g_ipv6_nroutes; i++)
+    {
+      /* Call the handler. */
+
+      ret  = handler(&g_ipv6_routes[i], arg);
+    }
+
+  return ret;
+}
+#endif
+
+#endif /* CONFIG_NET_ROUTE */

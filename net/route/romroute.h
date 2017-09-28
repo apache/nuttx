@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/queue/sq_remafter.c
+ * net/route/romroute.h
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,43 +33,41 @@
  *
  ****************************************************************************/
 
+#ifndef __NET_ROUTE_ROMROUTE_H
+#define __NET_ROUTE_ROMROUTE_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <queue.h>
+#include <nuttx/config.h>
+
+#include "route/route.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* These are the routing tables.  These must be provided by board-specific
+ * logic.
+ */
+
+#if defined(CONFIG_ROUTE_IPv4_ROMROUTE)
+/* The in-memory routing tables are represented as a simple array. */
+
+extern struct net_route_ipv4_s g_ipv4_routes[];
+extern const unsigned int g_ipv4_nroutes;
+#endif
+
+#if defined(CONFIG_ROUTE_IPv6_ROMROUTE)
+/* The in-memory routing tables are represented as asimple array. */
+
+extern struct net_route_ipv6_s g_ipv6_routes[];
+extern const unsigned int g_ipv6_nroutes;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sq_remafter
- *
- * Description:
- *   sq_remafter removes the entry following 'node' from the'queue'  Returns
- *   a reference to the removed entry.
- *
- ****************************************************************************/
-
-FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, sq_queue_t *queue)
-{
-  FAR sq_entry_t *ret = node->flink;
-
-  if (queue->head && ret)
-    {
-      if (queue->tail == ret)
-        {
-          queue->tail = node;
-          node->flink = NULL;
-        }
-      else
-        {
-          node->flink = ret->flink;
-        }
-
-      ret->flink = NULL;
-    }
-
-  return ret;
-}
+#endif /* __NET_ROUTE_ROMROUTE_H */

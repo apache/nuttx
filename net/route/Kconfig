@@ -14,19 +14,85 @@ config NET_ROUTE
 
 if NET_ROUTE
 
-config ROUTE_MAX_IPv4ROUTES
-	int "IPv4 routing table size"
-	default 4
+choice
+	prompt "IPv4 routing table"
+	default ROUTE_IPv4_RAMROUTE
 	depends on NET_IPv4
-	---help---
-		The size of the IPv4 routing table (in entries).
 
-config ROUTE_MAX_IPv6ROUTES
-	int "IPv6 routing table size"
-	default 4
-	depends on NET_IPv6
+config ROUTE_IPv4_RAMROUTE
+	bool "In-memory"
 	---help---
-		The size of the IPv6 routing table (in entries).
+		Select to used a IPv4 routing table RAM.
+
+config ROUTE_IPv4_ROMROUTE
+	bool "Read-only"
+	---help---
+		Select to used a fixed read-only IPv4 routing table in FLASH or ROM.
+		In this case, the board-specific logic must provide a routing table
+		of the form of a simple array:
+
+			FAR const struct net_route_ipv4_s g_ipv4_routes[];
+			const unsigned int g_ipv4_nroutes;
+
+		NOTE:  The read-only variable g_ipv4_nroutes must be set to the
+		actual number of valid entries in the array.
+
+config NET_ROUTE_IPv4_FILEROUTE
+	bool "File"
+	depends on EXPERIMENTAL
+	---help---
+		Select to used a IPv4 routing table in a file in a mounted file system.
+
+endchoice # IPv4 routing table
+
+config ROUTE_MAX_IPv4_RAMROUTES
+	int "Preallocated IPv4 routing table entries"
+	default 4
+	depends on ROUTE_IPv4_RAMROUTE
+	---help---
+		The number of preallocated of the IPv4 routing table entries.  This
+		eliminates dynamica memory allocations, but limits the maximum size
+		of the in-memory routing table to this number.
+
+choice
+	prompt "IPv6 routing table"
+	default ROUTE_IPv6_RAMROUTE
+	depends on NET_IPv6
+
+config ROUTE_IPv6_RAMROUTE
+	bool "In-memory"
+	---help---
+		Select to used a IPv6 routing table RAM.
+
+config ROUTE_IPv6_ROMROUTE
+	bool "Read-only"
+	---help---
+		Select to used a fixed read-only IPv6 routing table in FLASH or ROM.
+		In this case, the board-specific logic must provide a routing table
+		of the form of simply array:
+
+			FAR const struct net_route_ipv6_s g_ipv6_routes[];
+			const unsigned int g_ipv6_nroutes;
+
+		NOTE:  The read-only variable g_ipv6_nroutes must be set to the
+		actual number of valid entries in the array.
+
+config NET_ROUTE_IPv6_FILEROUTE
+	bool "File"
+	depends on EXPERIMENTAL
+	---help---
+		Select to used a IPv6 routing table in a file in a mounted file system.
+
+endchoice # IPv6 routing table
+
+config ROUTE_MAX_IPv6_RAMROUTES
+	int "Preallocated IPv6 routing table entries"
+	default 4
+	depends on ROUTE_IPv6_RAMROUTE
+	---help---
+		The number of preallocated of the IPv6 routing table entries.  This
+		eliminates dynamica memory allocations, but limits the maximum size
+		of the in-memory routing table to this number.
 
 endif # NET_ROUTE
 endmenu # ARP Configuration

@@ -42,8 +42,6 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
-
 #include <net/if.h>
 
 #include <nuttx/net/ip.h>
@@ -51,52 +49,38 @@
 #ifdef CONFIG_NET_ROUTE
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_ROUTE_MAX_IPv4ROUTES
-#  define CONFIG_ROUTE_MAX_IPv4ROUTES 4
-#endif
-
-#ifndef CONFIG_ROUTE_MAX_IPv6ROUTES
-#  define CONFIG_ROUTE_MAX_IPv6ROUTES 4
-#endif
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This structure describes one entry in the routing table */
 
 #ifdef CONFIG_NET_IPv4
 struct net_route_ipv4_s
 {
-  FAR struct net_route_ipv4_s *flink; /* Supports a singly linked list */
-  in_addr_t target;                   /* The destination network */
-  in_addr_t netmask;                  /* The network address mask */
-  in_addr_t router;                   /* Route packets via this router */
+  in_addr_t target;          /* The destination network */
+  in_addr_t netmask;         /* The network address mask */
+  in_addr_t router;          /* Route packets via this router */
 };
 
 /* Type of the call out function pointer provided to net_foreachroute_ipv4() */
 
 typedef int (*route_handler_t)(FAR struct net_route_ipv4_s *route,
                                FAR void *arg);
-#endif
+#endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 struct net_route_ipv6_s
 {
-  FAR struct net_route_ipv6_s *flink; /* Supports a singly linked list */
-  net_ipv6addr_t target;              /* The destination network */
-  net_ipv6addr_t netmask;             /* The network address mask */
-  net_ipv6addr_t router;              /* Route packets via this router */
+  net_ipv6addr_t target;     /* The destination network */
+  net_ipv6addr_t netmask;    /* The network address mask */
+  net_ipv6addr_t router;     /* Route packets via this router */
 };
 
 /* Type of the call out function pointer provided to net_foreachroute_ipv6() */
 
 typedef int (*route_handler_ipv6_t)(FAR struct net_route_ipv6_s *route,
                                     FAR void *arg);
-#endif
+#endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
  * Public Data
@@ -110,22 +94,12 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* These are the routing tables */
-
-#ifdef CONFIG_NET_IPv4
-EXTERN sq_queue_t g_ipv4_routes;
-#endif
-
-#ifdef CONFIG_NET_IPv6
-EXTERN sq_queue_t g_ipv6_routes;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_initroute
+ * Name: net_init_route
  *
  * Description:
  *   Initialize to the routing table
@@ -138,52 +112,7 @@ EXTERN sq_queue_t g_ipv6_routes;
  *
  ****************************************************************************/
 
-void net_initroute(void);
-
-/****************************************************************************
- * Name: net_allocroute_ipv4 and net_allocroute_ipv6
- *
- * Description:
- *   Allocate one route by removing it from the free list
- *
- * Parameters:
- *   None
- *
- * Returned Value:
- *   On success, a pointer to the newly allocated routing table entry is
- *   returned; NULL is returned on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-FAR struct net_route_ipv4_s *net_allocroute_ipv4(void);
-#endif
-
-#ifdef CONFIG_NET_IPv6
-FAR struct net_route_ipv6_s *net_allocroute_ipv6(void);
-#endif
-
-/****************************************************************************
- * Name: net_freeroute_ipv4 and net_freeroute_ipv6
- *
- * Description:
- *   Free one route by adding it from the free list
- *
- * Parameters:
- *   route - The route to be freed
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-void net_freeroute_ipv4(FAR struct net_route_ipv4_s *route);
-#endif
-
-#ifdef CONFIG_NET_IPv6
-void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
-#endif
+void net_init_route(void);
 
 /****************************************************************************
  * Name: net_addroute_ipv4 and net_addroute_ipv6

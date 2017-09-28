@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/route/net_addroute.c
+ * net/route/net_foreach_ramroute.c
  *
- *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,102 +40,94 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <string.h>
-#include <queue.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
 
 #include <arch/irq.h>
 
+#include "route/ramroute.h"
 #include "route/route.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+#ifdef CONFIG_NET_ROUTE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_addroute_ipv4 and net_addroute_ipv6
+ * Name: net_foreachroute_ipv4 and net_foreachroute_ipv6
  *
  * Description:
- *   Add a new route to the routing table
+ *   Traverse the routing table
  *
  * Parameters:
+ *   handler - Will be called for each route in the routing table.
+ *   arg     - An arbitrary value that will be passed tot he handler.
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   0 if in use; 1 if avaialble and the new entry was added
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
-int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
+#ifdef CONFIG_ROUTE_IPv4_RAMROUTE
+int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
 {
-  FAR struct net_route_ipv4_s *route;
+  FAR struct net_route_ipv4_entry_s *route;
+  FAR struct net_route_ipv4_entry_s *next;
+  int ret = 0;
 
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv4();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv4addr_copy(route->target, target);
-  net_ipv4addr_copy(route->netmask, netmask);
-  net_ipv4addr_copy(route->router, router);
-  net_ipv4_dumproute("New route", route);
-
-  /* Get exclusive address to the networking data structures */
+  /* Prevent concurrent access to the routing table */
 
   net_lock();
 
-  /* Then add the new entry to the table */
+  /* Visit each entry in the routing table */
 
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_ipv4_routes);
+  for (route = g_ipv4_routes.head; ret == 0 && route != NULL; route = next)
+    {
+      /* Get the next entry in the to visit.  We do this BEFORE calling the
+       * handler because the hanlder may delete this entry.
+       */
+
+      next = route->flink;
+      ret  = handler(&route->entry, arg);
+    }
+
+  /* Unlock the network */
+
   net_unlock();
-  return OK;
+  return ret;
 }
 #endif
 
-#ifdef CONFIG_NET_IPv6
-int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
-                      net_ipv6addr_t router)
+#ifdef CONFIG_ROUTE_IPv6_RAMROUTE
+int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 {
-  FAR struct net_route_ipv6_s *route;
+  FAR struct net_route_ipv6_entry_s *route;
+  FAR struct net_route_ipv6_entry_s *next;
+  int ret = 0;
 
-  /* Allocate a route entry */
-
-  route = net_allocroute_ipv6();
-  if (!route)
-    {
-      nerr("ERROR:  Failed to allocate a route\n");
-      return -ENOMEM;
-    }
-
-  /* Format the new routing table entry */
-
-  net_ipv6addr_copy(route->target, target);
-  net_ipv6addr_copy(route->netmask, netmask);
-  net_ipv6addr_copy(route->router, router);
-  net_ipv6_dumproute("New route", route);
-
-  /* Get exclusive address to the networking data structures */
+  /* Prevent concurrent access to the routing table */
 
   net_lock();
 
-  /* Then add the new entry to the table */
+  /* Visit each entry in the routing table */
 
-  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_ipv6_routes);
+  for (route = g_ipv6_routes.head; ret == 0 && route != NULL; route = next)
+    {
+      /* Get the next entry in the to visit.  We do this BEFORE calling the
+       * handler because the hanlder may delete this entry.
+       */
+
+      next = route->flink;
+      ret  = handler(&route->entry, arg);
+    }
+
+  /* Unlock the network */
+
   net_unlock();
-  return OK;
+  return ret;
 }
 #endif
 
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
+#endif /* CONFIG_NET_ROUTE */
