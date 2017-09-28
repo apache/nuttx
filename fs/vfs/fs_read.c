@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_read.c
  *
- *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,15 +102,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
       ret = (int)inode->u.i_ops->read(filep, (FAR char *)buf, (size_t)nbytes);
     }
 
-  /* If an error occurred, set errno and return -1 (ERROR) */
-
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      return ERROR;
-    }
-
-  /* Otherwise, return the number of bytes read */
+  /* Return the number of bytes read (or possibly an error code) */
 
   return ret;
 }
@@ -180,11 +172,14 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
         }
       else
         {
-          /* Then let file_read do all of the work.  Note that file_read()
-           * sets the errno variable.
-           */
+          /* Then let file_read do all of the work. */
 
           ret = file_read(filep, buf, nbytes);
+          if (ret < 0)
+            {
+              set_errno((int)-ret);
+              ret = ERROR;
+            }
         }
     }
 #endif

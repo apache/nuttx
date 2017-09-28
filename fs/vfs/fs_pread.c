@@ -95,7 +95,7 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
   ret = file_read(filep, buf, nbytes);
   if (ret < 0)
     {
-      errcode = get_errno();
+      errcode = -ret;
       ret     = ERROR;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l476rg/src/stm32_ajoystick.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -209,13 +209,12 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                     MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
   if (nread < 0)
     {
-      int errcode = get_errno();
-      if (errcode != EINTR)
+      if (nread != -EINTR)
         {
-          ierr("ERROR: read failed: %d\n", errcode);
+          ierr("ERROR: read failed: %d\n", (int)nread);
         }
 
-      return -errcode;
+      return nread;
     }
   else if (nread < NJOYSTICK_CHANNELS * sizeof(struct adc_msg_s))
     {

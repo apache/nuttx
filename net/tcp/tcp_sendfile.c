@@ -402,9 +402,8 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
           ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
           if (ret < 0)
             {
-              int errcode = get_errno();
-              nerr("ERROR: Failed to read from input file: %d\n", errcode);
-              pstate->snd_sent = -errcode;
+              nerr("ERROR: Failed to read from input file: %d\n", (int)ret);
+              pstate->snd_sent = ret;
               goto end_wait;
             }
 
