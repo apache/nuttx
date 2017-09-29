@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/vnc/vnc_rre.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -295,11 +295,9 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
               nsent = psock_send(&session->connect, rre, nbytes, 0);
               if (nsent < 0)
                 {
-                  int errcode = get_errno();
                   gerr("ERROR: Send RRE FrameBufferUpdate failed: %d\n",
-                       errcode);
-                  DEBUGASSERT(errcode > 0);
-                  return -errcode;
+                       (int)nsent);
+                  return (int)nsent;
                 }
 
               DEBUGASSERT(nsent == nbytes);

@@ -183,8 +183,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.  One of:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation

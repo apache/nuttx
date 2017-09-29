@@ -707,8 +707,8 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *   flags    Send flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.  One of:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation
@@ -775,8 +775,8 @@ ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len,
  *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On a negated errno
- *   value is returned.  One of:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.  One of:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation

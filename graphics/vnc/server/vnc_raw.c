@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/vnc/vnc_raw.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -482,11 +482,9 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                   nsent = psock_send(&session->connect, src, size, 0);
                   if (nsent < 0)
                     {
-                      int errcode = get_errno();
                       gerr("ERROR: Send FrameBufferUpdate failed: %d\n",
-                           errcode);
-                      DEBUGASSERT(errcode > 0);
-                      return -errcode;
+                           (int)nsent);
+                      return (int)nsent;
                     }
 
                   DEBUGASSERT(nsent <= size);

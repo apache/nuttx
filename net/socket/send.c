@@ -70,8 +70,8 @@
  *   flags    Send flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned.  One of:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation
@@ -121,7 +121,6 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
   ssize_t ret;
-  int errcode;
 
   DEBUGASSERT(psock != NULL && buf != NULL);
 
@@ -129,27 +128,20 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   if (psock == NULL || psock->s_crefs <= 0)
     {
-      errcode = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Let the address family's send() method handle the operation */
 
   DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
-  ret = psock->s_sockif->si_send(psock, buf, len, flags);
 
+  ret = psock->s_sockif->si_send(psock, buf, len, flags);
   if (ret < 0)
     {
       nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %d\n", ret);
-      errcode = -ret;
-      goto errout;
     }
 
   return ret;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
 }
 
 /****************************************************************************

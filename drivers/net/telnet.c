@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/telnet.c
  *
- *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This is a leverage of similar logic from uIP which has a compatible BSD
@@ -439,15 +439,19 @@ static void telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                            uint8_t value)
 {
   uint8_t optbuf[4];
+  int ret;
+
   optbuf[0] = TELNET_IAC;
   optbuf[1] = option;
   optbuf[2] = value;
   optbuf[3] = 0;
 
   telnet_dumpbuffer("Send optbuf", optbuf, 4);
-  if (psock_send(&priv->td_psock, optbuf, 4, 0) < 0)
+
+  ret = psock_send(&priv->td_psock, optbuf, 4, 0);
+  if (ret < 0)
     {
-      nerr("ERROR: Failed to send TELNET_IAC\n");
+      nerr("ERROR: Failed to send TELNET_IAC: %d\n", ret);
     }
 }
 

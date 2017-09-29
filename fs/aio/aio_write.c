@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/aio/aio_write.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,13 +155,6 @@ static void aio_write_worker(FAR void *arg)
                                  aiocbp->aio_nbytes,
                                  aiocbp->aio_offset);
         }
-
-      /* errno is not set */
-
-      if (nwritten < 0)
-        {
-          ferr("ERROR: file_write/file_pwrite failed: %d\n", nwritten);
-        }
     }
 #endif
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
@@ -179,17 +172,13 @@ static void aio_write_worker(FAR void *arg)
       nwritten = psock_send(aioc->u.aioc_psock,
                             (FAR const void *)aiocbp->aio_buf,
                             aiocbp->aio_nbytes, 0);
-      /* errno is set */
-
-      if (nwritten < 0)
-        {
-          int errcode = get_errno();
-          ferr("ERROR: psock_send failed: %d\n", errcode);
-          DEBUGASSERT(errcode > 0);
-          nwritten = -errcode;
-        }
     }
 #endif
+
+  if (nwritten < 0)
+    {
+      ferr("ERROR: write/pwrite/send failed: %d\n", nwritten);
+    }
 
   /* Save the result of the write */
 
