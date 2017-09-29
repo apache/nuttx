@@ -338,6 +338,8 @@ int net_openroute_ipv6(int oflags, FAR struct file *filep)
 ssize_t net_readroute_ipv4(FAR struct file *filep,
                            FAR struct net_route_ipv4_s *route)
 {
+  FAR uint8_t *dest;
+  ssize_t ntotal;
   ssize_t ret;
 
   /* Lock the route.. we don't want to read from it while it is subject to
@@ -348,16 +350,35 @@ ssize_t net_readroute_ipv4(FAR struct file *filep,
   if (ret < 0)
     {
       nerr("ERROR: net_lockroute_ipv4() failed: %d\n", ret);
+      return ret;
     }
-  else
-    {
-      /* Read one record from the current position in the routing table */
 
-      ret = file_read(filep, route, sizeof(struct net_route_ipv4_s));
+  /* Read one record from the current position in the routing table */
+
+  dest   = (FAR uint8_t *)route;
+  ntotal = 0;
+
+  do
+    {
+      size_t nbytes = sizeof(struct net_route_ipv4_s) - ntotal;
+      ssize_t nread;
+
+      nread = file_read(filep, dest, nbytes);
+      if (nread <= 0)
+        {
+          /* Read error or end of file */
+
+          ntotal = nread;
+          break;
+        }
+
+      ntotal += nread;
+      dest   += nread;
     }
+  while (ntotal < sizeof(struct net_route_ipv4_s));
 
   (void)net_unlockroute_ipv4();
-  return ret;
+  return ntotal;
 }
 #endif
 
@@ -365,6 +386,8 @@ ssize_t net_readroute_ipv4(FAR struct file *filep,
 ssize_t net_readroute_ipv6(FAR struct file *filep,
                            FAR struct net_route_ipv6_s *route)
 {
+  FAR uint8_t *dest;
+  ssize_t ntotal;
   ssize_t ret;
 
   /* Lock the route.. we don't want to read from it while it is subject to
@@ -375,16 +398,35 @@ ssize_t net_readroute_ipv6(FAR struct file *filep,
   if (ret < 0)
     {
       nerr("ERROR: net_lockroute_ipv6() failed: %d\n", ret);
+      return ret;
     }
-  else
-    {
-      /* Read one record from the current position in the routing table */
 
-      ret = file_read(filep, route, sizeof(struct net_route_ipv6_s));
+  /* Read one record from the current position in the routing table */
+
+  dest   = (FAR uint8_t *)route;
+  ntotal = 0;
+
+  do
+    {
+      size_t nbytes = sizeof(struct net_route_ipv6_s) - ntotal;
+      ssize_t nread;
+
+      nread = file_read(filep, dest, nbytes);
+      if (nread <= 0)
+        {
+          /* Read error or end of file */
+
+          ret = nread;
+          break;
+        }
+
+      ntotal += nread;
+      dest   += nread;
     }
+  while (ntotal < sizeof(struct net_route_ipv6_s));
 
   (void)net_unlockroute_ipv6();
-  return ret;
+  return ntotal;
 }
 #endif
 
@@ -408,6 +450,8 @@ ssize_t net_readroute_ipv6(FAR struct file *filep,
 ssize_t net_writeroute_ipv4(FAR struct file *filep,
                             FAR const struct net_route_ipv4_s *route)
 {
+  FAR const uint8_t *src;
+  ssize_t ntotal;
   ssize_t ret;
 
   /* Lock the route.. we don't want to write to it while it is subject to
@@ -418,16 +462,35 @@ ssize_t net_writeroute_ipv4(FAR struct file *filep,
   if (ret < 0)
     {
       nerr("ERROR: net_lockroute_ipv4() failed: %d\n", ret);
+      return ret;
     }
-  else
-    {
-      /* Write one record at the current position in the routing table */
 
-      ret = file_write(filep, route, sizeof(struct net_route_ipv4_s));
+  /* Write one record at the current position in the routing table */
+
+  src    = (FAR const uint8_t *)route;
+  ntotal = 0;
+
+  do
+    {
+      size_t nbytes = sizeof(struct net_route_ipv4_s) - ntotal;
+      ssize_t nwritten;
+
+      nwritten = file_write(filep, src, nbytes);
+      if (nwritten <= 0)
+        {
+          /* Write error (zero is not a valid return value for write) */
+
+          ret = nwritten;
+          break;
+        }
+
+      ntotal += nwritten;
+      src    += nwritten;
     }
+  while (ntotal < sizeof(struct net_route_ipv4_s));
 
   (void)net_unlockroute_ipv4();
-  return ret;
+  return ntotal;
 }
 #endif
 
@@ -435,6 +498,8 @@ ssize_t net_writeroute_ipv4(FAR struct file *filep,
 ssize_t net_writeroute_ipv6(FAR struct file *filep,
                             FAR const struct net_route_ipv6_s *route)
 {
+  FAR const uint8_t *src;
+  ssize_t ntotal;
   ssize_t ret;
 
   /* Lock the route.. we don't want to write to it while it is subject to
@@ -445,13 +510,32 @@ ssize_t net_writeroute_ipv6(FAR struct file *filep,
   if (ret < 0)
     {
       nerr("ERROR: net_lockroute_ipv6() failed: %d\n", ret);
+      return ret;
     }
-  else
-    {
-      /* Write one record at the current position in the routing table */
 
-      ret = file_write(filep, route, sizeof(struct net_route_ipv6_s));
+  /* Write one record at the current position in the routing table */
+
+  src    = (FAR const uint8_t *)route;
+  ntotal = 0;
+
+  do
+    {
+      size_t nbytes = sizeof(struct net_route_ipv6_s) - ntotal;
+      ssize_t nwritten;
+
+      nwritten = file_write(filep, src, nbytes);
+      if (nwritten <= 0)
+        {
+          /* Write error (zero is not a valid return value for write) */
+
+          ntotal = nwritten;
+          break;
+       }
+
+      ntotal += nwritten;
+      src    += nwritten;
     }
+  while (ntotal < sizeof(struct net_route_ipv6_s));
 
   (void)net_unlockroute_ipv6();
   return ret;
