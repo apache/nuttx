@@ -162,12 +162,12 @@ static int rpcclnt_send(FAR struct rpcclnt *rpc, int procid, int prog,
                         FAR void *call, int reqlen)
 {
   ssize_t nbytes;
-  int error = OK;
+  int ret = OK;
 
   /* Send the call message
    *
    * On success, psock_sendto returns the number of bytes sent;
-   * On failure, it returns -1 with the specific error in errno.
+   * On failure, it returns a negated errno value.
    */
 
   nbytes = psock_sendto(rpc->rc_so, call, reqlen, 0,
@@ -176,11 +176,11 @@ static int rpcclnt_send(FAR struct rpcclnt *rpc, int procid, int prog,
     {
       /* psock_sendto failed */
 
-      error = get_errno();
-      ferr("ERROR: psock_sendto failed: %d\n", error);
+      ret = (int)-nbytes;
+      ferr("ERROR: psock_sendto failed: %d\n", ret);
     }
 
-  return error;
+  return ret;
 }
 
 /****************************************************************************
