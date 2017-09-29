@@ -51,6 +51,7 @@
 #include <nuttx/net/ip.h>
 
 #include "route/fileroute.h"
+#include "route/cacheroute.h"
 #include "route/route.h"
 
 #if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
@@ -276,6 +277,14 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
        goto errout_with_lock;
     }
 
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
+  /* We are committed to modifying the routing table.  Flush the in-memory
+   * routing table cache.
+   */
+
+  net_flushcache_ipv4();
+#endif
+
   /* Loop, copying each entry, to the previous entry thus removing the entry
    * to be deleted.
    */
@@ -419,6 +428,14 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
       nerr("ERROR: Could not open IPv6 routing table: %d\n", ret);
       goto errout_with_lock;
     }
+
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+  /* We are committed to modifying the routing table.  Flush the in-memory
+   * routing table cache.
+   */
+
+  net_flushcache_ipv6();
+#endif
 
   /* Loop, copying each entry, to the previous entry thus removing the entry
    * to be deleted.

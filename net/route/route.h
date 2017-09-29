@@ -64,7 +64,7 @@ struct net_route_ipv4_s
 
 /* Type of the call out function pointer provided to net_foreachroute_ipv4() */
 
-typedef int (*route_handler_t)(FAR struct net_route_ipv4_s *route,
+typedef int (*route_handler_ipv4_t)(FAR struct net_route_ipv4_s *route,
                                FAR void *arg);
 #endif /* CONFIG_NET_IPv4 */
 
@@ -260,7 +260,7 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Name: net_foreachroute_ipv4
+ * Name: net_foreachroute_ipv4/net_foreachroute_ipv6
  *
  * Description:
  *   Traverse the routing table
@@ -270,14 +270,14 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
  *   arg     - An arbitrary value that will be passed tot he handler.
  *
  * Returned Value:
- *   Zero (OK) returned if the entire table was search.  A negated errno
+ *   Zero (OK) returned if the entire table was searched.  A negated errno
  *   value will be returned in the event of a failure.  Handlers may also
- *   terminate the search early with any non-zero, non-negative value.
+ *   terminate the search early with any non-zero value.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg);
+int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg);
 #endif
 
 #ifdef CONFIG_NET_IPv6

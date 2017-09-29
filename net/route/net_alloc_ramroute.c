@@ -124,7 +124,7 @@ void net_init_ramroute(void)
   ramroute_init(&g_ipv4_routes);
   ramroute_init(&g_free_ipv4routes);
 
-  /* All all of the pre-allocated routing table entries to a free list */
+  /* Add all of the pre-allocated routing table entries to a free list */
 
   for (i = 0; i < CONFIG_ROUTE_MAX_IPv4_RAMROUTES; i++)
     {
@@ -136,7 +136,7 @@ void net_init_ramroute(void)
   ramroute_init(&g_ipv6_routes);
   ramroute_init(&g_free_ipv6routes);
 
-  /* All all of the pre-allocated routing table entries to a free list */
+  /* Add all of the pre-allocated routing table entries to a free list */
 
   for (i = 0; i < CONFIG_ROUTE_MAX_IPv6_RAMROUTES; i++)
     {

@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv4_ROMROUTE
-int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
+int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
 {
   int ret = 0;
   int i;

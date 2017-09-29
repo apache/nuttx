@@ -41,6 +41,7 @@
 
 #include "route/ramroute.h"
 #include "route/fileroute.h"
+#include "route/cacheroute.h"
 #include "route/route.h"
 
 #ifdef CONFIG_NET_ROUTE
@@ -71,6 +72,10 @@ void net_init_route(void)
 
 #if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
   net_init_fileroute();
+#endif
+
+#if defined(CONFIG_ROUTE_IPv4_CACHEROUTE) || defined(CONFIG_ROUTE_IPv6_CACHEROUTE)
+  net_init_cacheroute();
 #endif
 }
 

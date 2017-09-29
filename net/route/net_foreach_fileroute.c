@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
-int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
+int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
 {
   struct net_route_ipv4_s route;
   struct file fshandle;

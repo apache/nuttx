@@ -65,6 +65,24 @@ config ROUTE_MAX_IPv4_RAMROUTES
 		eliminates dynamica memory allocations, but limits the maximum size
 		of the in-memory routing table to this number.
 
+config ROUTE_IPv4_CACHEROUTE
+	bool "In-memory IPv4 cache"
+	default n
+	depends on ROUTE_IPv4_FILEROUTE
+	---help---
+		Accessing a routing table on a file system before each packet is sent
+		can harm performance.  This option will cache a few of the most
+		frequently used routing table entries in memory to reduce performance
+		issues.
+
+config ROUTE_MAX_IPv4_CACHEROUTES
+	int "IPv4 cache size"
+	default 4
+	depends on ROUTE_IPv4_CACHEROUTE
+	---help---
+		This determines the maxium number of routes that can be cached in
+		memory.
+
 choice
 	prompt "IPv6 routing table"
 	default ROUTE_IPv6_RAMROUTE
@@ -124,6 +142,24 @@ config ROUTE_FILEDIR
 		Provides the full path to location in the file system where routing
 		table will be accessed.  This is a string and should not include
 		any traling '/'.
+
+config ROUTE_IPv6_CACHEROUTE
+	bool "In-memory IPv6 cache"
+	default n
+	depends on ROUTE_IPv6_FILEROUTE
+	---help---
+		Accessing a routing table on a file system before each packet is sent
+		can harm performance.  This option will cache a few of the most
+		frequently used routing table entries in memory to reduce performance
+		issues.
+
+config ROUTE_MAX_IPv6_CACHEROUTES
+	int "IPv6 cache size"
+	default 4
+	depends on ROUTE_IPv6_CACHEROUTE
+	---help---
+		This determines the maxium number of routes that can be cached in
+		memory.
 
 endif # NET_ROUTE
 endmenu # ARP Configuration

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_router.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,26 @@
 #include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
+#include "route/cacheroute.h"
 #include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+
+/****************************************************************************
+ * Pre-processor defintions
+ ****************************************************************************/
+
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+#  define IPv4_ROUTER entry.router
+#else
+#  define IPv4_ROUTER router
+#endif
+
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+#  define IPv6_ROUTER entry.router
+#else
+#  define IPv6_ROUTER router
+#endif
 
 /****************************************************************************
  * Public Types
@@ -59,16 +76,24 @@
 #ifdef CONFIG_NET_IPv4
 struct route_ipv4_match_s
 {
-  in_addr_t target;       /* Target IPv4 address on an external network to match */
-  in_addr_t router;       /* IPv4 address of the router on one of our networks */
+  in_addr_t target;              /* Target IPv4 address on remote network */
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
+  struct net_route_ipv4_s entry; /* Full entry from the IPv4 routing table */
+#else
+  in_addr_t router;              /* IPv4 address of router a local networks */
+#endif
 };
 #endif
 
 #ifdef CONFIG_NET_IPv6
 struct route_ipv6_match_s
 {
-  net_ipv6addr_t target;  /* Target IPv6 address on an external network to match */
-  net_ipv6addr_t router;  /* IPv6 address of the router on one of our networks */
+  net_ipv6addr_t target;         /* Target IPv6 address on remote network */
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+  struct net_route_ipv6_s entry; /* Full entry from the IPv6 routing table */
+#else
+  net_ipv6addr_t router;         /* IPv6 address of router a local networks */
+#endif
 };
 #endif
 
@@ -103,9 +128,15 @@ static int net_ipv4_match(FAR struct net_route_ipv4_s *route, FAR void *arg)
 
   if (net_ipv4addr_maskcmp(route->target, match->target, route->netmask))
     {
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
+      /* They match.. Copy the entire routing table entry */
+
+      memcpy(&match->entry, route, sizeof(struct net_route_ipv4_s));
+#else
       /* They match.. Copy the router address */
 
       net_ipv4addr_copy(match->router, route->router);
+#endif
       return 1;
     }
 
@@ -140,9 +171,15 @@ static int net_ipv6_match(FAR struct net_route_ipv6_s *route, FAR void *arg)
 
   if (net_ipv6addr_maskcmp(route->target, match->target, route->netmask))
     {
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+      /* They match.. Copy the entire routing table entry */
+
+      memcpy(&match->entry, route, sizeof(struct net_route_ipv6_s));
+#else
       /* They match.. Copy the router address */
 
       net_ipv6addr_copy(match->router, route->router);
+#endif
       return 1;
     }
 
@@ -189,23 +226,45 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
   memset(&match, 0, sizeof(struct route_ipv4_match_s));
   net_ipv4addr_copy(match.target, target);
 
-  /* Find an router entry with the routing table that can forward to this
-   * address
-   */
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
+  /* First see if we can find a router entry in the cache */
 
-  ret = net_foreachroute_ipv4(net_ipv4_match, &match);
+  ret = net_foreachcache_ipv4(net_ipv4_match, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */
 
-      net_ipv4addr_copy(*router, match.router);
+      net_ipv4addr_copy(*router, match.IPv4_ROUTER);
       ret = OK;
     }
   else
+#endif
     {
-      /* There is no route for this address */
+      /* Find a router entry with the routing table that can forward to this
+       * address
+      */
 
-      ret = -ENOENT;
+      ret = net_foreachroute_ipv4(net_ipv4_match, &match);
+      if (ret > 0)
+        {
+          /* We found a route. */
+
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
+          /* Add the route to the cache */
+
+          ret = net_addcache_ipv4(&match.entry);
+#endif
+          /* Return the router address. */
+
+          net_ipv4addr_copy(*router, match.IPv4_ROUTER);
+          ret = OK;
+        }
+      else
+        {
+          /* There is no route for this address */
+
+          ret = -ENOENT;
+        }
     }
 
   return ret;
@@ -247,23 +306,45 @@ int net_ipv6_router(const net_ipv6addr_t target, net_ipv6addr_t router)
   memset(&match, 0, sizeof(struct route_ipv6_match_s));
   net_ipv6addr_copy(match.target, target);
 
-  /* Find an router entry with the routing table that can forward to this
-   * address
-   */
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+  /* First see if we can find a router entry in the cache */
 
-  ret = net_foreachroute_ipv6(net_ipv6_match, &match);
+  ret = net_foreachcache_ipv6(net_ipv6_match, &match);
   if (ret > 0)
     {
       /* We found a route.  Return the router address. */
 
-      net_ipv6addr_copy(router, match.router);
+      net_ipv6addr_copy(router, match.IPv6_ROUTER);
       ret = OK;
     }
   else
+#endif
     {
-      /* There is no route for this address */
+      /* Find n router entry with the routing table that can forward to this
+       * address
+       */
 
-      ret = -ENOENT;
+      ret = net_foreachroute_ipv6(net_ipv6_match, &match);
+      if (ret > 0)
+        {
+          /* We found a route */
+
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+          /* Add the route to the cache */
+
+          ret = net_addcache_ipv6(&match.entry);
+#endif
+          /* Return the router address. */
+
+          net_ipv6addr_copy(router, match.IPv6_ROUTER);
+          ret = OK;
+        }
+      else
+        {
+          /* There is no route for this address */
+
+          ret = -ENOENT;
+        }
     }
 
   return ret;
