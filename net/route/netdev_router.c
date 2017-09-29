@@ -245,7 +245,11 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
   ret = net_foreachcache_ipv4(net_ipv4_devmatch, &match);
   if (ret > 0)
     {
-      /* We found a route.  Return the router address. */
+      /* We found a route.  Return the router address.
+       *
+       * REVISIT:  We should move the cache entry to the head of the list
+       * because it is the most recently used.
+       */
 
       net_ipv4addr_copy(*router, match.IPv4_ROUTER);
     }
@@ -324,7 +328,11 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
   ret = net_foreachcache_ipv6(net_ipv6_devmatch, &match);
   if (ret > 0)
     {
-      /* We found a route.  Return the router address. */
+      /* We found a route.  Return the router address.
+       *
+       * REVISIT:  We should move the cache entry to the head of the list
+       * because it is the most recently used.
+       */
 
       net_ipv6addr_copy(router, match.IPv6_ROUTER);
     }

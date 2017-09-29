@@ -232,7 +232,11 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
   ret = net_foreachcache_ipv4(net_ipv4_match, &match);
   if (ret > 0)
     {
-      /* We found a route.  Return the router address. */
+      /* We found a route.  Return the router address.
+       *
+       * REVISIT:  We should move the cache entry to the head of the list
+       * because it is the most recently used.
+       */
 
       net_ipv4addr_copy(*router, match.IPv4_ROUTER);
       ret = OK;
@@ -312,7 +316,11 @@ int net_ipv6_router(const net_ipv6addr_t target, net_ipv6addr_t router)
   ret = net_foreachcache_ipv6(net_ipv6_match, &match);
   if (ret > 0)
     {
-      /* We found a route.  Return the router address. */
+      /* We found a route.  Return the router address.
+       *
+       * REVISIT:  We should move the cache entry to the head of the list
+       * because it is the most recently used.
+       */
 
       net_ipv6addr_copy(router, match.IPv6_ROUTER);
       ret = OK;
