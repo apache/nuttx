@@ -153,6 +153,13 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 
   (void)enter_cancellation_point();
 
+  if (buf == NULL)
+    {
+      set_errno(EINVAL);
+      ret = ERROR;
+      goto errout;
+    }
+
   /* Did we get a valid file descriptor? */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -167,7 +174,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
       ret = send(fd, buf, nbytes, 0);
 #else
       set_errno(EBADF);
-      ret = ERROR ERROR;
+      ret = ERROR;
 #endif
     }
 
@@ -202,6 +209,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
     }
 #endif
 
+errout:
   leave_cancellation_point();
   return ret;
 }

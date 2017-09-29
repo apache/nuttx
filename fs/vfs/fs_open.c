@@ -99,14 +99,20 @@ int open(const char *path, int oflags, ...)
   int ret;
   int fd;
 
+  /* open() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
+  if (path == NULL)
+    {
+      set_errno(EINVAL);
+      goto errout;
+    }
+
 #ifdef CONFIG_FILE_MODE
 #  ifdef CONFIG_CPP_HAVE_WARNING
 #    warning "File creation not implemented"
 #  endif
-
-  /* open() is a cancellation point */
-
-  (void)enter_cancellation_point();
 
   /* If the file is opened for creation, then get the mode bits */
 
