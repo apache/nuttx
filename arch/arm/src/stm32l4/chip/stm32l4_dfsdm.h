@@ -263,9 +263,11 @@
 #define DFSDM_FLTCR1_JEXTSEL_SHIFT       (8)       /* Bits 8-10: External trigger selection for injected group */
 #define DFSDM_FLTCR1_JEXTSEL_MASK        (0x7 << DFSDM_FLTCR1_JEXTSEL_SHIFT)
 #  define DFSDM_FLTCR1_JEXTSEL(event)    ((event) << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* Event = 0..7 */
+
 /* Trigger selections. Note: for RM0351 devices (STM32L4X6) these are valid for FLT0 and FLT1.
  * For subtle differences for FLT2 and FLT3, see the reference manual.
  */
+
 #  define DFSDM_FLTCR1_JEXTSEL_T1TRGO    (0x00 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0000: Timer 1 TRGO event */
 #  define DFSDM_FLTCR1_JEXTSEL_T1TRGO2   (0x01 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0001: Timer 1 TRGO2 event */
 #  if !defined(CONFIG_STM32L4_STM32L4X3)
