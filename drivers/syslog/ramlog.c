@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/ramlog.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -802,7 +802,7 @@ int ramlog_putc(int ch)
         {
           /* The buffer is full and nothing was saved. */
 
-          goto errout;
+          return ret;
         }
     }
 #endif
@@ -810,20 +810,16 @@ int ramlog_putc(int ch)
   /* Add the character to the RAMLOG */
 
   ret = ramlog_addchar(priv, ch);
-  if (ret >= 0)
+  if (ret < 0)
     {
-      /* Return the character added on success */
+      /* ramlog_addchar() failed */
 
-      return ch;
+      return ret;
     }
 
-  /* On a failure, we need to return EOF and set the errno so that
-   * work like all other putc-like functions.
-   */
+  /* Return the character added on success */
 
-errout:
-  set_errno(-ret);
-  return EOF;
+  return ch;
 }
 #endif
 

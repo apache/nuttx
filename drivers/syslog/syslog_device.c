@@ -474,8 +474,8 @@ int syslog_dev_uninitialize(void)
  *   buflen - The number of bytes in the buffer
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  Minus one
- *   is returned on any failure with the errno set correctly.
+ *   On success, the character is echoed back to the caller. A negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 
@@ -485,7 +485,6 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
   ssize_t nwritten;
   size_t writelen;
   size_t remaining;
-  int errcode;
   int ret;
 
   /* Check if the system is ready to do output operations */
@@ -493,8 +492,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
   ret = syslog_dev_outputready();
   if (ret < 0)
     {
-      errcode = -ret;
-      goto errout_with_errcode;
+      return ret;
     }
 
   /* The syslog device is ready for writing */
@@ -508,8 +506,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
        * way, we are outta here.
        */
 
-      errcode = -ret;
-      goto errout_with_errcode;
+      return ret;
     }
 
   /* Loop until we have output all characters */
@@ -548,7 +545,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
                   nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
                   if (nwritten < 0)
                     {
-                      errcode = -nwritten;
+                      ret = (int)nwritten;
                       goto errout_with_sem;
                     }
                 }
@@ -562,7 +559,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
                   nwritten = file_write(&g_syslog_dev.sl_file, g_syscrlf, 2);
                   if (nwritten < 0)
                     {
-                      errcode = -nwritten;
+                      ret = (int)nwritten;
                       goto errout_with_sem;
                     }
                 }
@@ -587,7 +584,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
       nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
       if (nwritten < 0)
         {
-          errcode = -nwritten;
+          ret = (int)nwritten;
           goto errout_with_sem;
         }
     }
@@ -597,9 +594,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
 
 errout_with_sem:
   syslog_dev_givesem();
-errout_with_errcode:
-  set_errno(errcode);
-  return -1;
+  return ret;
 }
 
 /****************************************************************************
@@ -622,7 +617,6 @@ int syslog_dev_putc(int ch)
 {
   ssize_t nbytes;
   uint8_t uch;
-  int errcode;
   int ret;
 
   /* Check if the system is ready to do output operations */
@@ -630,8 +624,7 @@ int syslog_dev_putc(int ch)
   ret = syslog_dev_outputready();
   if (ret < 0)
     {
-      errcode = -ret;
-      goto errout_with_errcode;
+      return ret;
     }
 
   /* Ignore carriage returns */
@@ -654,8 +647,7 @@ int syslog_dev_putc(int ch)
        * way, we are outta here.
        */
 
-      errcode = -ret;
-      goto errout_with_errcode;
+      return ret;
     }
 
   /* Pre-pend a newline with a carriage return. */
@@ -693,15 +685,10 @@ int syslog_dev_putc(int ch)
 
   if (nbytes < 0)
     {
-      errcode = -ret;
-      goto errout_with_errcode;
+      return (int)nbytes;
     }
 
   return ch;
-
-errout_with_errcode:
-  set_errno(errcode);
-  return EOF;
 }
 
 /****************************************************************************

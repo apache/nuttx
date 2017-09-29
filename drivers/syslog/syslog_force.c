@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/syslog_force.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,8 @@
  *   ch - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   On success, the character is echoed back to the caller. A negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 
