@@ -134,6 +134,28 @@ static void flash_lock(void)
   modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
+static void flash_optbytes_unlock(void)
+{
+  flash_unlock();
+
+  if (getreg32(STM32L4_FLASH_CR) & FLASH_CR_OPTLOCK)
+    {
+      /* Unlock Option Bytes sequence */
+
+      putreg32(OPTBYTES_KEY1, STM32L4_FLASH_OPTKEYR);
+      putreg32(OPTBYTES_KEY2, STM32L4_FLASH_OPTKEYR);
+    }
+}
+
+static inline void flash_optbytes_lock(void)
+{
+  /* We don't need to set OPTLOCK here as it is automatically
+   * set by MCU when flash_lock() sets LOCK.
+   */
+
+  flash_lock();
+}
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -150,6 +172,64 @@ void stm32l4_flash_lock(void)
   sem_lock();
   flash_lock();
   sem_unlock();
+}
+
+/****************************************************************************
+ * Name: stm32l4_flash_user_optbytes
+ *
+ * Description:
+ *   Modify the contents of the user option bytes (USR OPT) on the flash.
+ *   This does not set OBL_LAUNCH so new options take effect only after
+ *   next power reset.
+ *
+ * Input Parameters:
+ *   clrbits - Bits in the option bytes to be cleared
+ *   setbits - Bits in the option bytes to be set
+ *
+ * Returned Value:
+ *   Option bytes after operation is completed
+ *
+ ****************************************************************************/
+
+uint32_t stm32l4_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
+{
+  uint32_t regval;
+
+  /* To avoid accidents, do not allow setting RDP via this function.
+   * Remove these asserts if want to enable changing the protection level.
+   * WARNING: level 2 protection is permanent!
+   */
+
+  DEBUGASSERT((clrbits & FLASH_OPTCR_RDP_MASK) == 0);
+  DEBUGASSERT((setbits & FLASH_OPTCR_RDP_MASK) == 0);
+
+  sem_lock();
+  flash_optbytes_unlock();
+
+  /* Modify Option Bytes in register. */
+
+  regval = getreg32(STM32L4_FLASH_OPTR);
+
+  finfo("Flash option bytes before: 0x%x\n", regval);
+
+  regval = (regval & ~clrbits) | setbits;
+  putreg32(regval, STM32L4_FLASH_OPTR);
+
+  finfo("Flash option bytes after:  0x%x\n", regval);
+
+  /* Start Option Bytes programming and wait for completion. */
+
+  modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_OPTSTRT);
+
+  while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
+
+  flash_optbytes_lock();
+  sem_unlock();
+
+  return regval;
 }
 
 size_t up_progmem_pagesize(size_t page)
