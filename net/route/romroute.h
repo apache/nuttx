@@ -69,7 +69,7 @@ extern const unsigned int g_ipv6_nroutes;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #endif /* CONFIG_ROUTE_IPv4_ROMROUTE || CONFIG_ROUTE_IPv6_ROMROUTE */

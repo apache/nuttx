@@ -154,7 +154,7 @@ extern "C"
 
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
-int stat(const char *path, FAR struct stat *buf);
+int stat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 
 #undef EXTERN

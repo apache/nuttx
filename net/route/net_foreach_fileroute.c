@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/route/net_foreach_romroute.c
+ * net/route/net_foreach_fileroute.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,11 +40,16 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <debug.h>
 
-#include "route/romroute.h"
+#include <nuttx/fs/fs.h>
+
+#include "route/fileroute.h"
 #include "route/route.h"
 
-#if defined(CONFIG_ROUTE_IPv4_ROMROUTE) || defined(CONFIG_ROUTE_IPv6_ROMROUTE)
+#if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
 
 /****************************************************************************
  * Public Functions
@@ -67,42 +72,142 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ROUTE_IPv4_ROMROUTE
+#ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
 {
+  struct net_route_ipv4_s route;
+  struct file fshandle;
+  ssize_t nread;
   int ret = 0;
-  int i;
 
-  /* Visit each entry in the routing table */
+  /* Open the IPv4 routing table for read-only access */
 
-  for (i = 0; ret == 0 && i < g_ipv4_nroutes; i++)
+  ret = net_openroute_ipv4(O_RDONLY, &fshandle);
+  if (ret < 0)
     {
-      /* Call the handler. */
+      /* Special case:  the routing table has not yet been created.  This is
+       * not an error.  We will just want to return successful completion of
+       * the traversal.
+       */
 
-      ret  = handler(&g_ipv4_routes[i], arg);
+       if (ret == -ENOENT)
+         {
+           /* The routing table does not exit.. return successful completion */
+
+           ninfo("The IPv4 routing table file does not exist\n");
+           return OK;
+         }
+
+       /* Some other error occurred. */
+
+       nerr("ERROR: Could not open IPv4 routing table: %d\n", ret);
+       return ret;
     }
 
+  /* Read each entry from the routing table */
+
+  for (; ; )
+    {
+      nread = net_readroute_ipv4(&fshandle, &route);
+      if (nread < 0)
+        {
+          /* File read error */
+
+          nerr("ERROR: net_readroute_ipv4() failed: %ld\n", (long)nread);
+          ret = (int)nread;
+          break;
+        }
+      else if (nread == 0)
+        {
+          /* End of file */
+
+          ret = OK;
+          break;
+        }
+
+      /* Call the handler. */
+
+      ret = handler(&route, arg);
+      if (ret != OK)
+        {
+          /* Terminate early if the handler returns any non-zero value. */
+
+          break;
+        }
+    }
+
+  (void)net_closeroute_ipv4(&fshandle);
   return ret;
 }
 #endif
 
-#ifdef CONFIG_ROUTE_IPv6_ROMROUTE
+#ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 {
+  struct net_route_ipv6_s route;
+  struct file fshandle;
+  ssize_t nread;
   int ret = 0;
-  int i;
 
-  /* Visit each entry in the routing table */
+  /* Open the IPv6 routing table for read-only access */
 
-  for (i = 0; ret == 0 && i < g_ipv6_nroutes; i++)
+  ret = net_openroute_ipv6(O_RDONLY, &fshandle);
+  if (ret < 0)
     {
-      /* Call the handler. */
+      /* Special case:  the routing table has not yet been created.  This is
+       * not an error.  We will just want to return successful completion of
+       * the traversal.
+       */
 
-      ret  = handler(&g_ipv6_routes[i], arg);
+       if (ret == -ENOENT)
+         {
+           /* The routing table does not exit.. return successful completion */
+
+           ninfo("The IPv6 routing table file does not exist\n");
+           return OK;
+         }
+
+       /* Some other error occurred. */
+
+       nerr("ERROR: Could not open IPv6 routing table: %d\n", ret);
+       return ret;
     }
 
+  /* Read each entry from the routing table */
+
+  for (; ; )
+    {
+      nread = net_readroute_ipv6(&fshandle, &route);
+      if (nread < 0)
+        {
+          /* File read error */
+
+          nerr("ERROR: net_readroute_ipv6() failed: %ld\n", (long)nread);
+          ret = (int)nread;
+          break;
+        }
+      else if (nread == 0)
+        {
+          /* End of file */
+
+          ret = OK;
+          break;
+        }
+
+      /* Call the handler. */
+
+      ret = handler(&route, arg);
+      if (ret != OK)
+        {
+          /* Terminate early if the handler returns any non-zero value. */
+
+          break;
+        }
+    }
+
+  (void)net_closeroute_ipv6(&fshandle);
   return ret;
 }
 #endif
 
-#endif /* CONFIG_ROUTE_IPv4_ROMROUTE || CONFIG_ROUTE_IPv6_ROMROUTE */
+#endif /* CONFIG_ROUTE_IPv4_FILEROUTE || CONFIG_ROUTE_IPv6_FILEROUTE */

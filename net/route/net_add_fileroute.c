@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/route/net_foreach_romroute.c
+ * net/route/net_add_fileroute.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,69 +40,102 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <debug.h>
 
-#include "route/romroute.h"
+#include <nuttx/fs/fs.h>
+//#include <nuttx/net/net.h>
+#include <nuttx/net/ip.h>
+
+#include "route/fileroute.h"
 #include "route/route.h"
 
-#if defined(CONFIG_ROUTE_IPv4_ROMROUTE) || defined(CONFIG_ROUTE_IPv6_ROMROUTE)
+#if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_foreachroute_ipv4 and net_foreachroute_ipv6
+ * Name: net_addroute_ipv4 and net_addroute_ipv6
  *
  * Description:
- *   Traverse the routing table
+ *   Add a new route to the routing table
  *
  * Parameters:
- *   handler - Will be called for each route in the routing table.
- *   arg     - An arbitrary value that will be passed tot he handler.
  *
  * Returned Value:
- *   Zero (OK) returned if the entire table was search.  A negated errno
- *   value will be returned in the event of a failure.  Handlers may also
- *   terminate the search early with any non-zero, non-negative value.
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ROUTE_IPv4_ROMROUTE
-int net_foreachroute_ipv4(route_handler_t handler, FAR void *arg)
+#ifdef CONFIG_ROUTE_IPv4_FILEROUTE
+int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
 {
-  int ret = 0;
-  int i;
+  struct net_route_ipv4_s route;
+  struct file fshandle;
+  ssize_t nwritten;
+  int ret;
 
-  /* Visit each entry in the routing table */
+  /* Format the new routing table entry */
 
-  for (i = 0; ret == 0 && i < g_ipv4_nroutes; i++)
+  net_ipv4addr_copy(route.target, target);
+  net_ipv4addr_copy(route.netmask, netmask);
+  net_ipv4addr_copy(route.router, router);
+  net_ipv4_dumproute("New route", &route);
+
+  /* Open the IPv4 routing table for append access */
+
+  ret = net_openroute_ipv4(O_WRONLY | O_APPEND | O_CREAT, &fshandle);
+  if (ret < 0)
     {
-      /* Call the handler. */
-
-      ret  = handler(&g_ipv4_routes[i], arg);
+       nerr("ERROR: Could not open IPv4 routing table: %d\n", ret);
+       return ret;
     }
 
-  return ret;
+  /* Then append the new entry to the end of the routing table */
+
+  nwritten = net_writeroute_ipv4(&fshandle, &route);
+
+  (void)net_closeroute_ipv4(&fshandle);
+  return nwritten >= 0 ? 0 : (int)nwritten;
 }
 #endif
 
-#ifdef CONFIG_ROUTE_IPv6_ROMROUTE
-int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
+#ifdef CONFIG_ROUTE_IPv6_FILEROUTE
+int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
+                      net_ipv6addr_t router)
 {
-  int ret = 0;
-  int i;
+  struct net_route_ipv6_s route;
+  struct file fshandle;
+  ssize_t nwritten;
+  int ret;
 
-  /* Visit each entry in the routing table */
+  /* Format the new routing table entry */
 
-  for (i = 0; ret == 0 && i < g_ipv6_nroutes; i++)
+  net_ipv6addr_copy(route.target, target);
+  net_ipv6addr_copy(route.netmask, netmask);
+  net_ipv6addr_copy(route.router, router);
+  net_ipv6_dumproute("New route", &route);
+
+  /* Open the IPv6 routing table for append access */
+
+  ret = net_openroute_ipv6(O_WRONLY | O_APPEND | O_CREAT, &fshandle);
+  if (ret < 0)
     {
-      /* Call the handler. */
-
-      ret  = handler(&g_ipv6_routes[i], arg);
+       nerr("ERROR: Could not open IPv6 routing table: %d\n", ret);
+       return ret;
     }
 
-  return ret;
+  /* Then append the new entry to the end of the routing table */
+
+  nwritten = net_writeroute_ipv6(&fshandle, &route);
+
+  (void)net_closeroute_ipv6(&fshandle);
+  return nwritten >= 0 ? 0 : (int)nwritten;
 }
 #endif
 
-#endif /* CONFIG_ROUTE_IPv4_ROMROUTE || CONFIG_ROUTE_IPv6_ROMROUTE */
+#endif /* CONFIG_ROUTE_IPv4_FILEROUTE || CONFIG_ROUTE_IPv6_FILEROUTE */

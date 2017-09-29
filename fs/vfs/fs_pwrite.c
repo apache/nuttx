@@ -159,7 +159,7 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
       if (ret < 0)
         {
           set_errno((int)-ret);
-          ret = ERROR;
+          ret = (ssize_t)ERROR;
         }
     }
 

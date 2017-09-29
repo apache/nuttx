@@ -57,11 +57,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv4_RAMROUTE
-struct route_match_s
+struct route_match_ipv4_s
 {
   FAR struct net_route_ipv4_s *prev;     /* Predecessor in the list */
-  in_addr_t               target;   /* The target IP address to match */
-  in_addr_t               netmask;  /* The network mask to match */
+  in_addr_t                    target;   /* The target IP address to match */
+  in_addr_t                    netmask;  /* The network mask to match */
 };
 #endif
 
@@ -96,7 +96,7 @@ struct route_match_ipv6_s
 #ifdef CONFIG_ROUTE_IPv4_RAMROUTE
 static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
-  FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
+  FAR struct route_match_ipv4_s *match = (FAR struct route_match_ipv4_s *)arg;
 
   /* To match, the masked target address must be the same, and the masks
    * must be the same.
@@ -211,7 +211,7 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 #ifdef CONFIG_ROUTE_IPv4_RAMROUTE
 int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
 {
-  struct route_match_s match;
+  struct route_match_ipv4_s match;
 
   /* Set up the comparison structure */
 

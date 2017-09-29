@@ -57,6 +57,16 @@ else ifeq ($(CONFIG_ROUTE_IPv6_ROMROUTE),y)
 SOCK_CSRCS += net_foreach_romroute.c
 endif
 
+# Support for routing tables in files
+
+ifeq ($(CONFIG_ROUTE_IPv4_FILEROUTE),y)
+SOCK_CSRCS += net_fileroute.c net_add_fileroute.c net_del_fileroute.c
+SOCK_CSRCS += net_foreach_fileroute.c
+else ifeq ($(CONFIG_ROUTE_IPv6_FILEROUTE),y)
+SOCK_CSRCS += net_fileroute.c net_add_fileroute.c net_del_fileroute.c
+SOCK_CSRCS += net_foreach_fileroute.c
+endif
+
 ifeq ($(CONFIG_DEBUG_NET_INFO),y)
 SOCK_CSRCS += net_dumproute.c
 endif

@@ -37,11 +37,22 @@ config ROUTE_IPv4_ROMROUTE
 		NOTE:  The read-only variable g_ipv4_nroutes must be set to the
 		actual number of valid entries in the array.
 
-config NET_ROUTE_IPv4_FILEROUTE
+config ROUTE_IPv4_FILEROUTE
 	bool "File"
-	depends on EXPERIMENTAL
 	---help---
 		Select to used a IPv4 routing table in a file in a mounted file system.
+
+		REVISIT:  There is a problem with the current design.  NuttX does not
+		currently support truncate().  Therefore, it is not possible to delete
+		entries from the routing table file.
+
+		In this current implementation, that leaves the last entry intact at
+		the end of the file.  An alternative design might include a tag on
+		each record to indicate if the record is valid or not.  That would work
+		but would add complexity to the other routing table functions.
+
+		The existing 'delroute' implementation is available for testing purpose
+		only if CONFIG_EXPERIMENTAL=y.
 
 endchoice # IPv4 routing table
 
@@ -62,12 +73,12 @@ choice
 config ROUTE_IPv6_RAMROUTE
 	bool "In-memory"
 	---help---
-		Select to used a IPv6 routing table RAM.
+		Select to use a IPv6 routing table RAM.
 
 config ROUTE_IPv6_ROMROUTE
 	bool "Read-only"
 	---help---
-		Select to used a fixed read-only IPv6 routing table in FLASH or ROM.
+		Select to use a fixed read-only IPv6 routing table in FLASH or ROM.
 		In this case, the board-specific logic must provide a routing table
 		of the form of simply array:
 
@@ -77,11 +88,22 @@ config ROUTE_IPv6_ROMROUTE
 		NOTE:  The read-only variable g_ipv6_nroutes must be set to the
 		actual number of valid entries in the array.
 
-config NET_ROUTE_IPv6_FILEROUTE
+config ROUTE_IPv6_FILEROUTE
 	bool "File"
-	depends on EXPERIMENTAL
 	---help---
-		Select to used a IPv6 routing table in a file in a mounted file system.
+		Select to use a IPv6 routing table in a file in a mounted file system.
+
+		REVISIT:  There is a problem with the current design.  NuttX does not
+		currently support truncate().  Therefore, it is not possible to delete
+		entries from the routing table file.
+
+		In this current implementation, that leaves the last entry intact at
+		the end of the file.  An alternative design might include a tag on
+		each record to indicate if the record is valid or not.  That would work
+		but would add complexity to the other routing table functions.
+
+		The existing 'delroute' implementation is available for testing purpose
+		only if CONFIG_EXPERIMENTAL=y.
 
 endchoice # IPv6 routing table
 
@@ -93,6 +115,15 @@ config ROUTE_MAX_IPv6_RAMROUTES
 		The number of preallocated of the IPv6 routing table entries.  This
 		eliminates dynamica memory allocations, but limits the maximum size
 		of the in-memory routing table to this number.
+
+config ROUTE_FILEDIR
+	string "Routing table directory"
+	default /tmp
+	depends on ROUTE_IPv4_FILEROUTE || ROUTE_IPv6_FILEROUTE
+	---help---
+		Provides the full path to location in the file system where routing
+		table will be accessed.  This is a string and should not include
+		any traling '/'.
 
 endif # NET_ROUTE
 endmenu # ARP Configuration

@@ -266,9 +266,13 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
  *   Traverse the routing table
  *
  * Parameters:
+ *   handler - Will be called for each route in the routing table.
+ *   arg     - An arbitrary value that will be passed tot he handler.
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   Zero (OK) returned if the entire table was search.  A negated errno
+ *   value will be returned in the event of a failure.  Handlers may also
+ *   terminate the search early with any non-zero, non-negative value.
  *
  ****************************************************************************/
 
