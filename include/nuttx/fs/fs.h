@@ -649,14 +649,6 @@ int fs_dupfd(int fd, int minfd);
  *
  * Description:
  *   Equivalent to the non-standard fs_dupfd() function except that it
- *   accepts a struct file instance instead of a file descriptor.  Currently
- *   used only by file_vfcntl();
- *
-/****************************************************************************
- * Name: file_dup
- *
- * Description:
- *   Equivalent to the non-standard fs_dupfd() function except that it
  *   accepts a struct file instance instead of a file descriptor and does
  *   not set the errno variable.
  *

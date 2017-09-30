@@ -200,6 +200,7 @@
 #  define CONFIG_HAVE_FARPOINTER 1
 
 #elif defined(__mc68hc1x__)
+
 /* No I-space access qualifiers */
 
 #  define IOBJ
@@ -269,9 +270,18 @@
 
 #  define CONFIG_CAN_PASS_STRUCTS 1
 
+/* Indicate that a local variable is not used */
+
+#  define UNUSED(a) ((void)(a))
+
 /* SDCC-specific definitions ************************************************/
 
 #elif defined(SDCC)
+
+/* No I-space access qualifiers */
+
+#  define IOBJ
+#  define IPTR
 
 /* Pre-processor */
 
@@ -329,6 +339,10 @@
 
 #  define reentrant_function __reentrant
 
+/* Indicate that a local variable is not used */
+
+#  define UNUSED(a) ((void)(a))
+
 /* It is assumed that the system is build using the small
  * data model with storage defaulting to internal RAM.
  * The NEAR storage class can also be used to address data
@@ -385,6 +399,10 @@
  */
 
 #  undef  CONFIG_CAN_PASS_STRUCTS
+
+/* Indicate that a local variable is not used */
+
+#  define UNUSED(a) ((void)(a))
 
 /* Zilog-specific definitions ***********************************************/
 
@@ -505,6 +523,10 @@
 
 #  define CONFIG_CAN_PASS_STRUCTS 1
 
+/* Indicate that a local variable is not used */
+
+#  define UNUSED(a) ((void)(a))
+
 /* ICCARM-specific definitions ***********************************************/
 
 #elif defined(__ICCARM__)
@@ -533,6 +555,7 @@
 #  define NEAR
 #  define DSEG
 #  define CODE
+#  define IOBJ
 #  define IPTR
 
 #  define __asm__       asm
@@ -587,6 +610,8 @@
 #  undef  CONFIG_HAVE_DOUBLE
 #  undef  CONFIG_HAVE_LONG_DOUBLE
 #  undef  CONFIG_CAN_PASS_STRUCTS
+
+#  define UNUSED(a) ((void)(a))
 
 #endif
 
