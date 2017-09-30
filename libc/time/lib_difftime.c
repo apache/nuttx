@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/time/lib_difftime.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ float difftime(time_t time1, time_t time0)
        * differences!)
        */
 
-      return (float)((uint32_t)(time1 - time0))
+      return (float)((uint32_t)(time1 - time0));
     }
   else
     {
@@ -80,7 +80,7 @@ float difftime(time_t time1, time_t time0)
        * might not be set?
        */
 
-      return (float)((int32_t)(time1 - time0))
+      return (float)((int32_t)(time1 - time0));
     }
 }
 #endif

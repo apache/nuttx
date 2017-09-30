@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/wchar.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -218,11 +218,15 @@ size_t            wcsrtombs(FAR char *, FAR const wchar_t **, size_t,
                       FAR mbstate_t *);
 size_t            wcsspn(FAR const wchar_t *, FAR const wchar_t *);
 FAR wchar_t      *wcsstr(FAR const wchar_t *, FAR const wchar_t *);
+#ifdef CONFIG_HAVE_DOUBLE
 double            wcstod(FAR const wchar_t *, FAR wchar_t **);
+#endif
 float             wcstof(FAR const wchar_t *, FAR wchar_t **);
 FAR wchar_t      *wcstok(FAR wchar_t *, FAR const wchar_t *, FAR wchar_t **);
 long int          wcstol(FAR const wchar_t *, FAR wchar_t **, int);
+#ifdef CONFIG_HAVE_LONG_DOUBLE
 long double       wcstold(FAR const wchar_t *, FAR wchar_t **);
+#endif
 long long int     wcstoll(FAR const wchar_t *, FAR wchar_t **, int);
 unsigned long int wcstoul(FAR const wchar_t *, FAR wchar_t **, int);
 unsigned long long int wcstoull(FAR const wchar_t *, FAR wchar_t **, int);

@@ -43,6 +43,8 @@
 #include <stdint.h>
 #include <crc64.h>
 
+#ifdef CONFIG_HAVE_LONG_LONG
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -299,3 +301,5 @@ uint64_t crc64(FAR const uint8_t *src, size_t len)
 {
   return crc64part(src, len, CRC64_INIT) ^ CRC64_XOROUT;
 }
+
+#endif /* CONFIG_HAVE_LONG_LONG */

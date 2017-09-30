@@ -40,6 +40,8 @@
 // Included Files
 //***************************************************************************
 
+#include <nuttx/config.h>
+
 #include <wchar.h>
 #include <stdlib.h>
 
@@ -112,10 +114,15 @@ namespace std
   using ::wcsrtombs;
   using ::wcsspn;
   using ::wcsstr;
+#ifdef CONFIG_HAVE_DOUBLE
   using ::wcstod;
+#endif
   using ::wcstof;
   using ::wcstok;
   using ::wcstol;
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+  using ::wcstold;
+#endif
   using ::wcstoll;
   using ::wcstoul;
   using ::wcstoull;

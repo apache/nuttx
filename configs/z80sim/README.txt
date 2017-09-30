@@ -88,7 +88,7 @@ Configuring NuttX
        cd tools
        ./configure.sh z80sim/pashello
     2) Set the PATH environment variable to include the path to the SDCC
-       toolchain.
+       toolchain binaries.
 
     NOTES:
 
@@ -171,9 +171,14 @@ compatible with this build.  First start with the usual steps
   cd sdcc
   ./configure
 
+Note if you do not have the gputils packet installed, newer version of the
+SDCC configure will fail.  You will have to either install the gputils
+package or if you don't need PIC14 or PIC16 support:
+
+  ./configure --disable-pic14-port --disable-pic16-port
+
 Then make the SDCC binaries
 
-  cd sdcc
   make
 
 and install SDCC:
