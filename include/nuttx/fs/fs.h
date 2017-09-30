@@ -606,6 +606,14 @@ void files_releaselist(FAR struct filelist *list);
  *   Assign an inode to a specific files structure.  This is the heart of
  *   dup2.
  *
+ *   Equivalent to the non-standard fs_dupfd2() function except that it
+ *   accepts struct file instances instead of file descriptors and it does
+ *   not set the errno variable.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -625,6 +633,11 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  *   This alternative naming is used when dup could operate on both file and
  *   socket descriptors to avoid drawing unused socket support into the link.
  *
+ * Returned Value:
+ *   fs_dupfd is sometimes an OS internal function and sometimes is a direct
+ *   substitute for dup().  So it must return an errno value as though it
+ *   were dup().
+ *
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -638,6 +651,18 @@ int fs_dupfd(int fd, int minfd);
  *   Equivalent to the non-standard fs_dupfd() function except that it
  *   accepts a struct file instance instead of a file descriptor.  Currently
  *   used only by file_vfcntl();
+ *
+/****************************************************************************
+ * Name: file_dup
+ *
+ * Description:
+ *   Equivalent to the non-standard fs_dupfd() function except that it
+ *   accepts a struct file instance instead of a file descriptor and does
+ *   not set the errno variable.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -654,6 +679,11 @@ int file_dup(FAR struct file *filep, int minfd);
  *
  *   This alternative naming is used when dup2 could operate on both file and
  *   socket descritors to avoid drawing unused socket support into the link.
+ *
+ * Returned Value:
+ *   fs_dupfd2 is sometimes an OS internal function and sometimes is a direct
+ *   substitute for dup2().  So it must return an errno value as though it
+ *   were dup2().
  *
  ****************************************************************************/
 
@@ -965,8 +995,17 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
  *
  * Description:
  *   Similar to the standard vfcntl function except that is accepts a struct
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by aio_fcntl();
+ *   struct file instance instead of a file descriptor.
+ *
+ * Input Parameters:
+ *   filep - Instance for struct file for the opened file.
+ *   cmd   - Indentifies the operation to be performed.
+ *   ap    - Variable argument following the command.
+ *
+ * Returned Value:
+ *   The nature of the return value depends on the command.  Non-negative
+ *   values indicate success.  Failures are reported as negated errno
+ *   values.
  *
  ****************************************************************************/
 

@@ -232,42 +232,6 @@ FAR struct socket *sockfd_socket(int sockfd);
 FAR const struct sock_intf_s *net_sockif(sa_family_t family);
 
 /****************************************************************************
- * Name: psock_close
- *
- * Description:
- *   Performs the close operation on a socket instance
- *
- * Parameters:
- *   psock   Socket instance
- *
- * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int psock_close(FAR struct socket *psock);
-
-/****************************************************************************
- * Name: net_close
- *
- * Description:
- *   Performs the close operation on socket descriptors
- *
- * Parameters:
- *   sockfd   Socket descriptor of socket
- *
- * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int net_close(int sockfd);
-
-/****************************************************************************
  * Name: net_timeo
  *
  * Description:

@@ -1323,8 +1323,8 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
  *   arg      The argument of the ioctl cmd
  *
  * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   On a failure, -1 is returned with errno set appropriately
+ *   A non-negative value is returned on success; a negated errno value is
+ *   returned on any failure to indicate the nature of the failure:
  *
  *   EBADF
  *     'psock' is not a valid, connected socket structure.
@@ -1350,8 +1350,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
   if (psock == NULL || psock->s_crefs <= 0)
     {
-      ret = -EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Execute the command.  First check for a standard network IOCTL command. */
@@ -1419,18 +1418,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     }
 #endif
 
-  /* Check for success or failure */
-
-  if (ret >= 0)
-    {
-      return ret;
-    }
-
-/* On failure, set the errno and return -1 */
-
-errout:
-  set_errno(-ret);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
@@ -1445,8 +1433,8 @@ errout:
  *   arg      The argument of the ioctl cmd
  *
  * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   On a failure, -1 is returned with errno set appropriately
+ *   A non-negative value is returned on success; a negated errno value is
+ *   returned on any failure to indicate the nature of the failure:
  *
  *   EBADF
  *     'sockfd' is not a valid socket descriptor.

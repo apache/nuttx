@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_vfcntl.c
  *
- *   Copyright (C) 2009, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,16 +70,15 @@
  *   ap     - Command-specific arguments
  *
  * Returned Value:
- *   Zero (OK) is returned on success; -1 (ERROR) is returned on failure and
- *   the errno value is set appropriately.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
 int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  int errcode = 0;
-  int ret = 0;
+  int ret;
 
   ninfo("sockfd=%d cmd=%d\n", sockfd, cmd);
 
@@ -87,8 +86,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
   if (psock == NULL || psock->s_crefs <= 0)
     {
-      errcode = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Interrupts must be disabled in order to perform operations on socket structures */
@@ -108,6 +106,8 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          */
 
         {
+          /* Does not set the errno value on failure */
+
           ret = net_dupsd(sockfd, va_arg(ap, int));
         }
         break;
@@ -127,7 +127,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * successful execution of one  of  the  exec  functions.
          */
 
-         errcode = ENOSYS; /* F_GETFD and F_SETFD not implemented */
+         ret = -ENOSYS; /* F_GETFD and F_SETFD not implemented */
          break;
 
       case F_GETFL:
@@ -245,25 +245,16 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          * not be done.
          */
 
-         errcode = ENOSYS; /* F_GETOWN, F_SETOWN, F_GETLK, F_SETLK, F_SETLKW */
+         ret = -ENOSYS; /* F_GETOWN, F_SETOWN, F_GETLK, F_SETLK, F_SETLKW */
          break;
 
       default:
-         errcode = EINVAL;
+         ret = -EINVAL;
          break;
-  }
-
-  net_unlock();
-
-errout:
-  if (errcode != 0)
-    {
-      set_errno(errcode);
-      return ERROR;
     }
 
+  net_unlock();
   return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
-

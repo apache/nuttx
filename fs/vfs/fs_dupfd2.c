@@ -70,6 +70,11 @@
  *   case of file descriptors.  If socket descriptors are not implemented,
  *   then this function IS dup2().
  *
+ * Returned Value:
+ *   fs_dupfd is sometimes an OS internal function and sometimes is a direct
+ *   substitute for dup2().  So it must return an errno value as though it
+ *   were dup2().
+ *
  ****************************************************************************/
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -80,6 +85,7 @@ int dup2(int fd1, int fd2)
 {
   FAR struct file *filep1;
   FAR struct file *filep2;
+  int ret;
 
   /* Get the file structures corresponding to the file descriptors. */
 
@@ -110,7 +116,14 @@ int dup2(int fd1, int fd2)
 
   /* Perform the dup2 operation */
 
-  return file_dup2(filep1, filep2);
+  ret = file_dup2(filep1, filep2);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

@@ -459,7 +459,8 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock);
  *   sockfd   Socket descriptor of socket
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  * Assumptions:
  *
@@ -477,9 +478,8 @@ int net_close(int sockfd);
  *   psock   Socket instance
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
- *
- * Assumptions:
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  ****************************************************************************/
 
@@ -994,8 +994,8 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *   arg      The argument of the ioctl cmd
  *
  * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   On a failure, -1 is returned with errno set appropriately
+ *   A non-negative value is returned on success; a negated errno value is
+ *   returned on any failure to indicate the nature of the failure:
  *
  *   EBADF
  *     'psock' is not a valid, connected socket structure.
@@ -1027,8 +1027,8 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
  *   arg      The argument of the ioctl cmd
  *
  * Return:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   On a failure, -1 is returned with errno set appropriately
+ *   A non-negative value is returned on success; a negated errno value is
+ *   returned on any failure to indicate the nature of the failure:
  *
  *   EBADF
  *     'sockfd' is not a valid socket descriptor.
@@ -1103,6 +1103,10 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup().
  *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any error,
+ *   a negated errno value is returned:.
+ *
  ****************************************************************************/
 
 int net_dupsd(int sockfd, int minsd);
@@ -1115,6 +1119,10 @@ int net_dupsd(int sockfd, int minsd);
  *   descriptors are implemented, then this is called by dup2() for the case
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup2().
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any error,
+ *   a negated errno value is returned:.
  *
  ****************************************************************************/
 
@@ -1190,8 +1198,6 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
  *     In this case the process will also receive a SIGPIPE unless
  *     MSG_NOSIGNAL is set.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SENDFILE
@@ -1211,8 +1217,8 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset, size_t count
  *   ap     - Command-specific arguments
  *
  * Returned Value:
- *   Zero (OK) is returned on success; -1 (ERROR) is returned on failure and
- *   the errno value is set appropriately.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 

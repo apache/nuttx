@@ -102,6 +102,12 @@ int close(int fd)
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           ret = net_close(fd);
+          if (ret < 0)
+            {
+              errcode = -ret;
+              goto errout;
+            }
+
           leave_cancellation_point();
           return ret;
         }

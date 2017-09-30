@@ -124,9 +124,8 @@ static void aio_write_worker(FAR void *arg)
       oflags = file_fcntl(aioc->u.aioc_filep, F_GETFL);
       if (oflags < 0)
         {
-          int errcode = get_errno();
-          ferr("ERROR: fcntl failed: %d\n", errcode);
-          aiocbp->aio_result = -errcode;
+          ferr("ERROR: file_fcntl failed: %d\n", oflags);
+          aiocbp->aio_result = oflags;
           goto errout;
         }
 

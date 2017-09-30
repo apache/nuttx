@@ -190,19 +190,25 @@ void files_releaselist(FAR struct filelist *list)
  *   Assign an inode to a specific files structure.  This is the heart of
  *   dup2.
  *
+ *   Equivalent to the non-standard fs_dupfd2() function except that it
+ *   accepts struct file instances instead of file descriptors and it does
+ *   not set the errno variable.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
  ****************************************************************************/
 
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 {
   FAR struct filelist *list;
   FAR struct inode *inode;
-  int errcode;
   int ret;
 
   if (!filep1 || !filep1->f_inode || !filep2)
     {
-      errcode = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   list = sched_getfiles();
@@ -228,7 +234,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
     {
       /* An error occurred while closing the driver */
 
-      goto errout_with_ret;
+      goto errout_with_sem;
     }
 
   /* Increment the reference count on the contained inode */
@@ -286,17 +292,13 @@ errout_with_inode:
   filep2->f_pos    = 0;
   filep2->f_inode  = NULL;
 
-errout_with_ret:
-  errcode              = -ret;
-
+errout_with_sem:
   if (list != NULL)
     {
       _files_semgive(list);
     }
 
-errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************

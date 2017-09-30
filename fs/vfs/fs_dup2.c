@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_dup2.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,25 +73,38 @@ int dup2(int fd1, int fd2)
 
   if ((unsigned int)fd1 >= CONFIG_NFILE_DESCRIPTORS)
     {
+      int ret;
+
       /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
       if ((unsigned int)fd1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
-          /* Yes.. dup the socket descriptor */
+          /* Yes.. dup the socket descriptor. The errno value is not set. */
 
-          return net_dupsd2(fd1, fd2);
+          ret = net_dupsd2(fd1, fd2);
         }
       else
         {
           /* No.. then it is a bad descriptor number */
 
-          set_errno(EBADF);
-          return ERROR;
+          ret = -EBADF;
         }
+
+      /* Set the errno value on failures */
+
+      if (ret < 0)
+        {
+          set_errno(-ret);
+          ret = ERROR;
+        }
+
+      return ret;
     }
   else
     {
-      /* Its a valid file descriptor.. dup the file descriptor */
+      /* Its a valid file descriptor.. dup the file descriptor.  fd_dupfd()
+       * sets the errno value in the event of any failures.
+       */
 
       return fs_dupfd2(fd1, fd2);
     }

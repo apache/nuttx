@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_dupsd2.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/net.h>
+
 #include "socket/socket.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -61,6 +63,10 @@
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup2().
  *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any error,
+ *   a negated errno value is returned:.
+ *
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -71,7 +77,6 @@ int dup2(int sockfd1, int sockfd2)
 {
   FAR struct socket *psock1;
   FAR struct socket *psock2;
-  int errcode;
   int ret;
 
   /* Lock the scheduler throughout the following */
@@ -89,7 +94,7 @@ int dup2(int sockfd1, int sockfd2)
 
   if (!psock1 || !psock2 || psock1->s_crefs <= 0)
     {
-      errcode = EBADF;
+      ret = -EBADF;
       goto errout;
     }
 
@@ -105,19 +110,10 @@ int dup2(int sockfd1, int sockfd2)
   /* Duplicate the socket state */
 
   ret = net_clone(psock1, psock2);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout;
-    }
-
-  sched_unlock();
-  return OK;
 
 errout:
   sched_unlock();
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */

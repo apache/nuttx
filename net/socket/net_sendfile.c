@@ -115,8 +115,6 @@
  *     In this case the process will also receive a SIGPIPE unless
  *     MSG_NOSIGNAL is set.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 ssize_t net_sendfile(int outfd, FAR struct file *infile, FAR off_t *offset,
