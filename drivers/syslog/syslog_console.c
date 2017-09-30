@@ -106,7 +106,7 @@ static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t syslog_console_write(FAR struct file *filep,
                                     FAR const char *buffer, size_t buflen)
 {
-  return syslog_write(buffer, len);
+  return syslog_write(buffer, buflen);
 }
 
 /****************************************************************************
