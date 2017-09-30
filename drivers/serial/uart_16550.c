@@ -444,9 +444,9 @@ static uart_dev_t g_uart3port =
 #  endif
 #endif
 
-/************************************************************************************
- * Inline Functions
- ************************************************************************************/
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: u16550_serialin
@@ -487,7 +487,8 @@ static inline void u16550_disableuartint(FAR struct u16550_s *priv,
  * Name: u16550_restoreuartint
  ****************************************************************************/
 
-static inline void u16550_restoreuartint(FAR struct u16550_s *priv, uint32_t ier)
+static inline void u16550_restoreuartint(FAR struct u16550_s *priv,
+                                         uint32_t ier)
 {
   priv->ier |= ier & UART_IER_ALLIE;
   u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
@@ -497,7 +498,8 @@ static inline void u16550_restoreuartint(FAR struct u16550_s *priv, uint32_t ier
  * Name: u16550_enablebreaks
  ****************************************************************************/
 
-static inline void u16550_enablebreaks(FAR struct u16550_s *priv, bool enable)
+static inline void u16550_enablebreaks(FAR struct u16550_s *priv,
+                                       bool enable)
 {
   uint32_t lcr = u16550_serialin(priv, UART_LCR_OFFSET);
 
@@ -513,7 +515,7 @@ static inline void u16550_enablebreaks(FAR struct u16550_s *priv, bool enable)
   u16550_serialout(priv, UART_LCR_OFFSET, lcr);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: u16550_divisor
  *
  * Descrption:
@@ -524,7 +526,7 @@ static inline void u16550_enablebreaks(FAR struct u16550_s *priv, bool enable)
  *
  *   Ignoring the fractional divider for now.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_16550_SUPRESS_CONFIG
 static inline uint32_t u16550_divisor(FAR struct u16550_s *priv)
@@ -532,10 +534,6 @@ static inline uint32_t u16550_divisor(FAR struct u16550_s *priv)
   return (priv->uartclk + (priv->baud << 3)) / (priv->baud << 4);
 }
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: u16550_setup
@@ -547,7 +545,7 @@ static inline uint32_t u16550_divisor(FAR struct u16550_s *priv)
  *
  ****************************************************************************/
 
-static int u16550_setup(struct uart_dev_s *dev)
+static int u16550_setup(FAR struct uart_dev_s *dev)
 {
 #ifndef CONFIG_16550_SUPRESS_CONFIG
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
@@ -676,6 +674,7 @@ static int u16550_attach(struct uart_dev_s *dev)
       up_enable_irq(priv->irq);
     }
 #endif
+
   return ret;
 }
 
@@ -711,10 +710,10 @@ static void u16550_detach(FAR struct uart_dev_s *dev)
 
 static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct u16550_s   *priv;
-  uint32_t           status;
-  int                passes;
+  FAR struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  FAR struct u16550_s *priv;
+  uint32_t status;
+  int passes;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (FAR struct u16550_s *)dev->priv;
@@ -791,7 +790,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 
           default:
             {
-              _err("ERROR: Unexpected IIR: %02x\n", status);
+              serr("ERROR: Unexpected IIR: %02x\n", status);
               break;
             }
         }
@@ -810,9 +809,9 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 
 static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode      *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
-  struct u16550_s   *priv  = (FAR struct u16550_s *)dev->priv;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct uart_dev_s *dev   = inode->i_private;
+  FAR struct u16550_s *priv  = (FAR struct u16550_s *)dev->priv;
   int ret;
 
 #ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
@@ -822,6 +821,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
     {
       return ret;
     }
+
 #else
   ret = OK;
 #endif
@@ -834,8 +834,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
         FAR struct u16550_s *user = (FAR struct u16550_s *)arg;
         if (!user)
           {
-            set_errno(EINVAL);
-            ret = ERROR;
+            ret = -EINVAL;
           }
         else
           {
@@ -863,8 +862,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      set_errno(ENOTTY);
-      ret = ERROR;
+      ret = -ENOTTY;
       break;
     }
 
@@ -902,6 +900,7 @@ static int u16550_receive(struct uart_dev_s *dev, uint32_t *status)
 static void u16550_rxint(struct uart_dev_s *dev, bool enable)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
   if (enable)
     {
       priv->ier |= UART_IER_ERBFI;

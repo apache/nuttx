@@ -502,7 +502,7 @@ int board_lcd_initialize(void)
             }
         }
 
-      return -errno;
+      return -ENODEV;
     }
 
   return OK;

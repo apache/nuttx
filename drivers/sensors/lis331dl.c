@@ -177,8 +177,7 @@ static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
     }
   else
     {
-      errno = EFAULT;
-      return ERROR;
+      return -EFAULT;
     }
 
   if (length > 1)
@@ -240,7 +239,7 @@ static int lis331dl_readregs(FAR struct lis331dl_dev_s *dev)
 FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
                                          uint16_t address)
 {
-  FAR struct lis331dl_dev_s * dev;
+  FAR struct lis331dl_dev_s *dev;
   uint8_t retval;
 
   ASSERT(i2c);
@@ -249,7 +248,6 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
   dev = kmm_malloc(sizeof(struct lis331dl_dev_s));
   if (dev == NULL)
     {
-      errno = ENOMEM;
       return NULL;
     }
 
@@ -273,28 +271,14 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
             {
               /* Normal exit point */
 
-              errno = 0;
               return dev;
             }
-
-          retval = errno;
         }
-
-      /* Otherwise, we mark an invalid device found at given address */
-
-      retval = ENODEV;
-    }
-  else
-    {
-      /* No response at given address is marked as */
-
-      retval = EFAULT;
     }
 
   /* Error exit */
 
   kmm_free(dev);
-  errno = retval;
   return NULL;
 }
 
@@ -412,7 +396,6 @@ lis331dl_getreadings(FAR struct lis331dl_dev_s * dev)
 
       if (!(retval[0] & ST_LIS331DL_SR_ZYXDA))
         {
-          errno = EAGAIN;
           return NULL;
         }
 

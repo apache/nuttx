@@ -335,7 +335,7 @@ void cc1101_access_end(FAR struct cc1101_dev_s *dev)
  *        however
  *
  * Returned Value:
- *   OK on success or errno is set.
+ *   OK on success or a negated errno value on any failure.
  */
 
 int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
@@ -350,7 +350,7 @@ int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
 
   if ((addr & CC1101_READ_SINGLE) && length != 1)
     {
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Prepare SPI */
@@ -396,7 +396,6 @@ int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
     }
 
   cc1101_access_end(dev);
-
   return stabyte;
 }
 
@@ -435,7 +434,7 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
   if (cc1101_access(dev, CC1101_PARTNUM, &partnum, 1) < 0 ||
       cc1101_access(dev, CC1101_VERSION, &version, 1) < 0)
     {
-      return ERROR;
+      return -ENODEV;
     }
 
   if (partnum == CC1101_PARTNUM_VALUE && version == CC1101_VERSION_VALUE)
@@ -443,7 +442,7 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
       return OK;
     }
 
-  return ERROR;
+  return -ENOTSUP;
 }
 
 void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
@@ -524,16 +523,17 @@ int cc1101_eventcb(int irq, FAR void *context)
  * Public Functions
  ****************************************************************************/
 
-struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
-    uint32_t pinset, const struct c1101_rfsettings_s *rfsettings)
+FAR struct cc1101_dev_s *
+  cc1101_init(FAR struct spi_dev_s *spi, uint8_t isrpin,
+              uint32_t pinset,
+              FAR const struct c1101_rfsettings_s *rfsettings)
 {
-  struct cc1101_dev_s *dev;
+  FAR struct cc1101_dev_s *dev;
 
   ASSERT(spi);
 
   if ((dev = kmm_malloc(sizeof(struct cc1101_dev_s))) == NULL)
     {
-      errno = ENOMEM;
       return NULL;
     }
 
@@ -550,7 +550,6 @@ struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
   if (cc1101_reset(dev) < 0)
     {
       kmm_free(dev);
-      errno = EFAULT;
       return NULL;
     }
 
@@ -559,7 +558,6 @@ struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
   if (cc1101_checkpart(dev) < 0)
     {
       kmm_free(dev);
-      errno = ENODEV;
       return NULL;
     }
 
@@ -667,24 +665,24 @@ int cc1101_setrf(struct cc1101_dev_s *dev, const struct c1101_rfsettings_s *sett
 
   if (cc1101_access(dev, CC1101_FSCTRL1, (FAR uint8_t *)&settings->FSCTRL1, -11) < 0)
     {
-      return ERROR;
+      return -EIO;
     }
 
   if (cc1101_access(dev, CC1101_FOCCFG,  (FAR uint8_t *)&settings->FOCCFG,  -5) < 0)
     {
-      return ERROR;
+      return -EIO;
     }
 
   if (cc1101_access(dev, CC1101_FREND1,  (FAR uint8_t *)&settings->FREND1,  -6) < 0)
     {
-      return ERROR;
+      return -EIO;
     }
 
   /* Load Power Table */
 
   if (cc1101_access(dev, CC1101_PATABLE, (FAR uint8_t *)settings->PA, -8) < 0)
     {
-      return ERROR;
+      return -EIO;
     }
 
   /* If channel is out of valid range, mark that. Limit power.

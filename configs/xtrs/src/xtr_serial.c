@@ -266,8 +266,7 @@ static void up_detach(FAR struct uart_dev_s *dev)
 
 static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  *get_errno_ptr() = ENOTTY;
-  return ERROR;
+  return -ENOTTY;
 }
 
 /****************************************************************************
