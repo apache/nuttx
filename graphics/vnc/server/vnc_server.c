@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/vnc/vnc_server.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016=-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,7 +176,6 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   ret = psock_socket(AF_INET, SOCK_STREAM, 0, &session->listen);
   if (ret < 0)
     {
-      ret = -get_errno();
       return ret;
     }
 
@@ -186,7 +185,6 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
                    sizeof(struct sockaddr_in));
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout_with_listener;
     }
 
@@ -195,7 +193,6 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   ret = psock_listen(&session->listen, 5);
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout_with_listener;
     }
 
@@ -206,7 +203,6 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout_with_listener;
     }
 

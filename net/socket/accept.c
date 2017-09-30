@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/accept.c
  *
- *   Copyright (C) 2007-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,8 +92,8 @@
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
- *  Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with the
- *  errno variable set to indicate the nature of the error.
+ *  Returns 0 (OK) on success.  On failure, it returns a negated errno value
+ *  to indicate the nature of the error.
  *
  * EAGAIN or EWOULDBLOCK
  *   The socket is marked non-blocking and no connections are present to
@@ -125,22 +125,16 @@
 int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                  FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
-  int errcode;
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && newsock != NULL);
-
-  /* Treat as a cancellation point */
-
-  (void)enter_cancellation_point();
 
   /* May sure that the socket has been opened with socket() */
 
   if (psock == NULL || psock->s_conn == NULL)
     {
       nerr("ERROR: Socket invalid or not opened\n");
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Is the socket listening for a connection? */
@@ -148,8 +142,7 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   if (!_SS_ISLISTENING(psock->s_flags))
     {
       nerr("ERROR: Socket is not listening for a connection.\n");
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Let the address family's accept() method handle the operation */
@@ -161,7 +154,6 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   if (ret < 0)
     {
       nerr("ERROR: si_accept failed: %d\n", ret);
-      errcode = -ret;
       goto errout_with_lock;
     }
 
@@ -169,18 +161,12 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   newsock->s_flags |= _SF_CONNECTED;
   newsock->s_flags &= ~_SF_CLOSED;
-  net_unlock();
 
-  leave_cancellation_point();
-  return OK;
+  ret = OK;
 
 errout_with_lock:
   net_unlock();
-
-errout:
-  set_errno(errcode);
-  leave_cancellation_point();
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
@@ -307,11 +293,8 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   ret = psock_accept(psock, addr, addrlen, newsock);
   if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      sockfd_release(newfd);
-      leave_cancellation_point();
-      return ERROR;
+      errcode = -ret;
+      goto errout_with_socket;
     }
 
   leave_cancellation_point();
@@ -321,8 +304,9 @@ errout_with_socket:
   sockfd_release(newfd);
 
 errout:
-  set_errno(errcode);
   leave_cancellation_point();
+
+  set_errno(errcode);
   return ERROR;
 }
 

@@ -422,7 +422,8 @@ FAR struct socket *sockfd_socket(int sockfd);
  *   psock    A pointer to a user allocated socket structure to be initialized.
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error:
  *
  *   EACCES
  *     Permission to create a socket of the specified type and/or protocol
@@ -499,7 +500,8 @@ int psock_close(FAR struct socket *psock);
  *   addrlen  Length of 'addr'
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  *   EACCES
  *     The address is protected, and the user is not the superuser.
@@ -537,8 +539,8 @@ int psock_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *            may be ignored so that retries succeed.
  *
  * Returned Value:
- *   On success, zero is returned. On error, -1 is returned, and errno is set
- *   appropriately.
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  *   EADDRINUSE
  *     Another socket is already listening on the same port.
@@ -584,8 +586,8 @@ int psock_listen(FAR struct socket *psock, int backlog);
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
- *  Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with the
- *  errno variable set to indicate the nature of the error.
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  * EAGAIN or EWOULDBLOCK
  *   The socket is marked non-blocking and no connections are present to
@@ -645,7 +647,8 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   addrlen   Length of actual 'addr'
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  *     EACCES, EPERM
  *       The user tried to connect to a broadcast address without having the
@@ -847,8 +850,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, -1 is returned, and errno
- *   is set appropriately:
+ *   recv() will return 0.  Otherwise, on any failure, a negated errno value
+ *   is returned.  One of:
  *
  *   EAGAIN
  *     The socket is marked non-blocking and the receive operation would block,
@@ -873,8 +876,6 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  *     not been connected.
  *   ENOTSOCK
  *     The argument sockfd does not refer to a socket.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -912,6 +913,8 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   value_len The length of the argument value
  *
  * Returned Value:
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error:
  *
  *  EINVAL
  *    The specified option is invalid at the specified socket 'level' or the
@@ -923,8 +926,6 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *  ENOBUFS
  *    Insufficient resources are available in the system to complete the
  *    call.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -952,7 +953,8 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *   value_len The length of the argument value
  *
  * Returned Value:
- *  0 on success; -1 on failure
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error:
  *
  *  EDOM
  *    The send and receive timeout values are too big to fit into the

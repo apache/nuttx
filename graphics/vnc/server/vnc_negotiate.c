@@ -127,14 +127,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   tv.tv_sec  = 5;
   tv.tv_usec = 0;
+
   ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
                          &tv, sizeof(struct timeval));
   if (ret < 0)
     {
-      errcode = get_errno();
-      gerr("ERROR: Failed to set receive timeout: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      gerr("ERROR: Failed to set receive timeout: %d\n", ret);
+      return ret;
     }
 #endif
 

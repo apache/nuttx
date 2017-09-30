@@ -67,7 +67,8 @@
  *   psock    A pointer to a user allocated socket structure to be initialized.
  *
  * Returned Value:
- *   0 on success; -1 on error with errno set appropriately
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error:
  *
  *   EACCES
  *     Permission to create a socket of the specified type and/or protocol
@@ -87,14 +88,11 @@
  *     The protocol type or the specified protocol is not supported within
  *     this domain.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 {
   FAR const struct sock_intf_s *sockif = NULL;
-  int errcode;
   int ret;
 
   /* Initialize the socket structure */
@@ -126,8 +124,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
           if (ret < 0)
             {
-              errcode = -ret;
-              goto errout;
+              return ret;
             }
 
           return ret;
@@ -141,8 +138,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   if (sockif == NULL)
     {
       nerr("ERROR: socket address family unsupported: %d\n", domain);
-      errcode = EAFNOSUPPORT;
-      goto errout;
+      return -EAFNOSUPPORT;
     }
 
   /* The remaining of the socket initialization depends on the address
@@ -156,15 +152,10 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   if (ret < 0)
     {
       nerr("ERROR: socket si_setup() failed: %d\n", ret);
-      errcode = -ret;
-      goto errout;
+      return ret;
     }
 
   return OK;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
 }
 
 /****************************************************************************
@@ -207,6 +198,7 @@ errout:
 int socket(int domain, int type, int protocol)
 {
   FAR struct socket *psock;
+  int errcode;
   int sockfd;
   int ret;
 
@@ -216,8 +208,8 @@ int socket(int domain, int type, int protocol)
   if (sockfd < 0)
     {
       nerr("ERROR: Failed to allodate a socket descriptor\n");
-      set_errno(ENFILE);
-      return ERROR;
+      errcode = ENFILE;
+      goto errout;
     }
 
   /* Get the underlying socket structure */
@@ -225,8 +217,8 @@ int socket(int domain, int type, int protocol)
   psock = sockfd_socket(sockfd);
   if (!psock)
     {
-      set_errno(ENOSYS); /* should not happen */
-      goto errout;
+      errcode = ENOSYS; /* should not happen */
+      goto errout_with_sockfd;
     }
 
   /* Initialize the socket structure */
@@ -234,16 +226,18 @@ int socket(int domain, int type, int protocol)
   ret = psock_socket(domain, type, protocol, psock);
   if (ret < 0)
     {
-      /* errno already set by psock_socket() */
-
       nerr("ERROR: psock_socket() failed: %d\n", ret);
-      goto errout;
+      errcode = -ret;
+      goto errout_with_sockfd;
     }
 
   return sockfd;
 
-errout:
+errout_with_sockfd:
   sockfd_release(sockfd);
+
+errout:
+  set_errno(errcode);
   return ERROR;
 }
 

@@ -74,10 +74,10 @@
  *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, -1 is returned, and errno
- *   is set appropriately:
+ *   recv() will return 0.  Otherwise, on any failure, a negated errno value
+ *   is returned.  One of:
  *
  *   EAGAIN
  *     The socket is marked non-blocking and the receive operation would block,
@@ -103,8 +103,6 @@
  *   ENOTSOCK
  *     The argument sockfd does not refer to a socket.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
@@ -112,34 +110,26 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        FAR socklen_t *fromlen)
 {
   ssize_t ret;
-  int errcode;
-
-  /* Treat as a cancellation point */
-
-  (void)enter_cancellation_point();
 
   /* Verify that non-NULL pointers were passed */
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buf)
     {
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
   if (from != NULL && fromlen != NULL && *fromlen <= 0)
     {
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_crefs <= 0)
     {
-      errcode = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Set the socket state to receiving */
@@ -158,20 +148,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   /* Set the socket state to idle */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout;
-    }
-
-  leave_cancellation_point();
   return ret;
-
-errout:
-  set_errno(errcode);
-  leave_cancellation_point();
-  return ERROR;
 }
 
 /****************************************************************************
@@ -222,8 +199,6 @@ errout:
  *   ENOTSOCK
  *     The argument sockfd does not refer to a socket.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
@@ -243,6 +218,12 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
   /* Then let psock_recvfrom() do all of the work */
 
   ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   leave_cancellation_point();
   return ret;
 }

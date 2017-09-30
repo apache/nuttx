@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/getsockopt.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,8 @@
  *   value_len The length of the argument value
  *
  * Returned Value:
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  *  EINVAL
  *    The specified option is invalid at the specified socket 'level' or the
@@ -92,21 +94,16 @@
  *    Insufficient resources are available in the system to complete the
  *    call.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int psock_getsockopt(FAR struct socket *psock, int level, int option,
                      FAR void *value, FAR socklen_t *value_len)
 {
-  int errcode;
-
   /* Verify that the socket option if valid (but might not be supported ) */
 
   if (!_SO_GETVALID(option) || !value || !value_len)
     {
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
 #ifdef CONFIG_NET_USRSOCK
@@ -130,14 +127,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           default:          /* Other options are passed to usrsock daemon. */
             {
-              ret = usrsock_getsockopt(conn, level, option, value, value_len);
-              if (ret < 0)
-                {
-                  errcode = -ret;
-                  goto errout;
-                }
-
-              return OK;
+              return usrsock_getsockopt(conn, level, option, value, value_len);
             }
         }
     }
@@ -168,8 +158,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           if (*value_len < sizeof(int))
             {
-              errcode = EINVAL;
-              goto errout;
+              return -EINVAL;
            }
 
           /* Sample the current options.  This is atomic operation and so
@@ -192,8 +181,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           if (*value_len < sizeof(int))
             {
-              errcode = EINVAL;
-              goto errout;
+              return -EINVAL;
             }
 
 #ifdef CONFIG_NET_USRSOCK
@@ -230,8 +218,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           if (*value_len < sizeof(struct timeval))
             {
-              errcode = EINVAL;
-              goto errout;
+              return -EINVAL;
             }
 
           /* Get the timeout value.  This is a atomic operation and should
@@ -265,15 +252,10 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
 
       default:
-        errcode = ENOPROTOOPT;
-        goto errout;
+        return -ENOPROTOOPT;
     }
 
   return OK;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
 }
 
 /****************************************************************************
@@ -301,6 +283,8 @@ errout:
  *   value_len The length of the argument value
  *
  * Returned Value:
+ *  Returns zero (OK) on success.  On failure, -1 (ERROR) is returned and th
+ *  errno variable is set appropriately:
  *
  *  EBADF
  *    The 'sockfd' argument is not a valid socket descriptor.
@@ -315,13 +299,12 @@ errout:
  *    Insufficient resources are available in the system to complete the
  *    call.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_len)
 {
   FAR struct socket *psock;
+  int ret;
 
   /* Get the underlying socket structure */
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -335,7 +318,14 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
 
   /* Then let psock_getsockopt() do all of the work */
 
-  return psock_getsockopt(psock, level, option, value, value_len);
+  ret = psock_getsockopt(psock, level, option, value, value_len);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS */

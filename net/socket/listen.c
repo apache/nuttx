@@ -71,8 +71,8 @@
  *            may be ignored so that retries succeed.
  *
  * Returned Value:
- *   On success, zero is returned. On error, -1 is returned, and errno is set
- *   appropriately.
+ *  Returns zero (OK) on success.  On failure, it returns a negated errno
+ *  value to indicate the nature of the error.
  *
  *   EADDRINUSE
  *     Another socket is already listening on the same port.
@@ -83,7 +83,6 @@
 
 int psock_listen(FAR struct socket *psock, int backlog)
 {
-  int errcode;
   int ret;
 
   DEBUGASSERT(psock != NULL);
@@ -93,8 +92,7 @@ int psock_listen(FAR struct socket *psock, int backlog)
   if (psock == NULL || psock->s_conn == NULL)
     {
       nerr("ERROR: Invalid or unconnected socket\n");
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Let the address family's listen() method handle the operation */
@@ -104,16 +102,11 @@ int psock_listen(FAR struct socket *psock, int backlog)
   if (ret < 0)
     {
       nerr("ERROR: si_listen failed: %d\n", ret);
-      errcode = -ret;
-      goto errout;
+      return ret;
     }
 
   psock->s_flags |= _SF_LISTENING;
   return OK;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
 }
 
 /****************************************************************************
@@ -153,6 +146,7 @@ int listen(int sockfd, int backlog)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   int errcode;
+  int ret;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -182,7 +176,14 @@ int listen(int sockfd, int backlog)
    * set the errno variable.
    */
 
-  return psock_listen(psock, backlog);
+  ret = psock_listen(psock, backlog);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
