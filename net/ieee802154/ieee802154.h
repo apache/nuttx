@@ -395,8 +395,8 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately.  See sendto()
- *   for the complete list of return values.
+ *   a negated errno value is retruend.  See sendto() for the complete list
+ *   of return values.
  *
  ****************************************************************************/
 
