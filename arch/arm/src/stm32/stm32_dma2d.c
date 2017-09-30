@@ -1945,7 +1945,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
+FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid)
 {
   if (lid < DMA2D_LAYER_NSIZE)
     {
@@ -1957,8 +1957,7 @@ FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
       return &priv->dma2d;
     }
 
-  lcderr("ERROR: EINVAL, Unknown layer identifier\n");
-  errno = EINVAL;
+  lcderr("ERROR: lid invalid: %d\n", lid);
   return NULL;
 }
 
@@ -1975,10 +1974,7 @@ FAR struct dma2d_layer_s * up_dma2dgetlayer(int lid)
  *
  * Return:
  *   On success - A valid dma2d layer reference
- *   On error   - NULL and errno is set to
- *                -EINVAL if one of the parameter is invalid
- *                -ENOMEM if no memory available or exceeds
- *                 CONFIG_STM32_DMA2D_NLAYERS
+ *   On error   - NULL
  *
  ****************************************************************************/
 
@@ -1986,11 +1982,11 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
                                               fb_coord_t height,
                                               uint8_t fmt)
 {
+  FAR struct stm32_dma2d_s *layer = NULL;
   int        ret;
   int        lid;
   uint8_t    fmtmap;
   uint8_t    bpp = 0;
-  FAR struct stm32_dma2d_s *layer = NULL;
 
   lcdinfo("width=%d, height=%d, fmt=%02x \n", width, height, fmt);
 
@@ -2000,7 +1996,6 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
 
   if (ret != OK)
     {
-      errno = -ret;
       return NULL;
     }
 
@@ -2069,24 +2064,21 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
             }
           else
             {
-              /* free the layer struture */
+              /* Free the layer struture */
 
+              lcderr("ERROR: ENOMEM, Unable to allocate layer buffer\n");
               kmm_free(layer);
               layer = NULL;
-              lcderr("ERROR: ENOMEM, Unable to allocate layer buffer\n");
-              errno = ENOMEM;
             }
         }
       else
         {
           lcderr("ERROR: ENOMEM, unable to allocate layer structure\n");
-          errno = ENOMEM;
         }
     }
   else
     {
       lcderr("ERROR: EINVAL, no free layer available\n");
-      errno = EINVAL;
     }
 
   sem_post(&g_lock);
@@ -2262,12 +2254,11 @@ void up_dma2duninitialize(void)
  *
  * Return:
  *   On success - A valid dma2d layer reference
- *   On error   - NULL and errno is set to
- *                -EINVAL if one of the parameter is invalid
+ *   On error   - NULL
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
+FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
 {
   int        ret;
   uint8_t    fmt = 0;
@@ -2282,7 +2273,6 @@ FAR struct dma2d_layer_s * stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
     {
       lcderr("ERROR: Returning -EINVAL, unsupported pixel format: %d\n",
              layer->vinfo.fmt);
-      errno = -EINVAL;
       return NULL;
     }
 

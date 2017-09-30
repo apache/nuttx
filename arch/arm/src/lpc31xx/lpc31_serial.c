@@ -621,8 +621,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      errno = ENOTTY;
-      ret = ERROR;
+      ret = -ENOTTY;
       break;
     }
 

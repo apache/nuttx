@@ -141,8 +141,7 @@ static ssize_t devconsole_write(struct file *filep, const char *buffer, size_t l
 
   if (ret < 0)
     {
-      set_errno(EIO);
-      return ERROR;
+      return -ret;
     }
 
   return len;

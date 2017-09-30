@@ -3432,8 +3432,7 @@ FAR struct ltdc_layer_s *stm32_ltdcgetlayer(int lid)
       return (FAR struct ltdc_layer_s *) &LAYER(lid);
     }
 
-  lcderr("ERROR: Returning EINVAL\n");
-  errno = EINVAL;
+  lcderr("ERROR: lid invalid: %d\n", lid);
   return NULL;
 }
 #endif /* CONFIG_STM32_LTDC_INTERFACE */

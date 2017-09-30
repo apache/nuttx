@@ -2705,14 +2705,12 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
           ret = adc_ioc_wait_rcnr_zeroed(priv);
           if (ret < 0)
             {
-              set_errno(-ret);
               return ret;
             }
 
           ret = adc_set_ch(dev, ch);
           if (ret < 0)
             {
-              set_errno(-ret);
               return ret;
             }
 

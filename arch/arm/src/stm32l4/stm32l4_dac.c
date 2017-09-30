@@ -1181,7 +1181,6 @@ FAR struct dac_dev_s *stm32l4_dacinitialize(int intf)
 #endif
       default:
         aerr("ERROR: No such DAC interface: %d\n", intf);
-        errno = ENODEV;
         return NULL;
     }
 
@@ -1196,7 +1195,6 @@ FAR struct dac_dev_s *stm32l4_dacinitialize(int intf)
   if (ret < 0)
     {
       aerr("ERROR: Failed to initialize DAC channel %d: %d\n", intf, ret);
-      errno = -ret;
       return NULL;
     }
 
