@@ -106,9 +106,12 @@
 #  define weak_const_function
 # endif
 
-/* The noreturn attribute informs GCC that the function will not return. */
+/* The noreturn attribute informs GCC that the function will not return.
+ * C11 adds _Noreturn keyword.
+ */
 
 #  define noreturn_function __attribute__ ((noreturn))
+#  define noreturn _Noreturn
 
 /* The farcall_function attribute informs GCC that is should use long calls
  * (even though -mlong-calls does not appear in the compilation options)
@@ -279,7 +282,7 @@
 
 /* SDCC-specific definitions ************************************************/
 
-#elif defined(SDCC)
+#elif defined(__SDCC__) || defined(SDCC)
 
 /* No I-space access qualifiers */
 
@@ -317,13 +320,13 @@
 #  define weak_const_function
 #  define restrict /* REVISIT */
 
-/* Current SDCC supports noreturn (via stdnoreturn.h or _Noreturn) */
-/* REVISIT: #define noreturn_function _Noreturn */
+/* Current SDCC supports noreturn via C11 _Noreturn keyword */
+
+#  define noreturn _Noreturn
+
+/* SDCC does not support the noreturn or packed attributes */
 
 #  define noreturn_function
-
-/* SDCC does not support the packed attributes */
-
 #  define begin_packed_struct
 #  define end_packed_struct
 
@@ -460,6 +463,7 @@
 /* The Zilog compiler does not support the noreturn, packed, naked attributes */
 
 #  define noreturn_function
+#  define noreturn
 #  define begin_packed_struct
 #  define end_packed_struct
 #  define naked_function
@@ -556,6 +560,7 @@
 #  define weak_function        __weak
 #  define weak_const_function
 #  define noreturn_function
+#  define noreturn
 #  define farcall_function
 #  define begin_packed_struct  __packed
 #  define end_packed_struct
@@ -600,6 +605,7 @@
 #  define weak_const_function
 #  define restrict
 #  define noreturn_function
+#  define noreturn
 #  define farcall_function
 #  define begin_packed_struct
 #  define end_packed_struct
