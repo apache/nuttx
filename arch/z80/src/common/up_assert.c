@@ -49,7 +49,7 @@
 #include <nuttx/board.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "up_arch.h"
 #include "sched/sched.h"
 #include "up_internal.h"

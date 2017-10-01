@@ -63,8 +63,8 @@
 #include <stdbool.h>
 
 #include <arch/irq.h>
-#include "chip/chip.h"
-#include "chip/switch.h"
+#include "chip.h"
+#include "switch.h"
 
 /****************************************************************************
  * Pre-processor Definitions

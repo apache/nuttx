@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z80/z80_schedulesigaction.c
  *
- *   Copyright (C) 2007-2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,20 +45,13 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/sched.h>
 
 #include "chip/switch.h"
 #include "sched/sched.h"
 #include "up_internal.h"
 
 #ifndef CONFIG_DISABLE_SIGNALS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -68,7 +61,8 @@
  * Name: z80_sigsetup
  ****************************************************************************/
 
-static void z80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
+static void z80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
+                         FAR chipreg_t *regs)
 {
   /* Save the return address and interrupt state. These will be restored by
    * the signal trampoline after the signals have been delivered.
@@ -80,8 +74,8 @@ static void z80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR ch
 
   /* Then set up to vector to the trampoline with interrupts disabled */
 
-  regs[XCPT_PC]  = (chipreg_t)up_sigdeliver;
-  regs[XCPT_I]   = 0;
+  regs[XCPT_PC]          = (chipreg_t)up_sigdeliver;
+  regs[XCPT_I]           = 0;
 }
 
 /****************************************************************************

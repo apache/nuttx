@@ -1,8 +1,7 @@
 /************************************************************************************
  * arch/z80/src/z80/switch.h
- * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,10 +152,6 @@ int z80_saveusercontext(FAR chipreg_t *regs);
 /* Defined in z80_restoreusercontext.asm */
 
 void z80_restoreusercontext(FAR chipreg_t *regs);
-
-/* Defined in z80_sigsetup.c */
-
-void z80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs);
 
 /* Defined in z80_registerdump.c */
 

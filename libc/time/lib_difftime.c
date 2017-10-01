@@ -66,7 +66,7 @@ double difftime(time_t time1, time_t time0)
 #else
 float difftime(time_t time1, time_t time0)
 {
-  if (time1 >= time2)
+  if (time1 >= time0)
     {
       /* Result will be positive (even though bit 31 may be set on very large
        * differences!)
