@@ -73,6 +73,10 @@
 #define LONG_MAX    2147483647L
 #define ULONG_MAX   4294967295UL
 
+#define LLONG_MIN   (-LLONG_MAX - 1)
+#define LLONG_MAX   9223372036854775807LL
+#define ULLONG_MAX  18446744073709551615ULL
+
 /* A pointer is 2 bytes */
 
 #define PTR_MIN     (-PTR_MAX - 1)

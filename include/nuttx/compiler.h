@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007-2009, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013, 2015-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +56,9 @@
 #  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
 #  define CONFIG_CPP_HAVE_WARNING 1 /* Supports #warning */
 
-/* Intriniscs */
+/* Intriniscs.  GCC supports __func__ but provides __FUNCTION__ for backward
+ * compatibility with older versions of GCC.
+ */
 
 #  define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
 #  define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
@@ -292,6 +295,7 @@
 
 #  define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
 #  define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
+#  define __FUNCTION__ __func__      /* SDCC supports on __func__ */
 
 /* Pragmas
  *
@@ -313,9 +317,13 @@
 #  define weak_const_function
 #  define restrict /* REVISIT */
 
-/* SDCC does not support the noreturn or packed attributes */
+/* Current SDCC supports noreturn (via stdnoreturn.h or _Noreturn) */
+/* REVISIT: #define noreturn_function _Noreturn */
 
 #  define noreturn_function
+
+/* SDCC does not support the packed attributes */
+
 #  define begin_packed_struct
 #  define end_packed_struct
 
@@ -335,6 +343,9 @@
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
  * arguments on the stack to support reentrancy.
+ *
+ * SDCC functions are always reentrant (except for the mcs51,
+ * ds390, hc08 and s08 backends)
  */
 
 #  define reentrant_function __reentrant
@@ -374,22 +385,24 @@
 
 #  define CONFIG_LONG_IS_NOT_INT 1
 
-/* The generic pointer and int are not the same size
- * (for some SDCC architectures)
+/* The generic pointer and int are not the same size (for some SDCC
+ * architectures).  REVISIT: SDCC now has more backends where pointers are
+ * the same size as int than just z80 and z180.
  */
 
 #if !defined(__z80) && !defined(__gbz80)
 #  define CONFIG_PTR_IS_NOT_INT 1
 #endif
 
-/* SDCC does not support inline functions */
+/* New versions of SDCC supports inline function */
 
-#  undef  CONFIG_HAVE_INLINE
-#  define inline
+#  define CONFIG_HAVE_INLINE 1
 
-/* SDCC does not support type long long or type double */
+/* SDCC does types long long and float, but not types double and long
+ * double.
+ */
 
-#  undef  CONFIG_HAVE_LONG_LONG
+#  define CONFIG_HAVE_LONG_LONG 1
 #  define CONFIG_HAVE_FLOAT 1
 #  undef  CONFIG_HAVE_DOUBLE
 #  undef  CONFIG_HAVE_LONG_DOUBLE
