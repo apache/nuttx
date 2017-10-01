@@ -1102,7 +1102,16 @@ static void refresh(void)
       exit(EXIT_FAILURE);
     }
 
+  printf("  Refreshing...");
+  fflush(stdout);
+
+#ifdef WIN32
   ret = system("make olddefconfig");
+#else
+  ret = system("make olddefconfig 1>/dev/null");
+#endif
+  putchar('\n');
+
 #ifdef WEXITSTATUS
   if (ret < 0 || WEXITSTATUS(ret) != 0)
 #else
