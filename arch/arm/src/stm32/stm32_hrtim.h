@@ -488,7 +488,6 @@ enum stm32_hrtim_eev_mode_e
   HRTIM_EEV_MODE_FAST   = 1     /* low latency mode */
 };
 
-
 /* External Event filter.
  * NOTE: supported only for EEV6-10.
  */
