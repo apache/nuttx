@@ -169,10 +169,27 @@ fi
 # (2) The CONFIG_APPS_DIR setting to see if there is a configured location for the
 #     application directory.  This can be overridden from the command line.
 
-winnative=`grep CONFIG_WINDOWS_NATIVE= "${src_config}" | cut -d'=' -f2`
+# If we are going to some host other then windows native or to a windows
+# native host, then don't even check what is in the defconfig file.
+
+oldnative=`grep CONFIG_WINDOWS_NATIVE= "${src_config}" | cut -d'=' -f2`
+if [ "X$host" != "Xwindows" -o "X$wenv" != "Xnative" ]; then
+  unset winnative
+else
+  if [ "X$host" == "Xwindows" -a "X$wenv" == "Xnative" ]; then
+    winnative=y
+  else
+    winnative=$oldnative
+  fi
+fi
+
+# If not application direction was specified on the command line and we are
+# switching between a windows native host and some other host then ignore the
+# path to the apps/ direction in the defconfig file.  It will most certainly
+# not be a usable forma.
 
 defappdir=y
-if [ -z "${appdir}" ]; then
+if [ -z "${appdir}" -a "X$oldnative" = "$winnative" ]; then
   quoted=`grep "^CONFIG_APPS_DIR=" "${src_config}" | cut -d'=' -f2`
   if [ ! -z "${quoted}" ]; then
     appdir=`echo ${quoted} | sed -e "s/\"//g"`
