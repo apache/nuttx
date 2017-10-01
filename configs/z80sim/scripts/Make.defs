@@ -81,7 +81,7 @@ AFLAGS = -x -a -l -o -s -g
 SDCCLIB = z80.lib
 
 ASMEXT = .asm
-OBJEXT = .o
+OBJEXT = .rel
 LIBEXT = .lib
 EXEEXT = .hex
 
@@ -130,7 +130,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
   # Windows-native host tools
 
-  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+  MKDEP = $(TOPDIR)\tools\mkdeps$(HOSTEXEEXT) --winnative
 
   # Use NTFS links or directory copies
 
@@ -150,9 +150,13 @@ else
   HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
   HOSTLDFLAGS =
 
-  # This is the tool to use for dependencies (i.e., none)
+  # This is the tool to use for dependencies
 
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
+  ifeq ($(WINTOOL),y)
+    MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
+  else
+    MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+  endif
 
   # SDCC for Linux, OSX, or Cygwin understands symbolic links.  Windows SDCC
   # running under Cygwin does not
