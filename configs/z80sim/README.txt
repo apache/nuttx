@@ -25,10 +25,23 @@ Configuring NuttX
     examples/ostest.  This can be configured as follows:
 
     1) From a POSIX window:
-       cd tools
-       ./configure.sh z80sim/ostest
+
+         tools/configure.sh [OPTIONS] z80sim/ostest
+
+       where you need to select the right [OPTIONS] for your build
+       environment.  Do:
+
+         tools/configure.sh -h
+
+       to see the options.
+
     2) Make sure that your PATH environment variable includes the path
        to the SDCC toolchain.
+
+
+    3) Then build the binaries:
+
+          make
 
     NOTES:
 
@@ -54,10 +67,23 @@ Configuring NuttX
     This configuration can be selected by:
 
     1) From a POSIX window:
-       cd tools
-       ./configure.sh z80sim/nsh
+
+         tools/configure.sh [OPTIONS] z80sim/nsh
+
+       where you need to select the right [OPTIONS] for your build
+       environment.  Do:
+
+         tools/configure.sh -h
+
+       to see the options.
+
     2) Set the PATH environment variable to include the path to the SDCC
        toolchain.
+
+
+    3) Then build the binaries:
+
+          make
 
     NOTES:
 
@@ -85,10 +111,22 @@ Configuring NuttX
     This configuration can be selected by:
 
     1) From a POSIX window:
-       cd tools
-       ./configure.sh z80sim/pashello
+
+         tools/configure.sh [OPTIONS] z80sim/pashello
+
+       where you need to select the right [OPTIONS] for your build
+       environment.  Do:
+
+         tools/configure.sh -h
+
+       to see the options.
+
     2) Set the PATH environment variable to include the path to the SDCC
        toolchain binaries.
+
+    3) Then build the binaries:
+
+          make
 
     NOTES:
 
