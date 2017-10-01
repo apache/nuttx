@@ -949,13 +949,13 @@
 
 /* Timer X Chopper Register */
 
-#define HRTIM_TIMCHP_CARFRQ_SHIFT     0 /* Bits 0-3 */
+#define HRTIM_TIMCHP_CARFRQ_SHIFT     0 /* Bits 0-3: Chopper carrier frequency */
 #define HRTIM_TIMCHP_CARFRQ_MASK      (15 << HRTIM_TIMCHP_CARFRQ_SHIFT)
 
-#define HRTIM_TIMCHP_CARDTY_SHIFT     4 /* Bits 4-6 */
+#define HRTIM_TIMCHP_CARDTY_SHIFT     4 /* Bits 4-6: Chopper duty cycle */
 #define HRTIM_TIMCHP_CARDTY_MASK      (7 << HRTIM_TIMCHP_CARDTY_SHIFT)
 
-#define HRTIM_TIMCHP_STRTPW_SHIFT     7 /* Bits 7-10 */
+#define HRTIM_TIMCHP_STRTPW_SHIFT     7 /* Bits 7-10: Chopper start pulsewidth */
 #define HRTIM_TIMCHP_STRTPW_MASK      (15 << HRTIM_TIMCHP_STRTPW_SHIFT)
 
 /* Timer X Capture 1 Control Register */

@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/board/board.h>
+
 #include "chip.h"
 
 #ifdef CONFIG_STM32_HRTIM1
@@ -127,8 +129,8 @@
 #endif
 
 #if defined(CONFIG_STM32_HRTIM_MASTER_IRQ) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ) || \
-    defined(CONFIG_STM32_HRTIM_TIMB_IRQ) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
-    defined(CONFIG_STM32_HRTIM_TIMD_IRQ) || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_TIMB_IRQ)   || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
+    defined(CONFIG_STM32_HRTIM_TIMD_IRQ)   || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
     defined(CONFIG_STM32_HRTIM_CMN_IRQ)
 #   ifndef CONFIG_STM32_HRTIM_INTERRUPTS
 #     error "CONFIG_STM32_HRTIM_INTERRUPTS must be set"
@@ -170,11 +172,34 @@
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME_PWM
 #  if !defined(CONFIG_STM32_HRTIM_TIME_PWM_CH1) &&  \
-     !defined(CONFIG_STM32_HRTIM_TIME_PWM_CH2)
+      !defined(CONFIG_STM32_HRTIM_TIME_PWM_CH2)
 #    error "HRTIM TIME PWM set but no channel selected"
 #  endif
 #endif
 
+/* HRTIM clock source configuration */
+
+#ifdef CONFIG_STM32_HRTIM_CLK_FROM_PLL
+#  if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
+#    if (STM32_RCC_CFGR_PPRE2 != RCC_CFGR_PPRE2_HCLK) &&  \
+        (STM32_RCC_CFGR_PPRE2 != RCC_CFGR_PPRE2_HCLKd2)
+#      error "APB2 prescaler factor can not be greater than 2"
+#    else
+#      define HRTIM_HAVE_CLK_FROM_PLL 1
+#      define HRTIM_CLOCK 2*STM32_PLL_FREQUENCY
+#    endif
+#  else
+#    error "Clock system must be set to PLL"
+#  endif
+#else
+#  error "Not supported yet: system freezes when no PLL selected."
+#  define HRTIM_HAVE_CLK_FROM_APB2 1
+#  if STM32_RCC_CFGR_PPRE2 ==  RCC_CFGR_PPRE2_HCLK
+#      define HRTIM_CLOCK STM32_PCLK2_FREQUENCY
+#  else
+#      define HRTIM_CLOCK 2*STM32_PCLK2_FREQUENCY
+#  endif
+#endif
 
 /************************************************************************************
  * Public Types
@@ -498,7 +523,15 @@ enum stm32_hrtim_cmp_index_e
   HRTIM_CMP4
 };
 
-/* HRTIM Slave Timer Outputs */
+/* HRTIM Slave Timer Outputs index */
+
+enum stm32_output_s
+{
+  HRTIM_OUT_CH1 = (1 << 0),
+  HRTIM_OUT_CH2 = (1 << 1)
+};
+
+/* HRTIM Slave Timers Outputs */
 
 enum stm32_outputs_e
 {
@@ -514,20 +547,42 @@ enum stm32_outputs_e
   HRTIM_OUT_TIME_CH2 = (1 << 9)
 };
 
-/* HRTIM Deadtime Locks */
+/* HRTIM Deadtime sign */
 
-enum stm32_hrtim_deadtime_lock_e
+enum stm32_hrtim_deadtime_sign_e
 {
-  HRTIM_DT_VALUE_LOCK = (1 << 0), /* Lock Deadtime value */
-  HRTIM_DT_SIGN_LOCK  = (1 << 1)  /* Lock Deadtime sign */
+  HRTIM_DT_SIGN_POSITIVE = 0,
+  HRTIM_DT_DIGN_NEGATIVE = 1
 };
 
 /* HRTIM Deadtime types  */
 
 enum stm32_hrtim_deadtime_edge_e
 {
-  HRTIM_DT_RISING = 0,
-  HRTIM_DT_FALLING = 1
+  HRTIM_DT_EDGE_RISING = 0,
+  HRTIM_DT_EDGE_FALLING = 1
+};
+
+/* HRTIM Deadtime lock */
+
+enum stm32_hrtim_deadtime_lock_e
+{
+  HRTIM_DT_RW   = 0,
+  HRTIM_DT_LOCK = 1
+};
+
+/* HRTIM Deadtime prescaler */
+
+enum stm32_hrtim_deadtime_prescaler_e
+{
+  HRTIM_DEADTIME_PRESCALER_1   = 0,
+  HRTIM_DEADTIME_PRESCALER_2   = 1,
+  HRTIM_DEADTIME_PRESCALER_4   = 2,
+  HRTIM_DEADTIME_PRESCALER_8   = 3,
+  HRTIM_DEADTIME_PRESCALER_16  = 4,
+  HRTIM_DEADTIME_PRESCALER_32  = 5,
+  HRTIM_DEADTIME_PRESCALER_64  = 6,
+  HRTIM_DEADTIME_PRESCALER_128 = 7
 };
 
 /* Chopper start pulsewidth */
@@ -837,30 +892,89 @@ enum stm32_hrtim_burst_triggers_e
   HRTIM_BURST_TRG_OCHPEV  = (1 << 31),
 };
 
+/* HRTIM Capture triggers */
+enum stm32_hrtim_capture_index_e
+{
+  HRTIM_CAPTURE1 = 0,
+  HRTIM_CAPTURE2 = 1
+};
+
+/* HRTIM Capture triggers */
+
+enum stm32_hrtim_capture_triggers_e
+{
+  HRTIM_CAPTURE_TRG_SW     = (1 << 0),
+  HRTIM_CAPTURE_TRG_UPD    = (1 << 1),
+  HRTIM_CAPTURE_TRG_EXEV1  = (1 << 2),
+  HRTIM_CAPTURE_TRG_EXEV2  = (1 << 3),
+  HRTIM_CAPTURE_TRG_EXEV3  = (1 << 4),
+  HRTIM_CAPTURE_TRG_EXEV4  = (1 << 5),
+  HRTIM_CAPTURE_TRG_EXEV5  = (1 << 6),
+  HRTIM_CAPTURE_TRG_EXEV6  = (1 << 7),
+  HRTIM_CAPTURE_TRG_EXEV7  = (1 << 8),
+  HRTIM_CAPTURE_TRG_EXEV8  = (1 << 9),
+  HRTIM_CAPTURE_TRG_EXEV9  = (1 << 10),
+  HRTIM_CAPTURE_TRG_EXEV10 = (1 << 11),
+  HRTIM_CAPTURE_TRG_TA1SET = (1 << 12),
+  HRTIM_CAPTURE_TRG_TA1RST = (1 << 13),
+  HRTIM_CAPTURE_TRG_TACMP1 = (1 << 14),
+  HRTIM_CAPTURE_TRG_TACMP2 = (1 << 15),
+  HRTIM_CAPTURE_TRG_TB1SET = (1 << 16),
+  HRTIM_CAPTURE_TRG_TB1RST = (1 << 17),
+  HRTIM_CAPTURE_TRG_TBCMP1 = (1 << 18),
+  HRTIM_CAPTURE_TRG_TBCMP2 = (1 << 19),
+  HRTIM_CAPTURE_TRG_TC1SET = (1 << 20),
+  HRTIM_CAPTURE_TRG_TC1RST = (1 << 21),
+  HRTIM_CAPTURE_TRG_TCCMP1 = (1 << 22),
+  HRTIM_CAPTURE_TRG_TCCMP2 = (1 << 23),
+  HRTIM_CAPTURE_TRG_TD1SET = (1 << 24),
+  HRTIM_CAPTURE_TRG_TD1RST = (1 << 25),
+  HRTIM_CAPTURE_TRG_TDCMP1 = (1 << 26),
+  HRTIM_CAPTURE_TRG_TDCMP2 = (1 << 27),
+  HRTIM_CAPTURE_TRG_TE1SET = (1 << 28),
+  HRTIM_CAPTURE_TRG_TE1RST = (1 << 29),
+  HRTIM_CAPTURE_TRG_TECMP1 = (1 << 30),
+  HRTIM_CAPTURE_TRG_TECMP2 = (1 << 31),
+};
+
 /* HRTIM vtable */
 
 struct hrtim_dev_s;
 struct stm32_hrtim_ops_s
 {
-  int (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
-                    uint8_t index, uint16_t cmp);
-  int (*per_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint16_t per);
+  int      (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                         uint8_t index, uint16_t cmp);
+  int      (*per_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint16_t per);
   uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                       uint8_t index);
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
-  void (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
+  void     (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
 #endif
 #ifdef CONFIG_STM32_HRTIM_PWM
-  int (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
-                        bool state);
+  int      (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
+                             bool state);
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
-  int (*burst_enable)(FAR struct hrtim_dev_s *dev, bool state);
-  int (*burst_cmp_set)(FAR struct hrtim_dev_s *dev, uint16_t cmp);
-  int (*burst_per_set)(FAR struct hrtim_dev_s *dev, uint16_t per);
+  int      (*burst_enable)(FAR struct hrtim_dev_s *dev, bool state);
+  int      (*burst_cmp_set)(FAR struct hrtim_dev_s *dev, uint16_t cmp);
+  int      (*burst_per_set)(FAR struct hrtim_dev_s *dev, uint16_t per);
+  int      (*burst_pre_set)(FAR struct hrtim_dev_s *dev, uint8_t pre);
   uint16_t (*burst_cmp_get)(FAR struct hrtim_dev_s *dev);
   uint16_t (*burst_per_get)(FAR struct hrtim_dev_s *dev);
+  int      (*burst_pre_get)(FAR struct hrtim_dev_s *dev);
+#endif
+#ifdef CONFIG_STM32_HRTIM_CHOPPER
+  int      (*chopper_enable)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                             uint8_t chan, bool state);
+#endif
+#ifdef CONFIG_STM32_HRTIM_DEADTIME
+  int      (*deadtime_update)(FAR struct hrtim_dev_s *dev, uint8_t dt, uint16_t value);
+  uint16_t (*deadtime_get)(FAR struct hrtim_dev_s *dev, uint8_t dt);
+#endif
+#ifdef CONFIG_STM32_HRTIM_CAPTURE
+  uint16_t (*capture_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                          uint8_t index);
 #endif
 };
 
