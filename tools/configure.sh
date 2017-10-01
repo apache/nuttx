@@ -183,10 +183,10 @@ else
   fi
 fi
 
-# If not application direction was specified on the command line and we are
+# If no application directory was provided on the command line and we are
 # switching between a windows native host and some other host then ignore the
-# path to the apps/ direction in the defconfig file.  It will most certainly
-# not be a usable forma.
+# path to the apps/ directory in the defconfig file.  It will most certainly
+# not be in a usable form.
 
 defappdir=y
 if [ -z "${appdir}" -a "X$oldnative" = "$winnative" ]; then

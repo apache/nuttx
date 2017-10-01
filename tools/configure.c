@@ -99,6 +99,7 @@ static char       *g_srcdefconfig  = NULL;  /* Source defconfig file */
 static char       *g_srcmakedefs   = NULL;  /* Source Make.defs file */
 
 static bool        g_winnative     = false; /* True: Windows native configuration */
+static bool        g_oldnative     = false; /* True: Was Windows native configuration */
 static bool        g_needapppath   = true;  /* Need to add app path to the .config file */
 
 static uint8_t     g_host          = HOST_NOCHANGE;
@@ -652,24 +653,35 @@ static void check_appdir(void)
 
   if (!g_appdir)
     {
-      /* No, was the path provided in the configuration? */
+      /* If no application directory was provided on the command line and we
+       * are switching between a windows native host and some other host then
+       * ignore any path to the apps/ directory in the defconfig file.  It
+       * will most certainly not be in a usable form.
+       */
 
-      struct variable_s *var = find_variable("CONFIG_APP_DIR", g_configvars);
-      if (var)
+      if (g_winnative == g_oldnative)
         {
-          debug("check_appdir: Config file appdir=%s\n",
-                var->val ? var->val : "<null>");
+          /* No, was the path provided in the configuration? */
 
-          /* Yes.. does this directory exist? */
+          struct variable_s *var =
+            find_variable("CONFIG_APPS_DIR", g_configvars);
 
-          if (var->val && verify_appdir(var->val))
+          if (var != NULL)
             {
-              /* We are using the CONFIG_APP_DIR setting already
-               * in the defconfig file.
-               */
+              debug("check_appdir: Config file appdir=%s\n",
+                    var->val ? var->val : "<null>");
 
-              g_needapppath = false;
-              return;
+              /* Yes.. does this directory exist? */
+
+              if (var->val && verify_appdir(var->val))
+                {
+                  /* We are using the CONFIG_APPS_DIR setting already in the
+                   * defconfig file.
+                   */
+
+                  g_needapppath = false;
+                  return;
+                }
             }
         }
 
@@ -718,6 +730,23 @@ static void check_configuration(void)
   if (var && var->val && strcmp("y", var->val) == 0)
     {
       debug("check_configuration: Windows native configuration\n");
+      g_oldnative = true;
+    }
+
+  /* If we are going to some host other then windows native or to a windows
+   * native host, then don't ignore what is in the defconfig file.
+   */
+
+  if (g_host == HOST_NOCHANGE)
+    {
+      /* Use whatever we found in the configuration file */
+
+      g_winnative = g_oldnative;
+    }
+  else if (g_host == HOST_WINDOWS && g_windows == WINDOWS_NATIVE)
+    {
+      /* The new configuration is windows native */
+
       g_winnative = true;
     }
 
