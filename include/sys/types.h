@@ -64,11 +64,11 @@
 /* NULL is usually defined in stddef.h (which includes this file) */
 
 #ifndef NULL
-    /* SDCC is sensitive to NULL pointer type conversions, and C++ defines
-     * NULL as zero
-     */
+  /* SDCC is sensitive to NULL pointer type conversions, and C++ defines
+   * NULL as zero
+   */
 
-#  if defined(SDCC) || defined(__cplusplus)
+#  if defined(SDCC) || defined(__SDCC) || defined(__cplusplus)
 #    define NULL (0)
 #  else
 #    define NULL ((void*)0)

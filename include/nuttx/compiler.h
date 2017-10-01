@@ -282,7 +282,7 @@
 
 /* SDCC-specific definitions ************************************************/
 
-#elif defined(__SDCC__) || defined(SDCC)
+#elif defined(SDCC) || defined(__SDCC)
 
 /* No I-space access qualifiers */
 
