@@ -89,7 +89,7 @@ void task_start(void)
   /* Execute the start hook if one has been registered */
 
 #ifdef CONFIG_SCHED_STARTHOOK
-  if (tcb->starthook)
+  if (tcb->starthook != NULL)
     {
       tcb->starthook(tcb->starthookarg);
     }

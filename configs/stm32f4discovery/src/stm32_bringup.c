@@ -68,7 +68,7 @@
 
 #include "stm32f4discovery.h"
 
-/* Conditional logic in stm32f4discover.h will determine if certain features
+/* Conditional logic in stm32f4discovery.h will determine if certain features
  * are supported.  Tests for these features need to be made after including
  * stm32f4discovery.h.
  */

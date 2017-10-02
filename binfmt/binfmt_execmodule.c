@@ -276,7 +276,10 @@ int exec_module(FAR const struct binary_s *binp)
    * until the new task has been started.
    */
 
-  task_starthook(tcb, exec_ctors, (FAR void *)binp);
+  if (binp->nctors > 0)
+    {
+      task_starthook(tcb, exec_ctors, (FAR void *)binp);
+    }
 #endif
 
   /* Get the assigned pid before we start the task */
