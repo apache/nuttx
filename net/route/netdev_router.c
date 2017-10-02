@@ -243,46 +243,42 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
   /* First see if we can find a router entry in the cache */
 
   ret = net_foreachcache_ipv4(net_ipv4_devmatch, &match);
+  if (ret <= 0)
+#endif
+    {
+      /* Not found in the cache.  Try to find a router entry with the
+       * routing table that can forward to this address
+       */
+
+      ret = net_foreachroute_ipv4(net_ipv4_devmatch, &match);
+    }
+
+  /* Did we find a route? */
+
   if (ret > 0)
     {
-      /* We found a route.  Return the router address.
-       *
-       * REVISIT:  We should move the cache entry to the head of the list
-       * because it is the most recently used.
+      /* We found a route. */
+
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
+      /* Add the route to the cache.  If the route is already in the cache,
+       * this will update it to the most recently accessed.
        */
+
+      ret = net_addcache_ipv4(&match.entry);
+#endif
+
+      /* We Return the router address. */
 
       net_ipv4addr_copy(*router, match.IPv4_ROUTER);
     }
   else
-#endif
     {
-      /* Find a router entry with the routing table that can forward to this
-       * address using this device.
+      /* There isn't a matching route.. fallback and use the default
+       * router
+       * of the device.
        */
 
-      ret = net_foreachroute_ipv4(net_ipv4_devmatch, &match);
-      if (ret > 0)
-        {
-          /* We found a route */
-
-#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
-          /* Add the route to the cache */
-
-          ret = net_addcache_ipv4(&match.entry);
-#endif
-          /* We Return the router address. */
-
-          net_ipv4addr_copy(*router, match.IPv4_ROUTER);
-        }
-      else
-        {
-          /* There isn't a matching route.. fallback and use the default
-           * router
-           * of the device.
-           */
-
-          net_ipv4addr_copy(*router, dev->d_draddr);
-        }
+      net_ipv4addr_copy(*router, dev->d_draddr);
     }
 }
 #endif
@@ -326,45 +322,40 @@ void netdev_ipv6_router(FAR struct net_driver_s *dev,
   /* First see if we can find a router entry in the cache */
 
   ret = net_foreachcache_ipv6(net_ipv6_devmatch, &match);
+  if (ret <= 0)
+#endif
+    {
+      /* Not found in the cache.  Try to find a router entry with the
+       * routing table that can forward to this address
+       */
+
+      ret = net_foreachroute_ipv6(net_ipv6_devmatch, &match);
+    }
+
+  /* Did we find a route? */
+
   if (ret > 0)
     {
-      /* We found a route.  Return the router address.
-       *
-       * REVISIT:  We should move the cache entry to the head of the list
-       * because it is the most recently used.
+      /* We found a route. */
+
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+      /* Add the route to the cache.  If the route is already in the cache,
+       * this will update it to the most recently accessed.
        */
+
+      ret = net_addcache_ipv6(&match.entry);
+#endif
+      /* Return the router address. */
 
       net_ipv6addr_copy(router, match.IPv6_ROUTER);
     }
   else
-#endif
     {
-      /* Find a router entry with the routing table that can forward to this
-       * address using this device.
+      /* There isn't a matching route.. fallback and use the default
+       * router of the device.
        */
 
-      ret = net_foreachroute_ipv6(net_ipv6_devmatch, &match);
-      if (ret > 0)
-        {
-          /* We found a route */
-
-#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
-          /* Add the route to the cache */
-
-          ret = net_addcache_ipv6(&match.entry);
-#endif
-          /* Return the router address. */
-
-          net_ipv6addr_copy(router, match.IPv6_ROUTER);
-       }
-      else
-        {
-          /* There isn't a matching route.. fallback and use the default
-           * router of the device.
-           */
-
-          net_ipv6addr_copy(router, dev->d_ipv6draddr);
-        }
+      net_ipv6addr_copy(router, dev->d_ipv6draddr);
     }
 }
 #endif

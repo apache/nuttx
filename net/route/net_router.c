@@ -230,48 +230,39 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
   /* First see if we can find a router entry in the cache */
 
   ret = net_foreachcache_ipv4(net_ipv4_match, &match);
-  if (ret > 0)
+  if (ret <= 0)
+#endif
     {
-      /* We found a route.  Return the router address.
-       *
-       * REVISIT:  We should move the cache entry to the head of the list
-       * because it is the most recently used.
+      /* Not found in the cache.  Try to find a router entry with the
+       * routing table that can forward to this address
        */
 
-      net_ipv4addr_copy(*router, match.IPv4_ROUTER);
-      ret = OK;
-    }
-  else
-#endif
-    {
-      /* Find a router entry with the routing table that can forward to this
-       * address
-      */
-
       ret = net_foreachroute_ipv4(net_ipv4_match, &match);
-      if (ret > 0)
-        {
-          /* We found a route. */
+    }
+
+  /* Did we find a route? */
+
+  if (ret <= 0)
+    {
+      /* No.. there is no route for this address */
+
+      return -ENOENT;
+    }
+
+  /* We found a route. */
 
 #ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
-          /* Add the route to the cache */
+  /* Add the route to the cache.  If the route is already in the cache, this
+   * will update it to the most recently accessed.
+   */
 
-          ret = net_addcache_ipv4(&match.entry);
+  (void)net_addcache_ipv4(&match.entry);
 #endif
-          /* Return the router address. */
 
-          net_ipv4addr_copy(*router, match.IPv4_ROUTER);
-          ret = OK;
-        }
-      else
-        {
-          /* There is no route for this address */
+  /* Return the router address. */
 
-          ret = -ENOENT;
-        }
-    }
-
-  return ret;
+  net_ipv4addr_copy(*router, match.IPv4_ROUTER);
+  return OK;
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -314,48 +305,39 @@ int net_ipv6_router(const net_ipv6addr_t target, net_ipv6addr_t router)
   /* First see if we can find a router entry in the cache */
 
   ret = net_foreachcache_ipv6(net_ipv6_match, &match);
-  if (ret > 0)
-    {
-      /* We found a route.  Return the router address.
-       *
-       * REVISIT:  We should move the cache entry to the head of the list
-       * because it is the most recently used.
-       */
-
-      net_ipv6addr_copy(router, match.IPv6_ROUTER);
-      ret = OK;
-    }
-  else
+  if (ret <= 0)
 #endif
     {
-      /* Find n router entry with the routing table that can forward to this
-       * address
+      /* Not found in the cache.  Try to find a router entry with the
+       * routing table that can forward to this address
        */
 
       ret = net_foreachroute_ipv6(net_ipv6_match, &match);
-      if (ret > 0)
-        {
-          /* We found a route */
-
-#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
-          /* Add the route to the cache */
-
-          ret = net_addcache_ipv6(&match.entry);
-#endif
-          /* Return the router address. */
-
-          net_ipv6addr_copy(router, match.IPv6_ROUTER);
-          ret = OK;
-        }
-      else
-        {
-          /* There is no route for this address */
-
-          ret = -ENOENT;
-        }
     }
 
-  return ret;
+  /* Did we find a route? */
+
+  if (ret <= 0)
+    {
+      /* No.. there is no route for this address */
+
+      return -ENOENT;
+    }
+
+  /* We found a route. */
+
+#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+  /* Add the route to the cache.  If the route is already in the cache, this
+   * will update it to the most recently accessed.
+   */
+
+  (void)net_addcache_ipv6(&match.entry);
+#endif
+
+  /* Return the router address. */
+
+  net_ipv6addr_copy(router, match.IPv6_ROUTER);
+  return OK;
 }
 #endif /* CONFIG_NET_IPv6 */
 
