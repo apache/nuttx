@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX Binary Loader</i></font></big></h1>
-      <p>Last Updated: August 22, 2014</p>
+      <p>Last Updated: October 1, 2017</p>
     </td>
   </tr>
 </table>
@@ -280,9 +280,7 @@ int load_module(FAR struct binary_s *bin);
 </ul>
 <p><b>Returned Value:</b></p>
 <ul>
-This is an end-user function, so it follows the normal convention:
-Returns 0 (<code>OK</code>) on success.
-On failure, it returns -1 (<code>ERROR</code>) with <code>errno</code> set appropriately.
+  This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
 </ul>
 
 <h3>2.3.4 <a name="unload_module"><code>unload_module()</code></a></h3>
@@ -304,7 +302,7 @@ int unload_module(FAR struct binary_s *bin);
 </ul>
 <p><b>Returned Value:</b></p>
 <ul>
-This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
+  This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
 </ul>
 
 <h3>2.3.5 <a name="exec_module"><code>exec_module()</code></a></h3>
@@ -315,13 +313,11 @@ int exec_module(FAR const struct binary_s *bin);
 </pre></ul>
 <p><b>Description:</b></p>
 <ul>
-Execute a module that has been loaded into memory by <code>load_module()</code>.
+  Execute a module that has been loaded into memory by <code>load_module()</code>.
 </ul>
 <p><b>Returned Value:</b></p>
 <ul>
-This is an end-user function, so it follows the normal convention:
-Returns 0 (<code>OK</code>) on success.
-On failure, it returns -1 (<code>ERROR</code>) with <code>errno</code> set appropriately.
+  This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
 </ul>
 
 <h3>2.3.7 <a name="exec"><code>exec()</code></a></h3>

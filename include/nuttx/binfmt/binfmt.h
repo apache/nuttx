@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/binfmt/binfmt.h
  *
- *   Copyright (C) 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -215,9 +215,9 @@ int unregister_binfmt(FAR struct binfmt_s *binfmt);
  *   prep the module for execution.
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with
- *   errno set appropriately.
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  ****************************************************************************/
 
@@ -251,9 +251,9 @@ int unload_module(FAR struct binary_s *bin);
  *   Execute a module that has been loaded into memory by load_module().
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   Returns the PID of the exec'ed module.  On failure, it returns
- *   -1 (ERROR) and sets errno appropriately.
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  ****************************************************************************/
 
@@ -267,8 +267,8 @@ int exec_module(FAR const struct binary_s *bin);
  *   the parent of the newly created task to automatically unload the
  *   module when the task exits.  This assumes that (1) the caller is the
  *   parent of the created task, (2) that bin was allocated with kmm_malloc()
- *   or friends.  It will also automatically free the structure with kmm_free()
- *   after unloading the module.
+ *   or friends.  It will also automatically free the structure with
+ *   kmm_free() after unloading the module.
  *
  * Input Parameter:
  *   pid - The task ID of the child task
@@ -276,9 +276,9 @@ int exec_module(FAR const struct binary_s *bin);
  *         persist until the task unloads
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   It returns 0 (OK) if the callback was successfully scheduled. On
- *  failure, it returns -1 (ERROR) and sets errno appropriately.
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  ****************************************************************************/
 

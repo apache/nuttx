@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_loadmodule.c
  *
- *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,8 +76,8 @@
  *   between calls to load_module() and exec_module().
  *
  * Returned Value:
- *   Zero (OK) is returned on success; Otherwise, -1 (ERROR) is returned and
- *   the errno variable is set appropriately.
+ *   Zero (OK) is returned on success; Otherwise a negated errno value is
+ *   returned.
  *
  ****************************************************************************/
 
@@ -91,8 +91,9 @@ static int load_default_priority(FAR struct binary_s *bin)
   ret = sched_getparam(0, &param);
   if (ret < 0)
     {
-      berr("ERROR: sched_getparam failed: %d\n", get_errno());
-      return ERROR;
+      ret = -get_errno();
+      berr("ERROR: sched_getparam failed: %d\n", ret);
+      return ret;
     }
 
   /* Save that as the priority of child thread */
@@ -168,9 +169,9 @@ static int load_absmodule(FAR struct binary_s *bin)
  *   prep the module for execution.
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   Returns 0 (OK) on success.  On failure, it returns -1 (ERROR) with
- *   errno set appropriately.
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  ****************************************************************************/
 
@@ -189,9 +190,7 @@ int load_module(FAR struct binary_s *bin)
       ret = load_default_priority(bin);
       if (ret < 0)
         {
-          /* The errno is already set in this case */
-
-          return ERROR;
+          return ret;
         }
 
       /* Were we given a relative path?  Or an absolute path to the file to
@@ -258,16 +257,7 @@ int load_module(FAR struct binary_s *bin)
         }
     }
 
-  /* This is an end-user function.  Return failures via errno */
-
-  if (ret < 0)
-    {
-      berr("ERROR: Returning errno %d\n", -ret);
-      set_errno(-ret);
-      return ERROR;
-    }
-
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */

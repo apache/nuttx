@@ -300,7 +300,7 @@ static void pcode_onexit(int exitcode, FAR void *arg)
 
   /* And unload the module */
 
-  unload_module(binp);
+  (void)unload_module(binp);
 }
 #endif
 

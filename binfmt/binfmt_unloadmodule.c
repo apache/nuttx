@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_loadmodule.c
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,8 +162,7 @@ int unload_module(FAR struct binary_s *binp)
           if (ret < 0)
             {
               berr("binp->unload() failed: %d\n", ret);
-              set_errno(-ret);
-              return ERROR;
+              return ret;
             }
         }
 
@@ -174,8 +173,7 @@ int unload_module(FAR struct binary_s *binp)
       if (ret < 0)
         {
           berr("exec_ctors() failed: %d\n", ret);
-          set_errno(-ret);
-          return ERROR;
+          return ret;
         }
 #endif
 

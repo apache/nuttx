@@ -9,7 +9,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NXFLAT</i></font></big></h1>
-      <p>Last Updated: September 1, 2012</p>
+      <p>Last Updated: October 1, 2017</p>
     </td>
   </tr>
 </table>
@@ -652,9 +652,7 @@ cat ../syscall/syscall.csv ../libc/libc.csv | sort >tmp.csv
   prep the module for execution.
 </p>
 <p><b>Returned Value:</b>
-  This is an end-user function, so it follows the normal convention:
-  Returns 0 (<code>OK</code>) on success.  On failure, it returns -1 (<code>ERROR</code>) with
-  errno set appropriately.
+  This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
 </p>
 </ul>
 
@@ -665,9 +663,7 @@ cat ../syscall/syscall.csv ../libc/libc.csv | sort >tmp.csv
   been started (via <code>exec_module()</code>), calling this will be fatal.
 </p>
 <p><b>Returned Value:</b>
-  This is a NuttX internal function so it follows the convention that
-  0 (<code>OK</code>) is returned on success and a negated errno is returned on
-  failure.
+  This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
 </p>
 </ul>
 
@@ -677,9 +673,7 @@ cat ../syscall/syscall.csv ../libc/libc.csv | sort >tmp.csv
   Execute a module that has been loaded into memory by load_module().
 </p>
 <p><b>Returned Value:</b>
-  This is an end-user function, so it follows the normal convention:
-  Returns the PID of the exec'ed module.  On failure, it.returns
-  -1 (<code>ERROR</code>) and sets errno appropriately.
+  This is a NuttX internal function so it follows the convention that 0 (<code>OK</code>) is returned on success and a negated <code>errno</code> is returned on failure.
 </p>
 </ul>
 </ul>

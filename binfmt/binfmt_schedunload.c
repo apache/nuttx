@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_schedunload.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -227,7 +227,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
   ret = unload_module(bin);
   if (ret < 0)
     {
-      berr("ERROR: unload_module failed: %d\n", get_errno());
+      berr("ERROR: unload_module() failed: %d\n", ret);
     }
 
   /* Free the load structure */
@@ -256,9 +256,9 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
  *         persist until the task unloads
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   It returns 0 (OK) if the callback was successfully scheduled. On
- *   failure, it returns -1 (ERROR) and sets errno appropriately.
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  *   On failures, the 'bin' structure will not be deallocated and the
  *   module not not be unloaded.
@@ -271,7 +271,6 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
   struct sigaction oact;
   sigset_t set;
   irqstate_t flags;
-  int errorcode;
   int ret;
 
   /* Make sure that SIGCHLD is unmasked */
@@ -283,9 +282,9 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
     {
       /* The errno value will get trashed by the following debug output */
 
-      errorcode = get_errno();
+      ret = -get_errno();
       berr("ERROR: sigprocmask failed: %d\n", ret);
-      goto errout;
+      return ret;
     }
 
   /* Add the structure to the list.  We want to do this *before* connecting
@@ -309,7 +308,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
     {
       /* The errno value will get trashed by the following debug output */
 
-      errorcode = get_errno();
+      ret = -get_errno();
       berr("ERROR: sigaction failed: %d\n" , ret);
 
       /* Emergency removal from the list */
@@ -321,14 +320,9 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
         }
 
       leave_critical_section(flags);
-      goto errout;
     }
 
-  return OK;
-
-errout:
-  set_errno(errorcode);
-  return ERROR;
+  return ret;
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE && CONFIG_SCHED_HAVE_PARENT */

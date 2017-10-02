@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_exec.c
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,7 +120,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = load_module(bin);
   if (ret < 0)
     {
-      errcode = get_errno();
+      errcode = -ret;
       berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
       goto errout_with_argv;
     }
@@ -137,7 +137,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   pid = exec_module(bin);
   if (pid < 0)
     {
-      errcode = get_errno();
+      errcode = -pid;
       berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
       goto errout_with_lock;
     }
@@ -149,8 +149,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = schedule_unload(pid, bin);
   if (ret < 0)
     {
-      errcode = get_errno();
-      berr("ERROR: Failed to schedule unload '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to schedule unload '%s': %d\n", filename, ret);
     }
 
   sched_unlock();
@@ -158,7 +157,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 
 errout_with_lock:
   sched_unlock();
-  unload_module(bin);
+  (void)unload_module(bin);
 errout_with_argv:
   binfmt_freeargv(bin);
 errout_with_bin:
@@ -182,7 +181,7 @@ errout:
   ret = load_module(&bin);
   if (ret < 0)
     {
-      errcode = get_errno();
+      errcode = -ret;
       berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
       goto errout;
     }
@@ -192,7 +191,7 @@ errout:
   ret = exec_module(&bin);
   if (ret < 0)
     {
-      errcode = get_errno();
+      errcode = -ret;
       berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
       goto errout_with_module;
     }
@@ -202,7 +201,7 @@ errout:
   return ret;
 
 errout_with_module:
-  unload_module(&bin);
+  (void)unload_module(&bin);
 errout:
   set_errno(errcode);
   return ERROR;

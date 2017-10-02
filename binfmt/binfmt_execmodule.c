@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_execmodule.c
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,14 +70,6 @@
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -128,9 +120,9 @@ static void exec_ctors(FAR void *arg)
  *   Execute a module that has been loaded into memory by load_module().
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   Returns the PID of the exec'ed module.  On failure, it returns
- *   -1 (ERROR) and sets errno appropriately.
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
  *
  ****************************************************************************/
 
@@ -142,7 +134,6 @@ int exec_module(FAR const struct binary_s *binp)
 #endif
   FAR uint32_t *stack;
   pid_t pid;
-  int errcode;
   int ret;
 
   /* Sanity checking */
@@ -150,8 +141,7 @@ int exec_module(FAR const struct binary_s *binp)
 #ifdef CONFIG_DEBUG_FEATURES
   if (!binp || !binp->entrypt || binp->stacksize <= 0)
     {
-      errcode = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
@@ -162,8 +152,7 @@ int exec_module(FAR const struct binary_s *binp)
   tcb = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
-      errcode = ENOMEM;
-      goto errout;
+      return -ENOMEM;
     }
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -173,7 +162,6 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_select() failed: %d\n", ret);
-      errcode = -ret;
       goto errout_with_tcb;
     }
 
@@ -192,7 +180,7 @@ int exec_module(FAR const struct binary_s *binp)
   stack = (FAR uint32_t *)kumm_malloc(binp->stacksize);
   if (!stack)
     {
-      errcode = ENOMEM;
+      ret = -ENOMEM;
       goto errout_with_addrenv;
     }
 
@@ -202,8 +190,8 @@ int exec_module(FAR const struct binary_s *binp)
                   stack, binp->stacksize, binp->entrypt, binp->argv);
   if (ret < 0)
     {
-      errcode = get_errno();
-      berr("task_init() failed: %d\n", errcode);
+      ret = -get_errno();
+      berr("task_init() failed: %d\n", ret);
       goto errout_with_addrenv;
     }
 
@@ -225,7 +213,6 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_select() failed: %d\n", ret);
-      errcode = -ret;
       goto errout_with_tcbinit;
     }
 #endif
@@ -237,7 +224,6 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       berr("ERROR: shm_group_initialize() failed: %d\n", ret);
-      errcode = -ret;
       goto errout_with_tcbinit;
     }
 #endif
@@ -260,7 +246,6 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_clone(&binp->addrenv, &tcb->cmn.group->tg_addrenv);
   if (ret < 0)
     {
-      errcode = -ret;
       berr("ERROR: up_addrenv_clone() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
@@ -291,8 +276,8 @@ int exec_module(FAR const struct binary_s *binp)
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < 0)
     {
-      errcode = get_errno();
-      berr("task_activate() failed: %d\n", errcode);
+      ret = -get_errno();
+      berr("task_activate() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
 
@@ -303,7 +288,6 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_select() failed: %d\n", ret);
-      errcode = -ret;
       goto errout_with_tcbinit;
     }
 #endif
@@ -314,7 +298,7 @@ errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
   sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
   kumm_free(stack);
-  goto errout;
+  return ret;
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -323,11 +307,7 @@ errout_with_addrenv:
 errout_with_tcb:
 #endif
   kmm_free(tcb);
-
-errout:
-  set_errno(errcode);
-  berr("returning errno: %d\n", errcode);
-  return ERROR;
+  return ret;
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */
