@@ -546,6 +546,7 @@ void net_init_cacheroute(void)
 int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
 {
   FAR struct net_cache_ipv4_entry_s *cache;
+  FAR struct net_cache_ipv4_entry_s *prev;
   int ret;
 
   DEBUGASSERT(route != NULL);
@@ -558,14 +559,60 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
       return ret;
     }
 
-  /* Allocate a new cache entry (should never fail) */
+  /* First, check if the route already exists in the cache */
+  /* Visit each entry in the cache */
 
-  cache = net_alloccache_ipv4();
-  DEBUGASSERT(cache != NULL);
+  for (prev = NULL, cache = g_ipv4_cache.head;
+       cache != NULL;
+       prev = cache, cache = cache->flink)
+    {
+      /* To match, the masked target addresses and netmasks must be the
+       * same.
+       */
 
-  /* Copy the routing table entry into the allocated cache entry */
+      if (net_ipv4addr_cmp(route->target, cache->entry.target) &&
+          net_ipv4addr_cmp(route->netmask, cache->entry.netmask))
+        {
+          /* If the route already exists and is already at the head of the
+           * list, then do nothing.  It is already the most recently used.
+           */
 
-  memcpy(&cache->entry, route, sizeof(struct net_route_ipv4_s));
+           if (prev == NULL)
+             {
+               net_unlock_ipv4_cache();
+               return OK;
+             }
+
+           /* Otherwise, remove the cache entry from the list */
+
+           if (g_ipv4_cache.tail == cache)
+             {
+               g_ipv4_cache.tail = prev;
+             }
+           else
+             {
+               prev->flink = cache->flink;
+             }
+
+           cache->flink = NULL;
+        }
+    }
+
+  /* If we did not find the entry in the list, then we will have to
+   * allocate a new entry.
+   */
+
+  if (cache == NULL)
+    {
+      /* Allocate a new cache entry (should never fail) */
+
+      cache = net_alloccache_ipv4();
+      DEBUGASSERT(cache != NULL);
+
+      /* Copy the routing table entry into the allocated cache entry. */
+
+      memcpy(&cache->entry, route, sizeof(struct net_route_ipv4_s));
+    }
 
   /* Then add the new cache entry as the newest entry in the table */
 
@@ -579,6 +626,7 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
 int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
 {
   FAR struct net_cache_ipv6_entry_s *cache;
+  FAR struct net_cache_ipv6_entry_s *prev;
   int ret;
 
   DEBUGASSERT(route != NULL);
@@ -591,14 +639,60 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
       return ret;
     }
 
-  /* Allocate a new cache entry (should never fail) */
+  /* First, check if the route already exists in the cache */
+  /* Visit each entry in the cache */
 
-  cache = net_alloccache_ipv6();
-  DEBUGASSERT(cache != NULL);
+  for (prev = NULL, cache = g_ipv6_cache.head;
+       cache != NULL;
+       prev = cache, cache = cache->flink)
+    {
+      /* To match, the masked target addresses and netmasks must be the
+       * same.
+       */
 
-  /* Copy the routing table entry into the allocated cache entry */
+      if (net_ipv6addr_cmp(route->target, cache->entry.target) &&
+          net_ipv6addr_cmp(route->netmask, cache->entry.netmask))
+        {
+          /* If the route already exists and is already at the head of the
+           * list, then do nothing.  It is already the most recently used.
+           */
 
-  memcpy(&cache->entry, route, sizeof(struct net_route_ipv6_s));
+           if (prev == NULL)
+             {
+               net_unlock_ipv6_cache();
+               return OK;
+             }
+
+           /* Otherwise, remove the cache entry from the list */
+
+           if (g_ipv6_cache.tail == cache)
+             {
+               g_ipv6_cache.tail = prev;
+             }
+           else
+             {
+               prev->flink = cache->flink;
+             }
+
+           cache->flink = NULL;
+        }
+    }
+
+  /* If we did not find the entry in the list, then we will have to
+   * allocate a new entry.
+   */
+
+  if (cache == NULL)
+    {
+      /* Allocate a new cache entry (should never fail) */
+
+      cache = net_alloccache_ipv6();
+      DEBUGASSERT(cache != NULL);
+
+      /* Copy the routing table entry into the allocated cache entry */
+
+      memcpy(&cache->entry, route, sizeof(struct net_route_ipv6_s));
+    }
 
   /* Then add the new cache entry as the newest entry in the table */
 
