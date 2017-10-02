@@ -188,6 +188,18 @@ int stm32_gpio_initialize(void);
 #endif
 
 /************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
+/************************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:

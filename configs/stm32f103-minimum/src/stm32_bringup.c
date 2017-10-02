@@ -292,6 +292,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_WL_NRF24L01)
   /* Initialize the NRF24L01 wireless module */
 
