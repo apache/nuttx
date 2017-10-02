@@ -577,24 +577,24 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
            * list, then do nothing.  It is already the most recently used.
            */
 
-           if (prev == NULL)
-             {
-               net_unlock_ipv4_cache();
-               return OK;
-             }
+          if (prev == NULL)
+            {
+              net_unlock_ipv4_cache();
+              return OK;
+            }
 
-           /* Otherwise, remove the cache entry from the list */
+          /* Otherwise, remove the cache entry from the middle or end of
+           * the list.
+           */
 
-           if (g_ipv4_cache.tail == cache)
-             {
-               g_ipv4_cache.tail = prev;
-             }
-           else
-             {
-               prev->flink = cache->flink;
-             }
+          prev->flink = cache->flink;
+          if (g_ipv4_cache.tail == cache)
+            {
+              g_ipv4_cache.tail = prev;
+            }
 
-           cache->flink = NULL;
+          cache->flink = NULL;
+          break;
         }
     }
 
@@ -657,24 +657,24 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
            * list, then do nothing.  It is already the most recently used.
            */
 
-           if (prev == NULL)
-             {
-               net_unlock_ipv6_cache();
-               return OK;
-             }
+          if (prev == NULL)
+            {
+              net_unlock_ipv6_cache();
+              return OK;
+            }
 
-           /* Otherwise, remove the cache entry from the list */
+          /* Otherwise, remove the cache entry from the middle or end of
+           * the list.
+           */
 
-           if (g_ipv6_cache.tail == cache)
-             {
-               g_ipv6_cache.tail = prev;
-             }
-           else
-             {
-               prev->flink = cache->flink;
-             }
+          prev->flink = cache->flink;
+          if (g_ipv6_cache.tail == cache)
+            {
+              g_ipv6_cache.tail = prev;
+            }
 
-           cache->flink = NULL;
+          cache->flink = NULL;
+          break;
         }
     }
 
