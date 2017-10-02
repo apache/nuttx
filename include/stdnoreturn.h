@@ -44,11 +44,7 @@
 
 /* C11 adds _Noreturn keyword that the function will not return. */
 
-#  if __cplusplus >= 201103L
-#    define noreturn _Noreturn
-#  else
-#    define noreturn
-#  endif
+#  define noreturn _Noreturn
 
 #elif defined(SDCC) || defined(__SDCC)
 
