@@ -77,7 +77,7 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0
 int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 {
-  int ret;
+  int ret = -EINVAL;
 
   /* Was this file opened ? */
 
@@ -205,7 +205,6 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
         break;
 
       default:
-        ret = -EINVAL;
         break;
     }
 
