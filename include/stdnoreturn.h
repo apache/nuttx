@@ -40,10 +40,26 @@
  * Included Files
  ****************************************************************************/
 
-/* If the noreturn keyword is support by this toolchain, then keywork will be
- * defined in compiler.h.
- */
+#ifdef __GNUC__
 
-#include <nuttx/compiler.h>
+/* C11 adds _Noreturn keyword that the function will not return. */
+
+#  if __cplusplus >= 201103L
+#    define noreturn _Noreturn
+#  else
+#    define noreturn
+#  endif
+
+#elif defined(SDCC) || defined(__SDCC)
+
+/* Current SDCC supports noreturn via C11 _Noreturn keyword. */
+
+#  define noreturn _Noreturn
+
+#else
+
+#  define noreturn
+
+#endif
 
 #endif /* __INCLUDE_STDNORETURN_H */
