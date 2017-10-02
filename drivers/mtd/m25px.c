@@ -86,11 +86,16 @@
 #  define CONFIG_M25P_MEMORY_TYPE  0x20
 #endif
 
+#ifndef CONFIG_MT25Q_MEMORY_TYPE
+#  define CONFIG_MT25Q_MEMORY_TYPE  0xBA
+#endif
+
 /* M25P Registers *******************************************************************/
 /* Indentification register values */
 
 #define M25P_MANUFACTURER          CONFIG_M25P_MANUFACTURER
 #define M25P_MEMORY_TYPE           CONFIG_M25P_MEMORY_TYPE
+#define MT25Q_MEMORY_TYPE          CONFIG_MT25Q_MEMORY_TYPE
 #define M25P_RES_ID                0x13
 #define M25P_M25P1_CAPACITY        0x11 /* 1 M-bit */
 #define M25P_EN25F80_CAPACITY      0x14 /* 8 M-bit */
@@ -98,6 +103,7 @@
 #define M25P_M25P32_CAPACITY       0x16 /* 32 M-bit */
 #define M25P_M25P64_CAPACITY       0x17 /* 64 M-bit */
 #define M25P_M25P128_CAPACITY      0x18 /* 128 M-bit */
+#define M25P_MT25Q128_CAPACITY     0x18 /* 128 M-bit */
 
 /*  M25P1 capacity is 131,072 bytes:
  *  (4 sectors) * (32,768 bytes per sector)
@@ -162,6 +168,17 @@
 #define M25P_M25P128_NSECTORS      64
 #define M25P_M25P128_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P128_NPAGES        65536
+
+/*  MT25Q128 capacity is 16,777,216 bytes:
+ *  (256 sectors) * (65,536 bytes per sector)
+ *  (65536 pages) * (256 bytes per page)
+ */
+
+#define M25P_MT25Q128_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
+#define M25P_MT25Q128_NSECTORS      256
+#define M25P_MT25Q128_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
+#define M25P_MT25Q128_NPAGES        65536
+#define M25P_MT25Q128_SUBSECT_SHIFT 12    /* Sub-Sector size 1 << 12 = 4,096 */
 
 /* Instructions */
 /*      Command        Value      N Description             Addr Dummy Data   */
@@ -411,6 +428,27 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
            priv->nsectors       = M25P_M25P128_NSECTORS;
            priv->pageshift      = M25P_M25P128_PAGE_SHIFT;
            priv->npages         = M25P_M25P128_NPAGES;
+           return OK;
+        }
+    }
+  else if (manufacturer == M25P_MANUFACTURER && memory == MT25Q_MEMORY_TYPE)
+    {
+      /* Also okay.. is it a FLASH capacity that we understand? */
+
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
+      priv->subsectorshift = 0;
+#endif
+      if (capacity == M25P_MT25Q128_CAPACITY)
+        {
+           /* Save the FLASH geometry */
+
+           priv->sectorshift    = M25P_MT25Q128_SECTOR_SHIFT;
+           priv->nsectors       = M25P_MT25Q128_NSECTORS;
+           priv->pageshift      = M25P_MT25Q128_PAGE_SHIFT;
+           priv->npages         = M25P_MT25Q128_NPAGES;
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
+           priv->subsectorshift = M25P_MT25Q128_SUBSECT_SHIFT;
+#endif
            return OK;
         }
     }

@@ -415,7 +415,7 @@ config IS25XP_SPIFREQUENCY
 endif # MTD_IS25XP
 
 config MTD_M25P
-	bool "SPI-based M25P FLASH"
+	bool "SPI-based M25P/MT25Q FLASH"
 	default n
 	select SPI
 
@@ -445,6 +445,12 @@ config M25P_MEMORY_TYPE
 		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
 		memory type for "F" series parts from EON is 0x31.  The 4K sector erase size will
 		automatically be enabled when filesytems that can use it are enabled, such as SMART.
+
+config MT25Q_MEMORY_TYPE
+	hex "MT25Q memory type ID"
+	default 0xBA
+	---help---
+		The memory type for MT25 "Q" series is 0xBA.
 
 config M25P_SUBSECTOR_ERASE
 	bool "Sub-Sector Erase"
