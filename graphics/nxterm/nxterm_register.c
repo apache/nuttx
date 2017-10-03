@@ -89,7 +89,7 @@ FAR struct nxterm_state_s *
   priv->minor   = minor;
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 #ifdef CONFIG_DEBUG_FEATURES
   priv->holder  = NO_HOLDER;
 #endif
@@ -99,7 +99,7 @@ FAR struct nxterm_state_s *
    * priority inheritance enabled.
    */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 

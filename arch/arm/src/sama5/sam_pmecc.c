@@ -988,7 +988,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 #if NAND_NPMECC_BANKS > 1
 void pmecc_initialize(void)
 {
-  sem_init(&g_pmecc.exclsem, 0, 1);
+  nxsem_init(&g_pmecc.exclsem, 0, 1);
 }
 #endif
 

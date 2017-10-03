@@ -1595,7 +1595,7 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
   priv->bl_bit = priv->cfg.bl_active_high ? 0 : (1 << priv->cfg.bl);
   priv->refs = 0;
   priv->unlinked = false;
-  sem_init(&priv->sem_excl, 0, 1);
+  nxsem_init(&priv->sem_excl, 0, 1);
 
   /* Initialize */
 

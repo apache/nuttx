@@ -855,7 +855,7 @@ int btn_register(FAR const char *devname,
   /* Initialize the new button driver instance */
 
   priv->bu_lower = lower;
-  sem_init(&priv->bu_exclsem, 0, 1);
+  nxsem_init(&priv->bu_exclsem, 0, 1);
 
   DEBUGASSERT(lower->bl_buttons);
   priv->bu_sample = lower->bl_buttons(lower);

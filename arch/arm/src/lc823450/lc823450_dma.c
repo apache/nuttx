@@ -344,7 +344,7 @@ void up_dmainitialize(void)
       sq_init(&g_dma.phydmach[i].req_q);
     }
 
-  sem_init(&g_dma.exclsem, 0, 1);
+  nxsem_init(&g_dma.exclsem, 0, 1);
 
   if (irq_attach(LC823450_IRQ_DMAC, dma_interrupt, NULL) != 0)
     {

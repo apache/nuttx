@@ -800,7 +800,7 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
       return -ENOMEM;
     }
 
-  sem_init(&eedev->sem, 0, 1);
+  nxsem_init(&eedev->sem, 0, 1);
 
   eedev->spi      = dev;
   eedev->size     = 128 << g_ee25xx_devices[devtype].bytes;

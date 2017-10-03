@@ -1074,14 +1074,14 @@ static inline void stm32_i2c_sem_post(FAR struct i2c_master_s *dev)
 
 static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
 {
-  sem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl, 0, 1);
+  nxsem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl, 0, 1);
 
 #ifndef CONFIG_I2C_POLLED
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
-  sem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
+  nxsem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
   sem_setprotocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }

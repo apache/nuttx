@@ -1274,7 +1274,7 @@ static void sai_buf_initialize(struct stm32l4_sai_s *priv)
   int i;
 
   priv->freelist = NULL;
-  sem_init(&priv->bufsem, 0, CONFIG_STM32L4_SAI_MAXINFLIGHT);
+  nxsem_init(&priv->bufsem, 0, CONFIG_STM32L4_SAI_MAXINFLIGHT);
 
   for (i = 0; i < CONFIG_STM32L4_SAI_MAXINFLIGHT; i++)
     {
@@ -1300,7 +1300,7 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
 {
   sai_dump_regs(priv, "Before initialization");
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Create a watchdog timer to catch transfer timeouts */
 

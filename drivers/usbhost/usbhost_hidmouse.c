@@ -1932,8 +1932,8 @@ static FAR struct usbhost_class_s *
 
           /* Initialize semaphores */
 
-          sem_init(&priv->exclsem, 0, 1);
-          sem_init(&priv->waitsem, 0, 0);
+          nxsem_init(&priv->exclsem, 0, 1);
+          nxsem_init(&priv->waitsem, 0, 0);
 
           /* The waitsem semaphore is used for signaling and, hence, should
            * not have priority inheritance enabled.
@@ -2557,8 +2557,8 @@ int usbhost_mouse_init(void)
 {
   /* Perform any one-time initialization of the class implementation */
 
-  sem_init(&g_exclsem, 0, 1);
-  sem_init(&g_syncsem, 0, 0);
+  nxsem_init(&g_exclsem, 0, 1);
+  nxsem_init(&g_syncsem, 0, 0);
 
   /* The g_syncsem semaphore is used for signaling and, hence, should not
    * have priority inheritance enabled.

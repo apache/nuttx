@@ -107,7 +107,7 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&notify->nt_sem, 0, 0);
+  (void)nxsem_init(&notify->nt_sem, 0, 0);
   sem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */

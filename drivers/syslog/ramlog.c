@@ -694,9 +694,9 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
     {
       /* Initialize the non-zero values in the RAM logging device structure */
 
-      sem_init(&priv->rl_exclsem, 0, 1);
+      nxsem_init(&priv->rl_exclsem, 0, 1);
 #ifndef CONFIG_RAMLOG_NONBLOCKING
-      sem_init(&priv->rl_waitsem, 0, 0);
+      nxsem_init(&priv->rl_waitsem, 0, 0);
 
       /* The rl_waitsem semaphore is used for signaling and, hence, should
        * not have priority inheritance enabled.

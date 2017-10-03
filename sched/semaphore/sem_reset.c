@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_reset.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,11 +52,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_reset
+ * Name: nxsem_reset
  *
  * Description:
  *   Reset a semaphore count to a specific value.  This is similar to part
- *   of the operation of sem_init().  But sem_reset() may need to wake up
+ *   of the operation of nxsem_init().  But nxsem_reset() may need to wake up
  *   tasks waiting on a count.  This kind of operation is sometimes required
  *   within the OS (only) for certain error handling conditions.
  *
@@ -65,11 +65,13 @@
  *   count - The requested semaphore count
  *
  * Return Value:
- *   0 (OK) or a negated errno value if unsuccessful
+ *   This is an internal OS interface, not available to applications, and
+ *   hence follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sem_reset(FAR sem_t *sem, int16_t count)
+int nxsem_reset(FAR sem_t *sem, int16_t count)
 {
   irqstate_t flags;
 

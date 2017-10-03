@@ -1286,14 +1286,14 @@ static void stm32_global_configure(void)
 {
   /* Initialize the LTDC semaphore that enforces mutually exclusive access */
 
-  sem_init(&g_lock, 0, 1);
+  nxsem_init(&g_lock, 0, 1);
 
   /* Initialize the semaphore for interrupt handling.  This waitsem
    * semaphore is used for signaling and, hence, should not have priority
    * inheritance enabled.
    */
 
-  sem_init(g_interrupt.sem, 0, 0);
+  nxsem_init(g_interrupt.sem, 0, 0);
   sem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
 
   /* Attach LTDC interrupt vector */

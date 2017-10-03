@@ -620,8 +620,8 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 
   /* Initialize semaphores */
 
-  sem_init(&dev->ad_recv.af_sem, 0, 0);
-  sem_init(&dev->ad_closesem, 0, 1);
+  nxsem_init(&dev->ad_recv.af_sem, 0, 0);
+  nxsem_init(&dev->ad_closesem, 0, 1);
 
   /* The receive semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

@@ -95,7 +95,7 @@ int pthread_barrier_init(FAR pthread_barrier_t *barrier,
     }
   else
     {
-      sem_init(&barrier->sem, 0, 0);
+      nxsem_init(&barrier->sem, 0, 0);
       barrier->count = count;
     }
 

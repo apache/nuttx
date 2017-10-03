@@ -2162,7 +2162,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
        * access to the SPI registers.
        */
 
-      sem_init(&spi->spisem, 0, 1);
+      nxsem_init(&spi->spisem, 0, 1);
       spi->escape_lastxfer = false;
       spi->initialized = true;
 
@@ -2172,7 +2172,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
        * signaling and, hence, should not have priority inheritance enabled.
        */
 
-      sem_init(&spics->dmawait, 0, 0);
+      nxsem_init(&spics->dmawait, 0, 0);
       sem_setprotocol(&spics->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */

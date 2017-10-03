@@ -967,8 +967,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   /* Initialize semaphores */
 
-  sem_init(&priv->exclsem, 0, 1);
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

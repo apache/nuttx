@@ -118,7 +118,7 @@ static int stm32_rng_initialize(void)
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
-  sem_init(&g_rngdev.rd_devsem, 0, 1);
+  nxsem_init(&g_rngdev.rd_devsem, 0, 1);
 
   if (irq_attach(STM32_IRQ_RNG, stm32_rnginterrupt, NULL))
     {
@@ -283,7 +283,7 @@ static ssize_t stm32_rngread(struct file *filep, char *buffer, size_t buflen)
        * enabled.
        */
 
-      sem_init(&g_rngdev.rd_readsem, 0, 0);
+      nxsem_init(&g_rngdev.rd_readsem, 0, 0);
       sem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
       g_rngdev.rd_buflen = buflen;

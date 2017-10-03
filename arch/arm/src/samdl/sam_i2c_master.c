@@ -1344,8 +1344,8 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
   priv->dev.ops = &g_i2cops;
   priv->flags = 0;
 
-  (void)sem_init(&priv->exclsem, 0, 1);
-  (void)sem_init(&priv->waitsem, 0, 0);
+  (void)nxsem_init(&priv->exclsem, 0, 1);
+  (void)nxsem_init(&priv->waitsem, 0, 0);
 
   /* Perform repeatable I2C hardware initialization */
 

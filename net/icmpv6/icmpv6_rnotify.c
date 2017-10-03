@@ -171,7 +171,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&notify->rn_sem, 0, 0);
+  (void)nxsem_init(&notify->rn_sem, 0, 0);
   sem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */

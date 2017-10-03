@@ -397,7 +397,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * priority inheritance enabled.
    */
 
-  sem_init(&state.st_sem, 0, 0);
+  nxsem_init(&state.st_sem, 0, 0);
   sem_setprotocol(&state.st_sem, SEM_PRIO_NONE);
 
   state.st_buflen = len;

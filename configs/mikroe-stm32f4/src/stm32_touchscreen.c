@@ -1541,8 +1541,8 @@ int board_tsc_setup(int minor)
   /* Initialize the touchscreen device driver instance */
 
   memset(priv, 0, sizeof(struct tc_dev_s));
-  sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
-  sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+  nxsem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
+  nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
   /* Register the device as an input device */
 

@@ -1933,7 +1933,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 
   slot = &g_mmcsdslot[slotno];
   memset(slot, 0, sizeof(struct mmcsd_slot_s));
-  sem_init(&slot->sem, 0, 1);
+  nxsem_init(&slot->sem, 0, 1);
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (slot->spi)

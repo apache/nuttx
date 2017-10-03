@@ -2797,8 +2797,8 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   DEBUGASSERT(priv->txpoll != NULL && priv->txtimeout != NULL);
 
-  sem_init(&priv->rxsem, 0, 1);            /* Access to RX packet queue */
-  sem_init(&priv->txsem, 0, 1);            /* Access to TX packet queue */
+  nxsem_init(&priv->rxsem, 0, 1);            /* Access to RX packet queue */
+  nxsem_init(&priv->txsem, 0, 1);            /* Access to TX packet queue */
 
   /* Initialize the IEEE 802.15.4 network device fields */
 

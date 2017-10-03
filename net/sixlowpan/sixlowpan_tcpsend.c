@@ -662,7 +662,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
           /* Initialize the send state structure */
 
-          sem_init(&sinfo.s_waitsem, 0, 0);
+          nxsem_init(&sinfo.s_waitsem, 0, 0);
           (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
           sinfo.s_sock      = psock;

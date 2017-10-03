@@ -670,7 +670,7 @@ int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c     = i2c;
   priv->address = address;
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Register the character driver */
 

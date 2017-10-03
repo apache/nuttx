@@ -137,12 +137,12 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 
   /* Init control frames mutex and timeout signal */
 
-  if ((ret = sem_init(&priv->control_mutex, 0, 1)) != OK)
+  if ((ret = nxsem_init(&priv->control_mutex, 0, 1)) != OK)
     {
       goto exit_free_priv;
     }
 
-  if ((ret = sem_init(&priv->control_timeout, 0, 0)) != OK)
+  if ((ret = nxsem_init(&priv->control_timeout, 0, 0)) != OK)
     {
       goto exit_free_priv;
     }
@@ -154,7 +154,7 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 
   /* Init authentication signal semaphore */
 
-  if ((ret = sem_init(&priv->auth_signal, 0, 0)) != OK)
+  if ((ret = nxsem_init(&priv->auth_signal, 0, 0)) != OK)
     {
       goto exit_free_priv;
     }

@@ -573,7 +573,7 @@ static int stm32l4_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
 FAR struct rtc_lowerhalf_s *stm32l4_rtc_lowerhalf(void)
 {
-  sem_init(&g_rtc_lowerhalf.devsem, 0, 1);
+  nxsem_init(&g_rtc_lowerhalf.devsem, 0, 1);
 
   return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }

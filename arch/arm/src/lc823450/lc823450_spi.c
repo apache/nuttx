@@ -537,7 +537,7 @@ FAR struct spi_dev_s *lc823450_spibus_initialize(int port)
       modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_PORT5_RSTB);
 
 #ifndef CONFIG_SPI_OWNBUS
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 #endif
 
       /* Initialize SPI mode. It must be done before starting SPI transfer */
@@ -556,7 +556,7 @@ FAR struct spi_dev_s *lc823450_spibus_initialize(int port)
       lc823450_spiinitialize();
 
 #ifdef CONFIG_LC823450_SPI_DMA
-      sem_init(&priv->dma_wait, 0, 0);
+      nxsem_init(&priv->dma_wait, 0, 0);
       priv->hdma = lc823450_dmachannel(DMA_CHANNEL_SIOTX);
       lc823450_dmarequest(priv->hdma, DMA_REQUEST_SIOTX);
 

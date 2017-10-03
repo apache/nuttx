@@ -103,7 +103,7 @@ int sem_post(FAR sem_t *sem)
        *
        * NOTE:  When semaphores are used for signaling purposes, the holder
        * of the semaphore may not be this thread!  In this case,
-       * sem_releaseholder() will do nothing.
+       * nxsem_releaseholder() will do nothing.
        *
        * In the case of a mutex this could be simply resolved since there is
        * only one holder but for the case of counting semaphores, there may
@@ -116,7 +116,7 @@ int sem_post(FAR sem_t *sem)
        */
 
       ASSERT(sem->semcount < SEM_VALUE_MAX);
-      sem_releaseholder(sem);
+      nxsem_releaseholder(sem);
       sem->semcount++;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -152,7 +152,7 @@ int sem_post(FAR sem_t *sem)
                * it is awakened.
                */
 
-              sem_addholder_tcb(stcb, sem);
+              nxsem_addholder_tcb(stcb, sem);
 
               /* It is, let the task take the semaphore */
 
@@ -170,7 +170,7 @@ int sem_post(FAR sem_t *sem)
        */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      sem_restorebaseprio(stcb, sem);
+      nxsem_restorebaseprio(stcb, sem);
       sched_unlock();
 #endif
       ret = OK;

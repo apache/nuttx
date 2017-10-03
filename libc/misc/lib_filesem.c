@@ -65,7 +65,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
    * to private data sets.
    */
 
-  (void)sem_init(&stream->fs_sem, 0, 1);
+  (void)nxsem_init(&stream->fs_sem, 0, 1);
 
   stream->fs_holder = -1;
   stream->fs_counts = 0;

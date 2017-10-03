@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_waitirq
+ * Name: nxsem_waitirq
  *
  * Description:
  *   This function is called when either:
@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
+void nxsem_waitirq(FAR struct tcb_s *wtcb, int errcode)
 {
   irqstate_t flags;
 
@@ -101,7 +101,7 @@ void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
        * to this semaphore.
        */
 
-      sem_canceled(wtcb, sem);
+      nxsem_canceled(wtcb, sem);
 
       /* And increment the count on the semaphore.  This releases the count
        * that was taken by sem_post().  This count decremented the semaphore

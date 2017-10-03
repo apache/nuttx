@@ -3288,7 +3288,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
       /* Initialize the MMC/SD state structure */
 
       memset(priv, 0, sizeof(struct mmcsd_state_s));
-      sem_init(&priv->sem, 0, 1);
+      nxsem_init(&priv->sem, 0, 1);
 
       /* Bind the MMCSD driver to the MMCSD state structure */
 

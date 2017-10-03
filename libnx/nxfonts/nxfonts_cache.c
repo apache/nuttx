@@ -748,7 +748,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
       /* Initialize the mutual exclusion semaphore */
 
-      sem_init(&priv->fsem, 0, 1);
+      nxsem_init(&priv->fsem, 0, 1);
 
       /* Add the new font cache to the list of font caches */
 

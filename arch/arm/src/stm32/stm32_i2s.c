@@ -773,7 +773,7 @@ static void i2s_buf_initialize(struct stm32_i2s_s *priv)
   int i;
 
   priv->freelist = NULL;
-  sem_init(&priv->bufsem, 0, CONFIG_STM32_I2S_MAXINFLIGHT);
+  nxsem_init(&priv->bufsem, 0, CONFIG_STM32_I2S_MAXINFLIGHT);
 
   for (i = 0; i < CONFIG_STM32_I2S_MAXINFLIGHT; i++)
     {
@@ -2598,7 +2598,7 @@ FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
 
   /* Initialize the common parts for the I2S device structure */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   priv->dev.ops = &g_i2sops;
   priv->i2sno   = port;
 

@@ -264,7 +264,7 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&pstate->pr_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&pstate->pr_sem, 0, 0); /* Doesn't really fail */
   (void)sem_setprotocol(&pstate->pr_sem, SEM_PRIO_NONE);
 
   pstate->pr_buflen = len;

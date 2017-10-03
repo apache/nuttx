@@ -212,7 +212,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
   sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   /* Remember the routing device name */

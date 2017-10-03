@@ -1703,7 +1703,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
 
           /* Initialize semaphores (this works okay in the interrupt context) */
 
-          sem_init(&priv->exclsem, 0, 1);
+          nxsem_init(&priv->exclsem, 0, 1);
 
           /* NOTE: We do not yet know the geometry of the USB mass storage device */
 

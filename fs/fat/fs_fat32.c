@@ -1948,8 +1948,8 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
    * have to addref() here (but does have to release in unbind().
    */
 
-  fs->fs_blkdriver = blkdriver;  /* Save the block driver reference */
-  sem_init(&fs->fs_sem, 0, 0);   /* Initialize the semaphore that controls access */
+  fs->fs_blkdriver = blkdriver;   /* Save the block driver reference */
+  nxsem_init(&fs->fs_sem, 0, 0);  /* Initialize the semaphore that controls access */
 
   /* Then get information about the FAT32 filesystem on the devices managed
    * by this block driver.

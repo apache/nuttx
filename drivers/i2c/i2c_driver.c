@@ -405,7 +405,7 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
 
       priv->i2c = i2c;
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 #endif
 
       /* Create the character device name */

@@ -121,7 +121,7 @@ int sem_wait(FAR sem_t *sem)
           /* It is, let the task take the semaphore. */
 
           sem->semcount--;
-          sem_addholder(sem);
+          nxsem_addholder(sem);
           rtcb->waitsem = NULL;
           ret = OK;
         }
@@ -161,7 +161,7 @@ int sem_wait(FAR sem_t *sem)
            * semaphore.
            */
 
-          sem_boostpriority(sem);
+          nxsem_boostpriority(sem);
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
@@ -177,7 +177,7 @@ int sem_wait(FAR sem_t *sem)
            * a timeout, certain semaphore clean-up operations have already been
            * performed (see sem_waitirq.c).  Specifically:
            *
-           * - sem_canceled() was called to restore the priority of all threads
+           * - nxsem_canceled() was called to restore the priority of all threads
            *   that hold a reference to the semaphore,
            * - The semaphore count was decremented, and
            * - tcb->waitsem was nullifed.
@@ -192,7 +192,7 @@ int sem_wait(FAR sem_t *sem)
             {
               /* Not awakened by a signal or a timeout...
                *
-               * NOTE that in this case sem_addholder() was called by logic
+               * NOTE that in this case nxsem_addholder() was called by logic
                * in sem_wait() fore this thread was restarted.
                */
 

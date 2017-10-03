@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/sem/sem_init.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,18 @@
 #include <semaphore.h>
 #include <errno.h>
 
+#include <nuttx/semaphore.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_init
+ * Name: nxsem_init
  *
  * Description:
  *   This function initializes the UNAMED semaphore sem. Following a
- *   successful call to sem_init(), the semaophore may be used in subsequent
+ *   successful call to nxsem_init(), the semaphore may be used in subsequent
  *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
  *   remains usable until it is destroyed.
  *
@@ -67,19 +69,19 @@
  *   value - Semaphore initialization value
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if unsuccessful.
- *
- * Assumptions:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
+int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
 {
   /* Verify that a semaphore was provided and the count is within the valid
    * range.
    */
 
-  if (sem && value <= SEM_VALUE_MAX)
+  if (sem != NULL && value <= SEM_VALUE_MAX)
     {
       /* Initialize the seamphore count */
 
@@ -100,9 +102,44 @@ int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
 #endif
       return OK;
     }
-  else
+
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: sem_init
+ *
+ * Description:
+ *   This function initializes the UNAMED semaphore sem. Following a
+ *   successful call to sem_init(), the semaphore may be used in subsequent
+ *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   remains usable until it is destroyed.
+ *
+ *   Only sem itself may be used for performing synchronization. The result
+ *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
+ *   sem_post(), and sem_destroy() is undefined.
+ *
+ * Parameters:
+ *   sem - Semaphore to be initialized
+ *   pshared - Process sharing (not used)
+ *   value - Semaphore initialization value
+ *
+ * Return Value:
+ *   This returns zero (OK) if successful.  Otherwise, -1 (ERROR) is
+ *   returned and the errno value is set appropriately.
+ *
+ ****************************************************************************/
+
+int sem_init(FAR sem_t *sem, int pshared, unsigned int value)
+{
+  int ret;
+
+  ret = nxsem_init(sem, pshared, value);
+  if (ret < 0)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      set_errno(-ret);
+      ret = ERROR;
     }
+
+  return ret;
 }

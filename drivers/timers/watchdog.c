@@ -479,7 +479,7 @@ FAR void *watchdog_register(FAR const char *path,
    * by kmm_zalloc()).
    */
 
-  sem_init(&upper->exclsem, 0, 1);
+  nxsem_init(&upper->exclsem, 0, 1);
   upper->lower = lower;
 
   /* Copy the registration path */

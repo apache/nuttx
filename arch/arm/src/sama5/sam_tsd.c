@@ -1674,7 +1674,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
    * signaling and, hence, should not have priority inheritance enabled.
    */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Register the device as an input device */

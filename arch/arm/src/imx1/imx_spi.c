@@ -1122,10 +1122,10 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
    * signaling and, hence, should not have priority inheritance enabled.
    */
 
-   sem_init(&priv->waitsem, 0, 0);
+   nxsem_init(&priv->waitsem, 0, 0);
    sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
-   sem_init(&priv->exclsem, 0, 1);
+   nxsem_init(&priv->exclsem, 0, 1);
 
   /* Initialize control register: min frequency, ignore ready, master mode, mode=0, 8-bit */
 

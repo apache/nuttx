@@ -1838,7 +1838,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    * incrementing the count to one.
    */
 
-  sem_init(&nmp->nm_sem, 0, 0);     /* Initialize the semaphore that controls access */
+  nxsem_init(&nmp->nm_sem, 0, 0);   /* Initialize the semaphore that controls access */
 
   /* Initialize NFS */
 

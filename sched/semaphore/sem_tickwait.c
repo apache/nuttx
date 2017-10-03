@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/semaphore/sem_tickdwait.c
+ * sched/semaphore/sem_tickwait.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_tickwait
+ * Name: nxsem_tickwait
  *
  * Description:
  *   This function is a lighter weight version of sem_timedwait().  It is
@@ -76,12 +76,14 @@
  *             to sem_trywait().
  *
  * Return Value:
- *   Zero (OK) is returned on success.  A negated errno value is returned on
- *   failure.  -ETIMEDOUT is returned on the timeout condition.
+ *   This is an internal OS interface, not available to applications, and
+ *   hence follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   -ETIMEDOUT is returned on the timeout condition.
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
+int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
@@ -147,7 +149,8 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 
   /* Start the watchdog with interrupts still disabled */
 
-  (void)wd_start(rtcb->waitdog, delay, (wdentry_t)sem_timeout, 1, getpid());
+  (void)wd_start(rtcb->waitdog, delay, (wdentry_t)nxsem_timeout,
+                 1, getpid());
 
   /* Now perform the blocking wait */
 

@@ -956,7 +956,7 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Initialize the wait semaphore */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Put the interface in the down state.  This usually amounts to resetting

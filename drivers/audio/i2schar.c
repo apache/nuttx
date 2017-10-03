@@ -393,7 +393,7 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
       /* Initialize the I2S character device structure */
 
       priv->i2s = i2s;
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 
       /* Create the character device name */
 

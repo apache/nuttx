@@ -543,7 +543,7 @@ void os_start(void)
    * because many subsystems depend upon fully functional semaphores.
    */
 
-  sem_initialize();
+  nxsem_initialize();
 
 #if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || \
     defined(CONFIG_MM_PGALLOC)

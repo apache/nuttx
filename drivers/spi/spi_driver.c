@@ -384,7 +384,7 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
 
       priv->spi = spi;
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 #endif
 
       /* Create the character device name */

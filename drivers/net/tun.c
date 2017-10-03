@@ -872,8 +872,8 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
 
   /* Initialize the mutual exlcusion and wait semaphore */
 
-  sem_init(&priv->waitsem, 0, 1);
-  sem_init(&priv->read_wait_sem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 1);
+  nxsem_init(&priv->read_wait_sem, 0, 0);
 
   /* The wait semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -1272,7 +1272,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int tun_initialize(void)
 {
-  sem_init(&g_tun.waitsem, 0, 1);
+  nxsem_init(&g_tun.waitsem, 0, 1);
 
   g_tun.free_tuns = (1 << CONFIG_TUN_NINTERFACES) - 1;
 

@@ -363,7 +363,7 @@ void sam_progmem_initialize(void)
    * page buffer.
    */
 
-  sem_init(&g_page_sem, 0, 1);
+  nxsem_init(&g_page_sem, 0, 1);
 }
 
 /****************************************************************************

@@ -120,7 +120,7 @@ void pktradio_metadata_initialize(void)
 
       /* Initialize the mutual exclusion semaphore */
 
-      sem_init(&g_metadata_sem, 0, 1);
+      nxsem_init(&g_metadata_sem, 0, 1);
       g_metadata_initialized = true;
     }
 }

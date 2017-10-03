@@ -787,7 +787,7 @@ FAR struct battery_charger_dev_s *
     {
       /* Initialize the BQ2425x device structure */
 
-      sem_init(&priv->batsem, 0, 1);
+      nxsem_init(&priv->batsem, 0, 1);
       priv->ops       = &g_bq2425xops;
       priv->i2c       = i2c;
       priv->addr      = addr;

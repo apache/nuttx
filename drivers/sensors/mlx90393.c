@@ -589,7 +589,7 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   priv->work.worker = NULL;
 
-  sem_init(&priv->datasem, 0, 1);       /* Initialize sensor data access
+  nxsem_init(&priv->datasem, 0, 1);     /* Initialize sensor data access
                                          * semaphore */
 
   /* Setup SPI frequency and mode */

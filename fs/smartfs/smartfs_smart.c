@@ -1564,7 +1564,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
   fs->fs_sem = &g_sem;
   if (!g_seminitialized)
     {
-      sem_init(&g_sem, 0, 0);   /* Initialize the semaphore that controls access */
+      nxsem_init(&g_sem, 0, 0);  /* Initialize the semaphore that controls access */
       g_seminitialized = TRUE;
     }
   else

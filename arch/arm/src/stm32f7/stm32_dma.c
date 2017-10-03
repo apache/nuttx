@@ -478,7 +478,7 @@ void weak_function up_dmainitialize(void)
   for (stream = 0; stream < DMA_NSTREAMS; stream++)
     {
       dmast = &g_dma[stream];
-      sem_init(&dmast->sem, 0, 1);
+      nxsem_init(&dmast->sem, 0, 1);
 
       /* Attach DMA interrupt vectors */
 

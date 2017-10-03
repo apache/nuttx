@@ -43,6 +43,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
 /****************************************************************************
@@ -87,7 +88,7 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
    * private data sets).
    */
 
-  (void)sem_init(&heap->mm_semaphore, 0, 1);
+  (void)nxsem_init(&heap->mm_semaphore, 0, 1);
 
   heap->mm_holder      = -1;
   heap->mm_counts_held = 0;

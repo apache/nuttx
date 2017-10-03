@@ -760,7 +760,7 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
 
 #endif
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   return &priv->dev;
 }
 

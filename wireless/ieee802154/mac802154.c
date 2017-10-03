@@ -130,7 +130,7 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
       sq_addlast((FAR sq_entry_t *)&priv->txdesc_pool[i], &priv->txdesc_queue);
     }
 
-  sem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
+  nxsem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
 
   /* Initialize the notifcation allocation pool */
 
@@ -1963,11 +1963,11 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   /* Allow exclusive access to the privmac struct */
 
-  sem_init(&mac->exclsem, 0, 1);
+  nxsem_init(&mac->exclsem, 0, 1);
 
   /* Allow exclusive access to the dedicated command transaction */
 
-  sem_init(&mac->opsem, 0, 1);
+  nxsem_init(&mac->opsem, 0, 1);
 
   /* Initialize fields */
 

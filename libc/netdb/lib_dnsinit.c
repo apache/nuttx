@@ -94,7 +94,7 @@ bool dns_initialize(void)
 
   if (!g_dns_initialized)
     {
-      sem_init(&g_dns_sem, 0, 1);
+      nxsem_init(&g_dns_sem, 0, 1);
       g_dns_initialized = true;
     }
 

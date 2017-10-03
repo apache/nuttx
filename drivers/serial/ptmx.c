@@ -310,7 +310,7 @@ int ptmx_register(void)
 {
   /* Initialize driver state */
 
-  sem_init(&g_ptmx.px_exclsem, 0, 1);
+  nxsem_init(&g_ptmx.px_exclsem, 0, 1);
 
   /* Register the PTMX driver */
 

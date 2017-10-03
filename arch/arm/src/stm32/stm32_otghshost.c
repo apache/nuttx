@@ -5189,8 +5189,8 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
 
   /* Initialize semaphores */
 
-  sem_init(&priv->pscsem,  0, 0);
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->pscsem,  0, 0);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* The pscsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -5220,7 +5220,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
        * have priority inheritance enabled.
        */
 
-      sem_init(&chan->waitsem,  0, 0);
+      nxsem_init(&chan->waitsem,  0, 0);
       sem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }

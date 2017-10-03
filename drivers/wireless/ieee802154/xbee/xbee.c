@@ -862,7 +862,7 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
 
   /* Allow exclusive access to the struct */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Initialize the data indication and notifcation allocation pools */
 
@@ -1135,7 +1135,7 @@ void xbee_query_firmwareversion(FAR struct xbee_priv_s *priv)
   struct xbee_respwaiter_s respwaiter;
 
   respwaiter.resp_id = XBEE_RESP_AT_FIRMWAREVERSION;
-  sem_init(&respwaiter.sem, 0, 0);
+  nxsem_init(&respwaiter.sem, 0, 0);
   sem_setprotocol(&respwaiter.sem, SEM_PRIO_NONE);
 
   xbee_register_respwaiter(priv, &respwaiter);
@@ -1162,7 +1162,7 @@ void xbee_query_panid(FAR struct xbee_priv_s *priv)
   struct xbee_respwaiter_s respwaiter;
 
   respwaiter.resp_id = XBEE_RESP_AT_NETWORKID;
-  sem_init(&respwaiter.sem, 0, 0);
+  nxsem_init(&respwaiter.sem, 0, 0);
   sem_setprotocol(&respwaiter.sem, SEM_PRIO_NONE);
 
   xbee_register_respwaiter(priv, &respwaiter);
@@ -1189,7 +1189,7 @@ void xbee_query_eaddr(FAR struct xbee_priv_s *priv)
   struct xbee_respwaiter_s respwaiter;
 
   respwaiter.resp_id = XBEE_RESP_AT_SERIALHIGH;
-  sem_init(&respwaiter.sem, 0, 0);
+  nxsem_init(&respwaiter.sem, 0, 0);
   sem_setprotocol(&respwaiter.sem, SEM_PRIO_NONE);
 
   xbee_register_respwaiter(priv, &respwaiter);
@@ -1220,7 +1220,7 @@ void xbee_query_saddr(FAR struct xbee_priv_s *priv)
   struct xbee_respwaiter_s respwaiter;
 
   respwaiter.resp_id = XBEE_RESP_AT_SOURCEADDR;
-  sem_init(&respwaiter.sem, 0, 0);
+  nxsem_init(&respwaiter.sem, 0, 0);
   sem_setprotocol(&respwaiter.sem, SEM_PRIO_NONE);
 
   xbee_register_respwaiter(priv, &respwaiter);
@@ -1247,7 +1247,7 @@ void xbee_query_chan(FAR struct xbee_priv_s *priv)
   struct xbee_respwaiter_s respwaiter;
 
   respwaiter.resp_id = XBEE_RESP_AT_CHAN;
-  sem_init(&respwaiter.sem, 0, 0);
+  nxsem_init(&respwaiter.sem, 0, 0);
   sem_setprotocol(&respwaiter.sem, SEM_PRIO_NONE);
 
   xbee_register_respwaiter(priv, &respwaiter);

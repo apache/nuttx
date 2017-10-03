@@ -1460,7 +1460,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   /* Setup a locking semaphore for exclusive device driver access */
 
-  sem_init(&priv->md_exclsem, 0, 1);
+  nxsem_init(&priv->md_exclsem, 0, 1);
 
   DEBUGASSERT(priv->md_txpoll != NULL);
 
@@ -1477,7 +1477,7 @@ int mac802154netdev_register(MACHANDLE mac)
   /* Initialize fields related to MAC event handling */
 
   priv->md_eventpending = false;
-  sem_init(&priv->md_eventsem, 0, 0);
+  nxsem_init(&priv->md_eventsem, 0, 0);
   sem_setprotocol(&priv->md_eventsem, SEM_PRIO_NONE);
 
   priv->md_eventhead = NULL;

@@ -1169,11 +1169,11 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 
   /* Initialize semaphores */
 
-  sem_init(&dev->cd_xmit.tx_sem, 0, 1);
-  sem_init(&dev->cd_recv.rx_sem, 0, 1);
-  sem_init(&dev->cd_closesem,    0, 1);
+  nxsem_init(&dev->cd_xmit.tx_sem, 0, 1);
+  nxsem_init(&dev->cd_recv.rx_sem, 0, 1);
+  nxsem_init(&dev->cd_closesem,    0, 1);
 #ifndef CONFIG_DISABLE_POLL
-  sem_init(&dev->cd_pollsem,     0, 1);
+  nxsem_init(&dev->cd_pollsem,     0, 1);
 #endif
 
   for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
@@ -1182,7 +1182,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
        * and should not have priority inheritance enabled.
        */
 
-      sem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
+      nxsem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
       sem_setprotocol(&dev->cd_rtr[i].cr_sem, SEM_PRIO_NONE);
       dev->cd_rtr[i].cr_msg = NULL;
     }

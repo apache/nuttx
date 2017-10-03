@@ -98,7 +98,7 @@ void inode_initialize(void)
    * inode tree).
    */
 
-  (void)sem_init(&g_inode_sem.sem, 0, 1);
+  (void)nxsem_init(&g_inode_sem.sem, 0, 1);
   g_inode_sem.holder = NO_HOLDER;
   g_inode_sem.count  = 0;
 

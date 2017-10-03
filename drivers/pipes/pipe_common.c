@@ -169,9 +169,9 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
       /* Initialize the private structure */
 
       memset(dev, 0, sizeof(struct pipe_dev_s));
-      sem_init(&dev->d_bfsem, 0, 1);
-      sem_init(&dev->d_rdsem, 0, 0);
-      sem_init(&dev->d_wrsem, 0, 0);
+      nxsem_init(&dev->d_bfsem, 0, 1);
+      nxsem_init(&dev->d_rdsem, 0, 0);
+      nxsem_init(&dev->d_wrsem, 0, 0);
 
      /* The read/write wait semaphores are used for signaling and, hence,
       * should not have priority inheritance enabled.
@@ -254,7 +254,7 @@ int pipecommon_open(FAR struct file *filep)
 
       if (dev->d_nwriters == 1)
         {
-          while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+          while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
             {
               sem_post(&dev->d_rdsem);
             }
@@ -349,7 +349,7 @@ int pipecommon_close(FAR struct file *filep)
 
           if (--dev->d_nwriters <= 0)
             {
-              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   sem_post(&dev->d_rdsem);
                 }
@@ -494,7 +494,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Notify all waiting writers that bytes have been removed from the buffer */
 
-  while (sem_getvalue(&dev->d_wrsem, &sval) == 0 && sval < 0)
+  while (nxsem_getvalue(&dev->d_wrsem, &sval) == 0 && sval < 0)
     {
       sem_post(&dev->d_wrsem);
     }
@@ -580,7 +580,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
-              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   sem_post(&dev->d_rdsem);
                 }
@@ -603,7 +603,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
-              while (sem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   sem_post(&dev->d_rdsem);
                 }

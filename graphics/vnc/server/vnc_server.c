@@ -131,8 +131,8 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   /* Set the INITIALIZED state */
 
-  sem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
-  sem_reset(&session->queuesem, 0);
+  nxsem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
+  nxsem_reset(&session->queuesem, 0);
 
   session->fb      = fb;
   session->display = display;
@@ -291,8 +291,8 @@ int vnc_server(int argc, FAR char *argv[])
     }
 
   g_vnc_sessions[display] = session;
-  sem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
-  sem_init(&session->queuesem, 0, 0);
+  nxsem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
+  nxsem_init(&session->queuesem, 0, 0);
 
   /* Inform any waiter that we have started */
 
@@ -311,7 +311,7 @@ int vnc_server(int argc, FAR char *argv[])
 
       vnc_reset_session(session, fb, display);
       g_fbstartup[display].result = -EBUSY;
-      sem_reset(&g_fbstartup[display].fbconnect, 0);
+      nxsem_reset(&g_fbstartup[display].fbconnect, 0);
 
       /* Establish a connection with the VNC client */
 

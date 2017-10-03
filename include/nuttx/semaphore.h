@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/semaphore.h
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,34 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_tickwait
+ * Name: nxsem_init
+ *
+ * Description:
+ *   This function initializes the UNAMED semaphore sem. Following a
+ *   successful call to nxsem_init(), the semaphore may be used in subsequent
+ *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   remains usable until it is destroyed.
+ *
+ *   Only sem itself may be used for performing synchronization. The result
+ *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
+ *   sem_post(), and sem_destroy() is undefined.
+ *
+ * Parameters:
+ *   sem - Semaphore to be initialized
+ *   pshared - Process sharing (not used)
+ *   value - Semaphore initialization value
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used byapplications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
+
+/****************************************************************************
+ * Name: nxsem_tickwait
  *
  * Description:
  *   This function is a lighter weight version of sem_timedwait().  It is
@@ -115,19 +142,49 @@ extern "C"
  *             to sem_trywait().
  *
  * Return Value:
- *   Zero (OK) is returned on success.  A negated errno value is returned on
- *   failure.  -ETIMEDOUT is returned on the timeout condition.
+ *   This is an internal OS interface, not available to applications, and
+ *   hence follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   -ETIMEDOUT is returned on the timeout condition.
  *
  ****************************************************************************/
 
-int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
+int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
 
 /****************************************************************************
- * Name: sem_reset
+ * Name:  nxsem_getvalue
+ *
+ * Description:
+ *   This function updates the location referenced by 'sval' argument to
+ *   have the value of the semaphore referenced by 'sem' without effecting
+ *   the state of the semaphore.  The updated value represents the actual
+ *   semaphore value that occurred at some unspecified time during the call,
+ *   but may not reflect the actual value of the semaphore when it is
+ *   returned to the calling task.
+ *
+ *   If 'sem' is locked, the value return by nxsem_getvalue() will either be
+ *   zero or a negative number whose absolute value represents the number
+ *   of tasks waiting for the semaphore.
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor
+ *   sval - Buffer by which the value is returned
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_getvalue(FAR sem_t *sem, FAR int *sval);
+
+/****************************************************************************
+ * Name: nxsem_reset
  *
  * Description:
  *   Reset a semaphore count to a specific value.  This is similar to part
- *   of the operation of sem_init().  But sem_reset() may need to wake up
+ *   of the operation of nxsem_init().  But nxsem_reset() may need to wake up
  *   tasks waiting on a count.  This kind of operation is sometimes required
  *   within the OS (only) for certain error handling conditions.
  *
@@ -136,11 +193,13 @@ int sem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
  *   count - The requested semaphore count
  *
  * Return Value:
- *   0 (OK) or a negated errno value if unsuccessful
+ *   This is an internal OS interface, not available to applications, and
+ *   hence follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sem_reset(FAR sem_t *sem, int16_t count);
+int nxsem_reset(FAR sem_t *sem, int16_t count);
 
 /****************************************************************************
  * Name: sem_getprotocol
@@ -155,8 +214,9 @@ int sem_reset(FAR sem_t *sem, int16_t count);
  *               value.
  *
  * Return Value:
- *   0 if successful.  Otherwise, -1 is returned and the errno value is set
- *   appropriately.
+ *   This function is exposed as a non-standard application interface.  It
+ *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.
  *
  ****************************************************************************/
 
@@ -193,8 +253,9 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  *    protocol - The new protocol to use
  *
  * Return Value:
- *   0 if successful.  Otherwise, -1 is returned and the errno value is set
- *   appropriately.
+ *   This function is exposed as a non-standard application interface.  It
+ *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.
  *
  ****************************************************************************/
 

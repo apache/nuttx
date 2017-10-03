@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/semaphore/sem_getprotocol.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,9 @@
  *               value.
  *
  * Return Value:
- *   0 if successful.  Otherwise, -1 is returned and the errno value is set
- *   appropriately.
+ *   This function is exposed as a non-standard application interface.  It
+ *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.
  *
  ****************************************************************************/
 

@@ -555,7 +555,7 @@ int userled_register(FAR const char *devname,
   /* Initialize the new LED driver instance */
 
   priv->lu_lower = lower;
-  sem_init(&priv->lu_exclsem, 0, 1);
+  nxsem_init(&priv->lu_exclsem, 0, 1);
 
   DEBUGASSERT(lower && lower->ll_supported);
   priv->lu_supported = lower->ll_supported(lower);

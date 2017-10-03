@@ -185,7 +185,8 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Start the watchdog */
 
-  (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)sem_timeout, 1, getpid());
+  (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)nxsem_timeout,
+                 1, getpid());
 
   /* Now perform the blocking wait */
 

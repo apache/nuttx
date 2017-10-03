@@ -290,7 +290,7 @@ int arp_send(in_addr_t ipaddr)
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
   sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_retries   = 0;              /* No retries yet */

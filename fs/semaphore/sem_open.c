@@ -239,7 +239,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
       /* Initialize the semaphore */
 
-      sem_init(&nsem->ns_sem, 0, value);
+      nxsem_init(&nsem->ns_sem, 0, value);
 
       /* Return a reference to the semaphore */
 

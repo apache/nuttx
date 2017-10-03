@@ -1510,13 +1510,13 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_STM32L4_SPI_DMA
   /* Initialize the SPI semaphores that is used to wait for DMA completion */
 
-  sem_init(&priv->rxsem, 0, 0);
-  sem_init(&priv->txsem, 0, 0);
+  nxsem_init(&priv->rxsem, 0, 0);
+  nxsem_init(&priv->txsem, 0, 0);
 
   /* These semaphores are used for signaling and, hence, should not have
    * priority inheritance enabled.

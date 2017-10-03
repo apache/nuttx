@@ -305,7 +305,7 @@ void weak_function up_dmainitialize(void)
 
   /* Initialize the DMA state structure */
 
-  sem_init(&g_gpdma.exclsem, 0, 1);
+  nxsem_init(&g_gpdma.exclsem, 0, 1);
 
   for (i = 0; i < LPC17_NDMACH; i++)
     {

@@ -1430,7 +1430,7 @@ void up_usbinitialize(void)
       return;
     }
 
-  sem_init(&dma_wait, 0, 0);
+  nxsem_init(&dma_wait, 0, 0);
   hdma = lc823450_dmachannel(DMA_CHANNEL_USBDEV);
   lc823450_dmarequest(hdma, DMA_REQUEST_USBDEV);
 
@@ -1697,7 +1697,7 @@ void usbdev_msc_read_enter()
   privep->epcmd &= ~USB_EPCMD_EMPTY_EN;
   epcmd_write(CONFIG_USBMSC_EPBULKIN, (privep->epcmd));
   lc823450_dmareauest_dir(hdma, DMA_REQUEST_USBDEV, 1);
-  sem_init(&dma_wait, 0, 0);
+  nxsem_init(&dma_wait, 0, 0);
 }
 
 /****************************************************************************
@@ -1800,7 +1800,7 @@ void usbdev_msc_write_enter0(void)
   privep->epcmd &= ~USB_EPCMD_READY_EN;
   epcmd_write(CONFIG_USBMSC_EPBULKOUT, (privep->epcmd));
   lc823450_dmareauest_dir(hdma, DMA_REQUEST_USBDEV, 0);
-  sem_init(&dma_wait, 0, 0);
+  nxsem_init(&dma_wait, 0, 0);
 }
 
 /****************************************************************************

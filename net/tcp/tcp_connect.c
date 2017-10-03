@@ -106,7 +106,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
   (void)sem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
 
   pstate->tc_conn   = conn;

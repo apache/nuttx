@@ -124,7 +124,7 @@ void mac802154_notifpool_init(FAR struct ieee802154_privmac_s *priv)
       remaining--;
     }
 
-  sem_init(&priv->notif_sem, 0, CONFIG_MAC802154_NNOTIF);
+  nxsem_init(&priv->notif_sem, 0, CONFIG_MAC802154_NNOTIF);
 }
 
 /****************************************************************************

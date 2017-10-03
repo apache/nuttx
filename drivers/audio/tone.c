@@ -962,7 +962,7 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
    * kmm_zalloc()).
    */
 
-  sem_init(&upper->exclsem, 0, 1);
+  nxsem_init(&upper->exclsem, 0, 1);
   upper->devtone = tone;
   upper->oneshot = oneshot;
 #ifdef CONFIG_PWM_MULTICHAN

@@ -4802,7 +4802,7 @@ int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev)
 
   /* Initialize semaphores */
 
-  sem_init(&dev->hd_closesem, 0, 1);
+  nxsem_init(&dev->hd_closesem, 0, 1);
 
   /* Register the HRTIM character driver */
 

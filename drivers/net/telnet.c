@@ -777,7 +777,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   /* Initialize the allocated driver instance */
 
-  sem_init(&priv->td_exclsem, 0, 1);
+  nxsem_init(&priv->td_exclsem, 0, 1);
 
   priv->td_state   = STATE_NORMAL;
   priv->td_crefs   = 0;

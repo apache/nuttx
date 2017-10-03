@@ -874,7 +874,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     {
       /* Initialize the semaphore that controls access */
 
-      sem_init(&g_sem, 0, 0);
+      nxsem_init(&g_sem, 0, 0);
       g_seminitialized = TRUE;
     }
   else

@@ -407,7 +407,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
 
   /* Initialize the device state structure */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   priv->config = config;
 
 #ifdef CONFIG_ADXL345_SPI

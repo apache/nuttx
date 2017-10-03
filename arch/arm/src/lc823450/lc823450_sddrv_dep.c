@@ -289,9 +289,9 @@ SINT_T sddep_os_init(struct SdDrCfg_s *cfg)
 
 #ifdef CONFIG_LC823450_SDC_DMA
   _hrdma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  sem_init(&_sem_rwait[ch], 0, 0);
+  nxsem_init(&_sem_rwait[ch], 0, 0);
   _hwdma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  sem_init(&_sem_wwait[ch], 0, 0);
+  nxsem_init(&_sem_wwait[ch], 0, 0);
 #endif /* CONFIG_LC823450_SDC_DMA */
   return 0;
 }

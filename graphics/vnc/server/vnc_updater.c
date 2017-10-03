@@ -585,7 +585,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 
               curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
               sq_init(&session->updqueue);
-              sem_reset(&session->queuesem, 0);
+              nxsem_reset(&session->queuesem, 0);
 
               for (; curr != NULL; curr = next)
                 {

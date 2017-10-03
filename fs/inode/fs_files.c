@@ -151,7 +151,7 @@ void files_initlist(FAR struct filelist *list)
 
   /* Initialize the list access mutex */
 
-  (void)sem_init(&list->fl_sem, 0, 1);
+  (void)nxsem_init(&list->fl_sem, 0, 1);
 }
 
 /****************************************************************************

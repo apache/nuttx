@@ -1255,8 +1255,8 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   memset(priv, 0, sizeof(struct tsc2007_dev_s));
   priv->i2c    = dev;             /* Save the I2C device handle */
   priv->config = config;          /* Save the board configuration */
-  sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
-  sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+  nxsem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
+  nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
   /* Make sure that interrupts are disabled */
 

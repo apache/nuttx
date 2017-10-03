@@ -1382,8 +1382,8 @@ void weak_function up_dmainitialize(void)
 
   /* Initialize semaphores */
 
-  sem_init(&g_chsem, 0, 1);
-  sem_init(&g_dsem, 0, CONFIG_SAM34_NLLDESC);
+  nxsem_init(&g_chsem, 0, 1);
+  nxsem_init(&g_dsem, 0, CONFIG_SAM34_NLLDESC);
 }
 
 /****************************************************************************

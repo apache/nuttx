@@ -535,9 +535,9 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
       inst->nchannels = CONFIG_ADC_NCHANNELS;
       inst->chanlist = lc823450_chanlist;
 
-      sem_init(&inst->sem_excl, 0, 1);
+      nxsem_init(&inst->sem_excl, 0, 1);
 #ifndef CONFIG_ADC_POLLED
-      sem_init(&inst->sem_isr, 0, 0);
+      nxsem_init(&inst->sem_isr, 0, 0);
 #endif
 
       lc823450_adc_sem_wait(inst);

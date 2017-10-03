@@ -1037,7 +1037,7 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
   int i;
 
   priv->freelist = NULL;
-  sem_init(&priv->bufsem, 0, CONFIG_SAMA5_SSC_MAXINFLIGHT);
+  nxsem_init(&priv->bufsem, 0, CONFIG_SAMA5_SSC_MAXINFLIGHT);
 
   for (i = 0; i < CONFIG_SAMA5_SSC_MAXINFLIGHT; i++)
     {
@@ -3430,7 +3430,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
 
   /* Initialize the common parts for the SSC device structure  */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   priv->dev.ops = &g_sscops;
   priv->sscno   = port;
 

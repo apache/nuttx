@@ -135,7 +135,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
       /* Initialize mutual exclusion support */
 
 #ifndef CONFIG_GRAN_INTR
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 #endif
     }
 

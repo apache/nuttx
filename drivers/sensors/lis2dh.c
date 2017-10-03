@@ -2015,7 +2015,7 @@ int lis2dh_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return -ENOMEM;
     }
 
-  sem_init(&priv->devsem, 0, 1);
+  nxsem_init(&priv->devsem, 0, 1);
 
   priv->fifo_used = false;
 #ifdef LIS2DH_COUNT_INTS

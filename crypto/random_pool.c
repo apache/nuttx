@@ -370,7 +370,7 @@ static void rng_init(void)
   cryptinfo("Initializing RNG\n");
 
   memset(&g_rng, 0, sizeof(struct rng_s));
-  sem_init(&g_rng.rd_sem, 0, 1);
+  nxsem_init(&g_rng.rd_sem, 0, 1);
 
   /* We do not initialize output here because this is called
    * quite early in boot and there may not be enough entropy.

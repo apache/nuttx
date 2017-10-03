@@ -1302,7 +1302,7 @@ static FAR struct usbhost_class_s *
 
   /* Initialize semaphores (this works okay in the interrupt context) */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Initialize per-port data */
 

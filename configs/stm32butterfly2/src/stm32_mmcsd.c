@@ -198,7 +198,7 @@ int stm32_mmcsd_initialize(int minor)
 
   (void)stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
 
-  sem_init(&g_cdsem, 0, 0);
+  nxsem_init(&g_cdsem, 0, 0);
   pthread_attr_init(&pattr);
 
 #ifdef CONFIG_DEBUG_FS

@@ -1317,12 +1317,12 @@ void up_serialinit(void)
 #ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #ifdef CONFIG_HSUART
-  sem_init(&g_uart1priv.txdma_wait, 0, 1);
+  nxsem_init(&g_uart1priv.txdma_wait, 0, 1);
   g_uart1priv.htxdma = lc823450_dmachannel(DMA_CHANNEL_UART1TX);
   lc823450_dmarequest(g_uart1priv.htxdma, DMA_REQUEST_UART1TX);
 
 
-  sem_init(&g_uart1priv.rxdma_wait, 0, 0);
+  nxsem_init(&g_uart1priv.rxdma_wait, 0, 0);
   g_uart1priv.hrxdma = lc823450_dmachannel(DMA_CHANNEL_UART1RX);
   lc823450_dmarequest(g_uart1priv.hrxdma, DMA_REQUEST_UART1RX);
 

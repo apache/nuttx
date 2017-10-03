@@ -967,7 +967,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
   nand->mtd.ioctl  = nand_ioctl;
   nand->raw        = raw;
 
-  sem_init(&nand->exclsem, 0, 1);
+  nxsem_init(&nand->exclsem, 0, 1);
 
   /* Scan the device for bad blocks */
 

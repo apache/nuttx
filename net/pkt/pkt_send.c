@@ -209,7 +209,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
   (void)sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock      = psock;          /* Socket descriptor to use */

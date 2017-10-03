@@ -1144,7 +1144,7 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
    */
 
   sem_destroy(&priv->txfsem);
-  sem_init(&priv->txfsem, 0, config->ntxbuffers);
+  nxsem_init(&priv->txfsem, 0, config->ntxbuffers);
 
   /* Define the current state and unlock */
 
@@ -2516,8 +2516,8 @@ FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *confi
 
   /* Initialize semaphores */
 
-  sem_init(&priv->locksem, 0, 1);
-  sem_init(&priv->txfsem, 0, config->ntxbuffers);
+  nxsem_init(&priv->locksem, 0, 1);
+  nxsem_init(&priv->txfsem, 0, config->ntxbuffers);
 
   /* And put the hardware in the initial state */
 

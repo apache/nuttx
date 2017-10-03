@@ -599,9 +599,9 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
 
   /* Initialize the PWM device structure (it was already zeroed by kmm_zalloc()) */
 
-  sem_init(&upper->exclsem, 0, 1);
+  nxsem_init(&upper->exclsem, 0, 1);
 #ifdef CONFIG_PWM_PULSECOUNT
-  sem_init(&upper->waitsem, 0, 0);
+  nxsem_init(&upper->waitsem, 0, 0);
 
   /* The wait semaphore is used for signaling and, hence, should not have priority
    * inheritance enabled.

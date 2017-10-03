@@ -1492,8 +1492,8 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
       return NULL;
     }
 
-  sem_init(&dev->ieee.rxsem, 0, 0);
-  sem_init(&dev->ieee.txsem, 0, 0);
+  nxsem_init(&dev->ieee.rxsem, 0, 0);
+  nxsem_init(&dev->ieee.txsem, 0, 0);
 
   /* Initialize device */
 

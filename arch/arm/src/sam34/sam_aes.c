@@ -225,7 +225,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
 
 int up_aesinitialize()
 {
-  sem_init(&lock, 0, 1);
+  nxsem_init(&lock, 0, 1);
   sam_aes_enableclk();
   putreg32(AES_CR_SWRST, SAM_AES_CR);
   return OK;

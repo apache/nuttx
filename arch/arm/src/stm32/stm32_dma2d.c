@@ -2160,14 +2160,14 @@ int up_dma2dinitialize(void)
        * to the driver
        */
 
-      sem_init(&g_lock, 0, 1);
+      nxsem_init(&g_lock, 0, 1);
 
       /* Initialize the semaphore for interrupt handling.  This waitsem
        * semaphore is used for signaling and, hence, should not have
        * priority inheritance enabled.
        */
 
-      sem_init(g_interrupt.sem, 0, 0);
+      nxsem_init(g_interrupt.sem, 0, 0);
       sem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
 
 #ifdef CONFIG_STM32_DMA2D_L8

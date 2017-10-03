@@ -1455,7 +1455,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   /* Setup a locking semaphore for exclusive device driver access */
 
-  sem_init(&priv->xd_exclsem, 0, 1);
+  nxsem_init(&priv->xd_exclsem, 0, 1);
 
   DEBUGASSERT(priv->xd_txpoll != NULL);
 
@@ -1472,7 +1472,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
   /* Initialize fields related to MAC event handling */
 
   priv->xd_eventpending = false;
-  sem_init(&priv->xd_eventsem, 0, 0);
+  nxsem_init(&priv->xd_eventsem, 0, 0);
   sem_setprotocol(&priv->xd_eventsem, SEM_PRIO_NONE);
 
   priv->xd_eventhead = NULL;

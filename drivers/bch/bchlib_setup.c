@@ -118,7 +118,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 
   /* Save the geometry info and complete initialization of the structure */
 
-  sem_init(&bch->sem, 0, 1);
+  nxsem_init(&bch->sem, 0, 1);
   bch->nsectors = geo.geo_nsectors;
   bch->sectsize = geo.geo_sectorsize;
   bch->sector   = (size_t)-1;

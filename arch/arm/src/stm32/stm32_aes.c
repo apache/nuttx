@@ -293,7 +293,7 @@ int up_aesinitialize(void)
 {
   uint32_t regval;
 
-  sem_init(&aes_lock, 0, 1);
+  nxsem_init(&aes_lock, 0, 1);
 
   regval = getreg32(STM32_RCC_AHBENR);
   regval |= RCC_AHBENR_AESEN;

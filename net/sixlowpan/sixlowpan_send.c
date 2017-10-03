@@ -281,7 +281,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
   /* Initialize the send state structure */
 
-  sem_init(&sinfo.s_waitsem, 0, 0);
+  nxsem_init(&sinfo.s_waitsem, 0, 0);
   (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
   sinfo.s_result  = -EBUSY;

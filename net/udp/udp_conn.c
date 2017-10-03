@@ -445,7 +445,7 @@ void udp_initialize(void)
 
   dq_init(&g_free_udp_connections);
   dq_init(&g_active_udp_connections);
-  sem_init(&g_free_sem, 0, 1);
+  nxsem_init(&g_free_sem, 0, 1);
 
   for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
     {

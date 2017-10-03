@@ -405,7 +405,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
 
   /* The SYSLOG device is open and ready for writing. */
 
-  sem_init(&g_syslog_dev.sl_sem, 0, 1);
+  nxsem_init(&g_syslog_dev.sl_sem, 0, 1);
   g_syslog_dev.sl_holder = NO_HOLDER;
   g_syslog_dev.sl_state  = SYSLOG_OPENED;
   return OK;

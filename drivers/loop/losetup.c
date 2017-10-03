@@ -413,7 +413,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
 
   /* Initialize the loop device structure. */
 
-  sem_init(&dev->sem, 0, 1);
+  nxsem_init(&dev->sem, 0, 1);
   dev->nsectors  = (sb.st_size - offset) / sectsize;
   dev->sectsize  = sectsize;
   dev->offset    = offset;

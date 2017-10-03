@@ -650,12 +650,12 @@ static int uart_close(FAR struct file *filep)
    * a thread currently blocking on any of them.
    */
 
-  sem_reset(&dev->xmitsem,  0);
-  sem_reset(&dev->recvsem,  0);
-  sem_reset(&dev->xmit.sem, 1);
-  sem_reset(&dev->recv.sem, 1);
+  nxsem_reset(&dev->xmitsem,  0);
+  nxsem_reset(&dev->recvsem,  0);
+  nxsem_reset(&dev->xmit.sem, 1);
+  nxsem_reset(&dev->recv.sem, 1);
 #ifndef CONFIG_DISABLE_POLL
-  sem_reset(&dev->pollsem,  1);
+  nxsem_reset(&dev->pollsem,  1);
 #endif
 
   uart_givesem(&dev->closesem);
@@ -1532,13 +1532,13 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
   /* Initialize semaphores */
 
-  sem_init(&dev->xmit.sem, 0, 1);
-  sem_init(&dev->recv.sem, 0, 1);
-  sem_init(&dev->closesem, 0, 1);
-  sem_init(&dev->xmitsem,  0, 0);
-  sem_init(&dev->recvsem,  0, 0);
+  nxsem_init(&dev->xmit.sem, 0, 1);
+  nxsem_init(&dev->recv.sem, 0, 1);
+  nxsem_init(&dev->closesem, 0, 1);
+  nxsem_init(&dev->xmitsem,  0, 0);
+  nxsem_init(&dev->recvsem,  0, 0);
 #ifndef CONFIG_DISABLE_POLL
-  sem_init(&dev->pollsem,  0, 1);
+  nxsem_init(&dev->pollsem,  0, 1);
 #endif
 
   /* The recvsem and xmitsem are used for signaling and, hence, should not have

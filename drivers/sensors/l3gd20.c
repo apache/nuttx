@@ -617,7 +617,7 @@ int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize sensor data access semaphore */
 
-  sem_init(&priv->datasem, 0, 1);
+  nxsem_init(&priv->datasem, 0, 1);
 
   /* Setup SPI frequency and mode */
 

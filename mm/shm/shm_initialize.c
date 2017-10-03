@@ -87,7 +87,7 @@ void shm_initialize(void)
 
   /* Initialize the shared memory region list */
 
-  sem_init(&g_shminfo.si_sem, 0, 1);
+  nxsem_init(&g_shminfo.si_sem, 0, 1);
 
 #if 0
   /* Initialize each shared memory region */

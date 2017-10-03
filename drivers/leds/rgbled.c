@@ -454,7 +454,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
    * kmm_zalloc())
    */
 
-  sem_init(&upper->exclsem, 0, 1);
+  nxsem_init(&upper->exclsem, 0, 1);
   upper->devledr = ledr;
   upper->devledg = ledg;
   upper->devledb = ledb;

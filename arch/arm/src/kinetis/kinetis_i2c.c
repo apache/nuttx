@@ -316,13 +316,13 @@ static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv, uint8_t value,
 
 static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv)
 {
-  sem_init(&priv->mutex, 0, 1);
+  nxsem_init(&priv->mutex, 0, 1);
 
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
-  sem_init(&priv->wait, 0, 0);
+  nxsem_init(&priv->wait, 0, 0);
   sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 }
 

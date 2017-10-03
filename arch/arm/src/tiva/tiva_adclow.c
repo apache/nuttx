@@ -802,7 +802,7 @@ static struct tiva_adc_s *tiva_adc_struct_init(struct tiva_adc_cfg_s *cfg)
                     {
                       sse->adc = cfg->adc;
                       sse->num = s;
-                      sem_init(&sse->exclsem, SEM_PROCESS_PRIVATE, 1);
+                      nxsem_init(&sse->exclsem, SEM_PROCESS_PRIVATE, 1);
                       sse->ena = false;
                       sse->cfg = true;
                     }

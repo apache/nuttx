@@ -99,7 +99,7 @@ FAR struct local_conn_s *local_alloc(void)
        * priority inheritance enabled.
        */
 
-      sem_init(&conn->lc_waitsem, 0, 0);
+      nxsem_init(&conn->lc_waitsem, 0, 0);
       sem_setprotocol(&conn->lc_waitsem, SEM_PRIO_NONE);
 
 #ifdef HAVE_LOCAL_POLL

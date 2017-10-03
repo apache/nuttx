@@ -1136,7 +1136,7 @@ int cypress_mbr3108_register(FAR const char *devpath,
   priv->board = board_config;
   priv->sensor_conf = sensor_conf;
 
-  sem_init(&priv->devsem, 0, 1);
+  nxsem_init(&priv->devsem, 0, 1);
 
   ret = register_driver(devpath, &g_mbr3108_fileops, 0666, priv);
   if (ret < 0)

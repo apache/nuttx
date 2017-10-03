@@ -387,7 +387,7 @@ int up_hrttimer_usleep(unsigned int usec)
 {
   struct hrt_s hrt;
 
-  sem_init(&hrt.sem, 0, 0);
+  nxsem_init(&hrt.sem, 0, 0);
   hrt.usec = usec;
 
   hrt_usleep_add(&hrt);

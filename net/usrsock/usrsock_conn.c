@@ -256,7 +256,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 {
   int ret = -EBUSY;
 
-  (void)sem_init(&pstate->recvsem, 0, 0);
+  (void)nxsem_init(&pstate->recvsem, 0, 0);
   pstate->conn   = conn;
   pstate->result = -EAGAIN;
   pstate->completed = false;
@@ -324,7 +324,7 @@ void usrsock_initialize(void)
 
   dq_init(&g_free_usrsock_connections);
   dq_init(&g_active_usrsock_connections);
-  sem_init(&g_free_sem, 0, 1);
+  nxsem_init(&g_free_sem, 0, 1);
 
   for (i = 0; i < CONFIG_NET_USRSOCK_CONNS; i++)
     {

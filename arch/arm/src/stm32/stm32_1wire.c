@@ -708,8 +708,8 @@ static int stm32_1wire_deinit(FAR struct stm32_1wire_priv_s *priv)
 
 static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
 {
-  sem_init(&priv->sem_excl, 0, 1);
-  sem_init(&priv->sem_isr, 0, 0);
+  nxsem_init(&priv->sem_excl, 0, 1);
+  nxsem_init(&priv->sem_isr, 0, 0);
 
   /* The sem_isr semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

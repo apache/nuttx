@@ -634,7 +634,7 @@ static FAR struct tmpfs_file_s *tmpfs_alloc_file(void)
 
   tfo->tfo_exclsem.ts_holder = getpid();
   tfo->tfo_exclsem.ts_count  = 1;
-  sem_init(&tfo->tfo_exclsem.ts_sem, 0, 0);
+  nxsem_init(&tfo->tfo_exclsem.ts_sem, 0, 0);
 
   return tfo;
 }
@@ -792,7 +792,7 @@ static FAR struct tmpfs_directory_s *tmpfs_alloc_directory(void)
 
   tdo->tdo_exclsem.ts_holder = TMPFS_NO_HOLDER;
   tdo->tdo_exclsem.ts_count  = 0;
-  sem_init(&tdo->tdo_exclsem.ts_sem, 0, 1);
+  nxsem_init(&tdo->tdo_exclsem.ts_sem, 0, 1);
 
   return tdo;
 }
@@ -2014,7 +2014,7 @@ static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   fs->tfs_exclsem.ts_holder = TMPFS_NO_HOLDER;
   fs->tfs_exclsem.ts_count  = 0;
-  sem_init(&fs->tfs_exclsem.ts_sem, 0, 1);
+  nxsem_init(&fs->tfs_exclsem.ts_sem, 0, 1);
 
   /* Return the new file system handle */
 

@@ -1545,7 +1545,7 @@ int board_lcd_initialize(void)
 
   /* Initialize the LCD state structure */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Allocate a DMA channel */
 

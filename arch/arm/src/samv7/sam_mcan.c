@@ -1441,7 +1441,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
           flags = enter_critical_section();
           txfqs1 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
-          (void)sem_getvalue(&priv->txfsem, &sval);
+          (void)nxsem_getvalue(&priv->txfsem, &sval);
           txfqs2 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
 
           /* If the semaphore count and the TXFQS samples are in
@@ -1477,7 +1477,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
           if (sval > 0)
             {
               canerr("ERROR: TX FIFOQ full but txfsem is %d\n", sval);
-              sem_reset(&priv->txfsem, 0);
+              nxsem_reset(&priv->txfsem, 0);
             }
         }
 
@@ -1542,7 +1542,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
           /* Reset the semaphore count to the Tx FIFO free level. */
 
-          sem_reset(&priv->txfsem, tffl);
+          nxsem_reset(&priv->txfsem, tffl);
         }
 #endif
 
@@ -1587,7 +1587,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
    * many times.
    */
 
-  (void)sem_getvalue(&priv->txfsem, &sval);
+  (void)nxsem_getvalue(&priv->txfsem, &sval);
   if (sval < priv->config->ntxfifoq)
     {
       sem_post(&priv->txfsem);
@@ -2270,7 +2270,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
    */
 
   sem_destroy(&priv->txfsem);
-  sem_init(&priv->txfsem, 0, config->ntxfifoq);
+  nxsem_init(&priv->txfsem, 0, config->ntxfifoq);
 
   /* Disable peripheral clocking to the MCAN controller */
 
@@ -2949,7 +2949,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
    * the TX FIFO/queue.  Make sure that they are consistent.
    */
 
-  (void)sem_getvalue(&priv->txfsem, &sval);
+  (void)nxsem_getvalue(&priv->txfsem, &sval);
   DEBUGASSERT(((notfull && sval > 0) || (!notfull && sval <= 0)) &&
               (sval <= priv->config->ntxfifoq));
 #endif
@@ -3016,7 +3016,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
    * elements, then there is no transfer in progress.
    */
 
-  (void)sem_getvalue(&priv->txfsem, &sval);
+  (void)nxsem_getvalue(&priv->txfsem, &sval);
   DEBUGASSERT(sval > 0 && sval <= priv->config->ntxfifoq);
 
   empty = (sval ==  priv->config->ntxfifoq);
@@ -4014,8 +4014,8 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
       /* Initialize semaphores */
 
-      sem_init(&priv->locksem, 0, 1);
-      sem_init(&priv->txfsem, 0, config->ntxfifoq);
+      nxsem_init(&priv->locksem, 0, 1);
+      nxsem_init(&priv->txfsem, 0, config->ntxfifoq);
 
       dev->cd_ops  = &g_mcanops;
       dev->cd_priv = (FAR void *)priv;

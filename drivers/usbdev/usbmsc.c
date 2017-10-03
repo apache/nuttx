@@ -1358,9 +1358,9 @@ int usbmsc_configure(unsigned int nluns, void **handle)
 
   /* Initialize semaphores */
 
-  sem_init(&priv->thsynch, 0, 0);
-  sem_init(&priv->thlock, 0, 1);
-  sem_init(&priv->thwaitsem, 0, 0);
+  nxsem_init(&priv->thsynch, 0, 0);
+  nxsem_init(&priv->thlock, 0, 1);
+  nxsem_init(&priv->thwaitsem, 0, 0);
 
   /* The thsynch and thwaitsem semaphores are used for signaling and, hence,
    * should not have priority inheritance enabled.

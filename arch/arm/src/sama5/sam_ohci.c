@@ -2663,7 +2663,7 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
 
   /* Initialize the endpoint container */
 
-  sem_init(&eplist->wdhsem, 0, 0);
+  nxsem_init(&eplist->wdhsem, 0, 0);
 
   /* The wdhsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -3907,8 +3907,8 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Initialize the state data structure */
 
-  sem_init(&g_ohci.pscsem,  0, 0);
-  sem_init(&g_ohci.exclsem, 0, 1);
+  nxsem_init(&g_ohci.pscsem,  0, 0);
+  nxsem_init(&g_ohci.exclsem, 0, 1);
 
   /* The pscsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

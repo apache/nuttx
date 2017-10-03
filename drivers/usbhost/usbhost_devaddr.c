@@ -254,7 +254,7 @@ void usbhost_devaddr_initialize(FAR struct usbhost_roothubport_s *rhport)
   devgen = &rhport->devgen;
 
   memset(devgen, 0, sizeof(struct usbhost_devaddr_s));
-  sem_init(&devgen->exclsem, 0, 1);
+  nxsem_init(&devgen->exclsem, 0, 1);
   devgen->next = 1;
 }
 

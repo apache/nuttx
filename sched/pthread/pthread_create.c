@@ -501,10 +501,15 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Initialize the semaphores in the join structure to zero. */
 
-  ret = sem_init(&pjoin->data_sem, 0, 0);
+  ret = nxsem_init(&pjoin->data_sem, 0, 0);
   if (ret == OK)
     {
-      ret = sem_init(&pjoin->exit_sem, 0, 0);
+      ret = nxsem_init(&pjoin->exit_sem, 0, 0);
+    }
+
+  if (ret < 0)
+    {
+      ret = -ret;
     }
 
   /* Thse semaphores are used for signaling and, hence, should not have
@@ -514,11 +519,16 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (ret == OK)
     {
       ret = sem_setprotocol(&pjoin->data_sem, SEM_PRIO_NONE);
-    }
 
-  if (ret == OK)
-    {
-      ret = sem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
+      if (ret == OK)
+        {
+          ret = sem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
+        }
+
+      if (ret < 0)
+        {
+          ret = get_errno();
+        }
     }
 
   /* If the priority of the new pthread is lower than the priority of the
@@ -538,6 +548,10 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       if (ptcb->cmn.sched_priority < parent->sched_priority)
         {
           ret = sched_setpriority(&ptcb->cmn, parent->sched_priority);
+          if (ret < 0)
+            {
+              ret = get_errno();
+            }
         }
     }
 
@@ -547,6 +561,10 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (ret == OK)
     {
       ret = task_activate((FAR struct tcb_s *)ptcb);
+      if (ret < 0)
+        {
+          ret = get_errno();
+        }
     }
 
   if (ret == OK)

@@ -1234,7 +1234,7 @@ FAR struct spi_dev_s *kinetis_spibus_initialize(int port)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   return &priv->spidev;
 }

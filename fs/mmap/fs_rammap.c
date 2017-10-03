@@ -84,7 +84,7 @@ void rammap_initialize(void)
 {
   if (!g_rammaps.initialized)
     {
-      sem_init(&g_rammaps.exclsem, 0, 1);
+      nxsem_init(&g_rammaps.exclsem, 0, 1);
       g_rammaps.initialized = true;
     }
 }

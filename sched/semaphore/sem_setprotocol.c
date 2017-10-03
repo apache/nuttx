@@ -103,7 +103,7 @@ int sem_setprotocol(FAR sem_t *sem, int protocol)
 
         /* Remove any current holders */
 
-        sem_destroyholder(sem);
+        nxsem_destroyholder(sem);
         return OK;
 
       case SEM_PRIO_INHERIT:

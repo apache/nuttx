@@ -425,7 +425,7 @@ int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev, FAR 
 
   /* Initialize semaphores */
 
-  sem_init(&dev->closesem, 0, 1);
+  nxsem_init(&dev->closesem, 0, 1);
 
   /* Connect POWERLED driver with lower level interface */
 

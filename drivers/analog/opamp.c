@@ -229,7 +229,7 @@ int opamp_register(FAR const char *path, FAR struct opamp_dev_s *dev)
 
   /* Initialize semaphores */
 
-  sem_init(&dev->ad_closesem, 0, 1);
+  nxsem_init(&dev->ad_closesem, 0, 1);
 
   /* Register the OPAMP character driver */
 

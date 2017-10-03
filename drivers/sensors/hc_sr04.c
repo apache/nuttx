@@ -121,7 +121,7 @@ static int hcsr04_read_distance(FAR struct hcsr04_dev_s *priv)
 {
   int done;
 
-  sem_getvalue(&priv->conv_donesem, &done);
+  nxsem_getvalue(&priv->conv_donesem, &done);
 
   if (done == 0)
     {
@@ -273,7 +273,7 @@ static bool hcsr04_sample(FAR struct hcsr04_dev_s *priv)
 {
   int done;
 
-  sem_getvalue(&priv->conv_donesem, &done);
+  nxsem_getvalue(&priv->conv_donesem, &done);
 
   return (done == 0);
 }
@@ -446,8 +446,8 @@ int hcsr04_register(FAR const char *devpath,
     }
 
   priv->config = config;
-  sem_init(&priv->devsem, 0, 1);
-  sem_init(&priv->conv_donesem, 0, 0);
+  nxsem_init(&priv->devsem, 0, 1);
+  nxsem_init(&priv->conv_donesem, 0, 0);
 
   ret = register_driver(devpath, &g_hcsr04ops, 0666, priv);
   if (ret < 0)

@@ -114,7 +114,7 @@ void tcp_wrbuffer_initialize(void)
       sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
     }
 
-  sem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
+  nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
 }
 
 /****************************************************************************
@@ -211,7 +211,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 int tcp_wrbuffer_test(void)
 {
   int val = 0;
-  sem_getvalue(&g_wrbuffer.sem, &val);
+  nxsem_getvalue(&g_wrbuffer.sem, &val);
   return val > 0 ? OK : ERROR;
 }
 

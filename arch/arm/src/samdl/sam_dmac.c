@@ -774,9 +774,9 @@ void weak_function up_dmainitialize(void)
 
   /* Initialize global semaphores */
 
-  sem_init(&g_chsem, 0, 1);
+  nxsem_init(&g_chsem, 0, 1);
 #if CONFIG_SAMDL_DMAC_NDESC > 0
-  sem_init(&g_dsem, 0, CONFIG_SAMDL_DMAC_NDESC);
+  nxsem_init(&g_dsem, 0, CONFIG_SAMDL_DMAC_NDESC);
 #endif
 
   /* Initialized the DMA channel table */

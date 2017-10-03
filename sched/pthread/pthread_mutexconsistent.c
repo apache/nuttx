@@ -128,7 +128,7 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
                * dead task had called pthread_mutex_unlock().
                */
 
-              status = sem_reset((FAR sem_t *)&mutex->sem, 1);
+              status = nxsem_reset((FAR sem_t *)&mutex->sem, 1);
               ret = (status != OK) ? get_errno() : OK;
             }
 

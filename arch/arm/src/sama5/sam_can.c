@@ -1947,7 +1947,7 @@ FAR struct can_dev_s *sam_caninitialize(int port)
       priv->freemb      = CAN_ALL_MAILBOXES;
       priv->initialized = true;
 
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 
       dev->cd_ops       = &g_canops;
       dev->cd_priv      = (FAR void *)priv;

@@ -748,7 +748,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       tmrerr("ERROR: Initializing TC%d\n", chconfig->chan);
 
       memset(chan, 0, sizeof(struct sam_chan_s));
-      sem_init(&chan->exclsem, 0, 1);
+      nxsem_init(&chan->exclsem, 0, 1);
       chan->base = chconfig->base;
       chan->pid  = chconfig->pid;
       chan->irq  = chconfig->irq;

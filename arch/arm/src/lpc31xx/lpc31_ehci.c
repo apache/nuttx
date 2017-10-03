@@ -3937,7 +3937,7 @@ static int lpc31_epalloc(FAR struct usbhost_driver_s *drvr,
    * priority inheritance enabled.
    */
 
-  sem_init(&epinfo->iocsem, 0, 0);
+  nxsem_init(&epinfo->iocsem, 0, 0);
   sem_setprotocol(&epinfo->iocsem, SEM_PRIO_NONE);
 
   /* Success.. return an opaque reference to the endpoint information structure
@@ -4920,8 +4920,8 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   /* Initialize the EHCI state data structure */
 
-  sem_init(&g_ehci.exclsem, 0, 1);
-  sem_init(&g_ehci.pscsem,  0, 0);
+  nxsem_init(&g_ehci.exclsem, 0, 1);
+  nxsem_init(&g_ehci.pscsem,  0, 0);
 
   /* The pscsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -4931,7 +4931,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   /* Initialize EP0 */
 
-  sem_init(&g_ehci.ep0.iocsem, 0, 1);
+  nxsem_init(&g_ehci.ep0.iocsem, 0, 1);
 
   /* Initialize the root hub port structures */
 
@@ -4970,7 +4970,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
        * should not have priority inheritance enabled.
        */
 
-      sem_init(&rhport->ep0.iocsem, 0, 0);
+      nxsem_init(&rhport->ep0.iocsem, 0, 0);
       sem_setprotocol(&rhport->iocsem, SEM_PRIO_NONE);
 
       /* Initialize the public port representation */

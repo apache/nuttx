@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_poll.c
  *
- *   Copyright (C) 2008-2009, 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -397,7 +397,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
    * priority inheritance enabled.
    */
 
-  sem_init(&sem, 0, 0);
+  nxsem_init(&sem, 0, 0);
   sem_setprotocol(&sem, SEM_PRIO_NONE);
 
   ret = poll_setup(fds, nfds, &sem);
@@ -434,11 +434,11 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            * or for the specified timeout to elapse with no event.
            *
            * NOTE: If a poll event is pending (i.e., the semaphore has already
-           * been incremented), sem_tickwait() will not wait, but will return
+           * been incremented), nxsem_tickwait() will not wait, but will return
            * immediately.
            */
 
-           ret = sem_tickwait(&sem, clock_systimer(), ticks);
+           ret = nxsem_tickwait(&sem, clock_systimer(), ticks);
            if (ret < 0)
              {
                if (ret == -ETIMEDOUT)

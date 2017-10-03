@@ -1640,10 +1640,10 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
    * priority inheritance enabled.
    */
 
-  sem_init(&priv->xfrsem, 0, 0);
+  nxsem_init(&priv->xfrsem, 0, 0);
   sem_setprotocol(&priv->xfrsem, SEM_PRIO_NONE);
 #endif
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Set all CR1 fields to reset state.  This will be master mode. */
 

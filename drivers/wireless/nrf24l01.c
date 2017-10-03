@@ -863,8 +863,8 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   /* Wait for IRQ (TX_DS or MAX_RT) - but don't hang on lost IRQ */
 
-  result = sem_tickwait(&dev->sem_tx, clock_systimer(),
-                        MSEC2TICK(NRF24L01_MAX_TX_IRQ_WAIT));
+  result = nxsem_tickwait(&dev->sem_tx, clock_systimer(),
+                          MSEC2TICK(NRF24L01_MAX_TX_IRQ_WAIT));
 
   /* Re-acquire the SPI bus */
 
@@ -1468,14 +1468,14 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
   dev->en_aa      = 0;
   dev->ce_enabled = false;
 
-  sem_init(&(dev->devsem), 0, 1);
+  nxsem_init(&(dev->devsem), 0, 1);
   dev->nopens     = 0;
 
 #ifndef CONFIG_DISABLE_POLL
   dev->pfd        = NULL;
 #endif
 
-  sem_init(&dev->sem_tx, 0, 0);
+  nxsem_init(&dev->sem_tx, 0, 0);
   sem_setprotocol(&dev->sem_tx, SEM_PRIO_NONE);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
@@ -1490,8 +1490,8 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
   dev->nxt_write  = 0;
   dev->fifo_len   = 0;
 
-  sem_init(&(dev->sem_fifo), 0, 1);
-  sem_init(&(dev->sem_rx), 0, 0);
+  nxsem_init(&(dev->sem_fifo), 0, 1);
+  nxsem_init(&(dev->sem_rx), 0, 0);
   sem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 

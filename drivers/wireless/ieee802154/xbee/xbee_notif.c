@@ -120,7 +120,7 @@ void xbee_notifpool_init(FAR struct xbee_priv_s *priv)
       remaining--;
     }
 
-  sem_init(&priv->notif_sem, 0, CONFIG_XBEE_NNOTIF);
+  nxsem_init(&priv->notif_sem, 0, CONFIG_XBEE_NNOTIF);
 }
 
 /****************************************************************************

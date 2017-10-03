@@ -436,10 +436,10 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
 
   /* Initialize semaphores */
 
-  sem_init(&dev->ad_sem, 0, 1);
+  nxsem_init(&dev->ad_sem, 0, 1);
   (void)sem_setprotocol(&dev->ad_sem, SEM_PRIO_NONE);
 
-  sem_init(&dev->ad_readsem, 0, 0);
+  nxsem_init(&dev->ad_readsem, 0, 0);
   (void)sem_setprotocol(&dev->ad_readsem, SEM_PRIO_NONE);
 
   /* Bind the upper-half callbacks to the lower half COMP driver */

@@ -63,7 +63,7 @@ void simuart_initialize(void)
    * have priority inheritance enabled.
    */
 
-  sem_init(&g_uartavail, 0, 0);
+  nxsem_init(&g_uartavail, 0, 0);
   sem_setprotocol(&g_uartavail, SEM_PRIO_NONE);
 }
 

@@ -830,7 +830,7 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize device structure semaphore */
 
-  sem_init(&priv->devsem, 0, 1);
+  nxsem_init(&priv->devsem, 0, 1);
 
   priv->int_pending = false;
   priv->i2c         = i2c;

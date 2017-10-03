@@ -122,7 +122,7 @@ static int shm_reserve(key_t key, int shmflg)
           region->sr_key   = key;
           region->sr_flags = SRFLAG_INUSE;
 
-          sem_init(&region->sr_sem, 0, 1);
+          nxsem_init(&region->sr_sem, 0, 1);
 
           /* Set the low-order nine bits of shm_perm.mode to the low-order
            * nine bits of shmflg.

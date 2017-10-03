@@ -443,8 +443,8 @@ static int vnc_start_server(int display)
   ginfo("Starting the VNC server for display %d\n", display);
 
   g_fbstartup[display].result = -EBUSY;
-  sem_reset(&g_fbstartup[display].fbinit, 0);
-  sem_reset(&g_fbstartup[display].fbconnect, 0);
+  nxsem_reset(&g_fbstartup[display].fbinit, 0);
+  nxsem_reset(&g_fbstartup[display].fbconnect, 0);
 
   /* Format the kernel thread arguments (ASCII.. yech) */
 

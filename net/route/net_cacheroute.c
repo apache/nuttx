@@ -517,12 +517,12 @@ void net_init_cacheroute(void)
   /* Initialize the routing table cash and the free list */
 
 #ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
-  sem_init(&g_ipv4_cachelock, 0, 1);
+  nxsem_init(&g_ipv4_cachelock, 0, 1);
   net_reset_ipv4_cache();
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
-  sem_init(&g_ipv6_cachelock, 0, 1);
+  nxsem_init(&g_ipv6_cachelock, 0, 1);
   net_reset_ipv6_cache();
 #endif
 }

@@ -2508,7 +2508,7 @@ FAR struct audio_lowerhalf_s *
       priv->i2c        = i2c;
       priv->i2s        = i2s;
 
-      sem_init(&priv->pendsem, 0, 1);
+      nxsem_init(&priv->pendsem, 0, 1);
       dq_init(&priv->pendq);
       dq_init(&priv->doneq);
 

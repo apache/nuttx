@@ -771,8 +771,8 @@ int lps25h_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return -ENOMEM;
     }
 
-  sem_init(&dev->devsem, 0, 1);
-  sem_init(&dev->waitsem, 0, 0);
+  nxsem_init(&dev->devsem, 0, 1);
+  nxsem_init(&dev->waitsem, 0, 0);
 
   dev->addr = addr;
   dev->i2c = i2c;

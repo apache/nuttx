@@ -777,7 +777,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
                do
                  {
-                   DEBUGVERIFY(sem_getvalue(&devpair->pp_slavesem, &sval));
+                   DEBUGVERIFY(nxsem_getvalue(&devpair->pp_slavesem, &sval));
                    if (sval < 0)
                      {
                        sem_post(&devpair->pp_slavesem);
@@ -1019,8 +1019,8 @@ int pty_register(int minor)
 
   /* Initialize semaphores */
 
-  sem_init(&devpair->pp_slavesem, 0, 0);
-  sem_init(&devpair->pp_exclsem, 0, 1);
+  nxsem_init(&devpair->pp_slavesem, 0, 0);
+  nxsem_init(&devpair->pp_exclsem, 0, 1);
 
   /* The pp_slavesem semaphore is used for signaling and, hence, should not
    * have priority inheritance enabled.

@@ -356,8 +356,8 @@ static int sam_rng_initialize(void)
 
   /* Initialize semphores */
 
-  sem_init(&g_trngdev.exclsem, 0, 1);
-  sem_init(&g_trngdev.waitsem, 0, 0);
+  nxsem_init(&g_trngdev.exclsem, 0, 1);
+  nxsem_init(&g_trngdev.waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

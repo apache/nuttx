@@ -551,7 +551,7 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct spi_bitbang_ops_s *low
   priv->nbits   = 8;
 #endif
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Select an initial state of mode 0, 8-bits, and 400KHz */
 

@@ -2718,7 +2718,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   /* Initialize the SD card slot structure */
   /* Initialize semaphores */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

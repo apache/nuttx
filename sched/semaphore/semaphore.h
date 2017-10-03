@@ -64,49 +64,49 @@ extern "C"
 /* Common semaphore logic */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-void sem_initialize(void);
+void nxsem_initialize(void);
 #else
-#  define sem_initialize()
+#  define nxsem_initialize()
 #endif
 
 /* Wake up a thread that is waiting on semaphore */
 
-void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
+void nxsem_waitirq(FAR struct tcb_s *wtcb, int errcode);
 
 /* Handle semaphore timer expiration */
 
-void sem_timeout(int argc, wdparm_t pid);
+void nxsem_timeout(int argc, wdparm_t pid);
 
 /* Recover semaphore resources with a task or thread is destroyed  */
 
-void sem_recover(FAR struct tcb_s *tcb);
+void nxsem_recover(FAR struct tcb_s *tcb);
 
 /* Special logic needed only by priority inheritance to manage collections of
  * holders of semaphores.
  */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-void sem_initholders(void);
-void sem_destroyholder(FAR sem_t *sem);
-void sem_addholder(FAR sem_t *sem);
-void sem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem);
-void sem_boostpriority(FAR sem_t *sem);
-void sem_releaseholder(FAR sem_t *sem);
-void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
+void nxsem_initholders(void);
+void nxsem_destroyholder(FAR sem_t *sem);
+void nxsem_addholder(FAR sem_t *sem);
+void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem);
+void nxsem_boostpriority(FAR sem_t *sem);
+void nxsem_releaseholder(FAR sem_t *sem);
+void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #  ifndef CONFIG_DISABLE_SIGNALS
-void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
+void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #  else
-#    define sem_canceled(stcb, sem)
+#    define nxsem_canceled(stcb, sem)
 #  endif
 #else
-#  define sem_initholders()
-#  define sem_destroyholder(sem)
-#  define sem_addholder(sem)
-#  define sem_addholder_tcb(htcb,sem)
-#  define sem_boostpriority(sem)
-#  define sem_releaseholder(sem)
-#  define sem_restorebaseprio(stcb,sem)
-#  define sem_canceled(stcb,sem)
+#  define nxsem_initholders()
+#  define nxsem_destroyholder(sem)
+#  define nxsem_addholder(sem)
+#  define nxsem_addholder_tcb(htcb,sem)
+#  define nxsem_boostpriority(sem)
+#  define nxsem_releaseholder(sem)
+#  define nxsem_restorebaseprio(stcb,sem)
+#  define nxsem_canceled(stcb,sem)
 #endif
 
 #undef EXTERN

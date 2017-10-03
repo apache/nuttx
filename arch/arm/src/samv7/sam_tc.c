@@ -1187,7 +1187,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       /* Initialize the timer counter data structure. */
 
       memset(tc, 0, sizeof(struct sam_tc_s));
-      sem_init(&tc->exclsem, 0, 1);
+      nxsem_init(&tc->exclsem, 0, 1);
       tc->base = tcconfig->base;
       tc->tc   = tcconfig->tc;
 

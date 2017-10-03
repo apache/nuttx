@@ -86,7 +86,7 @@ void pm_initialize(void)
    */
 
   sq_init(&g_pmglobals.registry);
-  sem_init(&g_pmglobals.regsem, 0, 1);
+  nxsem_init(&g_pmglobals.regsem, 0, 1);
 }
 
 #endif /* CONFIG_PM */

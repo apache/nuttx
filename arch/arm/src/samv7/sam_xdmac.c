@@ -1586,8 +1586,8 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 
   /* Initialize semaphores */
 
-  sem_init(&xdmac->chsem, 0, 1);
-  sem_init(&xdmac->dsem, 0, SAMV7_NDMACHAN);
+  nxsem_init(&xdmac->chsem, 0, 1);
+  nxsem_init(&xdmac->dsem, 0, SAMV7_NDMACHAN);
 }
 
 /****************************************************************************

@@ -869,7 +869,7 @@ int djoy_register(FAR const char *devname,
   /* Initialize the new djoystick driver instance */
 
   priv->du_lower = lower;
-  sem_init(&priv->du_exclsem, 0, 1);
+  nxsem_init(&priv->du_exclsem, 0, 1);
 
   DEBUGASSERT(lower->dl_sample);
   priv->du_sample = lower->dl_sample(lower);

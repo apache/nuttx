@@ -301,7 +301,7 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
 
   /* Initialize the device state structure */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   priv->config = config;
 
   priv->spi = dev;

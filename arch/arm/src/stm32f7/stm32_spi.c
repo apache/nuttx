@@ -1696,7 +1696,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access. */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_STM32F7_SPI_DMA
   /* Initialize the SPI semaphores that is used to wait for DMA completion.
@@ -1704,8 +1704,8 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
    * priority inheritance enabled.
    */
 
-  sem_init(&priv->rxsem, 0, 0);
-  sem_init(&priv->txsem, 0, 0);
+  nxsem_init(&priv->rxsem, 0, 0);
+  nxsem_init(&priv->txsem, 0, 0);
 
   sem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
   sem_setprotocol(&priv->txsem, SEM_PRIO_NONE);

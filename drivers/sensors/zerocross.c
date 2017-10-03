@@ -526,7 +526,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
   /* Initialize the new zero cross driver instance */
 
   priv->lower = lower;
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* And register the zero cross driver */
 

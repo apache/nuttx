@@ -516,7 +516,7 @@ static FAR struct mtd_dev_s *lc823450_mtd_allocdev(uint32_t channel)
       return NULL;
     }
 
-  sem_init(&priv->sem, 0, 1);
+  nxsem_init(&priv->sem, 0, 1);
 
   priv->mtd.erase  = lc823450_erase;
   priv->mtd.bread  = lc823450_bread;

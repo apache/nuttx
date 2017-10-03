@@ -542,7 +542,7 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c
     {
       /* Initialize the MAX1704x device structure */
 
-      sem_init(&priv->batsem, 0, 1);
+      nxsem_init(&priv->batsem, 0, 1);
       priv->ops       = &g_max1704xops;
       priv->i2c       = i2c;
       priv->addr      = addr;

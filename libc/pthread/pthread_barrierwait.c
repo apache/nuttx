@@ -109,7 +109,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
   /* Find out how many threads are already waiting at the barrier */
 
-  ret = sem_getvalue(&barrier->sem, &semcount);
+  ret = nxsem_getvalue(&barrier->sem, &semcount);
   if (ret != OK)
     {
       sched_unlock();
@@ -125,7 +125,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
       while (semcount < 0)
         {
           (void)sem_post(&barrier->sem);
-          (void)sem_getvalue(&barrier->sem, &semcount);
+          (void)nxsem_getvalue(&barrier->sem, &semcount);
         }
 
       /* Then return PTHREAD_BARRIER_SERIAL_THREAD to the final thread */

@@ -1190,8 +1190,8 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 
   /* Initialize semaphores */
 
-  sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
-  sem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
+  nxsem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
+  nxsem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
 
   /* The pen event semaphore is used for signaling and, hence, should not
    * have priority inheritance enabled.

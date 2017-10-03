@@ -365,7 +365,7 @@ int oneshot_register(FAR const char *devname,
   /* Initialize the new oneshot timer driver instance */
 
   priv->od_lower = lower;
-  sem_init(&priv->od_exclsem, 0, 1);
+  nxsem_init(&priv->od_exclsem, 0, 1);
 
   /* And register the oneshot timer driver */
 

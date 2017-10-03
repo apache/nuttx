@@ -698,7 +698,7 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
 
           pdev[i].bbf = pf;
           pf = (struct bbsramfh_s *)((uint8_t *)pf + alloc);
-          sem_init(&g_bbsram[i].exclsem, 0, 1);
+          nxsem_init(&g_bbsram[i].exclsem, 0, 1);
         }
 
       avail -= alloc;

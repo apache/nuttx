@@ -1198,7 +1198,7 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
        * access to the SPI registers.
        */
 
-      sem_init(&priv->spisem, 0, 1);
+      nxsem_init(&priv->spisem, 0, 1);
       priv->nss         = true;
       priv->initialized = true;
 

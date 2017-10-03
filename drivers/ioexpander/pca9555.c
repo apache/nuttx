@@ -951,7 +951,7 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *i2cdev,
   pcadev->config->enable(pcadev->config, TRUE);
 #endif
 
-  sem_init(&pcadev->exclsem, 0, 1);
+  nxsem_init(&pcadev->exclsem, 0, 1);
   return &pcadev->dev;
 }
 

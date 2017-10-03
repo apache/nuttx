@@ -115,7 +115,7 @@ void xbee_dataindpool_init(FAR struct xbee_priv_s *priv)
       remaining--;
     }
 
-  sem_init(&priv->dataind_sem, 0, CONFIG_XBEE_NDATAIND);
+  nxsem_init(&priv->dataind_sem, 0, CONFIG_XBEE_NDATAIND);
 }
 
 /****************************************************************************

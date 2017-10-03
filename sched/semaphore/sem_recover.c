@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_recover
+ * Name: nxsem_recover
  *
  * Description:
  *   This function is called from task_recover() when a task is deleted via
@@ -75,13 +75,13 @@
  *
  ****************************************************************************/
 
-void sem_recover(FAR struct tcb_s *tcb)
+void nxsem_recover(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
 
   /* The task is being deleted.  If it is waiting for a semphore, then
    * increment the count on the semaphores.  This logic is almost identical
-   * to what you see in sem_waitirq() except that no attempt is made to
+   * to what you see in nxsem_waitirq() except that no attempt is made to
    * restart the exiting task.
    *
    * NOTE:  In the case that the task is waiting we can assume: (1) That the
@@ -102,7 +102,7 @@ void sem_recover(FAR struct tcb_s *tcb)
        * to this semaphore.
        */
 
-      sem_canceled(tcb, sem);
+      nxsem_canceled(tcb, sem);
 
       /* And increment the count on the semaphore.  This releases the count
        * that was taken by sem_post().  This count decremented the semaphore

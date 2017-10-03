@@ -540,7 +540,7 @@ static FAR struct spi_dev_s *lpc43_spiport_initialize(int port)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   return &priv->spidev;
 }
 #endif /* CONFIG_LPC43_SPI */

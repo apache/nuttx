@@ -1114,9 +1114,9 @@ FAR struct i2c_master_s *lc823450_i2cbus_initialize(int port)
 
   if ((volatile int)priv->refs++ == 0)
     {
-      sem_init(&priv->sem_excl, 0, 1);
+      nxsem_init(&priv->sem_excl, 0, 1);
 #ifndef CONFIG_I2C_POLLED
-      sem_init(&priv->sem_isr, 0, 0);
+      nxsem_init(&priv->sem_isr, 0, 0);
 #endif
       (void)lc823450_i2c_init(priv, port);
     }

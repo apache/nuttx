@@ -1905,8 +1905,8 @@ int mxt_register(FAR struct i2c_master_s *i2c,
 
   /* Initialize semaphores */
 
-  sem_init(&priv->devsem, 0, 1);  /* Initialize device semaphore */
-  sem_init(&priv->waitsem, 0, 0); /* Initialize event wait semaphore */
+  nxsem_init(&priv->devsem, 0, 1);  /* Initialize device semaphore */
+  nxsem_init(&priv->waitsem, 0, 0); /* Initialize event wait semaphore */
 
   /* The event wait semaphore is used for signaling and, hence, should not
    * have priority inheritance enabled.

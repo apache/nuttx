@@ -541,7 +541,7 @@ int pcode_initialize(void)
 
   /* Initialize globals */
 
-  sem_init(&g_pcode_handoff.exclsem, 0, 1);
+  nxsem_init(&g_pcode_handoff.exclsem, 0, 1);
 
   /* Mount the test file system */
 

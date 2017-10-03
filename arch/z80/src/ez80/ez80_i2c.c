@@ -948,7 +948,7 @@ FAR struct i2c_master_s *ez80_i2cbus_initialize(int port)
 
       /* This semaphore enforces serialized access for I2C transfers */
 
-      sem_init(&g_i2csem, 0, 1);
+      nxsem_init(&g_i2csem, 0, 1);
 
       /* Enable I2C -- but not interrupts */
 

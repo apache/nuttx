@@ -873,7 +873,7 @@ int ajoy_register(FAR const char *devname,
   /* Initialize the new ajoystick driver instance */
 
   priv->au_lower = lower;
-  sem_init(&priv->au_exclsem, 0, 1);
+  nxsem_init(&priv->au_exclsem, 0, 1);
 
   DEBUGASSERT(lower->al_buttons);
   priv->au_sample = lower->al_buttons(lower);

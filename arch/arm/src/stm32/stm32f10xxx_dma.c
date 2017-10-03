@@ -348,7 +348,7 @@ void weak_function up_dmainitialize(void)
   for (chndx = 0; chndx < DMA_NCHANNELS; chndx++)
     {
       dmach = &g_dma[chndx];
-      sem_init(&dmach->sem, 0, 1);
+      nxsem_init(&dmach->sem, 0, 1);
 
       /* Attach DMA interrupt vectors */
 

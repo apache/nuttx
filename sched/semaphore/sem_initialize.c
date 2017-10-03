@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/sem_initialize.c
+ * sched/semaphore/nxsem_initialize.c
  *
  *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,11 +50,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_initialize
+ * Name: nxsem_initialize
  *
  * Description:
  *   The control structures for all semaphores may be initialized by calling
- *   sem_initialize().  This should be done once at power-on.
+ *   nxsem_initialize().  This should be done once at power-on.
  *
  * Parameters:
  *   None
@@ -67,11 +67,11 @@
  *
  ****************************************************************************/
 
-void sem_initialize(void)
+void nxsem_initialize(void)
 {
   /* Initialize holder structures needed to support priority inheritance */
 
-  sem_initholders();
+  nxsem_initholders();
 }
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */

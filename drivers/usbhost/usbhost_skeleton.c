@@ -889,7 +889,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_hubport_s *
 
           /* Initialize semaphores (this works okay in the interrupt context) */
 
-          sem_init(&priv->exclsem, 0, 1);
+          nxsem_init(&priv->exclsem, 0, 1);
 
           /* Return the instance of the USB class driver */
 

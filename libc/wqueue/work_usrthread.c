@@ -350,7 +350,7 @@ int work_usrstart(void)
   {
     /* Set up the work queue lock */
 
-    (void)sem_init(&g_usrsem, 0, 1);
+    (void)nxsem_init(&g_usrsem, 0, 1);
 
     /* Start a user-mode worker thread for use by applications. */
 

@@ -2593,7 +2593,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
       return -ENOMEM;
     }
 
-  sem_init(&ui->ui_exclsem, 0, 1);
+  nxsem_init(&ui->ui_exclsem, 0, 1);
 
   /* Get the inodes associated with fspath1 and fspath2 */
 

@@ -245,7 +245,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the pthread join semaphore */
 
-  (void)sem_init(&group->tg_joinsem, 0, 1);
+  (void)nxsem_init(&group->tg_joinsem, 0, 1);
 #endif
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
@@ -255,7 +255,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&group->tg_exitsem, 0, 0);
+  (void)nxsem_init(&group->tg_exitsem, 0, 0);
   (void)sem_setprotocol(&group->tg_exitsem, SEM_PRIO_NONE);
 #endif
 

@@ -233,11 +233,11 @@ void net_init_fileroute(void)
   /* Initialize semaphores */
 
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
-  sem_init(&g_ipv4_exclsem, 0, 1);
+  nxsem_init(&g_ipv4_exclsem, 0, 1);
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
-  sem_init(&g_ipv6_exclsem, 0, 1);
+  nxsem_init(&g_ipv6_exclsem, 0, 1);
 #endif
 }
 

@@ -1087,7 +1087,7 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
    * priority inheritance enabled.
    */
 
-  (void)sem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
   (void)sem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
 
   pstate->ir_buflen    = len;

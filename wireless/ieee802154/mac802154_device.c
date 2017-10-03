@@ -898,17 +898,17 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   /* Initialize the new mac driver instance */
 
   dev->md_mac = mac;
-  sem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
-                                     * before blocking */
+  nxsem_init(&dev->md_exclsem, 0, 1); /* Allow the device to be opened once
+                                       * before blocking */
 
-  sem_init(&dev->readsem, 0, 0);
+  nxsem_init(&dev->readsem, 0, 0);
   sem_setprotocol(&dev->readsem, SEM_PRIO_NONE);
   dev->readpending = false;
 
   sq_init(&dev->dataind_queue);
 
   dev->geteventpending = false;
-  sem_init(&dev->geteventsem, 0, 0);
+  nxsem_init(&dev->geteventsem, 0, 0);
   sem_setprotocol(&dev->geteventsem, SEM_PRIO_NONE);
 
   dev->event_head = NULL;

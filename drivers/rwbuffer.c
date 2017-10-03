@@ -657,7 +657,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 
       /* Initialize the write buffer access semaphore */
 
-      sem_init(&rwb->wrsem, 0, 1);
+      nxsem_init(&rwb->wrsem, 0, 1);
 
       /* Initialize write buffer parameters */
 
@@ -688,7 +688,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 
       /* Initialize the read-ahead buffer access semaphore */
 
-      sem_init(&rwb->rhsem, 0, 1);
+      nxsem_init(&rwb->rhsem, 0, 1);
 
       /* Initialize read-ahead buffer parameters */
 

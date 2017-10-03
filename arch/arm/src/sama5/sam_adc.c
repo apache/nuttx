@@ -2025,7 +2025,7 @@ struct adc_dev_s *sam_adc_initialize(void)
 
       /* Initialize the private ADC device data structure */
 
-      sem_init(&priv->exclsem,  0, 1);
+      nxsem_init(&priv->exclsem,  0, 1);
       priv->cb  = NULL;
       priv->dev = &g_adcdev;
 

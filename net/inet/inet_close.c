@@ -388,7 +388,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
            * priority inheritance enabled.
            */
 
-          sem_init(&state.cl_sem, 0, 0);
+          nxsem_init(&state.cl_sem, 0, 0);
           sem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
 
           /* Record the time that we started the wait (in ticks) */

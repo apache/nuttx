@@ -84,7 +84,7 @@ void task_recover(FAR struct tcb_s *tcb)
    * then release the counts.
    */
 
-  sem_recover(tcb);
+  nxsem_recover(tcb);
 
 #ifndef CONFIG_DISABLE_MQUEUE
   /* Handle cases where the thread was waiting for a message queue event */

@@ -2807,7 +2807,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   /* Initialize the SDHC slot structure data structure */
   /* Initialize semaphores */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

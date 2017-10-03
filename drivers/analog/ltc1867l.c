@@ -237,7 +237,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
   int32_t dataToPost;
   int ret = OK;
 
-  if(cmd == ANIOC_TRIGGER)
+  if (cmd == ANIOC_TRIGGER)
     {
       while (sem_wait(&priv->sem) != OK);
 
@@ -344,11 +344,11 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   adcpriv->channel_config = channel_config;
   adcpriv->channel_config_count = channel_config_count;
 
-  ret = sem_init(&adcpriv->sem, 1, 1);
-  if(ret == -1)
+  ret = nxsem_init(&adcpriv->sem, 1, 1);
+  if (ret < 0)
     {
       kmm_free(adcpriv);
-      return -errno;
+      return ret;
     }
 
   adcdev = (FAR struct adc_dev_s *)kmm_malloc(sizeof(struct adc_dev_s));

@@ -285,7 +285,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        * priority inheritance enabled.
        */
 
-      sem_init(&state.acpt_sem, 0, 0);
+      nxsem_init(&state.acpt_sem, 0, 0);
       sem_setprotocol(&state.acpt_sem, SEM_PRIO_NONE);
 
       /* Set up the callback in the connection */

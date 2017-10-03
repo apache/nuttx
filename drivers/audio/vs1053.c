@@ -1835,7 +1835,7 @@ struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
       dev->bass        = 0;
       dev->treble      = 0;
 #endif
-      sem_init(&dev->apbq_sem, 0, 1);
+      nxsem_init(&dev->apbq_sem, 0, 1);
       dq_init(&dev->apbq);
 
       /* Reset the VS1053 chip */

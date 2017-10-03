@@ -53,11 +53,11 @@
  *
  * Description:
  *   This function is used to destroy the un-named semaphore indicated by
- *   'sem'.  Only a semaphore that was created using sem_init() may be
+ *   'sem'.  Only a semaphore that was created using nxsem_init() may be
  *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
  *   a named semaphore is undefined.  The effect of subsequent use of the
  *   semaphore sem is undefined until sem is re-initialized by another call
- *   to sem_init().
+ *   to nxsem_init().
  *
  *   The effect of destroying a semaphore upon which other processes are
  *   currently blocked is undefined.
@@ -95,7 +95,7 @@ int sem_destroy (FAR sem_t *sem)
 
       /* Release holders of the semaphore */
 
-      sem_destroyholder(sem);
+      nxsem_destroyholder(sem);
       return OK;
     }
   else

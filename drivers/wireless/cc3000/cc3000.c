@@ -503,7 +503,7 @@ static void *select_thread_func(FAR void *arg)
                   int count;
                   do
                     {
-                      sem_getvalue(&priv->sockets[s].semwait, &count);
+                      nxsem_getvalue(&priv->sockets[s].semwait, &count);
                       if (count < 0)
                         {
                           /* Release the waiting threads */
@@ -714,7 +714,7 @@ static void *cc3000_worker(FAR void *arg)
                     ninfo("Completed S:%d irq :%d\n",
                           priv->state, priv->config->irq_read(priv->config));
 
-                    sem_getvalue(&priv->irqsem, &count);
+                    nxsem_getvalue(&priv->irqsem, &count);
                     if (priv->config->irq_read(priv->config) && count == 0)
                       {
                         sem_post(&priv->irqsem);
@@ -816,9 +816,9 @@ static int cc3000_open(FAR struct file *filep)
     {
       /* Initialize semaphores */
 
-      sem_init(&priv->waitsem, 0, 0);  /* Initialize event wait semaphore */
-      sem_init(&priv->irqsem, 0, 0);   /* Initialize IRQ Ready semaphore */
-      sem_init(&priv->readysem, 0, 0); /* Initialize Device Ready semaphore */
+      nxsem_init(&priv->waitsem, 0, 0);  /* Initialize event wait semaphore */
+      nxsem_init(&priv->irqsem, 0, 0);   /* Initialize IRQ Ready semaphore */
+      nxsem_init(&priv->readysem, 0, 0); /* Initialize Device Ready semaphore */
 
       /* These semaphores are all used for signaling and, hence, should
        * not have priority inheritance enabled.
@@ -830,7 +830,7 @@ static int cc3000_open(FAR struct file *filep)
 
 #ifdef CONFIG_CC3000_MT
       priv->accepting_socket.acc.sd = FREE_SLOT;
-      sem_init(&priv->accepting_socket.acc.semwait, 0, 0);
+      nxsem_init(&priv->accepting_socket.acc.semwait, 0, 0);
       sem_setprotocol(&priv->accepting_socket.acc.semwait, SEM_PRIO_NONE);
 
       for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
@@ -839,7 +839,7 @@ static int cc3000_open(FAR struct file *filep)
           priv->sockets[s].received_closed_event = false;
           priv->sockets[s].emptied_and_remotely_closed = false;
 
-          sem_init(&priv->sockets[s].semwait, 0, 0);
+          nxsem_init(&priv->sockets[s].semwait, 0, 0);
           sem_setprotocol(&priv->sockets[s].semwait, SEM_PRIO_NONE);
         }
 #endif
@@ -889,7 +889,7 @@ static int cc3000_open(FAR struct file *filep)
       param.sched_priority = CONFIG_CC3000_SELECT_THREAD_PRIORITY;
       pthread_attr_setschedparam(&tattr, &param);
 
-      sem_init(&priv->selectsem, 0, 0);
+      nxsem_init(&priv->selectsem, 0, 0);
       sem_setprotocol(&priv->selectsem, SEM_PRIO_NONE);
 
       ret = pthread_create(&priv->selecttid, &tattr, select_thread_func,
@@ -1551,7 +1551,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 
   priv->rx_buffer_max_len = config->max_rx_size;
 
-  sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
+  nxsem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
 
   (void)snprintf(semname, SEM_NAMELEN, SEM_FORMAT, minor);
   priv->wrkwaitsem = sem_open(semname, O_CREAT, 0, 0); /* Initialize  Worker Wait semaphore */

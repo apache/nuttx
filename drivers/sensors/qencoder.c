@@ -376,7 +376,7 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
 
   /* Initialize the PWM device structure (it was already zeroed by kmm_zalloc()) */
 
-  sem_init(&upper->exclsem, 0, 1);
+  nxsem_init(&upper->exclsem, 0, 1);
   upper->lower = lower;
 
   /* Register the PWM device */

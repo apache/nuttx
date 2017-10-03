@@ -2949,7 +2949,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
    * priority inheritance enabled.
    */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
@@ -2960,7 +2960,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       /* Initialize the global nand state structure */
 
 #if NAND_NBANKS > 1
-      sem_init(&g_nand.exclsem, 0, 1);
+      nxsem_init(&g_nand.exclsem, 0, 1);
 #endif
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
@@ -2968,7 +2968,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
        * have priority inheritance enabled.
        */
 
-      sem_init(&g_nand.waitsem, 0, 0);
+      nxsem_init(&g_nand.waitsem, 0, 0);
       sem_setprotocol(&g_nand.waitsem, SEM_PRIO_NONE);
 #endif
 

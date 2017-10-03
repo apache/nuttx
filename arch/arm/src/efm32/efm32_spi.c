@@ -1605,7 +1605,7 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_EFM32_SPI_DMA
   /* Allocate two DMA channels... one for the RX and one for the TX side of
@@ -1639,8 +1639,8 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   /* Initialized semaphores used to wait for DMA completion */
 
-  (void)sem_init(&priv->rxdmasem, 0, 0);
-  (void)sem_init(&priv->txdmasem, 0, 0);
+  (void)nxsem_init(&priv->rxdmasem, 0, 0);
+  (void)nxsem_init(&priv->txdmasem, 0, 0);
 
   /* These semaphores are used for signaling and, hence, should not have
    * priority inheritance enabled.

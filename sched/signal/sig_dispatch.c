@@ -409,7 +409,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       if (stcb->task_state == TSTATE_WAIT_SEM)
         {
-          sem_waitirq(stcb, EINTR);
+          nxsem_waitirq(stcb, EINTR);
         }
 
       /* If the task is blocked waiting on a message queue, then that task

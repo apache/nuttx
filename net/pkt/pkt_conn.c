@@ -128,7 +128,7 @@ void pkt_initialize(void)
 
   dq_init(&g_free_pkt_connections);
   dq_init(&g_active_pkt_connections);
-  sem_init(&g_free_sem, 0, 1);
+  nxsem_init(&g_free_sem, 0, 1);
 
   for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
     {

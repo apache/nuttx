@@ -242,7 +242,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
       spiconf.cc3000fd = fd;
       spiconf.run = true;
 
-      sem_init(&spiconf.unsoliced_thread_wakesem, 0, 0);
+      nxsem_init(&spiconf.unsoliced_thread_wakesem, 0, 0);
 
       pthread_attr_t attr;
       struct sched_param param;

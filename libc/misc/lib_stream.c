@@ -83,7 +83,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 
   /* Initialize the list access mutex */
 
-  (void)sem_init(&list->sl_sem, 0, 1);
+  (void)nxsem_init(&list->sl_sem, 0, 1);
 
   /* Initialize each FILE structure */
 

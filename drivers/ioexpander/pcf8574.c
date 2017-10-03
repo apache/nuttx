@@ -1130,7 +1130,7 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
   priv->config->enable(config, true);
 #endif
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   return &priv->dev;
 }
 

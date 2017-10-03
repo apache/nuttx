@@ -2487,7 +2487,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
        * access to the QSPI registers.
        */
 
-      sem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
       /* Pre-allocate DMA channels. */
@@ -2507,7 +2507,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
        * signaling and, hence, should not have priority inheritance enabled.
        */
 
-      sem_init(&priv->dmawait, 0, 0);
+      nxsem_init(&priv->dmawait, 0, 0);
       sem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
@@ -2535,7 +2535,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
        * priority inheritance enabled.
        */
 
-      sem_init(&priv->op_sem, 0, 0);
+      nxsem_init(&priv->op_sem, 0, 0);
       sem_setprotocol(&priv->op_sem, SEM_PRIO_NONE);
 #endif
 

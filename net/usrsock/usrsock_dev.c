@@ -1260,9 +1260,9 @@ void usrsockdev_register(void)
 
   g_usrsockdev.ocount = 0;
   g_usrsockdev.req.nbusy = 0;
-  sem_init(&g_usrsockdev.devsem, 0, 1);
-  sem_init(&g_usrsockdev.req.sem, 0, 1);
-  sem_init(&g_usrsockdev.req.acksem, 0, 0);
+  nxsem_init(&g_usrsockdev.devsem, 0, 1);
+  nxsem_init(&g_usrsockdev.req.sem, 0, 1);
+  nxsem_init(&g_usrsockdev.req.acksem, 0, 0);
 
   (void)register_driver("/dev/usrsock", &g_usrsockdevops, 0666, &g_usrsockdev);
 }

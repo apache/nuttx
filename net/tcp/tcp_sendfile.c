@@ -619,7 +619,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    * priority inheritance enabled.
    */
 
-  sem_init(&state.snd_sem, 0, 0);           /* Doesn't really fail */
+  nxsem_init(&state.snd_sem, 0, 0);           /* Doesn't really fail */
   sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock    = psock;                /* Socket descriptor to use */

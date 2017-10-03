@@ -380,7 +380,7 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
    * hence, should not have priority inheritance enabled.
    */
 
-  (void)sem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
+  (void)nxsem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
   (void)sem_setprotocol(&state.ir_sem, SEM_PRIO_NONE);
 
   /* Set the socket state to receiving */

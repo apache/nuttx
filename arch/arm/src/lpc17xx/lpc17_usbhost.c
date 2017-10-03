@@ -2267,7 +2267,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
        * should not have priority inheritance enabled.
        */
 
-      sem_init(&ed->wdhsem, 0, 0);
+      nxsem_init(&ed->wdhsem, 0, 0);
       sem_setprotocol(&ed->wdhsem, SEM_PRIO_NONE);
 
       /* Link the common tail TD to the ED's TD list */
@@ -3641,8 +3641,8 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
 
   /* Initialize semaphores */
 
-  sem_init(&priv->pscsem,  0, 0);
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->pscsem,  0, 0);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* The pscsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -3735,7 +3735,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
    * not have priority inheritance enabled.
    */
 
-  sem_init(&EDCTRL->wdhsem, 0, 0);
+  nxsem_init(&EDCTRL->wdhsem, 0, 0);
   sem_setprotocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
 
   /* Initialize user-configurable EDs */

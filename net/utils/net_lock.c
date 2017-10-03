@@ -104,7 +104,7 @@ static void _net_takesem(void)
 
 void net_lockinitialize(void)
 {
-  sem_init(&g_netlock, 0, 1);
+  nxsem_init(&g_netlock, 0, 1);
 }
 
 /****************************************************************************

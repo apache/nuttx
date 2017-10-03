@@ -43,29 +43,48 @@
 #include <semaphore.h>
 #include <errno.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  nxsem_getvalue
+ *
+ * Description:
+ *   This function updates the location referenced by 'sval' argument to
+ *   have the value of the semaphore referenced by 'sem' without effecting
+ *   the state of the semaphore.  The updated value represents the actual
+ *   semaphore value that occurred at some unspecified time during the call,
+ *   but may not reflect the actual value of the semaphore when it is
+ *   returned to the calling task.
+ *
+ *   If 'sem' is locked, the value return by nxsem_getvalue() will either be
+ *   zero or a negative number whose absolute value represents the number
+ *   of tasks waiting for the semaphore.
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor
+ *   sval - Buffer by which the value is returned
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_getvalue(FAR sem_t *sem, FAR int *sval)
+{
+  if (sem && sval)
+    {
+      *sval = sem->semcount;
+      return OK;
+    }
+
+  return -EINVAL;
+}
 
 /****************************************************************************
  * Name:  sem_getvalue
@@ -86,23 +105,21 @@
  *   sem - Semaphore descriptor
  *   sval - Buffer by which the value is returned
  *
- * Return Value:
- *   0 (OK), or -1 (ERROR) if unsuccessful
- *
- * Assumptions:
+ *   This returns zero (OK) if successful.  Otherwise, -1 (ERROR) is
+ *   returned and the errno value is set appropriately.
  *
  ****************************************************************************/
 
 int sem_getvalue(FAR sem_t *sem, FAR int *sval)
 {
-  if (sem && sval)
+  int ret;
+
+  ret = nxsem_getvalue(sem, sval);
+  if (ret < 0)
     {
-      *sval = sem->semcount;
-      return OK;
+      set_errno(-ret);
+      ret = ERROR;
     }
-  else
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
+
+  return ret;
 }

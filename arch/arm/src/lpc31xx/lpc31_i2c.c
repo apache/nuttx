@@ -551,8 +551,8 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
 
   /* Initialize semaphores */
 
-  sem_init(&priv->mutex, 0, 1);
-  sem_init(&priv->wait, 0, 0);
+  nxsem_init(&priv->mutex, 0, 1);
+  nxsem_init(&priv->wait, 0, 0);
 
   /* The wait semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

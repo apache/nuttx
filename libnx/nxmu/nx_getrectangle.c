@@ -105,11 +105,11 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   /* Create a semaphore for tracking command completion */
 
   outmsg.sem_done = &sem_done;
-  ret = sem_init(&sem_done, 0, 0);
 
-  if (ret != OK)
+  ret = sem_init(&sem_done, 0, 0);
+  if (ret < 0)
     {
-      gerr("ERROR: sem_init failed: %d\n", errno);
+      gerr("ERROR: nxsem_init failed: %d\n", errno);
       return ret;
     }
 

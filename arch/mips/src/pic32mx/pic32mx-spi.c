@@ -948,7 +948,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   /* Enable interrupts at the SPI controller */

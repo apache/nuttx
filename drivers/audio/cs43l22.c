@@ -1920,7 +1920,7 @@ FAR struct audio_lowerhalf_s *cs43l22_initialize(FAR struct i2c_master_s *i2c,
       priv->i2c        = i2c;
       priv->i2s        = i2s;
 
-      sem_init(&priv->pendsem, 0, 1);
+      nxsem_init(&priv->pendsem, 0, 1);
       dq_init(&priv->pendq);
       dq_init(&priv->doneq);
 
