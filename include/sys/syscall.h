@@ -183,25 +183,35 @@
 #  define SYS_insmod                   __SYS_insmod
 #  define SYS_rmmod                   (__SYS_insmod+1)
 #  define SYS_modhandle               (__SYS_insmod+2)
-#  define __SYS_posix_spawn           (__SYS_insmod+3)
+#  define __SYS_exec                  (__SYS_insmod+3)
 #else
-#  define __SYS_posix_spawn            __SYS_insmod
+#  define __SYS_exec                   __SYS_insmod
 #endif
 
 /* The following can only be defined if we are configured to execute
  * programs from a file system.
  */
 
-#if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
-#  ifdef CONFIG_BINFMT_EXEPATH
-#    define SYS_posix_spawnp           __SYS_posix_spawn
+#ifndef CONFIG_BINFMT_DISABLE
+#  ifndef CONFIG_BUILD_KERNEL
+#    define SYS_exec                   __SYS_exec
+#    define __SYS_posix_spawn          (__SYS_exec+1)
 #  else
-#    define SYS_posix_spawn            __SYS_posix_spawn
+#    define __SYS_posix_spawn          __SYS_exec
 #  endif
-#  define SYS_execv                    (__SYS_posix_spawn+1)
-#  define __SYS_signals                (__SYS_posix_spawn+2)
+#  ifdef CONFIG_LIBC_EXECFUNCS
+#    ifdef CONFIG_BINFMT_EXEPATH
+#      define SYS_posix_spawnp         __SYS_posix_spawn
+#    else
+#      define SYS_posix_spawn          __SYS_posix_spawn
+#    endif
+#    define SYS_execv                  (__SYS_posix_spawn+1)
+#    define __SYS_signals              (__SYS_posix_spawn+2)
+#  else
+#    define __SYS_signals              __SYS_posix_spawn
+#  endif
 #else
-#  define __SYS_signals                __SYS_posix_spawn
+#  define __SYS_signals                __SYS_exec
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
