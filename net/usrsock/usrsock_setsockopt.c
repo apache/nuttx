@@ -82,7 +82,7 @@ static uint16_t setsockopt_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->recvsem);
+      nxsem_post(&pstate->recvsem);
     }
   else if (flags & USRSOCK_EVENT_REQ_COMPLETE)
     {
@@ -98,7 +98,7 @@ static uint16_t setsockopt_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->recvsem);
+      nxsem_post(&pstate->recvsem);
     }
 
   return flags;

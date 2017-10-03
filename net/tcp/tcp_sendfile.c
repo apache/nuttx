@@ -239,7 +239,7 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
 
   /* Wake up the waiting thread */
 
-  sem_post(&pstate->snd_sem);
+  nxsem_post(&pstate->snd_sem);
 
   return flags;
 }
@@ -475,7 +475,7 @@ end_wait:
 
   /* Wake up the waiting thread */
 
-  sem_post(&pstate->snd_sem);
+  nxsem_post(&pstate->snd_sem);
 
 wait:
   return flags;
@@ -620,7 +620,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    */
 
   nxsem_init(&state.snd_sem, 0, 0);           /* Doesn't really fail */
-  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock    = psock;                /* Socket descriptor to use */
   state.snd_foffset = offset ? *offset : 0; /* Input file offset */
@@ -695,7 +695,7 @@ errout_datacb:
 
 errout_locked:
 
-  sem_destroy(&state. snd_sem);
+  nxsem_destroy(&state. snd_sem);
   net_unlock();
 
 errout:

@@ -173,7 +173,7 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   buffer = (FAR char *) &sample;
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return sizeof(struct adxl345_sample_s);
 }
 
@@ -226,14 +226,14 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);
-      sem_post(&priv->exclsem);
+      nxsem_post(&priv->exclsem);
       return ret;
     }
 
   /* Indicate that the accelerometer was successfully initialized */
 
   priv->status |= ADXL345_STAT_INITIALIZED;  /* Accelerometer is initialized */
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 

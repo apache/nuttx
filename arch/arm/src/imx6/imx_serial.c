@@ -995,7 +995,7 @@ int up_putc(int ch)
 
   if (locked)
     {
-      sem_post(&g_putc_lock);
+      nxsem_post(&g_putc_lock);
     }
 
   return ch;

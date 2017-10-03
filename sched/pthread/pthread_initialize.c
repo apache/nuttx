@@ -157,13 +157,13 @@ int pthread_sem_give(sem_t *sem)
     {
       /* Give the semaphore */
 
-      if (sem_post(sem) == OK)
+      if (nxsem_post(sem) == OK)
         {
           return OK;
         }
       else
         {
-          /* sem_post() reported an error */
+          /* nxsem_post() reported an error */
 
           return get_errno();
         }

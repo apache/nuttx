@@ -323,7 +323,7 @@ static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv)
    */
 
   nxsem_init(&priv->wait, 0, 0);
-  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 }
 
 /************************************************************************************
@@ -336,8 +336,8 @@ static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv)
 
 static inline void kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv)
 {
-  sem_destroy(&priv->mutex);
-  sem_destroy(&priv->wait);
+  nxsem_destroy(&priv->mutex);
+  nxsem_destroy(&priv->wait);
 }
 
 /************************************************************************************
@@ -366,7 +366,7 @@ static inline void kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
 
 static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv)
 {
-  sem_post(&priv->mutex);
+  nxsem_post(&priv->mutex);
 }
 
 /************************************************************************************
@@ -392,7 +392,7 @@ static inline void kinetis_i2c_wait(struct kinetis_i2cdev_s *priv)
 
 static inline void kinetis_i2c_endwait(struct kinetis_i2cdev_s *priv)
 {
-  sem_post(&priv->wait);
+  nxsem_post(&priv->wait);
 }
 
 /************************************************************************************

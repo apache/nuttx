@@ -93,7 +93,7 @@ static
 static void     wm8904_writereg(FAR struct wm8904_dev_s *priv,
                   uint8_t regaddr, uint16_t regval);
 static void     wm8904_takesem(sem_t *sem);
-#define         wm8904_givesem(s) sem_post(s)
+#define         wm8904_givesem(s) nxsem_post(s)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static inline uint16_t wm8904_scalevolume(uint16_t volume, b16_t scale);
@@ -2537,7 +2537,7 @@ FAR struct audio_lowerhalf_s *
   return NULL;
 
 errout_with_dev:
-  sem_destroy(&priv->pendsem);
+  nxsem_destroy(&priv->pendsem);
   kmm_free(priv);
   return NULL;
 }

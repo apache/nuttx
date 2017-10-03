@@ -270,7 +270,7 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for touchscreen data to become available,
@@ -287,7 +287,7 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -1675,7 +1675,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Register the device as an input device */
 
@@ -1696,7 +1696,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->waitsem);
   return ret;
 }
 

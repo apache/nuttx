@@ -91,7 +91,7 @@
  *
  ****************************************************************************/
 
-#define pm_unlock() sem_post(&g_pmglobals.regsem);
+#define pm_unlock() nxsem_post(&g_pmglobals.regsem);
 
 /****************************************************************************
  * Public Types

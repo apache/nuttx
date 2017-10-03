@@ -100,7 +100,7 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = OK;
 
 errout_with_semaphore:
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }
@@ -157,7 +157,7 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
       ret = OK;
     }
 
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }
@@ -195,7 +195,7 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   dir->u.nxffs.nx_offset = volume->inoffset;
   ret = OK;
 
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }

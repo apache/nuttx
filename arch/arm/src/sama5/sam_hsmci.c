@@ -464,7 +464,7 @@ struct sam_dev_s
 /* Low-level helpers ********************************************************/
 
 static void sam_takesem(struct sam_dev_s *priv);
-#define     sam_givesem(priv) (sem_post(&priv->waitsem))
+#define     sam_givesem(priv) (nxsem_post(&priv->waitsem))
 
 #ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
 static bool sam_checkreg(struct sam_dev_s *priv, bool wr,
@@ -3304,7 +3304,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Create a watchdog timer */
 

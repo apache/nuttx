@@ -133,8 +133,8 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 
               else
                 {
-                  status = sem_destroy((FAR sem_t *)&mutex->sem);
-                  ret = (status != OK) ? get_errno() : OK;
+                  status = nxsem_destroy((FAR sem_t *)&mutex->sem);
+                  ret = (status < 0) ? -status : OK;
                 }
             }
           else
@@ -150,8 +150,8 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
            * Perhaps this logic should all nxsem_reset() first?
            */
 
-          status = sem_destroy((FAR sem_t *)&mutex->sem);
-          ret = ((status != OK) ? get_errno() : OK);
+          status = nxsem_destroy((FAR sem_t *)&mutex->sem);
+          ret = ((status < 0) ? -status : OK);
         }
 
       sched_unlock();

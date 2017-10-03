@@ -138,7 +138,7 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
           if (fds->revents != 0)
             {
               ainfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -229,7 +229,7 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
  errout:
-  sem_post(&dev->ad_sem);
+  nxsem_post(&dev->ad_sem);
   return ret;
 }
 #endif
@@ -251,7 +251,7 @@ static int comp_notify(FAR struct comp_dev_s *dev, uint8_t val)
   dev->val = val;
 
   comp_pollnotify(dev, POLLIN);
-  sem_post(&dev->ad_readsem);
+  nxsem_post(&dev->ad_readsem);
 
   return 0;
 }
@@ -313,7 +313,7 @@ static int comp_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->ad_sem);
+      nxsem_post(&dev->ad_sem);
     }
 
   return ret;
@@ -348,7 +348,7 @@ static int comp_close(FAR struct file *filep)
       if (dev->ad_ocount > 1)
         {
           dev->ad_ocount--;
-          sem_post(&dev->ad_sem);
+          nxsem_post(&dev->ad_sem);
         }
       else
         {
@@ -362,7 +362,7 @@ static int comp_close(FAR struct file *filep)
           dev->ad_ops->ao_shutdown(dev);          /* Disable the COMP */
           leave_critical_section(flags);
 
-          sem_post(&dev->ad_sem);
+          nxsem_post(&dev->ad_sem);
         }
     }
 
@@ -437,10 +437,10 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
   /* Initialize semaphores */
 
   nxsem_init(&dev->ad_sem, 0, 1);
-  (void)sem_setprotocol(&dev->ad_sem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&dev->ad_sem, SEM_PRIO_NONE);
 
   nxsem_init(&dev->ad_readsem, 0, 0);
-  (void)sem_setprotocol(&dev->ad_readsem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&dev->ad_readsem, SEM_PRIO_NONE);
 
   /* Bind the upper-half callbacks to the lower half COMP driver */
 
@@ -463,7 +463,7 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
   ret =  register_driver(path, &comp_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->ad_sem);
+      nxsem_destroy(&dev->ad_sem);
     }
 
   return ret;

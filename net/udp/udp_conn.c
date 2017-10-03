@@ -123,7 +123,7 @@ static inline void _udp_semtake(FAR sem_t *sem)
   UNUSED(ret);
 }
 
-#define _udp_semgive(sem) sem_post(sem)
+#define _udp_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Name: udp_find_conn()

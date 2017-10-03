@@ -142,7 +142,7 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #endif
 
 static void     spi_semtake(struct sam_spidev_s *priv);
-#define         spi_semgive(priv) (sem_post(&(priv)->spisem))
+#define         spi_semgive(priv) (nxsem_post(&(priv)->spisem))
 
 /* Interrupt Handling */
 

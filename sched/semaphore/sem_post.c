@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_post.c
  *
- *   Copyright (C) 2007-2009, 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,12 +56,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_post
+ * Name: nxsem_post
  *
  * Description:
- *   When a task has finished with a semaphore, it will call sem_post().
- *   This function unlocks the semaphore referenced by sem by performing the
- *   semaphore unlock operation on that semaphore.
+ *   When a kernel thread has finished with a semaphore, it will call
+ *   nxsem_post().  This function unlocks the semaphore referenced by sem
+ *   by performing the semaphore unlock operation on that semaphore.
  *
  *   If the semaphore value resulting from this operation is positive, then
  *   no tasks were blocked waiting for the semaphore to become unlocked; the
@@ -74,22 +75,24 @@
  *   sem - Semaphore descriptor
  *
  * Return Value:
- *   0 (OK) or -1 (ERROR) if unsuccessful
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  * Assumptions:
  *   This function may be called from an interrupt handler.
  *
  ****************************************************************************/
 
-int sem_post(FAR sem_t *sem)
+int nxsem_post(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
-  int ret = ERROR;
+  int ret = -EINVAL;
 
   /* Make sure we were supplied with a valid semaphore. */
 
-  if (sem)
+  if (sem != NULL)
     {
       /* The following operations must be performed with interrupts
        * disabled because sem_post() may be called from an interrupt
@@ -111,7 +114,7 @@ int sem_post(FAR sem_t *sem)
        * not possible to know which thread/holder should be released.
        *
        * For this reason, it is recommended that priority inheritance be
-       * disabled via sem_setprotocol(SEM_PRIO_NONE) when the semahore is
+       * disabled via nxsem_setprotocol(SEM_PRIO_NONE) when the semahore is
        * initialixed if the semaphore is to used for signaling purposes.
        */
 
@@ -179,9 +182,48 @@ int sem_post(FAR sem_t *sem)
 
       leave_critical_section(flags);
     }
-  else
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sem_post
+ *
+ * Description:
+ *   When a task has finished with a semaphore, it will call sem_post().
+ *   This function unlocks the semaphore referenced by sem by performing the
+ *   semaphore unlock operation on that semaphore.
+ *
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
+ *
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to sem_wait().
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor
+ *
+ * Return Value:
+ *   This function is a standard, POSIX application interface.  It will
+ *   return zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int sem_post(FAR sem_t *sem)
+{
+  int ret;
+
+  ret = nxsem_post(sem);
+  if (ret < 0)
     {
-      set_errno(EINVAL);
+      set_errno(-ret);
+      ret = ERROR;
     }
 
   return ret;

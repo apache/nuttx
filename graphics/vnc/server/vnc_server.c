@@ -297,7 +297,7 @@ int vnc_server(int argc, FAR char *argv[])
   /* Inform any waiter that we have started */
 
   vnc_reset_session(session, fb, display);
-  sem_post(&g_fbstartup[display].fbinit);
+  nxsem_post(&g_fbstartup[display].fbinit);
 
   /* Loop... handling each each VNC client connection to this display.  Only
    * a single client is allowed for each display.
@@ -349,7 +349,7 @@ int vnc_server(int argc, FAR char *argv[])
            */
 
           g_fbstartup[display].result = OK;
-          sem_post(&g_fbstartup[display].fbconnect);
+          nxsem_post(&g_fbstartup[display].fbconnect);
 
           /* Run the VNC receiver on this trhead.  The VNC receiver handles
            * all Client-to-Server messages.  The VNC receiver function does
@@ -376,7 +376,7 @@ errout_with_fb:
 
 errout_with_post:
   g_fbstartup[display].result = ret;
-  sem_post(&g_fbstartup[display].fbconnect);
+  nxsem_post(&g_fbstartup[display].fbconnect);
 
 errout_with_hang:
   return EXIT_FAILURE;

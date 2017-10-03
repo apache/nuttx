@@ -162,7 +162,7 @@ static void pcf8574_lock(FAR struct pcf8574_dev_s *priv)
     }
 }
 
-#define pcf8574_unlock(p) sem_post(&(p)->exclsem)
+#define pcf8574_unlock(p) nxsem_post(&(p)->exclsem)
 
 /****************************************************************************
  * Name: pcf8574_read

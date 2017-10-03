@@ -416,7 +416,7 @@ DMA_HANDLE lpc17_dmachannel(void)
 
   /* Return what we found (or not) */
 
-  sem_post(&g_gpdma.exclsem);
+  nxsem_post(&g_gpdma.exclsem);
   return (DMA_HANDLE)dmach;
 }
 

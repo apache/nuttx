@@ -1078,7 +1078,7 @@ static void uart_dma_callback(DMA_HANDLE hdma, void *arg, int result)
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   sem_t *waitsem = &priv->txdma_wait;
-  sem_post(waitsem);
+  nxsem_post(waitsem);
   uart_datasent(dev);
 }
 
@@ -1214,7 +1214,7 @@ retry:
       int i;
       for (i = 0; i < buflen; i++)
         up_serialout(priv, UART_USTF, buf[i]);
-      sem_post(&priv->txdma_wait);
+      nxsem_post(&priv->txdma_wait);
       return buflen;
     }
 

@@ -352,10 +352,10 @@ static void     i2s_dump_regs(struct stm32_i2s_s *priv, const char *msg);
 /* Semaphore helpers */
 
 static void     i2s_exclsem_take(struct stm32_i2s_s *priv);
-#define         i2s_exclsem_give(priv) sem_post(&priv->exclsem)
+#define         i2s_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
 static void     i2s_bufsem_take(struct stm32_i2s_s *priv);
-#define         i2s_bufsem_give(priv) sem_post(&priv->bufsem)
+#define         i2s_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
 
@@ -2649,7 +2649,7 @@ FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
   /* Failure exits */
 
 errout_with_alloc:
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
   kmm_free(priv);
   return NULL;
 }

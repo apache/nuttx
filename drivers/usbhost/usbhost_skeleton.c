@@ -118,7 +118,7 @@ struct usbhost_state_s
 /* Semaphores */
 
 static void usbhost_takesem(sem_t *sem);
-#define usbhost_givesem(s) sem_post(s);
+#define usbhost_givesem(s) nxsem_post(s);
 
 /* Memory allocation services */
 

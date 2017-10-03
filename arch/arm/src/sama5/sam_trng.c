@@ -223,7 +223,7 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
           /* And wakeup the waiting read thread. */
 
-          sem_post(&g_trngdev.waitsem);
+          nxsem_post(&g_trngdev.waitsem);
           return OK;
         }
     }
@@ -324,7 +324,7 @@ errout:
 
   /* Release our lock on the TRNG hardware */
 
-  sem_post(&g_trngdev.exclsem);
+  nxsem_post(&g_trngdev.exclsem);
 
   finfo("Return %d\n", (int)retval);
   return retval;
@@ -363,7 +363,7 @@ static int sam_rng_initialize(void)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
 
   /* Enable clocking to the TRNG */
 

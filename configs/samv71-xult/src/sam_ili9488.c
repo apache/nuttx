@@ -903,7 +903,7 @@ static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
 
   /* Wake up the waiting thread */
 
-  sem_post(&priv->waitsem);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -1601,7 +1601,7 @@ errout_with_dmach:
   priv->dmach = NULL;
 
 errout_with_waitsem:
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->waitsem);
   return ret;
 }
 
@@ -1645,7 +1645,7 @@ void board_lcd_uninitialize(void)
   wd_delete(priv->dmadog);
   priv->dmadog = NULL;
 
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->waitsem);
 
   /* Put the LCD in the lowest possible power state */
 

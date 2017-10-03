@@ -1264,7 +1264,7 @@ void pmecc_lock(void)
 #if NAND_NPMECC_BANKS > 1
 void pmecc_unlock(void)
 {
-  sem_post(&g_pmecc.exclsem);
+  nxsem_post(&g_pmecc.exclsem);
 }
 #endif
 

@@ -184,7 +184,7 @@ void hostfs_semtake(FAR struct hostfs_mountpt_s *fs)
 
 void hostfs_semgive(FAR struct hostfs_mountpt_s *fs)
 {
-  sem_post(fs->fs_sem);
+  nxsem_post(fs->fs_sem);
 }
 
 /****************************************************************************

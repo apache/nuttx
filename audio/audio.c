@@ -178,7 +178,7 @@ static int audio_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -235,7 +235,7 @@ static int audio_close(FAR struct file *filep)
   ret = OK;
 
 //errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -657,7 +657,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   return ret;
 }
 

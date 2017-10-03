@@ -607,7 +607,7 @@ static void tc_notify(FAR struct tc_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for touchscreen data to become available,
@@ -624,7 +624,7 @@ static void tc_notify(FAR struct tc_dev_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -698,7 +698,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is availble.
@@ -1156,7 +1156,7 @@ static int tc_open(FAR struct file *filep)
   priv->crefs = tmp;
 
 errout_with_sem:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 #else
   return OK;
@@ -1201,7 +1201,7 @@ static int tc_close(FAR struct file *filep)
       priv->crefs--;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 #endif
   return OK;
 }
@@ -1324,7 +1324,7 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1371,7 +1371,7 @@ static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 #endif
 }
@@ -1465,7 +1465,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -1577,7 +1577,7 @@ int board_tsc_setup(int minor)
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->devsem);
 #ifdef CONFIG_TOUCHSCREEN_MULTIPLE
   kmm_free(priv);
 #endif

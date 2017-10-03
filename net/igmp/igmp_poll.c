@@ -114,7 +114,7 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
   if (IS_WAITMSG(group->flags))
     {
       ninfo("Awakening waiter\n");
-      sem_post(&group->sem);
+      nxsem_post(&group->sem);
     }
 }
 

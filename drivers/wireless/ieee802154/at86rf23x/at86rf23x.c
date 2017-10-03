@@ -1380,7 +1380,7 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev)
   dev->ieee.rxbuf->lqi = 0;
   dev->ieee.rxbuf->rssi = 0;
 
-  sem_post(&dev->ieee.rxsem);
+  nxsem_post(&dev->ieee.rxsem);
 
   /* TODO:
    *   Not to sure yet what I should do here.  I will something
@@ -1413,7 +1413,7 @@ static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev)
 
   dev->lower->enable(dev->lower, true);
 
-  sem_post(&dev->ieee.txsem);
+  nxsem_post(&dev->ieee.txsem);
 }
 
 /****************************************************************************

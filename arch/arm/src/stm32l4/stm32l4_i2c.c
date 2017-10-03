@@ -849,7 +849,7 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
 
 static inline void stm32l4_i2c_sem_post(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
 }
 
 /************************************************************************************
@@ -870,7 +870,7 @@ static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv)
    */
 
   nxsem_init(&priv->sem_isr, 0, 0);
-  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -884,9 +884,9 @@ static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv)
 
 static inline void stm32l4_i2c_sem_destroy(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  sem_destroy(&priv->sem_excl);
+  nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
-  sem_destroy(&priv->sem_isr);
+  nxsem_destroy(&priv->sem_isr);
 #endif
 }
 
@@ -1477,7 +1477,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
                * and wake it up.
                */
 
-              sem_post(&priv->sem_isr);
+              nxsem_post(&priv->sem_isr);
               priv->intstate = INTSTATE_DONE;
             }
 #else
@@ -1512,7 +1512,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
            * and wake it up.
            */
 
-          sem_post(&priv->sem_isr);
+          nxsem_post(&priv->sem_isr);
           priv->intstate = INTSTATE_DONE;
         }
 #else

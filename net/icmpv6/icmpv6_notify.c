@@ -108,7 +108,7 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
    */
 
   (void)nxsem_init(&notify->nt_sem, 0, 0);
-  sem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 
@@ -164,7 +164,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
     }
 
   leave_critical_section(flags);
-  (void)sem_destroy(&notify->nt_sem);
+  (void)nxsem_destroy(&notify->nt_sem);
   return ret;
 }
 
@@ -255,7 +255,7 @@ void icmpv6_notify(net_ipv6addr_t ipaddr)
           /* Yes.. Signal the waiting, returning success */
 
           curr->nt_result = OK;
-          sem_post(&curr->nt_sem);
+          nxsem_post(&curr->nt_sem);
           break;
         }
     }

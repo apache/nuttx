@@ -305,7 +305,7 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for ADS7843E data to become available,
@@ -322,7 +322,7 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -408,7 +408,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -698,7 +698,7 @@ ignored:
 
   /* Release our lock on the state structure and unlock the SPI bus */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   ads7843e_unlock(priv->spi);
 }
 
@@ -792,7 +792,7 @@ static int ads7843e_open(FAR struct file *filep)
   priv->crefs = tmp;
 
 errout_with_sem:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 #else
   iinfo("Opening\n");
@@ -839,7 +839,7 @@ static int ads7843e_close(FAR struct file *filep)
       priv->crefs--;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 #endif
   iinfo("Closing\n");
   return OK;
@@ -969,7 +969,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   iinfo("Returning: %d\n", ret);
   return ret;
 }
@@ -1027,7 +1027,7 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1118,7 +1118,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -1197,7 +1197,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
    * have priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Make sure that interrupts are disabled */
 
@@ -1267,7 +1267,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->devsem);
 #ifdef CONFIG_ADS7843E_MULTIPLE
   kmm_free(priv);
 #endif

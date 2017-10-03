@@ -79,7 +79,7 @@ static void usbhost_takesem(FAR struct usbhost_devaddr_s *devgen)
     }
 }
 
-#define usbhost_givesem(devgen) sem_post(&devgen->exclsem)
+#define usbhost_givesem(devgen) nxsem_post(&devgen->exclsem)
 
 /****************************************************************************
  * Name: usbhost_devaddr_allocate

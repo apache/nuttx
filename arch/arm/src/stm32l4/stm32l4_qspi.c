@@ -1172,7 +1172,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
 
     /* Signal complete */
 
-    sem_post(&g_qspi0dev.op_sem);
+    nxsem_post(&g_qspi0dev.op_sem);
   }
 
   /* Is it 'Status Match'? */
@@ -1199,7 +1199,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
 
           /* Signal complete */
 
-          sem_post(&g_qspi0dev.op_sem);
+          nxsem_post(&g_qspi0dev.op_sem);
         }
       else
         {
@@ -1231,7 +1231,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
 
       /* Signal complete */
 
-      sem_post(&g_qspi0dev.op_sem);
+      nxsem_post(&g_qspi0dev.op_sem);
     }
 
   /* Is it 'Timeout'? */
@@ -1295,7 +1295,7 @@ static void qspi_dma_timeout(int argc, uint32_t arg)
 
   /* Then wake up the waiting thread */
 
-  sem_post(&priv->dmawait);
+  nxsem_post(&priv->dmawait);
 }
 
 /****************************************************************************
@@ -1351,7 +1351,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Then wake up the waiting thread */
 
-  sem_post(&priv->dmawait);
+  nxsem_post(&priv->dmawait);
 }
 
 /****************************************************************************
@@ -1698,7 +1698,7 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
 
   return OK;
@@ -2508,7 +2508,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
        */
 
       nxsem_init(&priv->dmawait, 0, 0);
-      sem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
+      nxsem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 
@@ -2536,7 +2536,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
        */
 
       nxsem_init(&priv->op_sem, 0, 0);
-      sem_setprotocol(&priv->op_sem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&priv->op_sem, SEM_PRIO_NONE);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active
@@ -2571,7 +2571,7 @@ errout_with_dmadog:
   wd_delete(priv->dmadog);
 
 errout_with_dmahandles:
-  sem_destroy(&priv->dmawait);
+  nxsem_destroy(&priv->dmawait);
 
   if (priv->dmach)
     {
@@ -2580,7 +2580,7 @@ errout_with_dmahandles:
     }
 #endif
 
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
   return NULL;
 }
 

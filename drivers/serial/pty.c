@@ -220,7 +220,7 @@ static void pty_semtake(FAR struct pty_devpair_s *devpair)
  * Name: pty_semgive
  ****************************************************************************/
 
-#define pty_semgive(c) sem_post(&(c)->pp_exclsem)
+#define pty_semgive(c) nxsem_post(&(c)->pp_exclsem)
 
 /****************************************************************************
  * Name: pty_destroy
@@ -262,7 +262,7 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 
   /* And free the device structure */
 
-  sem_destroy(&devpair->pp_exclsem);
+  nxsem_destroy(&devpair->pp_exclsem);
   kmm_free(devpair);
 }
 #endif
@@ -780,7 +780,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                    DEBUGVERIFY(nxsem_getvalue(&devpair->pp_slavesem, &sval));
                    if (sval < 0)
                      {
-                       sem_post(&devpair->pp_slavesem);
+                       nxsem_post(&devpair->pp_slavesem);
                      }
                  }
                while (sval < 0);
@@ -1026,7 +1026,7 @@ int pty_register(int minor)
    * have priority inheritance enabled.
    */
 
-  sem_setprotocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   devpair->pp_minor             = minor;
@@ -1177,8 +1177,8 @@ errout_with_pipea:
     }
 
 errout_with_devpair:
-   sem_destroy(&devpair->pp_exclsem);
-   sem_destroy(&devpair->pp_slavesem);
+   nxsem_destroy(&devpair->pp_exclsem);
+   nxsem_destroy(&devpair->pp_slavesem);
    kmm_free(devpair);
    return ret;
 }

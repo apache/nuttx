@@ -152,7 +152,7 @@ void local_accept_pollnotify(FAR struct local_conn_s *conn,
           if (fds->revents != 0)
             {
               ninfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -294,7 +294,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
 pollerr:
   fds->revents |= POLLERR;
-  sem_post(fds->sem);
+  nxsem_post(fds->sem);
   return OK;
 }
 

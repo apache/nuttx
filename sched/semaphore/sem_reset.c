@@ -78,7 +78,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
   DEBUGASSERT(sem != NULL && count >= 0);
 
   /* Don't allow any context switches that may result from the following
-   * sem_post() operations.
+   * nxsem_post() operations.
    */
 
   sched_lock();
@@ -101,7 +101,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
        * logic (REVISIT).
        */
 
-      DEBUGVERIFY(sem_post(sem));
+      DEBUGVERIFY(nxsem_post(sem));
       count--;
     }
 

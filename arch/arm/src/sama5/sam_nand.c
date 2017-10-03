@@ -342,7 +342,7 @@ void nand_lock(void)
 #if NAND_NBANKS > 1
 void nand_unlock(void)
 {
-  sem_post(&g_nand.exclsem);
+  nxsem_post(&g_nand.exclsem);
 }
 #endif
 
@@ -1077,7 +1077,7 @@ static int hsmc_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Post the XFRDONE event */
 
-      sem_post(&g_nand.waitsem);
+      nxsem_post(&g_nand.waitsem);
 
       /* Disable further XFRDONE interrupts */
 
@@ -1092,7 +1092,7 @@ static int hsmc_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Post the CMDDONE event */
 
-      sem_post(&g_nand.waitsem);
+      nxsem_post(&g_nand.waitsem);
 
       /* Disable further CMDDONE interrupts */
 
@@ -1109,7 +1109,7 @@ static int hsmc_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Post the RBEDGE0 event */
 
-      sem_post(&g_nand.waitsem);
+      nxsem_post(&g_nand.waitsem);
 
       /* Disable further RBEDGE0 interrupts */
 
@@ -1261,7 +1261,7 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
 
   priv->result  = result;
   priv->dmadone = true;
-  sem_post(&priv->waitsem);
+  nxsem_post(&priv->waitsem);
 }
 #endif
 
@@ -2950,7 +2950,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Perform one-time, global NFC/PMECC initialization */
@@ -2969,7 +2969,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
        */
 
       nxsem_init(&g_nand.waitsem, 0, 0);
-      sem_setprotocol(&g_nand.waitsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&g_nand.waitsem, SEM_PRIO_NONE);
 #endif
 
       /* Enable the NAND FLASH Controller (The NFC is always used) */

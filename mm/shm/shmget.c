@@ -467,13 +467,13 @@ int shmget(key_t key, size_t size, int shmflg)
 
       /* Release our lock on the shared memory region list */
 
-      sem_post(&g_shminfo.si_sem);
+      nxsem_post(&g_shminfo.si_sem);
     }
 
   return shmid;
 
 errout_with_semaphore:
-  sem_post(&g_shminfo.si_sem);
+  nxsem_post(&g_shminfo.si_sem);
 errout:
   set_errno(-ret);
   return ERROR;

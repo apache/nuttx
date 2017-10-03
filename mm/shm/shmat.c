@@ -185,14 +185,14 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Release our lock on the entry */
 
-  sem_post(&region->sr_sem);
+  nxsem_post(&region->sr_sem);
   return (FAR void *)vaddr;
 
 errout_with_vaddr:
   gran_free(group->tg_shm.gs_handle, (FAR void *)vaddr,
             region->sr_ds.shm_segsz);
 errout_with_semaphore:
-  sem_post(&region->sr_sem);
+  nxsem_post(&region->sr_sem);
   set_errno(-ret);
 errout:
   return (FAR void *)ERROR;

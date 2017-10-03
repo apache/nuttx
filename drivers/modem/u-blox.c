@@ -262,7 +262,7 @@ static int ubxmdm_poll(FAR struct file* filep,
       fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 

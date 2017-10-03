@@ -126,7 +126,7 @@ struct djoy_open_s
 /* Semaphore helpers */
 
 static inline int djoy_takesem(sem_t *sem);
-#define djoy_givesem(s) sem_post(s);
+#define djoy_givesem(s) nxsem_post(s);
 
 /* Sampling and Interrupt handling */
 
@@ -358,7 +358,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
                   if (fds->revents != 0)
                     {
                       iinfo("Report events: %02x\n", fds->revents);
-                      sem_post(fds->sem);
+                      nxsem_post(fds->sem);
                     }
                 }
             }
@@ -880,7 +880,7 @@ int djoy_register(FAR const char *devname,
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);
-      sem_destroy(&priv->du_exclsem);
+      nxsem_destroy(&priv->du_exclsem);
       kmm_free(priv);
     }
 

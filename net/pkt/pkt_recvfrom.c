@@ -225,7 +225,7 @@ static uint16_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
            * actually read.
            */
 
-          sem_post(&pstate->pr_sem);
+          nxsem_post(&pstate->pr_sem);
         }
     }
 
@@ -265,7 +265,7 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
    */
 
   (void)nxsem_init(&pstate->pr_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&pstate->pr_sem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&pstate->pr_sem, SEM_PRIO_NONE);
 
   pstate->pr_buflen = len;
   pstate->pr_buffer = buf;
@@ -275,7 +275,7 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
  * semaphore.
  */
 
-#define pkt_recvfrom_uninitialize(s) sem_destroy(&(s)->pr_sem)
+#define pkt_recvfrom_uninitialize(s) nxsem_destroy(&(s)->pr_sem)
 
 /****************************************************************************
  * Name: pkt_recvfrom_result

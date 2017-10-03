@@ -172,7 +172,7 @@ void net_unlock(void)
 
       g_holder = NO_HOLDER;
       g_count  = 0;
-      sem_post(&g_netlock);
+      nxsem_post(&g_netlock);
     }
   else
     {
@@ -215,7 +215,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
       count    = g_count;
       g_holder = NO_HOLDER;
       g_count  = 0;
-      sem_post(&g_netlock);
+      nxsem_post(&g_netlock);
 
       /* Now take the semaphore, waiting if so requested. */
 

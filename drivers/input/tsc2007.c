@@ -263,7 +263,7 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for TSC2007 data to become available,
@@ -280,7 +280,7 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -366,7 +366,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -844,7 +844,7 @@ static int tsc2007_open(FAR struct file *filep)
   priv->crefs = tmp;
 
 errout_with_sem:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 #else
   return OK;
@@ -889,7 +889,7 @@ static int tsc2007_close(FAR struct file *filep)
       priv->crefs--;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 #endif
   return OK;
 }
@@ -1020,7 +1020,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1093,7 +1093,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1186,7 +1186,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -1323,7 +1323,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->devsem);
 #ifdef CONFIG_TSC2007_MULTIPLE
   kmm_free(priv);
 #endif

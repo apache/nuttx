@@ -182,6 +182,6 @@ void inode_semgive(void)
     {
       g_inode_sem.holder = NO_HOLDER;
       g_inode_sem.count  = 0;
-      sem_post(&g_inode_sem.sem);
+      nxsem_post(&g_inode_sem.sem);
     }
 }

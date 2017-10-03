@@ -101,7 +101,7 @@ static void _usrsock_semtake(FAR sem_t *sem)
 
 static void _usrsock_semgive(FAR sem_t *sem)
 {
-  (void)sem_post(sem);
+  (void)nxsem_post(sem);
 }
 
 /****************************************************************************

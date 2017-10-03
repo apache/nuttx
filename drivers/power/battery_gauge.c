@@ -218,7 +218,7 @@ static int bat_gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&dev->batsem);
+  nxsem_post(&dev->batsem);
   return ret;
 }
 

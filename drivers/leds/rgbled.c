@@ -162,7 +162,7 @@ static int rgbled_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -202,7 +202,7 @@ static int rgbled_close(FAR struct file *filep)
       upper->crefs--;
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   ret = OK;
 
 errout:

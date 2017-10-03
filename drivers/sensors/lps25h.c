@@ -362,7 +362,7 @@ static int lps25h_open(FAR struct file *filep)
   dev->irqenabled = true;
 
 out:
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return ret;
 }
 
@@ -383,7 +383,7 @@ static int lps25h_close(FAR struct file *filep)
   dev->config->set_power(dev->config, false);
   lps25h_dbg("CLOSED\n");
 
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return ret;
 }
 
@@ -425,7 +425,7 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
     }
 
 out:
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return length;
 }
 
@@ -442,7 +442,7 @@ static void lps25h_notify(FAR struct lps25h_dev_s *dev)
   DEBUGASSERT(dev != NULL);
 
   dev->int_pending = true;
-  sem_post(&dev->waitsem);
+  nxsem_post(&dev->waitsem);
 }
 
 static int lps25h_int_handler(int irq, FAR void *context, FAR void *arg)
@@ -754,7 +754,7 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return ret;
 }
 

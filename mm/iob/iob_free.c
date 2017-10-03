@@ -132,9 +132,9 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * IOB and should find it in the committed list.
    */
 
-  sem_post(&g_iob_sem);
+  nxsem_post(&g_iob_sem);
 #if CONFIG_IOB_THROTTLE > 0
-  sem_post(&g_throttle_sem);
+  nxsem_post(&g_throttle_sem);
 #endif
   leave_critical_section(flags);
 

@@ -389,7 +389,7 @@ static void mmcsd_semgive(FAR struct mmcsd_slot_s *slot)
 {
   /* Relinquish the lock on the MMC/SD device */
 
-  sem_post(&slot->sem);
+  nxsem_post(&slot->sem);
 
   /* Relinquish the lock on the SPI bus */
 

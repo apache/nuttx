@@ -100,7 +100,7 @@ struct userled_open_s
 /* Semaphore helpers */
 
 static inline int userled_takesem(sem_t *sem);
-#define userled_givesem(s) sem_post(s);
+#define userled_givesem(s) nxsem_post(s);
 
 /* Character driver methods */
 
@@ -576,7 +576,7 @@ int userled_register(FAR const char *devname,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->lu_exclsem);
+  nxsem_destroy(&priv->lu_exclsem);
   kmm_free(priv);
   return ret;
 }

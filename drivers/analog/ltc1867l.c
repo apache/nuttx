@@ -281,7 +281,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         }
 
       adc_unlock(spi);
-      sem_post(&priv->sem);
+      nxsem_post(&priv->sem);
     }
   else
     {
@@ -355,7 +355,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (adcdev == NULL)
     {
       aerr("ERROR: Failed to allocate adc_dev_s instance\n");
-      sem_destroy(&adcpriv->sem);
+      nxsem_destroy(&adcpriv->sem);
       kmm_free(adcpriv);
       return -ENOMEM;
     }
@@ -371,7 +371,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
     {
       aerr("ERROR: Failed to register adc driver: %d\n", ret);
       kmm_free(adcdev);
-      sem_destroy(&adcpriv->sem);
+      nxsem_destroy(&adcpriv->sem);
       kmm_free(adcpriv);
     }
 

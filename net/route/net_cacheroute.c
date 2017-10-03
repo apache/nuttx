@@ -217,8 +217,8 @@ static int net_lock_ipv6_cache(void)
  *
  ****************************************************************************/
 
-#define net_unlock_ipv4_cache() (void)sem_post(&g_ipv4_cachelock)
-#define net_unlock_ipv6_cache() (void)sem_post(&g_ipv6_cachelock)
+#define net_unlock_ipv4_cache() (void)nxsem_post(&g_ipv4_cachelock)
+#define net_unlock_ipv6_cache() (void)nxsem_post(&g_ipv6_cachelock)
 
 /****************************************************************************
  * Name: net_add_newest_ipv4 and net_add_newest_ipv6

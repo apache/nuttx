@@ -156,7 +156,7 @@ static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&state->snd_sem);
+      nxsem_post(&state->snd_sem);
     }
 
   return flags;
@@ -301,7 +301,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    */
 
   (void)nxsem_init(&state.snd_sem, 0, 0);        /* Doesn't really fail */
-  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_retries = 0;                       /* No retries yet */
   net_ipv6addr_copy(state.snd_ipaddr, lookup); /* IP address to query */
@@ -387,7 +387,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       state.snd_retries++;
     }
 
-  sem_destroy(&state.snd_sem);
+  nxsem_destroy(&state.snd_sem);
   icmpv6_callback_free(dev, state.snd_cb);
 errout_with_lock:
   net_unlock();

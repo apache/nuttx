@@ -2837,7 +2837,7 @@ void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv)
   if (priv->thwaiting)
     {
       priv->thwaiting = false;
-      sem_post(&priv->thwaitsem);
+      nxsem_post(&priv->thwaitsem);
     }
 
   leave_critical_section(flags);

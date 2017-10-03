@@ -355,7 +355,7 @@ static void sam_putreg(uint32_t val, uint32_t addr);
 /* Semaphores ******************************************************************/
 
 static void sam_takesem(sem_t *sem);
-#define sam_givesem(s) sem_post(s);
+#define sam_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions *****************************************/
 
@@ -2669,7 +2669,7 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&eplist->wdhsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&eplist->wdhsem, SEM_PRIO_NONE);
 
   /* We must have exclusive access to the ED pool, the bulk list, the periodic list
    * and the interrupt table.
@@ -2891,7 +2891,7 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* And free the container */
 
-  sem_destroy(&eplist->wdhsem);
+  nxsem_destroy(&eplist->wdhsem);
   kmm_free(eplist);
   sam_givesem(&g_ohci.exclsem);
   return ret;
@@ -3914,7 +3914,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&g_ohci.pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&g_ohci.pscsem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   g_ohci.ininterval  = MAX_PERINTERVAL;

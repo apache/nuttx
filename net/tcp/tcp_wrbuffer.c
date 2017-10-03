@@ -194,7 +194,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
   /* Then free the write buffer structure */
 
   sq_addlast(&wrb->wb_node, &g_wrbuffer.freebuffers);
-  sem_post(&g_wrbuffer.sem);
+  nxsem_post(&g_wrbuffer.sem);
 }
 
 /****************************************************************************

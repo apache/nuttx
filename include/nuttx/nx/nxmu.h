@@ -87,7 +87,7 @@
 
 /* Handy macros */
 
-#define nxmu_semgive(sem)    sem_post(sem) /* To match nxmu_semtake() */
+#define nxmu_semgive(sem)    nxsem_post(sem) /* To match nxmu_semtake() */
 
 /****************************************************************************
  * Public Types

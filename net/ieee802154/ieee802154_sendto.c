@@ -385,7 +385,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->is_sem);
+      nxsem_post(&pstate->is_sem);
     }
 
   return flags;
@@ -400,7 +400,7 @@ errout:
 
   /* Wake up the waiting thread */
 
-  sem_post(&pstate->is_sem);
+  nxsem_post(&pstate->is_sem);
   return flags;
 }
 
@@ -488,7 +488,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
    */
 
   (void)nxsem_init(&state.is_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&state.is_sem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&state.is_sem, SEM_PRIO_NONE);
 
   state.is_sock   = psock;          /* Socket descriptor to use */
   state.is_buflen = len;            /* Number of bytes to send */
@@ -531,7 +531,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
         }
     }
 
-  sem_destroy(&state.is_sem);
+  nxsem_destroy(&state.is_sem);
   net_unlock();
 
   /* Set the socket state to idle */

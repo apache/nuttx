@@ -105,7 +105,7 @@ static inline void _pkt_semtake(sem_t *sem)
   UNUSED(ret);
 }
 
-#define _pkt_semgive(sem) sem_post(sem)
+#define _pkt_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Public Functions

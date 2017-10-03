@@ -181,7 +181,7 @@ static inline void syslog_dev_givesem(void)
   /* Relinquish the semaphore */
 
   g_syslog_dev.sl_holder = NO_HOLDER;
-  sem_post(&g_syslog_dev.sl_sem);
+  nxsem_post(&g_syslog_dev.sl_sem);
 }
 
 /****************************************************************************
@@ -452,7 +452,7 @@ int syslog_dev_uninitialize(void)
 
   /* Destroy the semaphore */
 
-  sem_destroy(&g_syslog_dev.sl_sem);
+  nxsem_destroy(&g_syslog_dev.sl_sem);
 
   /* Reset the state structure */
 

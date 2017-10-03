@@ -97,7 +97,7 @@ static struct
 void cc3000_resume(void)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0 && spiconf.done);
-  sem_post(spiconf.done);
+  nxsem_post(spiconf.done);
   ninfo("Done\n");
 }
 
@@ -194,7 +194,7 @@ static void *unsoliced_thread_func(void *parameter)
   spiconf.done = sem_open(buff, O_RDONLY);
   DEBUGASSERT(spiconf.done != SEM_FAILED);
 
-  sem_post(&spiconf.unsoliced_thread_wakesem);
+  nxsem_post(&spiconf.unsoliced_thread_wakesem);
 
   while (spiconf.run)
     {

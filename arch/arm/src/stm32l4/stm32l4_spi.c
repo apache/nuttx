@@ -628,7 +628,7 @@ static void spi_dmatxwait(FAR struct stm32l4_spidev_s *priv)
 #ifdef CONFIG_STM32L4_SPI_DMA
 static inline void spi_dmarxwakeup(FAR struct stm32l4_spidev_s *priv)
 {
-  (void)sem_post(&priv->rxsem);
+  (void)nxsem_post(&priv->rxsem);
 }
 #endif
 
@@ -643,7 +643,7 @@ static inline void spi_dmarxwakeup(FAR struct stm32l4_spidev_s *priv)
 #ifdef CONFIG_STM32L4_SPI_DMA
 static inline void spi_dmatxwakeup(FAR struct stm32l4_spidev_s *priv)
 {
-  (void)sem_post(&priv->txsem);
+  (void)nxsem_post(&priv->txsem);
 }
 #endif
 
@@ -886,7 +886,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
   return OK;
 }
@@ -1522,8 +1522,8 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
-  sem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
 
   /* Get DMA channels.  NOTE: stm32l4_dmachannel() will always assign the DMA channel.
    * if the channel is not available, then stm32l4_dmachannel() will block and wait

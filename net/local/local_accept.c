@@ -244,7 +244,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           /* Signal the client with the result of the connection */
 
           client->u.client.lc_result = ret;
-          sem_post(&client->lc_waitsem);
+          nxsem_post(&client->lc_waitsem);
           return ret;
         }
 

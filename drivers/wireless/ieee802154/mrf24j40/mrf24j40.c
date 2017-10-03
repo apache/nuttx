@@ -190,7 +190,7 @@ void mrf24j40_dopoll_csma(FAR void *arg)
         }
     }
 
-  sem_post(&dev->exclsem);
+  nxsem_post(&dev->exclsem);
 }
 
 /****************************************************************************
@@ -244,7 +244,7 @@ void mrf24j40_dopoll_gts(FAR void *arg)
         }
     }
 
-  sem_post(&dev->exclsem);
+  nxsem_post(&dev->exclsem);
 }
 
 /****************************************************************************

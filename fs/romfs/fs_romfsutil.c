@@ -371,7 +371,7 @@ void romfs_semtake(struct romfs_mountpt_s *rm)
 
 void romfs_semgive(struct romfs_mountpt_s *rm)
 {
-   sem_post(&rm->rm_sem);
+   nxsem_post(&rm->rm_sem);
 }
 
 /****************************************************************************

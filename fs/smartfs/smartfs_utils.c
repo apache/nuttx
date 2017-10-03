@@ -93,7 +93,7 @@ void smartfs_semtake(struct smartfs_mountpt_s *fs)
 
 void smartfs_semgive(struct smartfs_mountpt_s *fs)
 {
-   sem_post(fs->fs_sem);
+   nxsem_post(fs->fs_sem);
 }
 
 /****************************************************************************

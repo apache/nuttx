@@ -140,7 +140,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
           info->cb->event   = NULL;
 
           info->fds->revents |= eventset;
-          sem_post(info->fds->sem);
+          nxsem_post(info->fds->sem);
         }
     }
 
@@ -300,7 +300,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       /* Yes.. then signal the poll logic */
 
-      sem_post(fds->sem);
+      nxsem_post(fds->sem);
     }
 
   net_unlock();

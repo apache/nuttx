@@ -377,7 +377,7 @@ static int kxtj9_configure(FAR struct kxtj9_dev_s *priv, uint8_t odr)
   priv->int_ctrl = KXTJ9_IEN | KXTJ9_IEA | KXTJ9_IEL;
   kxtj9_reg_write(priv, INT_CTRL1, priv->int_ctrl);
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return 0;
 }
 
@@ -423,7 +423,7 @@ static int kxtj9_enable(FAR struct kxtj9_dev_s *priv, bool on)
       sninfo("KXTJ9 in operating mode\n");
     }
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 
@@ -459,7 +459,7 @@ static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
   /* Read INT_REL to clear interrupt status */
 
   kxtj9_reg_read(priv, INT_REL, &data, 1);
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 
   /* Feed sensor data to entropy pool */
 

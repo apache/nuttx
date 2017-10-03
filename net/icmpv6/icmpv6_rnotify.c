@@ -172,7 +172,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
    */
 
   (void)nxsem_init(&notify->rn_sem, 0, 0);
-  sem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 
@@ -230,7 +230,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
     }
 
   leave_critical_section(flags);
-  (void)sem_destroy(&notify->rn_sem);
+  (void)nxsem_destroy(&notify->rn_sem);
   return ret;
 }
 
@@ -334,7 +334,7 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
           /* And signal the waiting, returning success */
 
           curr->rn_result = OK;
-          sem_post(&curr->rn_sem);
+          nxsem_post(&curr->rn_sem);
           break;
         }
     }

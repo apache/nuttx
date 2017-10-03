@@ -107,7 +107,7 @@ int nxterm_sempost(FAR struct nxterm_state_s *priv)
   /* Then let go of it */
 
   priv->holder = NO_HOLDER;
-  return sem_post(&priv->exclsem);
+  return nxsem_post(&priv->exclsem);
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */

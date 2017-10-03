@@ -157,7 +157,7 @@ static int spidrvr_open(FAR struct file *filep)
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 #endif
@@ -202,12 +202,12 @@ static int spidrvr_close(FAR struct file *filep)
 
   if (priv->crefs <= 0 && priv->unlinked)
     {
-      sem_destroy(&priv->exclsem);
+      nxsem_destroy(&priv->exclsem);
       kmm_free(priv);
       return OK;
     }
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 #endif
@@ -291,7 +291,7 @@ static int spidrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 
@@ -324,7 +324,7 @@ static int spidrvr_unlink(FAR struct inode *inode)
 
   if (priv->crefs <= 0)
     {
-      sem_destroy(&priv->exclsem);
+      nxsem_destroy(&priv->exclsem);
       kmm_free(priv);
       return OK;
     }
@@ -334,7 +334,7 @@ static int spidrvr_unlink(FAR struct inode *inode)
    */
 
   priv->unlinked = true;
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 #endif

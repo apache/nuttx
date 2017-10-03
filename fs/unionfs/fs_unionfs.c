@@ -110,7 +110,7 @@ struct unionfs_file_s
 /* Helper functions */
 
 static int     unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint);
-#define        unionfs_semgive(ui) (void)sem_post(&(ui)->ui_exclsem)
+#define        unionfs_semgive(ui) (void)nxsem_post(&(ui)->ui_exclsem)
 
 static FAR const char *unionfs_offsetpath(FAR const char *relpath,
                  FAR const char *prefix);
@@ -825,7 +825,7 @@ static void unionfs_destroy(FAR struct unionfs_inode_s *ui)
 
   /* And finally free the allocated unionfs state structure as well */
 
-  sem_destroy(&ui->ui_exclsem);
+  nxsem_destroy(&ui->ui_exclsem);
   kmm_free(ui);
 }
 
@@ -2704,7 +2704,7 @@ errout_with_fs1:
   inode_release(ui->ui_fs[0].um_node);
 
 errout_with_uinode:
-  sem_destroy(&ui->ui_exclsem);
+  nxsem_destroy(&ui->ui_exclsem);
   kmm_free(ui);
   return ret;
 }

@@ -90,7 +90,7 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
 
    /* Wake up the waiting thread */
 
-   sem_post(&state->snd_sem);
+   nxsem_post(&state->snd_sem);
 }
 
 /****************************************************************************
@@ -291,7 +291,7 @@ int arp_send(in_addr_t ipaddr)
    */
 
   (void)nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_retries   = 0;              /* No retries yet */
   state.snd_ipaddr    = ipaddr;         /* IP address to query */
@@ -395,7 +395,7 @@ int arp_send(in_addr_t ipaddr)
       nerr("ERROR: arp_wait failed: %d\n", ret);
     }
 
-  sem_destroy(&state.snd_sem);
+  nxsem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
 errout_with_lock:
   net_unlock();

@@ -121,7 +121,7 @@ static int _get_ch_from_cfg(struct SdDrCfg_s *cfg)
 static void dma_callback(DMA_HANDLE hdma, void *arg, int result)
 {
   sem_t *waitsem = (sem_t *)arg;
-  sem_post(waitsem);
+  nxsem_post(waitsem);
 }
 #endif /* CONFIG_LC823450_SDC_DMA */
 

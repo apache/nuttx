@@ -501,7 +501,7 @@ static void sam_takechsem(struct sam_dmac_s *dmac)
 
 static inline void sam_givechsem(struct sam_dmac_s *dmac)
 {
-  (void)sem_post(&dmac->chsem);
+  (void)nxsem_post(&dmac->chsem);
 }
 
 /****************************************************************************
@@ -528,7 +528,7 @@ static void sam_takedsem(struct sam_dmac_s *dmac)
 
 static inline void sam_givedsem(struct sam_dmac_s *dmac)
 {
-  (void)sem_post(&dmac->dsem);
+  (void)nxsem_post(&dmac->dsem);
 }
 
 /****************************************************************************

@@ -2174,7 +2174,7 @@ void sam_adc_lock(FAR struct sam_adc_s *priv)
 void sam_adc_unlock(FAR struct sam_adc_s *priv)
 {
   ainfo("Unlocking\n");
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 }
 
 /****************************************************************************

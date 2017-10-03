@@ -126,7 +126,7 @@ struct ajoy_open_s
 /* Semaphore helpers */
 
 static inline int ajoy_takesem(sem_t *sem);
-#define ajoy_givesem(s) sem_post(s);
+#define ajoy_givesem(s) nxsem_post(s);
 
 /* Sampling and Interrupt handling */
 
@@ -358,7 +358,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
                   if (fds->revents != 0)
                     {
                       iinfo("Report events: %02x\n", fds->revents);
-                      sem_post(fds->sem);
+                      nxsem_post(fds->sem);
                     }
                 }
             }
@@ -890,7 +890,7 @@ int ajoy_register(FAR const char *devname,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->au_exclsem);
+  nxsem_destroy(&priv->au_exclsem);
   kmm_free(priv);
   return ret;
 }

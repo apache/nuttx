@@ -1075,7 +1075,7 @@ static int pcf8574_lcd_open(FAR struct file *filep)
       priv->refs++;
     }
 
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
   return OK;
 }
 
@@ -1116,7 +1116,7 @@ static int pcf8574_lcd_close(FAR struct file *filep)
       ret = OK;
     }
 
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
   return ret;
 }
 
@@ -1198,7 +1198,7 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
 
   lcd_putcmd(priv, CMD_SET_DDADDR | addr);            /* Restore DDRAM address */
 
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
   return nIdx;
 }
 
@@ -1350,7 +1350,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
 
   lcd_curpos_to_fpos(priv, row, col, &filep->f_pos);
 
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
   return buflen;
 }
 
@@ -1398,7 +1398,7 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset, int whence)
       filep->f_pos = -EINVAL;
     }
 
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
   return filep->f_pos;
 }
 
@@ -1450,7 +1450,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
           attr->row = row;
           attr->column = col;
 
-          sem_post(&priv->sem_excl);
+          nxsem_post(&priv->sem_excl);
         }
         break;
 
@@ -1472,7 +1472,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
 
           sem_wait(&priv->sem_excl);
           lcd_backlight(priv, arg ? true : false);
-          sem_post(&priv->sem_excl);
+          nxsem_post(&priv->sem_excl);
         }
         break;
 
@@ -1484,7 +1484,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
 
           sem_wait(&priv->sem_excl);
           lcd_create_char(priv, attr->idx, attr->bmp);
-          sem_post(&priv->sem_excl);
+          nxsem_post(&priv->sem_excl);
         }
         break;
 
@@ -1513,7 +1513,7 @@ static int pcf8574lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->revents |= (fds->events & (POLLIN|POLLOUT));
       if (fds->revents != 0)
         {
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 
@@ -1542,7 +1542,7 @@ static int pcf8574_lcd_unlink(FAR struct inode *inode)
       ret = OK;
     }
 
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
   return ret;
 }
 #endif

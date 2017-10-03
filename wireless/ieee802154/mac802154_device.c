@@ -134,7 +134,7 @@ struct mac802154_chardevice_s
  /* Semaphore helpers */
 
 static inline int mac802154dev_takesem(sem_t *sem);
-#define mac802154dev_givesem(s) sem_post(s);
+#define mac802154dev_givesem(s) nxsem_post(s);
 
 static inline void mac802154dev_pushevent(FAR struct mac802154_chardevice_s *dev,
                                 FAR struct ieee802154_notif_s *notif);
@@ -780,7 +780,7 @@ static void mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
           /* Wake the thread waiting for the data transmission */
 
           dev->geteventpending = false;
-          sem_post(&dev->geteventsem);
+          nxsem_post(&dev->geteventsem);
         }
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -850,7 +850,7 @@ static int mac802154dev_rxframe(FAR struct mac802154_maccb_s *maccb,
       /* Wake the thread waiting for the data transmission */
 
       dev->readpending = false;
-      sem_post(&dev->readsem);
+      nxsem_post(&dev->readsem);
     }
 
   /* Release the driver */
@@ -902,14 +902,14 @@ int mac802154dev_register(MACHANDLE mac, int minor)
                                        * before blocking */
 
   nxsem_init(&dev->readsem, 0, 0);
-  sem_setprotocol(&dev->readsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->readsem, SEM_PRIO_NONE);
   dev->readpending = false;
 
   sq_init(&dev->dataind_queue);
 
   dev->geteventpending = false;
   nxsem_init(&dev->geteventsem, 0, 0);
-  sem_setprotocol(&dev->geteventsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->geteventsem, SEM_PRIO_NONE);
 
   dev->event_head = NULL;
   dev->event_tail = NULL;
@@ -955,7 +955,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   return OK;
 
 errout_with_priv:
-  sem_destroy(&dev->md_exclsem);
+  nxsem_destroy(&dev->md_exclsem);
   kmm_free(dev);
   return ret;
 }

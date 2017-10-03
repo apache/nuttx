@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_destroy.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_destroy
+ * Name: nxsem_destroy
  *
  * Description:
  *   This function is used to destroy the un-named semaphore indicated by
  *   'sem'.  Only a semaphore that was created using nxsem_init() may be
- *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
+ *   destroyed using nxsem_destroy(); the effect of calling nxsem_destroy() with
  *   a named semaphore is undefined.  The effect of subsequent use of the
  *   semaphore sem is undefined until sem is re-initialized by another call
  *   to nxsem_init().
@@ -66,17 +66,17 @@
  *   sem - Semaphore to be destroyed.
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if unsuccessful.
- *
- * Assumptions:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sem_destroy (FAR sem_t *sem)
+int nxsem_destroy (FAR sem_t *sem)
 {
   /* Assure a valid semaphore is specified */
 
-  if (sem)
+  if (sem != NULL)
     {
       /* There is really no particular action that we need
        * take to destroy a semaphore.  We will just reset
@@ -98,9 +98,44 @@ int sem_destroy (FAR sem_t *sem)
       nxsem_destroyholder(sem);
       return OK;
     }
-  else
+
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: sem_destroy
+ *
+ * Description:
+ *   This function is used to destroy the un-named semaphore indicated by
+ *   'sem'.  Only a semaphore that was created using nxsem_init() may be
+ *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
+ *   a named semaphore is undefined.  The effect of subsequent use of the
+ *   semaphore sem is undefined until sem is re-initialized by another call
+ *   to nxsem_init().
+ *
+ *   The effect of destroying a semaphore upon which other processes are
+ *   currently blocked is undefined.
+ *
+ * Parameters:
+ *   sem - Semaphore to be destroyed.
+ *
+ * Return Value:
+ *   This function is a application interface.  It returns zero (OK) if
+ *   successful.  Otherwise, -1 (ERROR) is returned and the errno value is
+ *   set appropriately.
+ *
+ ****************************************************************************/
+
+int sem_destroy (FAR sem_t *sem)
+{
+  int ret;
+
+  ret = nxsem_destroy(sem);
+  if (ret < 0)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      set_errno(-ret);
+      ret = ERROR;
     }
+
+  return ret;
 }

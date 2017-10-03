@@ -77,7 +77,7 @@ static void _files_semtake(FAR struct filelist *list)
  * Name: _files_semgive
  ****************************************************************************/
 
-#define _files_semgive(list) sem_post(&list->fl_sem)
+#define _files_semgive(list) nxsem_post(&list->fl_sem)
 
 /****************************************************************************
  * Name: _files_close
@@ -180,7 +180,7 @@ void files_releaselist(FAR struct filelist *list)
 
   /* Destroy the semaphore */
 
-  (void)sem_destroy(&list->fl_sem);
+  (void)nxsem_destroy(&list->fl_sem);
 }
 
 /****************************************************************************

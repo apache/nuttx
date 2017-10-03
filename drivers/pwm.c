@@ -214,7 +214,7 @@ static int pwm_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -271,7 +271,7 @@ static int pwm_close(FAR struct file *filep)
   ret = OK;
 
 //errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -551,7 +551,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   return ret;
 }
 
@@ -607,7 +607,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
    * inheritance enabled.
    */
 
-  sem_setprotocol(&upper->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&upper->waitsem, SEM_PRIO_NONE);
 #endif
 
   upper->dev = dev;
@@ -673,7 +673,7 @@ void pwm_expired(FAR void *handle)
           /* Yes.. clear the waiting flag and awakened the waiting thread */
 
           upper->waiting = false;
-          sem_post(&upper->waitsem);
+          nxsem_post(&upper->waitsem);
         }
 
       /* The PWM is now stopped */

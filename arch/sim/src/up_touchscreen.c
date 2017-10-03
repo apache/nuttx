@@ -202,7 +202,7 @@ static void up_notify(FAR struct up_dev_s *priv)
        * is no longer avaialable.
        */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for touchscreen data to become availabe,
@@ -219,7 +219,7 @@ static void up_notify(FAR struct up_dev_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -299,7 +299,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -482,7 +482,7 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
 errout:
   iinfo("Returning %d\n", ret);
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -523,7 +523,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -614,7 +614,7 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -664,7 +664,7 @@ int sim_tsc_initialize(int minor)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   priv->minor = minor;
 
@@ -689,8 +689,8 @@ int sim_tsc_initialize(int minor)
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->waitsem);
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->devsem);
   return ret;
 }
 
@@ -748,8 +748,8 @@ void sim_tsc_uninitialize(void)
 
   /* Clean up any resources.  Ouch!  While we are holding the semaphore? */
 
-  sem_destroy(&priv->waitsem);
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->devsem);
 }
 
 /****************************************************************************

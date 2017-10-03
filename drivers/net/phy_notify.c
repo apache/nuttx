@@ -151,7 +151,7 @@ static void phy_semtake(void)
     }
 }
 
-#define phy_semgive() sem_post(&g_notify_clients_sem);
+#define phy_semgive() nxsem_post(&g_notify_clients_sem);
 
 /****************************************************************************
  * Name: phy_find_unassigned

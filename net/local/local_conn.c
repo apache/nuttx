@@ -100,7 +100,7 @@ FAR struct local_conn_s *local_alloc(void)
        */
 
       nxsem_init(&conn->lc_waitsem, 0, 0);
-      sem_setprotocol(&conn->lc_waitsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&conn->lc_waitsem, SEM_PRIO_NONE);
 
 #ifdef HAVE_LOCAL_POLL
       memset(conn->lc_accept_fds, 0, sizeof(conn->lc_accept_fds));
@@ -144,7 +144,7 @@ void local_free(FAR struct local_conn_s *conn)
   /* Destroy all FIFOs associted with the connection */
 
   local_release_fifos(conn);
-  sem_destroy(&conn->lc_waitsem);
+  nxsem_destroy(&conn->lc_waitsem);
 #endif
 
   /* And free the connection structure */

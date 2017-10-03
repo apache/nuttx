@@ -838,7 +838,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
 static inline void tiva_i2c_sem_post(struct tiva_i2c_priv_s *priv)
 {
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 }
 
 /************************************************************************************
@@ -859,7 +859,7 @@ static inline void tiva_i2c_sem_init(struct tiva_i2c_priv_s *priv)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 }
 
@@ -873,9 +873,9 @@ static inline void tiva_i2c_sem_init(struct tiva_i2c_priv_s *priv)
 
 static inline void tiva_i2c_sem_destroy(struct tiva_i2c_priv_s *priv)
 {
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
 #ifndef CONFIG_I2C_POLLED
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->waitsem);
 #endif
 }
 
@@ -1219,7 +1219,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
                * and wake it up.
                */
 
-              sem_post(&priv->waitsem);
+              nxsem_post(&priv->waitsem);
               priv->mstatus   = mcs;
               priv->intstate = INTSTATE_DONE;
             }
@@ -1341,7 +1341,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
                            * complete and wake it up.
                            */
 
-                          sem_post(&priv->waitsem);
+                          nxsem_post(&priv->waitsem);
                           priv->mstatus   = 0;
                           priv->intstate = INTSTATE_DONE;
                         }

@@ -782,12 +782,10 @@ int net_unlockroute_ipv4(void)
       g_ipv4_holder = NO_HOLDER;
       g_ipv4_count  = 0;
 
-      ret = sem_post(&g_ipv4_exclsem);
+      ret = nxsem_post(&g_ipv4_exclsem);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          nerr("ERROR: sem_post() failed: %d\n", errcode);
-          ret = -errcode;
+          nerr("ERROR: nxsem_post() failed: %d\n", ret);
         }
     }
 
@@ -825,12 +823,10 @@ int net_unlockroute_ipv6(void)
       g_ipv6_holder = NO_HOLDER;
       g_ipv6_count  = 0;
 
-      ret = sem_post(&g_ipv6_exclsem);
+      ret = nxsem_post(&g_ipv6_exclsem);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          nerr("ERROR: sem_post() failed: %d\n", errcode);
-          ret = -errcode;
+          nerr("ERROR: nxsem_post() failed: %d\n", ret);
         }
     }
 

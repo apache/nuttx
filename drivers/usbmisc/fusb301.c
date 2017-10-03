@@ -565,7 +565,7 @@ static ssize_t fusb301_read(FAR struct file *filep, FAR char *buffer, size_t buf
   ptr->status = fusb301_getreg(priv, FUSB301_STATUS_REG);
   ptr->dev_type = fusb301_getreg(priv, FUSB301_TYPE_REG);
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return sizeof(struct fusb301_result_s);
 }
 
@@ -656,7 +656,7 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     break;
   }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -744,7 +744,7 @@ static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool set
     }
 
 out:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -775,7 +775,7 @@ static void fusb301_notify(FAR struct fusb301_dev_s *priv)
         {
           fds->revents |= POLLIN;
           fusb301_info("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 }
@@ -855,7 +855,7 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->devsem);
   kmm_free(priv);
 
   return ret;

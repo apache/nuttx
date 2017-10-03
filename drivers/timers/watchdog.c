@@ -153,7 +153,7 @@ static int wdog_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -193,7 +193,7 @@ static int wdog_close(FAR struct file *filep)
       upper->crefs--;
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   ret = OK;
 
 errout:
@@ -422,7 +422,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   return ret;
 }
 
@@ -506,7 +506,7 @@ errout_with_path:
   kmm_free(upper->path);
 
 errout_with_upper:
-  sem_destroy(&upper->exclsem);
+  nxsem_destroy(&upper->exclsem);
   kmm_free(upper);
 
 errout:
@@ -554,7 +554,7 @@ void watchdog_unregister(FAR void *handle)
   /* Then free all of the driver resources */
 
   kmm_free(upper->path);
-  sem_destroy(&upper->exclsem);
+  nxsem_destroy(&upper->exclsem);
   kmm_free(upper);
 }
 

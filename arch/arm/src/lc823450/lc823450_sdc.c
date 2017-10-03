@@ -150,7 +150,7 @@ static void _sdc_semtake(FAR sem_t *sem)
 
 static void _sdc_semgive(FAR sem_t *sem)
 {
-  sem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************

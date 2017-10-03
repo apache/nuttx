@@ -141,7 +141,7 @@ struct twi_dev_s
 /* Low-level helper functions */
 
 static void twi_takesem(sem_t *sem);
-#define     twi_givesem(sem) (sem_post(sem))
+#define     twi_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM34_TWI_REGDEBUG
 static bool twi_checkreg(struct twi_dev_s *priv, bool wr,
@@ -974,7 +974,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 
@@ -1017,8 +1017,8 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 
   /* Reset data structures */
 
-  sem_destroy(&priv->exclsem);
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->waitsem);
 
   /* Free the watchdog timer */
 

@@ -232,11 +232,11 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       total        += readsize;
     }
 
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
   return total;
 
 errout_with_semaphore:
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return (ssize_t)ret;
 }

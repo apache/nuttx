@@ -247,7 +247,7 @@ static void tundev_lock(FAR struct tun_driver_s *tun)
 
 static void tundev_unlock(FAR struct tun_driver_s *tun)
 {
-  sem_post(&tun->waitsem);
+  nxsem_post(&tun->waitsem);
 }
 
 /****************************************************************************
@@ -274,7 +274,7 @@ static void tun_lock(FAR struct tun_device_s *priv)
 
 static void tun_unlock(FAR struct tun_device_s *priv)
 {
-  sem_post(&priv->waitsem);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -296,7 +296,7 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
   if (eventset != 0)
     {
       fds->revents |= eventset;
-      sem_post(fds->sem);
+      nxsem_post(fds->sem);
     }
 }
 #else
@@ -335,7 +335,7 @@ static int tun_fd_transmit(FAR struct tun_device_s *priv)
   if (priv->read_wait)
     {
       priv->read_wait = false;
-      sem_post(&priv->read_wait_sem);
+      nxsem_post(&priv->read_wait_sem);
     }
 
   tun_pollnotify(priv, POLLIN);
@@ -879,7 +879,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->read_wait_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->read_wait_sem, SEM_PRIO_NONE);
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
@@ -904,8 +904,8 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
   ret = netdev_register(&priv->dev, NET_LL_TUN);
   if (ret != OK)
     {
-      sem_destroy(&priv->waitsem);
-      sem_destroy(&priv->read_wait_sem);
+      nxsem_destroy(&priv->waitsem);
+      nxsem_destroy(&priv->read_wait_sem);
       return ret;
     }
 
@@ -929,8 +929,8 @@ static int tun_dev_uninit(FAR struct tun_device_s *priv)
 
   (void)netdev_unregister(&priv->dev);
 
-  sem_destroy(&priv->waitsem);
-  sem_destroy(&priv->read_wait_sem);
+  nxsem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->read_wait_sem);
 
   return OK;
 }

@@ -167,7 +167,7 @@ int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   ret = nxffs_rminode(volume, relpath);
 
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }

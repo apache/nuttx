@@ -660,7 +660,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
 static inline void efm32_i2c_sem_post(FAR struct efm32_i2c_priv_s *priv)
 {
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -681,7 +681,7 @@ static inline void efm32_i2c_sem_init(FAR struct efm32_i2c_priv_s *priv)
    */
 
   nxsem_init(&priv->sem_isr, 0, 0);
-  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -695,9 +695,9 @@ static inline void efm32_i2c_sem_init(FAR struct efm32_i2c_priv_s *priv)
 
 static inline void efm32_i2c_sem_destroy(FAR struct efm32_i2c_priv_s *priv)
 {
-  sem_destroy(&priv->sem_excl);
+  nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
-  sem_destroy(&priv->sem_isr);
+  nxsem_destroy(&priv->sem_isr);
 #endif
 }
 
@@ -1254,7 +1254,7 @@ done:
   if (priv->i2c_state == I2CSTATE_DONE)
     {
 #ifndef CONFIG_I2C_POLLED
-      sem_post(&priv->sem_isr);
+      nxsem_post(&priv->sem_isr);
 #endif
       /* Disable interrupt sources when done */
 

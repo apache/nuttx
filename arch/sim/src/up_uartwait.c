@@ -64,7 +64,7 @@ void simuart_initialize(void)
    */
 
   nxsem_init(&g_uartavail, 0, 0);
-  sem_setprotocol(&g_uartavail, SEM_PRIO_NONE);
+  nxsem_setprotocol(&g_uartavail, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -73,7 +73,7 @@ void simuart_initialize(void)
 
 void simuart_post(void)
 {
-  sem_post(&g_uartavail);
+  nxsem_post(&g_uartavail);
 }
 
 /****************************************************************************

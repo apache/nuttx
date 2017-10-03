@@ -165,7 +165,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
 
   return OK;
@@ -320,7 +320,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static void spi_dma_callback(DMA_HANDLE hdma, void *arg, int result)
 {
   sem_t *waitsem = (sem_t *)arg;
-  sem_post(waitsem);
+  nxsem_post(waitsem);
 }
 #endif /* CONFIG_LC823450_SPI_DMA */
 

@@ -829,7 +829,7 @@ static int hts221_open(FAR struct file *filep)
   priv->config->set_power(priv->config, true);
   priv->config->irq_enable(priv->config, true);
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   hts221_dbg("Sensor is powered on\n");
   return OK;
 }
@@ -849,7 +849,7 @@ static int hts221_close(FAR struct file *filep)
   ret = hts221_power_on_off(priv, false);
   priv->config->set_power(priv->config, false);
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   hts221_dbg("CLOSED\n");
   return ret;
 }
@@ -885,7 +885,7 @@ static ssize_t hts221_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return length;
 }
 
@@ -944,7 +944,7 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -986,7 +986,7 @@ static void hts221_notify(FAR struct hts221_dev_s *priv)
         {
           fds->revents |= POLLIN;
           hts221_dbg("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 }
@@ -1068,7 +1068,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif /* !CONFIG_DISABLE_POLL */

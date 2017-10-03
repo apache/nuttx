@@ -110,7 +110,7 @@ static inline void sem_lock(void)
 
 static inline void sem_unlock(void)
 {
-  sem_post(&g_sem);
+  nxsem_post(&g_sem);
 }
 
 static void flash_unlock(void)

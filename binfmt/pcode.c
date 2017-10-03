@@ -330,7 +330,7 @@ static int pcode_proxy(int argc, char **argv)
   fullpath                 = g_pcode_handoff.fullpath;
   g_pcode_handoff.fullpath = NULL;
 
-  sem_post(&g_pcode_handoff.exclsem);
+  nxsem_post(&g_pcode_handoff.exclsem);
   DEBUGASSERT(binp && fullpath);
 
   binfo("Executing %s\n", fullpath);
@@ -477,7 +477,7 @@ static int pcode_load(struct binary_s *binp)
       berr("ERROR: Failed to duplicate the full path: %d\n",
            binp->filename);
 
-      sem_post(&g_pcode_handoff.exclsem);
+      nxsem_post(&g_pcode_handoff.exclsem);
       ret = -ENOMEM;
       goto errout_with_fd;
     }
@@ -510,7 +510,7 @@ static int pcode_unload(struct binary_s *binp)
   if (g_pcode_handoff.binp)
     {
       g_pcode_handoff.binp = NULL;
-      sem_post(&g_pcode_handoff.exclsem);
+      nxsem_post(&g_pcode_handoff.exclsem);
     }
 
   return OK;
@@ -607,7 +607,7 @@ void pcode_uninitialize(void)
 
   /* Uninitialize globals */
 
-  sem_destroy(&g_pcode_handoff.exclsem);
+  nxsem_destroy(&g_pcode_handoff.exclsem);
 }
 
 #endif /* CONFIG_BINFMT_PCODE */

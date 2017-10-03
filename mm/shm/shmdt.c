@@ -183,7 +183,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Release our lock on the entry */
 
-  sem_post(&region->sr_sem);
+  nxsem_post(&region->sr_sem);
   return OK;
 
 errout_with_errno:

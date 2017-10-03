@@ -168,7 +168,7 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
       syslog(LOG_INFO, "  Unqueued:       %u\n", unattached);
     }
 
-  sem_post(&g_errsem);
+  nxsem_post(&g_errsem);
 }
 #else
 #  define vnc_sem_debug(s,m,u)
@@ -236,7 +236,7 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
                             FAR struct vnc_fbupdate_s *update)
 {
   /* Reserve one element from the free list.  Lock the scheduler to assure
-   * that the sq_addlast() and the sem_post() are atomic.
+   * that the sq_addlast() and the nxsem_post() are atomic.
    */
 
   sched_lock();
@@ -248,7 +248,7 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
 
   /* Post the semaphore to indicate the availability of one more update */
 
-  sem_post(&session->freesem);
+  nxsem_post(&session->freesem);
 
   vnc_sem_debug(session, "After free", 0);
   DEBUGASSERT(session->freesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
@@ -328,7 +328,7 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
 static void vnc_add_queue(FAR struct vnc_session_s *session,
                           FAR struct vnc_fbupdate_s *rect)
 {
-  /* Lock the scheduler to assure that the sq_addlast() and the sem_post()
+  /* Lock the scheduler to assure that the sq_addlast() and the nxsem_post()
    * are atomic.
    */
 
@@ -343,7 +343,7 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
    * in the queue.  This may wakeup the updater.
    */
 
-  sem_post(&session->queuesem);
+  nxsem_post(&session->queuesem);
 
   vnc_sem_debug(session, "After add", 0);
   DEBUGASSERT(session->queuesem.semcount <= CONFIG_VNCSERVER_NUPDATES);

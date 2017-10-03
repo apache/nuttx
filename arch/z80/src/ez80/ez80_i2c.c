@@ -151,7 +151,7 @@ static void ez80_i2c_semtake(void)
     }
 }
 
-#define ez80_i2c_semgive() sem_post(&g_i2csem)
+#define ez80_i2c_semgive() nxsem_post(&g_i2csem)
 
 /****************************************************************************
  * Name: ez80_i2c_setccr

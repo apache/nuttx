@@ -107,7 +107,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
    */
 
   (void)nxsem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
 
   pstate->tc_conn   = conn;
   pstate->tc_psock  = psock;
@@ -300,7 +300,7 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->tc_sem);
+      nxsem_post(&pstate->tc_sem);
     }
 
   return flags;
@@ -370,7 +370,7 @@ int psock_tcp_connect(FAR struct socket *psock,
 
           /* Uninitialize the state structure */
 
-          (void)sem_destroy(&state.tc_sem);
+          (void)nxsem_destroy(&state.tc_sem);
 
           /* If net_lockedwait failed, negated errno was returned. */
 

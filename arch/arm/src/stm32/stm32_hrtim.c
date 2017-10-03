@@ -4809,7 +4809,7 @@ int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev)
   ret =  register_driver(path, &hrtim_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->hd_closesem);
+      nxsem_destroy(&dev->hd_closesem);
     }
 
   return ret;

@@ -267,7 +267,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
   aes_enable(false);
 
 out:
-  sem_post(&aes_lock);
+  nxsem_post(&aes_lock);
   return ret;
 }
 
@@ -314,7 +314,7 @@ int up_aesuninitialize(void)
   regval &= ~RCC_AHBENR_AESEN;
   putreg32(regval, STM32_RCC_AHBENR);
 
-  sem_destroy(&aes_lock);
+  nxsem_destroy(&aes_lock);
 
   return OK;
 }

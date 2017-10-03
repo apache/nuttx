@@ -484,7 +484,7 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
           /* Wake the thread waiting for the data transmission */
 
           priv->md_eventpending = false;
-          sem_post(&priv->md_eventsem);
+          nxsem_post(&priv->md_eventsem);
         }
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -510,7 +510,7 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
       mac802154_notif_free(priv->md_mac, notif);
     }
 
-  sem_post(&priv->md_exclsem);
+  nxsem_post(&priv->md_exclsem);
 }
 
 /****************************************************************************
@@ -1163,7 +1163,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                         }
 
                       priv->md_eventpending = true;
-                      sem_post(&priv->md_exclsem);
+                      nxsem_post(&priv->md_exclsem);
 
                       /* Wait to be signaled when an event is queued */
 
@@ -1211,7 +1211,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
      ret = mac802154_ioctl(priv->md_mac, cmd, arg);
    }
 
-  sem_post(&priv->md_exclsem);
+  nxsem_post(&priv->md_exclsem);
   return ret;
 }
 #endif
@@ -1478,7 +1478,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   priv->md_eventpending = false;
   nxsem_init(&priv->md_eventsem, 0, 0);
-  sem_setprotocol(&priv->md_eventsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->md_eventsem, SEM_PRIO_NONE);
 
   priv->md_eventhead = NULL;
   priv->md_eventtail = NULL;

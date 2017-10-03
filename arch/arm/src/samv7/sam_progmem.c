@@ -200,7 +200,7 @@ static void page_buffer_lock(void)
     }
 }
 
-#define page_buffer_unlock() sem_post(&g_page_sem)
+#define page_buffer_unlock() nxsem_post(&g_page_sem)
 
 /****************************************************************************
  * Name: efc_command

@@ -521,7 +521,7 @@ void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
  *
  ****************************************************************************/
 
-#define usbmsc_scsi_unlock(priv) sem_post(&priv->thlock)
+#define usbmsc_scsi_unlock(priv) nxsem_post(&priv->thlock)
 
 /*****************************************************************************
  * Name: usbmsc_scsi_signal
@@ -541,7 +541,7 @@ void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv);
  *
  ****************************************************************************/
 
-#define usbmsc_synch_signal(priv) sem_post(&priv->thsynch)
+#define usbmsc_synch_signal(priv) nxsem_post(&priv->thsynch)
 
 /****************************************************************************
  * Name: usbmsc_mkstrdesc

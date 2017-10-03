@@ -509,7 +509,7 @@ void up_rngreseed(void)
       rng_reseed();
     }
 
-  sem_post(&g_rng.rd_sem);
+  nxsem_post(&g_rng.rd_sem);
 }
 
 /****************************************************************************
@@ -557,5 +557,5 @@ void getrandom(FAR void *bytes, size_t nbytes)
     }
 
   rng_buf_internal(bytes, nbytes);
-  sem_post(&g_rng.rd_sem);
+  nxsem_post(&g_rng.rd_sem);
 }

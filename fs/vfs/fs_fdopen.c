@@ -264,7 +264,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
           stream->fs_fd      = fd;
           stream->fs_oflags  = (uint16_t)oflags;
 
-          sem_post(&slist->sl_sem);
+          nxsem_post(&slist->sl_sem);
           return stream;
         }
     }
@@ -276,7 +276,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 #if !defined(CONFIG_STDIO_DISABLE_BUFFERING) && CONFIG_STDIO_BUFFER_SIZE > 0
 errout_with_sem:
 #endif
-  sem_post(&slist->sl_sem);
+  nxsem_post(&slist->sl_sem);
 
 errout:
   set_errno(errcode);

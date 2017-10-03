@@ -152,7 +152,7 @@ struct usbhost_freestate_s
 /* Semaphores */
 
 static void usbhost_takesem(sem_t *sem);
-#define usbhost_givesem(s) sem_post(s);
+#define usbhost_givesem(s) nxsem_post(s);
 
 /* Memory allocation services */
 
@@ -949,7 +949,7 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Destroy the semaphores */
 
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
 
   /* Disconnect the USB host device */
 

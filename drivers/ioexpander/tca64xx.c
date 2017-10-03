@@ -205,7 +205,7 @@ static void tca64_lock(FAR struct tca64_dev_s *priv)
     }
 }
 
-#define tca64_unlock(p) sem_post(&(p)->exclsem)
+#define tca64_unlock(p) nxsem_post(&(p)->exclsem)
 
 /****************************************************************************
  * Name: tca64_getpart

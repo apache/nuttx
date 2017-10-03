@@ -148,7 +148,7 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
 
       /* Must unlock the radio before calling poll */
 
-      sem_post(&dev->exclsem);
+      nxsem_post(&dev->exclsem);
       mrf24j40_dopoll_csma(dev);
       while (sem_wait(&dev->exclsem) != 0) { }
     }
@@ -394,7 +394,7 @@ void mrf24j40_irqworker(FAR void *arg)
 
   /* Unlock the radio device */
 
-  sem_post(&dev->exclsem);
+  nxsem_post(&dev->exclsem);
 
   /* Re-enable GPIO interrupts */
 

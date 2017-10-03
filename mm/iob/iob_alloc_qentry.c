@@ -183,7 +183,7 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
                * we will have to wait again.
                */
 
-              sem_post(&g_qentry_sem);
+              nxsem_post(&g_qentry_sem);
               qentry = iob_tryalloc_qentry();
             }
         }

@@ -252,7 +252,7 @@ end_wait:
   pstate->cl_cb->flags = 0;
   pstate->cl_cb->priv  = NULL;
   pstate->cl_cb->event = NULL;
-  sem_post(&pstate->cl_sem);
+  nxsem_post(&pstate->cl_sem);
 
   ninfo("Resuming\n");
   return 0;
@@ -389,7 +389,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
            */
 
           nxsem_init(&state.cl_sem, 0, 0);
-          sem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
+          nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
 
           /* Record the time that we started the wait (in ticks) */
 
@@ -423,7 +423,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
           /* We are now disconnected */
 
-          sem_destroy(&state.cl_sem);
+          nxsem_destroy(&state.cl_sem);
           tcp_callback_free(conn, state.cl_cb);
 
           /* Free the connection */

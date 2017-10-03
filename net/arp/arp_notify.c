@@ -95,7 +95,7 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
    */
 
   (void)nxsem_init(&notify->nt_sem, 0, 0);
-  sem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 
@@ -150,7 +150,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
     }
 
   leave_critical_section(flags);
-  (void)sem_destroy(&notify->nt_sem);
+  (void)nxsem_destroy(&notify->nt_sem);
   return ret;
 }
 
@@ -250,7 +250,7 @@ void arp_notify(in_addr_t ipaddr)
           /* Yes.. Signal the waiting, returning success */
 
           curr->nt_result = OK;
-          sem_post(&curr->nt_sem);
+          nxsem_post(&curr->nt_sem);
           break;
         }
     }

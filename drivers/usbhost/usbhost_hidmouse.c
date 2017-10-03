@@ -308,7 +308,7 @@ struct usbhost_state_s
 /* Semaphores */
 
 static void usbhost_takesem(sem_t *sem);
-#define usbhost_givesem(s) sem_post(s);
+#define usbhost_givesem(s) nxsem_post(s);
 
 /* Polling support */
 
@@ -489,7 +489,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
           if (fds->revents != 0)
             {
               uinfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -647,8 +647,8 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Destroy the semaphores */
 
-  sem_destroy(&priv->exclsem);
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->waitsem);
 
   /* Disconnect the USB host device */
 
@@ -690,7 +690,7 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
 
   if (priv->nwaiters > 0)
     {
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for mouse data to become available,
@@ -707,7 +707,7 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -1365,7 +1365,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -1939,7 +1939,7 @@ static FAR struct usbhost_class_s *
            * not have priority inheritance enabled.
            */
 
-          sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+          nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
           /* Return the instance of the USB mouse class driver */
 
@@ -2527,7 +2527,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 #endif
@@ -2564,7 +2564,7 @@ int usbhost_mouse_init(void)
    * have priority inheritance enabled.
    */
 
-  sem_setprotocol(&g_syncsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&g_syncsem, SEM_PRIO_NONE);
 
   /* Advertise our availability to support (certain) mouse devices */
 

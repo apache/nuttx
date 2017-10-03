@@ -238,7 +238,7 @@ static void stm32_dmatake(FAR struct stm32_dma_s *dmach)
 
 static inline void stm32_dmagive(FAR struct stm32_dma_s *dmach)
 {
-  (void)sem_post(&dmach->sem);
+  (void)nxsem_post(&dmach->sem);
 }
 
 /************************************************************************************

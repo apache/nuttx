@@ -62,7 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define poll_semgive(sem) sem_post(sem)
+#define poll_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Private Functions
@@ -298,7 +298,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
               fds->revents |= (fds->events & (POLLIN | POLLOUT));
               if (fds->revents != 0)
                 {
-                  sem_post(fds->sem);
+                  nxsem_post(fds->sem);
                 }
             }
 
@@ -398,7 +398,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
    */
 
   nxsem_init(&sem, 0, 0);
-  sem_setprotocol(&sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&sem, SEM_PRIO_NONE);
 
   ret = poll_setup(fds, nfds, &sem);
   if (ret >= 0)
@@ -471,7 +471,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
         }
     }
 
-  sem_destroy(&sem);
+  nxsem_destroy(&sem);
   leave_cancellation_point();
 
   /* Check for errors */

@@ -229,7 +229,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   map->flink  = g_rammaps.head;
   g_rammaps.head = map;
 
-  sem_post(&g_rammaps.exclsem);
+  nxsem_post(&g_rammaps.exclsem);
   return map->addr;
 
 errout_with_region:

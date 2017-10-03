@@ -147,7 +147,7 @@ static int smps_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->closesem);
+      nxsem_post(&dev->closesem);
     }
 
   return OK;
@@ -182,7 +182,7 @@ static int smps_close(FAR struct file *filep)
       if (dev->ocount > 1)
         {
           dev->ocount--;
-          sem_post(&dev->closesem);
+          nxsem_post(&dev->closesem);
         }
       else
         {
@@ -196,7 +196,7 @@ static int smps_close(FAR struct file *filep)
           dev->ops->shutdown(dev);               /* Disable the SMPS */
           leave_critical_section(flags);
 
-          sem_post(&dev->closesem);
+          nxsem_post(&dev->closesem);
         }
     }
 
@@ -529,7 +529,7 @@ int smps_register(FAR const char *path, FAR struct smps_dev_s *dev, FAR void *lo
   ret = register_driver(path, &smps_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->closesem);
+      nxsem_destroy(&dev->closesem);
     }
 
   return ret;

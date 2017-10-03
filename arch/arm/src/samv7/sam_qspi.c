@@ -603,7 +603,7 @@ static void qspi_dma_timeout(int argc, uint32_t arg)
 
   /* Then wake up the waiting thread */
 
-  sem_post(&priv->dmawait);
+  nxsem_post(&priv->dmawait);
 }
 #endif
 
@@ -650,7 +650,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Then wake up the waiting thread */
 
-  sem_post(&priv->dmawait);
+  nxsem_post(&priv->dmawait);
 }
 #endif
 
@@ -1078,7 +1078,7 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
 
   return OK;
@@ -1796,7 +1796,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
        */
 
       nxsem_init(&priv->dmawait, 0, 0);
-      sem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
+      nxsem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 
@@ -1850,7 +1850,7 @@ errout_with_dmadog:
   wd_delete(priv->dmadog);
 
 errout_with_dmahandles:
-  sem_destroy(&priv->dmawait);
+  nxsem_destroy(&priv->dmawait);
 
   if (priv->dmach)
     {
@@ -1859,7 +1859,7 @@ errout_with_dmahandles:
     }
 #endif
 
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
   return NULL;
 }
 #endif /* CONFIG_SAMV7_QSPI */

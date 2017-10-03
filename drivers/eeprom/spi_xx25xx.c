@@ -461,7 +461,7 @@ static void ee25xx_semtake(FAR struct ee25xx_dev_s *eedev)
 
 static inline void ee25xx_semgive(FAR struct ee25xx_dev_s *eedev)
 {
-  sem_post(&eedev->sem);
+  nxsem_post(&eedev->sem);
 }
 
 /****************************************************************************

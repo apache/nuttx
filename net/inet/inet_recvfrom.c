@@ -712,7 +712,7 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
                * actually read.
                */
 
-              sem_post(&pstate->ir_sem);
+              nxsem_post(&pstate->ir_sem);
             }
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -775,7 +775,7 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
 
           /* Wake up the waiting thread */
 
-          sem_post(&pstate->ir_sem);
+          nxsem_post(&pstate->ir_sem);
         }
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -814,7 +814,7 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
            * the point that the timeout occurred (no error).
            */
 
-          sem_post(&pstate->ir_sem);
+          nxsem_post(&pstate->ir_sem);
         }
 #endif /* CONFIG_NET_SOCKOPTS */
     }
@@ -956,7 +956,7 @@ static void inet_udp_terminate(FAR struct inet_recvfrom_s *pstate, int result)
    * actually read.
    */
 
-  sem_post(&pstate->ir_sem);
+  nxsem_post(&pstate->ir_sem);
 }
 #endif /* NET_UDP_HAVE_STACK */
 
@@ -1088,7 +1088,7 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
    */
 
   (void)nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
 
   pstate->ir_buflen    = len;
   pstate->ir_buffer    = buf;
@@ -1107,7 +1107,7 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
  * semaphore.
  */
 
-#define inet_recvfrom_uninitialize(s) sem_destroy(&(s)->ir_sem)
+#define inet_recvfrom_uninitialize(s) nxsem_destroy(&(s)->ir_sem)
 
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 

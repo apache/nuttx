@@ -140,7 +140,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->snd_sem);
+      nxsem_post(&pstate->snd_sem);
     }
 
   return flags;
@@ -210,7 +210,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
    */
 
   (void)nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  (void)sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock      = psock;          /* Socket descriptor to use */
   state.snd_buflen    = len;            /* Number of bytes to send */
@@ -249,7 +249,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
         }
     }
 
-  sem_destroy(&state.snd_sem);
+  nxsem_destroy(&state.snd_sem);
   net_unlock();
 
   /* Set the socket state to idle */

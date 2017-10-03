@@ -715,7 +715,7 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -728,8 +728,8 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
 
 static inline void stm32_1wire_sem_destroy(FAR struct stm32_1wire_priv_s *priv)
 {
-  sem_destroy(&priv->sem_excl);
-  sem_destroy(&priv->sem_isr);
+  nxsem_destroy(&priv->sem_excl);
+  nxsem_destroy(&priv->sem_isr);
 }
 
 /****************************************************************************
@@ -758,7 +758,7 @@ static inline void stm32_1wire_sem_wait(FAR struct stm32_1wire_priv_s *priv)
 
 static inline void stm32_1wire_sem_post(FAR struct stm32_1wire_priv_s *priv)
 {
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -910,7 +910,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
             case ONEWIRETASK_RESET:
               priv->msgs = NULL;
               priv->result = (dr != RESET_TX) ? OK : -ENODEV; /* if read RESET_TX then no slave */
-              sem_post(&priv->sem_isr);
+              nxsem_post(&priv->sem_isr);
               break;
 
             case ONEWIRETASK_WRITE:
@@ -921,7 +921,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
                     {
                       priv->msgs = NULL;
                       priv->result = OK;
-                      sem_post(&priv->sem_isr);
+                      nxsem_post(&priv->sem_isr);
                       break;
                     }
                 }
@@ -948,7 +948,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
                     {
                       priv->msgs = NULL;
                       priv->result = OK;
-                      sem_post(&priv->sem_isr);
+                      nxsem_post(&priv->sem_isr);
                       break;
                     }
                 }
@@ -988,7 +988,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
         {
           priv->msgs = NULL;
           priv->result = ERROR;
-          sem_post(&priv->sem_isr);
+          nxsem_post(&priv->sem_isr);
         }
     }
 
@@ -1003,7 +1003,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
         {
           priv->msgs = NULL;
           priv->result = ERROR;
-          sem_post(&priv->sem_isr);
+          nxsem_post(&priv->sem_isr);
         }
     }
 

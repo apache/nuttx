@@ -160,7 +160,7 @@ static int hcsr04_open(FAR struct file *filep)
       assert(errno == EINTR);
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   hcsr04_dbg("OPENED\n");
   return OK;
 }
@@ -176,7 +176,7 @@ static int hcsr04_close(FAR struct file *filep)
       assert(errno == EINTR);
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   hcsr04_dbg("CLOSED\n");
   return ret;
 }
@@ -221,7 +221,7 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return length;
 }
 
@@ -264,7 +264,7 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -297,7 +297,7 @@ static void hcsr04_notify(FAR struct hcsr04_dev_s *priv)
         {
           fds->revents |= POLLIN;
           hcsr04_dbg("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 }
@@ -379,7 +379,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif /* !CONFIG_DISABLE_POLL */
@@ -416,7 +416,7 @@ static int hcsr04_int_handler(int irq, FAR void *context, FAR void *arg)
 
       /* Convertion is done */
 
-      sem_post(&priv->conv_donesem);
+      nxsem_post(&priv->conv_donesem);
     }
 
   hcsr04_dbg("HC-SR04 interrupt\n");

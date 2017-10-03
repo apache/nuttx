@@ -173,7 +173,7 @@ static int adc_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->ad_closesem);
+      nxsem_post(&dev->ad_closesem);
     }
 
   return ret;
@@ -208,7 +208,7 @@ static int adc_close(FAR struct file *filep)
       if (dev->ad_ocount > 1)
         {
           dev->ad_ocount--;
-          sem_post(&dev->ad_closesem);
+          nxsem_post(&dev->ad_closesem);
         }
       else
         {
@@ -222,7 +222,7 @@ static int adc_close(FAR struct file *filep)
           dev->ad_ops->ao_shutdown(dev);       /* Disable the ADC */
           leave_critical_section(flags);
 
-          sem_post(&dev->ad_closesem);
+          nxsem_post(&dev->ad_closesem);
         }
     }
 
@@ -479,7 +479,7 @@ static void adc_pollnotify(FAR struct adc_dev_s *dev, uint32_t type)
       if (fds)
         {
           fds->revents |= type;
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 }
@@ -499,7 +499,7 @@ static void adc_notify(FAR struct adc_dev_s *dev)
 
   if (dev->ad_nrxwaiters > 0)
     {
-      sem_post(&fifo->af_sem);
+      nxsem_post(&fifo->af_sem);
     }
 
   /* If there are threads waiting on poll() for data to become available,
@@ -627,7 +627,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&dev->ad_recv.af_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->ad_recv.af_sem, SEM_PRIO_NONE);
 
   /* Reset the ADC hardware */
 
@@ -639,8 +639,8 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   ret = register_driver(path, &g_adc_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->ad_recv.af_sem);
-      sem_destroy(&dev->ad_closesem);
+      nxsem_destroy(&dev->ad_recv.af_sem);
+      nxsem_destroy(&dev->ad_closesem);
     }
 
   return ret;

@@ -594,7 +594,7 @@ end_wait:
 
   /* Wake up the waiting thread */
 
-  sem_post(&sinfo->s_waitsem);
+  nxsem_post(&sinfo->s_waitsem);
   return flags;
 }
 
@@ -663,7 +663,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           /* Initialize the send state structure */
 
           nxsem_init(&sinfo.s_waitsem, 0, 0);
-          (void)sem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
+          (void)nxsem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
           sinfo.s_sock      = psock;
           sinfo.s_result    = -EBUSY;
@@ -714,7 +714,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
         }
     }
 
-  sem_destroy(&sinfo.s_waitsem);
+  nxsem_destroy(&sinfo.s_waitsem);
   net_unlock();
 
   return (sinfo.s_result < 0 ? sinfo.s_result : len);

@@ -298,7 +298,7 @@ static inline void lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
 
 static inline void lc823450_adc_sem_post(FAR struct lc823450_adc_inst_s *inst)
 {
-  sem_post(&inst->sem_excl);
+  nxsem_post(&inst->sem_excl);
 }
 
 /****************************************************************************
@@ -315,7 +315,7 @@ static int lc823450_adc_isr(int irq, void *context, FAR void *arg)
   ainfo("interrupt\n");
 
   lc823450_adc_clearirq();
-  sem_post(&g_inst->sem_isr);
+  nxsem_post(&g_inst->sem_isr);
   return OK;
 }
 #endif

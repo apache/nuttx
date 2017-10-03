@@ -245,7 +245,7 @@ struct kinetis_sdhcregs_s
 /* Low-level helpers ********************************************************/
 
 static void kinetis_takesem(struct kinetis_dev_s *priv);
-#define     kinetis_givesem(priv) (sem_post(&priv->waitsem))
+#define     kinetis_givesem(priv) (nxsem_post(&priv->waitsem))
 static void kinetis_configwaitints(struct kinetis_dev_s *priv, uint32_t waitints,
               sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
 static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints);
@@ -2813,7 +2813,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Create a watchdog timer */
 

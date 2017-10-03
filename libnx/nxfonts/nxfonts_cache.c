@@ -117,7 +117,7 @@ static void nxf_list_lock(void)
     }
 }
 
-#define nxf_list_unlock() (sem_post(&g_cachesem))
+#define nxf_list_unlock() (nxsem_post(&g_cachesem))
 
 /****************************************************************************
  * Name: nxf_removecache
@@ -174,7 +174,7 @@ static void nxf_cache_lock(FAR struct nxfonts_fcache_s *priv)
     }
 }
 
-#define nxf_cache_unlock(p) (sem_post(&priv->fsem))
+#define nxf_cache_unlock(p) (nxsem_post(&priv->fsem))
 
 /****************************************************************************
  * Name: nxf_removeglyph
@@ -845,7 +845,7 @@ void nxf_cache_disconnect(FCACHE fhandle)
 
       /* Destroy the serializing semaphore... while we are holding it? */
 
-      sem_destroy(&priv->fsem);
+      nxsem_destroy(&priv->fsem);
 
       /* Finally, free the font cache stucture itself */
 

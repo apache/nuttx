@@ -160,7 +160,7 @@ static int uart_takesem(FAR sem_t *sem, bool errout)
  * Name: uart_givesem
  ************************************************************************************/
 
-#define uart_givesem(sem) (void)sem_post(sem)
+#define uart_givesem(sem) (void)nxsem_post(sem)
 
 /****************************************************************************
  * Name: uart_pollnotify
@@ -184,7 +184,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
           if (fds->revents != 0)
             {
               finfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -1545,8 +1545,8 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&dev->xmitsem, SEM_PRIO_NONE);
-  sem_setprotocol(&dev->recvsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->xmitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->recvsem, SEM_PRIO_NONE);
 
   /* Register the serial driver */
 
@@ -1573,7 +1573,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
       /* Yes... wake it up */
 
       dev->recvwaiting = false;
-      (void)sem_post(&dev->recvsem);
+      (void)nxsem_post(&dev->recvsem);
     }
 
   /* Notify all poll/select waiters that they can read from the recv buffer */
@@ -1601,7 +1601,7 @@ void uart_datasent(FAR uart_dev_t *dev)
       /* Yes... wake it up */
 
       dev->xmitwaiting = false;
-      (void)sem_post(&dev->xmitsem);
+      (void)nxsem_post(&dev->xmitsem);
     }
 
   /* Notify all poll/select waiters that they can write to xmit buffer */
@@ -1653,7 +1653,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
           /* Yes... wake it up */
 
           dev->xmitwaiting = false;
-          (void)sem_post(&dev->xmitsem);
+          (void)nxsem_post(&dev->xmitsem);
         }
 
       /* Is there a thread waiting for read data?  */
@@ -1663,7 +1663,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
           /* Yes... wake it up */
 
           dev->recvwaiting = false;
-          (void)sem_post(&dev->recvsem);
+          (void)nxsem_post(&dev->recvsem);
         }
 
       /* Notify all poll/select waiters that a hangup occurred */

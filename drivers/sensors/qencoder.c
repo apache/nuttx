@@ -173,7 +173,7 @@ static int qe_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -228,7 +228,7 @@ static int qe_close(FAR struct file *filep)
       lower->ops->shutdown(lower);
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   ret = OK;
 
 errout:
@@ -332,7 +332,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&upper->exclsem);
+  nxsem_post(&upper->exclsem);
   return ret;
 }
 

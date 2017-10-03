@@ -168,7 +168,7 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
 
       /* We are finished with the free list */
 
-      sem_post(&g_metadata_sem);
+      nxsem_post(&g_metadata_sem);
     }
   else
     {
@@ -177,7 +177,7 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
        * access the free list.
        */
 
-      sem_post(&g_metadata_sem);
+      nxsem_post(&g_metadata_sem);
 
       metadata = (FAR struct pktradio_metadata_s *)
         kmm_malloc((sizeof (struct pktradio_metadata_s)));
@@ -234,7 +234,7 @@ void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata)
 
       /* We are finished with the free list */
 
-      sem_post(&g_metadata_sem);
+      nxsem_post(&g_metadata_sem);
     }
   else
     {
@@ -242,7 +242,7 @@ void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata)
 
       /* Otherwise, deallocate it.  We won't access the free list */
 
-      sem_post(&g_metadata_sem);
+      nxsem_post(&g_metadata_sem);
       sched_kfree(metadata);
     }
 }

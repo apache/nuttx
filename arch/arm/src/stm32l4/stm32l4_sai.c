@@ -182,10 +182,10 @@ static void     sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg);
 /* Semaphore helpers */
 
 static void     sai_exclsem_take(struct stm32l4_sai_s *priv);
-#define         sai_exclsem_give(priv) sem_post(&priv->exclsem)
+#define         sai_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
 static void     sai_bufsem_take(struct stm32l4_sai_s *priv);
-#define         sai_bufsem_give(priv) sem_post(&priv->bufsem)
+#define         sai_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
 

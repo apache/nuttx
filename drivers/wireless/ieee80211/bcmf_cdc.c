@@ -186,7 +186,7 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
   ret = bcmf_cdc_control_request_unsafe(priv, ifidx, set, cmd,
                                         name, data, len);
 
-  sem_post(&priv->control_mutex);
+  nxsem_post(&priv->control_mutex);
 
   return ret;
 }
@@ -321,7 +321,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
                  priv->control_rxdata_len);
         }
 
-      sem_post(&priv->control_timeout);
+      nxsem_post(&priv->control_timeout);
       return OK;
     }
 

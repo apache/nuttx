@@ -235,7 +235,7 @@ struct xbee_priv_s
  * Inline Functions
  ****************************************************************************/
 
-#define xbee_givesem(s) sem_post(s)
+#define xbee_givesem(s) nxsem_post(s)
 
 static inline int xbee_takesem(sem_t *sem, bool allowinterrupt)
 {
@@ -345,7 +345,7 @@ static inline void xbee_notify_respwaiter(FAR struct xbee_priv_s *priv,
     {
       if (waiter->resp_id == resp_id)
         {
-          sem_post(&waiter->sem);
+          nxsem_post(&waiter->sem);
         }
 
       waiter = (FAR struct xbee_respwaiter_s *)sq_next((FAR sq_entry_t *)waiter);

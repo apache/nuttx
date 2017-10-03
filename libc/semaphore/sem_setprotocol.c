@@ -51,6 +51,64 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsem_setprotocol
+ *
+ * Description:
+ *    Set semaphore protocol attribute.
+ *
+ *    One particularly important use of this furnction is when a semaphore
+ *    is used for inter-task communication like:
+ *
+ *      TASK A                 TASK B
+ *      nxsem_init(sem, 0, 0);
+ *      nxsem_wait(sem);
+ *                             snxem_post(sem);
+ *      Awakens as holder
+ *
+ *    In this case priority inheritance can interfere with the operation of
+ *    the semaphore.  The problem is that when TASK A is restarted it is a
+ *    holder of the semaphore.  However, it never calls nxsem_post(sem) so it
+ *    becomes *permanently* a holder of the semaphore and may have its
+ *    priority boosted when any other task tries to acquire the semaphore.
+ *
+ *    The fix is to call nxsem_setprotocol(SEM_PRIO_NONE) immediately after
+ *    the sem_init() call so that there will be no priority inheritance
+ *    operations on this semaphore.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               modified
+ *    protocol - The new protocol to use
+ *
+ * Return Value:
+ *   This function is exposed as a non-standard application interface.  It
+ *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.
+ *
+ ****************************************************************************/
+
+int nxsem_setprotocol(FAR sem_t *sem, int protocol)
+{
+  DEBUGASSERT(sem != NULL);
+
+  switch (protocol)
+    {
+      case SEM_PRIO_NONE:
+        return OK;
+
+      case SEM_PRIO_INHERIT:
+      case SEM_PRIO_PROTECT:
+        return -ENOSYS;
+        break;
+
+      default:
+        break;
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
  * Name: sem_setprotocol
  *
  * Description:
@@ -89,27 +147,16 @@
 
 int sem_setprotocol(FAR sem_t *sem, int protocol)
 {
-  int errcode;
+  int ret;
 
-  DEBUGASSERT(sem != NULL);
-
-  switch (protocol)
+  ret = nxsem_setprotocol(sem, protocol);
+  if (ret < 0)
     {
-      case SEM_PRIO_NONE:
-        return OK;
-
-      case SEM_PRIO_INHERIT:
-      case SEM_PRIO_PROTECT:
-        errcode = ENOSYS;
-        break;
-
-      default:
-        errcode = EINVAL;
-        break;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 #endif /* !CONFIG_PRIORITY_INHERITANCE */

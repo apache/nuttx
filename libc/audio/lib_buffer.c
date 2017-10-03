@@ -148,7 +148,7 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
       apb->session    = bufdesc->session;
 #endif
 
-      nxsem_init(&apb->sem, 0, 1);
+      sem_init(&apb->sem, 0, 1);
       ret = sizeof(struct audio_buf_desc_s);
     }
 

@@ -141,7 +141,7 @@ static void ptmx_semtake(void)
     }
 }
 
-#define ptmx_semgive() sem_post(&g_ptmx.px_exclsem)
+#define ptmx_semgive() nxsem_post(&g_ptmx.px_exclsem)
 
 /****************************************************************************
  * Name: ptmx_minor_allocate

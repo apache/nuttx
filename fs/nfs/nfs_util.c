@@ -145,7 +145,7 @@ void nfs_semtake(struct nfsmount *nmp)
 
 void nfs_semgive(struct nfsmount *nmp)
 {
-  sem_post(&nmp->nm_sem);
+  nxsem_post(&nmp->nm_sem);
 }
 
 /****************************************************************************

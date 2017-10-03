@@ -128,7 +128,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
 
 errout_with_semaphore:
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }

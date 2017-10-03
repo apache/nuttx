@@ -745,7 +745,7 @@ static void spi_dmatimeout(int argc, uint32_t arg)
 
   /* Then wake up the waiting thread */
 
-  sem_post(&spics->dmawait);
+  nxsem_post(&spics->dmawait);
 }
 #endif
 
@@ -792,7 +792,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   /* Then wake up the waiting thread */
 
-  sem_post(&spics->dmawait);
+  nxsem_post(&spics->dmawait);
 }
 #endif
 
@@ -893,7 +893,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&spi->spisem);
+      (void)nxsem_post(&spi->spisem);
     }
 
   return OK;
@@ -1888,7 +1888,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
        */
 
       nxsem_init(&spics->dmawait, 0, 0);
-      sem_setprotocol(&spics->dmawait, SEM_PRIO_NONE);
+      nxsem_setprotocol(&spics->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 

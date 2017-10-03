@@ -108,7 +108,7 @@ static FAR char *unique_chardev(void)
       /* Get the next device number and release the semaphore */
 
       devno = ++g_devno;
-      sem_post(&g_devno_sem);
+      nxsem_post(&g_devno_sem);
 
       /* Construct the full device number */
 

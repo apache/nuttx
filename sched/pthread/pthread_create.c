@@ -518,11 +518,11 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   if (ret == OK)
     {
-      ret = sem_setprotocol(&pjoin->data_sem, SEM_PRIO_NONE);
+      ret = nxsem_setprotocol(&pjoin->data_sem, SEM_PRIO_NONE);
 
       if (ret == OK)
         {
-          ret = sem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
+          ret = nxsem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
         }
 
       if (ret < 0)
@@ -588,14 +588,14 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
         }
 
       sched_unlock();
-      (void)sem_destroy(&pjoin->data_sem);
+      (void)nxsem_destroy(&pjoin->data_sem);
     }
   else
     {
       sched_unlock();
       dq_rem((FAR dq_entry_t *)ptcb, (FAR dq_queue_t *)&g_inactivetasks);
-      (void)sem_destroy(&pjoin->data_sem);
-      (void)sem_destroy(&pjoin->exit_sem);
+      (void)nxsem_destroy(&pjoin->data_sem);
+      (void)nxsem_destroy(&pjoin->exit_sem);
 
       errcode = EIO;
       goto errout_with_join;

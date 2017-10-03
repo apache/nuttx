@@ -201,7 +201,7 @@ static int can_takesem(FAR sem_t *sem)
  * Name: can_givesem
  ****************************************************************************/
 
-#define can_givesem(sem) sem_post(sem)
+#define can_givesem(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Name: can_pollnotify
@@ -222,7 +222,7 @@ static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
           if (fds->revents != 0)
             {
               caninfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -1183,7 +1183,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
        */
 
       nxsem_init(&dev->cd_rtr[i].cr_sem, 0, 0);
-      sem_setprotocol(&dev->cd_rtr[i].cr_sem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&dev->cd_rtr[i].cr_sem, SEM_PRIO_NONE);
       dev->cd_rtr[i].cr_msg = NULL;
     }
 

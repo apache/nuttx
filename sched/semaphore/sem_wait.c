@@ -88,7 +88,7 @@ int sem_wait(FAR sem_t *sem)
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
   /* The following operations must be performed with interrupts
-   * disabled because sem_post() may be called from an interrupt
+   * disabled because nxsem_post() may be called from an interrupt
    * handler.
    */
 

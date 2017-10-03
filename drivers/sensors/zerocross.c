@@ -267,7 +267,7 @@ static int zc_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 
@@ -362,7 +362,7 @@ static int zc_close(FAR struct file *filep)
   ret = OK;
 
 errout_with_exclsem:
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 
@@ -471,7 +471,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 
@@ -534,7 +534,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
   if (ret < 0)
     {
       snerr("ERROR: register_driver failed: %d\n", ret);
-      sem_destroy(&priv->exclsem);
+      nxsem_destroy(&priv->exclsem);
       kmm_free(priv);
     }
 

@@ -231,7 +231,7 @@ static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv, FAR const char *msg
 /* Semaphore helpers */
 
 static void mcp2515_dev_lock(FAR struct mcp2515_can_s *priv);
-#define mcp2515_dev_unlock(priv) sem_post(&priv->locksem)
+#define mcp2515_dev_unlock(priv) nxsem_post(&priv->locksem)
 
 /* MCP2515 helpers */
 
@@ -1143,7 +1143,7 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
    * will not wake up any waiting threads.
    */
 
-  sem_destroy(&priv->txfsem);
+  nxsem_destroy(&priv->txfsem);
   nxsem_init(&priv->txfsem, 0, config->ntxbuffers);
 
   /* Define the current state and unlock */

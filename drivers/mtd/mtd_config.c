@@ -958,7 +958,7 @@ static int  mtdconfig_close(FAR struct file *filep)
 
   /* Release exclusive access to the device */
 
-  sem_post(&dev->exclsem);
+  nxsem_post(&dev->exclsem);
   return OK;
 }
 
@@ -1362,7 +1362,7 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 

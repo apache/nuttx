@@ -611,7 +611,7 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for maXTouch data to become available,
@@ -628,7 +628,7 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
         {
           fds->revents |= POLLIN;
           iinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 #endif
@@ -697,7 +697,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -1079,7 +1079,7 @@ static void mxt_worker(FAR void *arg)
 errout_with_semaphore:
   /* Release our lock on the MXT device */
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* Acknowledge and re-enable maXTouch interrupts */
 
@@ -1202,7 +1202,7 @@ static int mxt_open(FAR struct file *filep)
   priv->crefs = tmp;
 
 errout_with_sem:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1256,7 +1256,7 @@ static int mxt_close(FAR struct file *filep)
         }
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return OK;
 }
 
@@ -1494,7 +1494,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
 errout:
   sched_unlock();
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1552,7 +1552,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -1645,7 +1645,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -1912,7 +1912,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
    * have priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Make sure that interrupts are disabled */
 
@@ -1963,8 +1963,8 @@ errout_with_hwinit:
 errout_with_irq:
   MXT_DETACH(lower);
 errout_with_priv:
-  sem_destroy(&priv->devsem);
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->waitsem);
   kmm_free(priv);
   return ret;
 }

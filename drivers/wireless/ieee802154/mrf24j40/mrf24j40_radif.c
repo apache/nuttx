@@ -339,7 +339,7 @@ int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
 
   if (!work_available(&dev->irqwork))
     {
-      sem_post(&dev->exclsem);
+      nxsem_post(&dev->exclsem);
       mrf24j40_irqworker((FAR void *)dev);
 
       /* Get exclusive access to the radio device */
@@ -366,7 +366,7 @@ int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
       mrf24j40_mactimer(dev, symboldelay);
     }
 
-  sem_post(&dev->exclsem);
+  nxsem_post(&dev->exclsem);
 
   return OK;
 }

@@ -284,7 +284,7 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 /* Semaphores ******************************************************************/
 
 static void lpc17_takesem(sem_t *sem);
-#define lpc17_givesem(s) sem_post(s);
+#define lpc17_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions *****************************************/
 
@@ -2268,7 +2268,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
        */
 
       nxsem_init(&ed->wdhsem, 0, 0);
-      sem_setprotocol(&ed->wdhsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&ed->wdhsem, SEM_PRIO_NONE);
 
       /* Link the common tail TD to the ED's TD list */
 
@@ -2307,7 +2307,7 @@ static int lpc17_epalloc(struct usbhost_driver_s *drvr,
           /* No.. destroy it and report the error */
 
           uerr("ERROR: Failed to queue ED for transfer type: %d\n", ed->xfrtype);
-          sem_destroy(&ed->wdhsem);
+          nxsem_destroy(&ed->wdhsem);
           lpc17_edfree(ed);
         }
       else
@@ -2385,7 +2385,7 @@ static int lpc17_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* Destroy the semaphore */
 
-  sem_destroy(&ed->wdhsem);
+  nxsem_destroy(&ed->wdhsem);
 
   /* Put the ED back into the free list */
 
@@ -3648,7 +3648,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;
@@ -3736,7 +3736,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
    */
 
   nxsem_init(&EDCTRL->wdhsem, 0, 0);
-  sem_setprotocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
 
   /* Initialize user-configurable EDs */
 

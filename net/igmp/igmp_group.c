@@ -136,7 +136,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
        */
 
       nxsem_init(&group->sem, 0, 0);
-      sem_setprotocol(&group->sem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&group->sem, SEM_PRIO_NONE);
 
       /* Initialize the group timer (but don't start it yet) */
 
@@ -235,7 +235,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Destroy the wait semaphore */
 
-  (void)sem_destroy(&group->sem);
+  (void)nxsem_destroy(&group->sem);
 
   /* Destroy the wdog */
 

@@ -135,7 +135,7 @@ int bcmf_oob_irq(int irq, FAR void *context, FAR void *arg)
 
       sbus->irq_pending = true;
 
-      sem_post(&sbus->thread_signal);
+      nxsem_post(&sbus->thread_signal);
     }
   return OK;
 }
@@ -605,7 +605,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_free_bus;
     }
 
-  if ((ret = sem_setprotocol(&sbus->thread_signal, SEM_PRIO_NONE)) != OK)
+  if ((ret = nxsem_setprotocol(&sbus->thread_signal, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_bus;
     }
@@ -732,7 +732,7 @@ void bcmf_sdio_waitdog_timeout(int argc, wdparm_t arg1, ...)
   /* Notify bcmf thread */
 
   wlinfo("Notify bcmf thread\n");
-  sem_post(&sbus->thread_signal);
+  nxsem_post(&sbus->thread_signal);
 }
 
 int bcmf_sdio_thread(int argc, char **argv)
@@ -856,12 +856,12 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
                   sbus->tx_queue_count += 1;
                 }
 
-              sem_post(&sbus->queue_mutex);
+              nxsem_post(&sbus->queue_mutex);
               break;
             }
         }
 
-      sem_post(&sbus->queue_mutex);
+      nxsem_post(&sbus->queue_mutex);
 
       if (block)
         {
@@ -900,5 +900,5 @@ void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
     {
       sbus->tx_queue_count -= 1;
     }
-  sem_post(&sbus->queue_mutex);
+  nxsem_post(&sbus->queue_mutex);
 }

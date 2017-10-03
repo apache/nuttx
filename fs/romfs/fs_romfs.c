@@ -1028,7 +1028,7 @@ errout_with_buffer:
     }
 
 errout_with_sem:
-  sem_destroy(&rm->rm_sem);
+  nxsem_destroy(&rm->rm_sem);
   kmm_free(rm);
   return ret;
 }
@@ -1105,7 +1105,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
           kmm_free(rm->rm_buffer);
         }
 
-      sem_destroy(&rm->rm_sem);
+      nxsem_destroy(&rm->rm_sem);
       kmm_free(rm);
       return OK;
     }

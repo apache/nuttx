@@ -518,7 +518,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
   ptr->header.int1_source = int1_src;
   ptr->header.int2_source = int2_src;
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   /* 'err' was just for debugging, we do return partial reads here. */
 
@@ -662,7 +662,7 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     break;
   }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -749,7 +749,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -772,7 +772,7 @@ static void lis2dh_notify(FAR struct lis2dh_dev_s *priv)
         {
           fds->revents |= POLLIN;
           lis2dh_dbg("lis2dh: Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 }
@@ -2044,7 +2044,7 @@ int lis2dh_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->devsem);
+  nxsem_destroy(&priv->devsem);
   kmm_free(priv);
 
   return ret;

@@ -129,7 +129,7 @@ struct sam_chan_s
 /* Low-level helpers ********************************************************/
 
 static void sam_takesem(struct sam_chan_s *chan);
-#define     sam_givesem(chan) (sem_post(&chan->exclsem))
+#define     sam_givesem(chan) (nxsem_post(&chan->exclsem))
 
 #ifdef CONFIG_SAM34_TC_REGDEBUG
 static void sam_regdump(struct sam_chan_s *chan, const char *msg);

@@ -208,11 +208,11 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
 
   /* Release our lock on the entry */
 
-  sem_post(&region->sr_sem);
+  nxsem_post(&region->sr_sem);
   return ret;
 
 errout_with_semaphore:
-  sem_post(&region->sr_sem);
+  nxsem_post(&region->sr_sem);
   set_errno(-ret);
   return ERROR;
 }
@@ -256,7 +256,7 @@ void shm_destroy(int shmid)
 
   /* Reset the region entry to its initial state */
 
-  sem_destroy(&region->sr_sem);
+  nxsem_destroy(&region->sr_sem);
   memset(region, 0, sizeof(struct shm_region_s));
 }
 

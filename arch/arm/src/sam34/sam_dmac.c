@@ -288,7 +288,7 @@ static void sam_takechsem(void)
 
 static inline void sam_givechsem(void)
 {
-  (void)sem_post(&g_chsem);
+  (void)nxsem_post(&g_chsem);
 }
 
 /****************************************************************************
@@ -315,7 +315,7 @@ static void sam_takedsem(void)
 
 static inline void sam_givedsem(void)
 {
-  (void)sem_post(&g_dsem);
+  (void)nxsem_post(&g_dsem);
 }
 
 /****************************************************************************

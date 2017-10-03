@@ -200,7 +200,7 @@ static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
                          unsigned int offset);
 
 static void i2c_takesem(sem_t * sem);
-#define i2c_givesem(sem) (sem_post(sem))
+#define i2c_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM_I2C_REGDEBUG
 static bool i2c_checkreg(struct sam_i2c_dev_s *priv, bool wr,
@@ -650,7 +650,7 @@ static void i2c_wakeup(struct sam_i2c_dev_s *priv, int result)
   /* Wake up the waiting thread with the result of the transfer */
 
   priv->result = result;
-  sem_post(&priv->waitsem);
+  nxsem_post(&priv->waitsem);
 }
 
 /*******************************************************************************
@@ -1374,8 +1374,8 @@ int sam_i2c_uninitialize(FAR struct i2c_master_s *dev)
 
   /* Reset data structures */
 
-  sem_destroy(&priv->exclsem);
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->waitsem);
 
   /* Detach Interrupt Handler */
 

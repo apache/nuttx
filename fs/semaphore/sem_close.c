@@ -111,7 +111,7 @@ int sem_close(FAR sem_t *sem)
     {
       /* Destroy the semaphore and free the container */
 
-      sem_destroy(&nsem->ns_sem);
+      nxsem_destroy(&nsem->ns_sem);
       group_free(NULL, nsem);
 
       /* Release and free the inode container.  If it has been properly

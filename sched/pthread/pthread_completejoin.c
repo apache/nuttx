@@ -279,8 +279,8 @@ void pthread_destroyjoin(FAR struct task_group_s *group,
 
   /* Destroy its semaphores */
 
-  (void)sem_destroy(&pjoin->data_sem);
-  (void)sem_destroy(&pjoin->exit_sem);
+  (void)nxsem_destroy(&pjoin->data_sem);
+  (void)nxsem_destroy(&pjoin->exit_sem);
 
   /* And deallocate the pjoin structure */
 

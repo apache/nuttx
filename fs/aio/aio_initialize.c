@@ -183,7 +183,7 @@ void aio_unlock(void)
 
       g_aio_holder = INVALID_PROCESS_ID;
       g_aio_count  = 0;
-      sem_post(&g_aio_exclsem);
+      nxsem_post(&g_aio_exclsem);
     }
   else
     {
@@ -264,7 +264,7 @@ void aioc_free(FAR struct aio_container_s *aioc)
    * free AIO container.
    */
 
-  sem_post(&g_aioc_freesem);
+  nxsem_post(&g_aioc_freesem);
 }
 
 #endif /* CONFIG_FS_AIO */

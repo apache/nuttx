@@ -261,7 +261,7 @@ struct usbhost_outstream_s
 /* Semaphores */
 
 static void usbhost_takesem(sem_t *sem);
-#define usbhost_givesem(s) sem_post(s);
+#define usbhost_givesem(s) nxsem_post(s);
 
 /* Polling support */
 
@@ -629,7 +629,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
           if (fds->revents != 0)
             {
               uinfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -791,8 +791,8 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Destroy the semaphores */
 
-  sem_destroy(&priv->exclsem);
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->waitsem);
 
   /* Disconnect the USB host device */
 
@@ -1869,7 +1869,7 @@ static FAR struct usbhost_class_s *
            * not have priority inheritance enabled.
            */
 
-          sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+          nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
           /* Return the instance of the USB keyboard class driver */
 
@@ -2397,7 +2397,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 #endif
@@ -2434,7 +2434,7 @@ int usbhost_kbdinit(void)
    * have priority inheritance enabled.
    */
 
-  sem_setprotocol(&g_syncsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&g_syncsem, SEM_PRIO_NONE);
 
   /* Advertise our availability to support (certain) devices */
 

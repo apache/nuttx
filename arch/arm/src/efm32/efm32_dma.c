@@ -381,7 +381,7 @@ DMA_HANDLE efm32_dmachannel(void)
         }
     }
 
-  sem_post(&g_dmac.exclsem);
+  nxsem_post(&g_dmac.exclsem);
 
   /* Since we have reserved a DMA descriptor by taking a count from chansem,
    * it would be a serious logic failure if we could not find a free channel
@@ -432,7 +432,7 @@ void efm32_dmafree(DMA_HANDLE handle)
    * thread that may be waiting for a channel.
    */
 
-  sem_post(&g_dmac.chansem);
+  nxsem_post(&g_dmac.chansem);
 }
 
 /****************************************************************************

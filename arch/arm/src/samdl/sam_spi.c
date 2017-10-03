@@ -797,7 +797,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->spilock);
+      (void)nxsem_post(&priv->spilock);
     }
 
   return OK;

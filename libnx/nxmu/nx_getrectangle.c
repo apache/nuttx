@@ -117,7 +117,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
    * priority inheritance enabled.
    */
 
-  (void)sem_setprotocol(&sem_done, SEM_PRIO_NONE);
+  (void)nxsem_setprotocol(&sem_done, SEM_PRIO_NONE);
 
   /* Forward the fill command to the server */
 
@@ -132,7 +132,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   /* Destroy the semaphore and return. */
 
-  sem_destroy(&sem_done);
+  nxsem_destroy(&sem_done);
 
   return ret;
 }

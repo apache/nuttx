@@ -158,7 +158,7 @@ static void pca9555_lock(FAR struct pca9555_dev_s *pca)
     }
 }
 
-#define pca9555_unlock(p) sem_post(&(p)->exclsem)
+#define pca9555_unlock(p) nxsem_post(&(p)->exclsem)
 
 /****************************************************************************
  * Name: pca9555_write

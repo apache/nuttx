@@ -763,7 +763,7 @@ static int spi_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Yes, wake up the waiting thread */
 
-      sem_post(&priv->waitsem);
+      nxsem_post(&priv->waitsem);
     }
 
   return OK;
@@ -810,7 +810,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
 
   return OK;
@@ -1309,7 +1309,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
    */
 
    nxsem_init(&priv->waitsem, 0, 0);
-   sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+   nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
    nxsem_init(&priv->exclsem, 0, 1);
 

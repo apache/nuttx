@@ -508,7 +508,7 @@ static void spirit_rxlock(FAR struct spirit_driver_s *priv)
 
 static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv)
 {
-  sem_post(&priv->rxsem);
+  nxsem_post(&priv->rxsem);
 }
 
 /****************************************************************************
@@ -549,7 +549,7 @@ static void spirit_txlock(FAR struct spirit_driver_s *priv)
 
 static inline void spirit_txunlock(FAR struct spirit_driver_s *priv)
 {
-  sem_post(&priv->txsem);
+  nxsem_post(&priv->txsem);
 }
 
 /****************************************************************************

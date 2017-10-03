@@ -141,7 +141,7 @@ static int opamp_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->ad_closesem);
+      nxsem_post(&dev->ad_closesem);
     }
 
   return ret;
@@ -176,7 +176,7 @@ static int opamp_close(FAR struct file *filep)
       if (dev->ad_ocount > 1)
         {
           dev->ad_ocount--;
-          sem_post(&dev->ad_closesem);
+          nxsem_post(&dev->ad_closesem);
         }
       else
         {
@@ -190,7 +190,7 @@ static int opamp_close(FAR struct file *filep)
           dev->ad_ops->ao_shutdown(dev);          /* Disable the OPAMP */
           leave_critical_section(flags);
 
-          sem_post(&dev->ad_closesem);
+          nxsem_post(&dev->ad_closesem);
         }
     }
 
@@ -236,7 +236,7 @@ int opamp_register(FAR const char *path, FAR struct opamp_dev_s *dev)
   ret =  register_driver(path, &opamp_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->ad_closesem);
+      nxsem_destroy(&dev->ad_closesem);
     }
 
   return ret;

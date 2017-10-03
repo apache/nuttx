@@ -1181,13 +1181,13 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               //audinfo("Next Buffer = %p, bytes = %d\n", apb, apb ? apb->nbytes : 0);
               if (apb == NULL)
                 {
-                  sem_post(&dev->apbq_sem);
+                  nxsem_post(&dev->apbq_sem);
                   break;
                 }
 
               pSamp = &apb->samp[apb->curbyte];
               apb_reference(apb);                /* Add our buffer reference */
-              sem_post(&dev->apbq_sem);
+              nxsem_post(&dev->apbq_sem);
             }
         }
     }
@@ -1357,7 +1357,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
         ;
     }
 
-  sem_post(&dev->apbq_sem);
+  nxsem_post(&dev->apbq_sem);
 
   /* Free the active buffer */
 
@@ -1449,7 +1449,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
     {
       dev->apb = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq);
       apb_reference(dev->apb);               /* Add our buffer reference */
-      sem_post(&dev->apbq_sem);
+      nxsem_post(&dev->apbq_sem);
     }
   else
     {
@@ -1617,7 +1617,7 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
       apb->curbyte = 0;
       apb->flags  |= AUDIO_APB_OUTPUT_ENQUEUED;
       dq_addlast(&apb->dq_entry, &dev->apbq);
-      sem_post(&dev->apbq_sem);
+      nxsem_post(&dev->apbq_sem);
 
       /* Send a message indicating a new buffer enqueued */
 
@@ -1730,7 +1730,7 @@ static int vs1053_reserve(FAR struct audio_lowerhalf_s *lower)
       dev->paused  = false;
     }
 
-  sem_post(&dev->apbq_sem);
+  nxsem_post(&dev->apbq_sem);
 
   return ret;
 }
@@ -1770,7 +1770,7 @@ static int vs1053_release(FAR struct audio_lowerhalf_s *lower)
   /* Really we should free any queued buffers here */
 
   dev->busy = false;
-  sem_post(&dev->apbq_sem);
+  nxsem_post(&dev->apbq_sem);
 
   return OK;
 }

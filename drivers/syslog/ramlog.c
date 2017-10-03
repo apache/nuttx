@@ -222,7 +222,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
           fds->revents |= (fds->events & eventset);
           if (fds->revents != 0)
             {
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
       leave_critical_section(flags);
@@ -345,7 +345,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           sched_lock();
           priv->rl_nwaiters++;
-          sem_post(&priv->rl_exclsem);
+          nxsem_post(&priv->rl_exclsem);
 
           /* We may now be pre-empted!  But that should be okay because we
            * have already incremented nwaiters.  Pre-emptions is disabled
@@ -424,7 +424,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Relinquish the mutual exclusion semaphore */
 
-  sem_post(&priv->rl_exclsem);
+  nxsem_post(&priv->rl_exclsem);
 
   /* Notify all poll/select waiters that they can write to the FIFO */
 
@@ -533,7 +533,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
         {
           /* Yes.. Notify all of the waiting readers that more data is available */
 
-          sem_post(&priv->rl_waitsem);
+          nxsem_post(&priv->rl_waitsem);
         }
 #endif
 
@@ -660,7 +660,7 @@ int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     }
 
 errout:
-  sem_post(&priv->rl_exclsem);
+  nxsem_post(&priv->rl_exclsem);
   return ret;
 }
 #endif
@@ -702,7 +702,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
        * not have priority inheritance enabled.
        */
 
-      sem_setprotocol(&priv->rl_waitsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&priv->rl_waitsem, SEM_PRIO_NONE);
 #endif
 
       priv->rl_bufsize = buflen;

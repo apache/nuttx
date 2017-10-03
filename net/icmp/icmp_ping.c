@@ -295,7 +295,7 @@ end_wait:
 
   /* Wake up the waiting thread */
 
-  sem_post(&pstate->png_sem);
+  nxsem_post(&pstate->png_sem);
   return flags;
 }
 
@@ -366,7 +366,7 @@ int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
    */
 
   nxsem_init(&state.png_sem, 0, 0);
-  sem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&state.png_sem, SEM_PRIO_NONE);
 
   state.png_ticks  = DSEC2TICK(dsecs); /* System ticks to wait */
   state.png_result = -ENOMEM;          /* Assume allocation failure */

@@ -540,7 +540,7 @@ static int lc823450_epdisable(struct usbdev_ep_s *ep)
   g_usbdev.bufoffset = 0x180;
   privep->disable = 1;
   lc823450_dmastop(hdma);
-  sem_post(&dma_wait);
+  nxsem_post(&dma_wait);
   return lc823450_epclearreq(ep);
 }
 
@@ -1720,7 +1720,7 @@ void usbdev_msc_read_exit()
 static void usbdev_dma_callback(DMA_HANDLE hd, void *arg, int result)
 {
   sem_t *waitsem = (sem_t *)arg;
-  sem_post(waitsem);
+  nxsem_post(waitsem);
 }
 
 /****************************************************************************
@@ -1892,7 +1892,7 @@ int usbdev_msc_epread(void *buf, int len)
 void usbdev_msc_stop(void)
 {
   lc823450_dmastop(hdma);
-  sem_post(&dma_wait);
+  nxsem_post(&dma_wait);
 }
 #endif /* CONFIG_USBMSC */
 

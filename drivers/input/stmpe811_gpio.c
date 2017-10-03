@@ -153,7 +153,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
   if ((priv->inuse & pinmask) != 0)
     {
       ierr("ERROR: PIN%d is already in-use\n", pin);
-      sem_post(&priv->exclsem);
+      nxsem_post(&priv->exclsem);
       return -EBUSY;
     }
 
@@ -226,7 +226,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
   /* Mark the pin as 'in use' */
 
   priv->inuse |= pinmask;
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 
@@ -278,7 +278,7 @@ void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value)
       stmpe811_putreg8(priv, STMPE811_GPIO_CLRPIN, (1 << pin));
     }
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -319,7 +319,7 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value)
 
   regval  = stmpe811_getreg8(priv, STMPE811_GPIO_MPSTA);
   *value = ((regval & GPIO_PIN(pin)) != 0);
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 
@@ -392,7 +392,7 @@ int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
 
   stmpe811_putreg8(priv, STMPE811_GPIO_EN, regval);
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 #endif

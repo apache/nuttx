@@ -313,7 +313,7 @@ static void usrsockdev_semtake(FAR sem_t *sem)
 
 static void usrsockdev_semgive(FAR sem_t *sem)
 {
-  (void)sem_post(sem);
+  (void)nxsem_post(sem);
 }
 
 /****************************************************************************
@@ -349,7 +349,7 @@ static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev, pollevent_t even
           if (fds->revents != 0)
             {
               ninfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -788,7 +788,7 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
 
       dev->req.iov = NULL;
 
-      sem_post(&dev->req.acksem);
+      nxsem_post(&dev->req.acksem);
     }
 
   ret = handle_response(dev, conn, buffer);
@@ -1045,7 +1045,7 @@ static int usrsockdev_close(FAR struct file *filep)
         }
 
       dev->req.iov = NULL;
-      sem_post(&dev->req.acksem);
+      nxsem_post(&dev->req.acksem);
     }
   while (true);
 

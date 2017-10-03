@@ -468,12 +468,11 @@ static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
   if (priv->wait)
     {
 
-      int ret = sem_post(priv->sem);
+      int ret = nxsem_post(priv->sem);
 
-      if (ret != OK)
+      if (ret < 0)
         {
-          lcderr("ERROR: sem_post() failed\n");
-          return ret;
+          lcderr("ERROR: nxsem_post() failed\n");
         }
     }
 
@@ -1181,7 +1180,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
     {
       sem_wait(priv->lock);
       memcpy(vinfo, &priv->vinfo, sizeof(struct fb_videoinfo_s));
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return OK;
     }
@@ -1218,7 +1217,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
     {
       sem_wait(priv->lock);
       memcpy(pinfo, &priv->pinfo, sizeof(struct fb_planeinfo_s));
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return OK;
     }
@@ -1253,7 +1252,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
     {
       sem_wait(priv->lock);
       *lid = priv->lid;
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
       return OK;
     }
 
@@ -1315,7 +1314,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
 
           ret = ltdc->setclut(ltdc, cmap);
 
-          sem_post(priv->lock);
+          nxsem_post(priv->lock);
 
           return ret;
         }
@@ -1373,7 +1372,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
           ret = OK;
         }
 
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
       return ret;
     }
 
@@ -1459,7 +1458,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
           ret = OK;
         }
 
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return ret;
     }
@@ -1500,7 +1499,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
     {
       sem_wait(priv->lock);
       priv->alpha = alpha;
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return OK;
     }
@@ -1535,7 +1534,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
     {
       sem_wait(priv->lock);
       *alpha = priv->alpha;
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return OK;
     }
@@ -1586,7 +1585,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
     {
       sem_wait(priv->lock);
       priv->blendmode = mode;
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return OK;
     }
@@ -1622,7 +1621,7 @@ static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
     {
       sem_wait(priv->lock);
       *mode = priv->blendmode;
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
 
       return OK;
     }
@@ -1725,7 +1724,7 @@ static int stm32_dma2dblit(FAR struct dma2d_layer_s *dest,
             }
         }
 
-      sem_post(destlayer->lock);
+      nxsem_post(destlayer->lock);
     }
   else
     {
@@ -1839,7 +1838,7 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
             }
         }
 
-      sem_post(destlayer->lock);
+      nxsem_post(destlayer->lock);
     }
   else
     {
@@ -1919,7 +1918,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
             }
         }
 
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
     }
   else
     {
@@ -1952,7 +1951,7 @@ FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid)
       FAR struct stm32_dma2d_s *priv;
       sem_wait(&g_lock);
       priv = g_layers[lid];
-      sem_post(&g_lock);
+      nxsem_post(&g_lock);
 
       return &priv->dma2d;
     }
@@ -2081,7 +2080,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
       lcderr("ERROR: EINVAL, no free layer available\n");
     }
 
-  sem_post(&g_lock);
+  nxsem_post(&g_lock);
   return (FAR struct dma2d_layer_s *)layer;
 }
 
@@ -2124,7 +2123,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
           ret = OK;
         }
 
-      sem_post(priv->lock);
+      nxsem_post(priv->lock);
     }
 
   return ret;
@@ -2168,7 +2167,7 @@ int up_dma2dinitialize(void)
        */
 
       nxsem_init(g_interrupt.sem, 0, 0);
-      sem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
+      nxsem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
 
 #ifdef CONFIG_STM32_DMA2D_L8
       /* Enable dma2d transfer and clut loading interrupts only */

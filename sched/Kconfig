@@ -929,6 +929,9 @@ menuconfig PRIORITY_INHERITANCE
 
 			int ret = sem_setprotocol(&sem, SEM_PRIO_NONE);
 
+		From applications, the functionally equivalent OS internal interface,
+		nxsem_setrotocol() should be used within the OS
+
 		And for individual pthread mutexes by setting the protocol attribute
 		before initializing the mutex:
 

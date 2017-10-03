@@ -454,7 +454,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
              if (getmsg->sem_done)
               {
-                sem_post(getmsg->sem_done);
+                nxsem_post(getmsg->sem_done);
               }
            }
            break;
@@ -479,7 +479,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
              if (bmpmsg->sem_done)
               {
-                sem_post(bmpmsg->sem_done);
+                nxsem_post(bmpmsg->sem_done);
               }
            }
            break;

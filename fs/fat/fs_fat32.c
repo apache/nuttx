@@ -1958,7 +1958,7 @@ static int fat_bind(FAR struct inode *blkdriver, FAR const void *data,
   ret = fat_mount(fs, true);
   if (ret != 0)
     {
-      sem_destroy(&fs->fs_sem);
+      nxsem_destroy(&fs->fs_sem);
       kmm_free(fs);
       return ret;
     }
@@ -2055,7 +2055,7 @@ static int fat_unbind(FAR void *handle, FAR struct inode **blkdriver,
       fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);
     }
 
-  sem_destroy(&fs->fs_sem);
+  nxsem_destroy(&fs->fs_sem);
   kmm_free(fs);
   return OK;
 }

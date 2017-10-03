@@ -545,10 +545,10 @@ static void     ssc_dump_queues(struct sam_transport_s *xpt,
 /* Semaphore helpers */
 
 static void     ssc_exclsem_take(struct sam_ssc_s *priv);
-#define         ssc_exclsem_give(priv) sem_post(&priv->exclsem)
+#define         ssc_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
 static void     ssc_bufsem_take(struct sam_ssc_s *priv);
-#define         ssc_bufsem_give(priv) sem_post(&priv->bufsem)
+#define         ssc_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
 
@@ -3502,7 +3502,7 @@ errout_with_clocking:
   ssc_dma_free(priv);
 
 errout_with_alloc:
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
   kmm_free(priv);
   return NULL;
 }

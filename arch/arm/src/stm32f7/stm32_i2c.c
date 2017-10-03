@@ -1061,7 +1061,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
 
 static inline void stm32_i2c_sem_post(FAR struct i2c_master_s *dev)
 {
-  sem_post(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
+  nxsem_post(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
 }
 
 /************************************************************************************
@@ -1082,7 +1082,7 @@ static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
    */
 
   nxsem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
-  sem_setprotocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_setprotocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -1096,9 +1096,9 @@ static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
 
 static inline void stm32_i2c_sem_destroy(FAR struct i2c_master_s *dev)
 {
-  sem_destroy(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
+  nxsem_destroy(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
-  sem_destroy(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr);
+  nxsem_destroy(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr);
 #endif
 }
 
@@ -2115,7 +2115,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       if (priv->intstate == INTSTATE_WAITING)
         {
-          sem_post(&priv->sem_isr);
+          nxsem_post(&priv->sem_isr);
           priv->intstate = INTSTATE_DONE;
         }
 #endif

@@ -922,7 +922,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 /* Semaphore helpers */
 
 static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
-#define mcan_dev_unlock(priv) sem_post(&priv->locksem)
+#define mcan_dev_unlock(priv) nxsem_post(&priv->locksem)
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
 static void mcan_buffer_release(FAR struct sam_mcan_s *priv);
@@ -1502,7 +1502,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
             {
               /* Bump up the count by one and try again */
 
-              sem_post(&priv->txfsem);
+              nxsem_post(&priv->txfsem);
               leave_critical_section(flags);
               continue;
             }
@@ -1590,7 +1590,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
   (void)nxsem_getvalue(&priv->txfsem, &sval);
   if (sval < priv->config->ntxfifoq)
     {
-      sem_post(&priv->txfsem);
+      nxsem_post(&priv->txfsem);
     }
   else
     {
@@ -2269,7 +2269,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
    * will not wake up any waiting threads.
    */
 
-  sem_destroy(&priv->txfsem);
+  nxsem_destroy(&priv->txfsem);
   nxsem_init(&priv->txfsem, 0, config->ntxfifoq);
 
   /* Disable peripheral clocking to the MCAN controller */

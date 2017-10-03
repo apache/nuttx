@@ -193,7 +193,7 @@ cont:
       if (tmp->usec <= 0)
         {
           dq_rem(pent, &hrt_timer_queue);
-          sem_post(&tmp->sem);
+          nxsem_post(&tmp->sem);
           goto cont;
         }
       else

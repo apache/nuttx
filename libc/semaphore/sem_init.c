@@ -56,12 +56,12 @@
  * Description:
  *   This function initializes the UNAMED semaphore sem. Following a
  *   successful call to nxsem_init(), the semaphore may be used in subsequent
- *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   calls to nxsem_wait(), nxnxsem_post(), and nxsem_trywait().  The semaphore
  *   remains usable until it is destroyed.
  *
  *   Only sem itself may be used for performing synchronization. The result
- *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
- *   sem_post(), and sem_destroy() is undefined.
+ *   of referring to copies of sem in calls to nxsem_wait(), nxsem_trywait(),
+ *   nxnxsem_post(), and nxsem_destroy() is undefined.
  *
  * Parameters:
  *   sem - Semaphore to be initialized
@@ -112,12 +112,12 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
  * Description:
  *   This function initializes the UNAMED semaphore sem. Following a
  *   successful call to sem_init(), the semaphore may be used in subsequent
- *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   calls to sem_wait(), nxsem_post(), and sem_trywait().  The semaphore
  *   remains usable until it is destroyed.
  *
  *   Only sem itself may be used for performing synchronization. The result
  *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
- *   sem_post(), and sem_destroy() is undefined.
+ *   nxsem_post(), and sem_destroy() is undefined.
  *
  * Parameters:
  *   sem - Semaphore to be initialized

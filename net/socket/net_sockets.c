@@ -75,7 +75,7 @@ static void _net_semtake(FAR struct socketlist *list)
   UNUSED(ret);
 }
 
-#define _net_semgive(list) sem_post(&list->sl_sem)
+#define _net_semgive(list) nxsem_post(&list->sl_sem)
 
 /****************************************************************************
  * Public Functions
@@ -135,7 +135,7 @@ void net_releaselist(FAR struct socketlist *list)
 
   /* Destroy the semaphore */
 
-  (void)sem_destroy(&list->sl_sem);
+  (void)nxsem_destroy(&list->sl_sem);
 }
 
 /****************************************************************************

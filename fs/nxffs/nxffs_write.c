@@ -530,7 +530,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
   filep->f_pos  = wrfile->datlen;
 
 errout_with_semaphore:
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }

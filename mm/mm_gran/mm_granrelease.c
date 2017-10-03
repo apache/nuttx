@@ -81,7 +81,7 @@ static inline void gran_release_common(FAR struct gran_s *priv)
 {
   DEBUGASSERT(priv);
 #ifndef CONFIG_GRAN_INTR
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
 #endif
   kmm_free(priv);
 }

@@ -93,7 +93,7 @@ static void aes_lock(void)
 
 static void aes_unlock(void)
 {
-  sem_post(&lock);
+  nxsem_post(&lock);
 }
 
 static void aes_memcpy(void *out, const void *in, size_t size)

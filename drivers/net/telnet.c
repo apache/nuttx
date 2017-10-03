@@ -505,7 +505,7 @@ static int telnet_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  sem_post(&priv->td_exclsem);
+  nxsem_post(&priv->td_exclsem);
 
 errout:
   return ret;
@@ -542,7 +542,7 @@ static int telnet_close(FAR struct file *filep)
       /* Just decrement the reference count and release the semaphore */
 
       priv->td_crefs--;
-      sem_post(&priv->td_exclsem);
+      nxsem_post(&priv->td_exclsem);
     }
   else
     {
@@ -591,7 +591,7 @@ static int telnet_close(FAR struct file *filep)
        */
 
       DEBUGASSERT(priv->td_exclsem.semcount == 0);
-      sem_destroy(&priv->td_exclsem);
+      nxsem_destroy(&priv->td_exclsem);
       free(priv);
       sched_unlock();
     }
@@ -859,11 +859,11 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   /* Return the path to the new telnet driver */
 
-  sem_post(&g_telnet_common.tc_exclsem);
+  nxsem_post(&g_telnet_common.tc_exclsem);
   return OK;
 
 errout_with_semaphore:
-  sem_post(&g_telnet_common.tc_exclsem);
+  nxsem_post(&g_telnet_common.tc_exclsem);
 
 errout_with_clone:
   psock_close(&priv->td_psock);

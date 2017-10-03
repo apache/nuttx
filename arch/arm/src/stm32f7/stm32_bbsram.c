@@ -206,7 +206,7 @@ static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
 
 static void stm32_bbsram_semgive(FAR struct stm32_bbsram_s *priv)
 {
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -555,7 +555,7 @@ static int stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 
@@ -636,7 +636,7 @@ static int stm32_bbsram_unlink(FAR struct inode *inode)
   stm32_bbsram_lock();
   bbr->refs  = 0;
   stm32_bbsram_semgive(bbr);
-  sem_destroy(&bbr->exclsem);
+  nxsem_destroy(&bbr->exclsem);
   return 0;
 }
 #endif

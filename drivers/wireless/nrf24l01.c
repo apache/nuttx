@@ -533,7 +533,7 @@ static void fifoput(FAR struct nrf24l01_dev_s *dev, uint8_t pipeno,
       dev->nxt_write = (dev->nxt_write + 1) % CONFIG_WL_NRF24L01_RXFIFO_LEN;
     }
 
-  sem_post(&dev->sem_fifo);
+  nxsem_post(&dev->sem_fifo);
 }
 
 /****************************************************************************
@@ -582,7 +582,7 @@ static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
   dev->fifo_len -= (pktlen + 1);
 
   no_data:
-  sem_post(&dev->sem_fifo);
+  nxsem_post(&dev->sem_fifo);
   return pktlen;
 }
 #endif
@@ -604,7 +604,7 @@ static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
 #else
   /* Otherwise we simply wake up the send function */
 
-  sem_post(&dev->sem_tx);  /* Wake up the send function */
+  nxsem_post(&dev->sem_tx);  /* Wake up the send function */
 #endif
 
   return OK;
@@ -716,7 +716,7 @@ static void nrf24l01_worker(FAR void *arg)
 #ifndef CONFIG_DISABLE_POLL
           has_data = true;
 #endif
-          sem_post(&dev->sem_rx);  /* Wake-up any thread waiting in recv */
+          nxsem_post(&dev->sem_rx);  /* Wake-up any thread waiting in recv */
 
           status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status, 1);
 
@@ -731,7 +731,7 @@ static void nrf24l01_worker(FAR void *arg)
           dev->pfd->revents |= POLLIN;  /* Data available for input */
 
           wlinfo("Wake up polled fd\n");
-          sem_post(dev->pfd->sem);
+          nxsem_post(dev->pfd->sem);
         }
 #endif
 
@@ -754,7 +754,7 @@ static void nrf24l01_worker(FAR void *arg)
          {
            /* The actual work is done in the send function */
 
-           sem_post(&dev->sem_tx);
+           nxsem_post(&dev->sem_tx);
          }
        else
          {
@@ -991,7 +991,7 @@ static int nrf24l01_open(FAR struct file *filep)
     }
 
 errout:
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return result;
 }
 
@@ -1024,7 +1024,7 @@ static int nrf24l01_close(FAR struct file *filep)
   nrf24l01_changestate(dev, ST_POWER_DOWN);
   dev->nopens--;
 
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return OK;
 }
 
@@ -1057,7 +1057,7 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
     }
   result = nrf24l01_recv(dev, (uint8_t *)buffer, buflen, &dev->last_recvpipeno);
 
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return result;
 #endif
 }
@@ -1089,7 +1089,7 @@ static ssize_t nrf24l01_write(FAR struct file *filep, FAR const char *buffer,
 
   result = nrf24l01_send(dev, (const uint8_t *)buffer, buflen);
 
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return result;
 }
 
@@ -1325,7 +1325,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return result;
 }
 
@@ -1397,10 +1397,10 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
       if (dev->fifo_len > 0)
         {
           dev->pfd->revents |= POLLIN;  /* Data available for input */
-          sem_post(dev->pfd->sem);
+          nxsem_post(dev->pfd->sem);
         }
 
-      sem_post(&dev->sem_fifo);
+      nxsem_post(&dev->sem_fifo);
     }
   else /* Tear it down */
     {
@@ -1408,7 +1408,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&dev->devsem);
+  nxsem_post(&dev->devsem);
   return result;
 #endif
 }
@@ -1476,7 +1476,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 #endif
 
   nxsem_init(&dev->sem_tx, 0, 0);
-  sem_setprotocol(&dev->sem_tx, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->sem_tx, SEM_PRIO_NONE);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   if ((rx_fifo = kmm_malloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
@@ -1492,7 +1492,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   nxsem_init(&(dev->sem_fifo), 0, 1);
   nxsem_init(&(dev->sem_rx), 0, 0);
-  sem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 
   /* Configure IRQ pin  (falling edge) */

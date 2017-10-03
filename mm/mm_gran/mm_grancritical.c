@@ -94,7 +94,7 @@ void gran_leave_critical(FAR struct gran_s *priv)
 #ifdef CONFIG_GRAN_INTR
   leave_critical_section(priv->irqstate);
 #else
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
 #endif
 }
 

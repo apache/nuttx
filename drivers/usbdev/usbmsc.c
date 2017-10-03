@@ -1366,8 +1366,8 @@ int usbmsc_configure(unsigned int nluns, void **handle)
    * should not have priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->thsynch, SEM_PRIO_NONE);
-  sem_setprotocol(&priv->thwaitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->thsynch, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->thwaitsem, SEM_PRIO_NONE);
 
   sq_init(&priv->wrreqlist);
   priv->nluns = nluns;
@@ -1889,9 +1889,9 @@ void usbmsc_uninitialize(FAR void *handle)
 
   /* Uninitialize and release the driver structure */
 
-  sem_destroy(&priv->thsynch);
-  sem_destroy(&priv->thlock);
-  sem_destroy(&priv->thwaitsem);
+  nxsem_destroy(&priv->thsynch);
+  nxsem_destroy(&priv->thlock);
+  nxsem_destroy(&priv->thwaitsem);
 
 #ifndef CONFIG_USBMSC_COMPOSITE
   /* For the case of the composite driver, there is a two pass

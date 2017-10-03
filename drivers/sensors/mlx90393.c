@@ -232,7 +232,7 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
   /* Give back the semaphore */
 
-  sem_post(&dev->datasem);
+  nxsem_post(&dev->datasem);
 
   /* Feed sensor data to entropy pool */
 
@@ -507,7 +507,7 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
 
   /* Give back the semaphore */
 
-  sem_post(&priv->datasem);
+  nxsem_post(&priv->datasem);
 
   return sizeof(FAR struct mlx90393_sensor_data_s);
 }
@@ -613,7 +613,7 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
-      sem_destroy(&priv->datasem);
+      nxsem_destroy(&priv->datasem);
       return -ENODEV;
     }
 

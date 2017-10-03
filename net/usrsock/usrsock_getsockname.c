@@ -83,7 +83,7 @@ static uint16_t getsockname_event(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->reqstate.recvsem);
+      nxsem_post(&pstate->reqstate.recvsem);
     }
   else if (flags & USRSOCK_EVENT_REQ_COMPLETE)
     {
@@ -109,7 +109,7 @@ static uint16_t getsockname_event(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->reqstate.recvsem);
+      nxsem_post(&pstate->reqstate.recvsem);
     }
 
   return flags;

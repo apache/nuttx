@@ -264,12 +264,12 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
    * received
    */
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return sizeof(struct ap_buffer_s) + nbytes;
 
 errout_with_reference:
   apb_free(apb);
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 
@@ -339,12 +339,12 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
    * sent.
    */
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return sizeof(struct ap_buffer_s) + nbytes;
 
 errout_with_reference:
   apb_free(apb);
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 

@@ -126,7 +126,7 @@ int stmpe811_adcinitialize(STMPE811_HANDLE handle)
   /* Mark ADC initialized */
 
   priv->flags |= STMPE811_FLAGS_ADC_INITIALIZED;
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 
@@ -170,7 +170,7 @@ int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin)
   if ((priv->inuse & pinmask) != 0)
     {
       ierr("ERROR: PIN%d is already in-use\n", pin);
-      sem_post(&priv->exclsem);
+      nxsem_post(&priv->exclsem);
       return -EBUSY;
     }
 
@@ -186,7 +186,7 @@ int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin)
   /* Mark the pin as 'in use' */
 
   priv->inuse |= pinmask;
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return OK;
 }
 

@@ -255,7 +255,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         break;
     }
 
-  sem_post(&dev->batsem);
+  nxsem_post(&dev->batsem);
   return ret;
 }
 

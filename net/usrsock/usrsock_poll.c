@@ -145,7 +145,7 @@ static uint16_t poll_event(FAR struct net_driver_s *dev, FAR void *pvconn,
   if (eventset)
     {
       info->fds->revents |= eventset;
-      sem_post(info->fds->sem);
+      nxsem_post(info->fds->sem);
     }
 
   return flags;
@@ -290,7 +290,7 @@ static int usrsock_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       /* Yes.. then signal the poll logic */
 
-      sem_post(fds->sem);
+      nxsem_post(fds->sem);
     }
 
 errout_unlock:

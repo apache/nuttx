@@ -152,7 +152,7 @@ static void z8_i2c_semtake(void)
     }
 }
 
-#define z8_i2c_semgive() sem_post(&g_i2csem)
+#define z8_i2c_semgive() nxsem_post(&g_i2csem)
 
 /****************************************************************************
  * Name: z8_i2c_waittxempty

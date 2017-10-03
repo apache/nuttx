@@ -86,7 +86,7 @@
 /* NAND locking */
 
 static int      nand_lock(FAR struct nand_dev_s *nand);
-#define         nand_unlock(n) sem_post(&(n)->exclsem)
+#define         nand_unlock(n) nxsem_post(&(n)->exclsem)
 
 /* Bad block checking */
 

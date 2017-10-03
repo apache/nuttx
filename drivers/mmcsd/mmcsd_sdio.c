@@ -159,7 +159,7 @@ struct mmcsd_state_s
 static void    mmcsd_takesem(FAR struct mmcsd_state_s *priv);
 
 #ifndef CONFIG_SDIO_MUXBUS
-#  define mmcsd_givesem(p) sem_post(&priv->sem);
+#  define mmcsd_givesem(p) nxsem_post(&priv->sem);
 #endif
 
 /* Command/response helpers *************************************************/
@@ -310,7 +310,7 @@ static void mmcsd_givesem(FAR struct mmcsd_state_s *priv)
    */
 
   SDIO_LOCK(priv->dev, FALSE);
-  sem_post(&priv->sem);
+  nxsem_post(&priv->sem);
 }
 #endif
 

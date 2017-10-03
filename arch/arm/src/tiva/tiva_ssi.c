@@ -241,7 +241,7 @@ static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable);
 
 #ifndef CONFIG_SSI_POLLWAIT
 static void ssi_semtake(sem_t *sem);
-#define ssi_semgive(s) sem_post(s);
+#define ssi_semgive(s) nxsem_post(s);
 #endif
 
 /* SSI data transfer */
@@ -1100,7 +1100,7 @@ static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
 
   return OK;
@@ -1641,7 +1641,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
    */
 
   nxsem_init(&priv->xfrsem, 0, 0);
-  sem_setprotocol(&priv->xfrsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->xfrsem, SEM_PRIO_NONE);
 #endif
   nxsem_init(&priv->exclsem, 0, 1);
 

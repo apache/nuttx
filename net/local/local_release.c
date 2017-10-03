@@ -107,7 +107,7 @@ int local_release(FAR struct local_conn_s *conn)
            client = (FAR struct local_conn_s *)dq_next(&client->lc_node))
         {
           client->u.client.lc_result = -ENOTCONN;
-          sem_post(&client->lc_waitsem);
+          nxsem_post(&client->lc_waitsem);
         }
 
       conn->u.server.lc_pending = 0;

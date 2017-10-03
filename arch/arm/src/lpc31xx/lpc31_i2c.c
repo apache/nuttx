@@ -219,7 +219,7 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
       /* FIXME: automatic retry? */
 
       priv->state = I2C_STATE_DONE;
-      sem_post(&priv->wait);
+      nxsem_post(&priv->wait);
       return;
     }
 
@@ -388,7 +388,7 @@ out:
         }
 
       priv->state = I2C_STATE_DONE;
-      sem_post(&priv->wait);
+      nxsem_post(&priv->wait);
     }
 }
 
@@ -427,7 +427,7 @@ static void i2c_timeout(int argc, uint32_t arg, ...)
       /* Mark the transfer as finished */
 
       priv->state = I2C_STATE_DONE;
-      sem_post(&priv->wait);
+      nxsem_post(&priv->wait);
     }
 
   leave_critical_section(flags);
@@ -503,7 +503,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
   ret = count - priv->nmsg;
 
   leave_critical_section(flags);
-  sem_post(&priv->mutex);
+  nxsem_post(&priv->mutex);
   return ret;
 }
 
@@ -558,7 +558,7 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Enable I2C system clocks */
 

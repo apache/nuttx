@@ -307,7 +307,7 @@ static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits,
 /* Semaphores ******************************************************************/
 
 static void stm32_takesem(sem_t *sem);
-#define stm32_givesem(s) sem_post(s);
+#define stm32_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions *****************************************/
 
@@ -5193,7 +5193,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 
@@ -5218,7 +5218,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
        */
 
       nxsem_init(&chan->waitsem,  0, 0);
-      sem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }
 

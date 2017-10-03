@@ -211,7 +211,7 @@ static void slip_semtake(FAR struct slip_driver_s *priv)
     }
 }
 
-#define slip_semgive(p) sem_post(&(p)->waitsem);
+#define slip_semgive(p) nxsem_post(&(p)->waitsem);
 
 /****************************************************************************
  * Name: slip_write
@@ -957,7 +957,7 @@ int slip_initialize(int intf, FAR const char *devname)
   /* Initialize the wait semaphore */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling slip_ifdown().

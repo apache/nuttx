@@ -122,7 +122,7 @@ struct btn_open_s
 /* Semaphore helpers */
 
 static inline int btn_takesem(sem_t *sem);
-#define btn_givesem(s) sem_post(s);
+#define btn_givesem(s) nxsem_post(s);
 
 /* Sampling and Interrupt handling */
 
@@ -340,7 +340,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
                   if (fds->revents != 0)
                     {
                       iinfo("Report events: %02x\n", fds->revents);
-                      sem_post(fds->sem);
+                      nxsem_post(fds->sem);
                     }
                 }
             }
@@ -872,7 +872,7 @@ int btn_register(FAR const char *devname,
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->bu_exclsem);
+  nxsem_destroy(&priv->bu_exclsem);
   kmm_free(priv);
   return ret;
 }

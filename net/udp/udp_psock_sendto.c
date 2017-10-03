@@ -299,7 +299,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Wake up the waiting thread */
 
-      sem_post(&pstate->st_sem);
+      nxsem_post(&pstate->st_sem);
     }
 
   return flags;
@@ -398,7 +398,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    */
 
   nxsem_init(&state.st_sem, 0, 0);
-  sem_setprotocol(&state.st_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&state.st_sem, SEM_PRIO_NONE);
 
   state.st_buflen = len;
   state.st_buffer = buf;
@@ -475,7 +475,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 errout_with_lock:
   /* Release the semaphore */
 
-  sem_destroy(&state.st_sem);
+  nxsem_destroy(&state.st_sem);
 
   /* Set the socket state back to idle */
 

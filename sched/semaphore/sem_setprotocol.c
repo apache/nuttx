@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_setprotocol.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,77 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsem_setprotocol
+ *
+ * Description:
+ *    Set semaphore protocol attribute.
+ *
+ *    One particularly important use of this furnction is when a semaphore
+ *    is used for inter-task communication like:
+ *
+ *      TASK A                 TASK B
+ *      nxsem_init(sem, 0, 0);
+ *      nxsem_wait(sem);
+ *                             nxsem_post(sem);
+ *      Awakens as holder
+ *
+ *    In this case priority inheritance can interfere with the operation of
+ *    the semaphore.  The problem is that when TASK A is restarted it is a
+ *    holder of the semaphore.  However, it never calls nxsem_post(sem) so it
+ *    becomes *permanently* a holder of the semaphore and may have its
+ *    priority boosted when any other task tries to acquire the semaphore.
+ *
+ *    The fix is to call nxsem_setprotocol(SEM_PRIO_NONE) immediately after
+ *    the sem_init() call so that there will be no priority inheritance
+ *    operations on this semaphore.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               modified
+ *    protocol - The new protocol to use
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_setprotocol(FAR sem_t *sem, int protocol)
+{
+  DEBUGASSERT(sem != NULL);
+
+  switch (protocol)
+    {
+      case SEM_PRIO_NONE:
+        /* Disable priority inheritance */
+
+        sem->flags |= PRIOINHERIT_FLAGS_DISABLE;
+
+        /* Remove any current holders */
+
+        nxsem_destroyholder(sem);
+        return OK;
+
+      case SEM_PRIO_INHERIT:
+        /* Enable priority inheritance (dangerous) */
+
+        sem->flags &= ~PRIOINHERIT_FLAGS_DISABLE;
+        return OK;
+
+      case SEM_PRIO_PROTECT:
+        /* Not yet supported */
+
+        return -ENOSYS;
+
+      default:
+        break;
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
  * Name: sem_setprotocol
  *
  * Description:
@@ -83,48 +154,24 @@
  *    protocol - The new protocol to use
  *
  * Return Value:
- *   0 if successful.  Otherwise, -1 is returned and the errno value is set
- *   appropriately.
+ *   This function is exposed as a non-standard application interface.  It
+ *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.
  *
  ****************************************************************************/
 
 int sem_setprotocol(FAR sem_t *sem, int protocol)
 {
-  int errcode;
+  int ret;
 
-  DEBUGASSERT(sem != NULL);
-
-  switch (protocol)
+  ret = nxsem_setprotocol(sem, protocol);
+  if (ret < 0)
     {
-      case SEM_PRIO_NONE:
-        /* Disable priority inheritance */
-
-        sem->flags |= PRIOINHERIT_FLAGS_DISABLE;
-
-        /* Remove any current holders */
-
-        nxsem_destroyholder(sem);
-        return OK;
-
-      case SEM_PRIO_INHERIT:
-        /* Enable priority inheritance (dangerous) */
-
-        sem->flags &= ~PRIOINHERIT_FLAGS_DISABLE;
-        return OK;
-
-      case SEM_PRIO_PROTECT:
-        /* Not yet supported */
-
-        errcode = ENOSYS;
-        break;
-
-      default:
-        errcode = EINVAL;
-        break;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */

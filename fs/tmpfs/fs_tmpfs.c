@@ -278,7 +278,7 @@ static void tmpfs_unlock_reentrant(FAR struct tmpfs_sem_s *sem)
     {
       sem->ts_holder = TMPFS_NO_HOLDER;
       sem->ts_count  = 0;
-      sem_post(&sem->ts_sem);
+      nxsem_post(&sem->ts_sem);
     }
 }
 
@@ -464,7 +464,7 @@ static void tmpfs_release_lockedfile(FAR struct tmpfs_file_s *tfo)
 
   if (tfo->tfo_refs == 1 && (tfo->tfo_flags & TFO_FLAG_UNLINKED) != 0)
     {
-      sem_destroy(&tfo->tfo_exclsem.ts_sem);
+      nxsem_destroy(&tfo->tfo_exclsem.ts_sem);
       kmm_free(tfo);
     }
 
@@ -746,7 +746,7 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
 /* Error exits */
 
 errout_with_file:
-  sem_destroy(&newtfo->tfo_exclsem.ts_sem);
+  nxsem_destroy(&newtfo->tfo_exclsem.ts_sem);
   kmm_free(newtfo);
 
 errout_with_parent:
@@ -908,7 +908,7 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
 /* Error exits */
 
 errout_with_directory:
-  sem_destroy(&newtdo->tdo_exclsem.ts_sem);
+  nxsem_destroy(&newtdo->tdo_exclsem.ts_sem);
   kmm_free(newtdo);
 
 errout_with_parent:
@@ -1268,7 +1268,7 @@ static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
 
   /* Free the object now */
 
-  sem_destroy(&to->to_exclsem.ts_sem);
+  nxsem_destroy(&to->to_exclsem.ts_sem);
   kmm_free(to);
   return TMPFS_DELETED;
 }
@@ -2048,10 +2048,10 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Now we can destroy the root file system and the file system itself. */
 
-  sem_destroy(&tdo->tdo_exclsem.ts_sem);
+  nxsem_destroy(&tdo->tdo_exclsem.ts_sem);
   kmm_free(tdo);
 
-  sem_destroy(&fs->tfs_exclsem.ts_sem);
+  nxsem_destroy(&fs->tfs_exclsem.ts_sem);
   kmm_free(fs);
   return ret;
 }
@@ -2207,7 +2207,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   else
     {
-      sem_destroy(&tfo->tfo_exclsem.ts_sem);
+      nxsem_destroy(&tfo->tfo_exclsem.ts_sem);
       kmm_free(tfo);
     }
 
@@ -2333,7 +2333,7 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   /* Free the directory object */
 
-  sem_destroy(&tdo->tdo_exclsem.ts_sem);
+  nxsem_destroy(&tdo->tdo_exclsem.ts_sem);
   kmm_free(tdo);
 
   /* Release the reference and lock on the parent directory */

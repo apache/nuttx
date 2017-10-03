@@ -485,7 +485,7 @@ static void xbeenet_notify(FAR struct xbee_maccb_s *maccb,
           /* Wake the thread waiting for the data transmission */
 
           priv->xd_eventpending = false;
-          sem_post(&priv->xd_eventsem);
+          nxsem_post(&priv->xd_eventsem);
         }
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -511,7 +511,7 @@ static void xbeenet_notify(FAR struct xbee_maccb_s *maccb,
       xbee_notif_free(priv->xd_mac, notif);
     }
 
-  sem_post(&priv->xd_exclsem);
+  nxsem_post(&priv->xd_exclsem);
 }
 
 /****************************************************************************
@@ -1164,7 +1164,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                         }
 
                       priv->xd_eventpending = true;
-                      sem_post(&priv->xd_exclsem);
+                      nxsem_post(&priv->xd_exclsem);
 
                       /* Wait to be signaled when an event is queued */
 
@@ -1212,7 +1212,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
      ret = xbee_ioctl(priv->xd_mac, cmd, arg);
    }
 
-  sem_post(&priv->xd_exclsem);
+  nxsem_post(&priv->xd_exclsem);
   return ret;
 
 }
@@ -1473,7 +1473,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   priv->xd_eventpending = false;
   nxsem_init(&priv->xd_eventsem, 0, 0);
-  sem_setprotocol(&priv->xd_eventsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->xd_eventsem, SEM_PRIO_NONE);
 
   priv->xd_eventhead = NULL;
   priv->xd_eventtail = NULL;

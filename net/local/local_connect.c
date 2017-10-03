@@ -102,7 +102,7 @@ static inline void _local_semtake(sem_t *sem)
     }
 }
 
-#define _local_semgive(sem) sem_post(sem)
+#define _local_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Name: local_stream_connect

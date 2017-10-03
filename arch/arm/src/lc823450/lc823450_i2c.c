@@ -276,7 +276,7 @@ static inline void lc823450_i2c_sem_wait(FAR struct lc823450_i2c_priv_s *priv)
 
 static inline void lc823450_i2c_sem_post(FAR struct lc823450_i2c_priv_s *priv)
 {
-  sem_post(&priv->sem_excl);
+  nxsem_post(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -714,7 +714,7 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
       priv->irqstate = IRQSTATE_DONE;
 
 #ifndef CONFIG_I2C_POLLED
-      sem_post(&priv->sem_isr);
+      nxsem_post(&priv->sem_isr);
 #endif
     }
 
@@ -1184,9 +1184,9 @@ int lc823450_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 
   /* Release unused resources */
 
-  sem_destroy(&priv->sem_excl);
+  nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
-  sem_destroy(&priv->sem_isr);
+  nxsem_destroy(&priv->sem_isr);
 #endif
 
   return OK;

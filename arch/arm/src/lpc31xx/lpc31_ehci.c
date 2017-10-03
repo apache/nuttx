@@ -430,7 +430,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 /* Semaphores ******************************************************************/
 
 static void lpc31_takesem(sem_t *sem);
-#define lpc31_givesem(s) sem_post(s);
+#define lpc31_givesem(s) nxsem_post(s);
 
 /* Allocators ******************************************************************/
 
@@ -3938,7 +3938,7 @@ static int lpc31_epalloc(FAR struct usbhost_driver_s *drvr,
    */
 
   nxsem_init(&epinfo->iocsem, 0, 0);
-  sem_setprotocol(&epinfo->iocsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&epinfo->iocsem, SEM_PRIO_NONE);
 
   /* Success.. return an opaque reference to the endpoint information structure
    * instance
@@ -4927,7 +4927,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&g_ehci.pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&g_ehci.pscsem, SEM_PRIO_NONE);
 
   /* Initialize EP0 */
 
@@ -4971,7 +4971,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
        */
 
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
-      sem_setprotocol(&rhport->iocsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&rhport->iocsem, SEM_PRIO_NONE);
 
       /* Initialize the public port representation */
 

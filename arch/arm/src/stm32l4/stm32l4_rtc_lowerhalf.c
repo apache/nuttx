@@ -239,7 +239,7 @@ static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   ret = up_rtc_getdatetime((FAR struct tm *)rtctime);
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   return ret;
 }
@@ -279,7 +279,7 @@ static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
 
   ret = stm32l4_rtc_setdatetime((FAR const struct tm *)rtctime);
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   return ret;
 }
@@ -366,7 +366,7 @@ static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
         }
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   return ret;
 }
@@ -493,7 +493,7 @@ static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
       ret = stm32l4_rtc_cancelalarm((enum alm_id_e)alarmid);
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   return ret;
 }

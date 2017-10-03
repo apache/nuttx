@@ -52,8 +52,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define bchlib_semgive(d) sem_post(&(d)->sem)  /* To match bchlib_semtake */
-#define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
+#define bchlib_semgive(d) nxsem_post(&(d)->sem)  /* To match bchlib_semtake */
+#define MAX_OPENCNT       (255)                  /* Limit of uint8_t */
 
 /****************************************************************************
  * Public Types

@@ -162,7 +162,7 @@ static int dac_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->ad_closesem);
+      nxsem_post(&dev->ad_closesem);
     }
 
   return ret;
@@ -197,7 +197,7 @@ static int dac_close(FAR struct file *filep)
       if (dev->ad_ocount > 1)
         {
           dev->ad_ocount--;
-          sem_post(&dev->ad_closesem);
+          nxsem_post(&dev->ad_closesem);
         }
       else
         {
@@ -222,7 +222,7 @@ static int dac_close(FAR struct file *filep)
           dev->ad_ops->ao_shutdown(dev);       /* Disable the DAC */
           leave_critical_section(flags);
 
-          sem_post(&dev->ad_closesem);
+          nxsem_post(&dev->ad_closesem);
         }
     }
 
@@ -502,7 +502,7 @@ int dac_txdone(FAR struct dac_dev_s *dev)
           ret = nxsem_getvalue(&dev->ad_xmit.af_sem, &sval);
           if (ret == OK && sval <= 0)
             {
-              ret = sem_post(&dev->ad_xmit.af_sem);
+              ret = nxsem_post(&dev->ad_xmit.af_sem);
             }
         }
     }
@@ -525,7 +525,7 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
 
   dev->ad_ops->ao_reset(dev);
 

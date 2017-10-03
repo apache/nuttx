@@ -531,7 +531,7 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
             {
               /* Wake up the thread */
 
-              sem_post(&group->tg_exitsem);
+              nxsem_post(&group->tg_exitsem);
             }
         }
     }

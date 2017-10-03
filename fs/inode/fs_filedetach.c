@@ -74,7 +74,7 @@ static inline void _files_semtake(FAR struct filelist *list)
  * Name: _files_semgive
  ****************************************************************************/
 
-#define _files_semgive(list) sem_post(&list->fl_sem)
+#define _files_semgive(list) nxsem_post(&list->fl_sem)
 
 /****************************************************************************
  * Public Functions

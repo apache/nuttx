@@ -191,7 +191,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
                * we will have to wait again.
                */
 
-              sem_post(sem);
+              nxsem_post(sem);
               iob = iob_tryalloc(throttled);
             }
         }

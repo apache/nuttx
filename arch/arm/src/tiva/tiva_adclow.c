@@ -986,7 +986,7 @@ void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse)
 {
   ainfo("Unlocking\n");
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
-  sem_post(&s->exclsem);
+  nxsem_post(&s->exclsem);
 }
 
 /* DEBUG ********************************************************************/

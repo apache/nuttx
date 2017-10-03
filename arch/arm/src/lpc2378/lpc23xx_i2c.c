@@ -244,7 +244,7 @@ static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv)
                priv->base + I2C_CONSET_OFFSET);
     }
 
-  sem_post(&priv->wait);
+  nxsem_post(&priv->wait);
 }
 
 /****************************************************************************
@@ -261,7 +261,7 @@ static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...)
 
   irqstate_t flags = enter_critical_section();
   priv->state = 0xff;
-  sem_post(&priv->wait);
+  nxsem_post(&priv->wait);
   leave_critical_section(flags);
 }
 
@@ -425,7 +425,7 @@ static int lpc2378_i2c_transfer(FAR struct i2c_master_s *dev,
 
   ret = lpc2378_i2c_start(priv);
 
-  sem_post(&priv->mutex);
+  nxsem_post(&priv->mutex);
   return ret;
 }
 
@@ -587,7 +587,7 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 
@@ -626,8 +626,8 @@ int lpc2378_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 
   /* Reset data structures */
 
-  sem_destroy(&priv->mutex);
-  sem_destroy(&priv->wait);
+  nxsem_destroy(&priv->mutex);
+  nxsem_destroy(&priv->wait);
 
   /* Free the watchdog timer */
 

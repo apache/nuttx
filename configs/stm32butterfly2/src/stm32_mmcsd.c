@@ -142,7 +142,7 @@ static int stm32_cd(int irq, void *context, void *arg)
   if (now - debounce_time > prev)
     {
       prev = now;
-      sem_post(&g_cdsem);
+      nxsem_post(&g_cdsem);
     }
 
   return OK;

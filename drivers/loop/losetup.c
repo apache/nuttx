@@ -64,8 +64,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define loop_semgive(d) sem_post(&(d)->sem)  /* To match loop_semtake */
-#define MAX_OPENCNT     (255)                /* Limit of uint8_t */
+#define loop_semgive(d) nxsem_post(&(d)->sem)  /* To match loop_semtake */
+#define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
 
 /****************************************************************************
  * Private Types

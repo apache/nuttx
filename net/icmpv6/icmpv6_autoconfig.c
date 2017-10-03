@@ -106,7 +106,7 @@ static void icmpv6_router_terminate(FAR struct icmpv6_router_s *state,
 
   /* Wake up the waiting thread */
 
-  sem_post(&state->snd_sem);
+  nxsem_post(&state->snd_sem);
 }
 
 /****************************************************************************
@@ -213,7 +213,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    */
 
   (void)nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  sem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   /* Remember the routing device name */
 
@@ -262,7 +262,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   icmpv6_callback_free(dev, state.snd_cb);
 
 errout_with_semaphore:
-  sem_destroy(&state.snd_sem);
+  nxsem_destroy(&state.snd_sem);
   return ret;
 }
 

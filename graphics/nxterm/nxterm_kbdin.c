@@ -78,7 +78,7 @@ static void nxterm_pollnotify(FAR struct nxterm_state_s *priv, pollevent_t event
           fds->revents |= (fds->events & eventset);
           if (fds->revents != 0)
             {
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
 
@@ -463,7 +463,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
         {
           /* Yes.. Notify all of the waiting readers that more data is available */
 
-          sem_post(&priv->waitsem);
+          nxsem_post(&priv->waitsem);
         }
 
       /* Notify all poll/select waiters that they can write to the FIFO */

@@ -186,7 +186,7 @@ static int accept_eventhandler(FAR struct tcp_conn_s *listener,
 
       /* Wake-up the waiting caller thread */
 
-      sem_post(&pstate->acpt_sem);
+      nxsem_post(&pstate->acpt_sem);
 
       /* Stop any further callbacks */
 
@@ -286,7 +286,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        */
 
       nxsem_init(&state.acpt_sem, 0, 0);
-      sem_setprotocol(&state.acpt_sem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&state.acpt_sem, SEM_PRIO_NONE);
 
       /* Set up the callback in the connection */
 
@@ -304,7 +304,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       conn->accept_private = NULL;
       conn->accept         = NULL;
 
-      sem_destroy(&state. acpt_sem);
+      nxsem_destroy(&state. acpt_sem);
 
       /* Set the socket state to idle */
 

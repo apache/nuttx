@@ -191,7 +191,7 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
 
   buffer = (FAR char *) &priv->sample;
 
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return sizeof(struct xen1210_sample_s);
 }
 
@@ -389,14 +389,14 @@ int xen1210_register(XEN1210_HANDLE handle, int minor)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);
-      sem_post(&priv->exclsem);
+      nxsem_post(&priv->exclsem);
       return ret;
     }
 
   /* Indicate that the accelerometer was successfully initialized */
 
   priv->status |= XEN1210_STAT_INITIALIZED;  /* Accelerometer is initialized */
-  sem_post(&priv->exclsem);
+  nxsem_post(&priv->exclsem);
   return ret;
 }
 

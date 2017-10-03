@@ -76,7 +76,7 @@ uint8_t cs43l22_readreg(FAR struct cs43l22_dev_s *priv, uint8_t regaddr);
 static void cs43l22_writereg(FAR struct cs43l22_dev_s *priv, uint8_t regaddr,
                              uint8_t regval);
 static void cs43l22_takesem(sem_t * sem);
-#define     cs43l22_givesem(s) sem_post(s)
+#define     cs43l22_givesem(s) nxsem_post(s)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static inline uint16_t cs43l22_scalevolume(uint16_t volume, b16_t scale);
@@ -1953,7 +1953,7 @@ FAR struct audio_lowerhalf_s *cs43l22_initialize(FAR struct i2c_master_s *i2c,
   return NULL;
 
 errout_with_dev:
-  sem_destroy(&priv->pendsem);
+  nxsem_destroy(&priv->pendsem);
   kmm_free(priv);
   return NULL;
 }

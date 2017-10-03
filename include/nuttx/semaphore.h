@@ -103,7 +103,7 @@ extern "C"
  * Description:
  *   This function initializes the UNAMED semaphore sem. Following a
  *   successful call to nxsem_init(), the semaphore may be used in subsequent
- *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   calls to nxsem_wait(), nxsem_post(), and nxsem_trywait().  The semaphore
  *   remains usable until it is destroyed.
  *
  *   Only sem itself may be used for performing synchronization. The result
@@ -116,13 +116,39 @@ extern "C"
  *   value - Semaphore initialization value
  *
  * Return Value:
- *   This is an internal OS interface and should not be used byapplications.
+ *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
 int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
+
+/****************************************************************************
+ * Name: nxsem_destroy
+ *
+ * Description:
+ *   This function is used to destroy the un-named semaphore indicated by
+ *   'sem'.  Only a semaphore that was created using nxsem_init() may be
+ *   destroyed using nxsem_destroy(); the effect of calling nxsem_destroy() with
+ *   a named semaphore is undefined.  The effect of subsequent use of the
+ *   semaphore sem is undefined until sem is re-initialized by another call
+ *   to nxsem_init().
+ *
+ *   The effect of destroying a semaphore upon which other processes are
+ *   currently blocked is undefined.
+ *
+ * Parameters:
+ *   sem - Semaphore to be destroyed.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_destroy (FAR sem_t *sem);
 
 /****************************************************************************
  * Name: nxsem_tickwait
@@ -150,6 +176,37 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
  ****************************************************************************/
 
 int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
+
+/****************************************************************************
+ * Name: nxsem_post
+ *
+ * Description:
+ *   When a kernel thread has finished with a semaphore, it will call
+ *   nxsem_post().  This function unlocks the semaphore referenced by sem
+ *   by performing the semaphore unlock operation on that semaphore.
+ *
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
+ *
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to sem_wait().
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int nxsem_post(FAR sem_t *sem);
 
 /****************************************************************************
  * Name:  nxsem_getvalue
@@ -202,6 +259,27 @@ int nxsem_getvalue(FAR sem_t *sem, FAR int *sval);
 int nxsem_reset(FAR sem_t *sem, int16_t count);
 
 /****************************************************************************
+ * Name: nxsem_getprotocol
+ *
+ * Description:
+ *    Return the value of the semaphore protocol attribute.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               queried.
+ *    protocol - The user provided location in which to store the protocol
+ *               value.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#define nxsem_getprotocol(s,p) sem_getprotocol(s,p)
+
+/****************************************************************************
  * Name: sem_getprotocol
  *
  * Description:
@@ -221,6 +299,45 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
  ****************************************************************************/
 
 int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
+
+/****************************************************************************
+ * Name: nxsem_setprotocol
+ *
+ * Description:
+ *    Set semaphore protocol attribute.
+ *
+ *    One particularly important use of this furnction is when a semaphore
+ *    is used for inter-task communication like:
+ *
+ *      TASK A                 TASK B
+ *      sem_init(sem, 0, 0);
+ *      sem_wait(sem);
+ *                             sem_post(sem);
+ *      Awakens as holder
+ *
+ *    In this case priority inheritance can interfere with the operation of
+ *    the semaphore.  The problem is that when TASK A is restarted it is a
+ *    holder of the semaphore.  However, it never calls sem_post(sem) so it
+ *    becomes *permanently* a holder of the semaphore and may have its
+ *    priority boosted when any other task tries to acquire the semaphore.
+ *
+ *    The fix is to call nxsem_setprotocol(SEM_PRIO_NONE) immediately after
+ *    the sem_init() call so that there will be no priority inheritance
+ *    operations on this semaphore.
+ *
+ * Parameters:
+ *    sem      - A pointer to the semaphore whose attributes are to be
+ *               modified
+ *    protocol - The new protocol to use
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_setprotocol(FAR sem_t *sem, int protocol);
 
 /****************************************************************************
  * Name: sem_setprotocol

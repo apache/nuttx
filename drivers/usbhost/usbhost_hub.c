@@ -1089,7 +1089,7 @@ static void usbhost_disconnect_event(FAR void *arg)
 
   /* Destroy the semaphores */
 
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
 
   /* Disconnect the USB host device */
 

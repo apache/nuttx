@@ -200,11 +200,11 @@ int munmap(FAR void *start, size_t length)
       curr->length = length;
     }
 
-  sem_post(&g_rammaps.exclsem);
+  nxsem_post(&g_rammaps.exclsem);
   return OK;
 
 errout_with_semaphore:
-  sem_post(&g_rammaps.exclsem);
+  nxsem_post(&g_rammaps.exclsem);
   set_errno(errcode);
   return ERROR;
 }

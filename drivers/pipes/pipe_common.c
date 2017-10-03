@@ -138,7 +138,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
           if (fds->revents != 0)
             {
               finfo("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
+              nxsem_post(fds->sem);
             }
         }
     }
@@ -177,8 +177,8 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
       * should not have priority inheritance enabled.
       */
 
-     sem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
-     sem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
+     nxsem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
+     nxsem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
 
       dev->d_bufsize = bufsize;
     }
@@ -192,9 +192,9 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
 
 void pipecommon_freedev(FAR struct pipe_dev_s *dev)
 {
-  sem_destroy(&dev->d_bfsem);
-  sem_destroy(&dev->d_rdsem);
-  sem_destroy(&dev->d_wrsem);
+  nxsem_destroy(&dev->d_bfsem);
+  nxsem_destroy(&dev->d_rdsem);
+  nxsem_destroy(&dev->d_wrsem);
   kmm_free(dev);
 }
 
@@ -233,7 +233,7 @@ int pipecommon_open(FAR struct file *filep)
       dev->d_buffer = (FAR uint8_t *)kmm_malloc(dev->d_bufsize);
       if (!dev->d_buffer)
         {
-          (void)sem_post(&dev->d_bfsem);
+          (void)nxsem_post(&dev->d_bfsem);
           return -ENOMEM;
         }
     }
@@ -256,7 +256,7 @@ int pipecommon_open(FAR struct file *filep)
         {
           while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
             {
-              sem_post(&dev->d_rdsem);
+              nxsem_post(&dev->d_rdsem);
             }
         }
     }
@@ -274,7 +274,7 @@ int pipecommon_open(FAR struct file *filep)
    */
 
   sched_lock();
-  (void)sem_post(&dev->d_bfsem);
+  (void)nxsem_post(&dev->d_bfsem);
 
   if ((filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
       dev->d_nwriters < 1 &&                     /* No writers on the pipe */
@@ -351,7 +351,7 @@ int pipecommon_close(FAR struct file *filep)
             {
               while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->d_rdsem);
+                  nxsem_post(&dev->d_rdsem);
                 }
 
               /* Inform poll readers that other end closed. */
@@ -412,7 +412,7 @@ int pipecommon_close(FAR struct file *filep)
 #endif
     }
 
-  sem_post(&dev->d_bfsem);
+  nxsem_post(&dev->d_bfsem);
   return OK;
 }
 
@@ -453,7 +453,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
       if (filep->f_oflags & O_NONBLOCK)
         {
-          sem_post(&dev->d_bfsem);
+          nxsem_post(&dev->d_bfsem);
           return -EAGAIN;
         }
 
@@ -461,14 +461,14 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
       if (dev->d_nwriters <= 0)
         {
-          sem_post(&dev->d_bfsem);
+          nxsem_post(&dev->d_bfsem);
           return 0;
         }
 
       /* Otherwise, wait for something to be written to the pipe */
 
       sched_lock();
-      sem_post(&dev->d_bfsem);
+      nxsem_post(&dev->d_bfsem);
       ret = sem_wait(&dev->d_rdsem);
       sched_unlock();
 
@@ -496,14 +496,14 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   while (nxsem_getvalue(&dev->d_wrsem, &sval) == 0 && sval < 0)
     {
-      sem_post(&dev->d_wrsem);
+      nxsem_post(&dev->d_wrsem);
     }
 
   /* Notify all poll/select waiters that they can write to the FIFO */
 
   pipecommon_pollnotify(dev, POLLOUT);
 
-  sem_post(&dev->d_bfsem);
+  nxsem_post(&dev->d_bfsem);
   pipe_dumpbuffer("From PIPE:", start, nread);
   return nread;
 }
@@ -582,7 +582,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 
               while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->d_rdsem);
+                  nxsem_post(&dev->d_rdsem);
                 }
 
               /* Notify all poll/select waiters that they can read from the FIFO */
@@ -591,7 +591,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 
               /* Return the number of bytes written */
 
-              sem_post(&dev->d_bfsem);
+              nxsem_post(&dev->d_bfsem);
               return len;
             }
         }
@@ -605,7 +605,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 
               while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
-                  sem_post(&dev->d_rdsem);
+                  nxsem_post(&dev->d_rdsem);
                 }
 
               /* Notify all poll/select waiters that they can read from the FIFO */
@@ -624,14 +624,14 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                   nwritten = -EAGAIN;
                 }
 
-              sem_post(&dev->d_bfsem);
+              nxsem_post(&dev->d_bfsem);
               return nwritten;
             }
 
           /* There is more to be written.. wait for data to be removed from the pipe */
 
           sched_lock();
-          sem_post(&dev->d_bfsem);
+          nxsem_post(&dev->d_bfsem);
           pipecommon_semtake(&dev->d_wrsem);
           sched_unlock();
           pipecommon_semtake(&dev->d_bfsem);
@@ -757,7 +757,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&dev->d_bfsem);
+  nxsem_post(&dev->d_bfsem);
   return ret;
 }
 #endif
@@ -857,7 +857,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&dev->d_bfsem);
+  nxsem_post(&dev->d_bfsem);
   return ret;
 }
 

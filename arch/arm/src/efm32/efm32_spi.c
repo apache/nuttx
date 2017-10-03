@@ -510,7 +510,7 @@ static void spi_dmatxwait(struct efm32_spidev_s *priv)
 #ifdef CONFIG_EFM32_SPI_DMA
 static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv)
 {
-  (void)sem_post(&priv->rxdmasem);
+  (void)nxsem_post(&priv->rxdmasem);
 }
 #endif
 
@@ -525,7 +525,7 @@ static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv)
 #ifdef CONFIG_EFM32_SPI_DMA
 static inline void spi_dmatxwakeup(struct efm32_spidev_s *priv)
 {
-  (void)sem_post(&priv->txdmasem);
+  (void)nxsem_post(&priv->txdmasem);
 }
 #endif
 
@@ -759,7 +759,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      (void)nxsem_post(&priv->exclsem);
     }
 
   return OK;
@@ -1646,8 +1646,8 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
    * priority inheritance enabled.
    */
 
-   sem_setprotocol(&priv->rxdmasem, SEM_PRIO_NONE);
-   sem_setprotocol(&priv->txdmasem, SEM_PRIO_NONE);
+   nxsem_setprotocol(&priv->rxdmasem, SEM_PRIO_NONE);
+   nxsem_setprotocol(&priv->txdmasem, SEM_PRIO_NONE);
 #endif
 
   /* Enable SPI */

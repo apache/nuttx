@@ -143,7 +143,7 @@ static int powerled_open(FAR struct file *filep)
             }
         }
 
-      sem_post(&dev->closesem);
+      nxsem_post(&dev->closesem);
     }
 
   return OK;
@@ -178,7 +178,7 @@ static int powerled_close(FAR struct file *filep)
       if (dev->ocount > 1)
         {
           dev->ocount--;
-          sem_post(&dev->closesem);
+          nxsem_post(&dev->closesem);
         }
       else
         {
@@ -192,7 +192,7 @@ static int powerled_close(FAR struct file *filep)
           dev->ops->shutdown(dev);               /* Disable the POWERLED */
           leave_critical_section(flags);
 
-          sem_post(&dev->closesem);
+          nxsem_post(&dev->closesem);
         }
     }
 
@@ -436,7 +436,7 @@ int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev, FAR 
   ret = register_driver(path, &powerled_fops, 0444, dev);
   if (ret < 0)
     {
-      sem_destroy(&dev->closesem);
+      nxsem_destroy(&dev->closesem);
     }
 
   return ret;

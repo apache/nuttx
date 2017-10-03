@@ -662,7 +662,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    */
 
   *ppofile = &wrfile->ofile;
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
   return OK;
 
 errout_with_name:
@@ -673,9 +673,9 @@ errout_with_ofile:
 #endif
 
 errout_with_exclsem:
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout_with_wrsem:
-  sem_post(&volume->wrsem);
+  nxsem_post(&volume->wrsem);
 errout:
   return ret;
 }
@@ -769,13 +769,13 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   /* Return the open file state structure */
 
   *ppofile = ofile;
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
   return OK;
 
 errout_with_ofile:
   kmm_free(ofile);
 errout_with_exclsem:
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 errout:
   return ret;
 }
@@ -909,7 +909,7 @@ static inline int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
   /* The volume is now available for other writers */
 
 errout:
-  sem_post(&volume->wrsem);
+  nxsem_post(&volume->wrsem);
   return ret;
 }
 
@@ -1186,7 +1186,7 @@ int nxffs_close(FAR struct file *filep)
 
 
   filep->f_priv = NULL;
-  sem_post(&volume->exclsem);
+  nxsem_post(&volume->exclsem);
 
 errout:
   return ret;
@@ -1276,7 +1276,7 @@ int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
   /* The volume is now available for other writers */
 
 errout:
-  sem_post(&volume->wrsem);
+  nxsem_post(&volume->wrsem);
   return ret;
 }
 

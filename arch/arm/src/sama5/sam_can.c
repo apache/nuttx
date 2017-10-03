@@ -199,7 +199,7 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg);
 /* Semaphore helpers */
 
 static void can_semtake(FAR struct sam_can_s *priv);
-#define can_semgive(priv) sem_post(&priv->exclsem)
+#define can_semgive(priv) nxsem_post(&priv->exclsem)
 
 /* Mailboxes */
 

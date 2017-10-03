@@ -313,7 +313,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->od_exclsem);
+  nxsem_post(&priv->od_exclsem);
   return ret;
 }
 
@@ -373,7 +373,7 @@ int oneshot_register(FAR const char *devname,
   if (ret < 0)
     {
       snerr("ERROR: register_driver failed: %d\n", ret);
-      sem_destroy(&priv->od_exclsem);
+      nxsem_destroy(&priv->od_exclsem);
       kmm_free(priv);
     }
 

@@ -108,7 +108,7 @@ static void rwb_semtake(sem_t *sem)
  * Name: rwb_semgive
  ****************************************************************************/
 
-#define rwb_semgive(s) sem_post(s)
+#define rwb_semgive(s) nxsem_post(s)
 
 /****************************************************************************
  * Name: rwb_overlap
@@ -725,7 +725,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
   if (rwb->wrmaxblocks > 0)
     {
       rwb_wrcanceltimeout(rwb);
-      sem_destroy(&rwb->wrsem);
+      nxsem_destroy(&rwb->wrsem);
       if (rwb->wrbuffer)
         {
           kmm_free(rwb->wrbuffer);
@@ -736,7 +736,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
 #ifdef CONFIG_DRVR_READAHEAD
   if (rwb->rhmaxblocks > 0)
     {
-      sem_destroy(&rwb->rhsem);
+      nxsem_destroy(&rwb->rhsem);
       if (rwb->rhbuffer)
         {
           kmm_free(rwb->rhbuffer);

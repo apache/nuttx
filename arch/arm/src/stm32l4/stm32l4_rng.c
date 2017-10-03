@@ -240,7 +240,7 @@ static int stm32l4_rnginterrupt(int irq, void *context, FAR void *arg)
       /* Buffer filled, stop further interrupts. */
 
       stm32l4_rngdisable();
-      sem_post(&g_rngdev.rd_readsem);
+      nxsem_post(&g_rngdev.rd_readsem);
     }
 
   return OK;
@@ -267,7 +267,7 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
        */
 
       nxsem_init(&g_rngdev.rd_readsem, 0, 0);
-      sem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
       g_rngdev.rd_buflen = buflen;
       g_rngdev.rd_buf = buffer;
@@ -282,11 +282,11 @@ static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
 
       /* Done with the operation semaphore */
 
-      sem_destroy(&g_rngdev.rd_readsem);
+      nxsem_destroy(&g_rngdev.rd_readsem);
 
       /* Free RNG via the device semaphore for next use */
 
-      sem_post(&g_rngdev.rd_devsem);
+      nxsem_post(&g_rngdev.rd_devsem);
 
       return buflen;
     }

@@ -154,7 +154,7 @@ static void mtd_semtake(FAR sem_t *sem)
 
 static void mtd_semgive(FAR sem_t *sem)
 {
-  sem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************
@@ -535,7 +535,7 @@ static FAR struct mtd_dev_s *lc823450_mtd_allocdev(uint32_t channel)
   if (ret != OK)
     {
       finfo("ERROR: Failed to initialize media\n");
-      sem_destroy(&priv->sem);
+      nxsem_destroy(&priv->sem);
       kmm_free(priv);
       return NULL;
     }
@@ -799,7 +799,7 @@ int lc823450_mtd_uninitialize(uint32_t devno)
   ret = lc823450_sdc_finalize(ch);
   DEBUGASSERT(ret == OK);
 
-  sem_destroy(&priv->sem);
+  nxsem_destroy(&priv->sem);
 
   kmm_free(g_mtdmaster[ch]);
 

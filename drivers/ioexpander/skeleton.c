@@ -176,7 +176,7 @@ static void skel_lock(FAR struct skel_dev_s *priv)
     }
 }
 
-#define skel_unlock(p) sem_post(&(p)->exclsem)
+#define skel_unlock(p) nxsem_post(&(p)->exclsem)
 
 /****************************************************************************
  * Name: skel_direction

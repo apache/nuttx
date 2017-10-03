@@ -79,9 +79,9 @@ void nxterm_unregister(NXTERM handle)
   /* Get the reference to the driver structure from the handle */
 
   priv = (FAR struct nxterm_state_s *)handle;
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
 #ifdef CONFIG_NXTERM_NXKBDIN
-  sem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->waitsem);
 #endif
 
   /* Free the font cache */

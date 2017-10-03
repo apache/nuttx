@@ -150,7 +150,7 @@ struct sam_tc_s
 /* Low-level helpers ********************************************************/
 
 static void sam_takesem(struct sam_tc_s *tc);
-#define     sam_givesem(tc) (sem_post(&tc->exclsem))
+#define     sam_givesem(tc) (nxsem_post(&tc->exclsem))
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
 static void sam_regdump(struct sam_chan_s *chan, const char *msg);

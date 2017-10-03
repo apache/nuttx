@@ -780,7 +780,7 @@ static ssize_t mbr3108_read(FAR struct file *filep, FAR char *buffer,
   priv->int_pending = false;
   leave_critical_section(flags);
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret < 0 ? ret : outlen;
 }
 
@@ -861,7 +861,7 @@ static ssize_t mbr3108_write(FAR struct file *filep, FAR const char *buffer,
     }
 
 out:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   return ret < 0 ? ret : buflen;
 }
@@ -935,7 +935,7 @@ static int mbr3108_open(FAR struct file *filep)
     }
 
 out_sem:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -981,7 +981,7 @@ static int mbr3108_close(FAR struct file *filep)
       priv->cref = use_count;
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
   return 0;
 }
@@ -1002,7 +1002,7 @@ static void mbr3108_poll_notify(FAR struct mbr3108_dev_s *priv)
           mbr3108_dbg("Report events: %02x\n", fds->revents);
 
           fds->revents |= POLLIN;
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 }
@@ -1084,7 +1084,7 @@ static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
