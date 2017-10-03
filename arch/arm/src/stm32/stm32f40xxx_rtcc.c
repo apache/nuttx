@@ -770,8 +770,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
-  rtcinfo("  TR: %08x ALRMAR: %08x\n",
-          getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMAR));
+  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
 
   /* Enable RTC alarm */
 
@@ -807,8 +806,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMBR);
-  rtcinfo("  TR: %08x ALRMBR: %08x\n",
-          getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMBR));
+  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
 
@@ -1168,7 +1166,10 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   /* Sample the data time registers.  There is a race condition here... If
    * we sample the time just before midnight on December 31, the date could
-   * be wrong because the day rolled over while were sampling.
+   * be wrong because the day rolled over while were sampling. Thus loop for
+   * checking overflow here is needed.  There is a race condition with
+   * subseconds too. If we sample TR register just before second rolling
+   * and subseconds are read at wrong second, we get wrong time.
    */
 
   do
@@ -1177,16 +1178,24 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       tr  = getreg32(STM32_RTC_TR);
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
       ssr = getreg32(STM32_RTC_SSR);
+      tmp = getreg32(STM32_RTC_TR);
+      if (tmp != tr)
+        {
+          continue;
+        }
 #endif
       tmp = getreg32(STM32_RTC_DR);
+      if (tmp == dr)
+        {
+          break;
+        }
     }
-  while (tmp != dr);
+  while (1);
 
   rtc_dumpregs("Reading Time");
 
   /* Convert the RTC time to fields in struct tm format.  All of the STM32
-   * All of the ranges of values correspond between struct tm and the time
-   * register.
+   * ranges of values correspond between struct tm and the time register.
    */
 
   tmp = (tr & (RTC_TR_SU_MASK | RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
@@ -1221,7 +1230,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   tmp = (dr & RTC_DR_WDU_MASK) >> RTC_DR_WDU_SHIFT;
   tp->tm_wday = tmp % 7;
   tp->tm_yday = tp->tm_mday + clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
-  tp->tm_isdst = 0
+  tp->tm_isdst = 0;
 #endif
 
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS

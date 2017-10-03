@@ -72,8 +72,6 @@ int stm32l4_pmstandby(void)
 {
   uint32_t regval;
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6)
   /* Clear the Wake-Up Flags by setting the CWUFx bits in the power status
    * clear register
    */
@@ -82,25 +80,12 @@ int stm32l4_pmstandby(void)
   putreg32(regval, STM32L4_PWR_SCR);
 
   /* Select Standby mode */
+
   regval  = getreg32(STM32L4_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;
   regval |= PWR_CR1_LPMS_STANDBY;
 
   putreg32(regval, STM32L4_PWR_CR1);
-#else
-  /* Clear the Wake-Up Flag by setting the CWUF bit in the power control
-   * register.
-   */
-
-  regval  = getreg32(STM32L4_PWR_CR);
-  regval |= PWR_CR_CWUF;
-  putreg32(regval, STM32L4_PWR_CR);
-
-  /* Set the Power Down Deep Sleep (PDDS) bit in the power control register. */
-
-  regval |= PWR_CR_PDDS;
-  putreg32(regval, STM32L4_PWR_CR);
-#endif
 
   /* Set SLEEPDEEP bit of Cortex System Control Register */
 

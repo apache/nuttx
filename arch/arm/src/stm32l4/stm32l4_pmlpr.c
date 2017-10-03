@@ -48,9 +48,6 @@
 #include "stm32l4_pm.h"
 #include "stm32l4_rcc.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -108,5 +105,3 @@ int stm32l4_pmlpr(void)
 
   return OK;
 }
-
-#endif /* CONFIG_STM32L4_STM32L4X3 || CONFIG_STM32L4_STM32L4X5 || CONFIG_STM32L4_STM32L4X6 */

@@ -1405,6 +1405,11 @@ config ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
 	---help---
 		Enables special, board-specific STM32 clock configuration.
 
+config STM32L4_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+	default y
+
 choice
 	prompt "RTC clock source"
 	default STM32L4_RTC_LSECLOCK

@@ -43,12 +43,12 @@
 
 #include <stdbool.h>
 #include <sched.h>
-#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/time.h>
 
 #include <arch/board/board.h>
 
@@ -717,8 +717,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32L4_RTC_ALRMAR);
   putreg32(0, STM32L4_RTC_ALRMASSR);
-  rtcinfo("  TR: %08x ALRMAR: %08x\n",
-          getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMAR));
+  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32L4_RTC_ALRMAR));
 
   /* Enable RTC alarm A */
 
@@ -763,8 +762,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32L4_RTC_ALRMBR);
   putreg32(0, STM32L4_RTC_ALRMBSSR);
-  rtcinfo("  TR: %08x ALRMBR: %08x\n",
-          getreg32(STM32L4_RTC_TR), getreg32(STM32L4_RTC_ALRMBR));
+  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32L4_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
 
@@ -1092,30 +1090,25 @@ int stm32_rtc_irqinitialize(void)
 
 int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
 {
+#ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
   uint32_t ssr;
+#endif
   uint32_t dr;
   uint32_t tr;
   uint32_t tmp;
 
-  /* Sample the data time registers.  There is a race condition here... If we sample
-   * the time just before midnight on December 31, the date could be wrong because
-   * the day rolled over while were sampling.
-   */
+  /* Sample the date time registers. Must read in this order. */
 
-  do
-    {
-      dr  = getreg32(STM32L4_RTC_DR);
-      tr  = getreg32(STM32L4_RTC_TR);
-      ssr = getreg32(STM32L4_RTC_SSR);
-      tmp = getreg32(STM32L4_RTC_DR);
-    }
-  while (tmp != dr);
+#ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
+  ssr = getreg32(STM32L4_RTC_SSR);
+#endif
+  tr  = getreg32(STM32L4_RTC_TR);
+  dr  = getreg32(STM32L4_RTC_DR);
 
   rtc_dumpregs("Reading Time");
 
-  /* Convert the RTC time to fields in struct tm format.  All of the STM32
-   * All of the ranges of values correspond between struct tm and the time
-   * register.
+  /* Convert the RTC time to fields in struct tm format. All of the STM32
+   * ranges of values correspond between struct tm and the time register.
    */
 
   tmp = (tr & (RTC_TR_SU_MASK | RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
@@ -1150,13 +1143,14 @@ int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
   tmp = (dr & RTC_DR_WDU_MASK) >> RTC_DR_WDU_SHIFT;
   tp->tm_wday = tmp % 7;
   tp->tm_yday = tp->tm_mday + clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
-  tp->tm_isdst = 0
+  tp->tm_isdst = 0;
 #endif
 
   /* Return RTC sub-seconds if a non-NULL value
    * of nsec has been provided to receive the sub-second value.
    */
 
+#ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
   if (nsec)
     {
       uint32_t prediv_s;
@@ -1174,6 +1168,9 @@ int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
       usecs = (((prediv_s - ssr) * 100000) / (prediv_s + 1)) * 10;
       *nsec = usecs * 1000;
     }
+#else
+  DEBUGASSERT(nsec == NULL);
+#endif
 
   rtc_dumptime(tp, "Returning");
   return OK;
@@ -1206,6 +1203,40 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 {
   return stm32l4_rtc_getdatetime_with_subseconds(tp, NULL);
 }
+
+/************************************************************************************
+ * Name: up_rtc_getdatetime_with_subseconds
+ *
+ * Description:
+ *   Get the current date and time from the date/time RTC.  This interface
+ *   is only supported by the date/time RTC hardware implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS during
+ *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   are selected (and CONFIG_RTC_HIRES is not).
+ *
+ *   NOTE: This interface exposes sub-second accuracy capability of RTC hardware.
+ *   This interface allow maintaining timing accuracy when system time needs constant
+ *   resynchronization with RTC, for example with board level power-save mode utilizing
+ *   deep-sleep modes such as STOP on STM32 MCUs.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *   nsec - The location to return the subsecond time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
+#  ifndef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
+#    error "Invalid config, enable CONFIG_STM32L4_HAVE_RTC_SUBSECONDS."
+#  endif
+int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
+{
+  return stm32l4_rtc_getdatetime_with_subseconds(tp, nsec);
+}
+#endif
 
 /************************************************************************************
  * Name: stm32l4_rtc_setdatetime
@@ -1300,7 +1331,7 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
 }
 
 /************************************************************************************
- * Name: stm32l4_rtc_setdatetime
+ * Name: stm32l4_rtc_havesettime
  *
  * Description:
  *   Check if RTC time has been set.

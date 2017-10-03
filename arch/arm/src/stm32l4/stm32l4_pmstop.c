@@ -109,38 +109,19 @@ int stm32l4_pmstop(bool lpds)
 {
   uint32_t regval;
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6)
   /* Clear Low-Power Mode Selection (LPMS) bits in power control register 1. */
+
   regval  = getreg32(STM32L4_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;
 
   /* Select Stop 1 mode with low-power regulator if so requested */
+
   if (lpds)
     {
       regval |= PWR_CR1_LPMS_STOP1LPR;
     }
 
   putreg32(regval, STM32L4_PWR_CR1);
-#else
-  /* Clear the Power Down Deep Sleep (PDDS), Low Power Deep Sleep (LPDS), and
-   * Low Power regulator Low Voltage in Deep Sleep (LPLVDS) bits in the power
-   * control register.
-   */
-
-  regval  = getreg32(STM32L4_PWR_CR);
-  regval &= ~(PWR_CR_LPDS | PWR_CR_PDDS | PWR_CR_LPLVDS);
-
-  /* Set the Low Power Deep Sleep (LPDS) and Low Power regulator Low Voltage
-   * in Deep Sleep (LPLVDS) bits if so requested */
-
-  if (lpds)
-    {
-      regval |= PWR_CR_LPDS | PWR_CR_LPLVDS;
-    }
-
-  putreg32(regval, STM32L4_PWR_CR);
-#endif
 
   return do_stop();
 }
@@ -161,8 +142,6 @@ int stm32l4_pmstop(bool lpds)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6)
 int stm32l4_pmstop2(void)
 {
   uint32_t regval;
@@ -176,4 +155,3 @@ int stm32l4_pmstop2(void)
 
   return do_stop();
 }
-#endif
