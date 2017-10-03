@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: February 16, 2017</p>
+      <p>Last Updated: October 2, 2017</p>
     </td>
   </tr>
 </table>
@@ -224,8 +224,9 @@ paragraphs.
 </p>
 <ul>
   <li><a href="#vfork">2.1.11 vfork</a></li>
-  <li><a href="#execv">2.1.12 execv</a></li>
-  <li><a href="#execl">2.1.13 execl</a></li>
+  <li><a href="#exec">2.1.12 exec</a></li>
+  <li><a href="#execv">2.1.13 execv</a></li>
+  <li><a href="#execl">2.1.14 execl</a></li>
 </ul>
 <p>
   Standard <code>posix_spawn</code> interfaces:
@@ -835,7 +836,80 @@ pid_t vfork(void);
   Compatible with the Unix interface of the same name.
 </p>
 
-<H3><a name="execv">2.1.12 execv</a></H3>
+<H3><a name="exec">2.1.12 exec</a></H3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+  <ul><pre>
+#include &lt;nuttx/binfmt/binfmt.h&gt;
+#ifndef CONFIG_BUILD_KERNEL
+int exec(FAR const char *filename, FAR char * const *argv,
+         FAR const struct symtab_s *exports, int nexports);
+#endif
+</pre></ul>
+<p>
+  <b>Description:</b>
+  This non-standard, NuttX function is similar to <code>execv()</code> and <code>posix_spawn()</code> but differs in the following ways;
+</p>
+<ul>
+  <li>
+    Unlike <code>execv()</code> and <code>posix_spawn()</code> this function accepts symbol table information as input parameters.
+    This means that the symbol table used to link the application prior to execution is provided by the caller, not by the system.
+  </li>
+  <li>
+    Unlike <code>execv()</code>, this function always returns.
+  </li>
+</ul>
+<p>
+  This non-standard interface is included as a official NuttX API only because it is needed in certain build modes: <code>exec()</code> is probably the only want to load programs in the PROTECTED mode.  Other file execution APIs rely on a symbol table provided by the OS.  In the PROTECTED build mode, the OS cannot provide any meaningful symbolic information for execution of code in the user-space blob so that is the <code>exec()</code> function is really needed in that build case
+</p>
+  The interface is available in the FLAT build mode although it is not really necessary in that case.  It is currently used by some example code under the <code>apps/</code> that that generate their own symbol tables for linking test programs.  So althought it is not necessary, it can still be useful.
+</p>
+<p>
+  The interface would be completely useless and will not be supported in the KERNEL build mode where the contrary is true:  An application process cannot provide any meaning symbolic information for use in linking a different process.
+</p>
+<p>
+  <b>NOTE</b>:
+  This function is flawed and useless without <code>CONFIG_SCHED_ONEXIT</code> and <code>CONFIG_SCHED_HAVE_PARENT</code> because without those features there is then no mechanism to unload the module once it exits.
+</p>
+</p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+   <li>
+     <code>filename</code>:
+     The path to the program to be executed.
+     If <code>CONFIG_BINFMT_EXEPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
+     Otherwise, <code>path</code> must be the absolute path to the program.
+   </li>
+   <li>
+     <code>argv</code>:
+     A pointer to an array of string arguments. The end of the array is indicated with a NULL entry.
+   </li>
+   <li>
+     <code>exports</code>:
+     The address of the start of the caller-provided symbol table.
+     This symbol table contains the addresses of symbols exported by the caller and made available for linking the module into the system.
+   </li>
+   <li>
+     <code>nexports</code>:
+     The number of symbols in the <code>exports</code> table.
+   </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  Zero (OK) is returned on success;
+  On any failure, <code>exec()</code> will return -1 (<code>ERROR</code>) and will set the <code>errno</code> value appropriately.
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b>
+  This is a non-standard inteface unique to NuttX.
+  Motivation for inclusion of this non-standard interface in certain build modes is discussed above.
+</p>
+
+<H3><a name="execv">2.1.13 execv</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -921,7 +995,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
   There are, however, several compatibility issues as detailed in the description above.
 </p>
 
-<H3><a name="execl">2.1.13 execl</a></H3>
+<H3><a name="execl">2.1.14 execl</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -10408,6 +10482,7 @@ notify a task when a message is available on a queue.
   <li><a href="#drvrunistdops">dup2</a></li>
   <li><a href="#execl">execl</a></li>
   <li><a href="#mmapxip">eXecute In Place (XIP)</a></li>
+  <li><a href="#exec">exec</a></li>
   <li><a href="#execv">execv</a></li>
   <li><a href="#exit">exit</a></li>
   <li><a href="#fatsupport">FAT File System Support</a></li>
