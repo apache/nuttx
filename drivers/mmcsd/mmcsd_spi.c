@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_spi.c
  *
- *   Copyright (C) 2008-2010, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -354,6 +354,8 @@ static const struct mmcsd_cmdinfo_s g_acmd41 = {ACMD41, MMCSD_CMDRESP_R1, 0xff};
 
 static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 {
+  int ret;
+
   /* Get exclusive access to the SPI bus (if necessary) */
 
   (void)SPI_LOCK(slot->spi, true);
@@ -371,14 +373,19 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
    * SPI_LOCK is also implemented as a semaphore).
    */
 
-  while (sem_wait(&slot->sem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&slot->sem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

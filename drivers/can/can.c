@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/can/can.c
  *
- *   Copyright (C) 2008-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2014-2015, 2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
@@ -179,22 +180,18 @@ static const struct file_operations g_canops =
 
 static int can_takesem(FAR sem_t *sem)
 {
-  int errcode;
+  int ret;
 
   /* Take a count from the semaphore, possibly waiting */
 
-  if (sem_wait(sem) < 0)
-    {
-      /* The only case that an error should occur here is if the wait
-       * was awakened by a signal
-       */
+  ret = nxsem_wait(sem);
 
-      errcode = get_errno();
-      DEBUGASSERT(errcode == EINTR);
-      return -errcode;
-    }
+  /* The only case that an error should occur here is if the wait
+   * was awakened by a signal
+   */
 
-  return OK;
+  DEBUGASSERT(ret == OK || ret == -EINTR);
+  return ret;
 }
 
 /****************************************************************************

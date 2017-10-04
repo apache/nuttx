@@ -418,10 +418,10 @@ static void wm8904_takesem(sem_t *sem)
 
   do
     {
-      ret = sem_wait(sem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(sem);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /************************************************************************************

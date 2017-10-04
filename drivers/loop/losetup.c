@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/loop/losetup.c
  *
- *   Copyright (C) 2008-2009, 2011, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2014-2015, 2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,20 +137,14 @@ static int loop_semtake(FAR struct loop_struct_s *dev)
 
   /* Take the semaphore (perhaps waiting) */
 
-  ret = sem_wait(&dev->sem);
-  if (ret < 0)
-    {
-      int errcode = get_errno();
+  ret = nxsem_wait(&dev->sem);
 
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
-       */
+  /* The only case that an error should occur here is if the wait was
+   * awakened by a signal.
+   */
 
-      ASSERT(errcode == EINTR);
-      return -ret;
-    }
-
-  return OK;
+  DEBUGASSERT(ret == -EINTR);
+  return ret;
 }
 
 /****************************************************************************

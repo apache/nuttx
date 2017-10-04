@@ -80,14 +80,21 @@ static unsigned int g_count   = 0;
 
 static void _net_takesem(void)
 {
-  while (sem_wait(&g_netlock) != 0)
+  int ret;
+
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_netlock);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      DEBUGASSERT(get_errno() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -229,17 +236,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
         {
           /* Wait as long as necessary to get the lock */
 
-          ret = sem_wait(sem);
-        }
-
-      /* Check for errors from sem_wait() (should only be EINTR)
-       * REVISIT:  errno really should not be used within the OS
-       */
-
-      if (ret < 0)
-        {
-          ret = -get_errno();
-          DEBUGASSERT(ret < 0);
+          ret = nxsem_wait(sem);
         }
 
       /* Recover the network lock at the proper count */
@@ -250,17 +247,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
     }
   else
     {
-      ret = sem_wait(sem);
-
-      /* Check for errors from sem_wait() (should only be EINTR)
-       * REVISIT:  errno really should not be used within the OS
-       */
-
-      if (ret < 0)
-        {
-          ret = -get_errno();
-          DEBUGASSERT(ret < 0);
-        }
+      ret = nxsem_wait(sem);
     }
 
 

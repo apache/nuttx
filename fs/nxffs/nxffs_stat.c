@@ -80,8 +80,8 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   /* Get the mountpoint private data from the NuttX inode structure */
 
   volume = mountpt->i_private;
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->exclsem);
+  if (ret < 0)
     {
       goto errout;
     }
@@ -99,6 +99,7 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret            = OK;
 
   nxsem_post(&volume->exclsem);
+
 errout:
   return ret;
 }
@@ -126,7 +127,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   /* Get the mountpoint private data from the NuttX inode structure */
 
   volume = mountpt->i_private;
-  ret = sem_wait(&volume->exclsem);
+  ret = nxsem_wait(&volume->exclsem);
   if (ret != OK)
     {
       goto errout;
@@ -175,6 +176,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
 errout_with_semaphore:
   nxsem_post(&volume->exclsem);
+
 errout:
   return ret;
 }
@@ -212,12 +214,11 @@ int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
    * protects the open file list.
    */
 
-  ret = sem_wait(&volume->exclsem);
+  ret = nxsem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      int errcode = get_errno();
-      ferr("ERROR: sem_wait failed: %d\n", errcode);
-      return -errcode;
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Return status information based on the directory entry */

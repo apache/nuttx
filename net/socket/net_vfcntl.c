@@ -78,7 +78,7 @@
 int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  int ret;
+  int ret = -EINVAL;
 
   ninfo("sockfd=%d cmd=%d\n", sockfd, cmd);
 
@@ -249,7 +249,6 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          break;
 
       default:
-         ret = -EINVAL;
          break;
     }
 

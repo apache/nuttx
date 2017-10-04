@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_spi_slave.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -369,10 +369,10 @@ static void spi_semtake(struct sam_spidev_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->spisem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->spisem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

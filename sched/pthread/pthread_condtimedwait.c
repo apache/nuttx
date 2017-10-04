@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_condtimedwait.c
  *
- *   Copyright (C) 2007-2009, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,7 +168,6 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  uint16_t oldstate;
   ssystime_t ticks;
   int mypid = (int)getpid();
   int ret = OK;
@@ -283,25 +282,25 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                        * are started atomically.
                        */
 
-                      status = sem_wait((FAR sem_t *)&cond->sem);
+                      status = nxsem_wait((FAR sem_t *)&cond->sem);
 
                       /* Did we get the condition semaphore. */
 
-                      if (status != OK)
+                      if (status < 0)
                         {
-                          /* NO.. Handle the special case where the semaphore wait was
-                           * awakened by the receipt of a signal -- presumably the
-                           * signal posted by pthread_condtimedout().
+                          /* NO.. Handle the special case where the semaphore
+                           * wait was awakened by the receipt of a signal --
+                           * presumably the signal posted by pthread_condtimedout().
                            */
 
-                          if (get_errno() == EINTR)
+                          if (status == -EINTR)
                             {
                               serr("ERROR: Timedout!\n");
                               ret = ETIMEDOUT;
                             }
                           else
                             {
-                              ret = EINVAL;
+                              ret = status;
                             }
                         }
 
@@ -318,10 +317,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 
                   sinfo("Re-locking...\n");
 
-                  oldstate = pthread_disable_cancel();
                   status = pthread_mutex_take(mutex, false);
-                  pthread_enable_cancel(oldstate);
-
                   if (status == OK)
                     {
                       mutex->pid = mypid;

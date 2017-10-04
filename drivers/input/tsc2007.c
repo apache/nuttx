@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/tsc2007.c
  *
- *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -377,7 +377,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
       /* Wait for a change in the TSC2007 state */
 
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       if (ret < 0)
@@ -386,8 +386,8 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
            * the failure now.
            */
 
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          ierr("ERROR: nxsem_wait failed: %d\n", ret);
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
     }
@@ -397,7 +397,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -815,13 +815,14 @@ static int tsc2007_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Increment the reference count */
@@ -870,13 +871,14 @@ static int tsc2007_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Decrement the reference count unless it would decrement a negative
@@ -927,13 +929,14 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Try to read sample data. */
@@ -1043,13 +1046,14 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL by command */
@@ -1119,13 +1123,14 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   if (setup)

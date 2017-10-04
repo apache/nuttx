@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/lpc31xx/lpc31_spi.c
  *
- *   Copyright (C) 2009-2010, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: David Hewson, deriving in part from other SPI drivers originally by
  *           Gregory Nutt <gnutt@nuttx.org>
  *
@@ -443,25 +443,31 @@ static inline void spi_writeword(FAR struct lpc31_spidev_s *priv, uint16_t word)
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          ret = nxsem_wait(&priv->exclsem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
-  return OK;
+
+  return ret;
 }
 
 /****************************************************************************

@@ -1159,7 +1159,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
               /* Lock the buffer queue to pop the next buffer */
 
-              if ((ret = sem_wait(&dev->apbq_sem)) != OK)
+              if ((ret = nxsem_wait(&dev->apbq_sem)) < 0)
                 {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
                   dev->lower.upper(dev->lower.priv,
@@ -1193,6 +1193,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
     }
 
   /* Deselect the SPI bus and unlock it */
+
 err_out:
   SPI_SELECT(spi, SPIDEV_AUDIO_DATA(0), false);
   vs1053_spi_unlock(spi);
@@ -1349,7 +1350,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
   /* Cancel any leftover buffer in our queue */
 
-  if (sem_wait(&dev->apbq_sem) == OK)
+  if (nxsem_wait(&dev->apbq_sem) == OK)
     {
       /* Get the next buffer from the queue */
 
@@ -1445,7 +1446,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   /* Pop the first enqueued buffer */
 
-  if ((ret = sem_wait(&dev->apbq_sem)) == OK)
+  if ((ret = nxsem_wait(&dev->apbq_sem)) == OK)
     {
       dev->apb = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq);
       apb_reference(dev->apb);               /* Add our buffer reference */
@@ -1610,7 +1611,7 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
 
   /* Lock access to the apbq */
 
-  if ((ret = sem_wait(&dev->apbq_sem)) == OK)
+  if ((ret = nxsem_wait(&dev->apbq_sem)) == OK)
     {
       /* We can now safely add the buffer to the queue */
 
@@ -1705,13 +1706,14 @@ static int vs1053_reserve(FAR struct audio_lowerhalf_s *lower)
 #endif
 {
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
-  int   ret = OK;
+  int   ret;
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  if (sem_wait(&dev->apbq_sem) != OK)
+  ret = nxsem_wait(&dev->apbq_sem);
+  if (ret < 0)
     {
-      return -EBUSY;
+      return ret;
     }
 
   if (dev->busy)
@@ -1751,6 +1753,7 @@ static int vs1053_release(FAR struct audio_lowerhalf_s *lower)
 {
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
   void  *value;
+  int ret;
 
   /* Join any old worker thread we had created to prevent a memory leak */
 
@@ -1762,9 +1765,10 @@ static int vs1053_release(FAR struct audio_lowerhalf_s *lower)
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  if (sem_wait(&dev->apbq_sem) != OK)
+  ret = nxsem_wait(&dev->apbq_sem);
+  if (ret < 0)
     {
-      return -EBUSY;
+      return ret;
     }
 
   /* Really we should free any queued buffers here */

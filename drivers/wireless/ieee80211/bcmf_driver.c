@@ -851,7 +851,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /* Lock control_mutex semaphore */
 
-  if ((ret = sem_wait(&priv->control_mutex)) != OK)
+  if ((ret = nxsem_wait(&priv->control_mutex)) < 0)
     {
        goto exit_failed;
     }
@@ -894,6 +894,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 exit_sem_post:
   priv->scan_status = BCMF_SCAN_DISABLED;
   nxsem_post(&priv->control_mutex);
+
 exit_failed:
   wlinfo("Failed\n");
   return ret;
@@ -917,11 +918,10 @@ int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /* Lock control_mutex semaphore to avoid race condition */
 
-  if ((ret = sem_wait(&priv->control_mutex)) != OK)
-   {
-      ret = -EIO;
+  if ((ret = nxsem_wait(&priv->control_mutex)) < 0)
+    {
       goto exit_failed;
-   }
+    }
 
   if (!priv->scan_result)
     {
@@ -970,10 +970,11 @@ exit_sem_post:
   nxsem_post(&priv->control_mutex);
 
 exit_failed:
-  if (ret)
+  if (ret < 0)
     {
       iwr->u.data.length = 0;
     }
+
   return ret;
 }
 

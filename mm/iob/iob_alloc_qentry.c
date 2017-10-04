@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/iob/iob_alloc_qentry.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,11 +130,9 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
        * semaphore count will be incremented.
        */
 
-      ret = sem_wait(&g_qentry_sem);
+      ret = nxsem_wait(&g_qentry_sem);
       if (ret < 0)
         {
-          int errcode = get_errno();
-
           /* EINTR is not an error!  EINTR simply means that we were
            * awakened by a signal and we should try again.
            *
@@ -144,20 +142,11 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
            * the error should be returned.
            */
 
-          if (errcode == EINTR)
+          if (ret == -EINTR)
             {
-              /* Force a success indication so that we will continue
-               * looping.
-               */
+              /* Force a success indication so that we will continue looping. */
 
-              ret = 0;
-            }
-          else
-            {
-              /* Stop the loop and return a error */
-
-              DEBUGASSERT(errcode > 0);
-              ret = -errcode;
+              ret = OK;
             }
         }
       else
@@ -256,7 +245,7 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
       g_iob_freeqlist = iobq->qe_flink;
 
       /* Take a semaphore count.  Note that we cannot do this in
-       * in the orthodox way by calling sem_wait() or sem_trywait()
+       * in the orthodox way by calling nxsem_wait() or sem_trywait()
        * because this function may be called from an interrupt
        * handler. Fortunately we know at at least one free buffer
        * so a simple decrement is all that is needed.

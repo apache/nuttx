@@ -1065,7 +1065,7 @@ static int pcf8574_lcd_open(FAR struct file *filep)
 
   /* Increment the reference count */
 
-  sem_wait(&priv->sem_excl);
+  nxsem_wait(&priv->sem_excl);
   if (priv->refs == MAX_OPENCNT)
     {
       return -EMFILE;
@@ -1095,7 +1095,7 @@ static int pcf8574_lcd_close(FAR struct file *filep)
 
   /* Decrement the reference count */
 
-  sem_wait(&priv->sem_excl);
+  nxsem_wait(&priv->sem_excl);
 
   if (priv->refs == 0)
     {
@@ -1141,7 +1141,7 @@ static ssize_t pcf8574_lcd_read(FAR struct file *filep, FAR char *buffer,
   uint8_t col;
   bool onlf;
 
-  sem_wait(&priv->sem_excl);
+  nxsem_wait(&priv->sem_excl);
 
   /* Get current cursor position so we can restore it */
 
@@ -1224,7 +1224,7 @@ static ssize_t pcf8574_lcd_write(FAR struct file *filep,
   uint8_t ch;
   uint8_t count;
 
-  sem_wait(&priv->sem_excl);
+  nxsem_wait(&priv->sem_excl);
 
   /* Initialize the stream for use with the SLCD CODEC */
 
@@ -1372,7 +1372,7 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
   int maxpos;
 
-  sem_wait(&priv->sem_excl);
+  nxsem_wait(&priv->sem_excl);
 
   maxpos = priv->cfg.rows * priv->cfg.cols + (priv->cfg.rows - 1);
   switch (whence)
@@ -1444,7 +1444,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
           uint8_t row;
           uint8_t col;
 
-          sem_wait(&priv->sem_excl);
+          nxsem_wait(&priv->sem_excl);
 
           lcd_get_curpos(priv, &row, &col);
           attr->row = row;
@@ -1470,7 +1470,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
           FAR struct inode *inode = filep->f_inode;
           FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
 
-          sem_wait(&priv->sem_excl);
+          nxsem_wait(&priv->sem_excl);
           lcd_backlight(priv, arg ? true : false);
           nxsem_post(&priv->sem_excl);
         }
@@ -1482,7 +1482,7 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
           FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
           FAR struct slcd_createchar_s *attr = (FAR struct slcd_createchar_s *)((uintptr_t)arg);
 
-          sem_wait(&priv->sem_excl);
+          nxsem_wait(&priv->sem_excl);
           lcd_create_char(priv, attr->idx, attr->bmp);
           nxsem_post(&priv->sem_excl);
         }
@@ -1531,7 +1531,7 @@ static int pcf8574_lcd_unlink(FAR struct inode *inode)
   FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
   int ret = OK;
 
-  sem_wait(&priv->sem_excl);
+  nxsem_wait(&priv->sem_excl);
 
   priv->unlinked = true;
 

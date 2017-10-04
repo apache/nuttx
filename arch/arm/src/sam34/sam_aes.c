@@ -88,7 +88,7 @@ static sem_t lock;
 
 static void aes_lock(void)
 {
-  sem_wait(&lock);
+  nxsem_wait(&lock);
 }
 
 static void aes_unlock(void)

@@ -499,10 +499,10 @@ static void mcp2515_dev_lock(FAR struct mcp2515_can_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->locksem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->locksem);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

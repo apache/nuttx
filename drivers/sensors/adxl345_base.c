@@ -148,13 +148,13 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Read accelerometer X Y Z axes */
@@ -205,12 +205,12 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      snerr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      snerr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Initialize the structure fields to their default values */

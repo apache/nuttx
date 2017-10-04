@@ -983,11 +983,11 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
        * incremented and there will be no wait.
        */
 
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
 
       /* The only expected failure is EINTR */
 
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
 
   /* Dump the collect DMA sample data */

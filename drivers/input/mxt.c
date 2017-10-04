@@ -708,7 +708,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
       /* Wait for a change in the maXTouch state */
 
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       if (ret < 0)
@@ -717,8 +717,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
            * the failure now.
            */
 
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
     }
@@ -728,7 +727,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -1001,10 +1000,10 @@ static void mxt_worker(FAR void *arg)
 
   do
     {
-      ret = sem_wait(&priv->devsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 
   /* Loop, processing each message from the maXTouch */
 
@@ -1143,13 +1142,13 @@ static int mxt_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Increment the reference count */
@@ -1224,13 +1223,13 @@ static int mxt_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Decrement the reference count unless it would decrement a negative
@@ -1295,13 +1294,13 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Locking the scheduler will prevent the worker thread from running
@@ -1517,13 +1516,13 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL by command */
@@ -1578,13 +1577,13 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   if (setup)

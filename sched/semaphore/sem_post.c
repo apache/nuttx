@@ -69,7 +69,7 @@
  *
  *   If the value of the semaphore resulting from this operation is zero,
  *   then one of the tasks blocked waiting for the semaphore shall be
- *   allowed to return successfully from its call to sem_wait().
+ *   allowed to return successfully from its call to nxsem_wait().
  *
  * Parameters:
  *   sem - Semaphore descriptor
@@ -200,7 +200,7 @@ int nxsem_post(FAR sem_t *sem)
  *
  *   If the value of the semaphore resulting from this operation is zero,
  *   then one of the tasks blocked waiting for the semaphore shall be
- *   allowed to return successfully from its call to sem_wait().
+ *   allowed to return successfully from its call to nxsem_wait().
  *
  * Parameters:
  *   sem - Semaphore descriptor

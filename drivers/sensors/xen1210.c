@@ -173,14 +173,14 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
       snerr("Failed: Cannot get exclusive access to driver structure!\n");
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   sninfo("X = 0x%06X\n", priv->sample.data_x);
@@ -374,12 +374,11 @@ int xen1210_register(XEN1210_HANDLE handle, int minor)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      snerr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      snerr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Register the character driver */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/shm/shmat.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,11 +133,11 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Get exclusive access to the region data structure */
 
-  ret = sem_wait(&region->sr_sem);
+  ret = nxsem_wait(&region->sr_sem);
   if (ret < 0)
     {
-      shmerr("ERROR: sem_wait failed: %d\n", ret);
-      goto errout;
+      shmerr("ERROR: nxsem_wait failed: %d\n", ret);
+      goto errout_with_ret;
     }
 
   /* Set aside a virtual address space to span this physical region */
@@ -191,10 +191,12 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 errout_with_vaddr:
   gran_free(group->tg_shm.gs_handle, (FAR void *)vaddr,
             region->sr_ds.shm_segsz);
+
 errout_with_semaphore:
   nxsem_post(&region->sr_sem);
+
+errout_with_ret:
   set_errno(-ret);
-errout:
   return (FAR void *)ERROR;
 }
 

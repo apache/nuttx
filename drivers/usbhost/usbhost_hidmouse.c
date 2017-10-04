@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hidmouse.c
  *
- *   Copyright (C) 2014, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -459,16 +459,21 @@ static struct usbhost_state_s *g_priv;    /* Data passed to thread */
 
 static void usbhost_takesem(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -1377,7 +1382,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
 
       iinfo("Waiting..\n");
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       if (ret < 0)
@@ -1386,9 +1391,8 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
            * the failure now.
            */
 
-          ierr("ERROR: sem_wait: %d\n", errno);
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          ierr("ERROR: nxsem_wait: %d\n", ret);
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
 
@@ -1408,7 +1412,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there

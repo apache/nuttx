@@ -634,10 +634,10 @@ static void i2s_exclsem_take(struct stm32_i2s_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->exclsem);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -665,10 +665,10 @@ static void i2s_bufsem_take(struct stm32_i2s_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->bufsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->bufsem);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

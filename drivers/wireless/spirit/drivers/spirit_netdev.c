@@ -486,10 +486,21 @@ static struct spirit_pktstack_address_s g_addrinit =
 
 static void spirit_rxlock(FAR struct spirit_driver_s *priv)
 {
-  while (sem_wait(&priv->rxsem) < 0)
+  int ret;
+
+  do
     {
-      DEBUGASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->rxsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -527,10 +538,21 @@ static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv)
 
 static void spirit_txlock(FAR struct spirit_driver_s *priv)
 {
-  while (sem_wait(&priv->txsem) < 0)
+  int ret;
+
+  do
     {
-      DEBUGASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->txsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

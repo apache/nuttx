@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4x6xx_dma.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Sebastien Lorquet <sebastien@lorquet.fr>
  *           dev@ziggurat29.com
@@ -223,16 +223,21 @@ static inline void dmachan_putreg(struct stm32l4_dma_s *dmach, uint32_t offset, 
 
 static void stm32l4_dmatake(FAR struct stm32l4_dma_s *dmach)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&dmach->sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&dmach->sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void stm32l4_dmagive(FAR struct stm32l4_dma_s *dmach)

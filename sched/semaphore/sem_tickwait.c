@@ -154,12 +154,9 @@ int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 
   /* Now perform the blocking wait */
 
-  ret = sem_wait(sem);
+  ret = nxsem_wait(sem);
   if (ret < 0)
     {
-      /* Return the errno from sem_wait() */
-
-      ret = -get_errno();
       goto errout_with_irqdisabled;
     }
 

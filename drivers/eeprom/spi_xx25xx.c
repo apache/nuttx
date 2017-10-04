@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/eeprom/spi_xx25xx.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -440,16 +440,21 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev, uint32_t devaddr,
 
 static void ee25xx_semtake(FAR struct ee25xx_dev_s *eedev)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&eedev->sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&eedev->sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

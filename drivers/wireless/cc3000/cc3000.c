@@ -213,16 +213,21 @@ uint8_t spi_readCommand[] = READ_COMMAND;
 
 static inline void cc3000_devtake(FAR struct cc3000_dev_s *priv)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&priv->devsem) < 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->devsem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void cc3000_devgive(FAR struct cc3000_dev_s *priv)
@@ -349,10 +354,10 @@ static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t *psem)
 
   /* Wait on first psem to become signaled */
 
-  ret = sem_wait(psem);
+  ret = nxsem_wait(psem);
   if (ret < 0)
     {
-      return -errno;
+      return ret;
     }
 
   /* Then retake the mutual exclusion semaphore */
@@ -478,7 +483,7 @@ static void *select_thread_func(FAR void *arg)
 
   while (1)
     {
-      sem_wait(&priv->selectsem);
+      nxsem_wait(&priv->selectsem);
 
       CHECK_GUARD(priv);
 
@@ -710,7 +715,7 @@ static void *cc3000_worker(FAR void *arg)
                     cc3000_devgive(priv);
 
                     ninfo("Wait On Completion\n");
-                    sem_wait(priv->wrkwaitsem);
+                    nxsem_wait(priv->wrkwaitsem);
                     ninfo("Completed S:%d irq :%d\n",
                           priv->state, priv->config->irq_read(priv->config));
 
@@ -1118,7 +1123,7 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
        */
 
       ninfo("Waiting..\n");
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
       sched_unlock();
 
@@ -1137,19 +1142,17 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
       if (ret < 0)
         {
-          /* No.. One of the two sem_wait's failed. */
-
-          int errval = errno;
+          /* No.. One of the two nxsem_wait's failed. */
 
           /* Were we awakened by a signal?  Did we read anything before
            * we received the signal?
            */
 
-          if (errval != EINTR || nread  >= 0)
+          if (ret != -EINTR || nread  >= 0)
             {
               /* Yes.. return the error. */
 
-              nread = -errval;
+              nread = ret;
             }
 
           /* Break out to return what we have.  Note, we can't exactly
@@ -1279,8 +1282,8 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
           /* This should only happen if the wait was canceled by an signal */
 
           cc3000_deselect_and_unlock(priv->spi);
-          ninfo("sem_wait: %d\n", errno);
-          DEBUGASSERT(errno == EINTR);
+          ninfo("nxsem_wait: %d\n", ret);
+          DEBUGASSERT(ret == -EINTR);
           nwritten = ret;
           goto errout_without_sem;
         }
@@ -1642,9 +1645,9 @@ static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd)
         {
           sched_lock();
           cc3000_devgive(priv);
-          nxsem_post(&priv->selectsem);         /* Wake select thread if need be */
-          sem_wait(&priv->sockets[s].semwait);  /* Wait caller on select to finish */
-          sem_wait(&priv->selectsem);           /* Sleep select thread */
+          nxsem_post(&priv->selectsem);          /* Wake select thread if need be */
+          nxsem_wait(&priv->sockets[s].semwait); /* Wait caller on select to finish */
+          nxsem_wait(&priv->selectsem);          /* Sleep select thread */
           cc3000_devtake(priv);
           sched_unlock();
 
@@ -1690,9 +1693,9 @@ static int cc3000_accept_socket(FAR struct cc3000_dev_s *priv, int sd, struct so
 
   sched_lock();
   cc3000_devgive(priv);
-  nxsem_post(&priv->selectsem);                  /* Wake select thread if need be */
-  sem_wait(&priv->accepting_socket.acc.semwait); /* Wait caller on select to finish */
-  sem_wait(&priv->selectsem);                    /* Sleep the Thread */
+  nxsem_post(&priv->selectsem);                    /* Wake select thread if need be */
+  nxsem_wait(&priv->accepting_socket.acc.semwait); /* Wait caller on select to finish */
+  nxsem_wait(&priv->selectsem);                    /* Sleep the Thread */
   cc3000_devtake(priv);
   sched_unlock();
 
@@ -1800,8 +1803,8 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
       sched_lock();
       cc3000_devgive(priv);
       nxsem_post(&priv->selectsem);  /* Wake select thread if need be */
-      sem_wait(ps);
-      sem_wait(&priv->selectsem);    /* Sleep the Thread */
+      nxsem_wait(ps);
+      nxsem_wait(&priv->selectsem);  /* Sleep the Thread */
       cc3000_devtake(priv);
       sched_unlock();
     }

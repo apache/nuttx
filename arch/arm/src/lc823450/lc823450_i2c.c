@@ -260,10 +260,21 @@ static struct lc823450_i2c_priv_s lc823450_i2c1_priv =
 
 static inline void lc823450_i2c_sem_wait(FAR struct lc823450_i2c_priv_s *priv)
 {
-  while (sem_wait(&priv->sem_excl) != 0)
+  int ret;
+
+  do
     {
-      ASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->sem_excl);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

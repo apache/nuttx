@@ -121,15 +121,12 @@ static int adc_open(FAR struct file *filep)
   FAR struct inode     *inode = filep->f_inode;
   FAR struct adc_dev_s *dev   = inode->i_private;
   uint8_t               tmp;
-  int                   ret   = OK;
+  int                   ret;
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  if (sem_wait(&dev->ad_closesem) != OK)
-    {
-      ret = -errno;
-    }
-  else
+  ret = nxsem_wait(&dev->ad_closesem);
+  if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
        * time that the driver has been opened for this device, then initialize
@@ -193,13 +190,10 @@ static int adc_close(FAR struct file *filep)
   FAR struct inode     *inode = filep->f_inode;
   FAR struct adc_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
-  int                   ret = OK;
+  int                   ret;
 
-  if (sem_wait(&dev->ad_closesem) != OK)
-    {
-      ret = -errno;
-    }
-  else
+  ret = nxsem_wait(&dev->ad_closesem);
+  if (ret >= 0)
     {
       /* Decrement the references to the driver.  If the reference count will
        * decrement to 0, then uninitialize the driver.
@@ -295,11 +289,10 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
           /* Wait for a message to be received */
 
           dev->ad_nrxwaiters++;
-          ret = sem_wait(&dev->ad_recv.af_sem);
+          ret = nxsem_wait(&dev->ad_recv.af_sem);
           dev->ad_nrxwaiters--;
           if (ret < 0)
             {
-              ret = -errno;
               goto return_with_irqdisabled;
             }
         }

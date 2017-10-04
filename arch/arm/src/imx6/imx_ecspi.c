@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_ecspi.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from the i.MX1 CSPI driver:
@@ -687,9 +687,9 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
     {
       /* Wait to be signaled from the interrupt handler */
 
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
     }
-  while (ret < 0 && errno == EINTR);
+  while (ret < 0 && ret == -EINTR);
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -794,26 +794,26 @@ static int spi_interrupt(int irq, void *context, FAR void *arg)
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
+          /* Take the semaphore (perhaps waiting) */
 
-          DEBUGASSERT(errno == EINTR);
+          ret = nxsem_wait(&priv->exclsem);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

@@ -583,26 +583,31 @@ void inline spi_run(FAR struct kinetis_spidev_s *priv, bool enable)
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct kinetis_spidev_s *priv = (FAR struct kinetis_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          ret = nxsem_wait(&priv->exclsem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /************************************************************************************

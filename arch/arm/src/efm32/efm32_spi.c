@@ -1,7 +1,7 @@
 /****************************************************************************
  * arm/arm/src/efm32/efm32_spi.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2014 Bouteville Pierre-Noel. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bouteville Pierre-Noel <pnb990@gmail.com>
@@ -437,18 +437,24 @@ static void spi_dma_timeout(int argc, uint32_t arg1, ...)
 static void spi_dmarxwait(struct efm32_spidev_s *priv)
 {
   irqstate_t flags;
+  int ret;
 
   /* Take the semaphore (perhaps waiting). */
 
   flags = enter_critical_section();
-  while (sem_wait(&priv->rxdmasem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->rxdmasem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Cancel the timeout only if both the RX and TX transfers have completed */
 
@@ -474,18 +480,24 @@ static void spi_dmarxwait(struct efm32_spidev_s *priv)
 static void spi_dmatxwait(struct efm32_spidev_s *priv)
 {
   irqstate_t flags;
+  int ret;
 
   /* Take the semaphore (perhaps waiting). */
 
   flags = enter_critical_section();
-  while (sem_wait(&priv->txdmasem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->txdmasem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Cancel the timeout only if both the RX and TX transfers have completed */
 
@@ -748,21 +760,25 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
+          ret = nxsem_wait(&priv->exclsem);
+
           /* The only case that an error should occur here is if the wait
            * was awakened by a signal.
            */
 
-          DEBUGASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

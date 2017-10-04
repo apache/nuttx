@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_spi.c
  *
- *   Copyright (C) 2009-2010, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,25 +141,31 @@ static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access *
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
+  int ret;
+
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&g_exclsem) != 0)
+      do
         {
+          ret = nxsem_wait(&g_exclsem);
+
           /* The only case that an error should occur here is if the wait
            * was awakened by a signal.
            */
 
-          DEBUGASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&g_exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

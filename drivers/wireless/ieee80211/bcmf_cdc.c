@@ -178,10 +178,10 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
 
   /* Take device control mutex */
 
-  if ((ret = sem_wait(&priv->control_mutex)) != OK)
-   {
+  if ((ret = nxsem_wait(&priv->control_mutex)) < 0)
+    {
       return ret;
-   }
+    }
 
   ret = bcmf_cdc_control_request_unsafe(priv, ifidx, set, cmd,
                                         name, data, len);

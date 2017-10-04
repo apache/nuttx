@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_sem.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,23 +43,9 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
+
 #include "bch.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -71,14 +57,19 @@
 
 void bchlib_semtake(FAR struct bchlib_s *bch)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&bch->sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&bch->sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }

@@ -49,11 +49,11 @@
 #endif
 
 #include <queue.h>
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 

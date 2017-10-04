@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/shm/shmget.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -381,99 +381,101 @@ int shmget(key_t key, size_t size, int shmflg)
 
   /* Get exclusive access to the global list of shared memory regions */
 
-  ret = sem_wait(&g_shminfo.si_sem);
-  if (ret >= 0)
+  ret = nxsem_wait(&g_shminfo.si_sem);
+  if (ret < 0)
     {
-      /* Find the requested memory region */
+      goto errout;
+    }
 
-      ret = shm_find(key);
-      if (ret < 0)
+  /* Find the requested memory region */
+
+  ret = shm_find(key);
+  if (ret < 0)
+    {
+      /* The memory region does not exist.. create it if IPC_CREAT is
+       * included in the shmflags.
+       */
+
+      if ((shmflg & IPC_CREAT) != 0)
         {
-          /* The memory region does not exist.. create it if IPC_CREAT is
-           * included in the shmflags.
+          /* Create the memory region */
+
+          ret = shm_create(key, size, shmflg);
+          if (ret < 0)
+            {
+              shmerr("ERROR: shm_create failed: %d\n", ret);
+              goto errout_with_semaphore;
+            }
+
+          /* Return the shared memory ID */
+
+          shmid = ret;
+        }
+      else
+        {
+          /* Fail with ENOENT */
+
+          goto errout_with_semaphore;
+        }
+    }
+
+  /* The region exists */
+
+  else
+    {
+      /* Remember the shared memory ID */
+
+      shmid = ret;
+
+      /* Is the region big enough for the request? */
+
+      region = &g_shminfo.si_region[shmid];
+      if (region->sr_ds.shm_segsz < size)
+        {
+          /* We we asked to create the region?  If so we can just
+           * extend it.
+           *
+           * REVISIT: We should check the mode bits of the regions
+           * first
            */
 
           if ((shmflg & IPC_CREAT) != 0)
             {
-              /* Create the memory region */
+              /* Extend the region */
 
-              ret = shm_create(key, size, shmflg);
+              ret = shm_extend(shmid, size);
               if (ret < 0)
                 {
                   shmerr("ERROR: shm_create failed: %d\n", ret);
                   goto errout_with_semaphore;
                 }
-
-              /* Return the shared memory ID */
-
-              shmid = ret;
             }
           else
             {
-              /* Fail with ENOENT */
+              /* Fail with EINVAL */
 
+              ret = -EINVAL;
               goto errout_with_semaphore;
             }
         }
 
-      /* The region exists */
+      /* The region is already big enough or else we successfully
+       * extended the size of the region.  If the region was previously
+       * deleted, but waiting for processes to detach from the region,
+       * then it is no longer deleted.
+       */
 
-      else
-        {
-          /* Remember the shared memory ID */
-
-          shmid = ret;
-
-          /* Is the region big enough for the request? */
-
-          region = &g_shminfo.si_region[shmid];
-          if (region->sr_ds.shm_segsz < size)
-            {
-              /* We we asked to create the region?  If so we can just
-               * extend it.
-               *
-               * REVISIT: We should check the mode bits of the regions
-               * first
-               */
-
-              if ((shmflg & IPC_CREAT) != 0)
-                {
-                  /* Extend the region */
-
-                  ret = shm_extend(shmid, size);
-                  if (ret < 0)
-                    {
-                      shmerr("ERROR: shm_create failed: %d\n", ret);
-                      goto errout_with_semaphore;
-                    }
-                }
-              else
-                {
-                  /* Fail with EINVAL */
-
-                  ret = -EINVAL;
-                  goto errout_with_semaphore;
-                }
-            }
-
-          /* The region is already big enough or else we successfully
-           * extended the size of the region.  If the region was previously
-           * deleted, but waiting for processes to detach from the region,
-           * then it is no longer deleted.
-           */
-
-          region->sr_flags = SRFLAG_INUSE;
-        }
-
-      /* Release our lock on the shared memory region list */
-
-      nxsem_post(&g_shminfo.si_sem);
+      region->sr_flags = SRFLAG_INUSE;
     }
 
+  /* Release our lock on the shared memory region list */
+
+  nxsem_post(&g_shminfo.si_sem);
   return shmid;
 
 errout_with_semaphore:
   nxsem_post(&g_shminfo.si_sem);
+
 errout:
   set_errno(-ret);
   return ERROR;

@@ -234,7 +234,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
       return -EINVAL;
     }
 
-  ret = sem_wait(&aes_lock);
+  ret = nxsem_wait(&aes_lock);
   if (ret < 0)
     {
       return ret;

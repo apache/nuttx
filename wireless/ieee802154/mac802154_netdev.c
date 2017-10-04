@@ -465,7 +465,7 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again */
 
-  while (sem_wait(&priv->md_exclsem) < 0);
+  while (nxsem_wait(&priv->md_exclsem) < 0);
 
   /* If there is a registered notification receiver, queue the event and signal
    * the receiver. Events should be popped from the queue from the application
@@ -1088,10 +1088,10 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
   int ret = -EINVAL;
 
-  ret = sem_wait(&priv->md_exclsem);
+  ret = nxsem_wait(&priv->md_exclsem);
   if (ret < 0)
     {
-      wlerr("ERROR: sem_wait failed: %d\n", ret);
+      wlerr("ERROR: nxsem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -1129,6 +1129,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                 }
                 break;
         #endif
+
               case MAC802154IOC_GET_EVENT:
                 {
                   FAR struct ieee802154_notif_s *notif;
@@ -1167,32 +1168,35 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
                       /* Wait to be signaled when an event is queued */
 
-                      if (sem_wait(&priv->md_eventsem) < 0)
+                      ret = nxsem_wait(&priv->md_eventsem);
+                      if (ret < 0)
                         {
-                          DEBUGASSERT(errno == EINTR);
+                          DEBUGASSERT(ret == -EINTR);
                           priv->md_eventpending = false;
-                          return -EINTR;
+                          return ret;
                         }
 
                       /* Get exclusive access again, then loop back around and try and
                        * pop an event off the queue
                        */
 
-                      ret = sem_wait(&priv->md_exclsem);
+                      ret = nxsem_wait(&priv->md_exclsem);
                       if (ret < 0)
                         {
-                          wlerr("ERROR: sem_wait failed: %d\n", ret);
+                          wlerr("ERROR: nxsem_wait failed: %d\n", ret);
                           return ret;
                         }
                     }
                 }
                 break;
+
               case MAC802154IOC_ENABLE_EVENTS:
                 {
                   priv->md_enableevents = netmac->u.enable;
                   ret = OK;
                 }
                 break;
+
               default:
                 {
                   ret = mac802154_ioctl(priv->md_mac, cmd, macarg);

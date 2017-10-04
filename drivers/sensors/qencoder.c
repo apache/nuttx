@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/sensors/qencoder.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,10 +128,9 @@ static int qe_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
       goto errout;
     }
 
@@ -197,10 +196,9 @@ static int qe_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
       goto errout;
     }
 
@@ -288,7 +286,7 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
       return ret;

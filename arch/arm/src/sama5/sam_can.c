@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_can.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -567,10 +567,10 @@ static void can_semtake(FAR struct sam_can_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->exclsem);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

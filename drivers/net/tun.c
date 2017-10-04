@@ -229,16 +229,21 @@ static const struct file_operations g_tun_file_ops =
 
 static void tundev_lock(FAR struct tun_driver_s *tun)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&tun->waitsem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&tun->waitsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -256,16 +261,21 @@ static void tundev_unlock(FAR struct tun_driver_s *tun)
 
 static void tun_lock(FAR struct tun_device_s *priv)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&priv->waitsem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->waitsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -1076,7 +1086,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
       priv->read_wait = true;
       tun_unlock(priv);
-      sem_wait(&priv->read_wait_sem);
+      (void)nxsem_wait(&priv->read_wait_sem);
       tun_lock(priv);
     }
 

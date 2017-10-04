@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inode.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,14 +140,19 @@ void inode_semtake(void)
 
   else
     {
-      while (sem_wait(&g_inode_sem.sem) != 0)
+      int ret;
+
+      do
         {
-          /* The only case that an error should occr here is if
-           * the wait was awakened by a signal.
+          ret = nxsem_wait(&g_inode_sem.sem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(get_errno() == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
 
       /* No we hold the semaphore */
 

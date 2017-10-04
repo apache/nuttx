@@ -74,21 +74,18 @@
 
 static int poll_semtake(FAR sem_t *sem)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
-  if (sem_wait(sem) < 0)
-    {
-      int errcode = get_errno();
+  ret = nxsem_wait(sem);
 
-      /* The only case that an error should occur here is if the wait were
-       * awakened by a signal.
-       */
+  /* The only case that an error should occur here is if the wait were
+   * awakened by a signal.
+   */
 
-      DEBUGASSERT(errcode == EINTR);
-      return -errcode;
-    }
-
-  return OK;
+  DEBUGASSERT(ret == OK || ret == -EINTR);
+  return ret;
 }
 
 /****************************************************************************

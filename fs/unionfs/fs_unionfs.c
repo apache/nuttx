@@ -249,20 +249,19 @@ static int unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint)
 
   do
     {
-      ret = sem_wait(&ui->ui_exclsem);
+      ret = nxsem_wait(&ui->ui_exclsem);
       if (ret < 0)
         {
-          int errcode = errno;
-          DEBUGASSERT(errcode == EINTR);
+          DEBUGASSERT(ret == -EINTR);
           if (!noint)
             {
-              return -errcode;
+              return ret;
             }
         }
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

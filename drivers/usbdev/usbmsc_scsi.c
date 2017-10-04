@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc_scsi.c
  *
- *   Copyright (C) 2008-2010, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -391,8 +392,8 @@ static void usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->thwaitsem);
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      ret = nxsem_wait(&priv->thwaitsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
       UNUSED(ret); /* Eliminate warnings when debug is off */
     }
   while (priv->thwaiting);
@@ -2857,8 +2858,8 @@ void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->thlock);
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      ret = nxsem_wait(&priv->thlock);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }

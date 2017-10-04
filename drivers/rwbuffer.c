@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/rwbuffer.c
  *
- *   Copyright (C) 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013-2014, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,16 +93,21 @@
 
 static void rwb_semtake(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

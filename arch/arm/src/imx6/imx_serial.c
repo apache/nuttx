@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_serial.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -963,10 +963,10 @@ int up_putc(int ch)
 
   if (!up_interrupt_context() && g_os_initstate >= OSINIT_HARDWARE)
     {
-      ret = sem_wait(&g_putc_lock);
+      ret = nxsem_wait(&g_putc_lock);
       if (ret < 0)
         {
-          return ERROR;
+          return ret;
         }
 
       locked = true;

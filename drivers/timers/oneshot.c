@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/timers/oneshot.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -233,7 +233,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&priv->od_exclsem);
+  ret = nxsem_wait(&priv->od_exclsem);
   if (ret < 0)
     {
       return ret;

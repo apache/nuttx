@@ -254,11 +254,12 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
 
   /* Get exclusive access to the TRNG harware */
 
-  if (sem_wait(&g_trngdev.exclsem) != OK)
+  ret = nxsem_wait(&g_trngdev.exclsem);
+  if (ret < 0)
     {
       /* This is probably -EINTR meaning that we were awakened by a signal */
 
-      return -errno;
+      return ret;
     }
 
   /* Save the buffer information. */
@@ -288,7 +289,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
 
   while (g_trngdev.nsamples < g_trngdev.maxsamples)
     {
-      ret = sem_wait(&g_trngdev.waitsem);
+      ret = nxsem_wait(&g_trngdev.waitsem);
 
       finfo("Awakened: nsamples=%d maxsamples=%d ret=%d\n",
             g_trngdev.nsamples, g_trngdev.maxsamples, ret);
@@ -303,7 +304,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
             }
           else
             {
-              retval = -errno;
+              retval = ret;
               goto errout;
             }
         }

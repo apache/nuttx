@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_tsd.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -383,7 +383,7 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
 
       iinfo("Waiting..\n");
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       if (ret < 0)
@@ -392,9 +392,8 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
            * the failure now.
            */
 
-          ierr("ERROR: sem_wait: %d\n", errno);
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          ierr("ERROR: nxsem_wait: %d\n", ret);
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
     }

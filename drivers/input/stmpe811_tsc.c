@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/stmpe811_tsc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -300,26 +300,19 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
       /* Wait for a change in the STMPE811 state */
 
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       /* When we are re-awakened, pre-emption will again be disabled */
 
       if (ret < 0)
         {
-#if defined(CONFIG_DEBUG_INPUT_ERROR) || defined(CONFIG_DEBUG_ASSERTIONS)
-          /* Sample the errno (debug output could change it) */
-
-          int errval = errno;
-
           /* If we are awakened by a signal, then we need to return
            * the failure now.
            */
 
-          ierr("ERROR: sem_wait failed: %d\n", errval);
-          DEBUGASSERT(errval == EINTR);
-#endif
-          ret = -EINTR;
+          ierr("ERROR: nxsem_wait failed: %d\n", ret);
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
     }
@@ -329,7 +322,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
 
 errout:
   /* Restore pre-emption.  We might get suspended here but that is okay
@@ -366,13 +359,14 @@ static int stmpe811_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Increment the reference count */
@@ -425,13 +419,14 @@ static int stmpe811_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Decrement the reference count unless it would decrement a negative
@@ -487,13 +482,14 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Try to read sample data. */
@@ -601,13 +597,14 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL by command */
@@ -665,13 +662,14 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   if (setup)
@@ -906,12 +904,12 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Make sure that the pins (4-7) need by the TSC are not already in use */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_heap/mm_sem.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -158,19 +158,26 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
     }
   else
     {
+      int ret;
+
       /* Take the semaphore (perhaps waiting) */
 
       mseminfo("PID=%d taking\n", my_pid);
-      while (sem_wait(&heap->mm_semaphore) != 0)
+      do
         {
-          /* The only case that an error should occur here is if
-           * the wait was awakened by a signal.
+          ret = nxsem_wait(&heap->mm_semaphore);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
 
-      /* We have it.  Claim the stake and return */
+      /* We have it (or some awful, unexpected error occurred).  Claim
+       * the semaphore and return.
+       */
 
       heap->mm_holder      = my_pid;
       heap->mm_counts_held = 1;

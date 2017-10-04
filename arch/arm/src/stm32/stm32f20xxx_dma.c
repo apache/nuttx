@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f20xxx_dma.c
  *
- *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -253,16 +253,21 @@ static inline void dmast_putreg(struct stm32_dma_s *dmast, uint32_t offset, uint
 
 static void stm32_dmatake(FAR struct stm32_dma_s *dmast)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&dmast->sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&dmast->sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void stm32_dmagive(FAR struct stm32_dma_s *dmast)

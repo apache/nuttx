@@ -507,10 +507,10 @@ static void ssi_semtake(sem_t *sem)
   int ret;
   do
     {
-      ret = sem_wait(sem);
+      ret = nxsem_wait(sem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0 && errno == EINTR);
-  DEBUGASSERT(ret == 0);
+  while (ret == -EINTR);
 }
 #endif
 
@@ -1084,26 +1084,31 @@ static int ssi_interrupt(int irq, void *context, FAR void *arg)
 static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct tiva_ssidev_s *priv = (FAR struct tiva_ssidev_s *)dev;
+  int ret;
 
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          ret = nxsem_wait(&priv->exclsem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

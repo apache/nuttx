@@ -2,7 +2,7 @@
  * drivers/sensors/l3gd20.c
  * Character driver for the ST L3GD20 3-Axis gyroscope.
  *
- *   Copyright (C) Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Based on drivers/sensors/lis3dsh.c
@@ -242,7 +242,7 @@ static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev)
 
   /* Aquire the semaphore before the data is copied */
 
-  ret = sem_wait(&dev->datasem);
+  ret = nxsem_wait(&dev->datasem);
   if (ret < 0)
     {
       snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
@@ -507,12 +507,12 @@ static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
 
   /* Acquire the semaphore before the data is copied */
 
-  ret = sem_wait(&priv->datasem);
+  ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      int errcode = errno;
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", errcode);
-      return -errcode;
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Copy the sensor data into the buffer */

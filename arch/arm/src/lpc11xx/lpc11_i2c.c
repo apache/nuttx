@@ -216,7 +216,7 @@ static int lpc11_i2c_start(struct lpc11_i2cdev_s *priv)
   putreg32(I2C_CONSET_STA, priv->base + LPC11_I2C_CONSET_OFFSET);
 
   wd_start(priv->timeout, I2C_TIMEOUT, lpc11_i2c_timeout, 1, (uint32_t)priv);
-  sem_wait(&priv->wait);
+  nxsem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);
 
@@ -278,7 +278,7 @@ static int lpc11_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  sem_wait(&priv->mutex);
+  nxsem_wait(&priv->mutex);
 
   /* Set up for the transfer */
 

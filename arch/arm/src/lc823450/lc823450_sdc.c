@@ -138,10 +138,21 @@ extern SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
 
 static void _sdc_semtake(FAR sem_t *sem)
 {
-  while (sem_wait(sem) != 0)
+  int ret;
+
+  do
     {
-      ASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

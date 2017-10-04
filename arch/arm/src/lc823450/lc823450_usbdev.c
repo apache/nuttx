@@ -1780,7 +1780,7 @@ int usbdev_msc_epwrite(void *buf, int len)
            USB_DMAC_START,
            USB_DMAC1);
 
-  (void)sem_wait(&dma_wait);
+  (void)nxsem_wait(&dma_wait);
   return 0;
 }
 
@@ -1884,7 +1884,7 @@ int usbdev_msc_epread(void *buf, int len)
            CONFIG_USBMSC_EPBULKOUT  << USB_DMAC_DMAEP_SHIFT |
            USB_DMAC_START,
            USB_DMAC1);
-           (void)sem_wait(&dma_wait);
+           (void)nxsem_wait(&dma_wait);
 
   return 0;
 }

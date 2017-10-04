@@ -235,7 +235,7 @@ static void lis3mdl_read_measurement_data(FAR struct lis3mdl_dev_s *dev)
 
   /* Aquire the semaphore before the data is copied */
 
-  int ret = sem_wait(&dev->datasem);
+  int ret = nxsem_wait(&dev->datasem);
   if (ret != OK)
     {
       snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
@@ -497,12 +497,11 @@ static ssize_t lis3mdl_read(FAR struct file *filep, FAR char *buffer,
 
   /* Aquire the semaphore before the data is copied */
 
-  ret = sem_wait(&priv->datasem);
+  ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      int errcode = errno;
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", errcode);
-      return -errcode;
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      return ret;
     }
 
   /* Copy the sensor data into the buffer */

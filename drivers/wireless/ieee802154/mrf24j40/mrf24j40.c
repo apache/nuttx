@@ -166,7 +166,9 @@ void mrf24j40_dopoll_csma(FAR void *arg)
 
   /* Get exclusive access to the driver */
 
-  while (sem_wait(&dev->exclsem) != 0) { }
+  while (nxsem_wait(&dev->exclsem) < 0)
+    {
+    }
 
   /* If this a CSMA transaction and we have room in the CSMA fifo */
 
@@ -223,7 +225,9 @@ void mrf24j40_dopoll_gts(FAR void *arg)
 
   /* Get exclusive access to the driver */
 
-  while (sem_wait(&dev->exclsem) != 0) { }
+  while (nxsem_wait(&dev->exclsem) < 0)
+    {
+    }
 
   for (gts = 0; gts < MRF24J40_GTS_SLOTS; gts++)
     {

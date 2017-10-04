@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/phy_notify.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,16 +139,21 @@ static struct phy_notify_s g_notify_clients[CONFIG_PHY_NOTIFICATION_NCLIENTS];
 
 static void phy_semtake(void)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&g_notify_clients_sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_notify_clients_sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 #define phy_semgive() nxsem_post(&g_notify_clients_sem);

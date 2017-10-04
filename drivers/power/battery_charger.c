@@ -162,10 +162,10 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
 
   /* Enforce mutually exclusive access to the battery driver */
 
-  ret = sem_wait(&dev->batsem);
+  ret = nxsem_wait(&dev->batsem);
   if (ret < 0)
     {
-      return -errno; /* Probably EINTR */
+      return ret; /* Probably -EINTR */
     }
 
   /* Process the IOCTL command */

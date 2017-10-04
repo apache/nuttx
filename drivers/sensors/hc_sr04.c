@@ -154,11 +154,21 @@ static int hcsr04_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hcsr04_dev_s *priv = inode->i_private;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   nxsem_post(&priv->devsem);
   hcsr04_dbg("OPENED\n");
@@ -169,12 +179,21 @@ static int hcsr04_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hcsr04_dev_s *priv = inode->i_private;
-  int ret = OK;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   nxsem_post(&priv->devsem);
   hcsr04_dbg("CLOSED\n");
@@ -188,11 +207,21 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
   FAR struct hcsr04_dev_s *priv = inode->i_private;
   int distance = 0;
   ssize_t length = 0;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Setup and send a pulse to start measuring */
 
@@ -200,10 +229,19 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 
   /* Wait the convertion to finish */
 
-  while (sem_wait(&priv->conv_donesem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->conv_donesem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   distance = hcsr04_read_distance(priv);
   if (distance < 0)
@@ -236,12 +274,21 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hcsr04_dev_s *priv = inode->i_private;
-  int ret = OK;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   switch (cmd)
     {
@@ -307,9 +354,9 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode *inode;
   FAR struct hcsr04_dev_s *priv;
-  int ret = OK;
-  int i;
   uint32_t flags;
+  int ret;
+  int i;
 
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
@@ -317,10 +364,19 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct hcsr04_dev_s *)inode->i_private;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   if (setup)
     {

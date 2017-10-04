@@ -1141,7 +1141,7 @@ void xbee_query_firmwareversion(FAR struct xbee_priv_s *priv)
   xbee_register_respwaiter(priv, &respwaiter);
   xbee_at_query(priv, "VR");
 
-  sem_wait(&respwaiter.sem);
+  nxsem_wait(&respwaiter.sem);
 
   xbee_unregister_respwaiter(priv, &respwaiter);
 
@@ -1168,7 +1168,7 @@ void xbee_query_panid(FAR struct xbee_priv_s *priv)
   xbee_register_respwaiter(priv, &respwaiter);
   xbee_at_query(priv, "ID");
 
-  sem_wait(&respwaiter.sem);
+  nxsem_wait(&respwaiter.sem);
 
   xbee_unregister_respwaiter(priv, &respwaiter);
 
@@ -1195,12 +1195,12 @@ void xbee_query_eaddr(FAR struct xbee_priv_s *priv)
   xbee_register_respwaiter(priv, &respwaiter);
   xbee_at_query(priv, "SH");
 
-  sem_wait(&respwaiter.sem);
+  nxsem_wait(&respwaiter.sem);
 
   respwaiter.resp_id = XBEE_RESP_AT_SERIALLOW;
   xbee_at_query(priv, "SL");
 
-  sem_wait(&respwaiter.sem);
+  nxsem_wait(&respwaiter.sem);
 
   xbee_unregister_respwaiter(priv, &respwaiter);
   nxsem_destroy(&respwaiter.sem);
@@ -1226,7 +1226,7 @@ void xbee_query_saddr(FAR struct xbee_priv_s *priv)
   xbee_register_respwaiter(priv, &respwaiter);
   xbee_at_query(priv, "MY");
 
-  sem_wait(&respwaiter.sem);
+  nxsem_wait(&respwaiter.sem);
 
   xbee_unregister_respwaiter(priv, &respwaiter);
 
@@ -1253,7 +1253,7 @@ void xbee_query_chan(FAR struct xbee_priv_s *priv)
   xbee_register_respwaiter(priv, &respwaiter);
   xbee_at_query(priv, "CH");
 
-  sem_wait(&respwaiter.sem);
+  nxsem_wait(&respwaiter.sem);
 
   xbee_unregister_respwaiter(priv, &respwaiter);
 

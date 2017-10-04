@@ -1296,10 +1296,10 @@ static inline void usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->thsynch);
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      ret = nxsem_wait(&priv->thsynch);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

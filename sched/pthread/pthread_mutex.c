@@ -61,7 +61,7 @@
  *   Add the mutex to the list of mutexes held by this pthread.
  *
  * Parameters:
- *  mutex - The mux to be locked
+ *  mutex - The mutex to be locked
  *
  * Return Value:
  *   None
@@ -104,7 +104,7 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
  *   Remove the mutex to the list of mutexes held by this pthread.
  *
  * Parameters:
- *  mutex - The mux to be locked
+ *  mutex - The mutex to be locked
  *
  * Return Value:
  *   None
@@ -296,7 +296,7 @@ int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
  *   mutexes held by this thread.
  *
  * Parameters:
- *  mutex - The mux to be unlocked
+ *  mutex - The mutex to be unlocked
  *
  * Return Value:
  *   0 on success or an errno value on failure.
@@ -323,71 +323,3 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
 
   return ret;
 }
-
-/****************************************************************************
- * Name: pthread_disable_cancel() and pthread_enable_cancel()
- *
- * Description:
- *   Temporarily disable cancellation and return old cancel state, which
- *   can later be restored.  This is useful when a cancellation point
- *   function is called from within the OS by a non-cancellation point:
- *   In certain such cases, we need to defer the cancellation to prevent
- *   bad things from happening.
- *
- * Parameters:
- *   saved cancel flags for pthread_enable_cancel()
- *
- * Return Value:
- *   old cancel flags for pthread_disable_cancel()
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CANCELLATION_POINTS
-uint16_t pthread_disable_cancel(void)
-{
-  FAR struct tcb_s *tcb = this_task();
-  irqstate_t flags;
-  uint16_t old;
-
-  /* We need perform the following operations from within a critical section
-   * because it can compete with interrupt level activity.
-   */
-
-  flags = enter_critical_section();
-  old = tcb->flags & (TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
-  tcb->flags &= ~(TCB_FLAG_CANCEL_PENDING | TCB_FLAG_NONCANCELABLE);
-  leave_critical_section(flags);
-  return old;
-}
-
-void pthread_enable_cancel(uint16_t cancelflags)
-{
-  FAR struct tcb_s *tcb = this_task();
-  irqstate_t flags;
-
-  /* We need perform the following operations from within a critical section
-   * because it can compete with interrupt level activity.
-   */
-
-  flags = enter_critical_section();
-  tcb->flags |= cancelflags;
-
-  /* What should we do if there is a pending cancellation?
-   *
-   * If the thread is executing with deferred cancellation, we need do
-   * nothing more; the cancellation cannot occur until the next
-   * cancellation point.
-   *
-   * However, if the thread is executing in asynchronous cancellation mode,
-   * then we need to terminate now by simply calling pthread_exit().
-   */
-
-  if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) == 0 &&
-      (tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
-    {
-      pthread_exit(NULL);
-    }
-
-  leave_critical_section(flags);
-}
-#endif /* CONFIG_CANCELLATION_POINTS */

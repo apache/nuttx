@@ -6,7 +6,7 @@
  * audio driver.  It is not suitable for use in any real driver application
  * in its current form.
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -241,12 +241,10 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to i2c character driver */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
-      DEBUGASSERT(ret < 0);
-      i2serr("ERROR: sem_wait returned: %d\n", ret);
+      i2serr("ERROR: nxsem_wait returned: %d\n", ret);
       goto errout_with_reference;
     }
 
@@ -316,12 +314,10 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get exclusive access to i2c character driver */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
-      DEBUGASSERT(ret < 0);
-      i2serr("ERROR: sem_wait returned: %d\n", ret);
+      i2serr("ERROR: nxsem_wait returned: %d\n", ret);
       goto errout_with_reference;
     }
 

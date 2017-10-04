@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/shm/shmdt.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,11 +118,11 @@ int shmdt(FAR const void *shmaddr)
 
   /* Get exclusive access to the region data structure */
 
-  ret = sem_wait(&region->sr_sem);
+  ret = nxsem_wait(&region->sr_sem);
   if (ret < 0)
     {
-      shmerr("ERROR: sem_wait failed: %d\n", ret);
-      goto errout;
+      shmerr("ERROR: nxsem_wait failed: %d\n", ret);
+      goto errout_with_errno;
     }
 
   /* Free the virtual address space */
@@ -188,7 +188,6 @@ int shmdt(FAR const void *shmaddr)
 
 errout_with_errno:
   set_errno(-ret);
-errout:
   return ERROR;
 }
 

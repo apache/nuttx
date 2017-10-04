@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_pmecc.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1240,10 +1240,10 @@ void pmecc_lock(void)
 
   do
     {
-      ret = sem_wait(&g_pmecc.exclsem);
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      ret = nxsem_wait(&g_pmecc.exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret != OK);
+  while (ret == -EINTR);
 }
 #endif
 

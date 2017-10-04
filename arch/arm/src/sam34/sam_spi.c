@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_spi.c
  *
- *   Copyright (C) 2011, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -876,27 +877,34 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
+  int ret;
 
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&spi->spisem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          /* Take the semaphore (perhaps waiting) */
+
+          ret = nxsem_wait(&spi->spisem);
+
+          /* The only case that an error should occur here is if the wait was
+           * awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&spi->spisem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1589,26 +1597,20 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Wait for the DMA complete */
 
-      ret = sem_wait(&spics->dmawait);
+      ret = nxsem_wait(&spics->dmawait);
 
       /* Cancel the watchdog timeout */
 
       (void)wd_cancel(spics->dmadog);
 
-      /* Check if we were awakened by an error of some kind */
+      /* Check if we were awakened by an error of some kind.  EINTR is not a
+       * failure.  It simply means that the wait was awakened by a signal.
+       */
 
-      if (ret < 0)
+      if (ret < 0 && ret != -EINTR)
         {
-          /* EINTR is not a failure.  That simply means that the wait
-           * was awakened by a signal.
-           */
-
-          int errorcode = errno;
-          if (errorcode != EINTR)
-            {
-              DEBUGPANIC();
-              return;
-            }
+          DEBUGPANIC();
+          return;
         }
 
       /* Not that we might be awakened before the wait is over due to

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_open.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -388,11 +388,10 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * in FLASH, only a single file may be extending the FLASH region.
    */
 
-  ret = sem_wait(&volume->wrsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->wrsem);
+  if (ret < 0)
     {
-      ferr("ERROR: sem_wait failed: %d\n", ret);
-      ret = -get_errno();
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -401,11 +400,10 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * after wrsem to avoid deadlocks.
    */
 
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->exclsem);
+  if (ret < 0)
     {
-      ferr("ERROR: sem_wait failed: %d\n", ret);
-      ret = -get_errno();
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
       goto errout_with_wrsem;
     }
 
@@ -699,11 +697,10 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
    * protects the open file list.
    */
 
-  ret = sem_wait(&volume->exclsem);
+  ret = nxsem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      ferr("ERROR: sem_wait failed: %d\n", ret);
-      ret = -get_errno();
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -1145,11 +1142,10 @@ int nxffs_close(FAR struct file *filep)
    * protects the open file list.
    */
 
-  ret = sem_wait(&volume->exclsem);
+  ret = nxsem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      ret = -get_errno();
-      ferr("ERROR: sem_wait failed: %d\n", ret);
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
       goto errout;
     }
 

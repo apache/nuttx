@@ -342,10 +342,19 @@ static int lps25h_open(FAR struct file *filep)
   uint8_t addr = LPS25H_WHO_AM_I;
   int32_t ret;
 
-  while (sem_wait(&dev->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&dev->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   dev->config->set_power(dev->config, true);
   ret = lps25h_read_reg8(dev, &addr, &value);
@@ -372,10 +381,19 @@ static int lps25h_close(FAR struct file *filep)
   FAR struct lps25h_dev_s *dev = inode->i_private;
   int ret;
 
-  while (sem_wait(&dev->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&dev->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   dev->config->irq_enable(dev->config, false);
   dev->irqenabled = false;
@@ -392,14 +410,23 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct lps25h_dev_s *dev = inode->i_private;
-  int ret;
-  ssize_t length = 0;
   lps25h_pressure_data_t data;
+  ssize_t length = 0;
+  int ret;
 
-  while (sem_wait(&dev->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&dev->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   ret = lps25h_configure_dev(dev);
   if (ret < 0)
@@ -716,12 +743,21 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct lps25h_dev_s *dev = inode->i_private;
-  int ret = OK;
+  int ret;
 
-  while (sem_wait(&dev->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&dev->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   switch (cmd)
     {

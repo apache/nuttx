@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_i2c.c
  *
- *   Copyright(C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009, 2011, 2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,16 +140,21 @@ const struct i2c_ops_s g_ops =
 
 static void ez80_i2c_semtake(void)
 {
-  /* Take the I2C semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&g_i2csem) != 0)
+  do
     {
-      /* The only case that an error should occr here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_i2csem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 #define ez80_i2c_semgive() nxsem_post(&g_i2csem)

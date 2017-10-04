@@ -228,10 +228,11 @@ static void bmg160_read_measurement_data(FAR struct bmg160_dev_s *dev)
 
   /* Aquire the semaphore before the data is copied */
 
-  ret = sem_wait(&dev->datasem);
+  ret = nxsem_wait(&dev->datasem);
   if (ret < 0)
     {
       snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
       return;
     }
 
@@ -457,12 +458,12 @@ static ssize_t bmg160_read(FAR struct file *filep, FAR char *buffer,
 
   /* Aquire the semaphore before the data is copied */
 
-  ret = sem_wait(&priv->datasem);
+  ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      int errcode = errno;
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", errcode);
-      return -errcode;
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Copy the sensor data into the buffer */

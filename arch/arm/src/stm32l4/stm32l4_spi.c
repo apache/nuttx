@@ -576,18 +576,23 @@ static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv)
 #ifdef CONFIG_STM32L4_SPI_DMA
 static void spi_dmarxwait(FAR struct stm32l4_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
    * must not really have completed???
    */
 
-  while (sem_wait(&priv->rxsem) != 0 || priv->rxresult == 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      ret = nxsem_wait(&priv->rxsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR || priv->rxresult == 0);
 }
 #endif
 
@@ -602,18 +607,23 @@ static void spi_dmarxwait(FAR struct stm32l4_spidev_s *priv)
 #ifdef CONFIG_STM32L4_SPI_DMA
 static void spi_dmatxwait(FAR struct stm32l4_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
    * must not really have completed???
    */
 
-  while (sem_wait(&priv->txsem) != 0 || priv->txresult == 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      ret = nxsem_wait(&priv->txsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR || priv->txresult == 0);
 }
 #endif
 
@@ -870,25 +880,31 @@ static void spi_modifycr(uint32_t addr, FAR struct stm32l4_spidev_s *priv,
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          ret = nxsem_wait(&priv->exclsem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
-  return OK;
+
+  return ret;
 }
 
 /************************************************************************************

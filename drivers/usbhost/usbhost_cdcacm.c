@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_cdcacm.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -472,16 +472,21 @@ static uint32_t g_devinuse;
 
 static void usbhost_takesem(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

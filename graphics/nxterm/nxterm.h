@@ -190,7 +190,7 @@ extern const struct file_operations g_nxterm_drvrops;
 int nxterm_semwait(FAR struct nxterm_state_s *priv);
 int nxterm_sempost(FAR struct nxterm_state_s *priv);
 #else
-#  define nxterm_semwait(p) sem_wait(&p->exclsem)
+#  define nxterm_semwait(p) nxsem_wait(&p->exclsem)
 #  define nxterm_sempost(p) nxsem_post(&p->exclsem)
 #endif
 

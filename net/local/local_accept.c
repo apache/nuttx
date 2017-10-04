@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/local/local_accept.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,12 +69,11 @@ static int local_waitlisten(FAR struct local_conn_s *server)
     {
       /* No.. wait for a connection or a signal */
 
-      ret = sem_wait(&server->lc_waitsem);
+      ret = nxsem_wait(&server->lc_waitsem);
       if (ret < 0)
         {
-          int errval = get_errno();
-          DEBUGASSERT(errval == EINTR);
-          return -errval;
+          DEBUGASSERT(ret == -EINTR);
+          return ret;
         }
     }
 

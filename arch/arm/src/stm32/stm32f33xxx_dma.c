@@ -184,16 +184,21 @@ static inline void dmachan_putreg(struct stm32_dma_s *dmach, uint32_t offset, ui
 
 static void stm32_dmatake(FAR struct stm32_dma_s *dmach)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&dmach->sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&dmach->sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void stm32_dmagive(FAR struct stm32_dma_s *dmach)

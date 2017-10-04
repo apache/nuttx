@@ -134,7 +134,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol)
  *
  *      TASK A                 TASK B
  *      sem_init(sem, 0, 0);
- *      sem_wait(sem);
+ *      nxsem_wait(sem);
  *                             sem_post(sem);
  *      Awakens as holder
  *

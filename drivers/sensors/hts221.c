@@ -820,11 +820,21 @@ static int hts221_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hts221_dev_s *priv = inode->i_private;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   priv->config->set_power(priv->config, true);
   priv->config->irq_enable(priv->config, true);
@@ -838,12 +848,21 @@ static int hts221_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hts221_dev_s *priv = inode->i_private;
-  int ret = OK;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   priv->config->irq_enable(priv->config, false);
   ret = hts221_power_on_off(priv, false);
@@ -859,14 +878,23 @@ static ssize_t hts221_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hts221_dev_s *priv = inode->i_private;
-  int ret = OK;
-  ssize_t length = 0;
   hts221_conv_data_t data;
+  ssize_t length = 0;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   ret = hts221_read_convert_data(priv, &data);
   if (ret < 0)
@@ -900,12 +928,21 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hts221_dev_s *priv = inode->i_private;
-  int ret = OK;
+  int ret;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   switch (cmd)
     {
@@ -996,9 +1033,9 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode *inode;
   FAR struct hts221_dev_s *priv;
-  int ret = OK;
-  int i;
   uint32_t flags;
+  int ret;
+  int i;
 
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
@@ -1006,10 +1043,19 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct hts221_dev_s *)inode->i_private;
 
-  while (sem_wait(&priv->devsem) != 0)
+  /* Get exclusive access */
+
+  do
     {
-      assert(errno == EINTR);
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   if (setup)
     {

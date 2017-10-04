@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/i2c/i2c_driver.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,12 +146,10 @@ static int i2cdrvr_open(FAR struct file *filep)
 
   /* Get exclusive access to the I2C driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      return ret;
     }
 
   /* Increment the count of open references on the RTC driver */
@@ -185,12 +183,10 @@ static int i2cdrvr_close(FAR struct file *filep)
 
   /* Get exclusive access to the I2C driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      return ret;
     }
 
   /* Decrement the count of open references on the RTC driver */
@@ -258,12 +254,10 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Get exclusive access to the I2C driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      return ret;
     }
 #endif
 
@@ -333,12 +327,10 @@ static int i2cdrvr_unlink(FAR struct inode *inode)
 
   /* Get exclusive access to the I2C driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      return ret;
     }
 
   /* Are there open references to the driver data structure? */

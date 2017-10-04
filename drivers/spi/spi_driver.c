@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/spi/spi_driver.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,12 +144,11 @@ static int spidrvr_open(FAR struct file *filep)
 
   /* Get exclusive access to the SPI driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Increment the count of open references on the RTC driver */
@@ -183,12 +182,11 @@ static int spidrvr_close(FAR struct file *filep)
 
   /* Get exclusive access to the SPI driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Decrement the count of open references on the RTC driver */
@@ -255,12 +253,11 @@ static int spidrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the SPI driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL command */
@@ -312,12 +309,11 @@ static int spidrvr_unlink(FAR struct inode *inode)
 
   /* Get exclusive access to the SPI driver state structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode < 0);
-      return -errcode;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Are there open references to the driver data structure? */

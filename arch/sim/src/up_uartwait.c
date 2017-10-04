@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_uartwait.c
  *
- *   Copyright (C) 20014Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,5 +84,5 @@ void simuart_wait(void)
 {
   /* Should only fail if interrupted by a signal */
 
-  while (sem_wait(&g_uartavail) < 0);
+  while (nxsem_wait(&g_uartavail) < 0);
 }

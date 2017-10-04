@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/aio/aio_initialize.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -157,12 +157,21 @@ void aio_lock(void)
     }
   else
     {
+      int ret;
+
       /* No.. take the semaphore */
 
-      while (sem_wait(&g_aio_exclsem) < 0)
+      do
         {
-          DEBUGASSERT(get_errno() == EINTR);
+          ret = nxsem_wait(&g_aio_exclsem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
+
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
 
       /* And mark it as ours */
 
@@ -215,15 +224,25 @@ void aio_unlock(void)
 FAR struct aio_container_s *aioc_alloc(void)
 {
   FAR struct aio_container_s *aioc;
+  int ret;
 
   /* Take a count from semaphore, thus guaranteeing that we have an AIO
    * container set aside for us.
    */
 
-  while (sem_wait(&g_aioc_freesem) < 0)
+  do
     {
-      DEBUGASSERT(get_errno() == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_aioc_freesem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Get our AIO container */
 

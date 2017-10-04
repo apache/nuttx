@@ -100,7 +100,7 @@ static void *stm32_cd_thread(void *arg)
   spiinfo("INFO: Runnig card detect thread\n");
   while (1)
     {
-      sem_wait(&g_cdsem);
+      nxsem_wait(&g_cdsem);
       spiinfo("INFO: Card has been inserted, initializing\n");
 
       if (g_chmediaclbk)

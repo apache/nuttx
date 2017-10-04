@@ -151,6 +151,36 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
 int nxsem_destroy (FAR sem_t *sem);
 
 /****************************************************************************
+ * Name: nxsem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellaction point, and
+ *   - It does not modify the errno value.
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int nxsem_wait(FAR sem_t *sem);
+
+/****************************************************************************
  * Name: nxsem_tickwait
  *
  * Description:

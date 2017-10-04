@@ -56,32 +56,38 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_wait
+ * Name: nxsem_wait
  *
  * Description:
  *   This function attempts to lock the semaphore referenced by 'sem'.  If
  *   the semaphore value is (<=) zero, then the calling task will not return
  *   until it successfully acquires the lock.
  *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellaction point, and
+ *   - It does not modify the errno value.
+ *
  * Parameters:
  *   sem - Semaphore descriptor.
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) is unsuccessful
- *   If this function returns -1 (ERROR), then the cause of the failure will
- *   be reported in 'errno' as:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
  *   - EINVAL:  Invalid attempt to get the semaphore
  *   - EINTR:   The wait was interrupted by the receipt of a signal.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int sem_wait(FAR sem_t *sem)
+int nxsem_wait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int ret  = ERROR;
+  int ret = -EINVAL;
 
   /* This API should not be called from interrupt handlers */
 
@@ -93,22 +99,6 @@ int sem_wait(FAR sem_t *sem)
    */
 
   flags = enter_critical_section();
-
-  /* sem_wait() is a cancellation point */
-
-  if (enter_cancellation_point())
-    {
-#ifdef CONFIG_CANCELLATION_POINTS
-      /* If there is a pending cancellation, then do not perform
-       * the wait.  Exit now with ECANCELED.
-       */
-
-      set_errno(ECANCELED);
-      leave_cancellation_point();
-      leave_critical_section(flags);
-      return ERROR;
-#endif
-    }
 
   /* Make sure we were supplied with a valid semaphore. */
 
@@ -132,6 +122,8 @@ int sem_wait(FAR sem_t *sem)
 
       else
         {
+          int saved_errno;
+
           /* First, verify that the task is not already waiting on a
            * semaphore
            */
@@ -163,22 +155,29 @@ int sem_wait(FAR sem_t *sem)
 
           nxsem_boostpriority(sem);
 #endif
+          /* Set the errno value to zero (preserving the original errno)
+           * value).  We reuse the per-thread errno to pass information
+           * between sem_waitirq() and this functions.
+           */
+
+          saved_errno   = rtcb->pterrno;
+          rtcb->pterrno = OK;
+
           /* Add the TCB to the prioritized semaphore wait queue */
 
-          set_errno(0);
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been
            * assigned to this thread of execution, or (2) the semaphore wait
            * has been interrupted by a signal or a timeout.  We can detect these
-           * latter cases be examining the errno value.
+           * latter cases be examining the per-thread errno value.
            *
            * In the event that the semaphore wait was interrupted by a signal or
            * a timeout, certain semaphore clean-up operations have already been
            * performed (see sem_waitirq.c).  Specifically:
            *
-           * - nxsem_canceled() was called to restore the priority of all threads
-           *   that hold a reference to the semaphore,
+           * - nxsem_canceled() was called to restore the priority of all
+           *   threads that hold a reference to the semaphore,
            * - The semaphore count was decremented, and
            * - tcb->waitsem was nullifed.
            *
@@ -188,28 +187,83 @@ int sem_wait(FAR sem_t *sem)
            * race conditions.
            */
 
-          if (get_errno() != EINTR && get_errno() != ETIMEDOUT)
-            {
-              /* Not awakened by a signal or a timeout...
-               *
-               * NOTE that in this case nxsem_addholder() was called by logic
-               * in sem_wait() fore this thread was restarted.
-               */
+          /* Check if an error occurred while we were sleeping.  Expected
+           * errors include EINTR meaning that we were awakened by a signal
+           * or ETIMEDOUT meaning that the timer expired for the case of
+           * sem_timedwait().
+           *
+           * If we were not awakened by a signal or a timeout, then
+           * nxsem_addholder() was called by logic in sem_wait() fore this
+           * thread was restarted.
+           */
 
-              ret = OK;
-            }
+          ret           = rtcb->pterrno != OK ? -rtcb->pterrno : OK;
+          rtcb->pterrno = saved_errno;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
           sched_unlock();
 #endif
         }
     }
-  else
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Return Value:
+ *   This function is a standard, POSIX application interface.  It returns
+ *   zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.  Possible errno values include:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int sem_wait(FAR sem_t *sem)
+{
+  int errcode;
+  int ret;
+
+  /* sem_wait() is a cancellation point */
+
+  if (enter_cancellation_point())
     {
-      set_errno(EINVAL);
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      errcode = ECANCELED;
+      goto errout_with_cancelpt;
+#endif
+    }
+
+  /* Let nxsem_wait() do the real work */
+
+  ret = nxsem_wait(sem);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_cancelpt;
     }
 
   leave_cancellation_point();
-  leave_critical_section(flags);
-  return ret;
+  return OK;
+
+errout_with_cancelpt:
+  set_errno(errcode);
+  leave_cancellation_point();
+  return ERROR;
 }

@@ -128,8 +128,8 @@ static inline void pipe_free(int pipeno)
 {
   int ret;
 
-  ret = sem_wait(&g_pipesem);
-  if (ret == 0)
+  ret = nxsem_wait(&g_pipesem);
+  if (ret == OK)
     {
       g_pipeset &= ~(1 << pipeno);
       (void)nxsem_post(&g_pipesem);
@@ -198,12 +198,11 @@ int pipe2(int fd[2], size_t bufsize)
 
   /* Get exclusive access to the pipe allocation data */
 
-  ret = sem_wait(&g_pipesem);
+  ret = nxsem_wait(&g_pipesem);
   if (ret < 0)
     {
-      /* sem_wait() will have already set errno */
-
-      return ERROR;
+      errcode = -ret;
+      goto errout;
     }
 
   /* Allocate a minor number for the pipe device */

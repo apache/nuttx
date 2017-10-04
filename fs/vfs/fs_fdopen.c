@@ -208,10 +208,11 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   /* Find an unallocated FILE structure in the stream list */
 
-  ret = sem_wait(&slist->sl_sem);
-  if (ret != OK)
+  ret = nxsem_wait(&slist->sl_sem);
+  if (ret < 0)
     {
-      goto errout_with_errno;
+      errcode = -ret;
+      goto errout;
     }
 
   for (i = 0 ; i < CONFIG_NFILE_STREAMS; i++)
@@ -280,6 +281,5 @@ errout_with_sem:
 
 errout:
   set_errno(errcode);
-errout_with_errno:
   return NULL;
 }

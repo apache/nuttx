@@ -248,44 +248,38 @@ static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
 {
   int ret;
 
-  if (sem_wait(&g_rngdev.rd_devsem) < 0)
+  ret = nxsem_wait(&g_rngdev.rd_devsem);
+  if (ret < 0)
     {
-      return -get_errno();
+      return ret;
     }
-  else
-    {
-      /* We've got the semaphore. */
 
-      /* Initialize the operation semaphore with 0 for blocking until the
-       * buffer is filled from interrupts.  The readsem semaphore is used
-       * for signaling and, hence, should not have priority inheritance
-       * enabled.
-       */
+  /* We've got the semaphore. */
 
-      nxsem_init(&g_rngdev.rd_readsem, 0, 0);
-      nxsem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
+  /* Initialize the operation semaphore with 0 for blocking until the
+   * buffer is filled from interrupts.  The readsem semaphore is used
+   * for signaling and, hence, should not have priority inheritance
+   * enabled.
+   */
 
-      g_rngdev.rd_buflen = buflen;
-      g_rngdev.rd_buf = buffer;
+  nxsem_init(&g_rngdev.rd_readsem, 0, 0);
+  nxsem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
-      /* Enable RNG with interrupts */
+  g_rngdev.rd_buflen = buflen;
+  g_rngdev.rd_buf = buffer;
 
-      stm32_enable();
+  /* Enable RNG with interrupts */
 
-      /* Wait until the buffer is filled */
+  stm32_enable();
 
-      ret = sem_wait(&g_rngdev.rd_readsem);
-      if (ret < 0)
-        {
-          ret = -get_errno();
-        }
+  /* Wait until the buffer is filled */
 
-      /* Free RNG for next use */
+  ret = nxsem_wait(&g_rngdev.rd_readsem);
 
-      nxsem_post(&g_rngdev.rd_devsem);
+  /* Free RNG for next use */
 
-      return ret < 0 ? ret : buflen;
-    }
+  nxsem_post(&g_rngdev.rd_devsem);
+  return ret < 0 ? ret : buflen;
 }
 
 /****************************************************************************

@@ -189,18 +189,18 @@ static const struct file_operations mac802154dev_fops =
 
 static inline int mac802154dev_takesem(sem_t *sem)
 {
-  /* Take a count from the semaphore, possibly waiting */
+  int ret;
 
-  if (sem_wait(sem) < 0)
-    {
-      /* EINTR is the only error that we expect */
+  /* Take the semaphore (perhaps waiting) */
 
-      int errcode = get_errno();
-      DEBUGASSERT(errcode == EINTR);
-      return -errcode;
-    }
+  ret = nxsem_wait(sem);
 
-  return OK;
+  /* The only case that an error should occur here is if the wait were
+   * awakened by a signal.
+   */
+
+  DEBUGASSERT(ret == OK || ret == -EINTR);
+  return ret;
 }
 
 /****************************************************************************
@@ -500,11 +500,12 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 
       /* Wait to be signaled when a frame is added to the list */
 
-      if (sem_wait(&dev->readsem) < 0)
+      ret = nxsem_wait(&dev->readsem);
+      if (ret < 0)
         {
-          DEBUGASSERT(errno == EINTR);
+          DEBUGASSERT(ret == -EINTR);
           dev->readpending = false;
-          return -EINTR;
+          return ret;
         }
 
       /* Let the loop wrap back around, we will then pop a indication and this
@@ -707,11 +708,12 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
               /* Wait to be signaled when an event is queued */
 
-              if (sem_wait(&dev->geteventsem) < 0)
+              ret = nxsem_wait(&dev->geteventsem);
+              if (ret < 0)
                 {
-                  DEBUGASSERT(errno == EINTR);
+                  DEBUGASSERT(ret == -EINTR);
                   dev->geteventpending = false;
-                  return -EINTR;
+                  return ret;
                 }
 
               /* Get exclusive access again, then loop back around and try and

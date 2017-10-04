@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_ehci.c
  *
- *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1013,16 +1013,21 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 
 static void lpc31_takesem(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
-      /* The only case that an error should occr here is if the wait was
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

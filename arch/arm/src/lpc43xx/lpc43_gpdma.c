@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_gpdma.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -396,8 +396,8 @@ DMA_HANDLE lpc43_dmachannel(void)
 
   do
     {
-      ret = sem_wait(&g_gpdma.exclsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&g_gpdma.exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret < 0);
 

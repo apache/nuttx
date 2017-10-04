@@ -478,10 +478,11 @@ static int telnet_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&priv->td_exclsem);
+  ret = nxsem_wait(&priv->td_exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      nerr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
 
@@ -526,10 +527,11 @@ static int telnet_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&priv->td_exclsem);
+  ret = nxsem_wait(&priv->td_exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      nerr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
 
@@ -810,13 +812,14 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   do
     {
-      ret = sem_wait(&g_telnet_common.tc_exclsem);
-      if (ret < 0 && errno != -EINTR)
+      ret = nxsem_wait(&g_telnet_common.tc_exclsem);
+      if (ret < 0 && ret != -EINTR)
         {
+          nerr("ERROR: nxsem_wait failed: %d\n", ret);
           goto errout_with_clone;
         }
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 
   /* Loop until the device name is verified to be unique. */
 

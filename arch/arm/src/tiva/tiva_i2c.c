@@ -646,10 +646,21 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
 
 static inline void tiva_i2c_sem_wait(struct tiva_i2c_priv_s *priv)
 {
-  while (sem_wait(&priv->exclsem) != 0)
+  int ret;
+
+  do
     {
-      ASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->exclsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /************************************************************************************

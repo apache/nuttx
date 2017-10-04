@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_dmac.c
  *
- *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -274,16 +275,21 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
 
 static void sam_takechsem(void)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&g_chsem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_chsem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void sam_givechsem(void)
@@ -301,16 +307,21 @@ static inline void sam_givechsem(void)
 
 static void sam_takedsem(void)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&g_dsem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_dsem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void sam_givedsem(void)

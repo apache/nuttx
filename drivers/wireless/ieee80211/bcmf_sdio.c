@@ -737,9 +737,9 @@ void bcmf_sdio_waitdog_timeout(int argc, wdparm_t arg1, ...)
 
 int bcmf_sdio_thread(int argc, char **argv)
 {
-  int ret;
   FAR struct bcmf_dev_s *priv = g_sdio_priv;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
+  int ret;
 
   wlinfo("Enter\n");
 
@@ -751,8 +751,8 @@ int bcmf_sdio_thread(int argc, char **argv)
     {
       /* Wait for event (device interrupt, user request or waitdog timer) */
 
-      ret = sem_wait(&sbus->thread_signal);
-      if (ret != OK)
+      ret = nxsem_wait(&sbus->thread_signal);
+      if (ret < 0)
         {
           wlerr("Error while waiting for semaphore\n");
           break;
@@ -818,6 +818,7 @@ int bcmf_sdio_thread(int argc, char **argv)
       if (sbus->intstatus & I_HMB_FRAME_IND)
         {
           /* Try again */
+
           wlinfo("Try read again\n");
           continue;
         }
@@ -842,7 +843,7 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
 
   while (1)
     {
-      if (sem_wait(&sbus->queue_mutex))
+      if (nxsem_wait(&sbus->queue_mutex < 0))
         {
           PANIC();
         }
@@ -889,7 +890,7 @@ void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
   // wlinfo("free %p\n", sframe);
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
-  if (sem_wait(&sbus->queue_mutex))
+  if (nxsem_wait(&sbus->queue_mutex) < 0)
     {
       PANIC();
     }

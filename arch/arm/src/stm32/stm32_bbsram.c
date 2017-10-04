@@ -233,10 +233,10 @@ static void stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

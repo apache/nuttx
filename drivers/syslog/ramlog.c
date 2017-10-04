@@ -296,7 +296,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get exclusive access to the rl_tail index */
 
-  ret = sem_wait(&priv->rl_exclsem);
+  ret = nxsem_wait(&priv->rl_exclsem);
   if (ret < 0)
     {
       return ret;
@@ -352,7 +352,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * but will be re-enabled while we are waiting.
            */
 
-          ret = sem_wait(&priv->rl_waitsem);
+          ret = nxsem_wait(&priv->rl_waitsem);
 
           /* Interrupts will be disabled when we return.  So the decrementing
            * rl_nwaiters here is safe.
@@ -367,7 +367,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
             {
               /* Yes... then retake the mutual exclusion semaphore */
 
-              ret = sem_wait(&priv->rl_exclsem);
+              ret = nxsem_wait(&priv->rl_exclsem);
             }
 
           /* Was the semaphore wait successful? Did we successful re-take the
@@ -376,19 +376,16 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           if (ret < 0)
             {
-              /* No.. One of the two sem_wait's failed. */
-
-              int errval = errno;
-
+              /* No.. One of the two nxsem_wait's failed. */
               /* Were we awakened by a signal?  Did we read anything before
                * we received the signal?
                */
 
-              if (errval != EINTR || nread >= 0)
+              if (ret != -EINTR || nread >= 0)
                 {
                   /* Yes.. return the error. */
 
-                  nread = -errval;
+                  nread = ret;
                 }
 
               /* Break out to return what we have.  Note, we can't exactly
@@ -573,11 +570,10 @@ int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Get exclusive access to the poll structures */
 
-  ret = sem_wait(&priv->rl_exclsem);
+  ret = nxsem_wait(&priv->rl_exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      return -errval;
+      return ret;
     }
 
   /* Are we setting up the poll?  Or tearing it down? */

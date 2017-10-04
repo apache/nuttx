@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/input/ads7843e.c
  *
- *   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -420,7 +421,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
 
       iinfo("Waiting..\n");
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       if (ret < 0)
@@ -429,9 +430,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
            * the failure now.
            */
 
-          ierr("ERROR: sem_wait: %d\n", errno);
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          ierr("ERROR: nxsem_wait: %d\n", ret);
           goto errout;
         }
     }
@@ -443,7 +442,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -554,15 +553,15 @@ static void ads7843e_worker(FAR void *arg)
 
   do
     {
-      ret = sem_wait(&priv->devsem);
+      ret = nxsem_wait(&priv->devsem);
 
       /* This should only fail if the wait was canceled by an signal
        * (and the worker thread will receive a lot of signals).
        */
 
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 
@@ -763,13 +762,13 @@ static int ads7843e_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Increment the reference count */
@@ -820,13 +819,13 @@ static int ads7843e_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Decrement the reference count unless it would decrement a negative
@@ -880,14 +879,14 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      ierr("ERROR: sem_wait: %d\n", errno);
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      ierr("ERROR: nxsem_wait: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Try to read sample data. */
@@ -993,13 +992,13 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL by command */
@@ -1053,13 +1052,13 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   if (setup)

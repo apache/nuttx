@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_tc.c
  *
- *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -471,16 +471,21 @@ static const uint8_t g_regoffset[TC_NREGISTERS] =
 
 static void sam_takesem(struct sam_tc_s *tc)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&tc->exclsem) != 0)
+  do
     {
-      /* The only case that an error should occr here is if the wait was
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&tc->exclsem);
+
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

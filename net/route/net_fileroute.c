@@ -674,12 +674,10 @@ int net_lockroute_ipv4(void)
     {
       /* No.. wait to get the lock */
 
-      ret = sem_wait(&g_ipv4_exclsem);
+      ret = nxsem_wait(&g_ipv4_exclsem);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          nerr("ERROR: sem_wait() failed: %d\n", errcode);
-          ret = -errcode;
+          nerr("ERROR: nxsem_wait() failed: %d\n", ret);
         }
       else
         {
@@ -715,12 +713,10 @@ int net_lockroute_ipv6(void)
     {
       /* No.. wait to get the lock */
 
-      ret = sem_wait(&g_ipv6_exclsem);
+      ret = nxsem_wait(&g_ipv6_exclsem);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          nerr("ERROR: sem_wait() failed: %d\n", errcode);
-          ret = -errcode;
+          nerr("ERROR: nxsem_wait() failed: %d\n", errcode);
         }
       else
         {

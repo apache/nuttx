@@ -466,7 +466,7 @@ static void xbeenet_notify(FAR struct xbee_maccb_s *maccb,
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so if we see one, just go back to trying to get access again */
 
-  while (sem_wait(&priv->xd_exclsem) < 0);
+  while (nxsem_wait(&priv->xd_exclsem) < 0);
 
   /* If there is a registered notification receiver, queue the event and signal
    * the receiver. Events should be popped from the queue from the application
@@ -1089,10 +1089,10 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
   FAR struct xbeenet_driver_s *priv = (FAR struct xbeenet_driver_s *)dev->d_private;
   int ret = -EINVAL;
 
-  ret = sem_wait(&priv->xd_exclsem);
+  ret = nxsem_wait(&priv->xd_exclsem);
   if (ret < 0)
     {
-      wlerr("ERROR: sem_wait failed: %d\n", ret);
+      wlerr("ERROR: nxsem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -1168,21 +1168,22 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
                       /* Wait to be signaled when an event is queued */
 
-                      if (sem_wait(&priv->xd_eventsem) < 0)
+                      ret = nxsem_wait(&priv->xd_eventsem);
+                      if (ret < 0)
                         {
-                          DEBUGASSERT(errno == EINTR);
+                          DEBUGASSERT(ret == -EINTR);
                           priv->xd_eventpending = false;
-                          return -EINTR;
+                          return ret;
                         }
 
                       /* Get exclusive access again, then loop back around and try and
                        * pop an event off the queue
                        */
 
-                      ret = sem_wait(&priv->xd_exclsem);
+                      ret = nxsem_wait(&priv->xd_exclsem);
                       if (ret < 0)
                         {
-                          wlerr("ERROR: sem_wait failed: %d\n", ret);
+                          wlerr("ERROR: nxsem_wait failed: %d\n", ret);
                           return ret;
                         }
                     }

@@ -934,10 +934,11 @@ static int  mtdconfig_open(FAR struct file *filep)
 
   /* Get exclusive access to the device */
 
-  ret = sem_wait(&dev->exclsem);
+  ret = nxsem_wait(&dev->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
 
@@ -1015,7 +1016,8 @@ static int mtdconfig_findentry(FAR struct mtdconfig_struct_s *dev,
     }
 #endif
 
-  while (offset > 0 && (pdata->id != phdr->id || pdata->instance != phdr->instance))
+  while (offset > 0 && (pdata->id != phdr->id ||
+         pdata->instance != phdr->instance))
     {
       if (phdr->id == MTD_ERASED_ID)
         {

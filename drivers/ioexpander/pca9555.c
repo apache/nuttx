@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/ioexpander/pca9555.c
  *
- *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * References:
@@ -150,12 +150,21 @@ static const struct ioexpander_ops_s g_pca9555_ops =
 
 static void pca9555_lock(FAR struct pca9555_dev_s *pca)
 {
-  while (sem_wait(&pca->exclsem) < 0)
-    {
-      /* EINTR is the only expected error from sem_wait() */
+  int ret;
 
-      DEBUGASSERT(errno == EINTR);
+  do
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&pca->exclsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 #define pca9555_unlock(p) nxsem_post(&(p)->exclsem)

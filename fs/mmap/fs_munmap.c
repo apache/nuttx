@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mmap/fs_munmap.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,10 +120,11 @@ int munmap(FAR void *start, size_t length)
   /* Find a region containing this start and length in the list of regions */
 
   rammap_initialize();
-  ret = sem_wait(&g_rammaps.exclsem);
+  ret = nxsem_wait(&g_rammaps.exclsem);
   if (ret < 0)
     {
-      return ERROR;
+      errcode = ret;
+      goto errout;
     }
 
   /* Seach the list of regions */
@@ -205,6 +206,8 @@ int munmap(FAR void *start, size_t length)
 
 errout_with_semaphore:
   nxsem_post(&g_rammaps.exclsem);
+
+errout:
   set_errno(errcode);
   return ERROR;
 }

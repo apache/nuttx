@@ -163,7 +163,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * but will be re-enabled while we are waiting.
            */
 
-          ret = sem_wait(&priv->waitsem);
+          ret = nxterm_semwait(&priv->waitsem);
 
           /* Pre-emption will be disabled when we return.  So the decrementing
            * nwaiters here is safe.
@@ -187,9 +187,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           if (ret < 0)
             {
-              /* No.. One of the two sem_wait's failed. */
-
-              int errval = errno;
+              /* No.. One of the two nxterm_semwait's failed. */
 
               gerr("ERROR: nxterm_semwait failed\n");
 
@@ -197,11 +195,11 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
                * we received the signal?
                */
 
-              if (errval != EINTR || nread >= 0)
+              if (ret != -EINTR || nread >= 0)
                 {
                   /* Yes.. return the error. */
 
-                  nread = -errval;
+                  nread = ret;
                 }
 
               /* Break out to return what we have.  Note, we can't exactly

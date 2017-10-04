@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_rtc_lowerhalf.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com (adaptations for stm32l4)
  *
@@ -228,9 +228,10 @@ static int stm32l4_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
-  if (sem_wait(&priv->devsem) != OK)
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
    {
-     return -errno;
+     return ret;
    }
 
   /* This operation depends on the fact that struct rtc_time is cast
@@ -268,9 +269,10 @@ static int stm32l4_settime(FAR struct rtc_lowerhalf_s *lower,
 
   priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
-  if (sem_wait(&priv->devsem) != OK)
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
    {
-     return -errno;
+     return ret;
    }
 
    /* This operation depends on the fact that struct rtc_time is cast
@@ -327,7 +329,7 @@ static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
   FAR struct stm32l4_lowerhalf_s *priv;
   FAR struct stm32l4_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
-  int ret = -EINVAL;
+  int ret;
 
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
@@ -335,11 +337,13 @@ static int stm32l4_setalarm(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
   priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
-  if (sem_wait(&priv->devsem) != OK)
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
    {
-     return -errno;
+     return ret;
    }
 
+  ret = -EINVAL;
   if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
     {
       /* Remember the callback information */
@@ -467,19 +471,21 @@ static int stm32l4_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
   FAR struct stm32l4_lowerhalf_s *priv;
   FAR struct stm32l4_cbinfo_s *cbinfo;
-  int ret = -EINVAL;
+  int ret;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
   priv = (FAR struct stm32l4_lowerhalf_s *)lower;
 
-  if (sem_wait(&priv->devsem) != OK)
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
    {
-     return -errno;
+     return ret;
    }
 
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
+  ret = -EINVAL;
   if (alarmid == RTC_ALARMA || alarmid == RTC_ALARMB)
     {
       /* Nullify callback information to reduce window for race conditions */

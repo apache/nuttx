@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_usbhost.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -718,16 +718,21 @@ static inline void efm32_modifyreg(uint32_t addr, uint32_t clrbits, uint32_t set
 
 static void efm32_takesem(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
-      /* The only case that an error should occr here is if the wait was
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -1181,13 +1186,13 @@ static int efm32_chan_wait(FAR struct efm32_usbhost_s *priv,
        * wait here.
        */
 
-      ret = sem_wait(&chan->waitsem);
+      ret = nxsem_wait(&chan->waitsem);
 
-      /* sem_wait should succeed.  But it is possible that we could be
+      /* nxsem_wait should succeed.  But it is possible that we could be
        * awakened by a signal too.
        */
 
-      DEBUGASSERT(ret == OK || get_errno() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (chan->waiter);
 

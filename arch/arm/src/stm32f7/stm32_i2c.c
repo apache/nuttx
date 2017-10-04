@@ -714,10 +714,21 @@ static inline void stm32_i2c_modifyreg32(FAR struct stm32_i2c_priv_s *priv,
 
 static inline void stm32_i2c_sem_wait(FAR struct i2c_master_s *dev)
 {
-  while (sem_wait(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl) != 0)
+  int ret;
+
+  do
     {
-      ASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /************************************************************************************

@@ -1450,7 +1450,7 @@ static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
 
   /* Put the thread that requested transfer to a waiting state */
 
-  sem_wait(&dev->ieee.txsem);
+  nxsem_wait(&dev->ieee.txsem);
 
   /* TODO Verify that I want to stay in the PLL state or if I want to roll
    * back to RX_ON.

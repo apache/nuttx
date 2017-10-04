@@ -56,12 +56,12 @@
  * Description:
  *   This function initializes the UNAMED semaphore sem. Following a
  *   successful call to nxsem_init(), the semaphore may be used in subsequent
- *   calls to nxsem_wait(), nxnxsem_post(), and nxsem_trywait().  The semaphore
+ *   calls to nxsem_wait(), nxsem_post(), and nxsem_trywait().  The semaphore
  *   remains usable until it is destroyed.
  *
  *   Only sem itself may be used for performing synchronization. The result
  *   of referring to copies of sem in calls to nxsem_wait(), nxsem_trywait(),
- *   nxnxsem_post(), and nxsem_destroy() is undefined.
+ *   nxsem_post(), and nxsem_destroy() is undefined.
  *
  * Parameters:
  *   sem - Semaphore to be initialized

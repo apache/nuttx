@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/pcode.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -459,10 +459,10 @@ static int pcode_load(struct binary_s *binp)
 
   do
     {
-      ret = sem_wait(&g_pcode_handoff.exclsem);
-      DEBUGASSERT(ret == OK || get_errno() == EINTR);
+      ret = nxsem_wait(&g_pcode_handoff.exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 
   /* Save the data that we need to handoff to the child thread */
 

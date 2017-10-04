@@ -70,7 +70,7 @@
  *   task.  Following a call to sem_open() with the semaphore name, the task
  *   may reference the semaphore associated with name using the address
  *   returned by this call.  The semaphore may be used in subsequent calls
- *   to sem_wait(), sem_trywait(), and sem_post().  The semaphore remains
+ *   to nxsem_wait(), sem_trywait(), and sem_post().  The semaphore remains
  *   usable until the semaphore is closed by a successful call to sem_close().
  *
  *   If a task makes multiple calls to sem_open() with the same name, then

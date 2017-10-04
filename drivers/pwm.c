@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pwm.c
  *
- *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,10 +169,9 @@ static int pwm_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout;
     }
 
@@ -238,10 +237,9 @@ static int pwm_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout;
     }
 
@@ -356,7 +354,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
       if (ret == OK)
         {
           /* Should we wait for the pulse output to complete?  Loop in
-           * in case the wakeup form sem_wait() is a false alarm.
+           * in case the wakeup form nxsem_wait() is a false alarm.
            */
 
           while (upper->waiting)
@@ -366,8 +364,8 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
                * clear the waiting flag.
                */
 
-              int tmp = sem_wait(&upper->waitsem);
-              DEBUGASSERT(tmp == OK || get_errno() == EINTR);
+              int tmp = nxsem_wait(&upper->waitsem);
+              DEBUGASSERT(tmp == OK || tmp == -EINTR);
             }
         }
       else
@@ -437,7 +435,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
       return ret;

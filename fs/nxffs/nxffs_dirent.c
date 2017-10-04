@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_dirent.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -80,8 +80,8 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->exclsem);
+  if (ret < 0)
     {
       goto errout;
     }
@@ -101,6 +101,7 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
 errout_with_semaphore:
   nxsem_post(&volume->exclsem);
+
 errout:
   return ret;
 }
@@ -126,8 +127,8 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->exclsem);
+  if (ret < 0)
     {
       goto errout;
     }
@@ -158,6 +159,7 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
     }
 
   nxsem_post(&volume->exclsem);
+
 errout:
   return ret;
 }
@@ -184,8 +186,8 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->exclsem);
+  if (ret < 0)
     {
       goto errout;
     }
@@ -196,6 +198,7 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   ret = OK;
 
   nxsem_post(&volume->exclsem);
+
 errout:
   return ret;
 }

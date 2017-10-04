@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/stm32f7/stm32_spi.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -706,18 +706,23 @@ static inline bool spi_9to16bitmode(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32F7_SPI_DMA
 static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
    * must not really have completed???
    */
 
-  while (sem_wait(&priv->rxsem) != 0 || priv->rxresult == 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      ret = nxsem_wait(&priv->rxsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR || priv->rxresult == 0);
 }
 #endif
 
@@ -732,18 +737,23 @@ static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32F7_SPI_DMA
 static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
    * must not really have completed???
    */
 
-  while (sem_wait(&priv->txsem) != 0 || priv->txresult == 0)
+  do
     {
-      /* The only case that an error should occur here is if the wait was awakened
-       * by a signal.
+      ret = nxsem_wait(&priv->txsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR || priv->txresult == 0);
 }
 #endif
 
@@ -1025,26 +1035,31 @@ static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          ret = nxsem_wait(&priv->exclsem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /************************************************************************************

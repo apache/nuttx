@@ -149,26 +149,31 @@ static struct lc823450_spidev_s g_spidev =
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+         ret = nxsem_wait(&priv->exclsem);
+
+          /* The only case that an error should occur here is if the wait was
+           * awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 #endif
 
@@ -409,7 +414,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 
       modifyreg32(LC823450_SPI_SMD, 0, SPI_SMD_WTR);
 
-      while (sem_wait(&priv->dma_wait) != 0);
+      while (nxsem_wait(&priv->dma_wait) < 0);
       nwords -= len;
       buffer += len;
     }

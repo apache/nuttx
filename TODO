@@ -202,11 +202,7 @@ o Task/Scheduler (sched/)
 
                For example, having cancellation points hidden inside of the
                OS can cause non-cancellation point interfaces to behave
-               strangely.  There was a change recently in pthread_cond_wait()
-               and pthread_cond_timedwait() recently to effectively disable
-               the cancellation point behavior of sem_wait().  This was
-               accomplished with two functions:  pthread_disable_cancel()
-               and pthread_enable_cancel()
+               strangely.
 
                Here is another issue:  Internal OS functions should not set
                errno and should never have to look at the errno value to
@@ -217,7 +213,7 @@ o Task/Scheduler (sched/)
 
                Both of these could be fixed if there were special internal
                versions these functions.  For example, there could be a an
-               nx_sem_wait() that does all of the same things as sem_wait()
+               nxsem_wait() that does all of the same things as sem_wait()
                was does not create a cancellation point and does not set
                the errno value on failures.
 
@@ -227,20 +223,13 @@ o Task/Scheduler (sched/)
                and that sets the errno value on failures.
 
                Changes like that could clean up some of this internal
-               craziness.  The condition variable change described above is
-               really a "bandaid" to handle the case that sem_wait() is a
-               cancellation point.  Also will need to revisit previous changes
-               like:
+               craziness.
 
-                 commit b4747286b19d3b15193b2a5e8a0fe48fa0a8638c
-                 Author: Juha Niskanen (Haltian) <juha.niskanen@haltian.com>
-                 Date:   Tue Apr 11 11:03:25 2017 -0600
-
-                     Add logic to disable cancellation points within the OS.
-                     This is useful when an internal OS function that is NOT
-                     a cancellation point calls an OS function which is a
-                     cancellation point.  In that case, irrecoverable states
-                     may occur if the cancellation is within the OS.
+               UPDATE:
+               2017-1003:  This change has been completed for the case of
+                 semaphores used int he OS.  Still need to checkout signals
+                 and messages queues that are also used in the OS.  Also
+                 backed out commit b4747286b19d3b15193b2a5e8a0fe48fa0a8638c.
 
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design

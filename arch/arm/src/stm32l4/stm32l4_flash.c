@@ -102,10 +102,21 @@ static sem_t g_sem = SEM_INITIALIZER(1);
 
 static inline void sem_lock(void)
 {
-  while (sem_wait(&g_sem) < 0)
+  int ret;
+
+  do
     {
-      DEBUGASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static inline void sem_unlock(void)

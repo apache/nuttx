@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_spi.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -780,27 +780,32 @@ static int spi_interrupt(int irq, void *context, FAR void *arg)
 static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
+  int ret;
 
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->spilock) != 0)
+      do
         {
-          /* The only case that an error should occur here is if the wait was awakened
-           * by a signal.
+          ret = nxsem_wait(&priv->spilock);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->spilock);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

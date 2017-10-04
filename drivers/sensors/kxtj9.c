@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/sensors/kxtj9.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the Motorola Moto Z MDK:
@@ -344,9 +344,9 @@ static int kxtj9_configure(FAR struct kxtj9_dev_s *priv, uint8_t odr)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
+      ret = nxsem_wait(&priv->exclsem);
     }
-  while (ret < 0 && errno == EINTR);
+  while (ret == -EINTR);
 
   kxtj9_soft_reset(priv);
   kxtj9_set_mode_standby(priv);
@@ -397,9 +397,9 @@ static int kxtj9_enable(FAR struct kxtj9_dev_s *priv, bool on)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
+      ret = nxsem_wait(&priv->exclsem);
     }
-  while (ret < 0 && errno == EINTR);
+  while (ret == -EINTR);
 
   if (!on && priv->power_enabled)
     {
@@ -444,9 +444,9 @@ static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
+      ret = nxsem_wait(&priv->exclsem);
     }
-  while (ret < 0 && errno == EINTR);
+  while (ret == -EINTR);
 
   kxtj9_reg_read(priv, XOUT_L, (uint8_t *)acc_data, 6);
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_dma.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -336,6 +336,7 @@ DMA_HANDLE efm32_dmachannel(void)
   struct dma_channel_s *dmach;
   unsigned int chndx;
   uint32_t bit;
+  int ret;
 
   /* Take a count from from the channel counting semaphore.  We may block
    * if there are no free channels.  When we get the count, then we can
@@ -343,21 +344,35 @@ DMA_HANDLE efm32_dmachannel(void)
    * reserved for us.
    */
 
-  while (sem_wait(&g_dmac.chansem) < 0)
+  do
     {
-      /* sem_wait should fail only if it is awakened by a a signal */
+      /* Take the semaphore (perhaps waiting) */
 
-      DEBUGASSERT(errno == EINTR);
+      ret = nxsem_wait(&g_dmac.chansem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Get exclusive access to the DMA channel list */
 
-  while (sem_wait(&g_dmac.exclsem) < 0)
+  do
     {
-      /* sem_wait should fail only if it is awakened by a a signal */
+      /* Take the semaphore (perhaps waiting) */
 
-      DEBUGASSERT(errno == EINTR);
+      ret = nxsem_wait(&g_dmac.exclsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Search for an available DMA channel */
 

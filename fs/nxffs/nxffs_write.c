@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_write.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -455,11 +455,10 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
    * protects the open file list.
    */
 
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
+  ret = nxsem_wait(&volume->exclsem);
+  if (ret < 0)
     {
-      ret = -get_errno();
-      ferr("ERROR: sem_wait failed: %d\n", ret);
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
       goto errout;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_nand.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -318,10 +318,10 @@ void nand_lock(void)
 
   do
     {
-      ret = sem_wait(&g_nand.exclsem);
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      ret = nxsem_wait(&g_nand.exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret != OK);
+  while (ret == -EINTR);
 }
 #endif
 
@@ -689,11 +689,8 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
   flags = enter_critical_section();
   do
     {
-      ret = sem_wait(&g_nand.waitsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(errno == EINTR);
-        }
+      ret = nxsem_wait(&g_nand.waitsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (!g_nand.cmddone);
 
@@ -780,11 +777,8 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
   flags = enter_critical_section();
   do
     {
-      ret = sem_wait(&g_nand.waitsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(errno == EINTR);
-        }
+      ret = nxsem_wait(&g_nand.waitsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (!g_nand.xfrdone);
 
@@ -871,11 +865,8 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
   flags = enter_critical_section();
   do
     {
-      ret = sem_wait(&g_nand.waitsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(errno == EINTR);
-        }
+      ret = nxsem_wait(&g_nand.waitsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (!g_nand.rbedge);
 
@@ -1227,11 +1218,8 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
 
   while (!priv->dmadone)
     {
-      ret = sem_wait(&priv->waitsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(errno == EINTR);
-        }
+      ret = nxsem_wait(&priv->waitsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
 
   finfo("Awakened: result=%d\n", priv->result);

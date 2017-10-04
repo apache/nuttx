@@ -45,6 +45,7 @@
 #include <poll.h>
 #include <errno.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 

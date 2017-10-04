@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/mikroe-stm32f4/src/stm32_touchscreen.c
  *
- *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Modified:  May, 2013 by Ken Pettit to adapt for Mikroe-STM32M4 board
@@ -709,7 +709,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
       /* Wait for a change in the touchscreen state */
 
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
       if (ret < 0)
@@ -718,8 +718,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
            * the failure now.
            */
 
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
     }
@@ -729,7 +728,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
 
 errout:
   /* Restore pre-emption.  We might get suspended here but that is okay
@@ -1127,13 +1126,13 @@ static int tc_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Increment the reference count */
@@ -1182,13 +1181,13 @@ static int tc_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Decrement the reference count unless it would decrement a negative
@@ -1239,13 +1238,13 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Try to read sample data. */
@@ -1351,13 +1350,13 @@ static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL by command */
@@ -1398,13 +1397,13 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   if (setup)

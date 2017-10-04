@@ -1,7 +1,7 @@
 /****************************************************************************
  * rm/romfs/fs_romfsutil.c
  *
- *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -353,16 +353,21 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
 
 void romfs_semtake(struct romfs_mountpt_s *rm)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&rm->rm_sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&rm->rm_sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

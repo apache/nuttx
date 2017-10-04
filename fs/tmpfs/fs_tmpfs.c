@@ -221,14 +221,19 @@ static void tmpfs_lock_reentrant(FAR struct tmpfs_sem_s *sem)
 
   else
     {
-      while (sem_wait(&sem->ts_sem) != 0)
+      int ret;
+
+      do
         {
-          /* The only case that an error should occr here is if
-           * the wait was awakened by a signal.
+          ret = nxsem_wait(&sem->ts_sem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
            */
 
-          DEBUGASSERT(get_errno() == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
 
       /* No we hold the semaphore */
 

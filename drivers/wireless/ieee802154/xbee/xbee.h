@@ -244,22 +244,22 @@ static inline int xbee_takesem(sem_t *sem, bool allowinterrupt)
     {
       /* Take a count from the semaphore, possibly waiting */
 
-      ret = sem_wait(sem);
+      ret = nxsem_wait(sem);
       if (ret < 0)
         {
           /* EINTR is the only error that we expect */
 
-          DEBUGASSERT(get_errno() == EINTR);
+          DEBUGASSERT(ret == -EINTR);
 
           if (allowinterrupt)
             {
-              return -EINTR;
+              return ret;
             }
         }
     }
-  while (ret != OK);
+  while (ret == -EINTR);
 
-  return OK;
+  return ret;
 }
 
 #ifdef CONFIG_XBEE_LOCK_VERBOSE

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
- *   Copyright (C) 2010-2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Authors: Rafael Noronha <rafael@pdsolucoes.com.br>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -583,16 +583,21 @@ static void lpc17_putreg(uint32_t val, uint32_t addr)
 
 static void lpc17_takesem(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
-      /* The only case that an error should occr here is if the wait was
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

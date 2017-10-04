@@ -955,23 +955,24 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 
   do
     {
-      ret = sem_wait(&s->exclsem);
+      ret = nxsem_wait(&s->exclsem);
 
       /* This should only fail if the wait was canceled by an signal (and the
        * worker thread will receive a lot of signals).
        */
 
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
 
 #ifdef CONFIG_DEBUG_ANALOG
       if (loop_count % 1000)
         {
           ainfo("loop=%d\n");
         }
+
       ++loop_count;
 #endif
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

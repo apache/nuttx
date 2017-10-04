@@ -239,7 +239,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
   if (cmd == ANIOC_TRIGGER)
     {
-      while (sem_wait(&priv->sem) != OK);
+      while (nxsem_wait(&priv->sem) < 0);
 
       adc_lock(spi);
 

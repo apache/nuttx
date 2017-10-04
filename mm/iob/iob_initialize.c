@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"

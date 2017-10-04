@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/serial/ptmx.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,16 +129,21 @@ static struct ptmx_dev_s g_ptmx;
 
 static void ptmx_semtake(void)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(&g_ptmx.px_exclsem) != 0)
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_ptmx.px_exclsem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 #define ptmx_semgive() nxsem_post(&g_ptmx.px_exclsem)

@@ -140,12 +140,11 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Make sure that the pin is not already in use */
@@ -256,10 +255,10 @@ void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      ierr("ERROR: sem_wait failed: %d\n", errno);
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
       return;
     }
 
@@ -309,12 +308,11 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   regval  = stmpe811_getreg8(priv, STMPE811_GPIO_MPSTA);
@@ -358,12 +356,11 @@ int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Make sure that the GPIO interrupt system has been gpioinitialized */

@@ -1204,7 +1204,7 @@ static int up_hs_send(struct uart_dev_s *dev, const char *buf, int buflen)
 
 retry:
 
-  sem_wait(&priv->txdma_wait);
+  nxsem_wait(&priv->txdma_wait);
 
   /* If buflen <= FIFO space, write it by PIO. */
 

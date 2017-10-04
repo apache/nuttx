@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_sdio.c
  *
- *   Copyright (C) 2009-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -279,18 +279,23 @@ static const struct block_operations g_bops =
 
 static void mmcsd_takesem(FAR struct mmcsd_state_s *priv)
 {
+  int ret;
+
   /* Take the semaphore, giving exclusive access to the driver (perhaps
    * waiting)
    */
 
-  while (sem_wait(&priv->sem) != 0)
+  do
     {
+      ret = nxsem_wait(&priv->sem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Lock the bus if mutually exclusive access to the SDIO bus is required
    * on this platform.

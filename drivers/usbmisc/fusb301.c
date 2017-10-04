@@ -550,10 +550,10 @@ static ssize_t fusb301_read(FAR struct file *filep, FAR char *buffer, size_t buf
 
   ptr = (struct fusb301_result_s *)buffer;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      return -EINTR;
+      return ret;
     }
 
   flags = enter_critical_section();
@@ -596,10 +596,10 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct fusb301_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      return -EINTR;
+      return ret;
     }
 
   fusb301_info("cmd: 0x%02X, arg:%lu\n", cmd, arg);
@@ -681,10 +681,10 @@ static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool set
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct fusb301_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      return -EINTR;
+      return ret;
     }
 
   if (setup)

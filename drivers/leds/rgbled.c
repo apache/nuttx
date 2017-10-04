@@ -135,10 +135,11 @@ static int rgbled_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -get_errno();
+      lcderr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
 
@@ -186,10 +187,11 @@ static int rgbled_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -get_errno();
+      lcderr("ERROR: nxsem_wait failed: %d\n", ret);
+      DEBUGASSERT(ret == -EINTR);
       goto errout;
     }
 

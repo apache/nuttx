@@ -152,14 +152,21 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
 #ifndef CONFIG_DISABLE_POLL
 static void comp_semtake(FAR sem_t *sem)
 {
-  while (sem_wait(sem) != 0)
+ int ret;
+
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 #endif
 
@@ -270,15 +277,12 @@ static int comp_open(FAR struct file *filep)
   FAR struct inode      *inode = filep->f_inode;
   FAR struct comp_dev_s *dev   = inode->i_private;
   uint8_t                tmp;
-  int                    ret   = OK;
+  int                    ret;
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  if (sem_wait(&dev->ad_sem) != OK)
-    {
-      ret = -errno;
-    }
-  else
+  ret = nxsem_wait(&dev->ad_sem);
+  if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
        * time that the driver has been opened for this device, then initialize
@@ -333,13 +337,10 @@ static int comp_close(FAR struct file *filep)
   FAR struct inode     *inode = filep->f_inode;
   FAR struct comp_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
-  int                   ret = OK;
+  int                   ret;
 
-  if (sem_wait(&dev->ad_sem) != OK)
-    {
-      ret = -errno;
-    }
-  else
+  ret = nxsem_wait(&dev->ad_sem);
+  if (ret >= 0)
     {
       /* Decrement the references to the driver.  If the reference count will
        * decrement to 0, then uninitialize the driver.
@@ -391,11 +392,11 @@ static ssize_t comp_read(FAR struct file *filep, FAR char *buffer, size_t buflen
     }
 
 #ifndef CONFIG_DISABLE_POLL
-  ret = sem_wait(&dev->ad_readsem);
+  ret = nxsem_wait(&dev->ad_readsem);
   if (ret < 0)
     {
-      aerr("sem_wait() failed: %d\n", errno);
-      return -errno;
+      aerr("nxsem_wait() failed: %d\n", ret);
+      return ret;
     }
 
   buffer[0] = dev->val;

@@ -131,10 +131,21 @@ static void dma_callback(DMA_HANDLE hdma, void *arg, int result)
 
 static void _sddep_semtake(FAR sem_t *sem)
 {
-  while (sem_wait(sem) != 0)
+  int ret;
+
+  do
     {
-      ASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

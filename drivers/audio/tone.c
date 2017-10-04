@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/audio/tone.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * This driver is based on Tone Alarm driver from PX4 project. It was
@@ -778,10 +778,9 @@ static int tone_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout;
     }
 
@@ -828,10 +827,9 @@ static int tone_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&upper->exclsem);
+  ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -get_errno();
       goto errout;
     }
 

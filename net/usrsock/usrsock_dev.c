@@ -299,16 +299,21 @@ static uint8_t usrsockdev_get_xid(FAR struct usrsock_conn_s *conn)
 
 static void usrsockdev_semtake(FAR sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
        */
 
-      DEBUGASSERT(*get_errno_ptr() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 static void usrsockdev_semgive(FAR sem_t *sem)

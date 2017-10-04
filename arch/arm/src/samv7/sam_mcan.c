@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_mcan.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1381,10 +1381,10 @@ static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->locksem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->locksem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -1548,9 +1548,9 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
       /* The semaphore value is reasonable.  Wait for the next TC interrupt. */
 
-      ret = sem_wait(&priv->txfsem);
+      ret = nxsem_wait(&priv->txfsem);
       leave_critical_section(flags);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret < 0);
 }

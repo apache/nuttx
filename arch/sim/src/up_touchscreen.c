@@ -311,7 +311,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
 
       iinfo("Waiting...\n");
       priv->nwaiters++;
-      ret = sem_wait(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
       iinfo("Awakened...\n");
 
@@ -321,8 +321,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
            * the failure now.
            */
 
-          DEBUGASSERT(errno == EINTR);
-          ret = -EINTR;
+          DEBUGASSERT(ret == -EINTR);
           goto errout;
         }
     }
@@ -332,7 +331,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -407,13 +406,13 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Try to read sample data. */
@@ -505,13 +504,13 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   /* Process the IOCTL by command */
@@ -549,13 +548,13 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      DEBUGASSERT(ret == -EINTR);
+      return ret;
     }
 
   if (setup)
@@ -718,15 +717,15 @@ void sim_tsc_uninitialize(void)
 
   do
     {
-      ret = sem_wait(&priv->devsem);
-      if (ret < 0)
-        {
-          /* This should only happen if the wait was canceled by an signal */
+      ret = nxsem_wait(&priv->devsem);
 
-          DEBUGASSERT(errno == EINTR);
-        }
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret != OK);
+  while (ret == -EINTR);
 
   /* Stop the event loop (Hmm.. the caller must be sure that there are no
    * open references to the touchscreen driver.  This might better be

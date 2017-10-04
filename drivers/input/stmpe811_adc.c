@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/stmpe811_adc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -97,12 +97,11 @@ int stmpe811_adcinitialize(STMPE811_HANDLE handle)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Enable Clocking for ADC */
@@ -157,12 +156,11 @@ int stmpe811_adcconfig(STMPE811_HANDLE handle, int pin)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Make sure that the pin is not already in use */
@@ -217,12 +215,11 @@ uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin)
 
   /* Get exclusive access to the device structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      int errval = errno;
-      ierr("ERROR: sem_wait failed: %d\n", errval);
-      return -errval;
+      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* Request AD conversion by setting the bit corresponding the pin in the

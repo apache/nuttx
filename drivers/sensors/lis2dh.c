@@ -275,14 +275,14 @@ static int lis2dh_close(FAR struct file *filep)
 static int lis2dh_fifo_start(FAR struct lis2dh_dev_s *priv)
 {
   uint8_t buf;
-  int err = OK;
+  int ret = OK;
 
   buf =  0x00 | priv->setup->trigger_selection |
       priv->setup->fifo_trigger_threshold;
   if (lis2dh_access(priv, ST_LIS2DH_FIFO_CTRL_REG, &buf, -1) != 1)
     {
       lis2dh_dbg("lis2dh: Failed to write FIFO control register\n");
-      err = -EIO;
+      ret = -EIO;
     }
   else
     {
@@ -291,7 +291,7 @@ static int lis2dh_fifo_start(FAR struct lis2dh_dev_s *priv)
       if (lis2dh_access(priv, ST_LIS2DH_FIFO_CTRL_REG, &buf, -1) != 1)
         {
           lis2dh_dbg("lis2dh: Failed to write FIFO control register\n");
-          err = -EIO;
+          ret = -EIO;
         }
       else
         {
@@ -301,7 +301,7 @@ static int lis2dh_fifo_start(FAR struct lis2dh_dev_s *priv)
         }
     }
 
-  return err;
+  return ret;
 }
 
 /****************************************************************************
@@ -323,7 +323,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
   uint8_t int1_src = 0;
   uint8_t int2_src = 0;
   irqstate_t flags;
-  int err;
+  int ret;
 
   if (buflen <  sizeof(struct lis2dh_result) ||
       (buflen - sizeof(struct lis2dh_res_header)) % sizeof(struct lis2dh_vector_s) != 0)
@@ -332,10 +332,10 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  err = sem_wait(&priv->devsem);
-  if (err < 0)
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
     {
-      return -EINTR;
+      return ret;
     }
 
   /* Do not allow read() if no SNIOC_WRITESETUP first. */
@@ -370,8 +370,8 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
 
       if (readcount > 0)
         {
-          err = lis2dh_get_reading(priv, &ptr->measurements[0], true);
-          if (err < 0)
+          ret = lis2dh_get_reading(priv, &ptr->measurements[0], true);
+          if (ret < 0)
             {
               lis2dh_dbg("lis2dh: Failed to read xyz\n");
             }
@@ -440,7 +440,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
             }
 
           ptr->header.meas_count +=
-              lis2dh_get_fifo_readings(priv, ptr, fifo_num_samples, &err);
+              lis2dh_get_fifo_readings(priv, ptr, fifo_num_samples, &ret);
         }
       while (!fifo_empty && ptr->header.meas_count < readcount);
 
@@ -468,7 +468,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
            * further reading.
            */
 
-          err = lis2dh_fifo_start(priv);
+          ret = lis2dh_fifo_start(priv);
         }
     }
 
@@ -480,7 +480,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
   if (lis2dh_access(priv, ST_LIS2DH_INT1_SRC_REG, &buf, 1) != 1)
     {
       lis2dh_dbg("lis2dh: Failed to read INT1_SRC_REG\n");
-      err = -EIO;
+      ret = -EIO;
     }
   if (buf & ST_LIS2DH_INT_SR_ACTIVE)
     {
@@ -502,7 +502,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
   if (lis2dh_access(priv, ST_LIS2DH_INT2_SRC_REG, &buf, 1) != 1)
     {
       lis2dh_dbg("lis2dh: Failed to read INT2_SRC_REG\n");
-      err = -EIO;
+      ret = -EIO;
     }
   if (buf & ST_LIS2DH_INT_SR_ACTIVE)
     {
@@ -520,7 +520,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
 
   nxsem_post(&priv->devsem);
 
-  /* 'err' was just for debugging, we do return partial reads here. */
+  /* 'ret' was just for debugging, we do return partial reads here. */
 
   return sizeof(ptr->header) +
       ptr->header.meas_count * sizeof(struct lis2dh_vector_s);
@@ -562,10 +562,10 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct lis2dh_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      return -EINTR;
+      return ret;
     }
 
   switch (cmd)
@@ -680,7 +680,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode *inode;
   FAR struct lis2dh_dev_s *priv;
-  int ret = OK;
+  int ret;
   int i;
 
   DEBUGASSERT(filep && fds);
@@ -689,10 +689,10 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct lis2dh_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      return -EINTR;
+      return ret;
     }
 
   if (setup)

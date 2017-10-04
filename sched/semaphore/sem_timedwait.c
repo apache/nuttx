@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_timedwait.c
  *
- *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,20 +190,17 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Now perform the blocking wait */
 
-  ret = sem_wait(sem);
-  if (ret < 0)
-    {
-      /* sem_wait() failed.  Save the errno value */
-
-      errcode = get_errno();
-    }
+  ret = nxsem_wait(sem);
 
   /* Stop the watchdog timer */
 
   wd_cancel(rtcb->waitdog);
 
-  if (errcode != OK)
+  if (ret < 0)
     {
+      /* nxsem_wait() failed.  Save the errno value */
+
+      errcode = -ret;
       goto errout_with_irqdisabled;
     }
 

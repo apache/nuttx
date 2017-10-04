@@ -5,7 +5,7 @@
  *   Copyright (C) 2015 Pierre-noel Bouteville . All rights reserved.
  *   Authors: Pierre-noel Bouteville <pnb990@gmail.com>
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -480,10 +480,21 @@ static const char *efm32_i2c_state_str(int i2c_state)
 
 static inline void efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv)
 {
-  while (sem_wait(&priv->sem_excl) != OK)
+  int ret;
+
+  do
     {
-      ASSERT(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->sem_excl);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

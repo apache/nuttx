@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_qspi.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1435,7 +1435,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
   qspi_dma_sample(priv, DMA_AFTER_START);
 
   /* Wait for DMA completion.  This is done in a loop because there may be
-   * false alarm semaphore counts that cause sem_wait() not fail to wait
+   * false alarm semaphore counts that cause nxsem_wait() not fail to wait
    * or to wake-up prematurely (for example due to the receipt of a signal).
    * We know that the DMA has completed when the result is anything other
    * that -EBUSY.
@@ -1454,7 +1454,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
 
       /* Wait for the DMA complete */
 
-      ret = sem_wait(&priv->dmawait);
+      ret = nxsem_wait(&priv->dmawait);
 
       /* Cancel the watchdog timeout */
 
@@ -1468,14 +1468,13 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
            * was awakened by a signal.
            */
 
-          int errorcode = errno;
-          if (errorcode != EINTR)
+          if (ret != -EINTR)
             {
               DEBUGPANIC();
               regval = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
               regval &= ~QSPI_CR_DMAEN;
               qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
-              return -errorcode;
+              return ret;
             }
         }
 
@@ -1681,27 +1680,32 @@ static int qspi_transmit_blocking(struct stm32l4_qspidev_s *priv,
 static int qspi_lock(struct qspi_dev_s *dev, bool lock)
 {
   struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  int ret;
 
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
+          /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
+      do
         {
+          ret = nxsem_wait(&priv->exclsem);
+
           /* The only case that an error should occur here is if the wait
            * was awakened by a signal.
            */
 
-          ASSERT(errno == EINTR);
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
   else
     {
       (void)nxsem_post(&priv->exclsem);
+      ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -2029,7 +2033,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   /* Wait for the interrupt routine to finish it's magic */
 
-  sem_wait(&priv->op_sem);
+  (void)nxsem_wait(&priv->op_sem);
   MEMORY_SYNC();
 
   /* Convey the result */
@@ -2187,7 +2191,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   /* Wait for the interrupt routine to finish it's magic */
 
-  sem_wait(&priv->op_sem);
+  (void)nxsem_wait(&priv->op_sem);
   MEMORY_SYNC();
 
   /* convey the result */

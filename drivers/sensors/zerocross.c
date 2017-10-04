@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/sensors/zerocross.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -239,10 +239,10 @@ static int zc_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      snerr("ERROR: sem_wait failed: %d\n", ret);
+      snerr("ERROR: nxsem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -320,10 +320,10 @@ static int zc_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver structure */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      snerr("ERROR: sem_wait failed: %d\n", ret);
+      snerr("ERROR: nxsem_wait failed: %d\n", ret);
       return ret;
     }
 
@@ -421,7 +421,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = sem_wait(&priv->exclsem);
+  ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       return ret;

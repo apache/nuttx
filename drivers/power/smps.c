@@ -104,15 +104,12 @@ static int smps_open(FAR struct file *filep)
   FAR struct inode      *inode = filep->f_inode;
   FAR struct smps_dev_s *dev   = inode->i_private;
   uint8_t                tmp;
-  int                    ret   = OK;
+  int                    ret;
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  if (sem_wait(&dev->closesem) != OK)
-    {
-      ret = -errno;
-    }
-  else
+  ret = nxsem_wait(&dev->closesem);
+  if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
        * time that the driver has been opened for this device, then initialize
@@ -164,16 +161,13 @@ static int smps_open(FAR struct file *filep)
 
 static int smps_close(FAR struct file *filep)
 {
-  FAR struct inode     *inode = filep->f_inode;
+  FAR struct inode     *inode  = filep->f_inode;
   FAR struct smps_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
-  int                   ret = OK;
+  int                   ret;
 
-  if (sem_wait(&dev->closesem) != OK)
-    {
-      ret = -errno;
-    }
-  else
+  ret = nxsem_wait(&dev->closesem);
+  if (ret >= 0)
     {
       /* Decrement the references to the driver.  If the reference count will
        * decrement to 0, then uninitialize the driver.

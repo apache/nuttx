@@ -506,15 +506,15 @@ static int stm32_dma2d_waitforirq(void)
 
       priv->wait = true;
 
-      ret = sem_wait(priv->sem);
+      ret = nxsem_wait(priv->sem);
 
       /* irq or an error occurs, reset the wait flag */
 
       priv->wait = false;
 
-      if (ret != OK)
+      if (ret < 0)
         {
-          lcderr("ERROR: sem_wait() failed\n");
+          lcderr("ERROR: nxsem_wait() failed\n");
           return ret;
         }
     }
@@ -1178,7 +1178,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
 
   if (stm32_dma2d_lvalidate(priv) && vinfo)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       memcpy(vinfo, &priv->vinfo, sizeof(struct fb_videoinfo_s));
       nxsem_post(priv->lock);
 
@@ -1215,7 +1215,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
 
   if (stm32_dma2d_lvalidate(priv) && pinfo && planeno == 0)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       memcpy(pinfo, &priv->pinfo, sizeof(struct fb_planeinfo_s));
       nxsem_post(priv->lock);
 
@@ -1250,7 +1250,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
 
   if (stm32_dma2d_lvalidate(priv) && lid)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       *lid = priv->lid;
       nxsem_post(priv->lock);
       return OK;
@@ -1288,7 +1288,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
 
   if (stm32_dma2d_lvalidate(priv) && cmap)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
 
 #ifdef CONFIG_STM32_LTDC_INTERFACE
       if (priv->lid < DMA2D_SHADOW_LAYER)
@@ -1407,7 +1407,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
 
   if (stm32_dma2d_lvalidate(priv) && cmap)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
 
       if (priv->fmt != DMA2D_PF_L8)
         {
@@ -1497,7 +1497,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
 
   if (stm32_dma2d_lvalidate(priv))
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       priv->alpha = alpha;
       nxsem_post(priv->lock);
 
@@ -1532,7 +1532,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
 
   if (stm32_dma2d_lvalidate(priv))
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       *alpha = priv->alpha;
       nxsem_post(priv->lock);
 
@@ -1583,7 +1583,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
 
   if (stm32_dma2d_lvalidate(priv))
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       priv->blendmode = mode;
       nxsem_post(priv->lock);
 
@@ -1619,7 +1619,7 @@ static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
 
   if (stm32_dma2d_lvalidate(priv) && mode)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
       *mode = priv->blendmode;
       nxsem_post(priv->lock);
 
@@ -1670,7 +1670,7 @@ static int stm32_dma2dblit(FAR struct dma2d_layer_s *dest,
         stm32_dma2d_lvalidatesize(srclayer, srcarea->xpos,
                                     srcarea->ypos, srcarea))
     {
-      sem_wait(destlayer->lock);
+      nxsem_wait(destlayer->lock);
 
       /* Set output pfc */
 
@@ -1784,8 +1784,7 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
             stm32_dma2d_lvalidatesize(backlayer, backarea->xpos,
                                         backarea->ypos, backarea))
     {
-
-      sem_wait(destlayer->lock);
+      nxsem_wait(destlayer->lock);
 
       /* Set output pfc */
 
@@ -1880,8 +1879,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
 
   if (stm32_dma2d_lvalidatesize(priv, area->xpos, area->ypos, area))
     {
-
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
 
       /* Set output pfc */
 
@@ -1949,7 +1947,7 @@ FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid)
   if (lid < DMA2D_LAYER_NSIZE)
     {
       FAR struct stm32_dma2d_s *priv;
-      sem_wait(&g_lock);
+      nxsem_wait(&g_lock);
       priv = g_layers[lid];
       nxsem_post(&g_lock);
 
@@ -2000,7 +1998,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
 
   ret = stm32_dma2d_bpp(fmt, &bpp);
 
-  sem_wait(&g_lock);
+  nxsem_wait(&g_lock);
 
   /* Get a free layer identifier */
 
@@ -2108,7 +2106,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
 
   if (stm32_dma2d_lvalidate(priv) && priv->lid >= DMA2D_SHADOW_LAYER)
     {
-      sem_wait(priv->lock);
+      nxsem_wait(priv->lock);
 
       /* Check also if the layer id is valid to the layer reference */
 

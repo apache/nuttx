@@ -253,12 +253,12 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
     {
       /* Wait if necessary for status to become available */
 
-      ret = sem_wait(&group->tg_exitsem);
+      ret = nxsem_wait(&group->tg_exitsem);
       group_delwaiter(group);
 
       if (ret < 0)
         {
-          /* Unlock pre-emption and return the ERROR (sem_wait has already set
+          /* Unlock pre-emption and return the ERROR (nxsem_wait has already set
            * the errno).  Handle the awkward case of whether or not we need to
            * nullify the stat_loc value.
            */
@@ -268,7 +268,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
               group->tg_statloc = NULL;
             }
 
-          goto errout;
+          errcode = -ret;
+          goto errout_with_errno;
         }
     }
 
@@ -280,7 +281,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
 errout_with_errno:
   set_errno(errcode);
-errout:
+
   leave_cancellation_point();
   sched_unlock();
   return ERROR;

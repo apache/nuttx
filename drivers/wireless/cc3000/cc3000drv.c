@@ -231,6 +231,7 @@ static void *unsoliced_thread_func(void *parameter)
 void cc3000_open(gcSpiHandleRx pfRxHandler)
 {
   int status;
+  int ret;
   int fd;
 
   DEBUGASSERT(spiconf.cc3000fd == -1);
@@ -257,10 +258,17 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
 
       /* Wait unsoliced_thread to wake-up. */
 
-      while (sem_wait(&spiconf.unsoliced_thread_wakesem) != 0)
+      do
         {
-          ASSERT(errno == EINTR);
+          ret = nxsem_wait(&spiconf.unsoliced_thread_wakesem);
+
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
+
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
    }
 
   DEBUGASSERT(spiconf.cc3000fd >= 0);

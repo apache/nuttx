@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/vnc/server/vnc_fbdev.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -482,7 +482,7 @@ static int vnc_start_server(int display)
 
 static inline int vnc_wait_start(int display)
 {
-  int errcode;
+  int ret = OK;
 
   /* Check if there has been a session allocated yet.  This is one of the
    * first things that the VNC server will do with the kernel thread is
@@ -502,22 +502,20 @@ static inline int vnc_wait_start(int display)
        * conditions here, but I think none that are fatal.
        */
 
-      while (sem_wait(&g_fbstartup[display].fbinit) < 0)
+      do
         {
-          errcode = get_errno();
+          ret = nxsem_wait(&g_fbstartup[display].fbinit);
 
-          /* sem_wait() should fail only if it is interrupt by a signal. */
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
 
-          DEBUGASSERT(errcode == EINTR);
-          if (errcode != EINTR)
-            {
-              DEBUGASSERT(errcode > 0);
-              return -errcode;
-            }
+          DEBUGASSERT(ret == OK || ret == -EINTR);
         }
+      while (ret == -EINTR);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -563,19 +561,20 @@ static inline int vnc_wait_connect(int display)
        * conditions here, but I think none that are fatal.
        */
 
-      while (sem_wait(&g_fbstartup[display].fbconnect) < 0)
+      do
         {
-          errcode = get_errno();
+          ret = nxsem_wait(&g_fbstartup[display].fbconnect);
 
-          /* sem_wait() should fail only if it is interrupt by a signal. */
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
 
-          DEBUGASSERT(errcode == EINTR);
-          if (errcode != EINTR)
+          if (ret < 0 && ret != -EINTR)
             {
-              DEBUGASSERT(errcode > 0);
-              return -errcode;
+              return ret;
             }
         }
+      while (ret == -EINTR);
 
       /* We were awakened.  A result of -EBUSY means that the negotiation
        * is not complete.  Why would we be awakened in that case?  Some

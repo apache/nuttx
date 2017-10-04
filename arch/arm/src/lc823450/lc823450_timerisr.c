@@ -391,7 +391,7 @@ int up_hrttimer_usleep(unsigned int usec)
   hrt.usec = usec;
 
   hrt_usleep_add(&hrt);
-  sem_wait(&hrt.sem);
+  nxsem_wait(&hrt.sem);
 
   return 0;
 }

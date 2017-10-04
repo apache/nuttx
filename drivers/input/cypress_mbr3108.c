@@ -751,7 +751,7 @@ static ssize_t mbr3108_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -803,7 +803,7 @@ static ssize_t mbr3108_write(FAR struct file *filep, FAR const char *buffer,
       return -EINVAL;
     }
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -879,10 +879,19 @@ static int mbr3108_open(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  while (sem_wait(&priv->devsem) != 0)
+  do
     {
-      assert(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   use_count = priv->cref + 1;
   if (use_count == 1)
@@ -951,10 +960,19 @@ static int mbr3108_close(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  while (sem_wait(&priv->devsem) != 0)
+  do
     {
-      assert(errno == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   use_count = priv->cref - 1;
   if (use_count == 0)
@@ -1022,7 +1040,7 @@ static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mbr3108_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;

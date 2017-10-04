@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_ssc.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -872,10 +872,10 @@ static void ssc_exclsem_take(struct sam_ssc_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -903,10 +903,10 @@ static void ssc_bufsem_take(struct sam_ssc_s *priv)
 
   do
     {
-      ret = sem_wait(&priv->bufsem);
-      DEBUGASSERT(ret == 0 || errno == EINTR);
+      ret = nxsem_wait(&priv->bufsem);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
-  while (ret < 0);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

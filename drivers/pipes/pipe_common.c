@@ -95,14 +95,21 @@ static void pipecommon_semtake(sem_t *sem);
 
 static void pipecommon_semtake(FAR sem_t *sem)
 {
-  while (sem_wait(sem) != 0)
+  int ret;
+
+  do
     {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -212,15 +219,14 @@ int pipecommon_open(FAR struct file *filep)
   DEBUGASSERT(dev != NULL);
 
   /* Make sure that we have exclusive access to the device structure.  The
-   * sem_wait() call should fail only if we are awakened by a signal.
+   * nxsem_wait() call should fail only if we are awakened by a signal.
    */
 
-  ret = sem_wait(&dev->d_bfsem);
-  if (ret != OK)
+  ret = nxsem_wait(&dev->d_bfsem);
+  if (ret < 0)
     {
-      ferr("ERROR: sem_wait failed: %d\n", get_errno());
-      DEBUGASSERT(get_errno() > 0);
-      return -get_errno();
+      ferr("ERROR: nxsem_wait failed: %d\n", ret);
+      return ret;
     }
 
   /* If this the first reference on the device, then allocate the buffer.
@@ -289,16 +295,14 @@ int pipecommon_open(FAR struct file *filep)
        * no writer on the pipe.
        */
 
-      ret = sem_wait(&dev->d_rdsem);
-      if (ret != OK)
+      ret = nxsem_wait(&dev->d_rdsem);
+      if (ret < 0)
         {
-          /* The sem_wait() call should fail only if we are awakened by
+          /* The nxsem_wait() call should fail only if we are awakened by
            * a signal.
            */
 
-          ferr("ERROR: sem_wait failed: %d\n", get_errno());
-          DEBUGASSERT(get_errno() > 0);
-          ret = -get_errno();
+          ferr("ERROR: nxsem_wait failed: %d\n", ret);
 
           /* Immediately close the pipe that we just opened */
 
@@ -440,9 +444,10 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Make sure that we have exclusive access to the device structure */
 
-  if (sem_wait(&dev->d_bfsem) < 0)
+  ret = nxsem_wait(&dev->d_bfsem);
+  if (ret < 0)
     {
-      return ERROR;
+      return ret;
     }
 
   /* If the pipe is empty, then wait for something to be written to it */
@@ -469,12 +474,12 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
       sched_lock();
       nxsem_post(&dev->d_bfsem);
-      ret = sem_wait(&dev->d_rdsem);
+      ret = nxsem_wait(&dev->d_rdsem);
       sched_unlock();
 
-      if (ret < 0 || sem_wait(&dev->d_bfsem) < 0)
+      if (ret < 0 || (ret = nxsem_wait(&dev->d_bfsem)) < 0)
         {
-          return ERROR;
+          return ret;
         }
     }
 
@@ -521,6 +526,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   ssize_t                last;
   int                    nxtwrndx;
   int                    sval;
+  int                    ret;
 
   DEBUGASSERT(dev);
   pipe_dumpbuffer("To PIPE:", (FAR uint8_t *)buffer, len);
@@ -530,12 +536,13 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
       return 0;
     }
 
-  /* At present, this method cannot be called from interrupt handlers.  That is
-   * because it calls sem_wait (via pipecommon_semtake below) and sem_wait cannot
-   * be called from interrupt level.  This actually happens fairly commonly
-   * IF [a-z]err() is called from interrupt handlers and stdout is being redirected
-   * via a pipe.  In that case, the debug output will try to go out the pipe
-   * (interrupt handlers should use the  _err() APIs).
+  /* At present, this method cannot be called from interrupt handlers.  That
+   * is because it calls nxsem_wait (via pipecommon_semtake below) and
+   * nxsem_wait cannot be called from interrupt level.  This actually
+   * happens fairly commonly IF [a-z]err() is called from interrupt handlers
+   * and stdout is being redirected via a pipe.  In that case, the debug
+   * output will try to go out the pipe (interrupt handlers should use the
+   * _err() APIs).
    *
    * On the other hand, it would be very valuable to be able to feed the pipe
    * from an interrupt handler!  TODO:  Consider disabling interrupts instead
@@ -546,9 +553,10 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Make sure that we have exclusive access to the device structure */
 
-  if (sem_wait(&dev->d_bfsem) < 0)
+  ret = nxsem_wait(&dev->d_bfsem);
+  if (ret < 0)
     {
-      return ERROR;
+      return ret;
     }
 
   /* Loop until all of the bytes have been written */

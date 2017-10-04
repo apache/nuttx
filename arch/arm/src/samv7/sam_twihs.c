@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_twihs.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the SAMA5Dx TWIHS driver.  References:
@@ -313,16 +313,21 @@ static const struct i2c_ops_s g_twiops =
 
 static void twi_takesem(sem_t *sem)
 {
-  /* Take the semaphore (perhaps waiting) */
+  int ret;
 
-  while (sem_wait(sem) != 0)
+  do
     {
-      /* The only case that an error should occr here is if the wait was
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+
+      /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 /****************************************************************************

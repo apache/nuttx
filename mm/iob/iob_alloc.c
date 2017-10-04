@@ -140,11 +140,9 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
        * list.
        */
 
-      ret = sem_wait(sem);
+      ret = nxsem_wait(sem);
       if (ret < 0)
         {
-          int errcode = get_errno();
-
           /* EINTR is not an error!  EINTR simply means that we were
            * awakened by a signal and we should try again.
            *
@@ -154,18 +152,11 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
            * should be returned.
            */
 
-          if (errcode == EINTR)
+          if (ret == -EINTR)
             {
               /* Force a success indication so that we will continue looping. */
 
-              ret = 0;
-            }
-          else
-            {
-              /* Stop the loop and return a error */
-
-              DEBUGASSERT(errcode > 0);
-              ret = -errcode;
+              ret = OK;
             }
         }
       else
@@ -279,7 +270,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
           g_iob_freelist = iob->io_flink;
 
           /* Take a semaphore count.  Note that we cannot do this in
-           * in the orthodox way by calling sem_wait() or sem_trywait()
+           * in the orthodox way by calling nxsem_wait() or sem_trywait()
            * because this function may be called from an interrupt
            * handler. Fortunately we know at at least one free buffer
            * so a simple decrement is all that is needed.

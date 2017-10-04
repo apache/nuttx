@@ -125,14 +125,6 @@ void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb);
 #  define pthread_mutex_give(m)    pthread_sem_give(&(m)->sem)
 #endif
 
-#if defined(CONFIG_CANCELLATION_POINTS) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-uint16_t pthread_disable_cancel(void);
-void pthread_enable_cancel(uint16_t oldstate);
-#else
-#  define pthread_disable_cancel() (0)
-#  define pthread_enable_cancel(s) UNUSED(s)
-#endif
-
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
 int pthread_mutexattr_verifytype(int type);
 #endif

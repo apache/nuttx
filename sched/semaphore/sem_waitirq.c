@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/sem_waitirq.c
+ * sched/semaphore/nxsem_waitirq.c
  *
  *   Copyright (C) 2007-2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@
  *
  *   1. A signal is received by a task that is waiting on a semaphore.
  *      According to the POSIX spec, "...the calling thread shall not return
- *      from the call to [sem_wait] until it either locks the semaphore or
+ *      from the call to [nxsem_wait] until it either locks the semaphore or
  *      the call is interrupted by a signal."
  *   2. From logic associated with sem_timedwait().  This function is called
  *      when the timeout elapses without receiving the semaphore.

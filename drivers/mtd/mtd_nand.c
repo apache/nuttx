@@ -147,17 +147,9 @@ static int nand_lock(FAR struct nand_dev_s *nand)
   int errcode;
   int ret;
 
-  ret = sem_wait(&nand->exclsem);
-  if (ret < 0)
-    {
-      errcode = errno;
-      DEBUGASSERT(errcode != OK);
-
-      ferr("ERROR: sem_wait failed: %d\n", errcode);
-      return -errcode;
-    }
-
-  return OK;
+  ret = nxsem_wait(&nand->exclsem);
+  DEBUGASSERT(ret == OK || ret == -EINTR);
+  return ret;
 }
 
 /****************************************************************************

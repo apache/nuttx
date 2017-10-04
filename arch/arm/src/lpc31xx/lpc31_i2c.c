@@ -467,7 +467,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
 
   /* Get exclusive access to the I2C bus */
 
-  sem_wait(&priv->mutex);
+  nxsem_wait(&priv->mutex);
   flags = enter_critical_section();
 
   /* Set up for the transfer */
@@ -496,7 +496,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
 
   while (priv->state != I2C_STATE_DONE)
     {
-      sem_wait(&priv->wait);
+      nxsem_wait(&priv->wait);
     }
 
   wd_cancel(priv->timeout);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_initialize.c
  *
- *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,35 +96,46 @@ void pthread_initialize(void)
 
 int pthread_sem_take(sem_t *sem, bool intr)
 {
+  int ret;
+
   /* Verify input parameters */
 
   DEBUGASSERT(sem != NULL);
   if (sem != NULL)
     {
-      /* Take the semaphore */
-
-      while (sem_wait(sem) != OK)
+      do
         {
-          int errcode = get_errno();
+          /* Take the semaphore (perhaps waiting) */
 
-          /* Handle the special case where the semaphore wait was
-           * awakened by the receipt of a signal.
-           */
-
-          if (intr || errcode != EINTR)
+          ret = nxsem_wait(sem);
+          if (ret < 0)
             {
-              return errcode;
+              /* The only case that an error should occur here is if the wait
+               * was awakened by a signal.
+               */
+
+              DEBUGASSERT(ret == -EINTR);
+
+              /* When the signal is received, should we errout? Or should we
+               * just continue waiting until we have the semaphore?
+               */
+
+              if (intr)
+                {
+                  return -ret;
+                }
             }
         }
+      while (ret == -EINTR);
+
+      /* We have the semaphore (or some awful, unexpected error has
+       * occurred).
+       */
 
       return OK;
     }
-  else
-    {
-      /* NULL semaphore pointer! */
 
-      return EINVAL;
-    }
+  return EINVAL;
 }
 
 #ifdef CONFIG_PTHREAD_MUTEX_UNSAFE

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/button_upper.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,18 +176,18 @@ static const struct file_operations btn_fops =
 
 static inline int btn_takesem(sem_t *sem)
 {
+  int ret;
+
   /* Take a count from the semaphore, possibly waiting */
 
-  if (sem_wait(sem) < 0)
-    {
-      /* EINTR is the only error that we expect */
+  ret = nxsem_wait(sem);
 
-      int errcode = get_errno();
-      DEBUGASSERT(errcode == EINTR);
-      return -errcode;
-    }
+  /* The only case that an error should occur here is if the wait
+   * was awakened by a signal
+   */
 
-  return OK;
+  DEBUGASSERT(ret == OK || ret == -EINTR);
+  return ret;
 }
 
 /****************************************************************************

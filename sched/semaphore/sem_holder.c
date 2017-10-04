@@ -925,7 +925,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
  * Name: nxsem_addholder_tcb
  *
  * Description:
- *   Called from sem_wait() when the calling thread obtains the semaphore;
+ *   Called from nxsem_wait() when the calling thread obtains the semaphore;
  *   Called from sem_post() when the waiting thread obtains the semaphore.
  *
  * Parameters:
@@ -970,7 +970,7 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
  * Name: nxsem_addholder
  *
  * Description:
- *   Called from sem_wait() when the calling thread obtains the semaphore
+ *   Called from nxsem_wait() when the calling thread obtains the semaphore
  *
  * Parameters:
  *   sem - A reference to the incremented semaphore

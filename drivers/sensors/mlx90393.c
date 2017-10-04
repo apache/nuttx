@@ -216,7 +216,7 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
   /* Aquire the semaphore before the data is copied */
 
-  ret = sem_wait(&dev->datasem);
+  ret = nxsem_wait(&dev->datasem);
   if (ret != OK)
     {
       snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
@@ -489,12 +489,11 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
 
   /* Aquire the semaphore before the data is copied */
 
-  ret = sem_wait(&priv->datasem);
+  ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      int errcode = errno;
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", errcode);
-      return -errcode;
+      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      return ret;
     }
 
   data = (FAR struct mlx90393_sensor_data_s *)buffer;

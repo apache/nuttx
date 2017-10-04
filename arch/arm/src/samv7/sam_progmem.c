@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_progmem.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,18 +186,21 @@ static sem_t g_page_sem;
 
 static void page_buffer_lock(void)
 {
-  while (sem_wait(&g_page_sem) < 0)
+  int ret;
+
+  do
     {
-      int errcode = errno;
+      /* Take the semaphore (perhaps waiting) */
 
-      /* sem_wait should only fail if it was awakened by a signal */
+      ret = nxsem_wait(&g_page_sem);
 
-      DEBUGASSERT(errcode == EINTR);
-      if (errcode != EINTR)
-        {
-          break;
-        }
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 }
 
 #define page_buffer_unlock() nxsem_post(&g_page_sem)

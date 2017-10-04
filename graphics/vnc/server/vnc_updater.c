@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/vnc/vnc_updater.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,11 +125,21 @@ static void vnc_sem_debug(FAR struct vnc_session_s *session,
   int queuecount;
   int freewaiting;
   int queuewaiting;
+  int ret;
 
-  while (sem_wait(&g_errsem) < 0)
+  do
     {
-      DEBUGASSERT(get_errno() == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&g_errsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* Count structures in the list */
 
@@ -193,19 +203,29 @@ static FAR struct vnc_fbupdate_s *
 vnc_alloc_update(FAR struct vnc_session_s *session)
 {
   FAR struct vnc_fbupdate_s *update;
+  int ret;
 
   /* Reserve one element from the free list.  Lock the scheduler to assure
-   * that the sq_remfirst() and the successful return from sem_wait are
+   * that the sq_remfirst() and the successful return from nxsem_wait are
    * atomic.  Of course, the scheduler will be unlocked while we wait.
    */
 
   sched_lock();
   vnc_sem_debug(session, "Before alloc", 0);
 
-  while (sem_wait(&session->freesem) < 0)
+  do
     {
-      DEBUGASSERT(get_errno() == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&session->freesem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* It is reserved.. go get it */
 
@@ -276,20 +296,30 @@ static FAR struct vnc_fbupdate_s *
 vnc_remove_queue(FAR struct vnc_session_s *session)
 {
   FAR struct vnc_fbupdate_s *rect;
+  int ret;
 
   /* Reserve one element from the list of queued rectangle.  Lock the
    * scheduler to assure that the sq_remfirst() and the successful return
-   * from sem_wait are atomic.  Of course, the scheduler will be unlocked
+   * from nxsem_wait are atomic.  Of course, the scheduler will be unlocked
    * while we wait.
    */
 
   sched_lock();
   vnc_sem_debug(session, "Before remove", 0);
 
-  while (sem_wait(&session->queuesem) < 0)
+  do
     {
-      DEBUGASSERT(get_errno() == EINTR);
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(&session->queuesem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
+  while (ret == -EINTR);
 
   /* It is reserved.. go get it */
 

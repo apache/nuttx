@@ -177,31 +177,8 @@ static sem_t g_ipv6_cachelock;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
-static int net_lock_ipv4_cache(void)
-{
-  int ret = sem_wait(&g_ipv4_cachelock);
-  if (ret < 0)
-    {
-      ret = -get_errno();
-    }
-
-  return ret;
-}
-#endif
-
-#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
-static int net_lock_ipv6_cache(void)
-{
-  int ret = sem_wait(&g_ipv6_cachelock);
-  if (ret < 0)
-    {
-      ret = -get_errno();
-    }
-
-  return ret;
-}
-#endif
+#define net_lock_ipv4_cache() mxsem_wait(&g_ipv4_cachelock);
+#define net_lock_ipv6_cache() mxsem_wait(&g_ipv6_cachelock);
 
 /****************************************************************************
  * Name: net_unlock_ipv4_cache and net_unlock_ipv6_cache
