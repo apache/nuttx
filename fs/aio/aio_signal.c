@@ -112,10 +112,10 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
 
   else if (aiocbp->aio_sigevent.sigev_notify == SIGEV_THREAD)
     {
-      ret = sig_notification(pid, &aiocbp->aio_sigevent);
+      ret = nxsig_notification(pid, &aiocbp->aio_sigevent);
       if (ret < 0)
         {
-          ferr("ERROR: sig_notification failed: %d\n", ret);
+          ferr("ERROR: nxsig_notification failed: %d\n", ret);
         }
     }
 #endif

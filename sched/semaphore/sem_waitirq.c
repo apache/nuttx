@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/nxsem_waitirq.c
+ * sched/semaphore/sem_waitirq.c
  *
  *   Copyright (C) 2007-2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

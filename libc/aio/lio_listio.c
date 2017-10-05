@@ -207,7 +207,7 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
 
       else if (ighand->sig->sigev_notify == SIGEV_THREAD)
         {
-          DEBUGASSERT(sig_notification(sighand->pid, &sighand->sig));
+          DEBUGASSERT(nxsig_notification(sighand->pid, &sighand->sig));
         }
 #endif
 
@@ -713,7 +713,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
 
   else if (sig && sig->sigev_notify == SIGEV_THREAD)
     {
-      status = sig_notification(sighand->pid, &sighand->sig);
+      status = nxsig_notification(sighand->pid, &sighand->sig);
       if (status < 0 && ret == OK)
         {
          /* Something bad happened while performing the notification

@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_timeout
+ * Name: nxsig_timeout
  *
  * Description:
  *   A timeout elapsed while waiting for signals to be queued.
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-static void sig_timeout(int argc, wdparm_t itcb)
+static void nxsig_timeout(int argc, wdparm_t itcb)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags;
@@ -216,7 +216,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
    * signals in the pending signal set argument.
    */
 
-  intersection = *set & sig_pendingset(rtcb);
+  intersection = *set & nxsig_pendingset(rtcb);
   if (intersection != NULL_SIGNAL_SET)
     {
       /* One or more of the signals in intersections is sufficient to cause
@@ -224,7 +224,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
        * pending.
        */
 
-      sigpend = sig_removependingsignal(rtcb, sig_lowest(&intersection));
+      sigpend = nxsig_remove_pendingsignal(rtcb, nxsig_lowest(&intersection));
       ASSERT(sigpend);
 
       /* Return the signal info to the caller if so requested */
@@ -240,7 +240,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
       /* Then dispose of the pending signal structure properly */
 
-      sig_releasependingsignal(sigpend);
+      nxsig_release_pendingsignal(sigpend);
       leave_critical_section(flags);
     }
 
@@ -293,8 +293,8 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
               /* Start the watchdog */
 
-              wd_start(rtcb->waitdog, waitticks, (wdentry_t)sig_timeout, 1,
-                       wdparm.pvarg);
+              wd_start(rtcb->waitdog, waitticks, (wdentry_t)nxsig_timeout,
+                       1, wdparm.pvarg);
 
               /* Now wait for either the signal or the watchdog */
 

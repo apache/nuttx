@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_findaction.c
  *
- *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,14 +45,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_findaction
+ * Name: nxsig_find_action
  *
  * Description:
  *   Allocate a new element for a signal queue
  *
  ****************************************************************************/
 
-FAR sigactq_t *sig_findaction(FAR struct task_group_s *group, int signo)
+FAR sigactq_t *nxsig_find_action(FAR struct task_group_s *group, int signo)
 {
   FAR sigactq_t *sigact = NULL;
 

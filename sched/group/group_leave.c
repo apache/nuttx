@@ -149,7 +149,7 @@ static inline void group_release(FAR struct task_group_s *group)
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Release pending signals */
 
-  sig_release(group);
+  nxsig_release(group);
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD

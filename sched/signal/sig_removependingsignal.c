@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_removependingsignal.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014, 2016-2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,14 +59,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_removependingsignal
+ * Name: nxsig_remove_pendingsignal
  *
  * Description:
  *   Remove the specified signal from the signal pending list
  *
  ****************************************************************************/
 
-FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
+FAR sigpendq_t *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb, int signo)
 {
   FAR struct task_group_s *group = stcb->group;
   FAR sigpendq_t *currsig;

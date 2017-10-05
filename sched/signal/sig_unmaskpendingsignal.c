@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_unmaskpendingsignal.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_unmaskpendingsignal
+ * Name: nxsig_unmask_pendingsignal
  *
  * Description:
  *   Based upon the current setting of the sigprocmask, this function
@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-void sig_unmaskpendingsignal(void)
+void nxsig_unmask_pendingsignal(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   sigset_t unmaskedset;
@@ -78,7 +78,7 @@ void sig_unmaskpendingsignal(void)
    * can only be changed on this thread of execution.
    */
 
-  unmaskedset = ~(rtcb->sigprocmask) & sig_pendingset(rtcb);
+  unmaskedset = ~(rtcb->sigprocmask) & nxsig_pendingset(rtcb);
 
   /* Loop while there are unmasked pending signals to be processed. */
 
@@ -88,7 +88,7 @@ void sig_unmaskpendingsignal(void)
        * to highest
        */
 
-      signo = sig_lowest(&unmaskedset);
+      signo = nxsig_lowest(&unmaskedset);
       if (signo != ERROR)
         {
           /* Remove the signal from the set of unmasked signals.  NOTE:
@@ -100,7 +100,7 @@ void sig_unmaskpendingsignal(void)
 
           /* Remove the pending signal from the list of pending signals */
 
-          if ((pendingsig = sig_removependingsignal(rtcb, signo)) != NULL)
+          if ((pendingsig = nxsig_remove_pendingsignal(rtcb, signo)) != NULL)
             {
               /* If there is one, then process it like a normal signal.
                * Since the signal was pending, then unblocked on this
@@ -109,11 +109,11 @@ void sig_unmaskpendingsignal(void)
                * other than this thread.
                */
 
-              sig_tcbdispatch(rtcb, &pendingsig->info);
+              nxsig_tcbdispatch(rtcb, &pendingsig->info);
 
               /* Then remove it from the pending signal list */
 
-              sig_releasependingsignal(pendingsig);
+              nxsig_release_pendingsignal(pendingsig);
             }
         }
     }

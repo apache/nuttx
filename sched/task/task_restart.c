@@ -158,7 +158,7 @@ int task_restart(pid_t pid)
 
   /* Deallocate anything left in the TCB's queues */
 
-  sig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
+  nxsig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
 
   /* Reset the current task priority  */
 

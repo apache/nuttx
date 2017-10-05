@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/nxsem_initialize.c
+ * sched/semaphore/sem_initialize.c
  *
  *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

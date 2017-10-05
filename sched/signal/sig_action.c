@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_action.c
  *
- *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,14 +66,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_allocateaction
+ * Name: nxsig_alloc_action
  *
  * Description:
  *   Allocate a new element for a sigaction queue
  *
  ****************************************************************************/
 
-static FAR sigactq_t *sig_allocateaction(void)
+static FAR sigactq_t *nxsig_alloc_action(void)
 {
   FAR sigactq_t *sigact;
 
@@ -86,7 +87,7 @@ static FAR sigactq_t *sig_allocateaction(void)
     {
       /* Add another block of signal actions to the list */
 
-      sig_allocateactionblock();
+      nxsig_alloc_actionblock();
 
       /* And try again */
 
@@ -176,7 +177,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
   /* Find the signal in the signal action queue */
 
-  sigact = sig_findaction(group, signo);
+  sigact = nxsig_find_action(group, signo);
 
   /* Return the old sigaction value if so requested */
 
@@ -252,7 +253,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
           /* And deallocate it */
 
-          sig_releaseaction(sigact);
+          nxsig_release_action(sigact);
         }
     }
 
@@ -268,7 +269,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
         {
           /* No.. Then we need to allocate one for the new action. */
 
-          sigact = sig_allocateaction();
+          sigact = nxsig_alloc_action();
 
           /* An error has occurred if we could not allocate the sigaction */
 
@@ -296,14 +297,14 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 }
 
 /****************************************************************************
- * Name: sig_releaseaction
+ * Name: nxsig_release_action
  *
  * Description:
  *   Deallocate a sigaction Q entry
  *
  ****************************************************************************/
 
-void sig_releaseaction(FAR sigactq_t *sigact)
+void nxsig_release_action(FAR sigactq_t *sigact)
 {
   /* Just put it back on the free list */
 

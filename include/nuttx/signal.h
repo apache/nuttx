@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/signal.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_notification
+ * Name: nxsig_notification
  *
  * Description:
  *   Notify a client a signal event via a function call.  This function is
@@ -60,17 +60,18 @@
  *   event notification for the case of SIGEV_THREAD.
  *
  * Input Parameters:
- *   pid - The task/thread ID a the client thread to be signaled.
+ *   pid   - The task/thread ID a the client thread to be signaled.
  *   event - The instance of struct sigevent that describes how to signal
- *     the client.
+ *           the client.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   on failure.
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sig_notification(pid_t pid, FAR struct sigevent *event);
+int nxsig_notification(pid_t pid, FAR struct sigevent *event);
 
 #endif /* CONFIG_SIG_EVTHREAD && CONFIG_BUILD_FLAT */
 #endif /* __INCLUDE_NUTTX_SIGNAL_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/signal/sig_allocatependingsigaction.c
+ * sched/signal/sig_allocpendingsigaction.c
  *
- *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,14 +52,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_allocatependingsigaction
+ * Name: nxsig_alloc_pendingsigaction
  *
  * Description:
  *   Allocate a new element for the pending signal action queue
  *
  ****************************************************************************/
 
-FAR sigq_t *sig_allocatependingsigaction(void)
+FAR sigq_t *nxsig_alloc_pendingsigaction(void)
 {
   FAR sigq_t    *sigq;
   irqstate_t flags;

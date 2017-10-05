@@ -638,10 +638,10 @@ void os_start(void)
   /* Initialize the signal facility (if in link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (sig_initialize != NULL)
+  if (nxsig_initialize != NULL)
 #endif
     {
-      sig_initialize();
+      nxsig_initialize();
     }
 #endif
 

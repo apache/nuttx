@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_initialize.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,9 +118,9 @@ static sigpendq_t *g_sigpendingirqsignalalloc;
  * Private Function Prototypes
  ****************************************************************************/
 
-static sigq_t     *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
+static sigq_t     *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
                                      uint8_t sigtype);
-static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
+static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
                                                   uint16_t nsigs, uint8_t sigtype);
 
 /****************************************************************************
@@ -128,7 +128,7 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_allocateblock
+ * Name: nxsig_alloc_block
  *
  * Description:
  *   Allocate a block of pending signal actions and place them
@@ -136,7 +136,7 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
  *
  ****************************************************************************/
 
-static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
+static sigq_t *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
                                  uint8_t sigtype)
 {
   FAR sigq_t *sigqalloc;
@@ -158,7 +158,7 @@ static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
 }
 
 /****************************************************************************
- * Name: sig_allocatependingsignalblock
+ * Name: nxsig_alloc_pendingsignalblock
  *
  * Description:
  *   Allocate a block of pending signal structures  and place them on
@@ -166,7 +166,7 @@ static sigq_t *sig_allocateblock(sq_queue_t *siglist, uint16_t nsigs,
  *
  ****************************************************************************/
 
-static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
+static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
                                                   uint16_t nsigs, uint8_t sigtype)
 {
   FAR sigpendq_t *sigpendalloc;
@@ -193,14 +193,14 @@ static sigpendq_t *sig_allocatependingsignalblock(sq_queue_t *siglist,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_initialize
+ * Name: nxsig_initialize
  *
  * Description:
  *   Perform one-time power-up initialization
  *
  ****************************************************************************/
 
-void sig_initialize(void)
+void nxsig_initialize(void)
 {
   /* Initialize free lists */
 
@@ -213,30 +213,30 @@ void sig_initialize(void)
   /* Add a block of signal structures to each list */
 
   g_sigpendingactionalloc =
-    sig_allocateblock(&g_sigpendingaction,
+    nxsig_alloc_block(&g_sigpendingaction,
                       NUM_PENDING_ACTIONS,
                       SIG_ALLOC_FIXED);
 
   g_sigpendingirqactionalloc =
-    sig_allocateblock(&g_sigpendingirqaction,
+    nxsig_alloc_block(&g_sigpendingirqaction,
                       NUM_PENDING_INT_ACTIONS,
                       SIG_ALLOC_IRQ);
 
-  sig_allocateactionblock();
+  nxsig_alloc_actionblock();
 
   g_sigpendingsignalalloc =
-    sig_allocatependingsignalblock(&g_sigpendingsignal,
+    nxsig_alloc_pendingsignalblock(&g_sigpendingsignal,
                                    NUM_SIGNALS_PENDING,
                                    SIG_ALLOC_FIXED);
 
   g_sigpendingirqsignalalloc =
-    sig_allocatependingsignalblock(&g_sigpendingirqsignal,
+    nxsig_alloc_pendingsignalblock(&g_sigpendingirqsignal,
                                    NUM_INT_SIGNALS_PENDING,
                                    SIG_ALLOC_IRQ);
 }
 
 /****************************************************************************
- * Name: sig_allocateactionblock
+ * Name: nxsig_alloc_actionblock
  *
  * Description:
  *   Allocate a block of signal actions and place them
@@ -244,7 +244,7 @@ void sig_initialize(void)
  *
  ****************************************************************************/
 
-void sig_allocateactionblock(void)
+void nxsig_alloc_actionblock(void)
 {
   FAR sigactq_t *sigact;
   int i;

@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_queueaction
+ * Name: nxsig_queue_action
  *
  * Description:
  *   Queue a signal action for delivery to a task.
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
+static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   FAR sigactq_t *sigact;
   FAR sigq_t    *sigq;
@@ -82,7 +82,7 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 
   /* Find the group sigaction associated with this signal */
 
-  sigact = sig_findaction(stcb->group, info->si_signo);
+  sigact = nxsig_find_action(stcb->group, info->si_signo);
 
   /* Check if a valid signal handler is available and if the signal is
    * unblocked.  NOTE:  There is no default action.
@@ -91,10 +91,10 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
   if ((sigact) && (sigact->act.sa_u._sa_sigaction))
     {
       /* Allocate a new element for the signal queue.  NOTE:
-       * sig_allocatependingsigaction will force a system crash if it is
+       * nxsig_alloc_pendingsigaction will force a system crash if it is
        * unable to allocate memory for the signal data */
 
-      sigq = sig_allocatependingsigaction();
+      sigq = nxsig_alloc_pendingsigaction();
       if (!sigq)
         {
           ret = -ENOMEM;
@@ -120,14 +120,14 @@ static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 }
 
 /****************************************************************************
- * Name: sig_allocatependingsignal
+ * Name: nxsig_alloc_pendingsignal
  *
  * Description:
  *   Allocate a pending signal list entry
  *
  ****************************************************************************/
 
-static FAR sigpendq_t *sig_allocatependingsignal(void)
+static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
 {
   FAR sigpendq_t *sigpend;
   irqstate_t      flags;
@@ -186,15 +186,15 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
 }
 
 /****************************************************************************
- * Name: sig_findpendingsignal
+ * Name: nxsig_find_pendingsignal
  *
  * Description:
  *   Find a specified element in the pending signal list
  *
  ****************************************************************************/
 
-static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
-                                             int signo)
+static FAR sigpendq_t *
+  nxsig_find_pendingsignal(FAR struct task_group_s *group, int signo)
 {
   FAR sigpendq_t *sigpend = NULL;
   irqstate_t flags;
@@ -216,7 +216,7 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
 }
 
 /****************************************************************************
- * Name: sig_addpendingsignal
+ * Name: nxsig_add_pendingsignal
  *
  * Description:
  *   Add the specified signal to the signal pending list. NOTE:  This
@@ -226,8 +226,8 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
  *
  ****************************************************************************/
 
-static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
-                                            FAR siginfo_t *info)
+static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
+                                               FAR siginfo_t *info)
 {
   FAR struct task_group_s *group;
   FAR sigpendq_t *sigpend;
@@ -238,7 +238,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
 
   /* Check if the signal is already pending for the group */
 
-  sigpend = sig_findpendingsignal(group, info->si_signo);
+  sigpend = nxsig_find_pendingsignal(group, info->si_signo);
   if (sigpend)
     {
       /* The signal is already pending... retain only one copy */
@@ -252,7 +252,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
     {
       /* Allocate a new pending signal entry */
 
-      sigpend = sig_allocatependingsignal();
+      sigpend = nxsig_alloc_pendingsignal();
       if (sigpend)
         {
           /* Put the signal information into the allocated structure */
@@ -275,7 +275,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_tcbdispatch
+ * Name: nxsig_tcbdispatch
  *
  * Description:
  *   All signals received the task (whatever the source) go through this
@@ -296,7 +296,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
  *
  ****************************************************************************/
 
-int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
+int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   irqstate_t flags;
   int ret = OK;
@@ -337,7 +337,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       else
         {
           leave_critical_section(flags);
-          ASSERT(sig_addpendingsignal(stcb, info));
+          ASSERT(nxsig_add_pendingsignal(stcb, info));
         }
     }
 
@@ -350,7 +350,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #endif
       /* Queue any sigaction's requested by this task. */
 
-      ret = sig_queueaction(stcb, info);
+      ret = nxsig_queue_action(stcb, info);
 
       /* Deliver of the signal must be performed in a critical section */
 
@@ -369,7 +369,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * recipient's thread.
        */
 
-      up_schedule_sigaction(stcb, sig_deliver);
+      up_schedule_sigaction(stcb, nxsig_deliver);
 
 #ifdef CONFIG_SMP
       /* Resume the paused CPU (if any) */
@@ -429,15 +429,15 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 }
 
 /****************************************************************************
- * Name: sig_dispatch
+ * Name: nxsig_dispatch
  *
  * Description:
- *   This is the front-end for sig_tcbdispatch that should be typically
+ *   This is the front-end for nxsig_tcbdispatch that should be typically
  *   be used to dispatch a signal.  If HAVE_GROUP_MEMBERS is defined,
  *   then function will follow the group signal delivery algorthrims:
  *
  *   This front-end does the following things before calling
- *   sig_tcbdispatch.
+ *   nxsig_tcbdispatch.
  *
  *     With HAVE_GROUP_MEMBERS defined:
  *     - Get the TCB associated with the pid.
@@ -445,18 +445,18 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
  *     - If the PID has already exited, lookup the group that that was
  *       started by this task.
  *     - Use the group to pick the TCB to receive the signal
- *     - Call sig_tcbdispatch with the TCB
+ *     - Call nxsig_tcbdispatch with the TCB
  *
  *     With HAVE_GROUP_MEMBERS *not* defined
  *     - Get the TCB associated with the pid.
- *     - Call sig_tcbdispatch with the TCB
+ *     - Call nxsig_tcbdispatch with the TCB
  *
  * Returned Value:
  *   Returns 0 (OK) on success or a negated errno value on failure.
  *
  ****************************************************************************/
 
-int sig_dispatch(pid_t pid, FAR siginfo_t *info)
+int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
 {
 #ifdef HAVE_GROUP_MEMBERS
   FAR struct tcb_s *stcb;
@@ -509,7 +509,7 @@ int sig_dispatch(pid_t pid, FAR siginfo_t *info)
       return -ESRCH;
     }
 
-  return sig_tcbdispatch(stcb, info);
+  return nxsig_tcbdispatch(stcb, info);
 
 #endif
 }

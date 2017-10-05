@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/signal.h
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -161,41 +162,41 @@ struct task_group_s;
 
 /* sig_initializee.c */
 
-void weak_function sig_initialize(void);
-void               sig_allocateactionblock(void);
+void weak_function nxsig_initialize(void);
+void               nxsig_alloc_actionblock(void);
 
 /* sig_action.c */
 
-void               sig_releaseaction(FAR sigactq_t *sigact);
+void               nxsig_release_action(FAR sigactq_t *sigact);
 
 /* sig_pending.c */
 
-sigset_t           sig_pendingset(FAR struct tcb_s *stcb);
+sigset_t           nxsig_pendingset(FAR struct tcb_s *stcb);
 
 /* sig_dispatch.c */
 
-int                sig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info);
-int                sig_dispatch(pid_t pid, FAR siginfo_t *info);
+int                nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info);
+int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info);
 
 /* sig_cleanup.c */
 
-void               sig_cleanup(FAR struct tcb_s *stcb);
-void               sig_release(FAR struct task_group_s *group);
+void               nxsig_cleanup(FAR struct tcb_s *stcb);
+void               nxsig_release(FAR struct task_group_s *group);
 
 /* In files of the same name */
 
-FAR sigq_t        *sig_allocatependingsigaction(void);
-void               sig_deliver(FAR struct tcb_s *stcb);
-FAR sigactq_t     *sig_findaction(FAR struct task_group_s *group, int signo);
-int                sig_lowest(FAR sigset_t *set);
+FAR sigq_t        *nxsig_alloc_pendingsigaction(void);
+void               nxsig_deliver(FAR struct tcb_s *stcb);
+FAR sigactq_t     *nxsig_find_action(FAR struct task_group_s *group, int signo);
+int                nxsig_lowest(FAR sigset_t *set);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-int                sig_mqnotempty(int tid, int signo, union sigval value);
+int                nxsig_mqnotempty(int tid, int signo, union sigval value);
 #else
-int                sig_mqnotempty(int tid, int signo, FAR void *sival_ptr);
+int                nxsig_mqnotempty(int tid, int signo, FAR void *sival_ptr);
 #endif
-void               sig_releasependingsigaction(FAR sigq_t *sigq);
-void               sig_releasependingsignal(FAR sigpendq_t *sigpend);
-FAR sigpendq_t    *sig_removependingsignal(FAR struct tcb_s *stcb, int signo);
-void               sig_unmaskpendingsignal(void);
+void               nxsig_release_pendingsigaction(FAR sigq_t *sigq);
+void               nxsig_release_pendingsignal(FAR sigpendq_t *sigpend);
+FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb, int signo);
+void               nxsig_unmask_pendingsignal(void);
 
 #endif /* __SCHED_SIGNAL_SIGNAL_H */

@@ -136,7 +136,7 @@ int pthread_kill(pthread_t thread, int signo)
    * dispatch rules.
    */
 
-  ret = sig_tcbdispatch(stcb, &info);
+  ret = nxsig_tcbdispatch(stcb, &info);
   sched_unlock();
 
   if (ret < 0)

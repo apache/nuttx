@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_notification.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ struct sig_notify_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_ntworker
+ * Name: nxsig_notify_worker
  *
  * Description:
  *   Perform the callback from the context of the worker thread.
@@ -93,7 +93,7 @@ struct sig_notify_s
  *
  ****************************************************************************/
 
-static void sig_ntworker(FAR void *arg)
+static void nxsig_notify_worker(FAR void *arg)
 {
   FAR struct sig_notify_s *notify = (FAR struct sig_notify_s *)arg;
 
@@ -117,7 +117,7 @@ static void sig_ntworker(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_notification
+ * Name: nxsig_notification
  *
  * Description:
  *   Notify a client a signal event via a function call.  This function is
@@ -125,17 +125,18 @@ static void sig_ntworker(FAR void *arg)
  *   event notification for the case of SIGEV_THREAD.
  *
  * Input Parameters:
- *   pid - The task/thread ID a the client thread to be signaled.
+ *   pid   - The task/thread ID a the client thread to be signaled.
  *   event - The instance of struct sigevent that describes how to signal
- *     the client.
+ *           the client.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   on failure.
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int sig_notification(pid_t pid, FAR struct sigevent *event)
+int nxsig_notification(pid_t pid, FAR struct sigevent *event)
 {
   FAR struct sig_notify_s *notify;
   DEBUGASSERT(event != NULL && event->sigev_notify_function != NULL);
@@ -160,7 +161,8 @@ int sig_notification(pid_t pid, FAR struct sigevent *event)
 
   /* Then queue the work */
 
-  ret = work_queue(NTWORK, &notify->nt_work, sig_ntworker, notify, 0);
+  ret = work_queue(NTWORK, &notify->nt_work, nxsig_notify_worker,
+                   notify, 0);
   if (ret < 0)
     {
       kmm_free(notify);

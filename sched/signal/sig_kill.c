@@ -123,7 +123,7 @@ int kill(pid_t pid, int signo)
 
   /* Send the signal */
 
-  ret = sig_dispatch(pid, &info);
+  ret = nxsig_dispatch(pid, &info);
   sched_unlock();
 
   if (ret < 0)

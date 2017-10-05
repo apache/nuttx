@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_sndinternal.c
  *
- *   Copyright (C) 2007, 2009, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -416,11 +416,11 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
           /* Yes... Queue the signal -- What if this returns an error? */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-          DEBUGVERIFY(sig_mqnotempty(pid, event.sigev_signo,
-                                     event.sigev_value));
+          DEBUGVERIFY(nxsig_mqnotempty(pid, event.sigev_signo,
+                                       event.sigev_value));
 #else
-          DEBUGVERIFY(sig_mqnotempty(pid, event.sigev_signo,
-                                     event.sigev_value.sival_ptr));
+          DEBUGVERIFY(nxsig_mqnotempty(pid, event.sigev_signo,
+                                       event.sigev_value.sival_ptr));
 #endif
         }
 
@@ -429,7 +429,7 @@ int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
 
       else if (event.sigev_notify == SIGEV_THREAD)
         {
-          DEBUGVERIFY(sig_notification(pid, &event));
+          DEBUGVERIFY(nxsig_notification(pid, &event));
         }
 #endif
 

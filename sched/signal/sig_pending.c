@@ -76,7 +76,7 @@ int sigpending(FAR sigset_t *set)
 
   if (set)
     {
-      *set = sig_pendingset(rtcb);
+      *set = nxsig_pendingset(rtcb);
       ret = OK;
     }
 
@@ -84,14 +84,14 @@ int sigpending(FAR sigset_t *set)
 }
 
 /****************************************************************************
- * Name: sig_pendingset
+ * Name: nxsig_pendingset
  *
  * Description:
  *   Convert the list of pending signals into a signal set
  *
  ****************************************************************************/
 
-sigset_t sig_pendingset(FAR struct tcb_s *stcb)
+sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
 {
   FAR struct task_group_s *group = stcb->group;
   sigset_t sigpendset;

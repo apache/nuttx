@@ -154,7 +154,7 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 
       /* Now, process any pending signals that were just unmasked */
 
-      sig_unmaskpendingsignal();
+      nxsig_unmask_pendingsignal();
     }
 
   sched_unlock();

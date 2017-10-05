@@ -116,7 +116,7 @@ int sigsuspend(FAR const sigset_t *set)
    * signals that will be unblocked by the new sigprocmask.
    */
 
-  intersection = ~(*set) & sig_pendingset(rtcb);
+  intersection = ~(*set) & nxsig_pendingset(rtcb);
   if (intersection != NULL_SIGNAL_SET)
     {
       /* One or more of the signals in intersections is sufficient to cause
@@ -124,11 +124,11 @@ int sigsuspend(FAR const sigset_t *set)
        * pending.
        */
 
-      unblocksigno = sig_lowest(&intersection);
-      sigpend = sig_removependingsignal(rtcb, unblocksigno);
+      unblocksigno = nxsig_lowest(&intersection);
+      sigpend = nxsig_remove_pendingsignal(rtcb, unblocksigno);
       ASSERT(sigpend);
 
-      sig_releasependingsignal(sigpend);
+      nxsig_release_pendingsignal(sigpend);
       leave_critical_section(flags);
     }
   else
@@ -155,7 +155,7 @@ int sigsuspend(FAR const sigset_t *set)
        * sigprocmask will unblock the signal.
        */
 
-      sig_unmaskpendingsignal();
+      nxsig_unmask_pendingsignal();
     }
 
   sched_unlock();

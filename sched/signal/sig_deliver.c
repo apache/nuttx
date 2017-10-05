@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_deliver
+ * Name: nxsig_deliver
  *
  * Description:
  *   This function is called on the thread of execution of the signal
@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-void sig_deliver(FAR struct tcb_s *stcb)
+void nxsig_deliver(FAR struct tcb_s *stcb)
 {
   FAR sigq_t *sigq;
   FAR sigq_t *next;
@@ -151,7 +151,7 @@ void sig_deliver(FAR struct tcb_s *stcb)
        * original sigprocmask will unblock the signal.
        */
 
-      sig_unmaskpendingsignal();
+      nxsig_unmask_pendingsignal();
 
       /* Remove the signal from the sigpostedq */
 
@@ -161,7 +161,7 @@ void sig_deliver(FAR struct tcb_s *stcb)
 
       /* Then deallocate it */
 
-      sig_releasependingsigaction(sigq);
+      nxsig_release_pendingsigaction(sigq);
     }
 
   stcb->pterrno = saved_errno;

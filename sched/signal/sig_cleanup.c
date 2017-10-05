@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_cleanup.c
  *
- *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_cleanup
+ * Name: nxsig_cleanup
  *
  * Description:
  *   Deallocate all signal-related lists in a TCB.  This function is
@@ -56,7 +56,7 @@
  *
  ****************************************************************************/
 
-void sig_cleanup(FAR struct tcb_s *stcb)
+void nxsig_cleanup(FAR struct tcb_s *stcb)
 {
   FAR sigq_t     *sigq;
 
@@ -64,14 +64,14 @@ void sig_cleanup(FAR struct tcb_s *stcb)
 
   while ((sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq)) != NULL)
     {
-      sig_releasependingsigaction(sigq);
+      nxsig_release_pendingsigaction(sigq);
     }
 
   /* Deallocate all entries in the list of posted signal actions */
 
   while ((sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpostedq)) != NULL)
     {
-      sig_releasependingsigaction(sigq);
+      nxsig_release_pendingsigaction(sigq);
     }
 
   /* Misc. signal-related clean-up */
@@ -81,7 +81,7 @@ void sig_cleanup(FAR struct tcb_s *stcb)
 }
 
 /****************************************************************************
- * Name: sig_release
+ * Name: nxsig_release
  *
  * Description:
  *   Deallocate all signal-related lists in a group.  This function is
@@ -91,7 +91,7 @@ void sig_cleanup(FAR struct tcb_s *stcb)
  *
  ****************************************************************************/
 
-void sig_release(FAR struct task_group_s *group)
+void nxsig_release(FAR struct task_group_s *group)
 {
   FAR sigactq_t  *sigact;
   FAR sigpendq_t *sigpend;
@@ -100,14 +100,14 @@ void sig_release(FAR struct task_group_s *group)
 
   while ((sigact = (FAR sigactq_t *)sq_remfirst(&group->tg_sigactionq)) != NULL)
     {
-      sig_releaseaction(sigact);
+      nxsig_release_action(sigact);
     }
 
   /* Deallocate all entries in the list of pending signals */
 
   while ((sigpend = (FAR sigpendq_t *)sq_remfirst(&group->tg_sigpendingq)) != NULL)
     {
-      sig_releasependingsignal(sigpend);
+      nxsig_release_pendingsignal(sigpend);
     }
 }
 

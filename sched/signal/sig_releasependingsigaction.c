@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_releasependingsigaction.c
  *
- *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,14 +50,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_releasependingsigaction
+ * Name: nxsig_release_pendingsigaction
  *
  * Description:
  *   Deallocate a pending signal action Q entry
  *
  ****************************************************************************/
 
-void sig_releasependingsigaction(FAR sigq_t *sigq)
+void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
 {
   irqstate_t flags;
 

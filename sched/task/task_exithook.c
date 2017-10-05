@@ -405,7 +405,7 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
        * can provide the correct si_code value with the signal.
        */
 
-      (void)sig_tcbdispatch(ptcb, &info);
+      (void)nxsig_tcbdispatch(ptcb, &info);
     }
 }
 
@@ -690,7 +690,7 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Deallocate anything left in the TCB's queues */
 
-  sig_cleanup(tcb); /* Deallocate Signal lists */
+  nxsig_cleanup(tcb); /* Deallocate Signal lists */
 #endif
 
   /* This function can be re-entered in certain cases.  Set a flag

@@ -129,7 +129,7 @@ int sigqueue(int pid, int signo, void *sival_ptr)
   /* Send the signal */
 
   sched_lock();
-  ret = sig_dispatch(pid, &info);
+  ret = nxsig_dispatch(pid, &info);
   sched_unlock();
 
   /* Check for errors */

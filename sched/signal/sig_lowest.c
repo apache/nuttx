@@ -48,14 +48,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_lowest
+ * Name: nxsig_lowest
  *
  * Description:
  *   Return the lowest signal number that is a member of a set of signals.
  *
  ****************************************************************************/
 
-int sig_lowest(sigset_t *set)
+int nxsig_lowest(sigset_t *set)
 {
   int signo;
 

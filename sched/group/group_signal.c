@@ -121,7 +121,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
            * receive the signal.
            */
 
-          ret = sig_tcbdispatch(tcb, info->siginfo);
+          ret = nxsig_tcbdispatch(tcb, info->siginfo);
           if (ret < 0)
             {
               return ret;
@@ -152,7 +152,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
           /* Is there also a action associated with the task group? */
 
-          sigact = sig_findaction(tcb->group, info->siginfo->si_signo);
+          sigact = nxsig_find_action(tcb->group, info->siginfo->si_signo);
           if (sigact)
             {
               /* Yes.. then use this thread.  The requirement is this:
@@ -161,7 +161,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
                * blocking the signal will receive the signal.
                */
 
-              ret = sig_tcbdispatch(tcb, info->siginfo);
+              ret = nxsig_tcbdispatch(tcb, info->siginfo);
               if (ret < 0)
                 {
                   return ret;
@@ -261,7 +261,7 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo)
 
       /* Now deliver the signal to the selected group member */
 
-      ret = sig_tcbdispatch(tcb, siginfo);
+      ret = nxsig_tcbdispatch(tcb, siginfo);
     }
 
 errout:

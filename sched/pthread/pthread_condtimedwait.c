@@ -88,8 +88,8 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
   FAR struct tcb_s *tcb;
   siginfo_t info;
 
-  /* The logic below if equivalent to sigqueue(), but uses sig_tcbdispatch()
-   * instead of sig_dispatch().  This avoids the group signal deliver logic
+  /* The logic below if equivalent to sigqueue(), but uses nxsig_tcbdispatch()
+   * instead of nxsig_dispatch().  This avoids the group signal deliver logic
    * and assures, instead, that the signal is delivered specifically to this
    * thread that is known to be waiting on the signal.
    */
@@ -117,7 +117,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
        * a watchdog timer interrupt handler.
        */
 
-      (void)sig_tcbdispatch(tcb, &info);
+      (void)nxsig_tcbdispatch(tcb, &info);
     }
 
 #else /* HAVE_GROUP_MEMBERS */

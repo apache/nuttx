@@ -2,7 +2,7 @@
 ###########################################################################
 # configs/ea3131/locked/mklocked.sh
 #
-#   Copyright (C) 2010-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -168,7 +168,7 @@ fi
 
 answer=$(checkconfig CONFIG_DISABLE_SIGNALS)
 if [ "$answer" = n ]; then
-	echo "EXTERN(sig_initialize)" >>ld-locked.inc
+	echo "EXTERN(nxsig_initialize)" >>ld-locked.inc
 fi
 
 echo "EXTERN(sem_initialize)" >>ld-locked.inc
