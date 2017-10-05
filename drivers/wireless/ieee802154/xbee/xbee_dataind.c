@@ -45,6 +45,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/xbee.h>
 
@@ -149,7 +150,7 @@ int xbee_dataind_alloc(FAR struct xbee_priv_s *priv,
    * The MAC is already locked, so there shouldn't be any other conflicting calls
    */
 
-  ret = sem_trywait(&priv->dataind_sem);
+  ret = nxsem_trywait(&priv->dataind_sem);
 
   if (ret == OK)
     {

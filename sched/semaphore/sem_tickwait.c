@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
+#include <nuttx/semaphore.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -73,7 +74,7 @@
  *             in any event.
  *   delay   - Ticks to wait from the start time until the semaphore is
  *             posted.  If ticks is zero, then this function is equivalent
- *             to sem_trywait().
+ *             to nxsem_trywait().
  *
  * Return Value:
  *   This is an internal OS interface, not available to applications, and
@@ -116,7 +117,7 @@ int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 
   /* Try to take the semaphore without waiting. */
 
-  ret = sem_trywait(sem);
+  ret = nxsem_trywait(sem);
   if (ret == OK)
     {
       /* We got it! */
@@ -130,9 +131,8 @@ int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay)
 
   if (delay == 0)
     {
-      /* Return the errno from sem_trywait() */
+      /* Return the errno from nxsem_trywait() */
 
-      ret = -get_errno();
       goto errout_with_irqdisabled;
     }
 

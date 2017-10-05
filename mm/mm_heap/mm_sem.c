@@ -108,6 +108,7 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
 int mm_trysemaphore(FAR struct mm_heap_s *heap)
 {
   pid_t my_pid = getpid();
+  int ret;
 
   /* Do I already have the semaphore? */
 
@@ -122,9 +123,10 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
     {
       /* Try to take the semaphore (perhaps waiting) */
 
-      if (sem_trywait(&heap->mm_semaphore) != 0)
+      ret = nxsem_trywait(&heap->mm_semaphore);
+      if (ret < 0)
        {
-         return ERROR;
+         return ret;
        }
 
       /* We have it.  Claim the stak and return */

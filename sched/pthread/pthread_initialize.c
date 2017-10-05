@@ -45,6 +45,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/semaphore.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -150,8 +152,8 @@ int pthread_sem_trytake(sem_t *sem)
     {
       /* Try to take the semaphore */
 
-      int status = sem_trywait(sem);
-      ret = status < 0 ? get_errno() : OK;
+      int status = nxsem_trywait(sem);
+      ret = ret < 0 ? -ret : OK;
     }
 
   return ret;

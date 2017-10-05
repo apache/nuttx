@@ -270,7 +270,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled)
           g_iob_freelist = iob->io_flink;
 
           /* Take a semaphore count.  Note that we cannot do this in
-           * in the orthodox way by calling nxsem_wait() or sem_trywait()
+           * in the orthodox way by calling nxsem_wait() or nxsem_trywait()
            * because this function may be called from an interrupt
            * handler. Fortunately we know at at least one free buffer
            * so a simple decrement is all that is needed.

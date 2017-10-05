@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/cancelpt.h>
+#include <nuttx/semaphore.h>
 
 #include "sched/sched.h"
 #include "clock/clock.h"
@@ -146,7 +147,7 @@ int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Try to take the semaphore without waiting. */
 
-  ret = sem_trywait(sem);
+  ret = nxsem_trywait(sem);
   if (ret == OK)
     {
       /* We got it! */

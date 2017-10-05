@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
+#include <nuttx/semaphore.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"
@@ -269,10 +270,10 @@ int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
         {
           /* Try to take the semaphore underlying the mutex */
 
-          ret = sem_trywait(&mutex->sem);
-          if (ret < OK)
+          ret = nxsem_trywait(&mutex->sem);
+          if (ret < 0)
             {
-              ret = get_errno();
+              ret = -ret;
             }
           else
             {

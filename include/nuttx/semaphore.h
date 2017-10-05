@@ -173,12 +173,38 @@ int nxsem_destroy (FAR sem_t *sem);
  *   returned on success.  A negated errno value is returned on failure.
  *   Possible returned errors:
  *
- *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *     EINVAL - Invalid attempt to get the semaphore
+ *     EINTR  - The wait was interrupted by the receipt of a signal.
  *
  ****************************************************************************/
 
 int nxsem_wait(FAR sem_t *sem);
+
+/****************************************************************************
+ * Name: nxsem_trywait
+ *
+ * Description:
+ *   This function locks the specified semaphore only if the semaphore is
+ *   currently not locked.  Otherwise, it locks the semaphore.  In either
+ *   case, the call returns without blocking.
+ *
+ * Parameters:
+ *   sem - the semaphore descriptor
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *     EINVAL - Invalid attempt to get the semaphore
+ *     EAGAIN - The semaphore is not available.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsem_trywait(FAR sem_t *sem);
 
 /****************************************************************************
  * Name: nxsem_timedwait

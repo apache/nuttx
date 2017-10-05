@@ -46,6 +46,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>
+#include <nuttx/semaphore.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -241,7 +242,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
     {
       /* Don't wait if status is not available */
 
-      ret = sem_trywait(&group->tg_exitsem);
+      ret = nxsem_trywait(&group->tg_exitsem);
       group_delwaiter(group);
 
       if (ret < 0)

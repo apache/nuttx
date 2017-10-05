@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_trywait.c
  *
- *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_trywait
+ * Name: nxsem_trywait
  *
  * Description:
  *   This function locks the specified semaphore only if the semaphore is
@@ -66,21 +66,23 @@
  *   sem - the semaphore descriptor
  *
  * Return Value:
- *   0 (OK) or -1 (ERROR) if unsuccessful. If this function returns -1
- *   (ERROR),then the cause of the failure will be reported in "errno" as:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
  *
- *     EINVAL:  Invalid attempt to get the semaphore
- *     EAGAIN:  The semaphore is not available.
+ *     EINVAL - Invalid attempt to get the semaphore
+ *     EAGAIN - The semaphore is not available.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sem_trywait(FAR sem_t *sem)
+int nxsem_trywait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int ret = ERROR;
+  int ret;
 
   /* This API should not be called from interrupt handlers */
 
@@ -108,7 +110,7 @@ int sem_trywait(FAR sem_t *sem)
         {
           /* Semaphore is not available */
 
-          set_errno(EAGAIN);
+          ret = -EAGAIN;
         }
 
       /* Interrupts may now be enabled. */
@@ -117,7 +119,44 @@ int sem_trywait(FAR sem_t *sem)
     }
   else
     {
-      set_errno(EINVAL);
+      ret = -EINVAL;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sem_trywait
+ *
+ * Description:
+ *   This function locks the specified semaphore only if the semaphore is
+ *   currently not locked.  Otherwise, it locks the semaphore.  In either
+ *   case, the call returns without blocking.
+ *
+ * Parameters:
+ *   sem - the semaphore descriptor
+ *
+ * Return Value:
+ *   Zero (OK) on success or -1 (ERROR) if unsuccessful. If this function
+ *   returns -1(ERROR), then the cause of the failure will be reported in
+ *   errno variable as:
+ *
+ *     EINVAL - Invalid attempt to get the semaphore
+ *     EAGAIN - The semaphore is not available.
+ *
+ ****************************************************************************/
+
+int sem_trywait(FAR sem_t *sem)
+{
+  int ret;
+
+  /* Let nxsem_trywait do the real work */
+
+  ret = nxsem_trywait(sem);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
     }
 
   return ret;

@@ -52,6 +52,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 
 #include <nuttx/mm/iob.h>
 
@@ -168,7 +169,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
    * The MAC is already locked, so there shouldn't be any other conflicting calls
    */
 
-  ret = sem_trywait(&priv->txdesc_sem);
+  ret = nxsem_trywait(&priv->txdesc_sem);
   if (ret == OK)
     {
       *txdesc = (FAR struct ieee802154_txdesc_s *)sq_remfirst(&priv->txdesc_queue);

@@ -50,6 +50,8 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/semaphore.h>
+
 #include "mac802154.h"
 #include "mac802154_internal.h"
 
@@ -158,7 +160,7 @@ int mac802154_notif_alloc(FAR struct ieee802154_privmac_s *priv,
    * The MAC is already locked, so there shouldn't be any other conflicting calls
    */
 
-  ret = sem_trywait(&priv->notif_sem);
+  ret = nxsem_trywait(&priv->notif_sem);
 
   if (ret == OK)
     {
