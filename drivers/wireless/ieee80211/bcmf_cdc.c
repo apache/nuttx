@@ -227,7 +227,7 @@ int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
     }
 
   ret = bcmf_sem_wait(&priv->control_timeout, BCMF_CONTROL_TIMEOUT_MS);
-  if (ret != OK)
+  if (ret < 0)
     {
       wlerr("Error while waiting for control response %d\n", ret);
       return ret;

@@ -327,7 +327,7 @@ static int pn532_wait_rx_ready(struct pn532_dev_s *dev, int timeout)
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   ts.tv_sec += 1;
-  sem_timedwait(dev->sem_rx, &ts);
+  (void)nxsem_timedwait(dev->sem_rx, &ts);
 #endif
 
   /* TODO: Handle Exception bits 2, 3 */

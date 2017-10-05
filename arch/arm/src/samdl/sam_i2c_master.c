@@ -61,6 +61,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
@@ -624,15 +625,16 @@ static inline void i2c_putrel(struct sam_i2c_dev_s *priv, unsigned int offset,
 static int i2c_wait_for_bus(struct sam_i2c_dev_s *priv, unsigned int size)
 {
   struct timespec ts;
+  int ret;
 
   clock_gettime(CLOCK_REALTIME, &ts);
   ts.tv_nsec += 200e3;
 
-  if (sem_timedwait(&priv->waitsem, (const struct timespec *)&ts) != OK)
+  ret = nxsem_timedwait(&priv->waitsem, (const struct timespec *)&ts);
+  if (ret < 0)
     {
-      int errcode = errno;
-      i2cinfo("timedwait error %d\n", errcode);
-      return -errcode;
+      i2cinfo("timedwait error %d\n", ret);
+      return ret;
     }
 
   return priv->result;

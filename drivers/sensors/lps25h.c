@@ -570,14 +570,13 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
           abstime.tv_nsec -= 1000 * 1000 * 1000;
         }
 
-      while ((ret = sem_timedwait(&dev->waitsem, &abstime)) != 0)
+      while ((ret = nxsem_timedwait(&dev->waitsem, &abstime)) < 0)
         {
-          int err = errno;
-          if (err == EINTR)
+          if (ret == -EINTR)
             {
               continue;
             }
-          else if (err == ETIMEDOUT)
+          else if (ret == -ETIMEDOUT)
             {
               uint8_t reg = LPS25H_CTRL_REG2;
               uint8_t value;
@@ -609,7 +608,7 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
               /* Some unknown mystery error */
 
               DEBUGASSERT(false);
-              return -err;
+              return ret;
             }
         }
 

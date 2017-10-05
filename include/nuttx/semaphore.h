@@ -181,6 +181,52 @@ int nxsem_destroy (FAR sem_t *sem);
 int nxsem_wait(FAR sem_t *sem);
 
 /****************************************************************************
+ * Name: nxsem_timedwait
+ *
+ * Description:
+ *   This function will lock the semaphore referenced by sem as in the
+ *   sem_wait() function. However, if the semaphore cannot be locked without
+ *   waiting for another process or thread to unlock the semaphore by
+ *   performing a sem_post() function, this wait will be terminated when the
+ *   specified timeout expires.
+ *
+ *   The timeout will expire when the absolute time specified by abstime
+ *   passes, as measured by the clock on which timeouts are based (that is,
+ *   when the value of that clock equals or exceeds abstime), or if the
+ *   absolute time specified by abstime has already been passed at the
+ *   time of the call.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellaction point, and
+ *   - It does not modify the errno value.
+ *
+ * Parameters:
+ *   sem     - Semaphore object
+ *   abstime - The absolute time to wait until a timeout is declared.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   That may be one of:
+ *
+ *   EINVAL    The sem argument does not refer to a valid semaphore.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The semaphore could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *   EINTR     A signal interrupted this function.
+ *
+ ****************************************************************************/
+
+struct timespec; /* Forward reference */
+int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime);
+
+/****************************************************************************
  * Name: nxsem_tickwait
  *
  * Description:

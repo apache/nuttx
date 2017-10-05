@@ -47,6 +47,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "utils/utils.h"
@@ -226,11 +227,11 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
 
       /* Now take the semaphore, waiting if so requested. */
 
-      if (abstime)
+      if (abstime != NULL)
         {
           /* Wait until we get the lock or until the timeout expires */
 
-          ret = sem_timedwait(sem, abstime);
+          ret = nxsem_timedwait(sem, abstime);
         }
       else
         {
@@ -249,7 +250,6 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
     {
       ret = nxsem_wait(sem);
     }
-
 
   sched_unlock();
   leave_critical_section(flags);

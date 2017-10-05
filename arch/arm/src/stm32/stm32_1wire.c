@@ -814,11 +814,11 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           stm32_1wire_send(priv, RESET_TX);
           leave_critical_section(irqs);
 
-          /* Wait */
+          /* Wait.  Break on timeout if TX line closed to GND */
 
           clock_gettime(CLOCK_REALTIME, &abstime);
           abstime.tv_sec += BUS_TIMEOUT;
-          sem_timedwait(&priv->sem_isr, &abstime); /* break on timeout if TX line closed to GND */
+          (void)nxsem_timedwait(&priv->sem_isr, &abstime);
           break;
 
         case ONEWIRETASK_WRITE:
@@ -836,11 +836,11 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           stm32_1wire_send(priv, (*priv->byte & (1 << priv->bit)) ? WRITE_TX1 : WRITE_TX0);
           leave_critical_section(irqs);
 
-          /* Wait */
+          /* Wait.  Break on timeout if TX line closed to GND */
 
           clock_gettime(CLOCK_REALTIME, &abstime);
           abstime.tv_sec += BUS_TIMEOUT;
-          sem_timedwait(&priv->sem_isr, &abstime); /* break on timeout if TX line closed to GND */
+          (void)nxsem_timedwait(&priv->sem_isr, &abstime);
           break;
 
         case ONEWIRETASK_READ:
@@ -858,11 +858,11 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           stm32_1wire_send(priv, READ_TX);
           leave_critical_section(irqs);
 
-          /* Wait */
+          /* Wait.  Break on timeout if TX line closed to GND */
 
           clock_gettime(CLOCK_REALTIME, &abstime);
           abstime.tv_sec += BUS_TIMEOUT;
-          sem_timedwait(&priv->sem_isr, &abstime); /* break on timeout if TX line closed to GND */
+          (void)nxsem_timedwait(&priv->sem_isr, &abstime);
           break;
         }
 

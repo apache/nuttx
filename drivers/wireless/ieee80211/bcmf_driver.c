@@ -1188,10 +1188,10 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   wlinfo("semwait done ! %d\n", ret);
 
-  if (ret)
+  if (ret < 0)
     {
       wlerr("Associate request timeout\n");
-      return -EINVAL;
+      return ret;
     }
 
   switch (priv->auth_status)
@@ -1204,5 +1204,6 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
         wlerr("AP join failed %d\n", priv->auth_status);
         return -EINVAL;
     }
+
   return OK;
  }

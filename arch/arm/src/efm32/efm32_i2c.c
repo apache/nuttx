@@ -578,16 +578,16 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
       /* Wait until either the transfer is complete or the timeout expires */
 
-      ret = sem_timedwait(&priv->sem_isr, &abstime);
+      ret = nxsem_timedwait(&priv->sem_isr, &abstime);
 
       /* Disable I2C interrupts */
 
       efm32_i2c_putreg(priv, EFM32_I2C_IEN_OFFSET, 0);
 
-      if (ret != OK && errno != EINTR)
+      if (ret < 0 && ret != -EINTR)
         {
           /* Break out of the loop on irrecoverable errors.  This would include
-           * timeouts and mystery errors reported by sem_timedwait. NOTE that
+           * timeouts and mystery errors reported by nxsem_timedwait. NOTE that
            * we try again if we are awakened by a signal (EINTR).
            */
 
@@ -624,7 +624,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
   /* Signal the interrupt handler that we are waiting.  NOTE: Interrupts are
    * currently disabled but will be temporarily re-enabled below when
-   * sem_timedwait() sleeps.
+   * nxsem_timedwait() sleeps.
    */
 
   start = clock_systimer();

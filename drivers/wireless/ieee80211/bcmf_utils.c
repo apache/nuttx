@@ -45,6 +45,8 @@
 #include <stdio.h>
 #include <queue.h>
 
+#include <nuttx/semaphore.h>
+
 #include "bcmf_utils.h"
 
 /****************************************************************************
@@ -117,7 +119,7 @@ int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
       abstime.tv_nsec -= 1000 * 1000 * 1000;
     }
 
-  return sem_timedwait(sem, &abstime);
+  return nxsem_timedwait(sem, &abstime);
 }
 
 void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry)

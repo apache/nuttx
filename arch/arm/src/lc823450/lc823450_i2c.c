@@ -54,9 +54,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
 
@@ -308,11 +309,7 @@ static inline int lc823450_i2c_sem_waitdone(FAR struct lc823450_i2c_priv_s *priv
     {
       /* Get the current time */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-      (void)clock_gettime(CLOCK_MONOTONIC, &abstime);
-#else
       (void)clock_gettime(CLOCK_REALTIME, &abstime);
-#endif
 
       /* Calculate a time in the future */
 
@@ -331,16 +328,12 @@ static inline int lc823450_i2c_sem_waitdone(FAR struct lc823450_i2c_priv_s *priv
 
       /* Wait until either the transfer is complete or the timeout expires */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-      ret = sem_timedwait_monotonic(&priv->sem_isr, &abstime);
-#else
-      ret = sem_timedwait(&priv->sem_isr, &abstime);
-#endif
-      if (ret != OK && errno != EINTR)
+      ret = nxsem_timedwait(&priv->sem_isr, &abstime);
+      if (ret < 0 && errno != -EINTR)
         {
 
           /* Break out of the loop on irrecoverable errors.  This would
-           * include timeouts and mystery errors reported by sem_timedwait.
+           * include timeouts and mystery errors reported by nxsem_timedwait.
            * NOTE that we try again if we are awakened by a signal (EINTR).
            */
           break;
