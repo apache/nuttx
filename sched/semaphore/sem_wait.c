@@ -187,7 +187,7 @@ int nxsem_wait(FAR sem_t *sem)
            * race conditions.
            */
 
-          /* Check if an error occurred while we were sleeping.  Expected
+          /* An error may have occurred while we were sleeping.  Expected
            * errors include EINTR meaning that we were awakened by a signal
            * or ETIMEDOUT meaning that the timer expired for the case of
            * sem_timedwait().
@@ -197,7 +197,7 @@ int nxsem_wait(FAR sem_t *sem)
            * thread was restarted.
            */
 
-          ret           = rtcb->pterrno != OK ? -rtcb->pterrno : OK;
+          ret           = rtcb->pterrno;
           rtcb->pterrno = saved_errno;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
