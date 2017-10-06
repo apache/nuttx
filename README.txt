@@ -1756,13 +1756,13 @@ nuttx/
  |   |   `- README.txt
  |   |- pcduino-a10/
  |   |   `- README.txt
+ |   |- photon/
+ |   |   `- README.txt
  |   |- pic32mx-starterkit/
  |   |   `- README.txt
  |   |- pic32mx7mmb/
  |   |   `- README.txt
  |   |- pic32mz-starterkit/
- |   |   `- README.txt
- |   |- photon/
  |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
