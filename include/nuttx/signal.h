@@ -172,6 +172,70 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
                     FAR struct timespec *rmtp);
 
 /****************************************************************************
+ * Name: nxsig_sleep
+ *
+ * Description:
+ *   The nxsig_sleep() function will cause the calling thread to be
+ *   suspended from execution until either the number of real-time seconds
+ *   specified by the argument 'seconds' has elapsed or a signal is
+ *   delivered to the calling thread.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   the standard sleep() application interface except that:
+ *
+ *   - It is not a cancellaction point, and
+ *   - There is no check that the action of the signal is to invoke a
+ *     signal-catching function or to terminate the process.
+ *
+ *   See the description of sleep() for additional information that is not
+ *   duplicated here.
+ *
+ * Parameters:
+ *   seconds - The number of seconds to sleep
+ *
+ * Returned Value:
+ *   If nxsig_sleep() returns because the requested time has elapsed, the
+ *   value returned will be zero (OK). If nxsig_sleep() returns because of
+ *   premature arousal due to delivery of a signal, the return value will
+ *   be the "unslept" amount (the requested time minus the time actually
+ *   slept) in seconds.
+ *
+ ****************************************************************************/
+
+unsigned int nxsig_sleep(unsigned int seconds);
+
+/****************************************************************************
+ * Name: nxsig_usleep
+ *
+ * Description:
+ *   The nxsig_usleep() function will cause the calling thread to be
+ *   suspended from execution until either the number of real-time
+ *   microseconds specified by the argument 'usec' has elapsed or a signal
+ *   is delivered to the calling thread. The suspension time may be longer
+ *   than requested due to the scheduling of other activity by the system.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   the standard nxsig_usleep() application interface except that:
+ *
+ *   - It is not a cancellaction point, and
+ *   - It does not modify the errno value.
+ *
+ *   See the description of usleep() for additional information that is not
+ *   duplicated here.
+ *
+ * Parameters:
+ *   usec - the number of microseconds to wait.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsig_usleep(useconds_t usec);
+
+/****************************************************************************
  * Name: nxsig_notification
  *
  * Description:

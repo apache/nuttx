@@ -57,6 +57,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 
 #include <nuttx/usb/usb.h>
@@ -1076,7 +1077,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
   priv->polling = true;
   usbhost_givesem(&g_syncsem);
-  sleep(1);
+  nxsig_sleep(1);
 
   /* Loop here until the device is disconnected */
 

@@ -70,6 +70,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/tsc2007.h>
 
@@ -515,7 +516,7 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
    *  least 10ms before attempting to read data from the TSC2007...
    */
 
-  usleep(10*1000);
+  nxsig_usleep(10*1000);
 
   /* "Data access begins with the master issuing a START condition followed
    *  by the address byte ... with R/W = 1.

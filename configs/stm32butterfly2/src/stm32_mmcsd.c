@@ -36,15 +36,18 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
 #include <nuttx/config.h>
-#include <nuttx/mmcsd.h>
-#include <nuttx/spi/spi.h>
+
 #include <pthread.h>
 #include <sched.h>
 #include <semaphore.h>
 #include <time.h>
 #include <unistd.h>
+#include <debug.h>
+
+#include <nuttx/mmcsd.h>
+#include <nuttx/signal.h>
+#include <nuttx/spi/spi.h>
 
 #include "stm32.h"
 #include "stm32_butterfly2.h"
@@ -109,7 +112,7 @@ static void *stm32_cd_thread(void *arg)
            * rest for a millsecond or so.
            */
 
-          usleep(1 * 1000);
+          nxsig_usleep(1 * 1000);
           g_chmediaclbk(g_chmediaarg);
         }
     }

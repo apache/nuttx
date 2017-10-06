@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/viewtool-stm32f107/src/stm32_highpri.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <unistd.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
@@ -226,7 +227,7 @@ int highpri_main(int argc, char *argv[])
       /* Flush stdout and wait a bit */
 
       fflush(stdout);
-      sleep(1);
+      nxsig_sleep(1);
       seconds++;
 
       /* Sample counts so that they are not volatile.  Missing a count now

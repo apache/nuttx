@@ -46,9 +46,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/modem/u-blox.h>
 
 #include <arch/board/board.h>
@@ -182,7 +183,7 @@ static int lpc17_poweron(FAR struct ubxmdm_lower* lower)
 
   lpc17_configgpio(priv->pins->reset_n      | GPIO_VALUE_ONE);  /* Modem not in reset */
   lpc17_configgpio(priv->pins->power_on_n   | GPIO_VALUE_ZERO); /* Switch closed to GND */
-  usleep(10 * 1000);  /* Min. time for power_on_n being low is 5 ms */
+  nxsig_usleep(10 * 1000);  /* Min. time for power_on_n being low is 5 ms */
 
   if (priv->usb_used)
     {
@@ -196,7 +197,7 @@ static int lpc17_poweron(FAR struct ubxmdm_lower* lower)
   lpc17_configgpio(priv->pins->usb_detect   | usb_detect_val);
 
   lpc17_configgpio(priv->pins->ldo_enable   | GPIO_VALUE_ONE);  /* LDO enabled */
-  usleep(1 * 1000);  /* Delay to obtain correct voltage on shifters */
+  nxsig_usleep(1 * 1000);  /* Delay to obtain correct voltage on shifters */
 
   lpc17_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ZERO); /* UART shifter enabled */
 /* lpc17_configgpio(priv->pins->power_on_n  | GPIO_VALUE_ONE);   * Stop current through switch */
@@ -224,7 +225,7 @@ static int lpc17_reset(FAR struct ubxmdm_lower* lower)
     (FAR struct lpc17_ubxmdm_lower*) lower;
 
   lpc17_configgpio(priv->pins->reset_n | GPIO_VALUE_ZERO); /* Modem in reset */
-  usleep(75 * 1000);  /* The minimum reset_n low time is 50 ms */
+  nxsig_usleep(75 * 1000);  /* The minimum reset_n low time is 50 ms */
   lpc17_configgpio(priv->pins->reset_n | GPIO_VALUE_ONE);  /* Modem not in reset */
 
   return OK;

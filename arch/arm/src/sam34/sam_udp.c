@@ -61,6 +61,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -3523,7 +3524,7 @@ static int sam_wakeup(struct usbdev_s *dev)
 
   /* Wait 5msec in case we just entered the resume state */
 
-  usleep(5*1000);
+  nxsig_usleep(5*1000);
 
   /* Set the ESR bit to send the remote resume */
 

@@ -47,10 +47,12 @@
 #include <debug.h>
 #include <stdlib.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/wireless/cc3000/hci.h>
-#include "cc3000_socket.h"
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 #include <nuttx/wireless/cc3000/netapp.h>
+
+#include "cc3000_socket.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -154,7 +156,7 @@ int HostFlowControlConsumeBuff(int sd)
 
       if (0 == tSLInformation.usNumberOfFreeBuffers)
         {
-          usleep(100000);
+          nxsig_usleep(100000);
         }
     }
   while (0 == tSLInformation.usNumberOfFreeBuffers);

@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/page.h>
 #include <nuttx/clock.h>
 
@@ -538,15 +539,14 @@ int pg_worker(int argc, char *argv[])
     {
       /* Wait awhile.  We will wait here until either the configurable timeout
        * elapses or until we are awakened by a signal (which terminates the
-       * usleep with an EINTR error).  Note that interrupts will be re-enabled
-       * while this task sleeps.
+       * nxsig_usleep with an EINTR error).  Note that interrupts will be re- * enabled while this task sleeps.
        *
        * The timeout is a failsafe that will handle any cases where a single
        * is lost (that would really be a bug and shouldn't happen!) and also
        * supports timeouts for case of non-blocking, asynchronous fills.
        */
 
-      usleep(CONFIG_PAGING_WORKPERIOD);
+      nxsig_usleep(CONFIG_PAGING_WORKPERIOD);
 
       /* The page fill worker thread will be awakened on one of three conditions:
        *

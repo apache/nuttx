@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/input/stmpe811.h>
 
 #include "stmpe811.h"
@@ -234,7 +235,7 @@ static void stmpe811_reset(FAR struct stmpe811_dev_s *priv)
 
   /* Wait a bit */
 
-  usleep(20*1000);
+  nxsig_usleep(20*1000);
 
   /* Then power on again.  All registers will be in their reset state. */
 

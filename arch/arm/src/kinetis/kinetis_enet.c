@@ -55,6 +55,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -1679,8 +1680,9 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
       retries = 0;
       do
         {
-          usleep(LINK_WAITUS);
-          ninfo("%s: Read PHYID1, retries=%d\n",  BOARD_PHY_NAME, retries + 1);
+          nxsig_usleep(LINK_WAITUS);
+          ninfo("%s: Read PHYID1, retries=%d\n",
+                BOARD_PHY_NAME, retries + 1);
           phydata = 0xffff;
           ret = kinetis_readmii(priv, phyaddr, MII_PHYID1, &phydata);
         }
@@ -1758,7 +1760,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
           break;
         }
 
-      usleep(LINK_WAITUS);
+      nxsig_usleep(LINK_WAITUS);
     }
 
   if (phydata & MII_MSR_ANEGCOMPLETE)

@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_sleep.c
+ * sched/signal/sig_sleep.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <signal.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
+
 #include <arch/irq.h>
 
 /****************************************************************************
@@ -50,63 +51,37 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sleep
+ * Name: nxsig_sleep
  *
  * Description:
- *   The sleep() function will cause the calling thread to be suspended from
- *   execution until either the number of real-time seconds specified by the
- *   argument 'seconds' has elapsed or a signal is delivered to the calling
- *   thread and its action is to invoke a signal-catching function or to
- *   terminate the process. The suspension time may be longer than requested
- *   due to the scheduling of other activity by the system.
+ *   The nxsig_sleep() function will cause the calling thread to be
+ *   suspended from execution until either the number of real-time seconds
+ *   specified by the argument 'seconds' has elapsed or a signal is
+ *   delivered to the calling thread.
  *
- *   If a SIGALRM signal is generated for the calling process during
- *   execution of sleep() and if the SIGALRM signal is being ignored or
- *   blocked from delivery, it is unspecified whether sleep() returns
- *   when the SIGALRM signal is scheduled. If the signal is being blocked, it
- *   is also unspecified whether it remains pending after sleep() returns or
- *   it is discarded.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   the standard sleep() application interface except that:
  *
- *   If a SIGALRM signal is generated for the calling process during
- *   execution of sleep(), except as a result of a prior call to alarm(),
- *   and if the SIGALRM signal is not being ignored or blocked from delivery,
- *   it is unspecified whether that signal has any effect other than causing
- *   sleep() to return.
+ *   - It is not a cancellaction point, and
+ *   - There is no check that the action of the signal is to invoke a
+ *     signal-catching function or to terminate the process.
  *
- *   If a signal-catching function interrupts sleep() and examines or changes
- *   either the time a SIGALRM is scheduled to be generated, the action
- *   associated with the SIGALRM signal, or whether the SIGALRM signal is
- *   blocked from delivery, the results are unspecified.
- *
- *   If a signal-catching function interrupts sleep() and calls siglongjmp()
- *   or longjmp() to restore an environment saved prior to the sleep() call,
- *   the action associated with the SIGALRM signal and the time at which a
- *   SIGALRM signal is scheduled to be generated are unspecified. It is also
- *   unspecified whether the SIGALRM signal is blocked, unless the process'
- *   signal mask is restored as part of the environment.
- *
- *   Implementations may place limitations on the granularity of timer values.
- *   For each interval timer, if the requested timer value requires a finer
- *   granularity than the implementation supports, the actual timer value will
- *   be rounded up to the next supported value.
- *
- *   Interactions between sleep() and any of setitimer(), ualarm() or sleep()
- *   are unspecified.
+ *   See the description of sleep() for additional information that is not
+ *   duplicated here.
  *
  * Parameters:
  *   seconds - The number of seconds to sleep
  *
  * Returned Value:
- *   If sleep() returns because the requested time has elapsed, the value
- *   returned will be 0. If sleep() returns because of premature arousal due
- *   to delivery of a signal, the return value will be the "unslept" amount
- *   (the requested time minus the time actually slept) in seconds.
- *
- * Assumptions:
+ *   If nxsig_sleep() returns because the requested time has elapsed, the
+ *   value returned will be zero (OK). If nxsig_sleep() returns because of
+ *   premature arousal due to delivery of a signal, the return value will
+ *   be the "unslept" amount (the requested time minus the time actually
+ *   slept) in seconds.
  *
  ****************************************************************************/
 
-unsigned int sleep(unsigned int seconds)
+unsigned int nxsig_sleep(unsigned int seconds)
 {
   struct timespec rqtp;
   struct timespec rmtp;
@@ -117,12 +92,12 @@ unsigned int sleep(unsigned int seconds)
 
   if (seconds > 0)
     {
-      /* Let nanosleep() do all of the work. */
+      /* Let nxsig_nanosleep() do all of the work. */
 
       rqtp.tv_sec  = seconds;
       rqtp.tv_nsec = 0;
 
-      ret = nanosleep(&rqtp, &rmtp);
+      ret = nxsig_nanosleep(&rqtp, &rmtp);
 
       /* nanosleep() should only fail if it was interrupted by a signal,
        * but we treat all errors the same,

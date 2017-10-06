@@ -56,6 +56,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/can/can.h>
@@ -520,7 +521,7 @@ static int can_close(FAR struct file *filep)
   while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
 #ifndef CONFIG_DISABLE_SIGNALS
-       usleep(HALF_SECOND_USEC);
+       nxsig_usleep(HALF_SECOND_USEC);
 #else
        up_mdelay(HALF_SECOND_MSEC);
 #endif
@@ -531,7 +532,7 @@ static int can_close(FAR struct file *filep)
   while (!dev_txempty(dev))
     {
 #ifndef CONFIG_DISABLE_SIGNALS
-      usleep(HALF_SECOND_USEC);
+      nxsig_usleep(HALF_SECOND_USEC);
 #else
       up_mdelay(HALF_SECOND_MSEC);
 #endif

@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -2251,7 +2252,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
            * using the same buffer pointer and length.
            */
 
-          usleep(20*1000);
+          nxsig_usleep(20*1000);
         }
       else
         {
@@ -3915,7 +3916,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
 
   /* USB 2.0 spec says at least 50ms delay before port reset.  We wait 100ms. */
 
-  usleep(100*1000);
+  nxsig_usleep(100*1000);
 
   /* Reset the host port */
 

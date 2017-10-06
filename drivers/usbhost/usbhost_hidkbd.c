@@ -57,10 +57,11 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -96,7 +97,7 @@
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
-/* Signals must not be disabled as they are needed by usleep.  Need to have
+/* Signals must not be disabled as they are needed by nxsig_usleep.  Need to have
  * CONFIG_DISABLE_SIGNALS=n
  */
 
@@ -1039,7 +1040,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
   priv->polling = true;
   usbhost_givesem(&g_syncsem);
-  sleep(1);
+  nxsig_sleep(1);
 
   /* Loop here until the device is disconnected */
 
@@ -1250,7 +1251,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
           delay = CONFIG_HIDKBD_POLLUSEC;
         }
 
-      usleep(delay);
+      nxsig_usleep(delay);
     }
 
   /* We get here when the driver is removed.. or when too many errors have

@@ -47,6 +47,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
@@ -88,7 +89,7 @@ static int wdog_daemon(int argc, char *argv[])
 
   while(1)
     {
-      usleep((CONFIG_PHOTON_WDG_THREAD_INTERVAL)*1000);
+      nxsig_usleep((CONFIG_PHOTON_WDG_THREAD_INTERVAL)*1000);
 
       /* Send keep alive ioctl */
 

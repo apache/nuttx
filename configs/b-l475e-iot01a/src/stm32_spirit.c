@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wireless/spirit.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
@@ -147,7 +148,7 @@ static int stm32l4_reset(FAR const struct spirit_lower_s *lower)
 
   /* Wait minimum 1.5 ms to allow Spirit a proper boot-up sequence */
 
-  usleep(1500);
+  nxsig_usleep(1500);
   return OK;
 }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/cloudctrl/src/stm32_relays.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <arch/board/board.h>
 
 #include "cloudctrl.h"
@@ -244,11 +245,11 @@ void relays_onoff(int relays, uint32_t mdelay)
           if (relays_getstat(relays))
             {
               relays_setstat(relays, false);
-              usleep(RELAYS_MIN_RESET_TIME*1000*1000);
+              nxsig_usleep(RELAYS_MIN_RESET_TIME*1000*1000);
             }
 
           relays_setstat(relays,true);
-          usleep(mdelay*100*1000);
+          nxsig_usleep(mdelay*100*1000);
           relays_setstat(relays, false);
         }
     }

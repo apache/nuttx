@@ -56,6 +56,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -134,7 +135,7 @@
 struct slip_driver_s
 {
   volatile bool bifup;      /* true:ifup false:ifdown */
-  bool          txnodelay;  /* True: usleep() not needed */
+  bool          txnodelay;  /* True: nxsig_usleep() not needed */
   int16_t       fd;         /* TTY file descriptor */
   uint16_t      rxlen;      /* The number of bytes in rxbuf */
   pid_t         rxpid;      /* Receiver thread ID */
@@ -456,7 +457,7 @@ static void slip_txtask(int argc, FAR char *argv[])
       if (!priv->txnodelay)
         {
           slip_semgive(priv);
-          usleep(SLIP_WDDELAY);
+          nxsig_usleep(SLIP_WDDELAY);
         }
       else
         {

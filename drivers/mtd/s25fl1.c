@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
@@ -890,7 +891,7 @@ static int s25fl1_erase_chip(struct s25fl1_dev_s *priv)
   status = sf25fl1_read_status1(priv);
   while ((status & STATUS1_BUSY_MASK) != 0)
     {
-      usleep(200*1000);
+      nxsig_usleep(200*1000);
       status = sf25fl1_read_status1(priv);
     }
 
@@ -1511,7 +1512,7 @@ FAR struct mtd_dev_s *s25fl1_initialize(FAR struct qspi_dev_s *qspi, bool unprot
           priv->cmdbuf[1] |= STATUS2_QUAD_ENABLE;
           s25fl1_write_status(priv);
           priv->cmdbuf[1] = sf25fl1_read_status2(priv);
-          usleep(50*1000);
+          nxsig_usleep(50*1000);
         }
 
       /* Unprotect FLASH sectors if so requested. */

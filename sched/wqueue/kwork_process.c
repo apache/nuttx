@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/work_process.c
  *
- *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -258,7 +259,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
            */
 
           wqueue->worker[wndx].busy = false;
-          usleep(next * USEC_PER_TICK);
+          nxsig_usleep(next * USEC_PER_TICK);
           wqueue->worker[wndx].busy = true;
         }
     }

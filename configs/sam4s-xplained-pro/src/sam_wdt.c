@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4s-xplained-pro/src/up_wdt.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
@@ -114,10 +115,10 @@ static int wdog_daemon(int argc, char *argv[])
       goto errout_with_dev;
     }
 
-  usleep(200);
+  nxsig_usleep(200);
   while(1)
     {
-      usleep((CONFIG_WDT_THREAD_INTERVAL)*1000);
+      nxsig_usleep((CONFIG_WDT_THREAD_INTERVAL)*1000);
 
       wdinfo("ping\n");
       ret = ioctl(fd, WDIOC_KEEPALIVE, 0);

@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -1964,7 +1965,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                    *
                    * Small delays could require more resolution than is provided
                    * by the system timer.  For example, if the system timer
-                   * resolution is 10MS, then usleep(1000) will actually request
+                   * resolution is 10MS, then nxsig_usleep(1000) will actually request
                    * a delay 20MS (due to both quantization and rounding).
                    *
                    * REVISIT: So which is better?  To ignore tiny delays and
@@ -1974,7 +1975,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
                   if (delay > CONFIG_USEC_PER_TICK)
                     {
-                      usleep(delay - CONFIG_USEC_PER_TICK);
+                      nxsig_usleep(delay - CONFIG_USEC_PER_TICK);
                     }
                 }
             }
@@ -2276,7 +2277,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
            * using the same buffer pointer and length.
            */
 
-          usleep(20*1000);
+          nxsig_usleep(20*1000);
         }
       else
         {
@@ -3942,9 +3943,11 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
 
   DEBUGASSERT(priv->smstate == SMSTATE_ATTACHED);
 
-  /* USB 2.0 spec says at least 50ms delay before port reset.  We wait 100ms. */
+  /* USB 2.0 spec says at least 50ms delay before port reset.  We wait
+   * 100ms.
+   */
 
-  usleep(100*1000);
+  nxsig_usleep(100*1000);
 
   /* Reset the host port */
 

@@ -48,6 +48,7 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 
 #include "pn532.h"
 
@@ -340,7 +341,7 @@ static int pn532_wait_rx_ready(struct pn532_dev_s *dev, int timeout)
           return -ETIMEDOUT;
         }
 
-      usleep(1000);
+      nxsig_usleep(1000);
     }
 
   dev->state = PN532_STATE_DATA_READY;
@@ -370,7 +371,7 @@ static void pn532_writecommand(struct pn532_dev_s *dev, uint8_t cmd)
 
   pn532_lock(dev->spi);
   pn532_select(dev);
-  usleep(10000);
+  nxsig_usleep(10000);
 
   SPI_SEND(dev->spi, PN532_SPI_DATAWRITE);
   SPI_SNDBLOCK(dev->spi, f, FRAME_SIZE(f));
@@ -478,7 +479,7 @@ int pn532_write_frame(struct pn532_dev_s *dev, struct pn532_frame *f)
 
   pn532_lock(dev->spi);
   pn532_select(dev);
-  usleep(2000);
+  nxsig_usleep(2000);
 
   SPI_SEND(dev->spi, PN532_SPI_DATAWRITE);
   SPI_SNDBLOCK(dev->spi, f, FRAME_SIZE(f));
@@ -879,7 +880,7 @@ static int _open(FAR struct file *filep)
   pn532_configspi(dev->spi);
 
   dev->config->reset(1);
-  usleep(10000);
+  nxsig_usleep(10000);
 
   pn532_sam_config(dev, NULL);
   pn532_get_fw_version(dev, NULL);

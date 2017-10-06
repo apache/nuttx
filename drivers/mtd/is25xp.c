@@ -54,6 +54,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
@@ -374,7 +375,7 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
       if ((status & IS25_SR_WIP) != 0)
         {
           is25xp_unlock(priv->dev);
-          usleep(1000);
+          nxsig_usleep(1000);
           is25xp_lock(priv->dev);
         }
     }

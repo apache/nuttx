@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hub.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Kaushal Parikh <kaushal@dspworks.in>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
@@ -51,6 +51,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 
@@ -834,7 +835,7 @@ static void usbhost_hub_event(FAR void *arg)
                 }
 
               debouncetime += 25;
-              usleep(25*1000);
+              nxsig_usleep(25*1000);
             }
 
           if (ret < 0 || debouncetime >= 1500)
@@ -862,7 +863,7 @@ static void usbhost_hub_event(FAR void *arg)
                   continue;
                 }
 
-              usleep(100*1000);
+              nxsig_usleep(100*1000);
 
               ctrlreq->type = USB_REQ_DIR_IN | USBHUB_REQ_TYPE_PORT;
               ctrlreq->req  = USBHUB_REQ_GETSTATUS;

@@ -56,6 +56,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -1560,7 +1561,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       putreg32(~USB_DEVS_SOF, USB_DEVS);
 
-      usleep(100000);
+      nxsig_usleep(100000);
 
       /* SOF is not arrived & D+/D- is HIGH */
 

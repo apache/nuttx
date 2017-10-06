@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -3569,7 +3570,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
    * reset for 50Msec, not wait 50Msec before resetting.
    */
 
-  usleep(100*1000);
+  nxsig_usleep(100*1000);
 
   /* Paragraph 2.3.9:
    *
@@ -3672,7 +3673,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
    * 50 ms."
    */
 
-  usleep(50*1000);
+  nxsig_usleep(50*1000);
 
   regval  = lpc31_getreg(regaddr);
   regval &= ~EHCI_PORTSC_RESET;
@@ -3693,7 +3694,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
    */
 
   while ((lpc31_getreg(regaddr) & EHCI_PORTSC_RESET) != 0);
-  usleep(200*1000);
+  nxsig_usleep(200*1000);
 
   /* EHCI Paragraph 4.2.2:
    *

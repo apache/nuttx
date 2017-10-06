@@ -66,6 +66,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/mxt.h>
@@ -1794,7 +1795,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
       goto errout_with_objtab;
     }
 
-  usleep(MXT_RESET_TIME);
+  nxsig_usleep(MXT_RESET_TIME);
 
   /* Update matrix size in the info structure */
 

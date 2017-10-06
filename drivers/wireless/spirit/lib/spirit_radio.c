@@ -47,6 +47,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 #include "spirit_config.h"
 #include "spirit_types.h"
 #include "spirit_management.h"
@@ -225,7 +227,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  usleep(100);
+  nxsig_usleep(100);
 
   /* Wait for the device to enter STANDBY */
 
@@ -262,7 +264,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  usleep(100);
+  nxsig_usleep(100);
 
   /* Make sure that the device becomes READY */
 

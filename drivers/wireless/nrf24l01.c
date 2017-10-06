@@ -60,6 +60,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 #  include <nuttx/wqueue.h>
@@ -792,7 +793,7 @@ static void nrf24l01_tostate(struct nrf24l01_dev_s *dev,
       /* Leaving power down (note: new state cannot be power down here) */
 
       nrf24l01_setregbit(dev, NRF24L01_CONFIG, NRF24L01_PWR_UP, true);
-      usleep(NRF24L01_TPD2STBY_DELAY);
+      nxsig_usleep(NRF24L01_TPD2STBY_DELAY);
     }
 
   /* Entering new state */

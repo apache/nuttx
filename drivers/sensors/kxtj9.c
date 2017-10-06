@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/kxtj9.h>
@@ -303,7 +304,7 @@ static void kxtj9_soft_reset(FAR struct kxtj9_dev_s *priv)
 
   /* Delay 10ms for the accel parts to re-initialize */
 
-  usleep(10000);
+  nxsig_usleep(10000);
 }
 
 /****************************************************************************

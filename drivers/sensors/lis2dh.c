@@ -49,9 +49,10 @@
 #include <poll.h>
 #include <debug.h>
 
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/random.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/sensors/lis2dh.h>
 
@@ -1121,7 +1122,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
       goto out;
     }
 
-  usleep(20000);
+  nxsig_usleep(20000);
 
   /* Now INT1 should have been latched high and INT2 should be still low */
 
@@ -1150,7 +1151,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
           goto out;
         }
 
-      usleep(20000);
+      nxsig_usleep(20000);
 
       if (priv->config->read_int2_pin() != 1)
         {
@@ -1256,7 +1257,7 @@ static FAR const struct lis2dh_vector_s *
 
   while (--retries_left > 0)
     {
-      usleep(20000);
+      nxsig_usleep(20000);
       if (lis2dh_data_available(dev))
         {
           if (lis2dh_access(dev, ST_LIS2DH_OUT_X_L_REG, retval,
@@ -1692,7 +1693,7 @@ static int lis2dh_reboot(FAR struct lis2dh_dev_s *dev)
           return -ETIMEDOUT;
         }
 
-       usleep(1);
+       nxsig_usleep(1);
     }
   while (true);
 

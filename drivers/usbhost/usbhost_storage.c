@@ -50,10 +50,11 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/scsi.h>
+#include <nuttx/fs/fs.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -1248,7 +1249,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
       /* Wait just a bit */
 
-      usleep(USBHOST_RETRY_USEC);
+      nxsig_usleep(USBHOST_RETRY_USEC);
 
       /* Send TESTUNITREADY to see if the unit is ready.  The most likely error
        * error that can occur here is a a stall which simply means that the

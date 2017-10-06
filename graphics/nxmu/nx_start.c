@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_start.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/kthread.h>
 #include <nuttx/nx/nx.h>
 
@@ -204,7 +205,7 @@ int nx_start(void)
        * this operation cannot be done from the IDLE thread!
        */
 
-      usleep(50*1000);
+      nxsig_usleep(50*1000);
     }
 
   return OK;

@@ -63,6 +63,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -923,7 +924,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-      usleep(5*5000);
+      nxsig_usleep(5*5000);
     }
   while (priv->locked == false && --retries > 0);
 
@@ -946,7 +947,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-       usleep(5*5000);
+       nxsig_usleep(5*5000);
     }
   while ((wm8904_readreg(priv, WM8904_INT_STATUS) & WM8904_FLL_LOCK_INT) != 0 ||
           --retries > 0);

@@ -40,16 +40,18 @@
  * Included Files
  ****************************************************************************/
 
-#include <errno.h>
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/clock.h>
 
 #include <semaphore.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <errno.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/clock.h>
+#include <nuttx/signal.h>
 
 #include "up_arch.h"
 #include "lc823450_sddrv_type.h"
@@ -193,7 +195,7 @@ SINT_T sddep1_hw_init(struct SdDrCfg_s *cfg)
 
   /* wait 15ms */
 
-  usleep(15000);
+  nxsig_usleep(15000);
 
   irqstate_t flags = enter_critical_section();
 
@@ -286,7 +288,7 @@ void sddep_voltage_switch(struct SdDrCfg_s *cfg)
 
   lc823450_gpio_config(GPIO_PORT0 | GPIO_PIN6 |
                        GPIO_MODE_OUTPUT | GPIO_VALUE_ONE);
-  usleep(200 * 1000);
+  nxsig_usleep(200 * 1000);
 #endif
 }
 
@@ -345,7 +347,7 @@ SINT_T sddep_wait(UI_32 ms, struct SdDrCfg_s *cfg)
     }
   else
     {
-      usleep(ms * 1000);
+      nxsig_usleep(ms * 1000);
     }
 #endif
 

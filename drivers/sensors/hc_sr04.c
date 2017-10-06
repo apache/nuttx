@@ -43,11 +43,12 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/random.h>
-
 #include <nuttx/sensors/hc_sr04.h>
 
 /****************************************************************************
@@ -144,7 +145,7 @@ static int hcsr04_start_measuring(FAR struct hcsr04_dev_s *priv)
   /* Send to 10uS trigger pulse */
 
   priv->config->set_trigger(priv->config, true);
-  usleep(10);
+  nxsig_usleep(10);
   priv->config->set_trigger(priv->config, false);
 
   return 0;

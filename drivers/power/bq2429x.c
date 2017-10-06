@@ -76,6 +76,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
@@ -344,7 +345,7 @@ static int bq2429x_reset(FAR struct bq2429x_dev_s *priv)
 
   /* Wait a little bit to clear registers */
 
-  usleep(500);
+  nxsig_usleep(500);
 
 #if 0
   /* There is a BUG in BQ2429X the RESET bit is always read as 1 */

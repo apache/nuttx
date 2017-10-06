@@ -50,6 +50,7 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/contactless/mfrc522.h>
 
 #include "mfrc522.h"
@@ -1107,7 +1108,7 @@ void mfrc522_softreset(FAR struct mfrc522_dev_s *dev)
 
   /* Wait the internal state machine to initialize */
 
-  usleep(50000);
+  nxsig_usleep(50000);
 
   /* Wait for the PowerDown bit in COMMAND_REG to be cleared */
 
@@ -1381,7 +1382,7 @@ static int mfrc522_open(FAR struct file *filep)
 
   mfrc522_configspi(dev->spi);
 
-  usleep(10000);
+  nxsig_usleep(10000);
 
   mfrc522_getfwversion(dev);
 

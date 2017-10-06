@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/xbee.h>
@@ -154,7 +155,7 @@ static int sam_reset(FAR const struct xbee_lower_s *lower)
   /* Wait minimum 1.5 ms to allow Xbee a proper boot-up sequence */
   /* TODO: Update time according to datasheet */
 
-  usleep(1500);
+  nxsig_usleep(1500);
   return OK;
 }
 

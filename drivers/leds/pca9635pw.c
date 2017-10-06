@@ -42,8 +42,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/leds/pca9635pw.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_PCA9635PW)
@@ -212,7 +213,7 @@ static int pca9635pw_open(FAR struct file *filep)
    * left.
    */
 
-  usleep(500);
+  nxsig_usleep(500);
 
   /* Turn all led drivers to mode 2 in which the led brightness is controlled
    * by the indiviual pwm registers.

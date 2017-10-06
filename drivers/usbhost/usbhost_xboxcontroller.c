@@ -55,6 +55,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -618,7 +619,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
   priv->polling = true;
   usbhost_givesem(&g_syncsem);
-  sleep(1);
+  nxsig_sleep(1);
 
   /* Loop here until the device is disconnected */
 

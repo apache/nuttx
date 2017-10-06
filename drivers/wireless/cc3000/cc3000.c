@@ -69,6 +69,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
@@ -1264,9 +1265,9 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
   if (priv->state  == eSPI_STATE_INITIALIZED)
     {
       cc3000_lock_and_select(priv->spi); /* Assert CS */
-      usleep(55);
+      nxsig_usleep(55);
       SPI_SNDBLOCK(priv->spi, buffer, 4);
-      usleep(55);
+      nxsig_usleep(55);
       SPI_SNDBLOCK(priv->spi, buffer+4, tx_len-4);
     }
   else

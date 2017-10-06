@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_transfer.h>
 
@@ -148,7 +149,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
       if (trans->delay > 0)
         {
-          usleep(trans->delay);
+          nxsig_usleep(trans->delay);
         }
     }
 

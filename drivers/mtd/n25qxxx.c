@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
@@ -855,7 +856,7 @@ static int n25qxxx_erase_chip(struct n25qxxx_dev_s *priv)
   status = n25qxxx_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      usleep(200*1000);
+      nxsig_usleep(200*1000);
       status = n25qxxx_read_status(priv);
     }
 

@@ -47,8 +47,9 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/sensors/adxl345.h>
+#include <nuttx/signal.h>
 #include <nuttx/random.h>
+#include <nuttx/sensors/adxl345.h>
 
 #include "adxl345.h"
 
@@ -359,7 +360,7 @@ static void adxl345_reset(FAR struct adxl345_dev_s *priv)
 
   /* Wait a bit to make the GOD of TIME happy */
 
-  usleep(20*1000);
+  nxsig_usleep(20*1000);
 }
 
 /****************************************************************************

@@ -42,8 +42,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/leds/ncp5623c.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_NCP5623C)
@@ -170,7 +171,7 @@ static int ncp5623c_open(FAR struct file *filep)
 
   /* Let the chip settle a bit */
 
-  usleep(1);
+  nxsig_usleep(1);
   return OK;
 }
 

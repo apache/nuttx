@@ -58,6 +58,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mtd/mtd.h>
@@ -283,7 +284,7 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
               return -ETIMEDOUT;
             }
 
-          usleep(1000);
+          nxsig_usleep(1000);
         }
 
       at24c_i2c_write(priv, at24addr, buf, AT24XX_PAGESIZE + AT24XX_ADDRSIZE);
@@ -349,7 +350,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv, off_t offset,
           return -ETIMEDOUT;
         }
 
-      usleep(1000);
+      nxsig_usleep(1000);
     }
 
   /* Then transfer the following bytes */
@@ -472,7 +473,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
               return -ETIMEDOUT;
             }
 
-          usleep(1000);
+          nxsig_usleep(1000);
         }
 
       memcpy(&buf[AT24XX_ADDRSIZE], buffer, priv->pagesize);

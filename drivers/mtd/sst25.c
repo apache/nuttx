@@ -57,6 +57,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
@@ -425,7 +426,7 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
       if ((status & SST25_SR_BUSY) != 0)
         {
           sst25_unlock(priv->dev);
-          usleep(1000);
+          nxsig_usleep(1000);
           sst25_lock(priv->dev);
         }
 #endif

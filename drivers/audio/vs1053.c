@@ -54,6 +54,7 @@
 #include <queue.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>
@@ -342,7 +343,7 @@ static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16
 
   /* Short delay after a write for VS1053 processing time */
 
-  usleep(10);
+  nxsig_usleep(10);
 }
 
 /****************************************************************************
@@ -417,7 +418,7 @@ static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev, uint32_t freq)
   timeout = 200;
   while (!dev->hw_lower->read_dreq(dev->hw_lower) && timeout)
     {
-      usleep(1000);
+      nxsig_usleep(1000);
       timeout--;
     }
 
@@ -896,9 +897,9 @@ static int vs1053_hardreset(FAR struct vs1053_struct_s *dev)
 {
   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
   dev->hw_lower->reset(dev->hw_lower, false);
-  usleep(10);
+  nxsig_usleep(10);
   dev->hw_lower->reset(dev->hw_lower, true);
-  usleep(VS1053_RST_USECS);
+  nxsig_usleep(VS1053_RST_USECS);
   vs1053_setfrequency(dev, CONFIG_VS1053_XTALI);  /* Slow speed at first */
 
   return OK;
@@ -1269,7 +1270,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
   timeout = 200;
   while (!dev->hw_lower->read_dreq(dev->hw_lower) && timeout)
     {
-      usleep(100);
+      nxsig_usleep(100);
       timeout--;
     }
 
@@ -1305,7 +1306,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
           /* The ISR has requested more data */
 
           case AUDIO_MSG_DATA_REQUEST:
-            usleep(500);
+            nxsig_usleep(500);
             vs1053_feeddata(dev);   /* Feed more data to the VS1053 FIFO */
             break;
 
@@ -1315,7 +1316,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
           case AUDIO_MSG_STOP:
             if (!dev->hw_lower->read_dreq(dev->hw_lower))
               {
-                usleep(300);
+                nxsig_usleep(300);
               }
 
             /* Send CANCEL message to VS1053 */

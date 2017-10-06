@@ -56,6 +56,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -1043,7 +1044,7 @@ static int lc823450_i2c_transfer(FAR struct i2c_master_s *dev,
            * transaction, STOP condition for write transaction
            */
 
-          usleep(10 * 1000);
+          nxsig_usleep(10 * 1000);
         }
       else
         {

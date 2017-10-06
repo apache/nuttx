@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/input/stmpe811.h>
 
 #include "stmpe811.h"
@@ -236,12 +237,12 @@ uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin)
   for (i = 0; i < 3; i++)
     {
       /* The worst case ADC conversion time is (nominally) 56.4 uS. The
-       * following usleep() looks nice but in reality, the usleep()
-       * does not have that kind of precision (it will probably end up
-       * waiting 10 MS).
+       * following nxsig_usleep() looks nice but in reality, nxsig_usleep()
+       * normal does not have that kind of precision (it will probably end
+       * up waiting 10 MS).
        */
 
-      usleep(57);
+      nxsig_usleep(57);
 
       /* Check if the conversion is complete */
 
