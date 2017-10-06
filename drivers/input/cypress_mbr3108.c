@@ -953,6 +953,7 @@ static int mbr3108_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct mbr3108_dev_s *priv;
   int use_count;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
