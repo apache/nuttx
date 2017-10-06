@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_fcntl.c
  *
- *   Copyright (C) 2009, 2012-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,6 +154,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
           oflags          &=  FFCNTL;
           filep->f_oflags &= ~FFCNTL;
           filep->f_oflags |=  oflags;
+          ret              =  OK;
         }
         break;
 

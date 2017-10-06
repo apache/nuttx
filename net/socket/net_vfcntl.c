@@ -195,10 +195,13 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
                  {
                    psock->s_flags &= ~_SF_NONBLOCK;
                  }
+
+               ret = OK;
             }
           else
             {
               nerr("ERROR: Non-blocking not supported for this socket\n");
+              ret = -ENOSYS;
             }
         }
         break;
