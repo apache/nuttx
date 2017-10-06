@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig/nanosleep.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 
 #include "clock/clock.h"
@@ -53,6 +54,149 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsig_nanosleep
+ *
+ * Description:
+ *   The nxsig_nanosleep() function causes the current thread to be
+ *   suspended from execution until either the time interval specified by
+ *   the rqtp argument has elapsed or a signal is delivered to the calling
+ *   thread and its action is to invoke a signal-catching function or to
+ *   terminate the process. The suspension time may be longer than requested
+ *   because the argument value is rounded up to an integer multiple of the
+ *   sleep resolution or because of the scheduling of other activity by the
+ *   system. But, except for the case of being interrupted by a signal, the
+ *   suspension time will not be less than the time specified by rqtp, as
+ *   measured by the system clock, CLOCK_REALTIME.
+ *
+ *   The use of the nxsig_nanosleep() function has no effect on the action
+ *   or blockage of any signal.
+ *
+ * Parameters:
+ *   rqtp - The amount of time to be suspended from execution.
+ *   rmtp - If the rmtp argument is non-NULL, the timespec structure
+ *          referenced by it is updated to contain the amount of time
+ *          remaining in the interval (the requested time minus the time
+ *          actually slept)
+ *
+ * Returned Value:
+ *   If the nxsig_nanosleep() function returns because the requested time
+ *   has elapsed, its return value is zero.
+ *
+ *   If the nxsig_nanosleep() function returns because it has been
+ *   interrupted by a signal, the function returns a negated errno value
+ *   indicate the interruption. If the rmtp argument is non-NULL, the
+ *   timespec structure referenced by it is updated to contain the amount
+ *   of time remaining in the interval (the requested time minus the time
+ *   actually slept). If the rmtp argument is NULL, the remaining time is
+ *   not returned.
+ *
+ *   If nxsig_nanosleep() fails, it returns a negated errno indicating the
+ *   cause of the failure. The nxsig_nanosleep() function will fail if:
+ *
+ *     EINTR - The nxsig_nanosleep() function was interrupted by a signal.
+ *     EINVAL - The rqtp argument specified a nanosecond value less than
+ *       zero or greater than or equal to 1000 million.
+ *     ENOSYS - The nxsig_nanosleep() function is not supported by this
+ *       implementation.
+ *
+ ****************************************************************************/
+
+int nxsig_nanosleep(FAR const struct timespec *rqtp,
+                    FAR struct timespec *rmtp)
+{
+  irqstate_t flags;
+  systime_t starttick;
+  sigset_t set;
+  int ret;
+
+  /* Sanity check */
+
+  if (!rqtp || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
+    {
+      return -EINVAL;
+    }
+
+  /* Get the start time of the wait.  Interrupts are disabled to prevent
+   * timer interrupts while we do tick-related calculations before and
+   * after the wait.
+   */
+
+  flags     = enter_critical_section();
+  starttick = clock_systimer();
+
+  /* Set up for the sleep.  Using the empty set means that we are not
+   * waiting for any particular signal.  However, any unmasked signal can
+   * still awaken nxsig_timedwait().
+   */
+
+  (void)sigemptyset(&set);
+
+  /* nxsig_nanosleep is a simple application of nxsig_timedwait. */
+
+  ret = nxsig_timedwait(&set, NULL, rqtp);
+
+  /* nxsig_timedwait() cannot succeed.  It should always return error with
+   * either (1) EAGAIN meaning that the timeout occurred, or (2) EINTR
+   * meaning that some other unblocked signal was caught.
+   */
+
+  DEBUGASSERT(ret < 0 && (ret == -EAGAIN || ret == -EINTR));
+
+  if (ret == -EAGAIN)
+    {
+      /* The timeout "error" is the normal, successful result */
+
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  /* If we get there, the wait has failed because we were awakened by a
+   * signal.  Return the amount of "unwaited" time if rmtp is non-NULL.
+   */
+
+  if (rmtp)
+    {
+      systime_t elapsed;
+      systime_t remaining;
+      ssystime_t ticks;
+
+      /* REVISIT: The conversion from time to ticks and back could
+       * be avoided.  clock_timespec_subtract() would be used instead
+       * to get the time difference.
+       */
+
+      /* First get the number of clock ticks that we were requested to
+       * wait.
+       */
+
+      (void)clock_time2ticks(rqtp, &ticks);
+
+      /* Get the number of ticks that we actually waited */
+
+      elapsed = clock_systimer() - starttick;
+
+      /* The difference between the number of ticks that we were requested
+       * to wait and the number of ticks that we actualy waited is that
+       * amount of time that we failed to wait.
+       */
+
+      if (elapsed >= (systime_t)ticks)
+        {
+          remaining = 0;
+        }
+      else
+        {
+          remaining = (systime_t)ticks - elapsed;
+        }
+
+      (void)clock_ticks2time((ssystime_t)remaining, rmtp);
+    }
+
+  leave_critical_section(flags);
+  return ret;
+}
 
 /****************************************************************************
  * Name: nanosleep
@@ -104,110 +248,21 @@
 
 int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 {
-  irqstate_t flags;
-  systime_t starttick;
-  sigset_t set;
-  int errval;
-#ifdef CONFIG_DEBUG_ASSERTIONS /* Warning avoidance */
   int ret;
-#endif
 
   /* nanosleep() is a cancellation point */
 
   (void)enter_cancellation_point();
 
-  if (!rqtp || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
+  /* Just a wrapper around nxsig_nanosleep() */
+
+  ret = nxsig_nanosleep(rqtp, rmtp);
+  if (ret < 0)
     {
-      errval = EINVAL;
-      goto errout;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  /* Get the start time of the wait.  Interrupts are disabled to prevent
-   * timer interrupts while we do tick-related calculations before and
-   * after the wait.
-   */
-
-  flags     = enter_critical_section();
-  starttick = clock_systimer();
-
-  /* Set up for the sleep.  Using the empty set means that we are not
-   * waiting for any particular signal.  However, any unmasked signal can
-   * still awaken sigtimedwait().
-   */
-
-  (void)sigemptyset(&set);
-
-  /* nanosleep is a simple application of sigtimedwait. */
-
-#ifdef CONFIG_DEBUG_ASSERTIONS /* Warning avoidance */
-  ret = sigtimedwait(&set, NULL, rqtp);
-#else
-  (void)sigtimedwait(&set, NULL, rqtp);
-#endif
-
-  /* sigtimedwait() cannot succeed.  It should always return error with
-   * either (1) EAGAIN meaning that the timeout occurred, or (2) EINTR
-   * meaning that some other unblocked signal was caught.
-   */
-
-  errval = get_errno();
-  DEBUGASSERT(ret < 0 && (errval == EAGAIN || errval == EINTR));
-
-  if (errval == EAGAIN)
-    {
-      /* The timeout "error" is the normal, successful result */
-
-      leave_critical_section(flags);
-      leave_cancellation_point();
-      return OK;
-    }
-
-  /* If we get there, the wait has failed because we were awakened by a
-   * signal.  Return the amount of "unwaited" time if rmtp is non-NULL.
-   */
-
-  if (rmtp)
-    {
-      systime_t elapsed;
-      systime_t remaining;
-      ssystime_t ticks;
-
-      /* REVISIT: The conversion from time to ticks and back could
-       * be avoided.  clock_timespec_subtract() would be used instead
-       * to get the time difference.
-       */
-
-      /* First get the number of clock ticks that we were requested to
-       * wait.
-       */
-
-      (void)clock_time2ticks(rqtp, &ticks);
-
-      /* Get the number of ticks that we actually waited */
-
-      elapsed = clock_systimer() - starttick;
-
-      /* The difference between the number of ticks that we were requested
-       * to wait and the number of ticks that we actualy waited is that
-       * amount of time that we failed to wait.
-       */
-
-      if (elapsed >= (systime_t)ticks)
-        {
-          remaining = 0;
-        }
-      else
-        {
-          remaining = (systime_t)ticks - elapsed;
-        }
-
-      (void)clock_ticks2time((ssystime_t)remaining, rmtp);
-    }
-
-  leave_critical_section(flags);
-
-errout:
-  set_errno(errval);
   leave_cancellation_point();
-  return ERROR;
+  return ret;
 }

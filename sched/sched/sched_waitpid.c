@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/semaphore.h>
 
@@ -528,10 +529,11 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = sigwaitinfo(&set, &info);
+      ret = nxsig_waitinfo(&set, &info);
       if (ret < 0)
         {
-          goto errout_with_lock;
+          errcode = -ret;
+          goto errout_with_errno;
         }
 
       /* Was this the death of the thread we were waiting for? In the of
@@ -569,7 +571,6 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 errout_with_errno:
   set_errno(errcode);
 
-errout_with_lock:
   leave_cancellation_point();
   sched_unlock();
   return ERROR;

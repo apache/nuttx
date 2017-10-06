@@ -41,7 +41,9 @@
 
 #include <unistd.h>
 #include <signal.h>
+#include <errno.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 
 /****************************************************************************
@@ -92,7 +94,13 @@ int pause(void)
    * meaning that some unblocked signal was caught.
    */
 
-  ret = sigwaitinfo(&set, NULL);
+  ret = nxsig_waitinfo(&set, NULL);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   leave_cancellation_point();
   return ret;
 }

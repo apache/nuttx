@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_waitid.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
@@ -366,10 +367,11 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = sigwaitinfo(&set, info);
+      ret = nxsig_waitinfo(&set, info);
       if (ret < 0)
         {
-          goto errout;
+          errcode = -ret;
+          goto errout_with_errno;
         }
 
       /* Make there this was SIGCHLD */
@@ -403,8 +405,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
           else /* if (idtype == P_PGID) */
             {
-              set_errno(ENOSYS);
-              goto errout;
+              errcode = ENOSYS;
+              goto errout_with_errno;
             }
         }
     }
@@ -415,7 +417,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
 errout_with_errno:
   set_errno(errcode);
-errout:
+
   leave_cancellation_point();
   sched_unlock();
   return ERROR;

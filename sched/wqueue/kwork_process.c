@@ -232,7 +232,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, systime_t period, int wndx)
       sigaddset(&set, SIGWORK);
 
       wqueue->worker[wndx].busy = false;
-      DEBUGVERIFY(sigwaitinfo(&set, NULL));
+      DEBUGVERIFY(nxsig_waitinfo(&set, NULL));
       wqueue->worker[wndx].busy = true;
     }
   else

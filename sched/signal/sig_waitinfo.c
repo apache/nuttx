@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_waitinfo.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <signal.h>
+#include <errno.h>
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Public Functions
@@ -60,9 +61,7 @@
  *
  * Return Value:
  *   Signal number that cause the wait to be terminated, otherwise -1 (ERROR)
- *   is returned.
- *
- * Assumptions:
+ *   is returned and the errno variable is set appropriately.
  *
  ****************************************************************************/
 
@@ -74,9 +73,15 @@ int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *info)
 
   (void)enter_cancellation_point();
 
-  /* Just a wrapper around sigtimedwait() */
+  /* Just a wrapper around nxsig_timedwait() */
 
-  ret = sigtimedwait(set, info, NULL);
+  ret = nxsig_timedwait(set, info, NULL);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   leave_cancellation_point();
   return ret;
 }
