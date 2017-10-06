@@ -298,9 +298,15 @@
 #  ifndef CONFIG_DISABLE_POLL
 #    define SYS_poll                   __SYS_poll
 #    define SYS_select                 (__SYS_poll+1)
-#    define __SYS_boardctl             (__SYS_poll+2)
+#    define __SYS_termios              (__SYS_poll+2)
 #  else
-#    define __SYS_boardctl             __SYS_poll
+#    define __SYS_termios               __SYS_poll
+#  endif
+#  ifndef CONFIG_SERIAL_TERMIOS
+#    define SYS_tcdrain                __SYS_termios
+#    define __SYS_boardctl             (__SYS_termios+1)
+#  else
+#    define __SYS_boardctl             __SYS_termios
 #  endif
 #else
 #  define __SYS_boardctl               __SYS_descriptors

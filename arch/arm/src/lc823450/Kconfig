@@ -7,27 +7,22 @@ comment "LC823450 Configuration Options"
 
 menu "LC823450 Peripheral Support"
 
-config SERIAL_TERMIOS
-        bool "Serial driver TERMIOS supported"
-        default n
-        ---help---
-                Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
-                If this is not defined, then the terminal settings (baud, parity, etc).
-                are not configurable at runtime; serial streams cannot be flushed, etc..
-
 config LC823450_UART0
 	bool "UART0"
 	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	default n
 
 config LC823450_UART1
 	bool "UART1"
 	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	default n
 
 config LC823450_UART2
 	bool "UART2"
 	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	default n
 
 config LC823450_WDT

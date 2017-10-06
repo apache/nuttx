@@ -56,6 +56,7 @@ config LPC11_PLL
 config LPC11_UART0
 	bool "UART0"
 	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 	default y
 
 config LPC11_CAN0
@@ -97,20 +98,6 @@ config LPC11_ADC
 config LPC11_FLASH
 	bool "FLASH"
 	default n
-
-endmenu
-
-menu "Serial driver options"
-	depends on LPC11_UART0 || LPC11_UART1 || LPC11_UART2 || LPC11_UART3 || LPC11_UART4
-
-config SERIAL_TERMIOS
-	bool "Serial driver TERMIOS supported"
-	depends on LPC11_UART0 || LPC11_UART1 || LPC11_UART2 || LPC11_UART3
-	default n
-	---help---
-		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
-		If this is not defined, then the terminal settings (baud, parity, etc).
-		are not configurable at runtime; serial streams cannot be flushed, etc..
 
 endmenu
 

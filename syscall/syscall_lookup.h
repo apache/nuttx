@@ -211,6 +211,9 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(poll,                     3, STUB_poll)
   SYSCALL_LOOKUP(select,                   5, STUB_select)
 #  endif
+#  ifndef CONFIG_SERIAL_TERMIOS
+  SYSCALL_LOOKUP(tcdrain,                  1, STUB_tcdrain)
+#  endif
 #endif
 
 /* Board support */

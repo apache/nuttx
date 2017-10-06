@@ -153,6 +153,7 @@
 "task_setcancelstate","sched.h","","int","int","FAR int*"
 "task_setcanceltype","sched.h","defined(CONFIG_CANCELLATION_POINTS)","int","int","FAR int*"
 "task_testcancel","pthread.h","defined(CONFIG_CANCELLATION_POINTS)","void"
+"tcdrain","termios.h","defined(CONFIG_SERIAL_TERMIOS)","int","int"
 "telldir","dirent.h","CONFIG_NFILE_DESCRIPTORS > 0","off_t","FAR DIR*"
 "timer_create","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","clockid_t","FAR struct sigevent*","FAR timer_t*"
 "timer_delete","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","timer_t"

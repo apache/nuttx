@@ -210,6 +210,8 @@ uintptr_t STUB_aio_write(int nbr, uintptr_t parm1);
 uintptr_t STUB_aio_fsync(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_aio_cancel(int nbr, uintptr_t parm1, uintptr_t parm2);
 
+uintptr_t STUB_tcdrain(int nbr, uintptr_t parm1);
+
 /* Board support */
 
 uintptr_t STUB_boardctl(int nbr, uintptr_t parm1, uintptr_t parm2);
