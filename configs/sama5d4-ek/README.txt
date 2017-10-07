@@ -4115,9 +4115,6 @@ Configurations
        Then you will need to follow some special build instructions below
        in order to build and install the ROMFS file system image.
 
-       UPDATE: The ROMFS configuration is pre-configured in the
-       file nuttx/configs/sama5d4-ek/knsh/defconfig.ROMFS
-
     5. Board initialization is performed performed before the application
        is started:
 
