@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/timers/rtc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/timers/rtc.h>
 
@@ -188,11 +189,11 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
       /* Yes.. signal the alarm expriration */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      (void)sigqueue(alarminfo->pid, alarminfo->signo,
-                     alarminfo->sigvalue);
+      (void)nxsig_queue(alarminfo->pid, alarminfo->signo,
+                        alarminfo->sigvalue);
 #else
-      (void)sigqueue(alarminfo->pid, alarminfo->signo,
-                     alarminfo->sigvalue->sival_ptr);
+      (void)nxsig_queue(alarminfo->pid, alarminfo->signo,
+                        alarminfo->sigvalue->sival_ptr);
 #endif
     }
 

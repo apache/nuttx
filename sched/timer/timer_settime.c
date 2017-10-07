@@ -70,8 +70,8 @@ static void timer_timeout(int argc, wdparm_t itimer);
  * Name: timer_signotify
  *
  * Description:
- *   This function basically reimplements sigqueue() so that the si_code can
- *   be correctly set to SI_TIMER
+ *   This function basically reimplements nxsig_queue() so that the si_code
+ *   can be correctly set to SI_TIMER
  *
  * Parameters:
  *   timer - A reference to the POSIX timer that just timed out

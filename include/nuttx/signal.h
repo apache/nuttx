@@ -52,6 +52,47 @@
 struct timespec;  /* Forward reference */
 
 /****************************************************************************
+ * Name: nxsig_queue
+ *
+ * Description:
+ *   This function sends the signal specified by signo with the signal
+ *   parameter value to the process specified by pid.
+ *
+ *   If the receiving process has the signal blocked via the sigprocmask,
+ *   the signal will pend until it is unmasked. Only one pending signal (per
+ *   signo) is retained.  This is consistent with POSIX which states, "If
+ *   a subsequent occurrence of a pending signal is generated, it is
+ *   implementation defined as to whether the signal is delivered more than
+ *   once.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sigqueue() except that it does not modify the errno value.
+ *
+ * Parameters:
+ *   pid - Process ID of task to receive signal
+ *   signo - Signal number
+ *   value - Value to pass to task with signal
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    EGAIN  - The limit of signals which may be queued has been reached.
+ *    EINVAL - sig was invalid.
+ *    EPERM  - The  process  does  not  have  permission to send the
+ *             signal to the receiving process.
+ *    ESRCH  - No process has a PID matching pid.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+int nxsig_queue (int pid, int signo, union sigval value);
+#else
+int nxsig_queue(int pid, int signo, void *sival_ptr);
+#endif
+
+/****************************************************************************
  * Name: nxsig_kill
  *
  * Description:

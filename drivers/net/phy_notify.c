@@ -58,6 +58,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/net/phy.h>
 
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
@@ -251,18 +252,14 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = client->arg;
-  ret = sigqueue(client->pid, client->signo, value);
+  ret = nxsig_queue(client->pid, client->signo, value);
 #else
-  ret = sigqueue(client->pid, client->signo, client->arg);
+  ret = nxsig_queue(client->pid, client->signo, client->arg);
 #endif
 
   if (ret < 0)
     {
-      int errcode = errno;
-      DEBUGASSERT(errcode > 0);
-
-      nerr("ERROR: sigqueue failed: %d\n", errcode);
-      UNUSED(errcode);
+      nerr("ERROR: nxsig_queue failed: %d\n", ret);
     }
 
   return OK;

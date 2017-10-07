@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/timers/timer.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -51,9 +51,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/timers/timer.h>
 
 #ifdef CONFIG_TIMER
@@ -138,9 +139,9 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = upper->arg;
-  (void)sigqueue(upper->pid, upper->signo, value);
+  (void)nxsig_queue(upper->pid, upper->signo, value);
 #else
-  (void)sigqueue(upper->pid, upper->signo, upper->arg);
+  (void)nxsig_queue(upper->pid, upper->signo, upper->arg);
 #endif
 
   return true;

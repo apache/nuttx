@@ -61,6 +61,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -494,10 +495,11 @@ static void xbeenet_notify(FAR struct xbee_maccb_s *maccb,
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)notif->notiftype;
-          (void)sigqueue(priv->xd_notify_pid, priv->xd_notify_signo, value);
+          (void)nxsig_queue(priv->xd_notify_pid, priv->xd_notify_signo,
+                            value);
 #else
-          (void)sigqueue(priv->xd_notify_pid, priv->xd_notify_signo,
-                         (FAR void *)notif->notiftype);
+          (void)nxsig_queue(priv->xd_notify_pid, priv->xd_notify_signo,
+                            (FAR void *)notif->notiftype);
 #endif
         }
 #endif

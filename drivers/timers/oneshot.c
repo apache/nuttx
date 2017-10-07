@@ -50,6 +50,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/timers/oneshot.h>
 
@@ -139,9 +140,9 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = priv->od_arg;
-  (void)sigqueue(priv->od_pid, priv->od_signo, value);
+  (void)nxsig_queue(priv->od_pid, priv->od_signo, value);
 #else
-  (void)sigqueue(priv->od_pid, priv->od_signo, priv->od_arg);
+  (void)nxsig_queue(priv->od_pid, priv->od_signo, priv->od_arg);
 #endif
 }
 

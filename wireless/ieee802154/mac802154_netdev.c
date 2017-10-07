@@ -52,6 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
@@ -493,10 +494,11 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)notif->notiftype;
-          (void)sigqueue(priv->md_notify_pid, priv->md_notify_signo, value);
+          (void)nxsig_queue(priv->md_notify_pid, priv->md_notify_signo,
+                            value);
 #else
-          (void)sigqueue(priv->md_notify_pid, priv->md_notify_signo,
-                         (FAR void *)notif->notiftype);
+          (void)nxsig_queue(priv->md_notify_pid, priv->md_notify_signo,
+                            (FAR void *)notif->notiftype);
 #endif
         }
 #endif

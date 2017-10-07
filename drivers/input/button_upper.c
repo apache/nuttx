@@ -54,9 +54,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/random.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
-#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -358,10 +359,11 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)sample;
-          (void)sigqueue(opriv->bo_pid, opriv->bo_notify.bn_signo, value);
+          (void)nxsig_queue(opriv->bo_pid, opriv->bo_notify.bn_signo,
+                            value);
 #else
-          (void)sigqueue(opriv->bo_pid, opriv->bo_notify.dn.signo,
-                         (FAR void *)sample);
+          (void)nxsig_queue(opriv->bo_pid, opriv->bo_notify.dn.signo,
+                            (FAR void *)sample);
 #endif
         }
 #endif

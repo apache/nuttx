@@ -58,9 +58,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/random.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/djoystick.h>
-#include <nuttx/random.h>
 
 #include <nuttx/irq.h>
 
@@ -376,10 +377,11 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)sample;
-          (void)sigqueue(opriv->do_pid, opriv->do_notify.dn_signo, value);
+          (void)nxsig_queue(opriv->do_pid, opriv->do_notify.dn_signo,
+                            value);
 #else
-          (void)sigqueue(opriv->do_pid, opriv->do_notify.dn.signo,
-                         (FAR void *)sample);
+          (void)nxsig_queue(opriv->do_pid, opriv->do_notify.dn.signo,
+                            (FAR void *)sample);
 #endif
         }
 #endif

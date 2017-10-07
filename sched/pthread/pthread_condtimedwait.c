@@ -51,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
@@ -88,10 +89,10 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
   FAR struct tcb_s *tcb;
   siginfo_t info;
 
-  /* The logic below if equivalent to sigqueue(), but uses nxsig_tcbdispatch()
-   * instead of nxsig_dispatch().  This avoids the group signal deliver logic
-   * and assures, instead, that the signal is delivered specifically to this
-   * thread that is known to be waiting on the signal.
+  /* The logic below if equivalent to nxsig_queue(), but uses
+   * nxsig_tcbdispatch() instead of nxsig_dispatch().  This avoids the group
+   * signal deliver logic and assures, instead, that the signal is delivered
+   * specifically to this thread that is known to be waiting on the signal.
    */
 
   /* Get the waiting TCB.  sched_gettcb() might return NULL if the task has
@@ -123,7 +124,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 #else /* HAVE_GROUP_MEMBERS */
 
   /* Things are a little easier if there are not group members.  We can just
-   * use sigqueue().
+   * use nxsig_queue().
    */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
@@ -132,9 +133,9 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
   /* Send the specified signal to the specified task. */
 
   value.sival_ptr = NULL;
-  (void)sigqueue((int)pid, (int)signo, value);
+  (void)nxsig_queue((int)pid, (int)signo, value);
 #else
-  (void)sigqueue((int)pid, (int)signo, NULL);
+  (void)nxsig_queue((int)pid, (int)signo, NULL);
 #endif
 
 #endif /* HAVE_GROUP_MEMBERS */

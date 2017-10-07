@@ -52,8 +52,9 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/sensors/zerocross.h>
 
 #include <nuttx/irq.h>
@@ -206,23 +207,23 @@ static void zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
 #ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
       value.sival_int = (int)sample;
-      (void)sigqueue(opriv->do_pid, opriv->do_notify.zc_signo, value);
+      (void)nxsig_queue(opriv->do_pid, opriv->do_notify.zc_signo, value);
 #else
-      (void)sigqueue(opriv->do_pid, opriv->do_notify.zc_signo,
-                     (FAR void *)sample);
+      (void)nxsig_queue(opriv->do_pid, opriv->do_notify.zc_signo,
+                        (FAR void *)sample);
 #endif
     }
 
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: zc_open
  *
  * Description:
  *   This function is called whenever the PWM device is opened.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int zc_open(FAR struct file *filep)
 {
@@ -271,13 +272,13 @@ errout_with_sem:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: zc_close
  *
  * Description:
  *   This function is called when the PWM device is closed.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int zc_close(FAR struct file *filep)
 {
@@ -366,43 +367,45 @@ errout_with_exclsem:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: zc_read
  *
  * Description:O
  *   A dummy read method.  This is provided only to satsify the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t zc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t zc_read(FAR struct file *filep, FAR char *buffer,
+                       size_t buflen)
 {
   /* Return zero -- usually meaning end-of-file */
 
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: zc_write
  *
  * Description:
  *   A dummy write method.  This is provided only to satsify the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t zc_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t zc_write(FAR struct file *filep, FAR const char *buffer,
+                        size_t buflen)
 {
   /* Return a failure */
 
   return -EPERM;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: zc_ioctl
  *
  * Description:
  *   The standard ioctl method.  This is where ALL of the PWM work is done.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {

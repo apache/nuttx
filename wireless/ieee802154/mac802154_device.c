@@ -49,7 +49,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-
+#include <nuttx/signal.h>
 #include <nuttx/mm/iob.h>
 
 #include <nuttx/wireless/ieee802154/ieee802154_device.h>
@@ -792,10 +792,11 @@ static void mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_int = (int)notif->notiftype;
-          (void)sigqueue(dev->md_notify_pid, dev->md_notify_signo, value);
+          (void)nxsig_queue(dev->md_notify_pid, dev->md_notify_signo,
+                            value);
 #else
-          (void)sigqueue(dev->md_notify_pid, dev->md_notify_signo,
-                         (FAR void *)notif->notiftype);
+          (void)nxsig_queue(dev->md_notify_pid, dev->md_notify_signo,
+                            (FAR void *)notif->notiftype);
 #endif
         }
 #endif

@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 #include "sched/sched.h"
 #include "signal/signal.h"
 
@@ -56,10 +58,11 @@
  * Name: nxsig_mqnotempty
  *
  * Description:
- *   This function is equivalent to sigqueue(), but supports the messaging
- *   system's requirement to signal a task when a message queue becomes
- *   non-empty.  It is identical to sigqueue(), except that it sets the
- *   si_code field in the siginfo structure to SI_MESGQ rather than SI_QUEUE.
+ *   This function is equivalent to nxsig_queue(), but supports the
+ *   messaging system's requirement to signal a task when a message queue
+ *   becomes non-empty.  It is identical to nxsig_queue(), except that it
+ *   sets the si_code field in the siginfo structure to SI_MESGQ rather than
+ *   SI_QUEUE.
  *
  ****************************************************************************/
 
