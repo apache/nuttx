@@ -538,7 +538,7 @@ static inline int vnc_wait_start(int display)
 static inline int vnc_wait_connect(int display)
 {
   int errcode;
-  int result;
+  int ret;
 
   /* Check if there has been a session allocated yet.  This is one of the
    * first things that the VNC server will do with the kernel thread is
@@ -581,14 +581,14 @@ static inline int vnc_wait_connect(int display)
        * counting semaphore screw-up?
        */
 
-      result = g_fbstartup[display].result;
-      if (result != -EBUSY)
+      ret = g_fbstartup[display].result;
+      if (ret != -EBUSY)
         {
 #ifdef CONFIG_DEBUG_FEATURES
-          if (result < 0)
+          if (ret < 0)
             {
               DEBUGASSERT(g_vnc_sessions[display] == NULL);
-              gerr("ERROR: VNC server startup failed: %d\n", result);
+              gerr("ERROR: VNC server startup failed: %d\n", ret);
             }
           else
             {
@@ -596,7 +596,7 @@ static inline int vnc_wait_connect(int display)
                           g_vnc_sessions[display]->state == VNCSERVER_RUNNING);
             }
 #endif
-          return result;
+          return ret;
         }
     }
 
