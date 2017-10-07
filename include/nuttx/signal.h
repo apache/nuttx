@@ -52,6 +52,48 @@
 struct timespec;  /* Forward reference */
 
 /****************************************************************************
+ * Name: nxsig_procmask
+ *
+ * Description:
+ *   This function allows the calling process to examine and/or change its
+ *   signal mask.  If the 'set' is not NULL, then it points to a set of
+ *   signals to be used to change the currently blocked set.  The value of
+ *   'how' indicates the manner in which the set is changed.
+ *
+ *   If there any pending unblocked signals after the call to
+ *   nxsig_procmask(), those signals will be delivered before
+ *    nxsig_procmask() returns.
+ *
+ *   If nxsig_procmask() fails, the signal mask of the process is not changed
+ *   by this function call.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sigprocmask() except that it does not modify the errno value.
+ *
+ * Parameters:
+ *   how - How the signal mast will be changed:
+ *         SIG_BLOCK   - The resulting set is the union of the current set
+ *                       and the signal set pointed to by 'set'.
+ *         SIG_UNBLOCK - The resulting set is the intersection of the current
+ *                       set and the complement of the signal set pointed to
+ *                       by 'set'.
+ *         SIG_SETMASK - The resulting set is the signal set pointed to by
+ *                       'set'.
+ *   set  - Location of the new signal mask
+ *   oset - Location to store the old signal mask
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    EINVAL - The 'how' argument is invalid.
+ *
+ ****************************************************************************/
+
+int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+
+/****************************************************************************
  * Name: nxsig_queue
  *
  * Description:

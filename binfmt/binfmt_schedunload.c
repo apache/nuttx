@@ -45,6 +45,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
@@ -100,10 +101,10 @@ static void unload_list_add(pid_t pid, FAR struct binary_s *bin)
 
   bin->pid = pid;
 
-  /* Disable deliver of any signals while we muck with the list.  The graceful
-   * way to do this would be block delivery of SIGCHLD would be with
-   * sigprocmask.  Here we do it the quick'n'dirty way by just disabling
-   * interrupts.
+  /* Disable deliver of any signals while we muck with the list.  The
+   * graceful way to do this would be block delivery of SIGCHLD would be
+   * with nxsig_procmask.  Here we do it the quick'n'dirty way by just
+   * disabling interrupts.
    */
 
   flags = enter_critical_section();
@@ -277,13 +278,10 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
 
   (void)sigemptyset(&set);
   (void)sigaddset(&set, SIGCHLD);
-  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
-  if (ret != OK)
+  ret = nxsig_procmask(SIG_UNBLOCK, &set, NULL);
+  if (ret < 0)
     {
-      /* The errno value will get trashed by the following debug output */
-
-      ret = -get_errno();
-      berr("ERROR: sigprocmask failed: %d\n", ret);
+      berr("ERROR: nxsig_procmask failed: %d\n", ret);
       return ret;
     }
 

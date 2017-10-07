@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_exit.c
  *
- *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "task/task.h"
@@ -90,7 +91,7 @@ void pthread_exit(FAR void *exit_value)
 #ifndef CONFIG_DISABLE_SIGNALS
   {
     sigset_t set = ALL_SIGNAL_SET;
-    (void)sigprocmask(SIG_SETMASK, &set, NULL);
+    (void)nxsig_procmask(SIG_SETMASK, &set, NULL);
   }
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_sigmask.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,8 @@
  * Name: pthread_sigmask
  *
  * Description:
- *   This function is a simple wrapper around sigprocmask().
- *   See the sigprocmask() function description for further
+ *   This function is a simple wrapper around nxsig_procmask().
+ *   See the nxsig_procmask() function description for further
  *   information.
  *
  * Parameters:
@@ -70,19 +70,13 @@
  *   oset - Location to store the old signal mask
  *
  * Return Value:
- *   0 (OK) or EINVAL if how is invalid.
- *
- * Assumptions:
+ *   On success, this function will return 0 (OK).  It will return EINVAL if
+ *   how is invalid.
  *
  ****************************************************************************/
 
 int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
-  int ret = sigprocmask(how, set, oset);
-  if (ret != OK)
-    {
-      ret = EINVAL;
-    }
-
-  return ret;
+  int ret = nxsig_procmask(how, set, oset);
+  return ret < 0 ? -ret : OK;
 }

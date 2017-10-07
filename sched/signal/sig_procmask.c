@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_procmask.c
  *
- *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,14 +43,16 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
-#include <assert.h>
-#include <debug.h>
 #include <sched.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -59,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sigprocmask
+ * Name: nxsig_procmask
  *
  * Description:
  *   This function allows the calling process to examine and/or change its
@@ -67,11 +70,15 @@
  *   signals to be used to change the currently blocked set.  The value of
  *   'how' indicates the manner in which the set is changed.
  *
- *   If there any pending unblocked signals after the call to sigprocmask(),
- *   those signals will be delivered before sigprocmask() returns.
+ *   If there any pending unblocked signals after the call to
+ *   nxsig_procmask(), those signals will be delivered before
+ *    nxsig_procmask() returns.
  *
- *   If sigprocmask() fails, the signal mask of the process is not changed
+ *   If nxsig_procmask() fails, the signal mask of the process is not changed
  *   by this function call.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sigprocmask() except that it does not modify the errno value.
  *
  * Parameters:
  *   how - How the signal mast will be changed:
@@ -86,13 +93,15 @@
  *   oset - Location to store the old signal mask
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if how is invalid.
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
- * Assumptions:
+ *     EINVAL - The 'how' argument is invalid.
  *
  ****************************************************************************/
 
-int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
+int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
   FAR struct tcb_s *rtcb = this_task();
   sigset_t   oldsigprocmask;
@@ -111,7 +120,7 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 
   /* Modify the current signal mask if so requested */
 
-  if (set)
+  if (set != NULL)
     {
       /* Some of these operations are non-atomic.  We need to protect
        * ourselves from attempts to process signals from interrupts
@@ -146,7 +155,7 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             break;
 
           default:
-            ret = ERROR;
+            ret = -EINVAL;
             break;
         }
 
@@ -158,5 +167,54 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
     }
 
   sched_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sigprocmask
+ *
+ * Description:
+ *   This function allows the calling process to examine and/or change its
+ *   signal mask.  If the 'set' is not NULL, then it points to a set of
+ *   signals to be used to change the currently blocked set.  The value of
+ *   'how' indicates the manner in which the set is changed.
+ *
+ *   If there any pending unblocked signals after the call to sigprocmask(),
+ *   those signals will be delivered before sigprocmask() returns.
+ *
+ *   If sigprocmask() fails, the signal mask of the process is not changed
+ *   by this function call.
+ *
+ * Parameters:
+ *   how - How the signal mast will be changed:
+ *         SIG_BLOCK   - The resulting set is the union of the current set
+ *                       and the signal set pointed to by 'set'.
+ *         SIG_UNBLOCK - The resulting set is the intersection of the current
+ *                       set and the complement of the signal set pointed to
+ *                       by 'set'.
+ *         SIG_SETMASK - The resulting set is the signal set pointed to by
+ *                       'set'.
+ *   set  - Location of the new signal mask
+ *   oset - Location to store the old signal mask
+ *
+ * Return Value:
+ *   This function will return 0 (OK) on success or -1 (ERROR) if how is
+ *   invalid.  In the latter case, the errno variable will be set to EINVAL.
+ *
+ ****************************************************************************/
+
+int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
+{
+  int ret;
+
+  /* Let nxsig_procmask do all of the work */
+
+  ret = nxsig_procmask(how, set, oset);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   return ret;
 }

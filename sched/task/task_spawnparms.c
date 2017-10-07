@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_spawnparms.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <spawn.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/spawn.h>
 
 #include "task/spawn.h"
@@ -317,7 +318,7 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
 #ifndef CONFIG_DISABLE_SIGNALS
   if (attr && (attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
     {
-      (void)sigprocmask(SIG_SETMASK, &attr->sigmask, NULL);
+      (void)nxsig_procmask(SIG_SETMASK, &attr->sigmask, NULL);
     }
 
   /* Were we also requested to perform file actions? */
