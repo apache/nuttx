@@ -1364,7 +1364,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
   /* Exclusive access */
 
   ret = nxsem_wait(&dev->devsem);
-  if (ret)  < 0)
+  if (ret < 0)
     {
       /* This should only happen if the wait was canceled by an signal */
 

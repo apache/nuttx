@@ -163,7 +163,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * but will be re-enabled while we are waiting.
            */
 
-          ret = nxterm_semwait(&priv->waitsem);
+          ret = nxsem_wait(&priv->waitsem);
 
           /* Pre-emption will be disabled when we return.  So the decrementing
            * nwaiters here is safe.
