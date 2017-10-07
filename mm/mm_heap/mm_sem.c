@@ -50,6 +50,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Internal nxsem_* interfaces are not available in the user space in
+ * PROTECTED and FLAT builds.  In that context, the application semaphore
+ * interfaces must be used.  The differences between the two sets of
+ * interfaces are:  (1) the nxsem_* interfaces do not cause cancellation
+ * points and (2) they do not modify the errno variable.
+ *
+ * REVISIT:  The fact that sem_wait() is a cancellation point is an issue
+ * and does cause a violation:  It makes all of the memory management
+ * interfaces into cancellation points!
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define SEM_INIT(s,p,c) nxsem_init(s,p,c)
+#  define SEM_WAIT(s)     nxsem_wait(s)
+#  define SEM_TRYWAIT(s)  nxsem_trywait(s)
+#  define SEM_POST(s)     nxsem_post(s)
+#  define SEM_ERROR(r)
+#else
+#  define SEM_INIT(s,p,c) sem_init(s,p,c)
+#  define SEM_WAIT(s)     sem_wait(s)
+#  define SEM_TRYWAIT(s)  sem_trywait(s)
+#  define SEM_POST(s)     sem_post(s)
+#  define SEM_ERROR(r)    (r) = -errno
+#endif
+
 /* Define the following to enable semaphore state monitoring */
 //#define MONITOR_MM_SEMAPHORE 1
 
@@ -88,7 +113,7 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
    * private data sets).
    */
 
-  (void)nxsem_init(&heap->mm_semaphore, 0, 1);
+  (void)SEM_INIT(&heap->mm_semaphore, 0, 1);
 
   heap->mm_holder      = -1;
   heap->mm_counts_held = 0;
@@ -123,9 +148,10 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
     {
       /* Try to take the semaphore (perhaps waiting) */
 
-      ret = nxsem_trywait(&heap->mm_semaphore);
+      ret = SEM_TRYWAIT(&heap->mm_semaphore);
       if (ret < 0)
        {
+         SEM_ERROR(ret);
          return ret;
        }
 
@@ -167,13 +193,22 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       mseminfo("PID=%d taking\n", my_pid);
       do
         {
-          ret = nxsem_wait(&heap->mm_semaphore);
+          ret = SEM_WAIT(&heap->mm_semaphore);
 
           /* The only case that an error should occur here is if the wait
            * was awakened by a signal.
            */
 
-          DEBUGASSERT(ret == OK || ret == -EINTR);
+          if (ret < 0)
+            {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+              DEBUGASSERT(ret == -EINTR);
+#else
+              int errcode = errno;
+              DEBUGASSERT(errcode == EINTR);
+              ret = -errcode;
+#endif
+            }
         }
       while (ret == -EINTR);
 
@@ -225,6 +260,6 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
 
       heap->mm_holder      = -1;
       heap->mm_counts_held = 0;
-      ASSERT(nxsem_post(&heap->mm_semaphore) == 0);
+      DEBUGVERIFY(SEM_POST(&heap->mm_semaphore));
     }
 }
