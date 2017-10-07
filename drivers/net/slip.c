@@ -739,7 +739,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
           if (priv->dev.d_len > 0)
             {
               slip_transmit(priv);
-              kill(priv->txpid, SIGALRM);
+              (void)nxsig_kill(priv->txpid, SIGALRM);
             }
 
           net_unlock();
@@ -840,7 +840,7 @@ static int slip_txavail(FAR struct net_driver_s *dev)
       /* Wake up the TX polling thread */
 
       priv->txnodelay = true;
-      kill(priv->txpid, SIGALRM);
+      (void)nxsig_kill(priv->txpid, SIGALRM);
     }
 
   return OK;

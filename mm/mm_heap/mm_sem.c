@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -155,7 +156,7 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
          return ret;
        }
 
-      /* We have it.  Claim the stak and return */
+      /* We have it.  Claim the heap and return */
 
       heap->mm_holder      = my_pid;
       heap->mm_counts_held = 1;

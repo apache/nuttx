@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_kill.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2015, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,8 +60,8 @@
  *
  * Description:
  *   The pthread_kill() system call can be used to send any signal to a
- *   thread.  See kill() for further information as this is just a simple
- *   wrapper around the kill() function.
+ *   thread.  See nxsig_kill() for further information as this is just a
+ *   simple wrapper around the nxsig_kill() function.
  *
  * Parameters:
  *   thread - The id of the thread to receive the signal. Only positive,
@@ -79,18 +80,16 @@
  *           specified by the given thread ID
  *    ENOSYS Do not support sending signals to process groups.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int pthread_kill(pthread_t thread, int signo)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  /* If group members are supported then pthread_kill() differs from kill().
-   * kill(), in this case, must follow the POSIX rules for delivery of
-   * signals in the group environment.  Otherwise, kill(), like
-   * pthread_kill() will just deliver the signal to the thread ID it is
-   * requested to use.
+  /* If group members are supported then pthread_kill() differs from
+   * nxsig_kill().  nxsig_kill(), in this case, must follow the POSIX rules
+   * for delivery of signals in the group environment.  Otherwise,
+   * nxsig_kill(), like pthread_kill() will just deliver the signal to the
+   * thread ID it is requested to use.
    */
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
@@ -153,18 +152,10 @@ errout:
 
 #else
   /* If group members are not supported then pthread_kill is basically the
-   * same as kill().
+   * same as nxsig_kill() other than the sign of the returned value.
    */
 
-  int ret;
-
-  set_errno(EINVAL);
-  ret = kill((pid_t)thread, signo);
-  if (ret != OK)
-    {
-      ret = get_errno();
-    }
-
-  return ret;
+  int ret = nxsig_kill((pid_t)thread, signo);
+  return (ret < 0) ? -ret : OK;
 #endif
 }

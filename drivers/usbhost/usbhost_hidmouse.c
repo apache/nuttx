@@ -87,8 +87,8 @@
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
-/* Signals must not be disabled as they are needed for kill.  Need to have
- * CONFIG_DISABLE_SIGNALS=n
+/* Signals must not be disabled as they are needed for nxsig_kill.  Need to
+ * have CONFIG_DISABLE_SIGNALS=n
  */
 
 #ifdef CONFIG_DISABLE_SIGNALS
@@ -2097,7 +2097,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        * perhaps, destroy the class instance.  Then it will exit.
        */
 
-      (void)kill(priv->pollpid, SIGALRM);
+      (void)nxsig_kill(priv->pollpid, SIGALRM);
     }
   else
     {
@@ -2273,7 +2273,7 @@ static int usbhost_close(FAR struct file *filep)
                * signal that we use does not matter in this case.
                */
 
-              (void)kill(priv->pollpid, SIGALRM);
+              (void)nxsig_kill(priv->pollpid, SIGALRM);
             }
         }
     }

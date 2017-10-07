@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/work_signal.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 
 #include "wqueue/wqueue.h"
 
@@ -64,14 +65,13 @@
  *   qid    - The work queue ID
  *
  * Returned Value:
- *   Zero on success, a negated errno on failure
+ *   Zero (OK) on success, a negated errno value on failure
  *
  ****************************************************************************/
 
 int work_signal(int qid)
 {
   pid_t pid;
-  int ret;
 
   /* Get the process ID of the worker thread */
 
@@ -120,14 +120,7 @@ int work_signal(int qid)
 
   /* Signal the worker thread */
 
-  ret = kill(pid, SIGWORK);
-  if (ret < 0)
-    {
-      int errcode = errno;
-      return -errcode;
-    }
-
-  return OK;
+  return nxsig_kill(pid, SIGWORK);
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

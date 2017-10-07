@@ -327,11 +327,11 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         }
       else
         {
-          /* We can use kill() with signal number 0 to determine if that
-           * task is still alive.
+          /* We can use nxsig_kill() with signal number 0 to determine if
+           * that task is still alive.
            */
 
-          ret = kill((pid_t)id, 0);
+          ret = nxsig_kill((pid_t)id, 0);
           if (ret < 0)
             {
               /* It is no longer running.  We know that the child task
@@ -353,9 +353,9 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
        */
 
       if (rtcb->group->tg_nchildren == 0 ||
-          (idtype == P_PID && (ret = kill((pid_t)id, 0)) < 0))
+          (idtype == P_PID && (ret = nxsig_kill((pid_t)id, 0)) < 0))
         {
-          /* We know that the child task was running okay we stared,
+          /* We know that the child task was running okay we started,
            * so we must have lost the signal.  What can we do?
            * Let's return ECHILD.. that is at least informative.
            */

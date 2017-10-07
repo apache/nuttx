@@ -45,6 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/ioexpander/gpio.h>
 
@@ -99,7 +100,7 @@ static const struct file_operations g_gpio_drvrops =
 static int gpio_handler(FAR struct gpio_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
-  (void)kill(dev->gp_pid, dev->gp_signo);
+  (void)nxsig_kill(dev->gp_pid, dev->gp_signo);
   return OK;
 }
 

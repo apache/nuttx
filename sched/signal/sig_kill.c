@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_kill.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2015, 2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,16 +53,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kill
+ * Name: nxsig_kill
  *
  * Description:
- *   The kill() system call can be used to send any signal to any task.
+ *   The nxsig_kill() system call can be used to send any signal to any task.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   the POSIX standard kill() function but does not modify the appliation
+ *   errno variable.
  *
  *   Limitation: Sending of signals to 'process groups' is not
  *   supported in NuttX
  *
  * Parameters:
- *   pid - The id of the task to receive the signal.  The POSIX kill
+ *   pid - The id of the task to receive the signal.  The POSIX nxsig_kill
  *     specification encodes process group information as zero and
  *     negative pid values.  Only positive, non-zero values of pid are
  *     supported by this implementation.
@@ -69,8 +74,9 @@
  *     sent, but all error checking is performed.
  *
  * Returned Value:
- *    On success (at least one signal was sent), zero is returned.  On
- *    error, -1 is returned, and errno is set appropriately:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  *    EINVAL An invalid signal was specified.
  *    EPERM  The process does not have permission to send the
@@ -78,11 +84,9 @@
  *    ESRCH  The pid or process group does not exist.
  *    ENOSYS Do not support sending signals to process groups.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int kill(pid_t pid, int signo)
+int nxsig_kill(pid_t pid, int signo)
 {
 #ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct tcb_s *rtcb = this_task();
@@ -94,16 +98,14 @@ int kill(pid_t pid, int signo)
 
   if (pid <= 0)
     {
-      ret = -ENOSYS;
-      goto errout;
+      return -ENOSYS;
     }
 
   /* Make sure that the signal is valid */
 
   if (!GOOD_SIGNO(signo))
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Keep things stationary through the following */
@@ -124,16 +126,53 @@ int kill(pid_t pid, int signo)
   /* Send the signal */
 
   ret = nxsig_dispatch(pid, &info);
-  sched_unlock();
 
+  sched_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: kill
+ *
+ * Description:
+ *   The kill() system call can be used to send any signal to any task.
+ *
+ *   Limitation: Sending of signals to 'process groups' is not
+ *   supported in NuttX
+ *
+ * Parameters:
+ *   pid - The id of the task to receive the signal.  The POSIX kill
+ *     specification encodes process group information as zero and
+ *     negative pid values.  Only positive, non-zero values of pid are
+ *     supported by this implementation.
+ *   signo - The signal number to send.  If signo is zero, no signal is
+ *     sent, but all error checking is performed.
+ *
+ * Returned Value:
+ *    This is a standard POSIX application interface.  On success (at least
+ *    one signal was sent), zero (OK) is returned.  On any failure , -1
+ *    (ERROR) is returned, and errno is set appropriately:
+ *
+ *      EINVAL An invalid signal was specified.
+ *      EPERM  The process does not have permission to send the
+ *             signal to any of the target processes.
+ *      ESRCH  The pid or process group does not exist.
+ *      ENOSYS Do not support sending signals to process groups.
+ *
+ ****************************************************************************/
+
+int kill(pid_t pid, int signo)
+{
+  int ret;
+
+  /* Let nxsem_kill() do all of the work */
+
+  ret = nxsig_kill(pid, signo);
   if (ret < 0)
     {
-      goto errout;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  return OK;
-
-errout:
-  set_errno(-ret);
-  return ERROR;
+  return ret;
 }

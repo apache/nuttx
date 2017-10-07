@@ -1730,7 +1730,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        * perhaps, destroy the class instance.  Then it will exit.
        */
 
-      (void)kill(priv->pollpid, SIGALRM);
+      (void)nxsig_kill(priv->pollpid, SIGALRM);
     }
   else
     {
@@ -1907,7 +1907,7 @@ static int usbhost_close(FAR struct file *filep)
                * signal that we use does not matter in this case.
                */
 
-              (void)kill(priv->pollpid, SIGALRM);
+              (void)nxsig_kill(priv->pollpid, SIGALRM);
             }
         }
     }

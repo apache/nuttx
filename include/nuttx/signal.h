@@ -52,6 +52,42 @@
 struct timespec;  /* Forward reference */
 
 /****************************************************************************
+ * Name: nxsig_kill
+ *
+ * Description:
+ *   The nxsig_kill() system call can be used to send any signal to any task.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   the POSIX standard kill() function but does not modify the appliation
+ *   errno variable.
+ *
+ *   Limitation: Sending of signals to 'process groups' is not
+ *   supported in NuttX
+ *
+ * Parameters:
+ *   pid - The id of the task to receive the signal.  The POSIX nxsig_kill
+ *     specification encodes process group information as zero and
+ *     negative pid values.  Only positive, non-zero values of pid are
+ *     supported by this implementation.
+ *   signo - The signal number to send.  If signo is zero, no signal is
+ *     sent, but all error checking is performed.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    EINVAL An invalid signal was specified.
+ *    EPERM  The process does not have permission to send the
+ *           signal to any of the target processes.
+ *    ESRCH  The pid or process group does not exist.
+ *    ENOSYS Do not support sending signals to process groups.
+ *
+ ****************************************************************************/
+
+int nxsig_kill(pid_t pid, int signo);
+
+/****************************************************************************
  * Name: nxsig_waitinfo
  *
  * Description:

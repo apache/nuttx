@@ -2,7 +2,7 @@
  * sched/paging/pg_worker.c
  * Page fill worker thread implementation.
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/page.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "paging/paging.h"
@@ -200,7 +201,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
   /* Signal the page fill worker thread (in any event) */
 
   pginfo("Signaling worker. PID: %d\n", g_pgworker);
-  kill(g_pgworker, SIGWORK);
+  (void)nxsig_kill(g_pgworker, SIGWORK);
 }
 #endif
 
