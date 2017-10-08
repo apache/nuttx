@@ -67,7 +67,7 @@ void up_irqinitialize(void)
    * NOTE:  Normally, there are seperate enables for "global" interrupts
    * and specific device interrupts.  In such a "normal" case, the timer
    * interrupt should be attached and enabled in the function
-   * z80sim_timer_initialize()
+   * z80_timer_initialize()
    */
 
   irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)z80sim_timerisr, NULL);

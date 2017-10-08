@@ -43,15 +43,14 @@ CSRCS += lib_vsnprintf.c lib_libvsprintf.c lib_dprintf.c lib_vdprintf.c
 CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
 CSRCS += lib_memsostream.c lib_lowoutstream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
-CSRCS += lib_sscanf.c
+CSRCS += lib_sscanf.c lib_libnoflush.c lib_libsnoflush.c
 
 # The remaining sources files depend upon file descriptors
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
-CSRCS += lib_rawsostream.c lib_libnoflush.c lib_libsnoflush.c
-CSRCS += lib_remove.c
+CSRCS += lib_rawsostream.c lib_remove.c
 
 # And these depend upon both file descriptors and C streams
 

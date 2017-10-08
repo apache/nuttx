@@ -68,7 +68,7 @@ int z80sim_timerisr(int irq, FAR chipreg_t *regs, void *arg)
 }
 
 /****************************************************************************
- * Function:  z80sim_timer_initialize
+ * Function:  z80_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -76,7 +76,7 @@ int z80sim_timerisr(int irq, FAR chipreg_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void z80sim_timer_initialize(void)
+void z80_timer_initialize(void)
 {
   /* The timer interrupt was attached in up_irqinitialize -- see comments there */
 }
