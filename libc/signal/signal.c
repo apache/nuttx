@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-_sa_sighandler_t signal(int signo, _sa_handler_t func);
+_sa_handler_t signal(int signo, _sa_handler_t func)
 {
   struct sigaction act;
   struct sigaction oact;
