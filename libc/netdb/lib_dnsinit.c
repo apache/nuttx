@@ -168,7 +168,7 @@ void dns_semtake(void)
        ret = _SEM_WAIT(&g_dns_sem);
        if (ret < 0)
          {
-           errcode = SEM_ERRNO(ret);
+           errcode = _SEM_ERRNO(ret);
            DEBUGASSERT(errcode == EINTR);
          }
     }
