@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
@@ -190,7 +191,8 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
           gerr("ERROR: nx_message failed: %d\n", errno);
           goto errout_with_wmq;
         }
-      usleep(300000);
+
+      _SIG_USLEEP(300000);
     }
   while (conn->state != NX_CLISTATE_CONNECTED);
 #endif

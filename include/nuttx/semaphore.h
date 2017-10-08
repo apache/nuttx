@@ -68,9 +68,9 @@
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
  *
- * The interfaces sem_twait() and sem_timedwait() are cancellation points.
+ * The interfaces sem_wait() and sem_timedwait() are cancellation points.
  *
- * REVISIT:  The fact that sem_twait() and sem_timedwait() are cancellation
+ * REVISIT:  The fact that sem_wait() and sem_timedwait() are cancellation
  * points is an issue and may cause violations:  It use of these internally
  * will cause the calling function to become a cancellation points!
  */

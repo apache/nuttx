@@ -49,6 +49,51 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/* Most internal nxsig_* interfaces are not available in the user space in
+ * PROTECTED and KERNEL builds.  In that context, the application signal
+ * interfaces must be used.  The differences between the two sets of
+ * interfaces are:  (1) the nxsig_* interfaces do not cause cancellation
+ * points and (2) they do not modify the errno variable.
+ *
+ * This is only important when compiling libraries (libc or libnx) that are
+ * used both by the OS (libkc.a and libknx.a) or by the applications
+ * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * used for the build context.
+ *
+ * The interfaces sigtimedwait(), sigwait(), sigwaitinfo(), sleep(),
+ * nanosleep(), and usleep()  are cancellation points.
+ *
+ * REVISIT:  The fact that these interfaces are cancellation points is an
+ * issue and may cause violations:  It use of these internally will cause
+ * the calling function to become a cancellation points!
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _SIG_PROCMASK(h,s,o) nxsig_procmask(h,s,o)
+#  define _SIG_QUEUE(p,s,v)    nxsig_queue(p,s,v)
+#  define _SIG_KILL(p,s)       nxsig_kill(p,s);
+#  define _SIG_WAITINFO(s,i)   nxsig_timedwait(s,i,NULL)
+#  define _SIG_NANOSLEEP(r,a)  nxsig_nanosleep(r,a)
+#  define _SIG_SLEEP(s)        nxsig_sleep(s)
+#  define _SIG_USLEEP(u)       nxsig_usleep(u)
+#  define _SIG_ERRNO(r)        (-(r))
+#  define _SIG_ERRVAL(r)       (r)
+#else
+#  define _SIG_PROCMASK(h,s,o) sigprocmask(h,s,o)
+#  define _SIG_QUEUE(p,s,v)    sigqueue(p,s,v)
+#  define _SIG_KILL(p,s)       kill(p,s);
+#  define _SIG_WAITINFO(s,i)   sigwaitinfo(s,i)
+#  define _SIG_NANOSLEEP(r,a)  nanosleep(r,a)
+#  define _SIG_SLEEP(s)        sleep(s)
+#  define _SIG_USLEEP(u)       usleep(u)
+#  define _SIG_ERRNO(r)        errno
+#  define _SIG_ERRVAL(r)       (-errno)
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
 struct timespec;  /* Forward reference */
 
 /****************************************************************************
@@ -129,7 +174,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-int nxsig_queue (int pid, int signo, union sigval value);
+int nxsig_queue(int pid, int signo, union sigval value);
 #else
 int nxsig_queue(int pid, int signo, void *sival_ptr);
 #endif
@@ -236,6 +281,8 @@ int nxsig_kill(pid_t pid, int signo);
  *
  ****************************************************************************/
 
+int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
+                    FAR const struct timespec *timeout);
 int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                     FAR const struct timespec *timeout);
 
