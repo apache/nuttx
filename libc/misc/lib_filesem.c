@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
 #include "libc.h"
@@ -65,7 +66,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
    * to private data sets.
    */
 
-  (void)sem_init(&stream->fs_sem, 0, 1);
+  (void)nxsem_init(&stream->fs_sem, 0, 1);
 
   stream->fs_holder = -1;
   stream->fs_counts = 0;
@@ -91,13 +92,13 @@ void lib_take_semaphore(FAR struct file_struct *stream)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&stream->fs_sem) != 0)
+      while (_SEM_WAIT(&stream->fs_sem) < 0)
         {
           /* The only case that an error should occr here is if the wait
            * was awakened by a signal.
            */
 
-          ASSERT(get_errno() == EINTR);
+          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
         }
 
       /* We have it.  Claim the stak and return */
@@ -113,11 +114,9 @@ void lib_take_semaphore(FAR struct file_struct *stream)
 
 void lib_give_semaphore(FAR struct file_struct *stream)
 {
-  pid_t my_pid = getpid();
-
   /* I better be holding at least one reference to the semaphore */
 
-  ASSERT(stream->fs_holder == my_pid);
+  DEBUGASSERT(stream->fs_holder == getpid());
 
   /* Do I hold multiple references to the semphore */
 
@@ -133,7 +132,7 @@ void lib_give_semaphore(FAR struct file_struct *stream)
 
       stream->fs_holder = -1;
       stream->fs_counts = 0;
-      ASSERT(sem_post(&stream->fs_sem) == 0);
+      DEBUGVERIFY(_SEM_POST(&stream->fs_sem));
     }
 }
 

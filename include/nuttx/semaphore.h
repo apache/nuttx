@@ -57,7 +57,7 @@
 #define SEM_PRIO_INHERIT          1
 #define SEM_PRIO_PROTECT          2
 
-/* Internal nxsem_* interfaces are not available in the user space in
+/* Most internal nxsem_* interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the application semaphore
  * interfaces must be used.  The differences between the two sets of
  * interfaces are:  (1) the nxsem_* interfaces do not cause cancellation
@@ -68,26 +68,37 @@
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
  *
- * REVISIT:  The fact that sem_wait() is a cancellation point is an issue
- * and may cause violations:  It makes functions into cancellation points!
+ * The interfaces sem_twait() and sem_timedwait() are cancellation points.
+ *
+ * REVISIT:  The fact that sem_twait() and sem_timedwait() are cancellation
+ * points is an issue and may cause violations:  It use of these internally
+ * will cause the calling function to become a cancellation points!
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define _SEM_INIT(s,p,c) nxsem_init(s,p,c)
-#  define _SEM_DESTROY(s)  nxsem_destroy(s)
-#  define _SEM_WAIT(s)     nxsem_wait(s)
-#  define _SEM_TRYWAIT(s)  nxsem_trywait(s)
-#  define _SEM_POST(s)     nxsem_post(s)
-#  define _SEM_ERRNO(r)    (-(r))
-#  define _SEM_ERRVAL(r)   (r)
+#  define _SEM_INIT(s,p,c)      nxsem_init(s,p,c)
+#  define _SEM_DESTROY(s)       nxsem_destroy(s)
+#  define _SEM_WAIT(s)          nxsem_wait(s)
+#  define _SEM_TRYWAIT(s)       nxsem_trywait(s)
+#  define _SEM_TIMEDWAIT(s,t)   nxsem_timedwait(s,t)
+#  define _SEM_POST(s)          nxsem_post(s)
+#  define _SEM_GETVALUE(s)      nxsem_getvalue(s)
+#  define _SEM_GETPROTOCOL(s,p) nxsem_getprotocol(s,p)
+#  define _SEM_SETPROTOCOL(s,p) nxsem_setprotocol(s,p)
+#  define _SEM_ERRNO(r)         (-(r))
+#  define _SEM_ERRVAL(r)        (r)
 #else
-#  define _SEM_INIT(s,p,c) sem_init(s,p,c)
-#  define _SEM_DESTROY(s)  sem_destroy(s)
-#  define _SEM_WAIT(s)     sem_wait(s)
-#  define _SEM_TRYWAIT(s)  sem_trywait(s)
-#  define _SEM_POST(s)     sem_post(s)
-#  define _SEM_ERRNO(r)    errno
-#  define _SEM_ERRVAL(r)   (-errno)
+#  define _SEM_INIT(s,p,c)      sem_init(s,p,c)
+#  define _SEM_DESTROY(s)       sem_destroy(s)
+#  define _SEM_WAIT(s)          sem_wait(s)
+#  define _SEM_TRYWAIT(s)       sem_trywait(s)
+#  define _SEM_TIMEDWAIT(s,t)   sem_timedwait(s,t)
+#  define _SEM_GETVALUE(s,v)    sem_getvalue(s,v)
+#  define _SEM_POST(s)          sem_post(s)
+#  define _SEM_GETPROTOCOL(s,p) sem_getprotocol(s,p)
+#  define _SEM_SETPROTOCOL(s,p) sem_setprotocol(s,p)
+#  define _SEM_ERRNO(r)         errno
+#  define _SEM_ERRVAL(r)        (-errno)
 #endif
 
 /****************************************************************************

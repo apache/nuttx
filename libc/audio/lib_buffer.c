@@ -49,30 +49,13 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/usb/audio.h>
 
 #include "libc.h"
 
 #if defined(CONFIG_AUDIO)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -89,13 +72,13 @@ static void apb_semtake(FAR struct ap_buffer_s *apb)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&apb->sem) != 0)
+  while (_SEM_WAIT(&apb->sem) < 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
     }
 }
 
@@ -103,7 +86,7 @@ static void apb_semtake(FAR struct ap_buffer_s *apb)
  * Name: apb_semgive
  ****************************************************************************/
 
-#define apb_semgive(b) sem_post(&b->sem)
+#define apb_semgive(b) _SEM_POST(&b->sem)
 
 /****************************************************************************
  * Name: apb_alloc
@@ -148,7 +131,7 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
       apb->session    = bufdesc->session;
 #endif
 
-      sem_init(&apb->sem, 0, 1);
+      nxsem_init(&apb->sem, 0, 1);
       ret = sizeof(struct audio_buf_desc_s);
     }
 

@@ -1,7 +1,8 @@
 /****************************************************************************
  * libnx/nxmu/nxmu_semtake.c
  *
- *   Copyright (C) 2008-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2013, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +44,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 
@@ -56,12 +58,15 @@
 
 void nxmu_semtake(sem_t *sem)
 {
-  while (sem_wait(sem) != 0)
+  int ret;
+
+  while ((ret = _SEM_WAIT(sem)) < 0)
     {
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+      UNUSED(ret);
     }
 }

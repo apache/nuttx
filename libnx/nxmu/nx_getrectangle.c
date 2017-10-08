@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxmu/nx_getrectangle.c
  *
- *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,11 +43,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
-
-#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Public Functions

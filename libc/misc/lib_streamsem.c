@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/misc/lib_streamsem.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,25 +44,11 @@
 #include <assert.h>
 #include <semaphore.h>
 #include <errno.h>
+
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
 #include "libc.h"
-
-/****************************************************************************
- * Private types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -72,17 +58,17 @@ void stream_semtake(FAR struct streamlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&list->sl_sem) != 0)
+  while (_SEM_WAIT(&list->sl_sem) != 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.
        */
 
-      ASSERT(get_errno() == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
     }
 }
 
 void stream_semgive(FAR struct streamlist *list)
 {
-  sem_post(&list->sl_sem);
+  (void)_SEM_POST(&list->sl_sem);
 }

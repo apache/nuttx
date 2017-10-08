@@ -44,6 +44,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
@@ -98,6 +99,7 @@ static FAR struct module_s *g_mod_registry;
 void modlib_registry_lock(void)
 {
   pid_t me;
+  int ret;
 
   /* Do we already hold the semaphore? */
 
@@ -114,13 +116,14 @@ void modlib_registry_lock(void)
 
   else
     {
-      while (sem_wait(&g_modlock.lock) != 0)
+      while ((ret = _SEM_WAIT(&g_modlock.lock)) < 0)
         {
           /* The only case that an error should occr here is if
            * the wait was awakened by a signal.
            */
 
-          ASSERT(get_errno() == EINTR);
+          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+          UNUSED(ret);
         }
 
       /* No we hold the semaphore */
@@ -163,7 +166,7 @@ void modlib_registry_unlock(void)
     {
       g_modlock.holder = NO_HOLDER;
       g_modlock.count  = 0;
-      sem_post(&g_modlock.lock);
+      (void)_SEM_POST(&g_modlock.lock);
     }
 }
 

@@ -42,11 +42,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
-
-#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Public Functions
@@ -111,11 +110,11 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   /* Create a semaphore for tracking command completion */
 
   outmsg.sem_done = &sem_done;
-  ret = sem_init(&sem_done, 0, 0);
 
-  if (ret != OK)
+  ret = _SEM_INIT(&sem_done, 0, 0);
+  if (ret < 0)
     {
-      gerr("ERROR: sem_init failed: %d\n", errno);
+      gerr("ERROR: _SEM_INIT failed: %d\n", _SEM_ERRNO(r));
       return ret;
     }
 
@@ -123,7 +122,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
    * priority inheritance enabled.
    */
 
-  (void)nxsem_setprotocol(&sem_done, SEM_PRIO_NONE);
+  (void)_SEM_SETPROTOCOL(&sem_done, SEM_PRIO_NONE);
 
   /* Forward the fill command to the server */
 
@@ -133,12 +132,12 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   if (ret == OK)
     {
-      ret = sem_wait(&sem_done);
+      ret = _SEM_WAIT(&sem_done);
     }
 
   /* Destroy the semaphore and return. */
 
-  sem_destroy(&sem_done);
+  (void)_SEM_DESTROY(&sem_done);
 
   return ret;
 }

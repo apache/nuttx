@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/netdb/lib_dnscache.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@
 #include <assert.h>
 
 #include <arpa/inet.h>
+
+#include <nuttx/semaphore.h>
 
 #include "netdb/lib_dns.h"
 
@@ -94,7 +96,7 @@ bool dns_initialize(void)
 
   if (!g_dns_initialized)
     {
-      sem_init(&g_dns_sem, 0, 1);
+      (void)nxsem_init(&g_dns_sem, 0, 1);
       g_dns_initialized = true;
     }
 
@@ -163,10 +165,10 @@ void dns_semtake(void)
 
   do
     {
-       ret = sem_wait(&g_dns_sem);
+       ret = _SEM_WAIT(&g_dns_sem);
        if (ret < 0)
          {
-           errcode = get_errno();
+           errcode = SEM_ERRNO(ret);
            DEBUGASSERT(errcode == EINTR);
          }
     }
@@ -183,5 +185,5 @@ void dns_semtake(void)
 
 void dns_semgive(void)
 {
-  DEBUGVERIFY(sem_post(&g_dns_sem));
+  DEBUGVERIFY(_SEM_POST(&g_dns_sem));
 }

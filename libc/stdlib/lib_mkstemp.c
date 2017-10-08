@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdlib/lib_mkstemp.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,8 @@
 #include <string.h>
 #include <semaphore.h>
 #include <errno.h>
+
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_FS_WRITABLE
 
@@ -149,14 +151,16 @@ static void incr_base62(void)
 
 static void get_base62(FAR uint8_t *ptr)
 {
-  while (sem_wait(&g_b62sem) < 0)
+  int ret;
+
+  while ((ret = _SEM_WAIT(&g_b62sem)) < 0)
     {
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
     }
 
   memcpy(ptr, g_base62, MAX_XS);
   incr_base62();
-  sem_post(&g_b62sem);
+  (void)_SEM_POST(&g_b62sem);
 }
 
 /****************************************************************************
