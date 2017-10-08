@@ -90,11 +90,19 @@ enum powerled_state_e
   POWERLED_STATE_CRITICAL     = 4   /* Critical Fault state */
 };
 
+/* Powerled faults */
+
+enum powerled_fault_e
+{
+  POWERLED_FAULT_OVERHEAT = (1<<0) /* Overheat fault */
+};
+
 /* This structure describes converter state */
 
 struct powerled_state_s
 {
   uint8_t                state;     /* Powerled state  */
+  uint8_t                fault;     /* Fault state */
 };
 
 /* Powerled limits */

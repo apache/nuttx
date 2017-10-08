@@ -69,8 +69,8 @@
 #error "Powerled example requires HRTIM1 support"
 #endif
 
-#if !defined(CONFIG_STM32_DAC1CH1) || !defined(CONFIG_DAC)                    \
-    || !defined(CONFIG_STM32_DAC1CH1_DMA)
+#if !defined(CONFIG_STM32_DAC1CH1) || !defined(CONFIG_DAC) || \
+    !defined(CONFIG_STM32_DAC1CH1_DMA)
 #error "Powerled example requires DAC1 with DMA support"
 #endif
 
@@ -91,11 +91,18 @@
 #define HRTIM_OUTPUTS_ENABLE(hrtim, tim, state)     \
         hrtim->hd_ops->outputs_enable(hrtim, tim, state)
 #define HRTIM_BURST_CMP_SET(hrtim, cmp)             \
-        hrtim->hd_ops->burst_cmp_set(hrtim, cmp);
+        hrtim->hd_ops->burst_cmp_set(hrtim, cmp)
 #define HRTIM_BURST_PER_SET(hrtim, per)             \
-        hrtim->hd_ops->burst_per_set(hrtim, per);
+        hrtim->hd_ops->burst_per_set(hrtim, per)
+#define HRTIM_BURST_PRE_SET(hrtim, pre)         \
+        hrtim->hd_ops->burst_pre_set(hrtim, pre)
 #define HRTIM_BURST_ENABLE(hrtim, state)            \
-        hrtim->hd_ops->burst_enable(hrtim, state);
+        hrtim->hd_ops->burst_enable(hrtim, state)
+
+#define DAC_BUFFER_INIT(dac, buffer) \
+        dac->ad_ops->ao_ioctl(dac, IO_DMABUFFER_INIT, (unsigned long)buffer)
+
+#define DAC_START(dac) dac->ad_ops->ao_send(dac, NULL);
 
 #if CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE != 5
   #error "This example requires DAC1CH1 DMA buffer size == 5"
@@ -103,12 +110,16 @@
 
 /* Peripheral selection */
 
-#define DAC_CURRENT_LIMIT 1
+#define DAC_CURRENT_LIMIT  1
 #define COMP_CURRENT_LIMIT 4
 
 /* Maximum onboard LED current is 350mA */
 
 #define LED_ABSOLUTE_CURRENT_LIMIT_mA 250
+
+#if (CONFIG_EXAMPLES_POWERLED_CURRENT_LIMIT > LED_ABSOLUTE_CURRENT_LIMIT_mA)
+#  error "Board LED maximum current is 250 mA"
+#endif
 
 /* Voltage reference for DAC */
 
@@ -168,12 +179,7 @@ static int powerled_ioctl(FAR struct powerled_dev_s *dev, int cmd,
 
 struct powerled_priv_s powerled_priv;
 
-struct powerled_s g_powerled =
-{
-  .opmode = POWERLED_OPMODE_INIT,
-  .state = POWERLED_STATE_INIT,
-  .priv = &powerled_priv
-};
+struct powerled_s g_powerled;
 
 struct powerled_ops_s g_powerled_ops =
 {
@@ -212,14 +218,7 @@ struct powerled_lower_dev_s
   struct opamp_dev_s *opamp; /* not used in this demo - only as reference */
 };
 
-struct powerled_lower_dev_s g_powerled_lower =
-{
-  .hrtim = NULL,
-  .comp  = NULL,
-  .dac   = NULL,
-  .adc   = NULL,
-  .opamp = NULL
-};
+struct powerled_lower_dev_s g_powerled_lower;
 
 /****************************************************************************
  * Private Functions
@@ -227,9 +226,21 @@ struct powerled_lower_dev_s g_powerled_lower =
 
 static int powerled_shutdown(FAR struct powerled_dev_s *dev)
 {
-  /* TODO ? */
+  FAR struct powerled_s      *powerled = (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_priv_s *priv = (struct powerled_priv_s *)powerled->priv;
 
-  return 0;
+  /* Stop powerled if running */
+
+  if (priv->running == true)
+    {
+      powerled_stop(dev);
+    }
+
+  /* Reset powerled structure */
+
+  memset(powerled, 0, sizeof(struct powerled_s));
+
+  return OK;
 }
 
 /****************************************************************************
@@ -246,11 +257,16 @@ static int powerled_shutdown(FAR struct powerled_dev_s *dev)
 static int powerled_setup(FAR struct powerled_dev_s *dev)
 {
   FAR struct powerled_lower_dev_s *lower = dev->lower;
-  FAR struct powerled_s  *powerled    = (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_s  *powerled   = (FAR struct powerled_s *)dev->priv;
   FAR struct hrtim_dev_s *hrtim      = NULL;
-  FAR struct comp_dev_s *comp        = NULL;
-  FAR struct dac_dev_s *dac          = NULL;
-  FAR struct powerled_priv_s *priv   = (struct powerled_priv_s *)powerled->priv;
+  FAR struct comp_dev_s  *comp       = NULL;
+  FAR struct dac_dev_s   *dac        = NULL;
+
+  /* Initialize powerled structure */
+
+  powerled->opmode       = POWERLED_OPMODE_INIT;
+  powerled->state.state  = POWERLED_STATE_INIT;
+  powerled->priv         = &powerled_priv;
 
   /* Check lower half drivers */
 
@@ -279,16 +295,21 @@ static int powerled_setup(FAR struct powerled_dev_s *dev)
 
 static int powerled_start(FAR struct powerled_dev_s *dev)
 {
-  FAR struct powerled_lower_dev_s *lower    = dev->lower;
-  FAR struct powerled_s  *powerled = (FAR struct powerled_s *)dev->priv;
-  FAR struct hrtim_dev_s *hrtim    = lower->hrtim;
-  FAR struct dac_dev_s   *dac      = lower->dac;
-  struct powerled_priv_s *priv     = (struct powerled_priv_s *)powerled->priv;
-  int i = 0;
-  int current_av_mA = 0.0;
-  int current_max_mA = ((int)(powerled->limits.current * 1000));
+  FAR struct powerled_lower_dev_s *lower = dev->lower;
+  FAR struct powerled_s      *powerled   = (FAR struct powerled_s *)dev->priv;
+  FAR struct hrtim_dev_s     *hrtim      = lower->hrtim;
+  FAR struct dac_dev_s       *dac        = lower->dac;
+  FAR struct powerled_priv_s *priv = (struct powerled_priv_s *)powerled->priv;
   uint16_t burst_cmp = 0;
   uint16_t burst_per = 0;
+  uint16_t burst_pre = 0;
+  int current_av_mA  = 0;
+  int current_max_mA;
+  int i;
+
+  /* Set max current in mA */
+
+  current_max_mA = (int)(powerled->limits.current * 1000);
 
   /* Stop HRTIM PWM */
 
@@ -301,13 +322,14 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
     {
       /* Average curent set to max */
 
-      current_av_mA = ((uint16_t)(current_max_mA));
+      current_av_mA = (uint16_t)(current_max_mA);
 
       /* Dimming through burst mode IDLE state */
 
+      burst_pre = HRTIM_BURST_PRESCALER_1;
       burst_per = 1000;
-
-      burst_cmp = ((uint16_t)(((float)burst_per)*(100.0-powerled->param.brightness)/100.0));
+      burst_cmp = (uint16_t)(((float)burst_per)*
+                              (100.0-powerled->param.brightness)/100.0);
     }
 
   else if (powerled->opmode == POWERLED_OPMODE_FLASH)
@@ -318,15 +340,19 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
       /* Maximum brightness is achieved when average LED current is equalt to
        * LED current limit, and there is no IDLE state */
 
-      current_av_mA = ((uint16_t)(powerled->param.brightness * current_max_mA
-                                  / POWERLED_BRIGHTNESS_MAX));
+      current_av_mA = (uint16_t)(powerled->param.brightness * current_max_mA
+                                 / POWERLED_BRIGHTNESS_MAX);
 
-      /* TODO: configure burst mode period and compare.
-       * Probably need to change burst mode prescaler in run-time ??
+
+      /* HRTIM clock           = 144000000 Hz
+       * HRTIM burst prescaler = 32768,
+       * HRTIM burst clock     = 4394 Hz
        */
 
-      burst_per = 65000;
-      burst_cmp = 64000;
+      burst_pre = HRTIM_BURST_PRESCALER_32768;
+      burst_per = (uint16_t)(((float)HRTIM_CLOCK/(1<<burst_pre))/
+                             powerled->param.frequency);
+      burst_cmp = (uint16_t)((float)burst_per*((100-powerled->param.duty)/100.0));
     }
 
   /* Configure DAC buffer */
@@ -342,12 +368,13 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
 
   for (i = 0; i < CONFIG_STM32_DAC1CH1_DMA_BUFFER_SIZE; i += 1)
     {
-      priv->dacbuffer[i] = priv->current_tab[i] * DAC_RESOLUTION / DAC_REF_VOLTAGE_mV;
+      priv->dacbuffer[i] =
+        priv->current_tab[i] * DAC_RESOLUTION / DAC_REF_VOLTAGE_mV;
     }
 
   /* Write DAC buffer */
 
-  dac->ad_ops->ao_ioctl(dac, IO_DMABUFFER_INIT, (unsigned long)priv->dacbuffer);
+  DAC_BUFFER_INIT(dac, priv->dacbuffer);
 
   /* Configure HRTIM PWM */
 
@@ -373,17 +400,21 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
 
   /* Start DAC */
 
-  dac->ad_ops->ao_send(dac, NULL);
-
-  /* Start HRTIM PWM */
-
-  HRTIM_OUTPUTS_ENABLE(hrtim, HRTIM_OUT_TIMC_CH1, true);
+  DAC_START(dac);
 
   /* Configure burst mode */
 
   HRTIM_BURST_CMP_SET(hrtim, burst_cmp);
   HRTIM_BURST_PER_SET(hrtim, burst_per);
+  HRTIM_BURST_PRE_SET(hrtim, burst_pre);
+
+  /* Enable burst mode */
+
   HRTIM_BURST_ENABLE(hrtim, true);
+
+  /* Start HRTIM PWM */
+
+  HRTIM_OUTPUTS_ENABLE(hrtim, HRTIM_OUT_TIMC_CH1, true);
 
   /* Set running flag */
 
@@ -398,22 +429,25 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
 static int powerled_stop(FAR struct powerled_dev_s *dev)
 {
   FAR struct powerled_lower_dev_s *lower = dev->lower;
-  FAR struct hrtim_dev_s *hrtim      = lower->hrtim;
+  FAR struct hrtim_dev_s     *hrtim      = lower->hrtim;
+  FAR struct powerled_s      *powerled   = (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_priv_s *priv = (struct powerled_priv_s *)powerled->priv;
 
-  printf("powerled_stop\n");
+  /* Disable output */
 
   HRTIM_OUTPUTS_ENABLE(hrtim, HRTIM_OUT_TIMC_CH1, false);
+
+  /* Reset running flag */
+
+  priv->running = false;
 
   return OK;
 }
 
 static int powerled_params_set(FAR struct powerled_dev_s *dev,
-                           FAR struct powerled_params_s *param)
+                               FAR struct powerled_params_s *param)
 {
-  FAR struct powerled_s *powerled    = (FAR struct powerled_s *)dev->priv;
-  FAR struct powerled_lower_dev_s *lower  = dev->lower;
-  FAR struct hrtim_dev_s *hrtim       = lower->hrtim;
-  FAR struct dac_dev_s *dac           = lower->dac;
+  FAR struct powerled_s *powerled = (FAR struct powerled_s *)dev->priv;
   int ret = OK;
 
   /* Store params in pirvate struct. */
@@ -427,7 +461,7 @@ static int powerled_params_set(FAR struct powerled_dev_s *dev,
 
 static int powerled_mode_set(FAR struct powerled_dev_s *dev, uint8_t mode)
 {
-  FAR struct powerled_s *powerled    = (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_s *powerled = (FAR struct powerled_s *)dev->priv;
   int ret = OK;
 
   switch (mode)
@@ -457,9 +491,9 @@ errout:
 }
 
 static int powerled_limits_set(FAR struct powerled_dev_s *dev,
-                           FAR struct powerled_limits_s *limits)
+                               FAR struct powerled_limits_s *limits)
 {
-  FAR struct powerled_s *powerled    = (FAR struct powerled_s *)dev->priv;
+  FAR struct powerled_s *powerled = (FAR struct powerled_s *)dev->priv;
   int ret = OK;
 
   /* Some assertions */
@@ -494,29 +528,39 @@ errout:
 static int powerled_state_get(FAR struct powerled_dev_s *dev,
                           FAR struct powerled_state_s *state)
 {
-  return 0;
+  FAR struct powerled_s *powerled = (FAR struct powerled_s *)dev->priv;
+
+  memcpy(state, &powerled->state, sizeof(struct powerled_state_s));
+
+  return OK;
 }
 
 static int powerled_fault_set(FAR struct powerled_dev_s *dev, uint8_t fault)
 {
-  return 0;
+  /* Do nothin */
+
+  return -1;
 }
 
 static int powerled_fault_get(FAR struct powerled_dev_s *dev, FAR uint8_t *fault)
 {
-  return 0;
+  /* Do nothing */
+
+  return -1;
 }
 
 static int powerled_fault_clean(FAR struct powerled_dev_s *dev, uint8_t fault)
 {
-  return 0;
+  /* Do nothing */
+
+  return -1;
 }
 
 static int powerled_ioctl(FAR struct powerled_dev_s *dev, int cmd, unsigned long arg)
 {
-  int ret = ERROR;
+  /* Do nothing */
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -528,7 +572,8 @@ static int powerled_ioctl(FAR struct powerled_dev_s *dev, int cmd, unsigned long
  *
  * Description:
  *  Initialize POWERLED driver.
- *  This function should be call by board_app_initialize() (?)
+ *
+ *  This function should be call by board_app_initialize().
  *
  * Returned Value:
  *  0 on success, a negated errno value on failure
@@ -537,13 +582,15 @@ static int powerled_ioctl(FAR struct powerled_dev_s *dev, int cmd, unsigned long
 
 int stm32_powerled_setup(void)
 {
-  static bool initialized        = false;
-  struct hrtim_dev_s *hrtim      = NULL;
-  struct comp_dev_s *comp        = NULL;
-  struct dac_dev_s *dac          = NULL;
-  struct powerled_lower_dev_s *lower = &g_powerled_lower;
-  struct powerled_dev_s *powerled        = &g_powerled_dev;
-  int ret;
+  FAR struct powerled_lower_dev_s *lower       = &g_powerled_lower;
+  FAR struct powerled_dev_s       *powerled    = &g_powerled_dev;
+  FAR struct hrtim_dev_s          *hrtim       = NULL;
+  FAR struct comp_dev_s           *comp        = NULL;
+  FAR struct dac_dev_s            *dac         = NULL;
+  static bool                      initialized = false;
+  int                              ret         = OK;
+
+  /* Initialize only once */
 
   if (!initialized)
     {
@@ -587,7 +634,8 @@ int stm32_powerled_setup(void)
        * All control should be done via POWERLED character driver.
        */
 
-      ret = powerled_register("/dev/powerled0", powerled, (void *)lower);
+      ret = powerled_register(CONFIG_EXAMPLES_POWERLED_DEVPATH, powerled,
+                              (void *)lower);
       if (ret < 0)
         {
           printf("ERROR: powerled_register failed: %d\n", ret);
@@ -597,7 +645,7 @@ int stm32_powerled_setup(void)
       initialized = true;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_EXAMPLE_POWERLED && CONFIG_DRIVERS_POWERLED*/

@@ -3497,7 +3497,8 @@ static int hrtim_burst_pre_update(FAR struct hrtim_dev_s *dev, uint8_t pre)
   priv->burst->presc = pre;
   regval = pre << HRTIM_BMCR_BMPRSC_SHIFT;
 
-  hrtim_cmn_modifyreg(priv, STM32_HRTIM_CMN_BMCR_OFFSET, 0, regval);
+  hrtim_cmn_modifyreg(priv, STM32_HRTIM_CMN_BMCR_OFFSET,
+                      HRTIM_BMCR_BMPRSC_MASK, regval);
 
 errout:
   return ret;
