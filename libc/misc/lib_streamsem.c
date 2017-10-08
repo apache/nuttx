@@ -56,15 +56,18 @@
 
 void stream_semtake(FAR struct streamlist *list)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
-  while (_SEM_WAIT(&list->sl_sem) != 0)
+  while ((ret = _SEM_WAIT(&list->sl_sem)) < 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.
        */
 
       DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+      UNUSED(ret);
     }
 }
 

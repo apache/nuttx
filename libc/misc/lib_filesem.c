@@ -79,6 +79,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
 void lib_take_semaphore(FAR struct file_struct *stream)
 {
   pid_t my_pid = getpid();
+  int ret;
 
   /* Do I already have the semaphore? */
 
@@ -92,13 +93,14 @@ void lib_take_semaphore(FAR struct file_struct *stream)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (_SEM_WAIT(&stream->fs_sem) < 0)
+      while ((ret = _SEM_WAIT(&stream->fs_sem)) < 0)
         {
           /* The only case that an error should occr here is if the wait
            * was awakened by a signal.
            */
 
           DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+          UNUSED(ret);
         }
 
       /* We have it.  Claim the stak and return */
