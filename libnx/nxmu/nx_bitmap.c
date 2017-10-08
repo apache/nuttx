@@ -115,7 +115,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   if (ret != OK)
     {
-      gerr("ERROR: nxsem_init failed: %d\n", errno);
+      gerr("ERROR: sem_init failed: %d\n", errno);
       return ret;
     }
 
@@ -138,7 +138,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   /* Destroy the semaphore and return. */
 
-  nxsem_destroy(&sem_done);
+  sem_destroy(&sem_done);
 
   return ret;
 }

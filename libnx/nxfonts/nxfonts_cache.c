@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nxfonts.h>
 
 #include "nxcontext.h"
@@ -109,15 +110,15 @@ static void nxf_list_lock(void)
 
   /* Get exclusive access to the font cache */
 
-  while ((ret = sem_wait(&g_cachesem)) < 0)
+  while ((ret = _SEM_WAIT(&g_cachesem)) < 0)
     {
-      int errorcode = errno;
+      int errorcode = _SEM_ERRNO(ret);
       DEBUGASSERT(errorcode == EINTR || errorcode == ECANCELED);
       UNUSED(errorcode);
     }
 }
 
-#define nxf_list_unlock() (nxsem_post(&g_cachesem))
+#define nxf_list_unlock() (_SEM_POST(&g_cachesem))
 
 /****************************************************************************
  * Name: nxf_removecache
@@ -166,15 +167,15 @@ static void nxf_cache_lock(FAR struct nxfonts_fcache_s *priv)
 
   /* Get exclusive access to the font cache */
 
-  while ((ret = sem_wait(&priv->fsem)) < 0)
+  while ((ret = _SEM_WAIT(&priv->fsem)) < 0)
     {
-      int errorcode = errno;
+      int errorcode = _SEM_ERRNO(ret);
       DEBUGASSERT(errorcode == EINTR || errorcode == ECANCELED);
       UNUSED(errorcode);
     }
 }
 
-#define nxf_cache_unlock(p) (nxsem_post(&priv->fsem))
+#define nxf_cache_unlock(p) (_SEM_POST(&priv->fsem))
 
 /****************************************************************************
  * Name: nxf_removeglyph
@@ -845,7 +846,7 @@ void nxf_cache_disconnect(FCACHE fhandle)
 
       /* Destroy the serializing semaphore... while we are holding it? */
 
-      nxsem_destroy(&priv->fsem);
+      _SEM_DESTROY(&priv->fsem);
 
       /* Finally, free the font cache stucture itself */
 

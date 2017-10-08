@@ -43,10 +43,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <semaphore.h>
 #include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 
@@ -65,7 +67,7 @@
  * NOTE: that client ID 0 is reserved for the server(s) themselves
  */
 
-static sem_t    g_nxlibsem = { 1 };
+static sem_t    g_nxlibsem =  SEM_INITIALIZER(1);
 static uint32_t g_nxcid    = 1;
 
 /****************************************************************************

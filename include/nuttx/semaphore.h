@@ -57,6 +57,39 @@
 #define SEM_PRIO_INHERIT          1
 #define SEM_PRIO_PROTECT          2
 
+/* Internal nxsem_* interfaces are not available in the user space in
+ * PROTECTED and KERNEL builds.  In that context, the application semaphore
+ * interfaces must be used.  The differences between the two sets of
+ * interfaces are:  (1) the nxsem_* interfaces do not cause cancellation
+ * points and (2) they do not modify the errno variable.
+ *
+ * This is only important when compiling libraries (libc or libnx) that are
+ * used both by the OS (libkc.a and libknx.a) or by the applications
+ * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * used for the build context.
+ *
+ * REVISIT:  The fact that sem_wait() is a cancellation point is an issue
+ * and may cause violations:  It makes functions into cancellation points!
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _SEM_INIT(s,p,c) nxsem_init(s,p,c)
+#  define _SEM_DESTROY(s)  nxsem_destroy(s)
+#  define _SEM_WAIT(s)     nxsem_wait(s)
+#  define _SEM_TRYWAIT(s)  nxsem_trywait(s)
+#  define _SEM_POST(s)     nxsem_post(s)
+#  define _SEM_ERRNO(r)    (-(r))
+#  define _SEM_ERRVAL(r)   (r)
+#else
+#  define _SEM_INIT(s,p,c) sem_init(s,p,c)
+#  define _SEM_DESTROY(s)  sem_destroy(s)
+#  define _SEM_WAIT(s)     sem_wait(s)
+#  define _SEM_TRYWAIT(s)  sem_trywait(s)
+#  define _SEM_POST(s)     sem_post(s)
+#  define _SEM_ERRNO(r)    errno
+#  define _SEM_ERRVAL(r)   (-errno)
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

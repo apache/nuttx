@@ -954,8 +954,6 @@ Where <subdir> is one of the following:
 
   knxwm:
   -----
-    [WARNING:  This is a work in progress].
-
     This is identical to the nxwm configuration below except that NuttX
     is built as a kernel-mode, monolithic module and the user applications
     are built separately.  Is is recommended to use a special make command;
@@ -1470,14 +1468,16 @@ Where <subdir> is one of the following:
 
     1. Install the nxwm configuration
 
-       $ cd ~/nuttx-code/nuttx/tools
-       $ ./configure.sh stm3240g-eval/nxwm
+       $ cd ~/nuttx-code/nuttx
+       $ tools/configure.sh stm3240g-eval/nxwm
+
+       Use the -l option with the configure.sh script if you are using a
+       Linux host; use the -c option if you are using Cygwin under Windows.
+       Use the -h option to see other selections.
 
     2. Make the build context (only)
 
-       $ cd ..
        $ make context
-       ...
 
     3. Install the nxwm unit test
 
@@ -1491,13 +1491,11 @@ Where <subdir> is one of the following:
 
        $ cd ~/nuttx-code/NxWidgets/libnxwidgets
        $ make TOPDIR=~/nuttx-code/nuttx
-       ...
 
     5. Build the NxWM library
 
        $ cd ~/nuttx-code/NxWidgets/nxwm
        $ make TOPDIR=~/nuttx-code/nuttx
-       ...
 
     6. Built NuttX with the installed unit test as the application
 

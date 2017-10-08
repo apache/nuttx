@@ -47,6 +47,7 @@
 #include <mqueue.h>
 #include <semaphore.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 
 #ifdef CONFIG_NX_MULTIUSER
@@ -87,7 +88,7 @@
 
 /* Handy macros */
 
-#define nxmu_semgive(sem)    nxsem_post(sem) /* To match nxmu_semtake() */
+#define nxmu_semgive(sem)    _SEM_POST(sem) /* To match nxmu_semtake() */
 
 /****************************************************************************
  * Public Types
