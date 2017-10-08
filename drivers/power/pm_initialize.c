@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_initialize.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <semaphore.h>
 
+#include <nuttx/semapore.h>
 #include <nuttx/power/pm.h>
 
 #include "pm.h"

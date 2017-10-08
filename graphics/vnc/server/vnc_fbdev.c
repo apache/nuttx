@@ -537,7 +537,6 @@ static inline int vnc_wait_start(int display)
 
 static inline int vnc_wait_connect(int display)
 {
-  int errcode;
   int ret;
 
   /* Check if there has been a session allocated yet.  This is one of the

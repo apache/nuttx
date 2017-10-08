@@ -72,10 +72,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semapore.h>
 #include <nuttx/spi/spi.h>
 
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"

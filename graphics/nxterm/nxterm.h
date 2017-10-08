@@ -45,8 +45,8 @@
 #include <stdint.h>
 #include <semaphore.h>
 
+#include <nuttx/semapore.h>
 #include <nuttx/fs/fs.h>
-
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtk.h>
 #include <nuttx/nx/nxfonts.h>
