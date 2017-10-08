@@ -66,7 +66,7 @@ ub16_t ub32sqrtub16(ub32_t a)
     {
       /* Avoid 'xk + n / xk' overflow on first iteration. */
 
-      xk = 1ULL << 63;
+      xk = (uint64_t)1 << 63;
     }
 
   do
@@ -112,7 +112,7 @@ ub8_t ub16sqrtub8(ub16_t a)
     {
       /* Avoid 'xk + n / xk' overflow on first iteration. */
 
-      xk = 1U << 31;
+      xk = (uint32_t)1 << 31;
     }
 
   do

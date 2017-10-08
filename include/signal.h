@@ -297,7 +297,7 @@ int sigfillset(FAR sigset_t *set);
 int sighold(int signo);
 int sigismember(FAR const sigset_t *set, int signo);
 int sigignore(int signo);
-CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo);
+_sa_handler_t signal(int signo, _sa_handler_t func);
 int sigpause(int signo);
 int sigpending(FAR sigset_t *set);
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
@@ -307,7 +307,7 @@ int sigqueue(int pid, int signo, union sigval value);
 int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
 int sigrelse(int signo);
-CODE void (*sigset(int signo, CODE void (*func)(int signo)))(int signo);
+_sa_handler_t sigset(int signo, _sa_handler_t func);
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
                  FAR const struct timespec *timeout);
 int sigsuspend(FAR const sigset_t *sigmask);

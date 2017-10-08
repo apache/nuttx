@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/signal/signal.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-CODE void (*signal(int signo, CODE void (*func)(int signo)))(int signo)
+_sa_sighandler_t signal(int signo, _sa_handler_t func);
 {
   struct sigaction act;
   struct sigaction oact;
