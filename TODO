@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 22, 2017)
+NuttX TODO List (Last updated October 9, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -222,14 +222,35 @@ o Task/Scheduler (sched/)
                wrapper around nx_sem_wait() that adds the cancellation point
                and that sets the errno value on failures.
 
+               On particularly difficult issue is the use of common memory
+               manager C, and NX libraries in the build.  For the FLAT
+               build, that is not such a issue because the OS internal
+               versions of the interfaces can be used.  But is a difficult
+               problem for PROTECTED and KERNEL builds where the OS links
+               with a different version of the libraries than does the
+               application:  The OS version would use the OS internal
+               interfaces and the application would use the standard
+               interfaces.
+
+               But that raises yet another issue:  If the application
+               version of the libraries use the standard interfaces
+               internally, then they may generate unexpected cancellation
+               points.  For example, the memory management would take a
+               semaphore using sem_wait() to get exclusive access to the
+               heap.  That means that every call to malloc() and free()
+               would be a cancellation point, a clear POSIX violation.
+
                Changes like that could clean up some of this internal
                craziness.
 
                UPDATE:
-               2017-1003:  This change has been completed for the case of
-                 semaphores used int he OS.  Still need to checkout signals
+               2017-10-03:  This change has been completed for the case of
+                 semaphores used in the OS.  Still need to checkout signals
                  and messages queues that are also used in the OS.  Also
                  backed out commit b4747286b19d3b15193b2a5e8a0fe48fa0a8638c.
+               2017-10-86:  This change has been completed for the case of
+                 signals used in the OS.  Still need to checkout messages
+                 queues that are also used in the OS.
 
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design
@@ -522,8 +543,9 @@ o pthreads (sched/pthreads)
                 big loss from the experience I gained."
 
   Title:       ISSUES WITH CANCELLATION POINTS
-  Description: According to POIX cancellation points must occur when a thread is executing
-               the following functions.  There are some execptions as noted:
+  Description: According to POSIX cancellation points must occur when a
+               thread is executing the following functions.  There are some
+               exceptions as noted:
 
                 accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
              04 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
