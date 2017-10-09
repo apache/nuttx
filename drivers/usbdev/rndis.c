@@ -106,6 +106,10 @@
 
 #define RNDIS_WDDELAY           (1*CLK_TCK)
 
+/* Work queue to use for network operations. LPWORK should be used here */
+
+#define ETHWORK                 LPWORK
+
 #ifndef min
 #  define min(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -277,7 +281,7 @@ const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
     .cfgvalue     = RNDIS_CONFIGID,
     .icfg         = 0,
     .attr         = USB_CONFIG_ATTR_ONE | USB_CONFIG_ATTR_SELFPOWER,
-    .mxpower      = 200 / 2
+    .mxpower      = (CONFIG_USBDEV_MAXPOWER + 1) / 2
   },
   {
     .len          = USB_SIZEOF_IADDESC,
@@ -987,7 +991,7 @@ static void rndis_polltimer(int argc, uint32_t arg, ...)
 
   if (work_available(&priv->pollwork))
     {
-      ret = work_queue(HPWORK, &priv->pollwork, rndis_pollworker,
+      ret = work_queue(ETHWORK, &priv->pollwork, rndis_pollworker,
                        (FAR void *)priv, 0);
       DEBUGASSERT(ret == OK);
       UNUSED(ret);
@@ -1074,7 +1078,7 @@ static int rndis_txavail(FAR struct net_driver_s *dev)
 
   if (work_available(&priv->pollwork))
     {
-      work_queue(HPWORK, &priv->pollwork, rndis_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->pollwork, rndis_txavail_work, priv, 0);
     }
 
   return OK;
@@ -1167,7 +1171,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
               int ret;
 
               DEBUGASSERT(work_available(&priv->rxwork));
-              ret = work_queue(HPWORK, &priv->rxwork, rndis_rxdispatch,
+              ret = work_queue(ETHWORK, &priv->rxwork, rndis_rxdispatch,
                                priv, 0);
               DEBUGASSERT(ret == 0);
               UNUSED(ret);
