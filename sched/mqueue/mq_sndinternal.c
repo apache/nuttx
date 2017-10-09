@@ -66,7 +66,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_verifysend
+ * Name: nxmq_verify_send
  *
  * Description:
  *   This is internal, common logic shared by both mq_send and mq_timesend.
@@ -92,7 +92,8 @@
  *
  ****************************************************************************/
 
-int mq_verifysend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
+int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
+                     int prio)
 {
   /* Verify the input parameters */
 
@@ -118,10 +119,10 @@ int mq_verifysend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 }
 
 /****************************************************************************
- * Name: mq_msgalloc
+ * Name: nxmq_alloc_msg
  *
  * Description:
- *   The mq_msgalloc function will get a free message for use by the
+ *   The nxmq_alloc_msg function will get a free message for use by the
  *   operating system.  The message will be allocated from the g_msgfree
  *   list.
  *
@@ -144,7 +145,7 @@ int mq_verifysend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
  *
  ****************************************************************************/
 
-FAR struct mqueue_msg_s *mq_msgalloc(void)
+FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
 {
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
@@ -203,7 +204,7 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
 }
 
 /****************************************************************************
- * Name: mq_waitsend
+ * Name: nxmq_wait_send
  *
  * Description:
  *   This is internal, common logic shared by both mq_send and mq_timesend.
@@ -223,17 +224,17 @@ FAR struct mqueue_msg_s *mq_msgalloc(void)
  *            (mq_timedsend only).
  *
  * Assumptions/restrictions:
- * - The caller has verified the input parameters using mq_verifysend().
+ * - The caller has verified the input parameters using nxmq_verify_send().
  * - Executes within a critical section established by the caller.
  *
  ****************************************************************************/
 
-int mq_waitsend(mqd_t mqdes)
+int nxmq_wait_send(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb;
   FAR struct mqueue_inode_s *msgq;
 
-  /* mq_waitsend() is not a cancellation point, but it is always called from
+  /* nxmq_wait_send() is not a cancellation point, but it is always called from
    * a cancellation point.
    */
 
@@ -314,7 +315,7 @@ int mq_waitsend(mqd_t mqdes)
 }
 
 /****************************************************************************
- * Name: mq_dosend
+ * Name: nxmq_do_send
  *
  * Description:
  *   This is internal, common logic shared by both mq_send and mq_timesend.
@@ -336,8 +337,8 @@ int mq_waitsend(mqd_t mqdes)
  *
  ****************************************************************************/
 
-int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const char *msg,
-              size_t msglen, int prio)
+int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+                 FAR const char *msg, size_t msglen, int prio)
 {
   FAR struct tcb_s *btcb;
   FAR struct mqueue_inode_s *msgq;

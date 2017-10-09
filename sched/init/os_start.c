@@ -649,10 +649,10 @@ void os_start(void)
   /* Initialize the named message queue facility (if in link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (mq_initialize != NULL)
+  if (nxmq_initialize != NULL)
 #endif
     {
-      mq_initialize();
+      nxmq_initialize();
     }
 #endif
 

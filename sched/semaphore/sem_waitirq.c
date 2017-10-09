@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_waitirq
+ * Name: nxsem_wait_irq
  *
  * Description:
  *   This function is called when either:
@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-void nxsem_waitirq(FAR struct tcb_s *wtcb, int errcode)
+void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
   irqstate_t flags;
 

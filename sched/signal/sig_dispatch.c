@@ -409,7 +409,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       if (stcb->task_state == TSTATE_WAIT_SEM)
         {
-          nxsem_waitirq(stcb, EINTR);
+          nxsem_wait_irq(stcb, EINTR);
         }
 
       /* If the task is blocked waiting on a message queue, then that task
@@ -420,7 +420,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
           stcb->task_state == TSTATE_WAIT_MQNOTFULL)
         {
-          mq_waitirq(stcb, EINTR);
+          nxmq_wait_irq(stcb, EINTR);
         }
 #endif
     }

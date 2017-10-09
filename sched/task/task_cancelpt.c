@@ -302,7 +302,7 @@ void notify_cancellation(FAR struct tcb_s *tcb)
 
       if (tcb->task_state == TSTATE_WAIT_SEM)
         {
-          nxsem_waitirq(tcb, ECANCELED);
+          nxsem_wait_irq(tcb, ECANCELED);
         }
 
       /* If the thread is blocked waiting on a message queue, then the
@@ -313,7 +313,7 @@ void notify_cancellation(FAR struct tcb_s *tcb)
       if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
           tcb->task_state == TSTATE_WAIT_MQNOTFULL)
         {
-          mq_waitirq(tcb, ECANCELED);
+          nxmq_wait_irq(tcb, ECANCELED);
         }
 #endif
     }

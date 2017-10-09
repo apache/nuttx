@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_rcvtimeout
+ * Name: nxmq_rcvtimeout
  *
  * Description:
  *   This function is called if the timeout elapses before the message queue
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-static void mq_rcvtimeout(int argc, wdparm_t pid)
+static void nxmq_rcvtimeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
   irqstate_t flags;
@@ -103,7 +103,7 @@ static void mq_rcvtimeout(int argc, wdparm_t pid)
     {
       /* Restart with task with a timeout error */
 
-      mq_waitirq(wtcb, ETIMEDOUT);
+      nxmq_wait_irq(wtcb, ETIMEDOUT);
     }
 
   /* Interrupts may now be re-enabled. */
@@ -183,7 +183,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * errno appropriately.
    */
 
-  if (mq_verifyreceive(mqdes, msg, msglen) != OK)
+  if (nxmq_verify_receive(mqdes, msg, msglen) != OK)
     {
       leave_cancellation_point();
       return ERROR;
@@ -218,7 +218,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   sched_lock();
 
-  /* Furthermore, mq_waitreceive() expects to have interrupts disabled
+  /* Furthermore, nxmq_wait_receive() expects to have interrupts disabled
    * because messages can be sent from interrupt level.
    */
 
@@ -264,12 +264,13 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
       /* Start the watchdog */
 
-      wd_start(rtcb->waitdog, ticks, (wdentry_t)mq_rcvtimeout, 1, getpid());
+      wd_start(rtcb->waitdog, ticks, (wdentry_t)nxmq_rcvtimeout,
+               1, getpid());
     }
 
   /* Get the message from the message queue */
 
-  mqmsg = mq_waitreceive(mqdes);
+  mqmsg = nxmq_wait_receive(mqdes);
 
   /* Stop the watchdog timer (this is not harmful in the case where
    * it was never started)
@@ -291,7 +292,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   if (mqmsg)
     {
-      ret = mq_doreceive(mqdes, mqmsg, msg, prio);
+      ret = nxmq_do_receive(mqdes, mqmsg, msg, prio);
     }
 
   sched_unlock();

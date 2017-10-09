@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_verifyreceive
+ * Name: nxmq_verify_receive
  *
  * Description:
  *   This is internal, common logic shared by both mq_receive and
@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-int mq_verifyreceive(mqd_t mqdes, FAR char *msg, size_t msglen)
+int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen)
 {
   /* Verify the input parameters */
 
@@ -111,7 +111,7 @@ int mq_verifyreceive(mqd_t mqdes, FAR char *msg, size_t msglen)
 }
 
 /****************************************************************************
- * Name: mq_waitreceive
+ * Name: nxmq_wait_receive
  *
  * Description:
  *   This is internal, common logic shared by both mq_receive and
@@ -129,20 +129,20 @@ int mq_verifyreceive(mqd_t mqdes, FAR char *msg, size_t msglen)
  *
  * Assumptions:
  * - The caller has provided all validity checking of the input parameters
- *   using mq_verifyreceive.
+ *   using nxmq_verify_receive.
  * - Interrupts should be disabled throughout this call.  This is necessary
  *   because messages can be sent from interrupt level processing.
  * - For mq_timedreceive, setting of the timer and this wait must be atomic.
  *
  ****************************************************************************/
 
-FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
+FAR struct mqueue_msg_s *nxmq_wait_receive(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb;
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *rcvmsg;
 
-  /* mq_waitreceive() is not a cancellation point, but it is always called
+  /* nxmq_wait_receive() is not a cancellation point, but it is always called
    * from a cancellation point.
    */
 
@@ -218,7 +218,7 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
 }
 
 /****************************************************************************
- * Name: mq_doreceive
+ * Name: nxmq_do_receive
  *
  * Description:
  *   This is internal, common logic shared by both mq_receive and
@@ -238,15 +238,15 @@ FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
  *
  * Assumptions:
  * - The caller has provided all validity checking of the input parameters
- *   using mq_verifyreceive.
+ *   using nxmq_verify_receive.
  * - The user buffer, ubuffer, is known to be large enough to accept the
  *   largest message that an be sent on this message queue
  * - Pre-emption should be disabled throughout this call.
  *
  ****************************************************************************/
 
-ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                     FAR char *ubuffer, int *prio)
+ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+                        FAR char *ubuffer, int *prio)
 {
   FAR struct tcb_s *btcb;
   irqstate_t flags;
@@ -270,7 +270,7 @@ ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
   /* We are done with the message.  Deallocate it now. */
 
-  mq_msgfree(mqmsg);
+  nxmq_free_msg(mqmsg);
 
   /* Check if any tasks are waiting for the MQ not full event. */
 

@@ -81,7 +81,7 @@ void nxsem_recover(FAR struct tcb_s *tcb)
 
   /* The task is being deleted.  If it is waiting for a semphore, then
    * increment the count on the semaphores.  This logic is almost identical
-   * to what you see in nxsem_waitirq() except that no attempt is made to
+   * to what you see in nxsem_wait_irq() except that no attempt is made to
    * restart the exiting task.
    *
    * NOTE:  In the case that the task is waiting we can assume: (1) That the

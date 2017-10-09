@@ -62,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_desalloc
+ * Name: nxmq_alloc_des
  *
  * Description:
  *   Allocate a message queue descriptor.
@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-static mqd_t mq_desalloc(void)
+static mqd_t nxmq_alloc_des(void)
 {
   mqd_t mqdes;
 
@@ -89,7 +89,7 @@ static mqd_t mq_desalloc(void)
     {
       /* Add another block of message descriptors to the list */
 
-      mq_desblockalloc();
+      nxmq_alloc_desblock();
 
       /* And try again */
 
@@ -140,7 +140,7 @@ mqd_t mq_descreate(FAR struct tcb_s *mtcb, FAR struct mqueue_inode_s *msgq,
 
   /* Create a message queue descriptor for the TCB */
 
-  mqdes = mq_desalloc();
+  mqdes = nxmq_alloc_des();
   if (mqdes)
     {
       /* Initialize the message queue descriptor */

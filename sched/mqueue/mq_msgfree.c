@@ -52,10 +52,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_msgfree
+ * Name: nxmq_free_msg
  *
  * Description:
- *   The mq_msgfree function will return a message to the free pool of
+ *   The nxmq_free_msg function will return a message to the free pool of
  *   messages if it was a pre-allocated message. If the message was
  *   allocated dynamically it will be deallocated.
  *
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-void mq_msgfree(FAR struct mqueue_msg_s *mqmsg)
+void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
 {
   irqstate_t flags;
 

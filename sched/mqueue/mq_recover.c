@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_recover
+ * Name: nxmq_recover
  *
  * Description:
  *   This function is called when a task is deleted via task_deleted or
@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-void mq_recover(FAR struct tcb_s *tcb)
+void nxmq_recover(FAR struct tcb_s *tcb)
 {
   /* If were were waiting for a timed message queue event, then the
    * timer was canceled and deleted in task_recover() before this

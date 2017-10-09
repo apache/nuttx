@@ -94,7 +94,7 @@ void nxsem_timeout(int argc, wdparm_t pid)
     {
       /* Cancel the semaphore wait */
 
-      nxsem_waitirq(wtcb, ETIMEDOUT);
+      nxsem_wait_irq(wtcb, ETIMEDOUT);
     }
 
   /* Interrupts may now be enabled. */

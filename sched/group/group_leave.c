@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,7 +190,7 @@ static inline void group_release(FAR struct task_group_s *group)
 #ifndef CONFIG_DISABLE_MQUEUE
   /* Close message queues opened by members of the group */
 
-  mq_release(group);
+  nxmq_release(group);
 #endif
 
 #if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)

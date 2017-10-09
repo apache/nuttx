@@ -141,38 +141,36 @@ struct task_group_s; /* Forward reference */
 
 /* Functions defined in mq_initialize.c ************************************/
 
-void weak_function mq_initialize(void);
-void mq_desblockalloc(void);
-
-FAR struct mqueue_inode_s *mq_findnamed(FAR const char *mq_name);
-void mq_msgfree(FAR struct mqueue_msg_s *mqmsg);
+void weak_function nxmq_initialize(void);
+void nxmq_alloc_desblock(void);
+void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg);
 
 /* mq_waitirq.c ************************************************************/
 
-void mq_waitirq(FAR struct tcb_s *wtcb, int errcode);
+void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 /* mq_rcvinternal.c ********************************************************/
 
-int mq_verifyreceive(mqd_t mqdes, FAR char *msg, size_t msglen);
-FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes);
-ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                     FAR char *ubuffer, FAR int *prio);
+int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen);
+FAR struct mqueue_msg_s *nxmq_wait_receive(mqd_t mqdes);
+ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+                        FAR char *ubuffer, FAR int *prio);
 
 /* mq_sndinternal.c ********************************************************/
 
-int mq_verifysend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio);
-FAR struct mqueue_msg_s *mq_msgalloc(void);
-int mq_waitsend(mqd_t mqdes);
-int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-              FAR const char *msg, size_t msglen, int prio);
+int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio);
+FAR struct mqueue_msg_s *nxmq_alloc_msg(void);
+int nxmq_wait_send(mqd_t mqdes);
+int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+                 FAR const char *msg, size_t msglen, int prio);
 
 /* mq_release.c ************************************************************/
 
-void mq_release(FAR struct task_group_s *group);
+void nxmq_release(FAR struct task_group_s *group);
 
 /* mq_recover.c ************************************************************/
 
-void mq_recover(FAR struct tcb_s *tcb);
+void nxmq_recover(FAR struct tcb_s *tcb);
 
 #undef EXTERN
 #ifdef __cplusplus

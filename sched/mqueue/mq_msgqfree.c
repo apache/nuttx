@@ -78,7 +78,7 @@ void mq_msgqfree(FAR struct mqueue_inode_s *msgq)
       /* Deallocate the message structure. */
 
       next = curr->next;
-      mq_msgfree(curr);
+      nxmq_free_msg(curr);
       curr = next;
     }
 

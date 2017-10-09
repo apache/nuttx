@@ -1113,7 +1113,7 @@ void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
  * Name: nxsem_canceled
  *
  * Description:
- *   Called from nxsem_waitirq() after a thread that was waiting for a semaphore
+ *   Called from nxsem_wait_irq() after a thread that was waiting for a semaphore
  *   count was awakened because of a signal and the semaphore wait has been
  *   cancelled.  This function restores the correct thread priority of each
  *   holder of the semaphore.

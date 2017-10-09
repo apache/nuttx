@@ -112,7 +112,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * errno appropriately.
    */
 
-  if (mq_verifyreceive(mqdes, msg, msglen) != OK)
+  if (nxmq_verify_receive(mqdes, msg, msglen) != OK)
     {
       leave_cancellation_point();
       return ERROR;
@@ -127,7 +127,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   sched_lock();
 
-  /* Furthermore, mq_waitreceive() expects to have interrupts disabled
+  /* Furthermore, nxmq_wait_receive() expects to have interrupts disabled
    * because messages can be sent from interrupt level.
    */
 
@@ -135,7 +135,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* Get the message from the message queue */
 
-  mqmsg = mq_waitreceive(mqdes);
+  mqmsg = nxmq_wait_receive(mqdes);
   leave_critical_section(flags);
 
   /* Check if we got a message from the message queue.  We might
@@ -147,7 +147,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   if (mqmsg)
     {
-      ret = mq_doreceive(mqdes, mqmsg, msg, prio);
+      ret = nxmq_do_receive(mqdes, mqmsg, msg, prio);
     }
 
   sched_unlock();

@@ -175,7 +175,7 @@ echo "EXTERN(sem_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_DISABLE_MQUEUE)
 if [ "$answer" = n ]; then
-	echo "EXTERN(mq_initialize)" >>ld-locked.inc
+	echo "EXTERN(nxmq_initialize)" >>ld-locked.inc
 fi
 
 answer=$(checkconfig CONFIG_DISABLE_PTHREAD)

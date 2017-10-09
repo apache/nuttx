@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_sndtimeout
+ * Name: nxmq_sndtimeout
  *
  * Description:
  *   This function is called if the timeout elapses before the message queue
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-static void mq_sndtimeout(int argc, wdparm_t pid)
+static void nxmq_sndtimeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
   irqstate_t flags;
@@ -103,7 +103,7 @@ static void mq_sndtimeout(int argc, wdparm_t pid)
     {
       /* Restart with task with a timeout error */
 
-      mq_waitirq(wtcb, ETIMEDOUT);
+      nxmq_wait_irq(wtcb, ETIMEDOUT);
     }
 
   /* Interrupts may now be re-enabled. */
@@ -187,9 +187,9 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
    * on any failures to verify.
    */
 
-  if (mq_verifysend(mqdes, msg, msglen, prio) != OK)
+  if (nxmq_verify_send(mqdes, msg, msglen, prio) != OK)
     {
-      /* mq_verifysend() will set the errno appropriately */
+      /* nxmq_verify_send() will set the errno appropriately */
 
       leave_cancellation_point();
       return ERROR;
@@ -197,10 +197,10 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   /* Pre-allocate a message structure */
 
-  mqmsg = mq_msgalloc();
+  mqmsg = nxmq_alloc_msg();
   if (mqmsg == NULL)
     {
-      /* Failed to allocate the message. mq_msgalloc() does not set the
+      /* Failed to allocate the message. nxmq_alloc_msg() does not set the
        * errno value.
        */
 
@@ -224,17 +224,17 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
    *
    * NOTE: There is a race condition here: What if a message is added by
    * interrupt related logic so that queue again becomes non-empty.  That
-   * is handled because mq_dosend() will permit the maxmsgs limit to be
+   * is handled because nxmq_do_send() will permit the maxmsgs limit to be
    * exceeded in that case.
    */
 
   if (msgq->nmsgs < msgq->maxmsgs || up_interrupt_context())
     {
       /* Do the send with no further checks (possibly exceeding maxmsgs)
-       * Currently mq_dosend() always returns OK.
+       * Currently nxmq_do_send() always returns OK.
        */
 
-      ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
+      ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
       sched_unlock();
       leave_cancellation_point();
       return ret;
@@ -290,11 +290,11 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   /* Start the watchdog and begin the wait for MQ not full */
 
-  wd_start(rtcb->waitdog, ticks, (wdentry_t)mq_sndtimeout, 1, getpid());
+  wd_start(rtcb->waitdog, ticks, (wdentry_t)nxmq_sndtimeout, 1, getpid());
 
   /* And wait for the message queue to be non-empty */
 
-  ret = mq_waitsend(mqdes);
+  ret = nxmq_wait_send(mqdes);
 
   /* This may return with an error and errno set to either EINTR
    * or ETIMEOUT.  Cancel the watchdog timer in any event.
@@ -302,11 +302,11 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   wd_cancel(rtcb->waitdog);
 
-  /* Check if mq_waitsend() failed */
+  /* Check if nxmq_wait_send() failed */
 
   if (ret < 0)
     {
-      /* mq_waitsend() will set the errno, but the error exit will reset it */
+      /* nxmq_wait_send() will set the errno, but the error exit will reset it */
 
       result = get_errno();
       goto errout_in_critical_section;
@@ -320,10 +320,10 @@ int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
    * be space for another message in the message queue.  NOW we can allocate
    * the message structure.
    *
-   * Currently mq_dosend() always returns OK.
+   * Currently nxmq_do_send() always returns OK.
    */
 
-  ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
+  ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
 
   sched_unlock();
   wd_delete(rtcb->waitdog);
@@ -346,7 +346,7 @@ errout_in_critical_section:
    */
 
 errout_with_mqmsg:
-  mq_msgfree(mqmsg);
+  nxmq_free_msg(mqmsg);
   sched_unlock();
 
   set_errno(result);

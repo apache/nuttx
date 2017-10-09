@@ -71,7 +71,7 @@ void nxsem_initialize(void);
 
 /* Wake up a thread that is waiting on semaphore */
 
-void nxsem_waitirq(FAR struct tcb_s *wtcb, int errcode);
+void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 /* Handle semaphore timer expiration */
 

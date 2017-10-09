@@ -149,7 +149,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_initialize
+ * Name: nxmq_initialize
  *
  * Description:
  *   This function initializes the messasge system.  This function must
@@ -164,7 +164,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
  *
  ****************************************************************************/
 
-void mq_initialize(void)
+void nxmq_initialize(void)
 {
   /* Initialize the message free lists */
 
@@ -188,11 +188,11 @@ void mq_initialize(void)
 
   /* Allocate a block of message queue descriptors */
 
-  mq_desblockalloc();
+  nxmq_alloc_desblock();
 }
 
 /****************************************************************************
- * Name: mq_desblockalloc
+ * Name: nxmq_alloc_desblock
  *
  * Description:
  *   Allocate a block of message descriptors and place them on the free
@@ -206,7 +206,7 @@ void mq_initialize(void)
  *
  ****************************************************************************/
 
-void mq_desblockalloc(void)
+void nxmq_alloc_desblock(void)
 {
   FAR struct mq_des_block_s *mqdesblock;
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_release.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_release
+ * Name: nxmq_release
  *
  * Description:
  *   This function is called when the final member of a task group exits.
@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-void mq_release(FAR struct task_group_s *group)
+void nxmq_release(FAR struct task_group_s *group)
 {
   while (group->tg_msgdesq.head)
     {

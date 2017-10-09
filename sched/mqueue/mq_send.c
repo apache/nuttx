@@ -112,7 +112,7 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
    * on any failures to verify.
    */
 
-  if (mq_verifysend(mqdes, msg, msglen, prio) != OK)
+  if (nxmq_verify_send(mqdes, msg, msglen, prio) != OK)
     {
       leave_cancellation_point();
       return ERROR;
@@ -133,18 +133,18 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
   flags = enter_critical_section();
   if (up_interrupt_context()      || /* In an interrupt handler */
       msgq->nmsgs < msgq->maxmsgs || /* OR Message queue not full */
-      mq_waitsend(mqdes) == OK)      /* OR Successfully waited for mq not full */
+      nxmq_wait_send(mqdes) == OK)      /* OR Successfully waited for mq not full */
     {
       /* Allocate the message */
 
       leave_critical_section(flags);
-      mqmsg = mq_msgalloc();
+      mqmsg = nxmq_alloc_msg();
 
       /* Check if the message was sucessfully allocated */
 
       if (mqmsg == NULL)
         {
-          /* No... mq_msgalloc() does not set the errno value */
+          /* No... nxmq_alloc_msg() does not set the errno value */
 
           set_errno(ENOMEM);
         }
@@ -157,7 +157,7 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
        * - The message queue is full AND
        * - When we tried waiting, the wait was unsuccessful.
        *
-       * In this case mq_waitsend() has already set the errno value.
+       * In this case nxmq_wait_send() has already set the errno value.
        */
 
       leave_critical_section(flags);
@@ -175,11 +175,11 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
        *
        * NOTE: There is a race condition here: What if a message is added by
        * interrupt related logic so that queue again becomes non-empty.
-       * That is handled because mq_dosend() will permit the maxmsgs limit
+       * That is handled because nxmq_do_send() will permit the maxmsgs limit
        * to be exceeded in that case.
        */
 
-      ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
+      ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
     }
 
   sched_unlock();
