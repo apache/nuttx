@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = z80_irq.c z80_timerisr.c z80_lowputc.c
 
-ifneq ($(CONFIG_NFILE_DESCRIPTOR),0)
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 CSRCS += z80_serial.c
 endif
 
