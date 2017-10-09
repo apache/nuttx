@@ -233,7 +233,7 @@ config PM_SLEEPENTER_COUNT
 endif # PM
 
 config DRIVERS_POWERLED
-  bool "High Power LED driver"
+	bool "High Power LED driver"
 	default n
 	---help---
 		Enables building of an powerled upper half driver.

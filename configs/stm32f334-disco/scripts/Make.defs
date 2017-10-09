@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm32f334-disco/powerled/Make.defs
+# configs/stm32f334-disco/scripts/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
