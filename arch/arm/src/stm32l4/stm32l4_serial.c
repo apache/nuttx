@@ -213,6 +213,12 @@ struct stm32l4_serial_s
 
   bool              initialized;
 
+  bool              suspended; /* UART device has been suspended. */
+
+  /* Interrupt mask value stored before suspending for stop mode. */
+
+  uint16_t          suspended_ie;
+
   /* If termios are supported, then the following fields may vary at
    * runtime.
    */
@@ -262,6 +268,7 @@ struct stm32l4_serial_s
 #ifdef SERIAL_HAVE_DMA
   DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
   bool              rxenable;  /* DMA-based reception en/disable */
+  bool              rxdmasusp; /* Rx DMA suspended */
   uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
   char       *const rxfifo;    /* Receive DMA buffer */
 #endif
@@ -305,6 +312,10 @@ static int  stm32l4serial_dmasetup(FAR struct uart_dev_s *dev);
 static void stm32l4serial_dmashutdown(FAR struct uart_dev_s *dev);
 static int  stm32l4serial_dmareceive(FAR struct uart_dev_s *dev,
                                      FAR unsigned int *status);
+static void stm32l4serial_dmareenable(struct stm32l4_serial_s *priv);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool stm32l4serial_dmaiflowrestart(struct stm32l4_serial_s *priv);
+#endif
 static void stm32l4serial_dmarxint(FAR struct uart_dev_s *dev, bool enable);
 static bool stm32l4serial_dmarxavailable(struct uart_dev_s *dev);
 
@@ -749,6 +760,8 @@ static  struct pm_callback_s g_serialcb =
 };
 #endif
 
+static bool serial_suspended_for_stop = false;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -1029,6 +1042,127 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
   stm32l4serial_putreg(priv, STM32L4_USART_CR3_OFFSET, regval);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
+
+/****************************************************************************
+ * Name: stm32l4serial_setsuspend
+ *
+ * Description:
+ *   Suspend or resume serial peripheral.
+ *
+ ****************************************************************************/
+
+static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
+{
+  FAR struct stm32l4_serial_s *priv = (struct stm32l4_serial_s *)dev->priv;
+#ifdef SERIAL_HAVE_DMA
+  bool dmarestored = false;
+#endif
+
+  if (priv->suspended == suspend)
+    {
+      return;
+    }
+
+  priv->suspended = suspend;
+
+  if (suspend)
+    {
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow)
+        {
+          /* Force RTS high to prevent further Rx. */
+
+          stm32l4_configgpio((priv->rts_gpio & ~GPIO_MODE_MASK)
+                             | (GPIO_OUTPUT | GPIO_OUTPUT_SET));
+        }
+#endif
+
+      /* Disable interrupts to prevent Tx. */
+
+      stm32l4serial_disableusartint(priv, &priv->suspended_ie);
+
+      /* Wait last Tx to complete. */
+
+      while ((stm32l4serial_getreg(priv, STM32L4_USART_ISR_OFFSET) & USART_ISR_TC) == 0);
+
+#ifdef SERIAL_HAVE_DMA
+      if (priv->dev.ops == &g_uart_dma_ops && !priv->rxdmasusp)
+        {
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+          if (priv->iflow && priv->rxdmanext == RXDMA_BUFFER_SIZE)
+            {
+              /* Rx DMA in non-circular iflow mode and already stopped
+               * at end of DMA buffer. No need to suspend. */
+            }
+          else
+#endif
+            {
+              /* Suspend Rx DMA. */
+
+              stm32l4_dmastop(priv->rxdma);
+              priv->rxdmasusp = true;
+            }
+        }
+#endif
+    }
+  else
+    {
+#ifdef SERIAL_HAVE_DMA
+      if (priv->dev.ops == &g_uart_dma_ops && priv->rxdmasusp)
+        {
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+          if (priv->iflow)
+            {
+              (void)stm32l4serial_dmaiflowrestart(priv);
+            }
+          else
+#endif
+            {
+              /* This USART does not have HW flow-control. Unconditionally
+               * re-enable DMA (might loss unprocessed bytes received
+               * to DMA buffer before suspending). */
+
+              stm32l4serial_dmareenable(priv);
+              priv->rxdmasusp = false;
+            }
+          dmarestored = true;
+        }
+#endif
+
+      /* Re-enable interrupts to resume Tx. */
+
+      stm32l4serial_restoreusartint(priv, priv->suspended_ie);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow)
+        {
+          /* Restore peripheral RTS control. */
+
+          stm32l4_configgpio(priv->rts_gpio);
+        }
+#endif
+    }
+
+#ifdef SERIAL_HAVE_DMA
+  if (dmarestored)
+    {
+      irqstate_t flags;
+
+      flags = enter_critical_section();
+
+      /* Perform initial Rx DMA buffer fetch to wake-up serial device
+       * activity.
+       */
+
+      if (priv->rxdma != NULL)
+        {
+          stm32l4serial_dmarxcallback(priv->rxdma, 0, priv);
+        }
+
+      leave_critical_section(flags);
+    }
+#endif
+}
 
 /****************************************************************************
  * Name: stm32l4serial_setapbclock
@@ -1945,6 +2079,22 @@ static bool stm32l4serial_rxflowcontrol(FAR struct uart_dev_s *dev,
       /* Assert/de-assert nRTS set it high resume/stop sending */
 
       stm32l4_gpiowrite(priv->rts_gpio, upper);
+
+      if (upper)
+        {
+          /* With heavy Rx traffic, RXNE might be set and data pending.
+           * Returning 'true' in such case would cause RXNE left unhandled
+           * and causing interrupt storm. Sending end might be also be slow
+           * to react on nRTS, and returning 'true' here would prevent
+           * processing that data.
+           *
+           * Therefore, return 'false' so input data is still being processed
+           * until sending end reacts on nRTS signal and stops sending more.
+           */
+
+          return false;
+        }
+
       return upper;
     }
 
@@ -2040,16 +2190,31 @@ static int stm32l4serial_dmareceive(FAR struct uart_dev_s *dev,
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
+#if defined(SERIAL_HAVE_DMA)
 static void stm32l4serial_dmareenable(FAR struct stm32l4_serial_s *priv)
 {
-  /* Configure for non-circular DMA reception into the RX fifo */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      /* Configure for non-circular DMA reception into the RX FIFO */
 
-  stm32l4_dmasetup(priv->rxdma,
-                 priv->usartbase + STM32L4_USART_RDR_OFFSET,
-                 (uint32_t)priv->rxfifo,
-                 RXDMA_BUFFER_SIZE,
-                 SERIAL_DMA_IFLOW_CONTROL_WORD);
+      stm32l4_dmasetup(priv->rxdma,
+                       priv->usartbase + STM32L4_USART_RDR_OFFSET,
+                       (uint32_t)priv->rxfifo,
+                       RXDMA_BUFFER_SIZE,
+                       SERIAL_DMA_IFLOW_CONTROL_WORD);
+    }
+  else
+#endif
+    {
+      /* Configure for circular DMA reception into the RX FIFO */
+
+      stm32l4_dmasetup(priv->rxdma,
+                       priv->usartbase + STM32L4_USART_RDR_OFFSET,
+                       (uint32_t)priv->rxfifo,
+                       RXDMA_BUFFER_SIZE,
+                       SERIAL_DMA_CONTROL_WORD);
+    }
 
   /* Reset our DMA shadow pointer to match the address just
    * programmed above.
@@ -2057,14 +2222,77 @@ static void stm32l4serial_dmareenable(FAR struct stm32l4_serial_s *priv)
 
   priv->rxdmanext = 0;
 
-  /* Start the DMA channel, and arrange for callbacks at the full point in
-   * the FIFO. After buffer gets full, hardware flow-control kicks in and
-   * DMA transfer is stopped.
-   */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      /* Start the DMA channel, and arrange for callbacks at the full point
+       * in the FIFO. After buffer gets full, hardware flow-control kicks
+       * in and DMA transfer is stopped.
+       */
 
-  stm32l4_dmastart(priv->rxdma, stm32l4serial_dmarxcallback, (FAR void *)priv,
-                   false);
+      stm32l4_dmastart(priv->rxdma, stm32l4serial_dmarxcallback, (void *)priv, false);
+    }
+  else
+#endif
+    {
+      /* Start the DMA channel, and arrange for callbacks at the half and
+       * full points in the FIFO.  This ensures that we have half a FIFO
+       * worth of time to claim bytes before they are overwritten.
+       */
+
+      stm32l4_dmastart(priv->rxdma, stm32l4serial_dmarxcallback, (void *)priv, true);
+    }
+
+  /* Clear DMA suspended flag. */
+
+  priv->rxdmasusp = false;
 }
+#endif
+
+/****************************************************************************
+ * Name: stm32l4serial_dmaiflowrestart
+ *
+ * Description:
+ *   Call to restart RX DMA for input flow-controlled USART
+ *
+ ****************************************************************************/
+
+#if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
+static bool stm32l4serial_dmaiflowrestart(struct stm32l4_serial_s *priv)
+{
+  if (!priv->rxenable)
+    {
+      /* Rx not enabled by upper layer. */
+
+      return false;
+    }
+
+  if (priv->rxdmanext != RXDMA_BUFFER_SIZE)
+    {
+      if (priv->rxdmasusp)
+        {
+          /* Rx DMA in suspended state. */
+
+          if (stm32l4serial_dmarxavailable(&priv->dev))
+            {
+              /* DMA buffer has unprocessed data, do not re-enable yet. */
+
+              return false;
+            }
+        }
+      else
+        {
+          return false;
+        }
+    }
+
+  /* DMA is stopped or suspended and DMA buffer does not have pending data,
+   * re-enabling without data loss is now safe. */
+
+  stm32l4serial_dmareenable(priv);
+
+  return true;
+ }
 #endif
 
 /****************************************************************************
@@ -2091,11 +2319,11 @@ static void stm32l4serial_dmarxint(FAR struct uart_dev_s *dev, bool enable)
   priv->rxenable = enable;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow && priv->rxenable && (priv->rxdmanext == RXDMA_BUFFER_SIZE))
+  if (priv->iflow)
     {
       /* Re-enable RX DMA. */
 
-      stm32l4serial_dmareenable(priv);
+      (void)stm32l4serial_dmaiflowrestart(priv);
     }
 #endif
 }
@@ -2245,14 +2473,31 @@ static void stm32l4serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
       uart_recvchars(&priv->dev);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-      if (priv->iflow && priv->rxenable &&
-          (priv->rxdmanext == RXDMA_BUFFER_SIZE))
+      if (priv->iflow)
         {
           /* Re-enable RX DMA. */
 
-          stm32l4serial_dmareenable(priv);
+          (void)stm32l4serial_dmaiflowrestart(priv);
         }
 #endif
+    }
+
+  /* Get the masked USART status word to check and clear error flags.
+   *
+   * When wake-up from low power mode was not fast enough, UART is resumed too
+   * late and sometimes exactly when character was coming over UART, resulting
+   * to frame error.
+
+   * If error flag is not cleared, Rx DMA will be stuck. Clearing errors
+   * will release Rx DMA.
+   */
+
+  priv->sr = stm32l4serial_getreg(priv, STM32L4_USART_ISR_OFFSET);
+
+  if ((priv->sr & (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE)) != 0)
+    {
+      stm32l4serial_putreg(priv, STM32L4_USART_ICR_OFFSET,
+                           (USART_ICR_NCF | USART_ICR_ORECF | USART_ICR_FECF));
     }
 }
 #endif
@@ -2287,29 +2532,27 @@ static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
     {
       case(PM_NORMAL):
         {
-          /* Logic for PM_NORMAL goes here */
-
+          stm32l4_serial_set_suspend(false);
         }
         break;
 
       case(PM_IDLE):
         {
-          /* Logic for PM_IDLE goes here */
-
+          stm32l4_serial_set_suspend(false);
         }
         break;
 
       case(PM_STANDBY):
         {
-          /* Logic for PM_STANDBY goes here */
+          /* TODO: logic for enabling serial in Stop 1 mode with HSI16 missing */
 
+          stm32l4_serial_set_suspend(true);
         }
         break;
 
       case(PM_SLEEP):
         {
-          /* Logic for PM_SLEEP goes here */
-
+          stm32l4_serial_set_suspend(true);
         }
         break;
 
@@ -2370,6 +2613,49 @@ static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
+
+/****************************************************************************
+ * Name: stm32l4_is_serial_suspended
+ *
+ * Description:
+ *   Check if serial peripherals have been suspended for deep-sleep/stop modes.
+ *
+ ****************************************************************************/
+
+bool stm32l4_is_serial_suspended(void)
+{
+  return (serial_suspended_for_stop);
+}
+
+/****************************************************************************
+ * Name: stm32_serial_set_suspend
+ *
+ * Description:
+ *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
+ *
+ ****************************************************************************/
+
+void stm32l4_serial_set_suspend(bool suspend)
+{
+  int n;
+
+  /* Already in desired state? */
+
+  if (suspend == serial_suspended_for_stop)
+    return;
+
+  serial_suspended_for_stop = suspend;
+
+  for (n = 0; n < STM32L4_NUSART+STM32L4_NUART; n++)
+    {
+      struct stm32l4_serial_s *priv = uart_devs[n];
+
+      if (!priv || !priv->initialized)
+        continue;
+
+      stm32l4serial_setsuspend(&priv->dev, suspend);
+    }
+}
 
 /****************************************************************************
  * Name: stm32l4_serial_get_uart
