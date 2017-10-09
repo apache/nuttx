@@ -2158,7 +2158,7 @@ config STM32_SDADC3
 config STM32_COMP
 	bool "COMP"
 	default n
-	depends on STM32_STM32L15XX
+	depends on STM32_STM32L15XX || STM32_STM32F33XX
 
 config STM32_COMP1
 	bool "COMP1"
@@ -2310,10 +2310,43 @@ config STM32_HASH
 	default n
 	depends on STM32_STM32F207 || STM32_STM32F4XXX
 
+config HRTIM
+  bool "HRTIM"
+  default n
+
 config STM32_HRTIM1
 	bool "HRTIM1"
 	default n
 	depends on STM32_HAVE_HRTIM1
+	select HRTIM
+
+if STM32_HRTIM1
+
+config STM32_HRTIM_MASTER
+	bool "HRTIM MASTER"
+	default n
+
+config STM32_HRTIM_TIMA
+	bool "HRTIM TIMA"
+	default n
+
+config STM32_HRTIM_TIMB
+	bool "HRTIM TIMB"
+	default n
+
+config STM32_HRTIM_TIMC
+	bool "HRTIM TIMC"
+	default n
+
+config STM32_HRTIM_TIMD
+	bool "HRTIM TIMD"
+	default n
+
+config STM32_HRTIM_TIME
+	bool "HRTIM TIME"
+	default n
+
+endif # STM32_HRTIM
 
 config STM32_I2C1
 	bool "I2C1"
@@ -2455,7 +2488,7 @@ config STM32_SPI6
 config STM32_SYSCFG
 	bool "SYSCFG"
 	default y
-	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F37XX || STM32_STM32F207 || STM32_STM32F4XXX || STM32_CONNECTIVITYLINE
+	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F33XX || STM32_STM32F37XX || STM32_STM32F207 || STM32_STM32F4XXX || STM32_CONNECTIVITYLINE
 
 config STM32_TIM1
 	bool "TIM1"
@@ -5755,6 +5788,507 @@ config STM32_TIM14_CAP
 
 endmenu # Timer Configuration
 
+menu "HRTIM Configuration"
+
+if STM32_HRTIM1
+
+config STM32_HRTIM_DISABLE_CHARDRV
+  bool "HRTIM Disable Character Driver"
+	default n
+
+menuconfig STM32_HRTIM_ADC
+	bool "HRTIM ADC Configuration"
+	default n
+
+if STM32_HRTIM_ADC
+
+config STM32_HRTIM_ADC_TRG1
+  bool "HRTIM ADC Trigger 1"
+	default n
+
+config STM32_HRTIM_ADC_TRG2
+  bool "HRTIM ADC Trigger 2"
+	default n
+
+config STM32_HRTIM_ADC_TRG3
+  bool "HRTIM ADC Trigger 3"
+	default n
+
+config STM32_HRTIM_ADC_TRG4
+  bool "HRTIM ADC Trigger 4"
+	default n
+
+endif # STM32_HRTIM_ADC
+
+config STM32_HRTIM_DAC
+  bool "HRTIM DAC Triggering"
+	default n
+
+config STM32_HRTIM_PWM
+  bool "HRTIM PWM Outputs"
+	default n
+
+config STM32_HRTIM_CAP
+  bool "HRTIM Capture"
+	default n
+
+config STM32_HRTIM_INTERRUPTS
+  bool "HRTIM Interrupts"
+	default n
+
+config STM32_HRTIM_BURST
+  bool "HRTIM Burst Mode"
+	depends on STM32_HRTIM_PWM
+	default n
+
+config STM32_HRTIM_DEADTIME
+  bool "HRTIM Dead-time"
+	depends on STM32_HRTIM_PWM
+	default n
+
+config STM32_HRTIM_DMA
+  bool "HRTIM DMA"
+	default n
+
+config STM32_HRTIM_DMABURST
+  bool "HRTIM DMA Burst"
+	default n
+
+config STM32_HRTIM_CHOPPER
+  bool "HRTIM Chopper"
+	depends on STM32_HRTIM_PWM
+	default n
+
+config STM32_HRTIM_AUTODELAY
+  bool "HRTIM Autodelay"
+	depends on STM32_HRTIM_PWM
+	default n
+
+menuconfig STM32_HRTIM_EVENTS
+  bool "HRTIM Events Configuration"
+	default n
+
+if STM32_HRTIM_EVENTS
+
+config STM32_HRTIM_EEV1
+  bool "HRTIM EEV1"
+	default n
+
+config STM32_HRTIM_EEV2
+  bool "HRTIM EEV2"
+	default n
+
+config STM32_HRTIM_EEV3
+  bool "HRTIM EEV3"
+	default n
+
+config STM32_HRTIM_EEV4
+  bool "HRTIM EEV4"
+	default n
+
+config STM32_HRTIM_EEV5
+  bool "HRTIM EEV5"
+	default n
+
+config STM32_HRTIM_EEV6
+  bool "HRTIM EEV6"
+	default n
+
+config STM32_HRTIM_EEV7
+  bool "HRTIM EEV7"
+	default n
+
+config STM32_HRTIM_EEV8
+  bool "HRTIM EEV8"
+	default n
+
+config STM32_HRTIM_EEV9
+  bool "HRTIM EEV9"
+	default n
+
+config STM32_HRTIM_EEV10
+  bool "HRTIM EEV10"
+	default n
+
+endif # STM32_HRTIM_EVENTS
+
+menuconfig STM32_HRTIM_FAULTS
+	bool "HRTIM Faults Configuration"
+  default n
+
+if STM32_HRTIM_FAULTS
+
+config STM32_HRTIM_FAULT1
+  bool "HRTIM Fault 1"
+	default n
+
+config STM32_HRTIM_FAULT2
+  bool "HRTIM Fault 2"
+	default n
+
+config STM32_HRTIM_FAULT3
+  bool "HRTIM Fault 3"
+	default n
+
+config STM32_HRTIM_FAULT4
+  bool "HRTIM Fault 4"
+	default n
+
+endif # STM32_HRTIM_FAULTS
+
+config STM32_HRTIM_CLK_FROM_PLL
+  bool "HRTIM Clock from PLL"
+	default n
+
+menu "HRTIM Master Configuration"
+  depends on STM32_HRTIM_MASTER
+
+config STM32_HRTIM_MASTER_DAC
+  bool "HRTIM Master DAC Triggering"
+	default n
+	depends on STM32_HRTIM_DAC
+
+config STM32_HRTIM_MASTER_DMA
+  bool "HRTIM MASTER DMA"
+	default n
+	depends on STM32_HRTIM_DMA
+
+config STM32_HRTIM_MASTER_IRQ
+  bool "HRTIM MASTER Interrupts"
+	default n
+	depends on STM32_HRTIM_INTERRUPTS
+
+endmenu # "HRTIM Master Configuration"
+
+menu "HRTIM Timer A Configuration"
+  depends on STM32_HRTIM_TIMA
+
+config STM32_HRTIM_TIMA_CAP
+  bool "HRTIM TIMA Capture"
+	default n
+	depends on STM32_HRTIM_CAPTURE
+
+config STM32_HRTIM_TIMA_DAC
+  bool "HRTIM TIMA DAC Triggering"
+	default n
+	depends on STM32_HRTIM_DAC
+
+config STM32_HRTIM_TIMA_DMA
+  bool "HRTIM TIMA DMA"
+	default n
+	depends on STM32_HRTIM_DMA
+
+config STM32_HRTIM_TIMA_IRQ
+  bool "HRTIM TIMA Interrupts"
+	default n
+	depends on STM32_HRTIM_INTERRUPTS
+
+config STM32_HRTIM_TIMA_PWM
+  bool "HRTIM TIMA PWM Outputs"
+	default n
+	depends on STM32_HRTIM_PWM
+
+config STM32_HRTIM_TIMA_PWM_CH1
+  bool "HRTIM TIMA PWM Output 1"
+	default n
+	depends on STM32_HRTIM_TIMA_PWM
+
+config STM32_HRTIM_TIMA_PWM_CH2
+  bool "HRTIM TIMA PWM Output 2"
+	default n
+	depends on STM32_HRTIM_TIMA_PWM
+
+config STM32_HRTIM_TIMA_BURST
+  bool "HRTIM TIMA Burst"
+	default n
+	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMA_PWM)
+
+config STM32_HRTIM_TIMA_BURST_CH1
+  bool "HRTIM TIMA Output 1 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMA_BURST && STM32_HRTIM_TIMA_PWM_CH1)
+
+config STM32_HRTIM_TIMA_BURST_CH2
+  bool "HRTIM TIMA Output 2 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMA_BURST && STM32_HRTIM_TIMA_PWM_CH2)
+
+config STM32_HRTIM_TIMA_CHOP
+  bool "HRTIM TIMA PWM Chopper"
+	default n
+	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMA_PWM)
+
+config STM32_HRTIM_TIMA_DT
+  bool "HRTIM TIMA PWM Dead-time"
+	default n
+	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMA_PWM)
+
+endmenu # "HRTIM Timer A Configuration"
+
+menu "HRTIM Timer B Configuration"
+  depends on STM32_HRTIM_TIMB
+
+config STM32_HRTIM_TIMB_CAP
+  bool "HRTIM TIMB Capture"
+	default n
+	depends on STM32_HRTIM_CAPTURE
+
+config STM32_HRTIM_TIMB_DAC
+  bool "HRTIM TIMB DAC Triggering"
+	default n
+	depends on STM32_HRTIM_DAC
+
+config STM32_HRTIM_TIMB_DMA
+  bool "HRTIM TIMB DMA"
+	default n
+	depends on STM32_HRTIM_DMA
+
+config STM32_HRTIM_TIMB_IRQ
+  bool "HRTIM TIMB Interrupts"
+	default n
+	depends on STM32_HRTIM_INTERRUPTS
+
+config STM32_HRTIM_TIMB_PWM
+  bool "HRTIM TIMB PWM Outputs"
+	default n
+	depends on STM32_HRTIM_PWM
+
+config STM32_HRTIM_TIMB_PWM_CH1
+  bool "HRTIM TIMB PWM Output 1"
+	default n
+	depends on STM32_HRTIM_TIMB_PWM
+
+config STM32_HRTIM_TIMB_PWM_CH2
+  bool "HRTIM TIMB PWM Output 2"
+	default n
+	depends on STM32_HRTIM_TIMB_PWM
+
+config STM32_HRTIM_TIMB_BURST
+  bool "HRTIM TIMB Burst"
+	default n
+	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMB_PWM)
+
+config STM32_HRTIM_TIMB_BURST_CH1
+  bool "HRTIM TIMB Output 1 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMB_BURST && STM32_HRTIM_TIMB_PWM_CH1)
+
+config STM32_HRTIM_TIMB_BURST_CH2
+  bool "HRTIM TIMB Output 2 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMB_BURST && STM32_HRTIM_TIMB_PWM_CH2)
+
+config STM32_HRTIM_TIMB_CHOP
+  bool "HRTIM TIMB PWM Chopper"
+	default n
+	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMB_PWM)
+
+config STM32_HRTIM_TIMB_DT
+  bool "HRTIM TIMB PWM Dead-time"
+	default n
+	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMB_PWM)
+
+endmenu # "HRTIM Timer B Configuration"
+
+menu "HRTIM Timer C Configuration"
+  depends on STM32_HRTIM_TIMC
+
+config STM32_HRTIM_TIMC_CAP
+  bool "HRTIM TIMC Capture"
+	default n
+	depends on STM32_HRTIM_CAPTURE
+
+config STM32_HRTIM_TIMC_DAC
+  bool "HRTIM TIMC DAC Triggering"
+	default n
+	depends on STM32_HRTIM_DAC
+
+config STM32_HRTIM_TIMC_DMA
+  bool "HRTIM TIMC DMA"
+	default n
+	depends on STM32_HRTIM_DMA
+
+config STM32_HRTIM_TIMC_IRQ
+  bool "HRTIM TIMC Interrupts"
+	default n
+	depends on STM32_HRTIM_INTERRUPTS
+
+config STM32_HRTIM_TIMC_PWM
+  bool "HRTIM TIMC PWM Outputs"
+	default n
+	depends on STM32_HRTIM_PWM
+
+config STM32_HRTIM_TIMC_PWM_CH1
+  bool "HRTIM TIMC PWM Output 1"
+	default n
+	depends on STM32_HRTIM_TIMC_PWM
+
+config STM32_HRTIM_TIMC_PWM_CH2
+  bool "HRTIM TIMC PWM Output 2"
+	default n
+	depends on STM32_HRTIM_TIMC_PWM
+
+config STM32_HRTIM_TIMC_BURST
+  bool "HRTIM TIMC Burst"
+	default n
+	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMC_PWM)
+
+config STM32_HRTIM_TIMC_BURST_CH1
+  bool "HRTIM TIMC Output 1 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMC_BURST && STM32_HRTIM_TIMC_PWM_CH1)
+
+config STM32_HRTIM_TIMC_BURST_CH2
+  bool "HRTIM TIMC Output 2 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMC_BURST && STM32_HRTIM_TIMC_PWM_CH2)
+
+config STM32_HRTIM_TIMC_CHOP
+  bool "HRTIM TIMC PWM Chopper"
+	default n
+	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMC_PWM)
+
+config STM32_HRTIM_TIMC_DT
+  bool "HRTIM TIMC PWM Dead-time"
+	default n
+	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMC_PWM)
+
+endmenu # "HRTIM Timer C Configuration"
+
+menu "HRTIM Timer D Configuration"
+  depends on STM32_HRTIM_TIMD
+
+config STM32_HRTIM_TIMD_CAP
+  bool "HRTIM TIMD Capture"
+	default n
+	depends on STM32_HRTIM_CAPTURE
+
+config STM32_HRTIM_TIMD_DAC
+  bool "HRTIM TIMD DAC Triggering"
+	default n
+	depends on STM32_HRTIM_DAC
+
+config STM32_HRTIM_TIMD_DMA
+  bool "HRTIM TIMD DMA"
+	default n
+	depends on STM32_HRTIM_DMA
+
+config STM32_HRTIM_TIMD_IRQ
+  bool "HRTIM TIMD Interrupts"
+	default n
+	depends on STM32_HRTIM_INTERRUPTS
+
+config STM32_HRTIM_TIMD_PWM
+  bool "HRTIM TIMD PWM Outputs"
+	default n
+	depends on STM32_HRTIM_PWM
+
+config STM32_HRTIM_TIMD_PWM_CH1
+  bool "HRTIM TIMD PWM Output 1"
+	default n
+	depends on STM32_HRTIM_TIMD_PWM
+
+config STM32_HRTIM_TIMD_PWM_CH2
+  bool "HRTIM TIMD PWM Output 2"
+	default n
+	depends on STM32_HRTIM_TIMD_PWM
+
+config STM32_HRTIM_TIMD_BURST
+  bool "HRTIM TIMD Burst"
+	default n
+	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMD_PWM)
+
+config STM32_HRTIM_TIMD_BURST_CH1
+  bool "HRTIM TIMD Output 1 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMD_BURST && STM32_HRTIM_TIMD_PWM_CH1)
+
+config STM32_HRTIM_TIMD_BURST_CH2
+  bool "HRTIM TIMD Output 2 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIMD_BURST && STM32_HRTIM_TIMD_PWM_CH2)
+
+config STM32_HRTIM_TIMD_CHOP
+  bool "HRTIM TIMD PWM Chopper"
+	default n
+	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMD_PWM)
+
+config STM32_HRTIM_TIMD_DT
+  bool "HRTIM TIMD PWM Dead-time"
+	default n
+	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMD_PWM)
+
+endmenu # "HRTIM Timer D Configuration"
+
+menu "HRTIM Timer E Configuration"
+  depends on STM32_HRTIM_TIME
+
+config STM32_HRTIM_TIME_CAP
+  bool "HRTIM TIME Capture"
+	default n
+	depends on STM32_HRTIM_CAPTURE
+
+config STM32_HRTIM_TIME_DAC
+  bool "HRTIM TIME DAC Triggering"
+	default n
+	depends on STM32_HRTIM_DAC
+
+config STM32_HRTIM_TIME_DMA
+  bool "HRTIM TIME DMA"
+	default n
+	depends on STM32_HRTIM_DMA
+
+config STM32_HRTIM_TIME_IRQ
+  bool "HRTIM TIME Interrupts"
+	default n
+	depends on STM32_HRTIM_INTERRUPTS
+
+config STM32_HRTIM_TIME_PWM
+  bool "HRTIM TIME PWM Outputs"
+	default n
+	depends on STM32_HRTIM_PWM
+
+config STM32_HRTIM_TIME_PWM_CH1
+  bool "HRTIM TIME PWM Output 1"
+	default n
+	depends on STM32_HRTIM_TIME_PWM
+
+config STM32_HRTIM_TIME_PWM_CH2
+  bool "HRTIM TIME PWM Output 2"
+	default n
+	depends on STM32_HRTIM_TIME_PWM
+
+config STM32_HRTIM_TIME_BURST
+  bool "HRTIM TIME Burst"
+	default n
+	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIME_PWM)
+
+config STM32_HRTIM_TIME_BURST_CH1
+  bool "HRTIM TIME Output 1 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIME_BURST && STM32_HRTIM_TIME_PWM_CH1)
+
+config STM32_HRTIM_TIME_BURST_CH2
+  bool "HRTIM TIME Output 2 Burst Mode"
+	default n
+	depends on (STM32_HRTIM_TIME_BURST && STM32_HRTIM_TIME_PWM_CH2)
+
+config STM32_HRTIM_TIME_CHOP
+  bool "HRTIM TIME PWM Chopper"
+	default n
+	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIME_PWM)
+
+config STM32_HRTIM_TIME_DT
+  bool "HRTIM TIME PWM Dead-time"
+	default n
+	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIME_PWM)
+
+endmenu # "HRTIM Timer E Configuration"
+
+endif # STM32_HRTIM1
+
+endmenu # "HRTIM Configuration"
+
 menu "ADC Configuration"
 	depends on STM32_ADC
 
@@ -5853,12 +6387,30 @@ config STM32_DAC1CH1_DMA_BUFFER_SIZE
 	int "DAC1CH1 DMA buffer size"
 	default 256
 
+config STM32_DAC1CH1_DMA_EXTERNAL
+  bool "DAC1CH1 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC1CH1_HRTIM_TRG1
+  bool "DAC1CH1 HRTIM Trigger 1"
+	default n
+
+config STM32_DAC1CH1_HRTIM_TRG2
+  bool "DAC1CH1 HRTIM Trigger 2"
+	default n
+
+endif # STM32_HRTIM_DAC
+
 config STM32_DAC1CH1_TIMER
 	int "DAC1CH1 timer"
+	depends on !STM32_DAC1CH1_DMA_EXTERNAL
 	range 2 8
 
 config STM32_DAC1CH1_TIMER_FREQUENCY
 	int "DAC1CH1 timer frequency"
+	depends on !STM32_DAC1CH1_DMA_EXTERNAL
 	default 0
 
 endif
@@ -5879,12 +6431,30 @@ config STM32_DAC1CH2_DMA_BUFFER_SIZE
 	int "DAC1CH2 DMA buffer size"
 	default 256
 
+config STM32_DAC1CH2_DMA_EXTERNAL
+  bool "DAC1CH2 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC1CH2_HRTIM_TRG1
+  bool "DAC1CH2 HRTIM Trigger 1"
+	default n
+
+config STM32_DAC1CH2_HRTIM_TRG2
+  bool "DAC1CH2 HRTIM Trigger 2"
+	default n
+
+endif # STM32_HRTIM_DAC
+
 config STM32_DAC1CH2_TIMER
 	int "DAC1CH2 timer"
+	depends on !STM32_DAC1CH2_DMA_EXTERNAL
 	range 2 8
 
 config STM32_DAC1CH2_TIMER_FREQUENCY
 	int "DAC1CH2 timer frequency"
+	depends on !STM32_DAC1CH2_DMA_EXTERNAL
 	default 0
 
 endif
@@ -5905,13 +6475,27 @@ config STM32_DAC2CH1_DMA_BUFFER_SIZE
 	int "DAC2CH1 DMA buffer size"
 	default 256
 
+config STM32_DAC2CH1_DMA_EXTERNAL
+  bool "DAC2CH1 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC2CH1_HRTIM_TRG3
+  bool "DAC2CH1 HRTIM Trigger 3"
+	default n
+
+endif # STM32_HRTIM_DAC
+
 config STM32_DAC2CH1_TIMER
 	int "DAC2CH1 timer"
+	depends on !STM32_DAC2CH1_DMA_EXTERNAL
 	default 0
 	range 2 8
 
 config STM32_DAC2CH1_TIMER_FREQUENCY
 	int "DAC2CH1 timer frequency"
+	depends on !STM32_DAC2CH1_DMA_EXTERNAL
 	default 0
 
 endif

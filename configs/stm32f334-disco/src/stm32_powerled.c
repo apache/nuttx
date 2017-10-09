@@ -66,16 +66,16 @@
 #if defined(CONFIG_EXAMPLES_POWERLED) && defined(CONFIG_DRIVERS_POWERLED)
 
 #if !defined(CONFIG_STM32_HRTIM1) || !defined(CONFIG_HRTIM)
-#error "Powerled example requires HRTIM1 support"
+#  error "Powerled example requires HRTIM1 support"
 #endif
 
 #if !defined(CONFIG_STM32_DAC1CH1) || !defined(CONFIG_DAC) || \
     !defined(CONFIG_STM32_DAC1CH1_DMA)
-#error "Powerled example requires DAC1 with DMA support"
+#  error "Powerled example requires DAC1 with DMA support"
 #endif
 
 #if !defined(CONFIG_STM32_COMP4) || !defined(CONFIG_COMP)
-#error "Powerled example requires COMP4 support"
+#  error "Powerled example requires COMP4 support"
 #endif
 
 /****************************************************************************

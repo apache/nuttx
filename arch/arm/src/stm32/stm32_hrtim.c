@@ -59,35 +59,35 @@
 
 #warning "HRTIM UNDER DEVELOPMENT !"
 
-#if defined(CONFIG_STM32_TIMA_PWM)       || defined(CONFIG_STM32_HRTIM_TIMA_DAC) || \
+#if defined(CONFIG_STM32_HRTIM_TIMA_PWM) || defined(CONFIG_STM32_HRTIM_TIMA_DAC) || \
     defined(CONFIG_STM32_HRTIM_TIMA_CAP) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMA_DT)  || defined(CONFIG_STM32_HRTIM_TIMA_CHOP)
 #  ifndef CONFIG_STM32_HRTIM_TIMA
 #    error "CONFIG_STM32_HRTIM_TIMA must be set"
 #  endif
 #endif
-#if defined(CONFIG_STM32_TIMB_PWM)       || defined(CONFIG_STM32_HRTIM_TIMB_DAC) || \
+#if defined(CONFIG_STM32_HRTIM_TIMB_PWM) || defined(CONFIG_STM32_HRTIM_TIMB_DAC) || \
     defined(CONFIG_STM32_HRTIM_TIMB_CAP) || defined(CONFIG_STM32_HRTIM_TIMB_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMB_DT)  || defined(CONFIG_STM32_HRTIM_TIMB_CHOP)
 #  ifndef CONFIG_STM32_HRTIM_TIMB
 #    error "CONFIG_STM32_HRTIM_TIMB must be set"
 #  endif
 #endif
-#if defined(CONFIG_STM32_TIMC_PWM)       || defined(CONFIG_STM32_HRTIM_TIMC_DAC) || \
+#if defined(CONFIG_STM32_HRTIM_TIMC_PWM) || defined(CONFIG_STM32_HRTIM_TIMC_DAC) || \
     defined(CONFIG_STM32_HRTIM_TIMC_CAP) || defined(CONFIG_STM32_HRTIM_TIMC_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMC_DT)  || defined(CONFIG_STM32_HRTIM_TIMC_CHOP)
 #  ifndef CONFIG_STM32_HRTIM_TIMC
 #    error "CONFIG_STM32_HRTIM_TIMC must be set"
 #  endif
 #endif
-#if defined(CONFIG_STM32_TIMD_PWM)       || defined(CONFIG_STM32_HRTIM_TIMD_DAC) || \
+#if defined(CONFIG_STM32_HRTIM_TIMD_PWM) || defined(CONFIG_STM32_HRTIM_TIMD_DAC) || \
     defined(CONFIG_STM32_HRTIM_TIMD_CAP) || defined(CONFIG_STM32_HRTIM_TIMD_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMD_DT)  || defined(CONFIG_STM32_HRTIM_TIMD_CHOP)
 #  ifndef CONFIG_STM32_HRTIM_TIMD
 #    error "CONFIG_STM32_HRTIM_TIMD must be set"
 #  endif
 #endif
-#if defined(CONFIG_STM32_TIME_PWM)       || defined(CONFIG_STM32_HRTIM_TIME_DAC) || \
+#if defined(CONFIG_STM32_HRTIM_TIME_PWM) || defined(CONFIG_STM32_HRTIM_TIME_DAC) || \
     defined(CONFIG_STM32_HRTIM_TIME_CAP) || defined(CONFIG_STM32_HRTIM_TIME_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIME_DT)  || defined(CONFIG_STM32_HRTIM_TIME_CHOP)
 #  ifndef CONFIG_STM32_HRTIM_TIME
@@ -561,7 +561,7 @@ struct stm32_hrtim_s
 #ifdef CONFIG_STM32_HRTIM_BURST
   struct stm32_hrtim_burst_s *burst; /* Burst mode configuration */
 #endif
-#ifdef CONFIG_STM32_HRTIM_CMN_IRQ
+#ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   uint32_t irq;                      /* Common interrupts configuration */
 #endif
 };
@@ -1448,7 +1448,7 @@ static struct stm32_hrtim_s g_hrtim1priv =
 #ifdef CONFIG_STM32_HRTIM_BURST
   .burst      = &g_burst,
 #endif
-#ifdef CONFIG_STM32_HRTIM_CMN_IRQ
+#ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   .irq      = HRTIM_IRQ_COMMON,
 #endif
 };

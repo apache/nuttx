@@ -232,6 +232,12 @@ config PM_SLEEPENTER_COUNT
 
 endif # PM
 
+config DRIVERS_POWERLED
+  bool "High Power LED driver"
+	default n
+	---help---
+		Enables building of an powerled upper half driver.
+
 menuconfig DRIVERS_SMPS
 	bool "Switched-Mode Power Supply (SMPS)"
 	default n
