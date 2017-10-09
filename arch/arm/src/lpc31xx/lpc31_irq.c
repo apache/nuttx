@@ -127,9 +127,9 @@ void up_irqinitialize(void)
 
   CURRENT_REGS = NULL;
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_restore(SVC_MODE | PSR_F_BIT);
 #endif
 }
