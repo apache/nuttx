@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/semapore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/irq.h>

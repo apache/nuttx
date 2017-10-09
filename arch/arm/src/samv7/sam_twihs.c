@@ -979,7 +979,7 @@ errout:
 * Description:
 *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
 *   This function can be called from inside the driver while the TWIHS device is
-*   already locked, so we must not handle any semapores inside.
+*   already locked, so we must not handle any semaphores inside.
 *   To initiate a bus reset from outside the driver use twi_reset(dev).
 *
 * Input Parameters:

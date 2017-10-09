@@ -41,7 +41,7 @@
 
 #include <semaphore.h>
 
-#include <nuttx/semapore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/power/pm.h>
 
 #include "pm.h"

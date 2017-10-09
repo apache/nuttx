@@ -45,7 +45,7 @@
 #include <semaphore.h>
 #include <queue.h>
 
-#include <nuttx/semapore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/power/pm.h>
