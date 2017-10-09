@@ -2,7 +2,7 @@
  * include/nuttx/cancelpt.h
  * Definitions related to cancellation points
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -142,6 +142,31 @@ bool enter_cancellation_point(void);
 void leave_cancellation_point(void);
 #else
 #  define leave_cancellation_point()
+#endif
+
+/****************************************************************************
+ * Name: check_cancellation_point
+ *
+ * Description:
+ *   Returns true if:
+ *
+ *   1. Deferred cancellation does applies to this thread,
+ *   2. We are within a cancellation point (i.e., the nesting level in the
+ *      TCB is greater than zero).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value
+ *   true is returned if a cancellation is pending but cannot be performed
+ *   now due to the nesting level.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CANCELLATION_POINTS
+bool check_cancellation_point(void);
+#else
+#  define check_cancellation_point() false
 #endif
 
 #undef EXTERN
