@@ -1,7 +1,7 @@
-/************************************************************************************
- * arch/arm/src/sama5/chip.h
+/****************************************************************************
+ * arch/arm/src/bcm2708/bcm_memorymap.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,33 +31,46 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_H
+#ifndef __ARCH_ARM_SRC_BCM2708_IMX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_BCM2708_IMX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/sama5/chip.h>
 
-#include "chip/sam_memorymap.h"
+#include <sys/types.h>
+#include <stdint.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+#include <arch/bcm2708/chip.h>
 
-/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it to provide the
- * address of the L2CC-PL310 implementation.
+#include "chip/bcm2708_memorymap.h"
+#include "arm.h"
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct section_mapping_s
+{
+  uint32_t physbase;   /* Physical address of the region to be mapped */
+  uint32_t virtbase;   /* Virtual address of the region to be mapped */
+  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
+  uint32_t nsections;  /* Number of mappings in the region */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This table describes how to map a set of 1Mb pages to space the physical
+ * address space of the BCM2708.
  */
 
-#define L2CC_VBASE SAM_L2CC_VSECTION
+extern const struct section_mapping_s g_section_mapping[];
+extern const size_t g_num_mappings;
 
-/* Cache line sizes (in bytes) */
-
-#define ARMV7A_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
-#define ARMV7A_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
-
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_H */
+#endif /* __ARCH_ARM_SRC_BCM2708_IMX_MEMORYMAP_H */

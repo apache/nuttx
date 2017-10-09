@@ -1764,6 +1764,8 @@ nuttx/
  |   |   `- README.txt
  |   |- pic32mz-starterkit/
  |   |   `- README.txt
+ |   |- pizero/
+ |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
  |   |- sabre-6quad/

@@ -1,7 +1,7 @@
-/************************************************************************************
- * arch/arm/src/sama5/chip.h
+/****************************************************************************
+ * config/pizero/src/bcm_bringup.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,33 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/sama5/chip.h>
+#include <sys/types.h>
 
-#include "chip/sam_memorymap.h"
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Name: bcm_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
 
-/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it to provide the
- * address of the L2CC-PL310 implementation.
- */
-
-#define L2CC_VBASE SAM_L2CC_VSECTION
-
-/* Cache line sizes (in bytes) */
-
-#define ARMV7A_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
-#define ARMV7A_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
-
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_H */
+int bcm_bringup(void)
+{
+  return OK;
+}

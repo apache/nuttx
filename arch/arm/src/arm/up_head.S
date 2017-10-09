@@ -190,7 +190,7 @@
  * containing both.
  */
 
-/* REVISIT:  This works now of the low vector case only because the RAM
+/* REVISIT:  This works now for the low vector case only because the RAM
  * sizes that we have been dealing with are less then 1MB so that both the
  * page table and the vector table are in the same 1MB RAM block.  But
  * this will certainly break later. Hence, the annoying warning.

@@ -1,7 +1,7 @@
-/************************************************************************************
- * arch/arm/src/sama5/chip.h
+/****************************************************************************
+ * arch/arm/src/bcm2708/bcm_config.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,33 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_H
+#ifndef __ARCH_ARM_SRC_BCM2708_BCM_CONFIG_H
+#define __ARCH_ARM_SRC_BCM2708_BCM_CONFIG_H 1
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/sama5/chip.h>
 
-#include "chip/sam_memorymap.h"
-
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it to provide the
- * address of the L2CC-PL310 implementation.
- */
+/* Configuration **********************************************************/
 
-#define L2CC_VBASE SAM_L2CC_VSECTION
+/* Is there a UART enabled? */
 
-/* Cache line sizes (in bytes) */
+/* Is there a serial console? */
 
-#define ARMV7A_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
-#define ARMV7A_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
-
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_H */
+#endif /* __ARCH_ARM_SRC_BCM2708_BCM_CONFIG_H */

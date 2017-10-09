@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_BCM2708
+
+comment "BCM2708 Configuration Options"
+
+choice
+	prompt "BCM2708 Chip Selection"
+	default ARCH_CHIP_BCM2835
+
+config ARCH_CHIP_BCM2835
+	bool "Broadcom BCM2835"
+
+endchoice # BCM2708 Configuration Option
+endif # ARCH_CHIP_BCM2708

@@ -23,6 +23,13 @@ config ARCH_CHIP_A1X
 	---help---
 		Allwinner A1X family: A10, A10S (A12), A13 (ARM Cortex-A8)
 
+config ARCH_CHIP_BCM2708
+	bool "Broadcom BCM2708"
+	select ARCH_ARM1176JZ
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+
 config ARCH_CHIP_C5471
 	bool "TMS320 C5471"
 	select ARCH_ARM7TDMI
@@ -496,6 +503,7 @@ config ARCH_FAMILY
 config ARCH_CHIP
 	string
 	default "a1x"		if ARCH_CHIP_A1X
+	default "bcm2708"	if ARCH_CHIP_BCM2708
 	default "c5471"		if ARCH_CHIP_C5471
 	default "dm320"		if ARCH_CHIP_DM320
 	default "efm32"		if ARCH_CHIP_EFM32
@@ -698,11 +706,14 @@ endif
 if ARCH_CORTEXR4 || ARCH_CORTEXR4F || ARCH_CORTEXR5 || ARCH_CORTEXR5F || ARCH_CORTEX74 || ARCH_CORTEXR7F
 source arch/arm/src/armv7-r/Kconfig
 endif
-if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
+if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
 source arch/arm/src/arm/Kconfig
 endif
 if ARCH_CHIP_A1X
 source arch/arm/src/a1x/Kconfig
+endif
+if ARCH_CHIP_BCM2708
+source arch/arm/src/bcm2708/Kconfig
 endif
 if ARCH_CHIP_C5471
 source arch/arm/src/c5471/Kconfig
