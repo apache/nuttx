@@ -206,6 +206,18 @@ config LTC4151_I2C_FREQUENCY
 	default 400000
 	depends on SENSORS_LTC4151
 
+config SENSORS_INA219
+	bool "INA219 current and voltage monitor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments INA219 current and voltage monitor.
+
+config INA219_I2C_FREQUENCY
+	int "INA219 I2C frequency"
+	default 400000
+	depends on SENSORS_INA219
+
 config SENSORS_MB7040
 	bool "MaxBotix MB7040 Sonar support"
 	default n
