@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_desclose.c
  *
- *   Copyright (C) 2007, 2009, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_desclose_group
+ * Name: nxmq_desclose_group
  *
  * Description:
  *   This function performs the portion of the mq_close operation related
@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-void mq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
+void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
 {
   FAR struct mqueue_inode_s *msgq;
 

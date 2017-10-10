@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_msgqfree
+ * Name: nxmq_free_msgq
  *
  * Description:
  *   This function deallocates an initialized message queue structure.
@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-void mq_msgqfree(FAR struct mqueue_inode_s *msgq)
+void nxmq_free_msgq(FAR struct mqueue_inode_s *msgq)
 {
   FAR struct mqueue_msg_s *curr;
   FAR struct mqueue_msg_s *next;

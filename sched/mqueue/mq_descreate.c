@@ -104,7 +104,7 @@ static mqd_t nxmq_alloc_des(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_descreate
+ * Name: nxmq_create_des
  *
  * Description:
  *   Create a message queue descriptor for the specified TCB
@@ -120,8 +120,8 @@ static mqd_t nxmq_alloc_des(void)
  *
  ****************************************************************************/
 
-mqd_t mq_descreate(FAR struct tcb_s *mtcb, FAR struct mqueue_inode_s *msgq,
-                   int oflags)
+mqd_t nxmq_create_des(FAR struct tcb_s *mtcb,
+                      FAR struct mqueue_inode_s *msgq, int oflags)
 {
   FAR struct task_group_s *group;
   mqd_t mqdes;

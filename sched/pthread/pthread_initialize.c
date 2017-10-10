@@ -112,14 +112,16 @@ int pthread_sem_take(sem_t *sem, bool intr)
           ret = nxsem_wait(sem);
           if (ret < 0)
             {
-              /* The only case that an error should occur here is if the wait
-               * was awakened by a signal.
+              /* The only cases that an error should occur here is if the wait
+               * was awakened by a signal or if the thread was canceled during
+               * the wait.
                */
 
-              DEBUGASSERT(ret == -EINTR);
+              DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
 
-              /* When the signal is received, should we errout? Or should we
-               * just continue waiting until we have the semaphore?
+              /* When the error occurs in this case, should we errout?  Or
+               * should we just continue waiting until we have the
+               * semaphore?
                */
 
               if (intr)

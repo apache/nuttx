@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -963,11 +964,11 @@ cs43l22_senddone(FAR struct i2s_dev_s *i2s,
    */
 
   msg.msgId = AUDIO_MSG_COMPLETE;
-  ret = mq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
-                CONFIG_CS43L22_MSG_PRIO);
+  ret = nxmq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
+                  CONFIG_CS43L22_MSG_PRIO);
   if (ret < 0)
     {
-      auderr("ERROR: mq_send failed: %d\n", errno);
+      auderr("ERROR: nxmq_send failed: %d\n", ret);
     }
 }
 
@@ -1225,8 +1226,8 @@ static int cs43l22_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-          CONFIG_CS43L22_MSG_PRIO);
+  (void)nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+                  CONFIG_CS43L22_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -1341,15 +1342,11 @@ static int cs43l22_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
       term_msg.msgId  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
 
-      ret = mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-                    CONFIG_CS43L22_MSG_PRIO);
+      ret = nxmq_send(priv->mq, (FAR const char *)&term_msg,
+                      sizeof(term_msg), CONFIG_CS43L22_MSG_PRIO);
       if (ret < 0)
         {
-          int errcode = errno;
-          DEBUGASSERT(errcode > 0);
-
-          auderr("ERROR: mq_send failed: %d\n", errcode);
-          UNUSED(errcode);
+          auderr("ERROR: nxmq_send failed: %d\n", ret);
         }
     }
 

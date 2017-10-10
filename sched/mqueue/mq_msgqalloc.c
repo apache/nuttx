@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_msgqalloc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_msgqalloc
+ * Name: nxmq_alloc_msgq
  *
  * Description:
  *   This function implements a part of the POSIX message queue open logic.
@@ -72,8 +72,8 @@
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
-                                        FAR struct mq_attr *attr)
+FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
+                                           FAR struct mq_attr *attr)
 {
   FAR struct mqueue_inode_s *msgq;
 

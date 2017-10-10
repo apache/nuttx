@@ -296,7 +296,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 
                           if (status == -EINTR)
                             {
-                              serr("ERROR: Timedout!\n");
+                              swarn("WARNING: Timedout!\n");
                               ret = ETIMEDOUT;
                             }
                           else

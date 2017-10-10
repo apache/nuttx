@@ -55,6 +55,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
+#include <nuttx/mqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>
@@ -1222,8 +1223,8 @@ static int vs1053_dreq_isr(int irq, FAR void *context, FAR void *arg)
   if (dev->running)
     {
       msg.msgId = AUDIO_MSG_DATA_REQUEST;
-      mq_send(dev->mq, (FAR const char *)&msg, sizeof(msg),
-              CONFIG_VS1053_MSG_PRIO);
+      (void)nxmq_send(dev->mq, (FAR const char *)&msg, sizeof(msg),
+                      CONFIG_VS1053_MSG_PRIO);
     }
   else
     {
@@ -1513,8 +1514,8 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  mq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-          CONFIG_VS1053_MSG_PRIO);
+  (void)nxmq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+                  CONFIG_VS1053_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -1627,8 +1628,8 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
         {
           term_msg.msgId = AUDIO_MSG_ENQUEUE;
           term_msg.u.data = 0;
-          mq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-                  CONFIG_VS1053_MSG_PRIO);
+          (void)nxmq_send(dev->mq, (FAR const char *)&term_msg,
+                          sizeof(term_msg), CONFIG_VS1053_MSG_PRIO);
         }
     }
 

@@ -1360,11 +1360,11 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
    */
 
   msg.msgId = AUDIO_MSG_COMPLETE;
-  ret = mq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
-                CONFIG_WM8904_MSG_PRIO);
+  ret = nxmq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
+                  CONFIG_WM8904_MSG_PRIO);
   if (ret < 0)
     {
-      auderr("ERROR: mq_send failed: %d\n", errno);
+      auderr("ERROR: nxmq_send failed: %d\n", ret);
     }
 }
 
@@ -1622,8 +1622,8 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-          CONFIG_WM8904_MSG_PRIO);
+  (void)nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+                  CONFIG_WM8904_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -1738,15 +1738,11 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
       term_msg.msgId  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
 
-      ret = mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-                    CONFIG_WM8904_MSG_PRIO);
+      ret = nxmq_send(priv->mq, (FAR const char *)&term_msg,
+                      sizeof(term_msg), CONFIG_WM8904_MSG_PRIO);
       if (ret < 0)
         {
-          int errcode = errno;
-          DEBUGASSERT(errcode > 0);
-
-          auderr("ERROR: mq_send failed: %d\n", errcode);
-          UNUSED(errcode);
+          auderr("ERROR: nxmq_send failed: %d\n", ret);
         }
     }
 

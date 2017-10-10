@@ -53,8 +53,9 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/mqueue.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/audio/audio.h>
 #include <mqueue.h>
 
@@ -716,8 +717,8 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
       msg.session = session;
 #endif
       apb->flags |= AUDIO_APB_DEQUEUED;
-      mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-              CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+      (void)nxmq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                      CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 
@@ -754,8 +755,8 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       msg.session = session;
 #endif
-      mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-              CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+      (void)nxmq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                      CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 

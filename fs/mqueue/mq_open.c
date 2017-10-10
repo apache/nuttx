@@ -164,7 +164,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
       /* Create a message queue descriptor for the current thread */
 
       msgq  = inode->u.i_mqueue;
-      mqdes = mq_descreate(NULL, msgq, oflags);
+      mqdes = nxmq_create_des(NULL, msgq, oflags);
       if (!mqdes)
         {
           errcode = ENOMEM;
@@ -208,7 +208,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
        * be created with a reference count of zero.
        */
 
-      msgq = (FAR struct mqueue_inode_s *)mq_msgqalloc(mode, attr);
+      msgq = (FAR struct mqueue_inode_s *)nxmq_alloc_msgq(mode, attr);
       if (!msgq)
         {
           errcode = ENOSPC;
@@ -217,7 +217,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 
       /* Create a message queue descriptor for the TCB */
 
-       mqdes = mq_descreate(NULL, msgq, oflags);
+       mqdes = nxmq_create_des(NULL, msgq, oflags);
        if (!mqdes)
          {
            errcode = ENOMEM;
@@ -240,7 +240,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
   return mqdes;
 
 errout_with_msgq:
-  mq_msgqfree(msgq);
+  nxmq_free_msgq(msgq);
   inode->u.i_mqueue = NULL;
 
 errout_with_inode:

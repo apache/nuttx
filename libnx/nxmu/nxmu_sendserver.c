@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxmu/nxmu_sendserver.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mqueue.h>
 #include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
@@ -82,10 +83,10 @@ int nxmu_sendserver(FAR struct nxfe_conn_s *conn, FAR const void *msg,
 
   /* Send the message to the server */
 
-  ret = mq_send(conn->cwrmq, msg, msglen, NX_SVRMSG_PRIO);
+  ret = _MQ_SEND(conn->cwrmq, msg, msglen, NX_SVRMSG_PRIO);
   if (ret < 0)
     {
-      gerr("ERROR: mq_send failed: %d\n", errno);
+      gerr("ERROR: _MQ_SEND failed: %d\n", _MQ_ERRNO(rer));
     }
 
   return ret;
