@@ -1048,7 +1048,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
 }
@@ -2674,7 +2675,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 
 #ifdef USE_SERIALDRIVER
 
- /****************************************************************************
+/****************************************************************************
  * Name: stm32_serial_get_uart
  *
  * Description:
@@ -2682,6 +2683,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
+#ifdef HAVE_SERIALDRIVER
 FAR uart_dev_t *stm32_serial_get_uart(int uart_num)
 {
   int uart_idx = uart_num - 1;
@@ -2698,6 +2700,7 @@ FAR uart_dev_t *stm32_serial_get_uart(int uart_num)
 
   return &uart_devs[uart_idx]->dev;
 }
+#endif /* HAVE_SERIALDRIVER */
 
 /****************************************************************************
  * Name: up_earlyserialinit
