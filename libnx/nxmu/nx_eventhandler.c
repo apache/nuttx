@@ -121,10 +121,10 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
 int nx_eventhandler(NXHANDLE handle)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_s      *msg;
-  struct nxbe_window_s   *wnd;
-  char                    buffer[NX_MXCLIMSGLEN];
-  int                     nbytes;
+  struct nxsvrmsg_s *msg;
+  struct nxbe_window_s *wnd;
+  char buffer[NX_MXCLIMSGLEN];
+  int nbytes;
 
   /* Get the next message from our incoming message queue */
 
@@ -133,7 +133,7 @@ int nx_eventhandler(NXHANDLE handle)
       nbytes = _MQ_RECEIVE(conn->crdmq, buffer, NX_MXCLIMSGLEN, 0);
       if (nbytes < 0)
         {
-          int errcode = _MQ_GETERRNO(ret);
+          int errcode = _MQ_GETERRNO(nbytes);
 
           /* EINTR is not an error.  The wait was interrupted by a signal and
            * we just need to try reading again.
@@ -152,7 +152,7 @@ int nx_eventhandler(NXHANDLE handle)
               else
                 {
                   gerr("ERROR: _MQ_RECEIVE failed: %d\n", errcode);
-                  _MQ_SETERRNO(ret);
+                  _MQ_SETERRNO(nbytes);
                   return ERROR;
                 }
             }

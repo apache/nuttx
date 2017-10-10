@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 9, 2017)
+NuttX TODO List (Last updated October 10, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -248,9 +248,18 @@ o Task/Scheduler (sched/)
                  semaphores used in the OS.  Still need to checkout signals
                  and messages queues that are also used in the OS.  Also
                  backed out commit b4747286b19d3b15193b2a5e8a0fe48fa0a8638c.
-               2017-10-86:  This change has been completed for the case of
+               2017-10-06:  This change has been completed for the case of
                  signals used in the OS.  Still need to checkout messages
                  queues that are also used in the OS.
+               2017-10-10:  This change has been completed for the case of
+                 message queue used in the OS.  I am keeping this issue
+                 open because (1) there are some known remaining calls that
+                 that will modify the errno (such as dup(), dup2(),
+                 sched_getparam(), sched_reprioritize(). sched_setaffinity(),
+                 task_activate(), mq_open(), mq_close(), and others) and (2)
+                 there may still be calls that create cancellation points.
+                 Need to check things like open(), close(), read(), write(),
+                 and possibly others.
 
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design
