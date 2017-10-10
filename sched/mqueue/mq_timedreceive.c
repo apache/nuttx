@@ -1,7 +1,8 @@
 /****************************************************************************
  *  sched/mqueue/mq_timedreceive.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +51,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/mqueue.h>
 #include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
@@ -67,11 +69,11 @@
  *   This function is called if the timeout elapses before the message queue
  *   becomes non-empty.
  *
- * Parameters:
+ * Input Parameters:
  *   argc  - the number of arguments (should be 1)
  *   pid   - the task ID of the task to wakeup
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -116,84 +118,61 @@ static void nxmq_rcvtimeout(int argc, wdparm_t pid)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_timedreceive
+ * Name: nxmq_timedreceive
  *
  * Description:
  *   This function receives the oldest of the highest priority messages from
- *   the message queue specified by "mqdes."  If the size of the buffer in
- *   bytes (msglen) is less than the "mq_msgsize" attribute of the message
- *   queue, mq_timedreceive will return an error.  Otherwise, the selected
- *   message is removed from the queue and copied to "msg."
+ *   the message queue specified by "mqdes."  If the message queue is empty
+ *   and O_NONBLOCK was not set, nxmq_timedreceive() will block until a
+ *   message is added to the message queue (or until a timeout occurs).
  *
- *   If the message queue is empty and O_NONBLOCK was not set,
- *   mq_timedreceive() will block until a message is added to the message
- *   queue (or until a timeout occurs).  If more than one task is waiting
- *   to receive a message, only the task with the highest priority that has
- *   waited the longest will be unblocked.
+ *   nxmq_timedreceive() is an internal OS interface.  It is functionally
+ *   equivalent to mq_timedreceive() except that:
  *
- *   mq_timedreceive() behaves just like mq_receive(), except that if the
- *   queue is empty and the O_NONBLOCK flag is not enabled for the message
- *   queue description, then abstime points to a structure which specifies a
- *   ceiling on the time for which the call will block.  This ceiling is an
- *   absolute timeout in seconds and nanoseconds since the Epoch (midnight
- *   on the morning of 1 January 1970).
+ *   - It is not a cancellaction point, and
+ *   - It does not modify the errno value.
  *
- *   If no message is available, and the timeout has already expired by the
- *   time of the call, mq_timedreceive() returns immediately.
+ *  See comments with mq_timedreceive() for a more complete description of
+ *  the behavior of this function
  *
- * Parameters:
- *   mqdes - Message Queue Descriptor
- *   msg - Buffer to receive the message
- *   msglen - Size of the buffer in bytes
- *   prio - If not NULL, the location to store message priority.
+ * Input Parameters:
+ *   mqdes   - Message Queue Descriptor
+ *   msg     - Buffer to receive the message
+ *   msglen  - Size of the buffer in bytes
+ *   prio    - If not NULL, the location to store message priority.
  *   abstime - the absolute time to wait until a timeout is declared.
  *
- * Return Value:
- *   One success, the length of the selected message in bytes is returned.
- *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
- *
- *   EAGAIN    The queue was empty, and the O_NONBLOCK flag was set
- *             for the message queue description referred to by 'mqdes'.
- *   EPERM     Message queue opened not opened for reading.
- *   EMSGSIZE  'msglen' was less than the maxmsgsize attribute of the
- *             message queue.
- *   EINTR     The call was interrupted by a signal handler.
- *   EINVAL    Invalid 'msg' or 'mqdes' or 'abstime'
- *   ETIMEDOUT The call timed out before a message could be transferred.
- *
- * Assumptions:
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_timedreceive() for the list list valid return values).
  *
  ****************************************************************************/
 
-ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
+ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
                         FAR int *prio, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
-  int ret = ERROR;
+  int ret;
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
-
-  /* mq_timedreceive() is a cancellation point */
-
-  (void)enter_cancellation_point();
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
    */
 
-  if (nxmq_verify_receive(mqdes, msg, msglen) != OK)
+  ret = nxmq_verify_receive(mqdes, msg, msglen);
+  if (ret < 0)
     {
-      leave_cancellation_point();
-      return ERROR;
+      return ret;
     }
 
   if (!abstime || abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
     {
-      set_errno(EINVAL);
-      leave_cancellation_point();
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Create a watchdog.  We will not actually need this watchdog
@@ -204,9 +183,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
   rtcb->waitdog = wd_create();
   if (!rtcb->waitdog)
     {
-      set_errno(EINVAL);
-      leave_cancellation_point();
-      return ERROR;
+      return -ENOMEM;
     }
 
   /* Get the next message from the message queue.  We will disable
@@ -257,9 +234,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
           wd_delete(rtcb->waitdog);
           rtcb->waitdog = NULL;
 
-          set_errno(result);
-          leave_cancellation_point();
-          return ERROR;
+          return -result;
         }
 
       /* Start the watchdog */
@@ -270,7 +245,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* Get the message from the message queue */
 
-  mqmsg = nxmq_wait_receive(mqdes);
+  ret = nxmq_wait_receive(mqdes, &mqmsg);
 
   /* Stop the watchdog timer (this is not harmful in the case where
    * it was never started)
@@ -290,14 +265,84 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * - The watchdog timeout expired
    */
 
-  if (mqmsg)
+  if (ret >= 0)
     {
+      DEBUGASSERT(mqmsg != NULL);
       ret = nxmq_do_receive(mqdes, mqmsg, msg, prio);
     }
 
   sched_unlock();
   wd_delete(rtcb->waitdog);
   rtcb->waitdog = NULL;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mq_timedreceive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages from
+ *   the message queue specified by "mqdes."  If the size of the buffer in
+ *   bytes (msglen) is less than the "mq_msgsize" attribute of the message
+ *   queue, mq_timedreceive will return an error.  Otherwise, the selected
+ *   message is removed from the queue and copied to "msg."
+ *
+ *   If the message queue is empty and O_NONBLOCK was not set,
+ *   mq_timedreceive() will block until a message is added to the message
+ *   queue (or until a timeout occurs).  If more than one task is waiting
+ *   to receive a message, only the task with the highest priority that has
+ *   waited the longest will be unblocked.
+ *
+ *   mq_timedreceive() behaves just like mq_receive(), except that if the
+ *   queue is empty and the O_NONBLOCK flag is not enabled for the message
+ *   queue description, then abstime points to a structure which specifies a
+ *   ceiling on the time for which the call will block.  This ceiling is an
+ *   absolute timeout in seconds and nanoseconds since the Epoch (midnight
+ *   on the morning of 1 January 1970).
+ *
+ *   If no message is available, and the timeout has already expired by the
+ *   time of the call, mq_timedreceive() returns immediately.
+ *
+ * Input Parameters:
+ *   mqdes   - Message Queue Descriptor
+ *   msg     - Buffer to receive the message
+ *   msglen  - Size of the buffer in bytes
+ *   prio    - If not NULL, the location to store message priority.
+ *   abstime - the absolute time to wait until a timeout is declared.
+ *
+ * Returned Value:
+ *   One success, the length of the selected message in bytes is returned.
+ *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
+ *
+ *   EAGAIN    The queue was empty, and the O_NONBLOCK flag was set
+ *             for the message queue description referred to by 'mqdes'.
+ *   EPERM     Message queue opened not opened for reading.
+ *   EMSGSIZE  'msglen' was less than the maxmsgsize attribute of the
+ *             message queue.
+ *   EINTR     The call was interrupted by a signal handler.
+ *   EINVAL    Invalid 'msg' or 'mqdes' or 'abstime'
+ *   ETIMEDOUT The call timed out before a message could be transferred.
+ *
+ ****************************************************************************/
+
+ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
+                        FAR int *prio, FAR const struct timespec *abstime)
+{
+  int ret;
+
+  /* mq_timedreceive() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
+  /* Let nxmq_timedreceive do all of the work */
+
+  ret = nxmq_timedreceive(mqdes, msg, msglen, prio, abstime);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   leave_cancellation_point();
   return ret;
 }

@@ -100,10 +100,10 @@
  *   task is waiting for the message queue to become non-empty.  This is
  *   inconsistent with the POSIX specification which says, "If a process
  *   has registered for notification of message a arrival at a message
- *   queue and some process is blocked in mq_receive() waiting to receive
+ *   queue and some process is blocked in [nx]mq_receive() waiting to receive
  *   a message when a message arrives at the queue, the arriving message
- *   message shall satisfy mq_receive()... The resulting behavior is as if
- *   the message queue remains empty, and no notification shall be sent."
+ *   message shall satisfy [nx]mq_receive()... The resulting behavior is as
+ *   if the message queue remains empty, and no notification shall be sent."
  *
  ****************************************************************************/
 

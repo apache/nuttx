@@ -54,6 +54,7 @@
 #include <fcntl.h>
 #include "cc3000drv.h"
 
+#include <nuttx/mqueue.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 
@@ -159,8 +160,8 @@ uint8_t *cc3000_wait(void)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0);
 
-  mq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
-             sizeof(spiconf.rx_buffer), 0);
+  (void)nxmq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
+                     sizeof(spiconf.rx_buffer), 0);
   return spiconf.rx_buffer.pbuffer;
 }
 
@@ -199,8 +200,8 @@ static void *unsoliced_thread_func(void *parameter)
   while (spiconf.run)
     {
       memset(&spiconf.rx_buffer, 0, sizeof(spiconf.rx_buffer));
-      nbytes = mq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
-                          sizeof(spiconf.rx_buffer), 0);
+      nbytes = nxmq_receive(spiconf.queue, (FAR char *)&spiconf.rx_buffer,
+                            sizeof(spiconf.rx_buffer), 0);
       if (nbytes > 0)
         {
           ninfo("%d Processed\n", nbytes);

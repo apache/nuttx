@@ -64,6 +64,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
+#include <nuttx/mqueue.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -2051,7 +2052,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      msglen = mq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
+      msglen = nxmq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 

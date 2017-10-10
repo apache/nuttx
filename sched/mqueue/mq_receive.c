@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/mqueue/mq_receive.c
  *
- *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mqueue.h>
 #include <nuttx/cancelpt.h>
 
 #include "mqueue/mqueue.h"
@@ -56,66 +57,50 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_receive
+ * Name: nxmq_receive
  *
  * Description:
  *   This function receives the oldest of the highest priority messages
- *   from the message queue specified by "mqdes."  If the size of the
- *   buffer in bytes (msglen) is less than the "mq_msgsize" attribute of
- *   the message queue, mq_receive will return an error.  Otherwise, the
- *   selected message is removed from the queue and copied to "msg."
+ *   from the message queue specified by "mqdes."  This is an internal OS
+ *   interface.  It is functionally equivalent to mq_receive except that:
  *
- *   If the message queue is empty and O_NONBLOCK was not set,
- *   mq_receive() will block until a message is added to the message
- *   queue.  If more than one task is waiting to receive a message, only
- *   the task with the highest priority that has waited the longest will
- *   be unblocked.
+ *   - It is not a cancellaction point, and
+ *   - It does not modify the errno value.
  *
- *   If the queue is empty and O_NONBLOCK is set, ERROR will be returned.
+ *  See comments with mq_receive() for a more complete description of the
+ *  behavior of this function
  *
- * Parameters:
- *   mqdes - Message Queue Descriptor
- *   msg - Buffer to receive the message
+ * Input Parameters:
+ *   mqdes  - Message Queue Descriptor
+ *   msg    - Buffer to receive the message
  *   msglen - Size of the buffer in bytes
- *   prio - If not NULL, the location to store message priority.
+ *   prio   - If not NULL, the location to store message priority.
  *
- * Return Value:
- *   One success, the length of the selected message in bytes is returned.
- *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
- *
- *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set
- *            for the message queue description referred to by 'mqdes'.
- *   EPERM    Message queue opened not opened for reading.
- *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the
- *            message queue.
- *   EINTR    The call was interrupted by a signal handler.
- *   EINVAL   Invalid 'msg' or 'mqdes'
- *
- * Assumptions:
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_receive() for the list list valid return values).
  *
  ****************************************************************************/
 
-ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                   FAR int *prio)
+ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
+                     FAR int *prio)
 {
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
-  ssize_t ret = ERROR;
+  ssize_t ret;
 
   DEBUGASSERT(up_interrupt_context() == false);
-
-  /* mq_receive() is a cancellation point */
-
-  (void)enter_cancellation_point();
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
    */
 
-  if (nxmq_verify_receive(mqdes, msg, msglen) != OK)
+  ret = nxmq_verify_receive(mqdes, msg, msglen);
+  if (ret < 0)
     {
-      leave_cancellation_point();
-      return ERROR;
+      return ret;
     }
 
   /* Get the next message from the message queue.  We will disable
@@ -135,7 +120,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* Get the message from the message queue */
 
-  mqmsg = nxmq_wait_receive(mqdes);
+  ret = nxmq_wait_receive(mqdes, &mqmsg);
   leave_critical_section(flags);
 
   /* Check if we got a message from the message queue.  We might
@@ -145,12 +130,72 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * - The wait was interrupted by a signal
    */
 
-  if (mqmsg)
+  if (ret >= 0)
     {
+      DEBUGASSERT(mqmsg != NULL);
       ret = nxmq_do_receive(mqdes, mqmsg, msg, prio);
     }
 
   sched_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mq_receive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages
+ *   from the message queue specified by "mqdes."  If the size of the
+ *   buffer in bytes (msglen) is less than the "mq_msgsize" attribute of
+ *   the message queue, mq_receive will return an error.  Otherwise, the
+ *   selected message is removed from the queue and copied to "msg."
+ *
+ *   If the message queue is empty and O_NONBLOCK was not set,
+ *   mq_receive() will block until a message is added to the message
+ *   queue.  If more than one task is waiting to receive a message, only
+ *   the task with the highest priority that has waited the longest will
+ *   be unblocked.
+ *
+ *   If the queue is empty and O_NONBLOCK is set, ERROR will be returned.
+ *
+ * Input Parameters:
+ *   mqdes  - Message Queue Descriptor
+ *   msg    - Buffer to receive the message
+ *   msglen - Size of the buffer in bytes
+ *   prio   - If not NULL, the location to store message priority.
+ *
+ * Returned Value:
+ *   One success, the length of the selected message in bytes is returned.
+ *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
+ *
+ *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set
+ *            for the message queue description referred to by 'mqdes'.
+ *   EPERM    Message queue opened not opened for reading.
+ *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the
+ *            message queue.
+ *   EINTR    The call was interrupted by a signal handler.
+ *   EINVAL   Invalid 'msg' or 'mqdes'
+ *
+ ****************************************************************************/
+
+ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
+                   FAR int *prio)
+{
+  int ret;
+
+  /* mq_receive() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
+  /* Let nxmq_receive do all of the work */
+
+  ret = nxmq_receive(mqdes, msg, msglen, prio);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
   leave_cancellation_point();
   return ret;
 }

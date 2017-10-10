@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_server.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mqueue.h>
 #include <nuttx/nx/nx.h>
+
 #include "nxfe.h"
 
 /****************************************************************************
@@ -329,14 +331,16 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
     {
        /* Receive the next server message */
 
-       nbytes = mq_receive(fe.conn.crdmq, buffer, NX_MXSVRMSGLEN, 0);
+       nbytes = nxmq_receive(fe.conn.crdmq, buffer, NX_MXSVRMSGLEN, 0);
        if (nbytes < 0)
          {
-           if (errno != EINTR)
+           if (nbytes != -EINTR)
              {
-               gerr("ERROR: mq_receive failed: %d\n", errno);
-               goto errout; /* mq_receive sets errno */
+               gerr("ERROR: nxmq_receive() failed: %d\n", nbytes);
+               ret = nbytes;
+               goto errout;
              }
+
            continue;
          }
 
@@ -550,7 +554,11 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          }
     }
 
-errout:
   nxmu_shutdown(&fe);
   return OK;
+
+errout:
+  nxmu_shutdown(&fe);
+  set_errno(-ret);
+  return ERROR;
 }

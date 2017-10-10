@@ -1599,7 +1599,7 @@ static void *cs43l22_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      msglen = mq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
+      msglen = nxmq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 

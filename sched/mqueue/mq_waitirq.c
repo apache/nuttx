@@ -58,7 +58,8 @@
  * Description:
  *   This function is called when a signal or a timeout is received by a
  *   task that is waiting on a message queue -- either for a queue to
- *   becoming not full (on mq_send) or not empty (on mq_receive).
+ *   becoming not full (on mq_send and friends) or not empty (on mq_receive
+ *   and friends).
  *
  * Parameters:
  *   wtcb - A pointer to the TCB of the task that is waiting on a message

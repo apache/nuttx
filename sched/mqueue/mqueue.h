@@ -152,7 +152,7 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 /* mq_rcvinternal.c ********************************************************/
 
 int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen);
-FAR struct mqueue_msg_s *nxmq_wait_receive(mqd_t mqdes);
+int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg);
 ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                         FAR char *ubuffer, FAR int *prio);
 

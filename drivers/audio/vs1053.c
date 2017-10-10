@@ -1288,7 +1288,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      size = mq_receive(dev->mq, (FAR char *)&msg, sizeof(msg), &prio);
+      size = nxmq_receive(dev->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
