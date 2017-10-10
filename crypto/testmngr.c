@@ -124,8 +124,12 @@ static int test_aes(void)
 int crypto_test(void)
 {
 #if defined(CONFIG_CRYPTO_AES)
-  if (test_aes()) return -1;
+  if (test_aes())
+    {
+      return -1;
+    }
 #endif
+
   return OK;
 }
 

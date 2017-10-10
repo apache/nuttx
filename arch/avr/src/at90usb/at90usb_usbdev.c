@@ -2459,7 +2459,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
 
           /* If there is something avaible in the fifo now, then go get it */
 
-          if (avr_fifoready(AVR_TIMEOUT_NONE) == OK);
+          if (avr_fifoready(AVR_TIMEOUT_NONE) == OK)
             {
               ret = avr_epOUTqueue(privep);
             }
@@ -2968,3 +2968,4 @@ void avr_pollvbus(void)
   leave_critical_section(flags);
 }
 #endif
+

@@ -94,7 +94,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
    */
 
   ret = nxmq_verify_send(mqdes, msg, msglen, prio);
-  if (ret < 0);
+  if (ret < 0)
     {
       return ret;
     }

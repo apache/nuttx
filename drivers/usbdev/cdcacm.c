@@ -570,7 +570,7 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
        * processing. This allows proper utilization of hardware flow control.
        */
 
-      if (nexthead == rxbuf->tail);
+      if (nexthead == rxbuf->tail)
         {
           if (cdcuart_rxflowcontrol(&priv->serdev, recv->size, true))
             {

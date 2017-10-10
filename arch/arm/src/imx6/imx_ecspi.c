@@ -1058,7 +1058,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 
   DEBUGASSERT(priv != NULL);
 
-  if (priv->status != NULL);
+  if (priv->status != NULL)
     {
       ret = priv->select(dev, devid);
     }
@@ -1099,7 +1099,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
 
   DEBUGASSERT(priv != NULL);
 
-  if (priv->cmddata != NULL);
+  if (priv->cmddata != NULL)
     {
       ret = priv->cmddata(dev, devid, cmd);
     }
