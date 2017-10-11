@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ea3131/src/lpc31_fillpage.c
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #  include <stdbool.h>
 #  include <unistd.h>
 #  include <fcntl.h>
+#  include <nuttx/fs/fs.h>
 #  ifdef CONFIG_EA3131_PAGING_SDSLOT
 #    include <stdio.h>
 #    include <sys/mount.h>
@@ -439,7 +440,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   /* And read the page data from that offset */
 
-  nbytes = read(g_pgsrc.fd, vpage, PAGESIZE);
+  nbytes = nx_read(g_pgsrc.fd, vpage, PAGESIZE);
   DEBUGASSERT(nbytes == PAGESIZE);
   return OK;
 

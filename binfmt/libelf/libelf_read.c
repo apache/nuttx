@@ -47,6 +47,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/binfmt/elf.h>
 
 /****************************************************************************
@@ -134,31 +135,29 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
       /* Read the file data at offset into the user buffer */
 
-       nbytes = read(loadinfo->filfd, buffer, readsize);
-       if (nbytes < 0)
-         {
-           int errval = errno;
+      nbytes = nx_read(loadinfo->filfd, buffer, readsize);
+      if (nbytes < 0)
+        {
+          /* EINTR just means that we received a signal */
 
-           /* EINTR just means that we received a signal */
-
-           if (errval != EINTR)
-             {
-               berr("Read from offset %lu failed: %d\n",
-                    (unsigned long)offset, errval);
-               return -errval;
-             }
-         }
-       else if (nbytes == 0)
-         {
-           berr("Unexpected end of file\n");
-           return -ENODATA;
-         }
-       else
-         {
-           readsize -= nbytes;
-           buffer   += nbytes;
-           offset   += nbytes;
-         }
+          if (nbytes != -EINTR)
+            {
+              berr("Read from offset %lu failed: %d\n",
+                   (unsigned long)offset, (int)nbytes);
+              return nbytes;
+            }
+        }
+      else if (nbytes == 0)
+        {
+          berr("Unexpected end of file\n");
+          return -ENODATA;
+        }
+      else
+        {
+          readsize -= nbytes;
+          buffer   += nbytes;
+          offset   += nbytes;
+        }
     }
 
   elf_dumpreaddata(buffer, readsize);

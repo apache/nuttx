@@ -46,6 +46,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -154,13 +156,12 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
                   if (count > buffer_available)
                     {
-                      bytes_read = read(stream->fs_fd, dest, count);
+                      bytes_read = _NX_READ(stream->fs_fd, dest, count);
                       if (bytes_read < 0)
                         {
-                          /* An error occurred on the read.  The error code is
-                           * in the 'errno' variable.
-                           */
+                          /* An error occurred on the read. */
 
+                          _NX_SETERRNO(bytes_read);
                           goto errout_with_errno;
                         }
                       else if (bytes_read == 0)
@@ -202,14 +203,16 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                        * into the buffer.
                        */
 
-                      bytes_read = read(stream->fs_fd, stream->fs_bufread,
-                                        buffer_available);
+                      bytes_read = _NX_READ(stream->fs_fd,
+                                            stream->fs_bufread,
+                                            buffer_available);
                       if (bytes_read < 0)
                         {
                           /* An error occurred on the read.  The error code is
                            * in the 'errno' variable.
                            */
 
+                          _NX_SETERRNO(bytes_read);
                           goto errout_with_errno;
                         }
                       else if (bytes_read == 0)
@@ -238,13 +241,14 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
           while (count > 0)
             {
-              bytes_read = read(stream->fs_fd, dest, count);
+              bytes_read = _NX_READ(stream->fs_fd, dest, count);
               if (bytes_read < 0)
                 {
                   /* An error occurred on the read.  The error code is
                    * in the 'errno' variable.
                    */
 
+                  _NX_SETERRNO(bytes_read);
                   goto errout_with_errno;
                 }
               else if (bytes_read == 0)

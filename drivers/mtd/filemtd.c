@@ -162,8 +162,8 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
           /* Read more data from the file */
 
           lseek(priv->fd, seekpos, SEEK_SET);
-          buflen = read(priv->fd, buf, sizeof(buf));
-          pout = (FAR uint8_t *) buf;
+          buflen = nx_read(priv->fd, buf, sizeof(buf));
+          pout   = (FAR uint8_t *) buf;
         }
 
       /* Get the source and destination values */
@@ -231,9 +231,9 @@ static ssize_t filemtd_read(FAR struct file_dev_s *priv,
 {
   /* Set the starting location in the file */
 
-  lseek(priv->fd, priv->offset + offsetbytes, SEEK_SET);
+  (void)lseek(priv->fd, priv->offset + offsetbytes, SEEK_SET);
 
-  return read(priv->fd, buffer, nbytes);
+  return nx_read(priv->fd, buffer, nbytes);
 }
 
 /****************************************************************************
@@ -325,7 +325,7 @@ static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Then read the data from the file */
 
-  filemtd_read(priv, buf, offset, nbytes);
+  (void)filemtd_read(priv, buf, offset, nbytes);
   return nblocks;
 }
 
@@ -387,7 +387,7 @@ static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
      return 0;
    }
 
-  filemtd_read(priv, buf, offset, nbytes);
+  (void)filemtd_read(priv, buf, offset, nbytes);
   return nbytes;
 }
 

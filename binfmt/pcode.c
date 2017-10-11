@@ -49,6 +49,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>
+#include <nuttx/fd/fs.h>
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/pcode.h>
@@ -404,20 +405,17 @@ static int pcode_load(struct binary_s *binp)
     {
       /* Read the next GULP */
 
-      nread = read(fd, ptr, remaining);
+      nread = nx_read(fd, ptr, remaining);
       if (nread < 0)
         {
-          /* If errno is EINTR, then this is not an error; the read() was
-           * simply interrupted by a signal.
+          /* If the failure is EINTR, then this is not an error; the
+           * nx_read() was simply interrupted by a signal.
            */
 
-          int errval = get_errno();
-          DEBUGASSERT(errval > 0);
-
-          if (errval != EINTR)
+          if (nread != -EINTR)
             {
-              berr("ERROR: read failed: %d\n", errval);
-              ret = -errval;
+              berr("ERROR: read failed: %d\n", (int)nread);
+              ret = nread;
               goto errout_with_fd;
             }
 

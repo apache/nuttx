@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 
 #include "inode/inode.h"
@@ -174,30 +175,23 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   rdbuffer = map->addr;
   while (length > 0)
     {
-      nread = read(fd, rdbuffer, length);
+      nread = nx_read(fd, rdbuffer, length);
       if (nread < 0)
         {
           /* Handle the special case where the read was interrupted by a
            * signal.
            */
 
-          errcode = get_errno();
-          if (errcode != EINTR)
+          if (nread != -EINTR)
             {
-              /* All other read errors are bad.  errno is already set.
-               * (but maybe should be forced to EINVAL?).  NOTE that if
-               * FS DEBUG is enabled, then the following ferr() macro will
-               * destroy the errno value.
-               */
+              /* All other read errors are bad. */
 
               ferr("ERROR: Read failed: offset=%d errno=%d\n",
-                   (int)offset, errcode);
-#ifdef CONFIG_DEBUG_FS
+                   (int)offset, (int)nread);
+
+              errcode = (int)-ret;
               goto errout_with_region;
-#else
-              goto errout_with_errno;
-#endif
-             }
+            }
         }
 
       /* Check for end of file. */
@@ -239,12 +233,6 @@ errout_with_region:
 errout:
   set_errno(errcode);
   return MAP_FAILED;
-
-#ifndef CONFIG_DEBUG_FS
-errout_with_errno:
-  kumm_free(alloc);
-  return MAP_FAILED;
-#endif
 }
 
 #endif /* CONFIG_FS_RAMMAP */

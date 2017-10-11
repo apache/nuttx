@@ -48,6 +48,8 @@
 #include <errno.h>
 
 #include <arpa/inet.h>
+
+#include <nuttx/fs/fs.h>
 #include <nuttx/binfmt/nxflat.h>
 
 /****************************************************************************
@@ -106,7 +108,8 @@ static inline void nxflat_dumpreaddata(FAR char *buffer, int buflen)
  *
  ****************************************************************************/
 
-int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, int offset)
+int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
+                int readsize, int offset)
 {
   ssize_t nbytes;      /* Number of bytes read */
   off_t   rpos;        /* Position returned by lseek */
@@ -135,14 +138,14 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
 
       /* Read the file data at offset into the user buffer */
 
-       nbytes = read(loadinfo->filfd, bufptr, bytesleft);
+       nbytes = nx_read(loadinfo->filfd, bufptr, bytesleft);
        if (nbytes < 0)
          {
-           int errval = errno;
-           if (errval != EINTR)
+           if (nbytes != -EINTR)
              {
-               berr("Read from offset %d failed: %d\n", offset, errval);
-               return -errval;
+               berr("Read from offset %d failed: %d\n",
+                    offset, (int)nbytes);
+               return nbytes;
              }
          }
        else if (nbytes == 0)

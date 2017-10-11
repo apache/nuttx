@@ -152,7 +152,7 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
         {
           /* Read a buffer of data from the infd */
 
-          nbytesread = read(infd, iobuffer, CONFIG_LIB_SENDFILE_BUFSIZE);
+          nbytesread = _NX_READ(infd, iobuffer, CONFIG_LIB_SENDFILE_BUFSIZE);
 
           /* Check for end of file */
 
@@ -174,14 +174,17 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 
           else if (nbytesread < 0)
             {
+              int errcode = _NX_GETERRNO(nbytesread);
+
               /* EINTR is not an error (but will still stop the copy) */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-              if (errno != EINTR || ntransferred == 0)
+              if (errcode != EINTR || ntransferred == 0)
 #endif
                 {
                   /* Read error.  Break out and return the error condition. */
 
+                  _NX_SETERRNO(nbytesread);
                   ntransferred = ERROR;
                   endxfr       = true;
                   break;
@@ -241,7 +244,9 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
                   if (errcode != EINTR || ntransferred == 0)
 #endif
                     {
-                      /* Write error.  Break out and return the error condition */
+                      /* Write error.  Break out and return the error
+                       * condition.
+                       */
 
                       _NX_SETERRNO(nbyteswritten);
                       ntransferred = ERROR;

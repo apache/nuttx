@@ -60,16 +60,22 @@
  * Name: file_read
  *
  * Description:
- *   This is the internal implementation of read().
+ *   file_read() is an interanl OS interface.  It is functionally similar to
+ *   the standard read() interface except:
  *
- * Parameters:
- *   file     File structure instance
- *   buf      User-provided to save the data
- *   nbytes   The maximum size of the user-provided buffer
+ *    - It does not modify the errno variable,
+ *    - It is not a cancellation point,
+ *    - It does not handle socket descriptors, and
+ *    - It accepts a file structure instance instead of file descriptor.
  *
- * Return:
+ * Input Parameters:
+ *   filep  - File structure instance
+ *   buf    - User-provided to save the data
+ *   nbytes - The maximum size of the user-provided buffer
+ *
+ * Returned Value:
  *   The positive non-zero number of bytes read on success, 0 on if an
- *   end-of-file condition, or -1 on failure with errno set appropriately.
+ *   end-of-file condition, or a negated errno value on any failure.
  *
  ****************************************************************************/
 
@@ -110,29 +116,29 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 }
 
 /****************************************************************************
- * Name: read
+ * Name: nx_read
  *
  * Description:
- *   The standard, POSIX read interface.
+ *   nx_read() is an interanl OS interface.  It is functionally similar to
+ *   the standard read() interface except:
  *
- * Parameters:
- *   file     File structure instance
- *   buf      User-provided to save the data
- *   nbytes   The maximum size of the user-provided buffer
+ *    - It does not modify the errno variable, and
+ *    - It is not a cancellation point.
  *
- * Return:
+ * Input Parameters:
+ *   fd     - File descriptor to read from
+ *   buf    - User-provided to save the data
+ *   nbytes - The maximum size of the user-provided buffer
+ *
+ * Returned Value:
  *   The positive non-zero number of bytes read on success, 0 on if an
- *   end-of-file condition, or -1 on failure with errno set appropriately.
+ *   end-of-file condition, or a negated errno value on any failure.
  *
  ****************************************************************************/
 
-ssize_t read(int fd, FAR void *buf, size_t nbytes)
+ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 {
   ssize_t ret;
-
-  /* read() is a cancellation point */
-
-  (void)enter_cancellation_point();
 
   /* Did we get a valid file descriptor? */
 
@@ -142,20 +148,14 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
     {
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       /* No.. If networking is enabled, read() is the same as recv() with
-       * the flags parameter set to zero.  Note that recv() sets
-       * the errno variable.
+       * the flags parameter set to zero.
        */
 
-      ret = nx_recv(fd, buf, nbytes, 0);
-      if (ret < 0)
-        {
-          goto errout;
-        }
+      return nx_recv(fd, buf, nbytes, 0);
 #else
       /* No networking... it is a bad descriptor in any event */
 
-      ret = -EBADF;
-      goto errout;
+      return -EBADF;
 #endif
     }
 
@@ -172,24 +172,54 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
       ret = (ssize_t)fs_getfilep(fd, &filep);
       if (ret < 0)
         {
-          goto errout;
+          return ret;
         }
 
       /* Then let file_read do all of the work. */
 
-      ret = file_read(filep, buf, nbytes);
-      if (ret < 0)
-        {
-          goto errout;
-        }
+      return file_read(filep, buf, nbytes);
     }
+#else
+  /* I don't think we can get here */
+
+  return -ENOSYS;
 #endif
+}
+
+/****************************************************************************
+ * Name: read
+ *
+ * Description:
+ *   The standard, POSIX read interface.
+ *
+ * Input Parameters:
+ *   fd     - File descriptor to read from
+ *   buf    - User-provided to save the data
+ *   nbytes - The maximum size of the user-provided buffer
+ *
+ * Returned Value:
+ *   The positive non-zero number of bytes read on success, 0 on if an
+ *   end-of-file condition, or -1 on failure with errno set appropriately.
+ *
+ ****************************************************************************/
+
+ssize_t read(int fd, FAR void *buf, size_t nbytes)
+{
+  ssize_t ret;
+
+  /* read() is a cancellation point */
+
+  (void)enter_cancellation_point();
+
+  /* Let nx_read() do the real work */
+
+  ret = nx_read(fd, buf, nbytes);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
 
   leave_cancellation_point();
   return ret;
-
-errout:
-  set_errno((int)-ret);
-  leave_cancellation_point();
-  return (ssize_t)ERROR;
 }

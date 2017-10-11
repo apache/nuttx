@@ -55,6 +55,7 @@
 #include "cc3000drv.h"
 
 #include <nuttx/mqueue.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 
@@ -144,7 +145,7 @@ long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
 long cc3000_read(uint8_t *pUserBuffer, uint16_t usLength)
 {
   DEBUGASSERT(spiconf.cc3000fd >= 0);
-  return read(spiconf.cc3000fd, pUserBuffer, usLength);
+  return nx_read(spiconf.cc3000fd, pUserBuffer, usLength);
 }
 
 /****************************************************************************

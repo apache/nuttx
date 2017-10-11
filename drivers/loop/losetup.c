@@ -259,11 +259,11 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
 
   do
     {
-      nbytesread = read(dev->fd, buffer, nsectors * dev->sectsize);
-      if (nbytesread < 0 && get_errno() != EINTR)
+      nbytesread = nx_read(dev->fd, buffer, nsectors * dev->sectsize);
+      if (nbytesread < 0 && nbytesread != -EINTR)
         {
-          _err("ERROR: Read failed: %d\n", get_errno());
-          return -get_errno();
+          _err("ERROR: Read failed: %d\n", nbytesread);
+          return (int)nbytesread;
         }
     }
   while (nbytesread < 0);

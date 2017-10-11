@@ -48,6 +48,7 @@
 #include <errno.h>
 
 #include <nuttx/module.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
@@ -128,10 +129,10 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
       /* Read the file data at offset into the user buffer */
 
-       nbytes = read(loadinfo->filfd, buffer, readsize);
+       nbytes = _NX_READ(loadinfo->filfd, buffer, readsize);
        if (nbytes < 0)
          {
-           int errval = errno;
+           int errval = _NX_GETERRNO(nbytes);
 
            /* EINTR just means that we received a signal */
 

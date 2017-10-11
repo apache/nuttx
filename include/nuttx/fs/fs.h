@@ -83,11 +83,13 @@
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
 #else
+#  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)
@@ -913,15 +915,51 @@ int fs_getfilep(int fd, FAR struct file **filep);
  * Name: file_read
  *
  * Description:
- *   Equivalent to the standard read() function except that is accepts a
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by net_sendfile() and aio_read();
+ *   file_read() is an interanl OS interface.  It is functionally similar to
+ *   the standard read() interface except:
+ *
+ *    - It does not modify the errno variable,
+ *    - It is not a cancellation point,
+ *    - It does not handle socket descriptors, and
+ *    - It accepts a file structure instance instead of file descriptor.
+ *
+ * Input Parameters:
+ *   filep  - File structure instance
+ *   buf    - User-provided to save the data
+ *   nbytes - The maximum size of the user-provided buffer
+ *
+ * Returned Value:
+ *   The positive non-zero number of bytes read on success, 0 on if an
+ *   end-of-file condition, or a negated errno value on any failure.
  *
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
 #endif
+
+/****************************************************************************
+ * Name: nx_read
+ *
+ * Description:
+ *   nx_read() is an interanl OS interface.  It is functionally similar to
+ *   the standard read() interface except:
+ *
+ *    - It does not modify the errno variable, and
+ *    - It is not a cancellation point.
+ *
+ * Input Parameters:
+ *   fd     - File descriptor to read from
+ *   buf    - User-provided to save the data
+ *   nbytes - The maximum size of the user-provided buffer
+ *
+ * Returned Value:
+ *   The positive non-zero number of bytes read on success, 0 on if an
+ *   end-of-file condition, or a negated errno value on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
 
 /****************************************************************************
  * Name: file_write

@@ -58,6 +58,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -545,10 +547,10 @@ static int tzload(FAR const char *name,
 
   sp->goback = sp->goahead = FALSE;
 
-  if (!name)
+  if (name == NULL)
     {
       name = TZDEFAULT;
-      if (!name)
+      if (name == NULL)
         {
           goto oops;
         }
@@ -563,7 +565,8 @@ static int tzload(FAR const char *name,
   if (!doaccess)
     {
       p = TZDIR;
-      if (!p || sizeof lsp->fullname - 1 <= strlen(p) + strlen(name))
+      if (p == NULL ||
+          sizeof(lsp->fullname - 1) <= strlen(p) + strlen(name))
         {
           goto oops;
         }
@@ -593,7 +596,7 @@ static int tzload(FAR const char *name,
       goto oops;
     }
 
-  nread = read(fid, up->buf, sizeof up->buf);
+  nread = _NX_READ(fid, up->buf, sizeof up->buf);
   if (close(fid) < 0 || nread <= 0)
     {
       goto oops;

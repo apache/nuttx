@@ -37,9 +37,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -61,7 +65,7 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
 
   /* Attempt to read one character */
 
-  nwritten = read(rthis->fd, &ch, 1);
+  nwritten = _NX_READ(rthis->fd, &ch, 1);
   if (nwritten == 1)
     {
       this->nget++;

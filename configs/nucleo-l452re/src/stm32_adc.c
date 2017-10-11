@@ -47,9 +47,11 @@
 
 #include <nuttx/random.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <arch/board/board.h>
+
 #include "stm32l4_gpio.h"
 #include "stm32l4_adc.h"
 #include "nucleo-l452re.h"
@@ -183,14 +185,13 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
       goto out_close;
     }
 
-  nbytes = read(fd, sample, sizeof(sample));
+  nbytes = nx_read(fd, sample, sizeof(sample));
   if (nbytes < 0)
     {
-      errval = errno;
-      ret = -errval;
-      if (errval != EINTR)
+      if (nbytes != -EINTR)
         {
-          aerr("ERROR: read failed: %d\n", errval);
+          aerr("ERROR: nx_read() failed: %d\n", nbytes);
+          ret = (int)nbytes;
           goto out_close;
         }
 
