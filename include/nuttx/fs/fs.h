@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +61,36 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Most internal OS interfaces are not available in the user space in
+ * PROTECTED and KERNEL builds.  In that context, the corresponding
+ * application interfaces must be used.  The differences between the two
+ * sets of interfaces are:  The internal OS interfaces (1) do not cause
+ * cancellation points and (2) they do not modify the errno variable.
+ *
+ * This is only important when compiling libraries (libc or libnx) that are
+ * used both by the OS (libkc.a and libknx.a) or by the applications
+ * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * used for the build context.
+ *
+ * The interfaces open(), close(), creat(), read(), pread(), write(),
+ * pwrite(), poll(), select(), fcntl(), and aio_suspend() are all
+ * cancellation points.
+ *
+ * REVISIT:  These cancellation points are an issue and may cause
+ * violations:  It use of these internally will cause the calling function
+ * to become a cancellation points!
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _NX_WRITE(f,b,s)     nx_write(s,b,s)
+#  define _NX_ERRNO(r)         (-(r))
+#  define _NX_ERRVAL(r)        (r)
+#else
+#  define _NX_WRITE(f,b,s)     rite(s,b,s)
+#  define _NX_ERRNO(r)         errno
+#  define _NX_ERRVAL(r)        (-errno)
+#endif
 
 /* Stream flags for the fs_flags field of in struct file_struct */
 
@@ -739,13 +770,13 @@ int file_close_detached(FAR struct file *filep);
  * Description:
  *   Return the inode of the block driver specified by 'pathname'
  *
- * Inputs:
+ * Input Parameters:
  *   pathname - the full path to the block driver to be opened
  *   mountflags - if MS_RDONLY is not set, then driver must support write
  *     operations (see include/sys/mount.h)
  *   ppinode - address of the location to return the inode reference
  *
- * Return:
+ * Returned Value:
  *   Returns zero on success or a negated errno on failure:
  *
  *   EINVAL  - pathname or pinode is NULL
@@ -767,10 +798,10 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
  * Description:
  *   Call the close method and release the inode
  *
- * Inputs:
+ * Input Parameters:
  *   inode - reference to the inode of a block driver opened by open_blockdriver
  *
- * Return:
+ * Returned Value:
  *   Returns zero on success or a negated errno on failure:
  *
  *   EINVAL  - inode is NULL
@@ -788,12 +819,12 @@ int close_blockdriver(FAR struct inode *inode);
  * Description:
  *   Perform device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
  *   arg      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   -1 on failure with errno set properly:
  *
@@ -862,18 +893,18 @@ ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
  *   file.  NOTE that this function will currently fail if it is provided
  *   with a socket descriptor.
  *
- * Parameters:
- *   fd - The file descriptor
+ * Input Parameters:
+ *   fd    - The file descriptor
+ *   filep - The location to return the struct file instance
  *
- * Return:
- *   A point to the corresponding struct file instance is returned on
- *   success.  On failure,  NULL is returned and the errno value is
- *   set appropriately (EBADF).
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-FAR struct file *fs_getfilep(int fd);
+int fs_getfilep(int fd, FAR struct file **filep);
 #endif
 
 /****************************************************************************
@@ -953,8 +984,8 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence);
  *
  * Description:
  *   Equivalent to the standard fsync() function except that is accepts a
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by aio_fsync();
+ *   struct file instance instead of a file descriptor and it does not set
+ *   the errno variable.
  *
  ****************************************************************************/
 
@@ -974,7 +1005,9 @@ int file_fsync(FAR struct file *filep);
  *   arg      The argument of the ioctl cmd
  *
  * Return:
- *   See ioctl() below.
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments ioctl() for a list of appropriate
+ *   errno values).
  *
  ****************************************************************************/
 

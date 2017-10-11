@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_fsync.c
  *
- *   Copyright (C) 2007-2009, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,22 +62,20 @@
  *
  * Description:
  *   Equivalent to the standard fsync() function except that is accepts a
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by aio_fsync();
+ *   struct file instance instead of a file descriptor and it does not set
+ *   the errno variable.
  *
  ****************************************************************************/
 
 int file_fsync(FAR struct file *filep)
 {
   struct inode *inode;
-  int ret;
 
   /* Was this file opened for write access? */
 
   if ((filep->f_oflags & O_WROK) == 0)
     {
-      ret = EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Is this inode a registered mountpoint? Does it support the
@@ -88,23 +87,12 @@ int file_fsync(FAR struct file *filep)
   if (!inode || !INODE_IS_MOUNTPT(inode) ||
       !inode->u.i_mops || !inode->u.i_mops->sync)
     {
-      ret = EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Yes, then tell the mountpoint to sync this file */
 
-  ret = inode->u.i_mops->sync(filep);
-  if (ret >= 0)
-    {
-      return OK;
-    }
-
-  ret = -ret;
-
-errout:
-  set_errno(ret);
-  return ERROR;
+  return inode->u.i_mops->sync(filep);
 }
 
 /****************************************************************************
@@ -126,20 +114,29 @@ int fsync(int fd)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  filep = fs_getfilep(fd);
-  if (!filep)
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      leave_cancellation_point();
-      return ERROR;
+      goto errout;
     }
+
+  DEBUGASSERT(filep != NULL);
 
   /* Perform the fsync operation */
 
   ret = file_fsync(filep);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
   leave_cancellation_point();
   return ret;
+
+errout:
+  leave_cancellation_point();
+  set_errno(-ret);
+  return ERROR;
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */

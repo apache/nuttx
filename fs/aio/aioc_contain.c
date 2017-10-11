@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/aio/aioc_contain.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   struct sched_param param;
 #endif
+  int ret;
 
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
   if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
@@ -94,13 +95,13 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
     {
       /* Get the file structure corresponding to the file descriptor. */
 
-      u.filep = fs_getfilep(aiocbp->aio_fildes);
-      if (!u.filep)
+      ret = fs_getfilep(aiocbp->aio_fildes, &u.filep);
+      if (ret < 0)
         {
-          /* The errno value has already been set */
-
-          return NULL;
+          goto errout;
         }
+
+      DEBUGASSERT(u.filep != NULL);
     }
 #endif
 #if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
@@ -111,12 +112,14 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
       /* Get the socket structure corresponding to the socket descriptor */
 
       u.psock = sockfd_socket(aiocbp->aio_fildes);
-      if (!u.psock)
+      if (u.psock == NULL)
         {
-          /* Does not set the errno.  EBADF is the most likely explanation. */
+          /* Does not return error information.  EBADF is the most likely
+           * explanation.
+           */
 
-          set_errno(EBADF);
-          return NULL;
+          ret = -EBADF;
+          goto errout;
         }
     }
 #endif
@@ -146,6 +149,10 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
   dq_addlast(&aioc->aioc_link, &g_aio_pending);
   aio_unlock();
   return aioc;
+
+errout:
+  set_errno(-ret);
+  return NULL;
 }
 
 /****************************************************************************

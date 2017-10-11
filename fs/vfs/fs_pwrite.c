@@ -144,25 +144,25 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  filep = fs_getfilep(fd);
-  if (!filep)
+  ret = (ssize_t)fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      ret = (ssize_t)ERROR;
-    }
-  else
-    {
-      /* Let file_pread do the real work */
-
-      ret = file_pwrite(filep, buf, nbytes, offset);
-      if (ret < 0)
-        {
-          set_errno((int)-ret);
-          ret = (ssize_t)ERROR;
-        }
+      goto errout;
     }
 
-  (void)enter_cancellation_point();
+  /* Let file_pwrite do the real work */
+
+  ret = file_pwrite(filep, buf, nbytes, offset);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  leave_cancellation_point();
   return ret;
+
+errout:
+  set_errno((int)-ret);
+  leave_cancellation_point();
+  return (ssize_t)ERROR;
 }

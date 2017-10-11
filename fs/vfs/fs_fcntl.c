@@ -254,21 +254,17 @@ int fcntl(int fd, int cmd, ...)
     {
       /* Get the file structure corresponding to the file descriptor. */
 
-      filep = fs_getfilep(fd);
-      if (!filep)
+      ret = fs_getfilep(fd, &filep);
+      if (ret >= 0)
         {
-          /* The errno value has already been set */
+          DEBUGASSERT(filep != NULL);
 
-          va_end(ap);
-          leave_cancellation_point();
-          return ERROR;
+          /* Let file_vfcntl() do the real work.  The errno is not set on
+           * failures.
+           */
+
+          ret = file_vfcntl(filep, cmd, ap);
         }
-
-      /* Let file_vfcntl() do the real work.  The errno is not set on
-       * failures.
-       */
-
-      ret = file_vfcntl(filep, cmd, ap);
     }
   else
 #endif

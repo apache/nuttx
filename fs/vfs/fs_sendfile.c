@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_sendfile.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,18 +112,20 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
       (unsigned int)infd < CONFIG_NFILE_DESCRIPTORS)
     {
       FAR struct file *filep;
+      int ret;
 
       /* This appears to be a file-to-socket transfer.  Get the file
        * structure.
        */
 
-      filep = fs_getfilep(infd);
-      if (!filep)
+      ret = fs_getfilep(infd, &filep);
+      if (ret < 0)
         {
-          /* The errno value has already been set */
-
+          set_errno(-ret);
           return ERROR;
         }
+
+      DEBUGASSERT(filep != NULL);
 
       /* Then let net_sendfile do the work. */
 

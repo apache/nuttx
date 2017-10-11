@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_write.c
  *
- *   Copyright (C) 2007-2009, 2012-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,8 +156,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 
   if (buf == NULL)
     {
-      set_errno(EINVAL);
-      ret = ERROR;
+      ret = -EINVAL;
       goto errout;
     }
 
@@ -173,8 +173,8 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 
       ret = send(fd, buf, nbytes, 0);
 #else
-      set_errno(EBADF);
-      ret = ERROR;
+      ret = -EBADF;
+      goto errout;
 #endif
     }
 
@@ -186,30 +186,29 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
        * failure.
        */
 
-      filep = fs_getfilep(fd);
-      if (filep == NULL)
+      ret = (ssize_t)fs_getfilep(fd, &filep);
+      if (ret < 0)
         {
-          /* The errno value has already been set */
-
-          ret = ERROR;
+          goto errout;
         }
-      else
-        {
-          /* Perform the write operation using the file descriptor as an
-           * index.  Note that file_write() will set the errno on failure.
-           */
 
-          ret = file_write(filep, buf, nbytes);
-          if (ret < 0)
-            {
-              set_errno((int)-ret);
-              ret = ERROR;
-            }
+      /* Perform the write operation using the file descriptor as an
+       * index.  Note that file_write() will set the errno on failure.
+       */
+
+      ret = file_write(filep, buf, nbytes);
+      if (ret < 0)
+        {
+          goto errout;
         }
     }
 #endif
 
-errout:
   leave_cancellation_point();
   return ret;
+
+errout:
+  set_errno(-ret);
+  leave_cancellation_point();
+  return ERROR;
 }

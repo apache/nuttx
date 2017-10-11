@@ -56,10 +56,6 @@
 #define DUP_ISOPEN(filep) (filep->f_inode != NULL)
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -128,24 +124,27 @@ int fs_dupfd(int fd, int minfd)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  filep = fs_getfilep(fd);
-  if (!filep)
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      return ERROR;
+      goto errout;
     }
+
+  DEBUGASSERT(filep != NULL);
 
   /* Let file_dup() do the real work */
 
   ret = file_dup(filep, minfd);
   if (ret < 0)
     {
-      set_errno(-ret);
-      return ERROR;
+      goto errout;
     }
 
   return OK;
+
+errout:
+  set_errno(-ret);
+  return ERROR;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

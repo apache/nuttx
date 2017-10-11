@@ -99,10 +99,8 @@ static void aio_fsync_worker(FAR void *arg)
   ret = file_fsync(aioc->u.aioc_filep);
   if (ret < 0)
     {
-      int errcode = get_errno();
-      ferr("ERROR: fsync failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      aiocbp->aio_result = -errcode;
+      ferr("ERROR: file_fsync failed: %d\n", ret);
+      aiocbp->aio_result = ret;
     }
   else
     {

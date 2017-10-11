@@ -321,7 +321,8 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
  *   setup - true: Setup up the poll; false: Teardown the poll
  *
  * Returned Value:
- *  0: Success; Negated errno on failure
+ *  Zero (OK) is returned on success; a negated errno value is returned on
+ *  any failure.
  *
  ****************************************************************************/
 
@@ -329,18 +330,17 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
 {
   FAR struct file *filep;
+  int ret;
 
   /* Get the file pointer corresponding to this file descriptor */
 
-  filep = fs_getfilep(fd);
-  if (!filep)
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      int errorcode = get_errno();
-      DEBUGASSERT(errorcode > 0);
-      return -errorcode;
+      return ret;
     }
+
+  DEBUGASSERT(filep != NULL);
 
   /* Let file_poll() do the rest */
 

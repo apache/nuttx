@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_read.c
  *
- *   Copyright (C) 2007-2009, 2012-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,8 +149,8 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
 #else
       /* No networking... it is a bad descriptor in any event */
 
-      set_errno(EBADF);
-      ret = ERROR;
+      ret = -EBADF;
+      goto errout;
 #endif
     }
 
@@ -163,27 +164,27 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
        * fs_getfilep() will set the errno variable.
        */
 
-      filep = fs_getfilep(fd);
-      if (filep == NULL)
+      ret = (ssize_t)fs_getfilep(fd, &filep);
+      if (ret < 0)
         {
-          /* The errno value has already been set */
-
-          ret = ERROR;
+          goto errout;
         }
-      else
-        {
-          /* Then let file_read do all of the work. */
 
-          ret = file_read(filep, buf, nbytes);
-          if (ret < 0)
-            {
-              set_errno((int)-ret);
-              ret = ERROR;
-            }
+      /* Then let file_read do all of the work. */
+
+      ret = file_read(filep, buf, nbytes);
+      if (ret < 0)
+        {
+          goto errout;
         }
     }
 #endif
 
   leave_cancellation_point();
   return ret;
+
+errout:
+  set_errno((int)-ret);
+  leave_cancellation_point();
+  return (ssize_t)ERROR;
 }

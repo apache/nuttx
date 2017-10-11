@@ -67,17 +67,16 @@ static inline int fs_checkfd(FAR struct tcb_s *tcb, int fd, int oflags)
 {
   FAR struct file *filep;
   FAR struct inode *inode;
+  int ret;
 
   DEBUGASSERT(tcb && tcb->group);
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  filep = fs_getfilep(fd);
-  if (!filep)
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      return ERROR;
+      return ret;
     }
 
   /* Get the inode associated with the file descriptor.  This should

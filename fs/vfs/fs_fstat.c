@@ -84,8 +84,8 @@ int fstat(int fd, FAR struct stat *buf)
     {
       /* No networking... it is a bad descriptor in any event */
 
-      set_errno(EBADF);
-      return ERROR;
+      ret = -EBADF;
+      goto errout;
     }
 
   /* The descriptor is in a valid range to file descriptor... do the
@@ -93,13 +93,13 @@ int fstat(int fd, FAR struct stat *buf)
    * fs_getfilep() will set the errno variable.
    */
 
-  filep = fs_getfilep(fd);
-  if (filep == NULL)
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      return ERROR;
+      goto errout;
     }
+
+  DEBUGASSERT(filep != NULL);
 
   /* Get the inode from the file structure */
 
@@ -135,13 +135,14 @@ int fstat(int fd, FAR struct stat *buf)
 
   /* Check if the fstat operation was successful */
 
-  if (ret < 0)
+  if (ret >= 0)
     {
-      set_errno(-ret);
-      return ERROR;
+      /* Successfully fstat'ed the file */
+
+      return OK;
     }
 
-  /* Successfully fstat'ed the file */
-
-  return OK;
+errout:
+  set_errno(-ret);
+  return ERROR;
 }

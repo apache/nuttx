@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/cancelpt.h>
@@ -146,25 +147,27 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  filep = fs_getfilep(fd);
-  if (!filep)
+  ret = (ssize_t)fs_getfilep(fd, &filep);
+  if (ret < 0)
     {
-      /* The errno value has already been set */
-
-      ret = (ssize_t)ERROR;
+      goto errout;
     }
-  else
-    {
-      /* Let file_pread do the real work */
 
-      ret = file_pread(filep, buf, nbytes, offset);
-      if (ret < 0)
-        {
-          set_errno((int)-ret);
-          ret = (ssize_t)ERROR;
-        }
+  DEBUGASSERT(filep != NULL);
+
+  /* Let file_pread do the real work */
+
+  ret = file_pread(filep, buf, nbytes, offset);
+  if (ret < 0)
+    {
+      goto errout;
     }
 
   leave_cancellation_point();
   return ret;
+
+errout:
+  set_errno((int)-ret);
+  leave_cancellation_point();
+  return (ssize_t)ERROR;
 }
