@@ -57,10 +57,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Most internal nxsig_* interfaces are not available in the user space in
- * PROTECTED and KERNEL builds.  In that context, the application signal
- * interfaces must be used.  The differences between the two sets of
- * interfaces are:  (1) the nxsig_* interfaces do not cause cancellation
+/* Most internal nxmq_* interfaces are not available in the user space in
+ * PROTECTED and KERNEL builds.  In that context, the application message
+ * queu interfaces must be used.  The differences between the two sets of
+ * interfaces are:  (1) the nxmq_* interfaces do not cause cancellation
  * points and (2) they do not modify the errno variable.
  *
  * This is only important when compiling libraries (libc or libnx) that are
