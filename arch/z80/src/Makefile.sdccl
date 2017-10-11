@@ -91,31 +91,47 @@ $(COBJS): %$(OBJEXT): %.c
 
 $(TOPDIR)/lib/$(SDCCLIB): $(SDCC_LIBDIR)/$(SDCCLIB)
 	$(Q) cp $(SDCC_LIBDIR)/$(SDCCLIB) $(TOPDIR)/lib/$(SDCCLIB)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _calloc.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _malloc.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _realloc.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _free.rel
+	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) calloc.rel
+	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) malloc.rel
+	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) realloc.rel
+	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) free.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) printf_large.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) sprintf.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) vprintf.rel
+ifneq ($(CONFIG_LIBC_ARCH_STRCPY),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) strcpy.rel
+endif
+ifneq ($(CONFIG_LIBC_ARCH_STRLEN),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) strlen.rel
+endif
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strcat.rel
+ifneq ($(CONFIG_LIBC_ARCH_STRCHR),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strchr.rel
+endif
+ifneq ($(CONFIG_LIBC_ARCH_STRCMP),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strcmp.rel
+endif
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strcspn.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strncat.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strncmp.rel
+ifneq ($(CONFIG_LIBC_ARCH_STRNCPY),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strncpy.rel
+endif
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strpbrk.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strrchr.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strspn.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strstr.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strtok.rel
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memchr.rel
+ifneq ($(CONFIG_LIBC_ARCH_MEMCMP),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memcmp.rel
+endif
+ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memcpy.rel
+endif
+ifneq ($(CONFIG_LIBC_ARCH_MEMSET),y)
 	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memset.rel
+endif
 
 # Create a header file that contains addressing information needed by the
 # assemlby language start-up code.  Locate the IDLE thread stack at the
