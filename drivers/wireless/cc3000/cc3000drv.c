@@ -118,8 +118,12 @@ void cc3000_resume(void)
 
 long cc3000_write(uint8_t *pUserBuffer, uint16_t usLength)
 {
+  ssize_t ret;
+
   DEBUGASSERT(spiconf.cc3000fd >= 0);
-  return write(spiconf.cc3000fd, pUserBuffer, usLength) == usLength ? 0 : -errno;
+
+  ret = nx_write(spiconf.cc3000fd, pUserBuffer, usLength);
+  return ret >= 0 ? 0 : ret;
 }
 
 /****************************************************************************

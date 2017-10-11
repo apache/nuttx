@@ -45,25 +45,11 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0
-
-/****************************************************************************
- * Private types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -217,7 +203,7 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
             {
               /* Write the buffer of data to the outfd */
 
-              nbyteswritten = write(outfd, wrbuffer, nbytesread);
+              nbyteswritten = _NX_WRITE(outfd, wrbuffer, nbytesread);
 
               /* Check for a complete (or parial) write.  write() should not
                * return zero.
@@ -242,6 +228,8 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 
               else
                 {
+                  int errcode = _NX_GETERRNO(nbyteswritten);
+
                   /* Check for a read ERROR.  EINTR is a special case.  This
                    * function should break out and return an error if EINTR
                    * is returned and no data has been transferred.  But what
@@ -250,11 +238,12 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
                    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-                  if (errno != EINTR || ntransferred == 0)
+                  if (errcode != EINTR || ntransferred == 0)
 #endif
                     {
                       /* Write error.  Break out and return the error condition */
 
+                      _NX_SETERRNO(nbyteswritten);
                       ntransferred = ERROR;
                       endxfr       = true;
                       break;

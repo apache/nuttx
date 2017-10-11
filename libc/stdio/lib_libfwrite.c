@@ -46,6 +46,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -84,7 +86,15 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   if (stream->fs_bufstart == NULL)
    {
-     ret = write(stream->fs_fd, ptr, count);
+     ret = _NX_WRITE(stream->fs_fd, ptr, count);
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+     if (ret < 0)
+       {
+         _NX_SETERRNO((int)-ret);
+         ret = ERROR;
+       }
+#endif
+
      goto errout;
    }
 
@@ -167,10 +177,11 @@ errout:
 }
 #else
 {
-  ssize_t ret = write(stream->fs_fd, ptr, count);
+  ssize_t ret = _NX_WRITE(stream->fs_fd, ptr, count);
   if (ret < 0)
     {
       stream->fs_flags |= __FS_FLAG_ERROR;
+      _NX_SETERRNO(ret);
     }
 
   return ret;

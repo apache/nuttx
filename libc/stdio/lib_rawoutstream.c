@@ -37,9 +37,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -54,8 +58,9 @@
 static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
 {
   FAR struct lib_rawsostream_s *rthis = (FAR struct lib_rawsostream_s *)this;
-  int nwritten;
   char buffer = ch;
+  int nwritten;
+  int errcode;
 
   DEBUGASSERT(this && rthis->fd >= 0);
 
@@ -65,7 +70,7 @@ static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
 
   do
     {
-      nwritten = write(rthis->fd, &buffer, 1);
+      nwritten = _NX_WRITE(rthis->fd, &buffer, 1);
       if (nwritten == 1)
         {
           this->nput++;
@@ -74,12 +79,13 @@ static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
 
       /* The only expected error is EINTR, meaning that the write operation
        * was awakened by a signal.  Zero would not be a valid return value
-       * from write().
+       * from _NX_WRITE().
        */
 
+      errcode = _NX_GETERRNO(nwritten);
       DEBUGASSERT(nwritten < 0);
     }
-  while (get_errno() == EINTR);
+  while (errcode == EINTR);
 }
 
 /****************************************************************************

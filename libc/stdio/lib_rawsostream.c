@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/stdio/lib_rawoutstream.c
+ * libc/stdio/lib_rawsostream.c
  *
  *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,9 +37,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -66,7 +70,7 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
   do
     {
-      nwritten = write(rthis->fd, &buffer, 1);
+      nwritten = _NX_WRITE(rthis->fd, &buffer, 1);
       if (nwritten == 1)
         {
           this->nput++;
@@ -75,10 +79,10 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
       /* The only expected error is EINTR, meaning that the write operation
        * was awakened by a signal.  Zero or values > 1 would not be valid
-       * return values from write().
+       * return values from _NX_WRITE().
        */
 
-      errcode = get_errno();
+      errcode = _NX_GETERRNO(nwritten);
       DEBUGASSERT(nwritten < 0);
     }
   while (errcode == EINTR);

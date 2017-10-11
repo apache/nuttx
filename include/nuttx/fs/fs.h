@@ -84,12 +84,14 @@
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 #  define _NX_WRITE(f,b,s)     nx_write(s,b,s)
-#  define _NX_ERRNO(r)         (-(r))
-#  define _NX_ERRVAL(r)        (r)
+#  define _NX_GETERRNO(r)      (-(r))
+#  define _NX_SETERRNO(r)      set_errno(-(r))
+#  define _NX_GETERRVAL(r)     (r)
 #else
-#  define _NX_WRITE(f,b,s)     rite(s,b,s)
-#  define _NX_ERRNO(r)         errno
-#  define _NX_ERRVAL(r)        (-errno)
+#  define _NX_WRITE(f,b,s)     write(s,b,s)
+#  define _NX_GETERRNO(r)      errno
+#  define _NX_SETERRNO(r)
+#  define _NX_GETERRVAL(r)     (-errno)
 #endif
 
 /* Stream flags for the fs_flags field of in struct file_struct */
@@ -934,6 +936,33 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
 #if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
 #endif
+
+/****************************************************************************
+ * Name: nx_write
+ *
+ * Description:
+ *  nx_write() writes up to nytes bytes to the file referenced by the file
+ *  descriptor fd from the buffer starting at buf.  nx_write() is an
+ *  internal OS function.  It is functionally equivalent to write() except
+ *  that:
+ *
+ *  - It does not modify the errno variable, and
+ *  - It is not a cancellation point.
+ *
+ * Input Parameters:
+ *   fd     - file descriptor (or socket descriptor) to write to
+ *   buf    - Data to write
+ *   nbytes - Length of data to write
+ *
+ * Returned Value:
+ *  On success, the number of bytes written are returned (zero indicates
+ *  nothing was written).  On any failure, a negated errno value is returned
+ *  (see comments withwrite() for a description of the appropriate errno
+ *   values).
+ *
+ ****************************************************************************/
+
+ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes);
 
 /****************************************************************************
  * Name: file_pread

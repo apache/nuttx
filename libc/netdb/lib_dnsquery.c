@@ -255,9 +255,9 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
   ret = _NX_RECV(sd, buffer, RECV_BUFFER_SIZE, 0);
   if (ret < 0)
     {
-      errcode = _NX_ERRNO(ret);
+      errcode = -_NX_GETERRNO(ret);
       nerr("ERROR: recv failed: %d\n", errcode);
-      return -errcode;
+      return errcode;
     }
 
   hdr = (FAR struct dns_header_s *)buffer;

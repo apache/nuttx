@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -47,7 +46,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "local/local.h"
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -92,16 +95,13 @@ static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
 
   while (len > 0)
     {
-      nwritten = write(fd, buf, len);
+      nwritten = nx_write(fd, buf, len);
       if (nwritten < 0)
         {
-          int errcode = get_errno();
-          DEBUGASSERT(errcode > 0);
-
-          if (errcode != EINTR)
+          if (nwritten != -EINTR)
             {
-              nerr("ERROR: Write failed: %d\n", errcode);
-              return -errcode;
+              nerr("ERROR: nx_write failed: %d\n", nwritten);
+              return (int)nwritten;
             }
 
           ninfo("Ignoring signal\n");

@@ -299,18 +299,19 @@ static ssize_t loop_write(FAR struct inode *inode,
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      _err("ERROR: Seek failed for offset=%d: %d\n", (int)offset, get_errno());
+      _err("ERROR: Seek failed for offset=%d: %d\n",
+           (int)offset, get_errno());
     }
 
   /* Then write the requested number of sectors to that position */
 
   do
     {
-      nbyteswritten = write(dev->fd, buffer, nsectors * dev->sectsize);
-      if (nbyteswritten < 0 && get_errno() != EINTR)
+      nbyteswritten = nx_write(dev->fd, buffer, nsectors * dev->sectsize);
+      if (nbyteswritten < 0 && nbyteswritten != -EINTR)
         {
-          _err("ERROR: Write failed: %d\n", get_errno());
-          return -get_errno();
+          _err("ERROR: nx_write failed: %d\n", nbyteswritten);
+          return nbyteswritten;
         }
     }
   while (nbyteswritten < 0);

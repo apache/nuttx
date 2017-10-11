@@ -65,8 +65,24 @@
  *
  * Description:
  *   Equivalent to the standard write() function except that is accepts a
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by aio_write();
+ *   struct file instance instead of a file descriptor.  It is functionally
+ *   equivalent to write() except that in addition to the differences in
+ *   input paramters:
+ *
+ *  - It does not modify the errno variable,
+ *  - It is not a cancellation point, and
+ *  - It does not handle socket descriptors.
+ *
+ * Input Parameters:
+ *   filep  - Instance of struct file to use with the write
+ *   buf    - Data to write
+ *   nbytes - Length of data to write
+ *
+ * Returned Value:
+ *  On success, the number of bytes written are returned (zero indicates
+ *  nothing was written).  On any failure, a negated errno value is returned
+ *  (see comments withwrite() for a description of the appropriate errno
+ *  values).
  *
  ****************************************************************************/
 
@@ -95,19 +111,94 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
 }
 
 /****************************************************************************
+ * Name: nx_write
+ *
+ * Description:
+ *  nx_write() writes up to nytes bytes to the file referenced by the file
+ *  descriptor fd from the buffer starting at buf.  nx_write() is an
+ *  internal OS function.  It is functionally equivalent to write() except
+ *  that:
+ *
+ *  - It does not modify the errno variable, and
+ *  - It is not a cancellation point.
+ *
+ * Input Parameters:
+ *   fd     - file descriptor (or socket descriptor) to write to
+ *   buf    - Data to write
+ *   nbytes - Length of data to write
+ *
+ * Returned Value:
+ *  On success, the number of bytes written are returned (zero indicates
+ *  nothing was written).  On any failure, a negated errno value is returned
+ *  (see comments withwrite() for a description of the appropriate errno
+ *   values).
+ *
+ ****************************************************************************/
+
+ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
+{
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  FAR struct file *filep;
+#endif
+  ssize_t ret;
+
+  if (buf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Did we get a valid file descriptor? */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+    {
+#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      /* Write to a socket descriptor is equivalent to send with flags == 0. */
+
+      ret = nx_send(fd, buf, nbytes, 0);
+#else
+      ret = -EBADF;
+#endif
+    }
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  else
+    {
+      /* The descriptor is in the right range to be a file descriptor..
+       * write to the file.  Note that fs_getfilep() will set the errno on
+       * failure.
+       */
+
+      ret = (ssize_t)fs_getfilep(fd, &filep);
+      if (ret >= 0)
+        {
+          /* Perform the write operation using the file descriptor as an
+           * index.  Note that file_write() will set the errno on failure.
+           */
+
+          ret = file_write(filep, buf, nbytes);
+        }
+    }
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: write
  *
  * Description:
  *  write() writes up to nytes bytes to the file referenced by the file
  *  descriptor fd from the buffer starting at buf.
  *
- * Parameters:
- *   fd       file descriptor (or socket descriptor) to write to
- *   buf      Data to write
- *   nbytes   Length of data to write
+ * Input Parameters:
+ *   fd     - file descriptor (or socket descriptor) to write to
+ *   buf    - Data to write
+ *   nbytes - Length of data to write
  *
  * Returned Value:
- *  On success, the number of bytes  written are returned (zero indicates
+ *  On success, the number of bytes written are returned (zero indicates
  *  nothing was written). On error, -1 is returned, and errno is set appro-
  *  priately:
  *
@@ -140,78 +231,25 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
  *    signal. (Thus, the write return value is seen only if the program
  *    catches, blocks or ignores this signal.)
  *
- * Assumptions:
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  FAR struct file *filep;
-#endif
   ssize_t ret;
 
   /* write() is a cancellation point */
 
   (void)enter_cancellation_point();
 
-  if (buf == NULL)
+  /* Let nx_write() do all of the work */
+
+  ret = nx_write(fd, buf, nbytes);
+  if (ret < 0)
     {
-      ret = -EINVAL;
-      goto errout;
+      set_errno(ret);
+      ret = ERROR;
     }
-
-  /* Did we get a valid file descriptor? */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
-    {
-#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      /* Write to a socket descriptor is equivalent to send with flags == 0. */
-
-      ret = nx_send(fd, buf, nbytes, 0);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-#else
-      ret = -EBADF;
-      goto errout;
-#endif
-    }
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  else
-    {
-      /* The descriptor is in the right range to be a file descriptor..
-       * write to the file.  Note that fs_getfilep() will set the errno on
-       * failure.
-       */
-
-      ret = (ssize_t)fs_getfilep(fd, &filep);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-
-      /* Perform the write operation using the file descriptor as an
-       * index.  Note that file_write() will set the errno on failure.
-       */
-
-      ret = file_write(filep, buf, nbytes);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-    }
-#endif
 
   leave_cancellation_point();
   return ret;
-
-errout:
-  set_errno(-ret);
-  leave_cancellation_point();
-  return ERROR;
 }

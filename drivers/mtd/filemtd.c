@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
@@ -204,7 +205,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
       if (buflen == 0)
         {
           lseek(priv->fd, seekpos, SEEK_SET);
-          write(priv->fd, buf, sizeof(buf));
+          (void)nx_write(priv->fd, buf, sizeof(buf));
           seekpos += sizeof(buf);
         }
     }
@@ -214,7 +215,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
   if (buflen != 0)
     {
       lseek(priv->fd, seekpos, SEEK_SET);
-      write(priv->fd, buf, sizeof(buf));
+      (void)nx_write(priv->fd, buf, sizeof(buf));
     }
 
   return len;
@@ -281,7 +282,7 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   memset(buffer, CONFIG_FILEMTD_ERASESTATE, sizeof(buffer));
   while (nbytes)
     {
-      write(priv->fd, buffer, sizeof(buffer));
+      (void)nx_write(priv->fd, buffer, sizeof(buffer));
       nbytes -= sizeof(buffer);
     }
 
@@ -333,7 +334,7 @@ static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  ****************************************************************************/
 
 static ssize_t filemtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR const uint8_t *buf)
+                              size_t nblocks, FAR const uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
   off_t offset;
@@ -396,7 +397,7 @@ static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
 
 #ifdef CONFIG_MTD_BYTE_WRITE
 static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
-                             size_t nbytes, FAR const uint8_t *buf)
+                              size_t nbytes, FAR const uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
   off_t maxoffset;

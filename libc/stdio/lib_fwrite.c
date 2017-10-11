@@ -52,7 +52,8 @@
  * Name: fwrite
  ****************************************************************************/
 
-size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream)
+size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
+              FAR FILE *stream)
 {
   size_t  full_size = n_items * (size_t)size;
   ssize_t bytes_written;
