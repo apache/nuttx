@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -48,7 +47,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "local/local.h"
+
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 /****************************************************************************
  * Public Functions
@@ -85,16 +88,13 @@ int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len)
   remaining = *len;
   while (remaining > 0)
     {
-      nread = read(fd, buf, remaining);
+      nread = nx_read(fd, buf, remaining);
       if (nread < 0)
         {
-          int errcode = get_errno();
-          DEBUGASSERT(errcode > 0);
-
-          if (errcode != EINTR)
+          if (nread != -EINTR)
             {
-              nerr("ERROR: Read failed: %d\n", errcode);
-              ret = -errcode;
+              ret = (int)nread;
+              nerr("ERROR: nx_read() failed: %d\n", ret);
               goto errout;
             }
 
