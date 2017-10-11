@@ -83,12 +83,12 @@
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define _NX_WRITE(f,b,s)     nx_write(s,b,s)
+#  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
 #else
-#  define _NX_WRITE(f,b,s)     write(s,b,s)
+#  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)
 #  define _NX_GETERRVAL(r)     (-errno)

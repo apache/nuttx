@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 10, 2017)
+NuttX TODO List (Last updated October 11, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -22,7 +22,7 @@ nuttx/:
  (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
- (14)  Libraries (libc/, libm/)
+ (12)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (3)  Build system / Toolchains
@@ -1739,52 +1739,6 @@ o Libraries (libc/, libm/)
 
   Status:      Open
   Priority:    Low
-
-  Title:       printf()/flush() Cancellation Point Problems
-  Description: printf() calls flush() which, in turn calls write().  write()
-               is a cancellation point and both print() and flush() are
-               permitted to be cancellation points according to
-               OpenGroup.org.
-
-               However, calling write(), albeit indirectly from printf()
-               does not make it a "well behaved" cancellation point.  When
-               write() exists, then the task or thread may be terminated
-               and printf() will leave the library semeaphore locked,
-               causing hang for the next task that calls printf().
-
-               There are basically three problems here.  Resolution of
-               any of these problems:
-
-               1. It is optional if printf is a cancellation point.  Because
-                  it calls write() (indirectly), it is essentially a
-                  cancellation point.  But it could be possible to generate
-                  a special interface, say nx_write() that behaves like
-                  write() but is not a cancellation point.  This function
-                  would have to be accessible from user space for the
-                  PROTECTED and KERNEL build.
-
-               2. pthreads maintain of list of all mutexes that they hold.
-                  These are handling according to OpenGroup.org when the
-                  pthread exits holding the mutex.  There is nothing
-                  comparable for tasks and semaphores, there is no list of
-                  semaphores held for each tasks or pthreads and there is
-                  no logic to deal with semaphores held when the task or
-                  pthread exits.
-
-               3. NuttX supports nested cancellation points:  A function
-                  that is a cancellation point can call another function
-                  that is also a cancellation point.  The cancellation will
-                  not occur until the final nested cancellation point
-                  exits.  So in the case of printf, if it were to be a
-                  cancellation point, then the actual action exit would not
-                  occur until printf() frees all semaphores and exits.
-                  Unfortunately, printf() is a user space interface and the
-                  cancellation interfaces are internal to the OS and would
-                  not be available to printf() in the PROTECTED or KERNEL
-                  build modes.
-  Status:      Open
-  Priority:    Medium-high.  Anything that can result in a hang is
-               automatically pretty high priority.
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
