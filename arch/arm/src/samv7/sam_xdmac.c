@@ -981,7 +981,7 @@ static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
       /* Look up the DMA channel code for RX:  Peripheral is the source. */
 
       field   = sam_source_channel(xdmach, pid);
-      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+      regval |= (field << XDMACH_CC_PERID_SHIFT);
 
 #if 0 /* Not supported */
       /* 10. Set SWREQ to use software request (only relevant for a
