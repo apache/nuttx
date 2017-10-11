@@ -174,11 +174,11 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 
           else if (nbytesread < 0)
             {
+#ifndef CONFIG_DISABLE_SIGNALS
               int errcode = _NX_GETERRNO(nbytesread);
 
               /* EINTR is not an error (but will still stop the copy) */
 
-#ifndef CONFIG_DISABLE_SIGNALS
               if (errcode != EINTR || ntransferred == 0)
 #endif
                 {
@@ -231,6 +231,7 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 
               else
                 {
+#ifndef CONFIG_DISABLE_SIGNALS
                   int errcode = _NX_GETERRNO(nbyteswritten);
 
                   /* Check for a read ERROR.  EINTR is a special case.  This
@@ -240,7 +241,6 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
                    * suppose just continue?
                    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
                   if (errcode != EINTR || ntransferred == 0)
 #endif
                     {
