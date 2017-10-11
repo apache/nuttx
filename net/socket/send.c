@@ -89,7 +89,14 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 {
   ssize_t ret;
 
-  DEBUGASSERT(psock != NULL && buf != NULL);
+  /* Verify that non-NULL pointers were passed */
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (buf == NULL)
+    {
+      return -EINVAL;
+    }
+#endif
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
