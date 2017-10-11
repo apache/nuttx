@@ -6,107 +6,107 @@
 if ARCH_BOARD_CLICKER2_STM32
 
 config CLICKER2_STM32_MB1_SPI
-    bool "mikroBUS1 SPI"
-    default n
-    select STM32_SPI3
-    ---help---
-        Enable SPI support on mikroBUS1 (STM32 SPI3)
+	bool "mikroBUS1 SPI"
+	default n
+	select STM32_SPI3
+	---help---
+		Enable SPI support on mikroBUS1 (STM32 SPI3)
 
 config CLICKER2_STM32_MB2_SPI
-    bool "mikroBUS2 SPI"
-    default n
-    select STM32_SPI2
-    ---help---
-        Enable SPI support on mikroBUS1 (STM32 SPI2)
+	bool "mikroBUS2 SPI"
+	default n
+	select STM32_SPI2
+	---help---
+		Enable SPI support on mikroBUS1 (STM32 SPI2)
 
 config CLICKER2_STM32_MB1_BEE
-    bool "mikroBUS1 MRF24J40 BEE"
-    default y
-    depends on IEEE802154_MRF24J40
-    select CLICKER2_STM32_MB1_SPI
-    ---help---
-        Enable support for MRF24J40 BEE on mikroBUS1
+	bool "mikroBUS1 MRF24J40 BEE"
+	default y
+	depends on IEEE802154_MRF24J40
+	select CLICKER2_STM32_MB1_SPI
+	---help---
+		Enable support for MRF24J40 BEE on mikroBUS1
 
 config CLICKER2_STM32_MB2_BEE
-    bool "mikroBUS2 MRF24J40 BEE"
-    default n
-    depends on IEEE802154_MRF24J40
-    select CLICKER2_STM32_MB2_SPI
-    ---help---
-        Enable support for MRF24J40 BEE on mikroBUS2
+	bool "mikroBUS2 MRF24J40 BEE"
+	default n
+	depends on IEEE802154_MRF24J40
+	select CLICKER2_STM32_MB2_SPI
+	---help---
+		Enable support for MRF24J40 BEE on mikroBUS2
 
 config CLICKER2_STM32_MRF24J40LH_VERBOSE
-    bool "Verbose MRF24J40 lowerhalf"
-    default n
-    depends on IEEE802154_MRF24J40 && DEBUG_WIRELESS_INFO
-    ---help---
-        Enable verbose syslog for MRF24J40 lowerhalf
+	bool "Verbose MRF24J40 lowerhalf"
+	default n
+	depends on IEEE802154_MRF24J40 && DEBUG_WIRELESS_INFO
+	---help---
+		Enable verbose syslog for MRF24J40 lowerhalf
 
 config CLICKER2_STM32_MB1_XBEE
-    bool "mikroBUS1 XBee radio"
-    default n
-    depends on IEEE802154_XBEE
-    select CLICKER2_STM32_MB1_SPI
-    ---help---
-        Enable support for XBee radio on mikroBUS1
+	bool "mikroBUS1 XBee radio"
+	default n
+	depends on IEEE802154_XBEE
+	select CLICKER2_STM32_MB1_SPI
+	---help---
+		Enable support for XBee radio on mikroBUS1
 
 config CLICKER2_STM32_MB2_XBEE
-    bool "mikroBUS2 XBee radio"
-    default n
-    depends on IEEE802154_XBEE
-    select CLICKER2_STM32_MB2_SPI
-    ---help---
-        Enable support for XBee on mikroBUS2
+	bool "mikroBUS2 XBee radio"
+	default n
+	depends on IEEE802154_XBEE
+	select CLICKER2_STM32_MB2_SPI
+	---help---
+		Enable support for XBee on mikroBUS2
 
 config CLICKER2_STM32_XBEELH_VERBOSE
-    bool "Verbose XBee lowerhalf"
-    default n
-    depends on IEEE802154_XBEE && DEBUG_WIRELESS_INFO
-    ---help---
-        Enable verbose syslog for XBee lowerhalf
+	bool "Verbose XBee lowerhalf"
+	default n
+	depends on IEEE802154_XBEE && DEBUG_WIRELESS_INFO
+	---help---
+		Enable verbose syslog for XBee lowerhalf
 
 config CLICKER2_STM32_MB1_MMCSD
-    bool "mikroBUS1 uSD Card Click board"
-    default n
-    select CLICKER2_STM32_MB1_SPI
-    ---help---
-        Enable support for uSD click on mikroBUS1
+	bool "mikroBUS1 uSD Card Click board"
+	default n
+	select CLICKER2_STM32_MB1_SPI
+	---help---
+		Enable support for uSD click on mikroBUS1
 
 config CLICKER2_STM32_MB2_MMCSD
-    bool "mikroBUS2 uSD Card Click board"
-    default n
-    select CLICKER2_STM32_MB2_SPI
-    ---help---
-        Enable support for uSD click on mikroBUS2
+	bool "mikroBUS2 uSD Card Click board"
+	default n
+	select CLICKER2_STM32_MB2_SPI
+	---help---
+		Enable support for uSD click on mikroBUS2
 
 if FS_AUTOMOUNTER
 if CLICKER2_STM32_MB1_MMCSD
 
 config CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT
-    bool "MB1 MMCSD automounter"
-    default n
+	bool "MB1 MMCSD automounter"
+	default n
 
 if CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT
 
 config CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_FSTYPE
-    string "MB1 MMCSD file system type"
-    default "vfat"
+	string "MB1 MMCSD file system type"
+	default "vfat"
 
 config CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_BLKDEV
-    string "MB1 MMCSD block device"
-    default "/dev/mmcsd0"
+	string "MB1 MMCSD block device"
+	default "/dev/mmcsd0"
 
 config CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_MOUNTPOINT
-    string "MB1 MMCSD mount point"
-    default "/mnt/sdcard0"
+	string "MB1 MMCSD mount point"
+	default "/mnt/sdcard0"
 
 config CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_DDELAY
-    int "MB1 MMCSD debounce delay (milliseconds)"
-    default 1000
+	int "MB1 MMCSD debounce delay (milliseconds)"
+	default 1000
 
 config CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_UDELAY
-    int "MB1 MMCSD unmount retry delay (milliseconds)"
-    default 2000
+	int "MB1 MMCSD unmount retry delay (milliseconds)"
+	default 2000
 
 endif # CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT
 endif # CLICKER2_STM32_MB1_MMCSD
@@ -114,30 +114,30 @@ endif # CLICKER2_STM32_MB1_MMCSD
 if CLICKER2_STM32_MB2_MMCSD
 
 config CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT
-    bool "MB2 MMCSD automounter"
-    default n
+	bool "MB2 MMCSD automounter"
+	default n
 
 if CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT
 
 config CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_FSTYPE
-    string "MB2 MMCSD file system type"
-    default "vfat"
+	string "MB2 MMCSD file system type"
+	default "vfat"
 
 config CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_BLKDEV
-    string "MB2 MMCSD block device"
-    default "/dev/mmcsd0"
+	string "MB2 MMCSD block device"
+	default "/dev/mmcsd0"
 
 config CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_MOUNTPOINT
-    string "MB2 MMCSD mount point"
-    default "/mnt/sdcard0"
+	string "MB2 MMCSD mount point"
+	default "/mnt/sdcard0"
 
 config CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_DDELAY
-    int "MB2 MMCSD debounce delay (milliseconds)"
-    default 1000
+	int "MB2 MMCSD debounce delay (milliseconds)"
+	default 1000
 
 config CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_UDELAY
-    int "MB2 MMCSD unmount retry delay (milliseconds)"
-    default 2000
+	int "MB2 MMCSD unmount retry delay (milliseconds)"
+	default 2000
 
 endif # CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT
 endif # CLICKER2_STM32_MB2_MMCSD
@@ -145,24 +145,24 @@ endif # CLICKER2_STM32_MB2_MMCSD
 endif # FS_AUTOMOUNTER
 
 config CLICKER2_STM32_SYSLOG_FILE
-    bool "Enable file syslog"
-    default n
-    depends on SYSLOG_FILE
+	bool "Enable file syslog"
+	default n
+	depends on SYSLOG_FILE
 
 if CLICKER2_STM32_SYSLOG_FILE
 
 config CLICKER2_STM32_SYSLOG_FILE_PATH
-    string "Path to syslog file"
-    default "/mnt/sdcard0/nuttx.log"
+	string "Path to syslog file"
+	default "/mnt/sdcard0/nuttx.log"
 
 config CLICKER2_STM32_SYSLOG_FILE_DELAY
-    int "Delay time(ms) for syslog file"
-    default 2500
-    ---help---
-        If the file used for syslog is on an SD card, the device may need time
-        to finish mounting the file system. This option selects the amount of
-        time in milliseconds for the system to wait before attempting to setup
-        the syslog file
+	int "Delay time(ms) for syslog file"
+	default 2500
+	---help---
+		If the file used for syslog is on an SD card, the device may need time
+		to finish mounting the file system. This option selects the amount of
+		time in milliseconds for the system to wait before attempting to setup
+		the syslog file
 
 endif # CLICKER2_STM32_SYSLOG_FILE
 
