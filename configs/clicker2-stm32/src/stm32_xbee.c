@@ -83,6 +83,28 @@
 #  endif
 #endif
 
+/* Reset
+ *
+ *   mikroBUS1 Reset: PE7-MB1_RST
+ *   mikroBUS2 Reset: PE13-MB2_RST
+ *
+ * Reset line must be configured for opendrain
+ */
+
+#define GPIO_MB1_XBEE_RST  (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
+#define GPIO_MB2_XBEE_RST  (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
+
+/* Interrupts
+ *
+ *   mikroBUS1 Interrupt: PE10-MB1_INT
+ *   mikroBUS2 Interrupt: PE14-MB2_INT
+ */
+
+#define GPIO_MB1_XBEE_INT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
+#define GPIO_MB2_XBEE_INT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN14)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/

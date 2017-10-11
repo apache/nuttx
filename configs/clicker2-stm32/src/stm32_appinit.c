@@ -41,7 +41,10 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <syslog.h>
 
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/board.h>
 
 #include "clicker2-stm32.h"
@@ -86,13 +89,37 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
   /* Did we already initialize via board_initialize()? */
 
 #ifndef CONFIG_BOARD_INITIALIZE
-  return stm32_bringup();
-#else
-  return OK;
+  ret = stm32_bringup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_bringup() failed: %d\n", ret);
+      return ret
+    }
 #endif
+
+#ifdef CONFIG_CLICKER2_STM32_SYSLOG_FILE
+
+  /* Delay some time for the automounter to finish mounting before bringing up
+   * file syslog.
+   */
+
+  usleep(CONFIG_CLICKER2_STM32_SYSLOG_FILE_DELAY * 1000);
+
+  ret = syslog_file_channel(CONFIG_CLICKER2_STM32_SYSLOG_FILE_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: syslog_file_channel() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
 }
 
 #endif /* CONFIG_LIB_BOARDCTL */

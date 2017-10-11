@@ -52,43 +52,70 @@
 
 /* Assume that we support everything until convinced otherwise */
 
-#define HAVE_MMCSD      1
-#define HAVE_USBDEV     1
-#define HAVE_USBMONITOR 1
+#define HAVE_USBDEV       1
+#define HAVE_USBMONITOR   1
+#define HAVE_MMCSD        1
+#define HAVE_AUTOMOUNTER  1
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
- */
+/* MMCSD */
+/* Only support uSD click board */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO) || \
-   !defined(CONFIG_MMCSD_SDIO)
+#if !defined(CONFIG_CLICKER2_STM32_MB1_MMCSD) && \
+    !defined(CONFIG_CLICKER2_STM32_MB2_MMCSD)
 #  undef HAVE_MMCSD
 #endif
 
-/* Default MMC/SD minor number */
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(HAVE_MMCSD) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No MMC/SD support
+#  undef HAVE_MMCSD
+#endif
 
 #ifdef HAVE_MMCSD
 
-/* Default MMC/SD SLOT number */
+/* Default slot number */
 
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error Only one MMC/SD slot
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-
-#  ifdef CONFIG_NSH_MMCSDSLOTNO
-#    define MMCSD_SLOTNO CONFIG_NSH_MMCSDSLOTNO
-#  else
-#    define MMCSD_SLOTNO 0
+#  ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
+#    ifdef CONFIG_NSH_MMCSDSLOTNO
+#      define MB1_MMCSD_SLOTNO CONFIG_NSH_MMCSDSLOTNO
+#    else
+#      define MB1_MMCSD_SLOTNO 0
+#    endif
+#    ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
+#      define MB2_MMCSD_SLOTNO MB1_MMCSD_SLOTNO+1
+#    endif
+#  elif defined(CONFIG_CLICKER2_STM32_MB2_MMCSD)
+#    ifdef CONFIG_NSH_MMCSDSLOTNO
+#      define MB2_MMCSD_SLOTNO CONFIG_NSH_MMCSDSLOTNO
+#    else
+#      define MB2_MMCSD_SLOTNO 0
+#    endif
 #  endif
 
 /* Default minor device number */
 
-#  ifdef CONFIG_NSH_MMCSDMINOR
-#    define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
-#  else
-#    define MMCSD_MINOR 0
+#  ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
+#    ifdef CONFIG_NSH_MMCSDMINOR
+#      define MB1_MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#    else
+#      define MB1_MMCSD_MINOR 0
+#    endif
+#    ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
+#      define MB2_MMCSD_MINOR MB1_MMCSD_MINOR+1
+#    endif
+#  elif defined(CONFIG_CLICKER2_STM32_MB2_MMCSD)
+#    ifdef CONFIG_NSH_MMCSDMINOR
+#      define MB2_MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#    else
+#      define MB2_MMCSD_MINOR 0
+#    endif
 #  endif
+
+#endif /* HAVE_MMCSD */
+
+#ifndef CONFIG_FS_AUTOMOUNTER
+#  undef HAVE_AUTOMOUNTER
 #endif
 
 /* Can't support USB device feature if USB OTG FS is not enabled */
@@ -110,7 +137,6 @@
 #if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
-
 
 /* Mickroe Clicker2 STM32 GPIOs *********************************************/
 /* LEDs
@@ -203,23 +229,14 @@
 
 /* Reset
  *
- *   mikroBUS1 Interrupt: PE7-MB1_RST
- *   mikroBUS2 Interrupt: PE13-MB2_RST
- *
- * I assume that the interrupt lines are active low.  The initial state holds the
- * device in reset.
+ *   mikroBUS1 Reset: PE7-MB1_RST
+ *   mikroBUS2 Reset: PE13-MB2_RST
  */
 
 #define GPIO_MB1_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
 #define GPIO_MB2_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                           GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
-
-#define GPIO_MB1_XBEE_RST  (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
-                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
-
-#define GPIO_MB2_XBEE_RST  (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
-                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
 
 /* Interrupts
  *
@@ -232,9 +249,6 @@
 
 #define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
 #define GPIO_MB2_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN14)
-
-#define GPIO_MB1_XBEE_INT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
-#define GPIO_MB2_XBEE_INT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN14)
 
 #ifndef __ASSEMBLY__
 
@@ -336,6 +350,80 @@ int stm32_mrf24j40_initialize(void);
 
 #if defined(CONFIG_CLICKER2_STM32_MB1_XBEE) || defined(CONFIG_CLICKER2_STM32_MB2_XBEE)
 int stm32_xbee_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_mmcsd_initialize
+ *
+ * Description:
+ *   Initialize the MMCSD device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+int stm32_mmcsd_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_cardinserted
+ *
+ * Description:
+ *   Check if SD card is inserted in slotno
+ *
+ * Returned Value:
+ *   true if card is inserted, false if not
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+bool stm32_cardinserted(int slotno);
+#endif
+
+/************************************************************************************
+ * Name:  stm32_automount_initialize
+ *
+ * Description:
+ *   Configure auto-mounters for each enabled MikroBus MMCSD
+ *
+ * Input Parameters:
+ *   None
+ *
+ *  Returned Value:
+ *    None
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+int stm32_automount_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_automount_event
+ *
+ * Description:
+ *   The MMCSD card detection logic has detected an insertion or removal event.  It
+ *   has already scheduled the MMC/SD block driver operations.  Now we need to
+ *   schedule the auto-mount event which will occur with a substantial delay to make
+ *   sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   slotno - Identifies the MB slot: MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO.
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void stm32_automount_event(int slotno, bool inserted);
 #endif
 
 #endif  /* __ASSEMBLY__ */

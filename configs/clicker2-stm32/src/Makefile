@@ -64,6 +64,14 @@ ifeq ($(CONFIG_IEEE802154_XBEE),y)
 CSRCS += stm32_xbee.c
 endif
 
+ifeq ($(CONFIG_MMCSD_SPI),y)
+CSRCS += stm32_mmcsd.c
+endif
+
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += stm32_automount.c
+endif
+
 ifeq ($(CONFIG_ADC),y)
 CSRCS +=  stm32_adc.c
 endif

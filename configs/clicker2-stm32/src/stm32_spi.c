@@ -122,12 +122,47 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  /* To be provided */
+
+  switch (devid)
+    {
+#ifdef CONFIG_IEEE802154_MRF24J40
+      case SPIDEV_IEEE802154(0):
+        /* Set the GPIO low to select and high to de-select */
+
+        stm32_gpiowrite(GPIO_MB2_CS, !selected);
+        break;
+#endif
+#ifdef CONFIG_IEEE802154_XBEE
+      case SPIDEV_IEEE802154(0):
+        /* Set the GPIO low to select and high to de-select */
+
+        stm32_gpiowrite(GPIO_MB2_CS, !selected);
+        break;
+#endif
+#ifdef CONFIG_MMCSD_SPI
+      case SPIDEV_MMCSD(0):
+        /* Set the GPIO low to select and high to de-select */
+
+        stm32_gpiowrite(GPIO_MB2_CS, !selected);
+        break;
+#endif
+      default:
+        break;
+    }
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t status = 0;
+
+#ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
+  if (devid == SPIDEV_MMCSD(0))
+    {
+       status = stm32_cardinserted(MB2_MMCSD_SLOTNO);
+    }
+#endif
+
+  return status;
 }
 #endif
 
@@ -152,6 +187,13 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
         stm32_gpiowrite(GPIO_MB1_CS, !selected);
         break;
 #endif
+#ifdef CONFIG_MMCSD_SPI
+      case SPIDEV_MMCSD(0):
+        /* Set the GPIO low to select and high to de-select */
+
+        stm32_gpiowrite(GPIO_MB1_CS, !selected);
+        break;
+#endif
       default:
         break;
     }
@@ -159,7 +201,16 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t status = 0;
+
+#ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
+  if (devid == SPIDEV_MMCSD(0))
+    {
+       status |= stm32_cardinserted(MB1_MMCSD_SLOTNO);
+    }
+#endif
+
+  return status;
 }
 #endif
 
