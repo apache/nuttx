@@ -284,7 +284,7 @@ static inline void task_groupexit(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_HAVE_PARENT
+#if defined(CONFIG_SCHED_HAVE_PARENT) && !defined(CONFIG_DISABLE_SIGNALS)
 #ifdef HAVE_GROUP_MEMBERS
 static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
 {
@@ -410,11 +410,11 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
-#else /* CONFIG_SCHED_HAVE_PARENT */
+#else /* CONFIG_SCHED_HAVE_PARENT && !CONFIG_DISABLE_SIGNALS */
 
 #  define task_sigchild(x,ctcb,status)
 
-#endif /* CONFIG_SCHED_HAVE_PARENT */
+#endif /* CONFIG_SCHED_HAVE_PARENT && !CONFIG_DISABLE_SIGNALS */
 
 /****************************************************************************
  * Name: task_signalparent
