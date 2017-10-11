@@ -52,6 +52,7 @@
 #endif
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -167,11 +168,13 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 #endif
     {
 #if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      /* Write to a socket descriptor is equivalent to send with flags == 0.
-       * Note that send() will set the errno on failure.
-       */
+      /* Write to a socket descriptor is equivalent to send with flags == 0. */
 
-      ret = send(fd, buf, nbytes, 0);
+      ret = nx_send(fd, buf, nbytes, 0);
+      if (ret < 0)
+        {
+          goto errout;
+        }
 #else
       ret = -EBADF;
       goto errout;

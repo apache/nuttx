@@ -53,6 +53,39 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Most internal network OS interfaces are not available in the user space in
+ * PROTECTED and KERNEL builds.  In that context, the corresponding
+ * application network interfaces must be used.  The differences between the two
+ * sets of interfaces are:  The internal OS interfaces (1) do not cause
+ * cancellation points and (2) they do not modify the errno variable.
+ *
+ * This is only important when compiling libraries (libc or libnx) that are
+ * used both by the OS (libkc.a and libknx.a) or by the applications
+ * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * used for the build context.
+ *
+ * The interfaces accept(), read(), recv(), recvfrom(), write(), send(),
+ * sendto() are all cancellation points.
+ *
+ * REVISIT:  These cancellation points are an issue and may cause
+ * violations:  It use of these internally will cause the calling function
+ * to become a cancellation points!
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _NX_SEND(s,b,l,f)         nx_send(s,b,l,f)
+#  define _NX_RECV(s,b,l,f)         nx_recv(s,b,l,f)
+#  define _NX_RECVFROM(s,b,l,f,a,n) nx_recvfrom(s,b,l,f,a,n)
+#  define _NX_ERRNO(r)              (-(r))
+#  define _NX_ERRVAL(r)             (r)
+#else
+#  define _NX_SEND(s,b,l,f)         send(s,b,l,f) 
+#  define _NX_RECV(s,b,l,f)         recv(s,b,l,f)
+#  define _NX_RECVFROM(s,b,l,f,a,n) recvfrom(s,b,l,f,a,n)
+#  define _NX_ERRNO(r)              errno
+#  define _NX_ERRVAL(r)             (-errno)
+#endif
+
 /* Socket descriptors are the index into the TCB sockets list, offset by the
  * following amount. This offset is used to distinguish file descriptors from
  * socket descriptors
@@ -697,68 +730,64 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  * Name: psock_send
  *
  * Description:
- *   The send() call may be used only when the socket is in a connected state
- *   (so that the intended recipient is known). The only difference between
- *   send() and write() is the presence of flags. With zero flags parameter,
- *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
- *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
+ *   The psock_send() call may be used only when the socket is in a
+ *   connected state (so that the intended recipient is known).  This is an
+ *   internal OS interface.  It is functionally equivalent to send() except
+ *   that:
+ *
+ *   - It is not a cancellation point,
+ *   - It does not modify the errno variable, and
+ *   - I accepts the internal socket structure as an input rather than an
+ *     task-specific socket descriptor.
+ *
+ *   See comments with send() for more a more complete description of the
+ *   functionality.
  *
  * Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
+ *   psock - An instance of the internal socket structure.
+ *   buf   - Data to send
+ *   len   - Length of data to send
+ *   flags - Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On any failure, a
- *   negated errno value is returned.  One of:
- *
- *   EAGAIN or EWOULDBLOCK
- *     The socket is marked non-blocking and the requested operation
- *     would block.
- *   EBADF
- *     An invalid descriptor was specified.
- *   ECONNRESET
- *     Connection reset by peer.
- *   EDESTADDRREQ
- *     The socket is not connection-mode, and no peer address is set.
- *   EFAULT
- *      An invalid user space address was specified for a parameter.
- *   EINTR
- *      A signal occurred before any data was transmitted.
- *   EINVAL
- *      Invalid argument passed.
- *   EISCONN
- *     The connection-mode socket was connected already but a recipient
- *     was specified. (Now either this error is returned, or the recipient
- *     specification is ignored.)
- *   EMSGSIZE
- *     The socket type requires that message be sent atomically, and the
- *     size of the message to be sent made this impossible.
- *   ENOBUFS
- *     The output queue for a network interface was full. This generally
- *     indicates that the interface has stopped sending, but may be
- *     caused by transient congestion.
- *   ENOMEM
- *     No memory available.
- *   ENOTCONN
- *     The socket is not connected, and no target has been given.
- *   ENOTSOCK
- *     The argument s is not a socket.
- *   EOPNOTSUPP
- *     Some bit in the flags argument is inappropriate for the socket
- *     type.
- *   EPIPE
- *     The local end has been shut down on a connection oriented socket.
- *     In this case the process will also receive a SIGPIPE unless
- *     MSG_NOSIGNAL is set.
- *
- * Assumptions:
+ *   negated errno value is returned (See comments with send() for a list
+ *   of the appropriate errno value).
  *
  ****************************************************************************/
 
 ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len,
                    int flags);
+
+/****************************************************************************
+ * Name: nx_send
+ *
+ * Description:
+ *   The nx_send() call may be used only when the socket is in a
+ *   connected state (so that the intended recipient is known).  This is an
+ *   internal OS interface.  It is functionally equivalent to send() except
+ *   that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno variable.
+ *
+ *   See comments with send() for more a more complete description of the
+ *   functionality.
+ *
+ * Parameters:
+ *   sockfd - Socket descriptor of the socket
+ *   buf    - Data to send
+ *   len    - Length of data to send
+ *   flags  - Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any failure, a
+ *   negated errno value is returned (See comments with send() for a list
+ *   of the appropriate errno value).
+ *
+ ****************************************************************************/
+
+ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags);
 
 /****************************************************************************
  * Name: psock_sendto
@@ -831,51 +860,30 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  * Name: psock_recvfrom
  *
  * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
- *   data on a socket whether or not it is connection-oriented.
+ *   psock_recvfrom() receives messages from a socket, and may be used to
+ *   receive data on a socket whether or not it is connection-oriented.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   recvfrom() except that:
  *
- *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument fromlen
- *   initialized to the size of the buffer associated with from, and modified
- *   on return to indicate the actual size of the address stored there.
+ *   - It is not a cancellation point,
+ *   - It does not modify the errno variable, and
+ *   - I accepts the internal socket structure as an input rather than an
+ *     task-specific socket descriptor.
  *
- * Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
+ * Input Parameters:
+ *   psock   - A pointer to a NuttX-specific, internal socket structure
+ *   buf     - Buffer to receive data
+ *   len     - Length of buffer
+ *   flags   - Receive flags
+ *   from    - Address of source (may be NULL)
+ *   fromlen - The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
  *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned.  One of:
- *
- *   EAGAIN
- *     The socket is marked non-blocking and the receive operation would block,
- *     or a receive timeout had been set and the timeout expired before data
- *     was received.
- *   EBADF
- *     The argument sockfd is an invalid descriptor.
- *   ECONNREFUSED
- *     A remote host refused to allow the network connection (typically because
- *     it is not running the requested service).
- *   EFAULT
- *     The receive buffer pointer(s) point outside the process's address space.
- *   EINTR
- *     The receive was interrupted by delivery of a signal before any data were
- *     available.
- *   EINVAL
- *     Invalid argument passed.
- *   ENOMEM
- *     Could not allocate memory.
- *   ENOTCONN
- *     The socket is associated with a connection-oriented protocol and has
- *     not been connected.
- *   ENOTSOCK
- *     The argument sockfd does not refer to a socket.
+ *   is returned (see comments with send() for a list of appropriate errno
+ *   values).
  *
  ****************************************************************************/
 
@@ -887,6 +895,42 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
 #define psock_recv(psock,buf,len,flags) \
   psock_recvfrom(psock,buf,len,flags,NULL,0)
+
+/****************************************************************************
+ * Name: nx_recvfrom
+ *
+ * Description:
+ *   nx_recvfrom() receives messages from a socket, and may be used to
+ *   receive data on a socket whether or not it is connection-oriented.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   recvfrom() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno variable.
+ *
+ * Input Parameters:
+ *   sockfd  - Socket descriptor of socket
+ *   buf     - Buffer to receive data
+ *   len     - Length of buffer
+ *   flags   - Receive flags
+ *   from    - Address of source (may be NULL)
+ *   fromlen - The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recv() will return 0.  Otherwise, on any failure, a negated errno value
+ *   is returned (see comments with send() for a list of appropriate errno
+ *   values).
+ *
+ ****************************************************************************/
+
+ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
+                    FAR struct sockaddr *from, FAR socklen_t *fromlen);
+
+/* Internal version os recv */
+
+#define nx_recv(psock,buf,len,flags) nx_recvfrom(psock,buf,len,flags,NULL,0)
 
 /****************************************************************************
  * Name: psock_getsockopt

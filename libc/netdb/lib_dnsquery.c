@@ -5,7 +5,8 @@
  * The DNS resolver functions are used to lookup a hostname and map it to a
  * numerical IP address.
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based heavily on portions of uIP:
@@ -17,6 +18,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -52,6 +54,7 @@
 
 #include <arpa/inet.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/dns.h>
 
 #include "netdb/lib_dns.h"
@@ -249,10 +252,10 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
 
   /* Receive the response */
 
-  ret = recv(sd, buffer, RECV_BUFFER_SIZE, 0);
+  ret = _NX_RECV(sd, buffer, RECV_BUFFER_SIZE, 0);
   if (ret < 0)
     {
-      errcode = get_errno();
+      errcode = _NX_ERRNO(ret);
       nerr("ERROR: recv failed: %d\n", errcode);
       return -errcode;
     }

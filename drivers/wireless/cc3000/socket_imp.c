@@ -66,15 +66,6 @@
 #  define close(sd) closesocket(sd)
 #endif
 
-/* Enable this flag if and only if you must comply with BSD socket read() and
- * write() functions
- */
-
-#ifdef _API_USE_BSD_READ_WRITE
-#  define read(sd, buf, len, flags) recv(sd, buf, len, flags)
-#  define write(sd, buf, len, flags) send(sd, buf, len, flags)
-#endif
-
 #define SOCKET_OPEN_PARAMS_LEN             (12)
 #define SOCKET_CLOSE_PARAMS_LEN            (4)
 #define SOCKET_ACCEPT_PARAMS_LEN           (4)

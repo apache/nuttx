@@ -48,6 +48,7 @@
 #include <errno.h>
 
 #include <nuttx/cancelpt.h>
+#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -145,7 +146,11 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
        * the errno variable.
        */
 
-      ret = recv(fd, buf, nbytes, 0);
+      ret = nx_recv(fd, buf, nbytes, 0);
+      if (ret < 0)
+        {
+          goto errout;
+        }
 #else
       /* No networking... it is a bad descriptor in any event */
 
