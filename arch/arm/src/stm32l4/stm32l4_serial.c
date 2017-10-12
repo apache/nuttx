@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_serial.c
  *
- *   Copyright (C) 2009-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some sanity checks *******************************************************/
 /* DMA configuration */
 
@@ -2530,19 +2531,19 @@ static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
 {
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case PM_NORMAL:
         {
           stm32l4_serial_set_suspend(false);
         }
         break;
 
-      case(PM_IDLE):
+      case PM_IDLE:
         {
           stm32l4_serial_set_suspend(false);
         }
         break;
 
-      case(PM_STANDBY):
+      case PM_STANDBY:
         {
           /* TODO: logic for enabling serial in Stop 1 mode with HSI16 missing */
 
@@ -2550,7 +2551,7 @@ static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_SLEEP):
+      case PM_SLEEP:
         {
           stm32l4_serial_set_suspend(true);
         }
@@ -2651,7 +2652,9 @@ void stm32l4_serial_set_suspend(bool suspend)
       struct stm32l4_serial_s *priv = uart_devs[n];
 
       if (!priv || !priv->initialized)
-        continue;
+        {
+          continue;
+        }
 
       stm32l4serial_setsuspend(&priv->dev, suspend);
     }
