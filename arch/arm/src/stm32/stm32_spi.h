@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/spi/spi.h>
+
 #include "chip.h"
 #include "chip/stm32_spi.h"
 
