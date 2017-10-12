@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: October 1, 2017</p>
+      <p>Last Updated: October 12, 2017</p>
     </td>
   </tr>
 </table>
@@ -148,42 +148,43 @@
       <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a><br>
       <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
-    <a href="#boardctl">4.6 <code>boardctl()</code> Application Interface</a><br>
-    <a href="#boardsmp">4.7 Symmetric Multiprocessing (SMP) Application Interface</a>
+    <a href="#exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#uptestset">4.7.1 <code>up_testset()</code></a><br>
-      <a href="#upcpuindex">4.7.2 <code>up_cpu_index()</code></a><br>
-      <a href="#upcpustart">4.7.3 <code>up_cpu_start()</code></a><br>
-      <a href="#upcpupause">4.7.4 <code>up_cpu_pause()</code></a><br>
-      <a href="#upcpuresume">4.7.5 <code>up_cpu_resume()</code></a>
+      <a href="#osstart">4.6.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.6.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a><br>
+      <a href="#schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a><br>
+      <a href="#schedalarmexpiration">4.6.5 <code>sched_alarm_expiration()</code></a><br>
+      <a href="#irqdispatch">4.6.6 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#exports">4.8 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#internalOS">4.7 Application OS vs. Internal OS Interfaces</a><br>
+    <a href="#boardctl">4.8 <code>boardctl()</code> Application Interface</a><br>
+    <a href="#boardsmp">4.9 Symmetric Multiprocessing (SMP) Application Interface</a>
     <ul>
-      <a href="#osstart">4.8.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.8.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.8.3 <code>sched_process_timer()</code></a><br>
-      <a href="#schedtimerexpiration">4.8.4 <code>sched_timer_expiration()</code></a><br>
-      <a href="#schedalarmexpiration">4.8.5 <code>sched_alarm_expiration()</code></a><br>
-      <a href="#irqdispatch">4.8.6 <code>irq_dispatch()</code></a>
+      <a href="#uptestset">4.9.1 <code>up_testset()</code></a><br>
+      <a href="#upcpuindex">4.9.2 <code>up_cpu_index()</code></a><br>
+      <a href="#upcpustart">4.9.3 <code>up_cpu_start()</code></a><br>
+      <a href="#upcpupause">4.9.4 <code>up_cpu_pause()</code></a><br>
+      <a href="#upcpuresume">4.9.5 <code>up_cpu_resume()</code></a>
     </ul>
-    <a href="#shm">4.9 Shared Memory</a>
+    <a href="#shm">4.10 Shared Memory</a>
     <ul>
-      <a href="#upshmat">4.9.1 <code>up_shmat()</code></a><br>
-      <a href="#upshmdt">4.9.2 <code>up_shmdt()</code></a><br>
+      <a href="#upshmat">4.10.1 <code>up_shmat()</code></a><br>
+      <a href="#upshmdt">4.10.2 <code>up_shmdt()</code></a><br>
     </ul>
-    <a href="#demandpaging">4.10 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.11 LED Support</a>
+    <a href="#demandpaging">4.11 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.12 LED Support</a>
     <ul>
-      <a href="#ledheaders">4.11.1 Header Files</a><br>
-      <a href="#leddefinitions">4.11.2 LED Definitions</a><br>
-      <a href="#ledapis">4.11.3 Common LED interfaces</a>
+      <a href="#ledheaders">4.12.1 Header Files</a><br>
+      <a href="#leddefinitions">4.12.2 LED Definitions</a><br>
+      <a href="#ledapis">4.12.3 Common LED interfaces</a>
     </ul>
-    <a href="#iobs">4.12 I/O Buffer Management</a>
+    <a href="#iobs">4.13 I/O Buffer Management</a>
     <ul>
-      <a href="#iobconfig">4.12.1 Configuration Options</a><br>
-      <a href="#iobthrottle">4.12.2 Throttling</a><br>
-      <a href="#iobtypes">4.12.3 Public Types</a><br>
-      <a href="#iobprotos">4.12.4 Public Function Prototypes</a>
+      <a href="#iobconfig">4.13.1 Configuration Options</a><br>
+      <a href="#iobthrottle">4.13.2 Throttling</a><br>
+      <a href="#iobtypes">4.13.3 Public Types</a><br>
+      <a href="#iobprotos">4.13.4 Public Function Prototypes</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -3660,7 +3661,174 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h2><a name="boardctl">4.6 <code>boardctl()</code> Application Interface</a></h2>
+<h2><a name="exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<p>
+  These are standard interfaces that are exported by the OS
+  for use by the architecture specific logic.
+</p>
+
+<h3><a name="osstart">4.6.1 <code>os_start()</code></a></h3>
+<p>
+  <b><i>To be provided</i></b>
+</p>
+
+<h3><a name="listmgmt">4.6.2 OS List Management APIs</a></h3></h3>
+<p>
+  <b><i>To be provided</i></b>
+</p>
+
+<h3><a name="schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a></h3>
+<p><b>Function Prototype</b>:</p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_process_timer(void);
+</pre></ul>
+
+<p><b>Description</b>.
+  This function handles system timer events.
+  The timer interrupt logic itself is implemented in the
+  architecture specific code, but must call the following OS
+  function periodically -- the calling interval must be
+  <code>CONFIG_USEC_PER_TICK</code>.
+</p>
+
+<h3><a name="schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_timer_expiration(void);
+</pre></ul>
+<p><b>Description</b>:</p>
+  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
+</ul>
+
+<h3><a name="schedalarmexpiration">4.6.5 <code>sched_alarm_expiration()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_timer_expiration(void);
+</ul>
+<p><b>Description</b>:</p>
+  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
+</ul>
+
+<h3><a name="irqdispatch">4.6.6 <code>irq_dispatch()</code></a></h3>
+<p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
+
+<p><b>Description</b>.
+  This function must be called from the architecture-
+  specific logic in order to display an interrupt to
+  the appropriate, registered handling logic.
+</p>
+
+<h2><a name="internalOS">4.7 Application OS vs. Internal OS Interfaces</a></h2>
+
+<p>
+  NuttX provides a standard, portable OS interface for use by applications.
+  This standard interface is controlled by the specifications proved at <a href="http://opengroup.org">OpenGroup.org</a>.
+  These application interfaces, in general, should not be used directly by logic executing within the OS.  The reason for this is that there are certain properties of the standard application interfaces that make them unsuitable for use within the OS
+  These properties include:
+</p>
+<ol>
+  <li>
+    <p>
+      <b>Use of the <i>per-thread</i> <code>errno</code> variable</b>:
+      Handling of return values, particularly, in the case of returned error indications.
+      Most legacy POSIX OS interface return information via a <i>per-thread</i> <code>errno</code>.
+      There must be no alteration of the <code>errno</code> value that must be stable from the point of view of the application.
+      So, as a general rule, internal OS logic must never modify the <code>errno</code> and particularly not by the inappropriate use of application OS interfaces within OS itself.
+    </p>
+    <p>
+      Within the OS, functions do not return error information via the <code>errno</code> variable.  Instead, the majority of internal OS function return error information as an integer value:  Returned values greater than or equal to zero are success values; returned values less than zero indicate failures.
+      Failures are reported by returning a negated <code>errno</code> value from <code>include/errno.h</code>,
+    </p>
+  <li>
+    <p><b>Cancellation Points</b>:
+      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>defferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
+    </p>
+    <p>
+      The POSIX specification is very specific about this, specific both in identifying which application OS interfaces are cancellation points and specific in the fact that it is prohibited for any OS operation other than those listed in the specification to generate cancellation points.
+      If internal OS logic were to re-use application OS interfaces directly then it could very easily violate this POSIX requirement by incorrectly generating cancellation points on inappropriate OS operations and could result in very difficult to analyze application failures.
+    </p>
+  </li>
+  <li>
+     <p><b>Use of <i>per-task</i> Resources</b>:
+       Many resources are only valid in the task group context in which a thread operates.  Above we mentioned one:  <code>errno</code> is only valid for the thread that is currently executing.  So, for example, the <code>errno</code> at the time of a call is a completely different variable than, say, the <code>errno</code> while running in a work queue task.
+     </p>
+     <p>
+       File descriptors are an even better example:  An open file on file descriptor 5 on task A is <i>not</i> the same open file as might be used on file descriptor 5 on task B.
+     </p>
+     <p>
+       As a result, internal OS logic may not use application OS interfaces that use file descriptors or any other <i>per-task</i> resource.
+     </p>
+  </li>
+</ol>
+<p>
+  Within NuttX, this is handled by supporting equivalent internal OS interfaces that do not break the above rules.
+  These internal interfaces are intended for use <i>only</i> within the OS and should not be used by application logic.
+  Some examples include:
+</p>
+<ul>
+  <li>
+    <p>
+      <b><code>nxsem_wait()</code></b>:
+      <code>nxsem_wait()</code> is functionally equivalent to the standard application interface <code>sem_wait()</code>.  However, <code>nxsem_wait()</code> will not modify the errno value and will not cause a cancellation point.
+      (see <code>include/nuttx/semaphore.h</code> for other internal OS interfaces for semaphores).
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>nxsig_waitinfo()</code></b>:
+      <code>nxsig_waitinfo()</code> is functionally equivalent to the standard application interface <code>sigwaitinfo()</code>.  However, <code>nxsig_waitinfo()</code> will not modify the errno value and will not cause a cancellation point (see <code>include/nuttx/signal.h</code> for other internal OS interfaces for signals).
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>nxmq_send()</code></b>:
+      <code>nxmq_send()</code> is functionally equivalent to the standard application interface <code>mq_send()</code>.  However, <code>nxmq_send()</code> will not modify the errno value and will not cause a cancellation point (see <code>include/nuttx/mqueue.h</code> for other internal OS interfaces for POSIX message queues).
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>file_read()</code></b>:
+      <code>file_read()</code> is functionally equivalent to the standard application interface <code>read()</code>.  However, <code>file_read()</code> will not modify the errno value, will not cause a cancellation point, and uses a special internal data structure in place of the file descriptor (see <code>include/nuttx/fs/fs.h</code> for other internal OS interfaces for VFS functions).
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>psock_recvfrom()</code></b>:
+      <code>file_read()</code> is functionally equivalent to the standard application interface <code>recvfrom()</code>.  However, <code>psock_recvfrom()</code> will not modify the errno value, will not cause a cancellation point, and uses a special internal data structure in place of the socket descriptor (see <code>include/nuttx/net/net.h</code> for other internal OS interfaces for sockets).
+    </p>
+  </li>
+</ul>
+
+<h2><a name="boardctl">4.8 <code>boardctl()</code> Application Interface</a></h2>
 
 <p><b>Function Prototype</b>:<p>
 <ul>
@@ -3710,7 +3878,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
 </ul>
 
-<h4><a name="boardsmp">4.7 Symmetric Multiprocessing (SMP) Application Interface</a></h4>
+<h4><a name="boardsmp">4.9 Symmetric Multiprocessing (SMP) Application Interface</a></h4>
 <p>
 According to Wikipedia: "Symmetric multiprocessing (SMP) involves a symmetric multiprocessor system hardware and software architecture where two or more identical processors connect to a single, shared main memory, have full access to all I/O devices, and are controlled by a single operating system instance that treats all processors equally, reserving none for special purposes. Most multiprocessor systems today use an SMP architecture. In the case of multi-core processors, the SMP architecture applies to the cores, treating them as separate processors.
 </p>
@@ -3724,7 +3892,7 @@ For a technical description of the NuttX implementation of SMP, see the NuttX <a
   None
 </ul>
 
-<h3><a name="uptestset">4.7.1 <code>up_testset()</code></a></h3>
+<h3><a name="uptestset">4.9.1 <code>up_testset()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/spinlock.h&gt;
@@ -3753,7 +3921,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
   </p>
 </ul>
 
-<h3><a name="upcpuindex">4.7.2 <code>up_cpu_index()</code></a></h3>
+<h3><a name="upcpuindex">4.9.2 <code>up_cpu_index()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3781,7 +3949,7 @@ int up_cpu_index(void);
   </p>
 </ul>
 
-<h3><a name="upcpustart">4.7.3 <code>up_cpu_start()</code></a></h3>
+<h3><a name="upcpustart">4.9.3 <code>up_cpu_start()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3821,7 +3989,7 @@ int up_cpu_start(int cpu);
   </p>
 </ul>
 
-<h3><a name="upcpupause">4.7.4 <code>up_cpu_pause()</code></a></h3>
+<h3><a name="upcpupause">4.9.4 <code>up_cpu_pause()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3853,7 +4021,7 @@ int up_cpu_pause(int cpu);
   </p>
 </ul>
 
-<h3><a name="upcpuresume">4.7.5 <code>up_cpu_resume()</code></a></h3>
+<h3><a name="upcpuresume">4.9.5 <code>up_cpu_resume()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3885,93 +4053,7 @@ int up_cpu_resume(int cpu);
   </p>
 </ul>
 
-<h2><a name="exports">4.8 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
-<p>
-  These are standard interfaces that are exported by the OS
-  for use by the architecture specific logic.
-</p>
-
-<h3><a name="osstart">4.8.1 <code>os_start()</code></a></h3>
-<p>
-  <b><i>To be provided</i></b>
-</p>
-
-<h3><a name="listmgmt">4.8.2 OS List Management APIs</a></h3></h3>
-<p>
-  <b><i>To be provided</i></b>
-</p>
-
-<h3><a name="schedprocesstimer">4.8.3 <code>sched_process_timer()</code></a></h3>
-<p><b>Function Prototype</b>:</p>
-<ul><pre>
-#include &lt;nuttx/arch.h&gt;
-void sched_process_timer(void);
-</pre></ul>
-
-<p><b>Description</b>.
-  This function handles system timer events.
-  The timer interrupt logic itself is implemented in the
-  architecture specific code, but must call the following OS
-  function periodically -- the calling interval must be
-  <code>CONFIG_USEC_PER_TICK</code>.
-</p>
-
-<h3><a name="schedtimerexpiration">4.8.4 <code>sched_timer_expiration()</code></a></h3>
-<p><b>Function Prototype</b>:<p>
-<ul><pre>
-#include &lt;nuttx/arch.h&gt;
-void sched_timer_expiration(void);
-</pre></ul>
-<p><b>Description</b>:</p>
-  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
-<ul>
-</ul>
-<p><b>Input Parameters</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Returned Value</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Assumptions</b>:</p>
-<ul>
-  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
-</ul>
-
-<h3><a name="schedalarmexpiration">4.8.5 <code>sched_alarm_expiration()</code></a></h3>
-<p><b>Function Prototype</b>:<p>
-<ul><pre>
-#include &lt;nuttx/arch.h&gt;
-void sched_timer_expiration(void);
-</ul>
-<p><b>Description</b>:</p>
-  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
-<ul>
-</ul>
-<p><b>Input Parameters</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Returned Value</b>:</p>
-<ul>
-  None
-</ul>
-<p><b>Assumptions</b>:</p>
-<ul>
-  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
-</ul>
-
-<h3><a name="irqdispatch">4.8.6 <code>irq_dispatch()</code></a></h3>
-<p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
-
-<p><b>Description</b>.
-  This function must be called from the architecture-
-  specific logic in order to display an interrupt to
-  the appropriate, registered handling logic.
-</p>
-
-<h2><a name="shm">4.9 Shared Memory</a></h2>
+<h2><a name="shm">4.10 Shared Memory</a></h2>
 <p>
   Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
   These interfaces support user memory regions that can be shared between multiple user processes.
@@ -3980,7 +4062,7 @@ void sched_timer_expiration(void);
   Those interfaces are described below:
 </p>
 
-<h3><a name="upshmat">4.9.1 <code>up_shmat()</code></a></h3>
+<h3><a name="upshmat">4.10.1 <code>up_shmat()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4009,7 +4091,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h3><a name="upshmdt">4.9.2 <code>up_shmdt()</code></a></h3>
+<h3><a name="upshmdt">4.10.2 <code>up_shmdt()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4035,7 +4117,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h2><a name="demandpaging">4.10 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.11 On-Demand Paging</a></h2>
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
   If the platform meets certain requirements, then NuttX can provide on-demand paging:
@@ -4044,7 +4126,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.11 LED Support</a></h2>
+<h2><a name="ledsupport">4.12 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -4054,7 +4136,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.11.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.12.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -4078,7 +4160,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.11.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.12.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -4142,7 +4224,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </li>
 </ul>
 
-<h3><a name="ledapis">4.11.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.12.3 Common LED interfaces</a></h3>
 
 <p>
   The <code>include/nuttx/board.h</code> has declarations like:
@@ -4192,7 +4274,7 @@ void board_autoled_off(int led);
   </li>
 </ul>
 
-<h2><a name="iobs">4.12 I/O Buffer Management</a></h2>
+<h2><a name="iobs">4.13 I/O Buffer Management</a></h2>
 
 NuttX supports generic I/O buffer management (IOB) logic.
 This logic was originally added to support network I/O buffering, but has been generalized to meet buffering requirements by all device drivers.
@@ -4224,7 +4306,7 @@ This objectives of this feature are:
   </li>
 </ol>
 
-<h3><a name="iobconfig">4.12.1 Configuration Options</a></h3>
+<h3><a name="iobconfig">4.13.1 Configuration Options</a></h3>
 
 <dl>
   <dt><code>CONFIG_MM_IOB</code>
@@ -4256,12 +4338,12 @@ This objectives of this feature are:
   NOTE that this selection is not available if DEBUG features are not enabled (<code>CONFIG_DEBUG_FEATURES</code>) with IOBs are being used to syslog buffering logic (<code>CONFIG_SYSLOG_BUFFER</code>).
 </dl>
 
-<h3><a name="iobthrottle">4.12.2 Throttling</a></h3>
+<h3><a name="iobthrottle">4.13.2 Throttling</a></h3>
 
 <b></b>
 An allocation throttle was added.  I/O buffer allocation logic supports a throttle value originally for read-ahead buffering to prevent the read-ahead logic from consuming all available I/O buffers and blocking the write buffering logic.  This throttle logic is only needed for networking only if both write buffering and read-ahead buffering are used.  Of use of I/O buffering might have other motivations for throttling.
 
-<h3><a name="iobtypes">4.12.3 Public Types</a></h3>
+<h3><a name="iobtypes">4.13.3 Public Types</a></h3>
 
 <p>
   This structure represents one I/O buffer.  A packet is contained by one or more I/O buffers in a chain.  The <code>io_pktlen</code> is only valid for the I/O buffer at the head of the chain.
@@ -4324,33 +4406,33 @@ struct iob_queue_s
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 </pre>
 
-<h3><a name="iobprotos">4.12.4 Public Function Prototypes</a></h3>
+<h3><a name="iobprotos">4.13.4 Public Function Prototypes</a></h3>
 
 <ul>
-  <li><a href="#iob_initialize">4.12.4.1 <code>iob_initialize()</code></a></li>
-  <li><a href="#iob_alloc">4.12.4.2 <code>iob_alloc()</code></a></li>
-  <li><a href="#iob_tryalloc">4.12.4.3 <code>iob_tryalloc()</code></a></li>
-  <li><a href="#iob_free">4.12.4.4 <code>iob_free()</code></a></li>
-  <li><a href="#iob_free_chain">4.12.4.5 <code>iob_free_chain()</code></a></li>
-  <li><a href="#iob_add_queue">4.12.4.6 <code>iob_add_queue()</code></a></li>
-  <li><a href="#iob_tryadd_queue">4.12.4.7 <code>iob_tryadd_queue()</code></a></li>
-  <li><a href="#iob_remove_queue">4.12.4.8 <code>iob_remove_queue()</code></a></li>
-  <li><a href="#iob_peek_queue">4.12.4.9 <code>iob_peek_queue()</code></a></li>
-  <li><a href="#iob_free_queue">4.12.4.10 <code>iob_free_queue()</code></a></li>
-  <li><a href="#iob_copyin">4.12.4.11 <code>iob_copyin()</code></a></li>
-  <li><a href="#iob_trycopyin">4.12.4.12 <code>iob_trycopyin()</code></a></li>
-  <li><a href="#iob_copyout">4.12.4.13 <code>iob_copyout()</code></a></li>
-  <li><a href="#iob_clone">4.12.4.14 <code>iob_clone()</code></a></li>
-  <li><a href="#iob_concat">4.12.4.15 <code>iob_concat()</code></a></li>
-  <li><a href="#iob_trimhead">4.12.4.16 <code>iob_trimhead()</code></a></li>
-  <li><a href="#iob_trimhead_queue">4.12.4.17 <code>iob_trimhead_queue()</code></a></li>
-  <li><a href="#iob_trimtail">4.12.4.18 <code>iob_trimtail()</code></a></li>
-  <li><a href="#iob_pack">4.12.4.19 <code>iob_pack()</code></a></li>
-  <li><a href="#iob_contig">4.12.4.20 <code>iob_contig()</code></a></li>
-  <li><a href="#iob_dump">4.12.4.21 <code>iob_dump()</code></a></li>
+  <li><a href="#iob_initialize">4.13.4.1 <code>iob_initialize()</code></a></li>
+  <li><a href="#iob_alloc">4.13.4.2 <code>iob_alloc()</code></a></li>
+  <li><a href="#iob_tryalloc">4.13.4.3 <code>iob_tryalloc()</code></a></li>
+  <li><a href="#iob_free">4.13.4.4 <code>iob_free()</code></a></li>
+  <li><a href="#iob_free_chain">4.13.4.5 <code>iob_free_chain()</code></a></li>
+  <li><a href="#iob_add_queue">4.13.4.6 <code>iob_add_queue()</code></a></li>
+  <li><a href="#iob_tryadd_queue">4.13.4.7 <code>iob_tryadd_queue()</code></a></li>
+  <li><a href="#iob_remove_queue">4.13.4.8 <code>iob_remove_queue()</code></a></li>
+  <li><a href="#iob_peek_queue">4.13.4.9 <code>iob_peek_queue()</code></a></li>
+  <li><a href="#iob_free_queue">4.13.4.10 <code>iob_free_queue()</code></a></li>
+  <li><a href="#iob_copyin">4.13.4.11 <code>iob_copyin()</code></a></li>
+  <li><a href="#iob_trycopyin">4.13.4.12 <code>iob_trycopyin()</code></a></li>
+  <li><a href="#iob_copyout">4.13.4.13 <code>iob_copyout()</code></a></li>
+  <li><a href="#iob_clone">4.13.4.14 <code>iob_clone()</code></a></li>
+  <li><a href="#iob_concat">4.13.4.15 <code>iob_concat()</code></a></li>
+  <li><a href="#iob_trimhead">4.13.4.16 <code>iob_trimhead()</code></a></li>
+  <li><a href="#iob_trimhead_queue">4.13.4.17 <code>iob_trimhead_queue()</code></a></li>
+  <li><a href="#iob_trimtail">4.13.4.18 <code>iob_trimtail()</code></a></li>
+  <li><a href="#iob_pack">4.13.4.19 <code>iob_pack()</code></a></li>
+  <li><a href="#iob_contig">4.13.4.20 <code>iob_contig()</code></a></li>
+  <li><a href="#iob_dump">4.13.4.21 <code>iob_dump()</code></a></li>
 </ul>
 
-<h4><a name="iob_initialize">4.12.4.1 <code>iob_initialize()</code></a></h4>
+<h4><a name="iob_initialize">4.13.4.1 <code>iob_initialize()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4361,7 +4443,7 @@ void iob_initialize(void);
   Set up the I/O buffers for normal operations.
 </p>
 
-<h4><a name="iob_alloc">4.12.4.2 <code>iob_alloc()</code></a></h4>
+<h4><a name="iob_alloc">4.13.4.2 <code>iob_alloc()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4372,7 +4454,7 @@ FAR struct iob_s *iob_alloc(bool throttled);
   Allocate an I/O buffer by taking the buffer at the head of the free list.
 </p>
 
-<h4><a name="iob_tryalloc">4.12.4.3 <code>iob_tryalloc()</code></a></h4>
+<h4><a name="iob_tryalloc">4.13.4.3 <code>iob_tryalloc()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4383,7 +4465,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled);
   Try to allocate an I/O buffer by taking the buffer at the head of the free list without waiting for a buffer to become free.
 </p>
 
-<h4><a name="iob_free">4.12.4.4 <code>iob_free()</code></a></h4>
+<h4><a name="iob_free">4.13.4.4 <code>iob_free()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4394,7 +4476,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
    Free the I/O buffer at the head of a buffer chain returning it to the free list.  The link to  the next I/O buffer in the chain is return.
 </p>
 
-<h4><a name="iob_free_chain">4.12.4.5 <code>iob_free_chain()</code></a></h4>
+<h4><a name="iob_free_chain">4.13.4.5 <code>iob_free_chain()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4405,7 +4487,7 @@ void iob_free_chain(FAR struct iob_s *iob);
   Free an entire buffer chain, starting at the beginning of the I/O buffer chain
 </p>
 
-<h4><a name="iob_add_queue">4.12.4.6 <code>iob_add_queue()</code></a></h4>
+<h4><a name="iob_add_queue">4.13.4.6 <code>iob_add_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4418,7 +4500,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
   Add one I/O buffer chain to the end of a queue.  May fail due to lack of resources.
 </p>
 
-<h4><a name="iob_tryadd_queue">4.12.4.7 <code>iob_tryadd_queue()</code></a></h4>
+<h4><a name="iob_tryadd_queue">4.13.4.7 <code>iob_tryadd_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4431,7 +4513,7 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
   Add one I/O buffer chain to the end of a queue without waiting for resources to become free.
 </p>
 
-<h4><a name="iob_remove_queue">4.12.4.8 <code>iob_remove_queue()</code></a></h4>
+<h4><a name="iob_remove_queue">4.13.4.8 <code>iob_remove_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4448,7 +4530,7 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
   Returns a reference to the I/O buffer chain at the head of the queue.
 </p>
 
-<h4><a name="iob_peek_queue">4.12.4.9 <code>iob_peek_queue()</code></a></h4>
+<h4><a name="iob_peek_queue">4.13.4.9 <code>iob_peek_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4465,7 +4547,7 @@ FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
   Returns a reference to the I/O buffer chain at the head of the queue.
 </p>
 
-<h4><a name="iob_free_queue">4.12.4.10 <code>iob_free_queue()</code></a></h4>
+<h4><a name="iob_free_queue">4.13.4.10 <code>iob_free_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4478,7 +4560,7 @@ void iob_free_queue(FAR struct iob_queue_s *qhead);
   Free an entire queue of I/O buffer chains.
 </p>
 
-<h4><a name="iob_copyin">4.12.4.11 <code>iob_copyin()</code></a></h4>
+<h4><a name="iob_copyin">4.13.4.11 <code>iob_copyin()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4490,7 +4572,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
   Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary.
 </p>
 
-<h4><a name="iob_trycopyin">4.12.4.12 <code>iob_trycopyin()</code></a></h4>
+<h4><a name="iob_trycopyin">4.13.4.12 <code>iob_trycopyin()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4502,7 +4584,7 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary BUT without waiting if buffers are not available.
 </p>
 
-<h4><a name="iob_copyout">4.12.4.13 <code>iob_copyout()</code></a></h4>
+<h4><a name="iob_copyout">4.13.4.13 <code>iob_copyout()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4514,7 +4596,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
  Copy data <code>len</code> bytes of data into the user buffer starting at <code>offset</code> in the I/O buffer, returning that actual number of bytes copied out.
 </p>
 
-<h4><a name="iob_clone">4.12.4.14 <code>iob_clone()</code></a></h4>
+<h4><a name="iob_clone">4.13.4.14 <code>iob_clone()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4525,7 +4607,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled);
   Duplicate (and pack) the data in <code>iob1</code> in <code>iob2</code>.  <code>iob2</code> must be empty.
 </p>
 
-<h4><a name="iob_concat">4.12.4.15 <code>iob_concat()</code></a></h4>
+<h4><a name="iob_concat">4.13.4.15 <code>iob_concat()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4536,7 +4618,7 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
   Concatenate iob_s chain iob2 to iob1.
 </p>
 
-<h4><a name="iob_trimhead">4.12.4.16 <code>iob_trimhead()</code></a></h4>
+<h4><a name="iob_trimhead">4.13.4.16 <code>iob_trimhead()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4547,7 +4629,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers are freed and, hence, the beginning of the chain may change.
 </p>
 
-<h4><a name="iob_trimhead_queue">4.12.4.17 <code>iob_trimhead_queue()</code></a></h4>
+<h4><a name="iob_trimhead_queue">4.13.4.17 <code>iob_trimhead_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4568,7 +4650,7 @@ FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
   The new iob at the head of the queue is returned.
 </p>
 
-<h4><a name="iob_trimtail">4.12.4.18 <code>iob_trimtail()</code></a></h4>
+<h4><a name="iob_trimtail">4.13.4.18 <code>iob_trimtail()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4579,7 +4661,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
   Remove bytes from the end of an I/O chain.  Emptied I/O buffers are freed NULL will be returned in the special case where the entry I/O buffer chain is freed.
 </p>
 
-<h4><a name="iob_pack">4.12.4.19 <code>iob_pack()</code></a></h4>
+<h4><a name="iob_pack">4.13.4.19 <code>iob_pack()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4590,7 +4672,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
   Pack all data in the I/O buffer chain so that the data offset is zero and all but the final buffer in the chain are filled.  Any emptied buffers at the end of the chain are freed.
 </p>
 
-<h4><a name="iob_contig">4.12.4.20 <code>iob_contig()</code></a></h4>
+<h4><a name="iob_contig">4.13.4.20 <code>iob_contig()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4601,7 +4683,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len);
   Ensure that there is <code>len</code> bytes of contiguous space at the beginning of the I/O buffer chain starting at <code>iob</code>.
 </p>
 
-<h4><a name="iob_dump">4.12.4.21 <code>iob_dump()</code></a></h4>
+<h4><a name="iob_dump">4.13.4.21 <code>iob_dump()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
