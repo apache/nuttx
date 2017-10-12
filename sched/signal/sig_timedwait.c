@@ -247,7 +247,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   int32_t waitticks;
   int ret;
 
-  DEBUGASSERT(rtcb->waitdog == NULL);
+  DEBUGASSERT(set != NULL && rtcb->waitdog == NULL);
   sched_lock();  /* Should not be necessary */
 
   /* Several operations must be performed below:  We must determine if any
@@ -294,6 +294,23 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
   else
     {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* nxsig_timedwait() is not a cancellation point, but it may be called
+       * from a cancellation point.  So if a cancellation is pending, we
+       * must exit immediately without waiting.
+       */
+
+      if (check_cancellation_point())
+        {
+          /* If there is a pending cancellation, then do not perform
+           * the wait.  Exit now with ECANCELED.
+           */
+
+          leave_critical_section(flags);
+          sched_unlock();
+          return -ECANCELED;
+       }
+#endif
       /* Save the set of pending signals to wait for */
 
       rtcb->sigwaitmask = *set;
