@@ -63,11 +63,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is a special value of si_signo that means that it was the timeout
- * that awakened the wait... not the receipt of a signal.
+/* These are special values of si_signo that mean that either the wait was
+ * awakened with a timeout, or the wait was canceled... not the receipt of a
+ * signal.
  */
 
-#define SIG_WAIT_TIMEOUT 0xff
+#define SIG_CANCEL_TIMEOUT 0xfe
+#define SIG_WAIT_TIMEOUT   0xff
 
 /****************************************************************************
  * Private Functions
@@ -104,7 +106,7 @@ static void nxsig_timeout(int argc, wdparm_t itcb)
   } u;
 
   u.itcb = itcb;
-  ASSERT(u.wtcb);
+  DEBUGASSERT(u.wtcb);
 
 #ifdef CONFIG_SMP
   /* We must be in a critical section in order to call up_unblock_task()
@@ -144,6 +146,56 @@ static void nxsig_timeout(int argc, wdparm_t itcb)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsig_wait_irq
+ *
+ * Description:
+ *   An error event has occurred and the signal wait must be terminated with
+ *   an error.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CANCELLATION_POINTS
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
+{
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+
+  /* We must be in a critical section in order to call up_unblock_task()
+   * below.  If we are running on a single CPU architecture, then we know
+   * interrupts a disabled an there is no need to explicitly call
+   * enter_critical_section().  However, in the SMP case,
+   * enter_critical_section() does much more than just disable interrupts on
+   * the local CPU; it also manages spinlocks to assure the stability of the
+   * TCB that we are manipulating.
+   */
+
+  flags = enter_critical_section();
+#endif
+
+  /* There may be a race condition -- make sure the task is
+   * still waiting for a signal
+   */
+
+  if (wtcb->task_state == TSTATE_WAIT_SIG)
+    {
+      wtcb->sigunbinfo.si_signo           = SIG_CANCEL_TIMEOUT;
+      wtcb->sigunbinfo.si_code            = SI_USER;
+      wtcb->sigunbinfo.si_errno           = errcode;
+      wtcb->sigunbinfo.si_value.sival_int = 0;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+      wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
+      wtcb->sigunbinfo.si_status          = OK;
+#endif
+      up_unblock_task(wtcb);
+    }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
+}
+#endif /* CONFIG_CANCELLATION_POINTS */
 
 /****************************************************************************
  * Name: nxsig_timedwait
@@ -345,12 +397,28 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
         }
       else
         {
-          /* Otherwise, we must have been awakened by the timeout.  Set EGAIN
-           * and return an error.
+          /* Otherwise, we must have been awakened by the timeout or,
+           * perhaps, the wait was cancelled.
            */
 
-          DEBUGASSERT(rtcb->sigunbinfo.si_signo == SIG_WAIT_TIMEOUT);
-          ret = -EAGAIN;
+#ifdef CONFIG_CANCELLATION_POINTS
+          if (rtcb->sigunbinfo.si_signo == SIG_CANCEL_TIMEOUT)
+            {
+              /* The wait was canceled */
+
+              ret = -rtcb->sigunbinfo.si_errno;
+              DEBUGASSERT(ret < 0);
+            }
+          else
+#endif
+           {
+             /* We were awakened by a timeout.  Set EAGAIN and return an
+              * error.
+              */
+
+             DEBUGASSERT(rtcb->sigunbinfo.si_signo == SIG_WAIT_TIMEOUT);
+             ret = -EAGAIN;
+           }
         }
 
       /* Return the signal info to the caller if so requested */

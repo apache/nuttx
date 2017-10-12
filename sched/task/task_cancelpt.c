@@ -75,6 +75,7 @@
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
+#include "signal/signal.h"
 #include "mqueue/mqueue.h"
 #include "task/task.h"
 
@@ -358,13 +359,24 @@ void notify_cancellation(FAR struct tcb_s *tcb)
           nxsem_wait_irq(tcb, ECANCELED);
         }
 
+#ifndef CONFIG_DISABLE_SIGNALS
+      /* If the thread is blocked waiting on a signal, then the
+       * thread must be unblocked to handle the cancellation.
+       */
+
+      else if (tcb->task_state == TSTATE_WAIT_SIG)
+        {
+          nxsig_wait_irq(tcb, ECANCELED);
+        }
+#endif
+
+#ifndef CONFIG_DISABLE_MQUEUE
       /* If the thread is blocked waiting on a message queue, then the
        * thread must be unblocked to handle the cancellation.
        */
 
-#ifndef CONFIG_DISABLE_MQUEUE
-      if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
-          tcb->task_state == TSTATE_WAIT_MQNOTFULL)
+      else if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+               tcb->task_state == TSTATE_WAIT_MQNOTFULL)
         {
           nxmq_wait_irq(tcb, ECANCELED);
         }

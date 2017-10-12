@@ -183,6 +183,12 @@ int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info);
 void               nxsig_cleanup(FAR struct tcb_s *stcb);
 void               nxsig_release(FAR struct task_group_s *group);
 
+/* sig_timedwait.c */
+
+#ifdef CONFIG_CANCELLATION_POINTS
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode);
+#endif
+
 /* In files of the same name */
 
 FAR sigq_t        *nxsig_alloc_pendingsigaction(void);
