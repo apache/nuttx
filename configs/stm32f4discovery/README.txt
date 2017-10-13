@@ -1599,6 +1599,74 @@ Where <subdir> is one of the following:
        2015-04-30
           Appears to be fully functional.
 
+   12. Using USB Device as a Mass Storage for the host computer:
+
+       System Type  --->
+           STM32 Peripheral Support  --->
+               [*] OTG FS
+
+       Device Drivers  --->
+           [*] USB Device Driver Support  --->
+               [*]   USB Mass storage class device  --->
+                   [*]   Mass storage removable
+
+           [*] RAM Disk Support
+
+       Board Selection  --->
+           [*] Enable boardctl() interface
+           [*]   Enable USB device controls
+
+       File Systems  --->
+           [*] FAT file system
+           [*]   FAT upper/lower names
+           [*]   FAT long file names
+
+           [*] PROCFS File System
+
+       Application Configuration  --->
+           System Libraries and NSH Add-Ons  --->
+               [*] USB Mass Storage Device Commands  --->
+                   (/dev/ram0) LUN1 Device Path
+
+       Compile and flash the firmware in the board as usual, then in the nsh:
+
+       nsh> mkrd -m 0 -s 512 64
+
+       nsh> ls /dev
+       /dev:
+        console
+        null
+        ram0
+        ttyS0
+
+       nsh> mkfatfs /dev/ram0
+
+       Connect a USB cable to STM32F4Discovery board (connector CN5) and run:
+
+       nsh> msconn
+       mcsonn_main: Creating block drivers
+       mcsonn_main: Configuring with NLUNS=1
+       mcsonn_main: handle=1000a550
+       mcsonn_main: Bind LUN=0 to /dev/ram0
+       mcsonn_main: Connected
+
+       In this moment a 33KB disk should appear in your host computer. If you
+       saved some file on this small disk you can now run disconnect command:
+
+       nsh> msdis
+       msdis: Disconnected
+
+       Remove the USB cable from microUSB connector and run:
+
+       nsh> mount -t vfat /dev/ram0 /mnt
+
+       nsh> ls /mnt
+       /mnt:
+        TEST.TXT
+
+       nsh> cat /mnt/TEST.TXT
+       Testing
+
   nxlines:
   ------
     An example using the NuttX graphics system (NX).   This example focuses on

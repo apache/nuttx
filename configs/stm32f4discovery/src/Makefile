@@ -164,4 +164,8 @@ ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
 CSRCS += stm32_uid.c
 endif
 
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += stm32_usbmsc.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
