@@ -834,8 +834,6 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 
       bbf = g_bbsram[fileno].bbf;
 
-      DEBUGASSERT(bbf);
-
       /* If the g_bbsram has been nulled out we return ENXIO.
        *
        * As once ensures we will keep the first dump. Checking the time for
@@ -844,7 +842,7 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
        * loop.
        */
 
-      if (!bbf)
+      if (bbf == NULL)
         {
           ret = -ENXIO;
         }
