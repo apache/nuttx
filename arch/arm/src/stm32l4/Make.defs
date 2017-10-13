@@ -184,7 +184,7 @@ CHIP_CSRCS += stm32l4_exti_alarm.c
 endif
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += stm32l4_rtc_lowerhalf.c
-CHIP_CSRCS += stm32l4_rtcc.c
+CHIP_CSRCS += stm32l4_rtc.c
 endif
 endif
 

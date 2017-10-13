@@ -858,7 +858,7 @@ static inline void rtc_enable_alarm(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_getalarmdatetime
  *
  * Description:
@@ -871,7 +871,7 @@ static inline void rtc_enable_alarm(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
@@ -1638,6 +1638,7 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           alarmreg = STM32_RTC_ALRMBR;
@@ -1645,6 +1646,7 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
                                           (struct tm *)alminfo->ar_time);
         }
         break;
+#endif
 
       default:
         rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);

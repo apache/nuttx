@@ -103,7 +103,7 @@ static int stm32_exti_alarm_isr(int irq, void *context, FAR void *arg)
  *   Sets/clears EXTI alarm interrupt.
  *
  * Parameters:
- *  - rising/falling edge: enables interrupt on rising/falling edget
+ *  - rising/falling edge: enables interrupt on rising/falling edge
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
@@ -117,8 +117,6 @@ static int stm32_exti_alarm_isr(int irq, void *context, FAR void *arg)
 int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
                      xcpt_t func, void *arg)
 {
-  /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
-
   g_alarm_callback = func;
   g_callback_arg   = arg;
 
@@ -151,8 +149,6 @@ int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
   modifyreg32(STM32_EXTI_IMR,
               func ? 0 : EXTI_RTC_ALARM,
               func ? EXTI_RTC_ALARM : 0);
-
-  /* Return the old IRQ handler */
 
   return OK;
 }

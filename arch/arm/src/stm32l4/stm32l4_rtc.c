@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/stm32l4/stm32l4_rtcc.c
+/****************************************************************************
+ * arch/arm/src/stm32l4/stm32l4_rtc.c
  *
  *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
@@ -61,11 +61,11 @@
 
 #ifdef CONFIG_RTC
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 /* This RTC implementation supports
  *  - date/time RTC hardware
  *  - extended functions Alarm A and B
@@ -99,30 +99,16 @@
 #define RTC_MAGIC_TIME_SET   CONFIG_RTC_MAGIC_TIME_SET
 #define RTC_MAGIC_REG        STM32L4_RTC_BKR(CONFIG_RTC_MAGIC_REG)
 
-/* Constants ************************************************************************/
+/* Constants ****************************************************************/
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
 
-/* BCD conversions */
+#define RTC_ALRMR_ENABLE              (0x00000000)
 
-#define rtc_reg_tr_bin2bcd(tp) \
-  ((rtc_bin2bcd((tp)->tm_sec)  << RTC_TR_SU_SHIFT) | \
-   (rtc_bin2bcd((tp)->tm_min)  << RTC_TR_MNU_SHIFT) | \
-   (rtc_bin2bcd((tp)->tm_hour) << RTC_TR_HU_SHIFT))
-
-#define rtc_reg_alrmr_bin2bcd(tm) \
-  ((rtc_bin2bcd((tm)->tm_sec)  << RTC_ALRMR_SU_SHIFT) | \
-   (rtc_bin2bcd((tm)->tm_min)  << RTC_ALRMR_MNU_SHIFT) | \
-   (rtc_bin2bcd((tm)->tm_hour) << RTC_ALRMR_HU_SHIFT))
-
-/* Need to ignore DATE/DOW part of alarm; rtc_reg_alrmr_bin2bcd only encodes hms */
-
-#define RTC_ALRMR_ENABLE              (0x80000000)
-
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 typedef unsigned int rtc_alarmreg_t;
@@ -134,9 +120,9 @@ struct alm_cbinfo_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 /* Callback to use when an EXTI is activated  */
@@ -145,31 +131,33 @@ static struct alm_cbinfo_s g_alarmcb[RTC_ALARM_LAST];
 static bool g_alarm_enabled;  /* True: Alarm interrupts are enabled */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* g_rtc_enabled is set true after the RTC has successfully initialized */
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_check_alrawf(void);
-static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg);
+#if CONFIG_RTC_NALARMS > 1
+static int rtchw_check_alrbwf(void);
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg);
+#endif
 static inline void rtc_enable_alarm(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_dumpregs
  *
  * Description:
@@ -181,7 +169,7 @@ static inline void rtc_enable_alarm(void);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumpregs(FAR const char *msg)
@@ -204,12 +192,13 @@ static void rtc_dumpregs(FAR const char *msg)
   rtcinfo("  TAMPCR: %08x\n", getreg32(STM32L4_RTC_TAMPCR));
   rtcinfo("ALRMASSR: %08x\n", getreg32(STM32L4_RTC_ALRMASSR));
   rtcinfo("ALRMBSSR: %08x\n", getreg32(STM32L4_RTC_ALRMBSSR));
+  rtcinfo("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
 }
 #else
 #  define rtc_dumpregs(msg)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_dumptime
  *
  * Description:
@@ -221,7 +210,7 @@ static void rtc_dumpregs(FAR const char *msg)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
@@ -244,7 +233,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
 #  define rtc_dumptime(tp, msg)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_wprunlock
  *
  * Description:
@@ -256,7 +245,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void rtc_wprunlock(void)
 {
@@ -277,7 +266,7 @@ static void rtc_wprunlock(void)
   putreg32(0x53, STM32L4_RTC_WPR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_wprlock
  *
  * Description:
@@ -289,7 +278,7 @@ static void rtc_wprunlock(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void rtc_wprlock(void)
 {
@@ -302,7 +291,7 @@ static inline void rtc_wprlock(void)
   (void)stm32l4_pwr_enablebkp(false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_synchwait
  *
  * Description:
@@ -315,17 +304,13 @@ static inline void rtc_wprlock(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_synchwait(void)
 {
   volatile uint32_t timeout;
   uint32_t regval;
   int ret;
-
-  /* Disable the write protection for RTC registers */
-
-  rtc_wprunlock();
 
   /* Clear Registers synchronization flag (RSF) */
 
@@ -348,13 +333,10 @@ static int rtc_synchwait(void)
         }
     }
 
-  /* Re-enable the write protection for RTC registers */
-
-  rtc_wprlock();
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_enterinit
  *
  * Description:
@@ -366,7 +348,7 @@ static int rtc_synchwait(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_enterinit(void)
 {
@@ -402,7 +384,7 @@ static int rtc_enterinit(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_exitinit
  *
  * Description:
@@ -414,7 +396,7 @@ static int rtc_enterinit(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void rtc_exitinit(void)
 {
@@ -425,7 +407,7 @@ static void rtc_exitinit(void)
   putreg32(regval, STM32L4_RTC_ISR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_bin2bcd
  *
  * Description:
@@ -437,7 +419,7 @@ static void rtc_exitinit(void)
  * Returned Value:
  *   The value in BCD representation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint32_t rtc_bin2bcd(int value)
 {
@@ -452,7 +434,7 @@ static uint32_t rtc_bin2bcd(int value)
   return (msbcd << 4) | value;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_bin2bcd
  *
  * Description:
@@ -464,7 +446,7 @@ static uint32_t rtc_bin2bcd(int value)
  * Returned Value:
  *   The value in binary representation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_bcd2bin(uint32_t value)
 {
@@ -472,12 +454,12 @@ static int rtc_bcd2bin(uint32_t value)
   return (int)(tens + (value & 0x0f));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_resume
  *
  * Description:
- *   Called when the RTC was already initialized on a previous power cycle.  This
- *   just brings the RTC back into full operation.
+ *   Called when the RTC was already initialized on a previous power cycle.
+ *   This just brings the RTC back into full operation.
  *
  * Input Parameters:
  *   None
@@ -485,7 +467,7 @@ static int rtc_bcd2bin(uint32_t value)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void rtc_resume(void)
 {
@@ -504,7 +486,7 @@ static void rtc_resume(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_alarm_handler
  *
  * Description:
@@ -517,7 +499,7 @@ static void rtc_resume(void)
  * Returned Value:
  *   Zero (OK) on success; A negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_handler_arg)
@@ -565,6 +547,7 @@ static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_h
         }
     }
 
+#if CONFIG_RTC_NALARMS > 1
   cr  = getreg32(STM32L4_RTC_CR);
   if ((cr & RTC_CR_ALRBIE) != 0)
     {
@@ -592,6 +575,7 @@ static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_h
           putreg32(isr, STM32L4_RTC_ISR);
         }
     }
+#endif
 
   /* Disable write access to the backup domain (RTC registers, RTC backup
    * data registers and backup SRAM).
@@ -603,7 +587,7 @@ static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_h
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtchw_check_alrXwf X= a or B
  *
  * Description:
@@ -615,7 +599,7 @@ static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_h
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_check_alrawf(void)
@@ -643,7 +627,7 @@ static int rtchw_check_alrawf(void)
 }
 #endif
 
-#ifdef CONFIG_RTC_ALARM
+#if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_check_alrbwf(void)
 {
   volatile uint32_t timeout;
@@ -669,12 +653,12 @@ static int rtchw_check_alrbwf(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtchw_set_alrmXr X is a or b
  *
  * Description:
- *   Set the alarm (A or B) hardware registers, using the required hardware access
- *   protocol
+ *   Set the alarm (A or B) hardware registers, using the required hardware
+ *   access protocol
  *
  * Input Parameters:
  *   alarmreg - the register
@@ -682,7 +666,7 @@ static int rtchw_check_alrbwf(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
@@ -729,7 +713,7 @@ errout_with_wprunlock:
 }
 #endif
 
-#ifdef CONFIG_RTC_ALARM
+#if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
   int isr;
@@ -813,7 +797,7 @@ static inline void rtc_enable_alarm(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_getalarmdatetime
  *
  * Description:
@@ -826,7 +810,7 @@ static inline void rtc_enable_alarm(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32l4_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
@@ -857,36 +841,36 @@ static int stm32l4_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_is_initialized
  *
  * Description:
- *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
- *    It will be 'false' if the RTC has never been initialized since first time power
+ *    Returns 'true' if the RTC has been initialized
+ *    Returns 'false' if the RTC has never been initialized since first time power
  *    up, and the counters are stopped until it is first initialized.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   bool -- true if the INITS flag is set in the ISR.
+ *   Returns true if RTC has been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_rtc_is_initialized(void)
 {
   uint32_t regval;
 
-  regval = getreg32(STM32L4_RTC_ISR);
+  regval = getreg32(RTC_MAGIC_REG);
 
-  return (regval & RTC_ISR_INITS) ? true : false;
+  return regval == RTC_MAGIC || regval == RTC_MAGIC_TIME_SET;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
@@ -899,13 +883,12 @@ bool stm32l4_rtc_is_initialized(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
   bool init_stat;
   uint32_t regval;
-  int ret;
 
   rtc_dumpregs("Before Initialization");
 
@@ -928,6 +911,8 @@ int up_rtc_initialize(void)
       modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
 #elif defined(CONFIG_STM32L4_RTC_LSECLOCK)
       modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+#else
+#  error "No clock for RTC!"
 #endif
 
       /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
@@ -954,7 +939,7 @@ int up_rtc_initialize(void)
 
           rtc_dumpregs("After Failed Initialization");
 
-          return -1;
+          return ERROR;
         }
       else
         {
@@ -962,6 +947,7 @@ int up_rtc_initialize(void)
 
           regval = getreg32(STM32L4_RTC_CR);
           regval &= ~(RTC_CR_FMT | RTC_CR_OSEL_MASK | RTC_CR_POL);
+          putreg32(regval, STM32L4_RTC_CR);
 
           /* Configure RTC pre-scaler with the required values */
 
@@ -992,16 +978,19 @@ int up_rtc_initialize(void)
                   STM32L4_RTC_PRER);
 #endif
 
+          /* Exit Initialization mode */
+
+          rtc_exitinit();
+
           /* Wait for the RTC Time and Date registers to be synchronized with RTC APB
            * clock.
            */
 
-          ret = rtc_synchwait();
-          (void)ret;
+          rtc_synchwait();
 
-          /* Exit Initialization mode */
+          /* Keep the fact that the RTC is initialized */
 
-          rtc_exitinit();
+          putreg32(RTC_MAGIC, RTC_MAGIC_REG);
 
           /* Enable the write protection for RTC registers */
 
@@ -1022,15 +1011,9 @@ int up_rtc_initialize(void)
 
       (void)stm32l4_pwr_enablebkp(true);
 
-      /* Disable the write protection for RTC registers */
-
-      //rtc_wprunlock();
+      /* Write protection for RTC registers does not need to be disabled. */
 
       rtc_resume();
-
-      /* Enable the write protection for RTC registers */
-
-      //rtc_wprlock();
 
       /* Disable write access to the backup domain (RTC registers, RTC backup
        * data registers and backup SRAM).
@@ -1045,29 +1028,7 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
- * Name: stm32_rtc_irqinitialize
- *
- * Description:
- *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
- *   up_irqinitialize is called later.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ************************************************************************************/
-
-int stm32_rtc_irqinitialize(void)
-{
-  /* Nothing to do */
-
-  return OK;
-}
-
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds
  *
  * Description:
@@ -1086,7 +1047,7 @@ int stm32_rtc_irqinitialize(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
 {
@@ -1097,13 +1058,33 @@ int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
   uint32_t tr;
   uint32_t tmp;
 
-  /* Sample the date time registers. Must read in this order. */
+  /* Sample the data time registers.  There is a race condition here... If
+   * we sample the time just before midnight on December 31, the date could
+   * be wrong because the day rolled over while were sampling. Thus loop for
+   * checking overflow here is needed.  There is a race condition with
+   * subseconds too. If we sample TR register just before second rolling
+   * and subseconds are read at wrong second, we get wrong time.
+   */
 
+  do
+    {
+      dr  = getreg32(STM32L4_RTC_DR);
+      tr  = getreg32(STM32L4_RTC_TR);
 #ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
-  ssr = getreg32(STM32L4_RTC_SSR);
+      ssr = getreg32(STM32L4_RTC_SSR);
+      tmp = getreg32(STM32L4_RTC_TR);
+      if (tmp != tr)
+        {
+          continue;
+        }
 #endif
-  tr  = getreg32(STM32L4_RTC_TR);
-  dr  = getreg32(STM32L4_RTC_DR);
+      tmp = getreg32(STM32L4_RTC_DR);
+      if (tmp == dr)
+        {
+          break;
+        }
+    }
+  while (1);
 
   rtc_dumpregs("Reading Time");
 
@@ -1176,7 +1157,7 @@ int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime
  *
  * Description:
@@ -1197,14 +1178,14 @@ int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_getdatetime(FAR struct tm *tp)
 {
   return stm32l4_rtc_getdatetime_with_subseconds(tp, NULL);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime_with_subseconds
  *
  * Description:
@@ -1226,7 +1207,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
 #  ifndef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
@@ -1238,7 +1219,7 @@ int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_setdatetime
  *
  * Description:
@@ -1252,7 +1233,7 @@ int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
 {
@@ -1330,7 +1311,7 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_havesettime
  *
  * Description:
@@ -1339,19 +1320,19 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp)
  * Returned Value:
  *   Returns true if RTC date-time have been previously set.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_rtc_havesettime(void)
 {
   return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -1359,19 +1340,21 @@ bool stm32l4_rtc_havesettime(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
   FAR struct tm newtime;
 
-  /* Break out the time values (not that the time is set only to units of seconds) */
+  /* Break out the time values (not that the time is set only to units of
+   * seconds)
+   */
 
   (void)gmtime_r(&tp->tv_sec, &newtime);
   return stm32l4_rtc_setdatetime(&newtime);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_setalarm
  *
  * Description:
@@ -1383,7 +1366,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
@@ -1403,9 +1386,15 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   rtc_dumptime(&alminfo->as_time, "New alarm time");
 
-  /* Break out the values to the HW alarm register format */
+  /* Break out the values to the HW alarm register format.  The values in
+   * all STM32L4 fields match the fields of struct tm in this case.  Notice
+   * that the alarm is limited to one month.
+   */
 
-  alarmreg = rtc_reg_alrmr_bin2bcd(&alminfo->as_time);
+  alarmreg = (rtc_bin2bcd(alminfo->as_time.tm_sec)  << RTC_ALRMR_SU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_min)  << RTC_ALRMR_MNU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_hour) << RTC_ALRMR_HU_SHIFT) |
+             (rtc_bin2bcd(alminfo->as_time.tm_mday) << RTC_ALRMR_DU_SHIFT);
 
   /* Set the alarm in hardware and enable interrupts from the RTC */
 
@@ -1426,6 +1415,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           cbinfo         = &g_alarmcb[RTC_ALARMB];
@@ -1440,6 +1430,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
             }
         }
         break;
+#endif
 
       default:
         rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
@@ -1509,6 +1500,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           /* Cancel the global callback function */
@@ -1540,6 +1532,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
           ret = OK;
         }
         break;
+#endif
 
       default:
         rtcerr("ERROR: Invalid ALARM%d\n", alarmid);
@@ -1554,7 +1547,7 @@ errout_with_wprunlock:
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_rdalarm
  *
  * Description:
@@ -1566,7 +1559,7 @@ errout_with_wprunlock:
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
@@ -1587,6 +1580,7 @@ int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           alarmreg = STM32L4_RTC_ALRMBR;
@@ -1594,6 +1588,7 @@ int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
                                              (struct tm *)alminfo->ar_time);
         }
         break;
+#endif
 
       default:
         rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);

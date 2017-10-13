@@ -817,7 +817,7 @@ rtchw_set_alrmbr_exit:
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_getalarmdatetime
  *
  * Description:
@@ -830,7 +830,7 @@ rtchw_set_alrmbr_exit:
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
@@ -1418,7 +1418,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  * Name: stm32_rtc_setalarm
  *
  * Description:
- *   Set an alarm to an asbolute time using associated hardware.
+ *   Set an alarm to an absolute time using associated hardware.
  *
  * Input Parameters:
  *  alminfo - Information about the alarm configuration.
@@ -1505,7 +1505,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
  * Name: stm32_rtc_cancelalarm
  *
  * Description:
- *   Cancel an alaram.
+ *   Cancel an alarm.
  *
  * Input Parameters:
  *  alarmid - Identifies the alarm to be cancelled
@@ -1636,6 +1636,7 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
         }
         break;
 
+#if CONFIG_RTC_NALARMS > 1
       case RTC_ALARMB:
         {
           alarmreg = STM32_RTC_ALRMBR;
@@ -1643,6 +1644,7 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
                                           (struct tm *)alminfo->ar_time);
         }
         break;
+#endif
 
       default:
         rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);

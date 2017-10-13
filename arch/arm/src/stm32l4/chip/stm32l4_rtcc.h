@@ -252,8 +252,8 @@
 #define RTC_ISR_TAMP1F            (1 << 13) /* Bit 13: Tamper detection flag */
 #define RTC_ISR_TAMP2F            (1 << 14) /* Bit 14: TAMPER2 detection flag */
 #define RTC_ISR_TAMP3F            (1 << 15) /* Bit 15: TAMPER3 detection flag */
-#define RTC_ISR_RECALPF           (1 << 16) /* Bit 16: Recalibration pending Flag */
-#define RTC_ISR_ITSF              (1 << 17) /* Bit 17: Recalibration pending Flag */
+#define RTC_ISR_RECALPF           (1 << 16) /* Bit 16: Recalibration pending flag */
+#define RTC_ISR_ITSF              (1 << 17) /* Bit 17: Internal time-stamp flag */
 #define RTC_ISR_ALLFLAGS          (0x0003ffff)
 
 /* RTC prescaler register */
@@ -325,11 +325,11 @@
 /* RTC time stamp date register */
 
 #define RTC_TSDR_DU_SHIFT         (0)       /* Bit 0-3: Date units in BCD format */
-#define RTC_TSDR_DU_MASK          (15 << RTC_TSDR_DU_SHIFT) */
+#define RTC_TSDR_DU_MASK          (15 << RTC_TSDR_DU_SHIFT)
 #define RTC_TSDR_DT_SHIFT         (4)       /* Bits 4-5: Date tens in BCD format */
 #define RTC_TSDR_DT_MASK          (3 << RTC_TSDR_DT_SHIFT)
 #define RTC_TSDR_MU_SHIFT         (8)       /* Bits 8-11: Month units in BCD format */
-#define RTC_TSDR_MU_MASK          (xx << RTC_TSDR_MU_SHIFT)
+#define RTC_TSDR_MU_MASK          (15 << RTC_TSDR_MU_SHIFT)
 #define RTC_TSDR_MT               (1 << 12) /* Bit 12: Month tens in BCD format */
 #define RTC_TSDR_WDU_SHIFT        (13)      /* Bits 13-15: Week day units */
 #define RTC_TSDR_WDU_MASK         (7 << RTC_TSDR_WDU_SHIFT)

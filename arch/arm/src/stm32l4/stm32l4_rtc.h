@@ -117,21 +117,19 @@ extern "C"
  * Name: stm32l4_rtc_is_initialized
  *
  * Description:
- *    Returns 'true' if the RTC has been initialized (according to the RTC itself).
- *    It will be 'false' if the RTC has never been initialized since first time power
+ *    Returns 'true' if the RTC has been initialized
+ *    Returns 'false' if the RTC has never been initialized since first time power
  *    up, and the counters are stopped until it is first initialized.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   bool -- true if the INITS flag is set in the ISR.
+ *   Returns true if RTC has been initialized.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_RTC_DRIVER
 bool stm32l4_rtc_is_initialized(void);
-#endif
 
 /****************************************************************************
  * Name: stm32l4_rtc_getdatetime_with_subseconds

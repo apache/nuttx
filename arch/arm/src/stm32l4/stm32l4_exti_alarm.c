@@ -117,8 +117,6 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, FAR void *arg)
 int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
                        xcpt_t func, void *arg)
 {
-  /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
-
   g_alarm_callback = func;
   g_callback_arg   = arg;
 
@@ -151,8 +149,6 @@ int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
   modifyreg32(STM32L4_EXTI1_IMR,
               func ? 0 : EXTI1_RTC_ALARM,
               func ? EXTI1_RTC_ALARM : 0);
-
-  /* Return the old IRQ handler */
 
   return OK;
 }
