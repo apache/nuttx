@@ -140,16 +140,18 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parameters:
- *   fptr - Pointer to the beginning of the frame under construction
- *   bptr - Output goes here.  Normally this is a known offset into d_buf,
- *          may be redirected to g_bitbucket on the case of FRAGN frames.
+ *   fptr  - Pointer to the beginning of the frame under construction
+ *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
+ *           may be redirected to g_bitbucket on the case of FRAGN frames.
+ *   proto - True: Copy the protocol header following the IPv6 header too.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
+static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr,
+                                         FAR uint8_t *bptr, bool proto)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   uint16_t protosize;
@@ -164,49 +166,53 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr, FAR uint8_t *bptr)
   g_frame_hdrlen  += IPv6_HDRLEN;
   g_uncomp_hdrlen += IPv6_HDRLEN;
 
-  /* Copy the following protocol header, */
+  /* Does a protocol header follow the IPv6 header? */
 
-   switch (ipv6->proto)
-     {
+  if (proto)
+    {
+      /* Yes.. Copy the following protocol header. */
+
+      switch (ipv6->proto)
+        {
 #ifdef CONFIG_NET_TCP
-     case IP_PROTO_TCP:
-       {
-         FAR struct tcp_hdr_s *tcp =
-           (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
+        case IP_PROTO_TCP:
+          {
+            FAR struct tcp_hdr_s *tcp =
+              (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
 
-         /* The TCP header length is encoded in the top 4 bits of the
-          * tcpoffset field (in units of 32-bit words).
-          */
+            /* The TCP header length is encoded in the top 4 bits of the
+             * tcpoffset field (in units of 32-bit words).
+             */
 
-         protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-       }
-       break;
+            protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+          }
+          break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-     case IP_PROTO_UDP:
-       protosize = sizeof(struct udp_hdr_s);
-       break;
+        case IP_PROTO_UDP:
+          protosize = sizeof(struct udp_hdr_s);
+          break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-     case IP_PROTO_ICMP6:
-       protosize = sizeof(struct icmpv6_hdr_s);
-       break;
+        case IP_PROTO_ICMP6:
+          protosize = sizeof(struct icmpv6_hdr_s);
+          break;
 #endif
 
-     default:
-       nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
-       return;
-     }
+        default:
+          nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
+          return;
+        }
 
-  /* Copy the protocol header. */
+      /* Copy the protocol header. */
 
-  memcpy((FAR uint8_t *)ipv6 + g_uncomp_hdrlen, fptr + g_frame_hdrlen,
-         protosize);
+      memcpy((FAR uint8_t *)ipv6 + g_uncomp_hdrlen, fptr + g_frame_hdrlen,
+             protosize);
 
-  g_frame_hdrlen  += protosize;
-  g_uncomp_hdrlen += protosize;
+      g_frame_hdrlen += protosize;
+    }
 }
 
 /****************************************************************************
@@ -261,7 +267,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   uint16_t fragtag   = 0;     /* Tag of the fragment */
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
   bool isfrag        = false; /* true: Frame is a fragment */
-  bool isfirstfrag   = false; /* true: Frame is the first fragement of the series */
+  bool isfrag1       = false; /* true: Frame is the first fragement of the series */
   int reqsize;                /* Required buffer size */
   int hdrsize;                /* Size of the IEEE802.15.4 header */
   int ret;
@@ -344,7 +350,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
         /* Indicate the first fragment of the reassembly */
 
         bptr               = reass->rb_buf;
-        isfirstfrag        = true;
+        isfrag1            = true;
         isfrag             = true;
       }
       break;
@@ -440,7 +446,12 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   if (hc1[SIXLOWPAN_HC1_DISPATCH] == SIXLOWPAN_DISPATCH_IPV6)
     {
       ninfo("IPv6 Dispatch\n");
-      sixlowpan_uncompress_ipv6hdr(fptr, bptr);
+
+      /* NOTE: A protocol header will follow only on a non-fragmented
+       * packet or on the first fragment of a fragmented packet.
+       */
+
+      sixlowpan_uncompress_ipv6hdr(fptr, bptr, !isfrag || isfrag1);
     }
   else
     {
@@ -453,7 +464,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
   /* Is this the first fragment is a sequence? */
 
-  if (isfirstfrag)
+  if (isfrag1)
     {
       /* Yes.. Remember the offset from the beginning of d_buf where we
        * begin placing the data payload.
