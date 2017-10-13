@@ -2680,7 +2680,7 @@ static int fat_stat_root(FAR struct fat_mountpt_s *fs,
   buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IWOTH |
                  S_IWGRP | S_IWUSR;
 
-  return fat_stat_common(fs, direntry, buf);
+  return OK;
 }
 
 /****************************************************************************
