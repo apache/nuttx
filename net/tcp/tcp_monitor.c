@@ -427,11 +427,18 @@ void tcp_lost_connection(FAR struct socket *psock,
 
   /* Nullify the callback structure so that recursive callbacks are not
    * received by the event handler due to disconnection processing.
+   *
+   * NOTE: In a configuration with CONFIG_NET_TCP_WRITE_BUFFERS=y,
+   * the "semi-permanent" callback structure may have already been
+   * nullified.
    */
 
-  cb->flags = 0;
-  cb->priv  = NULL;
-  cb->event = NULL;
+  if (cb != NULL)
+    {
+      cb->flags = 0;
+      cb->priv  = NULL;
+      cb->event = NULL;
+    }
 
   /* Make sure that this socket is explicitly marked.  It may not get a
    * callback due to the above nullification.

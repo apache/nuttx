@@ -339,20 +339,17 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   /* Interrupts are disabled here to avoid race conditions */
 
   net_lock();
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* If we have a semi-permanent write buffer callback in place, then
    * release it now.
    */
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  if (psock->s_sndcb)
-    {
-      psock->s_sndcb = NULL;
-    }
+  psock->s_sndcb = NULL;
 #endif
-
-  DEBUGASSERT(conn != NULL);
 
   /* Check for the case where the host beat us and disconnected first */
 
