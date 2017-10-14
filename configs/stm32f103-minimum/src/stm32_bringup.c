@@ -204,6 +204,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LM75_I2C
+  /* Configure and initialize the LM75 sensor */
+
+  ret = stm32_lm75initialize("/dev/temp");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_lm75initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RGBLED
   /* Configure and initialize the RGB LED. */
 

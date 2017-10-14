@@ -117,6 +117,10 @@
 #define STM32F103MINIMUM_PWMTIMER   3
 #define STM32F103MINIMUM_PWMCHANNEL 3
 
+/* LM-75 Temperature Sensor: PA.0 */
+
+#define GPIO_LM75_OSINT (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
 /* nRF24 Configuration */
 
 /* NRF24L01 chip enable:  PB.1 */
@@ -218,6 +222,18 @@ void stm32_spidev_initialize(void);
  ************************************************************************************/
 
 int stm32_hcsr04_initialize(FAR const char *devname);
+
+/************************************************************************************
+ * Name: stm32_lm75initialize
+ *
+ * Description:
+ *   Called to initialize LM75 temperature sensor
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LM75_I2C
+int stm32_lm75initialize(FAR const char *devpath);
+#endif
 
 /************************************************************************************
  * Name: stm32_w25initialize
