@@ -286,7 +286,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   uint16_t paysize;           /* Size of the data payload */
   uint16_t fragtag   = 0;     /* Tag of the fragment */
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
-  uint8_t protosize  = 0;     /* Length of the protocal header (treated like payload) */
+  uint8_t protosize  = 0;     /* Length of the protocol header (treated like payload) */
   bool isfrag        = false; /* true: Frame is a fragment */
   bool isfrag1       = false; /* true: Frame is the first fragement of the series */
   int reqsize;                /* Required buffer size */
