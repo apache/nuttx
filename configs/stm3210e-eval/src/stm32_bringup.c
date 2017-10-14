@@ -214,10 +214,11 @@ int stm32_bringup(void)
   spi = stm32_spibus_initialize(1);
   if (!spi)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 0\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 1\n");
       return -ENODEV;
     }
-  syslog(LOG_INFO, "Successfully initialized SPI port 0\n");
+
+  syslog(LOG_INFO, "Successfully initialized SPI port 1\n");
 
   /* Now bind the SPI interface to the M25P64/128 SPI FLASH driver */
 
