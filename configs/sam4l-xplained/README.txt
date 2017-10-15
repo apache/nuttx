@@ -800,6 +800,7 @@ Configuration sub-directories
          CONFIG_NX_DISABLE_24BPP=y
          CONFIG_NX_DISABLE_32BPP=y
          CONFIG_NX_PACKEDMSFIRST=y          : LSB packed first (shouldn't matter)
+         CONFIG_NXSTART_EXTERNINIT=y        : We have board_graphics_setup()
          CONFIG_NXTK_BORDERWIDTH=2          : Use a small border
          CONFIG_NXTK_DEFAULT_BORDERCOLORS=y : Default border colors
          CONFIG_NXFONTS_CHARBITS=7          : 7-bit fonts
