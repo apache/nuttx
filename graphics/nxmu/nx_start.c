@@ -82,9 +82,7 @@ static bool g_nxserver_started;
 int nx_server(int argc, char *argv[])
 {
   FAR NX_DRIVERTYPE *dev;
-#ifndef CONFIG_NXSTART_EXTERNINIT
   int ret;
-#endif
 
 #if defined(CONFIG_NXSTART_EXTERNINIT)
   /* Use external graphics driver initialization */
@@ -111,7 +109,8 @@ int nx_server(int argc, char *argv[])
   dev = board_lcd_getdev(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gerr("ERROR: board_lcd_getdev failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gerr("ERROR: board_lcd_getdev failed, devno=%d\n",
+           CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 
@@ -144,6 +143,8 @@ int nx_server(int argc, char *argv[])
 
   ret = nx_run(dev);
   ginfo("nx_run returned: %d\n", ret);
+  UNUSED(ret);
+
   return EXIT_FAILURE;
 }
 
