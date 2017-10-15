@@ -344,11 +344,8 @@ void board_tsc_teardown(void);
  *   If the driver for the graphics device on the platform some unusual
  *   initialization, then this board interface should be provided.
  *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level graphics logic.  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_GRAPHICS=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the BOARDIOC_GRAPHICS_SETUP
- *   command.
+ *   This is an internal OS interface. It is invoked by graphics sub-system
+ *   initialization logic (nx_start()).
  *
  ****************************************************************************/
 

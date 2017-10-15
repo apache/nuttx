@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,13 +126,6 @@
  * ARG:           None
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
  * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
- *
- * CMD:           BOARDIOC_GRAPHICS_SETUP
- * DESCRIPTION:   Configure graphics that require special initialization
- *                procedures
- * ARG:           A pointer to an instance of struct boardioc_graphics_s
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_GRAPHICS
- * DEPENDENCIES:  Board logic must provide board_graphics_setup()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
@@ -145,16 +138,15 @@
 #define BOARDIOC_NX_START          _BOARDIOC(0x0008)
 #define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
 #define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x000a)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000b)
 
-/* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
+/* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
  * to the board-provided board_ioctl() function.
  *
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000d)
+#define BOARDIOC_USER              _BOARDIOC(0x000b)
 
 /****************************************************************************
  * Public Type Definitions
