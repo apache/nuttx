@@ -1963,5 +1963,5 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *r_chanlist,
 }
 
 #endif /* CONFIG_STM32_STM32F33XX */
-#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2*/
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 */
 #endif /* CONFIG_STM32_ADC */

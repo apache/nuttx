@@ -10,4 +10,39 @@ config EXAMPLES_TOUCHSCREEN_BGCOLOR
 	default 0x007b68ee
 	depends on EXAMPLES_TOUCHSCREEN
 
+if SIM_TOUCHSCREEN
+
+comment "NX Server Options"
+
+config SIM_LISTENER_STACKSIZE
+	int "NX Server/Listener Stack Size"
+	default 2048
+	---help---
+		The stacksize to use when creating the NX server.  Default 2048
+
+config SIM_CLIENTPRIO
+	int "Client Priority"
+	default 100
+	---help---
+		The client priority.  Default: 100
+
+config SIM_SERVERPRIO
+	int "Server Priority"
+	default 120
+	---help---
+		The server priority.  Default: 120
+
+config SIM_LISTENERPRIO
+	int "Listener Priority"
+	default 80
+	---help---
+		The priority of the event listener thread. Default 80.
+
+config SIM_NOTIFYSIGNO
+	int "Notify Signal Number"
+	default 4
+	---help---
+		The signal number to use with nx_eventnotify().  Default: 4
+
+endif
 endif
