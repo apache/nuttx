@@ -386,11 +386,11 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_NX_MULTIUSER
+#ifdef CONFIG_NX
       /* CMD:           BOARDIOC_NX_START
        * DESCRIPTION:   Start the NX servier
        * ARG:           None
-       * CONFIGURATION: CONFIG_NX_MULTIUSER
+       * CONFIGURATION: CONFIG_NX
        * DEPENDENCIES:  Base graphics logic provides nx_start()
        */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nxbe.h
  *
- *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,9 +89,7 @@ struct nxbe_window_s
   /* State information */
 
   FAR struct nxbe_state_s *be;        /* The back-end state structure */
-#ifdef CONFIG_NX_MULTIUSER
   FAR struct nxfe_conn_s *conn;       /* Connection to the window client */
-#endif
   FAR const struct nx_callback_s *cb; /* Event handling callbacks */
 
   /* The following links provide the window's vertical position using a
@@ -109,9 +107,7 @@ struct nxbe_window_s
 
   /* Window flags (see the NXBE_* bit definitions above) */
 
-#ifdef CONFIG_NX_MULTIUSER            /* Currently used only in multi-user mode */
   uint8_t flags;
-#endif
 
   /* Client state information this is provide in window callbacks */
 

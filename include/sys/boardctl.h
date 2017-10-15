@@ -112,7 +112,7 @@
  * CMD:           BOARDIOC_NX_START
  * DESCRIPTION:   Start the NX servier
  * ARG:           None
- * CONFIGURATION: CONFIG_NX_MULTIUSER
+ * CONFIGURATION: CONFIG_NX
  * DEPENDENCIES:  Base graphics logic provides nx_start()
  *
  * CMD:           BOARDIOC_TSCTEST_SETUP

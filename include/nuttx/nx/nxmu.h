@@ -50,8 +50,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 
-#ifdef CONFIG_NX_MULTIUSER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -482,7 +480,7 @@ extern "C"
  *   This function is the same a nx_openwindow EXCEPT that the client provides
  *   the window structure instance.  nx_constructwindow will initialize the
  *   the pre-allocated window structure for use by NX.  This function is
- *   provided in addition to nx_open window in order to support a kind of
+ *   provided in addition to nx_openwindow in order to support a kind of
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
@@ -568,5 +566,4 @@ int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
 }
 #endif
 
-#endif  /* CONFIG_NX_MULTIUSER */
 #endif  /* __INCLUDE_NUTTX_NX_NXMU_H */

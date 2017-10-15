@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxtk/nxtk_events.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,9 +76,7 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 static void nxtk_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch,
                        FAR void *arg);
 #endif
-#ifdef CONFIG_NX_MULTIUSER
 static void nxtk_blocked(NXWINDOW hwnd, FAR void *arg1, FAR void *arg2);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -98,9 +96,7 @@ const struct nx_callback_s g_nxtkcb =
 #ifdef CONFIG_NX_KBD
   , nxtk_kbdin    /* kbdin */
 #endif
-#ifdef CONFIG_NX_MULTIUSER
-  , nxtk_blocked
-#endif
+  , nxtk_blocked  /* blocked */
 };
 
 /****************************************************************************
@@ -237,7 +233,6 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
    * window to revert to the previous window.  Not good behavior.
    */
 
-#ifndef CONFIG_NX_MULTIUSER /* Queuing only happens in multi-user mode */
 #ifdef CONFIG_NXTK_AUTORAISE
   if (fwnd->wnd.above != NULL)
 #else
@@ -246,7 +241,6 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
     {
        nx_raise((NXWINDOW)&fwnd->wnd);
     }
-#endif
 
   /* When we get here, the mouse position that we receive has already been
    * offset by the window origin.  Here we need to detect mouse events in
@@ -313,7 +307,6 @@ static void nxtk_kbdin(NXWINDOW hwnd, uint8_t nch, const uint8_t *ch,
  * Name: nxtk_blocked
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 static void nxtk_blocked(NXWINDOW hwnd, FAR void *arg1, FAR void *arg2)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
@@ -325,7 +318,6 @@ static void nxtk_blocked(NXWINDOW hwnd, FAR void *arg1, FAR void *arg2)
       fwnd->fwcb->blocked((NXTKWINDOW)fwnd, fwnd->fwarg, arg2);
     }
 }
-#endif
 
 /****************************************************************************
  * Public Functions

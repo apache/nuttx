@@ -645,14 +645,6 @@ nx
 
      See the "nx11" configuration below for more information.
 
-  3. Multi- and Single-User Modes
-
-     The default is the single-user NX implementation.  To select
-     the multi-user NX implementation:
-
-       CONFG_NX_MULTIUSER=y
-       CONFIG_DISABLE_MQUEUE=n
-
 nx11
 
   Configures to use apps/examples/nx.  This configuration is similar
@@ -724,15 +716,7 @@ nx11
        cd /usr/lib/
        sudo ln -s libXext.so.6.4.0 libXext.so
 
-  5. Multi- and Single-User Modes
-
-     The default is the single-user NX implementation.  To select
-     the multi-user NX implementation:
-
-       CONFG_NX_MULTIUSER=y
-       CONFIG_DISABLE_MQUEUE=n
-
-   6. apps/examples/nxterm
+   5. apps/examples/nxterm
 
       This configuration is also set up to use the apps/examples/nxterm
       test instead of apps/examples/nx.  To enable this configuration,
@@ -741,9 +725,6 @@ nx11
 
        -CONFIG_NXTERM=n
        +CONFIG_NXTERM=y
-
-       -CONFIG_NX_MULTIUSER=n
-       +CONFIG_NX_MULTIUSER=y
 
        -CONFIG_EXAMPLES_NX=y
        +CONFIG_EXAMPLES_NX=n

@@ -62,10 +62,6 @@
 
 #undef HAVE_NXSTART
 
-#if !defined(CONFIG_NX_MULTIUSER)
-#  undef CONFIG_NX_START
-#endif
-
 #if defined(CONFIG_NXWIDGETS) && !defined(CONFIG_NXWIDGET_SERVERINIT)
 #   define HAVE_NXSTART
 #   include <nuttx/nx/nx.h>

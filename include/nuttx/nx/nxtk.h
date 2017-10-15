@@ -181,9 +181,7 @@ int nxtk_closewindow(NXTKWINDOW hfwnd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
-#endif
 
 /****************************************************************************
  * Name: nxtk_getposition

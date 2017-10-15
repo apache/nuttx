@@ -26,19 +26,14 @@ at the present, but here is the longer term roadmap:
               operations.  The toolkit can be used for window-oriented graphics
               without NxWidgets and is built on top of NX.
   NXFONTS   - A set of C graphics tools for present (bitmap) font images.
-  NX        - The tiny NuttX windowing system.  This includes both a small-footprint,
-              single user implementaton (NXSU as described below) and a somewhat
-              larger multi-user implentation (NXMU as described below).  Both
-              conform to the same APIs as defined in include/nuttx/nx/nx.h and, hence,
-              are more-or-less interchangable.  NX can be used without NxWidgets
-              and without NXTOOLKIT for raw access to window memory.
+  NX        - The tiny NuttX windowing system.  This includes the small-footprint 
+              multi-user implentation (NXMU as described below).  NX can be used
+              without NxWidgets and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
               NX is built on top of NXGLIB.
   NxTerm - NxTerm is a write-only character device that is built on top of
               an NX window.  This character device can be used to provide stdout
               and stderr and, hence, can provide the output side of NuttX console.
-              NxTerm is only available when the multi-user NX implementation is
-              selected (CONFIG_NX_MULTIUSERs).
 
 
 Related Header Files
@@ -63,7 +58,7 @@ Directories
   provided in sub-directories under nuttx/libnx.
 
 libnx/nx
-  Common callable interfaces that are, logically, part of both nxmu and nxsu.
+  Client application callable interfaces.
 
 graphics/nxglib
 libnx/nxglib
@@ -73,31 +68,20 @@ libnx/nxglib
   window).
 
 graphics/nxbe
-  This is the "back-end" of a tiny windowing system.  It can be used with either of
-  two front-ends to complete a windowing system (see nxmu and nxsu below).  It
-  contains most of the important window management logic:  clipping, window controls,
-  window drawing, etc.
-
-graphics/nxsu
-  This is the NX single user "front end".  When combined with the generic "back-end"
-  (nxbe), it implements a single thread, single user windowing system.  The files
-  in this directory present the window APIs described in include/nuttx/nx/nx.h.  The
-  single user front-end is selected when CONFIG_NX_MULTIUSER is not defined in the
-  NuttX configuration file.
-
-  NOTE:  There is no nxsu sub-directory in nuttx/libnx.  That is because this
-  separation of interfaces is only required in the kernel build mode and
-  only the multi-user interfaces can be used with the kernel build.
+  This is the "back-end" of a tiny windowing system.  It contains most
+  of the important window management logic:  clipping, window controls,
+  window drawing, etc.  Currently, the NXserver is the only "front-end"
 
 graphics/nxmu
 libnx/nxmu
-  This is the NX multi user "front end".  When combined with the generic "back-end"
-  (nxbe), it implements a multi-threaded, multi-user windowing system.  The files
-  in this directory present the window APIs described in include/nuttx/nx/nx.h.  The
-  multi-user front end includes a graphics server that executes on its own thread;
-  multiple graphics clients then communicate with the server via a POSIX message
-  queue to serialize window operations from many threads. The multi-user front-end
-  is selected when CONFIG_NX_MULTIUSER is defined in the NuttX configuration file.
+  This is the NX multi user "front end".  When combined with the generic
+  "back-end" (nxbe), it implements a multi-threaded, multi-user windowing
+  system.  The files in this directory present the window APIs described in
+  include/nuttx/nx/nx.h.  The multi-user front end includes the NX graphics
+  server that executes on its own thread;  multiple graphics clients then
+  communicate with the server via a POSIX message queue to serialize window
+  operations from many threads. The multi-user front-end is selected
+  automatically.
 
 libnx/nxfonts
   This is where the NXFONTS implementation resides.  This is a relatively low-
@@ -260,8 +244,6 @@ General NX Settings
 
 CONFIG_NX
   Enables overall support for graphics library and NX
-CONFIG_NX_MULTIUSER
-  Configures NX in multi-user mode
 CONFIG_NX_NPLANES
   Some YUV color formats requires support for multiple planes, one for each
   color component.  Unless you have such special hardware, this value should be

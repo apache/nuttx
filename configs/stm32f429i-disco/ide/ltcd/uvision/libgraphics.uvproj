@@ -611,11 +611,6 @@
               <FilePath>../../../../../graphics/nxsu/nx_bitmap.c</FilePath>
             </File>
             <File>
-              <FileName>nx_close.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../graphics/nxsu/nx_close.c</FilePath>
-            </File>
-            <File>
               <FileName>nx_closewindow.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../graphics/nxsu/nx_closewindow.c</FilePath>
@@ -664,11 +659,6 @@
               <FileName>nx_move.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../graphics/nxsu/nx_move.c</FilePath>
-            </File>
-            <File>
-              <FileName>nx_open.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../graphics/nxsu/nx_open.c</FilePath>
             </File>
             <File>
               <FileName>nx_openwindow.c</FileName>

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxmu/nx_requestbkgd.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,7 @@
  *   background window in the following conditions:
  *
  *   - If you want to implement a windowless solution.  The single screen
- *     can be used to creat a truly simple graphic environment.  In this
- *     case, you should probably also de-select CONFIG_NX_MULTIUSER as well.
+ *     can be used to creat a truly simple graphic environment.
  *   - When you want more on the background than a solid color.  For
  *     example, if you want an image in the background, or animations in the
  *     background, or live video, etc.

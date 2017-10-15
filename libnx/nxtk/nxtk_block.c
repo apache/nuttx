@@ -1,7 +1,7 @@
 /****************************************************************************
  * libnx/nxtk/nxtk_block.c
  *
- *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,28 +43,6 @@
 #include <nuttx/nx/nxtk.h>
 #include <nuttx/nx/nxmu.h>
 
-#ifdef CONFIG_NX_MULTIUSER
-
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -88,8 +66,6 @@
  *   window may be safely closed.  Closing the window prior with pending
  *   callbacks can lead to bad behavior when the callback is executed.
  *
- *   Multiple user mode only!
- *
  * Input Parameters:
  *   hfwnd - The window to be blocked
  *   arg - An argument that will accompany the block messages (This is arg2
@@ -104,5 +80,3 @@ int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg)
 {
   return nx_block((NXWINDOW)hfwnd, arg);
 }
-
-#endif /* CONFIG_NX_MULTIUSER */

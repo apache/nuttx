@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nx.h
  *
- *   Copyright (C) 2008-2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -207,11 +207,11 @@ struct nx_callback_s
    *   that (1) there are no further pending callbacks and (2) that the
    *   window is now 'defunct' and will receive no further callbacks.
    *
-   *   This callback supports coordinated destruction of a window in multi-
-   *   user mode.  In multi-use mode, the client window logic must stay
-   *   intact until all of the queued callbacks are processed.  Then the
-   *   window may be safely closed.  Closing the window prior with pending
-   *   callbacks can lead to bad behavior when the callback is executed.
+   *   This callback supports coordinated destruction of a window.  In
+   *   the multi-user mode, the client window logic must stay intact until
+   *   all of the queued callbacks are processed.  Then the window may be
+   *   safely closed.  Closing the window prior with pending callbacks can
+   *   lead to bad behavior when the callback is executed.
    *
    * Input Parameters:
    *   hwnd - Window handle of the blocked window
@@ -224,9 +224,7 @@ struct nx_callback_s
    *
    **************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
   void (*blocked)(NXWINDOW hwnd, FAR void *arg1, FAR void *arg2);
-#endif
 };
 
 /****************************************************************************
@@ -258,8 +256,6 @@ extern "C"
  *   a macro that can be used when only one server instance is required.  In
  *   that case, a default server name is used.
  *
- *   Multiple user mode only!
- *
  * Input Parameters:
  *   mqname - The name for the server incoming message queue
  *   dev     - Vtable "object" of the framebuffer "driver" to use
@@ -270,10 +266,8 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
-#  define nx_run(dev) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
-#endif
+#define nx_run(dev) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
 
 /****************************************************************************
  * Name: nx_start
@@ -303,9 +297,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 int nx_start(void);
-#endif
 
 /****************************************************************************
  * Name:nx_connectinstance (and nx_connect macro)
@@ -325,8 +317,6 @@ int nx_start(void);
  *     server instance is required.  In that case, a default server name
  *     is used.
  *
- *   Multiple user mode only!
- *
  * Input Parameters:
  *   svrmqname - The name for the server incoming message queue
  *
@@ -336,44 +326,15 @@ int nx_start(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 NXHANDLE nx_connectinstance(FAR const char *svrmqname);
-#  define nx_connect(cb) nx_connectinstance(NX_DEFAULT_SERVER_MQNAME)
-#endif
-
-/****************************************************************************
- * Name: nx_open
- *
- * Description:
- *   Create, initialize and return an NX handle for use in subsequent
- *   NX API calls.  nx_open is the single user equivalent of nx_connect
- *   plus nx_run.
- *
- *   Single user mode only!
- *
- * Input Parameters:
- *   dev - Vtable "object" of the framebuffer/LCD "driver" to use
- *   cb - Callbacks used to process received NX server messages
- *
- * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
- *
- ****************************************************************************/
-
-#ifndef CONFIG_NX_MULTIUSER
-NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
-#endif
+#define nx_connect(cb) nx_connectinstance(NX_DEFAULT_SERVER_MQNAME)
 
 /****************************************************************************
  * Name: nx_disconnect
  *
  * Description:
  *   Disconnect a client from the NX server and/or free resources reserved
- *   by nx_connect/nx_connectinstance. nx_disconnect is multi-user equivalent
- *   of nx_close.
- *
- *   Multiple user mode only!
+ *   by nx_connect/nx_connectinstance.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
@@ -383,30 +344,7 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 void nx_disconnect(NXHANDLE handle);
-#endif
-
-/****************************************************************************
- * Name: nx_close
- *
- * Description:
- *   Close the single user NX interface.  nx_close is single-user equivalent
- *   of nx_disconnect.
- *
- *   Single user mode only!
- *
- * Input Parameters:
- *   handle - the handle returned by nx_open
- *
- * Return:
- *   None
- *
- ****************************************************************************/
-
-#ifndef CONFIG_NX_MULTIUSER
-void nx_close(NXHANDLE handle);
-#endif
 
 /****************************************************************************
  * Name: nx_eventhandler
@@ -435,11 +373,7 @@ void nx_close(NXHANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 int nx_eventhandler(NXHANDLE handle);
-#else
-#  define nx_eventhandler(handle) (OK)
-#endif
 
 /****************************************************************************
  * Name: nx_eventnotify
@@ -461,7 +395,7 @@ int nx_eventhandler(NXHANDLE handle);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NX_MULTIUSER) && !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_DISABLE_SIGNALS
 int nx_eventnotify(NXHANDLE handle, int signo);
 #else
 #  define nx_eventnotify(handle, signo) (OK)
@@ -474,7 +408,7 @@ int nx_eventnotify(NXHANDLE handle, int signo);
  *   Create a new window.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect or nx_open
+ *   handle - The handle returned by nx_connect()
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -516,13 +450,11 @@ int nx_closewindow(NXWINDOW hwnd);
  *   that (1) there are no further pending callbacks and (2) that the
  *   window is now 'defunct' and will receive no further callbacks.
  *
- *   This callback supports coordinated destruction of a window in multi-
- *   user mode.  In multi-use more, the client window logic must stay
- *   intact until all of the queued callbacks are processed.  Then the
- *   window may be safely closed.  Closing the window prior with pending
- *   callbacks can lead to bad behavior when the callback is executed.
- *
- *   Multiple user mode only!
+ *   This callback supports coordinated destruction of a window.  In multi-
+ *   user mode, the client window logic must stay intact until all of the
+ *   queued callbacks are processed.  Then the window may be safely closed.
+ *   Closing the window prior with pending callbacks can lead to bad behavior
+ *   when the callback is executed.
  *
  * Input Parameters:
  *   wnd - The window to be blocked
@@ -534,9 +466,7 @@ int nx_closewindow(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MULTIUSER
 int nx_block(NXWINDOW hwnd, FAR void *arg);
-#endif
 
 /****************************************************************************
  * Name: nx_requestbkgd
@@ -549,8 +479,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  *   background window in the following conditions:
  *
  *   - If you want to implement a windowless solution.  The single screen
- *     can be used to create a truly simple graphic environment.  In this
- *     case, you should probably also de-select CONFIG_NX_MULTIUSER as well.
+ *     can be used to create a truly simple graphic environment.
  *   - When you want more on the background than a solid color.  For
  *     example, if you want an image in the background, or animations in the
  *     background, or live video, etc.
@@ -993,7 +922,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *   This function is the same a nx_openwindow EXCEPT that the client provides
  *   the window structure instance.  nx_constructwindow will initialize the
  *   the pre-allocated window structure for use by NX.  This function is
- *   provided in addition to nx_open window in order to support a kind of
+ *   provided in addition to nx_openwindow in order to support a kind of
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *

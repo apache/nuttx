@@ -57,10 +57,6 @@
 #  warning "NX is not enabled (CONFIG_NX)
 #endif
 
-#ifndef CONFIG_NX_MULTIUSER
-#  warning "NX Console requires multi-user support (CONFIG_NX_MULTIUSER)"
-#endif
-
 /* Nx Console configuration options:
  *
  * CONFIG_NXTERM

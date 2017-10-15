@@ -663,15 +663,7 @@ config NXTERM_NPOLLWAITERS
 
 endif # NXTERM
 
-comment "NX Multi-user only options"
-
-menuconfig NX_MULTIUSER
-	bool "Multi-user NX Server"
-	default n
-	---help---
-		Configures NX in multi-user mode
-
-if NX_MULTIUSER
+comment "NX server options"
 
 config NX_BLOCKING
 	bool "Blocking"
@@ -713,8 +705,7 @@ config NXSTART_SERVERPRIO
 	int "NX Server priority"
 	default 110
 	---help---
-		Priority of the NX server.  This applies only if NX is configured in
-		multi-user mode (NX_MULTIUSER=y).  Default: 110.
+		Priority of the NX server.  Default: 110.
 
 		NOTE:  NXSTART_SERVERPRIO should have a relatively high priority to
 		avoid data overrun race conditions.
@@ -747,8 +738,6 @@ config NXSTART_VPLANE
 	depends on !NX_LCDDRIVER && !NXSTART_EXTERNINIT
 	---help---
 		Only a single video plane is supported. Default: 0
-
-endif # NX_MULTIUSER
 
 source "graphics/vnc/Kconfig"
 
