@@ -82,7 +82,9 @@ static bool g_nxserver_started;
 int nx_server(int argc, char *argv[])
 {
   FAR NX_DRIVERTYPE *dev;
+#ifndef CONFIG_NXSTART_EXTERNINIT
   int ret;
+#endif
 
 #if defined(CONFIG_NXSTART_EXTERNINIT)
   /* Use external graphics driver initialization */
