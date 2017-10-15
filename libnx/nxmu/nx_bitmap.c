@@ -1,7 +1,8 @@
 /****************************************************************************
  * libnx/nxmu/nx_bitmap.c
  *
- *   Copyright (C) 2008-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,7 +115,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   ret = _SEM_INIT(&sem_done, 0, 0);
   if (ret < 0)
     {
-      gerr("ERROR: _SEM_INIT failed: %d\n", _SEM_ERRNO(r));
+      gerr("ERROR: _SEM_INIT failed: %d\n", _SEM_ERRNO(ret));
       return ret;
     }
 
