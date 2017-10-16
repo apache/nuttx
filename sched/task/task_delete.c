@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/task/task_delete.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,25 +56,26 @@
  * Name: task_delete
  *
  * Description:
- *   This function causes a specified task to cease to exist. Its  stack and
- *   TCB will be deallocated.  This function is the companion to task_create().
- *   This is the version of the function exposed to the user; it is simply
- *   a wrapper around the internal, task_terminate function.
+ *   This function causes a specified task to cease to exist.  Its stack and
+ *   TCB will be deallocated.  This function is the companion to
+ *   task_create().  This is the version of the function exposed to the
+ *   user; it is simply a wrapper around the internal, task_terminate
+ *   function.
  *
- *   The logic in this function only deletes non-running tasks.  If the 'pid'
- *   parameter refers to to the currently runing task, then processing is
- *   redirected to exit().  This can only happen if a task calls task_delete()
- *   in order to delete itself.
+ *   The logic in this function only deletes non-running tasks.  If the
+ *   'pid' parameter refers to to the currently runing task, then processing
+ *   is redirected to exit().  This can only happen if a task calls
+ *   task_delete()in order to delete itself.
  *
  *   This function obeys the semantics of pthread cancellation:  task
  *   deletion is deferred if cancellation is disabled or if deferred
  *   cancellation is supported (with cancellation points enabled).
  *
- * Inputs:
+ * Input Parameters:
  *   pid - The task ID of the task to delete.  A pid of zero
  *         signifies the calling task.
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; or ERROR on failure with the errno variable set
  *   appropriately.
  *
@@ -83,6 +85,7 @@ int task_delete(pid_t pid)
 {
   FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
+  int errcode;
   int ret;
 
   /* Check if the task to delete is the calling task:  PID=0 means to delete
@@ -105,13 +108,29 @@ int task_delete(pid_t pid)
        * has probably already exited.
        */
 
-      set_errno(ESRCH);
-      return ERROR;
+      errcode = ESRCH;
+      goto errout;
     }
 
-  /* Only tasks and kernel threads should use this interface */
+  /* Only tasks and kernel threads can be deleted with this interface
+   * (The semantics of the call should be sufficient to prohibit this).
+   */
 
   DEBUGASSERT((dtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+
+  /* Non-privileged tasks and pthreads may not delete privileged kernel
+   * threads.
+   *
+   * REVISIT: We will need to look at this again in the future if/when
+   * permissions are supported and a user task might also be priveleged.
+   */
+
+  if (((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
+      ((dtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL))
+    {
+      errcode = EACCES;
+      goto errout;
+    }
 
   /* Check to see if this task has the non-cancelable bit set in its
    * flags. Suppress context changes for a bit so that the flags are stable.
@@ -183,9 +202,13 @@ int task_delete(pid_t pid)
   ret = task_terminate(pid, false);
   if (ret < 0)
     {
-      set_errno(-ret);
-      return ERROR;
+      errcode = -ret;
+      goto errout;
     }
 
   return OK;
+
+errout:
+  set_errno(errcode);
+  return ERROR;
 }

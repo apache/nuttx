@@ -2,7 +2,7 @@
  * include/nuttx/kthread.h
  * Non-standard, NuttX-specific kernel thread-related declarations.
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,6 +82,29 @@ extern "C"
 
 int kernel_thread(FAR const char *name, int priority, int stack_size,
                   main_t entry, FAR char * const argv[]);
+
+/****************************************************************************
+ * Name: kthread_delete
+ *
+ * Description:
+ *   This function will terminate a kernel thread.  At present, this
+ *   function is equivalent to task_delete.c; the following definition
+ *   simply reserves the name in the name space.
+ *
+ *   Refer to comments with task_delete() for a more detailed description of
+ *   the operation of this function.
+ *
+ * Input Parameters:
+ *   pid - The task ID of the task to delete.  A pid of zero
+ *         signifies the calling task.
+ *
+ * Returned Value:
+ *   OK on success; or ERROR on failure with the errno variable set
+ *   appropriately.
+ *
+ ****************************************************************************/
+
+#define kthread_delete(p) task_delete(p)
 
 #undef EXTERN
 #ifdef __cplusplus

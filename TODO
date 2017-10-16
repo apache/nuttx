@@ -789,7 +789,6 @@ o Kernel/Protected Build
   Description: Certain interfaces, such as sched_setparam(),
                sched_setscheduler(), etc. can be used by user mode tasks to
                modify the behavior of priviledged kernel threads.
-               task_delete() could even be used to kill a kernel thread.
                For a truly secure system.  Privileges need to be checked in
                every interface that permits one thread to modify the
                properties of another thread.
