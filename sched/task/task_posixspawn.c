@@ -414,10 +414,10 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    * task.
    */
 
-  proxy = kernel_thread("posix_spawn_proxy", param.sched_priority,
-                        CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                        (main_t)posix_spawn_proxy,
-                        (FAR char * const *)NULL);
+  proxy = kthread_create("posix_spawn_proxy", param.sched_priority,
+                         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
+                         (main_t)posix_spawn_proxy,
+                         (FAR char * const *)NULL);
   if (proxy < 0)
     {
       ret = get_errno();

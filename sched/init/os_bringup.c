@@ -154,9 +154,9 @@ static inline void os_pgworker(void)
 
   sinfo("Starting paging thread\n");
 
-  g_pgworker = kernel_thread("pgfill", CONFIG_PAGING_DEFPRIO,
-                             CONFIG_PAGING_STACKSIZE,
-                             (main_t)pg_worker, (FAR char * const *)NULL);
+  g_pgworker = kthread_create("pgfill", CONFIG_PAGING_DEFPRIO,
+                              CONFIG_PAGING_STACKSIZE,
+                              (main_t)pg_worker, (FAR char * const *)NULL);
   DEBUGASSERT(g_pgworker > 0);
 }
 
@@ -354,7 +354,7 @@ static inline void os_start_application(void)
    * execution.
    */
 
-  pid = kernel_thread("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
+  pid = kthread_create("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
                       (main_t)os_start_task, (FAR char * const *)NULL);
   ASSERT(pid > 0);

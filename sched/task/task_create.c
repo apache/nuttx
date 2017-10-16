@@ -62,7 +62,7 @@
  * Description:
  *   This function creates and activates a new thread of the specified type
  *   with a specified priority and returns its system-assigned ID.  It is the
- *   internal, common implementation of task_create() and kernel_thread().
+ *   internal, common implementation of task_create() and kthread_create().
  *   See comments with task_create() for further information.
  *
  * Input Parameters:
@@ -243,7 +243,7 @@ int task_create(FAR const char *name, int priority,
 #endif
 
 /****************************************************************************
- * Name: kernel_thread
+ * Name: kthread_create
  *
  * Description:
  *   This function creates and activates a kernel thread task with kernel-
@@ -258,8 +258,8 @@ int task_create(FAR const char *name, int priority,
  *
  ****************************************************************************/
 
-int kernel_thread(FAR const char *name, int priority,
-                  int stack_size, main_t entry, FAR char *const argv[])
+int kthread_create(FAR const char *name, int priority,
+                   int stack_size, main_t entry, FAR char *const argv[])
 {
   return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
                        entry, argv);

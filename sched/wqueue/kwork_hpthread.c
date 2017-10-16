@@ -154,10 +154,10 @@ int work_hpstart(void)
 
   sinfo("Starting high-priority kernel worker thread\n");
 
-  pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
-                      CONFIG_SCHED_HPWORKSTACKSIZE,
-                      (main_t)work_hpthread,
-                      (FAR char * const *)NULL);
+  pid = kthread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
+                       CONFIG_SCHED_HPWORKSTACKSIZE,
+                       (main_t)work_hpthread,
+                       (FAR char * const *)NULL);
 
   DEBUGASSERT(pid > 0);
   if (pid < 0)
@@ -165,7 +165,7 @@ int work_hpstart(void)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      serr("ERROR: kernel_thread failed: %d\n", errcode);
+      serr("ERROR: kthread_create failed: %d\n", errcode);
       return -errcode;
     }
 

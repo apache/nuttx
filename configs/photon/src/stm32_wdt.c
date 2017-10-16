@@ -158,10 +158,10 @@ int photon_watchdog_initialize(void)
 
   /* Spawn wdog deamon thread */
 
-  int taskid = kernel_thread(CONFIG_PHOTON_WDG_THREAD_NAME,
-                             CONFIG_PHOTON_WDG_THREAD_PRIORITY,
-                             CONFIG_PHOTON_WDG_THREAD_STACKSIZE,
-                             (main_t)wdog_daemon, (FAR char * const *)NULL);
+  int taskid = kthread_create(CONFIG_PHOTON_WDG_THREAD_NAME,
+                              CONFIG_PHOTON_WDG_THREAD_PRIORITY,
+                              CONFIG_PHOTON_WDG_THREAD_STACKSIZE,
+                              (main_t)wdog_daemon, (FAR char * const *)NULL);
 
   if (taskid <= 0)
     {

@@ -670,9 +670,9 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Spawn bcmf daemon thread */
 
-  ret = kernel_thread(BCMF_THREAD_NAME, SCHED_PRIORITY_MAX,
-                      BCMF_THREAD_STACK_SIZE, bcmf_sdio_thread,
-                      (FAR char * const *)NULL);
+  ret = kthread_create(BCMF_THREAD_NAME, SCHED_PRIORITY_MAX,
+                       BCMF_THREAD_STACK_SIZE, bcmf_sdio_thread,
+                       (FAR char * const *)NULL);
 
   if (ret <= 0)
     {

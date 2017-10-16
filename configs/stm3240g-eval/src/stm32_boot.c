@@ -252,9 +252,9 @@ void board_initialize(void)
 
   /* Start the board initialization kernel thread */
 
-  server = kernel_thread("Board Init", CONFIG_STM3240G_BOARDINIT_PRIO,
-                         CONFIG_STM3240G_BOARDINIT_STACK, board_initthread,
-                         NULL);
+  server = kthread_create("Board Init", CONFIG_STM3240G_BOARDINIT_PRIO,
+                          CONFIG_STM3240G_BOARDINIT_STACK, board_initthread,
+                          NULL);
   ASSERT(server > 0);
 #else
   (void)stm32_bringup();

@@ -65,7 +65,7 @@ extern "C"
  ****************************************************************************/
 
 /********************************************************************************
- * Name: kernel_thread
+ * Name: kthread_create
  *
  * Description:
  *   This function creates and activates a kernel thread task with kernel-mode
@@ -80,8 +80,8 @@ extern "C"
  *
  ********************************************************************************/
 
-int kernel_thread(FAR const char *name, int priority, int stack_size,
-                  main_t entry, FAR char * const argv[]);
+int kthread_create(FAR const char *name, int priority, int stack_size,
+                   main_t entry, FAR char * const argv[]);
 
 /****************************************************************************
  * Name: kthread_delete

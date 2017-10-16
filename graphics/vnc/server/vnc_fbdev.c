@@ -452,7 +452,7 @@ static int vnc_start_server(int display)
   argv[0] = str;
   argv[1] = NULL;
 
-  pid = kernel_thread("vnc_server", CONFIG_VNCSERVER_PRIO,
+  pid = kthread_create("vnc_server", CONFIG_VNCSERVER_PRIO,
                        CONFIG_VNCSERVER_STACKSIZE,
                        (main_t)vnc_server, argv);
   if (pid < 0)

@@ -1613,7 +1613,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uinfo("Start poll task\n");
 
-  /* The inputs to a task started by kernel_thread() are very awkard for this
+  /* The inputs to a task started by kthread_create() are very awkard for this
    * purpose.  They are really designed for command line tasks (argc/argv). So
    * the following is kludge pass binary data when the keyboard poll task
    * is started.
@@ -1625,9 +1625,10 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   usbhost_takesem(&g_exclsem);
   g_priv = priv;
 
-  priv->pollpid = kernel_thread("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
-                                CONFIG_HIDKBD_STACKSIZE,
-                                (main_t)usbhost_kbdpoll, (FAR char * const *)NULL);
+  priv->pollpid = kthread_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
+                                 CONFIG_HIDKBD_STACKSIZE,
+                                 (main_t)usbhost_kbdpoll,
+                                 (FAR char * const *)NULL);
   if (priv->pollpid == ERROR)
     {
       /* Failed to started the poll thread... probably due to memory resources */

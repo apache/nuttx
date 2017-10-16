@@ -716,9 +716,10 @@ o Kernel/Protected Build
 
                Obviously system performance could be improved greatly by simply
                optimizing these functions so that they do not need to system calls
-               so frequently.  getpid() is (I believe) part of the re-entrant
-               semaphore logic.  Something like TLS might be used to retain the
-               thread's ID locally.
+               so frequently.  This getpid() call is part of the re-entrant
+               semaphore logic used with printf() and other C buffered I/O.
+               Something like TLS might be used to retain the thread's ID
+               locally.
 
                Linux, for example, has functions call up() and down().  up()
                increments the semaphore count but does not call into the kernel
@@ -727,11 +728,11 @@ o Kernel/Protected Build
                the count becomes negative the caller must be blocked.
 
                Update:
-               "I am thinking that there should be a "magic" global, user-accessible
-                variable that holds the PID of the currently executing thread;
-                basically the PID of the task at the head of the ready-to-run list.
-                This variable would have to be reset each time the head of the ready-
-                to-run list changes.
+               "I am thinking that there should be a "magic" global, user-
+                accessible variable that holds the PID of the currently
+                executing thread; basically the PID of the task at the head
+                of the ready-to-run list. This variable would have to be reset
+                each time the head of the ready-to-run list changes.
 
                "Then getpid() could be implemented in user space with no system call
                 by simply reading this variable.
@@ -749,6 +750,21 @@ o Kernel/Protected Build
                Update:
                One solution might be to used CONFIG_TLS, add the PID to struct
                tls_info_s.  Then the PID could be obtained without a system call.
+               TLS is not very useful in the FLAT build, however.  TLS works by
+               putting per-thread data at the bottom of an aligned stack.  The
+               current stack pointer is the ANDed with the alignment mask to
+               obtain the per-thread data address.
+
+               There are problems with this in the FLAT and PROTECTED builds:
+               First the maximum size of the stack is limited by the number
+               of bits in the mask.  This means that you need to have a very
+               high alignment to support tasks with large stacks.  But
+               secondly, the higher the alignment of the stacks stacks, the
+               more memory is lost to fragmentation.
+
+               In the KERNEL build, the the stack lies at a virtual address
+               and it is possible to have highly aligned stacks with no such
+               penalties.
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
                real performance issue or not.  The above statistics were collected
@@ -798,6 +814,10 @@ o Kernel/Protected Build
                might also want to be able to modify privileged threads from
                user tasks with certain permissions.  Permissions is a much
                more complex issue.
+
+               task_delete(), for example, is not permitted to kill a kernel
+               thread.  But should not a privileged user task be able to do
+               so?
   Status:      Open
   Priority:    Low for most embedded systems but would be a critical need if
                NuttX were used in a secure system.

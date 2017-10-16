@@ -192,10 +192,10 @@ int sam_watchdog_initialize(void)
 #if defined(CONFIG_WDT_THREAD)
   sched_lock();
 
-  int taskid = kernel_thread(CONFIG_WDT_THREAD_NAME,
-                             CONFIG_WDT_THREAD_PRIORITY,
-                             CONFIG_WDT_THREAD_STACKSIZE,
-                             (main_t)wdog_daemon, (FAR char * const *)NULL);
+  int taskid = kthread_create(CONFIG_WDT_THREAD_NAME,
+                              CONFIG_WDT_THREAD_PRIORITY,
+                              CONFIG_WDT_THREAD_STACKSIZE,
+                              (main_t)wdog_daemon, (FAR char * const *)NULL);
 
   ASSERT(taskid > 0);
   sched_unlock();

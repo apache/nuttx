@@ -191,8 +191,8 @@ int nx_start(void)
       /* Start the server kernel thread */
 
       ginfo("Starting server task\n");
-      server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
-                             CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
+      server = kthread_create("NX Server", CONFIG_NXSTART_SERVERPRIO,
+                              CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
       if (server < 0)
         {
           int errcode = errno;
