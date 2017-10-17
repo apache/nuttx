@@ -72,68 +72,119 @@
 #define BPR_IRQ_FIRST            0  /* IRQ of first defined bit */
 #define BPR_BIT_FIRST            0  /* First defined bit */
 
-#define BCM_IRQ_ARM_TIMER        0  /* Bit 0:  ARM Timer IRQ pending */
-#define BCM_IRQ_ARM_MAILBOX      1  /* Bit 1:  ARM Mailbox IRQ pending */
-#define BCM_IRQ_ARM_DOORBELL_0   2  /* Bit 2:  ARM Doorbell 0 IRQ pending */
-#define BCM_IRQ_ARM_DOORBELL_1   3  /* Bit 3:  ARM Doorbell 2 IRQ pending */
-#define BCM_IRQ_GPU0_HALTED      4  /* Bit 4:  GPU0 halted IRQ pending
-                                    * (Or GPU1 halted if bit 10 of control
-                                    * register 1 is set) */
-#define BCM_IRQ_GPU1_HALTED      5  /* Bit 5:  GPU1 halted IRQ pending */
-#define BCM_IRQ_ILLEGAL_ACCESS_1 6  /* Bit 6:  Illegal access type 1 IRQ pending */
-#define BCM_IRQ_ILLEGAL_ACCESS_0 7  /* Bit 7:  Illegal access type 0 IRQ pending */
+#define BCM_IRQ_ARM_TIMER        (BPR_IRQ_FIRST + 0)  /* Bit 0:  ARM Timer IRQ pending */
+#define BCM_IRQ_ARM_MAILBOX      (BPR_IRQ_FIRST + 1)  /* Bit 1:  ARM Mailbox IRQ pending */
+#define BCM_IRQ_ARM_DOORBELL_0   (BPR_IRQ_FIRST + 2)  /* Bit 2:  ARM Doorbell 0 IRQ pending */
+#define BCM_IRQ_ARM_DOORBELL_1   (BPR_IRQ_FIRST + 3)  /* Bit 3:  ARM Doorbell 2 IRQ pending */
+#define BCM_IRQ_VPU0_HALTED      (BPR_IRQ_FIRST + 4)  /* Bit 4:  GPU0 halted IRQ pending
+                                                       * (Or GPU1 halted if bit 10 of control
+                                                       * register 1 is set) */
+#define BCM_IRQ_VPU1_HALTED      (BPR_IRQ_FIRST + 5)  /* Bit 5:  GPU1 halted IRQ pending */
+#define BCM_IRQ_ILLEGAL_TYPE0    (BPR_IRQ_FIRST + 6)  /* Bit 6:  Illegal access type 1 IRQ pending */
+#define BCM_IRQ_ILLEGAL_TYPE1    (BPR_IRQ_FIRST + 7)  /* Bit 7:  Illegal access type 0 IRQ pending */
 
-#define BCM_BIT_PENDING_1        8  /* Bit 8:  Bits set in pending register 1 */
-#define BCM_BIT_PENDING_2        9  /* Bit 9:  Bits set in pending register 2 */
+#define BCM_IRQ_PENDING1         (BPR_IRQ_FIRST + 8)  /* Bit 8:  Bits set in pending register 1 */
+#define BCM_IRQ_PENDING2         (BPR_IRQ_FIRST + 9)  /* Bit 9:  Bits set in pending register 2 */
 
-#define BCM_IRQ_GPU_IRQ_7        10 /* Bit 10: GPU IRQ 7 */
-#define BCM_IRQ_GPU_IRQ_9        11 /* Bit 10: GPU IRQ 9 */
-#define BCM_IRQ_GPU_IRQ_10       12 /* Bit 10: GPU IRQ 10 */
-#define BCM_IRQ_GPU_IRQ_18       13 /* Bit 10: GPU IRQ 18 */
-#define BCM_IRQ_GPU_IRQ_19       14 /* Bit 10: GPU IRQ 19 */
-#define BCM_IRQ_GPU_IRQ_53       15 /* Bit 10: GPU IRQ 53 */
-#define BCM_IRQ_GPU_IRQ_54       16 /* Bit 10: GPU IRQ 54 */
-#define BCM_IRQ_GPU_IRQ_55       17 /* Bit 10: GPU IRQ 55 */
-#define BCM_IRQ_GPU_IRQ_56       18 /* Bit 10: GPU IRQ 56 */
-#define BCM_IRQ_GPU_IRQ_57       19 /* Bit 10: GPU IRQ 57 */
-#define BCM_IRQ_GPU_IRQ_62       20 /* Bit 10: GPU IRQ 61 */
+#define BCM_IRQ_JPEG             (BPR_IRQ_FIRST + 10) /* Bit 10: GPU IRQ 7 */
+#define BCM_IRQ_USB              (BPR_IRQ_FIRST + 11) /* Bit 11: GPU IRQ 9 */
+#define BCM_IRQ_3D               (BPR_IRQ_FIRST + 12) /* Bit 12: GPU IRQ 10 */
+#define BCM_IRQ_DMA2             (BPR_IRQ_FIRST + 13) /* Bit 13: GPU IRQ 18 */
+#define BCM_IRQ_DMA3             (BPR_IRQ_FIRST + 14) /* Bit 14: GPU IRQ 19 */
+#define BCM_IRQ_I2C              (BPR_IRQ_FIRST + 15) /* Bit 15: GPU IRQ 53 */
+#define BCM_IRQ_SPI              (BPR_IRQ_FIRST + 16) /* Bit 16: GPU IRQ 54 */
+#define BCM_IRQ_I2SPCM           (BPR_IRQ_FIRST + 17) /* Bit 17: GPU IRQ 55 */
+#define BCM_IRQ_SDIO             (BPR_IRQ_FIRST + 18) /* Bit 18: GPU IRQ 56 */
+#define BCM_IRQ_UART             (BPR_IRQ_FIRST + 19) /* Bit 19: GPU IRQ 57 */
+#define BCM_IRQ_ARASANSDIO       (BPR_IRQ_FIRST + 20) /* Bit 20: GPU IRQ 61 */
 
 #define BPR_BIT_IRQMASK          0x001ffcff            /* Mask of defined interrupts */
-#define BPR_BIT_LAST             20                    /* IRQ of last defined bit */
+#define BPR_BIT_LAST             BCM_IRQ_ARASANSDIO    /* IRQ of last defined bit */
 #define BPR_IRQ_LAST             20                    /* Last defined bit */
 
 /* IRQ pending 1 register */
 
 #define IPR1_IRQ_FIRST           (BPR_IRQ_LAST + 1)    /* IRQ of first defined bit */
-#define IPR1_BIT_FIRST           (29)                  /* First defined bit */
+#define IPR1_BIT_FIRST           (0)                   /* First defined bit */
 
-#define BCM_IRQ_AUX_INT          IPR1_IRQ_FIRST        /* Bit 29: Aux interrupt */
+#define BCM_IRQ_TIMER0           (IPR1_IRQ_FIRST + 0)  /* Bit 0: System Timer Compare Register 0 */
+#define BCM_IRQ_TIMER1           (IPR1_IRQ_FIRST + 1)  /* Bit 1: System Timer Compare Register 1 */
+#define BCM_IRQ_TIMER2           (IPR1_IRQ_FIRST + 2)  /* Bit 2: System Timer Compare Register 2 */
+#define BCM_IRQ_TIMER3           (IPR1_IRQ_FIRST + 3)  /* Bit 3: System Timer Compare Register 3 */
+#define BCM_IRQ_CODEC0           (IPR1_IRQ_FIRST + 4)
+#define BCM_IRQ_CODEC1           (IPR1_IRQ_FIRST + 5)
+#define BCM_IRQ_CODEC2           (IPR1_IRQ_FIRST + 6)
+#define BCM_IRQ_VC_JPEG          (IPR1_IRQ_FIRST + 7)
+#define BCM_IRQ_ISP              (IPR1_IRQ_FIRST + 8)
+#define BCM_IRQ_VC_USB           (IPR1_IRQ_FIRST + 9)  /* Bit 9: USB Controller */
+#define BCM_IRQ_VC_3D            (IPR1_IRQ_FIRST + 10)
+#define BCM_IRQ_TRANSPOSER       (IPR1_IRQ_FIRST + 11)
+#define BCM_IRQ_MULTICORESYNC0   (IPR1_IRQ_FIRST + 12)
+#define BCM_IRQ_MULTICORESYNC1   (IPR1_IRQ_FIRST + 13)
+#define BCM_IRQ_MULTICORESYNC2   (IPR1_IRQ_FIRST + 14)
+#define BCM_IRQ_MULTICORESYNC3   (IPR1_IRQ_FIRST + 15)
+#define BCM_IRQ_DMA0             (IPR1_IRQ_FIRST + 16)
+#define BCM_IRQ_DMA1             (IPR1_IRQ_FIRST + 17)
+#define BCM_IRQ_VC_DMA2          (IPR1_IRQ_FIRST + 18)
+#define BCM_IRQ_VC_DMA3          (IPR1_IRQ_FIRST + 19)
+#define BCM_IRQ_DMA4             (IPR1_IRQ_FIRST + 20)
+#define BCM_IRQ_DMA5             (IPR1_IRQ_FIRST + 21)
+#define BCM_IRQ_DMA6             (IPR1_IRQ_FIRST + 22)
+#define BCM_IRQ_DMA7             (IPR1_IRQ_FIRST + 23)
+#define BCM_IRQ_DMA8             (IPR1_IRQ_FIRST + 24)
+#define BCM_IRQ_DMA9             (IPR1_IRQ_FIRST + 25)
+#define BCM_IRQ_DMA10            (IPR1_IRQ_FIRST + 26)
+#define BCM_IRQ_DMA11            (IPR1_IRQ_FIRST + 27)
+#define BCM_IRQ_DMA12            (IPR1_IRQ_FIRST + 28)
+#define BCM_IRQ_AUX              (IPR1_IRQ_FIRST + 29) /* Bit 29: Aux interrupt */
+#define BCM_IRQ_ARM              (IPR1_IRQ_FIRST + 30)
+#define BCM_IRQ_VPUDMA           (IPR1_IRQ_FIRST + 31)
 
 #define IPR1_BIT_IRQMASK         0x20000000            /* Mask of defined interrupts */
-#define IPR1_IRQ_LAST            BCM_IRQ_AUX_INT       /* IRQ of last defined bit */
-#define IPR1_BIT_LAST            (29)                  /* Last defined bit */
+#define IPR1_IRQ_LAST            BCM_IRQ_VPUDMA        /* IRQ of last defined bit */
+#define IPR1_BIT_LAST            (31)                  /* Last defined bit */
 
 /* IRQ pending 1 register */
 
 #define IPR2_IRQ_FIRST           (IPR1_IRQ_LAST + 1)   /* IRQ of first defined bit */
-#define IPR2_BIT_FIRST           (11)                  /* First defined bit */
+#define IPR2_BIT_FIRST           (0)                   /* First defined bit */
 
-#define BCM_IRQ_I2C_SPI_SLV      (IPR2_IRQ_FIRST + 11) /* Bit 11: 43 I2C/SPI slave */
-#define BCM_IRQ_PWA0             (IPR2_IRQ_FIRST + 13) /* Bit 12: 45 PWA0 */
-#define BCM_IRQ_PWA1             (IPR2_IRQ_FIRST + 14) /* Bit 14: 46 PWA1 */
-#define BCM_IRQ_SMI              (IPR2_IRQ_FIRST + 16) /* Bit 16: 48 SMI */
-#define BCM_IRQ_GPIO0            (IPR2_IRQ_FIRST + 17) /* Bit 17: 49 GPIO interrupt 0 */
-#define BCM_IRQ_GPIO1            (IPR2_IRQ_FIRST + 18) /* Bit 18: 50 GPIO interrupt 1 */
-#define BCM_IRQ_GPIO2            (IPR2_IRQ_FIRST + 19) /* Bit 19: 51 GPIO interrupt 2 */
-#define BCM_IRQ_GPIO3            (IPR2_IRQ_FIRST + 20) /* Bit 20: 52 GPIO interrupt 3 */
-#define BCM_IRQ_I2C              (IPR2_IRQ_FIRST + 21) /* Bit 21: 53 I2C interrupt */
-#define BCM_IRQ_SPI              (IPR2_IRQ_FIRST + 22) /* Bit 22: 54 SPI interrupt */
-#define BCM_IRQ_PCM              (IPR2_IRQ_FIRST + 23) /* Bit 23: 55 PCM interrupt */
-#define BCM_IRQ_UART             (IPR2_IRQ_FIRST + 24) /* Bit 24: 57 UART interrupt */
+#define BCM_IRQ_HOSTPORT         (IPR2_IRQ_FIRST + 0)
+#define BCM_IRQ_VIDEOSCALER      (IPR2_IRQ_FIRST + 1)
+#define BCM_IRQ_CCP2TX           (IPR2_IRQ_FIRST + 2)
+#define BCM_IRQ_SDC              (IPR2_IRQ_FIRST + 3)
+#define BCM_IRQ_DSI0             (IPR2_IRQ_FIRST + 4)
+#define BCM_IRQ_AVE              (IPR2_IRQ_FIRST + 5)
+#define BCM_IRQ_CAM0             (IPR2_IRQ_FIRST + 6)
+#define BCM_IRQ_CAM1             (IPR2_IRQ_FIRST + 7)
+#define BCM_IRQ_HDMI0            (IPR2_IRQ_FIRST + 8)
+#define BCM_IRQ_HDMI1            (IPR2_IRQ_FIRST + 9)
+#define BCM_IRQ_PIXELVALVE1      (IPR2_IRQ_FIRST + 10)
+#define BCM_IRQ_I2CSPISLV        (IPR2_IRQ_FIRST + 11) /* Bit 11: I2C/SPI slave */
+#define BCM_IRQ_DSI1             (IPR2_IRQ_FIRST + 12)
+#define BCM_IRQ_PWA0             (IPR2_IRQ_FIRST + 13) /* Bit 13: PWA0 */
+#define BCM_IRQ_PWA1             (IPR2_IRQ_FIRST + 14) /* Bit 14: PWA1 */
+#define BCM_IRQ_CPR              (IPR2_IRQ_FIRST + 15)
+#define BCM_IRQ_SMI              (IPR2_IRQ_FIRST + 16) /* Bit 16: SMI */
+#define BCM_IRQ_GPIO0            (IPR2_IRQ_FIRST + 17) /* Bit 17: GPIO interrupt 0 */
+#define BCM_IRQ_GPIO1            (IPR2_IRQ_FIRST + 18) /* Bit 18: GPIO interrupt 1 */
+#define BCM_IRQ_GPIO2            (IPR2_IRQ_FIRST + 19) /* Bit 19: GPIO interrupt 2 */
+#define BCM_IRQ_GPIO3            (IPR2_IRQ_FIRST + 20) /* Bit 20: GPIO interrupt 3 */
+#define BCM_IRQ_VC_I2C           (IPR2_IRQ_FIRST + 21) /* Bit 21: I2C interrupt */
+#define BCM_IRQ_VC_SPI           (IPR2_IRQ_FIRST + 22) /* Bit 22: SPI interrupt */
+#define BCM_IRQ_VC_I2SPCM        (IPR2_IRQ_FIRST + 23) /* Bit 23: PCM audio interrupt */
+#define BCM_IRQ_VC_SDIO          (IPR2_IRQ_FIRST + 24) /* Bit 24: SDIO interrupt */
+#define BCM_IRQ_VC_UART          (IPR2_IRQ_FIRST + 25)
+#define BCM_IRQ_SLIMBUS          (IPR2_IRQ_FIRST + 26)
+#define BCM_IRQ_VEC              (IPR2_IRQ_FIRST + 27)
+#define BCM_IRQ_CPG              (IPR2_IRQ_FIRST + 28)
+#define BCM_IRQ_RNG              (IPR2_IRQ_FIRST + 29)
+#define BCM_IRQ_VC_ARASANSDIO    (IPR2_IRQ_FIRST + 30) /* Bit 30: SD Host Controller */
+#define BCM_IRQ_AVSPMON          (IPR2_IRQ_FIRST + 31)
 
-#define IPR2_BIT_IRQMASK         0x01ff6800            /* Mask of defined interrupts */
-#define IPR2_IRQ_LAST            BCM_IRQ_UART          /* IRQ of last defined bit */
-#define IPR2_BIT_LAST            (24)                  /* Last defined bit */
+#define IPR2_BIT_IRQMASK         0xffffffff            /* Mask of defined interrupts */
+#define IPR2_IRQ_LAST            BCM_IRQ_AVSPMON       /* IRQ of last defined bit */
+#define IPR2_BIT_LAST            (31)                  /* Last defined bit */
 
 /* Number of interrupts */
 

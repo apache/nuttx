@@ -61,6 +61,9 @@
  * timer provides the running time;  comparison registers are used to
  * generate interval interrupt.
  *
+ * Comparison registrs C1 and C3 are available to the ARM.  C0 and C2 are
+ * used by the GPU.
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -96,12 +99,21 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct systimr_s
+{
+  volatile uint64_t start;     /* Timer interval timer started */
+  volatile uint64_t interval;  /* Duration of the interval timer */
+  volatile bool     running;   /* True if the interval timer is running */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static volatile uint64_t g_systimr_start;    /* Timer interval timer started */
-static volatile uint64_t g_systimr_interval; /* Duration of the interval timer */
-static volatile bool g_systimr_running;      /* True if the interval timer is running */
+static struct systimr_s g_systimr;
 
 /****************************************************************************
  * Private Functions
@@ -189,7 +201,20 @@ static void bcm_convert_systimr(uint64_t usec, FAR struct timespec *ts)
 
 static int bcm_systimr_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-#warning Missing logic
+  /* Disable the Match 0 compare interrupt now. */
+
+  up_disable_irq(BCM_IRQ_TIMER1);
+
+  /* Clear the pending Match 0 compare interrupt */
+
+  putreg32(SYSTIMR_C_M0, BCM_SYSTIMR_C);
+
+  g_systimr.running  = false;
+  g_systimr.interval = 0;
+
+  /* Then process the timer expiration */
+
+  sched_timer_expiration();
   return OK;
 }
 
@@ -224,9 +249,10 @@ static int bcm_systimr_interrupt(int irq, FAR void *context, FAR void *arg)
 
 void arm_timer_initialize(void)
 {
-  /* Nothing needs to be done... we inherit the 1MHz timer from the
-   * bootloader.
-   */
+  /* Disable and attach the Match 1 compare interrupt handler. */
+
+  up_disable_irq(BCM_IRQ_TIMER1);
+  (void)irq_attach(BCM_IRQ_TIMER1, bcm_systimr_interrupt, NULL);
 }
 
 /****************************************************************************
@@ -361,39 +387,39 @@ int up_timer_cancel(FAR struct timespec *ts)
 
   DEBUGASSERT(ts != NULL);
 
-  /* Disable the comparison interrupt */
+  /* Disable the Match 1 comparison interrupt */
 
   flags = enter_critical_section();
-#warning Missing logic
+  up_disable_irq(BCM_IRQ_TIMER1);
 
   /* Check if the timer was actually running */
 
-  if (!g_systimr_running)
+  if (!g_systimr.running)
     {
       goto errout;
     }
 
-  g_systimr_running = false;
+  g_systimr.running = false;
 
   /* Get the time elapsed time since the interval timer was started */
 
-  elapsed = bcm_read_systimr() - g_systimr_start;
-  if (elapsed >= g_systimr_interval)
+  elapsed = bcm_read_systimr() - g_systimr.start;
+  if (elapsed >= g_systimr.interval)
     {
       goto errout;
     }
 
-  g_systimr_interval = 0;
+  g_systimr.interval = 0;
 
   /* Return the value remaining on the timer */
 
   leave_critical_section(flags);
-  bcm_convert_systimr(g_systimr_interval - elapsed, ts);
+  bcm_convert_systimr(g_systimr.interval - elapsed, ts);
   return OK;
 
 errout:
-  g_systimr_running  = false;
-  g_systimr_interval = 0;
+  g_systimr.running  = false;
+  g_systimr.interval = 0;
   leave_critical_section(flags);
 
   ts->tv_sec = 0;
@@ -431,26 +457,33 @@ int up_timer_start(FAR const struct timespec *ts)
   irqstate_t flags;
   uint64_t interval;
   uint64_t now;
-  uint32_t cmp;
 
   DEBUGASSERT(ts != NULL);
 
-  /* Convert the time to microseconds */
+  /* Convert the time to microseconds.  WARNING:  Bad things might happen if
+   * this interval is very small!
+   */
 
   interval = (uint64_t)ts->tv_sec * USEC_PER_SEC +
              (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
-  flags = enter_critical_section();
+  /* Make certain that the Match 0 comparison interrupt is disabled */
 
-  /* Configure and enable the comparison interrupt */
+  flags = enter_critical_section();
+  up_disable_irq(BCM_IRQ_TIMER1);
+
+  /* Configure the Match 1 comparison reigster*/
 
   now = bcm_read_systimr();
-  cmp = (uint32_t)(now + interval);
-#warning Missing logic
+  putreg32(now + interval, BCM_SYSTIMR_C1);
 
-  g_systimr_start    = now;
-  g_systimr_interval = interval;
-  g_systimr_running  = true;
+  g_systimr.start    = now;
+  g_systimr.interval = interval;
+  g_systimr.running  = true;
+
+  /* Enable the comparison interrupt */
+
+  up_enable_irq(BCM_IRQ_TIMER1);
   leave_critical_section(flags);
   return OK;
 }

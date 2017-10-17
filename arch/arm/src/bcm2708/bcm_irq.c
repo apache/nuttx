@@ -166,7 +166,7 @@ void up_decodeirq(uint32_t *regs)
 
   /* Check for pending interrupts in IPR1 */
 
-  if ((bpr & BCM_BIT_PENDING_1) != 0)
+  if ((bpr & BCM_IRQ_PENDING1) != 0)
     {
       /* Read the pending 1 register */
 
@@ -197,7 +197,7 @@ void up_decodeirq(uint32_t *regs)
 
   /* Check for pending interrupts in IPR2 */
 
-  if ((bpr & BCM_BIT_PENDING_2) != 0)
+  if ((bpr & BCM_IRQ_PENDING2) != 0)
     {
       /* Read the pending 2 register */
 
