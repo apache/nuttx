@@ -712,7 +712,7 @@ static int rtchw_check_alrbwf(void)
   uint32_t regval;
   int ret = -ETIMEDOUT;
 
-  /* Check RTC_ISR ALRAWF for access to alarm register,
+  /* Check RTC_ISR ALRBWF for access to alarm register,
    * can take 2 RTCCLK cycles or timeout
    * CubeMX use GetTick.
    */
@@ -885,8 +885,7 @@ static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
   data = getreg32(reg);
 
   /* Convert the RTC time to fields in struct tm format.  All of the STM32
-   * All of the ranges of values correspond between struct tm and the time
-   * register.
+   * ranges of values correspond between struct tm and the time register.
    */
 
   tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
@@ -897,6 +896,9 @@ static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
 
   tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
   tp->tm_hour = rtc_bcd2bin(tmp);
+
+  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >> RTC_ALRMR_DU_SHIFT;
+  tp->tm_mday = rtc_bcd2bin(tmp);
 
   return OK;
 }
@@ -1416,7 +1418,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  * Name: stm32_rtc_setalarm
  *
  * Description:
- *   Set an alarm to an asbolute time using associated hardware.
+ *   Set an alarm to an absolute time using associated hardware.
  *
  * Input Parameters:
  *  alminfo - Information about the alarm configuration.
@@ -1507,7 +1509,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
  * Name: stm32_rtc_cancelalarm
  *
  * Description:
- *   Cancel an alaram.
+ *   Cancel an alarm.
  *
  * Input Parameters:
  *  alarmid - Identifies the alarm to be cancelled

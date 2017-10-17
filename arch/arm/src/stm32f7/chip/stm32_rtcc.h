@@ -302,7 +302,7 @@
 /* RTC shift control register */
 
 #define RTC_SHIFTR_SUBFS_SHIFT    (0)       /* Bits 0-14: Subtract a fraction of a second */
-#define RTC_SHIFTR_SUBFS_MASK     (0x7ffff << RTC_SHIFTR_SUBFS_SHIFT)
+#define RTC_SHIFTR_SUBFS_MASK     (0x7fff << RTC_SHIFTR_SUBFS_SHIFT)
 #define RTC_SHIFTR_ADD1S          (1 << 31) /* Bit 31: Add one second */
 
 /* RTC time stamp time register */

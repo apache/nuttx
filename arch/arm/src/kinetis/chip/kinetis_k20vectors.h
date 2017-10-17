@@ -153,4 +153,4 @@ UNUSED(KINETIS_IRQ_RESVD92)                  /* Vector 108: Reserved */
 UNUSED(KINETIS_IRQ_RESVD93)                  /* Vector 109: Reserved */
 VECTOR(kinetis_swi, KINETIS_IRQ_SWI)         /* Vector 110: Software interrupt */
 #  endif /* CONFIG_ARMV7M_CMNVECTOR */
-#endif /* CONFIG_STM32_CONNECTIVITYLINE */
+#endif /* CONFIG_ARCH_FAMILY_K20 */

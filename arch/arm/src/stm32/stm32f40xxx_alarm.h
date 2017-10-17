@@ -63,7 +63,7 @@ enum alm_id_e
   RTC_ALARM_LAST
 };
 
-/* Structure used to pass parmaters to set an alarm */
+/* Structure used to pass parameters to set an alarm */
 
 struct alm_setalarm_s
 {
@@ -89,7 +89,7 @@ struct alm_rdalarm_s
  * Name: stm32_rtc_setalarm
  *
  * Description:
- *   Set an alarm to an asbolute time using associated hardware.
+ *   Set an alarm to an absolute time using associated hardware.
  *
  * Input Parameters:
  *  alminfo - Information about the alarm configuration.
@@ -121,7 +121,7 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
  * Name: stm32_rtc_cancelalarm
  *
  * Description:
- *   Cancel an alaram.
+ *   Cancel an alarm.
  *
  * Input Parameters:
  *  alarmid - Identifies the alarm to be cancelled

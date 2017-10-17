@@ -93,13 +93,7 @@
 #define STM32F0_RTC_BK3R            (STM32F0_RTC_BASE+STM32F0_RTC_BK3R_OFFSET)
 #define STM32F0_RTC_BK4R            (STM32F0_RTC_BASE+STM32F0_RTC_BK4R_OFFSET)
 
-#ifdef CONFIG_STM32F0_STM32F30XX
-#  define STM32F0_RTC_BKCOUNT       16
-#elif defined(CONFIG_STM32F0_STM32L15XX)
-#  define STM32F0_RTC_BKCOUNT       32
-#else
-#  define STM32F0_RTC_BKCOUNT       20
-#endif
+#define STM32F0_RTC_BKCOUNT       5
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -167,7 +161,7 @@
 #define RTC_CR_ADD1H              (1 << 16) /* Bit 16: Add 1 hour (summer time change) */
 #define RTC_CR_SUB1H              (1 << 17) /* Bit 17: Subtract 1 hour (winter time change) */
 #define RTC_CR_BKP                (1 << 18) /* Bit 18: Backup */
-#define RTC_CR_COSEL              (1 << 19) /* Bit 19 : Calibration output selection */
+#define RTC_CR_COSEL              (1 << 19) /* Bit 19: Calibration output selection */
 #define RTC_CR_POL                (1 << 20) /* Bit 20: Output polarity */
 #define RTC_CR_OSEL_SHIFT         (21)      /* Bits 21-22: Output selection */
 #define RTC_CR_OSEL_MASK          (3 << RTC_CR_OSEL_SHIFT)
@@ -193,7 +187,7 @@
 #define RTC_ISR_TAMP1F            (1 << 13) /* Bit 13: Tamper detection flag */
 #define RTC_ISR_TAMP2F            (1 << 14) /* Bit 14: TAMPER2 detection flag */
 #define RTC_ISR_TAMP3F            (1 << 15) /* Bit 15: TAMPER3 detection flag */
-#define RTC_ISR_RECALPF           (1 << 16) /* Bit 16: Recalibration pending Flag */
+#define RTC_ISR_RECALPF           (1 << 16) /* Bit 16: Recalibration pending flag */
 #define RTC_ISR_ALLFLAGS          (0x00017fff)
 
 /* RTC prescaler register */
@@ -265,11 +259,11 @@
 /* RTC time stamp date register */
 
 #define RTC_TSDR_DU_SHIFT         (0)       /* Bit 0-3: Date units in BCD format */
-#define RTC_TSDR_DU_MASK          (15 << RTC_TSDR_DU_SHIFT) /* */
+#define RTC_TSDR_DU_MASK          (15 << RTC_TSDR_DU_SHIFT)
 #define RTC_TSDR_DT_SHIFT         (4)       /* Bits 4-5: Date tens in BCD format */
 #define RTC_TSDR_DT_MASK          (3 << RTC_TSDR_DT_SHIFT)
 #define RTC_TSDR_MU_SHIFT         (8)       /* Bits 8-11: Month units in BCD format */
-#define RTC_TSDR_MU_MASK          (xx << RTC_TSDR_MU_SHIFT)
+#define RTC_TSDR_MU_MASK          (15 << RTC_TSDR_MU_SHIFT)
 #define RTC_TSDR_MT               (1 << 12) /* Bit 12: Month tens in BCD format */
 #define RTC_TSDR_WDU_SHIFT        (13)      /* Bits 13-15: Week day units */
 #define RTC_TSDR_WDU_MASK         (7 << RTC_TSDR_WDU_SHIFT)

@@ -179,14 +179,14 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
   DEBUGASSERT(upper != NULL && alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
   alarminfo = &upper->alarminfo[alarmid];
 
-  /* Do we think that the alaram is active?  It might be due to some
+  /* Do we think that the alarm is active?  It might be due to some
    * race condition between a cancellation event and the alarm
    * expiration.
    */
 
   if (alarminfo->active)
     {
-      /* Yes.. signal the alarm expriration */
+      /* Yes.. signal the alarm expiration */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
       (void)nxsig_queue(alarminfo->pid, alarminfo->signo,
@@ -446,7 +446,6 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      *           new relative alarm time to be set.
      */
 
-
     case RTC_SET_RELATIVE:
       {
         FAR const struct rtc_setrelative_s *alarminfo =
@@ -513,7 +512,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    /* RTC_WKALRM_CANCEL cancel the alarm.
+    /* RTC_CANCEL_ALARM cancel the alarm.
      *
      * Argument: An ALARM ID value that indicates which alarm should be
      *           canceled.
@@ -521,12 +520,20 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case RTC_CANCEL_ALARM:
       {
+        FAR struct rtc_alarminfo_s *upperinfo;
         int alarmid = (int)arg;
 
         DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+
+        upperinfo = &upper->alarminfo[alarmid];
+
         if (ops->cancelalarm)
           {
             ret = ops->cancelalarm(upper->lower, alarmid);
+            if (ret == OK)
+              {
+                upperinfo->active = false;
+              }
           }
       }
       break;
