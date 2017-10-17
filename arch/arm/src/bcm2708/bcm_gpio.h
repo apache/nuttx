@@ -50,7 +50,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Bit-encoded input to bcm_configgpio() ********************************************/
+/* Bit-encoded input to bcm_gpio_config() ********************************************/
 
 /* 32-bit Encoding:
  *
@@ -76,6 +76,8 @@
 /* These bits set the pull up/down configuration of the pin:
  *
  *   .... .... .... .... PP.. .... .... ....
+ *
+ * NOTE: The shifted values match the values of the GPPUD egister.
  */
 
 #define GPIO_PUD_SHIFT             (14)        /* Bits 14-16: GPIO configuration bits */
@@ -109,8 +111,9 @@
  *   .... .... .... .... .... .... V... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 7)    /* Bit 7: Initial value of output */
-#define GPIO_OUTPUT_CLEAR          (0)
+#define GPIO_OUTPUT_MASK           (1 << 7)    /* Bit 7: Initial value of output */
+#  define GPIO_OUTPUT_CLEAR        (0)
+#  define GPIO_OUTPUT_SET          (1 << 7)
 
 /* This identifies the GPIO pin:
  *
@@ -229,37 +232,37 @@ void bcm_gpio_irqinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: bcm_configgpio
+ * Name: bcm_gpio_config
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
  ************************************************************************************/
 
-int bcm_configgpio(gpio_pinset_t cfgset);
+int bcm_gpio_config(gpio_pinset_t pinset);
 
 /************************************************************************************
- * Name: bcm_gpiowrite
+ * Name: bcm_gpio_write
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
  ************************************************************************************/
 
-void bcm_gpiowrite(gpio_pinset_t pinset, bool value);
+void bcm_gpio_write(gpio_pinset_t pinset, bool value);
 
 /************************************************************************************
- * Name: bcm_gpioread
+ * Name: bcm_gpio_read
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
  ************************************************************************************/
 
-bool bcm_gpioread(gpio_pinset_t pinset);
+bool bcm_gpio_read(gpio_pinset_t pinset);
 
 /************************************************************************************
- * Name: bcm_gpioirq
+ * Name: bcm_gpio_irqconfig
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
@@ -267,13 +270,13 @@ bool bcm_gpioread(gpio_pinset_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-void bcm_gpioirq(gpio_pinset_t pinset);
+void bcm_gpio_irqconfig(gpio_pinset_t pinset);
 #else
-#  define bcm_gpioirq(pinset)
+#  define bcm_gpio_irqconfig(pinset)
 #endif
 
 /************************************************************************************
- * Name: bcm_gpioirqenable
+ * Name: bcm_gpio_irqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
@@ -281,13 +284,13 @@ void bcm_gpioirq(gpio_pinset_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-void bcm_gpioirqenable(int irq);
+void bcm_gpio_irqenable(int irq);
 #else
-#  define bcm_gpioirqenable(irq)
+#  define bcm_gpio_irqenable(irq)
 #endif
 
 /************************************************************************************
- * Name: bcm_gpioirqdisable
+ * Name: bcm_gpio_irqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
@@ -295,9 +298,9 @@ void bcm_gpioirqenable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-void bcm_gpioirqdisable(int irq);
+void bcm_gpio_irqdisable(int irq);
 #else
-#  define bcm_gpioirqdisable(irq)
+#  define bcm_gpio_irqdisable(irq)
 #endif
 
 #undef EXTERN

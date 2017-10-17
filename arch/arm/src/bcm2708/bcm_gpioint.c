@@ -62,40 +62,40 @@ void bcm_gpio_irqinitialize(void)
 }
 
 /************************************************************************************
- * Name: bcm_gpioirq
+ * Name: bcm_gpio_irqconfig
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
  *
  ************************************************************************************/
 
-void bcm_gpioirq(gpio_pinset_t pinset)
+void bcm_gpio_irqconfig(gpio_pinset_t pinset)
 {
 #warning Missing Logic
 }
 
 /************************************************************************************
- * Name: bcm_gpioirqenable
+ * Name: bcm_gpio_irqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
  ************************************************************************************/
 
-void bcm_gpioirqenable(int irq)
+void bcm_gpio_irqenable(int irq)
 {
 #warning Missing Logic
 }
 
 /************************************************************************************
- * Name: bcm_gpioirqdisable
+ * Name: bcm_gpio_irqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
  ************************************************************************************/
 
-void bcm_gpioirqdisable(int irq)
+void bcm_gpio_irqdisable(int irq)
 {
 #warning Missing Logic
 }
