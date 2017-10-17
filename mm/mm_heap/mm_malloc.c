@@ -76,11 +76,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Handle bad sizes */
 
-#ifndef CONFIG_MM_SMALL
-  if (size < 1 || size > (UINT32_MAX - SIZEOF_MM_ALLOCNODE))
-#else
-  if (size < 1 || size > (UINT16_MAX - SIZEOF_MM_ALLOCNODE))
-#endif
+  if (size < 1 || size > (MMSIZE_MAX - SIZEOF_MM_ALLOCNODE))
     {
       return NULL;
     }
