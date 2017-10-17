@@ -72,7 +72,7 @@ endif
 # BCM2708-specific source files.
 
 CHIP_CSRCS  = bcm_boot.c bcm_memorymap.c bcm_clockconfig.c bcm_irq.c
-CHIP_CSRCS += bcm_tickless.c bcm_gpio.c bcm_lowputc.c
+CHIP_CSRCS += bcm_tickless.c bcm_gpio.c bcm_aux.c bcm_lowputc.c
 
 ifeq ($(CONFIG_BCM2708_GPIO_IRQ),y)
 CHIP_CSRCS += bcm_gpioint.c

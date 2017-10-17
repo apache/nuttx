@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/bcm2708/chip/bcm2708_uart.h
+ * arch/arm/src/bcm2708/chip/bcm2708_aux.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_BCM_CHIP_BCM_UART_H
-#define __ARCH_ARM_SRC_BCM_CHIP_BCM_UART_H
+#ifndef __ARCH_ARM_SRC_BCM_CHIP_BCM_AUX_H
+#define __ARCH_ARM_SRC_BCM_CHIP_BCM_AUX_H
 
 /************************************************************************************
  * Included Files
@@ -208,4 +208,4 @@
 #define BCM_AUX_SPI_STAT_TXLEVEL_SHIFT  24 /* Data units in the FX FIFO */
 #define BCM_AUX_SPI_STAT_TXLEVEL_MASK   (0xff << BCM_AUX_SPI_STAT_TXLEVEL_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_BCM_CHIP_BCM_UART_H */
+#endif /* __ARCH_ARM_SRC_BCM_CHIP_BCM_AUX_H */

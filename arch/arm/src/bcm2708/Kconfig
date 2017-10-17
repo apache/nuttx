@@ -22,7 +22,13 @@ config BCM2708_MINI_UART
 	bool "Mini-UART"
 
 config BCM2708_PL011_UART
-	bool "PL011UART"
+	bool "PL011 UART"
+
+config BCM2708_SPI1
+	bool "SPI1"
+
+config BCM2708_SPI2
+	bool "SPI2"
 
 endmenu # BCM2708 Peripheral Selections
 

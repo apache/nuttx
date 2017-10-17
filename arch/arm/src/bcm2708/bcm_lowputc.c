@@ -44,7 +44,7 @@
 
 #include "up_arch.h"
 
-#include "chip/bcm2708_uart_spi.h"
+#include "chip/bcm2708_aux.h"
 #include "bcm_config.h"
 #include "bcm_lowputc.h"
 

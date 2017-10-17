@@ -52,6 +52,7 @@
 #include "up_internal.h"
 #include "group/group.h"
 
+#include "bcm_aux.h"
 #include "bcm_gpio.h"
 #include "chip/bcm2708_irq.h"
 
@@ -92,6 +93,10 @@ void up_irqinitialize(void)
   /* currents_regs is non-NULL only while processing an interrupt */
 
   CURRENT_REGS = NULL;
+
+  /* Intitialize AUX interrupts */
+
+  bcm_aux_irqinitialize();
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
   /* Initialize GPIO interrrupts */
