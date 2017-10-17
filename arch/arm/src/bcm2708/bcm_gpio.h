@@ -112,7 +112,7 @@
 #define GPIO_OUTPUT_SET            (1 << 7)    /* Bit 7: Initial value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
-/* This identifies the bit in the port:
+/* This identifies the GPIO pin:
  *
  *   ..... .... ... .... .... ..BB BBBB
  */

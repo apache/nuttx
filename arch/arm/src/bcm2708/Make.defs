@@ -69,4 +69,11 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-CHIP_CSRCS = bcm_boot.c bcm_memorymap.c bcm_clockconfig.c bcm_irq.c
+# BCM2708-specific source files.
+
+CHIP_CSRCS  = bcm_boot.c bcm_memorymap.c bcm_clockconfig.c bcm_irq.c
+CHIP_CSRCS += bcm_gpio.c
+
+ifeq ($(CONFIG_BCM2708_GPIO_IRQ),y)
+CHIP_CSRCS += bcm_gpioint.c
+endif
