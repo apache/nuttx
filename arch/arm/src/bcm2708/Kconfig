@@ -15,4 +15,10 @@ config ARCH_CHIP_BCM2835
 	bool "Broadcom BCM2835"
 
 endchoice # BCM2708 Configuration Option
+
+menuconfig BCM2708_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
 endif # ARCH_CHIP_BCM2708

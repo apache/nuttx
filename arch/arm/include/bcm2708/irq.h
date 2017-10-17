@@ -131,13 +131,26 @@
 #define BCM_IRQ_PCM              (IPR2_IRQ_FIRST + 23) /* Bit 23: 55 PCM interrupt */
 #define BCM_IRQ_UART             (IPR2_IRQ_FIRST + 24) /* Bit 24: 57 UART interrupt */
 
-#define IPR2_BIT_IRQMASK          0x01ff6800           /* Mask of defined interrupts */
-#define IPR2_IRQ_LAST             BCM_IRQ_UART         /* IRQ of last defined bit */
-#define IPR2_BIT_LAST             (24)                 /* Last defined bit */
+#define IPR2_BIT_IRQMASK         0x01ff6800            /* Mask of defined interrupts */
+#define IPR2_IRQ_LAST            BCM_IRQ_UART          /* IRQ of last defined bit */
+#define IPR2_BIT_LAST            (24)                  /* Last defined bit */
 
 /* Number of interrupts */
 
-#define NR_IRQS                  (IPR2_IRQ_LAST + 1)
+#define NR_INTERRUPTS            (IPR2_IRQ_LAST + 1)
+
+/* Second level GPIO interrupts */
+
+#ifdef CONFIG_BCM2708_GPIO_IRQ
+#  define BCM_IRQ_GPIO(n)        (NR_INTERRUPTS + (n))
+#  define NR_GPIOINTS            (54)
+#else
+#  define NR_GPIOINTS            (0)
+#endif
+
+/* Number of supported IRQs */
+
+#define NR_IRQS                  (NR_INTERRUPTS + NR_GPIOINTS)
 
 #else
 #  error Unrecognized BCM2708 chip
