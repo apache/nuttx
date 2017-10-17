@@ -100,7 +100,7 @@ void bcm_earlyserialinit(void);
  *
  ****************************************************************************/
 
-#if defined(USE_EARLYSERIALINIT) && defined(IMX6_HAVE_UART)
+#if defined(USE_EARLYSERIALINIT) && defined(BCM6_HAVE_UART)
 void uart_earlyserialinit(void);
 #endif
 
@@ -113,7 +113,7 @@ void uart_earlyserialinit(void);
  *
  ****************************************************************************/
 
-#ifdef IMX6_HAVE_UART
+#ifdef BCM6_HAVE_UART
 void uart_serialinit(void);
 #endif
 

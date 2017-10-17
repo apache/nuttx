@@ -46,10 +46,34 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
-/* Is there a UART enabled? */
+/* Is there a UART enabled?  The BCM2835 device has two UARTS. On mini UART
+ * and and PL011 UART.
+ */
 
-/* Is there a serial console? */
+#if defined(CONFIG_BCM2708_MINI_UART) || defined(CONFIG_BCM2708_PL011_UART)
+#  define BCM_HAVE_UART
+#endif
+
+#undef SUPPRESS_CONSOLE_CONFIG
+#ifdef CONFIG_SUPPRESS_UART_CONFIG
+#  define SUPPRESS_CONSOLE_CONFIG 1
+#endif
+
+/* Is there a serial console?  It could be on UART1-5 */
+
+#if defined(CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE) && defined(CONFIG_BCM2708_MINI_UART)
+#  undef  CONFIG_BCM2708_PL011_UART_SERIAL_CONSOLE
+#  define BCM_HAVE_UART_CONSOLE 1
+#elif defined(CONFIG_BCM2708_PL011_UART_SERIAL_CONSOLE) && defined(CONFIG_BCM2708_PL011_UART)
+#  undef  CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE
+#  define BCM_HAVE_UART_CONSOLE 1
+#else
+#  warning "No valid serial console Setting"
+#  undef  CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE
+#  undef  CONFIG_BCM2708_PL011_UART_SERIAL_CONSOLE
+#  undef  BCM_HAVE_UART_CONSOLE
+#endif
 
 #endif /* __ARCH_ARM_SRC_BCM2708_BCM_CONFIG_H */

@@ -66,14 +66,14 @@
 #define BCM_PCM_CLK_OFFSET    0x00101098 /* PCM Clock */
 #define BCM_RNG_OFFSET        0x00104000 /* Hardware RNG */
 #define BCM_GPIO_OFFSET       0x00200000 /* GPIO peripheral */
-#define BCM_UART0_OFFSET      0x00201000 /* UART0 peripheral */
+#define BCM_PL011_OFFSET      0x00201000 /* PL011 UART peripheral */
 #define BCM_MMCI0_OFFSET      0x00202000 /* MMC0 peripheral */
 #define BCM_I2S_OFFSET        0x00203000 /* PCM/I2S audio interface */
 #define BCM_SPI0_OFFSET       0x00204000 /* Serial interface peripheral */
 #define BCM_BSC0_OFFSET       0x00205000 /* Broadcom Serial Controller 0 (BSC0) */
 #define BCM_PWM_OFFSET        0x0020c000 /* Pulse Width Modulator interface */
 #define BCM_BSCSPI_OFFSET     0x00214000 /* BSC/SPI peripheral */
-#define BCM_UART1_OFFSET      0x00215000 /* UART1 peripheral */
+#define BCM_AUX_OFFSET        0x00215000 /* AUX/Mini-UART/SPI peripherals */
 #define BCM_EMMC_OFFSET       0x00300000 /* External Mass Media Controller */
 #define BCM_SMI_OFFSET        0x00600000 /* SMI */
 #define BCM_BSC1_OFFSET       0x00804000 /* Broadcom Serial Controller 1 (BSC1) */
@@ -128,14 +128,14 @@
 #define BCM_PCM_CLK_VBASE     (BCM_PERIPH_VSECTION + BCM_PCM_CLK_OFFSET)
 #define BCM_RNG_VBASE         (BCM_PERIPH_VSECTION + BCM_RNG_OFFSET)
 #define BCM_GPIO_VBASE        (BCM_PERIPH_VSECTION + BCM_GPIO_OFFSET)
-#define BCM_UART0_VBASE       (BCM_PERIPH_VSECTION + BCM_UART0_OFFSET)
+#define BCM_PL011_VBASE       (BCM_PERIPH_VSECTION + BCM_PL011_OFFSET)
 #define BCM_MMCI0_VBASE       (BCM_PERIPH_VSECTION + BCM_MMCI0_OFFSET)
 #define BCM_I2S_VBASE         (BCM_PERIPH_VSECTION + BCM_I2S_OFFSET)
 #define BCM_SPI0_VBASE        (BCM_PERIPH_VSECTION + BCM_SPI0_OFFSET)
 #define BCM_BSC0_VBASE        (BCM_PERIPH_VSECTION + BCM_BSC0_OFFSET)
 #define BCM_PWM_VBASE         (BCM_PERIPH_VSECTION + BCM_PWM_OFFSET)
 #define BCM_BSCSPI_VBASE      (BCM_PERIPH_VSECTION + BCM_BSCSPI_OFFSET)
-#define BCM_UART1_VBASE       (BCM_PERIPH_VSECTION + BCM_UART1_OFFSET)
+#define BCM_AUX_VBASE         (BCM_PERIPH_VSECTION + BCM_AUX_OFFSET)
 #define BCM_EMMC_VBASE        (BCM_PERIPH_VSECTION + BCM_EMMC_OFFSET)
 #define BCM_SMI_VBASE         (BCM_PERIPH_VSECTION + BCM_SMI_OFFSET)
 #define BCM_BSC1_VBASE        (BCM_PERIPH_VSECTION + BCM_BSC1_OFFSET)

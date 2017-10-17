@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_BCM2708_IMX_MEMORYMAP_H
-#define __ARCH_ARM_SRC_BCM2708_IMX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_BCM2708_BCM_MEMORYMAP_H
+#define __ARCH_ARM_SRC_BCM2708_BCM_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ struct section_mapping_s
 extern const struct section_mapping_s g_section_mapping[];
 extern const size_t g_num_mappings;
 
-#endif /* __ARCH_ARM_SRC_BCM2708_IMX_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_BCM2708_BCM_MEMORYMAP_H */
