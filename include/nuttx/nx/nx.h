@@ -276,11 +276,6 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  *   nx_start() provides a wrapper function to simplify and standardize the
  *   starting of the NX server.
  *
- *   NOTE:  Currently, many applications include logic to start the NX
- *   server from application initialization logic.  That, of course, cannot
- *   work in the NuttX kernel build because the resources required by the
- *   NX server are private to the kernel mode logic.
- *
  *   nx_start() can be called (indirectly) from applications via the
  *   boardctl() interface with the BOARDIOC_NX_START command.
  *

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: October 15, 2017</p>
+      <p>Last Updated: October 17, 2017</p>
     </td>
   </tr>
 </table>
@@ -90,40 +90,47 @@
      <ul>
         <i>2.3.1 <a href="#nxppdefs">Pre-Processor Definitions</a></i><br>
         <i>2.3.2 <a href="#nxtypes">NX Types</a></i><br>
-        <i>2.3.3 <a href="#nxtypes">NX Server Callbacks</a></i>
+        <i>2.3.3 <a href="#startingnx">Starting the NX Server</a></i>
         <p>
           <ul>
-            <i>2.3.3.1 <a href="#nxcbredraw"><code>redraw()</code></a></i><br>
-            <i>2.3.3.2 <a href="#nxcbposition"><code>position()</code></a></i><br>
-            <i>2.3.3.3 <a href="#nxcbmousein"><code>mousein()</code></a></i><br>
-            <i>2.3.3.4 <a href="#nxcbkbdin"><code>kbdin()</code></a></i>
+            <i>2.3.3.1 <a href="#nxstart"><code>nx_start()</code></a></i><br>
+            <i>2.3.3.2 <a href="#boardctl"><code>boardctl()</code></a></i><br>
           </ul>
         <p>
-        <i>2.3.4 <a href="#nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()<code> macro)</a></i><br>
-        <i>2.3.5 <a href="#nxconnectinstance"><code>nx_connectinstance()</code> (and <code>nx_connect()</code> macro)</a></i><br>
-        <i>2.3.6 <a href="#nxdisconnect"><code>nx_disconnect()</code></a></i><br>
-        <i>2.3.7 <a href="#nxeventhandler"><code>nx_eventhandler()</code></a></i><br>
-        <i>2.3.8 <a href="#nxeventnotify"><code>nx_eventnotify()</code></a></i><br>
-        <i>2.3.9 <a href="#nxopenwindow"><code>nx_openwindow()</code></a></i><br>
-        <i>2.3.10 <a href="#nxclosewindow"><code>nx_closewindow()</code></a></i><br>
-        <i>2.3.11 <a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a></i><br>
-        <i>2.3.12 <a href="#nxreleasebkgd"><code>nx_releasebkgd()</code></a></i><br>
-        <i>2.3.13 <a href="#nxgetposition"><code>nx_getposition()</code></a></i><br>
-        <i>2.3.14 <a href="#nxsetposition"><code>nx_setposition()</code></a></i><br>
-        <i>2.3.15 <a href="#nxsetsize"><code>nx_setsize()</code></a></i><br>
-        <i>2.3.16 <a href="#nxraise"><code>nx_raise()</code></a></i><br>
-        <i>2.3.17 <a href="#nxlower"><code>nx_lower()</code></a></i><br>
-        <i>2.3.18 <a href="#nxfill"><code>nx_fill()</code></a></i><br>
-        <i>2.3.19 <a href="#nxgetrectangle"><code>nx_getrectangle()</code></a></i><br>
-        <i>2.3.20 <a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></i><br>
-        <i>2.3.21 <a href="#nxdrawline"><code>nx_drawline()</code></a></i><br>
-        <i>2.3.22 <a href="#nxdrawcircle"><code>nx_drawcircle()</code></a></i><br>
-        <i>2.3.23 <a href="#nxfillcircle"><code>nx_fillcircle()</code></a></i><br>
-        <i>2.3.24 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
-        <i>2.3.25 <a href="#nxmove"><code>nx_move()</code></a></i><br>
-        <i>2.3.26 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
-        <i>2.3.27 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
-        <i>2.3.28 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
+        <i>2.3.4 <a href="#nxcallbacks">NX Server Callbacks</a></i>
+        <p>
+          <ul>
+            <i>2.3.4.1 <a href="#nxcbredraw"><code>redraw()</code></a></i><br>
+            <i>2.3.4.2 <a href="#nxcbposition"><code>position()</code></a></i><br>
+            <i>2.3.4.3 <a href="#nxcbmousein"><code>mousein()</code></a></i><br>
+            <i>2.3.4.4 <a href="#nxcbkbdin"><code>kbdin()</code></a></i>
+          </ul>
+        <p>
+        <i>2.3.5 <a href="#nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()<code> macro)</a></i><br>
+        <i>2.3.6 <a href="#nxconnectinstance"><code>nx_connectinstance()</code> (and <code>nx_connect()</code> macro)</a></i><br>
+        <i>2.3.7 <a href="#nxdisconnect"><code>nx_disconnect()</code></a></i><br>
+        <i>2.3.8 <a href="#nxeventhandler"><code>nx_eventhandler()</code></a></i><br>
+        <i>2.3.9 <a href="#nxeventnotify"><code>nx_eventnotify()</code></a></i><br>
+        <i>2.3.10 <a href="#nxopenwindow"><code>nx_openwindow()</code></a></i><br>
+        <i>2.3.11 <a href="#nxclosewindow"><code>nx_closewindow()</code></a></i><br>
+        <i>2.3.12 <a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a></i><br>
+        <i>2.3.13 <a href="#nxreleasebkgd"><code>nx_releasebkgd()</code></a></i><br>
+        <i>2.3.14 <a href="#nxgetposition"><code>nx_getposition()</code></a></i><br>
+        <i>2.3.15 <a href="#nxsetposition"><code>nx_setposition()</code></a></i><br>
+        <i>2.3.16 <a href="#nxsetsize"><code>nx_setsize()</code></a></i><br>
+        <i>2.3.17 <a href="#nxraise"><code>nx_raise()</code></a></i><br>
+        <i>2.3.18 <a href="#nxlower"><code>nx_lower()</code></a></i><br>
+        <i>2.3.19 <a href="#nxfill"><code>nx_fill()</code></a></i><br>
+        <i>2.3.20 <a href="#nxgetrectangle"><code>nx_getrectangle()</code></a></i><br>
+        <i>2.3.21 <a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></i><br>
+        <i>2.3.22 <a href="#nxdrawline"><code>nx_drawline()</code></a></i><br>
+        <i>2.3.23 <a href="#nxdrawcircle"><code>nx_drawcircle()</code></a></i><br>
+        <i>2.3.24 <a href="#nxfillcircle"><code>nx_fillcircle()</code></a></i><br>
+        <i>2.3.25 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
+        <i>2.3.26 <a href="#nxmove"><code>nx_move()</code></a></i><br>
+        <i>2.3.27 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
+        <i>2.3.28 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
+        <i>2.3.29 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
      </ul>
    </p>
   </td>
@@ -921,9 +928,94 @@ struct nx_callback_s
 };
 </pre></ul>
 
-<h3>2.3.3 <a name="nxtypes">NX Server Callbacks</a></h3>
+<h3>2.3.3 <a name="startingnx">Starting the NX Server</a></h3>
+<p>
+  The <i>NX Server</i> is a kernel daemon that receives and serializes graphic commands.
+  Before you can use the NX graphics system, you must first start this daemon.
+  There are two ways that this can be done:
+</p>
+<ol>
+  <li>
+    <p>
+      The NX server may be started in your board startup logic by simply calling the function <code> nx_start()</code>.
+      The board startup logic usually resides the the <code>configs/<i>board</i>/src</code> directory.
+      The boar board startup logic can run automatically during the early system if <code>CONFIG_BOARD_INITIALIZE</code> is defined in the configuration.
+      Or, the board startup logic can execute under control of the application by calling the <code>boardctl(BOARDIOC_INIT, arg)</code> OS interface.
+    </p>
+    <p>
+      The board initialization logic will run in either case and the simple call to <code>nx_start()</code> will start the NX server.
+    </p>
+  </li>
+  <li>
+    The NX server may also be started later by the application via the <code>boardctl(BOARDIOC_NX_START, arg)</code>
+  </li>
+</ol>
 
-<h4>2.3.3.1 <a name="nxcbredraw"><code>redraw()</code></a></h4>
+<h4>2.3.3.1 <a name="nxstart"><code>nx_start()</code></a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nx.h&gt;
+
+int nx_start(void);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <code>nx_start()</code> provides a wrapper function to simplify and standardize the starting of the NX server.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  None
+</p>
+<p>
+  <b>Returned Value:</b>
+  Zero (<code>OK</code>) is returned on success.
+  This indicates that the NX server has been successfully started, is running, and waiting to accept connections from NX clients.
+</p>
+<p>
+  A negated <code>errno</code> value is returned on failure.
+  The <code>errno</code> value indicates the nature of the failure.
+</p>
+
+<h4>2.3.3.1 <a name="boardctl"><code>boardctl()</code></a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;sys/boardctl.h&gt;
+
+</pre></ul>
+<p>
+  <b>Description:</b>
+  <code>boardctl()</code> is a generic NuttX interface that among many of it functions, may also be used to start the NX server.
+</p>
+  In a small embedded system, there will typically be a much greater interaction between application and low-level board features.
+  The canonically correct to implement such interactions is by implementing a character driver and performing the interactions via low level <code>ioctl()</code> calls.
+  This, however, may not be practical in many cases and will lead to &quot;correct&quot; but awkward implementations.
+</p>
+<p>
+  <code>boardctl()</code> is non-standard OS interface to alleviate the problem.
+  It basically circumvents the normal device driver ioctl interlace and allows the application to perform direction IOCTL-like calls to the board-specific logic.
+  In it is especially useful for setting up board operational and test configurations.
+</p>
+<p>
+ When called with the <code>cmd</code> of <code>BOARDIOC_NX_START</code>, then the  <code>boardctl()</code> will call <code>nx_start</code> indirectly on behalf of the appication.
+ In this case the <code>arg</code> parameter is ignored.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>cmd</code>
+    <dd> Identifies the board command to be executed
+    <dt><code>arg</code>
+    <dd>The argument that accompanies the command.  The nature of the argument is determined by the specific command.
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  On success zero (<code>OK</code) is returned; -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
+</p>
+
+<h3>2.3.4 <a name="nxcallbacks">NX Server Callbacks</a></h3>
+
+<h4>2.3.4.1 <a name="nxcbredraw"><code>redraw()</code></a></h4>
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
 void redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
@@ -952,7 +1044,7 @@ void redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <b>Returned Value:</b> None
 </p>
 
-<h4>2.3.3.2 <a name="nxcbposition"><code>position()</code></a></h4>
+<h4>2.3.4.2 <a name="nxcbposition"><code>position()</code></a></h4>
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
 void position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
@@ -986,7 +1078,7 @@ void position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
   <b>Returned Value:</b> None
 </p>
 
-<h4>2.3.3.3 <a name="nxcbmousein"><code>mousein()</code></a></h4>
+<h4>2.3.4.3 <a name="nxcbmousein"><code>mousein()</code></a></h4>
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
 #ifdef CONFIG_NX_XYINPUT
@@ -1016,7 +1108,7 @@ void mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
   <b>Returned Value:</b> None
 </p>
 
-<h4>2.3.3.4 <a name="nxcbkbdin"><code>kbdin()</code></a></h4>
+<h4>2.3.4.4 <a name="nxcbkbdin"><code>kbdin()</code></a></h4>
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
 #ifdef CONFIG_NX_KBD
@@ -1045,7 +1137,7 @@ void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
   <b>Returned Value:</b> None
 </p>
 
-<h3>2.3.4 <a name="nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()</code> macro)</a></h3>
+<h3>2.3.5 <a name="nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()</code> macro)</a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1082,7 +1174,7 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
   return <code>ERROR</code> and <code>errno</code> will be set appropriately.
 </p>
 
-<h3>2.3.5 <a name="nxconnectinstance"><code>nx_connectinstance()</code> (and <code>nx_connect()</code> macro)</a></h3>
+<h3>2.3.6 <a name="nxconnectinstance"><code>nx_connectinstance()</code> (and <code>nx_connect()</code> macro)</a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1131,7 +1223,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname);
     Failure:  NULL is returned and <code>errno</code> is set appropriately.
 </ul>
 
-<h3>2.3.6 <a name="nxdisconnect"><code>nx_disconnect()</code></a></h3>
+<h3>2.3.7 <a name="nxdisconnect"><code>nx_disconnect()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1155,7 +1247,7 @@ void nx_disconnect(NXHANDLE handle);
   <b>Returned Value:</b> None.
 </p>
 
-<h3>2.3.7 <a name="nxeventhandler"><code>nx_eventhandler()</code></a></h3>
+<h3>2.3.8 <a name="nxeventhandler"><code>nx_eventhandler()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1199,7 +1291,7 @@ int nx_eventhandler(NXHANDLE handle);
   </li>
 </ul>
 
-<h3>2.3.8 <a name="nxeventnotify"><code>nx_eventnotify()</code></a></h3>
+<h3>2.3.9 <a name="nxeventnotify"><code>nx_eventnotify()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1245,7 +1337,7 @@ int nx_eventnotify(NXHANDLE handle, int signo);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.9 <a name="nxopenwindow"><code>nx_openwindow()</code></a></h3>
+<h3>2.3.10 <a name="nxopenwindow"><code>nx_openwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1277,7 +1369,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle,
     Failure:  NULL is returned and <code>errno</code> is set appropriately.
 </ul>
 
-<h3>2.3.10 <a name="nxclosewindow"><code>nx_closewindow()</code></a></h3>
+<h3>2.3.11 <a name="nxclosewindow"><code>nx_closewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1305,7 +1397,7 @@ int nx_closewindow(NXWINDOW hwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.11 <a name="nxrequestbkgd"><code>nx_requestbkgd()</code></a></h3>
+<h3>2.3.12 <a name="nxrequestbkgd"><code>nx_requestbkgd()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1375,7 +1467,7 @@ int nx_requestbkgd(NXHANDLE handle,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.12 <a name="nxreleasebkgd"><code>nx_releasebkgd()</code></a></h3>
+<h3>2.3.13 <a name="nxreleasebkgd"><code>nx_releasebkgd()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1405,7 +1497,7 @@ int nx_releasebkgd(NXWINDOW hwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.13 <a name="nxgetposition"><code>nx_getposition()</code></a></h3>
+<h3>2.3.14 <a name="nxgetposition"><code>nx_getposition()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1433,7 +1525,7 @@ int nx_getposition(NXWINDOW hwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.14 <a name="nxsetposition"><code>nx_setposition()</code></a></h3>
+<h3>2.3.15 <a name="nxsetposition"><code>nx_setposition()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1462,7 +1554,7 @@ int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.15 <a name="nxsetsize"><code>nx_setsize()</code></a></h3>
+<h3>2.3.16 <a name="nxsetsize"><code>nx_setsize()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1490,7 +1582,7 @@ int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.16 <a name="nxraise"><code>nx_raise()</code></a></h3>
+<h3>2.3.17 <a name="nxraise"><code>nx_raise()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1518,7 +1610,7 @@ int nx_raise(NXWINDOW hwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.17 <a name="nxlower"><code>nx_lower()</code></a></h3>
+<h3>2.3.18 <a name="nxlower"><code>nx_lower()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1546,7 +1638,7 @@ int nx_lower(NXWINDOW hwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.18 <a name="nxfill"><code>nx_fill()</code></a></h3>
+<h3>2.3.19 <a name="nxfill"><code>nx_fill()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1577,7 +1669,7 @@ int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.19 <a name="nxgetrectangle"><code>nx_getrectangle()</code></a></h3>
+<h3>2.3.20 <a name="nxgetrectangle"><code>nx_getrectangle()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1617,7 +1709,7 @@ void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.20 <a name="nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></h3>
+<h3>2.3.21 <a name="nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1651,7 +1743,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.21 <a name="nxdrawline"><code>nx_drawline()</code></a></h3>
+<h3>2.3.22 <a name="nxdrawline"><code>nx_drawline()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1699,7 +1791,7 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.22 <a name="nxdrawcircle"><code>nx_drawcircle()</code></a></h3>
+<h3>2.3.23 <a name="nxdrawcircle"><code>nx_drawcircle()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1735,7 +1827,7 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.23 <a name="nxfillcircle"><code>nx_fillcircle()</code></a></h3>
+<h3>2.3.24 <a name="nxfillcircle"><code>nx_fillcircle()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1768,7 +1860,7 @@ int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.24 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
+<h3>2.3.25 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1796,7 +1888,7 @@ int nx_setbgcolor(NXHANDLE handle,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.25 <a name="nxmove"><code>nx_move()</code></a></h3>
+<h3>2.3.26 <a name="nxmove"><code>nx_move()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1827,7 +1919,7 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.26 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
+<h3>2.3.27 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1869,7 +1961,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.27 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
+<h3>2.3.28 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1892,7 +1984,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.28 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
+<h3>2.3.29 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;

@@ -12,6 +12,7 @@ Contents
     - 64-bit Issues
     - Compiler differences
     - Stack Size Issues
+    - Symbol Collisions
     - Networking Issues
     - X11 Issues
     - Cygwin64 Issues
@@ -24,20 +25,21 @@ Overview
 
 Description
 -----------
-This README file describes the contents of the build configurations available
-for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
-user-space program under Linux or Cygwin.  It is a very "low fidelity" embedded
-system simulation: This environment does not support any kind of asynchronous
-events -- there are nothing like interrupts in this context.  Therefore, there
-can be no pre-empting events.
+This README file describes the contents of the build configurations
+available for the NuttX "sim" target.  The sim target is a NuttX port that
+runs as a user-space program under Linux or Cygwin.  It is a very "low
+fidelity" embedded system simulation:  This environment does not support
+any kind of asynchronous events -- there are nothing like interrupts in this
+context.  Therefore, there can be no pre-empting events.
 
 Fake Interrupts
 ---------------
-In order to get timed behavior, the system timer "interrupt handler" is called
-from the sim target's IDLE loop.  The IDLE runs whenever there is no other task
-running.  So, for example, if a task calls sleep(), then that task will suspend
-wanting for the time to elapse.  If nothing else is available to run, then the
-IDLE loop runs and the timer increments, eventually re-awakening the sleeping task.
+In order to get timed behavior, the system timer "interrupt handler" is
+called from the sim target's IDLE loop.  The IDLE runs whenever there is no
+other task running.  So, for example, if a task calls sleep(), then that
+task will suspend wanting for the time to elapse.  If nothing else is
+available to run, then the IDLE loop runs and the timer increments,
+eventually re-awakening the sleeping task.
 
 Context switching is based on logic similar to setjmp() and longjmp().
 
@@ -47,14 +49,16 @@ application that I know of.
 
 Timing Fidelity
 ---------------
-NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
-calls the system "interrupt handler" as fast as possible.  As a result, there
-really are no noticeable delays when a task sleeps.  However, the task really does
-sleep -- but the time scale is wrong.  If you want behavior that is closer to
-normal timing, then you can define CONFIG_SIM_WALLTIME=y in your configuration
-file.  This configuration setting will cause the sim target's IDLE loop to delay
-on each call so that the system "timer interrupt" is called at a rate approximately
-correct for the system timer tick rate.  With this definition in the configuration,
+NOTE:  In order to facility fast testing, the sim target's IDLE loop, by
+default, calls the system "interrupt handler" as fast as possible.  As a
+result, there really are no noticeable delays when a task sleeps.  However,
+the task really does sleep -- but the time scale is wrong.  If you want
+behavior that is closer to normal timing, then you can define
+CONFIG_SIM_WALLTIME=y in your configuration file.  This configuration
+setting will cause the sim target's IDLE loop to delay on each call so that
+the system "timer interrupt" is called at a rate approximately correct for
+
+the system timer tick rate.  With this definition in the configuration,
 sleep() behavior is more or less normal.
 
 Debugging
@@ -141,44 +145,83 @@ steps for increasing the stack size in that case:
   vi builtin_list.h     # Edit this file and increase the stack size of the add-on
   rm .built *.o         # This will force the builtin apps logic to rebuild
 
+Symbol Collisions
+-----------------
+The simulation build is a two pass build:
+
+  1. On the first pass, an intermediate, partially relocatable object is
+    created called nuttx.rel.  This includes all of the files that are part
+    of the NuttX "domain."
+
+  2. On the second pass, the files are are in the host OS domain are build
+     and then linked with nuttx.rel to generate the simulation program.
+
+NuttX is a POSIX compliant RTOS and is normally build on a POSIX compliant
+host environment (like Linux or Cygwin).  As a result, the same symbols are
+exported by both the NuttX doman and the host domain.  How can we keep them
+separate?
+
+This is done using the special file nuttx-name.dat.  This file just contains
+a list of original function names and a new function name.  For example
+the NuttX printf() will get the new name NXprintf().
+
+This nuttx-names.dat file is used by the objcopy program between pass1 and
+pass2 to rename all of the symbols in the nuttx.rel object so that they do
+not collide with names provided by the host OS in the host PC domain.
+
+Occasionally, as you test new functionality, you will find that you need to
+add more names to the nuttx-names.dat file.  If there is a missing name
+mapping in nuttx-name.dat, the symptoms may be very obscure and difficult to
+debug.  What happens in this case is that when logic in nuttx.rel intended
+to call the NuttX domain function, it instead calls into the host OS
+function of the same name.
+
+Often you can survive such events.  For example, it really should not matter
+which version of strlen() you call.  Other times, it can cause subtle,
+mysterious errors.  Usually, however, callng the wrong function in the wrong
+OS results in a fatal crash.
+
 Networking Issues
 -----------------
-I never did get networking to work on the sim target.  It tries to use the tap device
-(/dev/net/tun) to emulate an Ethernet NIC, but I never got it correctly integrated
-with the NuttX networking (I probably should try using raw sockets instead).
+I never did get networking to work on the sim target.  It tries to use the
+tap device (/dev/net/tun) to emulate an Ethernet NIC, but I never got it
+correctly integrated with the NuttX networking (I probably should try using
+raw sockets instead).
 
-Update:  Max Holtzberg reports to me that the tap device actually does work properly,
-but not in an NSH configuration because of stdio operations freeze the simulation.
+Update:  Max Holtzberg reports to me that the tap device actually does work
+properly, but not in an NSH configuration because of stdio operations freeze
+the simulation.
 
-REVISIT: This may not long be an issue even with NSH because of the recent redesign
-of how the stdio devices are handled in the simulation (they should no longer freeze
-the simulation).
+REVISIT: This may not long be an issue even with NSH because of the recent
+redesign of how the stdio devices are handled in the simulation (they should
+no longer freeze the simulation).
 
 X11 Issues
 ----------
-There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
-subsystem on the simulator (see the sim/nx11 configuration below).  This may require a
-lot of tinkering to get working, depending upon where your X11 installation stores
-libraries and header files and how it names libraries.
+There is an X11-based framebuffer driver that you can use exercise the NuttX
+graphics subsystem on the simulator (see the sim/nx11 configuration below).
+This may require a lot of tinkering to get working, depending upon where
+your X11 installation stores libraries and header files and how it names
+libraries.
 
-For example, on UBuntu 9.09, I had to do the following to get a clean build:
+For example, on Ubuntu 9.09, I had to do the following to get a clean build:
 
     cd /usr/lib/
     sudo ln -s libXext.so.6.4.0 libXext.so
 
-(I also get a segmentation fault at the conclusion of the NX test -- that will need
-to get looked into as well).
+(I also get a segmentation fault at the conclusion of the NX test -- that
+will need to get looked into as well).
 
-The X11 examples builds on Cygwin, but does not run.  The last time I tried it,
-XOpenDisplay() aborted the program.  UPDATE:  This was caused by the small stack
-size and can be fixed by increasing the size of the NuttX stack that calls into
-X11.  See the discussion "Stack Size Issues" above.
+The X11 examples builds on Cygwin, but does not run.  The last time I tried
+it, XOpenDisplay() aborted the program.  UPDATE:  This was caused by the
+small stack size and can be fixed by increasing the size of the NuttX stack
+that calls into X11.  See the discussion "Stack Size Issues" above.
 
 Cygwin64 Issues
 ---------------
-There are some additional issues using the simulator with Cygwin64.  Below is the
-summary of the changes that I had to make to get the simulator working in that
-environment:
+There are some additional issues using the simulator with Cygwin64.  Below
+is the summary of the changes that I had to make to get the simulator
+working in that environment:
 
   CONFIG_HOST_X86_64=y
   CONFIG_SIM_M32=n
