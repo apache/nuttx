@@ -1,7 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_malloc.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014  Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014, 2017  Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +76,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Handle bad sizes */
 
-  if (size < 1)
+#ifndef CONFIG_MM_SMALL
+  if (size < 1 || size > (UINT32_MAX - SIZEOF_MM_ALLOCNODE))
+#else
+  if (size < 1 || size > (UINT16_MAX - SIZEOF_MM_ALLOCNODE))
+#endif
     {
       return NULL;
     }
