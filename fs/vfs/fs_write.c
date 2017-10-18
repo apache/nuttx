@@ -246,7 +246,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
   ret = nx_write(fd, buf, nbytes);
   if (ret < 0)
     {
-      set_errno(ret);
+      set_errno(-ret);
       ret = ERROR;
     }
 
