@@ -88,7 +88,7 @@ struct bcm_dev_s
   uint8_t       parity;    /* 0=none, 1=odd, 2=even */
   uint8_t       bits;      /* Number of bits (8 or 9) */
   uint8_t       stop2;     /* Use 2 stop bits */
-  uint8_t       ier;       /* Interrupts enabled */
+  uint8_t       ier;       /* Interrupt enable register shadow */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool          iflow;     /* input flow control (RTS) enabled */
 #endif
@@ -122,6 +122,7 @@ static bool bcm_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
 static void bcm_send(struct uart_dev_s *dev, int ch);
 static void bcm_txint(struct uart_dev_s *dev, bool enable);
 static bool bcm_txready(struct uart_dev_s *dev);
+static bool bcm_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -143,7 +144,7 @@ static const struct uart_ops_s g_miniuart_ops =
   .send           = bcm_send,
   .txint          = bcm_txint,
   .txready        = bcm_txready,
-  .txempty        = bcm_txready,
+  .txempty        = bcm_txempty,
 };
 
 /* I/O buffers */
@@ -528,8 +529,13 @@ static int bcm_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
 
-#warning Missing logic
-  return 0;
+  /* Revisit... RX status not returned */
+
+  *status = 0;
+
+  /* RX data is available when reading from the I/O register */
+
+  return getreg8(BCM_AUX_MU_IO);
 }
 
 /****************************************************************************
@@ -577,8 +583,12 @@ static void bcm_rxint(struct uart_dev_s *dev, bool enable)
 static bool bcm_rxavailable(struct uart_dev_s *dev)
 {
   struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-#warning Missing logic
-  return false;
+
+  /* Return true if there is at least one more by in the RX FIFO.
+   * NOTE: This has the side effect of clearing any RX overrun status.
+   */
+
+  return (getreg8(BCM_AUX_MU_LSR) & BCM_AUX_MU_LSR_DTREADY) != 0;
 }
 
 /****************************************************************************
@@ -624,7 +634,10 @@ static bool bcm_rxflowcontrol(struct uart_dev_s *dev,
 static void bcm_send(struct uart_dev_s *dev, int ch)
 {
   struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-#warning Missing logic
+
+  /* Data is sent be writing to the IO register */
+
+  putreg8((uint8_t)ch, BCM_AUX_MU_IO);
 }
 
 /****************************************************************************
@@ -671,15 +684,38 @@ static void bcm_txint(struct uart_dev_s *dev, bool enable)
  * Name: bcm_txready
  *
  * Description:
- *   Return true if the transmit data register is empty
+ *   Return true if the hardware can accept another by for transfer.
  *
  ****************************************************************************/
 
 static bool bcm_txready(struct uart_dev_s *dev)
 {
   struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-#warning Missing logic
-  return false;
+
+  /* Return true if the TX FIFO can accept at least one more byte.
+   * NOTE: This has the side effect of clearing any RX overrun status.
+   */
+
+  return (getreg8(BCM_AUX_MU_LSR) & BCM_AUX_MU_LSR_TXEMPTY) != 0;
+}
+
+/****************************************************************************
+ * Name: bcm_txempty
+ *
+ * Description:
+ *   Return true if the transmit FIFO is empty
+ *
+ ****************************************************************************/
+
+static bool bcm_txempty(struct uart_dev_s *dev)
+{
+  struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
+
+  /* Return true if the TX FIFO is empty.
+   * NOTE: This has the side effect of clearing any RX overrun status.
+   */
+
+  return (getreg8(BCM_AUX_MU_LSR) & BCM_AUX_MU_LSR_TXIDLE) != 0;
 }
 
 /****************************************************************************
@@ -701,7 +737,28 @@ static bool bcm_txready(struct uart_dev_s *dev)
 
 int bcm_mu_interrupt(int irq, void *context, void *arg)
 {
-#warning Missing logic
+  uint8_t iir;
+
+  /* Loop while there are pending interrupts */
+
+  while (((iir = getreg8(BCM_AUX_MU_IIR)) & BCM_AUX_MU_IIR_PEND) != 0)
+    {
+      switch (iir & BCM_AUX_MU_IIR_MASK)
+        {
+          case BCM_AUX_MU_IIR_NONE:     /* No interrupts */
+          default:                      /* Shouldn't happen */
+            return OK;
+
+          case BCM_AUX_MU_IIR_TXEMPTY:  /* TX FIFO empty (read) */
+            uart_xmitchars(&g_miniuart_port);
+            break;
+
+          case BCM_AUX_MU_IIR_RXDATA:   /* Data in RX FIFO (read) */
+            uart_recvchars(&g_miniuart_port);
+            break;
+        }
+    }
+
   return OK;
 }
 
