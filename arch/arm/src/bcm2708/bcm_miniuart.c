@@ -294,6 +294,10 @@ static void bcm_shutdown(struct uart_dev_s *dev)
 
   bcm_restoreuartint(priv, 0);
 
+  /* Disable receiver and tranmsmitter */
+
+  putreg8(0, BCM_AUX_MU_CNTL);
+
   /* Disable the Mini-UART */
 
   bcm_aux_disable(BCM_AUX_MINI_UART);
@@ -527,8 +531,6 @@ static int bcm_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int bcm_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-
   /* Revisit... RX status not returned */
 
   *status = 0;
@@ -582,8 +584,6 @@ static void bcm_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool bcm_rxavailable(struct uart_dev_s *dev)
 {
-  struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-
   /* Return true if there is at least one more by in the RX FIFO.
    * NOTE: This has the side effect of clearing any RX overrun status.
    */
@@ -633,8 +633,6 @@ static bool bcm_rxflowcontrol(struct uart_dev_s *dev,
 
 static void bcm_send(struct uart_dev_s *dev, int ch)
 {
-  struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-
   /* Data is sent be writing to the IO register */
 
   putreg8((uint8_t)ch, BCM_AUX_MU_IO);
@@ -690,8 +688,6 @@ static void bcm_txint(struct uart_dev_s *dev, bool enable)
 
 static bool bcm_txready(struct uart_dev_s *dev)
 {
-  struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-
   /* Return true if the TX FIFO can accept at least one more byte.
    * NOTE: This has the side effect of clearing any RX overrun status.
    */
@@ -709,8 +705,6 @@ static bool bcm_txready(struct uart_dev_s *dev)
 
 static bool bcm_txempty(struct uart_dev_s *dev)
 {
-  struct bcm_dev_s *priv = (struct bcm_dev_s *)dev->priv;
-
   /* Return true if the TX FIFO is empty.
    * NOTE: This has the side effect of clearing any RX overrun status.
    */

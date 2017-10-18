@@ -41,11 +41,13 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "up_arch.h"
 
 #include "chip/bcm2708_aux.h"
 #include "bcm_config.h"
+#include "bcm_aux.h"
 #include "bcm_lowputc.h"
 
 #include "up_internal.h"
@@ -154,10 +156,54 @@ void bcm_lowsetup(void)
 #ifdef CONFIG_BCM2708_MINI_UART
 int bcm_miniuart_configure(FAR const struct uart_config_s *config)
 {
+  DEBUGASSERT(config != NULL);
+
+  /* Enable the Mini-UART */
+
+  bcm_aux_enable(BCM_AUX_MINI_UART, NULL);
+
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-#  warning Missing logic
+  /* Set up BAUD Divisor */
+#warning Missing logic
+
+  /* Setup parity -- Mini-UART does not support parity. */
+
+  if (config->parity != 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Setup number of bits */
+
+  if (config->bits == 7)
+    {
+      putreg8(0, BCM_AUX_MU_LCR);
+    }
+  else if (config->bits == 8)
+    {
+      putreg8(BCM_AUX_MU_LCR_DATA8BIT, BCM_AUX_MU_LCR);
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  /* Configure Stop bits:  Only 1 STOP bit supported */
+
+  if (config->stopbits2)
+    {
+      return -EINVAL;
+    }
+
+  /* Configure flow control */
+#warning Missing logic
 #endif
 
+  /* Configure FIFOS:  Always enabled */
+
+  /* Enable receiver and tranmsmitter */
+
+  putreg8(BCM_AUX_MU_CNTL_RXEN | BCM_AUX_MU_CNTL_TXEN, BCM_AUX_MU_CNTL);
   return OK;
 }
 #endif
@@ -165,9 +211,24 @@ int bcm_miniuart_configure(FAR const struct uart_config_s *config)
 #ifdef CONFIG_BCM2708_PL011_UART
 int bcm_pl011uart_configure(FAR const struct uart_config_s *config)
 {
+  DEBUGASSERT(config != NULL);
+
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-#  warning Missing logic
+  /* Set up BAUD Divisor */
+#warning Missing logic
+
+  /* Setup parity */
+
+  /* Setup number of bits */
+
+  /* Configure Stop bits */
+
+  /* Configure flow control */
 #endif
+
+  /* Configure FIFOS */
+
+  /* Enable receiver and tranmsmitter */
 
   return OK;
 }
