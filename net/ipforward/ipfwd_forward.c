@@ -158,8 +158,8 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      FAR stuct ipv4_hdr_s *ipv4 = (FAR stuct ipv4_hdr_s *)fwd->f_iob->io_data;
-      return (arp_find(ipv4->destipaddr) != NULL);
+      FAR struct ipv4_hdr_s *ipv4 = (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data;
+      return (arp_find(*(in_addr_t *)ipv4->destipaddr) != NULL);
 #else
       return true;
 #endif
@@ -172,7 +172,7 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
 #endif
     {
 #if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      FAR stuct ipv6_hdr_s *ipv4 = (FAR stuct ipv6_hdr_s *)fwd->f_iob->io_data;
+      FAR struct ipv6_hdr_s *ipv4 = (FAR struct ipv6_hdr_s *)fwd->f_iob->io_data;
       return (neighbor_findentry(ipv6->destipaddr) != NULL);
 #else
       return true;

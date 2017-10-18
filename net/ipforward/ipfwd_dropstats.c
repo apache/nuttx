@@ -151,7 +151,7 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 {
   int ret;
 
-  ret = proto_dropstats(ipv6->ipv4);
+  ret = proto_dropstats(ipv4->proto);
   if (ret < 0)
     {
       g_netstats.ipv4.protoerr++;
@@ -179,7 +179,7 @@ void ipfwd_dropstats(FAR struct forward_s *fwd)
 {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (fwd->domain == PF_INET)
+  if (fwd->f_domain == PF_INET)
 #endif
     {
       ipv4_dropstats((FAR struct ipv4_hdr_s *)fwd->f_iob->io_data);

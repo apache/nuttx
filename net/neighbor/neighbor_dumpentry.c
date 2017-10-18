@@ -140,7 +140,7 @@ void neighbor_dumpentry(FAR const char *msg,
 
 #ifdef CONFIG_NET_ETHERNET
 #ifdef CONFIG_NET_6LOWPAN
-  if (neighbor->ne_addr.u.na_lltype == NET_LL_ETHERNET)
+  if (neighbor->ne_addr.na_lltype == NET_LL_ETHERNET)
 #endif
     {
       neighbor_dump_address(neighbor->ne_addr.u.na_ethernet.ether_addr_octet,
