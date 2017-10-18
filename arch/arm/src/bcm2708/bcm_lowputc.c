@@ -80,6 +80,12 @@ static const struct uart_config_s g_console_config =
   .parity    = BCM_CONSOLE_PARITY,  /* 0=none, 1=odd, 2=even */
   .bits      = BCM_CONSOLE_BITS,    /* Number of bits (5-9) */
   .stopbits2 = BCM_CONSOLE_2STOP,   /* true: Configure with 2 stop bits instead of 1 */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .iflow     = false;               /* true: Input flow control enabled */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .oflow     = false;               /* true: Output flow control enabled. */
+#endif
 };
 #endif
 

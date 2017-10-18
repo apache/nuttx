@@ -77,3 +77,7 @@ CHIP_CSRCS += bcm_tickless.c bcm_gpio.c bcm_aux.c bcm_lowputc.c bcm_serial.c
 ifeq ($(CONFIG_BCM2708_GPIO_IRQ),y)
 CHIP_CSRCS += bcm_gpioint.c
 endif
+
+ifeq ($(CONFIG_BCM2708_MINI_UART),y)
+CHIP_CSRCS += bcm_miniuart.c
+endif

@@ -54,7 +54,6 @@
  * Public Types
  ****************************************************************************/
 
-#ifdef BCM_HAVE_UART
 /* This structure describes the configuration of an UART */
 
 struct uart_config_s
@@ -63,8 +62,13 @@ struct uart_config_s
   uint8_t  parity;        /* 0=none, 1=odd, 2=even */
   uint8_t  bits;          /* Number of bits (5-9) */
   bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
-};
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool     iflow;         /* true: Input flow control enabled */
 #endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  bool     oflow;         /* true: Output flow control enabled. */
+#endif
+};
 
 /****************************************************************************
  * Public Function Prototypes
