@@ -480,10 +480,11 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
   uint16_t nexthead;
   uint16_t nbytes = 0;
 
+  DEBUGASSERT(priv != NULL && rdcontainer != NULL);
+
   uinfo("head=%d tail=%d nrdq=%d reqlen=%d\n",
         priv->serdev.recv.head, priv->serdev.recv.tail, priv->nrdq, reqlen);
 
-  DEBUGASSERT(priv != NULL && rdcontainer != NULL);
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   DEBUGASSERT(priv->rxenabled && !priv->iactive);
 #else
