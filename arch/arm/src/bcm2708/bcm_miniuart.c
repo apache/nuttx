@@ -797,7 +797,7 @@ int bcm_mu_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: bcm_lpuart_earlyserialinit
+ * Name: bcm_miniuart_earlyserialinit
  *
  * Description:
  *   Performs the low level Mini-UART initialization early in debug so that the
@@ -808,7 +808,7 @@ int bcm_mu_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-void bcm_lpuart_earlyserialinit(void)
+void bcm_miniuart_earlyserialinit(void)
 {
   /* Disable interrupts from all Mini-UARTS.  The console is enabled in
    * bcm_setup()
@@ -873,10 +873,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      bcm_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  bcm_lowputc(ch);
   bcm_restoreuartint(priv, ier);
 #endif
   return ch;
@@ -901,10 +901,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      bcm_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  bcm_lowputc(ch);
 #endif
 
   return ch;
