@@ -261,46 +261,34 @@ void bcm_gpio_write(gpio_pinset_t pinset, bool value);
 
 bool bcm_gpio_read(gpio_pinset_t pinset);
 
-/************************************************************************************
- * Name: bcm_gpio_irqconfig
- *
- * Description:
- *   Configure an interrupt for the specified GPIO pin.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_BCM2708_GPIO_IRQ
-void bcm_gpio_irqconfig(gpio_pinset_t pinset);
-#else
-#  define bcm_gpio_irqconfig(pinset)
-#endif
-
-/************************************************************************************
+/****************************************************************************
  * Name: bcm_gpio_irqenable
  *
  * Description:
- *   Enable the interrupt for specified GPIO IRQ
+ *   Configure interrupt event detection for the specified GPIO pin.  This
+ *   effective enables the pin interrupts.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-void bcm_gpio_irqenable(int irq);
+void bcm_gpio_irqenable(gpio_pinset_t pinset);
 #else
-#  define bcm_gpio_irqenable(irq)
+#  define bcm_gpio_irqenable(p)
 #endif
 
 /************************************************************************************
  * Name: bcm_gpio_irqdisable
  *
  * Description:
- *   Disable the interrupt for specified GPIO IRQ
+ *   Reset interrupt event detection for the specified GPIO pin.  This
+ *   effective disables the pin interrupts.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-void bcm_gpio_irqdisable(int irq);
+void bcm_gpio_irqdisable(gpio_pinset_t pinset);
 #else
-#  define bcm_gpio_irqdisable(irq)
+#  define bcm_gpio_irqdisable(p)
 #endif
 
 #undef EXTERN

@@ -193,7 +193,9 @@
 /* Second level GPIO interrupts */
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-#  define BCM_IRQ_GPIO(n)        (NR_INTERRUPTS + (n))
+#  define BCM_IRQ_GPIO(n)        (NR_INTERRUPTS + (n))   /* IRQ number of pin n */
+#  define BCM_IRQ_GPIO0_FIRST    (NR_INTERRUPTS)         /* IRQ number of first GPIO0 interrupt */
+#  define BCM_IRQ_GPIO1_FIRST    (NR_INTERRUPTS + 32)    /* IRQ number of first GPIO1 interrupt */
 #  define NR_GPIOINTS            (54)
 #else
 #  define NR_GPIOINTS            (0)

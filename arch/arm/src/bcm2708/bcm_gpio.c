@@ -237,7 +237,7 @@ void bcm_gpio_write(gpio_pinset_t pinset, bool value)
       regaddr = BCM_GPIO_GPCLR(pin);
     }
 
-  putreg32(BCM_GPIO_GPSET0_SET(pin), regaddr);
+  putreg32(BCM_GPIO_GPSET_SET(pin), regaddr);
 }
 
 /************************************************************************************
@@ -252,7 +252,7 @@ bool bcm_gpio_read(gpio_pinset_t pinset)
 {
   unsigned int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   uintptr_t regaddr = BCM_GPIO_GPLEV(pin);
-  uint32_t mask     = BCM_GPIO_GPLEV0_LEV(pin);
+  uint32_t mask     = BCM_GPIO_GPLEV_LEV(pin);
 
   return (getreg32(regaddr) & mask) != 0;
 }
