@@ -521,6 +521,7 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
    */
 
   watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * recv->size) / 100;
+  DEBUGASSERT(watermark > 0 && watermark < (recv->size - 1));
 #endif
 
   /* Then copy data into the RX buffer until either: (1) all of the data has
@@ -601,7 +602,7 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 
  if (nexthead == recv->tail)
    {
-     (void)cdcuart_rxflowcontrol(&priv->serdev, recv->size, true);
+     (void)cdcuart_rxflowcontrol(&priv->serdev, recv->size - 1, true);
    }
 #endif
 
