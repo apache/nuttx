@@ -84,15 +84,19 @@ struct uart_config_s
 void bcm_lowsetup(void);
 
 /****************************************************************************
- * Name: bcm_uart_configure
+ * Name: bcm_[mini|pl011]uart_configure
  *
  * Description:
- *   Configure a UART for non-interrupt driven operation
+ *   Configure the Mini- or PL011 UART for non-interrupt driven operation
  *
  ****************************************************************************/
 
-#ifdef BCM_HAVE_UART
-int bcm_uart_configure(uint32_t base, FAR const struct uart_config_s *config);
+#ifdef CONFIG_BCM2708_MINI_UART
+int bcm_miniuart_configure(FAR const struct uart_config_s *config);
+#endif
+
+#ifdef CONFIG_BCM2708_PL011_UART
+int bcm_pl011uart_configure(FAR const struct uart_config_s *config);
 #endif
 
 /************************************************************************************

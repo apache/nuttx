@@ -119,9 +119,16 @@ void bcm_aux_irqinitialize(void)
 {
   /* Disable all AUX interrupt sources (Also disables all peripheral
    * register accesses).
+   *
+   * Keep the Mini-UART enabled if we are using it for the system console
+   * (since it was initialized earlier in the boot-up sequence).
    */
 
+#ifdef CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE
+  putreg32(BCM_AUX_ENB_MU, BCM_AUX_ENB);
+#else
   putreg32(0, BCM_AUX_ENB);
+#endif
 
   /* Attach and enable the AUX interrupt */
 

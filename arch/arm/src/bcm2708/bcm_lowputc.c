@@ -57,13 +57,11 @@
 
 #ifdef BCM_HAVE_UART_CONSOLE
 #  if defined(CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE)
-#    define BCM_CONSOLE_VBASE    BCM_AUX_OFFSET
 #    define BCM_CONSOLE_BAUD     CONFIG_BCM2708_MINI_UART_BAUD
 #    define BCM_CONSOLE_BITS     CONFIG_BCM2708_MINI_UART_BITS
 #    define BCM_CONSOLE_PARITY   CONFIG_BCM2708_MINI_UART_PARITY
 #    define BCM_CONSOLE_2STOP    CONFIG_BCM2708_MINI_UART_2STOP
 #  elif defined(CONFIG_BCM2708_PL011_UART_SERIAL_CONSOLE)
-#    define BCM_CONSOLE_VBASE    BCM_PL011_VBASE
 #    define BCM_CONSOLE_BAUD     CONFIG_BCM2708_PL011_UART_BAUD
 #    define BCM_CONSOLE_BITS     CONFIG_BCM2708_PL011_UART_BITS
 #    define BCM_CONSOLE_PARITY   CONFIG_BCM2708_PL011_UART_PARITY
@@ -123,24 +121,32 @@ void bcm_lowsetup(void)
 # warning Missing logic
 #endif
 
-#ifdef BCM_HAVE_UART_CONSOLE
-  /* Configure the serial console for initial, non-interrupt driver mode */
+#if defined(CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE)
+  /* Configure the mini-uart serial console for initial, non-interrupt
+   * driven mode.
+   */
 
-  (void)bcm_uart_configure(BCM_CONSOLE_VBASE, &g_console_config);
+  (void)bcm_miniuart_configure(&g_console_config);
+#elif defined(CONFIG_BCM2708_PL011_UART_SERIAL_CONSOLE)
+  /* Configure the pl011-uart serial console for initial, non-interrupt
+   * driven mode.
+   */
+
+  (void)bcm_pl011uart_configure(&g_console_config);
 #endif
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 }
 
-/************************************************************************************
- * Name: bcm_uart_configure
+/****************************************************************************
+ * Name: bcm_[mini|pl011]uart_configure
  *
  * Description:
- *   Configure a UART for non-interrupt driven operation
+ *   Configure the Mini- or PL011 UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifdef BCM_HAVE_UART
-int bcm_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
+#ifdef CONFIG_BCM2708_MINI_UART
+int bcm_miniuart_configure(FAR const struct uart_config_s *config)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 #  warning Missing logic
@@ -148,17 +154,28 @@ int bcm_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 
   return OK;
 }
-#endif /* BCM_HAVE_UART */
+#endif
 
-/************************************************************************************
+#ifdef CONFIG_BCM2708_PL011_UART
+int bcm_pl011uart_configure(FAR const struct uart_config_s *config)
+{
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+#  warning Missing logic
+#endif
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: bcm_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.  This will
+ *   even work BEFORE the console is initialized if we are booting from
+ *   U-Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(BCM_HAVE_UART) && defined(CONFIG_DEBUG_FEATURES)
 void bcm_lowputc(int ch)

@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/bcm2708/bcm_serial.h
+ * arch/arm/src/bcm/bcm_serialinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,35 +33,27 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_BCM2708_BCM_SERIAL_H
-#define __ARCH_ARM_SRC_BCM2708_BCM_SERIAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "up_internal.h"
+#include <stdint.h>
+
 #include "bcm_config.h"
+#include "bcm_serial.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#if !defined(HAVE_UART_DEVICE) && !defined(HAVE_LPUART_DEVICE)
+#  undef CONFIG_KINETS_LPUART_LOWEST
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -75,82 +67,49 @@ extern "C"
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
-void bcm_earlyserialinit(void);
-
-/****************************************************************************
- * Name: bcm_miniuart_earlyserialinit
- *
- * Description:
- *   Performs the low level Mini-UART initialization early in debug so that
- *   the Mini-UART serial console will be available during bootup.  This
- *   function will be called by bcm_earlyserialinit() if the Mini-UART is
- *   selected for the serial console.
- *
- ****************************************************************************/
-
+void bcm_earlyserialinit(void)
+{
 #ifdef CONFIG_BCM2708_MINI_UART_SERIAL_CONSOLE
-void bcm_miniuart_earlyserialinit(void);
-#endif
+  /* Initialize the Mini-UART console */
 
-/****************************************************************************
- * Name: bcm_pl011uart_earlyserialinit
- *
- * Description:
- *   Performs the low level PL011-UART initialization early in debug so that
- *   the PL011-UART serial console will be available during bootup.  This
- *   function will be called by bcm_earlyserialinit() if the PL011-UART is
- *   selected for the serial console.
- *
- ****************************************************************************/
+  bcm_miniuart_earlyserialinit();
+#endif
 
 #ifdef CONFIG_BCM2708_PL011_UART_SERIAL_CONSOLE
-void bcm_pl011uart_earlyserialinit(void);
+  /* Initialize the PL011-UART console */
+
+  bcm_pl011uart_earlyserialinit();
 #endif
-#endif /* USE_EARLYSERIALINIT */
+}
+#endif
 
 /****************************************************************************
- * Name: uart_serialinit
+ * Name: up_serialinit
  *
  * Description:
- *   Register the UART serial console and serial ports.  This assumes that
- *   uart_earlyserialinit was called previously.
+ *   Register all the serial console and serial ports.  This assumes
+ *   that bcm_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
-void uart_serialinit(void);
-
-/****************************************************************************
- * Name: bcm_miniuart_serialinit
- *
- * Description:
- *   Register the Mini-UART serial console and serial ports.  This function
- *   will be called by uart_serialinit() if the Mini-UART is enabled.
- *
- ****************************************************************************/
-
+void up_serialinit(void)
+{
 #ifdef CONFIG_BCM2708_MINI_UART
-void bcm_miniuart_serialinit(void);
-#endif
+  /* Register the Mini-UART serial console and serial ports.  This function
+   * will be called by uart_serialinit() if the Mini-UART is enabled.
+   */
 
-/****************************************************************************
- * Name: bcm_pl011uart_serialinit
- *
- * Description:
- *   Register the PL011-UART serial console and serial ports.  This function
- *   will be called by uart_serialinit() if the Mini-UART is enabled.
- *
- ****************************************************************************/
+  bcm_miniuart_serialinit();
+#endif
 
 #ifdef CONFIG_BCM2708_PL011_UART
-void bcm_pl011uart_serialinit(void);
+  /* Register the PL011-UART serial console and serial ports.  This function
+   * will be called by uart_serialinit() if the Mini-UART is enabled.
+   */
+
+  bcm_pl011uart_serialinit();
 #endif
+}
 #endif /* USE_SERIALDRIVER */
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_BCM2708_BCM_SERIAL_H */
