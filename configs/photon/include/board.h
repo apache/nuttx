@@ -204,6 +204,18 @@
 #  define GPIO_USART1_TX GPIO_USART1_TX_1
 #endif
 
+/* SPI1 */
+
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1  /* PA6 */
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1  /* PA7 */
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1   /* PA5 */
+
+/* SPI3 */
+
+#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_1  /* PB4 */
+#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_1  /* PB5 */
+#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_1   /* PB3 */
+
 /* SDIO definitions *****************************************************************/
 
 /* Note that slower clocking is required when DMA is disabled in order
