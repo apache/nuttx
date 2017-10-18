@@ -70,6 +70,24 @@
 
 #define uart_putc(ch) up_putc(ch)
 
+/* Check watermark levels */
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
+    defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS)
+#  if CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK < 1
+#    warning CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK too small
+#  endif
+#  if CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK > 99
+#    warning CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK too large
+#  endif
+#  if CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK >= CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK
+#    warning CONFIG_SERIAL_IFLOWCONTROL_LOWER_WATERMARK too large
+#    warning Must be less than CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK
+#  endif
+#endif
+
+/* Timing */
+
 #define HALF_SECOND_MSEC 500
 #define HALF_SECOND_USEC 500000L
 
@@ -995,7 +1013,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
       (void)uart_rxflowcontrol(dev, nbuffered, false);
     }
 #else
-  /* If the RX  buffer empty */
+  /* Is the RX buffer empty? */
 
   if (rxbuf->head == rxbuf->tail)
     {

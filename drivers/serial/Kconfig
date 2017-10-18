@@ -518,7 +518,7 @@ if SERIAL_IFLOWCONTROL_WATERMARKS
 config SERIAL_IFLOWCONTROL_LOWER_WATERMARK
 	int "RX lower Watermark (percent)"
 	default 10
-	range 0 100
+	range 1 99
 	---help---
 		Call the rxflowcontrol method then there are this amount (or or less)
 		data buffered in the serial drivers RX buffer.  This is expressed
@@ -528,7 +528,7 @@ config SERIAL_IFLOWCONTROL_LOWER_WATERMARK
 config SERIAL_IFLOWCONTROL_UPPER_WATERMARK
 	int "RX upper Watermark (percent)"
 	default 90
-	range 0 100
+	range 1 99
 	---help---
 		Call the rxflowcontrol method then there are this amount (or more)
 		data buffered in the serial drivers RX buffer.  This is expressed
