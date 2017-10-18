@@ -91,6 +91,12 @@ config BCM2708_MINI_UART_OFLOWCONTROL
 	---help---
 		Enable BCM2708_MINI_UART CTS flow control
 
+config BCM2708_MINI_UART_BREAKS
+	bool "Break support"
+	default n
+	---help---
+		Support BSD style BREAK IOCTL commands
+
 endmenu # BCM2708 Mini-UART Configuration
 
 menu "BCM2708 PL011 UART Configuration"

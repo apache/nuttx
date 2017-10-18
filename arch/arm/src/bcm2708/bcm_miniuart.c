@@ -511,6 +511,46 @@ static int bcm_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
+#ifdef CONFIG_BCM2708_MINI_UART_BREAKS
+    case TIOCSBRK:
+      {
+        irqstate_t flags;
+        uint8_t lcr;
+
+        /* Send a break signal */
+
+        flags = enter_critical_section();
+        lcr   = getreg8(BCM_AUX_MU_LCR);
+        lcr  |= BCM_AUX_MU_LCR_BREAK;
+        putreg8(lcd, BCM_AUX_MU_LCR);
+
+        /* Disable TX activity */
+
+        bcm_txint(dev, false);
+        leave_critical_section(flags);
+      }
+      break;
+
+    case TIOCCBRK:
+      {
+        irqstate_t flags;
+        uint8_t lcr;
+
+        /* Configure TX back to UART */
+
+        flags = enter_critical_section();
+        lcr   = getreg8(BCM_AUX_MU_LCR);
+        lcr  &= ~BCM_AUX_MU_LCR_BREAK;
+        putreg8(lcd, BCM_AUX_MU_LCR);
+
+        /* Enable further TX activity */
+
+        bcm_txint(dev, true);
+        leave_critical_section(flags);
+      }
+      break;
+#endif /* CONFIG_BCM2708_MINI_UART_BREAKS */
+
     default:
       ret = -ENOTTY;
       break;

@@ -50,6 +50,12 @@
 #include "bcm_aux.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static FAR void *g_aux_arg[3];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -81,21 +87,21 @@ static int bcm_aux_interrupt(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_BCM2708_MINI_UART
   if ((auxirq & BCM_AUX_IRQ_MU) != 0)
     {
-      (void)bcm_mu_interrupt(irq, context, arg);
+      (void)bcm_mu_interrupt(irq, context, g_aux_arg[(int)BCM_AUX_MINI_UART]);
     }
 #endif
 
 #ifdef CONFIG_BCM2708_SPI1
   if ((auxirq & BCM_AUX_IRQ_SPI1) != 0)
     {
-      (void)bcm_spi1_interrupt(irq, context, arg);
+      (void)bcm_spi1_interrupt(irq, context, g_aux_arg[(int)BCM_AUX_MINI_SPI1]);
     }
 #endif
 
 #ifdef CONFIG_BCM2708_SPI2
   if ((auxirq & BCM_AUX_IRQ_SPI2) != 0)
     {
-      (void)bcm_spi2_interrupt(irq, context, arg);
+      (void)bcm_spi2_interrupt(irq, context, g_aux_arg[(int)BCM_AUX_MINI_SPI2]);
     }
 #endif
 
@@ -178,6 +184,7 @@ void bcm_aux_enable(enum bcm_aux_peripheral_e periph, FAR void *arg)
       return;
     }
 
+  g_aux_arg[(int)periph] = arg;
   modifyreg32(BCM_AUX_ENB, 0, setbits);
 }
 
@@ -223,5 +230,6 @@ void bcm_aux_disable(enum bcm_aux_peripheral_e periph)
       return;
     }
 
+  g_aux_arg[(int)periph] = NULL;
   modifyreg32(BCM_AUX_ENB, clrbits, 0);
 }
