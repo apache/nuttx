@@ -511,7 +511,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
     {
       ninfo("Lost connection: %04x\n", flags);
 
-      if (psock->s_conn != NULL)
+      /* We could get here recursively through the callback actions of
+       * tcp_lost_connection().  So don't repeat that action if we have
+       * already been disconnected.
+       */
+
+      if (psock->s_conn != NULL && _SS_ISCONNECTED(psock->s_flags))
         {
           /* Report not connected */
 

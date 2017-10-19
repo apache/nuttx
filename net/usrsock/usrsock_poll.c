@@ -195,7 +195,7 @@ static int usrsock_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Allocate a usrsock callback structure */
 
   cb = devif_callback_alloc(NULL, &conn->list);
-  if (!cb)
+  if (cb == NULL)
     {
       ret = -EBUSY;
       kmm_free(info); /* fds->priv not set, so we need to free info here. */

@@ -203,7 +203,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Allocate a TCP/IP callback structure */
 
   cb = udp_callback_alloc(info->dev, conn);
-  if (!cb)
+  if (cb == NULL)
     {
       ret = -EBUSY;
       goto errout_with_lock;

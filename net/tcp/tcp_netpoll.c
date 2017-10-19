@@ -97,11 +97,11 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
   ninfo("flags: %04x\n", flags);
 
-  DEBUGASSERT(!info || (info->psock && info->fds));
+  DEBUGASSERT(info == NULL || (info->psock != NULL && info->fds != NULL));
 
   /* 'priv' might be null in some race conditions (?) */
 
-  if (info)
+  if (info != NULL)
     {
       pollevent_t eventset = 0;
 

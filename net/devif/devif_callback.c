@@ -102,18 +102,18 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
        * it is supposed to be in the device notification list.
        */
 
-      if (dev)
+      if (dev != NULL)
         {
           /* Find the callback structure in the device event list */
 
           for (prev = NULL, curr = dev->d_devcb;
-               curr && curr != cb;
+               curr != NULL && curr != cb;
                prev = curr, curr = curr->nxtdev);
 
           /* Remove the structure from the device event list */
 
           DEBUGASSERT(curr);
-          if (curr)
+          if (curr != NULL)
             {
               if (prev)
                 {
