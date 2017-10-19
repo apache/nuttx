@@ -3,7 +3,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
@@ -38,19 +38,26 @@
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: logf
+ ****************************************************************************/
+
 float logf(float x)
 {
-  float y, y_old, ey, epsilon;
+  float y;
+  float y_old;
+  float ey;
+  float epsilon;
 
-  y = 0.0F;
-  y_old = 1.0F;
+  y       = 0.0F;
+  y_old   = 1.0F;
   epsilon = FLT_EPSILON;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
       y_old = y;
-      ey = exp(y);
-      y -= (ey - x) / ey;
+      ey    = expf(y);
+      y    -= (ey - x) / ey;
 
       if (y > FLT_MAX_EXP_X)
         {

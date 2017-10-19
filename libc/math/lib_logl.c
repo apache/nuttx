@@ -3,7 +3,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
@@ -42,17 +42,20 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double logl(long double x)
 {
-  long double y, y_old, ey, epsilon;
+  long double y;
+  long double y_old;
+  long double ey;
+  long double epsilon;
 
-  y = 0.0;
-  y_old = 1.0;
+  y       = 0.0;
+  y_old   = 1.0;
   epsilon = LDBL_EPSILON;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
       y_old = y;
-      ey = expl(y);
-      y -= (ey - x) / ey;
+      ey    = expl(y);
+      y    -= (ey - x) / ey;
 
       if (y > 700.0)
         {
