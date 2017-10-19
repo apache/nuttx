@@ -13,9 +13,20 @@ STATUS
     will not build to completion.  Missing logic includes:
 
     - GPIO support,
-    - Peripheral clocking support,
     - System timer initialization, and
     - Serial driver.
+
+  2017-10-19:  Much of that logic is in place but there are a few things
+    still missing.
+
+    - Mini-UART Baud divisor calculation,
+    - Start-up logic.  My understand from what I have read on the internet
+      is the PiZero OS starts up in hypervisor mode with the MMU and I- and
+      D-Caches enabled.  This probaby means that the standard, classic ARM
+      startup logic at at arch/arm/src/arm/up_head.S will need to be replaced
+      with some custom logic.
+
+    No testing has yet been performed.
 
 Basic Setup
 ===========
