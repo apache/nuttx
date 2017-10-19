@@ -561,6 +561,28 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
 
 /****************************************************************************
+ * Name: blockmtd_initialize
+ *
+ * Description:
+ *   Create a block device backed a MTD device.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
+                                          size_t mtdlen, int16_t sectsize,
+                                          int32_t erasesize);
+
+/****************************************************************************
+ * Name: blockmtd_teardown
+ *
+ * Description:
+ *   Tear down a blockmtd device.
+ *
+ ****************************************************************************/
+
+void blockmtd_teardown(FAR struct mtd_dev_s *dev);
+
+/****************************************************************************
  * Name: filemtd_initialize
  *
  * Description:
@@ -569,7 +591,7 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
  ****************************************************************************/
 
 FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
-                        int16_t sectsize, int32_t erasesize);
+                                        int16_t sectsize, int32_t erasesize);
 
 /****************************************************************************
  * Name: filemtd_teardown
