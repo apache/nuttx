@@ -564,7 +564,10 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
  * Name: blockmtd_initialize
  *
  * Description:
- *   Create a block device backed a MTD device.
+ *   Create and initialize a BLOCK MTD device instance.
+ *
+ * Input Parameters:
+ *   path - Path name of the block device backing the MTD device
  *
  ****************************************************************************/
 
@@ -576,7 +579,10 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
  * Name: blockmtd_teardown
  *
  * Description:
- *   Tear down a blockmtd device.
+ *   Teardown a previously created blockmtd device.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the mtd driver instance.
  *
  ****************************************************************************/
 
@@ -586,7 +592,10 @@ void blockmtd_teardown(FAR struct mtd_dev_s *dev);
  * Name: filemtd_initialize
  *
  * Description:
- *   Create a file backed MTD device.
+ *   Create and initialize a FILE MTD device instance.
+ *
+ * Input Parameters:
+ *   path - Path name of the file backing the MTD device
  *
  ****************************************************************************/
 
@@ -597,17 +606,23 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
  * Name: filemtd_teardown
  *
  * Description:
- *   Tear down a filemtd device.
+ *   Teardown a previously created filemtd device.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the mtd driver instance.
  *
  ****************************************************************************/
 
-void filemtd_teardown(FAR struct mtd_dev_s* mtd);
+void filemtd_teardown(FAR struct mtd_dev_s* dev);
 
 /****************************************************************************
  * Name: filemtd_isfilemtd
  *
  * Description:
- *   Test if MTD is a filemtd device.
+ *   Tests if the provided mtd is a filemtd or blockmtd device.
+ *
+ * Input Parameters:
+ *   mtd - Pointer to the mtd.
  *
  ****************************************************************************/
 

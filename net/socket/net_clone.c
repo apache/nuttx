@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/socket.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -47,6 +48,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/udp.h>
 
+#include "inet/inet.h"
 #include "tcp/tcp.h"
 #include "socket/socket.h"
 
@@ -81,7 +83,9 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 
   net_lock();
 
-  /* Duplicate the socket state */
+  /* Duplicate the relevant socket state (zeroing everything else) */
+
+  memset(psock2, 0, sizeof(struct socket));
 
   psock2->s_domain   = psock1->s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
   psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
@@ -96,10 +100,6 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 #endif
 #endif
   psock2->s_conn     = psock1->s_conn;      /* UDP or TCP connection structure */
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  psock2->s_sndcb    = NULL;                /* Force allocation of new callback
-                                             * instance for TCP send */
-#endif
 
   /* Increment the reference count on the socket */
 
@@ -113,14 +113,35 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   psock2->s_sockif->si_addref(psock2);
 
 #ifdef NET_TCP_HAVE_STACK
-  /* For connected socket types, it is necessary to also start the network monitor so
-   * that the newly cloned socket can receive a notification if the network connection
-   * is lost.
+  /* For connected socket types, it is necessary to also start the network
+   * monitor so that the newly cloned socket can receive a notification if
+   * the network connection is lost.
    */
 
   if (psock2->s_type == SOCK_STREAM)
     {
       ret = tcp_start_monitor(psock2);
+
+      /* On failure, back out the reference count on the TCP connection
+       * structure.  tcp_start_monitor() will fail only in the race condition
+       * where the TCP connection has been lost.
+       */
+
+      if (ret < 0)
+        {
+          /* There should be at least two reference counts on the connection
+           * structure:  At least one from the original socket and the one
+           * from above where we incremented the reference count.
+           * inet_close() will handle all cases.
+           *
+           * NOTE:  As a side-effect, inet_close()will also call
+           * tcp_stop_monitor() which could inform the loss of connection to
+           * all open sockets on the connection structure if the reference
+           * count decrements to zero.
+           */
+
+          (void)inet_close(psock2);
+        }
     }
 #endif
 

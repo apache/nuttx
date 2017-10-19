@@ -585,7 +585,7 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
  *   Teardown a previously created blockmtd device.
  *
  * Input Parameters:
- *   mtd - Pointer to the mtd.
+ *   dev - Pointer to the mtd driver instance.
  *
  ****************************************************************************/
 
@@ -655,7 +655,7 @@ FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
  *   Teardown a previously created filemtd device.
  *
  * Input Parameters:
- *   mtd - Pointer to the mtd.
+ *   dev - Pointer to the mtd driver instance.
  *
  ****************************************************************************/
 
