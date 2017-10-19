@@ -868,18 +868,9 @@ static void pca9555_irqworker(void *arg)
  *
  ****************************************************************************/
 
-static int pca9555_interrupt(int irq, FAR void *context)
+static int pca9555_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-#ifdef CONFIG_PCA9555_MULTIPLE
-  /* To support multiple devices,
-   * retrieve the pca structure using the irq number.
-   */
-
-#  warning Missing logic
-
-#else
-  register FAR struct pca9555_dev_s *pca = &g_pca9555;
-#endif
+  register FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)arg;
 
   /* In complex environments, we cannot do I2C transfers from the interrupt
    * handler because semaphores are probably used to lock the I2C bus.  In
@@ -956,7 +947,7 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *i2cdev,
   pcadev->config  = config;
 
 #ifdef CONFIG_PCA9555_INT_ENABLE
-  pcadev->config->attach(pcadev->config, pca9555_interrupt);
+  pcadev->config->attach(pcadev->config, pca9555_interrupt, pcadev);
   pcadev->config->enable(pcadev->config, TRUE);
 #endif
 

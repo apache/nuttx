@@ -74,10 +74,6 @@ struct pca9555_config_s
    * be provided for each so that their interrupts can be distinguished.
    */
 
-#ifdef CONFIG_PCA9555_MULTIPLE
-  int irq;             /* IRQ number received by interrupt handler. */
-#endif
-
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
    * callbacks to isolate the PCA9555 driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.
@@ -86,7 +82,8 @@ struct pca9555_config_s
    * enable  - Enable or disable the GPIO interrupt
    */
 
-  CODE int  (*attach)(FAR struct pca9555_config_s *state, xcpt_t isr);
+  CODE int  (*attach)(FAR struct pca9555_config_s *state, xcpt_t isr,
+                      FAR void *arg);
   CODE void (*enable)(FAR struct pca9555_config_s *state, bool enable);
 #endif
 };
