@@ -735,11 +735,22 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          ninfo("Lost connection\n");
+          FAR struct socket *psock = pstate->ir_sock;
 
-          /* Handle loss-of-connection event */
+          nwarn("WARNING: Lost connection\n");
 
-          tcp_lost_connection(pstate->ir_sock, pstate->ir_cb, flags);
+          /* We could get here recursively through the callback actions of
+           * tcp_lost_connection().  So don't repeat that action if we have
+           * already been disconnected.
+           */
+
+          DEBUGASSERT(psock != NULL);
+          if (_SS_ISCONNECTED(psock->s_flags))
+            {
+              /* Handle loss-of-connection event */
+
+              tcp_lost_connection(psock, pstate->ir_cb, flags);
+            }
 
           /* Check if the peer gracefully closed the connection. */
 

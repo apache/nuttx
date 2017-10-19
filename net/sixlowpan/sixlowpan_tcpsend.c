@@ -439,11 +439,25 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      ninfo("Lost connection\n");
+      FAR struct socket *psock = sinfo->s_sock;
 
-      /* Report the disconnection event to all socket clones */
+      nwarn("WARNING: Lost connection\n");
 
-      tcp_lost_connection(sinfo->s_sock, sinfo->s_cb, flags);
+      /* We could get here recursively through the callback actions of
+       * tcp_lost_connection().  So don't repeat that action if we have
+       * already been disconnected.
+       */
+
+      DEBUGASSERT(psock != NULL);
+      if (_SS_ISCONNECTED(psock->s_flags))
+         {
+           /* Report the disconnection event to all socket clones */
+
+           tcp_lost_connection(psock, sinfo->s_cb, flags);
+         }
+
+      /* Report not connected to the sender */
+
       sinfo->s_result = -ENOTCONN;
       goto end_wait;
     }
