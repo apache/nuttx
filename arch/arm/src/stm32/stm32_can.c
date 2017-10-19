@@ -1878,12 +1878,16 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
    *  - Automatic wake-up mode
    *  - No automatic retransmission
    *  - Receive FIFO locked mode
+   *
+   * Enable:
+   *
    *  - Transmit FIFO priority
    */
 
-  regval   = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
-  regval &= ~(CAN_MCR_TXFP | CAN_MCR_RFLM | CAN_MCR_NART |
-              CAN_MCR_AWUM | CAN_MCR_ABOM | CAN_MCR_TTCM);
+  regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+  regval &= ~(CAN_MCR_RFLM | CAN_MCR_NART | CAN_MCR_AWUM |
+              CAN_MCR_ABOM | CAN_MCR_TTCM);
+  regval |=  CAN_MCR_TXFP;
   stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
   /* Configure bit timing. */
