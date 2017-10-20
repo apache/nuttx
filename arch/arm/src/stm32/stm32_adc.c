@@ -2808,10 +2808,10 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
         }
     }
 
-  /* by MR regval &= ~pending; */
-  /* by MR adc_putreg(priv, STM32_ADC_ISR_OFFSET, regval);
+  /* Clear pending interrupts */
 
-  adc_putreg(priv, STM32_ADC_ISR_OFFSET, pending); */
+  adc_putreg(priv, STM32_ADC_ISR_OFFSET, pending);
+
   return OK;
 }
 
