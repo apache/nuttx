@@ -608,21 +608,6 @@
               <FileType>1</FileType>
               <FilePath>../../../../../fs/fat/fs_fat32util.c</FilePath>
             </File>
-            <File>
-              <FileName>fs_mkfatfs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../fs/fat/fs_mkfatfs.c</FilePath>
-            </File>
-            <File>
-              <FileName>fs_configfat.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../fs/fat/fs_configfat.c</FilePath>
-            </File>
-            <File>
-              <FileName>fs_writefat.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../fs/fat/fs_writefat.c</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>

@@ -55,8 +55,5 @@ endif
 ifeq ($(CONFIG_PAGING),y)
 CSRCS += lpc31_fillpage.c
 endif
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += lpc31_usbmsc.c
-endif
 
 include $(TOPDIR)/configs/Board.mk

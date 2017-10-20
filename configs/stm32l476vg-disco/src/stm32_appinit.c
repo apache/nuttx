@@ -61,7 +61,6 @@
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
-#include <nuttx/fs/mkfatfs.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/i2c/i2c_master.h>
 

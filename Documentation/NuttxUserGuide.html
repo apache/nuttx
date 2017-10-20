@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: October 2, 2017</p>
+      <p>Last Updated: October 20, 2017</p>
     </td>
   </tr>
 </table>
@@ -8404,8 +8404,7 @@ interface of the same name.
   <li><a href="#aio">2.10.7 Asynchronous I/O</a></li>
   <li><a href="#stdstrings">2.10.8 Standard String Operations</a></li>
   <li><a href="#PipesNFifos">2.10.9 Pipes and FIFOs</a></li>
-  <li><a href="#fatsupport">2.10.10 FAT File System Support</a></li>
-  <li><a href="#mmapxip">2.10.11 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
+  <li><a href="#mmapxip">2.10.10 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
 </ul>
 
 <h3><a name="FileSystemOverview">2.10.1 NuttX File System Overview</a></h3>
@@ -8957,85 +8956,7 @@ int mkfifo(FAR const char *pathname, mode_t mode);
   </ul>
 </p>
 
-<h3><a name="fatsupport">2.10.10 FAT File System Support</a></h3>
-<h3>2.10.10.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
-<p>
-  <b>Function Prototype:</b>
-</p>
-<ul><pre>
-#include &lt;nuttx/fs/mkfatfs.h&gt;
-int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
-</pre></ul>
-<p>
-  <b>Description:</b>
-  <ul>
-    <p>
-      The <code>mkfats()</code> formats a FAT file system image on the block
-      device specified by <code>pathname</code>
-    </p>
-    <p>Assumptions: The caller must assure that the block driver is not mounted and not in
-      use when this function is called.
-      The result of formatting a mounted device is indeterminate (but likely not good).
-    </p>
-  </ul>
-</p>
-<p>
-  <b>Input Parameters:</b>
-  <ul>
-    <li>
-      <code>pathname</code>
-      The full path to the registered block driver in the file system.
-    </li>
-    <li>
-      <code>fmt</code>
-      A reference to an instance of a structure that provides caller-selectable
-      attributes of the created FAT file system.
-      <ul>
-<pre>
-struct fat_format_s
-{
-   uint8_t  ff_nfats;           /* Number of FATs */
-   uint8_t  ff_fattype;         /* FAT size: 0 (autoselect), 12, 16, or 32 */
-   uint8_t  ff_clustshift;      /* Log2 of sectors per cluster: 0-5, 0xff (autoselect) */
-   uint8_t  ff_volumelabel[11]; /* Volume label */
-   uint16_t ff_backupboot;      /* Sector number of the backup boot sector (0=use default)*/
-   uint16_t ff_rootdirentries;  /* Number of root directory entries */
-   uint16_t ff_rsvdseccount;    /* Reserved sectors */
-   uint32_t ff_hidsec;          /* Count of hidden sectors preceding fat */
-   uint32_t ff_volumeid;        /* FAT volume id */
-   uint32_t ff_nsectors;        /* Number of sectors from device to use: 0: Use all */
-};
-</pre>
-      </ul></li>
-    </li>
-  </ul>
-</p>
-<p>
-  <b>Returned Value:</b>
-  <ul>
-    <p>
-      Zero (<code>OK</code>) on success;
-      -1 (<code>ERROR</code>) on failure with <code>errno</code> set appropriately:
-      <ul>
-        <li><code>EINVAL</code> -
-          NULL block driver string, bad number of FATS in <code>fmt</code>,
-          bad FAT size in <code>fmt</code>, bad cluster size in <code>fmt</code>
-        </li>
-        <li><code>ENOENT</code> -
-          <code>pathname</code> does not refer to anything in the file-system.
-        </li>
-        <li><code>ENOTBLK</code> -
-          <code>pathname</code> does not refer to a block driver
-        </li>
-        <li><code>EACCESS</code> -
-          block driver does not support write or geometry methods
-        </li>
-      </ul>
-    </p>
-  </ul>
-</p>
-
-<h3><a name="mmapxip">2.10.11 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
+<h3><a name="mmapxip">2.10.10 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
 <p>
   NuttX operates in a flat open address space and is focused on MCUs that do
   support Memory Management Units (MMUs).  Therefore, NuttX generally does not
@@ -9170,8 +9091,7 @@ struct fat_format_s
 </p>
 <ul><pre>
 #include &lt;sys/mman.h&gt;
-int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt);
-FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_t offset)
+FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_t offset);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -10525,7 +10445,6 @@ notify a task when a message is available on a queue.
   <li><a href="#drvrunistdops">lseek</a></li>
   <li><a href="#Message_Queue">Named Message Queue Interfaces</a>
   <li><a href="#standardio">mkdir</a></li>
-  <li><a href="#mkfatfs">mkfatfs</a></li>
   <li><a href="#mkfifo">mkfifo</a></li>
   <li><a href="#mktime">mktime</a></li>
   <li><a href="#mqclose">mq_close</a></li>

@@ -1,7 +1,7 @@
 ############################################################################
 # Make.defs
 #
-#   Copyright (C) 2008, 2011, 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,11 +38,6 @@ ifeq ($(CONFIG_FS_FAT),y)
 
 ASRCS +=
 CSRCS += fs_fat32.c fs_fat32dirent.c fs_fat32attrib.c fs_fat32util.c
-
-# Files required for mkfatfs utility function
-
-ASRCS +=
-CSRCS += fs_mkfatfs.c fs_configfat.c fs_writefat.c
 
 # Include FAT build support
 

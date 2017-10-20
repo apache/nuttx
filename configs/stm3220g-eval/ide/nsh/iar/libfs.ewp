@@ -2106,14 +2106,5 @@
     <file>
       <name>$PROJ_DIR$/../../../../../fs/fat/fs_fat32util.c</name>
     </file>
-    <file>
-      <name>$PROJ_DIR$/../../../../../fs/fat/fs_mkfatfs.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$/../../../../../fs/fat/fs_configfat.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$/../../../../../fs/fat/fs_writefat.c</name>
-    </file>
   </group>
 </project>

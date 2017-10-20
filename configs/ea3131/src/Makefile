@@ -66,9 +66,6 @@ ifeq ($(CONFIG_LPC31_USBOTG),y)
 ifeq ($(CONFIG_USBHOST),y)
 CSRCS += lpc31_usbhost.c
 endif
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += lpc31_usbmsc.c
-endif
 endif
 
 include $(TOPDIR)/configs/Board.mk
