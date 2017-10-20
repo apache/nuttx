@@ -1387,9 +1387,7 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
 
 static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
 {
-  /* Flag the first byte as an address byte */
-
-  priv->astart = true;
+  bool next_norestart = false;
 
   /* Set the private "current message" data used in protocol processing.
    *
@@ -1421,6 +1419,13 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
   priv->dcnt  = priv->msgv->length;
   priv->flags = priv->msgv->flags;
 
+  if ((priv->flags & I2C_M_NORESTART) == 0)
+    {
+      /* Flag the first byte as an address byte */
+
+      priv->astart = true;
+    }
+
   /* Enabling RELOAD allows the transfer of:
    *
    *  - individual messages with a payload exceeding 255 bytes
@@ -1430,7 +1435,12 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
    * it otherwise.
    */
 
-  if ((priv->flags & I2C_M_NORESTART) || priv->dcnt > 255)
+  if (priv->msgc > 0)
+    {
+      next_norestart = (((priv->msgv + 1)->flags & I2C_M_NORESTART) != 0);
+    }
+
+  if (next_norestart || priv->dcnt > 255)
     {
       i2cinfo("RELOAD enabled: dcnt = %i msgc = %i\n",
           priv->dcnt, priv->msgc);
