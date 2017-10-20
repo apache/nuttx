@@ -3,6 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config SENSORS_APDS9960
+	bool "Avago APDS-9960 Gesture Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Avago APDS-9960 gesture sensor.
+
+config APDS9960_I2C_FREQUENCY
+	int "APDS-9960 I2C frequency"
+	default 400000
+	depends on SENSORS_APDS9960
+
 config SENSORS_AS5048B
 	bool "AMS AS5048B Magnetic Rotary Encoder support"
 	default n

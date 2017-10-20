@@ -292,6 +292,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_APDS9960
+  /* Register the APDS-9960 gesture sensor */
+
+  ret = stm32_apds9960initialize("/dev/gest0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_apds9960initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_VEML6070
   /* Register the UV-A light sensor */
 
