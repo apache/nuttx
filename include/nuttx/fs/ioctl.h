@@ -218,19 +218,27 @@
                                            *      buffer address
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
-#define BIOC_GETPROCFSD _BIOC(0x000A)     /* Get ProcFS data specific to the
+#define BIOC_GETPROCFSD _BIOC(0x000a)     /* Get ProcFS data specific to the
                                            * block device.
                                            * IN:  Pointer to a struct defined for
                                            *      the block to load with it's
                                            *      ProcFS data.
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
-#define BIOC_DEBUGCMD   _BIOC(0x000B)     /* Send driver specific debug command /
+#define BIOC_DEBUGCMD   _BIOC(0x000b)     /* Send driver specific debug command /
                                            * data to the block device.
                                            * IN:  Pointer to a struct defined for
                                            *      the block with specific debug
                                            *      command and data.
                                            * OUT: None.  */
+#define BIOC_GEOMETRY   _BIOC(0x000c)    /* Used only by BCH to return the
+                                           * geometry of the contained block
+                                           * driver.
+                                           * IN:  Pointer to writable instance
+                                           *      of struct geometry in which
+                                           *      to return geometry.
+                                           * OUT: Data return in user-provided
+                                           *      buffer. */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 

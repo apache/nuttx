@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_driver.c
  *
- *   Copyright (C) 2008-2009, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -344,7 +344,8 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer, size_t 
 /****************************************************************************
  * Name: bch_ioctl
  *
- * Description: Return device geometry
+ * Description:
+ *   Handle IOCTL commands
  *
  ****************************************************************************/
 
@@ -357,49 +358,82 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   bch = (FAR struct bchlib_s *)inode->i_private;
 
-  /* Is this a request to get the private data structure */
+  /* Process the call according to the command */
 
-  if (cmd == DIOC_GETPRIV)
+  switch (cmd)
     {
-      FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)((uintptr_t)arg);
+      /* This isa request to get the private data structure */
 
-      bchlib_semtake(bch);
-      if (!bchr || bch->refs == MAX_OPENCNT)
+      case DIOC_GETPRIV:
         {
-          ret   = -EINVAL;
-        }
-      else
-        {
-          bch->refs++;
-          *bchr = bch;
-          ret   = OK;
-        }
+          FAR struct bchlib_s **bchr =
+            (FAR struct bchlib_s **)((uintptr_t)arg);
 
-      bchlib_semgive(bch);
-    }
+          bchlib_semtake(bch);
+          if (!bchr || bch->refs == MAX_OPENCNT)
+            {
+              ret   = -EINVAL;
+            }
+          else
+            {
+              bch->refs++;
+              *bchr = bch;
+              ret   = OK;
+            }
+
+          bchlib_semgive(bch);
+        }
+        break;
+
+      /* This is a required to return the geometry of the underlying block
+       * driver.
+       */
+
+      case BIOC_GEOMETRY:
+        {
+          FAR struct geometry *geo = (FAR struct geometry *)((uintptr_t)arg);
+
+          DEBUGASSERT(geo != NULL && bch->inode && bch->inode->u.i_bops &&
+                      bch->inode->u.i_bops->geometry);
+
+          ret = bch->inode->u.i_bops->geometry(bch->inode, geo);
+          if (ret < 0)
+            {
+              ferr("ERROR: geometry failed: %d\n", -ret);
+            }
+          else if (!geo->geo_available)
+            {
+              ferr("ERROR: geometry failed: %d\n", -ret);
+              ret = -ENODEV;
+            }
+        }
+        break;
 
 #ifdef CONFIG_BCH_ENCRYPTION
-  /* Is this a request to set the encryption key? */
+      /* This is a request to set the encryption key? */
 
-  else if (cmd == DIOC_SETKEY)
-    {
-      memcpy(bch->key, (FAR void *)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
-      ret = OK;
-    }
+      case DIOC_SETKEY:
+        {
+          memcpy(bch->key, (FAR void *)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
+          ret = OK;
+        }
+        break;
 #endif
 
-  /* Otherwise, pass the IOCTL command on to the contained block driver */
+      /* Otherwise, pass the IOCTL command on to the contained block driver. */
 
-  else
-    {
-      FAR struct inode *bchinode = bch->inode;
-
-      /* Does the block driver support the ioctl method? */
-
-      if (bchinode->u.i_bops->ioctl != NULL)
+      default:
         {
-          ret = bchinode->u.i_bops->ioctl(bchinode, cmd, arg);
+          FAR struct inode *bchinode = bch->inode;
+
+          /* Does the block driver support the ioctl method? */
+
+          if (bchinode->u.i_bops->ioctl != NULL)
+            {
+              ret = bchinode->u.i_bops->ioctl(bchinode, cmd, arg);
+            }
         }
+        break;
     }
 
   return ret;
