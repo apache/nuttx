@@ -51,6 +51,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/random.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/apds9960.h>
@@ -71,16 +72,18 @@
 
 struct apds9960_dev_s
 {
-  FAR struct apds9960_config_s *config; /* Hardware Configuration   */
-  struct gesture_data_s gesture_data;   /* Gesture data container   */
-  int gesture_ud_delta;                 /* UP/DOWN delta            */
-  int gesture_lr_delta;                 /* LEFT/RIGHT delta         */
-  int gesture_ud_count;                 /* UP/DOWN counter          */
-  int gesture_lr_count;                 /* LEFT/RIGHT counter       */
-  int gesture_near_count;               /* Near distance counter    */
-  int gesture_far_count;                /* Far distance counter     */
-  int gesture_state;                    /* Gesture machine state    */
-  int gesture_motion;                   /* Gesture motion direction */
+  FAR struct apds9960_config_s *config; /* Hardware Configuration     */
+  struct work_s work;                   /* Supports ISR "bottom half" */
+  struct gesture_data_s gesture_data;   /* Gesture data container     */
+  int gesture_ud_delta;                 /* UP/DOWN delta              */
+  int gesture_lr_delta;                 /* LEFT/RIGHT delta           */
+  int gesture_ud_count;                 /* UP/DOWN counter            */
+  int gesture_lr_count;                 /* LEFT/RIGHT counter         */
+  int gesture_near_count;               /* Near distance counter      */
+  int gesture_far_count;                /* Far distance counter       */
+  int gesture_state;                    /* Gesture machine state      */
+  int gesture_motion;                   /* Gesture motion direction   */
+  sem_t sample_sem;                     /* Semaphore for sample data  */
 };
 
 /****************************************************************************
@@ -98,6 +101,17 @@ static int     apds9960_setdefault(FAR struct apds9960_dev_s *priv);
 /* Probe function to verify if sensor is present */
 
 static int     apds9960_probe(FAR struct apds9960_dev_s *priv);
+
+/* Work queue */
+
+static void    apds9960_worker(FAR void *arg);
+
+/* Gesture processing/decoding functions */
+
+static int     apds9960_readgesture(FAR struct apds9960_dev_s *priv);
+static bool    apds9960_decodegesture(FAR struct apds9960_dev_s *priv);
+static bool    apds9960_processgesture(FAR struct apds9960_dev_s *priv);
+static bool    apds9960_isgestureavailable(FAR struct apds9960_dev_s *priv);
 
 /* I2C Helpers */
 
@@ -144,6 +158,24 @@ static const struct file_operations g_apds9960_fops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: apds9960_worker
+ ****************************************************************************/
+
+static void apds9960_worker(FAR void *arg)
+{
+  FAR struct apds9960_dev_s *priv = (FAR struct apds9960_dev_s *)arg;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+
+  ret = apds9960_readgesture(priv);
+  if (ret != DIR_NONE)
+    {
+      sninfo("Got a valid gesture!\n");
+    }
+}
+
+/****************************************************************************
  * Name: apds9960_int_handler
  *
  * Description:
@@ -153,11 +185,23 @@ static const struct file_operations g_apds9960_fops =
 
 static int apds9960_int_handler(int irq, FAR void *context, FAR void *arg)
 {
+  int ret;
+
   FAR struct apds9960_dev_s *priv = (FAR struct apds9960_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL);
 
-  snwarn("Interrupt on I2C add %d!\n", priv->config->i2c_addr);
+  /* Transfer processing to the worker thread.  Since APDS-9960 interrupts
+   * are disabled while the work is pending, no special action should be
+   * required to protect the work queue.
+   */
+
+  DEBUGASSERT(priv->work.worker == NULL);
+  ret = work_queue(HPWORK, &priv->work, apds9960_worker, priv, 0);
+  if (ret != 0)
+    {
+      snerr("ERROR: Failed to queue work: %d\n", ret);
+    }
 
   return OK;
 }
@@ -185,7 +229,6 @@ static void apds9960_resetgesture(FAR struct apds9960_dev_s *priv)
   priv->gesture_far_count  = 0;
     
   priv->gesture_state      = 0;
-  priv->gesture_motion     = DIR_NONE;
 }
 
 /****************************************************************************
@@ -587,7 +630,7 @@ static bool apds9960_isgestureavailable(FAR struct apds9960_dev_s *priv)
  *
  ****************************************************************************/
 
-bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
+static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
 {
   uint8_t u_first = 0;
   uint8_t d_first = 0;
@@ -811,14 +854,14 @@ bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: apds9960_readgesture
+ * Name: apds9960_decodegesture
  *
  * Description:
- *   Read the photodiode data, process/decode it and return the guess
+ *   Decode the sensor data and return true if there is some valid data
  *
  ****************************************************************************/
 
-bool apds9960_decodegesture(FAR struct apds9960_dev_s *priv)
+static bool apds9960_decodegesture(FAR struct apds9960_dev_s *priv)
 {
   /* Return if near or far event is detected */
 
@@ -944,7 +987,7 @@ bool apds9960_decodegesture(FAR struct apds9960_dev_s *priv)
  *
  ****************************************************************************/
 
-int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
+static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
 {
   uint8_t fifo_level = 0;
   uint8_t bytes_read = 0;
@@ -1086,6 +1129,10 @@ int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
               snwarn("RESULT = DOWN\n");
             }
 
+          /* Increase semaphore to indicate new data */
+
+          nxsem_post(&priv->sample_sem);
+
           apds9960_resetgesture(priv);
           return motion;
         }
@@ -1127,6 +1174,7 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode         *inode;
   FAR struct apds9960_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1136,21 +1184,28 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
 
   /* Check if the user is reading the right size */
 
-  if (buflen != 4)
+  if (buflen < 1)
     {
-      snerr("ERROR: You need to read 4 bytes from this sensor!\n");
+      snerr("ERROR: You need to read at least 1 byte from this sensor!\n");
       return -EINVAL;
     }
 
-  /* Read Gesture */
+  /* Wait for data available */
 
-  apds9960_readgesture(priv);
+  do
+    {
+      ret = nxsem_wait(&priv->sample_sem);
 
-  /* Just return something, when done this driver will return keyboard arrows */
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
 
-  buffer = (FAR char *) priv->gesture_data.u_data;
+      DEBUGASSERT(ret == OK || ret == -EINTR);
+    }
+  while (ret == -EINTR);
 
-  nxsig_usleep(1000);
+  buffer[0] = (char) priv->gesture_motion;
+  buflen    = 1;
 
   return buflen;
 }
@@ -1206,6 +1261,8 @@ int apds9960_register(FAR const char *devpath,
     }
 
   priv->config = config;
+  nxsem_init(&priv->sample_sem, 0, 0);
+  priv->gesture_motion = DIR_NONE;
 
   /* Probe APDS9960 device */
 

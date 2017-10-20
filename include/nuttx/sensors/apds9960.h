@@ -122,9 +122,9 @@
 
 /* PERS Register */
 
-#define APERS_SHIFT            0 /* Bits 0-3: ALS Int. Persistence */
+#define APERS_SHIFT            0        /* Bits 0-3: ALS Int. Persistence */
 #define APERS_MASK             (0xf << PERS_APERS_SHIFT)
-#define PPERS_SHIFT            4 /* Bits 4-7: Prox. Int. Persistence */
+#define PPERS_SHIFT            4        /* Bits 4-7: Prox. Int. Persistence */
 #define PPERS_MASK             (0xf << PERS_APERS_SHIFT)
 
 /* CONFIG1 Register */
@@ -134,10 +134,10 @@
 
 /* PPULSE Register */
 
-#define PPULSE_SHIFT           0 /* Bits 0-5: Prox. Pulse Count (1 up to 64 pulses) */
+#define PPULSE_SHIFT           0        /* Bits 0-5: Prox. Pulse Count (1 up to 64 pulses) */
 #define PPULSE_MASK            (0x3f << PPULSE_SHIFT)
 #  define PPULSE_NUM(n)        ((n-1) << PPULSE_SHIFT)
-#define PPLEN_SHIFT            6 /* Bits 6-7: Prox. Pulse Lenght */
+#define PPLEN_SHIFT            6        /* Bits 6-7: Prox. Pulse Lenght */
 #define PPLEN_MASK             (3 << PPLEN_SHIFT)
 #  define PPLEN_4US            (0 << PPLEN_SHIFT)
 #  define PPLEN_8US            (1 << PPLEN_SHIFT)
@@ -146,19 +146,19 @@
 
 /* CONTROL Register */
 
-#define AGAIN_SHIFT            0 /* Bits 0-1: ALS Gain Control */
+#define AGAIN_SHIFT            0        /* Bits 0-1: ALS Gain Control */
 #define AGAIN_MASK             (3 << AGAIN_SHIFT)
 #  define AGAIN_1X             (0 << AGAIN_SHIFT)
 #  define AGAIN_2X             (1 << AGAIN_SHIFT)
 #  define AGAIN_4X             (2 << AGAIN_SHIFT)
 #  define AGAIN_8X             (3 << AGAIN_SHIFT)
-#define PGAIN_SHIFT            2 /* Bits 2-3: Proximity Gain Control */
+#define PGAIN_SHIFT            2        /* Bits 2-3: Proximity Gain Control */
 #define PGAIN_MASK             (3 << PGAIN_SHIFT)
 #  define PGAIN_1X             (0 << PGAIN_SHIFT)
 #  define PGAIN_2X             (1 << PGAIN_SHIFT)
 #  define PGAIN_4X             (2 << PGAIN_SHIFT)
 #  define PGAIN_8X             (3 << PGAIN_SHIFT)
-#define LDRIVE_SHIFT           6 /* Bits 6-7: LED Drive Strength */
+#define LDRIVE_SHIFT           6        /* Bits 6-7: LED Drive Strength */
 #define LDRIVE_MASK            (3 << LDRIVE_SHIFT)
 #  define LDRIVE_100MA         (0 << LDRIVE_SHIFT)
 #  define LDRIVE_50MA          (1 << LDRIVE_SHIFT)
@@ -167,7 +167,7 @@
 
 /* CONFIG2 Register */
 
-#define LEDBOOST_SHIFT         4 /* Bits 4-5: Proximity/Gesture LED Boost */
+#define LEDBOOST_SHIFT         4        /* Bits 4-5: Proximity/Gesture LED Boost */
 #define LEDBOOST_MASK          (3 << LEDBOOST_SHIFT)
 #  define LEDBOOST_100         (0 << LEDBOOST_SHIFT) /* Boost LED 100% */
 #  define LEDBOOST_150         (1 << LEDBOOST_SHIFT) /* Boost LED 150% */
@@ -195,15 +195,15 @@
 
 /* GCONFIG1 Register */
 
-#define GEXPERS_SHIFT          0 /* Bits 0-1: Gesture Exit Persistence */
+#define GEXPERS_SHIFT          0        /* Bits 0-1: Gesture Exit Persistence */
 #define GEXPERS_MASK           (3 << GEXPERS_SHIFT)
 #  define GEXPERS_1ST          (0 << GEXPERS_SHIFT) /* 1st 'gesture end' exits */
 #  define GEXPERS_2ND          (1 << GEXPERS_SHIFT) /* 2nd 'gesture end' exits */
 #  define GEXPERS_4TH          (2 << GEXPERS_SHIFT) /* 4th 'gesture end' exits */
 #  define GEXPERS_7TH          (3 << GEXPERS_SHIFT) /* 7th 'gesture end' exits */
-#define GEXMSK_SHIFT           2 /* Bits 2-5: Gesture Exit Mask */
+#define GEXMSK_SHIFT           2        /* Bits 2-5: Gesture Exit Mask */
 #define GEXMSK_MASK            (0xf << GEXMSK_SHIFT)
-#define GFIFOTH_SHIFT          6 /* Bits 6-7: Gesture FIFO Threshold */
+#define GFIFOTH_SHIFT          6        /* Bits 6-7: Gesture FIFO Threshold */
 #define GFIFOTH_MASK           (3 << GFIFOTH_SHIFT)
 #  define GFIFOTH_1DS          (0 << GFIFOTH_SHIFT) /* Interrupt after 1 dataset */
 #  define GFIFOTH_4DS          (1 << GFIFOTH_SHIFT) /* Interrupt after 4 datasets */
@@ -212,7 +212,7 @@
 
 /* GCONFIG2 Register */
 
-#define GWTIME_SHIFT           0 /* Bits 0-2: Gesture Wait Time */
+#define GWTIME_SHIFT           0        /* Bits 0-2: Gesture Wait Time */
 #define GWTIME_MASK            (7 << GWTIME_SHIFT)
 #  define GWTIME_0MS           (0 << GWTIME_SHIFT)
 #  define GWTIME_2p8MS         (1 << GWTIME_SHIFT)
@@ -222,13 +222,13 @@
 #  define GWTIME_22p4MS        (5 << GWTIME_SHIFT)
 #  define GWTIME_30p8MS        (6 << GWTIME_SHIFT)
 #  define GWTIME_39p2MS        (7 << GWTIME_SHIFT)
-#define GLDRIVE_SHIFT          3 /* Bits 3-4: Gesture LED Drive Strength */
+#define GLDRIVE_SHIFT          3        /* Bits 3-4: Gesture LED Drive Strength */
 #define GLDRIVE_MASK           (3 << GLDRIVE_SHIFT)
 #  define GLDRIVE_100MA        (0 << GLDRIVE_SHIFT)
 #  define GLDRIVE_50MA         (1 << GLDRIVE_SHIFT)
 #  define GLDRIVE_25MA         (2 << GLDRIVE_SHIFT)
 #  define GLDRIVE_12p5MA       (3 << GLDRIVE_SHIFT)
-#define GGAIN_SHIFT            5 /* Bits 5-6: Gesture Gain Control */
+#define GGAIN_SHIFT            5        /* Bits 5-6: Gesture Gain Control */
 #define GGAIN_MASK             (3 << GGAIN_SHIFT)
 #  define GGAIN_1X             (0 << GGAIN_SHIFT)
 #  define GGAIN_2X             (1 << GGAIN_SHIFT)
@@ -237,10 +237,10 @@
 
 /* GPULSE Register */
 
-#define GPULSE_SHIFT           0 /* Bits 0-5: Pulse Count */
+#define GPULSE_SHIFT           0        /* Bits 0-5: Pulse Count */
 #define GPULSE_MASK            (0x3f << GPULSE_SHIFT)
 #  define GPULSE_NUM(n)        ((n-1) << GPULSE_SHIFT)
-#define GPLEN_SHIFT            6 /* Bit 6-7: Gesture Pulse Length */
+#define GPLEN_SHIFT            6        /* Bit 6-7: Gesture Pulse Length */
 #define GPLEN_MASK             (3 << GPLEN_SHIFT)
 #  define GPLEN_4US            (0 << GPLEN_SHIFT)
 #  define GPLEN_8US            (1 << GPLEN_SHIFT)
@@ -249,7 +249,7 @@
 
 /* GCONFIG3 Register */
 
-#define GDIMS_SHIFT            0 /* Bits 0-1: Gesture Dimension Select */
+#define GDIMS_SHIFT            0        /* Bits 0-1: Gesture Dimension Select */
 #define GDIMS_MASK             (3 << GDIMS_SHIFT)
 
 /* GCONFIG4 Register */
@@ -278,7 +278,7 @@
 #define DEFAULT_CONFIG3        0        /* Enable all photodiodes, no SAI        */
 #define DEFAULT_GPENTH         40       /* Threshold for entering gesture mode   */
 #define DEFAULT_GEXTH          30       /* Threshold for exiting gesture mode    */
-#define DEFAULT_GCONFIG1       GFIFOTH_4DS /* 4 gesture events for int., 1 for exit */
+#define DEFAULT_GCONFIG1       GFIFOTH_8DS /* 8 gesture events for int., 1 for exit */
 #define DEFAULT_GCONFIG2       (GGAIN_4X | GLDRIVE_100MA /*| GWTIME_2p8MS*/ )
 #define DEFAULT_GOFFSET_U      0        /* No offset scaling for gesture mode */
 #define DEFAULT_GOFFSET_D      0        /* No offset scaling for gesture mode */
