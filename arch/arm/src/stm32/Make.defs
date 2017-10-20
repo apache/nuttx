@@ -200,6 +200,9 @@ CHIP_CSRCS += stm32_rtc.c
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32_exti_alarm.c
 endif
+ifeq ($(CONFIG_RTC_PERIODIC),y)
+CHIP_CSRCS += stm32_exti_wakeup.c
+endif
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif

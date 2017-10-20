@@ -182,6 +182,9 @@ ifeq ($(CONFIG_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32l4_exti_alarm.c
 endif
+ifeq ($(CONFIG_RTC_PERIODIC),y)
+CHIP_CSRCS += stm32l4_exti_wakeup.c
+endif
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += stm32l4_rtc_lowerhalf.c
 CHIP_CSRCS += stm32l4_rtc.c

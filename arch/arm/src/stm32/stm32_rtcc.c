@@ -76,38 +76,10 @@
 #  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
-#ifdef CONFIG_STM32_STM32L15XX
-#  if defined(CONFIG_RTC_HSECLOCK)
-#    error "RTC with HSE clock not yet implemented for STM32L15XXX"
-#  elif defined(CONFIG_RTC_LSICLOCK)
-#    error "RTC with LSI clock not yet implemented for STM32L15XXX"
-#  endif
-#endif
-
 /* Constants ************************************************************************/
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
 #define INITMODE_TIMEOUT (0x00010000)
-
-/* Proxy definitions to make the same code work for all the STM32 series ************/
-
-#if defined(CONFIG_STM32_STM32L15XX)
-# define STM32_RCC_XXX       STM32_RCC_CSR
-# define RCC_XXX_YYYRST      RCC_CSR_RTCRST
-# define RCC_XXX_RTCEN       RCC_CSR_RTCEN
-# define RCC_XXX_RTCSEL_MASK RCC_CSR_RTCSEL_MASK
-# define RCC_XXX_RTCSEL_LSE  RCC_CSR_RTCSEL_LSE
-# define RCC_XXX_RTCSEL_LSI  RCC_CSR_RTCSEL_LSI
-# define RCC_XXX_RTCSEL_HSE  RCC_CSR_RTCSEL_HSE
-#else
-# define STM32_RCC_XXX       STM32_RCC_BDCR
-# define RCC_XXX_YYYRST      RCC_BDCR_BDRST
-# define RCC_XXX_RTCEN       RCC_BDCR_RTCEN
-# define RCC_XXX_RTCSEL_MASK RCC_BDCR_RTCSEL_MASK
-# define RCC_XXX_RTCSEL_LSE  RCC_BDCR_RTCSEL_LSE
-# define RCC_XXX_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
-# define RCC_XXX_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
-#endif
 
 /************************************************************************************
  * Private Data
@@ -535,29 +507,6 @@ static void rtc_resume(void)
 }
 
 /************************************************************************************
- * Name: rtc_wkup_interrupt
- *
- * Description:
- *    RTC WKUP interrupt service routine through the EXTI line
- *
- * Input Parameters:
- *   irq - The IRQ number that generated the interrupt
- *   context - Architecture specific register save information.
- *
- * Returned Value:
- *   Zero (OK) on success; A negated errno value on failure.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-static int rtc_wkup_interrupt(int irq, void *context)
-{
-#warning "Missing logic"
-  return OK;
-}
-#endif
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -610,54 +559,54 @@ int up_rtc_initialize(void)
 #ifdef CONFIG_RTC_HSECLOCK
       /* Use the HSE clock as the input to the RTC block */
 
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
 
 #elif defined(CONFIG_RTC_LSICLOCK)
       /* Use the LSI clock as the input to the RTC block */
 
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
 
 #elif defined(CONFIG_RTC_LSECLOCK)
       /* Use the LSE clock as the input to the RTC block */
 
-      modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
 
 #endif
       /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
 
-      modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
     }
   else /* The RTC is already in use: check if the clock source is changed */
     {
 #if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_RTC_LSICLOCK) || \
     defined(CONFIG_RTC_LSECLOCK)
 
-      uint32_t clksrc = getreg32(STM32_RCC_XXX);
+      uint32_t clksrc = getreg32(STM32_RCC_BDCR);
 
 #if defined(CONFIG_RTC_HSECLOCK)
-      if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_HSE)
+      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_HSE)
 #elif defined(CONFIG_RTC_LSICLOCK)
-      if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_LSI)
+      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_LSI)
 #elif defined(CONFIG_RTC_LSECLOCK)
-      if ((clksrc & RCC_XXX_RTCSEL_MASK) != RCC_XXX_RTCSEL_LSE)
+      if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_LSE)
 #endif
 #endif
         {
           tr_bkp = getreg32(STM32_RTC_TR);
           dr_bkp = getreg32(STM32_RTC_DR);
-          modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_YYYRST);
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_YYYRST, 0);
+          modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+          modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
 #if defined(CONFIG_RTC_HSECLOCK)
           /* Change to the new clock as the input to the RTC block */
 
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
+          modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
 
 #elif defined(CONFIG_RTC_LSICLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
+          modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
 
 #elif defined(CONFIG_RTC_LSECLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
+          modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
 #endif
 
           putreg32(tr_bkp, STM32_RTC_TR);
@@ -669,7 +618,7 @@ int up_rtc_initialize(void)
 
           /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
 
-          modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
+          modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
         }
     }
 
@@ -786,12 +735,7 @@ int up_rtc_initialize(void)
 int stm32_rtc_irqinitialize(void)
 {
 #ifdef CONFIG_RTC_ALARM
-#  warning "Missing EXTI setup logic"
-
-  /* Attach the ALARM interrupt handler */
-
-  irq_attach(STM32_IRQ_RTC_WKUP, rtc_interrupt, NULL);
-  up_enable_irq(STM32_IRQ_RTC_WKUP);
+#  warning "Missing logic"
 #endif
 
   return OK;

@@ -66,8 +66,10 @@
 
 /* Alarm function differs from part to part */
 
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F4XXX)
 #  include "stm32f40xxx_alarm.h"
+#elif defined(CONFIG_STM32_STM32L15XX)
+#  include "stm32l15xxx_alarm.h"
 #else
 #  include "stm32_alarm.h"
 #endif

@@ -33,8 +33,6 @@
  *
  ****************************************************************************/
 
-/* REVISIT:  This driver is *not* thread-safe! */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -60,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
 #  define STM32_NALARMS 2
 #else
 #  define STM32_NALARMS 1
@@ -74,8 +72,8 @@
 struct stm32_cbinfo_s
 {
   volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  volatile FAR void *priv;           /* Private argurment to accompany callback */
-#ifdef CONFIG_STM32_STM32F4XXX
+  volatile FAR void *priv;           /* Private argument to accompany callback */
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
   uint8_t id;                        /* Identifies the alarm */
 #endif
 };
@@ -97,10 +95,18 @@ struct stm32_lowerhalf_s
    * this file.
    */
 
+  sem_t devsem;         /* Threads can only exclusively access the RTC */
+
 #ifdef CONFIG_RTC_ALARM
   /* Alarm callback information */
 
   struct stm32_cbinfo_s cbinfo[STM32_NALARMS];
+#endif
+
+#ifdef CONFIG_RTC_PERIODIC
+  /* Periodic wakeup information */
+
+  struct lower_setperiodic_s periodic;
 #endif
 };
 
@@ -126,6 +132,12 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
                          FAR struct lower_rdalarm_s *alarminfo);
 #endif
 
+#ifdef CONFIG_RTC_PERIODIC
+static int stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
+                             FAR const struct lower_setperiodic_s *alarminfo);
+static int stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -141,6 +153,10 @@ static const struct rtc_ops_s g_rtc_ops =
   .setrelative = stm32_setrelative,
   .cancelalarm = stm32_cancelalarm,
   .rdalarm     = stm32_rdalarm,
+#endif
+#ifdef CONFIG_RTC_PERIODIC
+  .setperiodic    = stm32_setperiodic,
+  .cancelperiodic = stm32_cancelperiodic,
 #endif
 #ifdef CONFIG_RTC_IOCTL
   .ioctl       = NULL,
@@ -177,7 +193,7 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
 static void stm32_alarm_callback(FAR void *arg, unsigned int alarmid)
 {
   FAR struct stm32_lowerhalf_s *lower;
@@ -232,7 +248,7 @@ static void stm32_alarm_callback(void)
     }
 }
 
-#endif /* CONFIG_STM32_STM32F4XXX */
+#endif /* CONFIG_STM32_STM32F4XXX || CONFIG_STM32_STM32L15XX */
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
@@ -396,11 +412,11 @@ static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower)
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo)
 {
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
   FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
-  int ret = -EINVAL;
+  int ret;
 
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
@@ -408,6 +424,13 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
   priv = (FAR struct stm32_lowerhalf_s *)lower;
 
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -EINVAL;
   if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
     {
       /* Remember the callback information */
@@ -434,16 +457,25 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
         }
     }
 
+  nxsem_post(&priv->devsem);
+
   return ret;
 
 #else
   FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
-  int ret = -EINVAL;
+  int ret;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
   priv = (FAR struct stm32_lowerhalf_s *)lower;
 
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -EINVAL;
   if (alarminfo->id == 0)
     {
       struct timespec ts;
@@ -468,6 +500,8 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
           cbinfo->priv = NULL;
         }
     }
+
+  nxsem_post(&priv->devsem);
 
   return ret;
 #endif
@@ -495,7 +529,7 @@ static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
 static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct lower_setrelative_s *alarminfo)
 {
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
   struct lower_setalarm_s setalarm;
   struct tm time;
   time_t seconds;
@@ -646,17 +680,24 @@ static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
 #ifdef CONFIG_RTC_ALARM
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
   FAR struct stm32_lowerhalf_s *priv;
   FAR struct stm32_cbinfo_s *cbinfo;
-  int ret = -EINVAL;
+  int ret;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == RTC_ALARMA || alarmid == RTC_ALARMB);
   priv = (FAR struct stm32_lowerhalf_s *)lower;
 
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
+  ret = -EINVAL;
   if (alarmid == RTC_ALARMA || alarmid == RTC_ALARMB)
     {
       /* Nullify callback information to reduce window for race conditions */
@@ -669,6 +710,8 @@ static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 
       ret = stm32_rtc_cancelalarm((enum alm_id_e)alarmid);
     }
+
+  nxsem_post(&priv->devsem);
 
   return ret;
 
@@ -740,6 +783,130 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 #endif
 
 /****************************************************************************
+ * Name: stm32_periodic_callback
+ *
+ * Description:
+ *   This is the function that is called from the RTC driver when the periodic
+ *   wakeup goes off.  It just invokes the upper half drivers callback.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+static int stm32_periodic_callback(void)
+{
+  FAR struct stm32_lowerhalf_s *lower;
+  struct lower_setperiodic_s *cbinfo;
+  rtc_wakeup_callback_t cb;
+  FAR void *priv;
+
+  lower = (FAR struct stm32_lowerhalf_s *)&g_rtc_lowerhalf;
+
+  cbinfo = &lower->periodic;
+  cb     = (rtc_wakeup_callback_t)cbinfo->cb;
+  priv   = (FAR void *)cbinfo->priv;
+
+  /* Perform the callback */
+
+  if (cb != NULL)
+    {
+      cb(priv, 0);
+    }
+
+  return OK;
+}
+#endif /* CONFIG_RTC_PERIODIC */
+
+/****************************************************************************
+ * Name: stm32_setperiodic
+ *
+ * Description:
+ *   Set a new periodic wakeup relative to the current time, with a given
+ *   period. This function implements the setperiodic() method of the RTC
+ *   driver interface
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *   alarminfo - Provided information needed to set the wakeup activity
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_RTC_PERIODIC
+static int stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
+                             FAR const struct lower_setperiodic_s *alarminfo)
+{
+  FAR struct stm32_lowerhalf_s *priv;
+  int ret;
+
+  ASSERT(lower != NULL && alarminfo != NULL);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
+
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  memcpy(&priv->periodic, alarminfo, sizeof(struct lower_setperiodic_s));
+
+  ret = stm32_rtc_setperiodic(&alarminfo->period, stm32_periodic_callback);
+
+  nxsem_post(&priv->devsem);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_cancelperiodic
+ *
+ * Description:
+ *   Cancel the current periodic wakeup activity.  This function implements
+ *   the cancelperiodic() method of the RTC driver interface
+ *
+ * Input Parameters:
+ *   lower - A reference to RTC lower half driver state structure
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+static int stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id)
+{
+  FAR struct stm32_lowerhalf_s *priv;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+  priv = (FAR struct stm32_lowerhalf_s *)lower;
+
+  DEBUGASSERT(id == 0);
+
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = stm32_rtc_cancelperiodic();
+
+  nxsem_post(&priv->devsem);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -767,6 +934,8 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
 FAR struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void)
 {
+  nxsem_init(&g_rtc_lowerhalf.devsem, 0, 1);
+
   return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 

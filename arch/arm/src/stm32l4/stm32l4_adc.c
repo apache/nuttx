@@ -1016,7 +1016,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
  *   states. Check if ADC is in progress and if so prevent from entering STOP.
  *
  ****************************************************************************/
-#if CONFIG_PM
+#ifdef CONFIG_PM
 static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e state)
 {

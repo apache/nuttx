@@ -111,6 +111,29 @@ int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func,
                      void *arg);
 #endif
 
+/****************************************************************************
+ * Name: stm32_exti_wakeup
+ *
+ * Description:
+ *   Sets/clears EXTI wakeup interrupt.
+ *
+ * Parameters:
+ *  - rising/falling edge: enables interrupt on rising/falling edges
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
+ *
+ * Returns:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+int stm32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
+                      xcpt_t func, void *arg);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -96,6 +96,10 @@ struct alm_rdalarm_s
 
 #endif /* CONFIG_RTC_ALARM */
 
+#ifdef CONFIG_RTC_PERIODIC
+typedef CODE int (*wakeupcb_t)(void);
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -195,7 +199,7 @@ bool stm32l4_rtc_havesettime(void);
  * Name: stm32l4_rtc_setalarm
  *
  * Description:
- *   Set an alarm to an asbolute time using associated hardware.
+ *   Set an alarm to an absolute time using associated hardware.
  *
  * Input Parameters:
  *  alminfo - Information about the alarm configuration.
@@ -227,7 +231,7 @@ int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
  * Name: stm32l4_rtc_cancelalarm
  *
  * Description:
- *   Cancel an alaram.
+ *   Cancel an alarm.
  *
  * Input Parameters:
  *  alarmid - Identifies the alarm to be cancelled
@@ -239,6 +243,41 @@ int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
 
 int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid);
 #endif /* CONFIG_RTC_ALARM */
+
+#ifdef CONFIG_RTC_PERIODIC
+
+/****************************************************************************
+ * Name: stm32l4_rtc_setperiodic
+ *
+ * Description:
+ *   Set a periodic RTC wakeup
+ *
+ * Input Parameters:
+ *  period   - Time to sleep between wakeups
+ *  callback - Function to call when the period expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32l4_rtc_setperiodic(FAR const struct timespec *period, wakeupcb_t callback);
+
+/****************************************************************************
+ * Name: stm32l4_rtc_cancelperiodic
+ *
+ * Description:
+ *   Cancel a periodic wakeup
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32l4_rtc_cancelperiodic(void);
+#endif /* CONFIG_RTC_PERIODIC */
 
 /****************************************************************************
  * Name: stm32l4_rtc_lowerhalf

@@ -63,9 +63,11 @@
  * the RTCC in these families.
  */
 
-#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+#elif defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX)
 #  include "stm32_rtcc.c"
+#elif defined(CONFIG_STM32_STM32L15XX)
+#  include "stm32l15xxx_rtcc.c"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "stm32f40xxx_rtcc.c"
 #endif

@@ -51,6 +51,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include <nuttx/fs/ioctl.h>
 
@@ -89,6 +90,10 @@
  *
  * CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an
  *   alarm.  A callback function will be executed when the alarm goes off
+ *
+ * CONFIG_RTC_PERIODIC - Enable if the RTC hardware supports setting a
+ *  periodic wakeup. A callback function will be executed when the wakeup happens.
+ *  This is an experimental feature.
  *
  * CONFIG_RTC_DRIVER - Enable building the upper-half RTC driver
  */
@@ -170,7 +175,7 @@
 
 #define RTC_SET_RELATIVE   _RTCIOC(0x0005)
 
-/* RTC_SET_RELATIVE cancel the alarm.
+/* RTC_CANCEL_ALARM cancel the alarm.
  *
  * Argument: An ALARM ID value that indicates which alarm should be canceled.
  */
@@ -184,6 +189,21 @@
 
 #define RTC_RD_ALARM       _RTCIOC(0x0007)
 
+/* RTC_SET_PERIODIC set a periodic wakeup.
+ *
+ * Argument: A read-only reference to a struct rtc_setperiodic_s containing the
+ *           new wakeup period to be set.
+ */
+
+#define RTC_SET_PERIODIC     _RTCIOC(0x0008)
+
+/* RTC_CANCEL_PERIODIC cancel the periodic wakeup.
+ *
+ * Argument: An ID value that indicates which wakeup should be canceled.
+ */
+
+#define RTC_CANCEL_PERIODIC  _RTCIOC(0x0009)
+
 /* Architecture-specific RTC IOCTLS should begin at RTC_USER_IOCBASE.  For
  * example:
  *
@@ -192,7 +212,7 @@
  *   etc.
  */
 
-#define RTC_USER_IOCBASE   0x0008
+#define RTC_USER_IOCBASE     0x000a
 
 
 /****************************************************************************
@@ -268,7 +288,7 @@ struct lower_setalarm_s
 {
   uint8_t id;               /* Indicates the alarm to be set */
   rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  FAR void *priv;           /* Private argurment to accompany callback */
+  FAR void *priv;           /* Private argument to accompany callback */
   struct rtc_time time;     /* Alarm time */
 };
 
@@ -278,7 +298,7 @@ struct lower_setrelative_s
 {
   uint8_t id;               /* Indicates the alarm to be set */
   rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  FAR void *priv;           /* Private argurment to accompany callback */
+  FAR void *priv;           /* Private argument to accompany callback */
   time_t reltime;           /* Relative time in seconds */
 };
 
@@ -287,9 +307,40 @@ struct lower_setrelative_s
 struct lower_rdalarm_s
 {
   uint8_t id;               /* Indicates the alarm to be set */
-  FAR void *priv;           /* Private argurment to accompany callback */
+  FAR void *priv;           /* Private argument to accompany callback */
   FAR struct rtc_time *time;/* Queried RTC time pointer */
 };
+#endif
+
+#ifdef CONFIG_RTC_PERIODIC
+
+/* Structure used with the RTC_SET_PERIODIC IOCTL command. */
+
+struct rtc_setperiodic_s
+{
+  uint8_t id;               /* Indicates the alarm to be set */
+  uint8_t signo;            /* Signal number for alarm notification */
+  pid_t pid;                /* Identifies task to be notified (0=caller) */
+  union sigval sigvalue;    /* Data passed with notification */
+  struct timespec period;   /* Period between wakeups */
+};
+
+/* Callback type used by the RTC harware to notify the RTC driver when the
+ * wakeup period expires.
+ */
+
+typedef CODE void (*rtc_wakeup_callback_t)(FAR void *priv, int alarmid);
+
+/* Structure used with the setperiodic method */
+
+struct lower_setperiodic_s
+{
+  uint8_t id;                /* Indicates the wakeup to be set */
+  rtc_wakeup_callback_t cb;  /* Callback when the wakeup expires */
+  FAR void *priv;            /* Private argument to accompany callback */
+  struct timespec period;    /* Period between wakeups */
+};
+
 #endif
 
 /* The RTC driver is implemented as a common, upper-half character driver
@@ -340,6 +391,17 @@ struct rtc_ops_s
 
   CODE int (*rdalarm)(FAR struct rtc_lowerhalf_s *lower,
                       FAR struct lower_rdalarm_s *alarminfo);
+#endif
+
+#ifdef CONFIG_RTC_PERIODIC
+  /* setperiodic sets up a new periodic wakeup. */
+
+  CODE int (*setperiodic)(FAR struct rtc_lowerhalf_s *lower,
+                          FAR const struct lower_setperiodic_s *alarminfo);
+
+  /* cancelperiodic cancels the current periodic wakeup. */
+
+  CODE int (*cancelperiodic)(FAR struct rtc_lowerhalf_s *lower, int alarmid);
 #endif
 
 #ifdef CONFIG_RTC_IOCTL
