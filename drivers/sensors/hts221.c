@@ -1153,6 +1153,8 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->config = config;
   nxsem_init(&priv->devsem, 0, 1);
 
+  priv->config->set_power(priv->config, true);
+
   ret = hts221_load_calibration_data(priv);
   if (ret < 0)
     {
@@ -1179,5 +1181,6 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->config->irq_attach(priv->config, hts221_int_handler, priv);
   priv->config->irq_enable(priv->config, false);
+  priv->config->set_power(priv->config, false);
   return OK;
 }
