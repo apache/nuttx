@@ -249,13 +249,27 @@
 #define OPAMP2_VMSEL OPAMP2_VMSEL_PC5
 #define OPAMP2_VPSEL OPAMP2_VPSEL_PB14
 
+/* Configuration specific to high priority interrupts example:
+ *   - HRTIM Timer A trigger for ADC if DMA transfer
+ *   - ADC DMA transfer on DMA1_CH1
+ */
+
+#ifdef CONFIG_NUCLEOF334R8_HIGHPRI
+
 /* HRTIM */
+
+#define HRTIM_TIMA_PRESCALER HRTIM_PRESCALER_128
+#define HRTIM_TIMA_MODE      HRTIM_MODE_CONT
+
+#define HRTIM_ADC_TRG1       HRTIM_ADCTRG13_APER
 
 /* DMA channels *************************************************************/
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
-#define ADC2_DMA_CHAN DMACHAN_ADC2_1   /* DMA1_CH2 */
+
+#endif  /* CONFIG_NUCLEOF334R8_HIGHPRI */
+
 
 /****************************************************************************
  * Public Data

@@ -61,7 +61,9 @@
 
 #include <nuttx/power/powerled.h>
 
-#include "stm32.h"
+#include "stm32_comp.h"
+#include "stm32_hrtim.h"
+#include "stm32_dac.h"
 
 #if defined(CONFIG_EXAMPLES_POWERLED) && defined(CONFIG_DRIVERS_POWERLED)
 

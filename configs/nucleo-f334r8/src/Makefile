@@ -88,4 +88,8 @@ ifeq ($(CONFIG_OPAMP),y)
 CSRCS += stm32_opamp.c
 endif
 
+ifeq ($(CONFIG_NUCLEOF334R8_HIGHPRI),y)
+CSRCS += stm32_highpri.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

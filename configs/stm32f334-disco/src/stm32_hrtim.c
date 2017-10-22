@@ -45,7 +45,7 @@
 
 #include <nuttx/board.h>
 
-#include "stm32.h"
+#include "stm32_hrtim.h"
 
 #if defined(CONFIG_HRTIM) && defined(CONFIG_STM32_HRTIM1)
 

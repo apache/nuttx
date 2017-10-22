@@ -50,6 +50,7 @@
 
 #if defined(CONFIG_STM32_STM32F33XX)
 #  include "chip/stm32f33xxx_hrtim.h"
+#  include "chip/stm32f33xxx_rcc.h"
 #else
 #  error
 #endif
@@ -645,88 +646,88 @@ enum stm32_hrtim_chopper_freq_e
 
 enum stm32_hrtim_adc_trq13_e
 {
-  HRTIM_ADCTRG13_MC1   = (1 << 0),
-  HRTIM_ADCTRG13_MC2   = (1 << 1),
-  HRTIM_ADCTRG13_MC3   = (1 << 2),
-  HRTIM_ADCTRG13_MC4   = (1 << 3),
-  HRTIM_ADCTRG13_MPER  = (1 << 4),
+  HRTIM_ADCTRG13_MC1   = (1 << 0), /* Trigger on Master Compare 1 */
+  HRTIM_ADCTRG13_MC2   = (1 << 1), /* Trigger on Master Compare 2 */
+  HRTIM_ADCTRG13_MC3   = (1 << 2), /* Trigger on Master Compare 3 */
+  HRTIM_ADCTRG13_MC4   = (1 << 3), /* Trigger on Master Compare 4 */
+  HRTIM_ADCTRG13_MPER  = (1 << 4), /* Trigger on Master Period */
 
-  HRTIM_ADCTRG13_EEV1  = (1 << 5),
-  HRTIM_ADCTRG13_EEV2  = (1 << 6),
-  HRTIM_ADCTRG13_EEV3  = (1 << 7),
-  HRTIM_ADCTRG13_EEV4  = (1 << 8),
-  HRTIM_ADCTRG13_EEV5  = (1 << 9),
+  HRTIM_ADCTRG13_EEV1  = (1 << 5), /* Trigger on External Event 1 */
+  HRTIM_ADCTRG13_EEV2  = (1 << 6), /* Trigger on External Event 2 */
+  HRTIM_ADCTRG13_EEV3  = (1 << 7), /* Trigger on External Event 3 */
+  HRTIM_ADCTRG13_EEV4  = (1 << 8), /* Trigger on External Event 4 */
+  HRTIM_ADCTRG13_EEV5  = (1 << 9), /* Trigger on External Event 5 */
 
-  HRTIM_ADCTRG13_AC2   = (1 << 10),
-  HRTIM_ADCTRG13_AC3   = (1 << 11),
-  HRTIM_ADCTRG13_AC4   = (1 << 12),
-  HRTIM_ADCTRG13_APER  = (1 << 13),
-  HRTIM_ADCTRG13_ARST  = (1 << 14),
+  HRTIM_ADCTRG13_AC2   = (1 << 10), /* Trigger on Timer A Compare 2 */
+  HRTIM_ADCTRG13_AC3   = (1 << 11), /* Trigger on Timer A Compare 3 */
+  HRTIM_ADCTRG13_AC4   = (1 << 12), /* Trigger on Timer A Compare 4 */
+  HRTIM_ADCTRG13_APER  = (1 << 13), /* Trigger on Timer A Period */
+  HRTIM_ADCTRG13_ARST  = (1 << 14), /* Trigger on Timer A Reset */
 
-  HRTIM_ADCTRG13_BC2   = (1 << 15),
-  HRTIM_ADCTRG13_BC3   = (1 << 16),
-  HRTIM_ADCTRG13_BC4   = (1 << 17),
-  HRTIM_ADCTRG13_BPER  = (1 << 18),
-  HRTIM_ADCTRG13_BRST  = (1 << 19),
+  HRTIM_ADCTRG13_BC2   = (1 << 15), /* Trigger on Timer B Compare 2 */
+  HRTIM_ADCTRG13_BC3   = (1 << 16), /* Trigger on Timer B Compare 3 */
+  HRTIM_ADCTRG13_BC4   = (1 << 17), /* Trigger on Timer B Compare 4 */
+  HRTIM_ADCTRG13_BPER  = (1 << 18), /* Trigger on Timer B Period */
+  HRTIM_ADCTRG13_BRST  = (1 << 19), /* Trigger on Timer B Reset */
 
-  HRTIM_ADCTRG13_CC2   = (1 << 20),
-  HRTIM_ADCTRG13_CC3   = (1 << 21),
-  HRTIM_ADCTRG13_CC4   = (1 << 22),
-  HRTIM_ADCTRG13_CPER  = (1 << 23),
+  HRTIM_ADCTRG13_CC2   = (1 << 20), /* Trigger on Timer C Compare 2 */
+  HRTIM_ADCTRG13_CC3   = (1 << 21), /* Trigger on Timer C Compare 3 */
+  HRTIM_ADCTRG13_CC4   = (1 << 22), /* Trigger on Timer C Compare 4 */
+  HRTIM_ADCTRG13_CPER  = (1 << 23), /* Trigger on Timer C Period */
 
-  HRTIM_ADCTRG13_DC2   = (1 << 24),
-  HRTIM_ADCTRG13_DC3   = (1 << 25),
-  HRTIM_ADCTRG13_DC4   = (1 << 26),
-  HRTIM_ADCTRG13_DPER  = (1 << 27),
+  HRTIM_ADCTRG13_DC2   = (1 << 24), /* Trigger on Timer D Compare 2 */
+  HRTIM_ADCTRG13_DC3   = (1 << 25), /* Trigger on Timer D Compare 3 */
+  HRTIM_ADCTRG13_DC4   = (1 << 26), /* Trigger on Timer D Compare 4 */
+  HRTIM_ADCTRG13_DPER  = (1 << 27), /* Trigger on Timer D Period */
 
-  HRTIM_ADCTRG13_EC2   = (1 << 28),
-  HRTIM_ADCTRG13_EC3   = (1 << 29),
-  HRTIM_ADCTRG13_EC4   = (1 << 30),
-  HRTIM_ADCTRG13_ERST  = (1 << 31),
+  HRTIM_ADCTRG13_EC2   = (1 << 28), /* Trigger on Timer E Compare 2 */
+  HRTIM_ADCTRG13_EC3   = (1 << 29), /* Trigger on Timer E Compare 3 */
+  HRTIM_ADCTRG13_EC4   = (1 << 30), /* Trigger on Timer E Compare 4 */
+  HRTIM_ADCTRG13_EPER  = (1 << 31), /* Trigger on Timer E Period */
 };
 
 /* HRTIM ADC Trigger 2/4 */
 
 enum stm32_hrtim_adc_trq24_e
 {
-  HRTIM_ADCTRG24_MC1   = (1 << 0),
-  HRTIM_ADCTRG24_MC2   = (1 << 1),
-  HRTIM_ADCTRG24_MC3   = (1 << 2),
-  HRTIM_ADCTRG24_MC4   = (1 << 3),
-  HRTIM_ADCTRG24_MPER  = (1 << 4),
+  HRTIM_ADCTRG24_MC1   = (1 << 0), /* Trigger on Master Compare 1 */
+  HRTIM_ADCTRG24_MC2   = (1 << 1), /* Trigger on Master Compare 2 */
+  HRTIM_ADCTRG24_MC3   = (1 << 2), /* Trigger on Master Compare 3 */
+  HRTIM_ADCTRG24_MC4   = (1 << 3), /* Trigger on Master Compare 4 */
+  HRTIM_ADCTRG24_MPER  = (1 << 4), /* Trigger on Master Period */
 
-  HRTIM_ADCTRG24_EEV6  = (1 << 5),
-  HRTIM_ADCTRG24_EEV7  = (1 << 6),
-  HRTIM_ADCTRG24_EEV8  = (1 << 7),
-  HRTIM_ADCTRG24_EEV9  = (1 << 8),
-  HRTIM_ADCTRG24_EEV10 = (1 << 9),
+  HRTIM_ADCTRG24_EEV6  = (1 << 5), /* Trigger on External Event 6 */
+  HRTIM_ADCTRG24_EEV7  = (1 << 6), /* Trigger on External Event 7 */
+  HRTIM_ADCTRG24_EEV8  = (1 << 7), /* Trigger on External Event 8 */
+  HRTIM_ADCTRG24_EEV9  = (1 << 8), /* Trigger on External Event 9 */
+  HRTIM_ADCTRG24_EEV10 = (1 << 9), /* Trigger on External Event 10 */
 
-  HRTIM_ADCTRG24_AC2   = (1 << 10),
-  HRTIM_ADCTRG24_AC3   = (1 << 11),
-  HRTIM_ADCTRG24_AC4   = (1 << 12),
-  HRTIM_ADCTRG24_APER  = (1 << 13),
+  HRTIM_ADCTRG24_AC2   = (1 << 10), /* Trigger on Timer A Compare 2 */
+  HRTIM_ADCTRG24_AC3   = (1 << 11), /* Trigger on Timer A Compare 3 */
+  HRTIM_ADCTRG24_AC4   = (1 << 12), /* Trigger on Timer A Compare 4 */
+  HRTIM_ADCTRG24_APER  = (1 << 13), /* Trigger on Timer A Period */
 
-  HRTIM_ADCTRG24_BC2   = (1 << 14),
-  HRTIM_ADCTRG24_BC3   = (1 << 15),
-  HRTIM_ADCTRG24_BC4   = (1 << 16),
-  HRTIM_ADCTRG24_BPER  = (1 << 17),
+  HRTIM_ADCTRG24_BC2   = (1 << 14), /* Trigger on Timer B Compare 2 */
+  HRTIM_ADCTRG24_BC3   = (1 << 15), /* Trigger on Timer B Compare 3 */
+  HRTIM_ADCTRG24_BC4   = (1 << 16), /* Trigger on Timer B Compare 4 */
+  HRTIM_ADCTRG24_BPER  = (1 << 17), /* Trigger on Timer B Period */
 
-  HRTIM_ADCTRG24_CC2   = (1 << 18),
-  HRTIM_ADCTRG24_CC3   = (1 << 19),
-  HRTIM_ADCTRG24_CC4   = (1 << 20),
-  HRTIM_ADCTRG24_CPER  = (1 << 21),
-  HRTIM_ADCTRG24_CRST  = (1 << 22),
+  HRTIM_ADCTRG24_CC2   = (1 << 18),  /* Trigger on Timer C Compare 2 */
+  HRTIM_ADCTRG24_CC3   = (1 << 19),  /* Trigger on Timer C Compare 3 */
+  HRTIM_ADCTRG24_CC4   = (1 << 20),  /* Trigger on Timer C Compare 4 */
+  HRTIM_ADCTRG24_CPER  = (1 << 21),  /* Trigger on Timer C Period */
+  HRTIM_ADCTRG24_CRST  = (1 << 22),  /* Trigger on Timer C Reset */
 
-  HRTIM_ADCTRG24_DC2   = (1 << 23),
-  HRTIM_ADCTRG24_DC3   = (1 << 24),
-  HRTIM_ADCTRG24_DC4   = (1 << 25),
-  HRTIM_ADCTRG24_DPER  = (1 << 26),
-  HRTIM_ADCTRG24_DRST  = (1 << 27),
+  HRTIM_ADCTRG24_DC2   = (1 << 23),  /* Trigger on Timer D Compare 2 */
+  HRTIM_ADCTRG24_DC3   = (1 << 24),  /* Trigger on Timer D Compare 3 */
+  HRTIM_ADCTRG24_DC4   = (1 << 25),  /* Trigger on Timer D Compare 4 */
+  HRTIM_ADCTRG24_DPER  = (1 << 26),  /* Trigger on Timer D Period */
+  HRTIM_ADCTRG24_DRST  = (1 << 27),  /* Trigger on Timer D Reset */
 
-  HRTIM_ADCTRG24_EC2   = (1 << 28),
-  HRTIM_ADCTRG24_EC3   = (1 << 29),
-  HRTIM_ADCTRG24_EC4   = (1 << 30),
-  HRTIM_ADCTRG24_ERST  = (1 << 31),
+  HRTIM_ADCTRG24_EC2   = (1 << 28),  /* Trigger on Timer E Compare 2 */
+  HRTIM_ADCTRG24_EC3   = (1 << 29),  /* Trigger on Timer E Compare 3 */
+  HRTIM_ADCTRG24_EC4   = (1 << 30),  /* Trigger on Timer E Compare 4 */
+  HRTIM_ADCTRG24_ERST  = (1 << 31),  /* Trigger on Timer E Reset */
 };
 
 /* HRTIM DAC synchronization events */

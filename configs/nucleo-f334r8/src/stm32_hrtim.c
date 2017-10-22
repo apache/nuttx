@@ -45,9 +45,10 @@
 
 #include <nuttx/board.h>
 
-#include "stm32.h"
+#include "stm32_hrtim.h"
 
-#if defined(CONFIG_HRTIM) && defined(CONFIG_STM32_HRTIM1)
+#if defined(CONFIG_HRTIM) && defined(CONFIG_STM32_HRTIM1) && \
+    !defined(CONFIG_NUCLEOF334R8_HIGHPRI)
 
 /****************************************************************************
  * Public Functions

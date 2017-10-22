@@ -1908,6 +1908,66 @@ struct adc_sample_time_s
 
 #endif
 
+#ifdef CONFIG_STM32_STM32F33XX
+
+/* At this moment only for STM32F33XX family */
+
+/* ADC resolution can be reduced in order to perform faster conversion */
+
+enum stm32_adc_resoluton_e
+{
+  ADC_RESOLUTION_12BIT = 0,     /* 12 bit, 15 ADCCLK cycles */
+  ADC_RESOLUTION_10BIT = 1,     /* 10 bit, 12 ADCCLK cycles */
+  ADC_RESOLUTION_8BIT  = 2,     /* 8 bit, 10 ADCCLK cycles */
+  ADC_RESOLUTION_6BIT  = 3      /* 6 bit, 8 ADCCLK cycles */
+};
+
+#ifdef CONFIG_STM32_ADC_NOIRQ
+
+/* This structure provides the publicly visable representation of the
+ * "lower-half" ADC driver structure.
+ */
+
+struct stm32_adc_dev_s
+{
+  /* Publicly visible portion of the "lower-half" ADC driver structure */
+
+  FAR const struct stm32_adc_ops_s *ops;
+
+  /* Require cast-compatibility with private "lower-half" ADC strucutre */
+};
+
+struct stm32_adc_ops_s
+{
+
+  /* Acknowledge interrupts */
+
+  void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get pending interrupts */
+
+  uint32_t (*int_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Enable interrupts */
+
+  void (*int_en)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get current ADC data register */
+
+  uint32_t (*val_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Register buffer for ADC DMA transfer */
+
+  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer, uint8_t len);
+
+  /* Get current ADC injected data register */
+
+  uint32_t (*inj_get)(FAR struct stm32_adc_dev_s *dev, uint8_t chan);
+};
+
+#endif  /* CONFIG_STM32_ADC_NOIRQ */
+#endif  /* CONFIG_STM32_STM32F33XX */
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/

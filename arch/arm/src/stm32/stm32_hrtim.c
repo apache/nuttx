@@ -185,6 +185,26 @@
 #  error HRTIM ADC Triggering not supported yet
 #endif
 
+#if defined(CONFIG_STM32_HRTIM_ADC1_TRG1) || defined(CONFIG_STM32_HRTIM_ADC1_TRG2) || \
+    defined(CONFIG_STM32_HRTIM_ADC1_TRG3) || defined(CONFIG_STM32_HRTIM_ADC1_TRG4) || \
+    defined(CONFIG_STM32_HRTIM_ADC2_TRG1) || defined(CONFIG_STM32_HRTIM_ADC2_TRG2) || \
+    defined(CONFIG_STM32_HRTIM_ADC2_TRG3) || defined(CONFIG_STM32_HRTIM_ADC2_TRG4)
+#  define HRTIM_HAVE_ADC
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_ADC1_TRG1) || defined(CONFIG_STM32_HRTIM_ADC2_TRG1)
+#  define HRTIM_HAVE_ADC_TRG1
+#endif
+#if defined(CONFIG_STM32_HRTIM_ADC1_TRG2) || defined(CONFIG_STM32_HRTIM_ADC2_TRG2)
+#  define HRTIM_HAVE_ADC_TRG2
+#endif
+#if defined(CONFIG_STM32_HRTIM_ADC1_TRG3) || defined(CONFIG_STM32_HRTIM_ADC2_TRG3)
+#  define HRTIM_HAVE_ADC_TRG3
+#endif
+#if defined(CONFIG_STM32_HRTIM_ADC1_TRG4) || defined(CONFIG_STM32_HRTIM_ADC2_TRG4)
+#  define HRTIM_HAVE_ADC_TRG4
+#endif
+
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
 #  error HRTIM Interrupts not supported yet
 #endif
@@ -497,21 +517,21 @@ struct stm32_hrtim_eev_s
 };
 #endif
 
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
 /* Structure describes HRTIM ADC triggering configuration */
 
 struct stm32_hrtim_adc_s
 {
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG1
+#ifdef HRTIM_HAVE_ADC_TRG1
   uint32_t trg1;
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG2
+#ifdef HRTIM_HAVE_ADC_TRG2
   uint32_t trg2;
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG3
+#ifdef HRTIM_HAVE_ADC_TRG3
   uint32_t trg3;
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG4
+#ifdef HRTIM_HAVE_ADC_TRG4
   uint32_t trg4;
 #endif
 };
@@ -555,7 +575,7 @@ struct stm32_hrtim_s
 #ifdef CONFIG_STM32_HRTIM_EVENTS
   struct stm32_hrtim_eev_s *eev;     /* External Events configuration  */
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
   struct stm32_hrtim_adc_s *adc;     /* ADC triggering configuration */
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
@@ -630,7 +650,7 @@ static int hrtim_outputs_config(FAR struct stm32_hrtim_s *priv);
 static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev, uint16_t outputs,
                                 bool state);
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
 static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv);
 #endif
 #ifdef CONFIG_STM32_HRTIM_DAC
@@ -1386,19 +1406,19 @@ struct stm32_hrtim_eev_s g_eev =
 
 /* ADC triggering data */
 
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
 struct stm32_hrtim_adc_s g_adc =
 {
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG1
+#ifdef HRTIM_HAVE_ADC_TRG1
   .trg1 = HRTIM_ADC_TRG1,
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG2
+#ifdef HRTIM_HAVE_ADC_TRG2
   .trg2 = HRTIM_ADC_TRG2,
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG3
+#ifdef HRTIM_HAVE_ADC_TRG3
   .trg3 = HRTIM_ADC_TRG3,
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG4
+#ifdef HRTIM_HAVE_ADC_TRG4
   .trg4 = HRTIM_ADC_TRG4
 #endif
 };
@@ -1442,7 +1462,7 @@ static struct stm32_hrtim_s g_hrtim1priv =
 #ifdef CONFIG_STM32_HRTIM_EVENTS
   .eev      = &g_eev,
 #endif
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
   .adc      = &g_adc,
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
@@ -2841,30 +2861,30 @@ static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
 static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
 {
   /* Configure ADC Trigger 1 */
 
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG1
+#ifdef HRTIM_HAVE_ADC_TRG1
   hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC1R_OFFSET, priv->adc->trg1);
 #endif
 
   /* Configure ADC Trigger 2 */
 
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG2
+#ifdef HRTIM_HAVE_ADC_TRG2
   hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC2R_OFFSET, priv->adc->trg2);
 #endif
 
   /* Configure ADC Trigger 3 */
 
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG3
+#ifdef HRTIM_HAVE_ADC_TRG3
   hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC3R_OFFSET, priv->adc->trg3);
 #endif
 
   /* Configure ADC Trigger 4 */
 
-#ifdef CONFIG_STM32_HRTIM_ADC_TRG4
+#ifdef HRTIM_HAVE_ADC_TRG4
   hrtim_cmn_putreg(priv, STM32_HRTIM_CMN_ADC4R_OFFSET, priv->adc->trg4);
 #endif
 
@@ -4592,7 +4612,7 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
 
   /* Configure ADC triggers */
 
-#ifdef CONFIG_STM32_HRTIM_ADC
+#ifdef HRTIM_HAVE_ADC
   ret = hrtim_adc_config(priv);
   if (ret != OK)
     {

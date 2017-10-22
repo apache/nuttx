@@ -5802,20 +5802,36 @@ menuconfig STM32_HRTIM_ADC
 
 if STM32_HRTIM_ADC
 
-config STM32_HRTIM_ADC_TRG1
-	bool "HRTIM ADC Trigger 1"
+config STM32_HRTIM_ADC1_TRG1
+	bool "HRTIM ADC1 Trigger 1"
 	default n
 
-config STM32_HRTIM_ADC_TRG2
-	bool "HRTIM ADC Trigger 2"
+config STM32_HRTIM_ADC1_TRG2
+	bool "HRTIM ADC1 Trigger 2"
 	default n
 
-config STM32_HRTIM_ADC_TRG3
-	bool "HRTIM ADC Trigger 3"
+config STM32_HRTIM_ADC1_TRG3
+	bool "HRTIM ADC1 Trigger 3"
 	default n
 
-config STM32_HRTIM_ADC_TRG4
-	bool "HRTIM ADC Trigger 4"
+config STM32_HRTIM_ADC1_TRG4
+	bool "HRTIM ADC1 Trigger 4"
+	default n
+
+config STM32_HRTIM_ADC2_TRG1
+	bool "HRTIM ADC2 Trigger 1"
+	default n
+
+config STM32_HRTIM_ADC2_TRG2
+	bool "HRTIM ADC2 Trigger 2"
+	default n
+
+config STM32_HRTIM_ADC2_TRG3
+	bool "HRTIM ADC2 Trigger 3"
+	default n
+
+config STM32_HRTIM_ADC2_TRG4
+	bool "HRTIM ADC2 Trigger 4"
 	default n
 
 endif # STM32_HRTIM_ADC
@@ -6297,6 +6313,14 @@ config STM32_ADC_NO_STARTUP_CONV
 	default n
 	---help---
 		Do not start conversion when opening ADC device.
+
+config STM32_ADC_NOIRQ
+	bool "Do not use default ADC interrupts"
+	depends on STM32_STM32F33XX
+	default n
+	---help---
+		Do not use default ADC interrupts handlers.
+		Only for STM32_STM32F33XX at this moment.
 
 config STM32_ADC1_DMA
 	bool "ADC1 DMA"
