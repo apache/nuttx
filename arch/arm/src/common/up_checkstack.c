@@ -58,7 +58,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size);
+static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack);
 
 /****************************************************************************
  * Name: do_stackcheck
@@ -77,7 +77,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size)
+static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 {
   FAR uintptr_t start;
   FAR uintptr_t end;
@@ -92,11 +92,19 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
   /* Get aligned addresses of the top and bottom of the stack */
 
 #ifdef CONFIG_TLS
-  /* Skip over the TLS data structure at the bottom of the stack */
+  if (!int_stack)
+    {
+      /* Skip over the TLS data structure at the bottom of the stack */
 
-  DEBUGASSERT((alloc & TLS_STACK_MASK) == 0);
-  start = alloc + sizeof(struct tls_info_s);
+      DEBUGASSERT((alloc & TLS_STACK_MASK) == 0);
+      start = alloc + sizeof(struct tls_info_s);
+    }
+  else
+    {
+      start = alloc & ~3;
+    }
 #else
+  UNUSED(int_stack);
   start = alloc & ~3;
 #endif
   end   = (alloc + size + 3) & ~3;
@@ -181,7 +189,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size);
+  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size,
+                       false);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
@@ -202,7 +211,9 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
-  return do_stackcheck((uintptr_t)&g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3));
+  return do_stackcheck((uintptr_t)&g_intstackalloc,
+                       (CONFIG_ARCH_INTERRUPTSTACK & ~3),
+                       true);
 }
 
 size_t up_check_intstack_remain(void)
