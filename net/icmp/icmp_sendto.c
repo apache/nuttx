@@ -349,13 +349,13 @@ end_wait:
  * Name: icmp_sendto
  *
  * Description:
- *   Implements the sendto() operation for the case of the raw packet socket.
- *   The 'buf' parameter points to a block of memory that includes an ICMP
- *   request header, followed by any payload that accompanies the request.
- *   The 'len' parameter includes both the size of the ICMP header and the
- *   followign payload.
+ *   Implements the sendto() operation for the case of the IPPROTO_ICMP
+ *   socket.  The 'buf' parameter points to a block of memory that includes
+ *   an ICMP request header, followed by any payload that accompanies the
+ *   request.  The 'len' parameter includes both the size of the ICMP header
+ *   and the following payload.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send

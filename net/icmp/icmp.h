@@ -42,11 +42,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <queue.h>
 #include <assert.h>
-
-#include <sys/types.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
@@ -256,9 +255,13 @@ void icmp_poll(FAR struct net_driver_s *dev);
  * Name: icmp_sendto
  *
  * Description:
- *   Implements the sendto() operation for the case of the raw packet socket.
+ *   Implements the sendto() operation for the case of the IPPROTO_ICMP
+ *   socket.  The 'buf' parameter points to a block of memory that includes
+ *   an ICMP request header, followed by any payload that accompanies the
+ *   request.  The 'len' parameter includes both the size of the ICMP header
+ *   and the following payload.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
@@ -284,7 +287,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
  *   data gram socket with the IPPROTO_ICMP protocol.  icmp_recvfrom()
- *   receives ICMP ECHO replies for the  a socket.
+ *   receives ICMP ECHO replies for the a socket.
  *
  *   If 'from' is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in.  The argument 'fromlen' is

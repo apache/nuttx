@@ -69,8 +69,9 @@ static int        icmp_getsockname(FAR struct socket *psock,
 static int        icmp_listen(FAR struct socket *psock, int backlog);
 static int        icmp_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        icmp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                   FAR socklen_t *addrlen, FAR struct socket *newsock);
+static int        icmp_accept(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+                    FAR struct socket *newsock);
 #ifndef CONFIG_DISABLE_POLL
 static int        icmp_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
@@ -134,7 +135,7 @@ static int icmp_setup(FAR struct socket *psock, int protocol)
 
   if (psock->s_type == SOCK_DGRAM && protocol == IPPROTO_ICMP)
     {
-      /* Allocate the IPPROTO_ICMP socket connection structure and save in\
+      /* Allocate the IPPROTO_ICMP socket connection structure and save in
        * the new socket instance.
        */
 
@@ -493,7 +494,7 @@ static int icmp_close(FAR struct socket *psock)
 
   if (conn->crefs <= 1)
     {
-      /* Yes... free an read-ahead data */
+      /* Yes... free any read-ahead data */
 
       iob_free_queue(&conn->readahead);
 

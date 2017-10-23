@@ -380,7 +380,7 @@ out:
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
  *   data gram socket with the IPPROTO_ICMP protocol.  icmp_recvfrom()
- *   receives ICMP ECHO replies for the  a socket.
+ *   receives ICMP ECHO replies for the a socket.
  *
  *   If 'from' is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in.  The argument 'fromlen' is
