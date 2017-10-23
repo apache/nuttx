@@ -51,6 +51,7 @@
 #include "arp/arp.h"
 #include "sixlowpan/sixlowpan.h"
 #include "neighbor/neighbor.h"
+#include "icmp/icmp.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -124,6 +125,12 @@ void net_setup(void)
   /* Initialize packet socket support */
 
   pkt_initialize();
+#endif
+
+#ifdef CONFIG_NET_ICMP_SOCKET
+  /* Initialize IPPPROTO_ICMP socket support */
+
+  icmp_sock_initialize();
 #endif
 
 #ifdef CONFIG_NET_IEEE802154

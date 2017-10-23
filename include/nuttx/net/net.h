@@ -79,7 +79,7 @@
 #  define _NX_GETERRNO(r)           (-(r))
 #  define _NX_GETERRVAL(r)          (r)
 #else
-#  define _NX_SEND(s,b,l,f)         send(s,b,l,f) 
+#  define _NX_SEND(s,b,l,f)         send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) recvfrom(s,b,l,f,a,n)
 #  define _NX_GETERRNO(r)           errno

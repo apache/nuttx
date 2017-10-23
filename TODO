@@ -646,7 +646,7 @@ o Kernel/Protected Build
                COMMAND  KERNEL INTERFACE(s)
                -------- ----------------------------------------------
                mkrd     ramdisk_register()
-               ping     icmp_ping()
+               ping6    icmpv6_ping()
                mount    foreach_mountpoint()
 
   Status:      Open

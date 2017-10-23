@@ -92,8 +92,8 @@
 
 /* Header sizes */
 
-#define ICMP_HDRLEN    4                           /* Size of ICMP header */
-#define IPICMP_HDRLEN  (ICMP_HDRLEN + IPv4_HDRLEN) /* Size of IP + ICMP header */
+#define ICMP_HDRLEN    8                           /* Size of ICMP header */
+#define IPICMP_HDRLEN  (ICMP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + ICMP header */
 
 /****************************************************************************
  * Public Type Definitions
@@ -181,36 +181,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: imcp_ping
- *
- * Description:
- *   Send a ECHO request and wait for the ECHO response
- *
- * Parameters:
- *   addr  - The IP address of the peer to send the ICMP ECHO request to
- *           in network order.
- *   id    - The ID to use in the ICMP ECHO request.  This number should be
- *           unique; only ECHO responses with this matching ID will be
- *           processed (host order)
- *   seqno - The sequence number used in the ICMP ECHO request.  NOT used
- *           to match responses (host order)
- *   dsecs - Wait up to this many deci-seconds for the ECHO response to be
- *           returned (host order).
- *
- * Return:
- *   seqno of received ICMP ECHO with matching ID (may be different
- *   from the seqno argument (may be a delayed response from an earlier
- *   ping with the same ID). Or a negated errno on any failure.
- *
- * Assumptions:
- *   Called from the user level with interrupts enabled.
- *
- ****************************************************************************/
-
-int icmp_ping(in_addr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
-              int dsecs);
 
 #undef EXTERN
 #ifdef __cplusplus

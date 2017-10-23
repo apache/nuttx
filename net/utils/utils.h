@@ -352,7 +352,7 @@ uint16_t udp_ipv6_chksum(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_SOCKET)
 uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len);
 #endif
 

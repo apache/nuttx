@@ -15,18 +15,22 @@ config NET_ICMP
 
 if NET_ICMP
 
-config NET_ICMP_PING
-	bool "ICMP ping interfaces"
+config NET_ICMP_SOCKET
+	bool "IPPROTO_ICMP socket support"
 	default n
-	depends on BUILD_FLAT
 	---help---
-		Provide interfaces to support application level support for
-		for sending ECHO (ping) requests and associating ECHO replies.
+		Enable support for IPPROTO_ICMP sockets.  These sockets are needed
+		for application level support application for sending ECHO (ping)
+		requests and associated ECHO replies.
 
-		NOTE: Calling these interfaces from application space is a
-		violation of the OS/application interface but for historical
-		reasons, is permitted in the flat build.
+if NET_ICMP_SOCKET
 
+config NET_ICMP_NCONNS
+	int "Max ICMP packet sockets"
+	default 4
+	depends on MM_IOB
+
+endif # NET_ICMP_SOCKET
 endif # NET_ICMP
 endmenu # ICMP Networking Support
 endif # NET_IPv4

@@ -66,7 +66,134 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF   ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPICMPBUF ((FAR struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPBUF   ((FAR struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define ICMPSIZE  ((dev)->d_len - IPv4_HDRLEN)
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: icmp_datahandler
+ *
+ * Description:
+ *   Handle ICMP echo replies that are not accepted by the application.
+ *
+ * Input Parameters:
+ *   dev    - Device instance only the input packet in d_buf, length = d_len;
+ *   conn   - A pointer to the ICMP connection structure
+ *   buffer - A pointer to the buffer to be copied to the read-ahead
+ *     buffers
+ *   buflen - The number of bytes to copy to the read-ahead buffer.
+ *
+ * Returned value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMP_SOCKET
+uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
+                          FAR struct icmp_conn_s *conn)
+{
+  FAR struct ipv4_hdr_s *ipv4;
+  struct sockaddr_in inaddr;
+  FAR struct iob_s *iob;
+  uint16_t offset;
+  uint16_t buflen;
+  uint8_t addrsize;
+  int ret;
+
+  /* Try to allocate on I/O buffer to start the chain without waiting (and
+   * throttling as necessary).  If we would have to wait, then drop the
+   * packet.
+   */
+
+  iob = iob_tryalloc(true);
+  if (iob == NULL)
+    {
+      nerr("ERROR: Failed to create new I/O buffer chain\n");
+      return 0;
+    }
+
+  /* Put the IPv4 address at the beginning of the read-ahead buffer */
+
+  ipv4 = IPv4BUF;
+
+  inaddr.sin_family = AF_INET;
+  inaddr.sin_port   = INADDR_ANY;
+
+  net_ipv4addr_copy(inaddr.sin_addr.s_addr,
+                    net_ip4addr_conv32(ipv4->srcipaddr));
+
+  /* Copy the src address info into the I/O buffer chain.  We will not wait
+   * for an I/O buffer to become available in this context.  It there is
+   * any failure to allocated, the entire I/O buffer chain will be discarded.
+   */
+
+  addrsize = sizeof(struct sockaddr_in);
+  ret      = iob_trycopyin(iob, &addrsize, sizeof(uint8_t), 0, true);
+  if (ret < 0)
+    {
+      /* On a failure, iob_trycopyin return a negated error value but does
+       * not free any I/O buffers.
+       */
+
+      nerr("ERROR: Failed to length to the I/O buffer chain: %d\n", ret);
+      (void)iob_free_chain(iob);
+      return 0;
+    }
+
+  offset = sizeof(uint8_t);
+
+  ret = iob_trycopyin(iob, (FAR const uint8_t *)&inaddr,
+                      sizeof(struct sockaddr_in), offset, true);
+  if (ret < 0)
+    {
+      /* On a failure, iob_trycopyin return a negated error value but does
+       * not free any I/O buffers.
+       */
+
+      nerr("ERROR: Failed to source address to the I/O buffer chain: %d\n", ret);
+      (void)iob_free_chain(iob);
+      return 0;
+    }
+
+  offset += sizeof(struct sockaddr_in);
+
+  /* Copy the new ICMP reply into the I/O buffer chain (without waiting) */
+
+  buflen = ICMPSIZE;
+  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPBUF, buflen, offset, true);
+  if (ret < 0)
+    {
+      /* On a failure, iob_copyin return a negated error value but does
+       * not free any I/O buffers.
+       */
+
+      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
+      (void)iob_free_chain(iob);
+      return 0;
+    }
+
+  /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
+   * without waiting).
+   */
+
+  ret = iob_tryadd_queue(iob, &conn->readahead);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      (void)iob_free_chain(iob);
+      return 0;
+    }
+
+  ninfo("Buffered %d bytes\n", buflen + addrsize + 1);
+  return buflen;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -92,7 +219,7 @@
 
 void icmp_input(FAR struct net_driver_s *dev)
 {
-  FAR struct icmp_iphdr_s *picmp = ICMPBUF;
+  FAR struct icmp_iphdr_s *ipicmp = IPICMPBUF;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.recv++;
@@ -103,45 +230,46 @@ void icmp_input(FAR struct net_driver_s *dev)
    * we return the packet.
    */
 
-  if (picmp->type == ICMP_ECHO_REQUEST)
+  if (ipicmp->type == ICMP_ECHO_REQUEST)
     {
       /* Change the ICMP type */
 
-      picmp->type = ICMP_ECHO_REPLY;
+      ipicmp->type = ICMP_ECHO_REPLY;
 
       /* Swap IP addresses. */
 
-      net_ipv4addr_hdrcopy(picmp->destipaddr, picmp->srcipaddr);
-      net_ipv4addr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);
+      net_ipv4addr_hdrcopy(ipicmp->destipaddr, ipicmp->srcipaddr);
+      net_ipv4addr_hdrcopy(ipicmp->srcipaddr, &dev->d_ipaddr);
 
       /* Recalculate the ICMP checksum */
 
 #if 0
       /* The slow way... sum over the ICMP message */
 
-      picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - IPv4_HDRLEN);
-      if (picmp->icmpchksum == 0)
+      ipicmp->icmpchksum = 0;
+      ipicmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)ipicmp->len[0] << 8) |
+                                               (uint16_t)ipicmp->len[1]) - IPv4_HDRLEN);
+      if (ipicmp->icmpchksum == 0)
         {
-          picmp->icmpchksum = 0xffff;
+          ipicmp->icmpchksum = 0xffff;
         }
 #else
       /* The quick way -- Since only the type has changed, just adjust the
        * checksum for the change of type
        */
 
-      if (picmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
+      if (ipicmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
         {
-          picmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
+          ipicmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
         }
       else
         {
-          picmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
+          ipicmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
         }
 #endif
 
       ninfo("Outgoing ICMP packet length: %d (%d)\n",
-              dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
+            dev->d_len, (ipicmp->len[0] << 8) | ipicmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.icmp.sent++;
@@ -149,14 +277,48 @@ void icmp_input(FAR struct net_driver_s *dev)
 #endif
     }
 
+#ifdef CONFIG_NET_ICMP_SOCKET
   /* If an ICMP echo reply is received then there should also be
    * a thread waiting to received the echo response.
    */
 
-#ifdef CONFIG_NET_ICMP_PING
-  else if (picmp->type == ICMP_ECHO_REPLY && dev->d_conncb)
+  else if (ipicmp->type == ICMP_ECHO_REPLY)
     {
-      (void)devif_conn_event(dev, picmp, ICMP_ECHOREPLY, dev->d_conncb);
+      uint16_t flags;
+
+      flags = devif_conn_event(dev, ipicmp, ICMP_ECHOREPLY, dev->d_conncb);
+      if ((flags & ICMP_ECHOREPLY) != 0)
+        {
+          FAR struct icmp_conn_s *conn;
+          uint16_t nbuffered;
+
+          /* Nothing consumed the ICMP reply.  That might because this is
+           * an old, invalid reply or simply because the ping application
+           * has not yet put its poll or recv in place.
+           */
+
+          /* Is there any connection that might expect this reply? */
+
+          conn = icmp_findconn(dev, ipicmp->id);
+          if (conn == NULL)
+            {
+              /* No.. drop the packet */
+
+              goto drop;
+            }
+
+          /* Add the ICMP echo reply to the IPPROTO_ICMP socket read-ahead
+           * buffer.
+           */
+
+          nbuffered = icmp_datahandler(dev, conn);
+          if (nbuffered == 0)
+            {
+              /* Could not buffer the data.. drop the packet */
+
+              goto drop;
+            }
+        }
     }
 #endif
 
@@ -164,7 +326,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   else
     {
-      nwarn("WARNING: Unknown ICMP cmd: %d\n", picmp->type);
+      nwarn("WARNING: Unknown ICMP cmd: %d\n", ipicmp->type);
       goto typeerr;
     }
 
@@ -173,6 +335,10 @@ void icmp_input(FAR struct net_driver_s *dev)
 typeerr:
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.typeerr++;
+#endif
+
+drop:
+#ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.drop++;
 #endif
   dev->d_len = 0;

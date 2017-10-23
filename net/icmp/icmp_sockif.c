@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/pkt_sockif.c
+ * net/socket/icmp_sockif.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,65 +47,62 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
-#include <netpacket/packet.h>
 #include <socket/socket.h>
 
-#include "pkt/pkt.h"
+#include "icmp/icmp.h"
 
-#ifdef CONFIG_NET_PKT
+#ifdef CONFIG_NET_ICMP_SOCKET
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int        pkt_setup(FAR struct socket *psock, int protocol);
-static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
-static void       pkt_addref(FAR struct socket *psock);
-static int        pkt_bind(FAR struct socket *psock,
+static int        icmp_setup(FAR struct socket *psock, int protocol);
+static sockcaps_t icmp_sockcaps(FAR struct socket *psock);
+static void       icmp_addref(FAR struct socket *psock);
+static int        icmp_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        pkt_getsockname(FAR struct socket *psock,
+static int        icmp_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-static int        pkt_listen(FAR struct socket *psock, int backlog);
-static int        pkt_connect(FAR struct socket *psock,
+static int        icmp_listen(FAR struct socket *psock, int backlog);
+static int        icmp_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+static int        icmp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                    FAR socklen_t *addrlen, FAR struct socket *newsock);
 #ifndef CONFIG_DISABLE_POLL
-static int        pkt_poll_local(FAR struct socket *psock,
+static int        icmp_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 #endif
-static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
-                   size_t len, int flags);
-static ssize_t    pkt_sendto(FAR struct socket *psock, FAR const void *buf,
-                   size_t len, int flags, FAR const struct sockaddr *to,
-                   socklen_t tolen);
-static int        pkt_close(FAR struct socket *psock);
+static ssize_t    icmp_send(FAR struct socket *psock, FAR const void *buf,
+                    size_t len, int flags);
+static int        icmp_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-const struct sock_intf_s g_pkt_sockif =
+const struct sock_intf_s g_icmp_sockif =
 {
-  pkt_setup,       /* si_setup */
-  pkt_sockcaps,    /* si_sockcaps */
-  pkt_addref,      /* si_addref */
-  pkt_bind,        /* si_bind */
-  pkt_getsockname, /* si_getsockname */
-  pkt_listen,      /* si_listen */
-  pkt_connect,     /* si_connect */
-  pkt_accept,      /* si_accept */
+  icmp_setup,       /* si_setup */
+  icmp_sockcaps,    /* si_sockcaps */
+  icmp_addref,      /* si_addref */
+  icmp_bind,        /* si_bind */
+  icmp_getsockname, /* si_getsockname */
+  icmp_listen,      /* si_listen */
+  icmp_connect,     /* si_connect */
+  icmp_accept,      /* si_accept */
 #ifndef CONFIG_DISABLE_POLL
-  pkt_poll_local,  /* si_poll */
+  icmp_netpoll,     /* si_poll */
 #endif
-  pkt_send,        /* si_send */
-  pkt_sendto,      /* si_sendto */
+  icmp_send,        /* si_send */
+  icmp_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
-  NULL,            /* si_sendfile */
+  NULL,             /* si_sendfile */
 #endif
-  pkt_recvfrom,    /* si_recvfrom */
-  pkt_close        /* si_close */
+  icmp_recvfrom,    /* si_recvfrom */
+  icmp_close        /* si_close */
 };
 
 /****************************************************************************
@@ -113,42 +110,7 @@ const struct sock_intf_s g_pkt_sockif =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pkt_sockif_alloc
- *
- * Description:
- *   Allocate and attach a raw packet connection structure.
- *
- ****************************************************************************/
-
-static int pkt_sockif_alloc(FAR struct socket *psock)
-{
-  /* Allocate the packet socket connection structure and save in the new
-   * socket instance.
-   */
-
-  FAR struct pkt_conn_s *conn = pkt_alloc();
-  if (conn == NULL)
-    {
-      /* Failed to reserve a connection structure */
-
-      return -ENOMEM;
-    }
-
-  /* Set the reference count on the connection structure.  This reference
-   * count will be incremented only if the socket is dup'ed
-   */
-
-  DEBUGASSERT(conn->crefs == 0);
-  conn->crefs = 1;
-
-  /* Save the pre-allocated connection in the socket structure */
-
-  psock->s_conn = conn;
-  return OK;
-}
-
-/****************************************************************************
- * Name: pkt_setup
+ * Name: icmp_setup
  *
  * Description:
  *   Called for socket() to verify that the provided socket type and
@@ -166,18 +128,36 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int pkt_setup(FAR struct socket *psock, int protocol)
+static int icmp_setup(FAR struct socket *psock, int protocol)
 {
-  /* Allocate the appropriate connection structure.  This reserves the
-   * the connection structure is is unallocated at this point.  It will
-   * not actually be initialized until the socket is connected.
-   *
-   * Only SOCK_RAW is supported.
-   */
+  /* Only SOCK_DGRAM and IPPROTO_ICMP are supported */
 
-  if (psock->s_type == SOCK_RAW)
+  if (psock->s_type == SOCK_DGRAM && protocol == IPPROTO_ICMP)
     {
-      return pkt_sockif_alloc(psock);
+      /* Allocate the IPPROTO_ICMP socket connection structure and save in\
+       * the new socket instance.
+       */
+
+      FAR struct icmp_conn_s *conn = icmp_alloc();
+      if (conn == NULL)
+        {
+          /* Failed to reserve a connection structure */
+
+          return -ENOMEM;
+        }
+
+      /* Set the reference count on the connection structure.
+       * This reference count will be incremented only if the socket is
+       * dup'ed
+       */
+
+      DEBUGASSERT(conn->crefs == 0);
+      conn->crefs = 1;
+
+      /* Save the pre-allocated connection in the socket structure */
+
+      psock->s_conn = conn;
+      return OK;
     }
   else
     {
@@ -186,7 +166,7 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
 }
 
 /****************************************************************************
- * Name: pkt_sockcaps
+ * Name: icmp_sockcaps
  *
  * Description:
  *   Return the bit encoded capabilities of this socket.
@@ -200,13 +180,13 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
  *
  ****************************************************************************/
 
-static sockcaps_t pkt_sockcaps(FAR struct socket *psock)
+static sockcaps_t icmp_sockcaps(FAR struct socket *psock)
 {
   return 0;
 }
 
 /****************************************************************************
- * Name: pkt_addref
+ * Name: icmp_addref
  *
  * Description:
  *   Increment the refernce count on the underlying connection structure.
@@ -220,12 +200,11 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static void pkt_addref(FAR struct socket *psock)
+static void icmp_addref(FAR struct socket *psock)
 {
-  FAR struct pkt_conn_s *conn;
+  FAR struct icmp_conn_s *conn;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              psock->s_type == SOCK_RAW);
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
@@ -233,10 +212,10 @@ static void pkt_addref(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: pkt_connect
+ * Name: icmp_connect
  *
  * Description:
- *   pkt_connect() connects the local socket referred to by the structure
+ *   icmp_connect() connects the local socket referred to by the structure
  *   'psock' to the address specified by 'addr'. The addrlen argument
  *   specifies the size of 'addr'.  The format of the address in 'addr' is
  *   determined by the address space of the socket 'psock'.
@@ -248,8 +227,8 @@ static void pkt_addref(FAR struct socket *psock)
  *   that is bound to the address specified by 'addr'.
  *
  *   Generally, connection-based protocol sockets may successfully
- *   pkt_connect() only once; connectionless protocol sockets may use
- *   pkt_connect() multiple times to change their association.
+ *   icmp_connect() only once; connectionless protocol sockets may use
+ *   icmp_connect() multiple times to change their association.
  *   Connectionless sockets may dissolve the association by connecting to
  *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
  *
@@ -264,24 +243,24 @@ static void pkt_addref(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int pkt_connect(FAR struct socket *psock,
+static int icmp_connect(FAR struct socket *psock,
                        FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
- * Name: pkt_accept
+ * Name: icmp_accept
  *
  * Description:
- *   The pkt_accept function is used with connection-based socket types
+ *   The icmp_accept function is used with connection-based socket types
  *   (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
  *   connection request on the queue of pending connections, creates a new
  *   connected socket with mostly the same properties as 'sockfd', and
  *   allocates a new socket descriptor for the socket, which is returned. The
  *   newly created socket is no longer in the listening state. The original
  *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an pkt_accept.
+ *   are not inherited across an icmp_accept.
  *
  *   The 'sockfd' argument is a socket descriptor that has been created with
  *   socket(), bound to a local address with bind(), and is listening for
@@ -293,9 +272,9 @@ static int pkt_connect(FAR struct socket *psock,
  *   actual length of the address returned.
  *
  *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, pkt_accept blocks the caller until a
+ *   not marked as non-blocking, icmp_accept blocks the caller until a
  *   connection is present. If the socket is marked non-blocking and no
- *   pending connections are present on the queue, pkt_accept returns
+ *   pending connections are present on the queue, icmp_accept returns
  *   EAGAIN.
  *
  * Parameters:
@@ -313,17 +292,17 @@ static int pkt_connect(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+static int icmp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
- * Name: pkt_bind
+ * Name: icmp_bind
  *
  * Description:
- *   pkt_bind() gives the socket 'psock' the local address 'addr'.  'addr'
+ *   icmp_bind() gives the socket 'psock' the local address 'addr'.  'addr'
  *   is 'addrlen' bytes long.  Traditionally, this is called "assigning a
  *   name to a socket."  When a socket is created with socket(), it exists
  *   in a name space (address family) but has no name assigned.
@@ -339,67 +318,19 @@ static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
-                    socklen_t addrlen)
+static int icmp_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
+                     socklen_t addrlen)
 {
-#if 0
-  char hwaddr[6] =  /* our MAC for debugging */
-  {
-    0x00, 0xa1, 0xb1, 0xc1, 0xd1, 0xe1
-  };
-#endif
-  char hwaddr[6] =  /* MAC from ifconfig */
-  {
-    0x00, 0xe0, 0xde, 0xad, 0xbe, 0xef
-  };
-  int ifindex;
+  /* An ICMP socket cannot be bound to a local address */
 
-  /* Verify that a valid address has been provided */
-
-  if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll))
-    {
-      nerr("ERROR: Invalid address length: %d < %d\n",
-           addrlen, sizeof(struct sockaddr_ll));
-      return -EBADF;
-    }
-
-  /* Bind a raw socket to an network device. */
-
-  if (psock->s_type == SOCK_RAW)
-    {
-      FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
-
-      /* Look at the addr and identify network interface */
-
-      ifindex = ((struct sockaddr_ll*)addr)->sll_ifindex;
-
-#if 0
-      /* Get the MAC address of that interface */
-
-      memcpy(hwaddr, g_netdevices->d_mac.ether, 6);
-#endif
-
-      /* Put ifindex and mac address into connection */
-
-      conn->ifindex = ifindex;
-      memcpy(conn->lmac, hwaddr, 6);
-
-      /* Mark the socket bound */
-
-      psock->s_flags |= _SF_BOUND;
-      return OK;
-    }
-  else
-    {
-      return -EBADF;
-    }
+  return -EBADF;
 }
 
 /****************************************************************************
- * Name: pkt_getsockname
+ * Name: icmp_getsockname
  *
  * Description:
- *   The pkt_getsockname() function retrieves the locally-bound name of the
+ *   The icmp_getsockname() function retrieves the locally-bound name of the
  *   specified packet socket, stores this address in the sockaddr structure
  *   pointed to by the 'addr' argument, and stores the length of this
  *   address in the object pointed to by the 'addrlen' argument.
@@ -423,14 +354,14 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *
  ****************************************************************************/
 
-static int pkt_getsockname(FAR struct socket *psock,
+static int icmp_getsockname(FAR struct socket *psock,
                            FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
- * Name: pkt_listen
+ * Name: icmp_listen
  *
  * Description:
  *   To accept connections, a socket is first created with psock_socket(), a
@@ -454,13 +385,13 @@ static int pkt_getsockname(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-int pkt_listen(FAR struct socket *psock, int backlog)
+int icmp_listen(FAR struct socket *psock, int backlog)
 {
   return -EOPNOTSUPP;
 }
 
 /****************************************************************************
- * Name: pkt_poll
+ * Name: icmp_netpoll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -478,15 +409,32 @@ int pkt_listen(FAR struct socket *psock, int backlog)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int pkt_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
-                          bool setup)
+static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
+                        bool setup)
 {
+#ifdef CONFIG_MM_IOB
+  /* Check if we are setting up or tearing down the poll */
+
+  if (setup)
+    {
+      /* Perform the ICMP poll() setup */
+
+      return icmp_pollsetup(psock, fds);
+    }
+  else
+    {
+      /* Perform the ICMP poll() teardown */
+
+      return icmp_pollteardown(psock, fds);
+    }
+#else
   return -ENOSYS;
+#endif /* CONFIG_MM_IOB */
 }
 #endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
- * Name: pkt_send
+ * Name: icmp_send
  *
  * Description:
  *   Socket send() method for the raw packet socket.
@@ -504,62 +452,18 @@ static int pkt_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
+static ssize_t icmp_send(FAR struct socket *psock, FAR const void *buf,
                         size_t len, int flags)
 {
-  ssize_t ret;
+  /* ICMP sockets cannot be bound and, hence, cannot support any connection-
+   * oriented data transfer.
+   */
 
-  /* Only SOCK_RAW is supported */
-
-  if (psock->s_type == SOCK_RAW)
-    {
-      /* Raw packet send */
-
-      ret = psock_pkt_send(psock, buf, len);
-    }
-  else
-    {
-      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and no peer
-       * address is set.
-       */
-
-      ret = -EDESTADDRREQ;
-    }
-
-  return ret;
+  return -EDESTADDRREQ;
 }
 
 /****************************************************************************
- * Name: pkt_sendto
- *
- * Description:
- *   Implements the sendto() operation for the case of the raw packet socket.
- *
- * Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send_to() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
-                          size_t len, int flags, FAR const struct sockaddr *to,
-                          socklen_t tolen)
-{
-  nerr("ERROR: sendto() not supported for raw packet sockets\n");
-  return -EAFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: pkt_close
+ * Name: icmp_close
  *
  * Description:
  *   Performs the close operation on a raw packet socket instance
@@ -574,44 +478,42 @@ static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-static int pkt_close(FAR struct socket *psock)
+static int icmp_close(FAR struct socket *psock)
 {
-  /* Perform some pre-close operations for the raw packet address type */
+  FAR struct icmp_conn_s *conn;
 
-  switch (psock->s_type)
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  conn = psock->s_conn;
+
+  /* Is this the last reference to the connection structure (there could be\
+   * more if the socket was dup'ed).
+   */
+
+  DEBUGASSERT(conn->crefs > 0);
+
+  if (conn->crefs <= 1)
     {
-      case SOCK_RAW:
-        {
-          FAR struct pkt_conn_s *conn = psock->s_conn;
+      /* Yes... free an read-ahead data */
 
-          /* Is this the last reference to the connection structure (there
-           * could be more if the socket was dup'ed).
-           */
+      iob_free_queue(&conn->readahead);
 
-          if (conn->crefs <= 1)
-            {
-              /* Yes... free the connection structure */
+      /* Then free the connection structure */
 
-              conn->crefs = 0;          /* No more references on the connection */
-              pkt_free(psock->s_conn);  /* Free network resources */
-            }
-          else
-            {
-              /* No.. Just decrement the reference count */
-
-              conn->crefs--;
-            }
-
-          return OK;
-        }
-
-      default:
-        return -EBADF;
+      conn->crefs = 0;           /* No more references on the connection */
+      icmp_free(psock->s_conn);  /* Free network resources */
     }
+  else
+    {
+      /* No.. Just decrement the reference count */
+
+      conn->crefs--;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_NET_PKT */
+#endif /* CONFIG_NET_ICMP_SOCKET */

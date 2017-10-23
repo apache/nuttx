@@ -226,7 +226,7 @@
 /* ICMP configuration options */
 
 #ifndef CONFIG_NET_ICMP
-#  undef CONFIG_NET_ICMP_PING
+#  undef CONFIG_NET_ICMP_SOCKET
 #endif
 
 /* UDP configuration options */

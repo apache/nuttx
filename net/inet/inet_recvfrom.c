@@ -296,13 +296,12 @@ static inline void inet_udp_newdata(FAR struct net_driver_s *dev,
 #endif /* NET_UDP_HAVE_STACK */
 
 /****************************************************************************
- * Name: inet_tcp_readahead
+ * Name: inet_tcp_readahead and inet_udp_readahead
  *
  * Description:
- *   Copy the read data from the packet
+ *   Copy the read-ahead data from the packet
  *
  * Parameters:
- *   dev      The structure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -1501,7 +1500,7 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer

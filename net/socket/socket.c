@@ -60,7 +60,7 @@
  *   socket() creates an endpoint for communication and returns a socket
  *   structure.
  *
- * Parameters:
+ * Input Parameters:
  *   domain   (see sys/socket.h)
  *   type     (see sys/socket.h)
  *   protocol (see sys/socket.h)
@@ -134,7 +134,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   /* Get the socket interface */
 
-  sockif = net_sockif(domain);
+  sockif = net_sockif(domain, type, protocol);
   if (sockif == NULL)
     {
       nerr("ERROR: socket address family unsupported: %d\n", domain);

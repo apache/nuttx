@@ -50,6 +50,7 @@
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "icmp/icmp.h"
 #include "sixlowpan/sixlowpan.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
@@ -88,10 +89,10 @@ static ssize_t    inet_sendfile(FAR struct socket *psock, FAR struct file *infil
 #endif
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-const struct sock_intf_s g_inet_sockif =
+static const struct sock_intf_s g_inet_sockif =
 {
   inet_setup,       /* si_setup */
   inet_sockcaps,    /* si_sockcaps */
@@ -1206,16 +1207,39 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Name:
+ * Name: inet_sockif
  *
  * Description:
+ *   Return the socket interface associated with the inet address family.
  *
- * Parameters:
+ * Input Parameters:
+ *   family   - Socket address family
+ *   type     - Socket type
+ *   protocol - Socket protocol
  *
  * Returned Value:
- *
- * Assumptions:
+ *   On success, a non-NULL instance of struct sock_intf_s is returned.  NULL
+ *   is returned only if the address family is not supported.
  *
  ****************************************************************************/
+
+FAR const struct sock_intf_s *
+  inet_sockif(sa_family_t family, int type, int protocol)
+{
+  DEBUGASSERT(family == PF_INET || family == PF_INET6);
+
+#if defined(HAVE_PFINET_SOCKETS) && defined(CONFIG_NET_ICMP_SOCKET)
+  /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
+
+  if (family == PF_INET && type == SOCK_DGRAM && protocol == IPPROTO_ICMP)
+    {
+      return &g_icmp_sockif;
+    }
+  else
+#endif
+    {
+      return &g_inet_sockif;
+    }
+}
 
 #endif /* HAVE_INET_SOCKETS */

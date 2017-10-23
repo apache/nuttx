@@ -101,12 +101,6 @@ EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link addres
 #endif
 #endif /* CONFIG_NET_IPv6 */
 
-/* PF_INET/PF_INET6 socket address family interface */
-
-#ifdef HAVE_INET_SOCKETS
-EXTERN const struct sock_intf_s g_inet_sockif;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -127,6 +121,26 @@ struct socket; /* Forward reference */
  ****************************************************************************/
 
 void inet_setipid(uint16_t id);
+
+/****************************************************************************
+ * Name: inet_sockif
+ *
+ * Description:
+ *   Return the socket interface associated with the inet address family.
+ *
+ * Input Parameters:
+ *   family   - Socket address family
+ *   type     - Socket type
+ *   protocol - Socket protocol
+ *
+ * Returned Value:
+ *   On success, a non-NULL instance of struct sock_intf_s is returned.  NULL
+ *   is returned only if the address family is not supported.
+ *
+ ****************************************************************************/
+
+FAR const struct sock_intf_s *
+  inet_sockif(sa_family_t family, int type, int protocol);
 
 /****************************************************************************
  * Name: ipv4_getsockname and ipv6_sockname

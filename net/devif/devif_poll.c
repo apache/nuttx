@@ -282,7 +282,7 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_SOCKET)
 static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
                                   devif_poll_callback_t callback)
 {
@@ -298,7 +298,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 
   return callback(dev);
 }
-#endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
+#endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_SOCKET */
 
 /****************************************************************************
  * Name: devif_poll_icmpv6
@@ -601,7 +601,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
   if (!bstop)
 #endif
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_SOCKET)
     {
       /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
 

@@ -61,8 +61,10 @@
  * Description:
  *   Return the socket interface associated with this address family.
  *
- * Parameters:
- *   family - Address family
+ * Input Parameters:
+ *   family   - Socket address family
+ *   type     - Socket type
+ *   protocol - Socket protocol
  *
  * Returned Value:
  *   On success, a non-NULL instance of struct sock_intf_s is returned.  NULL
@@ -70,7 +72,8 @@
  *
  ****************************************************************************/
 
-FAR const struct sock_intf_s *net_sockif(sa_family_t family)
+FAR const struct sock_intf_s *
+  net_sockif(sa_family_t family, int type, int protocol)
 {
   FAR const struct sock_intf_s *sockif = NULL;
 
@@ -85,7 +88,7 @@ FAR const struct sock_intf_s *net_sockif(sa_family_t family)
 #ifdef HAVE_PFINET6_SOCKETS
     case PF_INET6:
 #endif
-      sockif = &g_inet_sockif;
+      sockif = inet_sockif(family, type, protocol);
       break;
 #endif
 

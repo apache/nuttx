@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/udp/udp_netpoll.c
+ * net/icmp/icmp_netpoll.c
  *
- *   Copyright (C) 2008-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,19 +47,18 @@
 #include <nuttx/net/net.h>
 
 #include <devif/devif.h>
-#include "udp/udp.h"
+#include "icmp/icmp.h"
 
-#ifdef HAVE_UDP_POLL
+#ifdef CONFIG_MM_IOB
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This is an allocated container that holds the poll-related information */
 
-struct udp_poll_s
+struct icmp_poll_s
 {
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
-  FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
@@ -69,7 +68,7 @@ struct udp_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_poll_eventhandler
+ * Name: icmp_poll_eventhandler
  *
  * Description:
  *   This function is called to perform the actual UDP receive operation
@@ -88,32 +87,36 @@ struct udp_poll_s
  *
  ****************************************************************************/
 
-static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *conn,
-                                      FAR void *pvpriv, uint16_t flags)
+static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
+                                       FAR void *pvconn,
+                                       FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct udp_poll_s *info = (FAR struct udp_poll_s *)pvpriv;
+  FAR struct icmp_poll_s *info = (FAR struct icmp_poll_s *)pvpriv;
+  FAR struct icmp_conn_s *conn = (FAR struct icmp_conn_s *)pvconn;
+  pollevent_t eventset;
 
   ninfo("flags: %04x\n", flags);
 
-  DEBUGASSERT(!info || (info->psock && info->fds));
+  DEBUGASSERT(info == NULL || (info->fds != NULL && conn != NULL));
 
-  /* 'priv' might be null in some race conditions (?) */
+  /* 'priv' might be null in some race conditions (?).  Only process the
+   * the event if this poll is from the same device that the request was
+   * sent out on.
+   */
 
-  if (info)
+  if (info != NULL && dev == conn->dev)
     {
-      pollevent_t eventset = 0;
-
       /* Check for data or connection availability events. */
 
-      if ((flags & UDP_NEWDATA) != 0)
+      eventset = 0;
+      if ((flags & ICMP_ECHOREPLY) != 0)
         {
           eventset |= (POLLIN & info->fds->events);
         }
 
-      /*  poll is a sign that we are free to send data. */
+      /*  ICMP_POLL is a sign that we are free to send data. */
 
-      if ((flags & UDP_POLL) != 0)
+      if ((flags & ICMP_POLL) != 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -142,7 +145,7 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_pollsetup
+ * Name: icmp_pollsetup
  *
  * Description:
  *   Setup to monitor events on one UDP/IP socket
@@ -157,25 +160,18 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct udp_conn_s *conn = psock->s_conn;
-  FAR struct udp_poll_s *info;
+  FAR struct icmp_conn_s *conn = psock->s_conn;
+  FAR struct icmp_poll_s *info;
   FAR struct devif_callback_s *cb;
   int ret;
 
-  /* Sanity check */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!conn || !fds)
-    {
-      return -EINVAL;
-    }
-#endif
+  DEBUGASSERT(conn != NULL && fds != NULL && conn->dev != NULL);
 
   /* Allocate a container to hold the poll information */
 
-  info = (FAR struct udp_poll_s *)kmm_malloc(sizeof(struct udp_poll_s));
+  info = (FAR struct icmp_poll_s *)kmm_malloc(sizeof(struct icmp_poll_s));
   if (!info)
     {
       return -ENOMEM;
@@ -190,19 +186,9 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * dev value will be zero and there will be no NETDEV_DOWN notifications.
    */
 
-  info->dev = udp_find_laddr_device(conn);
+  /* Allocate a ICMP callback structure */
 
-  /* Setup the UDP remote connection */
-
-  ret = udp_connect(conn, NULL);
-  if (ret)
-    {
-      goto errout_with_lock;
-    }
-
-  /* Allocate a UDP callback structure */
-
-  cb = udp_callback_alloc(info->dev, conn);
+  cb = icmp_callback_alloc(conn->dev);
   if (cb == NULL)
     {
       ret = -EBUSY;
@@ -211,18 +197,17 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Initialize the poll info container */
 
-  info->psock  = psock;
-  info->fds    = fds;
-  info->cb     = cb;
+  info->fds = fds;
+  info->cb  = cb;
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
    * callback processing.
    */
 
-  cb->flags    = 0;
-  cb->priv     = (FAR void *)info;
-  cb->event    = udp_poll_eventhandler;
+  cb->flags = 0;
+  cb->priv  = (FAR void *)info;
+  cb->event = icmp_poll_eventhandler;
 
   if ((info->fds->events & POLLOUT) != 0)
     {
@@ -259,6 +244,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   if (fds->revents != 0)
     {
       /* Yes.. then signal the poll logic */
+
       nxsem_post(fds->sem);
     }
 
@@ -272,13 +258,13 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: udp_pollteardown
+ * Name: icmp_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an UDP/IP socket
  *
  * Input Parameters:
- *   psock - The UDP socket of interest
+ *   psock - The IPPROTO_ICMP socket of interest
  *   fds   - The structure describing the events to be monitored, OR NULL if
  *           this is a request to stop monitoring events.
  *
@@ -287,30 +273,27 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct udp_conn_s *conn = psock->s_conn;
-  FAR struct udp_poll_s *info;
+  FAR struct icmp_conn_s *conn;
+  FAR struct icmp_poll_s *info;
 
-  /* Sanity check */
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
+              fds != NULL && fds->priv != NULL);
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!conn || !fds->priv)
-    {
-      return -EINVAL;
-    }
-#endif
+  conn = psock->s_conn;
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
-  info = (FAR struct udp_poll_s *)fds->priv;
-  DEBUGASSERT(info && info->fds && info->cb);
-  if (info)
+  info = (FAR struct icmp_poll_s *)fds->priv;
+  DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
+
+  if (info != NULL)
     {
       /* Release the callback */
 
       net_lock();
-      udp_callback_free(info->dev, conn, info->cb);
+      icmp_callback_free(conn->dev, info->cb);
       net_unlock();
 
       /* Release the poll/select data slot */
@@ -325,4 +308,4 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   return OK;
 }
 
-#endif /* !HAVE_UDP_POLL */
+#endif /* !CONFIG_MM_IOB */
