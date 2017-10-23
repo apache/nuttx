@@ -208,6 +208,18 @@ int stm32_adc_setup(void);
 #endif
 
 /************************************************************************************
+ * Name: stm32_apds9960initialize
+ *
+ * Description:
+ *   Initialize APDS-9960 gesture sensor
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SENSORS_APDS9960
+int stm32_apds9960initialize(FAR const char *devpath)
+#endif
+
+/************************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
