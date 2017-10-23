@@ -216,7 +216,7 @@ int stm32_adc_setup(void);
  ************************************************************************************/
 
 #ifdef CONFIG_SENSORS_APDS9960
-int stm32_apds9960initialize(FAR const char *devpath)
+int stm32_apds9960initialize(FAR const char *devpath);
 #endif
 
 /************************************************************************************
