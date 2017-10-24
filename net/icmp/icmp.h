@@ -321,10 +321,10 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  * Name: icmp_pollsetup
  *
  * Description:
- *   Setup to monitor events on one UDP/IP socket
+ *   Setup to monitor events on one ICMP socket
  *
  * Input Parameters:
- *   psock - The UDP/IP socket of interest
+ *   psock - The IPPROTO_ICMP socket of interest
  *   fds   - The structure describing the events to be monitored, OR NULL if
  *           this is a request to stop monitoring events.
  *
@@ -341,7 +341,7 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  * Name: icmp_pollteardown
  *
  * Description:
- *   Teardown monitoring of events on an UDP/IP socket
+ *   Teardown monitoring of events on an ICMP socket
  *
  * Input Parameters:
  *   psock - The IPPROTO_ICMP socket of interest

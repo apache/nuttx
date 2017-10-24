@@ -51,7 +51,7 @@
 
 /* Values for protocol argument to socket() */
 
-#define IPPROTO_IP            0    /* Dummy protocol for TCP */
+#define IPPROTO_IP            0    /* Default protocol */
 #define IPPROTO_HOPOPTS       0    /* IPv6 Hop-by-Hop options.  */
 #define IPPROTO_ICMP          1    /* Internet Control Message Protocol */
 #define IPPROTO_IGMP          2    /* Internet Group Management Protocol */
@@ -70,7 +70,7 @@
 #define IPPROTO_GRE           47   /* General Routing Encapsulation. */
 #define IPPROTO_ESP           50   /* Encapsulation Security Payload protocol */
 #define IPPROTO_AH            51   /* Authentication Header protocol */
-#define IPPROTO_ICMPV6        58   /* ICMPv6 */
+#define IPPROTO_ICMP6         58   /* Internal Control Message Protocol v6 */
 #define IPPROTO_NONE          59   /* IPv6 no next header. */
 #define IPPROTO_DSTOPTS       60   /* IPv6 destination options. */
 #define IPPROTO_MTP           92   /* Multicast Transport Protocol.  */

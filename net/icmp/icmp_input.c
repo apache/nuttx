@@ -72,7 +72,7 @@
 #define ICMPSIZE  ((dev)->d_len - IPv4_HDRLEN)
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -95,8 +95,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_SOCKET
-uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
-                          FAR struct icmp_conn_s *conn)
+static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
+                                 FAR struct icmp_conn_s *conn)
 {
   FAR struct ipv4_hdr_s *ipv4;
   struct sockaddr_in inaddr;
@@ -123,7 +123,7 @@ uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   ipv4 = IPv4BUF;
 
   inaddr.sin_family = AF_INET;
-  inaddr.sin_port   = INADDR_ANY;
+  inaddr.sin_port   = 0;
 
   net_ipv4addr_copy(inaddr.sin_addr.s_addr,
                     net_ip4addr_conv32(ipv4->srcipaddr));

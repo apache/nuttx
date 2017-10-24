@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET_ICMPv6_PING) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
+#if defined(CONFIG_NET_ICMPv6_SOCKET) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 
 #include <semaphore.h>
 #include <debug.h>
@@ -100,4 +100,4 @@ void icmpv6_poll(FAR struct net_driver_s *dev)
   (void)devif_conn_event(dev, NULL, ICMPv6_POLL, dev->d_conncb);
 }
 
-#endif /* CONFIG_NET_ICMPv6_PING || CONFIG_NET_ICMPv6_NEIGHBOR */
+#endif /* CONFIG_NET_ICMPv6_SOCKET || CONFIG_NET_ICMPv6_NEIGHBOR */

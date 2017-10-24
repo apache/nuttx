@@ -39,20 +39,22 @@ ifeq ($(CONFIG_NET_ICMPv6),y)
 
 NET_CSRCS += icmpv6_input.c icmpv6_solicit.c icmpv6_advertise.c
 
-ifeq ($(CONFIG_NET_ICMPv6_PING),y)
-NET_CSRCS += icmpv6_ping.c
+ifeq ($(CONFIG_NET_ICMPv6_SOCKET),y)
+SOCK_CSRCS += icmpv6_sockif.c icmpv6_conn.c icmpv6_sendto.c
+SOCK_CSRCS += icmpv6_recvfrom.c
+ifeq ($(CONFIG_MM_IOB),y)
+SOCK_CSRCS += icmpv6_netpoll.c
+endif
 endif
 
 ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)
 NET_CSRCS += icmpv6_neighbor.c icmpv6_notify.c
 endif
 
-ifeq ($(CONFIG_NET_ICMPv6_PING),y)
+ifeq ($(CONFIG_NET_ICMPv6_SOCKET),y)
+SOCK_CSRCS += icmpv6_poll.c
+else ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)
 NET_CSRCS += icmpv6_poll.c
-else
-ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)
-NET_CSRCS += icmpv6_poll.c
-endif
 endif
 
 ifeq ($(CONFIG_NET_ICMPv6_AUTOCONF),y)

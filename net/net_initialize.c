@@ -52,6 +52,7 @@
 #include "sixlowpan/sixlowpan.h"
 #include "neighbor/neighbor.h"
 #include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -131,6 +132,12 @@ void net_setup(void)
   /* Initialize IPPPROTO_ICMP socket support */
 
   icmp_sock_initialize();
+#endif
+
+#ifdef CONFIG_NET_ICMPv6_SOCKET
+  /* Initialize IPPPROTO_ICMP6 socket support */
+
+  icmpv6_sock_initialize();
 #endif
 
 #ifdef CONFIG_NET_IEEE802154

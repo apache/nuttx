@@ -16,17 +16,13 @@ config NET_ICMPv6
 
 if NET_ICMPv6
 
-config NET_ICMPv6_PING
-	bool "ICMPv6 ping interfaces"
+config NET_ICMPv6_SOCKET
+	bool "IPPROTO_ICMP6 socket support"
 	default n
-	depends on BUILD_FLAT
 	---help---
-		Provide interfaces to support application level support for
-		for sending ECHO (ping) requests and associating ECHO replies.
-
-		NOTE: Calling these interfaces from application space is a
-		violation of the OS/application interface but for historical
-		reasons, is permitted in the flat build.
+		Enable support for IPPROTO_ICMP6 sockets.  These sockets are needed
+		for application level support for sending ICMPv7 ECHO requests and
+		receiving associated ICMPv6 ECHO replies.
 
 config NET_ICMPv6_NEIGHBOR
 	bool "Solicit destination addresses"
@@ -183,6 +179,16 @@ config NET_ICMPv6_PREFIX_8
 		default for all eight values is fc00::0.
 
 endif # NET_ICMPv6_ROUTER
+
+if NET_ICMPv6_SOCKET
+
+config NET_ICMPv6_NCONNS
+	int "Max ICMPv6 packet sockets"
+	default 4
+	depends on MM_IOB
+
+endif # NET_ICMPv6_SOCKET
+
 endif # NET_ICMPv6
 endmenu # ICMPv6 Networking Support
 endif # NET_IPv6

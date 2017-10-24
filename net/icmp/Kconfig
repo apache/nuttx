@@ -20,8 +20,8 @@ config NET_ICMP_SOCKET
 	default n
 	---help---
 		Enable support for IPPROTO_ICMP sockets.  These sockets are needed
-		for application level support application for sending ECHO (ping)
-		requests and associated ECHO replies.
+		for application level support for sending ECHO (ping) requests and
+		receiving associated ECHO replies.
 
 if NET_ICMP_SOCKET
 

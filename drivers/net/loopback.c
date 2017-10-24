@@ -204,7 +204,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
       else
 #endif
         {
-          nwarn("WARNING: Unrecognized packet type dropped: %02x\n", IPv4BUF->vhl);
+          nwarn("WARNING: Unrecognized IP version\n");
           NETDEV_RXDROPPED(&priv->lo_dev);
           priv->lo_dev.d_len = 0;
         }

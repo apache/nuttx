@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/icmp/icmp_netpoll.c
+ * net/icmpv6/icmpv6_netpoll.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include <nuttx/net/net.h>
 
 #include <devif/devif.h>
-#include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_MM_IOB
 
@@ -57,7 +57,7 @@
 
 /* This is an allocated container that holds the poll-related information */
 
-struct icmp_poll_s
+struct icmpv6_poll_s
 {
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
@@ -68,7 +68,7 @@ struct icmp_poll_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmp_poll_eventhandler
+ * Name: icmpv6_poll_eventhandler
  *
  * Description:
  *   This function is called to perform the actual UDP receive operation
@@ -87,12 +87,12 @@ struct icmp_poll_s
  *
  ****************************************************************************/
 
-static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
-                                       FAR void *pvconn,
-                                       FAR void *pvpriv, uint16_t flags)
+static uint16_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
+                                         FAR void *pvconn,
+                                         FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct icmp_poll_s *info = (FAR struct icmp_poll_s *)pvpriv;
-  FAR struct icmp_conn_s *conn = (FAR struct icmp_conn_s *)pvconn;
+  FAR struct icmpv6_poll_s *info = (FAR struct icmpv6_poll_s *)pvpriv;
+  FAR struct icmpv6_conn_s *conn = (FAR struct icmpv6_conn_s *)pvconn;
   pollevent_t eventset;
 
   ninfo("flags: %04x\n", flags);
@@ -109,14 +109,14 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
       /* Check for data or connection availability events. */
 
       eventset = 0;
-      if ((flags & ICMP_ECHOREPLY) != 0)
+      if ((flags & ICMPv6_ECHOREPLY) != 0)
         {
           eventset |= (POLLIN & info->fds->events);
         }
 
       /*  ICMP_POLL is a sign that we are free to send data. */
 
-      if ((flags & DEVPOLL_MASK) == ICMP_POLL)
+      if ((flags & DEVPOLL_MASK) == ICMPv6_POLL)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -145,7 +145,7 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmp_pollsetup
+ * Name: icmpv6_pollsetup
  *
  * Description:
  *   Setup to monitor events on one ICMP socket
@@ -160,10 +160,10 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct icmp_conn_s *conn = psock->s_conn;
-  FAR struct icmp_poll_s *info;
+  FAR struct icmpv6_conn_s *conn = psock->s_conn;
+  FAR struct icmpv6_poll_s *info;
   FAR struct devif_callback_s *cb;
   int ret;
 
@@ -171,7 +171,7 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Allocate a container to hold the poll information */
 
-  info = (FAR struct icmp_poll_s *)kmm_malloc(sizeof(struct icmp_poll_s));
+  info = (FAR struct icmpv6_poll_s *)kmm_malloc(sizeof(struct icmpv6_poll_s));
   if (!info)
     {
       return -ENOMEM;
@@ -182,13 +182,13 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   net_lock();
 
   /* Get the device that will provide the provide the NETDEV_DOWN event.
-   * NOTE: in the event that the local socket is bound to INADDR_ANY, the
+   * NOTE: in the event that the local socket is bound to IN6ADDR_ANY, the
    * dev value will be zero and there will be no NETDEV_DOWN notifications.
    */
 
   /* Allocate a ICMP callback structure */
 
-  cb = icmp_callback_alloc(conn->dev);
+  cb = icmpv6_callback_alloc(conn->dev);
   if (cb == NULL)
     {
       ret = -EBUSY;
@@ -207,7 +207,7 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   cb->flags = 0;
   cb->priv  = (FAR void *)info;
-  cb->event = icmp_poll_eventhandler;
+  cb->event = icmpv6_poll_eventhandler;
 
   if ((info->fds->events & POLLOUT) != 0)
     {
@@ -258,7 +258,7 @@ errout_with_lock:
 }
 
 /****************************************************************************
- * Name: icmp_pollteardown
+ * Name: icmpv6_pollteardown
  *
  * Description:
  *   Teardown monitoring of events on an ICMP socket
@@ -273,10 +273,10 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
+int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct icmp_conn_s *conn;
-  FAR struct icmp_poll_s *info;
+  FAR struct icmpv6_conn_s *conn;
+  FAR struct icmpv6_poll_s *info;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
               fds != NULL && fds->priv != NULL);
@@ -285,7 +285,7 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
-  info = (FAR struct icmp_poll_s *)fds->priv;
+  info = (FAR struct icmpv6_poll_s *)fds->priv;
   DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
 
   if (info != NULL)
@@ -293,7 +293,7 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Release the callback */
 
       net_lock();
-      icmp_callback_free(conn->dev, info->cb);
+      icmpv6_callback_free(conn->dev, info->cb);
       net_unlock();
 
       /* Release the poll/select data slot */

@@ -51,6 +51,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
 #include "sixlowpan/sixlowpan.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
@@ -1234,6 +1235,15 @@ FAR const struct sock_intf_s *
   if (family == PF_INET && type == SOCK_DGRAM && protocol == IPPROTO_ICMP)
     {
       return &g_icmp_sockif;
+    }
+  else
+#endif
+#if defined(HAVE_PFINET6_SOCKETS) && defined(CONFIG_NET_ICMPv6_SOCKET)
+  /* PF_INET, ICMP data gram sockets are a special case of raw sockets */
+
+  if (family == PF_INET6 && type == SOCK_DGRAM && protocol == IPPROTO_ICMP6)
+    {
+      return &g_icmpv6_sockif;
     }
   else
 #endif
