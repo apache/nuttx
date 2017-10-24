@@ -509,38 +509,6 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
 #endif
 
 /****************************************************************************
- * Name: imcp_ping
- *
- * Description:
- *   Send a ECHO request and wait for the ECHO response
- *
- * Parameters:
- *   addr  - The IP address of the peer to send the ICMPv6 ECHO request to
- *           in network order.
- *   id    - The ID to use in the ICMPv6 ECHO request.  This number should be
- *           unique; only ECHO responses with this matching ID will be
- *           processed (host order)
- *   seqno - The sequence number used in the ICMPv6 ECHO request.  NOT used
- *           to match responses (host order)
- *   dsecs - Wait up to this many deci-seconds for the ECHO response to be
- *           returned (host order).
- *
- * Return:
- *   seqno of received ICMPv6 ECHO with matching ID (may be different
- *   from the seqno argument (may be a delayed response from an earlier
- *   ping with the same ID). Or a negated errno on any failure.
- *
- * Assumptions:
- *   Called from the user level with interrupts enabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6_SOCKET
-int icmpv6_ping(net_ipv6addr_t addr, uint16_t id, uint16_t seqno,
-                uint16_t datalen, int dsecs);
-#endif
-
-/****************************************************************************
  * Name: icmpv6_sock_initialize
  *
  * Description:
