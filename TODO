@@ -14,7 +14,7 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (4)  pthreads (sched/pthread)
+  (3)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
@@ -589,16 +589,6 @@ o pthreads (sched/pthreads)
                point.
   Status:      Not really open.  This is just the way it is.
   Priority:    Nothing additional is planned.
-
-  Title:       PTHREAD FILES IN WRONG LOCATION
-  Description: There are many pthread interface functions in files located in
-               sched/pthread.  These should be moved from that location to
-               libc/pthread.  In the flat build, this really does not matter,
-               but in the protected build that location means that system calls
-               are required to access the pthread interface functions.
-  Status:      Open
-  Priority:    Medium-low. Priority may be higher if system call overheade becomes
-               an issue.
 
   Title:       INAPPROPRIATE USE OF sched_lock() BY pthreads
   Description: In implementation of standard pthread functions, the non-
@@ -1709,7 +1699,6 @@ o Libraries (libc/, libm/)
                }
 
                Generates this incorrect output:
-
 
                NuttShell (NSH) NuttX-7.20
                nsh> hello
