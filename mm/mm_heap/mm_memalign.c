@@ -189,16 +189,20 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       node = newnode;
     }
 
-  /* Check if there is free space at the end of the aligned chunk */
+  /* Check if there is free space at the end of the aligned chunk. Convert
+   * malloc-compatible chunk size to include SIZEOF_MM_ALLOCNODE as needed
+   * for mm_shrinkchunk.
+   */
+
+  size = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
 
   if (allocsize > size)
     {
       /* Shrink the chunk by that much -- remember, mm_shrinkchunk wants
-       * internal chunk sizes that include SIZEOF_MM_ALLOCNODE, and not the
-       * malloc-compatible sizes that we have.
+       * internal chunk sizes that include SIZEOF_MM_ALLOCNODE.
        */
 
-      mm_shrinkchunk(heap, node, size + SIZEOF_MM_ALLOCNODE);
+      mm_shrinkchunk(heap, node, size);
     }
 
   mm_givesemaphore(heap);

@@ -67,6 +67,8 @@ void  mm_shrinkchunk(FAR struct mm_heap_s *heap,
 {
   FAR struct mm_freenode_s *next;
 
+  DEBUGASSERT((size & MM_GRAN_MASK) == 0);
+
   /* Get a reference to the next node */
 
   next = (FAR struct mm_freenode_s *)((FAR char *)node + node->size);
