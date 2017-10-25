@@ -33,6 +33,9 @@
 #
 ############################################################################
 
+CSRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c
+CSRCS += pthread_keydelete.c
+
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 
 CSRCS += pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
@@ -41,8 +44,6 @@ CSRCS += pthread_mutexinit.c pthread_mutexdestroy.c
 CSRCS += pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c
 CSRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
 CSRCS += pthread_cancel.c
-CSRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c
-CSRCS += pthread_keydelete.c
 CSRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
 CSRCS += pthread_release.c pthread_setschedprio.c
 
@@ -62,9 +63,9 @@ ifeq ($(CONFIG_PTHREAD_CLEANUP),y)
 CSRCS += pthread_cleanup.c
 endif
 
+endif
+
 # Include pthread build support
 
 DEPPATH += --dep-path pthread
 VPATH += :pthread
-
-endif

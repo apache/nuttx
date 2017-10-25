@@ -466,6 +466,8 @@ struct task_group_s
   sem_t tg_joinsem;                 /*   Mutually exclusive access to join data */
   FAR struct join_s *tg_joinhead;   /*   Head of a list of join data            */
   FAR struct join_s *tg_jointail;   /*   Tail of a list of join data            */
+#endif
+#if CONFIG_NPTHREAD_KEYS > 0
   uint8_t tg_nkeys;                 /* Number pthread keys allocated            */
 #endif
 
@@ -633,6 +635,12 @@ struct tcb_s
   FAR struct mqueue_inode_s *msgwaitq;   /* Waiting for this message queue      */
 #endif
 
+  /* POSIX Thread Specific Data *************************************************/
+
+#if CONFIG_NPTHREAD_KEYS > 0
+  FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
+#endif
+
   /* Library related fields *****************************************************/
 
   int pterrno;                           /* Current per-thread errno            */
@@ -712,12 +720,6 @@ struct pthread_tcb_s
 
   uint8_t tos;
   struct pthread_cleanup_s stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
-#endif
-
-  /* POSIX Thread Specific Data *************************************************/
-
-#if CONFIG_NPTHREAD_KEYS > 0
-  FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
 #endif
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */

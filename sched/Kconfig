@@ -522,7 +522,15 @@ config SCHED_WAITPID
 endmenu # Tasks and Scheduling
 
 menu "Pthread Options"
-	depends on !DISABLE_PTHREAD
+
+config NPTHREAD_KEYS
+	int "Maximum number of pthread keys"
+	default 4 if !DISABLE_PTHREAD
+	default 0 if DISABLE_PTHREAD
+	---help---
+		The number of items of thread-specific data that can be retained
+
+if !DISABLE_PTHREAD
 
 config PTHREAD_MUTEX_TYPES
 	bool "Enable mutex types"
@@ -573,13 +581,6 @@ config PTHREAD_MUTEX_DEFAULT_UNSAFE
 
 endchoice # Default NORMAL mutex robustness
 
-config NPTHREAD_KEYS
-	int "Maximum number of pthread keys"
-	default 4
-	---help---
-		The number of items of thread-
-		specific data that can be retained
-
 config PTHREAD_CLEANUP
 	bool "pthread cleanup stack"
 	default n
@@ -608,6 +609,8 @@ config CANCELLATION_POINTS
 		Enable POSIX cancellation points for pthread_cancel().  If selected,
 		cancellation points will also used with the () task_delete() API even if
 		pthreads are not enabled.
+
+endif # !DISABLE_PTHREAD
 
 endmenu # Pthread Options
 

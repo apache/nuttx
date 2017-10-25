@@ -95,12 +95,11 @@
 int pthread_setspecific(pthread_key_t key, FAR const void *value)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s *)this_task();
-  FAR struct task_group_s *group = rtcb->cmn.group;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group = rtcb->group;
   int ret = EINVAL;
 
-  DEBUGASSERT(group &&
-              (rtcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT(group);
 
   /* Check if the key is valid. */
 
