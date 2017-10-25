@@ -42,13 +42,13 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/irq.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 
@@ -60,7 +60,7 @@
 
 /* The array containing all usrsock connections. */
 
-struct usrsock_conn_s g_usrsock_connections[CONFIG_NET_USRSOCK_CONNS];
+static struct usrsock_conn_s g_usrsock_connections[CONFIG_NET_USRSOCK_CONNS];
 
 /* A list of all free usrsock connections */
 

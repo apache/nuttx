@@ -44,7 +44,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
@@ -55,6 +54,7 @@
 
 #include <nuttx/random.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
 

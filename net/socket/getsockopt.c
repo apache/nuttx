@@ -110,7 +110,6 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
   if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
       FAR struct usrsock_conn_s *conn = psock->s_conn;
-      int ret;
 
       DEBUGASSERT(conn);
 
