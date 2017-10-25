@@ -364,6 +364,29 @@ int psock_tcp_connect(FAR struct socket *psock,
           /* Wait for either the connect to complete or for an error/timeout
            * to occur. NOTES:  net_lockedwait will also terminate if a signal
            * is received.
+           *
+           * REVISIT:  This failure has been reported:
+           * - psock_tcp_accept() waits on net_lockedwait() below
+           * - The accept operation completes, the socket is in the connected
+           *   state and psock_accept() is awakened.  It cannot run,
+           *   however, because its priority is low and so it is blocked
+           *   from execution.
+           * - In the mean time, the remote host sends a
+           *   packet which is presumeably caught in the read-ahead buffer.
+           * - Then the remote host closes the socket.  Nothing happens on
+           *   the target side because net_start_monitor() has not yet been
+           *   called.
+           * - Then accept() finally runs, but not with a connected but
+           *   rather with a disconnected socket.  This fails when it
+           *   attempts to start the network monitor on the disconnected
+           *   socket below.
+           * - It is also impossible to read the buffered TCP data from a
+           *   disconnected socket.  The TCP recvfrom() logic would also
+           *   need to permit reading buffered data from a disconnected
+           *   socket.
+           *
+           * A work-around is to raise the priority of the thread that calls
+           * accept().
            */
 
           ret = net_lockedwait(&state.tc_sem);
