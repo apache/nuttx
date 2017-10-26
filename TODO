@@ -636,7 +636,6 @@ o Kernel/Protected Build
                COMMAND  KERNEL INTERFACE(s)
                -------- ----------------------------------------------
                mkrd     ramdisk_register()
-               mount    foreach_mountpoint()
 
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded

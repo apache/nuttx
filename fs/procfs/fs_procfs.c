@@ -62,6 +62,8 @@
 #include <nuttx/fs/dirent.h>
 #include <nuttx/lib/regex.h>
 
+#include "mount/mount.h"
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 
 /****************************************************************************
@@ -90,6 +92,7 @@ extern const struct procfs_operations net_procfsoperations;
 extern const struct procfs_operations net_procfs_routeoperations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
+extern const struct procfs_operations mount_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
 
 /* And even worse, this one is specific to the STM32.  The solution to
@@ -128,6 +131,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   { "modules",       &module_operations,          PROCFS_FILE_TYPE   },
 #endif
+
+  { "fs/blocks",     &mount_procfsoperations,     PROCFS_FILE_TYPE },
+  { "fs/mount",      &mount_procfsoperations,     PROCFS_FILE_TYPE },
+  { "fs/usage",      &mount_procfsoperations,     PROCFS_FILE_TYPE },
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
   { "fs/smartfs**",  &smartfs_procfsoperations,   PROCFS_UNKOWN_TYPE },

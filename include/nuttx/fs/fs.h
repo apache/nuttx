@@ -465,17 +465,6 @@ struct streamlist
 };
 #endif /* CONFIG_NFILE_STREAMS */
 
-/* Callback used by foreach_mountpoints to traverse all mountpoints in the
- * pseudo-file system.
- */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-struct statfs;                    /* Forward reference */
-typedef int (*foreach_mountpoint_t)(FAR const char *mountpoint,
-                                    FAR struct statfs *statbuf,
-                                    FAR void *arg);
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -499,30 +488,6 @@ extern "C"
  ****************************************************************************/
 
 void fs_initialize(void);
-
-/****************************************************************************
- * Name: foreach_mountpoint
- *
- * Description:
- *   Visit each mountpoint in the pseudo-file system.  The traversal is
- *   terminated when the callback 'handler' returns a non-zero value, or when
- *   all of the mountpoints have been visited.
- *
- *   This is just a front end "filter" to foreach_inode() that forwards only
- *   mountpoint inodes.  It is intended to support the mount() command to
- *   when the mount command is used to enumerate mounts.
- *
- *   NOTE 1: Use with caution... The pseudo-file system is locked throughout
- *   the traversal.
- *   NOTE 2: The search algorithm is recursive and could, in principle, use
- *   an indeterminant amount of stack space.  This will not usually be a
- *   real work issue.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg);
-#endif
 
 /****************************************************************************
  * Name: register_driver

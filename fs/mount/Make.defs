@@ -44,9 +44,16 @@ ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
 CSRCS += fs_automount.c
 endif
 
+ifeq  ($(CONFIG_FS_PROCFS),y)
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MOUNT),y)
+CSRCS += fs_procfs_mount.c fs_gettype.c
+endif
+endif
+
 # Include mount build support
 
 DEPPATH += --dep-path mount
 VPATH += :mount
+
 endif
 endif

@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/mount/fs_foreachmountpoint.c
+ * fs/mount/mount.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,106 +33,33 @@
  *
  ****************************************************************************/
 
+#ifndef __FS_MOUNT_MOUNT_H
+#define __FS_MOUNT_MOUNT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/statfs.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
-
-#include <nuttx/fs/fs.h>
-
-#include "inode/inode.h"
-#include "mount/mount.h"
-
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+struct statfs; /* Forward reference */
 
-/* This structure just remembers the final consumer of the mountpoint
- * information (and its argument).
+/* Callback used by foreach_mountpoints to traverse all mountpoints in the
+ * pseudo-file system.
  */
 
-struct enum_mountpoint_s
-{
-  foreach_mountpoint_t handler;
-  FAR void            *arg;
-};
+typedef int (*foreach_mountpoint_t)(FAR const char *mountpoint,
+                                    FAR struct statfs *statbuf,
+                                    FAR void *arg);
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static int mountpoint_filter(FAR struct inode *node,
-                             FAR char dirpath[PATH_MAX], FAR void *arg)
-{
-  FAR struct enum_mountpoint_s *info = (FAR struct enum_mountpoint_s *)arg;
-  struct statfs statbuf;
-  int pathlen;
-  int namlen;
-  int ret = OK;
-
-  DEBUGASSERT(node && info && info->handler);
-
-  /* Check if the inode is a mountpoint.  Mountpoints must support statfs.
-   * If this one does not for some reason, then it will be ignored.
-   *
-   * The root node is a special case:  It has no operations (u.i_mops == NULL)
-   */
-
-  if (INODE_IS_MOUNTPT(node) && node->u.i_mops && node->u.i_mops->statfs)
-    {
-      /* Yes... get the full path to the inode by concatenating the inode
-       * name and the path to the directory containing the inode.
-       */
-
-      pathlen = strlen(dirpath);
-      namlen  = strlen(node->i_name) + 1;
-
-      /* Make sure that this would not exceed the maximum path length */
-
-      if (pathlen + namlen > PATH_MAX)
-        {
-          return -ENAMETOOLONG;
-        }
-
-      /* Append the inode name to the directory path */
-
-      sprintf(&dirpath[pathlen], "/%s", node->i_name);
-
-      /* Get the status of the file system */
-
-      ret = node->u.i_mops->statfs(node, &statbuf);
-      if (ret == OK)
-        {
-          /* And pass the full path and file system status to the handler */
-
-          ret = info->handler(dirpath, &statbuf, info->arg);
-        }
-
-      /* Truncate the path name back to the correct length */
-
-      dirpath[pathlen] = '\0';
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -155,16 +82,24 @@ static int mountpoint_filter(FAR struct inode *node,
  *
  ****************************************************************************/
 
-int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg)
-{
-  struct enum_mountpoint_s info;
+int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg);
 
-  /* Let foreach_inode do the real work */
+/****************************************************************************
+ * Name: fs_gettype
+ *
+ * Description:
+ *   Given the result of statfs(), return a string representing the type of
+ *   the file system.
+ *
+ * Input Parameters:
+ *   statbuf - The result of a previouis statbuf statfs on the file system.
+ *
+ * Returned Value:
+ *   A reference to a string representing the type of the file system.
+ *
+ ****************************************************************************/
 
-  info.handler = handler;
-  info.arg     = arg;
+FAR const char *fs_gettype(FAR struct statfs *statbuf);
 
-  return foreach_inode(mountpoint_filter, (FAR void *)&info);
-}
-
-#endif
+#endif /* CONFIG_DISABLE_MOUNTPOINT */
+#endif /* __FS_MOUNT_MOUNT_H */

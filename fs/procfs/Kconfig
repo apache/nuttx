@@ -39,6 +39,30 @@ config FS_PROCFS_EXCLUDE_MODULE
 	---help---
 		Causes the module information to be excluded from the procfs system.
 
+config FS_PROCFS_EXCLUDE_BLOCKS
+	bool "Exclude fs/blocks information"
+	depends on !DISABLE_MOUNTPOINT
+	default n
+	---help---
+		Causes the fs block usage information to be excluded from the procfs
+		system.
+
+config FS_PROCFS_EXCLUDE_MOUNT
+	bool "Exclude fs/mount information"
+	depends on !DISABLE_MOUNTPOINT
+	default n
+	---help---
+		Causes the mount point information to be excluded from the procfs
+		system.
+
+config FS_PROCFS_EXCLUDE_USAGE
+	bool "Exclude fs/usage information"
+	depends on !DISABLE_MOUNTPOINT
+	default n
+	---help---
+		Causes the fs usage information to be excluded from the procfs
+		system.
+
 config FS_PROCFS_EXCLUDE_UPTIME
 	bool "Exclude uptime"
 	default n
