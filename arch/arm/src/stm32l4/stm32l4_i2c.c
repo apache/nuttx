@@ -1,6 +1,8 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/stm32l4_i2c.c
- * STM32L4 I2C driver - based on STM32F3 I2C Hardware Layer - Device Driver
+ * STM32L4 I2C driver - based on STM32F7 I2C Hardware Layer - Device Driver
+ *
+ * Original STM32L4 I2C driver:
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -9,6 +11,27 @@
  *   Author: John Wharington
  *   Author: Sebastien Lorquet
  *   Author: dev@ziggurat29.com
+ *
+ * STM32L4 I2C driver based on STM32F7 I2C driver:
+ *
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Author: Uros Platise <uros.platise@isotel.eu>
+ *
+ * With extensions and modifications for the F1, F2, and F4 by:
+ *
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Authors: Gregroy Nutt <gnutt@nuttx.org>
+ *            John Wharington
+ *            David Sidrane <david_s5@nscdg.com>
+ *
+ * Major rewrite of ISR and supporting methods, including support
+ * for NACK and RELOAD by:
+ *
+ *   Copyright (c) 2016 Doug Vetter.  All rights reserved.
+ *   Author: Doug Vetter <oss@aileronlabs.com>
+ *
+ * Port from STM32F7 to STM32L4:
+ *   Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,29 +62,189 @@
  *
  ************************************************************************************/
 
-/* Supports:
- *  - Master operation, 100 kHz (standard) and 400 kHz (full speed)
+/* ------------------------------------------------------------------------------
+ *
+ * STM32 L4 I2C Driver based on STM32 F7 I2C Driver:
+ *
+ * STM32 L4 and F7 peripheral differences:
+ *  - I2C Peripheral on these families are identical (incl. errata) except
+ *    for I2C_CR1 register bit 18:
+ *      STM32F7: reserved
+ *      STM32L4: WUPEN, Wakeup from Stop mode enable. Requires use of HSI clock
+ *               for I2C (RCC_CCIPR_I2CxSEL=HSI).
+ *
+ * Supports:
+ *  - Master operation:
+ *      Standard-mode (up to 100 kHz)
+ *      Fast-mode (up to 400 kHz)
+ *      fI2CCLK clock source selection is based on RCC_CCIPR_I2CxSEL
+ *      being set to PCLK and the calculations are based on PCLK frequency
+ *      of 80 Mhz
+ *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
+ *  - RELOAD support
+ *  - I2C_M_NORESTART support
  *
- * Structure naming:
+ * Test Environment:
+ *  - STM32L451CEU6 based board with I2C slaves LIS2DH accelerometer and
+ *    BQ24296 charger
+ *
+ * Supported on STM32F7 driver, untested on STM32L4:
+ *  - Master operation:
+ *      Fast-mode Plus (up to 1 MHz)
+ *  - Test Environment:
+ *      STM32F7676ZI on ST Nucleo-144 Board (ST Part STM32F429ZIT6)
+ *
+ * Unsupported, possible future work:
+ *  - Wakeup from Stop mode
+ *  - More effective error reporting to higher layers
+ *  - Slave operation
+ *  - Support of fI2CCLK frequencies other than 80 Mhz and other clock sources
+ *  - Polled operation (code present but untested)
+ *  - SMBus support
+ *  - Multi-master support
+ *  - IPMI
+ *
+ * Operational Status:
+ *
+ *  All supported features have been tested and found to be operational.
+ *
+ *  Although the RELOAD capability has been tested as it was required to
+ *  implement the I2C_M_NORESTART flag on F3 hardware, the associated
+ *  logic to support the transfer messages with more than 255 byte
+ *  payloads has not been  tested as the author lacked access to a real
+ *  device supporting these types of transfers.
+ *
+ * Performance Benchmarks: TBD
+ *
+ *  Time to transfer two messages, each a byte in length, in addition to the
+ *  START condition, in interrupt mode:
+ *
+ *  DEBUG enabled (development): TBDms
+ *      Excessive delay here is caused by printing to the console and
+ *      is of no concern.
+ *
+ *  DEBUG disabled (production): TBSus
+ *      Between Messages: TBDus
+ *      Between Bytes: TBDus
+ *
+ * Implementation:
+ *
  *  - Device: structure as defined by the nuttx/i2c/i2c.h
+ *
  *  - Instance: represents each individual access to the I2C driver, obtained by
  *      the i2c_init(); it extends the Device structure from the nuttx/i2c/i2c.h;
  *      Instance points to OPS, to common I2C Hardware private data and contains
- *      its own private data, as frequency, address, mode of operation (in the future)
+ *      its own private data including frequency, address and mode of operation.
+ *
  *  - Private: Private data of an I2C Hardware
  *
- * TODO
- *  - Check for all possible deadlocks (as BUSY='1' I2C needs to be reset in HW using the I2C_CR1_SWRST)
- *  - SMBus support (hardware layer timings are already supported) and add SMBA gpio pin
- *  - Slave support with multiple addresses (on multiple instances):
- *      - 2 x 7-bit address or
- *      - 1 x 10 bit adresses + 1 x 7 bit address (?)
- *      - plus the broadcast address (general call)
- *  - Multi-master support
- *  - DMA (to get rid of too many CPU wake-ups and interventions)
- *  - Be ready for IPMI
+ * High Level Functional Desecription
+ *
+ * This driver works with I2C "messages" (struct i2c_msg_s), which carry a buffer
+ * intended to transfer data to, or store data read from, the I2C bus.
+ *
+ * As the hardware can only transmit or receive one byte at a time the basic job
+ * of the driver (and the ISR specifically) is to process each message in the
+ * order they are stored in the message list, one byte at a time.  When
+ * no messages are left the ISR exits and returns the result to the caller.
+ *
+ * The order of the list of I2C messages provided to the driver is important and
+ * dependent upon the hardware in use.  A typical I2C transaction between the F3
+ * as an I2C Master and some other IC as a I2C Slave requires two messages that
+ * communicate the:
+ *
+ *    1) Subaddress (register offset on the slave device)
+ *    2) Data sent to or read from the device
+ *
+ * These messages will typically be one byte in length but may be up to 2^31
+ * bytes in length.  Incidentally, the maximum length is limited only because
+ * i2c_msg_s.length is a signed int for some odd reason.
+ *
+ * Interrupt mode relies on the following interrupt events:
+ *
+ *   TXIS  - Transmit interrupt
+ *           (data transmitted to bus and acknowedged)
+ *   NACKF - Not Acknowledge Received
+ *           (data transmitted to bus and NOT acknowledged)
+ *   RXNE  - Receive interrupt
+ *           (data received from bus)
+ *   TC    - Transfer Complete
+ *           (All bytes in message transferred)
+ *   TCR   - Transfer Complete (Reload)
+ *           (Current batch of bytes in message transferred)
+ *
+ * The driver currently supports Single Master mode only.  Slave mode is not
+ * supported.  Additionally, the driver runs in Software End Mode (AUTOEND
+ * disabled) so the driver is responsible for telling the hardware what to
+ * do at the end of a transfer.
+ *
+ * ------------------------------------------------------------------------------
+ *
+ * Configuration:
+ *
+ *  To use this driver, enable the following configuration variable:
+ *
+ *    CONFIG_STM32L4_I2C
+ *
+ *  and one or more interfaces:
+ *
+ *    CONFIG_STM32L4_I2C1
+ *    CONFIG_STM32L4_I2C2
+ *    CONFIG_STM32L4_I2C3
+ *    CONFIG_STM32L4_I2C4
+ *
+ *  To configure the ISR timeout using fixed values (CONFIG_STM32L4_I2C_DYNTIMEO=n):
+ *
+ *    CONFIG_STM32L4_I2CTIMEOSEC   (Timeout in seconds)
+ *    CONFIG_STM32L4_I2CTIMEOMS    (Timeout in milliseconds)
+ *    CONFIG_STM32L4_I2CTIMEOTICKS (Timeout in ticks)
+ *
+ *  To configure the ISR timeout using dynamic values (CONFIG_STM32L4_I2C_DYNTIMEO=y):
+ *
+ *    CONFIG_STM32L4_I2C_DYNTIMEO_USECPERBYTE  (Timeout in microseconds per byte)
+ *    CONFIG_STM32L4_I2C_DYNTIMEO_STARTSTOP    (Timeout for start/stop in milliseconds)
+ *
+ *  Debugging output enabled with:
+ *
+ *    CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_I2C_{ERROR|WARN|INFO}
+ *
+ *  ISR Debugging output may be enabled with:
+ *
+ *    CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_I2C_INFO
+ *
+ * ------------------------------------------------------------------------------
+ *
+ * References (STM32F7):
+ *
+ *  RM0316:
+ *     ST STM32F76xxx and STM32F77xxx Reference Manual
+ *     Document ID: DocID028270 Revision 2, April 2016.
+ *
+ *  DATASHEET:
+ *     ST STM32F777xx/STM32F778Ax/STM32F779x Datasheet
+ *     Document ID: DocID028294, Revision 3, May 2016.
+ *
+ *  ERRATA:
+ *     STM32F76xxx/STM32F77xxx Errata sheet Rev A device limitations
+ *     Document ID: DocID028806, Revision 2, April 2016.
+ *
+ *  I2CSPEC:
+ *     I2C Bus Specification and User Manual
+ *     Document ID: UM10204, Revision 6, April 2014.
+ *
+ * References (STM32L4):
+ *
+ *  RM0394:
+ *     ST STM32L43xxx STM32L44xxx STM32L45xxx STM32L46xxx Reference Manual
+ *     Document ID: DocID027295, Revision 3, April 2017.
+ *
+ *  ERRATA:
+ *     STM32L451xx Errata sheet device limitations
+ *     Document ID: DocID030061, Revision 4, September 2017.
+ *
+ * ------------------------------------------------------------------------------
  */
 
 /************************************************************************************
@@ -83,6 +266,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
@@ -102,7 +286,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
+
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.  Instead,
  * CPU-intensive polling will be used.
  */
@@ -112,6 +296,7 @@
 #if !defined(CONFIG_STM32L4_I2CTIMEOSEC) && !defined(CONFIG_STM32L4_I2CTIMEOMS)
 #  define CONFIG_STM32L4_I2CTIMEOSEC 0
 #  define CONFIG_STM32L4_I2CTIMEOMS  500   /* Default is 500 milliseconds */
+#  warning "Using Default 500 Ms Timeout"
 #elif !defined(CONFIG_STM32L4_I2CTIMEOSEC)
 #  define CONFIG_STM32L4_I2CTIMEOSEC 0     /* User provided milliseconds */
 #elif !defined(CONFIG_STM32L4_I2CTIMEOMS)
@@ -129,29 +314,25 @@
 #  define CONFIG_STM32L4_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_STM32L4_I2CTIMEOTICKS)
 #endif
 
-#define I2C_OUTPUT \
-  (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_OPENDRAIN | GPIO_SPEED_50MHz)
-#define MKI2C_OUTPUT(p) \
-  (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
+/* Macros to convert a I2C pin to a GPIO output */
 
-#define I2C_CR1_TXRX \
-  (I2C_CR1_RXIE | I2C_CR1_TXIE)
-#define I2C_CR1_ALLINTS \
-  (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ADDRIE | I2C_CR1_ERRIE)
+#define I2C_OUTPUT (GPIO_OUTPUT | GPIO_FLOAT | GPIO_OPENDRAIN | \
+                    GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 
-#define STATUS_NACK(status)    (status & I2C_INT_NACK)
-#define STATUS_ADDR(status)    (status & I2C_INT_ADDR)
-#define STATUS_ADDR_TX(status) (status & (I2C_INT_ADDR | I2C_ISR_TXIS))
-#define STATUS_ADD10(status)   (0)
-#define STATUS_RXNE(status)    (status & I2C_ISR_RXNE)
-#define STATUS_TC(status)      (status & I2C_ISR_TC)
-#define STATUS_BUSY(status)    (status & I2C_ISR_BUSY)
+#define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
-/* Debug ****************************************************************************/
+#define I2C_CR1_TXRX (I2C_CR1_RXIE | I2C_CR1_TXIE)
+#define I2C_CR1_ALLINTS (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
 
-/* I2C event trace logic.  NOTE:  trace uses the internal, non-standard, low-level
- * debug interface syslog() but does not require that any other debug
- * is enabled.
+/* I2C event tracing
+ *
+ * To enable tracing statements which show the details of the state machine
+ * enable the following configuration variable:
+ *
+ * CONFIG_I2C_TRACE
+ *
+ * Note: This facility uses syslog, which sends output to the console by
+ * default.  No other debug configuration variables are required.
  */
 
 #ifndef CONFIG_I2C_TRACE
@@ -168,6 +349,7 @@
 /************************************************************************************
  * Private Types
  ************************************************************************************/
+
 /* Interrupt state */
 
 enum stm32l4_intstate_e
@@ -181,28 +363,39 @@ enum stm32l4_intstate_e
 
 enum stm32l4_trace_e
 {
-  I2CEVENT_NONE = 0,      /* No events have occurred with this status */
-  I2CEVENT_SENDADDR,      /* Start/Master bit set and address sent, param = msgc */
-  I2CEVENT_SENDBYTE,      /* Send byte, param = dcnt */
-  I2CEVENT_ITBUFEN,       /* Enable buffer interrupts, param = 0 */
-  I2CEVENT_RCVBYTE,       /* Read more dta, param = dcnt */
-  I2CEVENT_REITBUFEN,     /* Re-enable buffer interrupts, param = 0 */
-  I2CEVENT_DISITBUFEN,    /* Disable buffer interrupts, param = 0 */
-  I2CEVENT_BTFNOSTART,    /* BTF on last byte with no restart, param = msgc */
-  I2CEVENT_BTFRESTART,    /* Last byte sent, re-starting, param = msgc */
-  I2CEVENT_BTFSTOP,       /* Last byte sten, send stop, param = 0 */
-  I2CEVENT_ERROR          /* Error occurred, param = 0 */
+  I2CEVENT_NONE = 0,
+  I2CEVENT_STATE_ERROR,
+  I2CEVENT_ISR_SHUTDOWN,
+  I2CEVENT_ISR_CALL,
+  I2CEVENT_ISR_EMPTY_CALL,
+  I2CEVENT_MSG_HANDLING,
+  I2CEVENT_POLL_NOT_READY,
+  I2CEVENT_EMPTY_MSG,
+  I2CEVENT_START,
+  I2CEVENT_ADDRESS_ACKED,
+  I2CEVENT_ADDRESS_NACKED,
+  I2CEVENT_NACK,
+  I2CEVENT_READ,
+  I2CEVENT_READ_ERROR,
+  I2CEVENT_WRITE_TO_DR,
+  I2CEVENT_WRITE_STOP,
+  I2CEVENT_WRITE_RESTART,
+  I2CEVENT_WRITE_NO_RESTART,
+  I2CEVENT_WRITE_ERROR,
+  I2CEVENT_WRITE_FLAG_ERROR,
+  I2CEVENT_TC_RESTART,
+  I2CEVENT_TC_NO_RESTART
 };
 
 /* Trace data */
 
 struct stm32l4_trace_s
 {
-  uint32_t status;             /* I2C 32-bit SR2|SR1 status */
-  uint32_t count;              /* Interrupt count when status change */
+  uint32_t status;               /* I2C 32-bit SR2|SR1 status */
+  uint32_t count;                /* Interrupt count when status change */
   enum stm32l4_intstate_e event; /* Last event that occurred with this status */
-  uint32_t parm;               /* Parameter associated with the event */
-  systime_t time;              /* First of event or first status */
+  uint32_t parm;                 /* Parameter associated with the event */
+  uint32_t time;                 /* First of event or first status */
 };
 
 /* I2C Device hardware configuration */
@@ -224,7 +417,6 @@ struct stm32l4_i2c_config_s
 
 struct stm32l4_i2c_priv_s
 {
-  const struct i2c_ops_s *ops; /* Standard I2C operations */
   const struct stm32l4_i2c_config_s *config; /* Port configuration */
   int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
@@ -237,7 +429,7 @@ struct stm32l4_i2c_priv_s
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *ptr;                /* Current message buffer */
   uint32_t frequency;          /* Current I2C frequency */
-  int dcnt;                    /* Current message length */
+  int dcnt;                    /* Current message bytes remaining to transfer */
   uint16_t flags;              /* Current message flags */
   bool astart;                 /* START sent */
 
@@ -245,7 +437,7 @@ struct stm32l4_i2c_priv_s
 
 #ifdef CONFIG_I2C_TRACE
   int tndx;                    /* Trace array index */
-  systime_t start_time;        /* Time when the trace was started */
+  uint32_t start_time;         /* Time when the trace was started */
 
   /* The actual trace data */
 
@@ -255,26 +447,36 @@ struct stm32l4_i2c_priv_s
   uint32_t status;             /* End of transfer SR2|SR1 status */
 };
 
+/* I2C Device, Instance */
+
+struct stm32l4_i2c_inst_s
+{
+  const struct i2c_ops_s    *ops;  /* Standard I2C operations */
+  struct stm32l4_i2c_priv_s *priv; /* Common driver private data structure */
+};
+
 /************************************************************************************
  * Private Function Prototypes
  ************************************************************************************/
 
-static inline uint32_t stm32l4_i2c_getreg32(FAR struct stm32l4_i2c_priv_s *priv,
-                                            uint8_t offset);
+static inline uint16_t stm32l4_i2c_getreg(FAR struct stm32l4_i2c_priv_s *priv,
+                                          uint8_t offset);
+static inline void stm32l4_i2c_putreg(FAR struct stm32l4_i2c_priv_s *priv,
+                                      uint8_t offset, uint16_t value);
 static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
                                         uint8_t offset, uint32_t value);
 static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
-                                         uint8_t offset, uint32_t clearbits,
-                                         uint32_t setbits);
-static inline void stm32l4_i2c_sem_wait(FAR struct stm32l4_i2c_priv_s *priv);
+                                           uint8_t offset, uint32_t clearbits,
+                                           uint32_t setbits);
+static inline void stm32l4_i2c_sem_wait(FAR struct i2c_master_s *dev);
 #ifdef CONFIG_STM32L4_I2C_DYNTIMEO
 static useconds_t stm32l4_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_STM32L4_I2C_DYNTIMEO */
 static inline int  stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv);
-static inline void stm32l4_i2c_sem_post(FAR struct stm32l4_i2c_priv_s *priv);
-static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv);
-static inline void stm32l4_i2c_sem_destroy(FAR struct stm32l4_i2c_priv_s *priv);
+static inline void stm32l4_i2c_sem_post(FAR struct i2c_master_s *dev);
+static inline void stm32l4_i2c_sem_init(FAR struct i2c_master_s *dev);
+static inline void stm32l4_i2c_sem_destroy(FAR struct i2c_master_s *dev);
 #ifdef CONFIG_I2C_TRACE
 static void stm32l4_i2c_tracereset(FAR struct stm32l4_i2c_priv_s *priv);
 static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
@@ -286,7 +488,6 @@ static void stm32l4_i2c_tracedump(FAR struct stm32l4_i2c_priv_s *priv);
 static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
                                  uint32_t frequency);
 static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv);
-static inline void stm32l4_i2c_clrstart(FAR struct stm32l4_i2c_priv_s *priv);
 static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv);
 static inline uint32_t stm32l4_i2c_getstatus(FAR struct stm32l4_i2c_priv_s *priv);
 static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv);
@@ -295,6 +496,9 @@ static int stm32l4_i2c_isr(int irq, void *context, FAR void *arg);
 #endif
 static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv);
 static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv);
+
+static int stm32l4_i2c_process(FAR struct i2c_master_s *dev,
+                               FAR struct i2c_msg_s *msgs, int count);
 static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev,
                                 FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
@@ -304,16 +508,6 @@ static int stm32l4_i2c_reset(FAR struct i2c_master_s *dev);
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-
-/* Device Structures, Instantiation */
-
-static const struct i2c_ops_s stm32l4_i2c_ops =
-{
- .transfer = stm32l4_i2c_transfer
-#ifdef CONFIG_I2C_RESET
-  , .reset  = stm32l4_i2c_reset
-#endif
-};
 
 #ifdef CONFIG_STM32L4_I2C1
 static const struct stm32l4_i2c_config_s stm32l4_i2c1_config =
@@ -331,13 +525,13 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c1_config =
 
 static struct stm32l4_i2c_priv_s stm32l4_i2c1_priv =
 {
-  .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c1_config,
   .refs       = 0,
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
@@ -360,13 +554,13 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c2_config =
 
 static struct stm32l4_i2c_priv_s stm32l4_i2c2_priv =
 {
-  .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c2_config,
   .refs       = 0,
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
@@ -389,13 +583,13 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c3_config =
 
 static struct stm32l4_i2c_priv_s stm32l4_i2c3_priv =
 {
-  .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c3_config,
   .refs       = 0,
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
@@ -418,22 +612,46 @@ static const struct stm32l4_i2c_config_s stm32l4_i2c4_config =
 
 static struct stm32l4_i2c_priv_s stm32l4_i2c4_priv =
 {
-  .ops        = &stm32l4_i2c_ops,
   .config     = &stm32l4_i2c4_config,
   .refs       = 0,
   .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
+  .frequency  = 0,
   .dcnt       = 0,
   .flags      = 0,
   .status     = 0
 };
 #endif
 
+/* Device Structures, Instantiation */
+
+static const struct i2c_ops_s stm32l4_i2c_ops =
+{
+  .transfer = stm32l4_i2c_transfer
+#ifdef CONFIG_I2C_RESET
+  , .reset  = stm32l4_i2c_reset
+#endif
+};
+
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32l4_i2c_getreg
+ *
+ * Description:
+ *   Get a 16-bit register value by offset
+ *
+ ************************************************************************************/
+
+static inline uint16_t stm32l4_i2c_getreg(FAR struct stm32l4_i2c_priv_s *priv,
+                                          uint8_t offset)
+{
+  return getreg16(priv->config->base + offset);
+}
 
 /************************************************************************************
  * Name: stm32l4_i2c_getreg32
@@ -444,9 +662,23 @@ static struct stm32l4_i2c_priv_s stm32l4_i2c4_priv =
  ************************************************************************************/
 
 static inline uint32_t stm32l4_i2c_getreg32(FAR struct stm32l4_i2c_priv_s *priv,
-                                          uint8_t offset)
+                                            uint8_t offset)
 {
   return getreg32(priv->config->base + offset);
+}
+
+/************************************************************************************
+ * Name: stm32l4_i2c_putreg
+ *
+ * Description:
+ *  Put a 16-bit register value by offset
+ *
+ ************************************************************************************/
+
+static inline void stm32l4_i2c_putreg(FAR struct stm32l4_i2c_priv_s *priv, uint8_t offset,
+                                      uint16_t value)
+{
+  putreg16(value, priv->config->base + offset);
 }
 
 /************************************************************************************
@@ -458,10 +690,11 @@ static inline uint32_t stm32l4_i2c_getreg32(FAR struct stm32l4_i2c_priv_s *priv,
  ************************************************************************************/
 
 static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
-                                      uint8_t offset, uint32_t value)
+                                        uint8_t offset, uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
 }
+
 
 /************************************************************************************
  * Name: stm32l4_i2c_modifyreg32
@@ -472,8 +705,8 @@ static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
  ************************************************************************************/
 
 static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
-                                         uint8_t offset, uint32_t clearbits,
-                                         uint32_t setbits)
+                                           uint8_t offset, uint32_t clearbits,
+                                           uint32_t setbits)
 {
   modifyreg32(priv->config->base + offset, clearbits, setbits);
 }
@@ -486,7 +719,7 @@ static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
  *
  ************************************************************************************/
 
-static inline void stm32l4_i2c_sem_wait(FAR struct stm32l4_i2c_priv_s *priv)
+static inline void stm32l4_i2c_sem_wait(FAR struct i2c_master_s *dev)
 {
   int ret;
 
@@ -494,7 +727,7 @@ static inline void stm32l4_i2c_sem_wait(FAR struct stm32l4_i2c_priv_s *priv)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      ret = nxsem_wait(&priv->sem_excl);
+      ret = nxsem_wait(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
 
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
@@ -545,22 +778,8 @@ static useconds_t stm32l4_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 #ifndef CONFIG_I2C_POLLED
 static inline void stm32l4_i2c_enableinterrupts(struct stm32l4_i2c_priv_s *priv)
 {
-  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, 0, I2C_CR1_TXRX);
-}
-#endif
-
-/************************************************************************************
- * Name: stm32l4_i2c_disableinterrupts
- *
- * Description:
- *   Enable I2C interrupts
- *
- ************************************************************************************/
-
-#ifndef CONFIG_I2C_POLLED
-static inline void stm32l4_i2c_disableinterrupts(struct stm32l4_i2c_priv_s *priv)
-{
-  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, I2C_CR1_TXRX, 0);
+    stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, 0,
+                            (I2C_CR1_TXRX | I2C_CR1_NACKIE));
 }
 #endif
 
@@ -569,6 +788,9 @@ static inline void stm32l4_i2c_disableinterrupts(struct stm32l4_i2c_priv_s *priv
  *
  * Description:
  *   Wait for a transfer to complete
+ *
+ * There are two versions of this function.  The first is included when using
+ * interrupts while the second is used if polling (CONFIG_I2C_POLLED=y).
  *
  ************************************************************************************/
 
@@ -583,16 +805,17 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* Enable I2C interrupts */
 
+  /* The TXIE and RXIE interrupts are enabled initially in stm32l4_i2c_process.
+   * The remainder of the interrupts, including error-related, are enabled here.
+   */
+
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, 0,
                         (I2C_CR1_ALLINTS & ~I2C_CR1_TXRX));
 
-  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
-   * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_timedwait() sleeps.
-   */
+  /* Signal the interrupt handler that we are waiting */
 
-   priv->intstate = INTSTATE_WAITING;
-   do
+  priv->intstate = INTSTATE_WAITING;
+  do
     {
       /* Get the current time */
 
@@ -654,9 +877,9 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
 #else
 static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  systime_t timeout;
-  systime_t start;
-  systime_t elapsed;
+  uint32_t timeout;
+  uint32_t start;
+  uint32_t elapsed;
   int ret;
 
   /* Get the timeout value */
@@ -692,8 +915,8 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
-          priv->intstate, (long)elapsed, (long)timeout, priv->status);
+  i2cinfo("intstate: %d elapsed: %d threshold: %d status: 0x%08x\n",
+          priv->intstate, elapsed, timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
 
@@ -714,7 +937,7 @@ static inline void
 stm32l4_i2c_set_7bit_address(FAR struct stm32l4_i2c_priv_s *priv)
 {
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
-                        ((priv->msgv->addr & 0x7F) << I2C_CR2_SADD7_SHIFT));
+                          ((priv->msgv->addr & 0x7F) << I2C_CR2_SADD7_SHIFT));
 }
 
 /************************************************************************************
@@ -726,10 +949,10 @@ stm32l4_i2c_set_7bit_address(FAR struct stm32l4_i2c_priv_s *priv)
 
 static inline void
 stm32l4_i2c_set_bytes_to_transfer(FAR struct stm32l4_i2c_priv_s *priv,
-                               uint8_t n_bytes)
+                                  uint8_t n_bytes)
 {
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, I2C_CR2_NBYTES_MASK,
-                        (n_bytes << I2C_CR2_NBYTES_SHIFT));
+                          (n_bytes << I2C_CR2_NBYTES_SHIFT));
 }
 
 /************************************************************************************
@@ -759,30 +982,31 @@ stm32l4_i2c_set_read_transfer_dir(FAR struct stm32l4_i2c_priv_s *priv)
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_enable_autoend
+ * Name: stm32l4_i2c_enable_reload
  *
  * Description:
  *
  ************************************************************************************/
 
 static inline void
-stm32l4_i2c_enable_autoend(FAR struct stm32l4_i2c_priv_s *priv)
+stm32l4_i2c_enable_reload(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, 0, I2C_CR2_AUTOEND);
+  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, 0, I2C_CR2_RELOAD);
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_disable_autoend
+ * Name: stm32l4_i2c_disable_reload
  *
  * Description:
  *
  ************************************************************************************/
 
 static inline void
-stm32l4_i2c_disable_autoend(FAR struct stm32l4_i2c_priv_s *priv)
+stm32l4_i2c_disable_reload(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, I2C_CR2_AUTOEND, 0);
+  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, I2C_CR2_RELOAD, 0);
 }
+
 
 /************************************************************************************
  * Name: stm32l4_i2c_sem_waitstop
@@ -794,9 +1018,9 @@ stm32l4_i2c_disable_autoend(FAR struct stm32l4_i2c_priv_s *priv)
 
 static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  systime_t start;
-  systime_t elapsed;
-  systime_t timeout;
+  uint32_t start;
+  uint32_t elapsed;
+  uint32_t timeout;
   uint32_t cr;
   uint32_t sr;
 
@@ -808,11 +1032,7 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
   timeout = CONFIG_STM32L4_I2CTIMEOTICKS;
 #endif
 
-  /* Wait as stop might still be in progress; but stop might also
-   * be set because of a timeout error: "The [STOP] bit is set and
-   * cleared by software, cleared by hardware when a Stop condition is
-   * detected, set by hardware when a timeout error is detected."
-   */
+  /* Wait as stop might still be in progress */
 
   start = clock_systimer();
   do
@@ -831,7 +1051,7 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
 
       /* Check for timeout error */
 
-      sr = stm32l4_i2c_getreg32(priv, STM32L4_I2C_ISR_OFFSET);
+      sr = stm32l4_i2c_getreg(priv, STM32L4_I2C_ISR_OFFSET);
       if ((sr & I2C_INT_TIMEOUT) != 0)
         {
           return;
@@ -858,9 +1078,9 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static inline void stm32l4_i2c_sem_post(FAR struct stm32l4_i2c_priv_s *priv)
+static inline void stm32l4_i2c_sem_post(FAR struct i2c_master_s *dev)
 {
-  nxsem_post(&priv->sem_excl);
+  nxsem_post(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
 }
 
 /************************************************************************************
@@ -871,17 +1091,17 @@ static inline void stm32l4_i2c_sem_post(FAR struct stm32l4_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv)
+static inline void stm32l4_i2c_sem_init(FAR struct i2c_master_s *dev)
 {
-  nxsem_init(&priv->sem_excl, 0, 1);
+  nxsem_init(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl, 0, 1);
 
 #ifndef CONFIG_I2C_POLLED
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
-  nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_init(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
+  nxsem_setprotocol(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -893,11 +1113,11 @@ static inline void stm32l4_i2c_sem_init(FAR struct stm32l4_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static inline void stm32l4_i2c_sem_destroy(FAR struct stm32l4_i2c_priv_s *priv)
+static inline void stm32l4_i2c_sem_destroy(FAR struct i2c_master_s *dev)
 {
-  nxsem_destroy(&priv->sem_excl);
+  nxsem_destroy(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
-  nxsem_destroy(&priv->sem_isr);
+  nxsem_destroy(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_isr);
 #endif
 }
 
@@ -914,7 +1134,7 @@ static void stm32l4_i2c_traceclear(FAR struct stm32l4_i2c_priv_s *priv)
 {
   struct stm32l4_trace_s *trace = &priv->trace[priv->tndx];
 
-  trace->status = 0;              /* I2C 32-bit SR2|SR1 status */
+  trace->status = 0;              /* I2C 32-bit status */
   trace->count  = 0;              /* Interrupt count when status change */
   trace->event  = I2CEVENT_NONE;  /* Last event that occurred with this status */
   trace->parm   = 0;              /* Parameter associated with the event */
@@ -931,7 +1151,7 @@ static void stm32l4_i2c_tracereset(FAR struct stm32l4_i2c_priv_s *priv)
 }
 
 static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
-                               uint32_t status)
+                                 uint32_t status)
 {
   struct stm32l4_trace_s *trace = &priv->trace[priv->tndx];
 
@@ -971,7 +1191,7 @@ static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
 }
 
 static void stm32l4_i2c_traceevent(FAR struct stm32l4_i2c_priv_s *priv,
-                                enum stm32l4_trace_e event, uint32_t parm)
+                                   enum stm32l4_trace_e event, uint32_t parm)
 {
   struct stm32l4_trace_s *trace;
 
@@ -1002,8 +1222,8 @@ static void stm32l4_i2c_tracedump(FAR struct stm32l4_i2c_priv_s *priv)
   struct stm32l4_trace_s *trace;
   int i;
 
-  syslog(LOG_DEBUG, "Elapsed time: %ld\n",
-         (long)(clock_systimer() - priv->start_time));
+  syslog(LOG_DEBUG, "Elapsed time: %d\n",
+         clock_systimer() - priv->start_time);
 
   for (i = 0; i <= priv->tndx; i++)
     {
@@ -1020,46 +1240,67 @@ static void stm32l4_i2c_tracedump(FAR struct stm32l4_i2c_priv_s *priv)
  * Name: stm32l4_i2c_setclock
  *
  * Description:
- *   Set the I2C clock
+ *
+ *   Sets the I2C bus clock frequency by configuring the I2C_TIMINGR register.
+ *
+ *   This function supports bus clock frequencies of:
+ *
+ *      1000Khz (Fast Mode+)
+ *      400Khz  (Fast Mode)
+ *      100Khz  (Standard Mode)
+ *      10Khz   (Standard Mode)
+ *
+ *   Attempts to set a different frequency will quietly provision the default
+ *   of 10Khz.
+ *
+ *   The only differences between the various modes of operation (std, fast,
+ *   fast+) are the bus clock speed and setup/hold times.  Setup/hold times are
+ *   specified as a MINIMUM time for the given mode, and naturally std mode
+ *   has the longest minimum times.  As a result, by provisioning setup/hold
+ *   times for std mode they are also compatible with fast/fast+, though some
+ *   performance degradation occurs in fast/fast+ as a result of the times
+ *   being somewhat longer than strictly required.  The values remain as they
+ *   are because reliability is favored over performance.
+ *
+ * Clock Selection:
+ *
+ *   The I2C peripheral clock can be provided by either PCLK1, SYSCLK or the HSI.
+ *
+ *    PCLK1 >------|\   I2CCLK
+ *   SYSCLK >------| |--------->
+ *      HSI >------|/
+ *
+ *   PCLK is the default and is expected to be 80Mhz.
+ *
+ *   SYSCLK can, in turn, be derived from the HSI, HSE, PPLCLK.
+ *
+ *      HSI >------|\
+ *                 | |  SYSCLK
+ *      PLL >------| |--------->
+ *                 | |
+ *      HSE >------|/
+ *
+ *
+ * References:
+ *
+ *  App Note AN4235 and the associated software STSW-STM32126.
  *
  ************************************************************************************/
 
-static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t frequency)
+static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
+                                 uint32_t frequency)
 {
+  int i2cclk_mhz;
   uint32_t pe;
   uint8_t presc;
-  uint8_t s_time;
-  uint8_t h_time;
+  uint8_t scl_delay;
+  uint8_t sda_delay;
   uint8_t scl_h_period;
   uint8_t scl_l_period;
 
-  /* XXX haque; these are the only freqs we support at the moment, until we can
-   * compute the values ourself.
-   */
-
-  if (frequency == 10000)
-    {
-    }
-  else if (frequency == 100000)
-    {
-    }
-  else if (frequency == 400000)
-    {
-    }
-  else
-    {
-#if 1
-      frequency = 1000000;
-#else
-      frequency = 500000;
-#endif
-    }
-
-  /* Has the I2C bus frequency changed? */
-
   if (frequency != priv->frequency)
     {
-      /* Disable the selected I2C peripheral to configure TRISE */
+      /* I2C peripheral must be disabled to update clocking configuration */
 
       pe = (stm32l4_i2c_getreg32(priv, STM32L4_I2C_CR1_OFFSET) & I2C_CR1_PE);
       if (pe)
@@ -1067,121 +1308,187 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t f
           stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
         }
 
-      /* Update timing and control registers */
-
-      /* TODO: speed/timing calcs, taking into consideration
-       * STM32L4_PCLK1_FREQUENCY, or SYSCLK, or HSI16
-       * clock source, RCC_CCIPR, I2CxSEL, 0 = PCKL, 1 = SCLK, 2 = HSI16, 3 = reserved
-#warning "check set filters before timing, see RM0351 35.4.4 p 1112"
-       * analog filter; suppress spikes up to 50 ns in fast-mode and fast-mode plus
-       * ANFOFF cr1
-       * DNF cr1; 1-15 I2CCLK periods
+      /*  The Speed and timing calculation are based on the following
+       *  fI2CCLK = PCLK and is 80Mhz
+       *  Analog filter is on,
+       *  Digital filter off
+       *  Rise Time is 120 ns and fall is 10ns
+       *  Mode is FastMode
        */
-      /* RM0351 35.4.9 p 1140 */
 
-      if (frequency == 10000)
+      i2cclk_mhz = 80;
+
+      if (i2cclk_mhz == 80)
         {
-#if 1
-          /* 10 KHz values from I2C timing tool with clock 80mhz */
+          uint8_t h_time;
+          uint8_t s_time;
 
-          presc        = 0x0b;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0xff;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0xba;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+          /* Default timing calculations from original STM32L4 driver,
+           * fI2CCLK = PCLK, 80 Mhz */
 
-#else
-          /* 10 KHz values from datasheet with clock 8mhz */
+          if (frequency == 100000)
+            {
+              /* 100 KHz values from I2C timing tool with clock 80mhz */
 
-          presc        = 0x03;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0xc7;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0xc3;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x02;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x04;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-#endif
+              presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
+              scl_l_period = 0xe7;    /* SCLL - SCL low period in master mode */
+              scl_h_period = 0x9b;    /* SCLH - SCL high period in master mode */
+              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              s_time       = 0x0d;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+            }
+          else if (frequency == 400000)
+             {
+              /* 400 KHz values from I2C timing tool for clock of 80mhz */
+
+              presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
+              scl_l_period = 0x43;    /* SCLL - SCL low period in master mode */
+              scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
+              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              s_time       = 0x07;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+             }
+          else if (frequency == 1000000)
+             {
+              /* 1000 KHhz values from I2C timing tool for clock of 80mhz */
+
+              presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
+              scl_l_period = 0x14;    /* SCLL - SCL low period in master mode */
+              scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
+              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              s_time       = 0x05;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+
+              frequency = 1000000;
+             }
+          else
+            {
+              /* 10 KHz values from I2C timing tool with clock 80mhz */
+
+              presc        = 0x0b;    /* PRESC - (+1) prescale I2CCLK */
+              scl_l_period = 0xff;    /* SCLL - SCL low period in master mode */
+              scl_h_period = 0xba;    /* SCLH - SCL high period in master mode */
+              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+            }
+
+          scl_delay = s_time;
+          sda_delay = h_time;
         }
-     else if (frequency == 100000)
+
+#if 0
+      /* TODO: Alternative clock configurations. Through Kconfig?
+       *       Or auto-detect? */
+
+      else if (i2cclk_mhz == 8)
         {
-#if 1
-          /* 100 KHz values from I2C timing tool with clock 80mhz */
+          uint8_t h_time;
+          uint8_t s_time;
 
-          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0xe7;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0x9b;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x0d;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-#else
-          /* 100 KHz values from datasheet with clock 8mhz */
+          /* Alternative timing calculations from original STM32L4 driver,
+           * fI2CCLK = PCLK, 8 Mhz */
 
-          presc        = 0x01;
-          scl_l_period = 0x13;
-          scl_h_period = 0x0f;
-          h_time       = 0x02;
-          s_time       = 0x04;
-#endif
+          if (frequency == 100000)
+            {
+              /* 100 KHz values from datasheet with clock 8mhz */
+
+              presc        = 0x01;
+              scl_l_period = 0x13;
+              scl_h_period = 0x0f;
+              h_time       = 0x02;
+              s_time       = 0x04;
+            }
+          else if (frequency == 400000)
+             {
+              /* 400 KHz values from datasheet for clock of 8mhz */
+
+              presc        = 0x00;
+              scl_l_period = 0x09;
+              scl_h_period = 0x03;
+              h_time       = 0x01;
+              s_time       = 0x03;
+             }
+          else if (frequency == 1000000)
+             {
+              /* 500 KHhz values from datasheet for clock of 8mhz */
+
+              presc        = 0x00;
+              scl_l_period = 0x06;
+              scl_h_period = 0x03;
+              h_time       = 0x00;
+              s_time       = 0x01;
+
+              frequency = 500000;
+             }
+          else
+            {
+              /* 10 KHz values from I2C timing tool with clock 8mhz */
+
+              presc        = 0x03;    /* PRESC - (+1) prescale I2CCLK */
+              scl_l_period = 0xc7;    /* SCLL - SCL low period in master mode */
+              scl_h_period = 0xc3;    /* SCLH - SCL high period in master mode */
+              h_time       = 0x02;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              s_time       = 0x04;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+            }
+
+          scl_delay = s_time;
+          sda_delay = h_time;
         }
-      else if (frequency == 400000)
+
+      else if (i2cclk_mhz == 16)
         {
-#if 1
-          /* 400 KHz values from I2C timing tool for clock of 80mhz */
+          /* Timing calculations from STM32F7 driver, fI2CCLK = HSI 16 MHz */
 
-          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0x43;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x07;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-#else
-          /* 400 KHz values from datasheet for clock of 8mhz */
+          if (frequency == 100000)
+            {
+              presc        = 0;
+              scl_delay    = 5;
+              sda_delay    = 0;
+              scl_h_period = 61;
+              scl_l_period = 89;
 
-          presc        = 0x00;
-          scl_l_period = 0x09;
-          scl_h_period = 0x03;
-          h_time       = 0x01;
-          s_time       = 0x03;
-#endif
+            }
+          else if (frequency == 400000)
+             {
+               presc        = 0;
+               scl_delay    = 3;
+               sda_delay    = 0;
+               scl_h_period = 6;
+               scl_l_period = 24;
+             }
+          else if (frequency == 1000000)
+             {
+               presc        = 0;
+               scl_delay    = 2;
+               sda_delay    = 0;
+               scl_h_period = 1;
+               scl_l_period = 5;
+             }
+          else
+            {
+              presc        = 7;
+              scl_delay    = 0;
+              sda_delay    = 0;
+              scl_h_period = 35;
+              scl_l_period = 162;
+            }
         }
+#endif
       else
-      {
-#if 1
-          /* 1000 KHhz values from I2C timing tool for clock of 80mhz */
-
-          presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
-          scl_l_period = 0x14;    /* SCLL - SCL low period in master mode */
-          scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
-          h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-          s_time       = 0x05;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-
-          frequency = 1000000;
-#else
-          /* 500 KHhz values from datasheet for clock of 8mhz */
-
-          presc        = 0x00;
-          scl_l_period = 0x06;
-          scl_h_period = 0x03;
-          h_time       = 0x00;
-          s_time       = 0x01;
-
-          frequency = 500000;
-#endif
-      }
+        {
+          PANIC();
+        }
 
       uint32_t timingr =
         (presc << I2C_TIMINGR_PRESC_SHIFT) |
-        (s_time << I2C_TIMINGR_SCLDEL_SHIFT) |
-        (h_time << I2C_TIMINGR_SDADEL_SHIFT) |
+        (scl_delay << I2C_TIMINGR_SCLDEL_SHIFT) |
+        (sda_delay << I2C_TIMINGR_SDADEL_SHIFT) |
         (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
         (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
       stm32l4_i2c_putreg32(priv, STM32L4_I2C_TIMINGR_OFFSET, timingr);
 
-      /* Re-enable the peripheral (or not) */
-
       if (pe)
         {
           stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
         }
-
-      /* Save the new I2C frequency */
 
       priv->frequency = frequency;
     }
@@ -1191,23 +1498,121 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv, uint32_t f
  * Name: stm32l4_i2c_sendstart
  *
  * Description:
- *   Send the START conditions/force Master mode
+ *   Send the START condition / force Master mode
+ *
+ *   A START condition in I2C consists of a single byte that contains both the
+ *   7 bit slave address and a read/write bit (0 = WRITE, 1 = READ).  If the
+ *   address is recognized by one of the slave devices that slave device will
+ *   ACK the byte so that data transfers can begin.
+ *
+ *   A RESTART (or repeated START per the I2CSPEC) is simply a START condition
+ *   issued in the middle of a transfer (i.e. after the initial START and before
+ *   a STOP).  A RESTART sends a new address byte and R/W bit to the bus. A
+ *   RESTART is optional in most cases but mandatory in the event the transfer
+ *   direction is changed.
+ *
+ *   Most of the time reading data from an I2C slave requires a WRITE of the
+ *   subaddress followed by a READ (and hence a RESTART in between).  Writing
+ *   to an I2C slave typically requires only WRITE operations and hence no
+ *   RESTARTs.
+ *
+ *   This function is therefore called both at the beginning of a transfer
+ *   (START) and at appropriate times during a transfer (RESTART).
  *
  ************************************************************************************/
 
 static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  /* Get run-time data */
+  bool next_norestart = false;
 
-  priv->astart = true;
+  /* Set the private "current message" data used in protocol processing.
+   *
+   * ptr:   A pointer to the start of the current message buffer.  This is
+   *        advanced after each byte in the current message is transferred.
+   *
+   * dcnt:  A running counter of the bytes in the current message waiting to be
+   *        transferred.  This is decremented each time a byte is transferred.
+   *        The hardware normally accepts a maximum of 255 bytes per transfer
+   *        but can support more via the RELOAD mechanism.  If dcnt initially
+   *        exceeds 255, the RELOAD mechanism will be enabled automatically.
+   *
+   * flags: Used to characterize handling of the current message.
+   *
+   *  The default flags value is 0 which specifies:
+   *
+   *   - A transfer direction of WRITE (R/W bit = 0)
+   *   - RESTARTs between all messages
+   *
+   *  The following flags can be used to override this behavior as follows:
+   *
+   *   - I2C_M_READ: Sets the transfer direction to READ (R/W bit = 1)
+   *   - I2C_M_NORESTART: Prevents a RESTART from being issued prior to the
+   *      transfer of the message (where allowed by the protocol).
+   *
+   */
+
   priv->ptr   = priv->msgv->buffer;
   priv->dcnt  = priv->msgv->length;
   priv->flags = priv->msgv->flags;
 
-  /* Disable ACK on receive by default and generate START */
+  if ((priv->flags & I2C_M_NORESTART) != 0)
+    {
+      /* Flag the first byte as an address byte */
 
-  stm32l4_i2c_set_bytes_to_transfer(priv, priv->dcnt);
+      priv->astart = true;
+    }
+
+  /* Enabling RELOAD allows the transfer of:
+   *
+   *  - individual messages with a payload exceeding 255 bytes
+   *  - multiple messages back to back without a RESTART in between
+   *
+   * so we enable it if either of those conditions exist and disable
+   * it otherwise.
+   */
+
+  if (priv->msgc > 0)
+    {
+      next_norestart = (((priv->msgv + 1)->flags & I2C_M_NORESTART) != 0);
+    }
+
+  if (next_norestart || priv->dcnt > 255)
+    {
+      i2cinfo("RELOAD enabled: dcnt = %i msgc = %i\n",
+          priv->dcnt, priv->msgc);
+      stm32l4_i2c_enable_reload(priv);
+    }
+  else
+    {
+      i2cinfo("RELOAD disable: dcnt = %i msgc = %i\n",
+          priv->dcnt, priv->msgc);
+      stm32l4_i2c_disable_reload(priv);
+    }
+
+  /* Set the number of bytes to transfer (I2C_CR2->NBYTES) to the number of
+   * bytes in the current message or 255, whichever is lower so as to not
+   * exceed the hardware maximum allowed.
+   */
+
+  if (priv->dcnt > 255)
+    {
+      stm32l4_i2c_set_bytes_to_transfer(priv, 255);
+    }
+  else
+    {
+      stm32l4_i2c_set_bytes_to_transfer(priv, priv->dcnt);
+    }
+
+  /* Set the (7 bit) address.
+   * 10 bit addressing is not yet supported.
+   */
+
   stm32l4_i2c_set_7bit_address(priv);
+
+  /* The flag of the current message is used to determine the direction of
+   * transfer required for the current message.
+   */
+
   if (priv->flags & I2C_M_READ)
     {
       stm32l4_i2c_set_read_transfer_dir(priv);
@@ -1217,52 +1622,14 @@ static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv)
       stm32l4_i2c_set_write_transfer_dir(priv);
     }
 
-  if (priv->msgc == 1)
-    {
-      /* stm32l4_i2c_enable_autoend(priv); */
-    }
-  else
-    {
-      /* stm32l4_i2c_disable_autoend(priv); */
-    }
-
-  /* TODO check NACK */
-  /* TODO handle NACKR? */
-
-  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, 0, I2C_CR2_START);
-}
-
-/************************************************************************************
- * Name: stm32l4_i2c_clrstart
- *
- * Description:
- *   Clear the STOP, START or PEC condition on certain error recovery steps.
- *
- ************************************************************************************/
-
-static inline void stm32l4_i2c_clrstart(FAR struct stm32l4_i2c_priv_s *priv)
-{
-  /* "Note: When the STOP, START or PEC bit is set, the software must
-   *  not perform any write access to I2C_CR1 before this bit is
-   *  cleared by hardware. Otherwise there is a risk of setting a
-   *  second STOP, START or PEC request."
-   *
-   * "The [STOP] bit is set and cleared by software, cleared by hardware
-   *  when a Stop condition is detected, set by hardware when a timeout
-   *  error is detected.
-   *
-   * "This [START] bit is set and cleared by software and cleared by hardware
-   *  when start is sent or PE=0."  The bit must be cleared by software if the
-   *  START is never sent.
-   *
-   * "This [PEC] bit is set and cleared by software, and cleared by hardware
-   *  when PEC is transferred or by a START or Stop condition or when PE=0."
+  /* Set the I2C_CR2->START bit to 1 to instruct the hardware to send the
+   * START condition using the address and transfer direction data entered.
    */
 
-  /* TODO check PEC (32 bit separate reg) */
+  i2cinfo("Sending START: dcnt=%i msgc=%i flags=0x%04x\n",
+          priv->dcnt, priv->msgc, priv->flags);
 
-  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET,
-                        I2C_CR2_START | I2C_CR2_STOP, 0);
+  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, 0, I2C_CR2_START);
 }
 
 /************************************************************************************
@@ -1271,11 +1638,16 @@ static inline void stm32l4_i2c_clrstart(FAR struct stm32l4_i2c_priv_s *priv)
  * Description:
  *   Send the STOP conditions
  *
+ *   A STOP condition can be requested by setting the STOP bit in the I2C_CR2
+ *   register. Setting the STOP bit clears the TC flag and the STOP condition is
+ *   sent on the bus.
+ *
  ************************************************************************************/
 
 static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv)
 {
-  /* TODO check NACK */
+  i2cinfo("Sending STOP\n");
+  stm32l4_i2c_traceevent(priv, I2CEVENT_WRITE_STOP, 0);
 
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, 0, I2C_CR2_STOP);
 }
@@ -1284,32 +1656,13 @@ static inline void stm32l4_i2c_sendstop(FAR struct stm32l4_i2c_priv_s *priv)
  * Name: stm32l4_i2c_getstatus
  *
  * Description:
- *   Get 32-bit status (ISR register)
+ *   Get 32-bit status (SR1 and SR2 combined)
  *
  ************************************************************************************/
 
 static inline uint32_t stm32l4_i2c_getstatus(FAR struct stm32l4_i2c_priv_s *priv)
 {
   return getreg32(priv->config->base + STM32L4_I2C_ISR_OFFSET);
-}
-
-/************************************************************************************
- * Name: stm32l4_i2c_isr_startmessage
- *
- * Description:
- *   Common logic when a message is started.  Just adds the even to the trace buffer
- *   if enabled and adjusts the message pointer and count.
- *
- ************************************************************************************/
-
-static inline void stm32l4_i2c_isr_startmessage(struct stm32l4_i2c_priv_s *priv)
-{
-  stm32l4_i2c_traceevent(priv, I2CEVENT_SENDADDR, priv->msgc);
-
-  /* Increment to next pointer and decrement message count */
-
-  priv->msgv++;
-  priv->msgc--;
 }
 
 /************************************************************************************
@@ -1322,216 +1675,612 @@ static inline void stm32l4_i2c_isr_startmessage(struct stm32l4_i2c_priv_s *priv)
 
 static inline void stm32l4_i2c_clearinterrupts(struct stm32l4_i2c_priv_s *priv)
 {
-#warning "check this clears interrupts?"
-    stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
+  stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
 }
 
 /************************************************************************************
  * Name: stm32l4_i2c_isr_process
  *
  * Description:
- *  I2C processing logic common to polled and non-polled operation.
+ *  Common interrupt service routine (ISR) that handles I2C protocol logic.
+ *  This is instantiated for each configured I2C interface (I2C1, I2C2, I2C3).
+ *
+ *  This ISR is activated and deactivated by:
+ *
+ *   stm32l4_i2c_process
+ *    and
+ *   stm32l4_i2c_waitdone
+ *
+ * Input Parameters:
+ *   priv - The private struct of the I2C driver.
  *
  ************************************************************************************/
 
 static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
 {
-  uint32_t status = stm32l4_i2c_getstatus(priv);
+  uint32_t status;
 
-  /* Check for new trace setup */
+  /* Get state of the I2C controller */
+
+  status = stm32l4_i2c_getreg32(priv, STM32L4_I2C_ISR_OFFSET);
+
+  i2cinfo("ENTER: status = 0x%08x\n", status);
+
+  /* Update private version of the state */
+
+  priv->status = status;
+
+  /* If this is a new transmission set up the trace table accordingly */
 
   stm32l4_i2c_tracenew(priv, status);
+  stm32l4_i2c_traceevent(priv, I2CEVENT_ISR_CALL, 0);
 
-#warning "TODO: check clear interrupts after all actions"
+  /* --------------------- Start of I2C protocol handling -------------------- */
 
-  if (STATUS_NACK(status))
+  /* I2C protocol logic follows. It's organized in an if else chain such that
+   * only one mode of operation is executed every time the ISR is called.
+   *
+   * If you need to add additional states to support new features be sure they
+   * continue the chain (i.e. begin with "else if") and are placed before the
+   * empty call / error states at the end of the chain.
+   */
+
+  /* NACK Handling
+   *
+   * This branch is only triggered when the NACK (Not Acknowledge Received)
+   * interrupt occurs.  This interrupt will only fire when the I2C_CR1->NACKIE
+   * bit is 1.
+   *
+   * I2C_ISR->NACKF is set by hardware when a NACK is received after a byte
+   * is transmitted and the slave fails to acknowledge it.  This is the
+   * opposite of, and mutually exclusive to, the I2C_ISR->TXIS event.
+   *
+   * In response to the NACK the hardware automatically triggers generation
+   * of a STOP condition, terminating the transfer.  The only valid response
+   * to this state is to exit the ISR and report the failure.
+   *
+   * To differentiate an "address NACK" from a NACK that might occur during
+   * the transfer of other bytes the "priv->astart" parameter is
+   * used.  This flag is set to TRUE in sendstart() and set to FALSE when
+   * the first TXIS event is received, which would be after the first byte
+   * (the address) is transmitted successfully (acknowledged).
+   */
+
+  if (status & I2C_INT_NACK)
     {
-      /* wait, reset this? */
+
+      if (priv->astart == true)
+        {
+
+          /* NACK received on first (address) byte: address is invalid */
+
+          i2cinfo("NACK: Address invalid: dcnt=%i msgc=%i status=0x%08x\n",
+          priv->dcnt, priv->msgc, status);
+          stm32l4_i2c_traceevent(priv, I2CEVENT_ADDRESS_NACKED, priv->msgv->addr);
+        }
+      else
+        {
+          /* NACK received on regular byte */
+
+          i2cinfo("NACK: NACK received: dcnt=%i msgc=%i status=0x%08x\n",
+          priv->dcnt, priv->msgc, status);
+          stm32l4_i2c_traceevent(priv, I2CEVENT_ADDRESS_NACKED, priv->msgv->addr);
+        }
+
+      /* Set flags to terminate message transmission:
+       *
+       *   set message length to -1 to indicate last byte of message sent
+       *   set message count to 0 to indicate no more messages to send
+       *
+       * As we fall through the logic in the ISR the message handling block
+       * will be triggered by these flags and signal the ISR to terminate.
+       */
+
+      priv->dcnt = -1;
+      priv->msgc = 0;
     }
-  else if (priv->astart)
-    {
-      stm32l4_i2c_isr_startmessage(priv);
-      priv->astart = false;
-    }
 
-  /* Was address sent, continue with either sending or reading data */
+  /* Transmit Interrupt Status (TXIS) Handler
+   *
+   * This branch is only triggered when the TXIS interrupt occurs.  This
+   * interrupt will only fire when the I2C_CR1->TXIE bit is 1.
+   *
+   * This indicates the transmit data register I2C_TXDR has been emptied
+   * following the successful transmission of a byte and slave acknowledgement.
+   * In this state the I2C_TXDR register is ready to accept another byte for
+   * transmission.  The TXIS bit will be cleared automatically when the next
+   * byte is written to I2C_TXDR.
+   *
+   * The number of TXIS events during the transfer corresponds to NBYTES.
+   *
+   * The TXIS flag is not set when a NACK is received.
+   *
+   * When RELOAD is disabled (RELOAD=0) and NBYTES data have been transferred:
+   *
+   *   - In Automatic End Mode (AUTOEND=1), a STOP is automatically sent.
+   *
+   *     Note:  Automatic End Mode is not currently supported.
+   *
+   *   - In Software End Mode (AUTOEND=0), the TC event occurs and the SCL
+   *     line is stretched low in order to allow software actions (STOP,
+   *     RESTART).
+   *
+   * When RELOAD is enabled (RELOAD=1) and NBYTES bytes have been transferred
+   * a TCR event occurs instead and that handler simply updates NBYTES which
+   * causes TXIS events to continue.  The process repeats until all bytes in
+   * the message have been transferred.
+   */
 
-  if ((priv->flags & I2C_M_READ) == 0 && STATUS_ADDR_TX(status))
+  else if ((priv->flags & (I2C_M_READ)) == 0 && (status & (I2C_ISR_TXIS)) != 0)
     {
-#warning "TODO: ADDRCF clear address interrupt flag"
+
+      /* TXIS interrupt occurred, address valid, ready to transmit */
+
+      stm32l4_i2c_traceevent(priv, I2CEVENT_WRITE, 0);
+      i2cinfo("TXIS: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+              priv->dcnt, priv->msgc, status);
+
+      /* The first event after the address byte is sent will be either TXIS
+       * or NACKF so it's safe to set the astart flag to false on
+       * the first TXIS event to indicate that it is no longer necessary to
+       * check for address validity.
+       */
+
+      if (priv->astart == true)
+        {
+          i2cinfo("TXIS: Address Valid\n");
+          stm32l4_i2c_traceevent(priv, I2CEVENT_ADDRESS_ACKED, priv->msgv->addr);
+          priv->astart = false;
+        }
+
+      /* If one or more bytes in the current message are ready to transmit */
+
       if (priv->dcnt > 0)
         {
-          /* Send a byte */
+          /* Prepare to transmit the current byte */
 
-          stm32l4_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
-          stm32l4_i2c_putreg32(priv, STM32L4_I2C_TXDR_OFFSET, *priv->ptr++);
+          stm32l4_i2c_traceevent(priv, I2CEVENT_WRITE_TO_DR, priv->dcnt);
+          i2cinfo("TXIS: Write Data 0x%02x\n", *priv->ptr);
+
+          /* Decrement byte counter */
+
           priv->dcnt--;
+
+          /* If we are about to transmit the last byte in the current message */
+
+          if (priv->dcnt == 0)
+            {
+              /* If this is also the last message to send, disable RELOAD so
+               * TC fires next and issues STOP condition.  If we don't do this
+               * TCR will fire next, and since there are no bytes to send we
+               * can't write NBYTES to clear TCR so it will fire forever.
+               */
+
+              if ((priv->msgc - 1) == 0)
+                {
+                  stm32l4_i2c_disable_reload(priv);
+                }
+            }
+
+          /* Transmit current byte */
+
+          stm32l4_i2c_putreg(priv, STM32L4_I2C_TXDR_OFFSET, *priv->ptr);
+
+          /* Advance to next byte */
+
+          priv->ptr++;
         }
+      else
+        {
+          /* Unsupported state */
+
+          i2cerr("ERROR: TXIS Unsupported state detected, dcnt=%i, status 0x%08x\n",
+          priv->dcnt, status);
+          stm32l4_i2c_traceevent(priv, I2CEVENT_WRITE_ERROR, 0);
+        }
+
+      i2cinfo("TXIS: EXIT  dcnt = %i msgc = %i status 0x%08x\n",
+              priv->dcnt, priv->msgc, status);
     }
 
-  else if ((priv->flags & I2C_M_READ) != 0 && STATUS_ADDR(status))
+  /* Receive Buffer Not Empty (RXNE) State Handler
+   *
+   * This branch is only triggered when the RXNE interrupt occurs.  This
+   * interrupt will only fire when the I2C_CR1->RXIE bit is 1.
+   *
+   * This indicates data has been received from the bus and is waiting to
+   * be read from the I2C_RXDR register.  When I2C_RXDR is read this bit
+   * is automatically cleared and then an ACK or NACK is sent depending on
+   * whether we have more bytes to receive.
+   *
+   * When RELOAD is disabled and bytes remain to be transferred an acknowledge
+   * is automatically sent on the bus and the RXNE events continue until the
+   * last byte is received.
+   *
+   * When RELOAD is disabled (RELOAD=0) and BYTES have been transferred:
+   *
+   *   - In Automatic End Mode (AUTOEND=1), a NACK and a STOP are automatically
+   *     sent after the last received byte.
+   *
+   *     Note:  Automatic End Mode is not currently supported.
+   *
+   *   - In Software End Mode (AUTOEND=0), a NACK is automatically sent after
+   *     the last received byte, the TC event occurs and the SCL line is
+   *     stretched low in order to allow software actions (STOP, RESTART).
+   *
+   * When RELOAD is enabled (RELOAD=1) and NBYTES bytes have been transferred
+   * a TCR event occurs and that handler simply updates NBYTES which causes
+   * RXNE events to continue until all bytes have been transferred.
+   */
+
+  else if ((priv->flags & (I2C_M_READ)) != 0 && (status & I2C_ISR_RXNE) != 0)
     {
-      /* Enable RxNE and TxE buffers in order to receive one or multiple bytes */
+      /* When read flag is set and the receive buffer is not empty
+       * (RXNE is set) then the driver can read from the data register.
+       */
 
-#warning "TODO: ADDRCF clear address interrupt flag"
+      stm32l4_i2c_traceevent(priv, I2CEVENT_READ, 0);
+      i2cinfo("RXNE: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+              priv->dcnt, priv->msgc, status);
 
-#ifndef CONFIG_I2C_POLLED
-      stm32l4_i2c_traceevent(priv, I2CEVENT_ITBUFEN, 0);
-      stm32l4_i2c_enableinterrupts(priv);
-#endif
-    }
-
-  /* More bytes to read */
-  else if (STATUS_RXNE(status))
-    {
-      /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
+      /* If more bytes in the current message */
 
       if (priv->dcnt > 0)
         {
           stm32l4_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
           /* No interrupts or context switches may occur in the following
-           * sequence.  Otherwise, additional bytes may be sent by the
-           * device.
+           * sequence.  Otherwise, additional bytes may be received.
            */
 
 #ifdef CONFIG_I2C_POLLED
-          irqstate_t flags = enter_critical_section();
+          irqstate_t state = enter_critical_section();
 #endif
           /* Receive a byte */
 
-          *priv->ptr++ = (uint8_t) stm32l4_i2c_getreg32(priv, STM32L4_I2C_RXDR_OFFSET);
+          *priv->ptr = stm32l4_i2c_getreg(priv, STM32L4_I2C_RXDR_OFFSET);
 
-          /* Disable acknowledge when last byte is to be received */
+          i2cinfo("RXNE: Read Data 0x%02x\n", *priv->ptr);
+
+          /* Advance buffer to the next byte in the message */
+
+          priv->ptr++;
+
+          /* Signal byte received */
 
           priv->dcnt--;
-          if (priv->dcnt == 1)
-            {
-              /* autoend? */
-            }
 
 #ifdef CONFIG_I2C_POLLED
-          leave_critical_section(flags);
+          leave_critical_section(state);
 #endif
         }
+      else
+        {
+          /* Unsupported state */
+
+          stm32l4_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
+          status = stm32l4_i2c_getreg(priv, STM32L4_I2C_ISR_OFFSET);
+          i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, status 0x%08x\n",
+                 priv->dcnt, status);
+
+          /* Set signals that will terminate ISR and wake waiting thread */
+
+          priv->dcnt = -1;
+          priv->msgc = 0;
+        }
+
+      i2cinfo("RXNE: EXIT  dcnt = %i msgc = %i status 0x%08x\n",
+              priv->dcnt, priv->msgc, status);
     }
 
-  /* Do we have more bytes to send, enable/disable buffer interrupts
-   * (these ISRs could be replaced by DMAs)
+  /* Transfer Complete (TC) State Handler
+   *
+   * This branch is only triggered when the TC interrupt occurs.  This
+   * interrupt will only fire when:
+   *
+   * I2C_CR1->TCIE = 1 (Transfer Complete Interrupts Enabled)
+   * I2C_CR2->RELOAD = 0 (Reload Mode Disabled)
+   * I2C_CR2->AUTOEND = 0 (Autoend Mode Disabled, i.e. Software End Mode)
+   *
+   * This event indicates that the number of bytes initially defined
+   * in NBYTES, meaning, the number of bytes in the current message (priv->dcnt)
+   * has been successfully transmitted or received.
+   *
+   * When the TC interrupt occurs we have two choices to clear it and move
+   * on, regardless of the transfer direction:
+   *
+   *    - if more messages follow, perform a repeated START if required
+   *      and then fall through to transmit or receive the next message.
+   *
+   *    - if no messages follow, perform a STOP and set flags needed to
+   *      exit the ISR.
+   *
+   * The fact that the hardware must either RESTART or STOP when a TC
+   * event occurs explains why, when messages must be sent back to back
+   * (i.e. without a restart by specifying the I2C_M_NORESTART flag),
+   * RELOAD mode must be enabled and TCR event(s) must be generated
+   * instead.  See the TCR handler for more.
    */
 
-#ifndef CONFIG_I2C_POLLED
-  if (priv->dcnt > 0)
+  else if ((status & I2C_ISR_TC) != 0)
     {
-      stm32l4_i2c_traceevent(priv, I2CEVENT_REITBUFEN, 0);
-      stm32l4_i2c_enableinterrupts(priv);
-    }
-  else if ((priv->dcnt == 0) && (priv->msgc == 0))
-    {
-      stm32l4_i2c_traceevent(priv, I2CEVENT_DISITBUFEN, 0);
-      stm32l4_i2c_disableinterrupts(priv);
-    }
-#endif
+      i2cinfo("TC: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+              priv->dcnt, priv->msgc, status);
 
-  /* Was last byte received or sent?  Hmmm... the F2 and F4 seems to differ from
-   * the F1 in that BTF is not set after data is received (only RXNE).
-   */
+      /* Prior message has been sent successfully */
 
-  if (priv->dcnt <= 0 && STATUS_TC(status))
-    {
-      /* ??? */
+      priv->msgc--;
 
-      /* Do we need to terminate or restart after this byte?
-       * If there are more messages to send, then we may:
-       *
-       *  - continue with repeated start
-       *  - or just continue sending writeable part
-       *  - or we close down by sending the stop bit
-       */
+      /* if additional messages remain to be transmitted / received */
 
       if (priv->msgc > 0)
         {
-          if (priv->msgv->flags & I2C_M_NORESTART)
-            {
-              stm32l4_i2c_traceevent(priv, I2CEVENT_BTFNOSTART, priv->msgc);
-              priv->ptr   = priv->msgv->buffer;
-              priv->dcnt  = priv->msgv->length;
-              priv->flags = priv->msgv->flags;
-              priv->msgv++;
-              priv->msgc--;
+          i2cinfo("TC: RESTART: dcnt=%i, msgc=%i\n",
+          priv->dcnt, priv->msgc);
+          stm32l4_i2c_traceevent(priv, I2CEVENT_TC_NO_RESTART, priv->msgc);
 
-              /* Restart this ISR! */
+          /* Issue a START condition.
+           *
+           * Note that the first thing sendstart does is update the
+           * private structure "current message" data (ptr, dcnt, flags)
+           * so they all reflect the next message in the list so we
+           * update msgv before we get there.
+           */
 
-#ifndef CONFIG_I2C_POLLED
-              stm32l4_i2c_enableinterrupts(priv);
-#endif
-            }
-          else
-            {
-              stm32l4_i2c_traceevent(priv, I2CEVENT_BTFRESTART, priv->msgc);
-              /* ??? */
-              stm32l4_i2c_sendstart(priv);
-            }
+          /* Advance to the next message in the list */
+
+          priv->msgv++;
+
+          stm32l4_i2c_sendstart(priv);
+
         }
-      else if (priv->msgv)
+      else
         {
-          stm32l4_i2c_traceevent(priv, I2CEVENT_BTFSTOP, 0);
+          /* Issue a STOP conditions.
+           *
+           * No additional messages to transmit / receive, so the
+           * transfer is indeed complete.  Nothing else to do but
+           * issue a STOP and exit.
+           */
+
+          i2cinfo("TC: STOP: dcnt=%i msgc=%i\n",
+          priv->dcnt, priv->msgc);
+          stm32l4_i2c_traceevent(priv, I2CEVENT_STOP, priv->dcnt);
 
           stm32l4_i2c_sendstop(priv);
 
-          /* Is there a thread waiting for this event (there should be) */
+          /* Set signals that will terminate ISR and wake waiting thread */
 
-#ifndef CONFIG_I2C_POLLED
-          if (priv->intstate == INTSTATE_WAITING)
+          priv->dcnt = -1;
+          priv->msgc = 0;
+        }
+
+      i2cinfo("TC: EXIT dcnt = %i msgc = %i status 0x%08x\n",
+      priv->dcnt, priv->msgc, status);
+    }
+
+  /* Transfer Complete (Reload) State Handler
+   *
+   * This branch is only triggered when the TCR interrupt occurs.  This
+   * interrupt will only fire when:
+   *
+   *  I2C_CR1->TCIE = 1 (Transfer Complete Interrupts Enabled)
+   *  I2C_CR2->RELOAD = 1 (Reload Mode Active)
+   *  I2C_CR2->AUTOEND = 0 (Autoend Mode Disabled, i.e. Software End Mode)
+   *
+   * This is similar to the TC event except that TCR assumes that additional
+   * bytes are available to transfer.  So despite what its name might imply
+   * the transfer really isn't complete.
+   *
+   * There are two reasons RELOAD would be enabled:
+   *
+   *  1) We're trying to send a message with a payload greater than 255 bytes.
+   *  2) We're trying to send messages back to back, regardless of their
+   *     payload size, to avoid a RESTART (i.e. I2C_M_NORESTART flag is set).
+   *
+   * These conditions may be true simultaneously, as would be the case if
+   * we're sending multiple messages with payloads > 255 bytes.   So we only
+   * advance to the next message if we arrive here and dcnt is 0, meaning,
+   * we're finished with the last message and ready to move to the next.
+   *
+   * This logic supports the transfer of bytes limited only by the size of
+   * the i2c_msg_s length variable.  The SCL line will be stretched low
+   * until NBYTES is written with a non-zero value, allowing the transfer
+   * to continue.
+   *
+   * TODO: RESTARTs are required by the I2CSPEC if the next message transfer
+   * direction changes.  Right now the NORESTART flag overrides this behavior.
+   * May have to introduce logic to issue sendstart, assuming it's legal
+   * with the hardware in the TCR state.
+   */
+
+  else if ((status & I2C_ISR_TCR) != 0)
+    {
+      i2cinfo("TCR: ENTER dcnt = %i msgc = %i status 0x%08x\n",
+      priv->dcnt, priv->msgc, status);
+
+      /* If no more bytes in the current message to transfer */
+
+      if (priv->dcnt == 0)
+        {
+          /* Prior message has been sent successfully */
+
+          priv->msgc--;
+
+          /* Advance to the next message in the list */
+
+          priv->msgv++;
+
+          /* Update current message data */
+
+          priv->ptr    = priv->msgv->buffer;
+          priv->dcnt   = priv->msgv->length;
+          priv->flags  = priv->msgv->flags;
+
+          /* if this is the last message, disable reload so the
+           * TC event fires next time */
+
+          if (priv->msgc == 0)
             {
-              /* Yes.. inform the thread that the transfer is complete
-               * and wake it up.
+              i2cinfo("TCR: DISABLE RELOAD: dcnt = %i msgc = %i\n",
+              priv->dcnt, priv->msgc);
+
+              stm32l4_i2c_disable_reload(priv);
+            }
+
+          /* Update NBYTES with length of current message */
+
+          i2cinfo("TCR: NEXT MSG dcnt = %i msgc = %i\n",
+                  priv->dcnt, priv->msgc);
+
+          stm32l4_i2c_set_bytes_to_transfer(priv, priv->dcnt);
+        }
+      else
+        {
+          /* More bytes in the current (greater than 255 byte payload
+           * length) message, so set NBYTES according to the bytes
+           * remaining in the message, up to a maximum each cycle of 255.
+           */
+
+          if (priv->dcnt > 255)
+            {
+              i2cinfo("TCR: ENABLE RELOAD: NBYTES = 255 dcnt = %i msgc = %i\n",
+              priv->dcnt, priv->msgc);
+
+              /* More than 255 bytes to transfer so the RELOAD bit is
+               * set in order to generate a TCR event rather than a TC
+               * event when 255 bytes are successfully transferred.
+               * This forces us to return here to update NBYTES and
+               * continue until NBYTES is set to less than 255 bytes,
+               * at which point RELOAD will be disabled and a TC
+               * event will (eventually) follow to officially terminate
+               * the transfer.
                */
 
-              nxsem_post(&priv->sem_isr);
-              priv->intstate = INTSTATE_DONE;
+              stm32l4_i2c_enable_reload(priv);
+
+              stm32l4_i2c_set_bytes_to_transfer(priv, 255);
             }
-#else
-          priv->intstate = INTSTATE_DONE;
-#endif
+          else
+            {
+              /* Less than 255 bytes left to transfer, which means we'll
+               * complete the transfer of all bytes in the current message
+               * the next time around.
+               *
+               * This means we need to disable the RELOAD functionality so
+               * we receive a TC event next time which will allow us to
+               * either RESTART and continue sending the contents of the
+               * next message or send a STOP condition and exit the ISR.
+               */
 
-          /* Mark that we have stopped with this transaction */
+              i2cinfo("TCR: DISABLE RELOAD: NBYTES = dcnt = %i msgc = %i\n",
+                      priv->dcnt, priv->msgc);
 
-          priv->msgv = NULL;
+              stm32l4_i2c_disable_reload(priv);
+
+              stm32l4_i2c_set_bytes_to_transfer(priv, priv->dcnt);
+            }
+
+          i2cinfo("TCR: EXIT dcnt = %i msgc = %i status 0x%08x\n",
+          priv->dcnt, priv->msgc, status);
         }
     }
 
-  /* Check for errors, in which case, stop the transfer and return
-   * Note that in master reception mode AF becomes set on last byte
-   * since ACK is not returned. We should ignore this error.
+  /* Empty call handler
+   *
+   * Case to handle an empty call to the ISR where it has nothing to
+   * do and should exit immediately.
    */
 
-  if ((status & I2C_ISR_ERRORMASK) != 0)
+  else if (priv->dcnt == -1 && priv->msgc == 0)
     {
-      stm32l4_i2c_traceevent(priv, I2CEVENT_ERROR, 0);
+      status = stm32l4_i2c_getreg(priv, STM32L4_I2C_ISR_OFFSET);
+      i2cwarn("WARNING: EMPTY CALL: Stopping ISR: status 0x%08x\n", status);
+      stm32l4_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
+    }
 
-      /* Clear interrupt flags */
+  /* Error handler
+   *
+   * We get to this branch only if we can't handle the current state.
+   *
+   * This should not happen in interrupt based operation.
+   *
+   * This will happen during polled operation when the device is not
+   * in one of the supported states when polled.
+   */
 
-      stm32l4_i2c_clearinterrupts(priv);
+  else
+    {
+#ifdef CONFIG_I2C_POLLED
+      stm32l4_i2c_traceevent(priv, I2CEVENT_POLL_DEV_NOT_RDY, 0);
+#else
+      /* Read rest of the state */
 
-      /* Is there a thread waiting for this event (there should be) */
+      status = stm32l4_i2c_getreg(priv, STM32L4_I2C_ISR_OFFSET);
 
-#ifndef CONFIG_I2C_POLLED
+      i2cerr("ERROR: Invalid state detected, status 0x%08x\n", status);
+
+      /* set condition to terminate ISR and wake waiting thread */
+
+      priv->dcnt = -1;
+      priv->msgc = 0;
+      stm32l4_i2c_traceevent(priv, I2CEVENT_STATE_ERROR, 0);
+#endif
+    }
+
+  /* --------------------- End of I2C protocol handling -------------------- */
+
+  /* Message Handling
+   *
+   * Transmission of the whole message chain has been completed. We have to
+   * terminate the ISR and wake up stm32l4_i2c_process() that is waiting for
+   * the ISR cycle to handle the sending/receiving of the messages.
+   */
+
+  if (priv->dcnt == -1 && priv->msgc == 0)
+    {
+      i2cinfo("MSG: Shutting down I2C ISR\n");
+
+      stm32l4_i2c_traceevent(priv, I2CEVENT_ISR_SHUTDOWN, 0);
+
+      /* clear pointer to message content to reflect we are done
+       * with the current transaction */
+
+      priv->msgv = NULL;
+
+#ifdef CONFIG_I2C_POLLED
+      priv->intstate = INTSTATE_DONE;
+#else
+
+      status = stm32l4_i2c_getreg32(priv, STM32L4_I2C_ISR_OFFSET);
+
+      /* Update private state to capture NACK which is used in combination
+       * with the astart flag to report the type of NACK received (address
+       * vs data) to the upper layers once we exit the ISR.
+       *
+       * Note: We do this prior to clearing interrupts because the NACKF
+       * flag will naturally be cleared by that process.
+       */
+
+      priv->status = status;
+
+      /* Clear all interrupts */
+
+      stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
+
+      /* If a thread is waiting then inform it transfer is complete */
+
       if (priv->intstate == INTSTATE_WAITING)
         {
-          /* Yes.. inform the thread that the transfer is complete
-           * and wake it up.
-           */
-
           nxsem_post(&priv->sem_isr);
           priv->intstate = INTSTATE_DONE;
         }
-#else
-      priv->intstate = INTSTATE_DONE;
 #endif
     }
 
-  priv->status = status;
+  status = stm32l4_i2c_getreg32(priv, STM32L4_I2C_ISR_OFFSET);
+  i2cinfo("EXIT: status = 0x%08x\n", status);
+
   return OK;
 }
 
@@ -1539,7 +2288,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
  * Name: stm32l4_i2c_isr
  *
  * Description:
- *   I2C interrupt service routine
+ *   Common I2C interrupt service routine
  *
  ************************************************************************************/
 
@@ -1595,31 +2344,29 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
       return ERROR;
     }
 
-  /* Attach ISRs */
-
 #ifndef CONFIG_I2C_POLLED
+  /* Attach error and event interrupts to the ISRs */
+
   irq_attach(priv->config->ev_irq, stm32l4_i2c_isr, priv);
   irq_attach(priv->config->er_irq, stm32l4_i2c_isr, priv);
   up_enable_irq(priv->config->ev_irq);
   up_enable_irq(priv->config->er_irq);
 #endif
 
-  /* Set peripheral frequency, where it must be at least 2 MHz  for 100 kHz
-   * or 4 MHz for 400 kHz.  This also disables all I2C interrupts.
+  /* TODO:
+   * - Provide means to set peripheral clock source via RCC_CCIPR_I2CxSEL
+   * - Make clock source Kconfigurable (currently PCLK = 80 Mhz)
    */
 
   /* Force a frequency update */
 
   priv->frequency = 0;
-
-  /* TODO: i2c clock source RCC_CCIPR */
-  /* RCC_CCIPR I2CxSEL (default is PCLK clock) */
-
   stm32l4_i2c_setclock(priv, 100000);
 
-  /* Enable I2C */
+  /* Enable I2C peripheral */
 
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+
   return OK;
 }
 
@@ -1642,9 +2389,10 @@ static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv)
   stm32l4_unconfiggpio(priv->config->scl_pin);
   stm32l4_unconfiggpio(priv->config->sda_pin);
 
+#ifndef CONFIG_I2C_POLLED
+
   /* Disable and detach interrupts */
 
-#ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->config->ev_irq);
   up_disable_irq(priv->config->er_irq);
   irq_detach(priv->config->ev_irq);
@@ -1663,12 +2411,242 @@ static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv)
     {
       modifyreg32(STM32L4_RCC_APB1ENR1, priv->config->clk_bit, 0);
     }
+
   return OK;
 }
 
 /************************************************************************************
- * Device Driver Operations
+ * Name: stm32l4_i2c_process
+ *
+ * Description:
+ *   Common I2C transfer logic
+ *
+ *   Initiates a master mode transaction on the I2C bus to transfer the provided
+ *   messages to and from the slave devices.
+ *
  ************************************************************************************/
+
+static int stm32l4_i2c_process(FAR struct i2c_master_s *dev,
+                               FAR struct i2c_msg_s *msgs, int count)
+{
+  struct stm32l4_i2c_inst_s     *inst = (struct stm32l4_i2c_inst_s *)dev;
+  FAR struct stm32l4_i2c_priv_s *priv = inst->priv;
+  uint32_t    status = 0;
+  uint32_t    cr1;
+  uint32_t    cr2;
+  int         errval = 0;
+  int         waitrc = 0;
+
+  ASSERT(count);
+
+  /* Wait for any STOP in progress */
+
+  stm32l4_i2c_sem_waitstop(priv);
+
+  /* Clear any pending error interrupts */
+
+  stm32l4_i2c_clearinterrupts(priv);
+
+  /* Old transfers are done */
+
+  priv->msgv = msgs;
+  priv->msgc = count;
+
+  /* Reset I2C trace logic */
+
+  stm32l4_i2c_tracereset(priv);
+
+  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
+
+  stm32l4_i2c_setclock(priv, msgs->frequency);
+
+  /* Trigger start condition, then the process moves into the ISR.  I2C
+   * interrupts will be enabled within stm32l4_i2c_waitdone().
+   */
+
+  priv->status = 0;
+
+#ifndef CONFIG_I2C_POLLED
+  /* Enable transmit and receive interrupts here so when we send the start
+   * condition below the ISR will fire if the data was sent and some
+   * response from the slave received.  All other interrupts relevant to
+   * our needs are enabled in stm32l4_i2c_sem_waitdone() below.
+   */
+
+  stm32l4_i2c_enableinterrupts(priv);
+#endif
+
+  /* Trigger START condition generation, which also sends the slave address
+   * with read/write flag and the data in the first message
+   */
+
+  stm32l4_i2c_sendstart(priv);
+
+  /* Wait for the ISR to tell us that the transfer is complete by attempting
+   * to grab the semaphore that is initially locked by the ISR.  If the ISR
+   * does not release the lock so we can obtain it here prior to the end of
+   * the timeout period waitdone returns error and we report a timeout.
+   */
+
+  waitrc = stm32l4_i2c_sem_waitdone(priv);
+
+  cr1 = stm32l4_i2c_getreg32(priv, STM32L4_I2C_CR1_OFFSET);
+  cr2 = stm32l4_i2c_getreg32(priv, STM32L4_I2C_CR2_OFFSET);
+#if !defined(CONFIG_DEBUG_I2C)
+  UNUSED(cr1);
+  UNUSED(cr2);
+#endif
+
+  /* Status after a normal / good exit is usually 0x00000001, meaning the TXE
+   * bit is set.  That occurs as a result of the I2C_TXDR register being
+   * empty, and it naturally will be after the last byte is transmitted.
+   * This bit is cleared when we attempt communications again and re-enable
+   * the peripheral.  The priv->status field can hold additional information
+   * like a NACK, so we reset the status field to include that information.
+   */
+
+  status = stm32l4_i2c_getstatus(priv);
+
+  /* The priv->status field can hold additional information like a NACK
+   * event so we include that information.
+   */
+
+  status = priv->status & 0xffffffff;
+
+  if (waitrc < 0)
+    {
+      /* Connection timed out */
+
+      errval = ETIMEDOUT;
+      i2cerr("ERROR: Waitdone timed out CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
+             cr1, cr2,status);
+    }
+  else
+    {
+      i2cinfo("Waitdone success: CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
+             cr1, cr2,status );
+    }
+
+  UNUSED(cr1);
+  UNUSED(cr2);
+
+  i2cinfo("priv->status: 0x%08x\n", priv->status);
+
+  /* Check for error status conditions */
+
+  if ((status & (I2C_INT_BERR |
+                 I2C_INT_ARLO |
+                 I2C_INT_OVR |
+                 I2C_INT_PECERR |
+                 I2C_INT_TIMEOUT |
+                 I2C_INT_NACK)) != 0)
+
+    {
+      /* one or more errors in the mask are present */
+
+      if (status & I2C_INT_BERR)
+        {
+          /* Bus Error, ignore it because of errata (revision A,Z) */
+
+          i2cerr("ERROR: I2C Bus Error\n");
+
+          /* errval = EIO; */
+        }
+      else if (status & I2C_INT_ARLO)
+        {
+          /* Arbitration Lost (master mode) */
+
+          i2cerr("ERROR: I2C Arbitration Lost\n");
+          errval = EAGAIN;
+        }
+
+      else if (status & I2C_INT_OVR)
+        {
+          /* Overrun/Underrun */
+
+          i2cerr("ERROR: I2C Overrun/Underrun\n");
+          errval = EIO;
+        }
+      else if (status & I2C_INT_PECERR)
+        {
+      /* PEC Error in reception (SMBus Only) */
+
+          i2cerr("ERROR: I2C PEC Error\n");
+          errval = EPROTO;
+        }
+      else if (status & I2C_INT_TIMEOUT)
+        {
+          /* Timeout or Tlow Error (SMBus Only) */
+
+          i2cerr("ERROR: I2C Timeout / Tlow Error\n");
+          errval = ETIME;
+        }
+      else if (status & I2C_INT_NACK)
+        {
+          /* NACK Received, flag as "communication error on send" */
+
+          if (priv->astart == TRUE)
+            {
+              i2cwarn("WARNING: I2C Address NACK\n");
+              errval = EADDRNOTAVAIL;
+            }
+          else
+            {
+              i2cwarn("WARNING: I2C Data NACK\n");
+              errval = ECOMM;
+            }
+        }
+      else
+        {
+          /* Unrecognized error */
+
+          i2cerr("ERROR: I2C Unrecognized Error");
+          errval = EINTR;
+        }
+    }
+
+  /* This is not an error, but should not happen.  The BUSY signal can be
+   * present if devices on the bus are in an odd state and need to be reset.
+   * NOTE:  We will only see this busy indication if stm32l4_i2c_sem_waitdone()
+   * fails above;  Otherwise it is cleared.
+   */
+
+  else if ((status & I2C_ISR_BUSY) != 0)
+    {
+      /* I2C Bus Busy
+       *
+       * This is a status condition rather than an error.
+       *
+       * We will only see this busy indication if stm32l4_i2c_sem_waitdone()
+       * fails above;  Otherwise it is cleared by the hardware when the ISR
+       * wraps up the transfer with a STOP condition.
+       */
+
+      uint32_t start = clock_systimer();
+      uint32_t timeout = USEC2TICK(USEC_PER_SEC/priv->frequency) + 1;
+
+      status = stm32l4_i2c_getstatus(priv);
+
+      while(status & I2C_ISR_BUSY)
+        {
+          if((clock_systimer() - start) > timeout)
+            {
+              i2cerr("ERROR: I2C Bus busy");
+              errval = EBUSY;
+              break;
+            }
+
+          status = stm32l4_i2c_getstatus(priv);
+        }
+    }
+
+  /* Dump the trace result */
+
+  stm32l4_i2c_tracedump(priv);
+  stm32l4_i2c_sem_post(dev);
+
+  return -errval;
+}
 
 /************************************************************************************
  * Name: stm32l4_i2c_transfer
@@ -1681,195 +2659,22 @@ static int stm32l4_i2c_deinit(FAR struct stm32l4_i2c_priv_s *priv)
 static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                               int count)
 {
-  FAR struct stm32l4_i2c_priv_s *priv = (struct stm32l4_i2c_priv_s *)dev;
-  uint32_t status = 0;
-  int ret = OK;
-
-  DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
-
-  /* Ensure that address or flags don't change meanwhile */
-
-  stm32l4_i2c_sem_wait(priv);
-
-  /* Wait for any STOP in progress. */
-
-  stm32l4_i2c_sem_waitstop(priv);
-
-  /* Clear any pending error interrupts */
-
-  stm32l4_i2c_clearinterrupts(priv);
-
-  /* "Note: When the STOP, START or PEC bit is set, the software must
-   *  not perform any write access to I2C_CR1 before this bit is
-   *  cleared by hardware. Otherwise there is a risk of setting a
-   *  second STOP, START or PEC request."  However, if the bits are
-   *  not cleared by hardware, then we will have to do that from hardware.
-   */
-
-  stm32l4_i2c_clrstart(priv);
-
-  /* Old transfers are done */
-
-  priv->msgv = msgs;
-  priv->msgc = count;
-
-  /* Reset I2C trace logic */
-
-  stm32l4_i2c_tracereset(priv);
-
-  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !)
-   * REVISIT: Note that the frequency is set only on the first message.
-   * This could be extended to support different transfer frequencies for
-   * each message segment.
-   */
-
-  stm32l4_i2c_setclock(priv, msgs->frequency);
-
-  /* Trigger start condition, then the process moves into the ISR.  I2C
-   * interrupts will be enabled within stm32l4_i2c_waitdone().
-   */
-
-  priv->status = 0;
-
-#ifndef CONFIG_I2C_POLLED
-  stm32l4_i2c_enableinterrupts(priv);
-#endif
-
-  stm32l4_i2c_sendstart(priv);
-
-  /* Wait for an ISR, if there was a timeout, fetch latest status to get
-   * the BUSY flag.
-   */
-
-  if (stm32l4_i2c_sem_waitdone(priv) < 0)
-    {
-      status = stm32l4_i2c_getstatus(priv);
-      ret = -ETIMEDOUT;
-
-      i2cerr("ERROR: Timed out: CR1: %08x status: %08x\n",
-             stm32l4_i2c_getreg32(priv, STM32L4_I2C_CR1_OFFSET), status);
-
-      /* "Note: When the STOP, START or PEC bit is set, the software must
-       *  not perform any write access to I2C_CR1 before this bit is
-       *  cleared by hardware. Otherwise there is a risk of setting a
-       *  second STOP, START or PEC request."
-       */
-
-      stm32l4_i2c_clrstart(priv);
-
-      /* Clear busy flag in case of timeout */
-
-      status = priv->status & 0xffff;
-    }
-  else
-    {
-      /* clear SR2 (BUSY flag) as we've done successfully */
-
-      status = priv->status & 0xffff;
-    }
-
-  status &= ~I2C_ISR_BUSY;
-#if 0
-  /* Refresh status */
-  do
-    {
-      status = stm32l4_i2c_getstatus(priv);
-    }
-  while (STATUS_BUSY(status));
-#endif
-
-  /* Check for error status conditions */
-
-  if ((status & I2C_ISR_ERRORMASK) != 0)
-    {
-      /* I2C_SR1_ERRORMASK is the 'OR' of the following individual bits: */
-
-      if (status & I2C_INT_BERR)
-        {
-          /* Bus Error */
-
-          ret = -EIO;
-        }
-      else if (status & I2C_INT_ARLO)
-        {
-          /* Arbitration Lost (master mode) */
-
-          ret = -EAGAIN;
-        }
-
-      /* TODO Acknowledge failure */
-
-      else if (status & I2C_INT_OVR)
-        {
-          /* Overrun/Underrun */
-
-          ret = -EIO;
-        }
-      else if (status & I2C_INT_PECERR)
-        {
-          /* PEC Error in reception */
-
-          ret = -EPROTO;
-        }
-      else if (status & I2C_INT_TIMEOUT)
-        {
-          /* Timeout or Tlow Error */
-
-          ret = -ETIME;
-        }
-
-      /* This is not an error and should never happen since SMBus is not
-       * enabled
-       */
-
-      else /* if (status & I2C_INT_ALERT) */
-        {
-          /* SMBus alert is an optional signal with an interrupt line for devices
-           * that want to trade their ability to master for a pin.
-           */
-
-          ret = -EINTR;
-        }
-    }
-
-  /* This is not an error, but should not happen.  The BUSY signal can hang,
-   * however, if there are unhealthy devices on the bus that need to be reset.
-   * NOTE:  We will only see this buy indication if stm32l4_i2c_sem_waitdone()
-   * fails above;  Otherwise it is cleared.
-   */
-
-  else if ((status & I2C_ISR_BUSY) != 0)
-    {
-      /* I2C Bus is for some reason busy */
-
-      ret = -EBUSY;
-    }
-
-  /* Dump the trace result */
-
-  stm32l4_i2c_tracedump(priv);
-  stm32l4_i2c_sem_post(priv);
-  return ret;
+  stm32l4_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
+  return stm32l4_i2c_process(dev, msgs, count);
 }
 
 /************************************************************************************
  * Name: stm32l4_i2c_reset
  *
  * Description:
- *   Perform an I2C bus reset in an attempt to break loose stuck I2C devices.
- *
- * Input Parameters:
- *   dev   - Device-specific state data
- *
- * Returned Value:
- *   Zero (OK) on success; negative value on failure.
+ *   Reset an I2C bus
  *
  ************************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int stm32l4_i2c_reset(FAR struct i2c_master_s * dev)
 {
-  FAR struct stm32l4_i2c_priv_s *priv = (struct stm32l4_i2c_priv_s *)dev;
+  struct stm32l4_i2c_priv_s * priv;
   unsigned int clock_count;
   unsigned int stretch_count;
   uint32_t scl_gpio;
@@ -1879,13 +2684,17 @@ static int stm32l4_i2c_reset(FAR struct i2c_master_s * dev)
 
   ASSERT(dev);
 
+  /* Get I2C private structure */
+
+  priv = ((struct stm32l4_i2c_inst_s *)dev)->priv;
+
   /* Our caller must own a ref */
 
   ASSERT(priv->refs > 0);
 
   /* Lock out other clients */
 
-  stm32l4_i2c_sem_wait(priv);
+  stm32l4_i2c_sem_wait(dev);
 
   /* Save the current frequency */
 
@@ -1976,7 +2785,7 @@ out:
 
   /* Release the port for re-use by other clients */
 
-  stm32l4_i2c_sem_post(priv);
+  stm32l4_i2c_sem_post(dev);
   return ret;
 }
 #endif /* CONFIG_I2C_RESET */
@@ -1996,15 +2805,12 @@ out:
 FAR struct i2c_master_s *stm32l4_i2cbus_initialize(int port)
 {
   struct stm32l4_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  irqstate_t flags;
+  struct stm32l4_i2c_inst_s * inst = NULL;  /* device, single instance */
+  int irqs;
 
-#if STM32L4_PCLK1_FREQUENCY < 4000000
-#   warning STM32L4_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32L4_PCLK1_FREQUENCY < 2000000
-#   warning STM32L4_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
+#if STM32L4_PCLK1_FREQUENCY != 80000000
+#   warning STM32_I2C_INIT: Peripheral clock is PCLK and it must be 80mHz or the speed/timing calculations need to be redone.
+    return NULL;
 #endif
 
   /* Get I2C private structure */
@@ -2035,20 +2841,32 @@ FAR struct i2c_master_s *stm32l4_i2cbus_initialize(int port)
         return NULL;
     }
 
+  /* Allocate instance */
+
+  if (!(inst = kmm_malloc(sizeof(struct stm32l4_i2c_inst_s))))
+    {
+      return NULL;
+    }
+
+  /* Initialize instance */
+
+  inst->ops       = &stm32l4_i2c_ops;
+  inst->priv      = priv;
+
   /* Init private data for the first time, increment refs count,
    * power-up hardware and configure GPIOs.
    */
 
-  flags = enter_critical_section();
+  irqs = enter_critical_section();
 
   if ((volatile int)priv->refs++ == 0)
     {
-      stm32l4_i2c_sem_init(priv);
+      stm32l4_i2c_sem_init((struct i2c_master_s *)inst);
       stm32l4_i2c_init(priv);
     }
 
-  leave_critical_section(flags);
-  return (struct i2c_master_s *)priv;
+  leave_critical_section(irqs);
+  return (struct i2c_master_s *)inst;
 }
 
 /************************************************************************************
@@ -2061,35 +2879,37 @@ FAR struct i2c_master_s *stm32l4_i2cbus_initialize(int port)
 
 int stm32l4_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 {
-  FAR struct stm32l4_i2c_priv_s *priv = (struct stm32l4_i2c_priv_s *)dev;
-  irqstate_t flags;
+  int irqs;
 
   ASSERT(dev);
 
   /* Decrement refs and check for underflow */
 
-  if (priv->refs == 0)
+  if (((struct stm32l4_i2c_inst_s *)dev)->priv->refs == 0)
     {
       return ERROR;
     }
 
-  flags = enter_critical_section();
+  irqs = enter_critical_section();
 
-  if (--priv->refs)
+  if (--((struct stm32l4_i2c_inst_s *)dev)->priv->refs)
     {
-      leave_critical_section(flags);
+      leave_critical_section(irqs);
+      kmm_free(dev);
       return OK;
     }
 
-  leave_critical_section(flags);
+  leave_critical_section(irqs);
 
   /* Disable power and other HW resource (GPIO's) */
 
-  stm32l4_i2c_deinit(priv);
+  stm32l4_i2c_deinit(((struct stm32l4_i2c_inst_s *)dev)->priv);
 
   /* Release unused resources */
 
-  stm32l4_i2c_sem_destroy(priv);
+  stm32l4_i2c_sem_destroy((struct i2c_master_s *)dev);
+
+  kmm_free(dev);
   return OK;
 }
 

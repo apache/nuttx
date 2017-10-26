@@ -256,6 +256,13 @@
 #define GPIO_USART2_CTS   GPIO_USART2_CTS_1
 #define GPIO_USART2_RTS   GPIO_USART2_RTS_1
 
+/* USART6: (UEXT connector) */
+
+#define GPIO_USART6_RX    GPIO_USART6_RX_1
+#define GPIO_USART6_TX    GPIO_USART6_TX_1
+
+/* GPIO_USART6_CTS and GPIO_USART6_RTS aren't used for UEXT */
+
 /* CAN: */
 
 #define GPIO_CAN1_RX      GPIO_CAN1_RX_2    /* PB8 */

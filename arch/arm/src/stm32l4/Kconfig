@@ -3715,11 +3715,6 @@ config STM32L4_I2CTIMEOTICKS
 	default 500
 	depends on STM32L4_I2C && !STM32L4_I2C_DYNTIMEO
 
-config STM32L4_I2C_DUTY16_9
-	bool "Frequency with Tlow/Thigh = 16/9 "
-	default n
-	depends on STM32L4_I2C
-
 endmenu
 
 menu "SD/MMC Configuration"
