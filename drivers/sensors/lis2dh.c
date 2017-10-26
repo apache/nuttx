@@ -1048,8 +1048,8 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
       abs_st_y_value = abs(avg_y_with_st - avg_y_no_st);
       abs_st_z_value = abs(avg_z_with_st - avg_z_no_st);
 
-      dbg ("ST %d, ABSX: %d, ABSY: %d, ABSZ: %d\n",
-            i, abs_st_x_value, abs_st_y_value, abs_st_z_value);
+      syslog(LOG_NOTICE, "ST %d, ABSX: %d, ABSY: %d, ABSZ: %d\n",
+             i, abs_st_x_value, abs_st_y_value, abs_st_z_value);
 
       if (abs_st_x_value < SELFTEST_ABS_DIFF_MIN_12BIT ||
           abs_st_x_value > SELFTEST_ABS_DIFF_MAX_12BIT ||
@@ -1058,11 +1058,11 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
           abs_st_z_value < SELFTEST_ABS_DIFF_MIN_12BIT ||
           abs_st_z_value > SELFTEST_ABS_DIFF_MAX_12BIT)
         {
-          dbg("Selftest %d fail! Limits (%d <= value <= %d). "
-              "Results: x: %d, y: %d, z: %d ",
-              i,
-              SELFTEST_ABS_DIFF_MIN_12BIT, SELFTEST_ABS_DIFF_MAX_12BIT,
-              abs_st_x_value, abs_st_y_value, abs_st_z_value);
+          syslog(LOG_NOTICE, "Selftest %d fail! Limits (%d <= value <= %d). "
+                 "Results: x: %d, y: %d, z: %d ",
+                 i,
+                 SELFTEST_ABS_DIFF_MIN_12BIT, SELFTEST_ABS_DIFF_MAX_12BIT,
+                 abs_st_x_value, abs_st_y_value, abs_st_z_value);
           ret = -ERANGE;
           goto out;
         }
@@ -1078,18 +1078,21 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
 
   /* Both INT lines should be low */
 
-  if (priv->config->read_int1_pin() != 0)
+  if (priv->config->read_int1_pin != NULL)
     {
-      dbg("INT1 line is HIGH - expected LOW\n");
-      ret = -ENXIO;
-      goto out;
+      if (priv->config->read_int1_pin() != 0)
+        {
+          syslog(LOG_NOTICE, "INT1 line is HIGH - expected LOW\n");
+          ret = -ENXIO;
+          goto out;
+        }
     }
 
   if (priv->config->read_int2_pin)
     {
       if (priv->config->read_int2_pin() != 0)
         {
-          dbg("INT2 line is HIGH - expected LOW\n");
+          syslog(LOG_NOTICE, "INT2 line is HIGH - expected LOW\n");
           ret = -ENODEV;
           goto out;
         }
@@ -1107,7 +1110,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
       (lis2dh_write_register(priv, ST_LIS2DH_FIFO_CTRL_REG, 0x40) != OK) ||
       (lis2dh_write_register(priv, ST_LIS2DH_INT1_CFG_REG, 0x3f) != OK))
     {
-      dbg("Writing registers for INT line check failed\n");
+      syslog(LOG_NOTICE, "Writing registers for INT line check failed\n");
       ret = -EIO;
       goto out;
     }
@@ -1117,7 +1120,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
   if ((lis2dh_read_register(priv, ST_LIS2DH_INT1_SRC_REG) == ERROR) ||
       (lis2dh_read_register(priv, ST_LIS2DH_INT2_SRC_REG) == ERROR))
     {
-      dbg("Failed to clear INT1 / INT2 registers\n");
+      syslog(LOG_NOTICE, "Failed to clear INT1 / INT2 registers\n");
       ret = -EIO;
       goto out;
     }
@@ -1126,18 +1129,21 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
 
   /* Now INT1 should have been latched high and INT2 should be still low */
 
-  if (priv->config->read_int1_pin() != 1)
+  if (priv->config->read_int1_pin)
     {
-      dbg("INT1 line is LOW - expected HIGH\n");
-      ret = -ENXIO;
-      goto out;
+      if (priv->config->read_int1_pin() != 1)
+        {
+          dbg("INT1 line is LOW - expected HIGH\n");
+          ret = -ENXIO;
+          goto out;
+        }
     }
 
-  if (priv->config->read_int2_pin)
+  if (priv->config->read_int2_pin != NULL)
     {
       if (priv->config->read_int2_pin() != 0)
         {
-          dbg("INT2 line is HIGH - expected LOW\n");
+          syslog(LOG_NOTICE, "INT2 line is HIGH - expected LOW\n");
           ret = -ENODEV;
           goto out;
         }
@@ -1146,7 +1152,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
 
       if (lis2dh_write_register(priv, ST_LIS2DH_CTRL_REG6, 0x40) != OK)
         {
-          dbg("Failed to enable interrupt 1 on INT2 pin");
+          syslog(LOG_NOTICE, "Failed to enable interrupt 1 on INT2 pin");
           ret = -EIO;
           goto out;
         }
@@ -1155,7 +1161,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
 
       if (priv->config->read_int2_pin() != 1)
         {
-          dbg("INT2 line is LOW - expected HIGH\n");
+          syslog(LOG_NOTICE, "INT2 line is LOW - expected HIGH\n");
           ret = -ENODEV;
           goto out;
         }

@@ -1353,7 +1353,7 @@ o Network (net/, drivers/net)
                that calls accept().
   Status:      Open
   Priority:    Medium.  I have never heard of this problem being reported
-               before, so I suspect it might not be so prevalent as the one
+               before, so I suspect it might not be so prevalent as one
                might expect.
 
 o USB (drivers/usbdev, drivers/usbhost)
