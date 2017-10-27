@@ -1133,7 +1133,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
     {
       if (priv->config->read_int1_pin() != 1)
         {
-          dbg("INT1 line is LOW - expected HIGH\n");
+          syslog(LOG_NOTICE, "INT1 line is LOW - expected HIGH\n");
           ret = -ENXIO;
           goto out;
         }
