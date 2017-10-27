@@ -1486,7 +1486,7 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
           brp = (uint32_t)
             (((float) MCP2515_CANCLK_FREQUENCY /
-             ((float)(tseg1 + tseg2 + 1) * (float)bt->bt_baud)) - 1);
+             ((float)(tseg1 + tseg2 + 1) * (float)(2 * bt->bt_baud))) - 1);
 
           /* Save the value of the new bit timing register */
 
