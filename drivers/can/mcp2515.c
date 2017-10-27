@@ -76,11 +76,20 @@
 #define MCP2515_TSEG2    MCP2515_PHSEG2
 #define MCP2515_BRP      ((uint8_t)(((float) MCP2515_CANCLK_FREQUENCY / \
                          ((float)(MCP2515_TSEG1 + MCP2515_TSEG2 + 1) * \
-                         (float)CONFIG_MCP2515_BITRATE)) - 1))
+                         (float)(2 * CONFIG_MCP2515_BITRATE))) - 1))
 #define MCP2515_SJW      CONFIG_MCP2515_SJW
 
-#if MCP2515_TSEG1 > 16
-#  error Invalid MCP2515 TSEG1
+#if MCP2515_PROPSEG < 1
+#  error Invalid PROPSEG. It cannot be lower than 1
+#endif
+#if MCP2515_PROPSEG > 8
+#  error Invalid PROPSEG. It cannot be greater than 8
+#endif
+#if MCP2515_PHSEG1 < 1
+#  error Invalid PHSEG1. It cannot be lower than 1
+#endif
+#if MCP2515_PHSEG1 > 8
+#  error Invalid PHSEG1. It cannot be greater than 1
 #endif
 #if MCP2515_TSEG2 < 2
 #  error Invalid TSEG2. It cannot be lower than 2
@@ -1404,7 +1413,7 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
           mcp2515_readregs(priv, MCP2515_CNF1, &regval, 1);
           bt->bt_sjw   = ((regval & CNF1_SJW_MASK) >> CNF1_SJW_SHIFT) + 1;
-          brp          = ((regval & CNF1_BRP_MASK) >> CNF1_BRP_SHIFT) + 1;
+          brp          = (((regval & CNF1_BRP_MASK) >> CNF1_BRP_SHIFT) + 1) * 2;
 
           mcp2515_readregs(priv, MCP2515_CNF2, &regval, 1);
           bt->bt_tseg1 = ((regval & CNF2_PRSEG_MASK) >> CNF2_PRSEG_SHIFT) + 1;
