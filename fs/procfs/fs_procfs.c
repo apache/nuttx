@@ -132,9 +132,17 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "modules",       &module_operations,          PROCFS_FILE_TYPE   },
 #endif
 
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
   { "fs/blocks",     &mount_procfsoperations,     PROCFS_FILE_TYPE },
+#endif
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
   { "fs/mount",      &mount_procfsoperations,     PROCFS_FILE_TYPE },
+#endif
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
   { "fs/usage",      &mount_procfsoperations,     PROCFS_FILE_TYPE },
+#endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
   { "fs/smartfs**",  &smartfs_procfsoperations,   PROCFS_UNKOWN_TYPE },
@@ -787,13 +795,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
               strncpy(dir->fd_dir.d_name, name, level0->lastlen);
               dir->fd_dir.d_name[level0->lastlen] = '\0';
 
-              /* If the entry is a directory type OR if the reported name is
-               * only a sub-string of the entry (meaning that it contains
-               * '/'), then report this entry as a directory.
-               */
-
-              if (entry->type == PROCFS_DIR_TYPE ||
-                  level0->lastlen != strlen(name))
+              if (entry->type == PROCFS_DIR_TYPE)
                 {
                   dir->fd_dir.d_type = DTYPE_DIRECTORY;
                 }
