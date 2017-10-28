@@ -2107,7 +2107,7 @@ static uint32_t adc_regget(FAR struct stm32_adc_dev_s *dev)
 /****************************************************************************
  * Name: adc_regbufregister
  ****************************************************************************/
-
+#ifdef ADC_HAVE_DMA
 static int adc_regbufregister(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer, uint8_t len)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
@@ -2124,6 +2124,7 @@ static int adc_regbufregister(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: adc_inj_get

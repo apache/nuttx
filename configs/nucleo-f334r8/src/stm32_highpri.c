@@ -250,7 +250,9 @@ void dma1ch1_handler(void)
 
 int highpri_main(int argc, char *argv[])
 {
+#ifdef CONFIG_STM32_ADC1_DMA
   FAR struct hrtim_dev_s *hrtim;
+#endif
   FAR struct adc_dev_s *adc;
   FAR struct highpri_s *highpri;
   int ret;
