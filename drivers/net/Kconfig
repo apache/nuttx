@@ -204,14 +204,6 @@ endchoice # Work queue
 
 endif # NET_DM90x0
 
-config NET_CS89x0
-	bool "CS89x0 support"
-	default n
-	depends on EXPERIMENTAL
-	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
-		Under construction -- do not use
-
 menuconfig ENC28J60
 	bool "Microchip ENC28J60 support"
 	default n

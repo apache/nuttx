@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (17)  Network (net/, drivers/net)
+ (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -1078,14 +1078,6 @@ o Network (net/, drivers/net)
                operations on Unix domain sockets.
   Status:      Open
   Priority:    Low.
-
-  Title:       UNFINISHED CRYSTALLAN CS89X0 DRIVER
-  Description: I started coding a CrystalLan CS89x0 driver (drivers/net/cs89x0.c),
-               but never finished it.
-  Status:      Closed.
-  Priority:    Low.  I don't plan to finish the CS89x0 driver.  It is just
-               history now.  The unfinished coded is retained in case someone
-               needs to resurrect it.
 
   Title:       INTERFACES TO LEAVE/JOIN IGMP MULTICAST GROUP
   Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
