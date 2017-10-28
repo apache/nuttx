@@ -45,7 +45,8 @@ config FS_PROCFS_EXCLUDE_BLOCKS
 	default n
 	---help---
 		Causes the fs block usage information to be excluded from the procfs
-		system.
+		system.  This procfs file provides the text output for the NSH 'df'
+		command.
 
 config FS_PROCFS_EXCLUDE_MOUNT
 	bool "Exclude fs/mount information"
@@ -53,7 +54,8 @@ config FS_PROCFS_EXCLUDE_MOUNT
 	default n
 	---help---
 		Causes the mount point information to be excluded from the procfs
-		system.
+		system.  This procfs file provides the text output for the NSH 'mount'
+		command.
 
 config FS_PROCFS_EXCLUDE_USAGE
 	bool "Exclude fs/usage information"
@@ -61,7 +63,8 @@ config FS_PROCFS_EXCLUDE_USAGE
 	default n
 	---help---
 		Causes the fs usage information to be excluded from the procfs
-		system.
+		system.  This procfs file provides the text output for the NSH 'df -h'
+		command.
 
 config FS_PROCFS_EXCLUDE_UPTIME
 	bool "Exclude uptime"
