@@ -406,16 +406,6 @@ config ARCH_BOARD_MOTEINO_MEGA
 		on the Atmel AVR ATMega1284P MCU.  There is not much there yet and what is
 		there is untested due to tool-related issues.
 
-config ARCH_BOARD_MX1ADS
-	bool "Motorola MX1ADS development board"
-	depends on ARCH_CHIP_IMX1
-	select ARCH_HAVE_LEDS
-	---help---
-		This is a port to the Motorola MX1ADS development board.  That board
-		is based on the NXP/FreeScale i.MX1 processor.  The i.MX1 is an ARM920T.
-		STATUS:  This port is nearly code complete but was never fully
-		integrated due to tool-related issues.
-
 config ARCH_BOARD_NE64BADGE
 	bool "FEG NE64 /PoE Badge board"
 	depends on ARCH_CHIP_MCS92S12NEC64
@@ -1609,7 +1599,6 @@ config ARCH_BOARD
 	default "micropendous3"            if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                   if ARCH_BOARD_MIRTOO
 	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
-	default "mx1ads"                   if ARCH_BOARD_MX1ADS
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
@@ -1883,9 +1872,6 @@ source "configs/moteino-mega/Kconfig"
 endif
 if ARCH_BOARD_MOXA
 source "configs/moxa/Kconfig"
-endif
-if ARCH_BOARD_MX1ADS
-source "configs/mx1ads/Kconfig"
 endif
 if ARCH_BOARD_NE64BADGE
 source "configs/ne64badge/Kconfig"

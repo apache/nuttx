@@ -1697,8 +1697,6 @@ nuttx/
  |   |   `- README.txt
  |   |- moteino-mega/
  |   |   `- README.txt
- |   |- mx1ads/
- |   |   `- README.txt
  |   |- ne63badge/
  |   |   `- README.txt
  |   |- ntosd-dm320/

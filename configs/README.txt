@@ -368,12 +368,6 @@ configs/moteino-mega
 configs/moxa
   Moxa NP51x0 series of 2-port advanced RS-232/422/485 serial device servers.
 
-configs/mx1ads
-  This is a port to the Motorola MX1ADS development board.  That board
-  is based on the NXP/FreeScale i.MX1 processor.  The i.MX1 is an ARM920T.
-  STATUS:  This port is nearly code complete but was never fully
-  integrated due to tool-related issues.
-
 configs/ne64badge
   Future Electronics Group NE64 /PoE Badge board based on the
   MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
