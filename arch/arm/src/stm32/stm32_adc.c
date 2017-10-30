@@ -2250,7 +2250,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_STM32L15XX
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX)
 static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
                                           bool enable)
 {
@@ -2264,6 +2264,32 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
     }
 
   ainfo("STM32_ADC_CCR value: 0x%08x\n", getreg32(STM32_ADC_CCR));
+}
+
+#elif defined(CONFIG_STM32_STM32F10XX)
+static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
+                                          bool enable)
+{
+#if defined(CONFIG_STM32_ADC1)
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  /* TSVREF bit is only available in the STM32_ADC1_CR2 register. */
+
+  if (priv->intf == 1)
+    {
+      if (enable)
+        {
+          adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, 0, ADC_CR2_TSVREFE);
+        }
+      else
+        {
+          adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_TSVREFE, 0);
+        }
+    }
+
+  ainfo("STM32_ADC_CR2 value: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_CR2_OFFSET));
+#endif /* CONFIG_STM32_ADC1 */
 }
 #endif
 
@@ -2661,7 +2687,17 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         adc_startconv(priv, true);
         break;
 
-#ifdef CONFIG_STM32_STM32L15XX
+#if defined(CONFIG_STM32_STM32F10XX)
+      case IO_ENABLE_TEMPER_VOLT_CH:
+        adc_ioc_enable_tvref_register(dev, *(bool *)arg);
+        break;
+
+#elif defined(CONFIG_STM32_STM32F20XX)
+      case IO_ENABLE_TEMPER_VOLT_CH:
+        adc_ioc_enable_tvref_register(dev, *(bool *)arg);
+        break;
+
+#elif defined(CONFIG_STM32_STM32L15XX)
       case IO_ENABLE_TEMPER_VOLT_CH:
         adc_ioc_enable_tvref_register(dev, *(bool *)arg);
         break;

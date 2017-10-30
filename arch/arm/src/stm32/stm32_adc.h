@@ -1856,8 +1856,20 @@
  * Public Types
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_STM32L15XX
-typedef enum ADC_IO_CMDS
+#if defined(CONFIG_STM32_STM32F10XX)
+enum adc_io_cmds_e
+{
+  IO_ENABLE_TEMPER_VOLT_CH = 0,
+};
+
+#elif defined(CONFIG_STM32_STM32F20XX)
+enum adc_io_cmds_e
+{
+  IO_ENABLE_TEMPER_VOLT_CH = 0,
+};
+
+#elif defined(CONFIG_STM32_STM32L15XX)
+enum adc_io_cmds_e
 {
   IO_ENABLE_TEMPER_VOLT_CH = 0,
   IO_ENABLE_DISABLE_PDI,
@@ -1871,7 +1883,7 @@ typedef enum ADC_IO_CMDS
   IO_START_CONV,
   IO_STOP_ADC,
   IO_START_ADC,
-} ADC_IO_CMDS;
+};
 
 /* Channel and sample time pair */
 
