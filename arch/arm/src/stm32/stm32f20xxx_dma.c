@@ -877,7 +877,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
    * multiply.
    */
 
-  switch (ccr & STM32_DMA_SCR_MSIZE_MASK)
+  switch (ccr & DMA_SCR_MSIZE_MASK)
     {
       case DMA_SCR_MSIZE_8BITS:
         transfer_size = 1;
@@ -894,7 +894,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         mend = maddr + (count << 2) - 1;
         break;
 
-      default
+      default:
         return false;
     }
 
@@ -912,7 +912,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
        * is aligned to the burst length.
        */
 
-      switch (ccr & STM32_DMA_SCR_MBURST_MASK)
+      switch (ccr & DMA_SCR_MBURST_MASK)
         {
           case DMA_SCR_MBURST_SINGLE:
             burst_length = transfer_size;
