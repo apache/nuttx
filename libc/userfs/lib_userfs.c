@@ -163,7 +163,7 @@ static inline int userfs_open_dispatch(FAR struct userfs_info_s *info,
   if (nsent < 0)
     {
       ret = -errno;
-      ferr("ERROR: Send open response failed: %d\n", ret)
+      ferr("ERROR: Send open response failed: %d\n", ret);
       return ret;
     }
 
@@ -838,7 +838,7 @@ int userfs_run(FAR const char *mountpt,
                FAR void *volinfo, size_t mxwrite)
 {
   FAR struct userfs_info_s *info;
-  FAR struct userfs_config_s *config;
+  FAR struct userfs_config_s config;
   struct sockaddr_un server;
   unsigned int iolen;
   socklen_t addrlen;
@@ -861,17 +861,17 @@ int userfs_run(FAR const char *mountpt,
 
   /* Initialize the state structure */
 
-  info->userops  = userops;
-  info->volinfo  = volinfo;
-  info->iolen    = iolen;
-  info->mxwrite  = mxwrite;
+  info->userops   = userops;
+  info->volinfo   = volinfo;
+  info->iolen     = iolen;
+  info->mxwrite   = mxwrite;
 
   /* Create the UserFS configuration that will be provided as optional
    * data when the UserFS is mounted.
    */
 
-  config->mxwrite  = mxwrite;
-  config->instance = userfs_instance();
+  config.mxwrite  = mxwrite;
+  config.instance = userfs_instance();
 
   /* Mounts the user file system at the provided mount point path. */
 
@@ -879,7 +879,7 @@ int userfs_run(FAR const char *mountpt,
   if (ret < 0)
     {
       ret = -get_errno();
-      ferr("ERROR: mount() failued: %d\n", ret);
+      ferr("ERROR: mount() failed: %d\n", ret);
       goto errout_with_info;
     }
 
@@ -897,7 +897,7 @@ int userfs_run(FAR const char *mountpt,
 
   server.sun_family = AF_LOCAL;
   snprintf(server.sun_path, UNIX_PATH_MAX, USERFS_SERVER_FMT,
-           config->instance);
+           config.instance);
   server.sun_path[UNIX_PATH_MAX - 1] = '\0';
 
   addrlen = strlen(server.sun_path) + sizeof(sa_family_t) + 1;

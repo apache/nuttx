@@ -115,6 +115,9 @@
 #define USERFS_SERVER_FMT      "/dev/userver%u"
 #define USERFS_SERVER_MAXLEN   (18)
 
+#define USERFS_CLIENT_FMT      "/dev/uclient%u"
+#define USERFS_CLIENT_MAXLEN   (18)
+
 /* It looks like the maximum size of a request is 16 bytes.  We will allow a
  * little more for the maximum size of a request structure.
  */

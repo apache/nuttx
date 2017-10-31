@@ -1066,6 +1066,8 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 {
   FAR struct userfs_state_s *priv;
   FAR const struct userfs_config_s *config;
+  struct sockaddr_un client;
+  socklen_t addrlen;
   unsigned int iolen;
   int ret;
 
@@ -1110,10 +1112,32 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       goto errout_with_alloc;
     }
 
+  priv->psock.s_crefs = 1;
+
+  /* Bind the socket to the client address */
+
+  client.sun_family = AF_LOCAL;
+  snprintf(client.sun_path, UNIX_PATH_MAX, USERFS_CLIENT_FMT,
+           config->instance);
+  client.sun_path[UNIX_PATH_MAX - 1] = '\0';
+
+  addrlen = strlen(client.sun_path) + sizeof(sa_family_t) + 1;
+  ret = psock_bind(&priv->psock, (struct sockaddr*)&client, addrlen);
+  if (ret < 0)
+    {
+      ferr("ERROR: bind() failed: %d\n", ret);
+      goto errout_with_psock;
+    }
+
+  priv->psock.s_crefs = 1;
+
   /* Mounted! */
 
   *handle = (FAR void *)priv;
   return OK;
+
+errout_with_psock:
+  psock_close(&priv->psock);
 
 errout_with_alloc:
   kmm_free(priv);
