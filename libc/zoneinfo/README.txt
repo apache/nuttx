@@ -1,4 +1,4 @@
-apps/system/zoninfo/README.txt
+apps/system/zoneinfo/README.txt
 Author: Gregory Nutt <gnutt@nuttx.org>
 
 Directory Contents

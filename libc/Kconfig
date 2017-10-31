@@ -22,3 +22,4 @@ source libc/netdb/Kconfig
 source libc/misc/Kconfig
 source libc/wqueue/Kconfig
 source libc/hex2bin/Kconfig
+source libc/userfs/Kconfig

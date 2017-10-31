@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/serial/pty.h>
 
 #include <arch/board/board.h>
 
@@ -188,11 +189,19 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
-  /* Initialize the system logging device */
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+  /* Register the master pseudo-terminal multiplexor device */
 
-#ifdef CONFIG_SYSLOG_CHAR
-  syslog_initialize();
+  (void)ptmx_register();
 #endif
+
+  /* Early initialization of the system logging device.  Some SYSLOG channel
+   * can be initialized early in the initialization sequence because they
+   * depend on only minimal OS initialization.
+   */
+
+  syslog_initialize(SYSLOG_INIT_EARLY);
+
 #ifdef CONFIG_RAMLOG_SYSLOG
   ramlog_sysloginit();
 #endif

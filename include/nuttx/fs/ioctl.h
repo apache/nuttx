@@ -149,6 +149,11 @@
 #define FIONSPACE       _FIOC(0x0007)     /* IN:  Location to return value (int *)
                                            * OUT: Free space in send queue.
                                            */
+#define FIONUSERFS      _FIOC(0x0008)     /* IN:  Pointer to struct usefs_config_s
+                                           *      holding userfs configuration.
+                                           * OUT: Instance number is returned on
+                                           *      success.
+                                           */
 
 /* NuttX file system ioctl definitions **************************************/
 

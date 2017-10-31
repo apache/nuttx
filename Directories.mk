@@ -131,7 +131,7 @@ else
 OTHERDIRS += audio
 endif
 
-ifeq ($(CONFIG_DRIVERS_WIRELESS),y)
+ifeq ($(CONFIG_WIRELESS),y)
 NONFSDIRS += wireless
 else
 OTHERDIRS += wireless

@@ -79,7 +79,7 @@
 
 #if defined(CONFIG_FS_NXFFS) || defined(CONFIG_FS_BINFS) || \
     defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
-    defined(CONFIG_FS_TMPFS)
+    defined(CONFIG_FS_TMPFS) || defined(CONFIG_FS_USERFS)
 #  define NONBDFS_SUPPORT
 #endif
 
@@ -139,6 +139,9 @@ extern const struct mountpt_operations binfs_operations;
 #ifdef CONFIG_FS_PROCFS
 extern const struct mountpt_operations procfs_operations;
 #endif
+#ifdef CONFIG_FS_USERFS
+extern const struct mountpt_operations userfs_operations;
+#endif
 #ifdef CONFIG_FS_HOSTFS
 extern const struct mountpt_operations hostfs_operations;
 #endif
@@ -159,6 +162,9 @@ static const struct fsmap_t g_nonbdfsmap[] =
 #endif
 #ifdef CONFIG_FS_PROCFS
     { "procfs", &procfs_operations },
+#endif
+#ifdef CONFIG_FS_USERFS
+    { "userfs", &userfs_operations },
 #endif
 #ifdef CONFIG_FS_HOSTFS
     { "hostfs", &hostfs_operations },

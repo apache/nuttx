@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/mount/fs_mount.c
+ * fs/userfs/userfs.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,117 +33,20 @@
  *
  ****************************************************************************/
 
+#ifndef __FS_USERFS_USERFS_H
+#define __FS_USERFS_USERFS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/statfs.h>
-
-#include "mount/mount.h"
-
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fs_gettype
- *
- * Description:
- *   Given the result of statfs(), return a string representing the type of
- *   the file system.
- *
- * Input Parameters:
- *   statbuf - The result of a previouis statbuf statfs on the file system.
- *
- * Returned Value:
- *   A reference to a string representing the type of the file system.
- *
- ****************************************************************************/
-
-FAR const char *fs_gettype(FAR struct statfs *statbuf)
-{
-  FAR const char *fstype;
-
-  /* Get the file system type */
-
-  switch (statbuf->f_type)
-    {
-#ifdef CONFIG_FS_FAT
-      case MSDOS_SUPER_MAGIC:
-        fstype = "vfat";
-        break;
-#endif
-
-#ifdef CONFIG_FS_ROMFS
-      case ROMFS_MAGIC:
-        fstype = "romfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_TMPFS
-      case TMPFS_MAGIC:
-        fstype = "tmpfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_BINFS
-      case BINFS_MAGIC:
-        fstype = "binfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_NXFFS
-      case NXFFS_MAGIC:
-        fstype = "nxffs";
-        break;
-#endif
-
-#ifdef CONFIG_NFS
-      case NFS_SUPER_MAGIC:
-        fstype = "nfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_SMARTFS
-      case SMARTFS_MAGIC:
-        fstype = "smartfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-      case PROCFS_MAGIC:
-        fstype = "procfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_UNIONFS
-      case UNIONFS_MAGIC:
-        fstype = "unionfs";
-        break;
-#endif
-
-#ifdef CONFIG_FS_HOSTFS
-      case HOSTFS_MAGIC:
-        fstype = "hostfs";
-        break;
-#endif
-
 #ifdef CONFIG_FS_USERFS
-      case USERFS_MAGIC:
-        fstype = "userfs";
-        break;
-#endif
 
-      default:
-        fstype = "Unrecognized";
-        break;
-    }
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  return fstype;
-}
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
+#endif /* CONFIG_FS_USERFS */
+#endif /* __FS_USERFS_USERFS_H */

@@ -177,6 +177,17 @@ struct fs_unionfsdir_s
 };
 #endif
 
+#ifdef CONFIG_FS_USERFS
+/* The UserFS uses an opaque representation since the actual userspace representation
+ * of the directory state structure is unknowable.
+ */
+
+struct fs_userfsdir_s
+{
+  FAR void *fs_dir;                           /* Opaque pointer to UserFS DIR */
+};
+#endif
+
 #ifdef CONFIG_FS_HOSTFS
 /* HOSTFS provides mapping to directories on the host machine in the
  * sim environment.
@@ -184,7 +195,7 @@ struct fs_unionfsdir_s
 
 struct fs_hostfsdir_s
 {
-  FAR void *fs_dir;                           /* Opaque pointer to host DIR * */
+  FAR void *fs_dir;                           /* Opaque pointer to host DIR */
 };
 #endif
 
@@ -253,6 +264,9 @@ struct fs_dirent_s
 #endif
 #ifdef CONFIG_FS_UNIONFS
       struct fs_unionfsdir_s unionfs;
+#endif
+#ifdef CONFIG_FS_USERFS
+      struct fs_userfsdir_s  userfs;
 #endif
 #ifdef CONFIG_FS_HOSTFS
       struct fs_hostfsdir_s  hostfs;
