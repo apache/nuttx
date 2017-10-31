@@ -172,22 +172,29 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
     {
       /* The pin is an output */
 
-      regval  = stmpe811_getreg8(priv, STMPE811_GPIO_DIR);
-      regval &= ~pinmask;
-      stmpe811_putreg8(priv, STMPE811_GPIO_DIR, regval);
+      regval  = stmpe811_getreg8(priv, STMPE811_GPIO_DIR_REG);
+      regval |= pinmask;
+      stmpe811_putreg8(priv, STMPE811_GPIO_DIR_REG, regval);
 
       /* Set its initial output value */
-
-      stmpe811_gpiowrite(handle, pinconfig,
-                        (pinconfig & STMPE811_GPIO_VALUE) != STMPE811_GPIO_ZERO);
+      if ((pinconfig & STMPE811_GPIO_VALUE) != STMPE811_GPIO_ZERO)
+        {
+          /* Set the output valu(s)e by writing to the SET register */
+          stmpe811_putreg8(priv, STMPE811_GPIO_SETPIN, (1 << pin));
+        }
+      else
+        {
+          /* Clear the output value(s) by writing to the CLR register */
+          stmpe811_putreg8(priv, STMPE811_GPIO_CLRPIN, (1 << pin));
+        }
     }
   else
     {
       /* It is an input */
 
-      regval  = stmpe811_getreg8(priv, STMPE811_GPIO_DIR);
-      regval |= pinmask;
-      stmpe811_putreg8(priv, STMPE811_GPIO_DIR, regval);
+      regval  = stmpe811_getreg8(priv, STMPE811_GPIO_DIR_REG);
+      regval &= ~pinmask;
+      stmpe811_putreg8(priv, STMPE811_GPIO_DIR_REG, regval);
 
       /* Set up the falling edge detection */
 

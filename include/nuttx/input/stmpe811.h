@@ -190,7 +190,7 @@
 #define STMPE811_GPIO_SETPIN         0x10  /* GPIO set pin register */
 #define STMPE811_GPIO_CLRPIN         0x11  /* GPIO clear pin register */
 #define STMPE811_GPIO_MPSTA          0x12  /* GPIO monitor pin state register */
-#define STMPE811_GPIO_DIR            0x13  /* GPIO direction register */
+#define STMPE811_GPIO_DIR_REG        0x13  /* GPIO direction register */
 #define STMPE811_GPIO_ED             0x14  /* GPIO edge detect register */
 #define STMPE811_GPIO_RE             0x15  /* GPIO rising edge register */
 #define STMPE811_GPIO_FE             0x16  /* GPIO falling edge register */
