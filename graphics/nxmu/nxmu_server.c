@@ -346,7 +346,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
        /* Dispatch the message appropriately */
 
-       DEBUGASSERT(nbytes >= sizeof(struct nxsvrmsg_s));
+       DEBUGASSERT(nbytes >= sizeof(struct nxsvrmsg_releasebkgd_s));
        msg = (FAR struct nxsvrmsg_s *)buffer;
 
        ginfo("Received opcode=%d nbytes=%d\n", msg->msgid, nbytes);

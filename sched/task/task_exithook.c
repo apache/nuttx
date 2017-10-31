@@ -215,7 +215,6 @@ static inline void task_exitstatus(FAR struct task_group_s *group, int status)
       /* No.. Find the exit status entry for this task in the parent TCB */
 
       child = group_findchild(group, getpid());
-      DEBUGASSERT(child);
       if (child)
         {
 #ifndef HAVE_GROUP_MEMBERS
@@ -260,7 +259,6 @@ static inline void task_groupexit(FAR struct task_group_s *group)
       /* No.. Find the exit status entry for this task in the parent TCB */
 
       child = group_findchild(group, getpid());
-      DEBUGASSERT(child);
       if (child)
         {
           /* Mark that all members of the child task group has exited */
