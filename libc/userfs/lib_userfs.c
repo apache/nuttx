@@ -177,6 +177,7 @@ static inline int userfs_close_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_close_request_s *req, size_t reqlen)
 {
   struct userfs_close_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -193,9 +194,10 @@ static inline int userfs_close_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_CLOSE;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_close_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_close_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_read_dispatch(FAR struct userfs_info_s *info,
@@ -204,6 +206,7 @@ static inline int userfs_read_dispatch(FAR struct userfs_info_s *info,
   FAR struct userfs_read_response_s *resp;
   size_t readlen;
   size_t resplen;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -230,9 +233,10 @@ static inline int userfs_read_dispatch(FAR struct userfs_info_s *info,
 
   resp->resp = USERFS_RESP_READ;
   resplen    = SIZEOF_USERFS_READ_RESPONSE_S(resp->nread);
-  return sendto(info->sockfd, resp, resplen, 0,
-                (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, resp, resplen, 0,
+                 (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_write_dispatch(FAR struct userfs_info_s *info,
@@ -241,6 +245,7 @@ static inline int userfs_write_dispatch(FAR struct userfs_info_s *info,
   struct userfs_write_response_s resp;
   size_t writelen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -270,15 +275,17 @@ static inline int userfs_write_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_WRITE;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_write_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_write_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_seek_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_seek_request_s *req, size_t reqlen)
 {
   struct userfs_seek_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -296,15 +303,17 @@ static inline int userfs_seek_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_SEEK;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_seek_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_seek_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_ioctl_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_ioctl_request_s *req, size_t reqlen)
 {
   struct userfs_ioctl_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -322,15 +331,17 @@ static inline int userfs_ioctl_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_IOCTL;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_ioctl_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_ioctl_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_sync_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_sync_request_s *req, size_t reqlen)
 {
   struct userfs_sync_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -347,15 +358,17 @@ static inline int userfs_sync_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_SYNC;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_sync_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_sync_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_dup_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_dup_request_s *req, size_t reqlen)
 {
   struct userfs_dup_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -372,15 +385,17 @@ static inline int userfs_dup_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_DUP;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_dup_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_dup_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_fstat_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_fstat_request_s *req, size_t reqlen)
 {
   struct userfs_fstat_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -397,9 +412,10 @@ static inline int userfs_fstat_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_FSTAT;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_fstat_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_fstat_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_opendir_dispatch(FAR struct userfs_info_s *info,
@@ -408,6 +424,7 @@ static inline int userfs_opendir_dispatch(FAR struct userfs_info_s *info,
   struct userfs_opendir_response_s resp;
   int pathlen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -436,15 +453,17 @@ static inline int userfs_opendir_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_OPENDIR;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_opendir_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_opendir_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_closedir_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_closedir_request_s *req, size_t reqlen)
 {
   struct userfs_closedir_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -461,15 +480,17 @@ static inline int userfs_closedir_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_CLOSEDIR;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_open_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_open_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_readdir_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_readdir_request_s *req, size_t reqlen)
 {
   struct userfs_readdir_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -486,15 +507,17 @@ static inline int userfs_readdir_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_READDIR;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_readdir_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_readdir_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_rewinddir_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_rewinddir_request_s *req, size_t reqlen)
 {
   struct userfs_rewinddir_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -511,15 +534,17 @@ static inline int userfs_rewinddir_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_REWINDDIR;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_rewinddir_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_rewinddir_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_statfs_dispatch(FAR struct userfs_info_s *info,
                    FAR struct userfs_statfs_request_s *req, size_t reqlen)
 {
   struct userfs_statfs_response_s resp;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -536,9 +561,10 @@ static inline int userfs_statfs_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_STATFS;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_statfs_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_statfs_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_unlink_dispatch(FAR struct userfs_info_s *info,
@@ -547,6 +573,7 @@ static inline int userfs_unlink_dispatch(FAR struct userfs_info_s *info,
   struct userfs_unlink_response_s resp;
   int pathlen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -575,9 +602,10 @@ static inline int userfs_unlink_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_UNLINK;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_unlink_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_unlink_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_mkdir_dispatch(FAR struct userfs_info_s *info,
@@ -586,6 +614,7 @@ static inline int userfs_mkdir_dispatch(FAR struct userfs_info_s *info,
   struct userfs_mkdir_response_s resp;
   int pathlen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -614,9 +643,10 @@ static inline int userfs_mkdir_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_MKDIR;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_mkdir_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_mkdir_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_rmdir_dispatch(FAR struct userfs_info_s *info,
@@ -625,6 +655,7 @@ static inline int userfs_rmdir_dispatch(FAR struct userfs_info_s *info,
   struct userfs_rmdir_response_s resp;
   int pathlen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -653,9 +684,10 @@ static inline int userfs_rmdir_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_RMDIR;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_rmdir_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_rmdir_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_rename_dispatch(FAR struct userfs_info_s *info,
@@ -667,6 +699,7 @@ static inline int userfs_rename_dispatch(FAR struct userfs_info_s *info,
   int oldpathlen;
   int newpathlen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -706,9 +739,10 @@ static inline int userfs_rename_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_RENAME;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_rename_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_rename_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_stat_dispatch(FAR struct userfs_info_s *info,
@@ -717,6 +751,7 @@ static inline int userfs_stat_dispatch(FAR struct userfs_info_s *info,
   struct userfs_stat_response_s resp;
   int pathlen;
   size_t expected;
+  ssize_t nsent;
 
   /* Verify the request size */
 
@@ -745,9 +780,10 @@ static inline int userfs_stat_dispatch(FAR struct userfs_info_s *info,
   /* Send the response */
 
   resp.resp = USERFS_RESP_STAT;
-  return sendto(info->sockfd, &resp, sizeof(struct userfs_stat_response_s),
-                0, (FAR struct sockaddr *)&info->client,
-                sizeof(struct sockaddr_un));
+  nsent = sendto(info->sockfd, &resp, sizeof(struct userfs_stat_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_un));
+  return nsent < 0 ? nsent : OK;
 }
 
 static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
