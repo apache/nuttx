@@ -60,8 +60,8 @@
  ****************************************************************************/
 
 /* Each client is assigned a unique ID using the g_nxcid counter.  That
- * counter increments as each new counter is created and is* protected for
- * thread safefy with g_nxlibsem.  Note that these are the only global values
+ * counter increments as each new counter is created and is protected for
+ * thread safety with g_nxlibsem.  Note that these are the only global values
  * in the NX implementation.  This is because the client ID must be unique
  * even across all server instances.
  *
