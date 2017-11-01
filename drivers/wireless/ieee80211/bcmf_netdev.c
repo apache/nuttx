@@ -83,10 +83,10 @@
 
 #  if defined(CONFIG_IEEE80211_BROADCOM_HPWORK)
 #    define BCMFWORK HPWORK
-#  elif defined(CONFIG_IEEE80211_BROADCOM_HLWORK)
+#  elif defined(CONFIG_IEEE80211_BROADCOM_LPWORK)
 #    define BCMFWORK LPWORK
 #  else
-#    error Neither CONFIG_IEEE80211_BROADCOM_HPWORK nor CONFIG_IEEE80211_BROADCOM_HLWORK defined
+#    error Neither CONFIG_IEEE80211_BROADCOM_HPWORK nor CONFIG_IEEE80211_BROADCOM_LPWORK defined
 #  endif
 #endif
 
@@ -926,7 +926,7 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
   mac[0] = 0x33;
   mac[1] = 0x33;
 
-  dev    = &priv->dev;
+  dev    = &priv->bc_dev;
   tmp16  = dev->d_ipv6addr[6];
   mac[2] = 0xff;
   mac[3] = tmp16 >> 8;
@@ -1122,7 +1122,7 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 
   priv->bc_txpoll        = wd_create();   /* Create periodic poll timer */
 
-  DEBUGASSERT(priv->bc_txpoll != NULL && priv->bc_txtimeout != NULL);
+  DEBUGASSERT(priv->bc_txpoll != NULL);
 
   /* Initialize network stack interface buffer */
 

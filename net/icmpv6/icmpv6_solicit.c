@@ -46,6 +46,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ethernet.h>
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"

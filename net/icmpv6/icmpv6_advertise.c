@@ -53,6 +53,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/icmpv6.h>
+#include <nuttx/net/ethernet.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
