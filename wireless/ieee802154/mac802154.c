@@ -57,7 +57,6 @@
 #include <nuttx/mm/iob.h>
 
 #include "mac802154.h"
-#include "mac802154_notif.h"
 #include "mac802154_internal.h"
 #include "mac802154_assoc.h"
 #include "mac802154_scan.h"
@@ -100,6 +99,8 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
 static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                                     FAR struct ieee802154_data_ind_s *ind);
 
+static void mac802154_notify_worker(FAR void *arg);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -122,6 +123,7 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
   sq_init(&priv->gts_queue);
   sq_init(&priv->indirect_queue);
   sq_init(&priv->dataind_queue);
+  sq_init(&priv->primitive_queue);
 
   /* Initialize the tx descriptor allocation pool */
 
@@ -132,20 +134,15 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
     }
 
   nxsem_init(&priv->txdesc_sem, 0, CONFIG_MAC802154_NTXDESC);
-
-  /* Initialize the notifcation allocation pool */
-
-  mac802154_notifpool_init(priv);
 }
 
 /****************************************************************************
  * Name: mac802154_txdesc_pool
  *
  * Description:
- *   This function allocates a tx descriptor and the dependent notification (data
- *   confirmation) from the free list. The notification and tx descriptor will
- *   be freed seperately, both by the MAC layer either directly, or through
- *   mac802154_notif_free in the case of the notification.
+ *   This function allocates a tx descriptor and the dependent primitive (data
+ *   confirmation) from the free list. The primitive and tx descriptor must be
+ *   freed seperately.
  *
  * Assumptions:
  *   priv MAC struct is locked when calling.
@@ -162,7 +159,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
                            bool allow_interrupt)
 {
   int ret;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
 
   /* Try and take a count from the semaphore.  If this succeeds, we have
    * "reserved" the structure, but still need to unlink it from the free list.
@@ -213,27 +210,16 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
     }
 
   /* We have now successfully allocated the tx descriptor.  Now we need to allocate
-   * the notification for the data confirmation that gets passed along with the
+   * the primitive for the data confirmation that gets passed along with the
    * tx descriptor. These are allocated together, but not freed together.
    */
 
-  ret = mac802154_notif_alloc(priv, &notif, allow_interrupt);
-  if (ret < 0)
-    {
-      /* The mac802154_notif_alloc function follows the same rules as this
-       * function.  If it returns -EINTR, the MAC layer is already released
-       */
-
-      /* We need to free the txdesc */
-
-      mac802154_txdesc_free(priv, *txdesc);
-      return -EINTR;
-    }
+  primitive = ieee802154_primitive_allocate();
 
   (*txdesc)->purgetime = 0;
   (*txdesc)->retrycount = priv->maxretries;
 
-  (*txdesc)->conf = &notif->u.dataconf;
+  (*txdesc)->conf = &primitive->u.dataconf;
   return OK;
 }
 
@@ -354,6 +340,126 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
   /* Save a reference of the tx descriptor */
 
   priv->cmd_desc = txdesc;
+}
+
+/****************************************************************************
+ * Name: mac802154_notify
+ *
+ * Description:
+ *   Queue the primitive in the queue and queue work on the LPWORK
+ *   queue if is not already scheduled.
+ *
+ * Assumptions:
+ *    Called with the MAC locked
+ *
+ ****************************************************************************/
+
+void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
+                      FAR struct ieee802154_primitive_s *primitive)
+{
+  sq_addlast((FAR sq_entry_t *)primitive, &priv->primitive_queue);
+
+  if (work_available(&priv->notifwork))
+    {
+      work_queue(LPWORK, &priv->notifwork, mac802154_notify_worker,
+                 (FAR void *)priv, 0);
+    }
+}
+
+/****************************************************************************
+ * Name: mac802154_notify_worker
+ *
+ * Description:
+ *    Pop each primitive off the queue and call the registered
+ *    callbacks.  There is special logic for handling ieee802154_data_ind_s.
+ *
+ ****************************************************************************/
+
+static void mac802154_notify_worker(FAR void *arg)
+{
+  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
+  FAR struct mac802154_maccb_s *cb;
+  FAR struct ieee802154_primitive_s *primitive;
+  int ret;
+
+
+  mac802154_lock(priv, false);
+  primitive =
+    (FAR struct ieee802154_primitive_s *)sq_remfirst(&priv->primitive_queue);
+  mac802154_unlock(priv);
+
+  while (primitive != NULL)
+    {
+      /* Data indications are a special case since the frame can only be passed to
+       * one place. The return value of the notify call is used to accept or reject
+       * the primitive. In the case of the data indication, there can only be one
+       * accept. Callbacks are stored in order of there receiver priority ordered
+       * when the callbacks are bound in mac802154_bind().
+       */
+
+      if (primitive->type == IEEE802154_PRIMITIVE_IND_DATA)
+        {
+          bool dispose = true;
+
+          primitive->nclients = 1;
+
+          for (cb = priv->cb; cb != NULL; cb = cb->flink)
+            {
+              if (cb->notify != NULL)
+                {
+                  ret = cb->notify(cb, primitive);
+                  if (ret >= 0)
+                    {
+                      /* The receiver accepted and disposed of the frame and it's
+                       * meta-data. We are done.
+                       */
+
+                      dispose = false;
+                      break;
+                    }
+                }
+            }
+
+          if (dispose)
+            {
+              iob_free(primitive->u.dataind.frame);
+              ieee802154_primitive_free(primitive);
+            }
+        }
+      else
+        {
+          /* Set the number of clients count so that the primitive resources will be
+           * preserved until all clients are finished with it.
+           */
+
+          primitive->nclients = priv->nclients;
+
+          /* Try to notify every registered MAC client */
+
+          for (cb = priv->cb; cb != NULL; cb = cb->flink)
+            {
+              if (cb->notify != NULL)
+                {
+                  ret = cb->notify(cb, primitive);
+                  if (ret <= 0)
+                    {
+                      ieee802154_primitive_free(primitive);
+                    }
+                }
+              else
+                {
+                  ieee802154_primitive_free(primitive);
+                }
+            }
+        }
+
+      /* Get the next primitive then loop */
+
+      mac802154_lock(priv, false);
+      primitive =
+        (FAR struct ieee802154_primitive_s *)sq_remfirst(&priv->primitive_queue);
+      mac802154_unlock(priv);
+    }
 }
 
 /****************************************************************************
@@ -579,7 +685,7 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
 
   if (work_available(&priv->purge_work))
     {
-      work_queue(MAC802154_WORK, &priv->purge_work, mac802154_purge_worker,
+      work_queue(HPWORK, &priv->purge_work, mac802154_purge_worker,
                 (FAR void *)priv, ticks);
     }
 }
@@ -635,8 +741,7 @@ static void mac802154_purge_worker(FAR void *arg)
         /* Free the IOB, the notification, and the tx descriptor */
 
         iob_free(txdesc->frame);
-        mac802154_notif_free_locked(priv,
-          (FAR struct ieee802154_notif_s *)txdesc->conf);
+        ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)txdesc->conf);
         mac802154_txdesc_free(priv, txdesc);
         priv->beaconupdate = true;
 
@@ -646,7 +751,7 @@ static void mac802154_purge_worker(FAR void *arg)
       {
         /* Reschedule the transaction for the next timeout */
 
-        work_queue(MAC802154_WORK, &priv->purge_work, mac802154_purge_worker,
+        work_queue(HPWORK, &priv->purge_work, mac802154_purge_worker,
                    (FAR void *)priv, txdesc->purgetime - clock_systimer());
         break;
       }
@@ -740,7 +845,7 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
 
   if (work_available(&priv->tx_work))
     {
-      work_queue(MAC802154_WORK, &priv->tx_work, mac802154_txdone_worker,
+      work_queue(HPWORK, &priv->tx_work, mac802154_txdone_worker,
                  (FAR void *)priv, 0);
     }
 }
@@ -760,7 +865,7 @@ static void mac802154_txdone_worker(FAR void *arg)
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_txdesc_s *txdesc;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
 
   /* Get exclusive access to the driver structure.  We don't care about any
    * signals so don't allow interruptions
@@ -781,7 +886,7 @@ static void mac802154_txdone_worker(FAR void *arg)
        * notification structure to make it easier to use.
        */
 
-      notif =(FAR struct ieee802154_notif_s *)txdesc->conf;
+      primitive =(FAR struct ieee802154_primitive_s *)txdesc->conf;
 
       wlinfo("Tx status: %s\n", IEEE802154_STATUS_STRING[txdesc->conf->status]);
 
@@ -789,13 +894,8 @@ static void mac802154_txdone_worker(FAR void *arg)
         {
           case IEEE802154_FRAME_DATA:
             {
-              notif->notiftype = IEEE802154_NOTIFY_CONF_DATA;
-
-              /* Release the MAC, call the callback, get exclusive access again */
-
-              mac802154_unlock(priv)
-              mac802154_notify(priv, notif);
-              mac802154_lock(priv, false);
+              primitive->type = IEEE802154_PRIMITIVE_CONF_DATA;
+              mac802154_notify(priv, primitive);
             }
             break;
 
@@ -858,7 +958,7 @@ static void mac802154_txdone_worker(FAR void *arg)
                     break;
 
                   default:
-                    mac802154_notif_free_locked(priv, notif);
+                    ieee802154_primitive_free(primitive);
                     break;
                 }
             }
@@ -866,7 +966,7 @@ static void mac802154_txdone_worker(FAR void *arg)
 
           default:
             {
-              mac802154_notif_free_locked(priv, notif);
+              ieee802154_primitive_free(primitive);
             }
             break;
         }
@@ -922,7 +1022,7 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
 
   if (work_available(&priv->rx_work))
     {
-      work_queue(MAC802154_WORK, &priv->rx_work, mac802154_rxframe_worker,
+      work_queue(HPWORK, &priv->rx_work, mac802154_rxframe_worker,
                  (FAR void *)priv, 0);
     }
 }
@@ -956,7 +1056,10 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
       mac802154_lock(priv, false);
 
-      /* Pop the iob from the head of the frame list for processing */
+      /* Pop the data indication from the head of the frame list for processing
+       * Note: dataind_queue contains ieee802154_primitive_s which is safe to
+       * cast directly to a data indication.
+       */
 
       ind = (FAR struct ieee802154_data_ind_s *)sq_remfirst(&priv->dataind_queue);
 
@@ -1040,6 +1143,16 @@ static void mac802154_rxframe_worker(FAR void *arg)
             }
         }
 
+      /* If the MAC is in promiscuous mode, just pass everything to the next layer
+       * assuming it is data
+       */
+
+      if (priv->promisc)
+        {
+          mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
+          continue;
+        }
+
       ftype = (*frame_ctrl & IEEE802154_FRAMECTRL_FTYPE) >>
               IEEE802154_FRAMECTRL_SHIFT_FTYPE;
 
@@ -1073,7 +1186,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
                     break;
 
                   case IEEE802154_CMD_DISASSOC_NOT:
-                    wlinfo("Disassoc notif received\n");
+                    wlinfo("Disassoc primitive received\n");
                     break;
 
                   case IEEE802154_CMD_DATA_REQ:
@@ -1082,11 +1195,11 @@ static void mac802154_rxframe_worker(FAR void *arg)
                     break;
 
                   case IEEE802154_CMD_PANID_CONF_NOT:
-                    wlinfo("PAN ID Conflict notif received\n");
+                    wlinfo("PAN ID Conflict primitive received\n");
                     break;
 
                   case IEEE802154_CMD_ORPHAN_NOT:
-                    wlinfo("Orphan notif received\n");
+                    wlinfo("Orphan primitive received\n");
                     break;
 
                   case IEEE802154_CMD_BEACON_REQ:
@@ -1104,7 +1217,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 
               /* Free the data indication struct from the pool */
 
-              ieee802154_ind_free(ind);
+              ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
             }
             break;
 
@@ -1112,7 +1225,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
             {
               wlinfo("Beacon frame received. BSN: 0x%02X\n", ind->dsn);
               mac802154_rxbeaconframe(priv, ind);
-              ieee802154_ind_free(ind);
+              ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
             }
             break;
 
@@ -1123,7 +1236,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
                */
 
               wlinfo("ACK received\n");
-              ieee802154_ind_free(ind);
+              ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
             }
             break;
         }
@@ -1142,7 +1255,7 @@ static void mac802154_rxframe_worker(FAR void *arg)
 static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
                                   FAR struct ieee802154_data_ind_s *ind)
 {
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
 
   /* Get exclusive access to the MAC */
 
@@ -1178,46 +1291,46 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
         {
           if (!IEEE802154_PANIDCMP(ind->dest.panid, priv->addr.panid))
             {
-              goto notify_with_lock;
+              mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
             }
 
           if (ind->dest.mode == IEEE802154_ADDRMODE_SHORT &&
               !IEEE802154_SADDRCMP(ind->dest.saddr, priv->addr.saddr))
             {
-              goto notify_with_lock;
+              mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
             }
           else if (ind->dest.mode == IEEE802154_ADDRMODE_EXTENDED &&
                    !IEEE802154_EADDRCMP(ind->dest.eaddr, priv->addr.eaddr))
             {
-              goto notify_with_lock;
+              mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
             }
           else
             {
-              goto notify_with_lock;
+              mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
             }
         }
 
       /* If this was our extracted data, the source addressing field can only
-        * be NONE if we are trying to extract data from the PAN coordinator.
-        * A PAN coordinator shouldn't be sending us a frame if it wasn't
-        * our extracted data. Therefore just assume if the address mode is set
-        * to NONE, we process it as our extracted frame
-        */
+       * be NONE if we are trying to extract data from the PAN coordinator.
+       * A PAN coordinator shouldn't be sending us a frame if it wasn't
+       * our extracted data. Therefore just assume if the address mode is set
+       * to NONE, we process it as our extracted frame
+       */
 
       if (ind->src.mode != priv->cmd_desc->destaddr.mode)
         {
-          goto notify_with_lock;
+          mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
         }
 
       if (ind->src.mode == IEEE802154_ADDRMODE_SHORT &&
           !IEEE802154_SADDRCMP(ind->src.saddr, priv->cmd_desc->destaddr.saddr))
         {
-          goto notify_with_lock;
+          mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
         }
       else if (ind->src.mode == IEEE802154_ADDRMODE_EXTENDED &&
                !IEEE802154_EADDRCMP(ind->src.eaddr, priv->cmd_desc->destaddr.eaddr))
         {
-          goto notify_with_lock;
+          mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
         }
 
       /* If we've gotten this far, the frame is our extracted data. Cancel the
@@ -1231,20 +1344,19 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
        * MLME-POLL.confirm primitive with a status of NO_DATA. [1] pg. 111
        */
 
-      mac802154_notif_alloc(priv, &notif, false);
+      primitive = ieee802154_primitive_allocate();
 
       if (priv->curr_op == MAC802154_OP_POLL)
         {
-          notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
+          primitive->type = IEEE802154_PRIMITIVE_CONF_POLL;
 
           if (ind->frame->io_offset == ind->frame->io_len)
             {
-              ieee802154_ind_free(ind);
-              notif->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
+              primitive->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
             }
           else
             {
-              notif->u.pollconf.status = IEEE802154_STATUS_SUCCESS;
+              primitive->u.pollconf.status = IEEE802154_STATUS_SUCCESS;
             }
         }
       else if (priv->curr_op == MAC802154_OP_ASSOC)
@@ -1253,8 +1365,8 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
            * association request, we assume it means there wasn't any data.
            */
 
-          notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
-          notif->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
+          primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
+          primitive->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
         }
 
       /* We are no longer performing the association operation */
@@ -1263,63 +1375,27 @@ static void mac802154_rxdataframe(FAR struct ieee802154_privmac_s *priv,
       priv->cmd_desc = NULL;
       mac802154_givesem(&priv->opsem);
 
-      /* Release the MAC */
+      /* Release the MAC and notify the next highest layer */
 
-      mac802154_unlock(priv)
-      mac802154_notify(priv, notif);
+      mac802154_notify(priv, primitive);
 
       /* If there was data, pass it along */
 
       if (ind->frame->io_len > ind->frame->io_offset)
         {
-          goto notify_without_lock;
+          mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
+        }
+      else
+        {
+          ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
         }
     }
   else
     {
-      FAR struct mac802154_maccb_s *cb;
-
-notify_with_lock:
-
-      mac802154_unlock(priv)
-
-notify_without_lock:
-
-      /* If there are registered MCPS callback receivers registered,
-       * then forward the frame in priority order.  If there are no
-       * registered receivers or if none of the receivers accept the
-       * data frame then drop the frame.
-        */
-
-      for (cb = priv->cb; cb != NULL; cb = cb->flink)
-        {
-          int ret;
-
-          /* Does this MAC client want frames? */
-
-          if (cb->rxframe != NULL)
-            {
-              /* Yes.. Offer this frame to the receiver */
-
-              ret = cb->rxframe(cb, ind);
-              if (ret >= 0)
-                {
-                  /* The receiver accepted and disposed of the frame and
-                   * its metadata.  We are done.
-                   */
-
-                  return;
-                }
-            }
-        }
-
-      /* We get here if the there are no registered receivers or if
-       * all of the registered receivers declined the frame.
-       * Free the data indication struct from the pool
-       */
-
-      ieee802154_ind_free(ind);
+      mac802154_notify(priv, (FAR struct ieee802154_primitive_s *)ind);
     }
+
+  mac802154_unlock(priv)
 }
 
 /****************************************************************************
@@ -1554,7 +1630,7 @@ static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
  *   Function called from the generic RX Frame worker to parse and handle the
  *   reception of a beacon frame.
  *
- * Assumptions: MAC is locked
+ * Assumptions: MAC is unlocked
  *
  ****************************************************************************/
 
@@ -1562,7 +1638,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                                     FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct ieee802154_txdesc_s *respdesc;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
   FAR struct ieee802154_beacon_ind_s *beacon;
   FAR struct iob_s *iob = ind->frame;
   uint8_t ngtsdesc;
@@ -1571,15 +1647,15 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
   bool pending_eaddr = false;
   int i;
 
-  /* Even though we may not use the notification, we use a notification to
-   * hold all the parsed beacon information. Freeing the notification is quick,
-   * so it's worth saving a copy (If you were to parse all the info in locally,
-   * you would have to copy the data over in the case that you actually need
-   * to notify the next highest layer)
+  /* Even though we may not use the primitive, we allocate one to hold all the
+   * parsed beacon information. Freeing the primitive is quick, so it's worth
+   * worth saving a copy (If you were to parse all the info in locally, you
+   * would have to copy the data over in the case that you actually need to
+   * notify the next highest layer)
    */
 
-  mac802154_notif_alloc(priv, &notif, false);
-  beacon = &notif->u.beaconind;
+  primitive = ieee802154_primitive_allocate();
+  beacon = &primitive->u.beaconind;
 
   /* Make sure there is another 2 bytes to process */
 
@@ -1731,6 +1807,8 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
   /* At this point, we have extracted all relevant info from the incoming frame */
 
+  mac802154_lock(priv, false);
+
   if (priv->curr_op == MAC802154_OP_SCAN)
     {
       /* Check to see if we already have a frame from this coordinator */
@@ -1750,7 +1828,8 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
           /* The beacon is the same as another, so discard it */
 
-          mac802154_notif_free_locked(priv, notif);
+          ieee802154_primitive_free(primitive);
+          mac802154_unlock(priv);
           return;
         }
 
@@ -1829,11 +1908,7 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
 
               if (beacon->payloadlength > 0)
                 {
-                  /* Unlock the MAC, notify, then lock again */
-
-                  mac802154_unlock(priv)
-                  mac802154_notify(priv, notif);
-                  mac802154_lock(priv, false);
+                  mac802154_notify(priv, primitive);
                 }
 
               /* If we have data pending for us, attempt to extract it. If for some
@@ -1881,12 +1956,13 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                   priv->radio->txnotify(priv->radio, false);
                 }
 
-                /* If there was a beacon payload, we used the notification, so
-                 * return here to make sure we don't free the notification.
+                /* If there was a beacon payload, we used the primitive, so
+                 * return here to make sure we don't free the primitive.
                  */
 
                 if (beacon->payloadlength > 0)
                   {
+                    mac802154_unlock(priv);
                     return;
                   }
             }
@@ -1897,22 +1973,20 @@ static void mac802154_rxbeaconframe(FAR struct ieee802154_privmac_s *priv,
                * by issuing the MLME-BEACON-NOTIFY.indication primitive. [1] pg. 38
                */
 
-              /* Unlock the MAC, notify, then lock again */
-
-              mac802154_unlock(priv)
-              mac802154_notify(priv, notif);
-              mac802154_lock(priv, false);
-              return; /* Return so that we don't free the notificaiton */
+              mac802154_notify(priv, primitive);
+              mac802154_unlock(priv);
+              return; /* Return so that we don't free the primitive */
             }
         }
     }
 
-  mac802154_notif_free_locked(priv, notif);
+  mac802154_unlock(priv);
+  ieee802154_primitive_free(primitive);
   return;
 
 errout:
   wlwarn("Received beacon with bad format\n");
-  mac802154_notif_free_locked(priv, notif);
+  ieee802154_primitive_free(primitive);
 }
 
 /****************************************************************************
@@ -1990,7 +2064,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 
   /* Initialize our various data pools */
 
-  ieee802154_indpool_initialize();
+  ieee802154_primitivepool_initialize();
   mac802154_resetqueues(mac);
 
   mac802154_req_reset((MACHANDLE)mac, true);

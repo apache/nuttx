@@ -441,11 +441,11 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
 
   /* Double check */
 
-  DEBUGASSERT(dev != NULL && dev->d_len > 0);
+  DEBUGASSERT(dev != NULL && dev->d_len > 0 && fwddev != NULL);
 
   ninfo("d_len %u\n", dev->d_len);
 
-  if (dev != NULL && dev->d_len > 0)
+  if (dev != NULL && dev->d_len > 0 && fwddev != NULL)
     {
 
       sixlowpan_dumpbuffer("Outgoing UDP packet",
@@ -472,7 +472,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)fwddev,
                                          ipv6udp->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {

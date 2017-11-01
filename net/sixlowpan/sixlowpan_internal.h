@@ -122,6 +122,7 @@
 
 #define REASS_POOL_PREALLOCATED 0
 #define REASS_POOL_DYNAMIC      1
+#define REASS_POOL_RADIO        2
 
 /* Debug ********************************************************************/
 

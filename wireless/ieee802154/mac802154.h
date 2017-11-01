@@ -68,12 +68,18 @@ struct mac802154_maccb_s
   FAR struct mac802154_maccb_s *flink;  /* Implements a singly linked list */
   uint8_t prio;                         /* RX frame callback priority */
 
-  /* Callback methods */
+  /* Callback for various MLME or MCPS service events.  Return value represents
+   * whether the callback accepts the primitive. >= 0 means the callback has
+   * accepted the primitive and is responsible for calling
+   * ieee802154_primitive_free(). In the case of DATA.indication primitive, only
+   * one callback can accept the frame. The callbacks are stored in order of
+   * receiver priority defined by the 'prio' field above. All other
+   * notifications are offered to all callbacks and all can accept and free
+   * separately since the primitive will not be freed until the nclients count
+   * reaches 0. */
 
-  CODE void (*notify)(FAR struct mac802154_maccb_s *maccb,
-                      FAR struct ieee802154_notif_s *notif);
-  CODE int (*rxframe)(FAR struct mac802154_maccb_s *maccb,
-                      FAR struct ieee802154_data_ind_s *ind);
+  CODE int (*notify)(FAR struct mac802154_maccb_s *maccb,
+                     FAR struct ieee802154_primitive_s *primitive);
 };
 
 /****************************************************************************
@@ -357,19 +363,6 @@ int mac802154_resp_associate(MACHANDLE mac,
 
 int mac802154_resp_orphan(MACHANDLE mac,
                           FAR struct ieee802154_orphan_resp_s *resp);
-
-/****************************************************************************
- * Name: mac802154_notif_free
- *
- * Description:
- *   When the MAC calls the registered callback, it passes a reference
- *   to a mac802154_notify_s structure.  This structure needs to be freed
- *   after the callback handler is done using it.
- *
- ****************************************************************************/
-
-void mac802154_notif_free(MACHANDLE mac,
-                          FAR struct ieee802154_notif_s *notif);
 
 #undef EXTERN
 #ifdef __cplusplus

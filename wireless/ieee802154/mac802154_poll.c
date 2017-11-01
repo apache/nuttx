@@ -189,9 +189,9 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
                                    FAR struct ieee802154_txdesc_s *txdesc)
 {
+  FAR struct ieee802154_primitive_s * primitive =
+    (FAR struct ieee802154_primitive_s *)txdesc->conf;
   enum ieee802154_status_e status;
-  FAR struct ieee802154_notif_s *notif =
-    (FAR struct ieee802154_notif_s *)txdesc->conf;
 
   /* If the data request failed to be sent, notify the next layer
    * that the poll has failed.
@@ -201,20 +201,20 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
    * pending at the coordinator. [1] pg. 43
    */
 
-  if (notif->u.dataconf.status != IEEE802154_STATUS_SUCCESS ||
+  if (txdesc->conf->status != IEEE802154_STATUS_SUCCESS ||
       txdesc->framepending == 0)
     {
-      if (notif->u.dataconf.status != IEEE802154_STATUS_SUCCESS)
+      if (txdesc->conf->status != IEEE802154_STATUS_SUCCESS)
         {
-          status = notif->u.dataconf.status;
+          status = txdesc->conf->status;
         }
       else
         {
           status = IEEE802154_STATUS_NO_DATA;
         }
 
-      notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
-      notif->u.pollconf.status = status;
+      primitive->type = IEEE802154_PRIMITIVE_CONF_POLL;
+      txdesc->conf->status = status;
 
       /* We are now done the operation, and can release the command */
 
@@ -222,11 +222,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       priv->cmd_desc = NULL;
       mac802154_givesem(&priv->opsem);
 
-      /* Release the MAC, call the callback, get exclusive access again */
-
-      mac802154_unlock(priv)
-      mac802154_notify(priv, notif);
-      mac802154_lock(priv, false);
+      mac802154_notify(priv, primitive);
     }
   else
     {
@@ -246,9 +242,9 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
       mac802154_timerstart(priv, priv->max_frame_waittime,
                            mac802154_polltimeout);
 
-      /* Deallocate the data conf notification as it is no longer needed. */
+      /* Deallocate the data conf primitive as it is no longer needed. */
 
-      mac802154_notif_free_locked(priv, notif);
+      ieee802154_primitive_free(primitive);
     }
 }
 
@@ -264,7 +260,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 void mac802154_polltimeout(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
 
   /* If there is work scheduled for the rxframe_worker, we want to reschedule
    * this work, so that we make sure if the frame we were waiting for was just
@@ -273,30 +269,23 @@ void mac802154_polltimeout(FAR void *arg)
 
   if (!work_available(&priv->rx_work))
     {
-      work_queue(MAC802154_WORK, &priv->timer_work, mac802154_polltimeout, priv, 0);
+      work_queue(HPWORK, &priv->timer_work, mac802154_polltimeout, priv, 0);
       return;
     }
 
   DEBUGASSERT(priv->curr_op == MAC802154_OP_POLL);
 
-  /* Allocate a notification struct to pass to the next highest layer.
-   * Don't allow EINTR to interrupt.
-   */
+  primitive = ieee802154_primitive_allocate();
+  primitive->type = IEEE802154_PRIMITIVE_CONF_POLL;
+  primitive->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
 
   mac802154_lock(priv, false);
-  mac802154_notif_alloc(priv, &notif, false);
 
   /* We are no longer performing the association operation */
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
   mac802154_givesem(&priv->opsem);
 
-  /* Release the MAC */
-
-  mac802154_unlock(priv)
-
-  notif->notiftype = IEEE802154_NOTIFY_CONF_POLL;
-  notif->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
-
-  mac802154_notify(priv, notif);
+  mac802154_notify(priv, primitive);
+  mac802154_unlock(priv);
 }

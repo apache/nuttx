@@ -756,6 +756,10 @@ struct ieee802154_frame_meta_s
 
 struct ieee802154_data_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t handle;                   /* Handle assoc. with MSDU */
 
   /* The time, in symbols, at which the data were transmitted */
@@ -806,7 +810,9 @@ struct ieee802154_data_conf_s
 
 struct ieee802154_data_ind_s
 {
-  FAR struct ieee802154_data_ind_s *flink;
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
 
   FAR struct iob_s *frame;
 
@@ -883,6 +889,10 @@ struct ieee802154_data_ind_s
 
 struct ieee802154_purge_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t msdu_handle;              /* Handle assoc. with MSDU */
 };
 
@@ -896,6 +906,10 @@ struct ieee802154_purge_req_s
 
 struct ieee802154_assoc_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t chan;  /* Channel number to attempt association */
   uint8_t chpage; /* Channel page to attempt association */
 
@@ -954,6 +968,10 @@ struct ieee802154_assoc_req_s
 
 struct ieee802154_assoc_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Address of device requesting association. Always in extended mode */
 
   uint8_t devaddr[IEEE802154_EADDRSIZE];
@@ -979,6 +997,10 @@ struct ieee802154_assoc_ind_s
 
 struct ieee802154_assoc_resp_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Address of device requesting association. Always in extended mode */
 
   uint8_t devaddr[IEEE802154_EADDRSIZE];
@@ -1009,6 +1031,10 @@ struct ieee802154_assoc_resp_s
 
 struct ieee802154_assoc_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Associated device address ALWAYS passed in short address mode. The
    * address will be IEEE802154_SADDR_UNSPEC if association was
    * unsuccessful.
@@ -1039,6 +1065,10 @@ struct ieee802154_assoc_conf_s
 
 struct ieee802154_disassoc_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Address of device to send disassociation notification */
 
   struct ieee802154_addr_s dev_addr;
@@ -1066,6 +1096,10 @@ struct ieee802154_disassoc_req_s
 
 struct ieee802154_disassoc_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Address of device requesting disassociation. Always extended mode */
 
   struct ieee802154_addr_s dev_addr;
@@ -1091,6 +1125,10 @@ struct ieee802154_disassoc_ind_s
 
 struct ieee802154_disassoc_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Status of the disassociation attempt */
 
   enum ieee802154_status_e status;
@@ -1114,6 +1152,10 @@ struct ieee802154_disassoc_conf_s
 
 struct ieee802154_beacon_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t bsn;        /* Beacon sequence number */
 
   /* PAN descriptor for the received beacon */
@@ -1137,6 +1179,10 @@ struct ieee802154_beacon_ind_s
 
 struct ieee802154_commstatus_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   struct ieee802154_addr_s src_addr;
   struct ieee802154_addr_s dest_addr;
   enum ieee802154_status_e status;
@@ -1160,6 +1206,10 @@ struct ieee802154_commstatus_ind_s
 
 struct ieee802154_gts_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   struct ieee802154_gts_info_s gts_info;
 
 #ifdef CONFIG_IEEE802154_SECURITY
@@ -1180,6 +1230,10 @@ struct ieee802154_gts_req_s
 
 struct ieee802154_gts_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   struct ieee802154_gts_info_s gts_info;
   enum ieee802154_status_e status;
 };
@@ -1195,6 +1249,10 @@ struct ieee802154_gts_conf_s
 
 struct ieee802154_gts_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint16_t dev_addr;
   struct ieee802154_gts_info_s gts_info;
 
@@ -1216,6 +1274,10 @@ struct ieee802154_gts_ind_s
 
 struct ieee802154_orphan_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t orphan_addr[8];
 
 #ifdef CONFIG_IEEE802154_SECURITY
@@ -1236,6 +1298,10 @@ struct ieee802154_orphan_ind_s
 
 struct ieee802154_orphan_resp_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t orphan_addr[8];
 
 #ifdef CONFIG_IEEE802154_SECURITY
@@ -1256,6 +1322,10 @@ struct ieee802154_orphan_resp_s
 
 struct ieee802154_reset_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   bool resetattr;
 };
 
@@ -1270,6 +1340,10 @@ struct ieee802154_reset_req_s
 
 struct ieee802154_rxenable_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   /* Number of symbols measured from the start of the superframe before the
    * receiver is to be enabled or disabled.
    */
@@ -1295,6 +1369,10 @@ struct ieee802154_rxenable_req_s
 
 struct ieee802154_rxenable_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_status_e status;
 };
 
@@ -1308,6 +1386,10 @@ struct ieee802154_rxenable_conf_s
 
 struct ieee802154_scan_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_scantype_e type;
   uint8_t duration;
   uint8_t chpage;
@@ -1331,6 +1413,10 @@ struct ieee802154_scan_req_s
 
 struct ieee802154_scan_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_status_e status;
   enum ieee802154_scantype_e type;
   uint8_t chpage;
@@ -1351,6 +1437,10 @@ struct ieee802154_scan_conf_s
 
 struct ieee802154_get_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_attr_e attr;
   union ieee802154_attr_u attrval;
 };
@@ -1371,6 +1461,10 @@ struct ieee802154_get_req_s
 
 struct ieee802154_set_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_attr_e attr;
   union ieee802154_attr_u attrval;
 };
@@ -1388,6 +1482,10 @@ struct ieee802154_set_req_s
 
 struct ieee802154_start_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t panid[IEEE802154_PANIDSIZE];
   uint8_t chan;
   uint8_t chpage;
@@ -1420,6 +1518,10 @@ struct ieee802154_start_req_s
 
 struct ieee802154_start_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_status_e status;
 };
 
@@ -1434,6 +1536,10 @@ struct ieee802154_start_conf_s
 
 struct ieee802154_sync_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   uint8_t ch_num;
   uint8_t ch_page;
   bool track_beacon;
@@ -1449,6 +1555,10 @@ struct ieee802154_sync_req_s
 
 struct ieee802154_syncloss_ind_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_status_e loss_reason;
   uint16_t pan_id;
   uint8_t ch_num;
@@ -1471,6 +1581,10 @@ struct ieee802154_syncloss_ind_s
 
 struct ieee802154_poll_req_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   struct ieee802154_addr_s coordaddr;
 
 #ifdef CONFIG_IEEE802154_SECURITY
@@ -1490,44 +1604,50 @@ struct ieee802154_poll_req_s
 
 struct ieee802154_poll_conf_s
 {
+  /* Each primitive must have a forward-link to a primitive to support lists */
+
+  FAR struct ieee802154_primitive_s *flink;
+
   enum ieee802154_status_e status;
 };
 
-/* MAC Service Notifications */
+/* MAC Service Primitives */
 
-enum ieee802154_notify_e
+enum ieee802154_primitive_e
 {
   /* MCPS Notifications */
 
-  IEEE802154_NOTIFY_CONF_DATA = 0x00,
+  IEEE802154_PRIMITIVE_CONF_DATA = 0x00,
+  IEEE802154_PRIMITIVE_IND_DATA,
 
   /* MLME Notifications */
 
-  IEEE802154_NOTIFY_CONF_ASSOC,
-  IEEE802154_NOTIFY_CONF_DISASSOC,
-  IEEE802154_NOTIFY_CONF_GTS,
-  IEEE802154_NOTIFY_CONF_RESET,
-  IEEE802154_NOTIFY_CONF_RXENABLE,
-  IEEE802154_NOTIFY_CONF_SCAN,
-  IEEE802154_NOTIFY_CONF_START,
-  IEEE802154_NOTIFY_CONF_POLL,
+  IEEE802154_PRIMITIVE_CONF_ASSOC,
+  IEEE802154_PRIMITIVE_CONF_DISASSOC,
+  IEEE802154_PRIMITIVE_CONF_GTS,
+  IEEE802154_PRIMITIVE_CONF_RESET,
+  IEEE802154_PRIMITIVE_CONF_RXENABLE,
+  IEEE802154_PRIMITIVE_CONF_SCAN,
+  IEEE802154_PRIMITIVE_CONF_START,
+  IEEE802154_PRIMITIVE_CONF_POLL,
 
-  IEEE802154_NOTIFY_IND_ASSOC,
-  IEEE802154_NOTIFY_IND_DISASSOC,
-  IEEE802154_NOTIFY_IND_BEACONNOTIFY,
-  IEEE802154_NOTIFY_IND_GTS,
-  IEEE802154_NOTIFY_IND_ORPHAN,
-  IEEE802154_NOTIFY_IND_COMMSTATUS,
-  IEEE802154_NOTIFY_IND_SYNCLOSS
+  IEEE802154_PRIMITIVE_IND_ASSOC,
+  IEEE802154_PRIMITIVE_IND_DISASSOC,
+  IEEE802154_PRIMITIVE_IND_BEACONNOTIFY,
+  IEEE802154_PRIMITIVE_IND_GTS,
+  IEEE802154_PRIMITIVE_IND_ORPHAN,
+  IEEE802154_PRIMITIVE_IND_COMMSTATUS,
+  IEEE802154_PRIMITIVE_IND_SYNCLOSS
 };
 
-union ieee802154_notif_u
+union ieee802154_primitive_u
 {
-  /* MCPS Notifications */
+  /* MCPS Primitives */
 
-  struct ieee802154_data_conf_s        dataconf;
+  struct ieee802154_data_conf_s       dataconf;
+  struct ieee802154_data_ind_s        dataind;
 
-  /* MLME Notifications */
+  /* MLME Primitives */
 
   struct ieee802154_assoc_conf_s      assocconf;
   struct ieee802154_disassoc_conf_s   disassocconf;
@@ -1544,23 +1664,23 @@ union ieee802154_notif_u
   struct ieee802154_orphan_ind_s      orphanind;
   struct ieee802154_commstatus_ind_s  commstatusind;
   struct ieee802154_syncloss_ind_s    synclossind;
+
+  /* Foward link contained as first entry of all primitives */
+
+  FAR struct ieee802154_primitive_s *flink;
 };
 
-struct ieee802154_notif_s
+struct ieee802154_primitive_s
 {
   /* Must be first member so that we can interchange between the actual
-   * notification and this extended struct.
+   * primitive and this extended struct. Note, all frames also have the first
+   * entry as a forward link to a primitive so that primitives can be contained
+   * in lists.
    */
 
-  union ieee802154_notif_u u;
-  enum ieee802154_notify_e notiftype;
-
-  /* Support a singly linked list. For use by receivers. The MAC has it's own
-   * extended struct type with another forward link that the MAC uses internally
-   * to handle allocation and freeing.
-   */
-
-  FAR struct ieee802154_notif_s *flink;
+  union ieee802154_primitive_u u;
+  enum ieee802154_primitive_e type;
+  int nclients; /* Number of clients to call ieee802154_primitive_free before freed */
 };
 
 /* A pointer to this structure is passed as the argument of each IOCTL
@@ -1587,7 +1707,7 @@ union ieee802154_macarg_u
   /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
 
   uint8_t                          signo;       /* MAC802154IOC_NOTIFY_REGISTER */
-  struct ieee802154_notif_s        notif;       /* MAC802154IOC_GET_EVENT */
+  struct ieee802154_primitive_s    primitive;   /* MAC802154IOC_GET_EVENT */
   bool                             enable;      /* MAC802154IOC_ENABLE_EVENTS */
 };
 
@@ -1690,10 +1810,12 @@ int mac802154dev_register(MACHANDLE mac, int minor);
 int mac802154netdev_register(MACHANDLE mac);
 
 /****************************************************************************
- * Name: ieee802154_indpool_initialize
+ * Name: ieee802154_primitivepool_initialize
  *
  * Description:
- *   This function initializes the meta-data allocator.  This function must
+ *   This function initializes the primitive allocator. Primitives are defined
+ *   in the standard and are used to pass information between the MAC layer and
+ *   the next highest layer. They are a data type abstraction.  This function must
  *   be called early in the initialization sequence before any radios
  *   begin operation.
  *
@@ -1705,54 +1827,53 @@ int mac802154netdev_register(MACHANDLE mac);
  *
  ****************************************************************************/
 
-void ieee802154_indpool_initialize(void);
+void ieee802154_primitivepool_initialize(void);
 
 /****************************************************************************
- * Name: ieee802154_ind_allocate
+ * Name: ieee802154_primitive_allocate
  *
  * Description:
- *   The ieee802154_ind_allocate function will get a free meta-data
- *   structure for use by the IEEE 802.15.4 MAC.
+ *   The ieee802154_primitive_allocate function will get a free primitive
+ *   structure from the pool, for use with the IEEE 802.15.4 MAC.
  *
  *   Interrupt handling logic will first attempt to allocate from the
- *   g_indfree list.  If that list is empty, it will attempt to allocate
- *   from its reserve, g_indfree_irq.  If that list is empty, then the
+ *   g_primfree list.  If that list is empty, it will attempt to allocate
+ *   from its reserve, g_primfree_irq.  If that list is empty, then the
  *   allocation fails (NULL is returned).
  *
- *   Non-interrupt handler logic will attempt to allocate from g_indfree
- *   list.  If that the list is empty, then the meta-data structure will be
+ *   Non-interrupt handler logic will attempt to allocate from g_primfree
+ *   list.  If that the list is empty, then the primitive structure will be
  *   allocated from the dynamic memory pool.
  *
  * Inputs:
  *   None
  *
  * Return Value:
- *   A reference to the allocated msg structure.  All user fields in this
+ *   A reference to the allocated primitive structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  ****************************************************************************/
 
-FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void);
+FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void);
 
 /****************************************************************************
- * Name: ieee802154_ind_free
+ * Name: ieee802154_primitive_free
  *
  * Description:
- *   The ieee802154_ind_free function will return a meta-data structure to
- *   the free pool of  messages if it was a pre-allocated meta-data
- *   structure. If the meta-data structure was allocated dynamically it will
- *   be deallocated.
+ *   The ieee802154_primitive_free function will return a primitive structure to
+ *   the free pool if it was a pre-allocated primitive structure. If the primitive
+ *   was allocated dynamically it will be deallocated.
  *
  * Inputs:
- *   ind - meta-data structure to free
+ *   prim - primitive structure to free
  *
  * Return Value:
  *   None
  *
  ****************************************************************************/
 
-void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind);
+void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim);
 
 #undef EXTERN
 #ifdef __cplusplus

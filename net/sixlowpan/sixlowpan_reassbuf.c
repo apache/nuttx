@@ -439,7 +439,7 @@ void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass)
       reass->rb_flink = g_free_reass;
       g_free_reass    = reass;
     }
-  else
+  else if (reass->rb_pool == REASS_POOL_DYNAMIC)
     {
 #ifdef CONFIG_NET_6LOWPAN_REASS_STATIC
       DEBUGPANIC();
@@ -451,4 +451,8 @@ void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass)
       sched_kfree(reass);
 #endif
     }
+
+  /* If the reassembly buffer structure was provided by the driver, nothing
+   * needs to be freed.
+   */
 }

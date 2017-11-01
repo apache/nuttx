@@ -59,8 +59,6 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
 
-#include "mac802154_notif.h"
-
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 
@@ -73,33 +71,13 @@
  * is required.
  */
 
-#if !defined(CONFIG_SCHED_WORKQUEUE)
-#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-  /* Use the low priority work queue if possible */
-
-#  if defined(CONFIG_MAC802154_HPWORK)
-#    define MAC802154_WORK HPWORK
-#  elif defined(CONFIG_MAC802154_LPWORK)
-#    define MAC802154_WORK LPWORK
-#  else
-#    error Neither CONFIG_MAC802154_HPWORK nor CONFIG_MAC802154_LPWORK defined
-#  endif
-#endif
-
-#if !defined(CONFIG_MAC802154_NNOTIF) || CONFIG_MAC802154_NNOTIF <= 0
-#  undef CONFIG_MAC802154_NNOTIF
-#  define CONFIG_MAC802154_NNOTIF 6
+#if !defined(CONFIG_SCHED_HPWORK) || !defined(CONFIG_SCHED_LPWORK)
+#  error Both Low and High priority work queues are required for this driver
 #endif
 
 #if !defined(CONFIG_MAC802154_NTXDESC) || CONFIG_MAC802154_NTXDESC <= 0
 #  undef CONFIG_MAC802154_NTXDESC
-#  define CONFIG_MAC802154_NTXDESC 3
-#endif
-
-#if CONFIG_MAC802154_NTXDESC > CONFIG_MAC802154_NNOTIF
-#  error CONFIG_MAC802154_NNOTIF must be greater than CONFIG_MAC802154_NTXDESC
+#  define CONFIG_MAC802154_NTXDESC 5
 #endif
 
 #if !defined(CONFIG_IEEE802154_DEFAULT_EADDR)
@@ -182,14 +160,9 @@ struct ieee802154_privmac_s
 
   /******************* Fields related to notifications ************************/
 
-  /* Pre-allocated notifications to be passed to the registered callback.  These
-   * need to be freed by the application using mac802154_xxxxnotif_free when
-   * the callee layer is finished with it's use.
-   */
-
-  FAR struct mac802154_notif_s *notif_free;
-  struct mac802154_notif_s notif_pool[CONFIG_MAC802154_NNOTIF];
-  sem_t notif_sem;
+  sq_queue_t primitive_queue;     /* Queue of primitives to pass via notify()
+                                   * callback to registered receivers */
+  struct work_s notifwork;        /* For deferring notifications to LPWORK queue*/
 
   /******************* Tx descriptor queues and pools *************************/
 
@@ -356,19 +329,21 @@ struct ieee802154_privmac_s
  * Function Prototypes
  ****************************************************************************/
 
-int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
-                           FAR struct ieee802154_txdesc_s **txdesc,
-                           bool allow_interrupt);
+int  mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
+      FAR struct ieee802154_txdesc_s **txdesc, bool allow_interrupt);
 
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
-                             FAR struct ieee802154_txdesc_s *txdesc);
+      FAR struct ieee802154_txdesc_s *txdesc);
 
 void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
-                             FAR struct ieee802154_addr_s *coordaddr,
-                             enum ieee802154_addrmode_e srcmode,
-                             FAR struct ieee802154_txdesc_s *txdesc);
+      FAR struct ieee802154_addr_s *coordaddr,
+      enum ieee802154_addrmode_e srcmode,
+      FAR struct ieee802154_txdesc_s *txdesc);
 
 void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
+
+void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
+      FAR struct ieee802154_primitive_s *primitive);
 
 /****************************************************************************
  * Helper Macros/Inline Functions
@@ -546,7 +521,7 @@ void mac802154_updatebeacon(FAR struct ieee802154_privmac_s *priv);
 
 /* General helpers **********************************************************/
 
-#define mac802154_givesem(s) sem_post(s)
+#define mac802154_givesem(s) nxsem_post(s)
 
 static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
 {
@@ -682,7 +657,7 @@ static inline void mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 
   /* Schedule the work, converting the number of symbols to the number of CPU ticks */
 
-  work_queue(MAC802154_WORK, &priv->timer_work, worker, priv,
+  work_queue(HPWORK, &priv->timer_work, worker, priv,
              mac802154_symtoticks(priv, numsymbols));
 }
 
@@ -699,7 +674,7 @@ static inline void mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
 
 static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
-  work_cancel(MAC802154_WORK, &priv->timer_work);
+  work_cancel(HPWORK, &priv->timer_work);
   wlinfo("Timer cancelled\n");
   return OK;
 }

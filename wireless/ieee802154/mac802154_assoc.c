@@ -111,12 +111,12 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* Get exclusive access to the MAC */
 
-   ret = mac802154_lock(priv, true);
-   if (ret < 0)
-     {
-       mac802154_givesem(&priv->opsem);
-       return ret;
-     }
+  ret = mac802154_lock(priv, true);
+  if (ret < 0)
+    {
+      mac802154_givesem(&priv->opsem);
+      return ret;
+    }
 
   /* Set the channel and channel page of the PHY layer */
 
@@ -452,8 +452,8 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 {
   enum ieee802154_status_e status;
   FAR struct ieee802154_txdesc_s *respdesc;
-  FAR struct ieee802154_notif_s *notif =
-    (FAR struct ieee802154_notif_s *)txdesc->conf;
+  FAR struct ieee802154_primitive_s *primitive =
+    (FAR struct ieee802154_primitive_s *)txdesc->conf;
 
   if(txdesc->conf->status != IEEE802154_STATUS_SUCCESS)
     {
@@ -463,23 +463,23 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
        */
 
       /* We can actually high-jack the data conf notification since it
-       * is allocated as an ieee80215_notif_s anyway. Before we overwrite
+       * is allocated as an ieee80215_primitive_s anyway. Before we overwrite
        * any data though, we need to get the status from the data
        * confirmation as that is the method we use to get the reason
        * why the tx failed from the radio layer.
        */
 
       status = txdesc->conf->status;
-      notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
+      primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
 
-      notif->u.assocconf.status = status;
+      primitive->u.assocconf.status = status;
 
       /* The short device address allocated by the coordinator on
        * successful association. This parameter will be equal to 0xffff
        * if the association attempt was unsuccessful. [1] pg. 81
        */
 
-      IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
+      IEEE802154_SADDRCOPY(primitive->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
 
       /* We are now done the operation, unlock the semaphore */
@@ -490,9 +490,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
       /* Release the MAC, call the callback, get exclusive access again */
 
-      mac802154_unlock(priv)
-      mac802154_notify(priv, notif);
-      mac802154_lock(priv, false);
+      mac802154_notify(priv, primitive);
     }
   else
     {
@@ -564,7 +562,7 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
 
       /* Deallocate the data conf notification as it is no longer needed. */
 
-      mac802154_notif_free_locked(priv, notif);
+      ieee802154_primitive_free(primitive);
     }
 }
 
@@ -585,8 +583,8 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
                                     FAR struct ieee802154_txdesc_s *txdesc)
 {
   enum ieee802154_status_e status;
-  FAR struct ieee802154_notif_s *notif =
-    (FAR struct ieee802154_notif_s *)txdesc->conf;
+  FAR struct ieee802154_primitive_s *primitive =
+    (FAR struct ieee802154_primitive_s *)txdesc->conf;
 
   /* If the data request failed to be sent, notify the next layer
    * that the association has failed.
@@ -596,12 +594,12 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
    * pending at the coordinator. [1] pg. 43
    */
 
-  if (notif->u.dataconf.status != IEEE802154_STATUS_SUCCESS ||
+  if (primitive->u.dataconf.status != IEEE802154_STATUS_SUCCESS ||
       txdesc->framepending == 0)
     {
-      if (notif->u.dataconf.status != IEEE802154_STATUS_SUCCESS)
+      if (primitive->u.dataconf.status != IEEE802154_STATUS_SUCCESS)
         {
-          status = notif->u.dataconf.status;
+          status = primitive->u.dataconf.status;
         }
       else
         {
@@ -615,15 +613,15 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
           status = IEEE802154_STATUS_NO_DATA;
         }
 
-      notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
-      notif->u.assocconf.status = status;
+      primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
+      primitive->u.assocconf.status = status;
 
       /* The short device address allocated by the coordinator on
        * successful association. This parameter will be equal to 0xffff
        * if the association attempt was unsuccessful. [1] pg. 81
        */
 
-      IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
+      IEEE802154_SADDRCOPY(primitive->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
       /* We are now done the operation, and can release the command */
 
@@ -631,11 +629,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
       priv->cmd_desc = NULL;
       mac802154_givesem(&priv->opsem);
 
-      /* Release the MAC, call the callback, get exclusive access again */
-
-      mac802154_unlock(priv)
-      mac802154_notify(priv, notif);
-      mac802154_lock(priv, false);
+      mac802154_notify(priv, primitive);
     }
   else
     {
@@ -672,7 +666,7 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
 
       /* Deallocate the data conf notification as it is no longer needed. */
 
-      mac802154_notif_free_locked(priv, notif);
+      ieee802154_primitive_free(primitive);
 
     }
 }
@@ -690,17 +684,13 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
                            FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct iob_s *frame = ind->frame;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
   uint8_t cap;
-
-  /* Get exclusive access to the MAC */
-
-  mac802154_lock(priv, false);
 
   /* Allocate a notification to pass to the next highest layer */
 
-  mac802154_notif_alloc(priv, &notif, false);
-  notif->notiftype = IEEE802154_NOTIFY_IND_ASSOC;
+  primitive = ieee802154_primitive_allocate();
+  primitive->type = IEEE802154_PRIMITIVE_IND_ASSOC;
 
   /* Association Requests should always be sent from a device with source
    * addressing mode set to extended mode. Throw out any request received
@@ -709,43 +699,39 @@ void mac802154_rx_assocreq(FAR struct ieee802154_privmac_s *priv,
 
   if (ind->src.mode != IEEE802154_ADDRMODE_EXTENDED)
     {
-      goto errout_with_sem;
+      return;
     }
 
   /* Copy the extended address of the requesting device */
 
-  IEEE802154_EADDRCOPY(notif->u.assocind.devaddr, ind->src.eaddr);
+  IEEE802154_EADDRCOPY(primitive->u.assocind.devaddr, ind->src.eaddr);
 
   /* Copy in the capability information from the frame to the notification */
 
   cap = frame->io_data[frame->io_offset++];
-  notif->u.assocind.capabilities.devtype =
+  primitive->u.assocind.capabilities.devtype =
     (cap >> IEEE802154_CAPABILITY_SHIFT_DEVTYPE) & 0x01;
-  notif->u.assocind.capabilities.powersource =
+  primitive->u.assocind.capabilities.powersource =
     (cap >> IEEE802154_CAPABILITY_SHIFT_PWRSRC) & 0x01;
-  notif->u.assocind.capabilities.rxonidle =
+  primitive->u.assocind.capabilities.rxonidle =
     (cap >> IEEE802154_CAPABILITY_SHIFT_RXONIDLE) & 0x01;
-  notif->u.assocind.capabilities.security =
+  primitive->u.assocind.capabilities.security =
     (cap >> IEEE802154_CAPABILITY_SHIFT_SECURITY) & 0x01;
-  notif->u.assocind.capabilities.allocaddr =
+  primitive->u.assocind.capabilities.allocaddr =
     (cap >> IEEE802154_CAPABILITY_SHIFT_ALLOCADDR) & 0x01;
 
 #ifdef CONFIG_IEEE802154_SECURITY
 #error Missing security logic
 #endif
 
-  /* Unlock the MAC */
+  /* Get exclusive access to the MAC */
 
-  mac802154_unlock(priv)
+  mac802154_lock(priv, false);
 
   /* Notify the next highest layer of the association status */
 
-  mac802154_notify(priv, notif);
-  return;
-
-errout_with_sem:
+  mac802154_notify(priv, primitive);
   mac802154_unlock(priv)
-  return;
 }
 
 /****************************************************************************
@@ -761,7 +747,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
                             FAR struct ieee802154_data_ind_s *ind)
 {
   FAR struct iob_s *iob = ind->frame;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
 
   /* Check if we are performing an Association operation, if not, we will just
    * ignore the frame.
@@ -789,14 +775,14 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   mac802154_timercancel(priv);
 
+  /* Allocate a notification to pass to the next highest layer */
+
+  primitive = ieee802154_primitive_allocate();
+  primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
+
   /* Get exclusive access to the MAC */
 
   mac802154_lock(priv, false);
-
-  /* Allocate a notification to pass to the next highest layer */
-
-  mac802154_notif_alloc(priv, &notif, false);
-  notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
 
   /* Parse the short address from the response */
 
@@ -822,9 +808,9 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 
   /* Parse the status from the response */
 
-  notif->u.assocconf.status = iob->io_data[iob->io_offset++];
+  primitive->u.assocconf.status = iob->io_data[iob->io_offset++];
 
-  if (notif->u.assocconf.status == IEEE802154_STATUS_SUCCESS)
+  if (primitive->u.assocconf.status == IEEE802154_STATUS_SUCCESS)
     {
       priv->isassoc = true;
     }
@@ -833,7 +819,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
       priv->isassoc = false;
     }
 
-  IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, priv->addr.saddr);
+  IEEE802154_SADDRCOPY(primitive->u.assocconf.saddr, priv->addr.saddr);
 
   /* We are no longer performing the association operation */
 
@@ -842,13 +828,10 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
   mac802154_givesem(&priv->opsem);
   mac802154_rxdisable(priv);
 
-  /* Unlock the MAC */
-
-  mac802154_unlock(priv)
-
   /* Notify the next highest layer of the association status */
 
-  mac802154_notify(priv, notif);
+  mac802154_notify(priv, primitive);
+  mac802154_unlock(priv)
 }
 
 /****************************************************************************
@@ -867,7 +850,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 static void mac802154_assoctimeout(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
-  FAR struct ieee802154_notif_s *notif;
+  FAR struct ieee802154_primitive_s *primitive;
 
   /* If there is work scheduled for the rxframe_worker, we want to reschedule
    * this work, so that we make sure if the frame we were waiting for was just
@@ -876,7 +859,7 @@ static void mac802154_assoctimeout(FAR void *arg)
 
   if (!work_available(&priv->rx_work))
     {
-      work_queue(MAC802154_WORK, &priv->timer_work, mac802154_assoctimeout, priv, 0);
+      work_queue(HPWORK, &priv->timer_work, mac802154_assoctimeout, priv, 0);
       return;
     }
 
@@ -893,8 +876,11 @@ static void mac802154_assoctimeout(FAR void *arg)
    * Don't allow EINTR to interrupt.
    */
 
-  mac802154_lock(priv, false);
-  mac802154_notif_alloc(priv, &notif, false);
+  primitive = ieee802154_primitive_allocate();
+  primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
+
+  primitive->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
+  IEEE802154_SADDRCOPY(primitive->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
 
   /* We are no longer performing the association operation */
 
@@ -903,13 +889,7 @@ static void mac802154_assoctimeout(FAR void *arg)
   mac802154_givesem(&priv->opsem);
   mac802154_rxdisable(priv);
 
-  /* Release the MAC */
-
+  mac802154_lock(priv, false);
+  mac802154_notify(priv, primitive);
   mac802154_unlock(priv)
-
-  notif->notiftype = IEEE802154_NOTIFY_CONF_ASSOC;
-  notif->u.assocconf.status = IEEE802154_STATUS_NO_DATA;
-  IEEE802154_SADDRCOPY(notif->u.assocconf.saddr, &IEEE802154_SADDR_UNSPEC);
-
-  mac802154_notify(priv, notif);
 }

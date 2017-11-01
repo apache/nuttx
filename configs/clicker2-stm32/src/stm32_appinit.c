@@ -98,7 +98,7 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_bringup() failed: %d\n", ret);
-      return ret
+      return ret;
     }
 #endif
 

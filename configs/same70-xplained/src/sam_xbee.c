@@ -76,7 +76,7 @@ struct sam_priv_s
   uint32_t attncfg;
   uint32_t rstcfg;
   uint8_t irq;
-  uint8_t spidev;
+  uint8_t csno;
 };
 
 /****************************************************************************
@@ -92,11 +92,12 @@ struct sam_priv_s
  *   irq_enable - Enable or disable the GPIO interrupt
  */
 
-static int  sam_reset(FAR const struct xbee_lower_s *lower);
+static void sam_reset(FAR const struct xbee_lower_s *lower);
 static int  sam_attach_irq(FAR const struct xbee_lower_s *lower,
                            xcpt_t handler, FAR void *arg);
 static void sam_enable_irq(FAR const struct xbee_lower_s *lower,
                            bool state);
+static bool sam_poll_attn(FAR const struct xbee_lower_s *lower);
 static int  sam_xbee_devsetup(FAR struct sam_priv_s *priv);
 
 /****************************************************************************
@@ -116,9 +117,11 @@ static int  sam_xbee_devsetup(FAR struct sam_priv_s *priv);
 #ifdef CONFIG_SAME70XPLAINED_MB1_XBEE
 static struct sam_priv_s g_xbee_mb1_priv =
 {
+  .dev.reset   = sam_reset,
   .dev.attach  = sam_attach_irq,
   .dev.enable  = sam_enable_irq,
-  .intcfg      = CLICK_MB1_INTR,
+  .dev.poll    = sam_poll_attn,
+  .attncfg     = CLICK_MB1_INTR,
   .rstcfg      = CLICK_MB1_RESET,
   .irq         = IRQ_MB1,
   .csno        = MB1_CSNO,
@@ -128,12 +131,14 @@ static struct sam_priv_s g_xbee_mb1_priv =
 #ifdef CONFIG_SAME70XPLAINED_MB2_XBEE
 static struct sam_priv_s g_xbee_mb2_priv =
 {
+  .dev.reset   = sam_reset,
   .dev.attach  = sam_attach_irq,
   .dev.enable  = sam_enable_irq,
-  .intcfg      = CLICK_MB2_INTR,
+  .dev.poll    = sam_poll_attn,
+  .attncfg     = CLICK_MB2_INTR,
   .rstcfg      = CLICK_MB2_RESET,
   .irq         = IRQ_MB2,
-  .spidev      = MB2_CSNO,
+  .csno        = MB2_CSNO,
 };
 #endif
 
@@ -141,7 +146,7 @@ static struct sam_priv_s g_xbee_mb2_priv =
  * Private Functions
  ****************************************************************************/
 
-static int sam_reset(FAR const struct xbee_lower_s *lower)
+static void sam_reset(FAR const struct xbee_lower_s *lower)
 {
   FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
 
@@ -149,14 +154,11 @@ static int sam_reset(FAR const struct xbee_lower_s *lower)
 
   /* Reset pulse */
 
-  sam_gpiowrite(priv->rstcfg, true);
   sam_gpiowrite(priv->rstcfg, false);
+  up_udelay(1);
+  sam_gpiowrite(priv->rstcfg, true);
 
-  /* Wait minimum 1.5 ms to allow Xbee a proper boot-up sequence */
-  /* TODO: Update time according to datasheet */
-
-  nxsig_usleep(1500);
-  return OK;
+  up_mdelay(100);
 }
 
 static int sam_attach_irq(FAR const struct xbee_lower_s *lower,
@@ -212,6 +214,13 @@ static void sam_enable_irq(FAR const struct xbee_lower_s *lower,
     }
 
   leave_critical_section(flags);
+}
+
+static bool sam_poll_attn(FAR const struct xbee_lower_s *lower)
+{
+  FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
+
+  return !sam_gpioread(priv->attncfg);
 }
 
 /****************************************************************************
@@ -286,7 +295,7 @@ int sam_xbee_initialize(void)
   int ret;
 
 #ifdef CONFIG_SAME70XPLAINED_MB1_XBEE
-  wlinfo("Configuring BEE in mikroBUS1\n");
+  wlinfo("Configuring XBee in mikroBUS1\n");
 
   ret = sam_xbee_devsetup(&g_xbee_mb1_priv);
   if (ret < 0)

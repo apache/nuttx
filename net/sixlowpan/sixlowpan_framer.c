@@ -182,7 +182,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
       rcvrnull = sixlowpan_saddrnull(pktmeta->dest.nm_addr);
     }
 
-  if (rcvrnull)
+  if (!rcvrnull)
     {
       meta->flags.ackreq = TRUE;
     }

@@ -15,44 +15,61 @@ menuconfig WIRELESS_IEEE802154
 
 if WIRELESS_IEEE802154
 
+config IEEE802154_PRIMITIVE_PREALLOC
+	int "Number of pre-allocated primitive structures"
+	default 20
+	---help---
+		This specifies the total number of preallocated primitive structures.
+		A primitive is an abstracted data type that provides service information
+		between the MAC layer and the next highest layer. These may be allocated
+		from either from tasking logic or from interrupt level logic.
+
+config IEEE802154_PRIMITIVE_IRQRESERVE
+	int "Reserved pre-allocated primitive structures"
+	default 0
+	depends on EXPERIMENTAL
+	---help---
+		If primitves can be allocated from interrupt handlers, then this
+		specifies the number of pre-allocatd meta-data structures that are
+		reserved for for use only by interrupt handlers.  This may be zero to
+		reserve no meta-data structures for interrupt handlers. In that case,
+		the allocation will fail if tasking logic has allocated them all.
+
+		Interrupt logic will first attempt to allocate from the general,
+		pre-allocated structure pool that will contain up to (size
+		CONFIG_IEEE802154_PRIMITIVE_PREALLOC - CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE)
+		entries.  If that fails, then it will try to take a structure from
+		the reserve (size CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE).
+
+		Non-interrupt logic will also first attempt to allocate from the
+		general, pre-allocated structure pool.  If that fails, it will
+		dynamically allocate the primitive with an additional cost in performance.
+
+		NOTE: Currently marked as experimental and with a default of zero
+		because there are no interrupt level allocations performed by the
+		current IEEE 802.15.4 MAC code.
+
 config IEEE802154_DEFAULT_EADDR
 	hex "IEEE 802.15.4 Default Extended Address"
 	default 0x00fade00deadbeef
 	---help---
 		Set the default extended address to be used by MAC networks on init
 
-choice
-	prompt "IEEE 802.15.4 work queue"
-	default MAC802154_HPWORK if SCHED_HPWORK
-	default MAC802154_LPWORK if !SCHED_HPWORK && SCHED_LPWORK
-	depends on SCHED_WORKQUEUE
+config IEEE802154_MAC
+	bool "Software MAC layer"
+	default n
 	---help---
-		Work queue support is required to use the IEEE 802.15.4 MAC layer.
-		If the high priority work queue is available, then it should be used by
-		the driver.
+		There are two types of IEEE 802.15.4 radios supported. Those that provide
+		all MAC functionality equivalent to the MAC802154 software implementation,
+		and radios that provide a lower half to the MAC802154 software layer.
+		This option enables the software MAC layer that can interface with
+		the lower-half radio drivers.
 
-		WARNING!! The IEEE802.15.4 network device must never run on the same
-		work queue as does the IEEE 802.15.4 MAC.  That configuration will
-		cause deadlocks:  The network logic may be blocked on the work queue
-		waiting on resources that can only be freed by the MAC logic but the
-		MAC is unable to run because the work queue is blocked.  The
-		recommended configuration is:  Network on the LP work queue; MAC on HP
-		work queue.  Blocking on the HP work queue is a very bad thing in
-		any case.
-
-config MAC802154_HPWORK
-	bool "High priority"
-	depends on SCHED_HPWORK
-
-config MAC802154_LPWORK
-	bool "Low priority"
-	depends on SCHED_LPWORK
-
-endchoice # Work queue
+if IEEE802154_MAC
 
 config MAC802154_NTXDESC
 	int "Number or TX descriptors"
-	default 3
+	default 5
 	---help---
 		Configured number of Tx descriptors. Default: 3
 
@@ -62,16 +79,6 @@ config MAC802154_NTXDESC
 		thing to do is set CONFIG_MAC802154_NTXDESC to CONFIG_IOB_NBUFFERS.
 		Then there should be the maximum pre-allocated buffers for each
 		possible TX frame.
-
-config MAC802154_NNOTIF
-	int "Number or notification structures"
-	default 3
-	---help---
-		Configured number of notification strucures Default: 3
-
-		When various MAC management events occur, the MAC notifies the registered
-		receiver with an allocated notification structure indicating the event. The
-		events are primitives such as Association Indication etc.
 
 config MAC802154_NPANDESC
 	int "Number of PAN descriptors"
@@ -97,40 +104,6 @@ config MAC802154_LOCK_VERBOSE
 	---help---
 		Enable verbose logging of MAC lock management. Default: false
 
-config IEEE802154_IND_PREALLOC
-	int "Number of pre-allocated meta-data structures"
-	default 20
-	---help---
-		This specifies the total number of preallocated meta data structures
-		must be allocated with each incoming packet.  These may be allocated
-		from either from tasking logic or from interrupt level logic.
-
-config IEEE802154_IND_IRQRESERVE
-	int "Reserved pre-allocated meta-data structures"
-	default 0
-	depends on EXPERIMENTAL
-	---help---
-		If meta-data structures can be allocated from interrupt handlers,
-		then this specifies the number of pre-allocatd meta-data structures
-		that are reserved for for use only by interrupt handlers.  This may
-		be zero to reserve no meta-data structures for interrupt handlers.
-		In that case, the allocation will fail if tasking logic has
-		allocated them all.
-
-		Interrupt logic will first attempt to allocate from the general,
-		pre-allocated structure pool that will contain up to (size
-		CONFIG_IEEE802154_IND_PREALLOC - CONFIG_IEEE802154_IND_IRQRESERVE)
-		entries.  If that fails, then it will try to take a structure from
-		the reserve (size CONFIG_IEEE802154_IND_IRQRESERVE).
-
-		Non-interrupt logic will also first attempt to allocate from the
-		general, pre-allocated structure pool.  If that fails, it will
-		dynamically allocate the meta data structure with an additional cost
-		in performance.
-
-		NOTE: Currently marked as experimental and with a default of zero
-		because there are no interrupt level allocations performed by the
-		current IEEE 802.15.4 MAC code.
 
 config IEEE802154_MACDEV
 	bool "Character driver for IEEE 802.15.4 MAC layer"
@@ -220,6 +193,8 @@ config IEEE802154_NETDEV_LPWORK
 
 endchoice # Work queue
 endif # IEEE802154_NETDEV
+
+endif # IEEE802154_MACDEV
 
 config IEEE802154_LOOPBACK
 	bool "IEEE802154 6LoWPAN Loopback"

@@ -438,6 +438,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
       DEBUGASSERT(radio->r_dev.d_buf != NULL);
       reass = (FAR struct sixlowpan_reassbuf_s *)radio->r_dev.d_buf;
+      reass->rb_pool = REASS_POOL_RADIO;
       bptr  = reass->rb_buf;
       break;
     }
@@ -735,9 +736,16 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
 
       ret = sixlowpan_frame_process(radio, metadata, iob);
 
-      /* Free the IOB the held the consumed frame */
+      /* If the frame was a valid 6LoWPAN frame, free the IOB the held the
+       * consumed frame. Otherwise, the frame must stay allocated since the
+       * MAC layer will try and pass it to another receiver to see if that
+       * receiver wants it.
+       */
 
-      iob_free(iob);
+      if (ret >= 0)
+        {
+          iob_free(iob);
+        }
 
       /* Was the frame successfully processed? Is the packet in d_buf fully
        * reassembled?
@@ -826,9 +834,9 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                         }
                     }
 
-                  if (hdrlen < radio->r_dev.d_len)
+                  if (hdrlen > radio->r_dev.d_len)
                     {
-                      nwarn("WARNING: Packet to small: Have %u need >%u\n",
+                      nwarn("WARNING: Packet too small: Have %u need >%u\n",
                             radio->r_dev.d_len, hdrlen);
                       ret = -ENOBUFS;
                       goto drop;

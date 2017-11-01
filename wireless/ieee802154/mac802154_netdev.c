@@ -140,8 +140,8 @@ struct macnet_driver_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct radio_driver_s md_dev;  /* Interface understood by the network */
-                                 /* Cast compatible with struct macnet_driver_s */
+  struct radio_driver_s md_dev;   /* Interface understood by the network */
+                                  /* Cast compatible with struct macnet_driver_s */
 
   /* For internal use by this driver */
 
@@ -154,11 +154,10 @@ struct macnet_driver_s
 
   /* Hold a list of events */
 
-  bool md_enableevents : 1;             /* Are events enabled? */
-  bool md_eventpending : 1;             /* Is there a get event using the semaphore? */
-  sem_t md_eventsem;                    /* Signaling semaphore for waiting get event */
-  FAR struct ieee802154_notif_s *md_eventhead;
-  FAR struct ieee802154_notif_s *md_eventtail;
+  bool md_enableevents : 1;       /* Are events enabled? */
+  bool md_eventpending : 1;       /* Is there a get event using the semaphore? */
+  sem_t md_eventsem;              /* Signaling semaphore for waiting get event */
+  sq_queue_t primitive_queue;     /* For holding primitives to pass along */
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* MAC Service notification information */
@@ -178,21 +177,12 @@ struct macnet_driver_s
 static int macnet_advertise(FAR struct net_driver_s *dev);
 static inline void macnet_netmask(FAR struct net_driver_s *dev);
 
-static inline void macnet_pushevent(FAR struct macnet_driver_s *priv,
-                                    FAR struct ieee802154_notif_s *notif);
-static inline FAR struct ieee802154_notif_s *
-  macnet_popevent(FAR struct macnet_driver_s *priv);
-
 /* IEE802.15.4 MAC callback functions ***************************************/
 
-static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
-                          FAR struct ieee802154_notif_s *notif);
-static int  macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
+static int  macnet_notify(FAR struct mac802154_maccb_s *maccb,
+                          FAR struct ieee802154_primitive_s *primitive);
+static int  macnet_rxframe(FAR struct macnet_driver_s *maccb,
                            FAR struct ieee802154_data_ind_s *ind);
-
-/* Asynchronous event indications, replied to synchronously with responses.
- * (none are implemented).
- */
 
 /* Network interface support ************************************************/
 /* Common TX logic */
@@ -390,71 +380,14 @@ static inline void macnet_netmask(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: macnet_pushevent
- *
- * Description:
- *   Push event onto the event queue
- *
- * Assumptions:
- *   Called with the device struct locked.
- *
- ****************************************************************************/
-
-static inline void macnet_pushevent(FAR struct macnet_driver_s *priv,
-                                    FAR struct ieee802154_notif_s *notif)
-{
-  notif->flink = NULL;
-  if (!priv->md_eventhead)
-    {
-      priv->md_eventhead = notif;
-      priv->md_eventtail = notif;
-    }
-  else
-    {
-      priv->md_eventtail->flink = notif;
-      priv->md_eventtail        = notif;
-    }
-}
-
-/****************************************************************************
- * Name: macnet_popevent
- *
- * Description:
- *   Pop an event off of the event queue
- *
- * Assumptions:
- *   Called with the device struct locked.
- *
- ****************************************************************************/
-
-static inline FAR struct ieee802154_notif_s *
-  macnet_popevent(FAR struct macnet_driver_s *priv)
-{
-  FAR struct ieee802154_notif_s *notif = priv->md_eventhead;
-
-  if (notif)
-    {
-      priv->md_eventhead = notif->flink;
-      if (!priv->md_eventhead)
-        {
-          priv->md_eventhead = NULL;
-        }
-
-      notif->flink = NULL;
-    }
-
-  return notif;
-}
-
-/****************************************************************************
  * Name: macnet_notify
  *
  * Description:
  *
  ****************************************************************************/
 
-static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
-                          FAR struct ieee802154_notif_s *notif)
+static int macnet_notify(FAR struct mac802154_maccb_s *maccb,
+                         FAR struct ieee802154_primitive_s *primitive)
 {
   FAR struct macnet_callback_s *cb =
     (FAR struct macnet_callback_s *)maccb;
@@ -463,10 +396,12 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
   DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
   priv = cb->mc_priv;
 
-  /* Get exclusive access to the driver structure.  We don't care about any
-   * signals so if we see one, just go back to trying to get access again */
+  /* Handle the special case for data indications or "incoming frames" */
 
-  while (nxsem_wait(&priv->md_exclsem) < 0);
+  if (primitive->type == IEEE802154_PRIMITIVE_IND_DATA)
+    {
+      return macnet_rxframe(priv, &primitive->u.dataind);
+    }
 
   /* If there is a registered notification receiver, queue the event and signal
    * the receiver. Events should be popped from the queue from the application
@@ -476,7 +411,13 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
 
   if (priv->md_enableevents)
     {
-      macnet_pushevent(priv, notif);
+      /* Get exclusive access to the driver structure.  We don't care about any
+       * signals so if we see one, just go back to trying to get access again
+       */
+
+      while (nxsem_wait(&priv->md_exclsem) < 0);
+
+      sq_addlast((FAR sq_entry_t *)primitive, &priv->primitive_queue);
 
       /* Check if there is a read waiting for data */
 
@@ -493,23 +434,18 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
         {
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
-          value.sival_int = (int)notif->notiftype;
+          value.sival_int = (int)primitive->type;
           (void)nxsig_queue(priv->md_notify_pid, priv->md_notify_signo,
                             value);
 #else
           (void)nxsig_queue(priv->md_notify_pid, priv->md_notify_signo,
-                            (FAR void *)notif->notiftype);
+                            (FAR void *)primitive->type);
 #endif
         }
 #endif
-    }
-  else
-    {
-      /* Just free the event if the driver is closed and there isn't a registered
-       * signal number.
-       */
 
-      mac802154_notif_free(priv->md_mac, notif);
+      nxsem_post(&priv->md_exclsem);
+      return OK;
     }
 
   nxsem_post(&priv->md_exclsem);
@@ -528,17 +464,11 @@ static void macnet_notify(FAR struct mac802154_maccb_s *maccb,
  *
  ****************************************************************************/
 
-static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
+static int macnet_rxframe(FAR struct macnet_driver_s *priv,
                           FAR struct ieee802154_data_ind_s *ind)
 {
-  FAR struct macnet_callback_s *cb =
-    (FAR struct macnet_callback_s *)maccb;
-  FAR struct macnet_driver_s *priv;
   FAR struct iob_s *iob;
   int ret;
-
-  DEBUGASSERT(cb != NULL && cb->mc_priv != NULL);
-  priv = cb->mc_priv;
 
   /* Ignore the frame if the network is not up */
 
@@ -556,6 +486,8 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
   /* Remove the IOB containing the frame. */
 
   ind->frame = NULL;
+
+  net_lock();
 
   /* Transfer the frame to the network logic */
 
@@ -597,6 +529,7 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
   if (ret < 0)
 #endif
     {
+      net_unlock();
       ind->frame = iob;
       return ret;
     }
@@ -606,11 +539,13 @@ static int macnet_rxframe(FAR struct mac802154_maccb_s *maccb,
   NETDEV_RXPACKETS(&priv->md_dev.r_dev);
   NETDEV_RXIPV6(&priv->md_dev.r_dev);
 
+  net_unlock();
+
   /* sixlowpan_input() will free the IOB, but we must free the struct
-   * ieee802154_data_ind_s container here.
+   * ieee802154_primitive_s container here.
    */
 
-  ieee802154_ind_free(ind);
+  ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
   return OK;
 }
 
@@ -1134,25 +1069,26 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
               case MAC802154IOC_GET_EVENT:
                 {
-                  FAR struct ieee802154_notif_s *notif;
+                  FAR struct ieee802154_primitive_s *primitive;
 
                   while (1)
                     {
                       /* Try popping an event off the queue */
 
-                      notif = macnet_popevent(priv);
+                      primitive = (FAR struct ieee802154_primitive_s *)
+                                      sq_remfirst(&priv->primitive_queue);
 
                       /* If there was an event to pop off, copy it into the user
                        * data and free it from the MAC layer's memory.
                        */
 
-                      if (notif != NULL)
+                      if (primitive != NULL)
                         {
-                          memcpy(&netmac->u, notif, sizeof(struct ieee802154_notif_s));
+                          memcpy(&netmac->u, primitive, sizeof(struct ieee802154_primitive_s));
 
                           /* Free the notification */
 
-                          mac802154_notif_free(priv->md_mac, notif);
+                          mac802154_primitive_free(priv->md_mac, primitive);
                           ret = OK;
                           break;
                         }
@@ -1486,8 +1422,7 @@ int mac802154netdev_register(MACHANDLE mac)
   nxsem_init(&priv->md_eventsem, 0, 0);
   nxsem_setprotocol(&priv->md_eventsem, SEM_PRIO_NONE);
 
-  priv->md_eventhead = NULL;
-  priv->md_eventtail = NULL;
+  sq_init(&priv->primitive_queue);
 
   priv->md_enableevents = false;
   priv->md_notify_registered = false;
@@ -1500,7 +1435,6 @@ int mac802154netdev_register(MACHANDLE mac)
   maccb->flink    = NULL;
   maccb->prio     = CONFIG_IEEE802154_NETDEV_RECVRPRIO;
   maccb->notify   = macnet_notify;
-  maccb->rxframe  = macnet_rxframe;
 
   /* Bind the callback structure */
 

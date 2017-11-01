@@ -929,7 +929,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
   sixlowpan_dumpbuffer("Outgoing TCP packet",
                        (FAR const uint8_t *)ipv6, dev->d_len);
 
-  if (dev != NULL && dev->d_len > 0)
+  if (dev != NULL && dev->d_len > 0 && fwddev != NULL)
     {
       FAR struct ipv6tcp_hdr_s *ipv6hdr;
 
@@ -961,7 +961,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
            * assumes an encoding of the MAC address in the IPv6 address.
            */
 
-          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
+          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)fwddev,
                                          ipv6hdr->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {

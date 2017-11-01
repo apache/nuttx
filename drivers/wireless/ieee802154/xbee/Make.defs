@@ -37,7 +37,7 @@ ifeq ($(CONFIG_IEEE802154_XBEE),y)
 
 # Include XBee files into the build
 
-CSRCS += xbee_dataind.c xbee_ioctl.c xbee_mac.c xbee_netdev.c xbee_notif.c xbee.c
+CSRCS += xbee_ioctl.c xbee_mac.c xbee_netdev.c xbee.c
 
 # Include XBee build support
 

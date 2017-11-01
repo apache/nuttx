@@ -117,7 +117,6 @@ static void mrf24j40_irqwork_txnorm(FAR struct mrf24j40_radio_s *dev)
                   MRF24J40_TXNCON_FPSTAT);
 
   if (dev->txdelayed_busy)
-
     {
       /* Inform the next layer of the transmission success/failure */
 
@@ -213,6 +212,7 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
 static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
 {
+  FAR struct ieee802154_primitive_s *primitive;
   FAR struct ieee802154_data_ind_s *ind;
   uint32_t addr;
   uint32_t index;
@@ -232,12 +232,23 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
 
   /* Allocate a data_ind to put the frame in */
 
-  ind = ieee802154_ind_allocate();
+  primitive = ieee802154_primitive_allocate();
+  ind = (FAR struct ieee802154_data_ind_s *)primitive;
   if (ind == NULL)
     {
       wlerr("ERROR: Unable to allocate data_ind. Discarding frame\n");
       goto done;
     }
+
+  primitive->type = IEEE802154_PRIMITIVE_IND_DATA;
+
+  /* Allocate an IOB to put the frame into */
+
+  ind->frame = iob_alloc(false);
+  ind->frame->io_flink = NULL;
+  ind->frame->io_len = 0;
+  ind->frame->io_pktlen = 0;
+  ind->frame->io_offset = 0;
 
   /* Read packet */
 

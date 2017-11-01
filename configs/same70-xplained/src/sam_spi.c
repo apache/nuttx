@@ -170,6 +170,18 @@ void sam_spi0select(uint32_t devid, bool selected)
         break;
 #endif
 
+#ifdef CONFIG_IEEE802154_XBEE
+      case SPIDEV_IEEE802154(0):
+        /* Set the GPIO low to select and high to de-select */
+
+#if defined(CONFIG_SAME70XPLAINED_MB1_XBEE)
+        sam_gpiowrite(CLICK_MB1_CS, !selected);
+#elif defined(CONFIG_SAME70XPLAINED_MB2_XBEE)
+        sam_gpiowrite(CLICK_MB2_CS, !selected);
+#endif
+        break;
+#endif
+
       default:
         break;
     }

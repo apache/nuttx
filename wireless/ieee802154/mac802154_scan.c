@@ -203,39 +203,41 @@ errout:
 void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
                           enum ieee802154_status_e status)
 {
-  FAR struct ieee802154_notif_s * notif;
+  FAR struct ieee802154_primitive_s * primitive;
+  FAR struct ieee802154_scan_conf_s *scanconf;
 
-  mac802154_lock(priv, false);
-  mac802154_notif_alloc(priv, &notif, false);
+  primitive = ieee802154_primitive_allocate();
+  scanconf = &primitive->u.scanconf;
 
-  priv->curr_op = MAC802154_OP_NONE;
-  mac802154_givesem(&priv->opsem);
-
-  notif->notiftype = IEEE802154_NOTIFY_CONF_SCAN;
-  notif->u.scanconf.type = priv->currscan.type;
-  notif->u.scanconf.chpage = priv->currscan.chpage;
+  primitive->type = IEEE802154_PRIMITIVE_CONF_SCAN;
+  scanconf->type = priv->currscan.type;
+  scanconf->chpage = priv->currscan.chpage;
 
   /* Copy in the channels that did not get scanned */
 
   if (priv->scanindex != priv->currscan.numchan)
     {
-      notif->u.scanconf.numunscanned = priv->currscan.numchan - priv->scanindex;
-      memcpy(notif->u.scanconf.unscanned, &priv->currscan.channels[priv->scanindex],
-             notif->u.scanconf.numunscanned);
+      scanconf->numunscanned = priv->currscan.numchan - priv->scanindex;
+      memcpy(scanconf->unscanned, &priv->currscan.channels[priv->scanindex],
+             scanconf->numunscanned);
     }
 
-  notif->u.scanconf.numdesc = priv->npandesc;
-  memcpy(notif->u.scanconf.pandescs, priv->pandescs,
+  /* Copy the PAN descriptors into the primitive */
+
+  memcpy(scanconf->pandescs, priv->pandescs,
          sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
-  notif->u.scanconf.status = status;
+
+  scanconf->numdesc = priv->npandesc;
+  scanconf->status = status;
 
   /* Reset the PAN ID to the setting before the scan started */
 
   mac802154_setpanid(priv, priv->panidbeforescan);
 
-  mac802154_unlock(priv)
+  priv->curr_op = MAC802154_OP_NONE;
+  mac802154_givesem(&priv->opsem);
 
-  mac802154_notify(priv, notif);
+  mac802154_notify(priv, primitive);
 }
 
 /****************************************************************************
@@ -255,6 +257,8 @@ static void mac802154_scantimeout(FAR void *arg)
 {
   FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
   DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN);
+
+  mac802154_lock(priv, false);
 
   /* If we got here it means we are done scanning that channel */
 
@@ -286,4 +290,5 @@ static void mac802154_scantimeout(FAR void *arg)
 
   mac802154_rxenable(priv);
   mac802154_timerstart(priv, priv->scansymdur, mac802154_scantimeout);
+  mac802154_unlock(priv);
 }

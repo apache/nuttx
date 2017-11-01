@@ -1,5 +1,5 @@
 /****************************************************************************
- *  wireless/ieee802154/ieee802154_indalloc.c
+ *  wireless/ieee802154/ieee802154_primitive.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,9 +43,6 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
-
-#include <nuttx/mm/iob.h>
-
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #include "mac802154.h"
@@ -54,46 +51,46 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* NOTE:  The CONFIG_IEEE802154_IND_IRQRESERVE options is marked as marked
+/* NOTE:  The CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE options is marked as marked
  * 'experimental' and with the default 0 zero because there are no interrupt
  * level allocations performed by the current IEEE 802.15.4 MAC code.
  */
 
-#if !defined(CONFIG_IEEE802154_IND_PREALLOC) || \
-    CONFIG_IEEE802154_IND_PREALLOC < 0
-#  undef CONFIG_IEEE802154_IND_PREALLOC
-#  define CONFIG_IEEE802154_IND_PREALLOC 20
+#if !defined(CONFIG_IEEE802154_PRIMITIVE_PREALLOC) || \
+    CONFIG_IEEE802154_PRIMITIVE_PREALLOC < 0
+#  undef CONFIG_IEEE802154_PRIMITIVE_PREALLOC
+#  define CONFIG_IEEE802154_PRIMITIVE_PREALLOC 20
 #endif
 
-#if !defined(CONFIG_IEEE802154_IND_IRQRESERVE) || \
-    CONFIG_IEEE802154_IND_IRQRESERVE < 0
-#  undef CONFIG_IEEE802154_IND_IRQRESERVE
-#  define CONFIG_IEEE802154_IND_IRQRESERVE 0
+#if !defined(CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE) || \
+    CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE < 0
+#  undef CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
+#  define CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE 0
 #endif
 
-#if CONFIG_IEEE802154_IND_IRQRESERVE > CONFIG_IEEE802154_IND_PREALLOC
-#  undef CONFIG_IEEE802154_IND_IRQRESERVE
-#  define CONFIG_IEEE802154_IND_IRQRESERVE CONFIG_IEEE802154_IND_PREALLOC
+#if CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE > CONFIG_IEEE802154_PRIMITIVE_PREALLOC
+#  undef CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
+#  define CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE CONFIG_IEEE802154_PRIMITIVE_PREALLOC
 #endif
 
 /* Memory Pools */
 
-#define POOL_IND_GENERAL  0
-#define POOL_IND_IRQ      1
-#define POOL_IND_DYNAMIC  2
+#define POOL_PRIMITIVE_GENERAL  0
+#define POOL_PRIMITIVE_IRQ      1
+#define POOL_PRIMITIVE_DYNAMIC  2
 
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
 
-/* Private data type that extends the ieee802154_data_ind_s struct */
+/* Private data type that extends the ieee802154_primitive_s struct */
 
-struct ieee802154_priv_ind_s
+struct ieee802154_priv_primitive_s
 {
   /* Must be first member so we can cast to/from */
 
-  struct ieee802154_data_ind_s pub;
-  FAR struct ieee802154_priv_ind_s *flink;
+  struct ieee802154_primitive_s pub;
+  FAR struct ieee802154_priv_primitive_s *flink;
   uint8_t pool;
 };
 
@@ -101,38 +98,40 @@ struct ieee802154_priv_ind_s
  * Private Data
  ****************************************************************************/
 
-#if CONFIG_IEEE802154_IND_PREALLOC > 0
-#if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
-/* The g_indfree is a list of meta-data structures that are available for
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
+/* The g_primfree is a list of primitive structures that are available for
  * general use.  The number of messages in this list is a system configuration
  * item.
  */
 
-static struct ieee802154_priv_ind_s *g_indfree;
+static struct ieee802154_priv_primitive_s *g_primfree;
 #endif
 
-#if CONFIG_IEEE802154_IND_IRQRESERVE > 0
-/* The g_indfree_irq is a list of meta-data structures that are reserved for
+#if CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE > 0
+/* The g_primfree_irq is a list of primitive structures that are reserved for
  * use by only by interrupt handlers.
  */
 
-static struct ieee802154_priv_ind_s *g_indfree_irq;
+static struct ieee802154_priv_primitive_s *g_primfree_irq;
 #endif
 
-/* Pool of pre-allocated meta-data stuctures */
+/* Pool of pre-allocated primitive stuctures */
 
-static struct ieee802154_priv_ind_s g_indpool[CONFIG_IEEE802154_IND_PREALLOC];
-#endif /* CONFIG_IEEE802154_IND_PREALLOC > 0 */
+static struct ieee802154_priv_primitive_s g_primpool[CONFIG_IEEE802154_PRIMITIVE_PREALLOC];
+#endif /* CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0 */
+
+static bool g_poolinit = false;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee802154_indpool_initialize
+ * Name: ieee802154_primitivepool_initialize
  *
  * Description:
- *   This function initializes the meta-data allocator.  This function must
+ *   This function initializes the primitive allocator.  This function must
  *   be called early in the initialization sequence before any radios
  *   begin operation.
  *
@@ -144,28 +143,37 @@ static struct ieee802154_priv_ind_s g_indpool[CONFIG_IEEE802154_IND_PREALLOC];
  *
  ****************************************************************************/
 
-void ieee802154_indpool_initialize(void)
+void ieee802154_primitivepool_initialize(void)
 {
-#if CONFIG_IEEE802154_IND_PREALLOC > 0
-  FAR struct ieee802154_priv_ind_s *pool = g_indpool;
-  int remaining = CONFIG_IEEE802154_IND_PREALLOC;
+  /* Only allow the pool to be initialized once */
 
-#if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
-  /* Initialize g_indfree, thelist of meta-data structures that are available
+  if (g_poolinit)
+    {
+      return;
+    }
+
+  g_poolinit = true;
+
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0
+  FAR struct ieee802154_priv_primitive_s *pool = g_primpool;
+  int remaining = CONFIG_IEEE802154_PRIMITIVE_PREALLOC;
+
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
+  /* Initialize g_primfree, thelist of primitive structures that are available
    * for general use.
    */
 
-  g_indfree = NULL;
-  while (remaining > CONFIG_IEEE802154_IND_IRQRESERVE)
+  g_primfree = NULL;
+  while (remaining > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE)
     {
-      FAR struct ieee802154_priv_ind_s *ind = pool;
+      FAR struct ieee802154_priv_primitive_s *prim = pool;
 
       /* Add the next meta data structure from the pool to the list of
        * general structures.
        */
 
-      ind->flink = g_indfree;
-      g_indfree  = ind;
+      prim->flink = g_primfree;
+      g_primfree  = prim;
 
       /* Set up for the next structure from the pool */
 
@@ -174,22 +182,22 @@ void ieee802154_indpool_initialize(void)
     }
 #endif
 
-#if CONFIG_IEEE802154_IND_IRQRESERVE > 0
-  /* Initialize g_indfree_irq is a list of meta-data structures reserved for
+#if CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE > 0
+  /* Initialize g_primfree_irq is a list of primitive structures reserved for
    * use by only by interrupt handlers.
    */
 
-  g_indfree_irq = NULL;
+  g_primfree_irq = NULL;
   while (remaining > 0)
     {
-      FAR struct ieee802154_priv_ind_s *ind = pool;
+      FAR struct ieee802154_priv_primitive_s *prim = pool;
 
       /* Add the next meta data structure from the pool to the list of
        * general structures.
        */
 
-      ind->flink    = g_indfree_irq;
-      g_indfree_irq = ind;
+      prim->flink    = g_primfree_irq;
+      g_primfree_irq = prim;
 
       /* Set up for the next structure from the pool */
 
@@ -197,39 +205,39 @@ void ieee802154_indpool_initialize(void)
       remaining--;
     }
 #endif
-#endif /* CONFIG_IEEE802154_IND_PREALLOC > 0 */
+#endif /* CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0 */
 }
 
 /****************************************************************************
- * Name: ieee802154_ind_allocate
+ * Name: ieee802154_primitive_allocate
  *
  * Description:
- *   The ieee802154_ind_allocate function will get a free meta-data
+ *   The ieee802154_primitive_allocate function will get a free primitive
  *   structure for use by the IEEE 802.15.4 MAC.
  *
  *   Interrupt handling logic will first attempt to allocate from the
- *   g_indfree list.  If that list is empty, it will attempt to allocate
- *   from its reserve, g_indfree_irq.  If that list is empty, then the
+ *   g_primfree list.  If that list is empty, it will attempt to allocate
+ *   from its reserve, g_primfree_irq.  If that list is empty, then the
  *   allocation fails (NULL is returned).
  *
- *   Non-interrupt handler logic will attempt to allocate from g_indfree
- *   list.  If that the list is empty, then the meta-data structure will be
+ *   Non-interrupt handler logic will attempt to allocate from g_primfree
+ *   list.  If that the list is empty, then the primitive structure will be
  *   allocated from the dynamic memory pool.
  *
  * Inputs:
  *   None
  *
  * Return Value:
- *   A reference to the allocated msg structure.  All user fields in this
+ *   A reference to the allocated primitive structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  ****************************************************************************/
 
-FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void)
+FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
 {
-#if CONFIG_IEEE802154_IND_PREALLOC > 0
-  FAR struct ieee802154_priv_ind_s *ind;
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0
+  FAR struct ieee802154_priv_primitive_s *prim;
   irqstate_t flags;
   uint8_t pool;
 
@@ -241,29 +249,29 @@ FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void)
   flags = enter_critical_section(); /* Always necessary in SMP mode */
   if (up_interrupt_context())
     {
-#if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
       /* Try the general free list */
 
-      if (g_indfree != NULL)
+      if (g_primfree != NULL)
         {
-          ind           = g_indfree;
-          g_indfree     = ind->flink;
+          prim           = g_primfree;
+          g_primfree     = prim->flink;
 
           leave_critical_section(flags);
-          pool          = POOL_IND_GENERAL;
+          pool          = POOL_PRIMITIVE_GENERAL;
         }
       else
 #endif
-#if CONFIG_IEEE802154_IND_IRQRESERVE > 0
+#if CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE > 0
       /* Try the list list reserved for interrupt handlers */
 
-      if (g_indfree_irq != NULL)
+      if (g_primfree_irq != NULL)
         {
-          ind           = g_indfree_irq;
-          g_indfree_irq = ind->flink;
+          prim           = g_primfree_irq;
+          g_primfree_irq = prim->flink;
 
           leave_critical_section(flags);
-          pool          = POOL_IND_IRQ;
+          pool          = POOL_PRIMITIVE_IRQ;
         }
       else
 #endif
@@ -277,136 +285,116 @@ FAR struct ieee802154_data_ind_s *ieee802154_ind_allocate(void)
 
   else
     {
-#if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
       /* Try the general free list */
 
-      if (g_indfree != NULL)
+      if (g_primfree != NULL)
         {
-          ind           = g_indfree;
-          g_indfree     = ind->flink;
+          prim           = g_primfree;
+          g_primfree     = prim->flink;
 
           leave_critical_section(flags);
-          pool          = POOL_IND_GENERAL;
+          pool          = POOL_PRIMITIVE_GENERAL;
         }
       else
 #endif
         {
-          /* If we cannot a meta-data structure from the free list, then we
+          /* If we cannot a primitive structure from the free list, then we
            * will have to allocate one from the kernal memory pool.
            */
 
           leave_critical_section(flags);
-          ind = (FAR struct ieee802154_priv_ind_s *)
-            kmm_malloc((sizeof (struct ieee802154_priv_ind_s)));
+          prim = (FAR struct ieee802154_priv_primitive_s *)
+            kmm_malloc((sizeof (struct ieee802154_priv_primitive_s)));
 
-          /* Check if we allocated the meta-data structure */
+          /* Check if we allocated the primitive structure */
 
-          if (ind != NULL)
+          if (prim != NULL)
             {
-              /* Yes... remember that this meta-data structure was dynamically allocated */
+              /* Yes... remember that this primitive structure was dynamically allocated */
 
-              pool = POOL_IND_DYNAMIC;
+              pool = POOL_PRIMITIVE_DYNAMIC;
             }
         }
     }
 
   /* We have successfully allocated memory from some source.
-   * Zero and tag the alloated meta-data structure.
+   * Zero and tag the alloated primitive structure.
    */
 
-  ind->pool = pool;
-  memset(&ind->pub, 0, sizeof(struct ieee802154_data_ind_s));
+  prim->pool = pool;
+  memset(&prim->pub, 0, sizeof(struct ieee802154_primitive_s));
 
-  /* Allocate the IOB for the frame */
-
-  ind->pub.frame = iob_alloc(true);
-  if (ind->pub.frame == NULL)
-    {
-      /* Deallocate the ind */
-
-      ieee802154_ind_free(&ind->pub);
-
-      return NULL;
-    }
-
-  ind->pub.frame->io_flink  = NULL;
-  ind->pub.frame->io_len    = 0;
-  ind->pub.frame->io_offset = 0;
-  ind->pub.frame->io_pktlen = 0;
-
-  return &ind->pub;
+  wlinfo("Primitive allocated: %p\n", prim);
+  return &prim->pub;
 #else
   return NULL;
 #endif
 }
 
 /****************************************************************************
- * Name: ieee802154_ind_free
+ * Name: ieee802154_primitive_free
  *
  * Description:
- *   The ieee802154_ind_free function will return a meta-data structure to
- *   the free pool of  messages if it was a pre-allocated meta-data
- *   structure. If the meta-data structure was allocated dynamically it will
+ *   The ieee802154_primitive_free function will return a primitive structure to
+ *   the free pool of  messages if it was a pre-allocated primitive
+ *   structure. If the primitive structure was allocated dynamically it will
  *   be deallocated.
  *
  * Inputs:
- *   ind - meta-data structure to free
+ *   prim - primitive structure to free
  *
  * Return Value:
  *   None
  *
  ****************************************************************************/
 
-void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind)
+void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim)
 {
-#if CONFIG_IEEE802154_IND_PREALLOC > 0
-  irqstate_t flags;
-  FAR struct ieee802154_priv_ind_s *priv =
-    (FAR struct ieee802154_priv_ind_s *)ind;
-
-  /* Check if the IOB is not NULL. The only time it should be NULL is if we
-   * allocated the data_ind, but the IOB allocation failed so we now have to
-   * free the data_ind but not the IOB. This really should happen rarely if at all.
-   */
-
-  if (ind->frame != NULL)
+  if (--prim->nclients > 0)
     {
-      iob_free(ind->frame);
+      wlinfo("Remaining Clients: %d\n", prim->nclients);
+      return;
     }
 
-#if CONFIG_IEEE802154_IND_PREALLOC > CONFIG_IEEE802154_IND_IRQRESERVE
-  /* If this is a generally available pre-allocated meta-data structure,
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0
+  irqstate_t flags;
+  FAR struct ieee802154_priv_primitive_s *priv =
+    (FAR struct ieee802154_priv_primitive_s *)prim;
+
+#if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
+  /* If this is a generally available pre-allocated primitive structure,
    * then just put it back in the free list.
    */
 
-  if (priv->pool == POOL_IND_GENERAL)
+  if (priv->pool == POOL_PRIMITIVE_GENERAL)
     {
       /* Make sure we avoid concurrent access to the free
        * list from interrupt handlers.
        */
 
       flags = enter_critical_section();
-      priv->flink = g_indfree;
-      g_indfree  = priv;
+      priv->flink = g_primfree;
+      g_primfree  = priv;
       leave_critical_section(flags);
     }
   else
 #endif
 
-#if CONFIG_IEEE802154_IND_IRQRESERVE > 0
-  /* If this is a meta-data structure pre-allocated for interrupts,
+#if CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE > 0
+  /* If this is a primitive structure pre-allocated for interrupts,
    * then put it back in the correct free list.
    */
 
-  if (priv->pool == POOL_IND_IRQ)
+  if (priv->pool == POOL_PRIMITIVE_IRQ)
     {
       /* Make sure we avoid concurrent access to the free
        * list from interrupt handlers.
        */
 
       flags = enter_critical_section();
-      priv->flink    = g_indfree_irq;
-      g_indfree_irq  = priv;
+      priv->flink    = g_primfree_irq;
+      g_primfree_irq  = priv;
       leave_critical_section(flags);
     }
   else
@@ -415,8 +403,10 @@ void ieee802154_ind_free(FAR struct ieee802154_data_ind_s *ind)
     {
       /* Otherwise, deallocate it. */
 
-      DEBUGASSERT(priv->pool == POOL_IND_DYNAMIC);
+      DEBUGASSERT(priv->pool == POOL_PRIMITIVE_DYNAMIC);
       sched_kfree(priv);
     }
 #endif
+
+  wlinfo("Primitive freed: %p\n", prim);
 }

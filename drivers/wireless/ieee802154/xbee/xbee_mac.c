@@ -128,7 +128,7 @@ static void xbee_assoctimer(int argc, uint32_t arg, ...)
  * Description:
  *   Poll the device for the assosciation status.  This function is indirectly
  *   scheduled rom xbee_req_associate in order to poll the device for association
- *    progress.
+ *   progress.
  *
  * Parameters:
  *   arg     - The reference to the driver structure (cast to void*)
@@ -144,7 +144,7 @@ static void xbee_assocworker(FAR void *arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
-  xbee_at_query(priv, "AI");
+  xbee_send_atquery(priv, "AI");
 
   (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)arg);
 }
@@ -268,6 +268,10 @@ int xbee_req_data(XBEEHANDLE xbee,
   int prevoffs = frame->io_offset;
 #endif
 
+  /* Support one pending transmit at a time */
+
+  while (nxsem_wait(&priv->tx_sem) < 0);
+
   /* Figure out how much room we need to place the API frame header */
 
   if (meta->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
@@ -326,6 +330,11 @@ int xbee_req_data(XBEEHANDLE xbee,
   xbee_send_apiframe(priv, &frame->io_data[frame->io_offset],
                      (frame->io_len - frame->io_offset));
 
+  /* Wait for a transmit status to be received. Does not necessarily mean success */
+
+  while (nxsem_wait(&priv->txdone_sem) < 0);
+
+  nxsem_post(&priv->tx_sem);
   iob_free(frame);
   return OK;
 }

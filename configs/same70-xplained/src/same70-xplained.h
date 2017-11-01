@@ -655,5 +655,21 @@ int sam_at24config(void);
 int sam_mrf24j40_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_xbee_initialize
+ *
+ * Description:
+ *   Initialize the XBee device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_XBEE
+int sam_xbee_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H */

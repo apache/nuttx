@@ -98,4 +98,8 @@ ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 CSRCS += sam_mrf24j40.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_XBEE),y)
+CSRCS += sam_xbee.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

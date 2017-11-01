@@ -22,19 +22,44 @@ config SAME70XPLAINED_MB2_SPI
 	default n
 
 choice
-	prompt "Bee mikroBUS"
-	depends on SAME70XPLAINED_CLICKSHIELD && IEEE802154_MRF24J40
-	default SAME70XPLAINED_MB1_BEE
+	prompt "mikroBUS1 Click"
+	depends on SAME70XPLAINED_CLICKSHIELD
+	default SAME70XPLAINED_MB1_NONE
+
+config SAME70XPLAINED_MB1_NONE
+	bool "None"
 
 config SAME70XPLAINED_MB1_BEE
 	bool "MRF24J40 Bee in mikroBUS1"
+	depends on IEEE802154_MRF24J40
 	select SAME70XPLAINED_MB1_SPI
+
+config SAME70XPLAINED_MB1_XBEE
+	bool "XBee in mikroBUS1"
+	depends on IEEE802154_XBEE
+	select SAME70XPLAINED_MB1_SPI
+
+endchoice # mikroBUS1 Click
+
+choice
+	prompt "mikroBUS2 Click"
+	depends on SAME70XPLAINED_CLICKSHIELD
+	default SAME70XPLAINED_MB2_NONE
+
+config SAME70XPLAINED_MB2_NONE
+	bool "None"
 
 config SAME70XPLAINED_MB2_BEE
 	bool "MRF24J40 Bee in mikroBUS2"
+	depends on IEEE802154_MRF24J40
 	select SAME70XPLAINED_MB2_SPI
 
-endchoice # Bee mikroBUS
+config SAME70XPLAINED_MB2_XBEE
+	bool "XBee in mikroBUS2"
+	depends on IEEE802154_XBEE
+	select SAME70XPLAINED_MB2_SPI
+
+endchoice # mikroBUS2 Click
 
 config SAME70XPLAINED_HSMCI0_AUTOMOUNT
 	bool "HSMCI0 automounter"
