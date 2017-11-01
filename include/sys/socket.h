@@ -110,7 +110,11 @@
 #define MSG_NOSIGNAL   0x4000 /* Do not generate SIGPIPE.  */
 #define MSG_MORE       0x8000 /* Sender will send more.  */
 
-/* Socket options */
+/* Protocol levels supported by get/setsockopt(): */
+
+#define SOL_SOCKET      0 /* Only socket-level options supported */
+
+/* Socket-level options */
 
 #define SO_DEBUG        0 /* Enables recording of debugging information (get/set).
                            * arg: pointer to integer containing a boolean value */
@@ -144,10 +148,6 @@
 #define SO_SNDTIMEO    15 /* Sets the timeout value specifying the amount of time that an
                            * output function blocks because flow control prevents data from
                            * being sent(get/set). arg: struct timeval */
-
-/* Protocol levels supported by get/setsockopt(): */
-
-#define SOL_SOCKET     0  /* Only socket-level options supported */
 
 /* Values for the 'how' argument of shutdown() */
 
