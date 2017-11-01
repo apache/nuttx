@@ -375,7 +375,7 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
     }
 
   resp = (FAR struct userfs_read_response_s *)priv->iobuffer;
-  if (resp->resp != USERFS_RESP_CLOSE)
+  if (resp->resp != USERFS_RESP_READ)
     {
       ferr("ERROR: Incorrect response: %u\n", resp->resp);
       return -EIO;
