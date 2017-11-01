@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 25, 2017)
+NuttX TODO List (Last updated November 1, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (17)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -1346,6 +1346,16 @@ o Network (net/, drivers/net)
   Priority:    Medium.  I have never heard of this problem being reported
                before, so I suspect it might not be so prevalent as one
                might expect.
+
+  Title:       LOCAL DATAGRAM RECVFROM RETURNS WRONG SENDER ADDRESS
+  Description: The recvfrom logic for local datagram sockets returns the
+               incorrect sender "from" address.  Instead, it returns the
+               receiver's "to" address.  This means that returning a reply
+               to the "from" address receiver sending a packet to itself.
+  Status:      Open
+  Priority:    Medium High.  This makes using local datagram sockets in
+               anything but a well-known point-to-point configuration
+               impossible.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
