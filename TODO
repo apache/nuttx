@@ -1983,7 +1983,7 @@ o File system / Generic drivers (fs/, drivers/)
                accidentlly enabling the feature.
   Status:      Open
   Priority:    Since this is a new feature, the priority must be low (unless,
-               of course, someone is in dire need of the featurea).
+               of course, someone is in dire need of the feature).
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

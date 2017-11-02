@@ -82,7 +82,7 @@ struct loop_struct_s
 #ifdef CONFIG_FS_WRITABLE
   bool         writeenabled; /* true: can write to device */
 #endif
-  int          fd;           /* Descriptor of char device/file */
+  struct file  devfile;      /* File struct of char device/file */
 };
 
 /****************************************************************************
@@ -143,7 +143,7 @@ static int loop_semtake(FAR struct loop_struct_s *dev)
    * awakened by a signal.
    */
 
-  DEBUGASSERT(ret == -EINTR);
+  DEBUGASSERT(ret == OK || ret == -EINTR);
   return ret;
 }
 
@@ -241,17 +241,18 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
 
   if (start_sector + nsectors > dev->nsectors)
     {
-      _err("ERROR: Read past end of file\n");
+      ferr("ERROR: Read past end of file\n");
       return -EIO;
     }
 
   /* Calculate the offset to read the sectors and seek to the position */
 
   offset = start_sector * dev->sectsize + dev->offset;
-  ret = lseek(dev->fd, offset, SEEK_SET);
+  ret = file_seek(&dev->devfile, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      _err("ERROR: Seek failed for offset=%d: %d\n", (int)offset, get_errno());
+      ferr("ERROR: Seek failed for offset=%d: %d\n",
+           (int)offset, get_errno());
       return -EIO;
     }
 
@@ -259,10 +260,11 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
 
   do
     {
-      nbytesread = nx_read(dev->fd, buffer, nsectors * dev->sectsize);
+      nbytesread = file_read(&dev->devfile, buffer,
+                             nsectors * dev->sectsize);
       if (nbytesread < 0 && nbytesread != -EINTR)
         {
-          _err("ERROR: Read failed: %d\n", nbytesread);
+          ferr("ERROR: Read failed: %d\n", nbytesread);
           return (int)nbytesread;
         }
     }
@@ -296,10 +298,10 @@ static ssize_t loop_write(FAR struct inode *inode,
   /* Calculate the offset to write the sectors and seek to the position */
 
   offset = start_sector * dev->sectsize + dev->offset;
-  ret = lseek(dev->fd, offset, SEEK_SET);
+  ret = file_seek(&dev->devfile, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      _err("ERROR: Seek failed for offset=%d: %d\n",
+      ferr("ERROR: Seek failed for offset=%d: %d\n",
            (int)offset, get_errno());
     }
 
@@ -307,10 +309,11 @@ static ssize_t loop_write(FAR struct inode *inode,
 
   do
     {
-      nbyteswritten = nx_write(dev->fd, buffer, nsectors * dev->sectsize);
+      nbyteswritten = file_write(&dev->devfile, buffer,
+                                 nsectors * dev->sectsize);
       if (nbyteswritten < 0 && nbyteswritten != -EINTR)
         {
-          _err("ERROR: nx_write failed: %d\n", nbyteswritten);
+          ferr("ERROR: nx_write failed: %d\n", nbyteswritten);
           return nbyteswritten;
         }
     }
@@ -372,11 +375,12 @@ int losetup(FAR const char *devname, FAR const char *filename,
   FAR struct loop_struct_s *dev;
   struct stat sb;
   int ret;
+  int fd;
 
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!devname || !filename || !sectsize)
+  if (devname == NULL || filename == NULL || sectsize == 0)
     {
       return -EINVAL;
     }
@@ -387,7 +391,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
   ret = stat(filename, &sb);
   if (ret < 0)
     {
-      _err("ERROR: Failed to stat %s: %d\n", filename, get_errno());
+      ferr("ERROR: Failed to stat %s: %d\n", filename, get_errno());
       return -get_errno();
     }
 
@@ -395,14 +399,15 @@ int losetup(FAR const char *devname, FAR const char *filename,
 
   if (sb.st_size - offset < sectsize)
     {
-      _err("ERROR: File is too small for blocksize\n");
+      ferr("ERROR: File is too small for blocksize\n");
       return -ERANGE;
     }
 
   /* Allocate a loop device structure */
 
-  dev = (FAR struct loop_struct_s *)kmm_zalloc(sizeof(struct loop_struct_s));
-  if (!dev)
+  dev = (FAR struct loop_struct_s *)
+    kmm_zalloc(sizeof(struct loop_struct_s));
+  if (dev == NULL)
     {
       return -ENOMEM;
     }
@@ -417,19 +422,16 @@ int losetup(FAR const char *devname, FAR const char *filename,
   /* Open the file. */
 
 #ifdef CONFIG_FS_WRITABLE
-  dev->writeenabled = false; /* Assume failure */
-  dev->fd           = -1;
-
   /* First try to open the device R/W access (unless we are asked
    * to open it readonly).
    */
 
   if (!readonly)
     {
-      dev->fd = open(filename, O_RDWR);
+      fd = open(filename, O_RDWR);
     }
 
-  if (dev->fd >= 0)
+  if (fd >= 0)
     {
       dev->writeenabled = true; /* Success */
     }
@@ -438,13 +440,23 @@ int losetup(FAR const char *devname, FAR const char *filename,
     {
       /* If that fails, then try to open the device read-only */
 
-      dev->fd = open(filename, O_RDWR);
-      if (dev->fd < 0)
+      fd = open(filename, O_RDWR);
+      if (fd < 0)
         {
-          _err("ERROR: Failed to open %s: %d\n", filename, get_errno());
           ret = -get_errno();
+          ferr("ERROR: Failed to open %s: %d\n", filename, ret);
           goto errout_with_dev;
         }
+    }
+
+  /* Detach the file from the file descriptor */
+
+  ret = file_detach(fd, &dev->devfile);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to open %s: %d\n", filename, ret);
+      close(fd);
+      goto errout_with_dev;
     }
 
   /* Inode private data will be reference to the loop device structure */
@@ -453,13 +465,14 @@ int losetup(FAR const char *devname, FAR const char *filename,
   if (ret < 0)
     {
       ferr("ERROR: register_blockdriver failed: %d\n", -ret);
-      goto errout_with_fd;
+      goto errout_with_file;
     }
 
   return OK;
 
-errout_with_fd:
-  close(dev->fd);
+errout_with_file:
+  file_close_detached(&dev->devfile);
+
 errout_with_dev:
   kmm_free(dev);
   return ret;
@@ -482,7 +495,7 @@ int loteardown(FAR const char *devname)
   /* Sanity check */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!devname)
+  if (devname == NULL)
     {
       return -EINVAL;
     }
@@ -495,7 +508,7 @@ int loteardown(FAR const char *devname)
   ret = open_blockdriver(devname, MS_RDONLY, &inode);
   if (ret < 0)
     {
-      _err("ERROR: Failed to open %s: %d\n", devname, -ret);
+      ferr("ERROR: Failed to open %s: %d\n", devname, -ret);
       return ret;
     }
 
@@ -504,7 +517,7 @@ int loteardown(FAR const char *devname)
   dev = (FAR struct loop_struct_s *)inode->i_private;
   close_blockdriver(inode);
 
-  DEBUGASSERT(dev);
+  DEBUGASSERT(dev != NULL);
 
   /* Are there still open references to the device */
 
@@ -519,9 +532,9 @@ int loteardown(FAR const char *devname)
 
   /* Release the device structure */
 
-  if (dev->fd >= 0)
+  if (dev->devfile.f_inode != NULL)
     {
-      (void)close(dev->fd);
+      (void)file_close_detached(&dev->devfile);
     }
 
   kmm_free(dev);

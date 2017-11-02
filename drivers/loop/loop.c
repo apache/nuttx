@@ -93,7 +93,8 @@ static ssize_t loop_read(FAR struct file *filep, FAR char *buffer, size_t len)
  * Name: loop_write
  ****************************************************************************/
 
-static ssize_t loop_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+static ssize_t loop_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t len)
 {
   return len; /* Say that everything was written */
 }
@@ -125,7 +126,7 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         else
           {
             ret = losetup(setup->devname, setup->filename, setup->sectsize,
-                         setup->offset, setup->readonly);
+                          setup->offset, setup->readonly);
           }
       }
       break;
