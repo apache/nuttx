@@ -6,7 +6,7 @@
 config FS_USERFS
 	bool "User file system"
 	default n
-	depends on NET_LOCAL
+	depends on NET_LOCAL && EXPERIMENTAL
 	---help---
 		Enable support for user file system.  See include/nuttx/fs/userfs.h
 

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 1, 2017)
+NuttX TODO List (Last updated November 2, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -23,7 +23,7 @@ nuttx/:
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
- (10)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
   (3)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -1962,6 +1962,28 @@ o File system / Generic drivers (fs/, drivers/)
                   checksum fails and the entire directory sequence is
                   ignored by readder() logic.  This the file does not
                   appear in the 'ls'.
+
+  Title:       DEADLOCKS WITH USERFS
+  Description: UserFS support has been added to NuttX.  However, the current
+               version is not very usable due to problems with deadlocks.  These
+               deadlocks occur because:  (1) logic on the NSH thread locks the
+               inode tree to prevent modification while travering file system
+               entities, but (2) Logic in the UserFS daemon also needs to lock
+               the inode tree.  This leads to the deadlock because the logic on
+               the NSH thread cannot unlock the inode tree until the traversal
+               completes but the logic on the UserFS daemon thread is blocked
+               waiting to lock the inodes.
+
+               This can be seen with the NSH mount command which locks the
+               inode tree while traversing all of the mountpoints and also
+               with a simple directory listing with the 'ls' command which
+               locks the inode tree while the directory entries are enumerate.
+
+               Support UserFS is currently marked EXPERIMENTAL to prevent
+               accidentlly enabling the feature.
+  Status:      Open
+  Priority:    Since this is a new feature, the priority must be low (unless,
+               of course, someone is in dire need of the featurea).
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
