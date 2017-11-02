@@ -290,6 +290,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }
 

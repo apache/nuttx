@@ -375,7 +375,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
   FAR struct loop_struct_s *dev;
   struct stat sb;
   int ret;
-  int fd;
+  int fd = -1;
 
   /* Sanity check */
 
