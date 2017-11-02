@@ -208,7 +208,8 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
           /* Poll wants to check state for both input and output. */
 
-          if (conn->lc_infd < 0 || conn->lc_outfd < 0)
+          if (conn->lc_infile.f_inode == NULL ||
+              conn->lc_outfile.f_inode == NULL)
             {
               fds->priv = NULL;
               goto pollerr;
@@ -222,23 +223,23 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
               return -ENOMEM;
             }
 
-          shadowfds[0].fd = conn->lc_infd;
-          shadowfds[0].sem = fds->sem;
+          shadowfds[0].fd     = 0; /* Does not matter */
+          shadowfds[0].sem    = fds->sem;
           shadowfds[0].events = fds->events & ~POLLOUT;
 
-          shadowfds[1].fd = conn->lc_outfd;
-          shadowfds[1].sem = fds->sem;
+          shadowfds[1].fd     = 1; /* Does not matter */
+          shadowfds[1].sem    = fds->sem;
           shadowfds[1].events = fds->events & ~POLLIN;
 
           /* Setup poll for both shadow pollfds. */
 
-          ret = fdesc_poll(conn->lc_infd, &shadowfds[0], true);
+          ret = file_poll(&conn->lc_infile, &shadowfds[0], true);
           if (ret >= 0)
             {
-              ret = fdesc_poll(conn->lc_outfd, &shadowfds[1], true);
+              ret = file_poll(&conn->lc_outfile, &shadowfds[1], true);
               if (ret < 0)
                 {
-                  (void)fdesc_poll(conn->lc_infd, &shadowfds[0], false);
+                  (void)file_poll(&conn->lc_infile, &shadowfds[0], false);
                 }
             }
 
@@ -260,13 +261,13 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
         {
           /* Poll wants to check state for input only. */
 
-          if (conn->lc_infd < 0)
+          if (conn->lc_infile.f_inode == NULL)
             {
               fds->priv = NULL;
               goto pollerr;
             }
 
-          ret = fdesc_poll(conn->lc_infd, fds, true);
+          ret = file_poll(&conn->lc_infile, fds, true);
         }
         break;
 
@@ -274,13 +275,13 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
         {
           /* Poll wants to check state for output only. */
 
-          if (conn->lc_outfd < 0)
+          if (conn->lc_outfile.f_inode == NULL)
             {
               fds->priv = NULL;
               goto pollerr;
             }
 
-          ret = fdesc_poll(conn->lc_outfd, fds, true);
+          ret = file_poll(&conn->lc_outfile, fds, true);
         }
         break;
 
@@ -350,18 +351,15 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
               return OK;
             }
 
-          DEBUGASSERT(shadowfds[0].fd == conn->lc_infd);
-          DEBUGASSERT(shadowfds[1].fd == conn->lc_outfd);
-
           /* Teardown for both shadow pollfds. */
 
-          ret = fdesc_poll(conn->lc_infd, &shadowfds[0], false);
+          ret = file_poll(&conn->lc_infile, &shadowfds[0], false);
           if (ret < 0)
             {
               status = ret;
             }
 
-          ret = fdesc_poll(conn->lc_outfd, &shadowfds[1], false);
+          ret = file_poll(&conn->lc_outfile, &shadowfds[1], false);
           if (ret < 0)
             {
               status = ret;
@@ -380,7 +378,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
               return OK;
             }
 
-          status = fdesc_poll(conn->lc_infd, fds, false);
+          status = file_poll(&conn->lc_infile, fds, false);
         }
         break;
 
@@ -391,7 +389,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
               return OK;
             }
 
-          status = fdesc_poll(conn->lc_outfd, fds, false);
+          status = file_poll(&conn->lc_outfile, fds, false);
         }
         break;
 

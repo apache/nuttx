@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/local/local_sendto.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* The outgoing FIFO should not be open */
 
-  DEBUGASSERT(conn->lc_outfd < 0);
+  DEBUGASSERT(conn->lc_outfile.f_inode == 0);
 
   /* At present, only standard pathname type address are support */
 
@@ -150,7 +150,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Send the packet */
 
-  nsent = local_send_packet(conn->lc_outfd, buf, len);
+  nsent = local_send_packet(&conn->lc_outfile, buf, len);
   if (nsent < 0)
     {
       nerr("ERROR: Failed to send the packet: %d\n", ret);
@@ -164,8 +164,8 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Now we can close the write-only socket descriptor */
 
-  close(conn->lc_outfd);
-  conn->lc_outfd = -1;
+  file_close_detached(&conn->lc_outfile);
+  conn->lc_outfile.f_inode = NULL;
 
 errout_with_halfduplex:
   /* Release our reference to the half duplex FIFO */

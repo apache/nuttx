@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/local/local_sendpacket.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
  *   Write a data on the write-only FIFO.
  *
  * Parameters:
- *   fd       File descriptor of write-only FIFO.
+ *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
  *
@@ -89,13 +89,14 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
  *
  ****************************************************************************/
 
-static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
+static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
+                            size_t len)
 {
   ssize_t nwritten;
 
   while (len > 0)
     {
-      nwritten = nx_write(fd, buf, len);
+      nwritten = file_write(filep, buf, len);
       if (nwritten < 0)
         {
           if (nwritten != -EINTR)
@@ -128,7 +129,7 @@ static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
  *   Send a packet on the write-only FIFO.
  *
  * Parameters:
- *   fd       File descriptor of write-only FIFO.
+ *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
  *
@@ -138,25 +139,27 @@ static int local_fifo_write(int fd, FAR const uint8_t *buf, size_t len)
  *
  ****************************************************************************/
 
-int local_send_packet(int fd, FAR const uint8_t *buf, size_t len)
+int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
+                      size_t len)
 {
   uint16_t len16;
   int ret;
 
   /* Send the packet preamble */
 
-  ret = local_fifo_write(fd, g_preamble, LOCAL_PREAMBLE_SIZE);
+  ret = local_fifo_write(filep, g_preamble, LOCAL_PREAMBLE_SIZE);
   if (ret == OK)
     {
       /* Send the packet length */
 
       len16 = len;
-      ret = local_fifo_write(fd, (FAR const uint8_t *)&len16, sizeof(uint16_t));
+      ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
+                             sizeof(uint16_t));
       if (ret == OK)
         {
           /* Send the packet data */
 
-          ret = local_fifo_write(fd, buf, len);
+          ret = local_fifo_write(filep, buf, len);
         }
     }
 

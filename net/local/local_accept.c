@@ -201,7 +201,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           if (ret == OK)
             {
-              DEBUGASSERT(conn->lc_outfd >= 0);
+              DEBUGASSERT(conn->lc_outfile.f_inode != NULL);
 
               /* Open the server-side read-only FIFO.  This should not
                * block because the client side has already opening it
@@ -221,7 +221,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           if (ret == OK)
             {
-              DEBUGASSERT(conn->lc_infd >= 0);
+              DEBUGASSERT(conn->lc_infile.f_inode != NULL);
 
               /* Return the address family */
 

@@ -182,7 +182,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
       goto errout_with_fifos;
     }
 
-  DEBUGASSERT(client->lc_outfd >= 0);
+  DEBUGASSERT(client->lc_outfile.f_inode != NULL);
 
   /* Add ourself to the list of waiting connections and notify the server. */
 
@@ -225,13 +225,13 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
       goto errout_with_outfd;
     }
 
-  DEBUGASSERT(client->lc_infd >= 0);
+  DEBUGASSERT(client->lc_infile.f_inode != NULL);
   client->lc_state = LOCAL_STATE_CONNECTED;
   return OK;
 
 errout_with_outfd:
-  (void)close(client->lc_outfd);
-  client->lc_outfd = -1;
+  (void)file_close_detached(&client->lc_outfile);
+  client->lc_outfile.f_inode = NULL;
 
 errout_with_fifos:
   (void)local_release_fifos(client);

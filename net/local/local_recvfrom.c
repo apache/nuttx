@@ -79,7 +79,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
   int ret;
 
-  ret = local_fifo_read(conn->lc_infd, buf, readlen);
+  ret = local_fifo_read(&conn->lc_infile, buf, readlen);
   if (ret < 0)
     {
       /* -ECONNRESET is a special case.  We may or not have received
@@ -161,7 +161,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* The incoming FIFO should be open */
 
-  DEBUGASSERT(conn->lc_infd >= 0);
+  DEBUGASSERT(conn->lc_infile.f_inode != NULL);
 
   /* Are there still bytes in the FIFO from the last packet? */
 
@@ -171,7 +171,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
        * the size of the next packet.
        */
 
-      ret = local_sync(conn->lc_infd);
+      ret = local_sync(&conn->lc_infile);
       if (ret < 0)
         {
           nerr("ERROR: Failed to get packet length: %d\n", ret);
@@ -265,7 +265,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* The incoming FIFO should not be open */
 
-  DEBUGASSERT(conn->lc_infd < 0);
+  DEBUGASSERT(conn->lc_infile.f_inode == NULL);
 
   /* Make sure that half duplex FIFO has been created */
 
@@ -292,7 +292,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * the next packet.
    */
 
-  ret = local_sync(conn->lc_infd);
+  ret = local_sync(&conn->lc_infile);
   if (ret < 0)
     {
       nerr("ERROR: Failed to get packet length: %d\n", ret);
@@ -348,8 +348,8 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Now we can close the read-only file descriptor */
 
-  close(conn->lc_infd);
-  conn->lc_infd = -1;
+  file_close_detached(&conn->lc_infile);
+  conn->lc_infile.f_inode = NULL;
 
   /* Release our reference to the half duplex FIFO */
 
@@ -371,8 +371,8 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 errout_with_infd:
   /* Close the read-only file descriptor */
 
-  close(conn->lc_infd);
-  conn->lc_infd = -1;
+  file_close_detached(&conn->lc_infile);
+  conn->lc_infile.f_inode = NULL;
 
 errout_with_halfduplex:
   /* Release our reference to the half duplex FIFO */

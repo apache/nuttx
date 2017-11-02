@@ -954,12 +954,8 @@ udgram
 
   To use the test:
 
-    nsh> mount -t binfs /bin
     nsh> server &
     nsh> client
-
-  For the sake of sanity, binfs and logins are disabled in this
-  configuration.
 
 unionfs
 

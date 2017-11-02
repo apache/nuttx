@@ -91,8 +91,8 @@ FAR struct local_conn_s *local_alloc(void)
     {
       /* Initialize non-zero elements the new connection structure */
 
-      conn->lc_infd  = -1;
-      conn->lc_outfd = -1;
+      conn->lc_infile.f_inode  = NULL;
+      conn->lc_outfile.f_inode = NULL;
 
 #ifdef CONFIG_NET_LOCAL_STREAM
       /* This semaphore is used for signaling and, hence, should not have
@@ -126,18 +126,18 @@ void local_free(FAR struct local_conn_s *conn)
 
   /* Make sure that the read-only FIFO is closed */
 
-  if (conn->lc_infd >= 0)
+  if (conn->lc_infile.f_inode != NULL)
     {
-      close(conn->lc_infd);
-      conn->lc_infd = -1;
+      file_close_detached(&conn->lc_infile);
+      conn->lc_infile.f_inode = NULL;
     }
 
   /* Make sure that the write-only FIFO is closed */
 
-  if (conn->lc_outfd >= 0)
+  if (conn->lc_outfile.f_inode != NULL)
     {
-      close(conn->lc_outfd);
-      conn->lc_outfd = -1;
+      file_close_detached(&conn->lc_outfile);
+      conn->lc_outfile.f_inode = NULL;
     }
 
 #ifdef CONFIG_NET_LOCAL_STREAM

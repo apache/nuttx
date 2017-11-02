@@ -51,6 +51,7 @@
 #include <stdint.h>
 #include <poll.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
 #ifdef CONFIG_NET_LOCAL
@@ -143,8 +144,8 @@ struct local_conn_s
   uint8_t lc_proto;            /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;             /* See enum local_type_e */
   uint8_t lc_state;            /* See enum local_state_e */
-  int16_t lc_infd;             /* File descriptor of read-only FIFO (peers) */
-  int16_t lc_outfd;            /* File descriptor of write-only FIFO (peers) */
+  struct file lc_infile;       /* File for read-only FIFO (peers) */
+  struct file lc_outfile;      /* File descriptor of write-only FIFO (peers) */
   char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
   int32_t lc_instance_id;      /* Connection instance ID for stream
                                 * server<->client connection pair */
@@ -424,7 +425,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
  *   Send a packet on the write-only FIFO.
  *
  * Parameters:
- *   fd       File descriptor of write-only FIFO.
+ *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
  *
@@ -434,7 +435,8 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-int local_send_packet(int fd, FAR const uint8_t *buf, size_t len);
+int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
+                      size_t len);
 
 /****************************************************************************
  * Name: local_recvfrom
@@ -475,10 +477,10 @@ ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
  *   Read a data from the read-only FIFO.
  *
  * Parameters:
- *   fd  - File descriptor of read-only FIFO.
- *   buf - Local to store the received data
- *   len - Length of data to receive [in]
- *         Length of data actually received [out]
+ *   filep - File structure of write-only FIFO.
+ *   buf   - Local to store the received data
+ *   len   - Length of data to receive [in]
+ *           Length of data actually received [out]
  *
  * Return:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -488,7 +490,7 @@ ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-int local_fifo_read(int fd, FAR uint8_t *buf, size_t *len);
+int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len);
 
 /****************************************************************************
  * Name: local_getaddr
@@ -517,7 +519,7 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
  *   Read a sync bytes until the start of the packet is found.
  *
  * Parameters:
- *   fd - File descriptor of read-only FIFO.
+ *   filep - File structure of write-only FIFO.
  *
  * Return:
  *   The non-zero size of the following packet is returned on success; a
@@ -525,7 +527,7 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int local_sync(int fd);
+int local_sync(FAR struct file *filep);
 
 /****************************************************************************
  * Name: local_create_fifos
