@@ -88,8 +88,8 @@
 
 /* Timing */
 
-#define HALF_SECOND_MSEC 500
-#define HALF_SECOND_USEC 500000L
+#define POLL_DELAY_MSEC 1
+#define POLL_DELAY_USEC 1000
 
 /************************************************************************************
  * Private Types
@@ -471,9 +471,9 @@ static int uart_tcdrain(FAR uart_dev_t *dev)
           while (!uart_txempty(dev))
             {
 #ifndef CONFIG_DISABLE_SIGNALS
-              nxsig_usleep(HALF_SECOND_USEC);
+              nxsig_usleep(POLL_DELAY_USEC);
 #else
-              up_mdelay(HALF_SECOND_MSEC);
+              up_mdelay(POLL_DELAY_MSEC);
 #endif
             }
          }
