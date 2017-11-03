@@ -429,8 +429,9 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *bu
  *
  ****************************************************************************/
 
-FAR struct ieee802154_radio_s *mrf24j40_init(FAR struct spi_dev_s *spi,
-                                      FAR const struct mrf24j40_lower_s *lower)
+FAR struct ieee802154_radio_s *
+  mrf24j40_init(FAR struct spi_dev_s *spi,
+                FAR const struct mrf24j40_lower_s *lower)
 {
   FAR struct mrf24j40_radio_s *dev;
 
