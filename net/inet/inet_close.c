@@ -348,7 +348,11 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
    * release it now.
    */
 
-  psock->s_sndcb = NULL;
+  if (psock->s_sndcb != NULL)
+    {
+      tcp_callback_free(conn, psock->s_sndcb);
+      psock->s_sndcb = NULL;
+    }
 #endif
 
   /* Check for the case where the host beat us and disconnected first */
