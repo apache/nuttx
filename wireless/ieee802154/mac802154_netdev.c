@@ -443,12 +443,10 @@ static int macnet_notify(FAR struct mac802154_maccb_s *maccb,
 #endif
         }
 #endif
-
-      nxsem_post(&priv->md_exclsem);
-      return OK;
     }
 
   nxsem_post(&priv->md_exclsem);
+  return OK;
 }
 
 /****************************************************************************

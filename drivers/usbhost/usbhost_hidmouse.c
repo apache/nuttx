@@ -1159,7 +1159,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
               if (buttons != priv->buttons || usbhost_threshold(priv))
 #endif
                 {
-                  /* We get here when either there is a meaning button
+                  /* We get here when either there is a meaningful button
                    * change and/or a significant movement of the mouse.  We
                    * are going to report the mouse event.
                    *
