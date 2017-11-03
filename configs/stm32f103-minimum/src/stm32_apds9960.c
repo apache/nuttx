@@ -111,8 +111,6 @@ static struct stm32_apds9960config_s g_apds9960config =
 static int apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
                                FAR void *arg)
 {
-  FAR struct stm32_apds9960config_s *priv =
-             (FAR struct stm32_apds9960config_s *)state;
   irqstate_t flags;
 
   sninfo("apds9960_irq_attach\n");
