@@ -445,9 +445,14 @@ static int macnet_notify(FAR struct mac802154_maccb_s *maccb,
 #endif
 
       nxsem_post(&priv->md_exclsem);
+      return OK;
     }
 
-  return OK;
+  /* By returning a negative value, we let the MAC know that we don't want the
+   * primitive and it will free it for us
+   */
+
+  return -1;
 }
 
 /****************************************************************************
