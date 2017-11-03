@@ -1076,7 +1076,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                       /* Try popping an event off the queue */
 
                       primitive = (FAR struct ieee802154_primitive_s *)
-                                      sq_remfirst(&priv->primitive_queue);
+                                    sq_remfirst(&priv->primitive_queue);
 
                       /* If there was an event to pop off, copy it into the user
                        * data and free it from the MAC layer's memory.
@@ -1084,11 +1084,12 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
                       if (primitive != NULL)
                         {
-                          memcpy(&netmac->u, primitive, sizeof(struct ieee802154_primitive_s));
+                          memcpy(&netmac->u, primitive,
+                                 sizeof(struct ieee802154_primitive_s));
 
-                          /* Free the notification */
+                          /* Free the event */
 
-                          mac802154_primitive_free(priv->md_mac, primitive);
+                          ieee802154_primitive_free(primitive);
                           ret = OK;
                           break;
                         }
