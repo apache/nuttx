@@ -246,6 +246,42 @@ config NOKIA6100_RGBORD
 
 endif
 
+config LCD_MAX7219
+	bool "Matrix of 8x8 LEDs controlled by MAX7219"
+	default n
+	---help---
+		Matrix of LEDs (8x8) controlled by MAX7219.
+		You can use cluster of 8x8 chained together.
+
+if LCD_MAX7219
+
+config MAX7219_NHORIZONTALBLKS
+	int "Number of 8x8 LEDs matrices in the horizontal (width)!"
+	default 1
+	---help---
+		Specifies the number of physical 8x8 LED matrices that are
+		connected together in the horizontal. In fact we have only
+		a single strip, but it can be arranged in blocks creating
+		physically horizontal/vertical columns/rows.
+
+config MAX7219_NVERTICALBLKS
+	int "Number of 8x8 LEDs matrices in the vertical (height)!"
+	default 1
+	---help---
+		Specifies the number of physical 8x8 LED matrices that are
+		connected together in the vertical. In fact we have only
+		a single strip, but it can be arranged in blocks creating
+		physically horizontal/vertical columns/rows.
+
+config MAX7219_INTENSITY
+	int "Default LED Matrix bright intensity"
+	default 10
+        range 0 15
+	---help---
+		Specifies the default LEDs bright intensity to use.
+
+endif # LCD_MAX7219
+
 config LCD_MIO283QT2
 	bool "MIO283QT-2 TFT LCD Display Module"
 	default n
