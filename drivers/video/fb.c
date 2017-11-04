@@ -405,7 +405,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
 #ifdef CONFIG_LCD_UPDATE
-      case FBIO_UPDATE:  /* Get video plane info */
+      case FBIO_UPDATE:  /* Update the LCD with the modified framebuffer data  */
         {
           FAR struct nxgl_rect_s *rect =
             (FAR struct nxgl_rect_s *)((uintptr_t)arg);

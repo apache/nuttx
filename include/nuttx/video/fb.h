@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/video/fb.h
  *
- *   Copyright (C) 2008-2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,24 +197,34 @@
 /* ioctls */
 
 #define FBIOGET_VIDEOINFO  _FBIOC(0x0001)  /* Get color plane info */
-                                           /* Argument: writable struct fb_videoinfo_s */
+                                           /* Argument: writable struct
+                                            *           fb_videoinfo_s */
 #define FBIOGET_PLANEINFO  _FBIOC(0x0002)  /* Get video plane info */
-                                           /* Argument: writable struct fb_planeinfo_s */
+                                           /* Argument: writable struct
+                                            *           fb_planeinfo_s */
 #ifdef CONFIG_FB_CMAP
 #  define FBIOGET_CMAP     _FBIOC(0x0003)  /* Get RGB color mapping */
-                                           /* Argument: writable struct fb_cmap_s */
+                                           /* Argument: writable struct
+                                            *           fb_cmap_s */
 #  define FBIOPUT_CMAP     _FBIOC(0x0004)  /* Put RGB color mapping */
-                                           /* Argument: read-only struct fb_cmap_s */
+                                           /* Argument: read-only struct
+                                            *           fb_cmap_s */
 #endif
+
 #ifdef CONFIG_FB_HWCURSOR
 #  define FBIOGET_CURSOR   _FBIOC(0x0005)  /* Get cursor attributes */
-                                           /* Argument: writable struct fb_cursorattrib_s */
+                                           /* Argument: writable struct
+                                            *           fb_cursorattrib_s */
 #  define FBIOPUT_CURSOR   _FBIOC(0x0006)  /* Set cursor attributes */
-                                           /* Argument: read-only struct fb_setcursor_s */
+                                           /* Argument: read-only struct
+                                            *           fb_setcursor_s */
 #endif
+
 #ifdef CONFIG_LCD_UPDATE
-#  define FBIO_UPDATE      _FBIOC(0x0007)  /* Update a rectangular region in the framebuffer */
-                                           /* Argument: read-only struct nxgl_rect_s */
+#  define FBIO_UPDATE      _FBIOC(0x0007)  /* Update a rectangular region in
+                                            * the framebuffer
+                                            * Argument: read-only struct
+                                            * nxgl_rect_s */
 #endif
 
 /****************************************************************************
