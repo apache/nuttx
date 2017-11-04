@@ -843,13 +843,17 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
  *   - When VNC is enabled.  This is case, this callout is necessary to
  *     update the remote frame buffer to match the local framebuffer.
  *
- * When this feature is enabled, some external logic must provide this
- * interface.  This is the function that will handle the notification.  It
- * receives the rectangular region that was updated on the provided plane.
+ *   When this feature is enabled, some external logic must provide this
+ *   interface.  This is the function that will handle the notification.  It
+ *   receives the rectangular region that was updated on the provided plane.
+ *
+ *   NOTE: This function is also required for use with the LCD framebuffer
+ *   driver front end when CONFIG_LCD_UPDATE=y, although that use does not
+ *   depend on CONFIG_NX (and this function seems misnamed in that case).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_UPDATE
+#if defined(CONFIG_NX_UPDATE) || defined(CONFIG_LCD_UPDATE)
 void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
                          FAR const struct nxgl_rect_s *rect);
 #endif

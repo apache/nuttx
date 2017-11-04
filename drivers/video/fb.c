@@ -404,7 +404,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 #endif
 
-#ifdef CONFIG_NX_UPDATE
+#ifdef CONFIG_LCD_UPDATE
       case FBIO_UPDATE:  /* Get video plane info */
         {
           FAR struct nxgl_rect_s *rect =

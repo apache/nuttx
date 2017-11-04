@@ -19,12 +19,17 @@ menuconfig LCD
 
 if LCD
 
+config LCD_UPDATE
+	bool
+	default n
+	select NX_UPDATE if NX
+
 comment "Common Graphic LCD Settings"
 
 config LCD_FRAMEBUFFER
 	bool "LCD framebuffer front end"
 	default n
-	select NX_UPDATE if NX
+	select LCD_UPDATE
 	---help---
 		Enable a "front end" that converts an sequential LCD driver into a
 		standard, NuttX frame buffer driver.

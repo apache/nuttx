@@ -63,11 +63,6 @@
  * Verbose debug must also be enabled
  */
 
-#ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_GRAPHICS
-#endif
-
 #ifndef CONFIG_DEBUG_INFO
 #  undef CONFIG_LCD_RITDEBUG
 #endif
