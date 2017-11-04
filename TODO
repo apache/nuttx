@@ -1979,6 +1979,14 @@ o File system / Generic drivers (fs/, drivers/)
                with a simple directory listing with the 'ls' command which
                locks the inode tree while the directory entries are enumerate.
 
+               The simplest solution would be change the IPC so that it does
+               not interact with the inode tree.  The simplest IPC change
+               would be to swith the underlying IPC from Unix domain local
+               sockets to LocalHost loopback sockets.  This would add
+               overhead of supporting a UDP stack in all configurations.
+               Another option would be to use shared memory or, perhaps
+               better, shared memory with a message queue.
+
                Support UserFS is currently marked EXPERIMENTAL to prevent
                accidentlly enabling the feature.
   Status:      Open
