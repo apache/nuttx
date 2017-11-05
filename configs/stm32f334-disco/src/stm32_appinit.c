@@ -96,7 +96,7 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-#ifndef CONFIG_DRIVERS_POWERLED
+#if !defined(CONFIG_DRIVERS_POWERLED) && !defined(CONFIG_DRIVERS_SMPS)
 #ifdef HAVE_LEDS
   /* Register the LED driver */
 
@@ -166,6 +166,16 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_powerled_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_SMPS
+  /* Initialize smps and register the smps driver */
+
+  ret = stm32_smps_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_smps_setup failed: %d\n", ret);
     }
 #endif
 

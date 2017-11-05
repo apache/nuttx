@@ -121,14 +121,14 @@ struct smps_feedback_s
 #ifdef CONFIG_SMPS_HAVE_OUTPUT_VOLTAGE
   float v_out;                       /* Output Voltage */
 #endif
-#ifdef CONFIG_SMPS_HAVE_INPUT_CURRENT
-  float i_in;                        /* Input Current */
-#endif
 #ifdef CONFIG_SMPS_HAVE_INPUT_VOLTAGE
   float v_in;                        /* Input Voltage */
 #endif
 #ifdef CONFIG_SMPS_HAVE_OUTPUT_CURRENT
   float i_out;                       /* Output Current */
+#endif
+#ifdef CONFIG_SMPS_HAVE_INPUT_CURRENT
+  float i_in;                        /* Input Current */
 #endif
 #ifdef CONFIG_SMPS_HAVE_INPUT_POWER
   float p_in;                        /* Input Power */

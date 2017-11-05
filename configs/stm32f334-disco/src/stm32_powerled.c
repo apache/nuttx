@@ -84,23 +84,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* REVISIT: Move to stm32_hrtim.h ? */
-
-#define HRTIM_CMP_SET(hrtim, tim, index, cmp)       \
-        hrtim->hd_ops->cmp_update(hrtim, tim, index, cmp)
-#define HRTIM_PER_SET(hrtim, tim, per)              \
-        hrtim->hd_ops->per_update(hrtim, tim, per)
-#define HRTIM_OUTPUTS_ENABLE(hrtim, tim, state)     \
-        hrtim->hd_ops->outputs_enable(hrtim, tim, state)
-#define HRTIM_BURST_CMP_SET(hrtim, cmp)             \
-        hrtim->hd_ops->burst_cmp_set(hrtim, cmp)
-#define HRTIM_BURST_PER_SET(hrtim, per)             \
-        hrtim->hd_ops->burst_per_set(hrtim, per)
-#define HRTIM_BURST_PRE_SET(hrtim, pre)         \
-        hrtim->hd_ops->burst_pre_set(hrtim, pre)
-#define HRTIM_BURST_ENABLE(hrtim, state)            \
-        hrtim->hd_ops->burst_enable(hrtim, state)
-
 #define DAC_BUFFER_INIT(dac, buffer) \
         dac->ad_ops->ao_ioctl(dac, IO_DMABUFFER_INIT, (unsigned long)buffer)
 
@@ -507,9 +490,9 @@ static int powerled_limits_set(FAR struct powerled_dev_s *dev,
       goto errout;
     }
 
-  if (limits->current > LED_ABSOLUTE_CURRENT_LIMIT_mA)
+  if (limits->current * 1000 > LED_ABSOLUTE_CURRENT_LIMIT_mA)
     {
-      limits->current = LED_ABSOLUTE_CURRENT_LIMIT_mA;
+      limits->current = (float)LED_ABSOLUTE_CURRENT_LIMIT_mA/1000.0;
       printf("LED current limiit > LED absoulute current limit."
              " Set current limit to %d.\n",
              limits->current);

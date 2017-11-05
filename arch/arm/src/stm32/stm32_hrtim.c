@@ -181,10 +181,6 @@
 #  endif
 #endif
 
-#ifdef CONFIG_STM32_HRTIM_ADC
-#  error HRTIM ADC Triggering not supported yet
-#endif
-
 #if defined(CONFIG_STM32_HRTIM_ADC1_TRG1) || defined(CONFIG_STM32_HRTIM_ADC1_TRG2) || \
     defined(CONFIG_STM32_HRTIM_ADC1_TRG3) || defined(CONFIG_STM32_HRTIM_ADC1_TRG4) || \
     defined(CONFIG_STM32_HRTIM_ADC2_TRG1) || defined(CONFIG_STM32_HRTIM_ADC2_TRG2) || \

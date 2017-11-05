@@ -84,7 +84,7 @@
 #define STM32_ADC_JDR4_OFFSET        0x008c  /* ADC injected data register 4 */
 #define STM32_ADC_AWD2CR_OFFSET      0x00a0  /* ADC analog watchdog 2 configuration register */
 #define STM32_ADC_AWD3CR_OFFSET      0x00a4  /* ADC analog watchdog 3 configuration register */
-#define STM32_ADC_DIFSEL_OFFSET      0x00b0  /* ADC differential mode selection register 2 */
+#define STM32_ADC_DIFSEL_OFFSET      0x00b0  /* ADC differential mode selection register */
 #define STM32_ADC_CALFACT_OFFSET     0x00b4  /* ADC calibration factors */
 
 /* Master and Slave ADC Common Registers */
@@ -384,7 +384,7 @@
 /* ADC injected sequence register */
 
 #define ADC_JSQR_JL_SHIFT             (0)       /* Bits 0-1: Injected Sequence length */
-#define ADC_JSQR_JL_MASK              (3 << ADC_JSQR_JL_SHIFT)
+#define ADC_JSQR_JL_MASK              (2 << ADC_JSQR_JL_SHIFT)
 #  define ADC_JSQR_JL(n)              (((n)-1) << ADC_JSQR_JL_SHIFT) /* n=1..4 */
 #define ADC_JSQR_JEXTSEL_SHIFT        (2)       /* Bits 2-5: External Trigger Selection for injected group */
 #define ADC_JSQR_JEXTSEL_MASK         (15 << ADC_JSQR_JEXTSEL_SHIFT)
@@ -414,8 +414,8 @@
 #define ADC_JSQR_JSQ1_MASK           (0x1f << ADC_JSQR_JSQ1_SHIFT)
 #  define ADC_JSQR_JSQ1(ch)          ((ch) << ADC_JSQR_JSQ1_SHIFT) /* Channel number 1..18 */
 #define ADC_JSQR_JSQ2_SHIFT          (14)       /* Bits 14-18: 2nd conversion in injected sequence */
-#define ADC_JSQR_JSQ2_MASK           (0x1f << ADC_JSQR_JSQ2_MASK)
-#  define ADC_JSQR_JSQ2(ch)          ((ch) << ADC_JSQR_JSQ2_MASK) /* Channel number 1..18 */
+#define ADC_JSQR_JSQ2_MASK           (0x1f << ADC_JSQR_JSQ2_SHIFT)
+#  define ADC_JSQR_JSQ2(ch)          ((ch) << ADC_JSQR_JSQ2_SHIFT) /* Channel number 1..18 */
 #define ADC_JSQR_JSQ3_SHIFT          (20)       /* Bits 20-24: 3rd conversion in injected sequence */
 #define ADC_JSQR_JSQ3_MASK           (0x1f << ADC_JSQR_JSQ3_SHIFT)
 #  define ADC_JSQR_JSQ3(ch)          ((ch) << ADC_JSQR_JSQ3_SHIFT) /* Channel number 1..18 */

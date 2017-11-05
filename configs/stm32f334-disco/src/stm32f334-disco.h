@@ -207,4 +207,16 @@ int stm32_opamp_setup(void);
 int stm32_powerled_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_smps_setup
+ *
+ * Description:
+ *  Initialize SMPS peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_SMPS
+int stm32_smps_setup(void);
+#endif
+
 #endif /* __CONFIGS_STM32F334_DISCO_SRC_STM32F334_DISCO_H */

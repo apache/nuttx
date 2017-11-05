@@ -211,15 +211,15 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_3 /* PB4 */
 #define GPIO_USART2_TX GPIO_USART2_TX_3 /* PB3 */
 
-/* Board configuration for powerled example */
-
-/* - Set HRTIM TIMC output 1 on PERIOD
- * - Reset HRTIM TIMC output 1 on HRTIM EEV2.
- * - HRTIM EEV2 is connected to COMP4 output which works as current limit.
- * - COMP4 inverting input is connected to DAC1CH1 output.
- * - COMP4 non-inverting input is connceted to current sense resitor (1 Ohm).
- * - DAC1CH1 DMA transfer is triggered by HRTIM TIMC events, which is used
- *   to provide slope compensation
+/* Board configuration for powerled example:
+ *   - Set HRTIM TIMC output 1 (PB12) on PERIOD.
+ *   - Reset HRTIM TIMC output 1 on HRTIM EEV2.
+ *   - HRTIM EEV2 is connected to COMP4 output which works as current limit.
+ *   - COMP4 inverting input is connected to DAC1CH1 output.
+ *   - COMP4 non-inverting input (PB1) is connceted to current sense
+ *     resitor (1 Ohm).
+ *   - DAC1CH1 DMA transfer is triggered by HRTIM TIMC events, which is used
+ *     to provide slope compensation.
  */
 
 #if defined(CONFIG_EXAMPLES_POWERLED)
@@ -256,6 +256,38 @@
 #define DAC1CH1_DMA_CHAN     DMACHAN_HRTIM1_C
 
 #endif  /* CONFIG_EXAMPLES_POWERLED */
+
+/* Board configuration for SMPS example:
+ *   PA8  - HRTIM_CHA1
+ *   PA9  - HRTIM_CHA2
+ *   PA10 - HRTIM_CHB1
+ *   PA11 - HRTIM_CHB2
+ *   VIN  - ADC Channel 2 (PA1)
+ *   VOUT - ADC Channel 4 (PA3)
+ */
+
+#if defined(CONFIG_EXAMPLES_SMPS)
+
+/* ADC configuration ******************************************************/
+
+#define ADC1_INJECTED_CHAN 2
+#define ADC1_EXTSEL_VALUE 0
+#define ADC1_SMP2 ADC_SMPR_61p5
+#define ADC1_SMP4 ADC_SMPR_61p5
+
+/* HRTIM configuration ******************************************************/
+
+#define HRTIM_TIMA_PRESCALER HRTIM_PRESCALER_32
+#define HRTIM_TIMA_MODE      HRTIM_MODE_CONT
+
+#define HRTIM_TIMB_PRESCALER HRTIM_PRESCALER_32
+#define HRTIM_TIMB_MODE      HRTIM_MODE_CONT
+
+#define HRTIM_ADC_TRG2       HRTIM_ADCTRG24_AC4
+
+/* DMA channels *************************************************************/
+
+#endif  /* CONFIG_EXAMPLES_SMPS */
 
 /****************************************************************************
  * Public Data

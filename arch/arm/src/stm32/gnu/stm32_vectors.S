@@ -106,7 +106,7 @@
 	.thumb
 	.file		"stm32_vectors.S"
 
-/* Check if common ARMv7 interrupt vectoring is used (see arch/arm/src/armv7-m/up_vectors.S) */
+/* Check if common ARMv7 interrupt vectoring is used (see arch/arm/src/armv7-m/up_vectors.c) */
 
 #ifndef CONFIG_ARMV7M_CMNVECTOR
 

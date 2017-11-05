@@ -202,6 +202,25 @@
 #  endif
 #endif
 
+/* Helpers **************************************************************************/
+
+#define HRTIM_CMP_SET(hrtim, tim, index, cmp)               \
+        (hrtim)->hd_ops->cmp_update(hrtim, tim, index, cmp)
+#define HRTIM_PER_SET(hrtim, tim, per)                      \
+        (hrtim)->hd_ops->per_update(hrtim, tim, per)
+#define HRTIM_OUTPUTS_ENABLE(hrtim, tim, state)             \
+        (hrtim)->hd_ops->outputs_enable(hrtim, tim, state)
+#define HRTIM_OUTPUTS_ENABLE(hrtim, tim, state)             \
+        (hrtim)->hd_ops->outputs_enable(hrtim, tim, state)
+#define HRTIM_BURST_CMP_SET(hrtim, cmp)                     \
+        (hrtim)->hd_ops->burst_cmp_set(hrtim, cmp)
+#define HRTIM_BURST_PER_SET(hrtim, per)                     \
+        (hrtim)->hd_ops->burst_per_set(hrtim, per)
+#define HRTIM_BURST_PRE_SET(hrtim, pre)                     \
+        (hrtim)->hd_ops->burst_pre_set(hrtim, pre)
+#define HRTIM_BURST_ENABLE(hrtim, state)                    \
+        (hrtim)->hd_ops->burst_enable(hrtim, state)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

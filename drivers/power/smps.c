@@ -421,7 +421,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (smps->limits.v_out > 0 && params->v_out > smps->limits.v_out)
             {
-              pwrerr("ERROR: params->v_out > limits.v_out: %d > %d\n",
+              pwrerr("ERROR: params->v_out > limits.v_out: %.2f > %.2f\n",
                      params->v_out, smps->limits.v_out);
 
               ret = -EPERM;
@@ -432,7 +432,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (smps->limits.i_out > 0 && params->i_out > smps->limits.i_out)
             {
-              pwrerr("ERROR: params->i_out > limits.i_out: %d > %d\n",
+              pwrerr("ERROR: params->i_out > limits.i_out: %.2f > %.2f\n",
                      params->i_out, smps->limits.i_out);
 
               ret = -EPERM;
@@ -443,7 +443,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (smps->limits.p_out > 0 && params->p_out > smps->limits.p_out)
             {
-              pwrerr("ERROR: params->p_out > limits.p_out: %d > %d\n",
+              pwrerr("ERROR: params->p_out > limits.p_out: %.2f > %.2f\n",
                      params->p_out, smps->limits.p_out);
 
               ret = -EPERM;

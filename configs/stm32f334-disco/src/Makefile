@@ -72,4 +72,8 @@ ifeq ($(CONFIG_DRIVERS_POWERLED),y)
 CSRCS += stm32_powerled.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_SMPS),y)
+CSRCS += stm32_smps.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

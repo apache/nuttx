@@ -53,7 +53,6 @@
 
 #include "up_internal.h"
 #include "ram_vectors.h"
-#include "stm32_tim.h"
 
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
@@ -106,11 +105,6 @@
 #define ADC_REF_VOLTAGE 3.3
 #define ADC_VAL_MAX     4095
 
-#define HRTIM_CMP_SET(hrtim, tim, index, cmp)       \
-  hrtim->hd_ops->cmp_update(hrtim, tim, index, cmp)
-#define HRTIM_PER_SET(hrtim, tim, per)          \
-  hrtim->hd_ops->per_update(hrtim, tim, per)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -128,6 +122,10 @@ struct highpri_s
   uint16_t           val[DEV1_NCHANNELS];
   float              volt[DEV1_NCHANNELS];
 };
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* ADC channel list  */
 
@@ -151,10 +149,6 @@ static const uint32_t g_pinlist1[DEV1_NCHANNELS] =
   GPIO_ADC1_IN11,               /* PB0/A3 */
 #endif
 };
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 static struct highpri_s g_highpri;
 
@@ -201,7 +195,6 @@ void adc12_handler(void)
     }
 
   adc->ops->int_ack(adc, pending);
-
 }
 #endif
 
