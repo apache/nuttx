@@ -1709,28 +1709,6 @@ NOTES:
 Configuration sub-directories
 -----------------------------
 
-  fb
-  --
-
-    A simple NSH configuration used for some basic (non-graphic) debug of
-    the framebuffer character driver at drivers/video/fb.c using test at
-    apps/examples/fb.  The SAMv7-XULT LCD driver does not support a
-    framebuffer!  This configuration uses the LCD framebuffer front end at
-    drivers/lcd/lcd_framebuffer to convert the LCD interface into a
-    compatible framebuffer interface.
-
-    NOTES:
-
-    1. This configuration uses USART0 to avoid conflicts with the LCD mode.
-       See the section about entitle "Serial Console" for connection of
-       RS-232 driver hardware.
-
-    STATUS:
-    2017-09-17:  This configuration was completed.  The frame buffer driver
-      is not yet functional.  I see the image only on the right side of the
-      LCD and the colors appear wrong.  NOTE that the similar configuration
-      for the STM3240G-EVAL is fully functional.
-
   knsh:
 
     This is identical to the nsh configuration below except that NuttX
