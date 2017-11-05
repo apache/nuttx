@@ -23,7 +23,7 @@ nuttx/:
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
- (11)  File system/Generic drivers (fs/, drivers/)
+ (10)  File system/Generic drivers (fs/, drivers/)
   (9)  Graphics Subsystem (graphics/)
   (3)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -1962,36 +1962,6 @@ o File system / Generic drivers (fs/, drivers/)
                   checksum fails and the entire directory sequence is
                   ignored by readder() logic.  This the file does not
                   appear in the 'ls'.
-
-  Title:       DEADLOCKS WITH USERFS
-  Description: UserFS support has been added to NuttX.  However, the current
-               version is not very usable due to problems with deadlocks.  These
-               deadlocks occur because:  (1) logic on the NSH thread locks the
-               inode tree to prevent modification while travering file system
-               entities, but (2) Logic in the UserFS daemon also needs to lock
-               the inode tree.  This leads to the deadlock because the logic on
-               the NSH thread cannot unlock the inode tree until the traversal
-               completes but the logic on the UserFS daemon thread is blocked
-               waiting to lock the inodes.
-
-               This can be seen with the NSH mount command which locks the
-               inode tree while traversing all of the mountpoints and also
-               with a simple directory listing with the 'ls' command which
-               locks the inode tree while the directory entries are enumerated.
-
-               The simplest solution would be change the IPC so that it does
-               not interact with the inode tree.  The simplest IPC change
-               would be to swith the underlying IPC from Unix domain local
-               sockets to LocalHost loopback sockets.  This would add
-               overhead of supporting a UDP stack in all configurations.
-               Another option would be to use shared memory or, perhaps
-               better, shared memory with a message queue.
-
-               Support UserFS is currently marked EXPERIMENTAL to prevent
-               accidentlly enabling the feature.
-  Status:      Open
-  Priority:    Since this is a new feature, the priority must be low (unless,
-               of course, someone is in dire need of the feature).
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

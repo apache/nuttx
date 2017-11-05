@@ -14,26 +14,6 @@ config NETDEV_LOOPBACK
 		Add support for the local network loopback device, lo.
 
 if NETDEV_LOOPBACK
-
-choice
-	prompt "Work queue"
-	default LOOPBACK_LPWORK if SCHED_LPWORK
-	default LOOPBACK_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
-	depends on SCHED_WORKQUEUE
-	---help---
-		Work queue support is required to use the loopback driver.  If the
-		low priority work queue is available, then it should be used by the
-		loopback driver.
-
-config LOOPBACK_HPWORK
-	bool "High priority"
-	depends on SCHED_HPWORK
-
-config LOOPBACK_LPWORK
-	bool "Low priority"
-	depends on SCHED_LPWORK
-
-endchoice # Work queue
 endif # NETDEV_LOOPBACK
 
 config NETDEV_TELNET

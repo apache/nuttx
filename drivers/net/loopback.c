@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NETDEV_LOOPBACK)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -63,6 +62,8 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
+#ifdef CONFIG_NETDEV_LOOPBACK
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -71,14 +72,6 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
-#else
-#  if defined(CONFIG_LOOPBACK_HPWORK)
-#    define LPBKWORK HPWORK
-#  elif defined(CONFIG_LOOPBACK_LPWORK)
-#    define LPBKWORK LPWORK
-#  else
-#    error Neither CONFIG_LOOPBACK_HPWORK nor CONFIG_LOOPBACK_LPWORK defined
-#  endif
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -283,7 +276,7 @@ static void lo_poll_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
+  work_queue(LPWORK, &priv->lo_work, lo_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -429,7 +422,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(LPBKWORK, &priv->lo_work, lo_txavail_work, priv, 0);
+      work_queue(LPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
     }
 
   return OK;
@@ -558,4 +551,4 @@ int localhost_initialize(void)
   return lo_ifup(&priv->lo_dev);
 }
 
-#endif /* CONFIG_NET && CONFIG_NETDEV_LOOPBACK */
+#endif /* CONFIG_NETDEV_LOOPBACK */

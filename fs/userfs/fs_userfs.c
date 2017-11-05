@@ -43,17 +43,19 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <mqueue.h>
+#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -82,10 +84,9 @@ struct userfs_state_s
 
   /* Internal state */
 
-  uint16_t instance;         /* UserFS instance number */
   struct socket psock;       /* Client socket instance */
-  struct sockaddr_un server; /* Server address */
-  socklen_t addrlen;         /* Size of server address */
+  struct sockaddr_in server; /* Server address */
+  sem_t exclsem;             /* Exlusive access for request-response sequence */
 
   /* I/O Buffer (actual size depends on USERFS_REQ_MAXSIZE and the configured
    * mxwrite).
@@ -200,6 +201,7 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
   ssize_t nsent;
   ssize_t nrecvd;
   int pathlen;
+  int ret;
 
   finfo("Open '%s'\n", relpath);
 
@@ -208,6 +210,23 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
 
+  /* Check the path length */
+
+  DEBUGASSERT(relpath != NULL);
+  pathlen = strlen(relpath);
+  if (pathlen > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
   req         = (FAR struct userfs_open_request_s *)priv->iobuffer;
@@ -215,21 +234,16 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
   req->oflags = oflags;
   req->mode   = mode;
 
-  DEBUGASSERT(relpath != NULL);
-  pathlen     = strlen(relpath);
-  if (pathlen > priv->mxwrite)
-    {
-      return -E2BIG;
-    }
-
   strncpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_OPEN_REQUEST_S(pathlen + 1), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -237,6 +251,8 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -259,7 +275,6 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
     }
 
   filep->f_priv = resp->openinfo;
-
   return resp->ret;
 }
 
@@ -274,11 +289,20 @@ static int userfs_close(FAR struct file *filep)
   FAR struct userfs_close_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Construct and send the request to the server */
 
@@ -288,10 +312,12 @@ static int userfs_close(FAR struct file *filep)
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_close_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -299,6 +325,8 @@ static int userfs_close(FAR struct file *filep)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -318,6 +346,11 @@ static int userfs_close(FAR struct file *filep)
       return -EIO;
     }
 
+  if (resp->ret >= 0)
+    {
+      filep->f_priv = NULL;
+    }
+
   return resp->ret;
 }
 
@@ -334,6 +367,7 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
   ssize_t nsent;
   ssize_t nrecvd;
   int respsize;
+  int ret;
 
   finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
 
@@ -341,6 +375,14 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Construct and send the request to the server */
 
@@ -351,10 +393,12 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_read_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -362,6 +406,8 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -412,6 +458,7 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct userfs_write_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
 
@@ -428,6 +475,14 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
       return -E2BIG; /* No implememented yet */
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
   req           = (FAR struct userfs_write_request_s *)priv->iobuffer;
@@ -438,10 +493,12 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_WRITE_REQUEST_S(buflen), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -449,6 +506,8 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -482,6 +541,7 @@ static off_t userfs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct userfs_seek_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   finfo("Offset %lu bytes to whence=%d\n", (unsigned long)offset, whence);
 
@@ -489,6 +549,14 @@ static off_t userfs_seek(FAR struct file *filep, off_t offset, int whence)
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Construct and send the request to the server */
 
@@ -500,10 +568,12 @@ static off_t userfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_seek_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -511,6 +581,8 @@ static off_t userfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -544,6 +616,7 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct userfs_ioctl_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
@@ -552,9 +625,17 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
-  req            = (FAR struct userfs_ioctl_request_s *)priv->iobuffer;
+  req           = (FAR struct userfs_ioctl_request_s *)priv->iobuffer;
   req->req      = USERFS_REQ_IOCTL;
   req->openinfo = filep->f_priv;
   req->cmd      = cmd;
@@ -562,10 +643,12 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_ioctl_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -573,6 +656,8 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -606,11 +691,20 @@ static int userfs_sync(FAR struct file *filep)
   FAR struct userfs_sync_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Construct and send the request to the server */
 
@@ -620,10 +714,12 @@ static int userfs_sync(FAR struct file *filep)
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_sync_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -631,6 +727,8 @@ static int userfs_sync(FAR struct file *filep)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -668,6 +766,7 @@ static int userfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   FAR struct userfs_dup_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   finfo("Dup %p->%p\n", oldp, newp);
 
@@ -675,6 +774,14 @@ static int userfs_dup(FAR const struct file *oldp, FAR struct file *newp)
               oldp->f_inode != NULL &&
               oldp->f_inode->i_private != NULL);
   priv = oldp->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Construct and send the request to the server */
 
@@ -684,10 +791,12 @@ static int userfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_dup_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -695,6 +804,8 @@ static int userfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -734,11 +845,20 @@ static int userfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct userfs_fstat_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Construct and send the request to the server */
 
@@ -748,10 +868,12 @@ static int userfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_fstat_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -759,6 +881,8 @@ static int userfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -802,6 +926,7 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ssize_t nsent;
   ssize_t nrecvd;
   int pathlen;
+  int ret;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
@@ -809,26 +934,38 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
-  /* Construct and send the request to the server */
-
-  req         = (FAR struct userfs_opendir_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_OPENDIR;
+  /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen     = strlen(relpath);
+  pathlen = strlen(relpath);
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req      = (FAR struct userfs_opendir_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_OPENDIR;
+
   strncpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_OPENDIR_REQUEST_S(pathlen + 1), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -836,6 +973,8 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -878,23 +1017,34 @@ static int userfs_closedir(FAR struct inode *mountpt,
   FAR struct userfs_closedir_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
-  req         = (FAR struct userfs_closedir_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_CLOSEDIR;
-  req->dir    = dir->u.userfs.fs_dir;
+  req      = (FAR struct userfs_closedir_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_CLOSEDIR;
+  req->dir = dir->u.userfs.fs_dir;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_closedir_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -902,6 +1052,8 @@ static int userfs_closedir(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -939,23 +1091,34 @@ static int userfs_readdir(FAR struct inode *mountpt,
   FAR struct userfs_readdir_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
-  req         = (FAR struct userfs_readdir_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_READDIR;
-  req->dir    = dir->u.userfs.fs_dir;
+  req      = (FAR struct userfs_readdir_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_READDIR;
+  req->dir = dir->u.userfs.fs_dir;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_readdir_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -963,6 +1126,8 @@ static int userfs_readdir(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1004,23 +1169,34 @@ static int userfs_rewinddir(FAR struct inode *mountpt,
   FAR struct userfs_rewinddir_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
-  req         = (FAR struct userfs_rewinddir_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_REWINDDIR;
-  req->dir    = dir->u.userfs.fs_dir;
+  req      = (FAR struct userfs_rewinddir_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_REWINDDIR;
+  req->dir = dir->u.userfs.fs_dir;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_rewinddir_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1028,6 +1204,8 @@ static int userfs_rewinddir(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1066,14 +1244,12 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 {
   FAR struct userfs_state_s *priv;
   FAR const struct userfs_config_s *config;
-  struct sockaddr_un client;
-  socklen_t addrlen;
+  struct sockaddr_in client;
   unsigned int iolen;
   int ret;
 
   DEBUGASSERT(data != NULL && handle != NULL);
   config = (FAR const struct userfs_config_s *)data;
-  DEBUGASSERT(config->instance >= 0 && config->instance <= UINT16_MAX);
 
   /* Allocate an instance of the UserFS state structure */
 
@@ -1085,27 +1261,29 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       return -ENOMEM;
     }
 
+  /* Initialize the semaphore that assures mutually exclusive access through
+   * the entire request-response sequence.
+   */
+
+  sem_init(&priv->exclsem, 0, 1);
+
   /* Copy the configuration data into the allocated structure.  Why?  First
    * we can't be certain of the life time of the memory underlying the config
    * reference.  Also, in the KERNEL build, the config data will like in
    * process-specific memory and cannot be shared across processes.
    */
 
-  priv->mxwrite  = config->mxwrite;
-  priv->instance = config->instance;
+  priv->mxwrite                = config->mxwrite;
 
   /* Preset the server address */
 
-  priv->server.sun_family = AF_LOCAL;
-  snprintf(priv->server.sun_path, UNIX_PATH_MAX, USERFS_SERVER_FMT,
-           config->instance);
-  priv->server.sun_path[UNIX_PATH_MAX - 1] = '\0';
+  priv->server.sin_family      = AF_INET;
+  priv->server.sin_port        = htons(config->portno);
+  priv->server.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
 
-  priv->addrlen = strlen(priv->server.sun_path) + sizeof(sa_family_t) + 1;
+  /* Create a LocalHost UDP client socket */
 
-  /* Create a new Unix domain datagram server socket */
-
-  ret = psock_socket(PF_LOCAL, SOCK_DGRAM, 0, &priv->psock);
+  ret = psock_socket(PF_INET, SOCK_DGRAM, 0, &priv->psock);
   if (ret < 0)
     {
       printf("client: ERROR socket failure %d\n", ret);
@@ -1116,13 +1294,12 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Bind the socket to the client address */
 
-  client.sun_family = AF_LOCAL;
-  snprintf(client.sun_path, UNIX_PATH_MAX, USERFS_CLIENT_FMT,
-           config->instance);
-  client.sun_path[UNIX_PATH_MAX - 1] = '\0';
+  client.sin_family      = AF_INET;
+  client.sin_port        = 0;
+  client.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
 
-  addrlen = strlen(client.sun_path) + sizeof(sa_family_t) + 1;
-  ret = psock_bind(&priv->psock, (struct sockaddr*)&client, addrlen);
+  ret = psock_bind(&priv->psock, (struct sockaddr*)&client,
+                   sizeof(struct sockaddr_in));
   if (ret < 0)
     {
       ferr("ERROR: bind() failed: %d\n", ret);
@@ -1160,20 +1337,31 @@ static int userfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   FAR struct userfs_destroy_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
-  req         = (FAR struct userfs_destroy_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_DESTROY;
+  req      = (FAR struct userfs_destroy_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_DESTROY;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_destroy_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1181,6 +1369,8 @@ static int userfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1229,22 +1419,33 @@ static int userfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   FAR struct userfs_statfs_response_s *resp;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Construct and send the request to the server */
 
-  req         = (FAR struct userfs_statfs_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_STATFS;
+  req      = (FAR struct userfs_statfs_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_STATFS;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_statfs_request_s), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1252,13 +1453,15 @@ static int userfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
       return (int)nrecvd;
     }
 
-  if (nrecvd != sizeof(struct userfs_unlink_response_s))
+  if (nrecvd != sizeof(struct userfs_statfs_response_s))
     {
       ferr("ERROR: Response size incorrect: %u\n", (unsigned int)nrecvd);
       return -EIO;
@@ -1295,15 +1498,13 @@ static int userfs_unlink(FAR struct inode *mountpt,
   ssize_t nsent;
   ssize_t nrecvd;
   int pathlen;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
-  /* Construct and send the request to the server */
-
-  req         = (FAR struct userfs_unlink_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_UNLINK;
+  /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
   pathlen     = strlen(relpath);
@@ -1312,14 +1513,29 @@ static int userfs_unlink(FAR struct inode *mountpt,
       return -E2BIG;
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req      = (FAR struct userfs_unlink_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_UNLINK;
+
   strncpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_UNLINK_REQUEST_S(pathlen + 1), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1327,6 +1543,8 @@ static int userfs_unlink(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1366,32 +1584,45 @@ static int userfs_mkdir(FAR struct inode *mountpt,
   ssize_t nsent;
   ssize_t nrecvd;
   int pathlen;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
-  /* Construct and send the request to the server */
-
-  req         = (FAR struct userfs_mkdir_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_MKDIR;
-  req->mode   = mode;
+  /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen     = strlen(relpath);
+  pathlen = strlen(relpath);
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req       = (FAR struct userfs_mkdir_request_s *)priv->iobuffer;
+  req->req  = USERFS_REQ_MKDIR;
+  req->mode = mode;
+
   strncpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen + 1), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1399,6 +1630,8 @@ static int userfs_mkdir(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1438,31 +1671,44 @@ static int userfs_rmdir(FAR struct inode *mountpt,
   ssize_t nsent;
   ssize_t nrecvd;
   int pathlen;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
-  /* Construct and send the request to the server */
-
-  req         = (FAR struct userfs_rmdir_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_RMDIR;
+  /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen     = strlen(relpath);
+  pathlen = strlen(relpath);
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req      = (FAR struct userfs_rmdir_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_RMDIR;
+
   strncpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_RMDIR_REQUEST_S(pathlen + 1), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1470,6 +1716,8 @@ static int userfs_rmdir(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1511,35 +1759,48 @@ static int userfs_rename(FAR struct inode *mountpt,
   int newpathlen;
   ssize_t nsent;
   ssize_t nrecvd;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
-  /* Construct and send the request to the server */
-
-  req            = (FAR struct userfs_rename_request_s *)priv->iobuffer;
-  req->req       = USERFS_REQ_RENAME;
+  /* Check the path lengths */
 
   DEBUGASSERT(oldrelpath != NULL && newrelpath != NULL);
-  oldpathlen     = strlen(oldrelpath) + 1;
-  newpathlen     = strlen(newrelpath) + 1;
+  oldpathlen = strlen(oldrelpath) + 1;
+  newpathlen = strlen(newrelpath) + 1;
 
   if ((oldpathlen + newpathlen) > priv->mxwrite)
     {
       return -E2BIG;
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req            = (FAR struct userfs_rename_request_s *)priv->iobuffer;
+  req->req       = USERFS_REQ_RENAME;
   req->newoffset = oldpathlen;
+
   strncpy(req->oldrelpath, oldrelpath, oldpathlen);
   strncpy(&req->oldrelpath[oldpathlen], newrelpath, newpathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_RENAME_REQUEST_S(oldpathlen, newpathlen), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1547,6 +1808,8 @@ static int userfs_rename(FAR struct inode *mountpt,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
@@ -1586,31 +1849,44 @@ static int userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ssize_t nsent;
   ssize_t nrecvd;
   int pathlen;
+  int ret;
 
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
 
-  /* Construct and send the request to the server */
-
-  req         = (FAR struct userfs_stat_request_s *)priv->iobuffer;
-  req->req    = USERFS_REQ_STAT;
+  /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen     = strlen(relpath);
+  pathlen = strlen(relpath);
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
     }
 
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req      = (FAR struct userfs_stat_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_STAT;
+
   strncpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_STAT_REQUEST_S(pathlen + 1), 0,
-                       (FAR struct sockaddr *)&priv->server, priv->addrlen);
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
   if (nsent < 0)
     {
       ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
       return (int)nsent;
     }
 
@@ -1618,6 +1894,8 @@ static int userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
                           0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
   if (nrecvd < 0)
     {
       ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
