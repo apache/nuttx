@@ -224,7 +224,7 @@
 #  define FBIO_UPDATE      _FBIOC(0x0007)  /* Update a rectangular region in
                                             * the framebuffer
                                             * Argument: read-only struct
-                                            * nxgl_rect_s */
+                                            *           nxgl_rect_s */
 #endif
 
 /****************************************************************************
