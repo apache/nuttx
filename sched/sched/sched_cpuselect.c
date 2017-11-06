@@ -113,6 +113,7 @@ int sched_cpu_select(cpu_set_t affinity)
           else if (rtcb->sched_priority < minprio)
             {
               DEBUGASSERT(rtcb->sched_priority > 0);
+              minprio = rtcb->sched_priority;
               cpu = i;
             }
         }
