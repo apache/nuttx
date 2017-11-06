@@ -47,7 +47,6 @@
 #include <nuttx/lcd/ili9341.h>
 #include <nuttx/video/fb.h>
 
-#include <arch/chip/ltdc.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"

@@ -53,7 +53,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 
-#include <arch/chip/dma2d.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
