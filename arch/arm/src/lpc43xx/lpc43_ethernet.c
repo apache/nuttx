@@ -3210,11 +3210,11 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #else /* Auto-negotion not selected */
 
 #ifdef CONFIG_LPC43_ETHFD
-  priv->mbps100 = 1;
+  priv->fduplex = 1;
 #endif
 
 #ifdef CONFIG_LPC43_ETH100MBPS
-  priv->fduplex = 1;
+  priv->mbps100 = 1;
 #endif
 
   phyval = 0;
@@ -3238,11 +3238,14 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 
   up_mdelay(PHY_CONFIG_DELAY);
 
-  /* Remember the selected speed and duplex modes */
+  /* Remember the selected speed and duplex modes
+   * REVISIT:  Isn't this redundant?
+   */
 
 #ifdef CONFIG_LPC43_ETHFD
   priv->fduplex = 1;
 #endif
+
 #ifdef CONFIG_LPC43_ETH100MBPS
   priv->mbps100 = 1;
 #endif
