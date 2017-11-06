@@ -154,7 +154,7 @@ enum userfs_req_e
 };
 
 /* This enumeration provides the type of each response returned from the
- * user file system to OS file system client to the .
+ * user file system to OS file system client.
  */
 
 enum userfs_resp_e
@@ -213,7 +213,7 @@ struct userfs_operations_s
   int     (*ioctl)(FAR void *volinfo, FAR void *openinfo, int cmd,
             unsigned long arg);
   int     (*sync)(FAR void *volinfo, FAR void *openinfo);
-  int     (*dup)(FAR void *volinfo, FAR void *oldinfo, FAR void *newinfo);
+  int     (*dup)(FAR void *volinfo, FAR void *oldinfo, FAR void **newinfo);
   int     (*fstat)(FAR void *volinfo, FAR void *openinfo,
             FAR struct stat *buf);
   int     (*opendir)(FAR void *volinfo, FAR const char *relpath,

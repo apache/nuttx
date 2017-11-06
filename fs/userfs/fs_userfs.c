@@ -86,7 +86,7 @@ struct userfs_state_s
 
   struct socket psock;       /* Client socket instance */
   struct sockaddr_in server; /* Server address */
-  sem_t exclsem;             /* Exlusive access for request-response sequence */
+  sem_t exclsem;             /* Exclusive access for request-response sequence */
 
   /* I/O Buffer (actual size depends on USERFS_REQ_MAXSIZE and the configured
    * mxwrite).
