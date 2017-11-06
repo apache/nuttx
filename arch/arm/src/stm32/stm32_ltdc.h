@@ -49,8 +49,6 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>
 
-#include <arch/chip/ltdc.h>
-
 #ifdef CONFIG_STM32_LTDC
 
 /************************************************************************************

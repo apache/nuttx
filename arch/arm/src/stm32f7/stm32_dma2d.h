@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/video/fb.h>
-#include <arch/chip/ltdc.h>
+#include "stm32_ltdc.h"
 
 #ifdef CONFIG_STM32F7_DMA2D
 
