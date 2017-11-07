@@ -7,6 +7,10 @@ comment "LC823450 Configuration Options"
 
 menu "LC823450 Peripheral Support"
 
+config LC823450_IPL2
+	bool "IPL2"
+	default n
+
 config LC823450_UART0
 	bool "UART0"
 	select UART0_SERIALDRIVER
@@ -125,6 +129,14 @@ config MTD_CONFIG_DEVPATH
 	string "Device path for config"
 	default "/dev/mtdblock0p2"
 
+config MTD_RECOVERY_DEVPATH
+	string "Device path for recovery"
+	default "/dev/mtdblock0p3"
+
+config MTD_KERNEL_DEVPATH
+	string "Device path for kernel"
+	default "/dev/mtdblock0p4"
+
 config MTD_ETC_DEVPATH
 	string "Device path for etc"
 	default "/dev/mtdblock0p5"
@@ -213,7 +225,7 @@ config LC823450_USBDEV_CUSTOM_HSDSEL_10
 endchoice
 
 config LC823450_LSISTBY
-	bool "LIS Standby"
+	bool "LSI Standby"
 	default n
 
 config LC823450_MTM0_TICK
@@ -228,5 +240,6 @@ config LC823450_SLEEP_MODE
 config HRT_TIMER
 	bool "High resolution timer"
 	default n
+
 
 endmenu

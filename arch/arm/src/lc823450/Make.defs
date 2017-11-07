@@ -137,8 +137,8 @@ ifeq ($(CONFIG_ADC),y)
 CHIP_CSRCS += lc823450_adc.c
 endif
 
-ifeq ($(CONFIG_IPL2),y)
-ifeq ($(CONFIG_SPIFLASH_BOOT),y)
+ifeq ($(CONFIG_LC823450_IPL2),y)
+ifeq ($(CONFIG_LC823450_SPIFLASH_BOOT),y)
 CHIP_CSRCS += lc823450_spif_ipl2.c
 else
 CHIP_CSRCS += lc823450_ipl2.c

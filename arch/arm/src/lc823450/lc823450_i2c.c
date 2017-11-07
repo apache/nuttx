@@ -1053,7 +1053,7 @@ static int lc823450_i2c_transfer(FAR struct i2c_master_s *dev,
           leave_critical_section(irqs);
         }
 
-#ifndef CONFIG_IPL2
+#ifndef CONFIG_LC823450_IPL2
       i2cerr("ERROR: I2C timed out (dev=%xh)\n", msgs->addr);
 #endif
     }

@@ -141,7 +141,7 @@ void lc823450_clockconfig()
   val |= OSCCNT_SCKSEL_MAIN;
   putreg32(val, OSCCNT);
 
-#ifdef CONFIG_IPL2
+#ifdef CONFIG_LC823450_IPL2
   /* set the common PLL values */
   /* XTAL / XT1OSC_CLK = 1MHz */
 

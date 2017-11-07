@@ -251,13 +251,13 @@ void __start(void)
 #else /* CONFIG_SPIFLASH_BOOT */
   /* vector offset */
 
-#ifdef CONFIG_IPL2
+#ifdef CONFIG_LC823450_IPL2
   putreg32(0x02000e00, 0xe000ed08);
   putreg32(0x0, 0x40080008); /* XXX: remap disable */
-#else /* CONFIG_IPL2 */
+#else /* CONFIG_LC823450_IPL2 */
   putreg32(0x02040000, 0xe000ed08);
-#endif /* CONFIG_IPL2 */
-#endif /* CONFIG_SPIFLASH_BOOT */
+#endif /* CONFIG_LC823450_IPL2 */
+#endif /* CONFIG_LC823450_SPIFLASH_BOOT */
 
   /* Mutex enable */
 
@@ -273,7 +273,7 @@ void __start(void)
 
   /* IPL2 don't change mux */
 
-#ifdef CONFIG_IPL2
+#ifdef CONFIG_LC823450_IPL2
   /* GPIO2F out High in IPL2 */
 
   modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_PORT2_CLKEN);
@@ -286,9 +286,9 @@ void __start(void)
 
   modifyreg32(PMDCNT5, 0, 3 << 14);
 #endif /* CONFIG_DEBUG */
-#else /* CONFIG_IPL2 */
+#else  /* CONFIG_LC823450_IPL2 */
   up_init_default_mux();
-#endif /* CONFIG_IPL2 */
+#endif /* CONFIG_LC823450_IPL2 */
 
   showprogress('B');
 
@@ -326,9 +326,9 @@ void __start(void)
 
   showprogress('F');
 
-#ifndef CONFIG_IPL2
+#ifndef CONFIG_LC823450_IPL2
   sinfo("icx_boot_reason = 0x%x\n", icx_boot_reason);
-#endif /* CONFIG_IPL2 */
+#endif /* CONFIG_LC823450_IPL2 */
 
 #ifdef CONFIG_POWERBUTTON_LDOWN
   if (icx_boot_reason & ICX_BOOT_REASON_POWERBUTTON)
