@@ -2279,7 +2279,7 @@ errout:
 struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
                                       int channels)
 {
-  FAR struct adc_dev_s   *dev;
+  FAR struct adc_dev_s *dev;
   FAR struct stm32_dev_s *priv;
   uint8_t cr_channels = 0;
   uint8_t cj_channels = 0;
@@ -2328,7 +2328,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
   memcpy(priv->r_chanlist, chanlist, cr_channels);
 
 #ifdef ADC_HAVE_INJECTED
-  /* Configur injected channels */
+  /* Configure injected channels */
 
   DEBUGASSERT(cj_channels <= ADC_INJ_MAX_SAMPLES);
 
