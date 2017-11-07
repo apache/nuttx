@@ -96,12 +96,6 @@
 #  define CONFIG_MAX7219_NVERTICALBLKS 1
 #endif
 
-/* Current driver is not prepared for multiples rows of LED Matrix */
-
-#if CONFIG_MAX7219_NVERTICALBLKS > 1
-#  error "This driver doesn't support yet blocks in the vertical!"
-#endif
-
 #if CONFIG_LCD_MAXCONTRAST > 15
 #  undef CONFIG_LCD_MAXCONTRAST
 #  define CONFIG_LCD_MAXCONTRAST 15
@@ -433,6 +427,7 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
   uint8_t usrmask;
   int i;
   int pixlen;
+  int newrow;
 
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
@@ -452,11 +447,17 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
       return OK;
     }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
-  usrmask = MS_BIT;
-#else
-  usrmask = LS_BIT;
-#endif
+  /* Get real row position in the strip */
+
+  newrow = (int) (row % 8);
+
+  /* Divide row by 8 */
+
+  row = (row >> 3);
+
+  col = col + (row * MAX7219_XRES);
+
+  row = newrow;
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
@@ -464,7 +465,13 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
   usrmask = LS_BIT;
 #endif
 
-  fbptr = &priv->fb[row * MAX7219_XSTRIDE];
+#ifdef CONFIG_NX_PACKEDMSFIRST
+  usrmask = MS_BIT;
+#else
+  usrmask = LS_BIT;
+#endif
+
+  fbptr = &priv->fb[row * MAX7219_XSTRIDE * MAX7219_YSTRIDE];
   ptr = fbptr + (col >> 3);
 
   for (i = 0; i < pixlen; i++)
@@ -507,7 +514,7 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
 
   /* We need to send last row/column first to avoid mirror image */
 
-  for (i = MAX7219_XSTRIDE; i >= 0; i--)
+  for (i = (MAX7219_XSTRIDE * MAX7219_YSTRIDE) - 1; i >= 0; i--)
     {
       /* Setup the row data */
 
