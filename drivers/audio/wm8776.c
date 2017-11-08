@@ -186,6 +186,8 @@ static void wm8776_writereg(FAR struct wm8776_dev_s *priv,
                             uint16_t regval)
 {
   struct i2c_config_s config;
+  uint8_t data[2];
+  int ret;
 
   /* Setup up the I2C configuration */
 
@@ -193,16 +195,12 @@ static void wm8776_writereg(FAR struct wm8776_dev_s *priv,
   config.address   = priv->lower->address;
   config.addrlen   = 7;
 
-  uint8_t data[2];
-  int ret;
-
   /* Set up the data to write */
 
   data[0] = (regaddr << 1) + ((regval >> 8) & 0x1);
   data[1] = (regval & 0xff);
 
   ret = i2c_write(priv->i2c, &config, data, sizeof(data));
-
   if (ret < 0)
     {
       auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
@@ -638,7 +636,6 @@ static void wm8776_returnbuffers(FAR struct wm8776_dev_s *priv)
 
   leave_critical_section(flags);
 }
-
 
 /****************************************************************************
  * Name: wm8776_sendbuffer

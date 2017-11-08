@@ -765,12 +765,12 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
 
               i2cinfo("re-START condition\n");
 
+#ifdef CONFIG_I2C_RESET
               /* Reset I2C bus by softreset. There is not description of the reset,
                * but in order to recover I2C bus busy, it must be done.
                * Please refer to macaron's code.
                */
 
-#ifdef CONFIG_I2C_RESET
               lc823450_i2c_reset((FAR struct i2c_master_s *)priv);
 #endif
 
@@ -778,6 +778,7 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
               /* We have to enable interrupt again, because all registers are reset by
                * lc823450_i2c_reset().
                */
+
               lc823450_i2c_enableirq(priv);
 #endif
 

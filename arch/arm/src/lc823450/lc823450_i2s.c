@@ -219,7 +219,6 @@ static void _setup_audio_pll(uint32_t freq)
               0x0,
               0x0200  /* AUDDIV=2 */
               );
-
 }
 
 /****************************************************************************
@@ -254,7 +253,6 @@ static void _i2s_semtake(FAR sem_t *sem)
     }
   while (ret == -EINTR);
 }
-
 
 /****************************************************************************
  * Name: lc823450_i2s_txsamplerate
@@ -334,6 +332,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 /****************************************************************************
  * Name: lc823450_i2s_beeptest
  ****************************************************************************/
+
 #ifdef BEEP_TEST
 static void lc823450_i2s_beeptest(void)
 {

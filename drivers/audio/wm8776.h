@@ -75,7 +75,6 @@
 #define WM8776_HPOUT_VOL_MASK        (0x7f << WM8776_HPOUT_VOL_SHIFT)
 #  define WM8776_HPOUT_VOL(n)        ((uint16_t)(n) << WM8776_HPOUT_VOL_SHIFT)
 
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -122,7 +121,6 @@ struct wm8776_dev_s
   bool                    reserved;         /* True: Device is reserved */
   volatile int            result;           /* The result of the last transfer */
 };
-
 
 #endif /* CONFIG_AUDIO */
 #endif /* __DRIVERS_AUDIO_WM8776_H */
