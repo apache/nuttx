@@ -158,6 +158,7 @@ struct rndis_dev_s
   size_t current_rx_received;            /* Number of bytes of current RX datagram received over USB */
   size_t current_rx_datagram_size;       /* Total number of bytes of the current RX datagram */
   size_t current_rx_datagram_offset;     /* Offset of current RX datagram */
+  size_t current_rx_msglen;              /* Length of the entire message to be received */
   bool rdreq_submitted;                  /* Indicates if the read request is submitted */
   bool rx_blocked;                       /* Indicates if we can receive packets on bulk in endpoint */
   bool ctrlreq_has_encap_response;       /* Indicates if ctrlreq buffer holds a response */
@@ -824,7 +825,6 @@ static void rndis_rxdispatch(FAR void *arg)
 #ifdef CONFIG_NET_IPv4
   if (hdr->type == HTONS(ETHTYPE_IP))
     {
-      uinfo("IPv4 frame\n");
       NETDEV_RXIPV4(&priv->netdev);
 
       /* Handle ARP on input then give the IPv4 packet to the network
@@ -839,7 +839,6 @@ static void rndis_rxdispatch(FAR void *arg)
 #ifdef CONFIG_NET_IPv6
   if (hdr->type == HTONS(ETHTYPE_IP6))
     {
-      uinfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->netdev);
 
       /* Give the IPv6 packet to the network layer */
@@ -851,7 +850,6 @@ static void rndis_rxdispatch(FAR void *arg)
 #ifdef CONFIG_NET_ARP
   if (hdr->type == htons(ETHTYPE_ARP))
     {
-      uinfo("ARP packet received (%02x)\n", hdr->type);
       NETDEV_RXARP(&priv->netdev);
 
       arp_arpin(&priv->netdev);
@@ -904,7 +902,7 @@ static int rndis_txpoll(FAR struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  uinfo("Poll result: d_len=%d\n", priv->netdev.d_len);
+  ninfo("Poll result: d_len=%d\n", priv->netdev.d_len);
   if (priv->netdev.d_len > 0)
     {
       /* Look up the destination MAC address and add it to the Ethernet
@@ -1123,6 +1121,17 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
             {
               priv->current_rx_received = reqlen;
               priv->current_rx_datagram_size = msg->datalen;
+              priv->current_rx_msglen = msg->msglen;
+
+              /* According to RNDIS-over-USB send, if the message length is a
+               * multiple of endpoint max packet size, the host must send an
+               * additional single-byte zero packet. Take that in account here.
+               */
+
+              if (priv->current_rx_msglen % 64 == 0)
+                {
+                  priv->current_rx_msglen += 1;
+                }
 
               /* Data offset is defined as an offset from the beginning of the
                * offset field itself
@@ -1142,20 +1151,24 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
             }
         }
     }
-  else if (priv->current_rx_received >= priv->current_rx_datagram_offset &&
-           priv->current_rx_received < priv->current_rx_datagram_size +
-                                       priv->current_rx_datagram_offset)
+  else
     {
-      size_t index = priv->current_rx_received - priv->current_rx_datagram_offset;
-      size_t copysize = min(reqlen, priv->current_rx_datagram_size +
-                                    priv->current_rx_datagram_offset -
-                                    priv->current_rx_received);
-      memcpy(&priv->rx_req->req->buf[RNDIS_PACKET_HDR_SIZE + index], reqbuf,
-             copysize);
+      if (priv->current_rx_received >= priv->current_rx_datagram_offset &&
+                 priv->current_rx_received < priv->current_rx_datagram_size +
+                                             priv->current_rx_datagram_offset)
+        {
+
+          size_t index = priv->current_rx_received - priv->current_rx_datagram_offset;
+          size_t copysize = min(reqlen, priv->current_rx_datagram_size +
+                                        priv->current_rx_datagram_offset -
+                                        priv->current_rx_received);
+          memcpy(&priv->rx_req->req->buf[RNDIS_PACKET_HDR_SIZE + index], reqbuf,
+                 copysize);
+        }
+
       priv->current_rx_received += reqlen;
 
-      if (priv->current_rx_received >= priv->current_rx_datagram_size +
-                                       priv->current_rx_datagram_offset)
+      if (priv->current_rx_received >= priv->current_rx_msglen)
         {
           /* Check for a usable packet length (4 added for the CRC) */
 
@@ -1165,6 +1178,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
               uerr("ERROR: Bad packet size dropped (%d)\n",
                    priv->current_rx_datagram_size);
               NETDEV_RXERRORS(&priv->netdev);
+              priv->current_rx_datagram_size = 0;
             }
           else
             {
@@ -1181,12 +1195,6 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
               return -EBUSY;
             }
         }
-    }
-  else
-    {
-      /* Ignore the packet */
-
-      priv->current_rx_received += reqlen;
     }
 
   return OK;
