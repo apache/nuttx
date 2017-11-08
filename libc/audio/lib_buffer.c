@@ -70,6 +70,8 @@
 
 static void apb_semtake(FAR struct ap_buffer_s *apb)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting) */
 
   while (_SEM_WAIT(&apb->sem) < 0)
@@ -79,6 +81,7 @@ static void apb_semtake(FAR struct ap_buffer_s *apb)
        */
 
       DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+      UNUSED(ret);
     }
 }
 

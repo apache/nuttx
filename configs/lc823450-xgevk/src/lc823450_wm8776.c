@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/src/lc823450-xgevk.h
+ * configs/lc823450-xgevk/src/lc823450_wm8776.c
  *
  *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -33,70 +33,98 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H
-#define __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <stdint.h>
+#include <errno.h>
+#include <debug.h>
+#include <stdio.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/audio/i2s.h>
+#include <nuttx/audio/pcm.h>
+#include <nuttx/audio/wm8776.h>
+
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "lc823450_i2c.h"
+#include "lc823450_i2s.h"
+#include "lc823450-xgevk.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Do we need to register I2C drivers on behalf of the I2C tool? */
-
-#define HAVE_I2CTOOL 1
-#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
-#  undef HAVE_I2CTOOL
-#endif
-
-#ifndef __ASSEMBLY__
+#define WM8776_I2C_PORTNO 0   /* On I2C0 */
+#define WM8776_I2C_ADDR   0x1a
 
 /****************************************************************************
- * Public Functions
+ * Private Data
  ****************************************************************************/
+
+static struct wm8776_lower_s g_wm8776info =
+{
+  .address = WM8776_I2C_ADDR,
+  .frequency = 400000,
+};
+
 
 /****************************************************************************
- * Name: lc823450_adc_setup
- *
- * Description:
- *   Initialize ADC and register the ADC driver.
- *
+ * Name: lc823450_wm8776initialize
  ****************************************************************************/
 
-#ifdef CONFIG_ADC
-int lc823450_adc_setup(void);
-#endif
+int lc823450_wm8776initialize(int minor)
+{
+  FAR struct audio_lowerhalf_s *wm8776;
+  FAR struct audio_lowerhalf_s *pcm;
+  FAR struct i2c_master_s *i2c;
+  FAR struct i2s_dev_s *i2s;
+  char devname[12];
+  int ret;
 
-/****************************************************************************
- * Name: lc823450_bringup
- *
- * Description:
- *   Bring up board features
- *
- ****************************************************************************/
+  ainfo("Initializing WM8776 \n");
 
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
-int lc823450_bringup(void);
-#endif
+  /* Initialize I2C */
 
-/****************************************************************************
- * Name: lc823450_bma250initialize
- ****************************************************************************/
+  i2c = lc823450_i2cbus_initialize(WM8776_I2C_PORTNO);
 
-#ifdef CONFIG_BMA250
-int lc823450_bma250initialize(FAR const char *devpath);
-#endif
+  if (!i2c)
+    {
+      return -ENODEV;
+    }
 
-#ifdef CONFIG_AUDIO_WM8776
-int lc823450_wm8776initialize(int minor);
-#endif
+  i2s = lc823450_i2sdev_initialize();
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H */
+  wm8776 = wm8776_initialize(i2c, i2s, &g_wm8776info);
+
+  if (!wm8776)
+    {
+      auderr("ERROR: Failed to initialize the WM8904\n");
+      return -ENODEV;
+    }
+
+  pcm = pcm_decode_initialize(wm8776);
+
+  if (!pcm)
+    {
+      auderr("ERROR: Failed create the PCM decoder\n");
+      return  -ENODEV;
+    }
+
+  snprintf(devname, 12, "pcm%d",  minor);
+
+  ret = audio_register(devname, pcm);
+
+  if (ret < 0)
+    {
+      auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+    }
+
+  return 0;
+}
+

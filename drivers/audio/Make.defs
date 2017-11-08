@@ -65,6 +65,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_AUDIO_WM8776),y)
+CSRCS += wm8776.c
+endif
+
 ifeq ($(CONFIG_AUDIO_NULL),y)
 CSRCS += audio_null.c
 endif

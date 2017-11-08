@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/src/lc823450-xgevk.h
+ * include/nuttx/audio/wm8776.h
  *
  *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -33,70 +33,65 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H
-#define __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H
+#ifndef __INCLUDE_NUTTX_AUDIO_WM8776_H
+#define __INCLUDE_NUTTX_AUDIO_WM8776_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
 #include <stdint.h>
+#include <stdbool.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Do we need to register I2C drivers on behalf of the I2C tool? */
-
-#define HAVE_I2CTOOL 1
-#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
-#  undef HAVE_I2CTOOL
-#endif
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lc823450_adc_setup
- *
- * Description:
- *   Initialize ADC and register the ADC driver.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ADC
-int lc823450_adc_setup(void);
-#endif
-
-/****************************************************************************
- * Name: lc823450_bringup
- *
- * Description:
- *   Bring up board features
- *
- ****************************************************************************/
-
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
-int lc823450_bringup(void);
-#endif
-
-/****************************************************************************
- * Name: lc823450_bma250initialize
- ****************************************************************************/
-
-#ifdef CONFIG_BMA250
-int lc823450_bma250initialize(FAR const char *devpath);
-#endif
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_AUDIO_WM8776
-int lc823450_wm8776initialize(int minor);
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct wm8776_lower_s;
+
+struct wm8776_lower_s
+{
+  /* I2C characterization */
+
+  uint32_t frequency;  /* Initial I2C frequency */
+  uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
+};
+
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+struct i2c_master_s;
+struct i2s_dev_s;
+struct audio_lowerhalf_s;
+
+FAR struct audio_lowerhalf_s *
+  wm8776_initialize(FAR struct i2c_master_s *i2c,
+                    FAR struct i2s_dev_s *i2s,
+                    FAR const struct wm8776_lower_s *lower);
+
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* CONFIG_AUDIO_WM8776 */
+#endif /* __INCLUDE_NUTTX_AUDIO_WM8776_H */

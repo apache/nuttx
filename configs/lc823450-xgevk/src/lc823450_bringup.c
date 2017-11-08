@@ -85,6 +85,10 @@ int lc823450_bringup(void)
   lc823450_bma250initialize("/dev/accel");
 #endif
 
+#ifdef CONFIG_AUDIO_WM8776
+  lc823450_wm8776initialize(0);
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.

@@ -155,6 +155,34 @@ config CS43L22_CLKDEBUG
 
 endif # AUDIO_CS43L22
 
+config AUDIO_WM8776
+	bool "WM8776 audio chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the WM8776 Audio codec by Wolfson
+		Microelectonics.
+
+if AUDIO_WM8776
+
+config WM8776_INFLIGHT
+	int "WM8776 maximum in-flight audio buffers"
+	default 2
+
+config WM8776_MSG_PRIO
+	int "WM8776 message priority"
+	default 1
+
+config WM8776_WORKER_STACKSIZE
+	int "WM8776 worker thread stack size"
+	default 768
+
+config WM8776_SWAP_HPOUT
+	bool "Swap WM8776 HP out signals"
+	default n
+
+endif # AUDIO_WM8776
+
 config AUDIO_WM8904
 	bool "WM8904 audio chip"
 	default n

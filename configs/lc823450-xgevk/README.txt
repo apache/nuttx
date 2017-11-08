@@ -21,7 +21,7 @@ MakeIPL2 Tool for eMMC boot is available at
 
 This port is intended to test LC823450 features including SMP.
 Supported peripherals:
-UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, USB, WDT, ADC.
+UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, USB, WDT, ADC, Audio.
 
 Settings
 ^^^^^^^^
@@ -42,9 +42,6 @@ output into the console because UART operates in FIFO mode.
 
 1. "nsh> smp" works but the result will be corrupted.
 2. "nsh> ostest" works but might cause a deadlock or assertion.
-
-
-
 
 Other Status
 ^^^^^^^^^^^^
@@ -187,8 +184,27 @@ then dd the files to the kernel partition (/dev/mtdblock0p4) and the IPL2 partit
   nsh> dd if=/mnt/sd0/LC8234xx_17S_start_data.boot_bin of=/dev/mtdblock0p1
   nsh> reboot
 
+10. Audio playback (WAV/44.1k/16bit/2ch only)
+
+Firstly, please check the jumper pin settings as follows.
+
+  JP1, JP2 => short
+  JP3, JP4 => open
+
+To play WAV file on uSD card,
+
+  nsh> mount -t vfat /dev/mtdblock1 /mnt/sd1
+  nsh> nxplayer
+  nxplayer> play /mnt/sd1/sample.wav
+  nxplayer> volume 50
+
+Currently nxplayer does not work in SMP mode.
+
+  up_assert: Assertion failed at file:chip/lc823450_cpupause.c line: 279 task: wm8776
+
+
 TODO
 ^^^^
 
 The following features will be supported.
-Audio, etc.
+LED, Accelerometer, etc.

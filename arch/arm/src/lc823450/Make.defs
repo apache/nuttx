@@ -181,3 +181,7 @@ ifeq ($(CONFIG_LC823450_MTD),y)
 CHIP_CSRCS += lc823450_mtd.c
 CHIP_CSRCS += lc823450_mmcl.c
 endif
+
+ifeq ($(CONFIG_LC823450_I2S0),y)
+CHIP_CSRCS += lc823450_i2s.c
+endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/src/lc823450-xgevk.h
+ * arch/arm/src/lc823450/lc823450_i2s.h
  *
  *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -33,70 +33,44 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H
-#define __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_I2S_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_I2S_H
+
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+#include <nuttx/audio/i2s.h>
 
-#include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Do we need to register I2C drivers on behalf of the I2C tool? */
-
-#define HAVE_I2CTOOL 1
-#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
-#  undef HAVE_I2CTOOL
-#endif
+#include "chip.h"
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Name: lc823450_adc_setup
- *
- * Description:
- *   Initialize ADC and register the ADC driver.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ADC
-int lc823450_adc_setup(void);
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Name: lc823450_bringup
- *
- * Description:
- *   Bring up board features
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
-int lc823450_bringup(void);
-#endif
+FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void);
 
-/****************************************************************************
- * Name: lc823450_bma250initialize
- ****************************************************************************/
-
-#ifdef CONFIG_BMA250
-int lc823450_bma250initialize(FAR const char *devpath);
-#endif
-
-#ifdef CONFIG_AUDIO_WM8776
-int lc823450_wm8776initialize(int minor);
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_LC823450_XGEVK_SRC_LC823450_XGEVK_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_I2S_H */

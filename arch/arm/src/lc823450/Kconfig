@@ -185,6 +185,11 @@ config LC823450_I2C1
 	default n
 	depends on I2C
 
+config LC823450_I2S0
+	bool "I2S0"
+	default n
+	depends on I2S
+
 config LC823450_SPI_DMA
 	bool "DMA for SPI"
 	default n
