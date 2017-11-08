@@ -226,11 +226,12 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ICMPv6_ROUTER_MANUAL
   /* Copy the configured prefex */
 
+  prefix->preflen     = CONFIG_NET_ICMPv6_PREFLEN;
   net_ipv6addr_copy(prefix->prefix, g_ipv6_prefix);
 #else
   /* Set the prefix and prefix length based on net driver IP and netmask */
 
-  prefix->preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
+  prefix->preflen     = net_ipv6_mask2pref(dev->d_ipv6netmask);
   ipv6addr_mask(prefix->prefix, dev->d_ipv6addr, dev->d_ipv6netmask);
 #endif /* CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 
