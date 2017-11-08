@@ -93,6 +93,16 @@ config NET_ICMPv6_ROUTER
 
 if NET_ICMPv6_ROUTER
 
+config NET_ICMPv6_ROUTER_MANUAL
+	bool "Manual router prefix"
+	default n
+	---help---
+		Select this to set the advertised router prefix manually. Otherwise, it
+		will be derived from the device IPv6 address and prefix length set in
+		the netdev structure.
+
+if NET_ICMPv6_ROUTER_MANUAL
+
 config NET_ICMPv6_PREFLEN
 	int "Prefix length"
 	default 64
@@ -178,6 +188,7 @@ config NET_ICMPv6_PREFIX_8
 		Advertisement message.  This is the last of the 8-values.  The
 		default for all eight values is fc00::0.
 
+endif # NET_ICMPv6_ROUTER_MANUAL
 endif # NET_ICMPv6_ROUTER
 
 if NET_ICMPv6_SOCKET

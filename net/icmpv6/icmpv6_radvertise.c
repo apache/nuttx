@@ -74,6 +74,7 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_NET_ICMPv6_ROUTER_MANUAL
 static const net_ipv6addr_t g_ipv6_prefix =
 {
   HTONS(CONFIG_NET_ICMPv6_PREFIX_1),
@@ -85,6 +86,7 @@ static const net_ipv6addr_t g_ipv6_prefix =
   HTONS(CONFIG_NET_ICMPv6_PREFIX_7),
   HTONS(CONFIG_NET_ICMPv6_PREFIX_8)
 };
+#endif /* CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 
 /****************************************************************************
  * Private Functions
@@ -106,6 +108,7 @@ static const net_ipv6addr_t g_ipv6_prefix =
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NET_ICMPv6_ROUTER_MANUAL
 static inline void ipv6addr_mask(FAR uint16_t *dest, FAR const uint16_t *src,
                                  FAR const uint16_t *mask)
 {
@@ -116,6 +119,7 @@ static inline void ipv6addr_mask(FAR uint16_t *dest, FAR const uint16_t *src,
       dest[i] = src[i] & mask[i];
     }
 }
+#endif /* !CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 
 /****************************************************************************
  * Public Functions
@@ -219,10 +223,16 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   prefix->reserved[0] = 0;
   prefix->reserved[1] = 0;
 
+#ifdef CONFIG_NET_ICMPv6_ROUTER_MANUAL
+  /* Copy the configured prefex */
+
+  net_ipv6addr_copy(prefix->prefix, g_ipv6_prefix);
+#else
   /* Set the prefix and prefix length based on net driver IP and netmask */
 
   prefix->preflen = net_ipv6_mask2pref(dev->d_ipv6netmask);
   ipv6addr_mask(prefix->prefix, dev->d_ipv6addr, dev->d_ipv6netmask);
+#endif /* CONFIG_NET_ICMPv6_ROUTER_MANUAL */
 
   /* Calculate the checksum over both the ICMP header and payload */
 
