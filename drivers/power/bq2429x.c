@@ -429,6 +429,27 @@ static int bq2429x_sysoff(FAR struct bq2429x_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: bq2429x_syson
+ *
+ * Description:
+ *   Turn the internal battery FET on.
+ *
+ ****************************************************************************/
+
+static int bq2429x_syson(FAR struct bq2429x_dev_s *priv)
+{
+  int ret;
+  uint8_t value = 0;
+
+  ret = bq2429x_getreg8(priv, BQ2429X_REG07, &value, 1);
+  batdbg("REG7 read value: 0x%08X\n", value);
+  value &= ~BQ2429XR7_BATFET_DISABLE;
+  ret |= bq2429x_putreg8(priv, BQ2429X_REG07, value);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: bq2429x_en_term
  *
  * Description:
@@ -1151,6 +1172,10 @@ static int bq2429x_operate(FAR struct battery_charger_dev_s *dev,
 
       case BATIO_OPRTN_SYSOFF:
         ret = bq2429x_sysoff(priv);
+        break;
+
+      case BATIO_OPRTN_SYSON:
+        ret = bq2429x_syson(priv);
         break;
 
       case BATIO_OPRTN_RESET:
