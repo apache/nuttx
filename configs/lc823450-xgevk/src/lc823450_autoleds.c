@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_idle.c
+ * configs/lc823450-xgevk/src/lc823450_autoleds.c
  *
- *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
+ *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,121 +39,77 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "nvic.h"
-#include "up_internal.h"
+#include "chip.h"
 #include "up_arch.h"
+#include "up_internal.h"
 
-#ifdef CONFIG_DVFS
-#  include "lc823450_dvfs.h"
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_LC823450_SLEEP_MODE
-static int32_t  g_in_sleep;
-static uint64_t g_sleep_t0;
-#endif /* CONFIG_LC823450_SLEEP_MODE */
+#include "lc823450_gpio.h"
+#include "lc823450-xgevk.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_get_current_time()
- ****************************************************************************/
-
-#ifdef CONFIG_LC823450_SLEEP_MODE
-static uint64_t up_get_current_time(void)
-{
-  struct timespec ts;
-
-#ifdef CONFIG_CLOCK_MONOTONIC
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-  clock_gettime(CLOCK_REALTIME, &ts);
-#endif
-  return (uint64_t)ts.tv_sec * NSEC_PER_SEC + (uint64_t)ts.tv_nsec;
-}
-#endif /* CONFIG_LC823450_SLEEP_MODE */
+#define LED0_PIN (GPIO_PORT0 | GPIO_PIN0)
+#define LED1_PIN (GPIO_PORT2 | GPIO_PINF)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when their is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void up_idle(void)
+void board_autoled_initialize(void)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
-
-  sched_process_timer();
-#else
-
-#ifdef CONFIG_LC823450_SLEEP_MODE
-  irqstate_t flags;
-  flags = enter_critical_section();
-
-  g_sleep_t0 = up_get_current_time();
-  g_in_sleep = 1;
-
-  /* Clear SLEEPDEEP flag */
-
-  uint32_t regval  = getreg32(NVIC_SYSCON);
-  regval &= ~NVIC_SYSCON_SLEEPDEEP;
-  putreg32(regval, NVIC_SYSCON);
-
-#ifdef CONFIG_DVFS
-  lc823450_dvfs_enter_idle();
-#endif
-
-  leave_critical_section(flags);
-#endif /* CONFIG_LC823450_SLEEP_MODE */
-
-  board_autoled_off(LED_CPU0 + up_cpu_index());
-
-  /* Sleep until an interrupt occurs to save power */
-
-  asm("WFI");
-#endif
 }
 
 /****************************************************************************
- * Name: up_update_idle_time()
- *
- * Description:
- *  up_update_idle_time() is the logic that will update idle time
- *
+ * Name: board_autoled_on
  ****************************************************************************/
 
-#ifdef CONFIG_LC823450_SLEEP_MODE
-void up_update_idle_time(void)
+void board_autoled_on(int led)
 {
-  if (g_in_sleep)
+  switch (led)
     {
-      g_in_sleep = 0;
-      uint64_t t1 = up_get_current_time();
-      sched_add_idl_tm(t1 - g_sleep_t0);
+      case LED_CPU0:
+        lc823450_gpio_write(LED0_PIN, 1);
+        break;
+
+      case LED_CPU1:
+        lc823450_gpio_write(LED1_PIN, 1);
+        break;
+
+      default:
+        break;
     }
 }
-#endif /* CONFIG_LC823450_SLEEP_MODE */
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  switch (led)
+    {
+      case LED_CPU0:
+        lc823450_gpio_write(LED0_PIN, 0);
+        break;
+
+      case LED_CPU1:
+        lc823450_gpio_write(LED1_PIN, 0);
+        break;
+
+      default:
+        break;
+    }
+}

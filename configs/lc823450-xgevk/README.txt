@@ -40,6 +40,8 @@ Currently SMP feature works on the board but might not be stable.
 In addition, console output might be corrupted if the both CPUs
 output into the console because UART operates in FIFO mode.
 
+CPU activities are shown at D9 (CPU0) and D10 (CPU1) respectively.
+
 1. "nsh> smp" works but the result will be corrupted.
 2. "nsh> ostest" works but might cause a deadlock or assertion.
 
@@ -207,4 +209,4 @@ TODO
 ^^^^
 
 The following features will be supported.
-LED, Accelerometer, etc.
+Accelerometer, etc.

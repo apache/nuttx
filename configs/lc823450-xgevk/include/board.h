@@ -39,6 +39,21 @@
 #include <stdint.h>
 
 /************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+#define LED_STARTED       0  /* N/A */
+#define LED_HEAPALLOCATE  1  /* N/A */
+#define LED_IRQSENABLED   2  /* N/A */
+#define LED_STACKCREATED  3  /* N/A */
+#define LED_INIRQ         4  /* N/A */
+#define LED_SIGNAL        5  /* N/A */
+#define LED_ASSERTION     6  /* N/A */
+#define LED_PANIC         7  /* N/A */
+#define LED_CPU0          8  /* LED0 (D9) */
+#define LED_CPU1          9  /* LED1 (D10) */
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
 #ifndef __ASSEMBLY__

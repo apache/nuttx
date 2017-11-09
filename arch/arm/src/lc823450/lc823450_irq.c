@@ -47,6 +47,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "nvic.h"
 #include "ram_vectors.h"
@@ -690,6 +692,13 @@ void up_enable_irq(int irq)
 
 void up_ack_irq(int irq)
 {
+  if (irq < LC823450_IRQ_SYSTICK)
+    {
+      return;
+    }
+
+  board_autoled_on(LED_CPU0 + up_cpu_index());
+
 #ifdef CONFIG_DVFS
   lc823450_dvfs_exit_idle(irq);
 #endif

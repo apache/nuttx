@@ -247,6 +247,7 @@ config ARCH_BOARD_HYMINI_STM32V
 config ARCH_BOARD_LC823450_XGEVK
 	bool "ON Semiconductor LC823450-XGEVK development board"
 	depends on ARCH_CHIP_LC823450
+	select ARCH_HAVE_LEDS
 	---help---
 		This port uses the ON Semiconductor LC823450-XGEVK development board.
 

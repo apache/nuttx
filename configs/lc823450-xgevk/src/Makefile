@@ -76,4 +76,8 @@ ifeq ($(CONFIG_AUDIO_WM8776),y)
 CSRCS += lc823450_wm8776.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += lc823450_autoleds.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
