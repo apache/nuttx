@@ -36,14 +36,16 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-l|c|u|n] [-a <app-dir>] <board-name>/<config-name>
+USAGE: ${0} [-d] [-l|m|c|u|n] [-a <app-dir>] <board-name>/<config-name>
 
 Where:
-  -l selects the Linux (l) host environment.  The [-c|u|n] options
-     select one of the Windows environments.  Default:  Use host setup
-     in the defconfig file
-  [-c|u|n] selects the Windows host and a Windows environment:  Cygwin (c),
-     Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+  -l selects the Linux (l) host environment.
+  -m selects the macOS (m) host environment.
+  -c selects the Windows host and Cygwin (c) environment.
+  -u selects the Windows host and Ubuntu under Windows 10 (u) environment.
+  -n selects the Windows host and Windows native (n) environment.
+  Default: Use host setup in the defconfig file
+  Default Windows: Cygwin
   <board-name> is the name of the board in the configs directory
   <config-name> is the name of the board configuration sub-directory
   <app-dir> is the path to the apps/ directory, relative to the nuttx
@@ -85,6 +87,9 @@ while [ ! -z "$1" ]; do
       ;;
     -l )
       host=linux
+      ;;
+    -m )
+      host=macos
       ;;
     -n )
       host=windows
@@ -279,31 +284,40 @@ if [ ! -z "$host" ]; then
   sed -i -e "/CONFIG_SIM_X8664_SYSTEMV/d" ${dest_config}
   sed -i -e "/CONFIG_SIM_M32/d" ${dest_config}
 
-  if [ "$host" == "linux" ]; then
-    echo "  Select CONFIG_HOST_LINUX=y"
-    echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
-    echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
+  case "$host" in
+    "linux")
+      echo "  Select CONFIG_HOST_LINUX=y"
+      echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
+      echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
+      ;;
 
-  else
-    echo "  Select CONFIG_HOST_WINDOWS=y"
-    echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
-    echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
+    "macos")
+      echo "  Select CONFIG_HOST_OSX=y"
+      echo "CONFIG_HOST_OSX=y" >> "${dest_config}"
+      ;;
 
-    if [ "X$wenv" == "Xcygwin" ]; then
-      echo "  Select CONFIG_WINDOWS_CYGWIN=y"
-      echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
+    "windows")
+      echo "  Select CONFIG_HOST_WINDOWS=y"
+      echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
+      echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
 
-    else
-      if [ "X$wenv" == "Xubuntu" ]; then
-        echo "  Select CONFIG_WINDOWS_UBUNTU=y"
-        echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
+      case "$wenv" in
+          "cygwin")
+            echo "  Select CONFIG_WINDOWS_CYGWIN=y"
+            echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
+            ;;
 
-      else
-        echo "  Select CONFIG_WINDOWS_NATIVE=y"
-        echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
-      fi
-    fi
-  fi
+          "ubuntu")
+            echo "  Select CONFIG_WINDOWS_UBUNTU=y"
+            echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
+            ;;
+
+          *)
+            echo "  Select CONFIG_WINDOWS_NATIVE=y"
+            echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
+            ;;
+      esac
+  esac
 fi
 
 # The saved defconfig files are all in compressed format and must be
