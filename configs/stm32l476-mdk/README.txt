@@ -1,8 +1,9 @@
 README
 ======
 
-This README discusses issues unique to NuttX configurations for Motorola
-MDK.
+This README discusses issues unique to NuttX configurations for STM32L476ME
+part in the Motorola MDK.  This is referred to as the MuC in Motorola
+technical documentation.
 
 STM32L476ME:
 
@@ -24,23 +25,30 @@ STM32L476ME:
   CRC calculation unit
   RTC
 
-Flashing:
+Flashing
+========
 
 The MDK has a builtin FTDI to support flashing from openocd.  There are a
 few extensions to openocd that haven't been integrated upstream yet.  To
 flash (or debug) the MDK, you will need the code from:
 
-	git clone https://github.com/MotorolaMobilityLLC/openocd
+  git clone https://github.com/MotorolaMobilityLLC/openocd
 
 Refer to detailed OpenOCD build instructions at developer.motorola.com
 
-After building, you can flash with the following command:
+After building, you can flash the STM32L476 (MuC) with the following
+command:
 
-	openocd -f board/moto_mdk_muc.cfg -c "program nuttx.bin 0x08000000 reset exit"
+  openocd -f board/moto_mdk_muc.cfg -c "program nuttx.bin 0x08000000 reset exit"
 
-Serial Console:
+Serial Console
+==============
 
 The serial console is configured on USART3 using MUC_UART3_TX (PC10) and
 MUC_UART_RX (PC11).  This connects to the FT4232 part which supports 4
-CDC/ACM serial ports.  The console is on port C which will probably be
-/dev/ttyUSB2 on your Linux host.
+CDC/ACM serial ports.  The MuC console is on port C which will probably be
+/dev/ttyUSB2 on your Linux host.  Port A (ttyUSB0) is the MuC SWD debug
+interface.  Ports B and D are the MHB* debug and console ports, respectively.
+
+*Then MHB is the acronym given to Toshiba Interface Bridged, part number
+T6WV7XBG.  See https://toshiba.semicon-storage.com/us/product/assp/interface-bridge.html
