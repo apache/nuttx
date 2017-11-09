@@ -65,7 +65,8 @@
 
 #define HOST_NOCHANGE  0
 #define HOST_LINUX     1
-#define HOST_WINDOWS   2
+#define HOST_MACOS     2
+#define HOST_WINDOWS   3
 
 #define WINDOWS_NATIVE 1
 #define WINDOWS_CYGWIN 2
@@ -127,7 +128,7 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|c|u|n] [-a <app-dir>] <board-name>[%c<config-name>]\n", progname, g_delim);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|n] [-a <app-dir>] <board-name>[%c<config-name>]\n", progname, g_delim);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
@@ -150,13 +151,16 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    instead of Windows style paths like C:\\Program Files are used.  POSIX\n");
   fprintf(stderr, "    style paths are used by default.\n");
 #endif
-  fprintf(stderr, "  -l:\n");
-  fprintf(stderr, "    Selects the Linux (l) host environment.  The [-c|u|n] options\n");
-  fprintf(stderr, "    select one of the Windows environments.  Default:  Use host setup\n");
-  fprintf(stderr, "    in the defconfig file\n");
-  fprintf(stderr, "  [-c|u|n]\n");
-  fprintf(stderr, "    Selects the Windows host and a Windows host environment:  Cygwin (c),\n");
-  fprintf(stderr, "    Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin\n");
+  fprintf(stderr, "  [-l|m|c|u|n]\n");
+  fprintf(stderr, "    Selects the host environment.\n");
+  fprintf(stderr, "    -l Selects the Linux (l) host environment.\n");
+  fprintf(stderr, "    -m Selects the macOS (m) host environment.\n");
+  fprintf(stderr, "  [-c|u|n] selects the Windows host and a Windows host environment:\n");
+  fprintf(stderr, "    -c Selects the Windows host and Cygwin (c) environment.\n");
+  fprintf(stderr, "    -u Selects the Windows host and Ubuntu under Windows 10 (u) environment.\n");
+  fprintf(stderr, "    -n Selects the Windows host and Windows native (n) environment.\n");
+  fprintf(stderr, "  Default: Use host setup in the defconfig file.\n");
+  fprintf(stderr, "  Default Windows: Cygwin.\n");
   fprintf(stderr, "  -a <app-dir>:\n");
   fprintf(stderr, "    Informs the configuration tool where the application build\n");
   fprintf(stderr, "    directory.  This is a relative path from the top-level NuttX\n");
@@ -196,7 +200,7 @@ static void parse_args(int argc, char **argv)
 
   g_debug = false;
 
-  while ((ch = getopt(argc, argv, ":a:bcdfhlnu")) > 0)
+  while ((ch = getopt(argc, argv, ":a:bcdfhlmnu")) > 0)
     {
       switch (ch)
         {
@@ -228,6 +232,10 @@ static void parse_args(int argc, char **argv)
 
           case 'l' :
             g_host = HOST_LINUX;
+            break;
+
+          case 'm' :
+            g_host = HOST_MACOS;
             break;
 
           case 'n' :
@@ -566,6 +574,33 @@ static void check_configdir(void)
   if (verify_optiondir(g_buffer))
     {
       g_scriptspath = strdup(g_buffer);
+    }
+}
+
+static void check_configured(void)
+{
+  /* If we are already configured then there will be a .config and a Make.defs
+   * file in the top-level directory.
+   */
+
+  snprintf(g_buffer, BUFFER_SIZE, "%s%c.config", g_topdir, g_delim);
+  debug("check_configured: Checking %s\n", g_buffer);
+  if (verify_file(g_buffer))
+    {
+      fprintf(stderr, "ERROR: Found %s... Already configured\n", g_buffer);
+      fprintf(stderr, "       Please 'make distclean' and try again\n");
+      exit(EXIT_FAILURE);
+    }
+
+  /* Try the Make.defs file */
+
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_topdir, g_delim);
+  debug("check_configuration: Checking %s\n", g_buffer);
+  if (verify_file(g_buffer))
+    {
+      fprintf(stderr, "ERROR: Found %s... Already configured\n", g_buffer);
+      fprintf(stderr, "       Please 'make distclean' and try again\n");
+      exit(EXIT_FAILURE);
     }
 }
 
@@ -948,69 +983,99 @@ static void set_host(const char *destconfig)
 {
   if (g_host != HOST_NOCHANGE)
     {
-      if (g_host == HOST_LINUX)
+      switch (g_host)
         {
-          printf("  Select the Linux host\n");
-
-          enable_feature(destconfig, "CONFIG_HOST_LINUX");
-          disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-
-          disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-          disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-          disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
-
-          enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-          disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-          disable_feature(destconfig, "CONFIG_SIM_M32");
-        }
-      else if (g_host == HOST_WINDOWS)
-        {
-          enable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-          disable_feature(destconfig, "CONFIG_HOST_LINUX");
-
-          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
-
-          enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-          disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-
-          disable_feature(destconfig, "CONFIG_SIM_M32");
-
-          switch (g_windows)
+          case HOST_LINUX:
             {
-              case WINDOWS_CYGWIN:
-                printf("  Select Windows/Cygwin host\n");
-                enable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                break;
+              printf("  Select the Linux host\n");
 
-              case WINDOWS_UBUNTU:
-                printf("  Select Ubuntu for Windows 10 host\n");
-                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                enable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                break;
+              enable_feature(destconfig, "CONFIG_HOST_LINUX");
+              disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+              disable_feature(destconfig, "CONFIG_HOST_OSX");
 
-              case WINDOWS_NATIVE:
-                printf("  Select Windows native host\n");
-                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                break;
+              disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+              disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+              disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+              disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+              disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
 
-              default:
-               fprintf(stderr, "ERROR: Unrecognized  windows configuration: %d\n",
-                       g_windows);
-               exit(EXIT_FAILURE);
+              enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+              disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+              disable_feature(destconfig, "CONFIG_SIM_M32");
             }
-        }
-      else
-        {
-          fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n", g_host);
-          exit(EXIT_FAILURE);
+            break;
+
+          case HOST_MACOS:
+            {
+              printf("  Select the Linux host\n");
+
+              disable_feature(destconfig, "CONFIG_HOST_LINUX");
+              disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+              enable_feature(destconfig, "CONFIG_HOST_OSX");
+
+              disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+              disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+              disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+              disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+              disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+              enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+              disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+              disable_feature(destconfig, "CONFIG_SIM_M32");
+            }
+            break;
+
+          case HOST_WINDOWS:
+            {
+              enable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+              disable_feature(destconfig, "CONFIG_HOST_LINUX");
+              disable_feature(destconfig, "CONFIG_HOST_OSX");
+
+              disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+              disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+              enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+              disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+
+              disable_feature(destconfig, "CONFIG_SIM_M32");
+
+              switch (g_windows)
+                {
+                  case WINDOWS_CYGWIN:
+                    printf("  Select Windows/Cygwin host\n");
+                    enable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                    disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                    disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                    break;
+
+                  case WINDOWS_UBUNTU:
+                    printf("  Select Ubuntu for Windows 10 host\n");
+                    disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                    enable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                    disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                    break;
+
+                  case WINDOWS_NATIVE:
+                    printf("  Select Windows native host\n");
+                    disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                    disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                    enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                    break;
+
+                  default:
+                   fprintf(stderr,
+                           "ERROR: Unrecognized  windows configuration: %d\n",
+                           g_windows);
+                   exit(EXIT_FAILURE);
+                }
+            }
+            break;
+
+          default:
+            {
+              fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n", g_host);
+              exit(EXIT_FAILURE);
+            }
         }
     }
 }
@@ -1135,6 +1200,7 @@ int main(int argc, char **argv, char **envp)
   debug("main: Checking Nuttx Directories\n");
   find_topdir();
   check_configdir();
+  check_configured();
 
   debug("main: Reading the configuration/version files\n");
   read_configfile();
