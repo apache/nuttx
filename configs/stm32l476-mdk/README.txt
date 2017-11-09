@@ -26,10 +26,21 @@ STM32L476ME:
 
 Flashing:
 
-The MDK has a builtin FTDI to support flashing from openocd.  There are a few extensions
-to openocd that haven't been integrated upstream yet.  To flash (or debug) the MDK, you
-will need the code from:
+The MDK has a builtin FTDI to support flashing from openocd.  There are a
+few extensions to openocd that haven't been integrated upstream yet.  To
+flash (or debug) the MDK, you will need the code from:
+
 	git clone https://github.com/MotorolaMobilityLLC/openocd
 
+Refer to detailed OpenOCD build instructions at developer.motorola.com
+
 After building, you can flash with the following command:
+
 	openocd -f board/moto_mdk_muc.cfg -c "program nuttx.bin 0x08000000 reset exit"
+
+Serial Console:
+
+The serial console is configured on USART3 using MUC_UART3_TX (PC10) and
+MUC_UART_RX (PC11).  This connects to the FT4232 part which supports 4
+CDC/ACM serial ports.  The console is on port C which will probably be
+/dev/ttyUSB2 on your Linux host.
