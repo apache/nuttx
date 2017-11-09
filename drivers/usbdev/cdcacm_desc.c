@@ -236,8 +236,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
                        bool hispeed)
 {
 #ifndef CONFIG_USBDEV_DUALSPEED
-    /* unused */
-    (void)hispeed;
+    UNUSED(hispeed);
 #endif
 
     switch (epid)
@@ -255,7 +254,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
               /* Maximum packet size (high speed) */
 
               epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
-               epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
+              epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_HSSIZE);
             }
           else
 #endif

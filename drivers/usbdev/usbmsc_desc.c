@@ -230,9 +230,7 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        bool hispeed)
 {
 #ifndef CONFIG_USBDEV_DUALSPEED
-    /* unused */
-
-    (void)hispeed;
+    UNUSED(hispeed);
 #endif
 
     switch (epid)
