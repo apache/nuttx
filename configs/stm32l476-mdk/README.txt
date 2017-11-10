@@ -32,14 +32,37 @@ The MDK has a builtin FTDI to support flashing from openocd.  There are a
 few extensions to openocd that haven't been integrated upstream yet.  To
 flash (or debug) the MDK, you will need the code from:
 
-  git clone https://github.com/MotorolaMobilityLLC/openocd
+  $ git clone https://github.com/MotorolaMobilityLLC/openocd
 
 Refer to detailed OpenOCD build instructions at developer.motorola.com
 
 After building, you can flash the STM32L476 (MuC) with the following
 command:
 
-  openocd -f board/moto_mdk_muc.cfg -c "program nuttx.bin 0x08000000 reset exit"
+  $ openocd -f board/moto_mdk_muc.cfg -c "program nuttx.bin 0x08000000 reset exit"
+
+You may need to be super-user in order access the USB device.
+
+NOTE:  In order for the debug Type C connector to power the phone the DIP
+Switch B4 must be in the on position. See the MDK User Guide at
+developer.motorola.com for more information on the hardware including the DIP
+switches.
+
+Or you can use the GDB server.  To start the GDB server:
+
+  $ openocd -f board/moto_mdk_mu_reset.cfg &
+
+Then start GDB:
+
+  $ arm-non-linux-gdb
+  (gdb) target extended-remote localhost:3333
+  (gdb) set can-use-hw-watchpoints 1
+
+You can load code into FLASH like:
+  (gdb) mon halt
+  (gdb) load nuttx
+  (gdb) file nuttx
+  (gdb) mon reset
 
 Serial Console
 ==============
@@ -49,6 +72,8 @@ MUC_UART_RX (PC11).  This connects to the FT4232 part which supports 4
 CDC/ACM serial ports.  The MuC console is on port C which will probably be
 /dev/ttyUSB2 on your Linux host.  Port A (ttyUSB0) is the MuC SWD debug
 interface.  Ports B and D are the MHB* debug and console ports, respectively.
+
+You may need to be super-user in order access the /dev/ttyUSB2 device.
 
 *Then MHB is the acronym given to Toshiba Interface Bridged, part number
 T6WV7XBG.  See https://toshiba.semicon-storage.com/us/product/assp/interface-bridge.html
