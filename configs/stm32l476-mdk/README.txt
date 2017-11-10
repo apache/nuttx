@@ -43,8 +43,8 @@ command:
 
 You may need to be super-user in order access the USB device.
 
-NOTE:  In order for the debug Type C connector to power the phone the DIP
-Switch B4 must be in the on position. See the MDK User Guide at
+NOTE:  In order for the debug Type C connector to power the phone, the DIP
+Switch B4 must be in the ON position.  See the MDK User Guide at
 developer.motorola.com for more information on the hardware including the DIP
 switches.
 
@@ -54,15 +54,20 @@ Or you can use the GDB server.  To start the GDB server:
 
 Then start GDB:
 
-  $ arm-non-linux-gdb
+  $ arm-none-linux-gdb
   (gdb) target extended-remote localhost:3333
   (gdb) set can-use-hw-watchpoints 1
 
 You can load code into FLASH like:
+
   (gdb) mon halt
   (gdb) load nuttx
   (gdb) file nuttx
   (gdb) mon reset
+
+NOTE:  There is a special version of GDB 7.11 available with some additional,
+MDK-specific features.  It is available in a MotorolaMobilityLLC github.com
+repository.
 
 Serial Console
 ==============

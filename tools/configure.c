@@ -981,101 +981,101 @@ static void disable_feature(const char *destconfig, const char *varname)
 
 static void set_host(const char *destconfig)
 {
-  if (g_host != HOST_NOCHANGE)
+  switch (g_host)
     {
-      switch (g_host)
+      case HOST_LINUX:
         {
-          case HOST_LINUX:
+          printf("  Select the Linux host\n");
+
+          enable_feature(destconfig, "CONFIG_HOST_LINUX");
+          disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+          disable_feature(destconfig, "CONFIG_HOST_OSX");
+
+          disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+          disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+          disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+          enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+          disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+          disable_feature(destconfig, "CONFIG_SIM_M32");
+        }
+        break;
+
+      case HOST_MACOS:
+        {
+          printf("  Select the Linux host\n");
+
+          disable_feature(destconfig, "CONFIG_HOST_LINUX");
+          disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+          enable_feature(destconfig, "CONFIG_HOST_OSX");
+
+          disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+          disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+          disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+          enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+          disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+          disable_feature(destconfig, "CONFIG_SIM_M32");
+        }
+        break;
+
+      case HOST_WINDOWS:
+        {
+          enable_feature(destconfig, "CONFIG_HOST_WINDOWS");
+          disable_feature(destconfig, "CONFIG_HOST_LINUX");
+          disable_feature(destconfig, "CONFIG_HOST_OSX");
+
+          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
+          disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+
+          enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
+          disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
+
+          disable_feature(destconfig, "CONFIG_SIM_M32");
+
+          switch (g_windows)
             {
-              printf("  Select the Linux host\n");
+              case WINDOWS_CYGWIN:
+                printf("  Select Windows/Cygwin host\n");
+                enable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                break;
 
-              enable_feature(destconfig, "CONFIG_HOST_LINUX");
-              disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-              disable_feature(destconfig, "CONFIG_HOST_OSX");
+              case WINDOWS_UBUNTU:
+                printf("  Select Ubuntu for Windows 10 host\n");
+                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                enable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                break;
 
-              disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-              disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-              disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-              disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-              disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
+              case WINDOWS_NATIVE:
+                printf("  Select Windows native host\n");
+                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
+                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
+                enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
+                break;
 
-              enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-              disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-              disable_feature(destconfig, "CONFIG_SIM_M32");
+              default:
+               fprintf(stderr,
+                       "ERROR: Unrecognized  windows configuration: %d\n",
+                       g_windows);
+               exit(EXIT_FAILURE);
             }
-            break;
+        }
+        break;
 
-          case HOST_MACOS:
-            {
-              printf("  Select the Linux host\n");
+      case HOST_NOCHANGE:
+        break;
 
-              disable_feature(destconfig, "CONFIG_HOST_LINUX");
-              disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-              enable_feature(destconfig, "CONFIG_HOST_OSX");
-
-              disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-              disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-              disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-              disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-              disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
-
-              enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-              disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-              disable_feature(destconfig, "CONFIG_SIM_M32");
-            }
-            break;
-
-          case HOST_WINDOWS:
-            {
-              enable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-              disable_feature(destconfig, "CONFIG_HOST_LINUX");
-              disable_feature(destconfig, "CONFIG_HOST_OSX");
-
-              disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-              disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
-
-              enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-              disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-
-              disable_feature(destconfig, "CONFIG_SIM_M32");
-
-              switch (g_windows)
-                {
-                  case WINDOWS_CYGWIN:
-                    printf("  Select Windows/Cygwin host\n");
-                    enable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                    disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                    disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                    break;
-
-                  case WINDOWS_UBUNTU:
-                    printf("  Select Ubuntu for Windows 10 host\n");
-                    disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                    enable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                    disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                    break;
-
-                  case WINDOWS_NATIVE:
-                    printf("  Select Windows native host\n");
-                    disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                    disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                    enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                    break;
-
-                  default:
-                   fprintf(stderr,
-                           "ERROR: Unrecognized  windows configuration: %d\n",
-                           g_windows);
-                   exit(EXIT_FAILURE);
-                }
-            }
-            break;
-
-          default:
-            {
-              fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n", g_host);
-              exit(EXIT_FAILURE);
-            }
+      default:
+        {
+          fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n", g_host);
+          exit(EXIT_FAILURE);
         }
     }
 }
