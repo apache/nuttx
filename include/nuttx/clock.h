@@ -178,6 +178,19 @@
 #define TICK2HSEC(tick)       (((tick)+(TICK_PER_HSEC/2))/TICK_PER_HSEC) /* Rounds */
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
 
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SYSTEM_TIME64) && \
+    defined(CONFIG_CLOCK_MONOTONIC)
+/* Initial system timer ticks value close to maximum 32-bit value, to test
+ * 64-bit system-timer after going over 32-bit value. This is to make errors
+ * of casting 64-bit system-timer to 32-bit variables more visible.
+ */
+
+#  define INITIAL_SYSTEM_TIMER_TICKS \
+    ((uint64_t)(UINT32_MAX - (TICK_PER_SEC * 5)))
+#else
+#  define INITIAL_SYSTEM_TIMER_TICKS 0
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
