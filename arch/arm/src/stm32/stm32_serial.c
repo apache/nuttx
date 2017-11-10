@@ -245,6 +245,8 @@
 
 #if defined(CONFIG_PM) && !defined(CONFIG_PM_SERIAL_ACTIVITY)
 #  define CONFIG_PM_SERIAL_ACTIVITY 10
+#endif
+#if defined(CONFIG_PM)
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 

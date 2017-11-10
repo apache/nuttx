@@ -177,7 +177,9 @@
 /* Power management definitions */
 
 #if defined(CONFIG_PM) && !defined(CONFIG_PM_SERIAL_ACTIVITY)
-#  define CONFIG_PM_SERIAL_ACTIVITY 10
+#  define CONFIG_PM_SERIAL_ACTIVITY  10
+#endif
+#if defined(CONFIG_PM)
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
@@ -214,11 +216,13 @@ struct stm32l4_serial_s
 
   bool              initialized;
 
+#ifdef CONFIG_PM
   bool              suspended; /* UART device has been suspended. */
 
   /* Interrupt mask value stored before suspending for stop mode. */
 
   uint16_t          suspended_ie;
+#endif
 
   /* If termios are supported, then the following fields may vary at
    * runtime.
@@ -269,7 +273,9 @@ struct stm32l4_serial_s
 #ifdef SERIAL_HAVE_DMA
   DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
   bool              rxenable;  /* DMA-based reception en/disable */
+#ifdef CONFIG_PM
   bool              rxdmasusp; /* Rx DMA suspended */
+#endif
   uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
   char       *const rxfifo;    /* Receive DMA buffer */
 #endif
@@ -325,6 +331,8 @@ static void stm32l4serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
 #endif
 
 #ifdef CONFIG_PM
+static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend);
+static void stm32l4serial_pm_setsuspend(bool suspend);
 static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
                                    enum pm_state_e pmstate);
 static int  stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
@@ -734,7 +742,7 @@ static struct stm32l4_serial_s g_uart5priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART+STM32L4_NUART] =
+FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART + STM32L4_NUART] =
 {
 #ifdef CONFIG_STM32L4_USART1
   [0] = &g_usart1priv,
@@ -754,14 +762,17 @@ FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART+STM32L4_NUAR
 };
 
 #ifdef CONFIG_PM
-static  struct pm_callback_s g_serialcb =
+static struct
 {
-  .notify  = stm32l4serial_pmnotify,
-  .prepare = stm32l4serial_pmprepare,
-};
+  struct pm_callback_s pm_cb;
+  bool serial_suspended;
+} g_serialpm =
+  {
+    .pm_cb.notify  = stm32l4serial_pmnotify,
+    .pm_cb.prepare = stm32l4serial_pmprepare,
+    .serial_suspended = false
+  };
 #endif
-
-static bool serial_suspended_for_stop = false;
 
 /****************************************************************************
  * Private Functions
@@ -1052,6 +1063,7 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_PM
 static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 {
   FAR struct stm32l4_serial_s *priv = (struct stm32l4_serial_s *)dev->priv;
@@ -1164,6 +1176,41 @@ static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
     }
 #endif
 }
+#endif
+
+/****************************************************************************
+ * Name: stm32l4serial_pm_setsuspend
+ *
+ * Description:
+ *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+void stm32l4serial_pm_setsuspend(bool suspend)
+{
+  int n;
+
+  /* Already in desired state? */
+
+  if (suspend == g_serialpm.serial_suspended)
+    return;
+
+  g_serialpm.serial_suspended = suspend;
+
+  for (n = 0; n < STM32L4_NUSART + STM32L4_NUART; n++)
+    {
+      struct stm32l4_serial_s *priv = uart_devs[n];
+
+      if (!priv || !priv->initialized)
+        {
+          continue;
+        }
+
+      stm32l4serial_setsuspend(&priv->dev, suspend);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: stm32l4serial_setapbclock
@@ -2244,9 +2291,11 @@ static void stm32l4serial_dmareenable(FAR struct stm32l4_serial_s *priv)
       stm32l4_dmastart(priv->rxdma, stm32l4serial_dmarxcallback, (void *)priv, true);
     }
 
+#ifdef CONFIG_PM
   /* Clear DMA suspended flag. */
 
   priv->rxdmasusp = false;
+#endif
 }
 #endif
 
@@ -2270,6 +2319,7 @@ static bool stm32l4serial_dmaiflowrestart(struct stm32l4_serial_s *priv)
 
   if (priv->rxdmanext != RXDMA_BUFFER_SIZE)
     {
+#ifdef CONFIG_PM
       if (priv->rxdmasusp)
         {
           /* Rx DMA in suspended state. */
@@ -2282,6 +2332,7 @@ static bool stm32l4serial_dmaiflowrestart(struct stm32l4_serial_s *priv)
             }
         }
       else
+#endif
         {
           return false;
         }
@@ -2533,27 +2584,31 @@ static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
     {
       case PM_NORMAL:
         {
-          stm32l4_serial_set_suspend(false);
+          stm32l4serial_pm_setsuspend(false);
         }
         break;
 
       case PM_IDLE:
         {
-          stm32l4_serial_set_suspend(false);
+          stm32l4serial_pm_setsuspend(false);
         }
         break;
 
       case PM_STANDBY:
         {
-          /* TODO: logic for enabling serial in Stop 1 mode with HSI16 missing */
+          /* TODO: Alternative configuration and logic for enabling serial in
+           *       Stop 1 mode with HSI16 missing. Current logic allows
+           *       suspending serial peripherals for Stop 0/1/2 when serial
+           *       Rx/Tx buffers are empty (checked in pmprepare).
+           */
 
-          stm32l4_serial_set_suspend(true);
+          stm32l4serial_pm_setsuspend(true);
         }
         break;
 
       case PM_SLEEP:
         {
-          stm32l4_serial_set_suspend(true);
+          stm32l4serial_pm_setsuspend(true);
         }
         break;
 
@@ -2601,11 +2656,67 @@ static void stm32l4serial_pmnotify(FAR struct pm_callback_s *cb, int domain,
 static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
                                    enum pm_state_e pmstate)
 {
+  int n;
+
   /* Logic to prepare for a reduced power state goes here. */
 
+  switch (pmstate)
+    {
+    case PM_NORMAL:
+    case PM_IDLE:
+      break;
+
+    case PM_STANDBY:
+    case PM_SLEEP:
+
+#ifdef SERIAL_HAVE_DMA
+      /* Flush Rx DMA buffers before checking state of serial device
+       * buffers.
+       */
+
+      stm32l4_serial_dma_poll();
+#endif
+
+      /* Check if any of the active ports have data pending on Tx/Rx
+       * buffers.
+       */
+
+      for (n = 0; n < STM32L4_NUSART + STM32L4_NUART; n++)
+        {
+          struct stm32l4_serial_s *priv = uart_devs[n];
+
+          if (!priv || !priv->initialized)
+            {
+              /* Not active, skip. */
+
+              continue;
+            }
+
+          if (priv->suspended)
+            {
+              /* Port already suspended, skip. */
+
+              continue;
+            }
+
+          /* Check if port has data pending (Rx & Tx). */
+
+          if (priv->dev.xmit.head != priv->dev.xmit.tail)
+            {
+              return ERROR;
+            }
+          if (priv->dev.recv.head != priv->dev.recv.tail)
+            {
+              return ERROR;
+            }
+        }
+
+      break;
+    }
   return OK;
 }
 #endif
+
 #endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
@@ -2614,77 +2725,6 @@ static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
-
-/****************************************************************************
- * Name: stm32l4_is_serial_suspended
- *
- * Description:
- *   Check if serial peripherals have been suspended for deep-sleep/stop modes.
- *
- ****************************************************************************/
-
-bool stm32l4_is_serial_suspended(void)
-{
-  return (serial_suspended_for_stop);
-}
-
-/****************************************************************************
- * Name: stm32_serial_set_suspend
- *
- * Description:
- *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
- *
- ****************************************************************************/
-
-void stm32l4_serial_set_suspend(bool suspend)
-{
-  int n;
-
-  /* Already in desired state? */
-
-  if (suspend == serial_suspended_for_stop)
-    return;
-
-  serial_suspended_for_stop = suspend;
-
-  for (n = 0; n < STM32L4_NUSART+STM32L4_NUART; n++)
-    {
-      struct stm32l4_serial_s *priv = uart_devs[n];
-
-      if (!priv || !priv->initialized)
-        {
-          continue;
-        }
-
-      stm32l4serial_setsuspend(&priv->dev, suspend);
-    }
-}
-
-/****************************************************************************
- * Name: stm32l4_serial_get_uart
- *
- * Description:
- *   Get serial driver structure for STM32 USART
- *
- ****************************************************************************/
-
-FAR uart_dev_t *stm32l4_serial_get_uart(int uart_num)
-{
-  int uart_idx = uart_num - 1;
-
-  if (uart_idx < 0 || uart_idx >= STM32L4_NUSART+STM32L4_NUART || \
-      !uart_devs[uart_idx])
-    {
-      return NULL;
-    }
-
-  if (!uart_devs[uart_idx]->initialized)
-    {
-      return NULL;
-    }
-
-  return &uart_devs[uart_idx]->dev;
-}
 
 /****************************************************************************
  * Name: up_earlyserialinit
@@ -2704,7 +2744,7 @@ void up_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32L4_NUSART+STM32L4_NUART; i++)
+  for (i = 0; i < STM32L4_NUSART + STM32L4_NUART; i++)
     {
       if (uart_devs[i])
         {
@@ -2743,7 +2783,7 @@ void up_serialinit(void)
   /* Register to receive power management callbacks */
 
 #ifdef CONFIG_PM
-  ret = pm_register(&g_serialcb);
+  ret = pm_register(&g_serialpm.pm_cb);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 #endif
@@ -2773,7 +2813,7 @@ void up_serialinit(void)
 
   strcpy(devname, "/dev/ttySx");
 
-  for (i = 0; i < STM32L4_NUSART+STM32L4_NUART; i++)
+  for (i = 0; i < STM32L4_NUSART + STM32L4_NUART; i++)
     {
       /* Don't create a device for non-configured ports. */
 

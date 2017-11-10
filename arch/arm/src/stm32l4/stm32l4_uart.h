@@ -239,36 +239,6 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32l4_serial_get_uart
- *
- * Description:
- *   Get serial driver structure for STM32 USART
- *
- ************************************************************************************/
-
-FAR uart_dev_t *stm32l4_serial_get_uart(int uart_num);
-
-/****************************************************************************
- * Name: stm32l4_is_serial_suspended
- *
- * Description:
- *   Check if serial peripherals have been suspended for deep-sleep/stop modes.
- *
- ****************************************************************************/
-
-bool stm32l4_is_serial_suspended(void);
-
-/****************************************************************************
- * Name: stm32_serial_set_suspend
- *
- * Description:
- *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
- *
- ****************************************************************************/
-
-void stm32l4_serial_set_suspend(bool suspend);
-
-/************************************************************************************
  * Name: stm32l4_serial_dma_poll
  *
  * Description:

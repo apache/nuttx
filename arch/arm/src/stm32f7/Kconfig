@@ -1683,6 +1683,15 @@ config STM32F7_SERIALBRK_BSDCOMPAT
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
 
+if PM
+config PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+endif
+
 endmenu # U[S]ART Configuration
 
 menu "SPI Configuration"

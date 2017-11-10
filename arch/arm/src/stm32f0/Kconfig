@@ -1470,4 +1470,13 @@ config USART8_RS485_DIR_POLARITY
 
 endif # STM32F0_USART8_SERIALDRIVER
 
+if PM
+config PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+endif
+
 endmenu

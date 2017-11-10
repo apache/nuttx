@@ -6971,6 +6971,15 @@ config STM32_USART_SINGLEWIRE
 		Enable single wire UART support.  The option enables support for the
 		TIOCSSINGLEWIRE ioctl in the STM32 serial driver.
 
+if PM
+config PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+endif
+
 endif # STM32_SERIALDRIVER
 endmenu # U[S]ART Configuration
 
