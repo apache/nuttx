@@ -53,6 +53,7 @@
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/lib/xorshift128.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/random.h>
