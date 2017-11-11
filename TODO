@@ -13,7 +13,7 @@ nuttx/:
   (1)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
-  (3)  Signals (sched/signal, arch/)
+  (4)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
@@ -485,6 +485,26 @@ o Signals (sched/signal, arch/)
                to map bits appropriately.
   Status:      Open
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
+
+  Title:       IMPLEMENT clock_nanosleep()
+  Description: NuttX currently supports only nanosleep(), not clock_nanosleep().
+               clock_nanosleep() permits you to use either CLOCK_REALTIME, CLOCK_MONOTONIC,
+               or any other clock that may be available.  It also permits you to use
+               a delay to an absolute time rather than a relative delay from the
+               current time.
+
+               One would think that adding support for clock_nanosleep() should be
+               simple since it is equivalent to nanosleep() with clock_id ==
+               CLOCK_REALTIME and with flags == 0.  However it is not because there
+               is an underlying assumption that nanosleep uses CLOCK_REALTIME and
+               logic like the POSIX timer interfaces.  The NuttX nanosleep does not
+               use CLOCK_REALTIME.  It uses the system timer directly.  Being able to
+               switch clocks would require a complete redesign of the existing logic
+               and the redesign would probably not be as compact or robust as the
+               existing implementation.
+  Status:      Open
+  Priority:    I consider this low priority at least for now and have no immediate
+               plans to implement clock_nanosleep().
 
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
