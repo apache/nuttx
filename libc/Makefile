@@ -90,11 +90,12 @@ include syslog/Make.defs
 include termios/Make.defs
 include time/Make.defs
 include tls/Make.defs
+include uio/Make.defs
 include unistd/Make.defs
+include userfs/Make.defs
 include wchar/Make.defs
 include wctype/Make.defs
 include wqueue/Make.defs
-include userfs/Make.defs
 
 # REVISIT: Backslash causes problems in $(COBJS) target
 DELIM := $(strip /)

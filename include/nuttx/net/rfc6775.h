@@ -86,7 +86,7 @@
  * Public Types
  ****************************************************************************/
 
-/* Table 1. alues for status field */
+/* Table 1. Values for status field */
 
 enum sixlowpan_status_e
 {

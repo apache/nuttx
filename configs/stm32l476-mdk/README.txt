@@ -80,5 +80,5 @@ interface.  Ports B and D are the MHB* debug and console ports, respectively.
 
 You may need to be super-user in order access the /dev/ttyUSB2 device.
 
-*Then MHB is the acronym given to Toshiba Interface Bridged, part number
-T6WV7XBG.  See https://toshiba.semicon-storage.com/us/product/assp/interface-bridge.html
+*MHB is the acronym given to Toshiba Interface Bridge, part number T6WV7XBG.
+ See https://toshiba.semicon-storage.com/us/product/assp/interface-bridge.html

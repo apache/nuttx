@@ -74,40 +74,40 @@
 
 /* USART */
 
-#define GPIO_USART1_CTS  GPIO_USART1_CTS_3   /* PG11 */
+#define GPIO_USART1_CTS  GPIO_USART1_CTS_3     /* PG11 */
 #define GPIO_USART1_RTS  GPIO_USART1_RTS_DE_2  /* PB3  */
-#define GPIO_USART1_RX   GPIO_USART1_RX_2    /* PB7  */
-#define GPIO_USART1_TX   GPIO_USART1_TX_2    /* PB6  */
+#define GPIO_USART1_RX   GPIO_USART1_RX_2      /* PB7  */
+#define GPIO_USART1_TX   GPIO_USART1_TX_2      /* PB6  */
 
-#define GPIO_USART2_CTS  GPIO_USART2_CTS_1   /* PA0  */
-#define GPIO_USART2_RTS  GPIO_USART2_RTS_DE_1 /* PA1  */
-#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3  */
-#define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2  */
+#define GPIO_USART2_CTS  GPIO_USART2_CTS_1     /* PA0  */
+#define GPIO_USART2_RTS  GPIO_USART2_RTS_DE_1  /* PA1  */
+#define GPIO_USART2_RX   GPIO_USART2_RX_1      /* PA3  */
+#define GPIO_USART2_TX   GPIO_USART2_TX_1      /* PA2  */
 
-#define GPIO_USART3_RX   GPIO_USART3_RX_3    /* PC11 */
-#define GPIO_USART3_TX   GPIO_USART3_TX_3    /* PC10 */
+#define GPIO_USART3_RX   GPIO_USART3_RX_3      /* PC11 */
+#define GPIO_USART3_TX   GPIO_USART3_TX_3      /* PC10 */
 
 /* I2C */
 
-#define GPIO_I2C2_SCL    GPIO_I2C2_SCL_1     /* PB10 */
-#define GPIO_I2C2_SDA    GPIO_I2C2_SDA_1     /* PB11 */
+#define GPIO_I2C2_SCL    GPIO_I2C2_SCL_1       /* PB10 */
+#define GPIO_I2C2_SDA    GPIO_I2C2_SDA_1       /* PB11 */
 
-#define GPIO_I2C3_SCL    GPIO_I2C3_SCL_1     /* PC0  */
-#define GPIO_I2C3_SDA    GPIO_I2C3_SDA_1     /* PC1  */
+#define GPIO_I2C3_SCL    GPIO_I2C3_SCL_1       /* PC0  */
+#define GPIO_I2C3_SDA    GPIO_I2C3_SDA_1       /* PC1  */
 
 /* SPI */
 
-#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1    /* PA6  */
-#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1    /* PA7  */
-#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1     /* PA5  */
-#define GPIO_SPI1_NSS    GPIO_SPI1_NSS_1     /* PA4  */
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1      /* PA6  */
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1      /* PA7  */
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1       /* PA5  */
+#define GPIO_SPI1_NSS    GPIO_SPI1_NSS_1       /* PA4  */
 #define DMACHAN_SPI1_RX  DMACHAN_SPI1_RX_1
 #define DMACHAN_SPI1_TX  DMACHAN_SPI1_TX_1
 
-#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1    /* PB14 */
-#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1    /* PB15 */
-#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2     /* PB13 */
-#define GPIO_SPI2_NSS    GPIO_SPI2_NSS_2     /* PB12 */
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1      /* PB14 */
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1      /* PB15 */
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2       /* PB13 */
+#define GPIO_SPI2_NSS    GPIO_SPI2_NSS_2       /* PB12 */
 
 /* Buttons **************************************************************************/
 /* The board only has one button */

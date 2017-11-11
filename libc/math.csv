@@ -57,6 +57,7 @@
 "rint","math.h","defined(CONFIG_HAVE_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","double","double"
 "rintf","math.h","defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH)","float","float"
 "rintl","math.h","defined(CONFIG_HAVE_LONG_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","long double","long double"
+"readv","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"
 "round","math.h","defined(CONFIG_HAVE_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","double","double"
 "roundf","math.h","defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH)","float","float"
 "roundl","math.h","defined(CONFIG_HAVE_LONG_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","long double","long double"
@@ -75,3 +76,4 @@
 "tanhf","math.h","defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH)","float","float"
 "tanhl","math.h","defined(CONFIG_HAVE_LONG_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","long double","long double"
 "tanl","math.h","defined(CONFIG_HAVE_LONG_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","long double","long double"
+"writev","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"

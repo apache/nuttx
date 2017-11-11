@@ -236,4 +236,8 @@
 #define SEM_NSEMS_MAX  _POSIX_SEM_NSEMS_MAX
 #define SEM_VALUE_MAX  _POSIX_SEM_VALUE_MAX
 
+/* Required for readv() and writev() */
+
+#define IOV_MAX        INT_MAX
+
 #endif /* __INCLUDE_LIMITS_H */

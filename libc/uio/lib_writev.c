@@ -1,10 +1,8 @@
 /****************************************************************************
- * include/sys/uio.h
+ * libc/stdio/lib_writev.c
  *
- *   Copyright (C) 2017 Grefory Nutt. All rights reserved.
- *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
- *   Author: Stavros Polymenis <sp@orbitalfox.com>
- *           Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,53 +33,18 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_UIO_H
-#define __INCLUDE_SYS_UIO_H
-
 /****************************************************************************
- * Public Types
+ * Included Files
  ****************************************************************************/
 
-struct iovec
-{
-  FAR void *iov_base;
-  size_t    iov_len;
-};
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+#include <errno.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: readv()
- *
- * Description:
- *   The readv() function is equivalent to read(), except as described below.
- *   The readv() function places the input data into the iovcnt buffers
- *   specified by the members of the iov array: iov[0], iov[1], ...,
- *   iov[iovcnt-1].  The iovcnt argument is valid if greater than 0 and less
- *   than or equal to IOV_MAX as defined in limits.h.
- *
- *   Each iovec entry specifies the base address and length of an area in
- *   memory where data should be placed.  The readv() function will always
- *   fill an area completely before proceeding to the next.
- *
- *   Upon successful completion, readv() will mark for update the st_atime
- *   field of the file.
- *
- * Input Parameters:
- *   filedes - The open file descriptor for the file to be read
- *   iov     - Array of read buffer descriptors
- *   iovcnt  - Number of elements in iov[]
- *
- * Returned Value:
- *   Upon successful completion, readv() will return a non-negative integer
- *   indicating the number of bytes actually read.  Otherwise, the functions
- *   will return -1 and set errno to indicate the error.  See read().
- *
- ****************************************************************************/
-
-ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: writev()
@@ -117,6 +80,71 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
  *
  ****************************************************************************/
 
-ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt);
+ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
+{
+  ssize_t ntotal;
+  ssize_t nwritten;
+  size_t remaining;
+  FAR uint8_t *buffer;
+  off_t pos;
+  int i;
 
-#endif /* __INCLUDE_SYS_UIO_H */
+  /* Get the current file position in case we have to reset it */
+
+  pos = lseek(fildes, 0, SEEK_CUR);
+  if (pos == (off_t)-1)
+    {
+      return ERROR;
+    }
+
+  /* Process each entry in the struct iovec array */
+
+  for (i = 0, ntotal = 0; i < iovcnt; i++)
+    {
+      /* Ignore zero-length writes */
+
+      if (iov[i].iov_len > 0)
+        {
+          buffer    = iov[i].iov_base;
+          remaining = iov[i].iov_len;
+
+          /* Write repeatedly as necessary to write the entire buffer */
+
+          do
+            {
+              /* NOTE:  write() is a cancellation point */
+
+              nwritten = write(fildes, buffer, remaining);
+
+              /* Check for a write error */
+
+              if (nwritten < 0)
+                {
+                  /* Save the errno value */
+
+                  int save = get_errno();
+
+                  /* Restore the file position */
+
+                  (void)lseek(fildes, pos, SEEK_SET);
+
+                  /* Restore the errno value */
+
+                  set_errno(save);
+                  return ERROR;
+                }
+
+              /* Update pointers and counts in order to handle partial
+               * buffer writes.
+               */
+
+              buffer    += nwritten;
+              remaining -= nwritten;
+              ntotal    += nwritten;
+            }
+          while (remaining > 0);
+        }
+    }
+
+  return ntotal;
+}

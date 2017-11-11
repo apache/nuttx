@@ -1,10 +1,8 @@
 /****************************************************************************
- * include/sys/uio.h
+ * libc/stdio/lib_readv.c
  *
- *   Copyright (C) 2017 Grefory Nutt. All rights reserved.
- *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
- *   Author: Stavros Polymenis <sp@orbitalfox.com>
- *           Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,21 +33,16 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_UIO_H
-#define __INCLUDE_SYS_UIO_H
-
 /****************************************************************************
- * Public Types
+ * Included Files
  ****************************************************************************/
 
-struct iovec
-{
-  FAR void *iov_base;
-  size_t    iov_len;
-};
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -81,42 +74,58 @@ struct iovec
  *
  ****************************************************************************/
 
-ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
+ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt)
+{
+  ssize_t ntotal;
+  ssize_t nread;
+  size_t remaining;
+  FAR uint8_t *buffer;
+  int i;
 
-/****************************************************************************
- * Name: writev()
- *
- * Description:
- *   The writev() function is equivalent to write(), except as described
- *   below. The writev() function will gather output data from the iovcnt
- *   buffers specified by the members of the iov array: iov[0], iov[1], ...,
- *   iov[iovcnt-1]. The iovcnt argument is valid if greater than 0 and less
- *   than or equal to IOV_MAX, as defined in limits.h.
- *
- *   Each iovec entry specifies the base address and length of an area in
- *   memory from which data should be written. The writev() function always
- *   writes a complete area before proceeding to the next.
- *
- *   If fildes refers to a regular file and all of the iov_len members in
- *   the array pointed to by iov are 0, writev() will return 0 and have no
- *   other effect. For other file types, the behavior is unspecified.
- *
- *   If the sum of the iov_len values is greater than SSIZE_MAX, the
- *   operation will fail and no data will be transferred.
- *
- * Input Parameters:
- *   filedes - The open file descriptor for the file to be read
- *   iov     - Array of read buffer descriptors
- *   iovcnt  - Number of elements in iov[]
- *
- * Returned Value:
- *   Upon successful completion, writev() shall return the number of bytes
- *   actually written. Otherwise, it shall return a value of -1, the file-
- *   pointer shall remain unchanged, and errno shall be set to indicate an
- *   error.
- *
- ****************************************************************************/
+  /* Process each entry in the struct iovec array */
 
-ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt);
+  for (i = 0, ntotal = 0; i < iovcnt; i++)
+    {
+      /* Ignore zero-length reads */
 
-#endif /* __INCLUDE_SYS_UIO_H */
+      if (iov[i].iov_len > 0)
+        {
+          buffer    = iov[i].iov_base;
+          remaining = iov[i].iov_len;
+
+          /* Read repeatedly as necessary to fill buffer */
+
+          do
+            {
+              /* NOTE:  read() is a cancellation point */
+
+              nread = read(fildes, buffer, remaining);
+
+              /* Check for a read error */
+
+              if (nread < 0)
+                {
+                  return nread;
+                }
+
+              /* Check for an end-of-file condition */
+
+              else if (nread == 0)
+                {
+                  return ntotal;
+                }
+
+              /* Update pointers and counts in order to handle partial
+               * buffer reads.
+               */
+
+              buffer    += nread;
+              remaining -= nread;
+              ntotal    += nread;
+            }
+          while (remaining > 0);
+        }
+    }
+
+  return ntotal;
+}

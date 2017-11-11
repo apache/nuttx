@@ -47,6 +47,7 @@ we have:
   stdlib    - stdlib.h
   string    - string.h (and legacy strings.h)
   time      - time.h
+  uio       - sys/uio.h
   unistd    - unistd.h
   wchar     - wchar.h
   wctype    - wctype.h
