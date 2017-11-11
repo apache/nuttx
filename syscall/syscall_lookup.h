@@ -157,7 +157,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(sigsuspend,               1, STUB_sigsuspend)
   SYSCALL_LOOKUP(sigtimedwait,             3, STUB_sigtimedwait)
   SYSCALL_LOOKUP(sigwaitinfo,              2, STUB_sigwaitinfo)
-  SYSCALL_LOOKUP(nanosleep,                2, STUB_nanosleep)
+  SYSCALL_LOOKUP(clock_nanosleep,          4, STUB_clock_nanosleep)
 #endif
 
 /* The following are only defined if the system clock is enabled in the

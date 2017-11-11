@@ -227,7 +227,7 @@
 #  define SYS_sigsuspend               (__SYS_signals+5)
 #  define SYS_sigtimedwait             (__SYS_signals+6)
 #  define SYS_sigwaitinfo              (__SYS_signals+7)
-#  define SYS_nanosleep                (__SYS_signals+8)
+#  define SYS_clock_nanosleep          (__SYS_signals+8)
 #  define __SYS_clock                  (__SYS_signals+9)
 #else
 #  define __SYS_clock                  __SYS_signals

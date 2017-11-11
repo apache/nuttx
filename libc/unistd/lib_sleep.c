@@ -1,7 +1,8 @@
 /****************************************************************************
  * lib/lib_sleep.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,14 +118,14 @@ unsigned int sleep(unsigned int seconds)
 
   if (seconds > 0)
     {
-      /* Let nanosleep() do all of the work. */
+      /* Let clock_nanosleep() do all of the work. */
 
       rqtp.tv_sec  = seconds;
       rqtp.tv_nsec = 0;
 
-      ret = nanosleep(&rqtp, &rmtp);
+      ret = clock_nanosleep(CLOCK_REALTIME, 0, &rqtp, &rmtp);
 
-      /* nanosleep() should only fail if it was interrupted by a signal,
+      /* clock_nanosleep() should only fail if it was interrupted by a signal,
        * but we treat all errors the same,
        */
 

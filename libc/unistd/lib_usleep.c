@@ -1,7 +1,8 @@
 /****************************************************************************
  * lib/lib_usleep.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,13 +115,13 @@ int usleep(useconds_t usec)
 
   if (usec)
     {
-      /* Let nanosleep() do all of the work. */
+      /* Let clock_nanosleep() do all of the work. */
 
       sec          = usec / 1000000;
       rqtp.tv_sec  = sec;
       rqtp.tv_nsec = (usec - (sec * 1000000)) * 1000;
 
-      ret = nanosleep(&rqtp, NULL);
+      ret = clock_nanosleep(CLOCK_REALTIME, 0, &rqtp, NULL);
     }
 
   return ret;

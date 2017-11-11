@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/time.h
  *
- *   Copyright (C) 2007-2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,15 +90,17 @@
 #  define CLOCK_MONOTONIC  1
 #endif
 
-/* This is a flag that may be passed to the timer_settime() function */
+/* This is a flag that may be passed to the timer_settime() and
+ * clock_nanosleep() functions.
+ */
 
 #define TIMER_ABSTIME      1
 
 #ifndef CONFIG_LIBC_LOCALTIME
 /* Local time is the same as gmtime in this implementation */
 
-#  define localtime(c)       gmtime(c)
-#  define localtime_r(c,r)   gmtime_r(c,r)
+#  define localtime(c)     gmtime(c)
+#  define localtime_r(c,r) gmtime_r(c,r)
 #endif
 
 /********************************************************************************
@@ -231,6 +233,9 @@ int timer_settime(timer_t timerid, int flags,
 int timer_gettime(timer_t timerid, FAR struct itimerspec *value);
 int timer_getoverrun(timer_t timerid);
 
+int clock_nanosleep(clockid_t clockid, int flags,
+                    FAR const struct timespec *rqtp,
+                    FAR struct timespec *rmtp);
 int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp);
 
 #ifdef CONFIG_LIBC_LOCALTIME
