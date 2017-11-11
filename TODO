@@ -557,36 +557,28 @@ o pthreads (sched/pthreads)
                exceptions as noted:
 
                 accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
-             04 aio_suspend()     NA msgrcv()                    pwrite()        NA sigwait()
+                aio_suspend()     NA msgrcv()                    pwrite()           sigwait()
              NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
-                close()           NA msync()                  NA readv()         01 sleep()
-                connect()            nanosleep()                 recv()          02 system()
+                close()           NA msync()                     readv()            sleep()
+                connect()            nanosleep()                 recv()          01 system()
              -- creat()              open()                      recvfrom()         tcdrain()
-                fcntl()              pause()                  NA recvmsg()       01 usleep()
+                fcntl()              pause()                  NA recvmsg()          usleep()
              NA fdatasync()          poll()                      select()        -- wait()
                 fsync()              pread()                     sem_timedwait()    waitid()
              NA getmsg()          NA pselect()                   sem_wait()         waitpid()
              NA getpmsg()            pthread_cond_timedwait()    send()             write()
-             NA lockf()              pthread_cond_wait()      NA sendmsg()       NA writev()
+             NA lockf()              pthread_cond_wait()      NA sendmsg()          writev()
                 mq_receive()         pthread_join()              sendto()
-                mq_send()            pthread_testcancel()     03 sigpause()
+                mq_send()            pthread_testcancel()        sigpause()
                 mq_timedreceive() NA putmsg()                    sigsuspend()
 
                   NA Not supported
                   -- Doesn't need instrumentation.  Handled by lower level calls.
                   nn See note nn
 
-               NOTE 01: sleep() and usleep() are user-space functions in the C library and cannot
-               serve as cancellation points.  They are, however, simple wrappers around nanosleep
-               which is a true cancellation point.
-               NOTE 02: system() is actually implemented in apps/ as part of NSH.  It cannot be
-               a cancellation point.
-               NOTE 03: sigpause() is a user-space function in the C library and cannot serve as
-               cancellation points.  It is, however, a simple wrapper around sigsuspend()
-               which is a true cancellation point.
-               NOTE 04: aio_suspend() is a user-space function in the C library and cannot serve as
-               cancellation points.  It does call around sigtimedwait() which is a true cancellation
-               point.
+               NOTE 01: system() is actually implemented in apps/ as part of NSH.  It cannot be
+               a cancellation point but probably will cause a cancellation due to lower level
+               system calls.
   Status:      Not really open.  This is just the way it is.
   Priority:    Nothing additional is planned.
 

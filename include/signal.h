@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/signal.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -308,6 +308,7 @@ int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
 int sigrelse(int signo);
 _sa_handler_t sigset(int signo, _sa_handler_t func);
+int sigwait(FAR const sigset_t *set, FAR int *sig);
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
                  FAR const struct timespec *timeout);
 int sigsuspend(FAR const sigset_t *sigmask);
