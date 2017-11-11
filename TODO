@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 2, 2017)
+NuttX TODO List (Last updated November 11, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,7 +14,7 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
-  (3)  pthreads (sched/pthread)
+  (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
   (8)  Kernel/Protected Build
   (3)  C++ Support
@@ -551,41 +551,10 @@ o pthreads (sched/pthreads)
                 solution. So I discarded a few hours of programming. Not a
                 big loss from the experience I gained."
 
-  Title:       ISSUES WITH CANCELLATION POINTS
-  Description: According to POSIX cancellation points must occur when a
-               thread is executing the following functions.  There are some
-               exceptions as noted:
-
-                accept()             mq_timedsend()           NA putpmsg()          sigtimedwait()
-                aio_suspend()     NA msgrcv()                    pwrite()           sigwait()
-             NA clock_nanosleep() NA msgsnd()                    read()             sigwaitinfo()
-                close()           NA msync()                     readv()            sleep()
-                connect()            nanosleep()                 recv()          01 system()
-             -- creat()              open()                      recvfrom()         tcdrain()
-                fcntl()              pause()                  NA recvmsg()          usleep()
-             NA fdatasync()          poll()                      select()        -- wait()
-                fsync()              pread()                     sem_timedwait()    waitid()
-             NA getmsg()          NA pselect()                   sem_wait()         waitpid()
-             NA getpmsg()            pthread_cond_timedwait()    send()             write()
-             NA lockf()              pthread_cond_wait()      NA sendmsg()          writev()
-                mq_receive()         pthread_join()              sendto()
-                mq_send()            pthread_testcancel()        sigpause()
-                mq_timedreceive() NA putmsg()                    sigsuspend()
-
-                  NA Not supported
-                  -- Doesn't need instrumentation.  Handled by lower level calls.
-                  nn See note nn
-
-               NOTE 01: system() is actually implemented in apps/ as part of NSH.  It cannot be
-               a cancellation point but probably will cause a cancellation due to lower level
-               system calls.
-  Status:      Not really open.  This is just the way it is.
-  Priority:    Nothing additional is planned.
-
   Title:       INAPPROPRIATE USE OF sched_lock() BY pthreads
   Description: In implementation of standard pthread functions, the non-
                standard, NuttX function sched_lock() is used.  This is very
-               strong sense it disables pre-emption for all threads in all
+               strong since it disables pre-emption for all threads in all
                task groups.  I believe it is only really necessary in most
                cases to lock threads in the task group with a new non-
                standard interface, say pthread_lock().
@@ -600,7 +569,7 @@ o pthreads (sched/pthreads)
                This is an easy change:  pthread_lock() and pthread_unlock()
                would simply operate on a semaphore retained in the task
                group structure.  I am, however, hesitant to make this change:
-               I the flat build model, there is nothing that prevents people
+               In the FLAT build model, there is nothing that prevents people
                from accessing the inter-thread controls from threads in
                differnt task groups.  Making this change, while correct,
                might introduce subtle bugs in code by people who are not
@@ -643,11 +612,9 @@ o Kernel/Protected Build
                These functions still call directly into operating system
                functions:
 
-                 - cdcacm_classobject - Called from apps/system/composite.
                  - usbmsc_configure - Called from apps/system/usbmsc and
                    apps/system/composite
-                 - usbmsc_bindlun - Called from apps/system/usbmsc and
-                   apps/system/composite
+                 - usbmsc_bindlun - Called from apps/system/usbmsc
                  - usbmsc_exportluns - Called from apps/system/usbmsc.
 
   Status:      Open
