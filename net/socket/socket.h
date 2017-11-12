@@ -95,24 +95,24 @@
 
 /* These define bit positions for each socket option (see sys/socket.h) */
 
-#define _SO_DEBUG        _SO_BIT(SO_DEBUG)
 #define _SO_ACCEPTCONN   _SO_BIT(SO_ACCEPTCONN)
 #define _SO_BROADCAST    _SO_BIT(SO_BROADCAST)
-#define _SO_REUSEADDR    _SO_BIT(SO_REUSEADDR)
+#define _SO_DEBUG        _SO_BIT(SO_DEBUG)
+#define _SO_DONTROUTE    _SO_BIT(SO_DONTROUTE)
+#define _SO_ERROR        _SO_BIT(SO_ERROR)
 #define _SO_KEEPALIVE    _SO_BIT(SO_KEEPALIVE)
 #define _SO_LINGER       _SO_BIT(SO_LINGER)
 #define _SO_OOBINLINE    _SO_BIT(SO_OOBINLINE)
-#define _SO_SNDBUF       _SO_BIT(SO_SNDBUF)
 #define _SO_RCVBUF       _SO_BIT(SO_RCVBUF)
-#define _SO_ERROR        _SO_BIT(SO_ERROR)
-#define _SO_TYPE         _SO_BIT(SO_TYPE)
-#define _SO_DONTROUTE    _SO_BIT(SO_DONTROUTE)
 #define _SO_RCVLOWAT     _SO_BIT(SO_RCVLOWAT)
 #define _SO_RCVTIMEO     _SO_BIT(SO_RCVTIMEO)
+#define _SO_REUSEADDR    _SO_BIT(SO_REUSEADDR)
+#define _SO_SNDBUF       _SO_BIT(SO_SNDBUF)
 #define _SO_SNDLOWAT     _SO_BIT(SO_SNDLOWAT)
 #define _SO_SNDTIMEO     _SO_BIT(SO_SNDTIMEO)
+#define _SO_TYPE         _SO_BIT(SO_TYPE)
 
-/* This is the larget option value */
+/* This is the largest option value.  REVISIT: belongs in sys/socket.h */
 
 #define _SO_MAXOPT       (15)
 
