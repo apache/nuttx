@@ -149,6 +149,10 @@
                            * output function blocks because flow control prevents data from
                            * being sent(get/set). arg: struct timeval */
 
+/* Protocol-level socket options may begin with this value */
+
+#define __SO_PROTOCOL  16
+
 /* Values for the 'how' argument of shutdown() */
 
 #define SHUT_RD        1  /* Bit 0: Disables further receive operations */
