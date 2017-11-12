@@ -46,17 +46,15 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "stm32l4_gpio.h"
 #include "stm32l476-mdk.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each button.  This array is indexed by
  * the BUTTON_* definitions in board.h
  */
@@ -65,10 +63,6 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
 {
   GPIO_BTN_POWER
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

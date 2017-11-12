@@ -55,6 +55,7 @@
 
 #define HAVE_PROC             1
 #define HAVE_RTC_DRIVER       1
+#define HAVE_USERLED_DRIVER   1
 
 #if !defined(CONFIG_FS_PROCFS)
 #  undef HAVE_PROC
@@ -69,6 +70,12 @@
 
 #if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
 #  undef HAVE_RTC_DRIVER
+#endif
+
+/* Check if we have the LED driver */
+
+#if !defined(CONFIG_USERLED) || !defined(CONFIG_USERLED_LOWER)
+#  undef HAVE_USERLED_DRIVER
 #endif
 
 /* LEDs.
@@ -136,6 +143,22 @@ extern struct spi_dev_s *g_spi2;
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
 
 /************************************************************************************
  * Name: stm32_spiinitialize
