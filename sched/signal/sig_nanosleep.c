@@ -296,13 +296,19 @@ int clock_nanosleep(clockid_t clockid, int flags,
 
       irqstate = enter_critical_section();
       ret = clock_gettime(clockid, &now);
-      if (ret >= 0)
+      if (ret < 0)
         {
-          clock_timespec_subtract(rqtp, &now, &reltime);
+          /* clock_gettime() sets the errno variable */
+
+          leave_critical_section(irqstate);
+          leave_cancellation_point();
+          return ERROR;
         }
 
-      /* Now that we have the relative time, the remaining operations are
-       * equivalent to nxsig_nanosleep().
+      clock_timespec_subtract(rqtp, &now, &reltime);
+
+      /* Now that we have the relative time, the remaining operations
+       * are equivalent to nxsig_nanosleep().
        */
 
       ret = nxsig_nanosleep(&reltime, rmtp);
@@ -322,6 +328,8 @@ int clock_nanosleep(clockid_t clockid, int flags,
 
   if (ret < 0)
     {
+      /* If not set the errno variable and return -1 */
+
       set_errno(-ret);
       ret = ERROR;
     }
