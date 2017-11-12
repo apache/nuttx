@@ -25,10 +25,20 @@ STM32L476ME:
   CRC calculation unit
   RTC
 
+Acronyms
+========
+
+  MDK is, of course, the Motorola Development Kit.
+  MuC is the acronym that is used to refer to the STM32L476ME on the MDK
+      board.
+  MHB is the acronym given to Toshiba Interface Bridge, part number T6WV7XBG.
+      See https://toshiba.semicon-storage.com/us/product/assp/interface-bridge.html
+      NuttX runs the MuC.
+
 Flashing
 ========
 
-The MDK has a builtin FTDI to support flashing from openocd.  There are a
+The MDK has a built-in FTDI to support flashing from openocd.  There are a
 few extensions to openocd that haven't been integrated upstream yet.  To
 flash (or debug) the MDK, you will need the code from:
 
@@ -76,9 +86,25 @@ The serial console is configured on USART3 using MUC_UART3_TX (PC10) and
 MUC_UART_RX (PC11).  This connects to the FT4232 part which supports 4
 CDC/ACM serial ports.  The MuC console is on port C which will probably be
 /dev/ttyUSB2 on your Linux host.  Port A (ttyUSB0) is the MuC SWD debug
-interface.  Ports B and D are the MHB* debug and console ports, respectively.
+interface.  Ports B and D are the MHB debug and console ports, respectively.
 
-You may need to be super-user in order access the /dev/ttyUSB2 device.
+The serial terminal that you use must be configured to use the /dev/ttyUSB2
+device at 11500 baud, no parity, 8 bits of data, 1 stop bit (115200 8N1 in
+minicom-speak) and with no flow control.  Minicom works well.
 
-*MHB is the acronym given to Toshiba Interface Bridge, part number T6WV7XBG.
- See https://toshiba.semicon-storage.com/us/product/assp/interface-bridge.html
+You will probably need to be super-user in order access the /dev/ttyUSB2
+device:
+
+  $ sudo minicom mdk
+
+When mdk is the name of my saved configuration using the above serial
+configuration.
+
+The Motorola documentation also mentions picocom.  NSH also works well with
+picocom:
+
+  $ sudo apt install picocom
+  $ sudo picocom -b 115200 /dev/ttyUSB2
+
+Everything else defaults correction.  Ctrl-A then Ctrl-X will terminate
+either the minicom or the picocom session.
