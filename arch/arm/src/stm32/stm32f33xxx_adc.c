@@ -74,6 +74,10 @@
 
 #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2)
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* This implementation is for the STM32F33XXX only.
  *
  * STM32F33XXX chips are intended for digital power conversion applications,
@@ -115,9 +119,6 @@
 #  define ADC2_HAVE_JEXTSEL
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 /* RCC reset ****************************************************************/
 
 #define STM32_RCC_RSTR   STM32_RCC_AHBRSTR
@@ -387,7 +388,9 @@ struct stm32_dev_s
 #endif
   uint8_t rnchannels;   /* Number of regular channels */
   uint8_t cr_channels;  /* Number of configured regular channels */
+#ifdef ADC_HAVE_INJECTED
   uint8_t cj_channels;  /* Number of configured injected channels */
+#endif
   uint8_t intf;         /* ADC interface number */
   uint8_t resolution;   /* ADC resolution*/
   uint8_t current;      /* Current ADC channel being converted */
@@ -2282,8 +2285,10 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
   FAR struct adc_dev_s *dev;
   FAR struct stm32_dev_s *priv;
   uint8_t cr_channels = 0;
+#ifdef ADC_HAVE_INJECTED
   uint8_t cj_channels = 0;
   FAR uint8_t *j_chanlist = NULL;
+#endif
 
   switch (intf)
     {
@@ -2293,8 +2298,10 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
           ainfo("ADC1 selected\n");
           dev         = &g_adcdev1;
           cr_channels = channels - ADC1_INJECTED_CHAN;
+#ifdef ADC_HAVE_INJECTED
           cj_channels = ADC1_INJECTED_CHAN;
           j_chanlist  = (FAR uint8_t *)chanlist + cr_channels;
+#endif
           break;
         }
 #endif
@@ -2304,8 +2311,10 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
           ainfo("ADC2 selected\n");
           dev         = &g_adcdev2;
           cr_channels = channels - ADC2_INJECTED_CHAN;
+#ifdef ADC_HAVE_INJECTED
           cj_channels = ADC2_INJECTED_CHAN;
           j_chanlist  = chanlist + cr_channels;
+#endif
           break;
         }
 #endif

@@ -300,12 +300,13 @@ o Task/Scheduler (sched/)
                   ./risc-v/src/common/up_internal.h:EXTERN uint32_t g_idle_topstack;
                   ./x86/src/common/up_internal.h:extern uint32_t g_idle_topstack;
 
-                  That omits there architectures: sh1, sim, xtensa, z16, z80,
+                  That omits these architectures: sh1, sim, xtensa, z16, z80,
                   ez80, and z8.  All would have to support this common
                   globlal variable.
 
                   Also, the stack itself may be 8-, 16-, or 32-bits wide,
-                  depending upon the architecture.
+                  depending upon the architecture and do have differing
+                  alignment requirements.
 
                2. Another problem is colorizing that stack to use with
                  stack usage monitoring logic.  There is logic in some
