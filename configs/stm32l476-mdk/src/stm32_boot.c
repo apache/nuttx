@@ -67,17 +67,17 @@
 
 void stm32l4_board_initialize(void)
 {
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
 
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
   /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
   stm32l4_spiinitialize();
 #endif
 }

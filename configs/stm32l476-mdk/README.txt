@@ -106,5 +106,5 @@ picocom:
   $ sudo apt install picocom
   $ sudo picocom -b 115200 /dev/ttyUSB2
 
-Everything else defaults correction.  Ctrl-A then Ctrl-X will terminate
+Everything else defaults correctly.  Ctrl-A then Ctrl-X will terminate
 either the minicom or the picocom session.

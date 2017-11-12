@@ -109,6 +109,65 @@
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2       /* PB13 */
 #define GPIO_SPI2_NSS    GPIO_SPI2_NSS_2       /* PB12 */
 
+/* LED definitions ******************************************************************/
+/* The Reference Moto Mod contains three LEDs.  Two LEDs, are by convention, used to
+ * indicate the Reference Moto Mod battery state of charge, and the other is
+ * available for you to use in your applications.
+ *
+ *   1. The red LED on PD7.  Part of the (rear-firing) red/green LED.
+ *   2. The green LED on PE7.  Part of the (rear-firing) red/green LED.
+ *   3. The white (top-firing) LED on PE8
+ *
+ * When the I/O is HIGH value, the LED is OFF.
+ * When the I/O is LOW, the LED is ON.
+ *
+ * Following this convention, only the white LED is made available even though they
+ * all could be user-application controlled if desired.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_RED_LED         0
+#define BOARD_GREEN_LED       1
+#ifndef CONFIG_ARCH_LEDS
+#  define BOARD_WHITE_LED     2
+#  define BOARD_NLEDS         3
+#else
+#  define BOARD_NLEDS         2
+#endif
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_RED_LED_BIT     (1 << BOARD_RED_LED)
+#define BOARD_GREEN_LED_BIT   (1 << BOARD_GREEN_LED)
+#ifndef CONFIG_ARCH_LEDS
+#  define BOARD_WHITE_LED_BIT (1 << BOARD_WHITE_LED)
+#endif
+
+/* None of the LEDs are used by the board port unless CONFIG_ARCH_LEDS is defined.
+ * In that case, the white LED (only) will be controlled.  Usage by the board port
+ * is defined in include/board.h and src/stm32_autoleds.c.  The white LED will be
+ * used to encode OS-related events as follows:
+ *
+ *   ------------------- ---------------------------- ------
+ *   SYMBOL                  Meaning                  LED
+ *   ------------------- ---------------------------- ------   */
+
+#define LED_STARTED      0 /* NuttX has been started  OFF      */
+#define LED_HEAPALLOCATE 0 /* Heap has been allocated OFF      */
+#define LED_IRQSENABLED  0 /* Interrupts enabled      OFF      */
+#define LED_STACKCREATED 1 /* Idle stack created      ON       */
+#define LED_INIRQ        2 /* In an interrupt         N/C      */
+#define LED_SIGNAL       2 /* In a signal handler     N/C      */
+#define LED_ASSERTION    2 /* An assertion failed     N/C      */
+#define LED_PANIC        3 /* The system has crashed  FLASH    */
+#undef  LED_IDLE           /* MCU is is sleep mode    Not used */
+
+/* Thus if the white LED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  If white LED is flashing at approximately 2Hz,
+ * then a fatal error has been detected and the system has halted.
+ */
+
 /* Buttons **************************************************************************/
 /* The board only has one button */
 

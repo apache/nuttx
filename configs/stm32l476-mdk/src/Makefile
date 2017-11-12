@@ -36,14 +36,18 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_spi.c stm32_userleds.c
 
 ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
+endif
+
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  stm32_buttons.c
+CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

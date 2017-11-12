@@ -71,20 +71,29 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-/* LED.
- * LD4: the red LED on PB2
- * LD5: the green LED on PE8
+/* LEDs.
+ * The Reference Moto Mod contains three LEDs.  Two LEDs, are by convention,
+ * used to indicate the Reference Moto Mod battery state of charge, and the
+ * other is available for you to use in your applications.
  *
- * - When the I/O is HIGH value, the LED is on.
- * - When the I/O is LOW, the LED is off.
+ *   1. The red LED on PD7.  Part of the (rear-firing) red/green LED.
+ *   2. The green LED on PE7.  Part of the (rear-firing) red/green LED.
+ *   3. The white (top-firing) LED on PE8
+ *
+ * When the I/O is HIGH value, the LED is OFF.
+ * When the I/O is LOW, the LED is ON.
  */
 
 #define GPIO_LED_RED \
-  (GPIO_PORTB | GPIO_PIN2 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PUSHPULL | \
+  (GPIO_PORTD | GPIO_PIN7 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PUSHPULL | \
    GPIO_PULLUP | GPIO_SPEED_50MHz)
 
-#define GPIO_LED_GRN \
-  (GPIO_PORTE | GPIO_PIN8 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PUSHPULL | \
+#define GPIO_LED_GREEN \
+  (GPIO_PORTE | GPIO_PIN7 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PUSHPULL | \
+   GPIO_PULLUP | GPIO_SPEED_50MHz)
+
+#define GPIO_LED_WHITE \
+  (GPIO_PORTE | GPIO_PIN8 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PUSHPULL | \
    GPIO_PULLUP | GPIO_SPEED_50MHz)
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
@@ -96,6 +105,7 @@
 #define GPIO_BTN_POWER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN2)
 
 /* SPI1 off */
+
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTE | GPIO_PIN15)
 #define GPIO_SPI1_MISO_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
