@@ -389,7 +389,7 @@ int lpc17_bringup(void)
     }
 
 #ifdef CONFIG_VIDEO_FB
-  /* Initialize and register the simulated framebuffer driver */
+  /* Initialize and register the framebuffer driver */
 
   ret = fb_register(0, 0);
   if (ret < 0)

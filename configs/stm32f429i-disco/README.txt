@@ -677,10 +677,12 @@ Where <subdir> is one of the following:
        external RS-232 line driver to the UART1 pins of the DISCO board
        on PA9 and PA10 of connector P1.
 
-  ltdc:
-  ----
-    STM32F429I-DISCO LTDC Framebuffer demo example.  See
-    configs/stm32f429i-disco/ltdc/README.txt for additional information.
+  fb
+  --
+
+    STM32F429I-DISCO LTDC Framebuffer demo example.  This is a simple
+    configuration used for some basic (non-graphic) debug of the framebuffer
+    character drivers using apps/examples/fb.
 
   nsh:
   ---
