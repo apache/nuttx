@@ -38,15 +38,7 @@ ifeq ($(CONFIG_FS_PROCFS),y)
 
 ASRCS +=
 CSRCS += fs_procfs.c fs_procfsutil.c fs_procfsproc.c fs_procfsuptime.c
-CSRCS += fs_procfscpuload.c fs_procfskmm.c
-
-ifneq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += fs_procfsumm.c
-endif
-
-ifeq ($(CONFIG_ARCH_HAVE_PROGMEM),y)
-CSRCS += fs_procfsprogmem.c
-endif
+CSRCS += fs_procfscpuload.c fs_procfsmeminfo.c
 
 # Include procfs build support
 

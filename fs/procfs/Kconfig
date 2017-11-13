@@ -75,10 +75,14 @@ config FS_PROCFS_EXCLUDE_CPULOAD
 	default n
 	depends on SCHED_CPULOAD
 
-config FS_PROCFS_EXCLUDE_KMM
-	bool "Exclude kmm"
+config FS_PROCFS_EXCLUDE_MEMINFO
+	bool "Exclude meminfo"
 	default n
-	depends on MM_KERNEL_HEAP
+
+config FS_PROCFS_INCLUDE_PROGMEM
+	bool "Include prog mem"
+	default n
+	depends on ARCH_HAVE_PROGMEM && !FS_PROCFS_EXCLUDE_MEMINFO
 
 config FS_PROCFS_EXCLUDE_MOUNTS
 	bool "Exclude mounts"
@@ -89,11 +93,6 @@ config FS_PROCFS_EXCLUDE_NET
 	bool "Exclude network"
 	depends on NET
 	default n
-
-config FS_PROCFS_EXCLUDE_PROGMEM
-	bool "Exclude progmem"
-	depends on ARCH_HAVE_PROGMEM
-	default y
 
 config FS_PROCFS_EXCLUDE_MTD
 	bool "Exclude mtd"
@@ -113,11 +112,6 @@ config FS_PROCFS_EXCLUDE_ROUTE
 config FS_PROCFS_EXCLUDE_SMARTFS
 	bool "Exclude fs/smartfs"
 	depends on FS_SMARTFS
-	default n
-
-config FS_PROCFS_EXCLUDE_UMM
-	bool "Exclude umm"
-	depends on !BUILD_KERNEL
 	default n
 
 endmenu #
