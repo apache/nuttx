@@ -49,9 +49,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_ARCH_HAVE_PROGMEM
 
 /****************************************************************************
  * Private Types
@@ -102,6 +100,7 @@ static int     progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This structure holds the state of the MTD driver */
 
 static struct progmem_dev_s g_progmem =
@@ -411,3 +410,5 @@ FAR struct mtd_dev_s *progmem_initialize(void)
 
   return (FAR struct mtd_dev_s *)priv;
 }
+
+#endif /* CONFIG_ARCH_HAVE_PROGMEM */

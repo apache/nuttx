@@ -45,6 +45,8 @@
 
 #include <stdbool.h>
 
+#ifdef CONFIG_ARCH_HAVE_PROGMEM
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -207,4 +209,5 @@ ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count);
 }
 #endif
 
+#endif /* CONFIG_ARCH_HAVE_PROGMEM */
 #endif /* __INCLUDE_NUTTX_PROGMEM_H */

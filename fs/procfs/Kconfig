@@ -90,10 +90,10 @@ config FS_PROCFS_EXCLUDE_NET
 	depends on NET
 	default n
 
-config FS_PROCFS_EXCLUDE_ROUTE
-	bool "Exclude routing table"
-	depends on !FS_PROCFS_EXCLUDE_NET && NET_ROUTE
-	default n
+config FS_PROCFS_EXCLUDE_PROGMEM
+	bool "Exclude progmem"
+	depends on ARCH_HAVE_PROGMEM
+	default y
 
 config FS_PROCFS_EXCLUDE_MTD
 	bool "Exclude mtd"
@@ -103,6 +103,11 @@ config FS_PROCFS_EXCLUDE_MTD
 config FS_PROCFS_EXCLUDE_PARTITIONS
 	bool "Exclude partitions"
 	depends on MTD_PARTITION
+	default n
+
+config FS_PROCFS_EXCLUDE_ROUTE
+	bool "Exclude routing table"
+	depends on !FS_PROCFS_EXCLUDE_NET && NET_ROUTE
 	default n
 
 config FS_PROCFS_EXCLUDE_SMARTFS

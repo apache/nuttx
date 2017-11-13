@@ -753,6 +753,8 @@ endif # SAMV7_WDT || SAMV7_RSWDT
 
 menuconfig SAMV7_PROGMEM
 	bool "FLASH program memory"
+	default n
+	select ARCH_HAVE_PROGMEM
 	---help---
 		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
