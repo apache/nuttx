@@ -160,18 +160,10 @@ int board_app_initialize(uintptr_t arg)
   FAR struct mtd_dev_s *mtd;
   FAR struct mtd_geometry_s geo;
 #endif
-
 #if defined(CONFIG_MTD_PARTITION_NAMES)
   FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
 #endif
-
-#if defined(CONFIG_MTD) && defined(CONFIG_MTD_SST25XX)
   int ret;
-#elif defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
-  int ret;
-#elif defined(CONFIG_SENSORS_L3GD20)
-  int ret;
-#endif
 
   /* Configure SPI-based devices */
 
@@ -402,5 +394,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }
