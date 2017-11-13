@@ -913,7 +913,6 @@ static const uintptr_t stm32_clutwr_layer_t[LTDC_NLAYERS] =
 
 static bool g_initialized;
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -2190,7 +2189,7 @@ static void stm32_ltdc_linit(int lid)
  ****************************************************************************/
 
 static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
-                                 struct fb_videoinfo_s *vinfo)
+                              struct fb_videoinfo_s *vinfo)
 {
   lcdinfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable)
@@ -2225,7 +2224,7 @@ static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
-                                 struct fb_planeinfo_s *pinfo)
+                              struct fb_planeinfo_s *pinfo)
 {
   lcdinfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable)
@@ -2261,7 +2260,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
 
 #ifdef STM32_LAYER_CLUT_SIZE
 static int stm32_getcmap(struct fb_vtable_s *vtable,
-                            struct fb_cmap_s *cmap)
+                         struct fb_cmap_s *cmap)
 {
 #ifdef CONFIG_STM32F7_LTDC_L2
   return stm32_getclut((FAR struct ltdc_layer_s *)&LAYER_L2, cmap);
@@ -2287,7 +2286,7 @@ static int stm32_getcmap(struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 static int stm32_putcmap(struct fb_vtable_s *vtable,
-                            const struct fb_cmap_s *cmap)
+                         const struct fb_cmap_s *cmap)
 {
 #ifdef CONFIG_STM32F7_LTDC_L2
   return stm32_setclut((FAR struct ltdc_layer_s *)&LAYER_L2, cmap);
@@ -2314,7 +2313,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
-                                 struct fb_videoinfo_s *vinfo)
+                               struct fb_videoinfo_s *vinfo)
 {
   lcdinfo("layer=%p vinfo=%p\n", layer, vinfo);
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
@@ -2348,7 +2347,7 @@ static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
  ****************************************************************************/
 
 static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
-                                 struct fb_planeinfo_s *pinfo)
+                               struct fb_planeinfo_s *pinfo)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
@@ -2383,7 +2382,7 @@ static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
 
 #ifdef STM32_LAYER_CLUT_SIZE
 static int stm32_setclut(struct ltdc_layer_s *layer,
-                        const struct fb_cmap_s *cmap)
+                         const struct fb_cmap_s *cmap)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
   int ret;
@@ -3017,9 +3016,9 @@ static int stm32_getblendmode(FAR struct ltdc_layer_s *layer, uint32_t *mode)
  ****************************************************************************/
 
 static int stm32_setarea(FAR struct ltdc_layer_s *layer,
-                        FAR const struct ltdc_area_s *area,
-                        fb_coord_t srcxpos,
-                        fb_coord_t srcypos)
+                         FAR const struct ltdc_area_s *area,
+                         fb_coord_t srcxpos,
+                         fb_coord_t srcypos)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
@@ -3074,8 +3073,8 @@ static int stm32_setarea(FAR struct ltdc_layer_s *layer,
  ****************************************************************************/
 
 static int stm32_getarea(FAR struct ltdc_layer_s *layer,
-                        FAR struct ltdc_area_s *area,
-                        fb_coord_t *srcxpos, fb_coord_t *srcypos)
+                         FAR struct ltdc_area_s *area,
+                         fb_coord_t *srcxpos, fb_coord_t *srcypos)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
@@ -3330,11 +3329,11 @@ static int stm32_blit(FAR struct ltdc_layer_s *dest,
  ****************************************************************************/
 
 static int stm32_blend(FAR struct ltdc_layer_s *dest,
-                        fb_coord_t destxpos, fb_coord_t destypos,
-                        FAR const struct dma2d_layer_s *fore,
-                        fb_coord_t forexpos, fb_coord_t foreypos,
-                        FAR const struct dma2d_layer_s *back,
-                        FAR const struct ltdc_area_s *backarea)
+                       fb_coord_t destxpos, fb_coord_t destypos,
+                       FAR const struct dma2d_layer_s *fore,
+                       fb_coord_t forexpos, fb_coord_t foreypos,
+                       FAR const struct dma2d_layer_s *back,
+                       FAR const struct ltdc_area_s *backarea)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)dest;
 
@@ -3379,8 +3378,8 @@ static int stm32_blend(FAR struct ltdc_layer_s *dest,
  ****************************************************************************/
 
 static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
-                            FAR const struct ltdc_area_s *area,
-                            uint32_t color)
+                          FAR const struct ltdc_area_s *area,
+                          uint32_t color)
 {
   FAR struct stm32_layer_s *priv = (FAR struct stm32_layer_s *)layer;
 
