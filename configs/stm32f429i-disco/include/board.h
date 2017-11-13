@@ -206,10 +206,10 @@
 
 /* Alternate function pin selections ************************************************/
 
-/* UART2:
+/* USART1:
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
- * brought out to PA2 (TX) and PA3 (RX) for connection to an external serial device.
+ * brought out to PA9 (TX) and PA10 (RX) for connection to an external serial device.
  * (See the README.txt file for other options)
  */
 
