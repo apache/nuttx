@@ -115,5 +115,10 @@ config FS_PROCFS_EXCLUDE_SMARTFS
 	depends on FS_SMARTFS
 	default n
 
+config FS_PROCFS_EXCLUDE_UMM
+	bool "Exclude umm"
+	depends on !BUILD_KERNEL
+	default n
+
 endmenu #
 endif # FS_PROCFS

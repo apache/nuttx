@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mm/mm.h
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* If the MCU has a small (16-bit) address capability, then we will use
  * a smaller chunk header that contains 16-bit size/offset information.

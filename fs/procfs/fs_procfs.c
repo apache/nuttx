@@ -79,6 +79,7 @@
 extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations kmm_operations;
+extern const struct procfs_operations umm_operations;
 extern const struct procfs_operations progmem_operations;
 extern const struct procfs_operations module_operations;
 extern const struct procfs_operations uptime_operations;
@@ -168,6 +169,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if defined(CONFIG_ARCH_HAVE_PROGMEM) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PROGMEM)
   { "progmem",       &progmem_operations,         PROCFS_FILE_TYPE   },
+#endif
+
+#if !defined(CONFIG_FS_PROCFS_EXCLUDE_UMM) && !defined(CONFIG_BUILD_KERNEL)
+  { "umm",           &umm_operations,             PROCFS_FILE_TYPE   },
 #endif
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)

@@ -240,7 +240,7 @@ static ssize_t kmm_read(FAR struct file *filep, FAR char *buffer,
 #endif
 
       linesize   = snprintf(procfile->line, KMM_LINELEN,
-                            "Mem:   %11d%11d%11d%11d\n",
+                            "Kmem:  %11d%11d%11d%11d\n",
                             mem.arena, mem.uordblks, mem.fordblks,
                             mem.mxordblk);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
