@@ -514,10 +514,29 @@ f7xx-nsh:
      CONFIG_HOST_LINUX=y                     : Builds under Linux
      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : ARM GNU for Linux
 
-  3. Although the default console is USART3 (which would correspond to
-     the Virtual COM port) I have done all testing with the console
-     device configured for UART8 (see instruction above under "Serial
-     Consoles).
+  3. The serial console may be configured to use either USART3 (which would
+     correspond to the Virtual COM port) or with the console device
+     configured for USART6 to support an Arduino serial shield (see
+     instructions above under "Serial Consoles).  You will need to check the
+     defconfig file to see how the console is set up and, perhaps, modify
+     the configuration accordingly.
+
+     To select the Virtual COM port:
+
+       -CONFIG_NUCLEO_CONSOLE_ARDUINO
+       +CONFIG_NUCLEO_CONSOLE_VIRTUAL=y
+       -CONFIG_USART6_SERIAL_CONSOLE=y
+       +CONFIG_USART3_SERIAL_CONSOLE=y
+
+     To select the Arduino serial shield:
+
+       -CONFIG_NUCLEO_CONSOLE_VIRTUAL=y
+       +CONFIG_NUCLEO_CONSOLE_ARDUINO
+       -CONFIG_USART3_SERIAL_CONSOLE=y
+       +CONFIG_USART6_SERIAL_CONSOLE=y
+
+     Default values for other settings associated with the select USART should
+     be correct.
 
 f7xx-evalos:
 -------

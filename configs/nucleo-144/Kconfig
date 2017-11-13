@@ -45,7 +45,7 @@ choice
 			-------- --------- -----
 
 config NUCLEO_CONSOLE_ARDUINO
-	bool "ARDUINO Connector"
+	bool "Arduino Connector"
 	select STM32F7_USART6
 	select USART6_SERIALDRIVER
 	select USART6_SERIAL_CONSOLE
