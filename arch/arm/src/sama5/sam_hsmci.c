@@ -2213,6 +2213,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
   unsigned int nwords;
   const uint32_t *ptr;
   uint32_t sr;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2232,9 +2233,12 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
 
   /* Copy each word to the TX FIFO
    *
-   * REVISIT:  If TX data underruns occur, then it may be necessary to
-   * disable pre-emption around this loop.
+   * It is necessary to disable pre-emption and interrupts around this loop
+   * in order to avoid a TX data underrun.
    */
+
+  sched_lock();
+  flags = enter_critical_section();
 
   nwords = (buflen + 3) >> 2;
   ptr = (const uint32_t *)buffer;
@@ -2260,6 +2264,8 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
         }
     }
 
+  leave_critical_section(flags);
+  sched_unlock();
   return OK;
 }
 
