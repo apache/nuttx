@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * configs/stm32f429i-disco/src/stm32f429i-disco.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
 #define __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -49,10 +49,11 @@
 #include <nuttx/lcd/ili9341.h>
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Configuration ************************************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
@@ -76,7 +77,7 @@
 
 #define GPIO_IO_EXPANDER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN15)
 
-/* STM32F429 Discovery GPIOs **************************************************************************/
+/* STM32F429 Discovery GPIOs ************************************************/
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -136,102 +137,127 @@
 #  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN5)
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
+
  * Public data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
 
-/****************************************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f429i-disco board.
+ *   Called to configure SPI chip select GPIO pins for the stm32f429i-disco
+ *   board.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
 
-/****************************************************************************************************
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
  *   Called from stm32_usbinitialize very early in inialization to setup USB-related
  *   GPIO pins for the STM32F429Discovery board.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_OTGHS
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host
+ *   functionality. This function will start a thread that will monitor for
+ *   device connection/disconnection events.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
+
  * Name: stm32_enablefsmc
  *
  * Description:
  *  enable clocking to the FSMC module
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_FSMC
 void stm32_enablefsmc(void);
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
+
  * Name: stm32_disablefsmc
  *
  * Description:
  *  enable clocking to the FSMC module
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_FSMC
 void stm32_disablefsmc(void);
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Name: stm32_ledpminitialize
  *
  * Description:
- *   Enable logic to use the LEDs on the STM32F429Discovery to support power management testing
+ *   Enable logic to use the LEDs on the STM32F429Discovery to support
+ *   power management testing
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 void stm32_ledpminitialize(void);
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
+
  * Name: stm32_pmbuttons
  *
  * Description:
  *   Configure the user button of the STM32F429I-DISCO board as EXTI,
  *   so it is able to wakeup the MCU from the PM_STANDBY mode
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
-#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && \
+    defined(CONFIG_PM_BUTTONS)
 void stm32_pmbuttons(void);
 #endif
 
@@ -245,8 +271,8 @@ void stm32_pmbuttons(void);
  *
  * Returned Value:
  *   On success, this function returns a reference to the LCD control object
- *   for the specified ILI9341 LCD Single chip driver connected as 4 wire serial
- *   (spi). NULL is returned on any failure.
+ *   for the specified ILI9341 LCD Single chip driver connected as 4 wire
+ *   serial (spi). NULL is returned on any failure.
  *
  ****************************************************************************/
 
@@ -264,9 +290,9 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *   register, it isn't safe to disable the spi device outside of the nuttx
  *   spi interface structure. But this has to be done as long as the nuttx
  *   spi interface doesn't support bidirectional data transfer for multiple
- *   devices share one spi bus. This wrapper does nothing else than store the
- *   initialized state of the spi device after the first initializing and
- *   should be used by each driver who shares the spi5 bus.
+ *   devices share one spi bus. This wrapper does nothing else than store
+ *   the initialized state of the spi device after the first initializing
+ *   and should be used by each driver who shares the spi5 bus.
  *
  * Input Parameter:
  *   None
@@ -301,4 +327,3 @@ int stm32_l3gd20initialize(FAR const char *devpath);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
-
