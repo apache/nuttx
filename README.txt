@@ -1827,6 +1827,7 @@ nuttx/
  |   |- stm32f411e-disco/
  |   |   `- README.txt
  |   |- stm32f429i-disco/
+ |   |   |- fb/README.txt
  |   |   |- ide/ltcd/uvision/README.txt
  |   |   `- README.txt
  |   |- stm32f746g-disco/
