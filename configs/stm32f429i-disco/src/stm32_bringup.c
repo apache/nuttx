@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -81,43 +82,6 @@
 #include "stm32f429i-disco.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-#define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
-#define HAVE_USBMONITOR 1
-
-/* Can't support USB host or device features if USB OTG HS is not enabled */
-
-#ifndef CONFIG_STM32_OTGHS
-#  undef HAVE_USBDEV
-#  undef HAVE_USBHOST
-#  undef HAVE_USBMONITOR
-#endif
-
-/* Can't support USB device monitor if USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
-#endif
-
-/* Can't support USB host is USB host is not enabled */
-
-#ifndef CONFIG_USBHOST
-#  undef HAVE_USBHOST
-#endif
-
-/* Check if we should enable the USB monitor before starting NSH */
-
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
-#  undef HAVE_USBMONITOR
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -146,6 +110,19 @@ int stm32_bringup(void)
   FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
 #endif
   int ret;
+
+#ifdef HAVE_PROC
+  /* mount the proc filesystem */
+
+  ret = mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
+             ret, errno);
+      return ret;
+    }
+#endif
 
   /* Configure SPI-based devices */
 
