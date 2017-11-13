@@ -168,4 +168,10 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += stm32_usbmsc.c
 endif
 
+ifneq ($(CONFIG_STM32_ETHMAC),y)
+ifeq ($(CONFIG_NETDEVICES),y)
+CSRCS += stm32_netinit.c
+endif
+endif
+
 include $(TOPDIR)/configs/Board.mk
