@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+
 #include <nuttx/board.h>
 
 #include "stm32f429i-disco.h"
