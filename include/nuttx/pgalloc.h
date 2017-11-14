@@ -2,7 +2,7 @@
  * include/nuttx/pgalloc.h
  * Page memory allocator.
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,17 @@
  * Public Types
  ****************************************************************************/
 
+/* Form in which the state of the granule allocator is returned, The size of
+ * each page is MM_PGSIZE/MM_PGSHIFT
+ */
+
+struct pginfo_s
+{
+  uint16_t  ntotal;  /* The total number of pages */
+  uint16_t  nfree;   /* The number of free pages */
+  uint16_t  mxfree;  /* The longest sequence of free pages */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -185,6 +196,24 @@ uintptr_t mm_pgalloc(unsigned int npages);
  ****************************************************************************/
 
 void mm_pgfree(uintptr_t paddr, unsigned int npages);
+
+/****************************************************************************
+ * Name: mm_pginfo
+ *
+ * Description:
+ *   Return information about the page allocator.
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   info   - Memory location to return the gran allocator info.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+void mm_pginfo(FAR struct pginfo_s *info);
 
 #undef EXTERN
 #ifdef __cplusplus

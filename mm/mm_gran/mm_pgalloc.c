@@ -194,4 +194,32 @@ void mm_pgfree(uintptr_t paddr, unsigned int npages)
   gran_free(g_pgalloc, (FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
 }
 
+/****************************************************************************
+ * Name: mm_pginfo
+ *
+ * Description:
+ *   Return information about the page allocator.
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   info   - Memory location to return the gran allocator info.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+void mm_pginfo(FAR struct pginfo_s *info)
+{
+  struct graninfo_s graninfo;
+
+  DEBUGASSERT(info != NULL);
+  gran_info(g_pgalloc, &graninfo);
+
+  info->ntotal = graninfo.ngranules;
+  info->nfree  = graninfo.nfree;
+  info->mxfree = graninfo.mxfree;
+}
+
 #endif /* CONFIG_MM_PGALLOC */

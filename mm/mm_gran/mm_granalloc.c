@@ -237,7 +237,7 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
                 }
 
               /* Set up for the next time through the loop.  Perform a 64
-               * bit shift to move to the next gran position andi ncrement
+               * bit shift to move to the next gran position and increment
                * to the next candidate allocation address.
                */
 

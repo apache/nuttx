@@ -71,7 +71,7 @@
 
 typedef FAR void *GRAN_HANDLE;
 
-/* For in which the state of the granule allocator is returned */
+/* Form in which the state of the granule allocator is returned */
 
 struct graninfo_s
 {
@@ -233,7 +233,7 @@ void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size);
  * Name: gran_info
  *
  * Description:
- *   Return memory to the granule heap.
+ *   Return information about the granule heap.
  *
  * Input Parameters:
  *   handle - The handle previously returned by gran_initialize
