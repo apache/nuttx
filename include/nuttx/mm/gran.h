@@ -2,7 +2,7 @@
  * include/nuttx/mm/gran.h
  * General purpose granule memory allocator.
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,12 +51,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* CONFIG_GRAN - Enable granule allocator support
- * CONFIG_GRAN_SINGLE - Select if there is only one instance of the
- *   granule allocator (i.e., gran_initialize will be called only once.
- *   In this case, (1) there are a few optimizations that can can be done
- *   and (2) the GRAN_HANDLE is not needed.
  * CONFIG_GRAN_INTR - Normally mutual exclusive access to granule allocator
  *   data is assured using a semaphore.  If this option is set then, instead,
  *   mutual exclusion logic will disable interrupts.  While this options is
@@ -70,9 +67,19 @@
  * Public Types
  ****************************************************************************/
 
-#ifndef CONFIG_GRAN_SINGLE
+/* An opaque reference to an instance of a granule allocator state */
+
 typedef FAR void *GRAN_HANDLE;
-#endif
+
+/* For in which the state of the granule allocator is returned */
+
+struct graninfo_s
+{
+  uint8_t   log2gran;  /* Log base 2 of the size of one granule */
+  uint16_t  ngranules; /* The total number of (aligned) granules in the heap */
+  uint16_t  nfree;     /* The number of free granules */
+  uint16_t  mxfree;    /* The longest sequence of free granules */
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -110,8 +117,7 @@ extern "C"
  *
  *     GRAN_HANDLE handle = gran_initialize(g_dmaheap, DMAHEAP_SIZE, 6, 4);
  *
- *   Then the GRAN_HANDLE can be used to allocate memory (There is no
- *   GRAN_HANDLE if CONFIG_GRAN_SINGLE=y):
+ *   Then the GRAN_HANDLE can be used to allocate memory:
  *
  *     FAR uint8_t *dma_memory = (FAR uint8_t *)gran_alloc(handle, 47);
  *
@@ -140,13 +146,8 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GRAN_SINGLE
-int gran_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
-                    uint8_t log2align);
-#else
 GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
                             uint8_t log2gran, uint8_t log2align);
-#endif
 
 /****************************************************************************
  * Name: gran_release
@@ -163,11 +164,7 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GRAN_SINGLE
-void gran_release(void);
-#else
 void gran_release(GRAN_HANDLE handle);
-#endif
 
 /****************************************************************************
  * Name: gran_reserve
@@ -191,11 +188,7 @@ void gran_release(GRAN_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GRAN_SINGLE
-void gran_reserve(uintptr_t start, size_t size);
-#else
 void gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size);
-#endif
 
 /****************************************************************************
  * Name: gran_alloc
@@ -212,16 +205,12 @@ void gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size);
  *   size   - The size of the memory region to allocate.
  *
  * Returned Value:
- *   On success, either a non-NULL pointer to the allocated memory (if
- *   CONFIG_GRAN_SINGLE) or zero  (if !CONFIG_GRAN_SINGLE) is returned.
+ *   On success, a non-NULL pointer to the allocated memory is returned;
+ *   NULL is returned on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GRAN_SINGLE
-FAR void *gran_alloc(size_t size);
-#else
 FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
-#endif
 
 /****************************************************************************
  * Name: gran_free
@@ -238,11 +227,25 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GRAN_SINGLE
-void gran_free(FAR void *memory, size_t size);
-#else
 void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size);
-#endif
+
+/****************************************************************************
+ * Name: gran_info
+ *
+ * Description:
+ *   Return memory to the granule heap.
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   info   - Memory location to return the gran allocator info.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info);
 
 #undef EXTERN
 #ifdef __cplusplus

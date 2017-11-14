@@ -116,8 +116,7 @@ This directory contains the NuttX memory management logic.  This include:
 
        GRAN_HANDLE handle = gran_initialize(g_dmaheap, DMAHEAP_SIZE, 6, 4);
 
-     Then the GRAN_HANDLE can be used to allocate memory (There is no
-     GRAN_HANDLE if CONFIG_GRAN_SINGLE=y):
+     Then the GRAN_HANDLE can be used to allocate memory:
 
        FAR uint8_t *dma_memory = (FAR uint8_t *)gran_alloc(handle, 47);
 

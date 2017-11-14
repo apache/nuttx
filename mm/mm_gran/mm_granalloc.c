@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_gran/mm_granalloc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,26 +48,32 @@
 #ifdef CONFIG_GRAN
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_common_alloc
+ * Name: gran_alloc
  *
  * Description:
  *   Allocate memory from the granule heap.
  *
+ *   NOTE: The current implementation also restricts the maximum allocation
+ *   size to 32 granules.  That restriction could be eliminated with some
+ *   additional coding effort.
+ *
  * Input Parameters:
- *   priv - The granule heap state structure.
- *   size - The size of the memory region to allocate.
+ *   handle - The handle previously returned by gran_initialize
+ *   size   - The size of the memory region to allocate.
  *
  * Returned Value:
- *   On success, a non-NULL pointer to the allocated memory is returned.
+ *   On success, a non-NULL pointer to the allocated memory is returned;
+ *   NULL is returned on failure.
  *
  ****************************************************************************/
 
-static inline FAR void *gran_common_alloc(FAR struct gran_s *priv, size_t size)
+FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
 {
+  FAR struct gran_s *priv = (FAR struct gran_s *)handle;
   unsigned int ngranules;
   size_t       tmpmask;
   uintptr_t    alloc;
@@ -79,7 +85,7 @@ static inline FAR void *gran_common_alloc(FAR struct gran_s *priv, size_t size)
   int          bitidx;
   int          shift;
 
-  DEBUGASSERT(priv && size <= 32 * (1 << priv->log2gran));
+  DEBUGASSERT(priv != NULL && size <= 32 * (1 << priv->log2gran));
 
   if (priv && size > 0)
     {
@@ -247,41 +253,5 @@ static inline FAR void *gran_common_alloc(FAR struct gran_s *priv, size_t size)
 
   return NULL;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: gran_alloc
- *
- * Description:
- *   Allocate memory from the granule heap.
- *
- *   NOTE: The current implementation also restricts the maximum allocation
- *   size to 32 granules.  That restriction could be eliminated with some
- *   additional coding effort.
- *
- * Input Parameters:
- *   handle - The handle previously returned by gran_initialize
- *   size   - The size of the memory region to allocate.
- *
- * Returned Value:
- *   On success, either a non-NULL pointer to the allocated memory (if
- *   CONFIG_GRAN_SINGLE) or zero  (if !CONFIG_GRAN_SINGLE) is returned.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_GRAN_SINGLE
-FAR void *gran_alloc(size_t size)
-{
-  return gran_common_alloc(g_graninfo, size);
-}
-#else
-FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
-{
-  return gran_common_alloc((FAR struct gran_s *)handle, size);
-}
-#endif
 
 #endif /* CONFIG_GRAN */

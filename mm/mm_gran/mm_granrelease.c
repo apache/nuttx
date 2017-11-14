@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_gran/mm_graninit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,43 +50,6 @@
 #ifdef CONFIG_GRAN
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* State of the single GRAN allocator */
-
-#ifdef CONFIG_GRAN_SINGLE
-FAR struct gran_s *g_graninfo;
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: gran_release_common
- *
- * Description:
- *   Perform common GRAN initialization.
- *
- * Input Parameters:
- *   priv - Reference to the granule heap structure to be released.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void gran_release_common(FAR struct gran_s *priv)
-{
-  DEBUGASSERT(priv);
-#ifndef CONFIG_GRAN_INTR
-  nxsem_destroy(&priv->exclsem);
-#endif
-  kmm_free(priv);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -105,17 +68,16 @@ static inline void gran_release_common(FAR struct gran_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GRAN_SINGLE
-void gran_release(void)
-{
-  gran_release_common(g_graninfo);
-  g_graninfo = NULL;
-}
-#else
 void gran_release(GRAN_HANDLE handle)
 {
-  gran_release_common(handle);
-}
+  FAR struct gran_s *priv = (FAR struct gran_s *)handle;
+
+  DEBUGASSERT(priv != NULL);
+
+#ifndef CONFIG_GRAN_INTR
+  nxsem_destroy(&priv->exclsem);
 #endif
+  kmm_free(priv);
+}
 
 #endif /* CONFIG_GRAN */

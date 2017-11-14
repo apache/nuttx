@@ -12,9 +12,6 @@ Prerequisites
       regions must be provided by the MMU.
     CONFIG_GRAN=y - The granule allocation is the allocation underlying all
       paged allocations.
-    CONFIG_GRAN_SINGLE=n - Multiple granule allocators are needed: One for
-      the physical page allocation and one virtual page allocator for each
-      process.
     CONFIG_MM_PGALLOC=y - Enables the physical page allocator
     CONFIG_MM_PGSIZE - Determines the size of one page that can be mapped by
       the MMU.

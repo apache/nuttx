@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_gran/mm_gran.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,16 +101,6 @@ struct gran_s
   uintptr_t  heapstart; /* The aligned start of the granule heap */
   uint32_t   gat[1];    /* Start of the granule allocation table */
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* State of the single GRAN allocator */
-
-#ifdef CONFIG_GRAN_SINGLE
-extern FAR struct gran_s *g_graninfo;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes

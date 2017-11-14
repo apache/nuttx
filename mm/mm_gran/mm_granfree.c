@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_gran/mm_granfree.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,11 +48,11 @@
 #ifdef CONFIG_GRAN
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_common_free
+ * Name: gran_free
  *
  * Description:
  *   Return memory to the granule heap.
@@ -66,9 +66,9 @@
  *
  ****************************************************************************/
 
-static inline void gran_common_free(FAR struct gran_s *priv,
-                                    FAR void *memory, size_t size)
+void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
 {
+  FAR struct gran_s *priv = (FAR struct gran_s *)handle;
   unsigned int granno;
   unsigned int gatidx;
   unsigned int gatbit;
@@ -77,7 +77,7 @@ static inline void gran_common_free(FAR struct gran_s *priv,
   unsigned int avail;
   uint32_t     gatmask;
 
-  DEBUGASSERT(priv && memory && size <= 32 * (1 << priv->log2gran));
+  DEBUGASSERT(priv != NULL && memory && size <= 32 * (1 << priv->log2gran));
 
   /* Get exclusive access to the GAT */
 
@@ -135,36 +135,5 @@ static inline void gran_common_free(FAR struct gran_s *priv,
 
   gran_leave_critical(priv);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: gran_free
- *
- * Description:
- *   Return memory to the granule heap.
- *
- * Input Parameters:
- *   handle - The handle previously returned by gran_initialize
- *   memory - A pointer to memory previoiusly allocated by gran_alloc.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_GRAN_SINGLE
-void gran_free(FAR void *memory, size_t size)
-{
-  return gran_common_free(g_graninfo, memory, size);
-}
-#else
-void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
-{
-  return gran_common_free((FAR struct gran_s *)handle, memory, size);
-}
-#endif
 
 #endif /* CONFIG_GRAN */

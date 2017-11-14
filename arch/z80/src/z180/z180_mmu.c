@@ -69,9 +69,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifndef CONFIG_GRAN_SINGLE
 static GRAN_HANDLE g_physhandle;
-#endif
 static struct z180_cbr_s g_cbrs[CONFIG_MAX_TASKS];
 
 /****************************************************************************
@@ -166,14 +164,9 @@ int up_mmuinit(void)
    * say that 1 page is 1 byte.
    */
 
-#ifdef CONFIG_GRAN_SINGLE
-return gran_initialize((FAR void *)Z180_PHYSHEAP_STARTPAGE,
-                       Z180_PHYSHEAP_NPAGES, 0, 0);
-#else
 g_physhandle = gran_initialize((FAR void *)Z180_PHYSHEAP_STARTPAGE,
                                Z180_PHYSHEAP_NPAGES, 0, 0);
 return g_physhandle ? OK : -ENOMEM;
-#endif
 }
 
 /****************************************************************************
@@ -280,12 +273,8 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Now allocate the physical memory to back up the address environment */
 
-#ifdef CONFIG_GRAN_SINGLE
   alloc = (uintptr_t)gran_alloc(npages);
-#else
-  alloc = (uintptr_t)gran_alloc(g_physhandle, npages);
-#endif
-  if (!alloc)
+  if (alloc == NULL)
     {
       serr("ERROR: Failed to allocate %d pages\n", npages);
       ret = -ENOMEM;
@@ -337,11 +326,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 
   /* Free the physical address space backing up the mapping */
 
-#ifdef CONFIG_GRAN_SINGLE
-  gran_free((FAR void *)cbr->cbr, cbr->pages);
-#else
   gran_free(g_physhandle, (FAR void *)cbr->cbr, cbr->pages);
-#endif
 
   /* And make the CBR structure available for re-use */
 

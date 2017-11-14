@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mm/shm.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,10 +63,6 @@
 
 #ifndef CONFIG_GRAN
 #  error CONFIG_GRAN must be selected with CONFIG_MM_SHM
-#endif
-
-#ifdef CONFIG_GRAN_SINGLE
-#  error CONFIG_GRAN_SINGLE must NOT be selected with CONFIG_MM_SHM
 #endif
 
 #ifndef CONFIG_MM_PGALLOC

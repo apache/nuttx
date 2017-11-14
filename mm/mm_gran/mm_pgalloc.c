@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_gran/mm_pgalloc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,11 +90,9 @@
  * Private Data
  ****************************************************************************/
 
-#ifndef CONFIG_GRAN_SINGLE
 /* The state of the page allocator */
 
 static GRAN_HANDLE g_pgalloc;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -123,18 +121,8 @@ static GRAN_HANDLE g_pgalloc;
 
 void mm_pginitialize(FAR void *heap_start, size_t heap_size)
 {
-#ifdef CONFIG_GRAN_SINGLE
-  int ret;
-
-  ret = gran_initialize(heap_start, heap_size, MM_PGSHIFT, MM_PGSHIFT);
-  DEBUGASSERT(ret == OK);
-  UNUSED(ret);
-
-#else
   g_pgalloc = gran_initialize(heap_start, heap_size, MM_PGSHIFT, MM_PGSHIFT);
   DEBUGASSERT(pg_alloc != NULL);
-
-#endif
 }
 
 /****************************************************************************
@@ -160,11 +148,7 @@ void mm_pginitialize(FAR void *heap_start, size_t heap_size)
 
 void mm_pgreserve(uintptr_t start, size_t size)
 {
-#ifdef CONFIG_GRAN_SINGLE
-  gran_reserve(start, size);
-#else
   gran_reserve(g_pgalloc, start, size);
-#endif
 }
 
 /****************************************************************************
@@ -185,11 +169,7 @@ void mm_pgreserve(uintptr_t start, size_t size)
 
 uintptr_t mm_pgalloc(unsigned int npages)
 {
-#ifdef CONFIG_GRAN_SINGLE
-  return (uintptr_t)gran_alloc((size_t)1 << MM_PGSHIFT);
-#else
   return (uintptr_t)gran_alloc(g_pgalloc, (size_t)1 << MM_PGSHIFT);
-#endif
 }
 
 /****************************************************************************
@@ -211,11 +191,7 @@ uintptr_t mm_pgalloc(unsigned int npages)
 
 void mm_pgfree(uintptr_t paddr, unsigned int npages)
 {
-#ifdef CONFIG_GRAN_SINGLE
-  gran_free((FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
-#else
   gran_free(g_pgalloc, (FAR void *)paddr, (size_t)npages << MM_PGSHIFT);
-#endif
 }
 
 #endif /* CONFIG_MM_PGALLOC */
