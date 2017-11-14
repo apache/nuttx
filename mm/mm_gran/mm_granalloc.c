@@ -87,7 +87,7 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
 
   DEBUGASSERT(priv != NULL && size <= 32 * (1 << priv->log2gran));
 
-  if (priv && size > 0)
+  if (priv != NULL && size > 0)
     {
       /* Get exclusive access to the GAT */
 

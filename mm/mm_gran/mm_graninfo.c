@@ -56,7 +56,7 @@ struct nibble_info_s
   uint16_t nfree   : 4; /* Total bits free in a nibble */
   uint16_t nlsfree : 4; /* Total contiguous LS bits free */
   uint16_t nmsfree : 4; /* Total contiguous MS bits free */
-  uint16_t mxfree : 4; /* Largest internal contiguous bits free */
+  uint16_t mxfree  : 4; /* Largest internal contiguous bits free */
 };
 
 struct valinfo_s
@@ -64,7 +64,7 @@ struct valinfo_s
   uint8_t nfree;        /* Total bits free in the byte/hword */
   uint8_t nlsfree;      /* Total contiguous LS bits free */
   uint8_t nmsfree;      /* Total contiguous MS bits free */
-  uint8_t mxfree;      /* Largest internal contiguous bits free */
+  uint8_t mxfree;       /* Largest internal contiguous bits free */
 };
 
 /****************************************************************************
@@ -122,12 +122,13 @@ static const struct nibble_info_s g_4bit_info[16] =
   { 0, 0, 0, 0}   /* 15 1111 */
 };
 
-static FAR const struct nibble_info_s *g_info_table[4] =
+static const struct nibble_info_s *g_info_table[5] =
 {
    g_0bit_info,
    g_1bit_info,
    g_2bit_info,
-   g_3bit_info
+   g_3bit_info,
+   g_4bit_info
 };
 
 /****************************************************************************
@@ -233,7 +234,14 @@ void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
 
           gran_nibble_info(value >> 4, &nibinfo, msbits);
 
-          midfree = info->nmsfree + nibinfo.nlsfree;
+          if (info->nlsfree < 8 && nibinfo.nlsfree < msbits)
+            {
+              midfree = info->nmsfree + nibinfo.nlsfree;
+            }
+          else
+            {
+              midfree = 0;
+            }
 
           info->nfree += nibinfo.nfree;
 
@@ -324,16 +332,23 @@ void gran_hword_info(uint16_t value, FAR struct valinfo_s *info,
     {
       /* Some allocated */
 
-      gran_hword_info((uint8_t)(value & 0xff), info, nbits > 8 ? 8 : nbits);
+      gran_byte_info((uint8_t)(value & 0xff), info, nbits > 8 ? 8 : nbits);
       if (nbits > 8)
         {
           struct valinfo_s byteinfo;
           unsigned int msbits = nbits - 8;
           unsigned int midfree;
 
-          gran_hword_info((uint8_t)(value >> 8), &byteinfo, msbits);
+          gran_byte_info((uint8_t)(value >> 8), &byteinfo, msbits);
 
-          midfree = info->nmsfree + byteinfo.nlsfree;
+          if (info->nlsfree < 8 && byteinfo.nlsfree < msbits)
+            {
+              midfree = info->nmsfree + byteinfo.nlsfree;
+            }
+          else
+            {
+              midfree = 0;
+            }
 
           info->nfree += byteinfo.nfree;
 
@@ -474,7 +489,14 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
 
               gran_hword_info((uint16_t)(value >> 16), &msinfo, msbits);
 
-              midfree = hwinfo.nmsfree + msinfo.nlsfree;
+              if (hwinfo.nlsfree < 16 && msinfo.nlsfree < msbits)
+                {
+                  midfree = hwinfo.nmsfree + msinfo.nlsfree;
+                }
+              else
+                {
+                  midfree = 0;
+                }
 
               hwinfo.nfree += msinfo.nfree;
 
@@ -550,6 +572,13 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
 
           info->nfree += hwinfo.nfree;
         }
+    }
+
+  /* Check if the last, unterminated sequence of free granules was the longest */
+
+  if (mxfree > info->mxfree)
+    {
+      info->mxfree = mxfree;
     }
 
   gran_leave_critical(priv);
