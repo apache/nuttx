@@ -53,6 +53,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/pgalloc.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -304,21 +305,23 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_MM_KERNEL_HEAP
   if (totalsize < buflen)
     {
-      buffer += copysize;
-      buflen -= copysize;
+      buffer    += copysize;
+      buflen    -= copysize;
 
-      /* The second line is the memory data */
+      /* Show kernel heap information */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      mem = kmm_mallinfo();
+      mem        = kmm_mallinfo();
 #else
       (void)kmm_mallinfo(&mem);
 #endif
 
       linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Kmem:  %11d%11d%11d%11d\n",
-                            mem.arena, mem.uordblks, mem.fordblks,
-                            mem.mxordblk);
+                            "Kmem:  %11ul%11ul%11ul%11ul\n",
+                            (unsigned long)mem.arena,
+                            (unsigned long)mem.uordblks,
+                            (unsigned long)mem.fordblks,
+                            (unsigned long)mem.mxordblk);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                                  &offset);
       totalsize += copysize;
@@ -328,21 +331,54 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 #if !defined(CONFIG_BUILD_KERNEL)
   if (totalsize < buflen)
     {
-      buffer += copysize;
-      buflen -= copysize;
+      buffer    += copysize;
+      buflen    -= copysize;
 
-      /* The second line is the memory data */
+      /* Show user heap information */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      mem = kumm_mallinfo();
+      mem        = kumm_mallinfo();
 #else
       (void)kumm_mallinfo(&mem);
 #endif
 
       linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Umem:  %11d%11d%11d%11d\n",
-                            mem.arena, mem.uordblks, mem.fordblks,
-                            mem.mxordblk);
+                            "Umem:  %11ul%11ul%11ul%11ul\n",
+                            (unsigned long)mem.arena,
+                            (unsigned long)mem.uordblks,
+                            (unsigned long)mem.fordblks,
+                            (unsigned long)mem.mxordblk);
+      copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
+                                 &offset);
+      totalsize += copysize;
+    }
+#endif
+
+#ifdef CONFIG_MM_PGALLOC
+  if (totalsize < buflen)
+    {
+      struct pginfo_s pginfo;
+      unsigned long total;
+      unsigned long available;
+      unsigned long allocated;
+      unsigned long max;
+
+      buffer    += copysize;
+      buflen    -= copysize;
+
+      /* Show page allocator information */
+
+      mm_pginfo(&pginfo);
+
+      total      = (unsigned long)pginfo.ntotal << MM_PGSHIFT;
+      available  = (unsigned long)pginfo.nfree  << MM_PGSHIFT;
+      allocated  = total - available;
+      max        = (unsigned long)pginfo.mxfree << MM_PGSHIFT;
+
+      linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
+                            "Page:  %11ul%11ul%11ul%11ul\n",
+                            total, allocated, available, max);
+
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                                  &offset);
       totalsize += copysize;
@@ -352,17 +388,21 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 #if defined(CONFIG_ARCH_HAVE_PROGMEM) && defined(CONFIG_FS_PROCFS_INCLUDE_PROGMEM)
   if (totalsize < buflen)
     {
-      buffer += copysize;
-      buflen -= copysize;
+      struct progmem_info_s progmem;
+
+      buffer    += copysize;
+      buflen    -= copysize;
 
       /* The second line is the memory data */
 
       meminfo_progmem(&progmem);
 
-      linesize   = snprintf(procfile->line, PROGMEM_LINELEN,
-                            "Prog:  %11d%11d%11d%11d\n",
-                            progmem.arena, progmem.uordblks, progmem.fordblks,
-                            progmem.mxordblk);
+      linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
+                            "Prog:  %11ul%11ul%11ul%11ul\n",
+                            (unsigned long)progmem.arena,
+                            (unsigned long)progmem.uordblks,
+                            (unsigned long)progmem.fordblks,
+                            (unsigned long)progmem.mxordblk);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                                  &offset);
       totalsize += copysize;
