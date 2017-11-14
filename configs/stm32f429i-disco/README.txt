@@ -667,10 +667,10 @@ Where <subdir> is one of the following:
     1. This configuration assumes an SST25VF064C 8Mbyte SPI FLASH is
        connected to SPI4 on the following Discovery board Pins:
 
-       SCK:   Port PE2   Board Connector P1, Pin 15
-       MOSI:  Port PE6   Board Connector P1, Pin 11
-       MISO:  Port PE5   Board Connector P1, Pin 14
-       CS:    Port PE4   Board Connector P1, Pin 13
+         SCK:   Port PE2   Board Connector P1, Pin 15
+         MOSI:  Port PE6   Board Connector P1, Pin 11
+         MISO:  Port PE5   Board Connector P1, Pin 14
+         CS:    Port PE4   Board Connector P1, Pin 13
 
     2. This configuration does have UART1 output enabled and set up as
        the system logging device.  To use this UART, you must add an
@@ -682,7 +682,32 @@ Where <subdir> is one of the following:
 
     STM32F429I-DISCO LTDC Framebuffer demo example.  This is a simple
     configuration used for some basic (non-graphic) debug of the framebuffer
-    character drivers using apps/examples/fb.
+    character drivers using apps/examples/fb.  It simply opens the framebuffer
+    device and draws concentric rectangles of different colors in the
+    framebuffer:
+
+      nsh> fb
+
+    Also included is the touchscreen test of apps/examples/touchscreen.  This
+    example will simply open the touchscrren driver then collect and display
+    touch inputs:
+
+      nsh> tc 1
+      tc_main: nsamples: 1
+      tc_main: Initializing external touchscreen device
+      tc_main: Opening /dev/input0
+      Sample     :
+         npoints : 1
+      Point 1    :
+              id : 0
+           flags : 3c
+               x : 2296
+               y : 2311
+               h : 0
+               w : 0
+        pressure : 1
+      Terminating!
+      nsh>
 
   nsh:
   ---
