@@ -122,8 +122,13 @@ ARCH_LIBPATHS += -L"$(TOPDIR)/arch/arm/src/lc823450"
 endif
 
 ifeq ($(CONFIG_LC823450_SDIF),y)
-ARCH_LIBS += $(ARCH_LIBS_OPT)--just-symbols=$(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld
-LDFLAGS +=--no-wchar-size-warning
+ifeq ($(WINTOOL),y)
+  ARCH_SYMBOLS = "${shell cygpath -w $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld}"
+else
+  ARCH_SYMBOLS = $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld
+endif
+  ARCH_LIBS += $(ARCH_LIBS_OPT) --just-symbols=$(ARCH_SYMBOLS)
+  LDFLAGS += --no-wchar-size-warning
 endif
 
 
