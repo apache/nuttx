@@ -949,12 +949,20 @@ Where <subdir> is one of the following:
        2015-04-30
           Appears to be fully functional.
 
+  nx
+  --
+
+    This a simple test using the graphic example at apps/example/nx.  This
+    configuration illustrates the use of the LCD with the lower performance
+    SPI interface.
+
   nxwm
   ----
     This is a special configuration setup for the NxWM window manager
     UnitTest.
 
     NOTES:
+
     1. The NxWM window manager can be found here:
 
          nuttx-code/NxWidgets/nxwm
@@ -972,12 +980,15 @@ Where <subdir> is one of the following:
 
        1. Install the nxwm configuration
 
-          $ cd ~/nuttx-code/nuttx/tools
-          $ ./configure.sh stm32f429i-disco/nxwm
+          $ cd ~/nuttx-code/nuttx
+          $ tools/configure.sh -l stm32f429i-disco/nxwm
+
+          When the -l option on configure.sh indicates that you are
+          configuring for a Linux host build environment.   Try
+          'tools/configure.sh -h' for other options.
 
        2. Make the build context (only)
 
-          $ cd ..
           $ make context
           ...
 
@@ -986,8 +997,8 @@ Where <subdir> is one of the following:
           $ cd ~/nuttx-code/NxWidgets
           $ tools/install.sh ~/nuttx-code/apps nxwm
           Creating symbolic link
-        - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-code/apps/external
+           - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
+           - At ~/nuttx-code/apps/external
 
        4. Build the NxWidgets library
 
@@ -1006,19 +1017,25 @@ Where <subdir> is one of the following:
           $ cd ~/nuttx-code/nuttx
           $ make
 
-    3. Performance is not so good in this example configuration because it
-       uses the slower SPI interfaces.
-
     STATUS:
       17-01-08:  There are instabilities in this configuration that make it
-      not usable on this platform.  While the equivalent configuration works
-      on other platforms, this one does not:  The calculator display does
-      not form properly.  There are fails in the NxTerm display, usually around
-      the point where the display should scroll up.
+        not usable on this platform.  While the equivalent configuration works
+        on other platforms, this one does not:  The calculator display does
+        not form properly.  There are fails in the NxTerm display, usually
+        around the point where the display should scroll up.
 
-      Update:  With all optimizations disabled, the issue seems to go away.
-      So this is most likely due to using high levels of optimization with a
-      bleeding edge GCC toolchain.
+        Update:  With all optimizations disabled, the issue seems to go away.
+        So this is most likely due to using high levels of optimization with a
+        bleeding edge GCC toolchain.
+      17-11-15: The original configuration used the slower SPI LCD interface.
+        The configuration was converted to use the high performance LTDC frame
+        buffer interface.  Performance is now excellent and I see none of the
+        instabilities mentioned above even at high levels of optimization.
+
+        The difficulty that I experienced was touching the tiny icons on the
+        menus.  The touscreen controller (along with my fat fingers) does not
+        appear to have sufficient precision to work in this way.  Larger icons
+        would likely make the interface easier to use.
 
   usbnsh:
   ------
