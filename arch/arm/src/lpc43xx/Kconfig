@@ -142,7 +142,7 @@ config LPC43_BOOT_FLASHA
 	bool "Running in internal FLASHA"
 
 config LPC43_BOOT_FLASHB
-	bool "Running in internal FLASHA"
+	bool "Running in internal FLASHB"
 
 config LPC43_BOOT_CS0FLASH
 	bool "Running in external FLASH CS0"
