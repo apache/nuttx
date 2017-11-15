@@ -173,6 +173,111 @@ void gran_nibble_info(uint8_t value, FAR struct valinfo_s *info,
 }
 
 /****************************************************************************
+ * Name: gran_info_combine
+ *
+ * Description:
+ *   Combine new MS bit information with existing LS bit information.
+ *
+ * Input Parameters:
+ *   msinfo - The new MS bit information
+ *   msbits - Number of bits in MS piece
+ *   lsinfo - The existing LS bit information
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void gran_info_combine(FAR const struct valinfo_s *msinfo, unsigned int msbits,
+                       FAR struct valinfo_s *lsinfo, unsigned int lsbits)
+{
+  unsigned int midfree;
+
+  /* Is there a region of free space isolated in the middle of the two
+   * pieces?
+   */
+
+  if (lsinfo->nlsfree < lsbits && msinfo->nlsfree < msbits)
+    {
+      /* Yes... combine the MS free bits from the LS piece with the
+       * LS free bits from the MS piece.
+       */
+
+      midfree = lsinfo->nmsfree + msinfo->nlsfree;
+    }
+  else
+    {
+      midfree = 0;
+    }
+
+  /* Update the total number of free bits in the combined pieces */
+
+  lsinfo->nfree += msinfo->nfree;
+
+  /* Figure out how many MS bits will now be free.  First, is the MS piece
+   * all free?
+   */
+
+  if (msinfo->nlsfree == msbits)
+    {
+      /* Yes.. is the LS piece also all free bits? */
+
+      if (lsinfo->nlsfree == lsbits)
+        {
+          /* Yes.. the there are no MS free bits (only LS) */
+
+          lsinfo->nmsfree = 0;
+        }
+      else
+        {
+          /* No.. then combine all of the bits from the MS piece with the
+           * MS bits of the LS piece.
+           */
+
+          lsinfo->nmsfree += msbits;
+        }
+    }
+  else
+    {
+      /* No.. then just replace the MS bits of the LS piece with the MS
+       * bits from the new MS piece.
+       */
+
+      lsinfo->nmsfree = msinfo->nmsfree;
+    }
+
+  /* Figure out how many LS bits will now be free.  First, is the LS piece
+   * all free?
+   */
+
+  if (lsinfo->nlsfree == lsbits)
+    {
+      /* Yes.. then combine all of the bits from the LS piece with the
+       * LS bits of the MS piece.
+       */
+
+      lsinfo->nlsfree += msinfo->nlsfree;
+    }
+
+  /* Now, what is the longest internal sequence of the free bits?  It might
+   * be original sequence of free bits in the LS piece.  Or it might the
+   * section of middle bits that got above.
+   */
+
+  if (midfree > lsinfo->mxfree)
+    {
+      lsinfo->mxfree = midfree;
+    }
+
+  /* Or it might the section of middle bits in the new MS piece */
+
+  if (msinfo->mxfree > lsinfo->mxfree)
+    {
+      lsinfo->mxfree = msinfo->mxfree;
+    }
+}
+
+/****************************************************************************
  * Name: gran_byte_info
  *
  * Description:
@@ -216,6 +321,8 @@ void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
     }
   else if (value == mask)
     {
+      /* All allocated */
+
       info->nfree   = 0;
       info->nlsfree = 0;
       info->nmsfree = 0;
@@ -228,53 +335,11 @@ void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
       gran_nibble_info(value & 0x0f, info, nbits > 4 ? 4 : nbits);
       if (nbits > 4)
         {
-          struct valinfo_s nibinfo;
+          struct valinfo_s msinfo;
           unsigned int msbits = nbits - 4;
-          unsigned int midfree;
 
-          gran_nibble_info(value >> 4, &nibinfo, msbits);
-
-          if (info->nlsfree < 8 && nibinfo.nlsfree < msbits)
-            {
-              midfree = info->nmsfree + nibinfo.nlsfree;
-            }
-          else
-            {
-              midfree = 0;
-            }
-
-          info->nfree += nibinfo.nfree;
-
-          if (nibinfo.nlsfree == msbits)
-            {
-              if (info->nlsfree == 8)
-                {
-                  info->nmsfree = 0;
-                }
-              else
-                {
-                  info->nmsfree += msbits;
-                }
-            }
-          else
-            {
-              info->nmsfree = nibinfo.nmsfree;
-            }
-
-          if (info->nlsfree == 8)
-            {
-              info->nlsfree += nibinfo.nlsfree;
-            }
-
-          if (midfree > info->mxfree)
-            {
-              info->mxfree = midfree;
-            }
-
-          if (nibinfo.mxfree > info->mxfree)
-            {
-              info->mxfree = nibinfo.mxfree;
-            }
+          gran_nibble_info(value >> 4, &msinfo, msbits);
+          gran_info_combine(&msinfo, msbits, info, 4);
         }
     }
 }
@@ -323,6 +388,8 @@ void gran_hword_info(uint16_t value, FAR struct valinfo_s *info,
     }
   else if (value == mask)
     {
+      /* All allocated */
+
       info->nfree   = 0;
       info->nlsfree = 0;
       info->nmsfree = 0;
@@ -335,53 +402,11 @@ void gran_hword_info(uint16_t value, FAR struct valinfo_s *info,
       gran_byte_info((uint8_t)(value & 0xff), info, nbits > 8 ? 8 : nbits);
       if (nbits > 8)
         {
-          struct valinfo_s byteinfo;
+          struct valinfo_s msinfo;
           unsigned int msbits = nbits - 8;
-          unsigned int midfree;
 
-          gran_byte_info((uint8_t)(value >> 8), &byteinfo, msbits);
-
-          if (info->nlsfree < 8 && byteinfo.nlsfree < msbits)
-            {
-              midfree = info->nmsfree + byteinfo.nlsfree;
-            }
-          else
-            {
-              midfree = 0;
-            }
-
-          info->nfree += byteinfo.nfree;
-
-          if (byteinfo.nlsfree == msbits)
-            {
-              if (info->nlsfree == 8)
-                {
-                  info->nmsfree = 0;
-                }
-              else
-                {
-                  info->nmsfree += msbits;
-                }
-            }
-          else
-            {
-              info->nmsfree = byteinfo.nmsfree;
-            }
-
-          if (info->nlsfree == 8)
-            {
-              info->nlsfree += byteinfo.nlsfree;
-            }
-
-          if (midfree > info->mxfree)
-            {
-              info->mxfree = midfree;
-            }
-
-          if (byteinfo.mxfree > info->mxfree)
-            {
-              info->mxfree = byteinfo.mxfree;
-            }
+          gran_byte_info((uint8_t)(value >> 8), &msinfo, msbits);
+          gran_info_combine(&msinfo, msbits, info, 8);
         }
     }
 }
@@ -485,51 +510,9 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
             {
               struct valinfo_s msinfo;
               unsigned int msbits = nbits - 16;
-              unsigned int midfree;
 
               gran_hword_info((uint16_t)(value >> 16), &msinfo, msbits);
-
-              if (hwinfo.nlsfree < 16 && msinfo.nlsfree < msbits)
-                {
-                  midfree = hwinfo.nmsfree + msinfo.nlsfree;
-                }
-              else
-                {
-                  midfree = 0;
-                }
-
-              hwinfo.nfree += msinfo.nfree;
-
-              if (msinfo.nlsfree == msbits)
-                {
-                  if (hwinfo.nlsfree == 8)
-                    {
-                      hwinfo.nmsfree = 0;
-                    }
-                  else
-                    {
-                      hwinfo.nmsfree += msbits;
-                   }
-                }
-              else
-                {
-                  hwinfo.nmsfree = msinfo.nmsfree;
-                }
-
-              if (hwinfo.nlsfree == 8)
-                {
-                  hwinfo.nlsfree += msinfo.nlsfree;
-                }
-
-              if (midfree > hwinfo.mxfree)
-                {
-                  hwinfo.mxfree = midfree;
-                }
-
-              if (msinfo.mxfree > hwinfo.mxfree)
-                {
-                  hwinfo.mxfree = msinfo.mxfree;
-                }
+              gran_info_combine(&msinfo, msbits, &hwinfo, 16);
             }
 
           /* Update the running free sequence of granules */
@@ -554,7 +537,7 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
                   mxfree = hwinfo.mxfree;
                 }
 
-              /* Is the running free sequence long than the last sequence
+              /* Is the running free sequence longer than the last sequence
                * that we saw?
                */
 
