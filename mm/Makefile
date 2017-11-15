@@ -1,7 +1,7 @@
 ############################################################################
 # mm/Makefile
 #
-#   Copyright (C) 2007, 2012, 2013-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2012, 2013-2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ DELIM := $(strip /)
 
 # CFLAGS
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
+ifneq ($(CONFIG_BUILD_FLAT),y)
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   KDEFINE = ${shell $(TOPDIR)\tools\define.bat "$(CC)" __KERNEL__}
 else
@@ -108,11 +108,11 @@ endif
 # Dependencies
 
 .depend: Makefile $(SRCS)
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
+ifeq ($(CONFIG_BUILD_FLAT),y)
+	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
+else
 	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
-else
-	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
 endif
 	$(Q) touch $@
 
