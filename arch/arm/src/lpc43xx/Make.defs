@@ -160,6 +160,14 @@ CHIP_CSRCS += lpc43_i2c.c
 endif
 endif
 
+ifeq ($(CONFIG_LPC43_CAN0),y)
+CHIP_CSRCS += lpc43_can.c
+else
+ifeq ($(CONFIG_LPC43_CAN1),y)
+CHIP_CSRCS += lpc43_can.c
+endif
+endif
+
 ifeq ($(CONFIG_LPC43_ADC0),y)
 CHIP_CSRCS += lpc43_adc.c
 else

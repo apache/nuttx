@@ -172,11 +172,11 @@ config LPC43_ATIMER
 	bool "Alarm timer"
 	default n
 
-config LPC43_CAN1
-	bool "C_CAN1"
+config LPC43_CAN0
+	bool "C_CAN0"
 	default n
 
-config LPC43_CAN2
+config LPC43_CAN1
 	bool "C_CAN1"
 	default n
 
