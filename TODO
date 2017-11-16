@@ -1301,7 +1301,9 @@ o Network (net/, drivers/net)
                connect() most likely has this same issue.
 
                A work-around might be to raise the priority of the thread
-               that calls accept().
+               that calls accept().  accept() might also need to check the
+               tcpstateflags in the connection structure before returning
+               in order to assure that the socket truly is connected.
   Status:      Open
   Priority:    Medium.  I have never heard of this problem being reported
                before, so I suspect it might not be so prevalent as one
