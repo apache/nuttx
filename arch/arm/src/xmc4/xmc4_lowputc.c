@@ -309,7 +309,7 @@ int xmc4_uart_configure(enum usic_channel_e channel,
    *   - Set frame length equal to the word length
    */
 
-  regval = USIC_SCTR_PDL0 | USIC_SCTR_TRM_1LEVEL |
+  regval = USIC_SCTR_PDL1 | USIC_SCTR_TRM_1LEVEL |
            USIC_SCTR_FLE(config->nbits) | USIC_SCTR_WLE(config->nbits);
   putreg32(regval, base + XMC4_USIC_SCTR_OFFSET);
 
