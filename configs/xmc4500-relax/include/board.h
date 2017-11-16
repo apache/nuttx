@@ -211,6 +211,16 @@
 #define GPIO_UART0_RXD0   GPIO_U0C0_DX0B
 #define GPIO_UART0_TXD0   (GPIO_U0C0_DOUT0_3 | GPIO_PADA1P_STRONGSOFT | GPIO_OUTPUT_SET)
 
+/* USIC1 CH1 is used as UART3
+ *
+ *  RX - P0.0
+ *  TX - P0.1
+ */
+
+#define BOARD_UART3_DX    USIC_DXD
+#define GPIO_UART0_RXD3   GPIO_U1C1_DX0D
+#define GPIO_UART0_TXD3   (GPIO_U1C1_DOUT0_2 | GPIO_PADA1P_STRONGSOFT | GPIO_OUTPUT_SET)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
