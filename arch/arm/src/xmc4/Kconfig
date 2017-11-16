@@ -71,6 +71,7 @@ config XMC4_USIC0
 config XMC4_USIC1
 	bool "USIC1"
 	default n
+	select XMC4_USIC
 	---help---
 		Support USIC1
 
