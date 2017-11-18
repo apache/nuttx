@@ -1924,6 +1924,8 @@ nuttx/
  |   |   `- README.txt
  |   `- README.txt
  |- libnx/
+ |   |- nxfongs
+ |   |   `- README.txt
  |   `- README.txt
  |- libxx/
  |   `- README.txt

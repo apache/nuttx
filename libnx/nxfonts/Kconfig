@@ -324,6 +324,11 @@ config NXFONT_TOM_THUMB_4X6
 
 endmenu
 
+# NOTE the remaining selections all shadow NX-configurations of a similar
+# name.  If CONFIG_NX is enabled, then these options should exactly match
+# the NX settings.  The shadow copies allow the fonts to be configured and
+# used on other contexts when the NX server is not initialized.
+
 menu "Font Cache Pixel Depths"
 
 config NXFONTS_DISABLE_1BPP
