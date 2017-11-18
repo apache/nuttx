@@ -35,7 +35,7 @@
 
 # Expose NXFONT interfaces to applications
 
-ifeq ($(CONFIG_NX),y)
+ifeq ($(CONFIG_NXFONTS),y)
 
 CSRCS += nxfonts_getfont.c nxfonts_cache.c
 CSRCS += nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c

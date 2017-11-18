@@ -25,7 +25,7 @@ at the present, but here is the longer term roadmap:
   NXTOOLKIT - A set of C graphics tools that provide higher-level window drawing
               operations.  The toolkit can be used for window-oriented graphics
               without NxWidgets and is built on top of NX.
-  NXFONTS   - A set of C graphics tools for present (bitmap) font images.
+  NXFONTS   - A set of C graphics tools for presenting (bitmap) font images.
   NX        - The tiny NuttX windowing system.  This includes the small-footprint 
               multi-user implentation (NXMU as described below).  NX can be used
               without NxWidgets and without NXTOOLKIT for raw access to window memory.
@@ -394,8 +394,8 @@ CONFIG_NXTERM_NPOLLWAITERS
   The number of threads that can be waiting for read data available.
   Default: 4
 
-NX Multi-user only options
---------------------------
+NX Multi-user options
+---------------------
 
 CONFIG_NX_BLOCKING
   Open the client message queues in blocking mode.  In this case,
@@ -405,5 +405,4 @@ CONFIG_NX_MXSERVERMSGS and CONFIG_NX_MXCLIENTMSGS
   No additional resources are allocated, but this can be set to prevent
   flooding of the client or server with too many messages (CONFIG_PREALLOC_MQ_MSGS
   controls how many messages are pre-allocated).
-
 

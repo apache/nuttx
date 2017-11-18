@@ -85,6 +85,7 @@ menu "Supported Pixel Depths"
 config NX_DISABLE_1BPP
 	bool "Disable 1 BPP"
 	default y
+	select NXFONTS_DISABLE_1BPP if NXFONTS
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 1BPP
@@ -93,6 +94,7 @@ config NX_DISABLE_1BPP
 config NX_DISABLE_2BPP
 	bool "Disable 2 BPP"
 	default y
+	select NXFONTS_DISABLE_2BPP
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 2BPP
@@ -100,6 +102,7 @@ config NX_DISABLE_2BPP
 
 config NX_DISABLE_4BPP
 	bool "Disable 4 BPP"
+	select NXFONTS_DISABLE_4BPP if NXFONTS
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -109,6 +112,7 @@ config NX_DISABLE_4BPP
 config NX_DISABLE_8BPP
 	bool "Disable 8 BPP"
 	default y
+	select NXFONTS_DISABLE_8BPP if NXFONTS
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 8BPP
@@ -117,6 +121,7 @@ config NX_DISABLE_8BPP
 config NX_DISABLE_16BPP
 	bool "Disable 16 BPP"
 	default y
+	select NXFONTS_DISABLE_16BPP if NXFONTS
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 16BPP
@@ -125,6 +130,7 @@ config NX_DISABLE_16BPP
 config NX_DISABLE_24BPP
 	bool "Disable 24 BPP"
 	default y
+	select NXFONTS_DISABLE_24BPP if NXFONTS
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 24BPP
@@ -133,6 +139,7 @@ config NX_DISABLE_24BPP
 config NX_DISABLE_32BPP
 	bool "Disable 32 BPP"
 	default y
+	select NXFONTS_DISABLE_32BPP if NXFONTS
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
 		support for unused color depths.  The selection disables support for 32BPP
@@ -143,6 +150,7 @@ endmenu
 config NX_PACKEDMSFIRST
 	bool "Packed MS First"
 	default y
+	select NXFONTS_PACKEDMSFIRST if NXFONTS
 	depends on NX_DISABLE_1BPP || NX_DISABLE_2BPP || NX_DISABLE_4BPP
 	---help---
 		If a pixel depth of less than 8-bits is used, then NX needs to know if the
@@ -251,318 +259,6 @@ config NXTK_AUTORAISE
 		If set, a window will be raised to the top if the mouse position is over a
 		visible portion of the window.  Default: A mouse button must be clicked over
 		a visible portion of the window.
-
-menu "Font Selections"
-
-config NXFONTS_CHARBITS
-	int "Bits in Character Set"
-	default 7
-	range 7 8
-	---help---
-		The number of bits in the character set.  Current options are only 7 and 8.
-		The default is 7.
-
-config NXFONT_MONO5X8
-	bool "Mono 5x8"
-	default n
-	---help---
-	Tiny mono-spaced 5x8 font (font ID FONTID_MONO5X8 = 18)
-
-config NXFONT_SANS17X22
-	bool "Sans 17x22"
-	default n
-	---help---
-		This option enables support for a tiny, 17x22 san serif font
-		(font ID FONTID_SANS17X22 == 14).
-
-config NXFONT_SANS20X26
-	bool "Sans 20x26"
-	default n
-	---help---
-		This option enables support for a tiny, 20x26 san serif font
-		(font ID FONTID_SANS20X26 == 15).
-
-config NXFONT_SANS23X27
-	bool "Sans 23x27"
-	default n
-	---help---
-		This option enables support for a tiny, 23x27 san serif font
-		(font ID FONTID_SANS23X27 == 1).
-
-config NXFONT_SANS22X29
-	bool "Sans 22x29"
-	default n
-	---help---
-		This option enables support for a small, 22x29 san serif font
-		(font ID FONTID_SANS22X29 == 2).
-
-config NXFONT_SANS28X37
-	bool "Sans 28x37"
-	default n
-	---help---
-		This option enables support for a medium, 28x37 san serif font
-		(font ID FONTID_SANS28X37 == 3).
-
-config NXFONT_SANS39X48
-	bool "Sans 39x48"
-	default n
-	---help---
-		This option enables support for a large, 39x48 san serif font
-		(font ID FONTID_SANS39X48 == 4).
-
-config NXFONT_SANS17X23B
-	bool "Sans 17x23 Bold"
-	default n
-	---help---
-		This option enables support for a tiny, 17x23 san serif bold font
-		(font ID FONTID_SANS17X23B == 16).
-
-config NXFONT_SANS20X27B
-	bool "Sans 20x27 Bold"
-	default n
-	---help---
-		This option enables support for a tiny, 20x27 san serif bold font
-		(font ID FONTID_SANS20X27B == 17).
-
-config NXFONT_SANS22X29B
-	bool "Sans 22x29 Bold"
-	default n
-	---help---
-		This option enables support for a small, 22x29 san serif bold font
-		(font ID FONTID_SANS22X29B == 5).
-
-config NXFONT_SANS28X37B
-	bool "Sans 28x37 Bold"
-	default n
-	---help---
-		This option enables support for a medium, 28x37 san serif bold font
-		(font ID FONTID_SANS28X37B == 6).
-
-config NXFONT_SANS40X49B
-	bool "Sans 40x49 Bold"
-	default n
-	---help---
-		This option enables support for a large, 40x49 san serif bold font
-		(font ID FONTID_SANS40X49B == 7).
-
-config NXFONT_SERIF22X29
-	bool "Serif 22x29"
-	default n
-	---help---
-		This option enables support for a small, 22x29 font (with serifs)
-		(font ID FONTID_SERIF22X29 == 8).
-
-config NXFONT_SERIF29X37
-	bool "Serif 29x37"
-	default n
-	---help---
-		This option enables support for a medium, 29x37 font (with serifs)
-		(font ID FONTID_SERIF29X37 == 9).
-
-config NXFONT_SERIF38X48
-	bool "Serif 38x48"
-	default n
-	---help---
-		This option enables support for a large, 38x48 font (with serifs)
-		(font ID FONTID_SERIF38X48 == 10).
-
-config NXFONT_SERIF22X28B
-	bool "Serif 22x28 Bold"
-	default n
-	---help---
-		This option enables support for a small, 27x38 bold font (with serifs)
-		(font ID FONTID_SERIF22X28B == 11).
-
-config NXFONT_SERIF27X38B
-	bool "Serif 27x38 Bold"
-	default n
-	---help---
-		This option enables support for a medium, 27x38 bold font (with serifs)
-		(font ID FONTID_SERIF27X38B == 12).
-
-config NXFONT_SERIF38X49B
-	bool "Serif 38x49 Bold"
-	default n
-	---help---
-		This option enables support for a large, 38x49 bold font (with serifs)
-		(font ID FONTID_SERIF38X49B == 13).
-
-config NXFONT_PIXEL_UNICODE
-	bool "Pixel UniCode"
-	default n
-	---help---
-		This option enables support for a small LCD, The "Pixel UniCode"
-		(font ID FONTID_PIXEL_UNICODE == 19).
-
-config NXFONT_PIXEL_LCD_MACHINE
-	bool "Pixel lcd machine"
-	default n
-	---help---
-		This option enables support for a small LCD, The "Pixel lcd machine"
-		(font ID FONTID_PIXEL_LCD_MACHINE == 20).
-
-config NXFONT_X11_MISC_FIXED_4X6
-	bool "x11 misc fixed 4x6"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-4x6".
-		(font ID FONTID_X11_MISC_FIXED_4X6 == 21).
-
-config NXFONT_X11_MISC_FIXED_5X7
-	bool "x11 misc fixed 5x7"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-5x7".
-		(font ID FONTID_X11_MISC_FIXED_5X7 == 22).
-
-config NXFONT_X11_MISC_FIXED_5X8
-	bool "x11 misc fixed 5x8"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-5x8".
-		(font ID FONTID_X11_MISC_FIXED_5X8 == 23).
-
-config NXFONT_X11_MISC_FIXED_6X9
-	bool "x11 misc fixed 6x9"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-6x9".
-		(font ID FONTID_X11_MISC_FIXED_6X9 == 24).
-
-config NXFONT_X11_MISC_FIXED_6X10
-	bool "x11 misc fixed 6x10"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-6x10".
-		(font ID FONTID_X11_MISC_FIXED_6X10 == 25).
-
-config NXFONT_X11_MISC_FIXED_6X12
-	bool "x11 misc fixed 6x12"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-6x12".
-		(font ID FONTID_X11_MISC_FIXED_6X12 == 26).
-
-config NXFONT_X11_MISC_FIXED_6X13
-	bool "x11 misc fixed 6x13"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-6x13".
-		(font ID FONTID_X11_MISC_FIXED_6X13 == 27).
-
-config NXFONT_X11_MISC_FIXED_6X13B
-	bool "x11 misc fixed 6x13B"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-6x13B".
-		(font ID FONTID_X11_MISC_FIXED_6X13B == 28).
-
-config NXFONT_X11_MISC_FIXED_6X13O
-	bool "x11 misc fixed 6x13O"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-6x13O".
-		(font ID FONTID_X11_MISC_FIXED_6X13O == 29).
-
-config NXFONT_X11_MISC_FIXED_7X13
-	bool "x11 misc fixed 7x13"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-7x13".
-		(font ID FONTID_X11_MISC_FIXED_7X13 == 30).
-
-config NXFONT_X11_MISC_FIXED_7X13B
-	bool "x11 misc fixed 7x13B"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-7x13B".
-		(font ID FONTID_X11_MISC_FIXED_7X13B == 31).
-
-config NXFONT_X11_MISC_FIXED_7X13O
-	bool "x11 misc fixed 7x13O"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-7x13O".
-		(font ID FONTID_X11_MISC_FIXED_7X13O == 32).
-
-config NXFONT_X11_MISC_FIXED_7X14
-	bool "x11 misc fixed 7x14"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-7x14".
-		(font ID FONTID_X11_MISC_FIXED_7X14 == 33).
-
-config NXFONT_X11_MISC_FIXED_7X14B
-	bool "x11 misc fixed 7x14B"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-7x14B".
-		(font ID FONTID_X11_MISC_FIXED_7X14B == 34).
-
-config NXFONT_X11_MISC_FIXED_8X13
-	bool "x11 misc fixed 8x13"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-8x13".
-		(font ID FONTID_X11_MISC_FIXED_8X13 == 35).
-
-config NXFONT_X11_MISC_FIXED_8X13B
-	bool "x11 misc fixed 8x13B"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-8x13B".
-		(font ID FONTID_X11_MISC_FIXED_8X13B == 36).
-
-config NXFONT_X11_MISC_FIXED_8X13O
-	bool "x11 misc fixed 8x13O"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-8x13O".
-		(font ID FONTID_X11_MISC_FIXED_8X13O == 37).
-
-config NXFONT_X11_MISC_FIXED_9X15
-	bool "x11 misc fixed 9x15"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-9x15".
-		(font ID FONTID_X11_MISC_FIXED_9X15 == 38).
-
-config NXFONT_X11_MISC_FIXED_9X15B
-	bool "x11 misc fixed 9x15B"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-9x15B".
-		(font ID FONTID_X11_MISC_FIXED_9X15B == 39).
-
-config NXFONT_X11_MISC_FIXED_9X18
-	bool "x11 misc fixed 9x18"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-9x18".
-		(font ID FONTID_X11_MISC_FIXED_9X18 == 40).
-
-config NXFONT_X11_MISC_FIXED_9X18B
-	bool "x11 misc fixed 9x18B"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-9x18B".
-		(font ID FONTID_X11_MISC_FIXED_9X18B == 41).
-
-config NXFONT_X11_MISC_FIXED_10X20
-	bool "x11 misc fixed 10x20"
-	default n
-	---help---
-		This option enables support for a "x11-misc-fixed-10x20".
-		(font ID FONTID_X11_MISC_FIXED_10X20 == 42).
-
-config NXFONT_TOM_THUMB_4X6
-	bool "Tom Thumb Monospace 4x6"
-	default n
-	---help---
-		This option enables support for a small, 3x5 font (with blank space
-		padding to 4x6) (font ID FONTID_TOM_THUMB_4X6 == 43).
-
-endmenu
 
 menuconfig NXTERM
 	bool "NxTerm"

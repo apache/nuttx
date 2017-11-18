@@ -1,7 +1,8 @@
 ############################################################################
 # ProtectedLibs.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -103,12 +104,11 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib$(DELIM)libgraphics$(LIBEXT)
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
 NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
 USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
-else
-NUTTXLIBS += lib$(DELIM)libnx$(LIBEXT)
-endif
+else ifeq ($(CONFIG_NXFONTS),y)
+NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
+USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
 endif
 
 # Add libraries for the Audio sub-system

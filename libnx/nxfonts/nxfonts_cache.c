@@ -355,8 +355,8 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 
   /* Initialize the glyph memory to the background color. */
 
-#if !defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_DISABLE_2BPP) || \
-    !defined(CONFIG_NX_DISABLE_4BPP) || !defined(CONFIG_NX_DISABLE_8BPP)
+#if !defined(CONFIG_NXFONTS_DISABLE_1BPP) || !defined(CONFIG_NXFONTS_DISABLE_2BPP) || \
+    !defined(CONFIG_NXFONTS_DISABLE_4BPP) || !defined(CONFIG_NXFONTS_DISABLE_8BPP)
 
   /* For pixel depths of 1, 2, 4, and 8, build up an 8-bit value containing
    * multiple background colored pixels.
@@ -367,7 +367,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
       uint8_t pixel = (uint8_t)priv->bgcolor;
       FAR uint8_t *ptr;
 
-#ifndef CONFIG_NX_DISABLE_1BPP
+#ifndef CONFIG_NXFONTS_DISABLE_1BPP
       /* Pack a 1-bit pixel to 2 pixels */
 
       if (priv->bpp < 2)
@@ -379,7 +379,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
         }
 #endif
 
-#if !defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_DISABLE_2BPP)
+#if !defined(CONFIG_NXFONTS_DISABLE_1BPP) || !defined(CONFIG_NXFONTS_DISABLE_2BPP)
       /* Pack a 2-bit pixel to a 4-bit nibble */
 
       if (priv->bpp < 4)
@@ -391,8 +391,8 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
         }
 #endif
 
-#if !defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_DISABLE_2BPP) || \
-    !defined(CONFIG_NX_DISABLE_4BPP)
+#if !defined(CONFIG_NXFONTS_DISABLE_1BPP) || !defined(CONFIG_NXFONTS_DISABLE_2BPP) || \
+    !defined(CONFIG_NXFONTS_DISABLE_4BPP)
       /* Pack the 4-bit nibble into a byte */
 
       if (priv->bpp < 8)
@@ -418,7 +418,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
   else
 #endif
 
-#if !defined(CONFIG_NX_DISABLE_16BPP)
+#if !defined(CONFIG_NXFONTS_DISABLE_16BPP)
   if (priv->bpp == 16)
     {
       FAR uint16_t *ptr = (FAR uint16_t *)glyph->bitmap;
@@ -436,7 +436,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
   else
 #endif
 
-#ifndef CONFIG_NX_DISABLE_24BPP
+#ifndef CONFIG_NXFONTS_DISABLE_24BPP
   if (priv->bpp == 24)
     {
       FAR uint32_t *ptr = (FAR uint32_t *)glyph->bitmap;
@@ -478,7 +478,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
   else
 #endif
 
-#if !defined(CONFIG_NX_DISABLE_32BPP)
+#if !defined(CONFIG_NXFONTS_DISABLE_32BPP)
   if (priv->bpp == 32)
     {
       FAR uint32_t *ptr = (FAR uint32_t *)glyph->bitmap;
@@ -696,37 +696,37 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
       switch (bpp)
         {
-#ifndef CONFIG_NX_DISABLE_1BPP
+#ifndef CONFIG_NXFONTS_DISABLE_1BPP
         case 1:
           priv->renderer = (nxf_renderer_t)nxf_convert_1bpp;
           break;
 #endif
-#ifndef CONFIG_NX_DISABLE_2BPP
+#ifndef CONFIG_NXFONTS_DISABLE_2BPP
         case 2:
           priv->renderer = (nxf_renderer_t)nxf_convert_2bpp;
           break;
 #endif
-#ifndef CONFIG_NX_DISABLE_4BPP
+#ifndef CONFIG_NXFONTS_DISABLE_4BPP
         case 4:
           priv->renderer = (nxf_renderer_t)nxf_convert_4bpp;
           break;
 #endif
-#ifndef CONFIG_NX_DISABLE_8BPP
+#ifndef CONFIG_NXFONTS_DISABLE_8BPP
         case 8:
           priv->renderer = (nxf_renderer_t)nxf_convert_8bpp;
           break;
 #endif
-#ifndef CONFIG_NX_DISABLE_16BPP
+#ifndef CONFIG_NXFONTS_DISABLE_16BPP
         case 16:
           priv->renderer = (nxf_renderer_t)nxf_convert_16bpp;
           break;
 #endif
-#ifndef CONFIG_NX_DISABLE_24BPP
+#ifndef CONFIG_NXFONTS_DISABLE_24BPP
         case 24:
           priv->renderer = (nxf_renderer_t)nxf_convert_24bpp;
           break;
 #endif
-#ifndef CONFIG_NX_DISABLE_32BPP
+#ifndef CONFIG_NXFONTS_DISABLE_32BPP
         case 32:
           priv->renderer = (nxf_renderer_t)nxf_convert_32bpp;
           break;

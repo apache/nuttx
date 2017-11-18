@@ -1,7 +1,8 @@
 ############################################################################
 # FlatLibs.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -103,6 +104,8 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib$(DELIM)libgraphics$(LIBEXT)
+NUTTXLIBS += lib$(DELIM)libnx$(LIBEXT)
+else ifeq ($(CONFIG_NXFONTS),y)
 NUTTXLIBS += lib$(DELIM)libnx$(LIBEXT)
 endif
 

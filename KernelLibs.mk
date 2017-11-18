@@ -99,6 +99,9 @@ ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib$(DELIM)libgraphics$(LIBEXT)
 NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
 USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
+else ifeq ($(CONFIG_NXFONTS),y)
+NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
+USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
 endif
 
 # Add libraries for the Audio sub-system

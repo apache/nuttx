@@ -104,7 +104,7 @@
 #endif
 
 #if NXFONTS_BITSPERPIXEL < 8
-#  ifdef CONFIG_NX_PACKEDMSFIRST
+#  ifdef CONFIG_NXFONTS_PACKEDMSFIRST
 #     define NXF_INITMASK         (NXF_PIXELMASK << (8 - NXFONTS_BITSPERPIXEL))
 #  else
 #     define NXF_INITMASK         NXF_PIXELMASK
@@ -217,7 +217,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
                   pixel = ((pixel & ~mask) | (mpixel & mask));
                 }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_NXFONTS_PACKEDMSFIRST
               mask >>= NXFONTS_BITSPERPIXEL;
 #else
               mask <<= NXFONTS_BITSPERPIXEL;

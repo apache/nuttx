@@ -1,7 +1,8 @@
 ############################################################################
 # Directories.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -121,6 +122,10 @@ endif
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS += graphics libnx
 CONTEXTDIRS += graphics libnx
+else ifeq ($(CONFIG_NXFONTS),y)
+NONFSDIRS += libnx
+CONTEXTDIRS += libnx
+OTHERDIRS += graphics
 else
 OTHERDIRS += graphics libnx
 endif
