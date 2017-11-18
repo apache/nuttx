@@ -1685,6 +1685,8 @@ nuttx/
  |   |   `- README.txt
  |   |- mbed/
  |   |   `- README.txt
+ |   |- mcb1700/
+ |   |   `- README.txt
  |   |- mcu123-lpc214x/
  |   |   `- README.txt
  |   |- micropendous3/

@@ -381,6 +381,13 @@ config ARCH_BOARD_MBED
 		that features the NXP LPC1768 microcontroller. This OS is also built
 		with the arm-nuttx-elf toolchain*.  STATUS:  Contributed.
 
+config ARCH_BOARD_MCB1700
+	bool "Keil MCB1700"
+	depends on ARCH_CHIP_LPC1768
+	select ARCH_HAVE_LEDS
+	---help---
+		The configurations in this directory support the Keil MCB1700.
+
 config ARCH_BOARD_MCU123_LPC214X
 	bool "mcu123.com LPC2148 Development Board"
 	depends on ARCH_CHIP_LPC214X
@@ -1599,6 +1606,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "mbed"                     if ARCH_BOARD_MBED
+	default "mcb1700"                  if ARCH_BOARD_MCB1700
 	default "mcu123-lpc214x"           if ARCH_BOARD_MCU123_LPC214X
 	default "micropendous3"            if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                   if ARCH_BOARD_MIRTOO
@@ -1858,6 +1866,9 @@ source "configs/maple/Kconfig"
 endif
 if ARCH_BOARD_MBED
 source "configs/mbed/Kconfig"
+endif
+if ARCH_BOARD_MCB1700
+source "configs/mcb1700/Kconfig"
 endif
 if ARCH_BOARD_MCU123_LPC214X
 source "configs/mcu123-lpc214x/Kconfig"
