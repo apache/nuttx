@@ -681,6 +681,8 @@ int ipl2_main(int argc, char *argv[])
 {
   int ret;
 
+  UNUSED(ret); /* Not used in all configurations */
+
   _info("start: %s\n", CONFIG_CURRENT_REVISION);
   _info("imgsig: %u\n", IMG_SIGNATURE);
 

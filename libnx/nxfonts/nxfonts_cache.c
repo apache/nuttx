@@ -353,6 +353,9 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
   int row;
   int col;
 
+  UNUSED(row); /* Not used in all configurations */
+  UNUSED(col);
+
   /* Initialize the glyph memory to the background color. */
 
 #if !defined(CONFIG_NXFONTS_DISABLE_1BPP) || !defined(CONFIG_NXFONTS_DISABLE_2BPP) || \
