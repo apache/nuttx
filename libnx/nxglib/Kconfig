@@ -5,5 +5,4 @@
 
 config NXGLIB
 	bool
-	default y if NX || NXFONTS
-	default n if !NX && !NXFONTS
+	default n

@@ -5,8 +5,8 @@
 
 config NXFONTS
 	bool "Bitmap Font Support"
-	default n if !NX
-	default y if NX
+	default n
+	select NXGLIB
 	---help---
 		Enable support for bitmap fonts, the fonter rendering library, and a
 		font cache.

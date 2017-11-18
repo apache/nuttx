@@ -6,6 +6,8 @@
 config NX
 	bool "NX Graphics"
 	default n
+	select NXGLIB
+	select NXFONTS
 	---help---
 		Enables overall support for graphics library and NX
 
