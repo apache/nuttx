@@ -1,9 +1,10 @@
 /************************************************************************************
  * arch/arm/include/stm32f7/chip.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,13 +47,23 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* STM32F745xx, STM32F746xx, STM32F756xx, STM32F765xx, STM32F767xx, STM32F768xx,
+/* STM32F722xx, STM32F723xx,
+ * STM32F745xx, STM32F746xx, STM32F756xx, STM32F765xx, STM32F767xx, STM32F768xx,
  * STM32F769xx, STM32F777xx and STM32F779xx  Differences between family members:
  *
  *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ---- ---- ----- ----- ---- ------------ ------
  *                                       SPI   ADC LCD
  *   PART        PACKAGE          GPIOs  I2S  CHAN TFT  MIPI JPEG CAN  ETH  DFSDM CRYPTO FPU      RAM      L1
  *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ---- ---- ----- ----- ---- ------------ ------
+ *   STM32F722Rx LQFP64             50   3/3   16   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F722Vx LQFP100            82   4/3   16   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F722Zx LQFP144           114   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F722Ix UFBGA176/LQFP176  140   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *
+ *   STM32F723Vx WLCSP100           79   4/3   16   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F723Zx UFBGA144/LQFP144  112   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *   STM32F723Ix UFBGA176/LQFP176  138   5/3   24   No   No   No   1   No    No    No   SFPU (176+16+64)  8+8
+ *
  *   STM32F745Vx LQFP100            82   4/3   16   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
  *   STM32F745Zx WLCSP143/LQFP144  114   6/3   24   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
  *   STM32F745Ix UFBGA176/LQFP176  140   6/3   24   No   No   No   2   Yes   No    No   SFPU (240+16+64)  4+4
@@ -108,6 +119,8 @@
  *   STM32F779Ax WLCSP180          129   6/3   24   Yes  Yes  Yes  3   No    Yes   Yes  DFPU (368+16+128) 16+16
  *   ----------- ---------------- ----- ---- ----- ---- ---- ---- ---- ---- ----- ----- ---- ------------ ------
  *
+ * Parts STM32F72xxC & STM32F73xxC have 256Kb of FLASH
+ * Parts STM32F72xxE & STM32F73xxE have 512Kb of FLASH
  * Parts STM32F74xxE have 512Kb of FLASH
  * Parts STM32F74xxG have 1024Kb of FLASH
  * Parts STM32F74xxI have 2048Kb of FLASH
@@ -116,7 +129,23 @@
  * with CONFIG_STM32F7_FLASH_OVERRIDE_x
  *
  */
-#if defined(CONFIG_ARCH_CHIP_STM32F745VG) || \
+#if defined(CONFIG_ARCH_CHIP_STM32F722RC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722RE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722VC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722VE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722ZC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722ZE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722IC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F722IE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723RC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723RE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723VC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723VE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723ZC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723ZE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723IC) || \
+  defined(CONFIG_ARCH_CHIP_STM32F723IE) || \
+  defined(CONFIG_ARCH_CHIP_STM32F745VG) || \
   defined(CONFIG_ARCH_CHIP_STM32F745VE) || \
   defined(CONFIG_ARCH_CHIP_STM32F745IG) || \
   defined(CONFIG_ARCH_CHIP_STM32F745IE) || \
@@ -179,7 +208,20 @@
 
 /* Size SRAM */
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#    define STM32F7_SRAM1_SIZE            (176*1024)  /* 176Kb SRAM1 on AHB bus Matrix */
+#    define STM32F7_SRAM2_SIZE            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
+#  if defined(CONFIG_ARMV7M_HAVE_DTCM)
+#      define STM32F7_DTCM_SRAM_SIZE      (64*1024)   /* 64Kb DTCM SRAM on TCM interface */
+#  else
+#      define STM32F7_DTCM_SRAM_SIZE      (0)         /* No DTCM SRAM on TCM interface */
+#  endif
+#  if defined(CONFIG_ARMV7M_HAVE_ITCM)
+#      define STM32F7_ITCM_SRAM_SIZE      (16*1024)   /* 16Kb ITCM SRAM on TCM interface */
+#  else
+#      define STM32F7_ITCM_SRAM_SIZE      (0)         /* No ITCM SRAM on TCM interface */
+#  endif
+#elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
 #    define STM32F7_SRAM1_SIZE            (240*1024)  /* 240Kb SRAM1 on AHB bus Matrix */
 #    define STM32F7_SRAM2_SIZE            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
 #  if defined(CONFIG_ARMV7M_HAVE_DTCM)
@@ -209,6 +251,18 @@
 #  error STM32 F7 chip Family not identified
 #endif
 
+/* Common to all Advanced (vs Foundation) Family members */
+
+#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#      define STM32F7_NSPDIFRX                 0   /* Not supported */
+#      define STM32F7_NGPIO                    9   /* 9 GPIO ports, GPIOA-I */
+#      define STM32F7_NI2C                     3   /* I2C1-3 */
+#else
+#      define STM32F7_NSPDIFRX                 4   /* 4 SPDIFRX inputs */
+#      define STM32F7_NGPIO                   11   /* 11 GPIO ports, GPIOA-K */
+#      define STM32F7_NI2C                     4   /* I2C1-4 */
+#endif
+
 /* Common to all Family members */
 
 #  define STM32F7_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -219,14 +273,11 @@
 #  define STM32F7_NUART                    4   /* UART 4-5 and 7-8 */
 #  define STM32F7_NUSART                   4   /* USART1-3 and 6 */
 #  define STM32F7_NI2S                     3   /* I2S1-2 (multiplexed with SPI1-3) */
-#  define STM32F7_NI2C                     4   /* I2C1-4 */
 #  define STM32F7_NUSBOTGFS                1   /* USB OTG FS */
 #  define STM32F7_NUSBOTGHS                1   /* USB OTG HS */
 #  define STM32F7_NSAI                     2   /* SAI1-2 */
-#  define STM32F7_NSPDIFRX                 4   /* 4 SPDIFRX inputs */
 #  define STM32F7_NDMA                     2   /* DMA1-2 */
-#  define STM32F7_NGPIO                   11   /* 11 GPIO ports, GPIOA-K */
-#  define STM32F7_NADC                     3   /* 12-bit ADC1-3, 24 channels *except V series) */
+#  define STM32F7_NADC                     3   /* 12-bit ADC1-3, number of channels vary */
 #  define STM32F7_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32F7_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32F7_NCRC                     1   /* CRC */
@@ -258,11 +309,17 @@
 #else
 #  define STM32F7_NRNG                     0   /* No Random number generator (RNG) */
 #endif
+
 #if defined(CONFIG_STM32F7_HAVE_SPI5) && defined(CONFIG_STM32F7_HAVE_SPI6)
-#  define STM32F7_NSPI                     6   /* SPI1-6 (Except V series) */
-#else
+#  define STM32F7_NSPI                     6   /* SPI1-6 (Advanced Family Except V series) */
+#elif defined(CONFIG_STM32F7_HAVE_SPI5)
+#  define STM32F7_NSPI                     5   /* SPI1-5 (Foundation Family Except V & R series) */
+#elif defined(CONFIG_STM32F7_HAVE_SPI4)
 #  define STM32F7_NSPI                     4   /* SPI1-4 V series */
+#else
+#  define STM32F7_NSPI                     3   /* SPI1-3 R series */
 #endif
+
 #if defined(CONFIG_STM32F7_HAVE_SDMMC2)
 #  define STM32F7_NSDMMC                   2   /* 2 SDMMC interfaces */
 #else
@@ -270,8 +327,10 @@
 #endif
 #if defined(CONFIG_STM32F7_HAVE_CAN3)
 #  define STM32F7_NCAN                     3   /* CAN1-3 */
-#else
+#elif defined(CONFIG_STM32F7_HAVE_CAN2)
 #  define STM32F7_NCAN                     2   /* CAN1-2 */
+#else
+#  define STM32F7_NCAN                     1   /* CAN1 only */
 #endif
 #if defined(CONFIG_STM32F7_HAVE_DCMI)
 #  define STM32F7_NDCMI                    1   /* Digital camera interface (DCMI) */
@@ -288,10 +347,10 @@
 #else
 #  define STM32F7_NLCDTFT                  0   /* No LCD-TFT */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_DMA2D)
-#  define STM32F7_NDMA2D                   0   /* No DChrom-ART Accelerator™ (DMA2D) */
-#else
+#if defined(CONFIG_STM32F7_HAVE_DMA2D)         /* bf20171107 Swapped defines they were reversed. */
 #  define STM32F7_NDMA2D                   1   /* DChrom-ART Accelerator™ (DMA2D) */
+#else
+#  define STM32F7_NDMA2D                   0   /* No DChrom-ART Accelerator™ (DMA2D) */
 #endif
 #if defined(CONFIG_STM32F7_HAVE_JPEG)
 #define STM32F7_NJPEG                      1   /* One JPEG Converter */

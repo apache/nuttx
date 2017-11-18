@@ -40,9 +40,21 @@ choice
 				STM32F7
 			MORPHO   FUNCTION  GPIO
 			-------- --------- -----
-			CN12-64  USART8_RX PE0
-			CN11-61  USART8_TX PE1
+			CN12-64  UART8_RX  PE0
+			CN11-61  UART8_TX  PE1
 			-------- --------- -----
+
+					OR
+
+		Morpho Connector UART4:
+
+				STM32F7
+			MORPHO   FUNCTION  GPIO
+			-------- --------- -----
+			CN11-30  UART4_RX  PA0
+			CN11-28  UART4_TX  PA1
+			-------- --------- -----
+			Note: SB13 must be removed to disable Ethernet.
 
 config NUCLEO_CONSOLE_ARDUINO
 	bool "Arduino Connector"
@@ -61,6 +73,12 @@ config NUCLEO_CONSOLE_MORPHO
 	select STM32F7_UART8
 	select UART8_SERIALDRIVER
 	select UART8_SERIAL_CONSOLE
+
+config NUCLEO_CONSOLE_MORPHO_UART4
+	bool "Morpho Connector UART4"
+	select STM32F7_UART4
+	select UART4_SERIALDRIVER
+	select UART4_SERIAL_CONSOLE
 
 config NUCLEO_CONSOLE_NONE
 	bool "No Console"

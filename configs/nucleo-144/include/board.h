@@ -1,10 +1,11 @@
 /************************************************************************************
  * configs/nucleo-144/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *           Mark Olsson <post@markolsson.se>
  *           David Sidrane <david_s5@nscdg.com>
+ *           Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -372,6 +373,36 @@
 #if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
  # define GPIO_USART3_RX GPIO_USART3_RX_3
  # define GPIO_USART3_TX GPIO_USART3_TX_3
+#endif
+
+#if defined(CONFIG_NUCLEO_CONSOLE_MORPHO_UART4)
+/* UART4:
+ *
+ * This configuration assumes that you disabled Ethernet MII clocking
+ * by removing SB13 to free PA1.
+ *
+ *   -------- ---------------
+ *               STM32F7
+ *   Pin      FUNCTION  GPIO
+ *   -------  --------- -----
+ *   CN11 30  UART4_RX  PA1
+ *   CN11 28  UART4_TX  PA0
+ *   -------  --------- -----
+ */
+
+ # define GPIO_UART4_RX GPIO_UART4_RX_1
+ # define GPIO_UART4_TX GPIO_UART4_TX_1
+
+/* USART3 seems to be forced selected by the Nucleo-F746ZG kconfig - bug */
+
+ # define GPIO_USART3_RX GPIO_USART3_RX_1
+ # define GPIO_USART3_TX GPIO_USART3_TX_1
+
+/* USART6 seems to be forced selected by the Nucleo-F722E kconfig - bug */
+
+ # define GPIO_USART6_RX GPIO_USART6_RX_2
+ # define GPIO_USART6_TX GPIO_USART6_TX_2
+
 #endif
 
 /* USART8:
