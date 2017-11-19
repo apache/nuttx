@@ -574,7 +574,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                   if (!noassign)
                     {
                       strncpy(tv, buf, width);
-                      tv[width] = '\0';
                       count++;
                     }
 
