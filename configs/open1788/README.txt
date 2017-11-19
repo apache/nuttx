@@ -245,6 +245,44 @@ Loading Code with the ISP Board
 CONFIGURATION
 =============
 
+Information Common to All Configurations
+----------------------------------------
+
+  1. These configurations use the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository
+        README.txt.
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. Most (but not all) configurations use the "GNU Tools for ARM
+     Embedded Processors" that is maintained by ARM:
+
+       https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
+
+     unless otherwise stated.
+  
+     That toolchain selection can easily be reconfigured using
+     'make menuconfig'.  Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y               : Window environment
+       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+  3. By Default, UART0 is used as the serial console in all configurations.
+     This may be connected to your computer via an external RS-232 driver or
+     via the WaveShare USB ISP/VCOM module.  See the section above entitled
+     "Serial Console" for other options.
+
+Configuration Directories
+-------------------------
+
   fb
   --
 
@@ -256,32 +294,7 @@ CONFIGURATION
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository
-          README.txt.
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. This configuration uses the "GNU Tools for ARM Embedded Processors"
-       that is maintained by ARM:
-
-       https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
-
-       That toolchain selection can easily be reconfigured using
-       'make menuconfig'.  Here are the relevant current settings:
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y               : Window environment
-         CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
-
-    3. In this configuration, the SDRAM is not added to heap but is
+    1. In this configuration, the SDRAM is not added to heap but is
        dedicated to supporting an LCD frame buffer at address 0xa0010000.
 
   knsh
@@ -299,24 +312,13 @@ CONFIGURATION
     Make the user-space binaries first (pass1), then make the kernel-space
     binaries (pass2)
 
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository.
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Uses the older, OABI, buildroot toolchain.  But that is easily
+    1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. This configuration has DMA-based SD card support enabled by
+    2. This configuration has DMA-based SD card support enabled by
        default.  That support can be disabled as follow:
 
        CONFIG_LPC17_GPDMA=n                : No DMA
@@ -326,7 +328,7 @@ CONFIGURATION
        CONFIG_MMCSD=n                      : No MMC/SD driver support
        CONFIG_FS_FAT=n                     : No FAT file system support
 
-    4. At the end of the build, there will be several files in the top-level
+    3. At the end of the build, there will be several files in the top-level
        NuttX build directory:
 
        PASS1:
@@ -348,7 +350,7 @@ CONFIGURATION
        load objects twice to account for write failures.  I have not yet
        found a simple foolproof way to reliably get the code into FLASH.
 
-    5. Combining .hex files.  If you plan to use the .hex files with your
+    4. Combining .hex files.  If you plan to use the .hex files with your
        debugger or FLASH utility, then you may need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
@@ -399,25 +401,16 @@ CONFIGURATION
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository./README.txt.
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Uses the older, OABI, buildroot toolchain.  But that is easily
+    1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. This NSH has support for built-in applications enabled, however,
+    2. This NSH has support for built-in applications enabled, however,
        no built-in configurations are built in the defulat configuration.
 
-    4. This configuration has DMA-based SD card support enabled by
+    3. This configuration has DMA-based SD card support enabled by
        default.  That support can be disabled as follow:
 
        CONFIG_LPC17_GPDMA=n                : No DMA
@@ -427,12 +420,12 @@ CONFIGURATION
        CONFIG_MMCSD=n                      : No MMC/SD driver support
        CONFIG_FS_FAT=n                     : No FAT file system support
 
-    5. This configuration has been used for verifying SDRAM by modifying
+    4. This configuration has been used for verifying SDRAM by modifying
        the configuration in the following ways:
 
        CONFIG_LPC17_EMC=y                  : Enable the EMC
-       CONFIG_LPC17_EXTDRAM=y               : Configure external DRAM
-       CONFIG_LPC17_EXTDRAMSIZE=67108864    : DRAM size 2x256/8 = 64MB
+       CONFIG_LPC17_EXTDRAM=y              : Configure external DRAM
+       CONFIG_LPC17_EXTDRAMSIZE=67108864   : DRAM size 2x256/8 = 64MB
        CONFIG_SYSTEM_RAMTEST=y             : Enable the RAM test built-in
 
        In this configuration, the SDRAM is not added to heap and so is
@@ -460,7 +453,7 @@ CONFIGURATION
             CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
 
           System Type:
-            CONFIG_LPC17_GPIOIRQ=y                 : GPIO interrupt support
+            CONFIG_LPC17_GPIOIRQ=y            : GPIO interrupt support
             CONFIG_LPC17_SSP1=y               : Enable support for SSP1
 
           RTOS Features:
@@ -514,22 +507,26 @@ CONFIGURATION
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          see additional README.txt files in the NuttX tools repository
-          README.txt.
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Uses the older, OABI, buildroot toolchain.  But that is easily
+    1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. In this configuration, the SDRAM is not added to heap but is
+    2. In this configuration, the SDRAM is not added to heap but is
+       dedicated to supporting an LCD frame buffer at address 0xa0010000.
+
+  pdcurses
+  -------
+
+    A simple NSH configuration used for some basic (non-graphic) debug of
+    the framebuffer character drivers using both apps/examples/pdcurses and
+    apps/examples/fb as NSH built-in applications.  This configuration
+    enables SDRAM to hold the LCD framebuffer and enables the LPC178x LCD
+    driver in order to support the WaveShare 4.3 inch TFT panel.
+
+    NOTES:
+
+    1. In this configuration, the SDRAM is not added to heap but is
        dedicated to supporting an LCD frame buffer at address 0xa0010000.
 

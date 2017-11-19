@@ -480,7 +480,7 @@ static inline FAR const struct nx_fontset_s *
     {
       /* Someday, perhaps 16-bit fonts will go here */
 
-      gerr("ERROR: 16-bit font not currently supported\n");
+      gwarn("WARNING: 16-bit font not currently supported\n");
       return NULL;
     }
 
@@ -491,7 +491,15 @@ static inline FAR const struct nx_fontset_s *
       return fontset;
     }
 
-  gerr("ERROR: No bitmap for code %02x\n", ch);
+  /* Too much debug output for the case of space which never resides in the
+   * font.
+   */
+
+  if (ch != ' ')
+    {
+      gwarn("WARNING: No bitmap for code %02x\n", ch);
+    }
+
   return NULL;
 }
 
