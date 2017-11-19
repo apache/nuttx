@@ -212,8 +212,8 @@ void closelog(void);
  *
  ****************************************************************************/
 
-int syslog(int priority, FAR const IPTR char *format, ...);
-int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
+int syslog(int priority, FAR const IPTR char *fmt, ...);
+int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap);
 
 /****************************************************************************
  * Name: setlogmask
