@@ -250,14 +250,15 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
           return OK;
      }
 
-   /* Otherwise, the destination MAC address is encoded in the IP address */
+  /* Otherwise, the destination MAC address is encoded in the IP address */
 
-   /* Check for compressible link-local address.
-    * REVISIT:  This should not restrict us to link-local addresses.
-    */
+  /* If the address is link-local, or matches the prefix of the local address,
+   * the interface identifier can be extracted from the lower bits of the address.
+   */
 
-  if (ipaddr[0] != HTONS(0xfe80) || ipaddr[1] != 0 ||
-      ipaddr[2] != 0             || ipaddr[3] != 0)
+  if (!sixlowpan_islinklocal(ipaddr) &&
+      !net_ipv6addr_maskcmp(radio->r_dev.d_ipv6addr, ipaddr,
+                            radio->r_dev.d_ipv6netmask))
     {
       return -EADDRNOTAVAIL;
     }
