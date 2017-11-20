@@ -490,7 +490,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
         {
           /* Big-endian, network order */
 
-          ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
+          ipaddr[i] = (uint16_t)srcptr[1] << 8 | (uint16_t)srcptr[0];
           srcptr += 2;
         }
 
