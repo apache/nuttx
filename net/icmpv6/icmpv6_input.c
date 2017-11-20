@@ -304,7 +304,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
                  * response.
                  */
 
-                goto icmpv_send_nothing;
+                goto icmpv6_send_nothing;
               }
           }
 
@@ -384,7 +384,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
                 /* Yes.. Notify any waiting threads */
 
                 icmpv6_rnotify(dev, ipicmp->srcipaddr, opt->prefix, opt->preflen);
-                goto icmpv_send_nothing;
+                goto icmpv6_send_nothing;
               }
 
             /* Skip to the next option (units of octets) */
@@ -429,7 +429,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
         flags = devif_conn_event(dev, ipicmp, flags, dev->d_conncb);
 
-        /* Wwas the ECHO reply consumed by any waiting thread? */
+        /* Was the ECHO reply consumed by any waiting thread? */
 
         if ((flags & ICMPv6_ECHOREPLY) != 0)
           {
@@ -465,6 +465,8 @@ void icmpv6_input(FAR struct net_driver_s *dev)
                 goto icmpv6_drop_packet;
               }
           }
+
+          goto icmpv6_send_nothing;
       }
       break;
 #endif
@@ -495,7 +497,7 @@ icmpv6_drop_packet:
   g_netstats.icmpv6.drop++;
 #endif
 
-icmpv_send_nothing:
+icmpv6_send_nothing:
   dev->d_len = 0;
 }
 
