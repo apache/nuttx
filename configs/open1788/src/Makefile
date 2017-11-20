@@ -68,6 +68,8 @@ endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
   CSRCS += lpc17_buttons.c
+else ifeq ($(CONFIG_OPEN1788_DJOYSTICK),y)
+  CSRCS += lpc17_djoystick.c
 endif
 
 ifeq ($(CONFIG_INPUT_ADS7843E),y)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3210e-eval/src/stm32_djoystick.c
+ * configs/open1788/src/lpc17_djoystick.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,32 +40,52 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/input/djoystick.h>
 
-#include "stm32_gpio.h"
-#include "stm3210e-eval.h"
-
-#ifdef CONFIG_DJOYSTICK
+#include "lpc17_gpio.h"
+#include "open1788.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* The Open1788 supports several buttons.  All will read "1" when open and "0"
+ * when closed
+ *
+ *   USER1           Connected to P4[26]
+ *   USER2           Connected to P2[22]
+ *   USER3           Connected to P0[10]
+ *
+ * And a Joystick
+ *
+ *   JOY_A           Connected to P2[25]
+ *   JOY_B           Connected to P2[26]
+ *   JOY_C           Connected to P2[23]
+ *   JOY_D           Connected to P2[19]
+ *   JOY_CTR         Connected to P0[14]
+ *
+ * The switches are all connected to ground and should be pulled up and sensed
+ * with a value of '0' when closed.
+ *
+ * Mapping to DJOYSTICK buttons:
+ *
+ *   DJOY_UP         JOY_B
+ *   DJOY_DOWN       JOY_C
+ *   DJOY_LEFT       JOY_A
+ *   DJOY_RIGHT      JOY_D
+ *   DJOY_BUTTON_1   JOY_CTR
+ *   DJOY_BUTTON_2   USER1
+ *   DJOY_BUTTON_3   USER2
+ *   DJOY_BUTTON_4   USER3
+ */
+
 /* Number of Joystick discretes */
 
-#define DJOY_NGPIOS  5
-
-/* Bitset of supported Joystick discretes */
-
-#define DJOY_SUPPORTED (DJOY_UP_BIT | DJOY_DOWN_BIT | DJOY_LEFT_BIT | \
-                        DJOY_RIGHT_BIT | DJOY_BUTTON_SELECT_BIT)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#define DJOY_NGPIOS  8
 
 /****************************************************************************
  * Private Function Prototypes
@@ -77,20 +97,35 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
 
+
 static void djoy_disable(void);
 static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* Pin configuration for each STM3210E-EVAL joystick "button."  Index using
+/* Pin configuration for each Open1788 joystick "button."  Indexed using
  * DJOY_* definitions in include/nuttx/input/djoystick.h.
  */
 
-static const uint16_t g_joygpio[DJOY_NGPIOS] =
+static const lpc17_pinset_t g_joygpio[DJOY_NGPIOS] =
 {
-  GPIO_JOY_UP, GPIO_JOY_DOWN, GPIO_JOY_LEFT, GPIO_JOY_RIGHT, GPIO_JOY_SEL
+  GPIO_JOY_B,   GPIO_JOY_C, GPIO_JOY_A, GPIO_JOY_D,
+  GPIO_JOY_CTR, GPIO_USER1, GPIO_USER2, GPIO_USER3
 };
+
+#ifdef CONFIG_LPC17_GPIOIRQ
+/* This array provides the mapping from button ID numbers to button IRQ
+ * numbers.  Indexed using DJOY_* definitions in
+ * include/nuttx/input/djoystick.h.
+ */
+
+static const uint8_t g_buttonirq[DJOY_NGPIOS] =
+{
+  GPIO_JOY_B_IRQ,   GPIO_JOY_C_IRQ, GPIO_JOY_A_IRQ, GPIO_JOY_D_IRQ,
+  GPIO_JOY_CTR_IRQ, 0,              GPIO_USER2_IRQ, GPIO_USER3_IRQ
+};
+#endif
 
 /* Current interrupt handler and argument */
 
@@ -120,8 +155,8 @@ static const struct djoy_lowerhalf_s g_djoylower =
 
 static djoy_buttonset_t djoy_supported(FAR const struct djoy_lowerhalf_s *lower)
 {
-  iinfo("Supported: %02x\n", DJOY_SUPPORTED);
-  return (djoy_buttonset_t)DJOY_SUPPORTED;
+  iinfo("Supported: %02x\n", DJOY_ALLBITS);
+  return (djoy_buttonset_t)DJOY_ALLBITS;
 }
 
 /****************************************************************************
@@ -141,14 +176,19 @@ static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower)
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-       bool released = stm32_gpioread(g_joygpio[i]);
+       /* A LOW value means that the key is pressed. */
+
+       bool released = lpc17_gpioread(g_joygpio[i]);
+
+       /* Accumulate the set of depressed (not released) keys */
+
        if (!released)
          {
             ret |= (1 << i);
          }
     }
 
-  iinfo("Retuning: %02x\n", DJOY_SUPPORTED);
+  iinfo("Returning: %02x\n", DJOY_ALLBITS);
   return ret;
 }
 
@@ -165,60 +205,48 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg)
 {
+#ifdef CONFIG_LPC17_GPIOIRQ
   irqstate_t flags;
   djoy_buttonset_t either = press | release;
-  djoy_buttonset_t bit;
-  bool rising;
-  bool falling;
+  int irq;
   int i;
+
+  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
+        press, release, handler, arg);
 
   /* Start with all interrupts disabled */
 
   flags = enter_critical_section();
   djoy_disable();
 
-  iinfo("press: %02x release: %02x handler: %p arg: %p\n",
-        press, release, handler, arg);
-
   /* If no events are indicated or if no handler is provided, then this
    * must really be a request to disable interrupts.
    */
 
-  if (either && handler)
+  /* REVISIT: Currently does not distinguish press/release selections */
+
+  if (either && handler != NULL)
     {
       /* Save the new the handler and argument */
 
       g_djoyhandler = handler;
       g_djoyarg     = arg;
 
-      /* Check each GPIO. */
+      /* Attach and enable interrupts each GPIO. */
 
       for (i = 0; i < DJOY_NGPIOS; i++)
         {
-           /* Enable interrupts on each pin that has either a press or
-            * release event associated with it.
-            */
-
-           bit = (1 << i);
-           if ((either & bit) != 0)
-             {
-               /* Active low so a press corresponds to a falling edge and
-                * a release corresponds to a rising edge.
-                */
-
-               falling = ((press & bit) != 0);
-               rising  = ((release & bit) != 0);
-
-               iinfo("GPIO %d: rising: %d falling: %d\n",
-                      i, rising, falling);
-
-               (void)stm32_gpiosetevent(g_joygpio[i], rising, falling,
-                                        true, djoy_interrupt, NULL);
-             }
+          irq = g_buttonirq[i];
+          if (irq > 0)
+            {
+              (void)irq_attach(irq, djoy_interrupt, arg);
+              up_enable_irq(irq);
+            }
         }
     }
 
   leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************
@@ -231,18 +259,26 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 
 static void djoy_disable(void)
 {
+#ifdef CONFIG_LPC17_GPIOIRQ
   irqstate_t flags;
+  int irq;
   int i;
 
-  /* Disable each joystick interrupt */
+  /* Disable and detach all button handlers for each GPIO */
 
   flags = enter_critical_section();
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-      (void)stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
+      irq = g_buttonirq[i];
+      if (irq > 0)
+        {
+          up_disable_irq(irq);
+          (void)irq_detach(irq);
+        }
     }
 
   leave_critical_section(flags);
+#endif
 
   /* Nullify the handler and argument */
 
@@ -260,8 +296,8 @@ static void djoy_disable(void)
 
 static int djoy_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  DEBUGASSERT(g_djoyhandler);
-  if (g_djoyhandler)
+  DEBUGASSERT(g_djoyhandler != NULL);
+  if (g_djoyhandler != NULL)
     {
       g_djoyhandler(&g_djoylower, g_djoyarg);
     }
@@ -274,24 +310,24 @@ static int djoy_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_djoy_initialization
+ * Name: lpc17_djoy_initialization
  *
  * Description:
  *   Initialize and register the discrete joystick driver
  *
  ****************************************************************************/
 
-int stm32_djoy_initialization(void)
+int lpc17_djoy_initialization(void)
 {
   int i;
 
   /* Configure the GPIO pins as inputs.    NOTE: This is unnecessary for
-   * interrupting pins since it will also be done by stm32_gpiosetevent().
+   * interrupting pins since it will also be done by lpc17_gpiosetevent().
    */
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-      stm32_configgpio(g_joygpio[i]);
+      lpc17_configgpio(g_joygpio[i]);
     }
 
   /* Make sure that all interrupts are disabled */
@@ -300,7 +336,5 @@ int stm32_djoy_initialization(void)
 
   /* Register the joystick device as /dev/djoy0 */
 
-  return djoy_register("/dev/djoy0", &g_djoylower);
+  return djoy_register(CONFIG_OPEN1788_DJOYDEV, &g_djoylower);
 }
-
-#endif /* CONFIG_DJOYSTICK */

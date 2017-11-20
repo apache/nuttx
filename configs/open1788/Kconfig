@@ -4,4 +4,15 @@
 #
 
 if ARCH_BOARD_OPEN1788
+
+config OPEN1788_DJOYSTICK
+	bool "Discrete Joystick Support"
+	default n
+	depends on !ARCH_BUTTONS && DJOYSTICK
+
+config OPEN1788_DJOYDEV
+	string "Joystick Device"
+	default "/dev/djoy0"
+	depends on OPEN1788_DJOYSTICK
+
 endif

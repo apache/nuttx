@@ -92,7 +92,7 @@ static const lpc17_pinset_t g_buttoncfg[BOARD_NUM_BUTTONS] =
  * numbers.
  */
 
-static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
+static const uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
 {
   0,              GPIO_USER2_IRQ, GPIO_USER3_IRQ, GPIO_JOY_A_IRQ,
   GPIO_JOY_B_IRQ, GPIO_JOY_C_IRQ, GPIO_JOY_D_IRQ, GPIO_JOY_CTR_IRQ

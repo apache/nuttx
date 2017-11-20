@@ -398,5 +398,16 @@ int lpc17_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_OPEN1788_DJOYSTICK
+  /* Initialize and register the joystick driver */
+
+  ret = lpc17_djoy_initialization();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return ret;
 }

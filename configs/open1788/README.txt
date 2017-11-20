@@ -530,3 +530,26 @@ Configuration Directories
     1. In this configuration, the SDRAM is not added to heap but is
        dedicated to supporting an LCD frame buffer at address 0xa0010000.
 
+
+    STATUS:
+    2017-11-20:  Basic graphics functionality appears to be functional, but
+       is not fully tested.  There is not yet any support for input devices.
+
+       Only keyboard and mouse input are supported by pdcurses.  NuttX
+       supports only USB HID keyboard and mouse.  It would require a hub to
+       use them simultaneously.  In a handheld device with an ncurses-style
+       UI, I don't think that a mouse (or even a touchscreen) makes sense.
+
+       For a handheld device, I think input would be via GPIO keypad, rather
+       that a full keyboard, and I doubt that you would do any significant
+       text data entry.  I think that up-down-left-right arrows keys and an
+       enter key is basically all you need for most interaction.
+
+       In NuttX naming that is called a discrete joystick djoystick.  There
+       is a well defined djoystick interface in include/nuttx/input/djoystick.h.
+       And I actually have a discrete joystick buttons on the Open1788 board so
+       I think that is where I should start.
+
+       A discrete joystick driver was added to pdcurses configuration.  It is
+       not yet integrated with pdcurses, however.
+

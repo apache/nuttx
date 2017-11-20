@@ -237,5 +237,17 @@ void open1788_nand_initialize(void);
 void open1788_lcd_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: lpc17_djoy_initialization
+ *
+ * Description:
+ *   Initialize and register the discrete joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_OPEN1788_DJOYSTICK
+int lpc17_djoy_initialization(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OPEN1788_SRC_OPEN1788_H */
