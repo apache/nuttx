@@ -223,7 +223,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
  *
  * Parameters:
  *   dev        The structure of the network driver that caused the interrupt
- *   conn       The received packet, cast to void *
+ *   pvconn     The received packet, cast to void *
  *   pvpriv     An instance of struct icmpv6_sendto_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
@@ -236,7 +236,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *conn,
+                                    FAR void *pvconn,
                                     FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmpv6_sendto_s *pstate = (struct icmpv6_sendto_s *)pvpriv;

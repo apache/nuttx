@@ -539,7 +539,7 @@ Configuration Directories
 
     STATUS:
     2017-11-20:  Basic graphics functionality appears to be functional, but
-       is not fully tested.  There is not yet any support for input devices.
+       is not fully tested.
 
        Only keyboard and mouse input are supported by pdcurses.  NuttX
        supports only USB HID keyboard and mouse.  It would require a hub to
@@ -553,9 +553,10 @@ Configuration Directories
 
        In NuttX naming that is called a discrete joystick djoystick.  There
        is a well defined djoystick interface in include/nuttx/input/djoystick.h.
-       And I actually have a discrete joystick buttons on the Open1788 board so
-       I think that is where I should start.
+       Note that there are dscrete joystick buttons on the Open1788 board so
+       would be a natural interace in this case.
 
-       A discrete joystick driver was added to pdcurses configuration.  It is
-       not yet integrated with pdcurses, however.
+       A discrete joystick driver was added to pdcurses configuration.  It
+       has been verified that the pdcurses demos that require menu
+       interactions work well with the discrete joystick.
 
