@@ -68,6 +68,12 @@
 #  error BOARD_FLASH_WAITSTATES is out of range
 #endif
 
+/* Voltage output scale (default to Scale 1 mode) */
+
+#ifndef STM32_PWR_VOS_SCALE
+#  define STM32_PWR_VOS_SCALE PWR_CR1_VOS_SCALE_1
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -732,7 +738,7 @@ static void stm32_stdclockconfig(void)
 
       regval  = getreg32(STM32_PWR_CR1);
       regval &= ~PWR_CR1_VOS_MASK;
-      regval |= PWR_CR1_VOS_SCALE_1;
+      regval |= STM32_PWR_VOS_SCALE;
       putreg32(regval, STM32_PWR_CR1);
 
       /* Set the HCLK source/divider */
@@ -788,20 +794,35 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-      /* Enable the Over-drive to extend the clock frequency to 216 Mhz */
+      /* Over-drive is needed if
+       *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
+       *    over 180 Mhz.
+       *  - Voltage output scale 2 mode is selected and SYSCLK frequence is
+       *    over 168 Mhz.
+       */
 
-      regval  = getreg32(STM32_PWR_CR1);
-      regval |= PWR_CR1_ODEN;
-      putreg32(regval, STM32_PWR_CR1);
-      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODRDY) == 0)
+      if ((STM32_PWR_VOS_SCALE == PWR_CR1_VOS_SCALE_1 &&
+           STM32_SYSCLK_FREQUENCY > 180000000) ||
+          (STM32_PWR_VOS_SCALE == PWR_CR1_VOS_SCALE_2 &&
+           STM32_SYSCLK_FREQUENCY > 168000000))
         {
-        }
+          /* Enable the Over-drive to extend the clock frequency up to
+           * 216 Mhz.
+           */
 
-      regval = getreg32(STM32_PWR_CR1);
-      regval |= PWR_CR1_ODSWEN;
-      putreg32(regval, STM32_PWR_CR1);
-      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODSWRDY) == 0)
-        {
+          regval  = getreg32(STM32_PWR_CR1);
+          regval |= PWR_CR1_ODEN;
+          putreg32(regval, STM32_PWR_CR1);
+          while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODRDY) == 0)
+            {
+            }
+
+          regval = getreg32(STM32_PWR_CR1);
+          regval |= PWR_CR1_ODSWEN;
+          putreg32(regval, STM32_PWR_CR1);
+          while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODSWRDY) == 0)
+            {
+            }
         }
 
       /* Configure FLASH wait states */
