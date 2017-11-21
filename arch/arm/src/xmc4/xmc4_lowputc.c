@@ -47,9 +47,11 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
+#include <debug.h>
 
 #include "xmc4_config.h"
 #include "chip/xmc4_usic.h"
+#include "chip/xmc4_ports.h"
 #include "chip/xmc4_pinmux.h"
 #include "xmc4_usic.h"
 #include "xmc4_gpio.h"
@@ -286,11 +288,15 @@ int xmc4_uart_configure(enum usic_channel_e channel,
 
   regval = USIC_PCR_ASCMODE_PLBIT | USIC_PCR_ASCMODE_SMD;
 
-   /*  - Sampling point set equal to the half of the oversampling period */
+  /* Enable the receive and transmit status */
+
+  regval |= USIC_PCR_ASCMODE_RSTEN | USIC_PCR_ASCMODE_TSTEN;
+
+  /* Sampling point set equal to the half of the oversampling period */
 
   regval |= USIC_PCR_ASCMODE_SP((UART_OVERSAMPLING >> 1) + 1);
 
-  /*   - Configure the number of stop bits */
+  /* Configure the number of stop bits */
 
   if (config->stop2)
     {
@@ -372,8 +378,8 @@ int xmc4_uart_configure(enum usic_channel_e channel,
    *     a data word
    */
 
-  regval &= ~(USIC_TBCTR_DPTR_MASK | USIC_TBCTR_LIMIT_MASK | USIC_RBCTR_SRBTEN |
-              USIC_TBCTR_SIZE_MASK | USIC_RBCTR_LOF);
+  regval &= ~(USIC_TBCTR_DPTR_MASK | USIC_TBCTR_LIMIT_MASK | USIC_TBCTR_STBTEN |
+              USIC_TBCTR_SIZE_MASK | USIC_TBCTR_LOF);
   regval |=  (USIC_TBCTR_DPTR(16) | USIC_TBCTR_LIMIT(1) | USIC_TBCTR_SIZE_16);
   putreg32(regval, base + XMC4_USIC_TBCTR_OFFSET);
 
@@ -386,8 +392,8 @@ int xmc4_uart_configure(enum usic_channel_e channel,
   /* Configure receive FIFO.
    *
    *   - DPTR = 0
-   *   - LIMIT = 15
-   *   - SIZE = 16
+   *   - LIMIT = 16
+   *   - SIZE = 15
    *   - LOF = 1, A standard receive buffer event occurs when the filling
    *     level equals the limit value and gets bigger due to the reception
    *     of a new data word
