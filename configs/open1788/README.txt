@@ -264,7 +264,7 @@ Information Common to All Configurations
        https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
      unless otherwise stated.
-  
+
      That toolchain selection can easily be reconfigured using
      'make menuconfig'.  Here are the relevant current settings:
 
@@ -520,16 +520,22 @@ Configuration Directories
   -------
 
     A simple NSH configuration used for some basic (non-graphic) debug of
-    the framebuffer character drivers using both apps/examples/pdcurses and
-    apps/examples/fb as NSH built-in applications.  This configuration
-    enables SDRAM to hold the LCD framebuffer and enables the LPC178x LCD
-    driver in order to support the WaveShare 4.3 inch TFT panel.
+    the pdcurses librawry on top of a framebuffer character drivers.  This
+    configuration provides the test programs from:
 
-    NOTES:
+      - apps/examples/pdcurses,
+      - apps/examples/fb, and
+      - apps/examples/djoystick
 
-    1. In this configuration, the SDRAM is not added to heap but is
-       dedicated to supporting an LCD frame buffer at address 0xa0010000.
+    as NSH built-in applications.  A discrete joystick is provided to
+    control pdcurses examples using the joystick buttons on the Open1788
+    board.
 
+    This configuration enables SDRAM to hold the LCD framebuffer and
+    enables the LPC178x LCD driver in order to support the WaveShare 4.3
+    inch TFT panel.  In this configuration, the SDRAM is not added to heap
+    but is dedicated to supporting an LCD frame buffer at address
+    0xa0010000.
 
     STATUS:
     2017-11-20:  Basic graphics functionality appears to be functional, but
