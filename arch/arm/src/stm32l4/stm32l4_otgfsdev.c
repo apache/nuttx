@@ -71,6 +71,10 @@
  ****************************************************************************/
 /* Configuration ***************************************************************/
 
+#ifndef CONFIG_STM32L4_SYSCFG
+#  error "CONFIG_STM32L4_SYSCFG is required"
+#endif
+
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
 #endif
@@ -4404,7 +4408,7 @@ static void stm32l4_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req
 #ifdef CONFIG_USBDEV_DMA
 static void *stm32l4_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 {
-  usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
+  usbtrace(TRACE_EPALLOCBUFFER, ((FAR struct stm32l4_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
@@ -4425,7 +4429,7 @@ static void *stm32l4_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 #ifdef CONFIG_USBDEV_DMA
 static void stm32l4_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 {
-  usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
+  usbtrace(TRACE_EPFREEBUFFER, ((FAR struct stm32l4_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
@@ -5357,7 +5361,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   address = STM32L4_RXFIFO_WORDS;
   regval  = (address << OTGFS_DIEPTXF0_TX0FD_SHIFT) |
             (STM32L4_EP0_TXFIFO_WORDS << OTGFS_DIEPTXF0_TX0FSA_SHIFT);
-  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(0));
+  stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF0);
 #endif
 
 #if STM32L4_NENDPOINTS > 1

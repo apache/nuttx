@@ -81,7 +81,7 @@
 #define STM32L4_OTGFS_GADPCTL_OFSSET      0x005c /* ADP timer, control and status register */
 #define STM32L4_OTGFS_HPTXFSIZ_OFFSET     0x0100 /* Host periodic transmit FIFO size register */
 
-#define STM32L4_OTGFS_DIEPTXF_OFFSET(n)   (104+(((n)-1) << 2))
+#define STM32L4_OTGFS_DIEPTXF_OFFSET(n)   (0x0104+(((n)-1) << 2))
 
 /* Host-mode control and status registers */
 

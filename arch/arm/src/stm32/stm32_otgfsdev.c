@@ -64,7 +64,6 @@
 #include "stm32_otgfs.h"
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32_OTGFS))
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -283,6 +282,16 @@
 #define STM32_TRACEINTID_OUTDONE            (90 + 2)
 #define STM32_TRACEINTID_SETUPDONE          (90 + 3)
 #define STM32_TRACEINTID_SETUPRECVD         (90 + 4)
+
+/* CONFIG_USB_DUMPBUFFER will dump the contents of buffers to the console. */
+
+#undef CONFIG_USB_DUMPBUFFER
+
+#ifdef CONFIG_USB_DUMPBUFFER
+#  define usb_dumpbuffer(t,b,l) uinfodumpbuffer(t,b,l)
+#else
+#  define usb_dumpbuffer(t,b,l)
+#endif
 
 /* Endpoints ******************************************************************/
 
@@ -1081,6 +1090,8 @@ static void stm32_txfifo_write(FAR struct stm32_ep_s *privep,
   int nwords;
   int i;
 
+  usb_dumpbuffer(">>>", buf, nbytes);
+
   /* Convert the number of bytes to words */
 
   nwords = (nbytes + 3) >> 2;
@@ -1469,6 +1480,8 @@ static void stm32_rxfifo_read(FAR struct stm32_ep_s *privep,
       *dest++ = data.b[2];
       *dest++ = data.b[3];
     }
+
+  usb_dumpbuffer("<<<", dest-len, len);
 }
 
 /****************************************************************************
@@ -4337,7 +4350,7 @@ static void stm32_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
 #ifdef CONFIG_USBDEV_DMA
 static void *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 {
-  usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
+  usbtrace(TRACE_EPALLOCBUFFER, ((FAR struct stm32_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
@@ -4358,7 +4371,7 @@ static void *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 #ifdef CONFIG_USBDEV_DMA
 static void stm32_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 {
-  usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
+  usbtrace(TRACE_EPALLOCBUFFER, ((FAR struct stm32_ep_s *)ep)->epphy);
 
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
