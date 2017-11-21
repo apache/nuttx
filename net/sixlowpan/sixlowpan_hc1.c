@@ -414,9 +414,10 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
     }
 
   ninfo("srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ipv6->srcipaddr[0], ipv6->srcipaddr[1], ipv6->srcipaddr[2],
-        ipv6->srcipaddr[3], ipv6->srcipaddr[4], ipv6->srcipaddr[5],
-        ipv6->srcipaddr[6], ipv6->srcipaddr[7]);
+        ntohs(ipv6->srcipaddr[0]), ntohs(ipv6->srcipaddr[1]),
+        ntohs(ipv6->srcipaddr[2]), ntohs(ipv6->srcipaddr[3]),
+        ntohs(ipv6->srcipaddr[4]), ntohs(ipv6->srcipaddr[5]),
+        ntohs(ipv6->srcipaddr[6]), ntohs(ipv6->srcipaddr[7]));
 
   if ((hc1[SIXLOWPAN_HC1_ENCODING] & SIXLOWPAN_HC1_DESTADDR_MASK) ==
       SIXLOWPAN_HC1_DESTADDR_PCIC)
@@ -438,9 +439,10 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
     }
 
   ninfo("destipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-        ipv6->destipaddr[6], ipv6->destipaddr[7]);
+        ntohs(ipv6->destipaddr[0]), ntohs(ipv6->destipaddr[1]),
+        ntohs(ipv6->destipaddr[2]), ntohs(ipv6->destipaddr[3]),
+        ntohs(ipv6->destipaddr[4]), ntohs(ipv6->destipaddr[5]),
+        ntohs(ipv6->destipaddr[6]), ntohs(ipv6->destipaddr[7]));
 
   /* IP length field. */
 
