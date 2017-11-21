@@ -71,12 +71,13 @@
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR struct mm_freenode_s *node;
+  size_t alignsize;
   void *ret = NULL;
   int ndx;
 
-  /* Handle bad sizes */
+  /* Ignore zero-length allocations */
 
-  if (size < 1 || size > (MMSIZE_MAX - SIZEOF_MM_ALLOCNODE))
+  if (size < 1)
     {
       return NULL;
     }
@@ -85,7 +86,8 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    * (2) to make sure that it is an even multiple of our granule size.
    */
 
-  size = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
+  alignsize = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
+  DEBUGASSERT(alignedsize >= size);  /* Check for integer overflow */
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
@@ -95,7 +97,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    * really big allocations
    */
 
-  if (size >= MM_MAX_CHUNK)
+  if (alignsize >= MM_MAX_CHUNK)
     {
       ndx = MM_NNODES-1;
     }
@@ -103,7 +105,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     {
       /* Convert the request size into a nodelist index */
 
-      ndx = mm_size2ndx(size);
+      ndx = mm_size2ndx(alignsize);
     }
 
   /* Search for a large enough chunk in the list of nodes. This list is
@@ -112,7 +114,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    */
 
   for (node = heap->mm_nodelist[ndx].flink;
-       node && node->size < size;
+       node && node->size < alignsize;
        node = node->flink);
 
   /* If we found a node with non-zero size, then this is one to use. Since
@@ -144,7 +146,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
        * allocation.
        */
 
-      remaining = node->size - size;
+      remaining = node->size - alignsize;
       if (remaining >= SIZEOF_MM_FREENODE)
         {
           /* Get a pointer to the next node in physical memory */
@@ -153,13 +155,15 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
           /* Create the remainder node */
 
-          remainder = (FAR struct mm_freenode_s *)(((FAR char *)node) + size);
-          remainder->size = remaining;
-          remainder->preceding = size;
+          remainder = (FAR struct mm_freenode_s *)
+            (((FAR char *)node) + alignsize);
+
+          remainder->size      = remaining;
+          remainder->preceding = alignsize;
 
           /* Adjust the size of the node under consideration */
 
-          node->size = size;
+          node->size = alignsize;
 
           /* Adjust the 'preceding' size of the (old) next node, preserving
            * the allocated flag.
@@ -187,11 +191,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #ifdef CONFIG_DEBUG_MM
   if (!ret)
     {
-      mwarn("WARNING: Allocation failed, size %d\n", size);
+      mwarn("WARNING: Allocation failed, size %d\n", alignsize);
     }
   else
     {
-      minfo("Allocated %p, size %d\n", ret, size);
+      minfo("Allocated %p, size %d\n", ret, alignsize);
     }
 #endif
 

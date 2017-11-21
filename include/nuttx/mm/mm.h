@@ -59,7 +59,7 @@
  */
 
 #ifdef CONFIG_SMALL_MEMORY
-  /* If the MCU has a small addressing capability, then for the smaller
+  /* If the MCU has a small addressing capability, then force the smaller
    * chunk header.
    */
 
