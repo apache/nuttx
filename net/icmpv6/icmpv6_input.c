@@ -427,7 +427,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
         /* Dispatch the ECHO reply to the waiting thread */
 
-        flags = devif_conn_event(dev, ipicmp, flags, dev->d_conncb);
+        flags = devif_conn_event(dev, NULL, flags, dev->d_conncb);
 
         /* Was the ECHO reply consumed by any waiting thread? */
 
