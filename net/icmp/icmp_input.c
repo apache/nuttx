@@ -287,7 +287,7 @@ void icmp_input(FAR struct net_driver_s *dev)
     {
       uint16_t flags;
 
-      flags = devif_conn_event(dev, ipicmp, ICMP_ECHOREPLY, dev->d_conncb);
+      flags = devif_conn_event(dev, NULL, ICMP_ECHOREPLY, dev->d_conncb);
       if ((flags & ICMP_ECHOREPLY) != 0)
         {
           FAR struct icmp_conn_s *conn;

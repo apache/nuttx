@@ -90,10 +90,6 @@ struct icmp_conn_s
 
   struct iob_queue_s readahead;  /* Read-ahead buffering */
 #endif
-
-  /* Defines the list of IPPROTO_ICMP callbacks */
-
-  struct devif_callback_s *list;
 };
 #endif
 

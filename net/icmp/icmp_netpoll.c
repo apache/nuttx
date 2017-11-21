@@ -59,7 +59,8 @@
 
 struct icmp_poll_s
 {
-  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct socket *psock;        /* IPPROTO_ICMP socket structure */
+  FAR struct pollfd *fds;          /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -92,7 +93,8 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
                                        FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmp_poll_s *info = (FAR struct icmp_poll_s *)pvpriv;
-  FAR struct icmp_conn_s *conn = (FAR struct icmp_conn_s *)pvconn;
+  FAR struct icmp_conn_s *conn;
+  FAR struct socket *psock;
   pollevent_t eventset;
 
   ninfo("flags: %04x\n", flags);
@@ -104,8 +106,21 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
    * sent out on.
    */
 
-  if (info != NULL && dev == conn->dev)
+  if (info != NULL)
     {
+       /* Is this a response on the same device that we sent the request out
+        * on?
+        */
+
+       psock = info->psock;
+       DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+       conn  = psock->s_conn;
+       if (dev != conn->dev)
+         {
+           ninfo("Wrong device\n");
+           return flags;
+         }
+
       /* Check for data or connection availability events. */
 
       eventset = 0;
@@ -197,8 +212,9 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Initialize the poll info container */
 
-  info->fds = fds;
-  info->cb  = cb;
+  info->psock = psock;
+  info->fds   = fds;
+  info->cb    = cb;
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
