@@ -321,6 +321,7 @@ nullreturn:
 int ipv4_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ipv4 = BUF;
+  in_addr_t destipaddr;
   uint16_t hdrlen;
   uint16_t iplen;
 
@@ -395,6 +396,10 @@ int ipv4_input(FAR struct net_driver_s *dev)
 #endif /* CONFIG_NET_TCP_REASSEMBLY */
     }
 
+  /* Get the destination IP address in a friendlier form */
+
+  destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
+
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
   /* If IP broadcast support is configured, we check for a broadcast
    * UDP packet, which may be destined to us (even if there is no IP
@@ -403,8 +408,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
    */
 
   if (ipv4->proto == IP_PROTO_UDP &&
-      net_ipv4addr_cmp(net_ip4addr_conv32(ipv4->destipaddr),
-                       INADDR_BROADCAST))
+      net_ipv4addr_cmp(destipaddr, INADDR_BROADCAST))
     {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
       /* Forward broadcast packets */
@@ -413,74 +417,90 @@ int ipv4_input(FAR struct net_driver_s *dev)
 #endif
       return udp_ipv4_input(dev);
     }
-
-  /* In other cases, the device must be assigned a non-zero IP address. */
-
   else
 #endif
 #ifdef CONFIG_NET_ICMP
+  /* In other cases, the device must be assigned a non-zero IP address. */
+
   if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
     {
       nwarn("WARNING: No IP address assigned\n");
       goto drop;
     }
-
-  /* Check if the packet is destined for our IP address */
   else
 #endif
-    {
-      /* Check if the packet is destined for our IP address. */
+#if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
+  /* The address is not the broadcast address and we have been assigned a
+   * address.  So there is also the possibility that the destination address
+   * is a sub-net broadcast address which we will need to handle just as for
+   * the broadcast address above.
+   */
 
-      if (!net_ipv4addr_cmp(net_ip4addr_conv32(ipv4->destipaddr),
-                            dev->d_ipaddr))
-        {
-          /* Check for an IPv4 IGMP group address */
+  if (ipv4->proto == IP_PROTO_UDP &&
+      net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask) &&
+      net_ipv4addr_broadcast(destipaddr, dev->d_netmask))
+    {
+#ifdef CONFIG_NET_IPFORWARD_BROADCAST
+      /* Forward broadcast packets */
+
+      ipv4_forward_broadcast(dev, ipv4);
+#endif
+      return udp_ipv4_input(dev);
+    }
+  else
+#endif
+  /* Check if the packet is destined for our IP address. */
+
+  if (!net_ipv4addr_cmp(destipaddr, dev->d_ipaddr))
+    {
+      /* No.. This is not our IP address. Check for an IPv4 IGMP group
+       * address
+       */
 
 #ifdef CONFIG_NET_IGMP
-          in_addr_t destip = net_ip4addr_conv32(ipv4->destipaddr);
-          if (igmp_grpfind(dev, &destip) != NULL)
-            {
+      in_addr_t destip = net_ip4addr_conv32(ipv4->destipaddr);
+      if (igmp_grpfind(dev, &destip) != NULL)
+        {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
-              /* Forward multicast packets */
+          /* Forward multicast packets */
 
-              ipv4_forward_broadcast(dev, ipv4);
+          ipv4_forward_broadcast(dev, ipv4);
 #endif
+        }
+      else
+#endif
+        {
+          /* No.. The packet is not destined for us. */
+
+#ifdef CONFIG_NET_IPFORWARD
+          /* Try to forward the packet */
+
+          int ret = ipv4_forward(dev, ipv4);
+          if (ret >= 0)
+            {
+              /* The packet was forwarded.  Return success; d_len will
+               * be set appropriately by the forwarding logic:  Cleared
+               * if the packet is forward via anoother device or non-
+               * zero if it will be forwarded by the same device that
+               * it was received on.
+               */
+
+              return OK;
             }
           else
 #endif
             {
-              /* No.. The packet is not destined for us. */
+              /* Not destined for us and not forwardable... Drop the
+               * packet.
+               */
 
-#ifdef CONFIG_NET_IPFORWARD
-              /* Try to forward the packet */
-
-              int ret = ipv4_forward(dev, ipv4);
-              if (ret >= 0)
-                {
-                  /* The packet was forwarded.  Return success; d_len will
-                   * be set appropriately by the forwarding logic:  Cleared
-                   * if the packet is forward via anoother device or non-
-                   * zero if it will be forwarded by the same device that
-                   * it was received on.
-                   */
-
-                  return OK;
-                }
-              else
-#endif
-                {
-                  /* Not destined for us and not forwardable... Drop the
-                   * packet.
-                   */
-
-                  nwarn("WARNING: Not destined for us; not forwardable... "
-                        "Dropping!\n");
+              nwarn("WARNING: Not destined for us; not forwardable... "
+                    "Dropping!\n");
 
 #ifdef CONFIG_NET_STATISTICS
-                  g_netstats.ipv4.drop++;
+              g_netstats.ipv4.drop++;
 #endif
-                  goto drop;
-                }
+              goto drop;
             }
         }
     }

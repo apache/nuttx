@@ -169,6 +169,7 @@ void arp_out(FAR struct net_driver_s *dev)
   if (net_ipv4addr_hdrcmp(pip->eh_destipaddr, g_broadcast_ipaddr))
     {
       memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      goto finish_header;
     }
 
 #ifdef CONFIG_NET_IGMP
@@ -181,8 +182,8 @@ void arp_out(FAR struct net_driver_s *dev)
    *   addresses=0xff (ff00::/8.)
    */
 
-  else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
-           NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
+  if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
+      NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
     {
       /* Build the well-known IPv4 IGMP Ethernet address.  The first
        * three bytes are fixed; the final three variable come from the
@@ -199,63 +200,76 @@ void arp_out(FAR struct net_driver_s *dev)
       peth->dest[3] = ip[2] & 0x7f;
       peth->dest[4] = ip[3];
       peth->dest[5] = ip[4];
+
+      goto finish_header;
     }
 #endif
-  else
-    {
-      /* Check if the destination address is on the local network. */
 
-      destipaddr = net_ip4addr_conv32(pip->eh_destipaddr);
-      if (!net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask))
-        {
-          /* Destination address is not on the local network */
+  /* Check if the destination address is on the local network. */
+
+  destipaddr = net_ip4addr_conv32(pip->eh_destipaddr);
+  if (!net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask))
+    {
+      /* Destination address is not on the local network */
 
 #ifdef CONFIG_NET_ROUTE
-          /* We have a routing table.. find the correct router to use in
-           * this case (or, as a fall-back, use the device's default router
-           * address).  We will use the router IP address instead of the
-           * destination address when determining the MAC address.
-           */
+      /* We have a routing table.. find the correct router to use in
+       * this case (or, as a fall-back, use the device's default router
+       * address).  We will use the router IP address instead of the
+       * destination address when determining the MAC address.
+       */
 
-          netdev_ipv4_router(dev, destipaddr, &ipaddr);
+      netdev_ipv4_router(dev, destipaddr, &ipaddr);
 #else
-          /* Use the device's default router IP address instead of the
-           * destination address when determining the MAC address.
-           */
+      /* Use the device's default router IP address instead of the
+       * destination address when determining the MAC address.
+       */
 
-          net_ipv4addr_copy(ipaddr, dev->d_draddr);
+      net_ipv4addr_copy(ipaddr, dev->d_draddr);
 #endif
-        }
-      else
-        {
-          /* Else, we use the destination IP address. */
-
-          net_ipv4addr_copy(ipaddr, destipaddr);
-        }
-
-      /* Check if we already have this destination address in the ARP table */
-
-      tabptr = arp_find(ipaddr);
-      if (!tabptr)
-        {
-           ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
-
-          /* The destination address was not in our ARP table, so we
-           * overwrite the IP packet with an ARP request.
-           */
-
-          arp_format(dev, ipaddr);
-          arp_dump(ARPBUF);
-          return;
-        }
-
-      /* Build an Ethernet header. */
-
-      memcpy(peth->dest, tabptr->at_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
+
+  /* The destination address is on the local network.  Check if it is
+   * the sub-net broadcast address.
+   */
+
+  else if (net_ipv4addr_broadcast(destipaddr, dev->d_netmask))
+    {
+      /* Yes.. then we won't need to know the destination MAC address */
+
+      memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
+      goto finish_header;
+    }
+  else
+    {
+      /* Else, we use the destination IP address. */
+
+      net_ipv4addr_copy(ipaddr, destipaddr);
+    }
+
+  /* Check if we already have this destination address in the ARP table */
+
+  tabptr = arp_find(ipaddr);
+  if (tabptr == NULL)
+    {
+      ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
+
+      /* The destination address was not in our ARP table, so we overwrite
+       * the IP packet with an ARP request.
+       */
+
+      arp_format(dev, ipaddr);
+      arp_dump(ARPBUF);
+      return;
+    }
+
+  /* Build an Ethernet header. */
+
+  memcpy(peth->dest, tabptr->at_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
 
   /* Finish populating the Ethernet header */
 
+finish_header:
   memcpy(peth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
   peth->type  = HTONS(ETHTYPE_IP);
   dev->d_len += ETH_HDRLEN;

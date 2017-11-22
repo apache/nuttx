@@ -250,7 +250,6 @@ int arp_send(in_addr_t ipaddr)
       /* Destination address is not on the local network */
 
 #ifdef CONFIG_NET_ROUTE
-
       /* We have a routing table.. find the correct router to use in
        * this case (or, as a fall-back, use the device's default router
        * address).  We will use the router IP address instead of the
@@ -266,6 +265,17 @@ int arp_send(in_addr_t ipaddr)
       net_ipv4addr_copy(dripaddr, dev->d_draddr);
 #endif
       ipaddr = dripaddr;
+    }
+
+  /* The destination address is on the local network.  Check if it is
+   * the sub-net broadcast address.
+   */
+
+  else if (net_ipv4addr_broadcast(ipaddr, dev->d_netmask))
+    {
+      /* Yes.. We don't need to send the ARP request */
+
+      return OK;
     }
 
   /* Allocate resources to receive a callback.  This and the following

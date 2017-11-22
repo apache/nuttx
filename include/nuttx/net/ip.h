@@ -509,6 +509,46 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 #endif
 
 /****************************************************************************
+ * Name: net_ipv4addr_broadcast
+ *
+ * Description:
+ *    Mask out the network part of an IP address, given the address and
+ *    the netmask.
+ *
+ *    Example:
+ *
+ *     in_addr_t ipaddr;
+ *     in_addr_t netmask;
+ *     bool isbroadcast;
+ *
+ *     net_ipaddr(&netmask, 255,255,255,0);
+ *     net_ipaddr(&ipaddr, 192,16,1,255);
+ *     isbroadcast = net_ipv4addr_broadcast(ipaddr, netmask);
+ *
+ *   Will return isboadcast == true.
+ *
+ *     net_ipaddr(&ipaddr, 192,16,1,2);
+ *     isbroadcast = net_ipv4addr_broadcast(ipaddr, netmask);
+ *
+ *   Will return isboadcast == false.
+ *
+ *   NOTES:
+ *   1. This function does not check for the broadcast address
+ *      255.255.255.255.  That must be performed as a seperate check.
+ *   2. You must also separately check if the ipaddress lies on the sub-net
+ *      using, perhaps, net_ipv4addr_maskcmp().
+ *
+ * Input Parameters:
+ *   addr - The IPv4 address to check
+ *   mask - The network mask
+ *
+ ****************************************************************************/
+
+#define net_ipv4addr_broadcast(addr, mask) \
+   (((in_addr_t)(addr) & ~(in_addr_t)(mask)) == \
+    ((in_addr_t)(0xffffffff) & ~(in_addr_t)(mask)))
+
+/****************************************************************************
  * Name: net_ipv6addr_prefixcmp
  *
  * Description:
@@ -586,36 +626,6 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  ****************************************************************************/
 
 #define net_is_addr_linklocal(a) ((a)[0] == HTONS(0xfe80))
-
-/****************************************************************************
- * Name: net_ipaddr_mask
- *
- * Description:
- *    Mask out the network part of an IP address, given the address and
- *    the netmask.
- *
- *    Example:
- *
- *     in_addr_t ipaddr1, ipaddr2, netmask;
- *
- *     net_ipaddr(&ipaddr1, 192,16,1,2);
- *     net_ipaddr(&netmask, 255,255,255,0);
- *     net_ipaddr_mask(&ipaddr2, &ipaddr1, &netmask);
- *
- *   In the example above, the variable "ipaddr2" will contain the IP
- *   address 192.168.1.0.
- *
- * Input Parameters:
- *   dest Where the result is to be placed.
- *   src The IP address.
- *   mask The netmask.
- *
- ****************************************************************************/
-
-#define net_ipaddr_mask(dest, src, mask) \
-  do { \
-    (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
-  } while (0)
 
 #undef EXTERN
 #ifdef __cplusplus
