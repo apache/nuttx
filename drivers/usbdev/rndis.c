@@ -2190,8 +2190,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   value = GETUINT16(ctrl->value);
   len   = GETUINT16(ctrl->len);
 
-  uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-        ctrl->type, ctrl->req, value, index, len);
+  uinfo("type=%02x req=%02x value=%04x len=%04x\n",
+        ctrl->type, ctrl->req, value, len);
 
   switch (ctrl->type & USB_REQ_TYPE_MASK)
     {
