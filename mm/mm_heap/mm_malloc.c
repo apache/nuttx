@@ -87,7 +87,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    */
 
   alignsize = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
-  DEBUGASSERT(alignedsize >= size);  /* Check for integer overflow */
+  DEBUGASSERT(alignsize >= size);  /* Check for integer overflow */
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
