@@ -228,9 +228,7 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
   FAR struct ieee802154_radio_s *radio;
   MACHANDLE mac;
   FAR struct spi_dev_s *spi;
-#ifdef CONFIG_IEEE802154_NETDEV
   int ret;
-#endif
 
   /* Configure the interrupt pin */
 

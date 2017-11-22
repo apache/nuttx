@@ -52,8 +52,23 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
+#ifdef CONFIG_RNDIS
+#  include <nuttx/usb/rndis.h>
+#  include <net/if.h>
+#endif
+
 #include "stm32.h"
 #include "clicker2-stm32.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_RNDIS
+#  ifndef CONFIG_CLICKER2_STM32_RNDIS_MACADDR
+#    define CONFIG_CLICKER2_STM32_RNDIS_MACADDR 0xfadedeadbeef
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -165,6 +180,25 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RNDIS
+  uint8_t mac[IFHWADDRLEN];
+
+  mac[0] = (CONFIG_CLICKER2_STM32_RNDIS_MACADDR >> (8 * 5)) & 0xff;
+  mac[1] = (CONFIG_CLICKER2_STM32_RNDIS_MACADDR >> (8 * 4)) & 0xff;
+  mac[2] = (CONFIG_CLICKER2_STM32_RNDIS_MACADDR >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_CLICKER2_STM32_RNDIS_MACADDR >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_CLICKER2_STM32_RNDIS_MACADDR >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_CLICKER2_STM32_RNDIS_MACADDR >> (8 * 0)) & 0xff;
+
+  /* Register USB RNDIS Driver */
+
+  ret = usbdev_rndis_initialize(mac);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: usbdev_rndis_initialize() failed %d\n", ret);
     }
 #endif
 
