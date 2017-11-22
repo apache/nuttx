@@ -237,7 +237,7 @@ static inline void rcc_enableapb1(void)
 #ifdef CONFIG_STM32_CAN1
   /* CAN1 clock enable */
 
-  regval |= RCC_APB1ENR_CAN1EN;
+  regval |= RCC_APB1ENR_CANEN;
 #endif
 
 #ifdef CONFIG_STM32_DAC2
