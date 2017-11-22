@@ -336,19 +336,6 @@
 #define STM32L4_TRACEINTID_SETUPDONE          (90 + 3)
 #define STM32L4_TRACEINTID_SETUPRECVD         (90 + 4)
 
-/* CONFIG_USB_DUMPBUFFER will dump the contents of buffers to the console. */
-
-#define CONFIG_USB_DUMPBUFFER
-
-#if !defined(CONFIG_DEBUG_INFO) || !defined(CONFIG_DEBUG_FEATURES)
-#  undef CONFIG_USB_DUMPBUFFER
-#endif
-#ifdef CONFIG_USB_DUMPBUFFER
-#  define usb_dumpbuffer(t,b,l) lib_dumpbuffer(t,b,l)
-#else
-#  define usb_dumpbuffer(t,b,l)
-#endif
-
 /* Endpoints ******************************************************************/
 
 /* Odd physical endpoint numbers are IN; even are OUT */
@@ -1145,8 +1132,6 @@ static void stm32l4_txfifo_write(FAR struct stm32l4_ep_s *privep,
   int nwords;
   int i;
 
-  usb_dumpbuffer(">>>",buf,nbytes);
-
   /* Convert the number of bytes to words */
 
   nwords = (nbytes + 3) >> 2;
@@ -1535,8 +1520,6 @@ static void stm32l4_rxfifo_read(FAR struct stm32l4_ep_s *privep,
       *dest++ = data.b[2];
       *dest++ = data.b[3];
     }
-
-  usb_dumpbuffer("<<<",dest-len,len);
 }
 
 /****************************************************************************
