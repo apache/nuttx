@@ -123,7 +123,13 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
         {
           attrval->mac.resp_waittime = priv->resp_waittime;
         }
-        break;;
+        break;
+
+      case IEEE802154_ATTR_MAC_PROMISCUOUS_MODE:
+        {
+          attrval->mac.promisc_mode = priv->promisc;
+        }
+        break;
 
       default:
         {

@@ -67,7 +67,14 @@ struct mac802154dev_rxframe_s
 {
   struct ieee802154_data_ind_s meta;
   uint8_t payload[IEEE802154_MAX_PHY_PACKET_SIZE];
-  uint16_t length;
+  uint8_t length;
+
+  /* In promiscous mode, the entire frame is passed to the application inside
+   * the payload field. The offset field is used to specify the start of the
+   * actual payload, skipping the 802.15.4 header.
+   */
+
+  uint8_t offset;
 };
 
 #endif /* CONFIG_WIRELESS_IEEE802154 */

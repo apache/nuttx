@@ -468,16 +468,18 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
   if (ret == 0 && req.attrval.mac.promisc_mode)
     {
       rx->length = ind->frame->io_len + 2;
+      rx->offset = ind->frame->io_offset;
 
-      /* Copy the data from the IOB to the user supplied struct */
+      /* Copy the entire frame from the IOB to the user supplied struct */
 
       memcpy(&rx->payload[0], &ind->frame->io_data[0], rx->length);
     }
   else
     {
       rx->length = (ind->frame->io_len - ind->frame->io_offset);
+      rx->offset = 0;
 
-      /* Copy the data from the IOB to the user supplied struct */
+      /* Copy just the payload from the IOB to the user supplied struct */
 
       memcpy(&rx->payload[0], &ind->frame->io_data[ind->frame->io_offset],
              rx->length);
