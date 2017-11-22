@@ -59,6 +59,7 @@
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
+#include "route/route.h"
 #include "inet/inet.h"
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -201,7 +202,7 @@ int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
        * destination address when determining the MAC address.
        */
 
-      netdev_ipv6_router(radio->r_dev, ipaddr, router);
+      netdev_ipv6_router(&radio->r_dev, ipaddr, router);
 #else
       /* Use the device's default router IPv6 address instead of the
        * destination address when determining the MAC address.
