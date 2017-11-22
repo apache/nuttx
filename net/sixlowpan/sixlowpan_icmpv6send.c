@@ -114,15 +114,13 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
           uint16_t buflen;
           int ret;
 
-          /* Get the IEEE 802.15.4 MAC address of the destination.  This
-           * assumes an encoding of the MAC address in the IPv6 address.
-           */
+          /* Get the IEEE 802.15.4 MAC address of the next hop. */
 
-          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)fwddev,
-                                         ipv6icmpv6->ipv6.destipaddr, &destmac);
+          ret = sixlowpan_nexthopaddr((FAR struct radio_driver_s *)fwddev,
+                                      ipv6icmpv6->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
-              nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+              nerr("ERROR: Failed to get dest MAC address: %d\n", ret);
               goto drop;
             }
 

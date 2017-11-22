@@ -838,12 +838,10 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif
 
-  /* Get the IEEE 802.15.4 MAC address of the destination.  This assumes
-   * an encoding of the MAC address in the IPv6 address.
-   */
+  /* Get the IEEE 802.15.4 MAC address of the next hop. */
 
-  ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)dev,
-                                 conn->u.ipv6.raddr, &destmac);
+  ret = sixlowpan_nexthopaddr((FAR struct radio_driver_s *)dev,
+                              conn->u.ipv6.raddr, &destmac);
   if (ret < 0)
     {
       nerr("ERROR: Failed to get dest MAC address: %d\n", ret);
@@ -957,12 +955,10 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
           uint16_t buflen;
           int ret;
 
-          /* Get the IEEE 802.15.4 MAC address of the destination.  This
-           * assumes an encoding of the MAC address in the IPv6 address.
-           */
+          /* Get the IEEE 802.15.4 MAC address of the next hop. */
 
-          ret = sixlowpan_destaddrfromip((FAR struct radio_driver_s *)fwddev,
-                                         ipv6hdr->ipv6.destipaddr, &destmac);
+          ret = sixlowpan_nexthopaddr((FAR struct radio_driver_s *)fwddev,
+                                      ipv6hdr->ipv6.destipaddr, &destmac);
           if (ret < 0)
             {
               nerr("ERROR: Failed to get dest MAC address: %d\n", ret);

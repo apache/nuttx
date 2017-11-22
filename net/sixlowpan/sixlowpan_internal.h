@@ -565,6 +565,22 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
 #endif
 
 /****************************************************************************
+ * Name: sixlowpan_nexthopaddr
+ *
+ * Description:
+ *   sixlowpan_nexthopaddr(): If the destination is on-link, extract the
+ *   IEEE 802.15.14 destination address from the destination IP address. If the
+ *   destination is not reachable directly, use the routing table (if available)
+ *   or fall back to the default router IP address and use the router IP address
+ *   to derive the IEEE 802.15.4 MAC address.
+ *
+ ****************************************************************************/
+
+int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
+                          FAR const net_ipv6addr_t ipaddr,
+                          FAR struct netdev_varaddr_s *destaddr);
+
+/****************************************************************************
  * Name: sixlowpan_islinklocal, sixlowpan_destaddrfromip, and
  *       sixlowpan_ismacbased
  *

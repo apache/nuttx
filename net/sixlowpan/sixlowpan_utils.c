@@ -167,6 +167,63 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sixlowpan_nexthopaddr
+ *
+ * Description:
+ *   sixlowpan_nexthopaddr(): If the destination is on-link, extract the
+ *   IEEE 802.15.14 destination address from the destination IP address. If the
+ *   destination is not reachable directly, use the routing table (if available)
+ *   or fall back to the default router IP address and use the router IP address
+ *   to derive the IEEE 802.15.4 MAC address.
+ *
+ ****************************************************************************/
+
+int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
+                          FAR const net_ipv6addr_t ipaddr,
+                          FAR struct netdev_varaddr_s *destaddr)
+{
+  FAR net_ipv6addr_t router;
+  int ret;
+
+  /* Try to get the IEEE 802.15.4 MAC address of the destination.  This
+   * assumes an encoding of the MAC address in the IPv6 address.
+   */
+
+  ret = sixlowpan_destaddrfromip(radio, ipaddr, destaddr);
+  if (ret < 0)
+    {
+      /* Destination address is not on the local network */
+
+#ifdef CONFIG_NET_ROUTE
+      /* We have a routing table.. find the correct router to use in
+       * this case (or, as a fall-back, use the device's default router
+       * address).  We will use the router IPv6 address instead of the
+       * destination address when determining the MAC address.
+       */
+
+      netdev_ipv6_router(radio->r_dev, ipaddr, router);
+#else
+      /* Use the device's default router IPv6 address instead of the
+       * destination address when determining the MAC address.
+       */
+
+      net_ipv6addr_copy(router, radio->r_dev.d_ipv6draddr);
+#endif
+      /* Get the IEEE 802.15.4 MAC address of the router.  This
+       * assumes an encoding of the MAC address in the IPv6 address.
+       */
+
+      ret = sixlowpan_destaddrfromip(radio, router, destaddr);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: sixlowpan_destaddrfromip
  *
  * Description:

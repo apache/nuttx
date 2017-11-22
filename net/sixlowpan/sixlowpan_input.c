@@ -782,11 +782,11 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                    * address.
                    */
 
-                  ret = sixlowpan_destaddrfromip(radio, ipv6hdr->destipaddr,
-                                                 &destmac);
+                  ret = sixlowpan_nexthopaddr(radio, ipv6hdr->destipaddr,
+                                              &destmac);
                   if (ret < 0)
                     {
-                      nerr("ERROR: Failed to dest MAC address: %d\n", ret);
+                      nerr("ERROR: Failed to get dest MAC address: %d\n", ret);
                       goto drop;
                     }
 
