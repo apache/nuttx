@@ -201,8 +201,6 @@ static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
       endx = priv->xres-1;
     }
 
-  width = endx - startx + 1;
-
   starty = rect->pt1.y;
   if (starty < 0)
     {
@@ -224,6 +222,8 @@ static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
       unsigned int pixperbyte = 8 / pinfo->bpp;
       startx &= ~(pixperbyte - 1);
     }
+
+  width = endx - startx + 1;
 
   /* Get the starting position in the framebuffer */
 
