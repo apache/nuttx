@@ -215,6 +215,16 @@ static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
       endy = priv->yres-1;
     }
 
+  /* If the display uses a value of BPP < 8, then we may have to extend the
+   * rectangle on the left so that it is byte aligned.  Works for BPP={1,2,4}
+   */
+
+  if (pinfo->bpp < 8)
+    {
+      unsigned int pixperbyte = 8 / pinfo->bpp;
+      startx &= ~(pixperbyte - 1);
+    }
+
   /* Get the starting position in the framebuffer */
 
   run  = priv->fbmem + starty * priv->stride;
