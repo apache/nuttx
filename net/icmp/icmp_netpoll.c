@@ -99,7 +99,7 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
 
   ninfo("flags: %04x\n", flags);
 
-  DEBUGASSERT(info == NULL || (info->fds != NULL && conn != NULL));
+  DEBUGASSERT(info == NULL || info->fds != NULL);
 
   /* 'priv' might be null in some race conditions (?).  Only process the
    * the event if this poll is from the same device that the request was
