@@ -280,6 +280,30 @@ static void ioctl_get_ipv4addr(FAR struct sockaddr *outaddr,
 #endif
 
 /****************************************************************************
+ * Name: ioctl_get_ipv4broadcast
+ *
+ * Description:
+ *   Return the sub-net broadcast address to user memory.
+ *
+ * Input Parameters:
+ *   outaddr - Pointer to the user-provided memory to receive the address.
+ *   inaddr  - The source IP address in the device structure.
+ *   netmask  - The netmask address mask in the device structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+static void inline ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
+                                           in_addr_t inaddr, in_addr_t netmask)
+{
+  FAR struct sockaddr_in *dest  = (FAR struct sockaddr_in *)outaddr;
+  dest->sin_family              = AF_INET;
+  dest->sin_port                = 0;
+  dest->sin_addr.s_addr         = net_ipv4addr_broadcast(inaddr, netmask);
+}
+#endif
+
+/****************************************************************************
  * Name: ioctl_get_ipv6addr
  *
  * Description:
@@ -627,6 +651,19 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
 #ifdef CONFIG_NET_IPv4
       case SIOCGIFBRDADDR:  /* Get broadcast IP address */
+        {
+          dev = netdev_ifr_dev(req);
+          if (dev)
+            {
+              ioctl_get_ipv4broadcast(&req->ifr_broadaddr, dev->d_ipaddr,
+                                      dev->d_netmask);
+              ret = OK;
+            }
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NET_IPv4
       case SIOCSIFBRDADDR:  /* Set broadcast IP address */
         {
           ret = -ENOSYS;
