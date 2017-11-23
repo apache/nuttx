@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_otgfsdev.c
  *
- *   Copyright (C) 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -282,16 +282,6 @@
 #define STM32_TRACEINTID_OUTDONE            (90 + 2)
 #define STM32_TRACEINTID_SETUPDONE          (90 + 3)
 #define STM32_TRACEINTID_SETUPRECVD         (90 + 4)
-
-/* CONFIG_USB_DUMPBUFFER will dump the contents of buffers to the console. */
-
-#undef CONFIG_USB_DUMPBUFFER
-
-#ifdef CONFIG_USB_DUMPBUFFER
-#  define usb_dumpbuffer(t,b,l) uinfodumpbuffer(t,b,l)
-#else
-#  define usb_dumpbuffer(t,b,l)
-#endif
 
 /* Endpoints ******************************************************************/
 
@@ -1090,8 +1080,6 @@ static void stm32_txfifo_write(FAR struct stm32_ep_s *privep,
   int nwords;
   int i;
 
-  usb_dumpbuffer(">>>", buf, nbytes);
-
   /* Convert the number of bytes to words */
 
   nwords = (nbytes + 3) >> 2;
@@ -1480,8 +1468,6 @@ static void stm32_rxfifo_read(FAR struct stm32_ep_s *privep,
       *dest++ = data.b[2];
       *dest++ = data.b[3];
     }
-
-  usb_dumpbuffer("<<<", dest-len, len);
 }
 
 /****************************************************************************
