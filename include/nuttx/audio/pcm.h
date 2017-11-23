@@ -61,10 +61,6 @@
 #  error CONFIG_AUDIO is required for PCM support
 #endif
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error CONFIG_SCHED_WORKQUEUE is required by the PCM decoder
-#endif
-
 /* Default configuration values */
 
 /* WAVE Header Definitions **************************************************/
