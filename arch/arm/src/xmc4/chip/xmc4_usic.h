@@ -477,7 +477,7 @@
 #  define USIC_INPR_TSINP_SR3       (3 << USIC_INPR_TSINP_SHIFT) /* Output SR3 activated */
 #  define USIC_INPR_TSINP_SR4       (4 << USIC_INPR_TSINP_SHIFT) /* Output SR4 activated */
 #  define USIC_INPR_TSINP_SR5       (5 << USIC_INPR_TSINP_SHIFT) /* Output SR5 activated */
-#define USIC_INPR_TBINP_SHIFT       (4)       /* Bits 4-6: Transmit Buffer Interrupt Node Poi */
+#define USIC_INPR_TBINP_SHIFT       (4)       /* Bits 4-6: Transmit Buffer Interrupt Node Pointer */
 #define USIC_INPR_TBINP_MASK        (7 << USIC_INPR_TBINP_SHIFT)
 #  define USIC_INPR_TBINP_SR0       (0 << USIC_INPR_TBINP_SHIFT) /* Output SR0 activated */
 #  define USIC_INPR_TBINP_SR1       (1 << USIC_INPR_TBINP_SHIFT) /* Output SR1 activated */
