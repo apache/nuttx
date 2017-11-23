@@ -75,6 +75,9 @@ void weak_function stm32_spidev_initialize(void)
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX31855)
   (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
 #endif
+#if defined(CONFIG_LCD_ST7567)
+  (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
+#endif
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX6675)
   (void)stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
 #endif
@@ -120,6 +123,12 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
+#ifdef CONFIG_LCD_ST7567
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(STM32_LCD_CS, !selected);
+    }
+#endif
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
     defined(CONFIG_LCD_SSD1351)
   if (devid == SPIDEV_DISPLAY(0))
@@ -203,6 +212,18 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
+#ifdef CONFIG_LCD_ST7567
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      (void)stm32_gpiowrite(STM32_LCD_RS, !cmd);
+
+      return OK;
+    }
+#endif
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
     defined(CONFIG_LCD_SSD1351)
   if (devid == SPIDEV_DISPLAY(0))
