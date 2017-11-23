@@ -317,7 +317,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 #endif
 
       linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Kmem:  %11ul%11ul%11ul%11ul\n",
+                            "Kmem:  %11lu%11lu%11lu%11lu\n",
                             (unsigned long)mem.arena,
                             (unsigned long)mem.uordblks,
                             (unsigned long)mem.fordblks,
@@ -343,7 +343,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 #endif
 
       linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Umem:  %11ul%11ul%11ul%11ul\n",
+                            "Umem:  %11lu%11lu%11lu%11lu\n",
                             (unsigned long)mem.arena,
                             (unsigned long)mem.uordblks,
                             (unsigned long)mem.fordblks,
@@ -376,7 +376,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
       max        = (unsigned long)pginfo.mxfree << MM_PGSHIFT;
 
       linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Page:  %11ul%11ul%11ul%11ul\n",
+                            "Page:  %11lu%11lu%11lu%11lu\n",
                             total, allocated, available, max);
 
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
@@ -398,7 +398,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
       meminfo_progmem(&progmem);
 
       linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Prog:  %11ul%11ul%11ul%11ul\n",
+                            "Prog:  %11lu%11lu%11lu%11lu\n",
                             (unsigned long)progmem.arena,
                             (unsigned long)progmem.uordblks,
                             (unsigned long)progmem.fordblks,
