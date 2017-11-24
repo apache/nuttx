@@ -436,12 +436,14 @@ void xmc4_clock_configure(void)
 
   delay(DELAY_CNT_50US_120MHZ);
 
+#ifdef BOARD_FCPU_144MHZ
   regval = (SCU_PLLCON1_NDIV(BOARD_PLL_NDIV) |
             SCU_PLLCON1_K2DIV(BOARD_PLL_K2DIV) |
             SCU_PLLCON1_PDIV(BOARD_PLL_PDIV));
   putreg32(regval, XMC4_SCU_PLLCON1);
 
   delay(DELAY_CNT_50US_144MHZ);
+#endif
 
 #endif /* BOARD_ENABLE_PLL */
 

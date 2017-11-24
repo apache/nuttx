@@ -51,8 +51,10 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#undef  XMC4_FCPU_144MHZ
-#define XMC4_FCPU_120MHZ 1
+/* The maximum frequency for the XMC4500 is 120MHz. */
+
+#undef  BOARD_FCPU_144MHZ
+#define BOARD_FCPU_120MHZ 1
 
 /* Clocking *************************************************************************/
 
@@ -67,7 +69,7 @@
 #define BOARD_XTAL_FREQUENCY        12000000 /* 12MHz XTAL */
 #undef  BOARD_RTC_XTAL_FRQUENCY              /* 32.768KHz RTC XTAL not available on the Relax Lite */
 
-#if defined(XMC4_FCPU_144MHZ)
+#if defined(BOARD_FCPU_144MHZ)
 /* Default clock initialization
  *
  *   fXTAL = 12Mhz
@@ -120,7 +122,7 @@
 #  define BOARD_PBDIV               1        /* No division */
 #  define BOARD_PERIPH_FREQUENCY    144000000
 
-#elif defined(XMC4_FCPU_120MHZ)
+#elif defined(BOARD_FCPU_120MHZ)
 /* Default clock initialization
  *
  *   fXTAL = 12Mhz
