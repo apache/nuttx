@@ -65,18 +65,18 @@
 /* See chip/xmc4_ports.h for the IOCR definitions */
 /* Direct input */
 
-#  define GPIO_INPUT               (IOCR_INPUT_NOPULL       << GPIO_PINTYPE_SHIFT)
-#  define GPIO_INPUT_PULLDOWN      (IOCR_INPUT_PULLDOWN     << GPIO_PINTYPE_SHIFT)
-#  define GPIO_INPUT_PULLUP        (IOCR_INPUT_PULLUP       << GPIO_PINTYPE_SHIFT)
-#  define GPIO_INPUT_CONT          (IOCR_INPUT_CONT         << GPIO_PINTYPE_SHIFT)
+#  define GPIO_INPUT               (IOCR_INPUT_NOPULL   << GPIO_PINTYPE_SHIFT)
+#  define GPIO_INPUT_PULLDOWN      (IOCR_INPUT_PULLDOWN << GPIO_PINTYPE_SHIFT)
+#  define GPIO_INPUT_PULLUP        (IOCR_INPUT_PULLUP   << GPIO_PINTYPE_SHIFT)
+#  define GPIO_INPUT_CONT          (IOCR_INPUT_CONT     << GPIO_PINTYPE_SHIFT)
 
 /* Push-pull Output (direct input) */
 
-#  define GPIO_OUTPUT              (IOCR_OUTPUT             << GPIO_PINTYPE_SHIFT)
-#  define GPIO_OUTPUT_ALT1         (IOCR_OUTPUT_ALT1        << GPIO_PINTYPE_SHIFT)
-#  define GPIO_OUTPUT_ALT2         (IOCR_OUTPUT_ALT2        << GPIO_PINTYPE_SHIFT)
-#  define GPIO_OUTPUT_ALT3         (IOCR_OUTPUT_ALT3        << GPIO_PINTYPE_SHIFT)
-#  define GPIO_OUTPUT_ALT4         (IOCR_OUTPUT_ALT4        << GPIO_PINTYPE_SHIFT)
+#  define GPIO_OUTPUT              (IOCR_OUTPUT         << GPIO_PINTYPE_SHIFT)
+#  define GPIO_OUTPUT_ALT1         (IOCR_OUTPUT_ALT1    << GPIO_PINTYPE_SHIFT)
+#  define GPIO_OUTPUT_ALT2         (IOCR_OUTPUT_ALT2    << GPIO_PINTYPE_SHIFT)
+#  define GPIO_OUTPUT_ALT3         (IOCR_OUTPUT_ALT3    << GPIO_PINTYPE_SHIFT)
+#  define GPIO_OUTPUT_ALT4         (IOCR_OUTPUT_ALT4    << GPIO_PINTYPE_SHIFT)
 
 #  define _GPIO_OUTPUT_BIT         (16                      << GPIO_PINTYPE_SHIFT)
 #  define GPIO_ISINPUT(p)          (((p) & _GPIO_OUTPUT_BIT) == 0)
@@ -161,16 +161,16 @@
 
 #define GPIO_PORT_SHIFT            (4)         /* Bit 4-7:  Port number */
 #define GPIO_PORT_MASK             (15 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT0               (0 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT1               (1 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT2               (2 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT3               (3 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT4               (4 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT5               (5 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT6               (6 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT7               (7 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT8               (8 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT9               (9 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT0               (0  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT1               (1  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT2               (2  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT3               (3  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT4               (4  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT5               (5  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT6               (6  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT7               (7  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT8               (8  << GPIO_PORT_SHIFT)
+#  define GPIO_PORT9               (9  << GPIO_PORT_SHIFT)
 #  define GPIO_PORT14              (14 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT15              (15 << GPIO_PORT_SHIFT)
 
