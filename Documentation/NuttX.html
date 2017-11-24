@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 28, 2017</p>
+      <p>Last Updated: November 24, 2017</p>
     </td>
   </tr>
 </table>
@@ -5936,10 +5936,16 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
     <ul>
       <p>
        <b>STATUS:</b>
-       Basically the same as for the Z80 instruction set simulator.
-       This port was contributed by Jacques Pelletier.
-       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/xtrs/README.txt" target="_blank">README</a> file for further information.
+         Basically the same as for the Z80 instruction set simulator.
+         This port was contributed by Jacques Pelletier.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/xtrs/README.txt" target="_blank">README</a> file for further information.
       </p>
+      <p>
+         <b>NOTE:</b>
+         This port was removed from the NuttX source tree on 2017-11-24.
+         It was removed because (1) it is unfinished, unverified, and unsupported, and (2) the TRS-80 simulation is a sub-optimal platform.i
+         That platform includes a 16-bit ROM image and only a 48Kb RAM space for NuttX.
+         The removed board support is still available in the <code>Obsoleted</code> repository if anyone would ever like to resurrect it.
     <ul>
   </td>
 </tr>

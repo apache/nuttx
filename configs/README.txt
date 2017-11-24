@@ -780,11 +780,6 @@ configs/viewtool-stm32f107
 config/xmc4500-relax
   Infineon XMC4000 Relax Lite v1
 
-configs/xtrs
-  TRS80 Model 3.  This port uses a vintage computer based on the Z80.
-  An emulator for this computer is available to run TRS80 programs on a
-  linux platform (http://www.tim-mann.org/xtrs.html).
-
 configs/z16f2800100zcog
   z16f Microcontroller.  This port use the Zilog z16f2800100zcog
   development kit and the Zilog ZDS-II Windows command line tools.  The

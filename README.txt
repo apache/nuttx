@@ -1870,8 +1870,6 @@ nuttx/
  |   |   `- README.txt
  |   |- xmc5400-relax/
  |   |   `- README.txt
- |   |- xtrs/
- |   |   `- README.txt
  |   |- z16f2800100zcog/
  |   |   |- ostest/README.txt
  |   |   |- pashello/README.txt
