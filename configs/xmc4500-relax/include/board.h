@@ -51,7 +51,23 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#undef  XMC4_FCPU_144MHZ
+#define XMC4_FCPU_120MHZ 1
+
 /* Clocking *************************************************************************/
+
+#undef BOARD_FOFI_CALIBRATION                /* Enable factory calibration */
+
+/* On-board crystals
+ *
+ *   NOTE: Only the XMC4500 Relax Kit-V1 provides the 32.768KHz RTC crystal.  It
+ *   is not available on XMC4500 Relax Lite Kit-V1.
+ */
+
+#define BOARD_XTAL_FREQUENCY        12000000 /* 12MHz XTAL */
+#undef  BOARD_RTC_XTAL_FRQUENCY              /* 32.768KHz RTC XTAL not available on the Relax Lite */
+
+#if defined(XMC4_FCPU_144MHZ)
 /* Default clock initialization
  *
  *   fXTAL = 12Mhz
@@ -70,21 +86,10 @@
  *      -> fWDT                          = 24MHz   (REVISIT)
  */
 
-#undef BOARD_FOFI_CALIBRATION              /* Enable factory calibration */
-
-/* On-board crystals
- *
- *   NOTE: Only the XMC4500 Relax Kit-V1 provides the 32.768KHz RTC crystal.  It
- *   is not available on XMC4500 Relax Lite Kit-V1.
- */
-
-#define BOARD_XTAL_FREQUENCY      12000000 /* 12MHz XTAL */
-#undef  BOARD_RTC_XTAL_FRQUENCY            /* 32.768KHz RTC XTAL not available */
-
 /* Select the external crystal as the PLL clock source */
 
-#define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == extnernal crystal */
-#undef  BOARD_PLL_CLOCKSRC_OFI             /* PLL Clock source != internal fast oscillator */
+#  define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == extnernal crystal */
+#  undef  BOARD_PLL_CLOCKSRC_OFI             /* PLL Clock source != internal fast oscillator */
 
 /* PLL Configuration:
  *
@@ -94,26 +99,80 @@
  *      = 288MHz
  */
 
-#define BOARD_ENABLE_PLL          1
-#define BOARD_PLL_PDIV            2
-#define BOARD_PLL_NDIV            48
-#define BOARD_PLL_K2DIV           1
-#define BOARD_PLL_FREQUENCY       288000000
+#  define BOARD_ENABLE_PLL          1
+#  define BOARD_PLL_PDIV            2
+#  define BOARD_PLL_NDIV            48
+#  define BOARD_PLL_K2DIV           1
+#  define BOARD_PLL_FREQUENCY       288000000
 
 /* System frequency, fSYS, is divided down from PLL output */
 
-#define BOARD_SYSDIV              1        /* PLL Output divider to get fSYS */
-#define BOARD_SYS_FREQUENCY       288000000
+#  define BOARD_SYSDIV              1        /* PLL Output divider to get fSYS */
+#  define BOARD_SYS_FREQUENCY       288000000
 
 /* CPU frequency, fCPU, may be divided down from system frequency */
 
-#define BOARD_CPUDIV_ENABLE       1        /* Enable PLL dive by 2 for fCPU */
-#define BOARD_CPU_FREQUENCY       144000000
+#  define BOARD_CPUDIV_ENABLE       1        /* Enable PLL dive by 2 for fCPU */
+#  define BOARD_CPU_FREQUENCY       144000000
 
 /* The peripheral clock, fPERIPH, derives from fCPU with no division */
 
-#define BOARD_PBDIV               1        /* No division */
-#define BOARD_PERIPH_FREQUENCY    144000000
+#  define BOARD_PBDIV               1        /* No division */
+#  define BOARD_PERIPH_FREQUENCY    144000000
+
+#elif defined(XMC4_FCPU_120MHZ)
+/* Default clock initialization
+ *
+ *   fXTAL = 12Mhz
+ *      -> fPLL = (fXTAL / (2 * 4) * 80) = 120
+ *         -> fSYS = (fPLL / 1)          = 120MHz
+ *            -> fCPU = (fSYS / 1)       = 120MHz
+ *               -> fPERIPH = (fCPU / 1) = 120MHz
+ *            -> fCCU = (fSYS / 1)       = 120MHz
+ *            -> fETH                    = 60MHz   (REVISIT)
+ *         -> fUSB                       = 48MHz   (REVISIT)
+ *         -> fEBU                       = 60MHz   (REVISIT)
+ *
+ * fUSBPLL Disabled, only enabled if SCU_CLK_USBCLKCR_USBSEL_USBPLL is selected
+ *
+ *   fOFI                                = 24MHz
+ *      -> fWDT                          = 24MHz   (REVISIT)
+ */
+
+/* Select the external crystal as the PLL clock source */
+
+#  define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == extnernal crystal */
+#  undef  BOARD_PLL_CLOCKSRC_OFI             /* PLL Clock source != internal fast oscillator */
+
+/* PLL Configuration:
+ *
+ * fPLL = (fPLLSRC / (pdiv * k2div) * ndiv
+ *
+ * fPLL = (12000000 / (2 * 4)) * 80
+ *      = 120MHz
+ */
+
+#  define BOARD_ENABLE_PLL          1
+#  define BOARD_PLL_PDIV            2
+#  define BOARD_PLL_NDIV            80
+#  define BOARD_PLL_K2DIV           4
+#  define BOARD_PLL_FREQUENCY       120000000
+
+/* System frequency, fSYS, is divided down from PLL output */
+
+#  define BOARD_SYSDIV              1        /* No division */
+#  define BOARD_SYS_FREQUENCY       120000000
+
+/* CPU frequency, fCPU, may be divided down from system frequency */
+
+#  define BOARD_CPUDIV_ENABLE       0        /* No divison */
+#  define BOARD_CPU_FREQUENCY       120000000
+
+/* The peripheral clock, fPERIPH, derives from fCPU with no division */
+
+#  define BOARD_PBDIV               1        /* No division */
+#  define BOARD_PERIPH_FREQUENCY    120000000
+#endif
 
 /* Standby clock source selection
  *
@@ -218,7 +277,7 @@
  */
 
 #define BOARD_UART3_DX    USIC_DXD
-#define GPIO_UART0_RXD3   GPIO_U1C1_DX0D
+#define GPIO_UART0_RXD3   (GPIO_U1C1_DX0D | GPIO_INPUT_PULLUP)
 #define GPIO_UART0_TXD3   (GPIO_U1C1_DOUT0_2 | GPIO_PADA1P_STRONGSOFT | GPIO_OUTPUT_SET)
 
 /************************************************************************************
