@@ -343,6 +343,6 @@ Configurations:
     2017-11-25:  Grrr... This configuration no longer works.  Some serious bit
       rot has set in.  Now only random garbage appears on the OLED.  Certainly
       a lot has changed since 2012, but I cannot see any change to either this
-      configuration, to the LCD driver or to the LPC2148 support that would
-      effect the operation of the LCD.
+      configuration, to the LCD driver, or to the LPC2148 support that would
+      affect the operation of the LCD.
 

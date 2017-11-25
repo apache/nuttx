@@ -47,8 +47,6 @@
 
 #include "stm32.h"
 #include "stm32f4discovery.h"
-#include <stm32_gpio.h>
-#include <nuttx/sensors/lis3dsh.h>
 
 #if defined(CONFIG_STM32F4DISCO_LIS3DSH) && defined(CONFIG_LIS3DSH)
 
