@@ -419,7 +419,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
   DEBUGASSERT(buffer);
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -438,7 +438,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
           __clear_bit(col % 8 + i, p);
         }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
@@ -510,7 +510,7 @@ static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
   DEBUGASSERT(buffer);
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -529,7 +529,7 @@ static int memlcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
           *buffer &= ~usrmask;
         }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;

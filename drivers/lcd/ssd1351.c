@@ -100,18 +100,7 @@
  * CONFIG_SPI                  - enables support for SPI
  * CONFIG_SPI_CMDDATA          - enables support for cmd/data selection
  *                               (if using 4-wire SPI)
- *
- * NX settings that must be undefined:
- * CONFIG_NX_DISABLE_16BPP     - disables 16 bpp support
  */
-
-/* Verify that all configuration requirements have been met */
-
-/* Number of bits per pixel */
-
-#ifdef CONFIG_NX_DISABLE_16BPP
-#  error "Requires support for 16 bits per pixel"
-#endif
 
 /* Max power */
 

@@ -128,14 +128,6 @@
 #  warning "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
 #endif
 
-/* Check power setting */
-
-/* Color is 1bpp monochrome with leftmost column contained in bits 0  */
-
-#ifdef CONFIG_NX_DISABLE_1BPP
-#  warning "1 bit-per-pixel support needed"
-#endif
-
 /* Color Properties *******************************************************************/
 
 /* The ST7565 display controller can handle a resolution of 128x64.
@@ -515,7 +507,7 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
   fbmask = 1 << (row & 7);
   fbptr = &priv->fb[page * ST7565_XRES + col];
   ptr = fbptr;
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -536,7 +528,7 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
 
       /* Inc/Decrement to the next source pixel */
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
@@ -667,7 +659,7 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
 
   fbmask = 1 << (row & 7);
   fbptr = &priv->fb[page * ST7565_XRES + col];
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -688,7 +680,7 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
        * logic could write past the end of the user buffer.  Revisit this!
        */
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;

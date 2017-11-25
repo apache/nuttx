@@ -138,20 +138,6 @@
 #  endif
 #endif
 
-#if CONFIG_NOKIA6100_BPP == 8
-#  ifdef CONFIG_NX_DISABLE_8BPP
-#    warning "8-bit pixel support needed"
-#  endif
-#elif CONFIG_NOKIA6100_BPP == 12
-#  if defined(CONFIG_NX_DISABLE_12BPP) || !defined(CONFIG_NX_PACKEDMSFIRST)
-#    warning "12-bit, big-endian pixel support needed"
-#  endif
-#elif CONFIG_NOKIA6100_BPP == 16
-#  ifdef CONFIG_NX_DISABLE_16BPP
-#    warning "16-bit pixel support needed"
-#  endif
-#endif
-
 /* Exactly one LCD controller must be selected. "The Olimex boards have both display
  * controllers possible; if the LCD has a GE-12 sticker on it, it’s a Philips PCF8833.
  * If it has a GE-8 sticker, it’s an Epson controller."

@@ -135,12 +135,6 @@
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
 
-/* Color is 4bpp greyscale with leftmost column contained in bits 7:4  */
-
-#if defined(CONFIG_NX_DISABLE_4BPP) || !defined(CONFIG_NX_PACKEDMSFIRST)
-#  warning "4-bit, big-endian pixel support needed"
-#endif
-
 /* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you would
  * never want to see unless you are debugging this file).
  *

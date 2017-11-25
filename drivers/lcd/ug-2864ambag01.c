@@ -558,7 +558,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
   ptr     = fbptr;
 #endif
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -590,7 +590,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
       /* Inc/Decrement to the next source pixel */
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
@@ -763,7 +763,7 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
   fbmask  = 1 << (row & 7);
   fbptr   = &priv->fb[page * UG2864AMBAG01_XRES + col];
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -789,7 +789,7 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
        * this!
        */
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;

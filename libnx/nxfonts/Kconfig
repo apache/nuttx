@@ -400,7 +400,7 @@ config NXFONTS_PACKEDMSFIRST
 	bool "Packed MS First"
 	default y if !NX || NX_PACKEDMSFIRST
 	default n if NX && !NX_PACKEDMSFIRST
-	depends on NXFONTS_DISABLE_1BPP || NXFONTS_DISABLE_2BPP || NXFONTS_DISABLE_4BPP
+	select LCD_PACKEDFIRST if LCD
 	---help---
 		If a pixel depth of less than 8-bits is used, then NX needs to know if the
 		pixels pack from the MS to LS or from LS to MS

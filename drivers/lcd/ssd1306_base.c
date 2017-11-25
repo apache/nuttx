@@ -361,7 +361,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   ptr     = fbptr;
 #endif
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -393,7 +393,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
       /* Inc/Decrement to the next source pixel */
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
@@ -564,7 +564,7 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   fbmask  = 1 << (row & 7);
   fbptr   = &priv->fb[page * SSD1306_DEV_XRES + col];
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -590,7 +590,7 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
       /* Inc/Decrement to the next destination pixel. */
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;

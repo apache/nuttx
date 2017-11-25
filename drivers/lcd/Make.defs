@@ -114,7 +114,7 @@ endif
 ifeq ($(CONFIG_LCD_RA8875),y)
   CSRCS += ra8875.c
 endif
-endif # CONFIG_NX_LCDDRIVER
+endif # CONFIG_LCD
 
 ifeq ($(CONFIG_SLCD),y)
 

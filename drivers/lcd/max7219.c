@@ -101,12 +101,6 @@
 #  define CONFIG_LCD_MAXCONTRAST 15
 #endif
 
-/* Color is 1bpp monochrome with leftmost column contained in bits 0  */
-
-#ifdef CONFIG_NX_DISABLE_1BPP
-#  warning "1 bit-per-pixel support needed"
-#endif
-
 /* Color Properties *********************************************************/
 /* The MAX7219 chip can handle resolution of 8x8, 16x8, 8x16, 16x16, 24x8,
  * etc.
@@ -459,13 +453,13 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
 
   row = newrow;
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
 #endif
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -485,7 +479,7 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
           __clear_bit(col % 8 + i, ptr);
         }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
@@ -578,7 +572,7 @@ static int max7219_getrun(fb_coord_t row, fb_coord_t col,
       return -EINVAL;
     }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
   usrmask = LS_BIT;
@@ -598,7 +592,7 @@ static int max7219_getrun(fb_coord_t row, fb_coord_t col,
           *buffer &= ~usrmask;
         }
 
-#ifdef CONFIG_NX_PACKEDMSFIRST
+#ifdef CONFIG_LCD_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;

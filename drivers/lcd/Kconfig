@@ -19,6 +19,10 @@ menuconfig LCD
 
 if LCD
 
+config LCD_PACKEDFIRST
+	bool
+	default n
+
 config LCD_UPDATE
 	bool
 	default n
