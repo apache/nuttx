@@ -496,6 +496,16 @@ int up_fbinitialize(int display)
   priv->vtable.setcursor    = lcdfb_setcursor,
 #endif
 
+#ifdef  CONFIG_LCD_EXTERNINIT
+  /* Use external graphics driver initialization */
+
+  lcd = board_graphics_setup(display);
+  if (lcd == NULL)
+    {
+      gerr("ERROR: board_graphics_setup failed, devno=%d\n", display);
+      return EXIT_FAILURE;
+    }
+#else
   /* Initialize the LCD device */
 
   ret = board_lcd_initialize();
@@ -514,6 +524,7 @@ int up_fbinitialize(int display)
       ret = -ENODEV;
       goto errout_with_lcd;
     }
+#endif
 
   priv->lcd = lcd;
 
@@ -571,9 +582,11 @@ int up_fbinitialize(int display)
   return OK;
 
 errout_with_lcd:
+#ifndef CONFIG_LCD_EXTERNINIT
   board_lcd_uninitialize();
 
 errout_with_state:
+#endif
   kmm_free(priv);
   return ret;
 }
@@ -656,9 +669,11 @@ void up_fbuninitialize(int display)
               g_lcdfb = priv->flink;
             }
 
+#ifndef  CONFIG_LCD_EXTERNINIT
           /* Uninitialize the LCD */
 
           board_lcd_uninitialize();
+#endif
 
           /* Free the frame buffer allocation */
 

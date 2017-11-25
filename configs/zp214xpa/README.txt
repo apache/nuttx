@@ -236,7 +236,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
       configs/zp214xpa/tools/oocd.sh $PWD
 
-    If you add that path to your PATH environment variable, ithe commandi
+    If you add that path to your PATH environment variable, the command
     simplifies to just:
 
       oocd.sh $PWD
@@ -309,9 +309,9 @@ Configurations:
 
     2. Default platform/toolchain:
 
-       CONFIG_HOST_LINUX=y             : Linux (Cygwin under Windows okay too).
+       CONFIG_HOST_LINUX=y              : Linux (Cygwin under Windows okay too).
        CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
-       CONFIG_RAW_BINARY=y             : Output formats: ELF and raw binary
+       CONFIG_RAW_BINARY=y              : Output formats: ELF and raw binary
 
   nxlines:
   --------
@@ -333,8 +333,16 @@ Configurations:
 
     2. Default platform/toolchain:
 
-       CONFIG_HOST_LINUX=y             : Linux (Cygwin under Windows okay too).
+       CONFIG_HOST_LINUX=y              : Linux (Cygwin under Windows okay too).
        CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
-       CONFIG_RAW_BINARY=y             : Output formats: ELF and raw binary
+       CONFIG_RAW_BINARY=y              : Output formats: ELF and raw binary
 
-    3. Verified as of this writing (2012-12-30).
+    STATUS:
+    2012-12-30:  Configuration verified.
+
+    2017-11-25:  Grrr... This configuration no longer works.  Some serious bit
+      rot has set in.  Now only random garbage appears on the OLED.  Certainly
+      a lot has changed since 2012, but I cannot see any change to either this
+      configuration, to the LCD driver or to the LPC2148 support that would
+      effect the operation of the LCD.
+

@@ -41,6 +41,17 @@ config LCD_FRAMEBUFFER
 		disabled because this external commone framebuffer interface will
 		provide the necessary buffering.
 
+config LCD_EXTERNINIT
+	bool "External LCD Initialization"
+	default n
+	depends on LCD_FRAMEBUFFER
+	---help---
+		Define to support external LCD initialization by platform-specific
+		code.  This this option is defined, then the LCD framebuffer
+		emulation will call board_graphics_setup() to initialize the
+		graphics device.  This option is necessary if display is used that
+		cannot be initialized using the standard LCD interfaces.
+
 menu "LCD driver selection"
 
 config LCD_CONSOLE

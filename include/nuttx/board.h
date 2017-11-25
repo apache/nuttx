@@ -349,7 +349,7 @@ void board_tsc_teardown(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_LCDDRIVER
+#if defined(CONFIG_NX_LCDDRIVER) || defined(CONFIG_LCD_FRAMEBUFFER)
 struct lcd_dev_s;
 FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno);
 #else

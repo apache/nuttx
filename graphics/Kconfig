@@ -389,8 +389,9 @@ config NX_MXCLIENTMSGS
 		controls how many messages are pre-allocated).
 
 config NXSTART_EXTERNINIT
-	bool "External display Initialization"
+	bool "External Display Initialization"
 	default n
+	select LCD_EXTERNINIT if NX_LCDDRIVER
 	---help---
 		Define to support external display initialization by platform-
 		specific code.  This this option is defined, then nx_start() will

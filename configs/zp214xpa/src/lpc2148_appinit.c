@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/zp214xpa/src/lpc2148_appinit.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nuttx/board.h>
+#include <syslog.h>
+
+#ifdef CONFIG_VIDEO_FB
+#  include <nuttx/video/fb.h>
+#endif
 
 #ifdef CONFIG_LIB_BOARDCTL
 
@@ -75,6 +79,29 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
 
