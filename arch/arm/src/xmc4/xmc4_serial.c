@@ -226,9 +226,9 @@
 /* Event sets */
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_AIEN | USIC_CCR_DLIEN)
+#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_DLIEN)
 #else
-#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_AIEN)
+#  define CCR_RX_EVENTS       (USIC_CCR_RIEN)
 #endif
 
 #define CCR_TX_EVENTS         (USIC_CCR_TBIEN)
@@ -362,7 +362,7 @@ static struct xmc4_dev_s g_uart1priv =
 {
   .uartbase       = XMC4_USIC0_CH1_BASE,
   .channel        = (uint8_t)USIC0_CHAN1,
-  .irq            = XMC4_IRQ_USIC0_SR0,
+  .irq            = XMC4_IRQ_USIC0_SR1,
   .config         =
   {
     .baud         = CONFIG_UART1_BAUD,
@@ -432,7 +432,7 @@ static struct xmc4_dev_s g_uart3priv =
 {
   .uartbase       = XMC4_USIC1_CH1_BASE,
   .channel        = (uint8_t)USIC1_CHAN1,
-  .irq            = XMC4_IRQ_USIC1_SR0,
+  .irq            = XMC4_IRQ_USIC1_SR1,
   .config         =
   {
     .baud         = CONFIG_UART3_BAUD,
@@ -502,7 +502,7 @@ static struct xmc4_dev_s g_uart5priv =
 {
   .uartbase       = XMC4_USIC2_CH1_BASE,
   .channel        = (uint8_t)USIC2_CHAN1,
-  .irq            = XMC4_IRQ_USIC2_SR0,
+  .irq            = XMC4_IRQ_USIC2_SR1,
   .config         =
   {
     .baud         = CONFIG_UART5_BAUD,
