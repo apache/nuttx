@@ -128,7 +128,7 @@
 
 /* CPU frequency, fCPU, may be divided down from system frequency */
 
-#  define BOARD_CPUDIV_ENABLE       1        /* Enable PLL dive by 2 for fCPU */
+#  define BOARD_CPUDIV_ENABLE       1        /* Enable PLL divide by 2 for fCPU */
 #  define BOARD_CPU_FREQUENCY       144000000
 
 /* CCU frequency may be divided down from system frequency */

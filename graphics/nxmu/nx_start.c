@@ -79,7 +79,7 @@ static bool g_nxserver_started;
  *
  ****************************************************************************/
 
-int nx_server(int argc, char *argv[])
+static int nx_server(int argc, char *argv[])
 {
   FAR NX_DRIVERTYPE *dev;
   int ret;
