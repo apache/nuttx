@@ -132,7 +132,8 @@ endchoice # USIC0 Channel 0 Configuration
 
 choice
 	prompt "USIC0 Channel 1 Configuration"
-	default XMC4_USIC0_CHAN1_ISUART
+	default XMC4_USIC0_CHAN1_ISUART if !XMC4_USIC0_CHAN0_ISUART
+	default XMC4_USIC0_CHAN1_NONE if XMC4_USIC0_CHAN0_ISUART
 	depends on XMC4_USIC0
 
 config XMC4_USIC0_CHAN1_NONE
@@ -144,6 +145,7 @@ config XMC4_USIC0_CHAN1_ISUART
 	bool "UART1"
 	select UART1_SERIALDRIVER
 	select XMC4_USCI_UART
+	depends on !XMC4_USIC0_CHAN0_ISUART
 	---help---
 		Configure USIC0 Channel 1 as a UART
 
@@ -218,7 +220,8 @@ endchoice # USIC1 Channel 0 Configuration
 
 choice
 	prompt "USIC1 Channel 1 Configuration"
-	default XMC4_USIC1_CHAN1_ISUART
+	default XMC4_USIC1_CHAN1_ISUART if !XMC4_USIC1_CHAN0_ISUART
+	default XMC4_USIC1_CHAN1_NONE if XMC4_USIC1_CHAN0_ISUART
 	depends on XMC4_USIC1
 
 config XMC4_USIC1_CHAN1_NONE
@@ -230,6 +233,7 @@ config XMC4_USIC1_CHAN1_ISUART
 	bool "UART3"
 	select UART3_SERIALDRIVER
 	select XMC4_USCI_UART
+	depends on !XMC4_USIC1_CHAN0_ISUART
 	---help---
 		Configure USIC1 Channel 1 as a UART
 
@@ -304,7 +308,8 @@ endchoice # USIC2 Channel 0 Configuration
 
 choice
 	prompt "USIC2 Channel 1 Configuration"
-	default XMC4_USIC2_CHAN1_ISUART
+	default XMC4_USIC2_CHAN1_ISUART if !XMC4_USIC2_CHAN0_ISUART
+	default XMC4_USIC2_CHAN1_NONE if XMC4_USIC2_CHAN0_ISUART
 	depends on XMC4_USIC2
 
 config XMC4_USIC2_CHAN1_NONE
@@ -316,6 +321,7 @@ config XMC4_USIC2_CHAN1_ISUART
 	bool "UART5"
 	select UART5_SERIALDRIVER
 	select XMC4_USCI_UART
+	depends on !XMC4_USIC2_CHAN0_ISUART
 	---help---
 		Configure USIC2 Channel 1 as a UART
 

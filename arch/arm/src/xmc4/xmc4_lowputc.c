@@ -205,24 +205,24 @@ void xmc4_lowsetup(void)
   (void)xmc4_gpio_config(GPIO_UART0_TXD0);
 #endif
 #ifdef HAVE_UART1
-  (void)xmc4_gpio_config(GPIO_UART0_RXD1);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD1);
+  (void)xmc4_gpio_config(GPIO_UART1_RXD);
+  (void)xmc4_gpio_config(GPIO_UART1_TXD);
 #endif
 #ifdef HAVE_UART2
-  (void)xmc4_gpio_config(GPIO_UART0_RXD2);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD2);
+  (void)xmc4_gpio_config(GPIO_UART2_RXD);
+  (void)xmc4_gpio_config(GPIO_UART2_TXD);
 #endif
 #ifdef HAVE_UART3
-  (void)xmc4_gpio_config(GPIO_UART0_RXD3);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD3);
+  (void)xmc4_gpio_config(GPIO_UART3_RXD);
+  (void)xmc4_gpio_config(GPIO_UART3_TXD);
 #endif
 #ifdef HAVE_UART4
-  (void)xmc4_gpio_config(GPIO_UART0_RXD4);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD4);
+  (void)xmc4_gpio_config(GPIO_UART4_RXD);
+  (void)xmc4_gpio_config(GPIO_UART4_TXD);
 #endif
 #ifdef HAVE_UART5
-  (void)xmc4_gpio_config(GPIO_UART0_RXD5);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD5);
+  (void)xmc4_gpio_config(GPIO_UART5_RXD);
+  (void)xmc4_gpio_config(GPIO_UART5_TXD);
 #endif
 
 #ifdef HAVE_UART_CONSOLE
@@ -412,23 +412,18 @@ int xmc4_uart_configure(enum usic_channel_e channel,
 
   /* Set service request for UART protocol, receiver, and transmitter events.
    *
-   *   Set channel 0 events on sevice request 0
-   *   Set channel 1 events on sevice request 1
+   *   Set channel 0/1 events on sevice request 0.  Only SR0 can be used with
+   *   RXD events.  This precludes use of Channel 0 and Channel 1 concurrently
+   *   for UARTs since both will map to the same interrupt request.
    */
 
   regval  = getreg32(base + XMC4_USIC_INPR_OFFSET);
-  regval &= ~(USIC_INPR_TBINP_MASK | USIC_INPR_RINP_MASK | USIC_INPR_PINP_MASK);
-
-  if (((unsigned int)channel & 1) != 0)
-    {
-      regval |= (USIC_INPR_TBINP_SR1 | USIC_INPR_RINP_SR1 | USIC_INPR_PINP_SR1);
-    }
-  else
-    {
-      regval |= (USIC_INPR_TBINP_SR0 | USIC_INPR_RINP_SR0 | USIC_INPR_PINP_SR0);
-    }
-
+  regval &= ~(USIC_INPR_TBINP_MASK | USIC_INPR_RINP_MASK |
+              USIC_INPR_AINP_MASK | USIC_INPR_PINP_MASK);
+  regval |=  (USIC_INPR_TBINP_SR0 | USIC_INPR_RINP_SR0 |
+              USIC_INPR_AINP_SR0 | USIC_INPR_PINP_SR0);
   putreg32(regval, base + XMC4_USIC_INPR_OFFSET);
+
   return OK;
 }
 #endif
