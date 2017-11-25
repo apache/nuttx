@@ -65,20 +65,6 @@
 #  undef CONFIG_XMC4_USIC2_CHAN1_ISUART
 #endif
 
-/* Only SR0 can be used as the interrupt source for the UART RXD events.  Therefore,
- * there can be only one UART per USIC.
- */
-
-#ifdef CONFIG_XMC4_USIC0_CHAN0_ISUART
-#  undef CONFIG_XMC4_USIC0_CHAN1_ISUART
-#endif
-#ifdef CONFIG_XMC4_USIC1_CHAN0_ISUART
-#  undef CONFIG_XMC4_USIC1_CHAN1_ISUART
-#endif
-#ifdef CONFIG_XMC4_USIC2_CHAN0_ISUART
-#  undef CONFIG_XMC4_USIC2_CHAN1_ISUART
-#endif
-
 /* Map logical UART names (Just for simplicity of naming) */
 
 #undef HAVE_UART0
