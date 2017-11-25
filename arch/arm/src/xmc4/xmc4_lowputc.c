@@ -417,15 +417,18 @@ int xmc4_uart_configure(enum usic_channel_e channel,
    */
 
   regval  = getreg32(base + XMC4_USIC_INPR_OFFSET);
-  regval &= ~(USIC_INPR_TBINP_MASK | USIC_INPR_RINP_MASK | USIC_INPR_PINP_MASK);
+  regval &= ~(USIC_INPR_TBINP_MASK | USIC_INPR_RINP_MASK |
+              USIC_INPR_AINP_MASK | USIC_INPR_PINP_MASK);
 
   if (((unsigned int)channel & 1) != 0)
     {
-      regval |= (USIC_INPR_TBINP_SR1 | USIC_INPR_RINP_SR1 | USIC_INPR_PINP_SR1);
+      regval |= (USIC_INPR_TBINP_SR1 | USIC_INPR_RINP_SR1 |
+                 USIC_INPR_AINP_SR1 | USIC_INPR_PINP_SR1);
     }
   else
     {
-      regval |= (USIC_INPR_TBINP_SR0 | USIC_INPR_RINP_SR0 | USIC_INPR_PINP_SR0);
+      regval |= (USIC_INPR_TBINP_SR0 | USIC_INPR_RINP_SR0 |
+                 USIC_INPR_AINP_SR0 | USIC_INPR_PINP_SR0);
     }
 
   putreg32(regval, base + XMC4_USIC_INPR_OFFSET);

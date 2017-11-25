@@ -345,7 +345,8 @@ void board_tsc_teardown(void);
  *   initialization, then this board interface should be provided.
  *
  *   This is an internal OS interface. It is invoked by graphics sub-system
- *   initialization logic (nx_start()).
+ *   initialization logic (nx_start()) or from the LCD framebuffer driver
+ *   (when the NX server is not used).
  *
  ****************************************************************************/
 
@@ -387,6 +388,9 @@ int board_ioctl(unsigned int cmd, uintptr_t arg);
  *                            the specified LCD.  This allows support for
  *                            multiple LCD devices.
  *   board_lcd_uninitialize - Uninitialize the LCD support
+ *
+ *  Alternatively, board_graphics_setup() may be used if external graphics
+ *  initialization is configured.
  *
  ****************************************************************************/
 
