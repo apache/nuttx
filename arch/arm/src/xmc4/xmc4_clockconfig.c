@@ -103,13 +103,7 @@
 #define PLL_K2DIV_120MHZ  (VCO / 120000000)
 
 #define CLKSET_VALUE      (0x00000000)
-#define SYSCLKCR_VALUE    (0x00010001)
-#define CPUCLKCR_VALUE    (0x00000000)
-#define CCUCLKCR_VALUE    (0x00000000)
-#define WDTCLKCR_VALUE    (0x00000000)
-#define EBUCLKCR_VALUE    (0x00000003)
 #define USBCLKCR_VALUE    (0x00010000)
-#define EXTCLKCR_VALUE    (0x01200003)
 
 #if BOARD_PBDIV == 1
 #  define PBCLKCR_VALUE   SCU_PBCLKCR_PBDIV_FCPU
@@ -391,14 +385,44 @@ void xmc4_clock_configure(void)
 
   /* Before scaling to final frequency we need to setup the clock dividers */
 
-  putreg32(SYSCLKCR_VALUE, XMC4_SCU_SYSCLKCR);
+  /* Setup fSYS clock */
+
+  regval  = (BOARD_ENABLE_PLL << SCU_SYSCLKCR_SYSSEL);
+  regval |= SCU_SYSCLKCR_SYSDIV(BOARD_SYSDIV);
+  putreg32(regval, XMC4_SCU_SYSCLKCR);
+
+  /* Setup peripheral clock divider */
+
   putreg32(PBCLKCR_VALUE,  XMC4_SCU_PBCLKCR);
-  putreg32(CPUCLKCR_VALUE, XMC4_SCU_CPUCLKCR);
-  putreg32(CCUCLKCR_VALUE, XMC4_SCU_CCUCLKCR);
-  putreg32(WDTCLKCR_VALUE, XMC4_SCU_WDTCLKCR);
-  putreg32(EBUCLKCR_VALUE, XMC4_SCU_EBUCLKCR);
+
+  /* Setup fCPU clock */
+
+  putreg32(BOARD_CPUDIV_ENABLE, XMC4_SCU_CPUCLKCR);
+
+  /* Setup CCU clock */
+
+  putreg32(BOARD_CCUDIV_ENABLE, XMC4_SCU_CCUCLKCR);
+
+  /* Setup Watchdog clock */
+
+  regval  = (BOARD_WDT_SOURCE << SCU_WDTCLKCR_WDTSEL_SHIFT);
+  regval |= SCU_WDTCLKCR_WDTDIV(BOARD_WDTDIV);
+  putreg32(regval, XMC4_SCU_WDTCLKCR);
+
+  /* Setup EBU clock */
+
+  regval = SCU_EBUCLKCR_EBUDIV(BOARD_EBUDIV);
+  putreg32(regval, XMC4_SCU_EBUCLKCR);
+
+  /* Setup USB clock */
+
   putreg32(USBCLKCR_VALUE | USB_DIV, XMC4_SCU_USBCLKCR);
-  putreg32(EXTCLKCR_VALUE, XMC4_SCU_EXTCLKCR);
+
+  /* Setup EXT */
+
+  regval  = (BOARD_EXT_SOURCE << SCU_EXTCLKCR_ECKSEL_SHIFT);
+  regval |= SCU_EXTCLKCR_ECKDIV(BOARD_EXTDIV);
+  putreg32(regval, XMC4_SCU_EXTCLKCR);
 
 #if BOARD_ENABLE_PLL
   /* PLL frequency stepping...*/

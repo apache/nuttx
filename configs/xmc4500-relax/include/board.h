@@ -51,12 +51,26 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Clocking *************************************************************************/
+
 /* The maximum frequency for the XMC4500 is 120MHz. */
 
 #undef  BOARD_FCPU_144MHZ
-#define BOARD_FCPU_120MHZ 1
+#define BOARD_FCPU_120MHZ     1
 
-/* Clocking *************************************************************************/
+/* Watchdog clock source selection */
+
+#define WDT_CLKSRC_FOFI       0              /* fOFI clock  */
+#define WDT_CLKSRC_FSTDY      1              /* fSTDY clock */
+#define WDT_CLKSRC_FPLL       2              /* fPLL clock  */
+
+/* External Clock source selection */
+
+#define EXT_CLKSRC_FSYS       0              /* fSYS clock                   */
+#define EXT_CLKSRC_FUSB       2              /* fUSB clock divided by ECKDIV */
+#define EXT_CLKSRC_FPLL       3              /* fPLL clock divided by ECKDIV */
+
+/* Factory Calibration */
 
 #undef BOARD_FOFI_CALIBRATION                /* Enable factory calibration */
 
@@ -117,6 +131,28 @@
 #  define BOARD_CPUDIV_ENABLE       1        /* Enable PLL dive by 2 for fCPU */
 #  define BOARD_CPU_FREQUENCY       144000000
 
+/* CCU frequency may be divided down from system frequency */
+
+#  define BOARD_CCUDIV_ENABLE       1        /* Enable PLL div by 2 */
+#  define BOARD_CCU_FREQUENCY       144000000
+
+/* Watchdog clock settings */
+
+#  define BOARD_WDT_SOURCE          WDT_CLKSRC_FOFI
+#  define BOARD_WDTDIV              1
+#  define BOARD_WDT_FREQUENCY       24000000
+
+/* EBU frequency may be divided down from system frequency */
+
+#  define BOARD_EBUDIV              2        /* fSYS / 2 */
+#  define BOARD_EBU_FREQUENCY       72000000
+
+/* EXT clock settings */
+
+#  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
+#  define BOARD_EXTDIV              289      /* REVISIT */
+#  define BOARD_EXT_FREQUENCY       498270   /* REVISIT */
+
 /* The peripheral clock, fPERIPH, derives from fCPU with no division */
 
 #  define BOARD_PBDIV               1        /* No division */
@@ -169,6 +205,28 @@
 
 #  define BOARD_CPUDIV_ENABLE       0        /* No divison */
 #  define BOARD_CPU_FREQUENCY       120000000
+
+/* CCU frequency may be divided down from system frequency */
+
+#  define BOARD_CCUDIV_ENABLE       0        /* No divison */
+#  define BOARD_CCU_FREQUENCY       120000000
+
+/* Watchdog clock setting */
+
+#  define BOARD_WDT_SOURCE          WDT_CLKSRC_FOFI
+#  define BOARD_WDTDIV              1
+#  define BOARD_WDT_FREQUENCY       24000000
+
+/* EBU frequency may be divided down from system frequency */
+
+#  define BOARD_EBUDIV              2       /* fSYS/2 */
+#  define BOARD_EBU_FREQUENCY       60000000
+
+/* EXT clock settings */
+
+#  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
+#  define BOARD_EXTDIV              289      /* REVISIT */
+#  define BOARD_EXT_FREQUENCY       415225   /* REVISIT */
 
 /* The peripheral clock, fPERIPH, derives from fCPU with no division */
 
