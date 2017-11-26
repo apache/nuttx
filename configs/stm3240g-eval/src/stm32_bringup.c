@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -247,7 +248,6 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to instantiate the RTC lower-half driver\n");
-      return -ENOMEM;
     }
   else
     {
@@ -261,7 +261,6 @@ int stm32_bringup(void)
           syslog(LOG_ERR,
                  "ERROR: Failed to bind/register the RTC driver: %d\n",
                  ret);
-          return ret;
         }
     }
 #endif
@@ -275,18 +274,19 @@ int stm32_bringup(void)
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 0\n");
-      return -ENODEV;
     }
-
-  /* Now bind the SPI interface to the M25P64/128 SPI FLASH driver */
-
-  mtd = m25p_initialize(spi);
-  if (!mtd)
+  else
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
-      return -ENODEV;
+      /* Now bind the SPI interface to the M25P64/128 SPI FLASH driver */
+
+      mtd = m25p_initialize(spi);
+      if (!mtd)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind SPI port 0 to the SPI FLASH driver\n");
+        }
     }
+
 #warning "Now what are we going to do with this SPI FLASH driver?"
 #endif
 
@@ -300,38 +300,47 @@ int stm32_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize SDIO slot %d\n",
              CONFIG_NSH_MMCSDSLOTNO);
-      return -ENODEV;
     }
-
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
-  if (ret != OK)
+  else
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-             ret);
-      return ret;
+      /* Now bind the SDIO interface to the MMC/SD driver */
+
+      ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
+      if (ret != OK)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+                 ret);
+        }
+
+      /* Then let's guess and say that there is a card in the slot.  I need
+       * to check to see if the STM3240G-EVAL board supports a GPIO to
+       * detect if there is a card in the slot.
+       */
+
+      sdio_mediachange(sdio, true);
     }
+#endif
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the STM3240G-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
-   */
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
 
-   sdio_mediachange(sdio, true);
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread that will monitor for USB connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
     }
 #endif
 
