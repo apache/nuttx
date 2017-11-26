@@ -19,7 +19,7 @@ menuconfig LCD
 
 if LCD
 
-config LCD_PACKEDFIRST
+config LCD_PACKEDMSFIRST
 	bool
 	default n
 
