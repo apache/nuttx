@@ -520,7 +520,7 @@ Configuration Directories
   -------
 
     A simple NSH configuration used for some basic (non-graphic) debug of
-    the pdcurses librawry on top of a framebuffer character drivers.  This
+    the pdcurses library on top of a framebuffer character drivers.  This
     configuration provides the test programs from:
 
       - apps/examples/pdcurses,

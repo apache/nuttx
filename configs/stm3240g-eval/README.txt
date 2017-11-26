@@ -943,14 +943,31 @@ Where <subdir> is one of the following:
   --
 
     A simple NSH configuration used for some basic (non-graphic) debug of
-    the framebuffer character driver at drivers/video/fb.c using test at
-    apps/examples/fb.  The STM3240G-EVAL LCD driver does not support a
-    framebuffer!  This configuration uses the LCD framebuffer front end at
+    the framebuffer character driver at drivers/video/fb.c.  NOTE that
+    the STM3240G-EVAL LCD driver does not support a framebuffer!  It
+    interfaces with the LCD through a parallel FSMC interface.  This
+    configuration uses the LCD framebuffer front end at
     drivers/lcd/lcd_framebuffer to convert the LCD interface into a
     compatible framebuffer interface.
 
+    This examples supports the framebuffer test at apps/examples/fb.  That
+    test simply draws a pattern into the framebuffer and updates the LCD.
+
+    This example also supports the pdcurses library at apps/graphics/pdcurses
+    and the demo programs at apps/examples/pdcurses.  This is a good test of
+    the use of the framebuffer driver in an application.  Many of the
+    pdcurses demos requires user interaction via a mouse, keyboard, or
+    joystick.  No input devices are currently present in the configuration
+    so no such interaction is possible.
+
+    The STM3240G-EVAL does provide a on-board discrete joystick (djoystick)
+    that could be used for this interaction.  However, those discrete inputs
+    do not go directly to the STM32 but rather go indirectly through an I/O
+    expander.  I just have not had the motivation to deal with that yet.
+
     STATUS:
     2017-09-17:  This configuration appears to be fully functional.
+    2017-11-25:  Non-interactive pdcurses examples added.
 
   knxwm:
   -----
