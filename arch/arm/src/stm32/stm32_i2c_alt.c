@@ -208,6 +208,7 @@ static const uint16_t I2CEVENT_ISR_SHUTDOWN = 1001;        /* ISR gets shutdown 
 static const uint16_t I2CEVENT_ISR_EMPTY_CALL = 1002;      /* ISR gets called but no I2C logic comes into play */
 static const uint16_t I2CEVENT_MSG_HANDLING = 1003;        /* Message Handling 1/1: advances the msg processing param = msgc */
 static const uint16_t I2CEVENT_POLL_DEV_NOT_RDY = 1004;    /* During polled operation if device is not ready yet */
+static const uint16_t I2CEVENT_ISR_SR1ERROR = 1005;        /* ERROR set in SR1 at end of transfer */
 static const uint16_t I2CEVENT_ISR_CALL = 1111;            /* ISR called */
 
 static const uint16_t I2CEVENT_SENDADDR = 5;               /* Start/Master bit set and address sent, param = priv->msgv->addr(EV5 in reference manual) */
@@ -1824,7 +1825,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    * device wasn't ready yet.
    */
 
-   else
+  else
     {
 #ifdef CONFIG_I2C_POLLED
       stm32_i2c_traceevent(priv, I2CEVENT_POLL_DEV_NOT_RDY, 0);
@@ -1836,7 +1837,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       i2cerr("ERROR:  No correct state detected(start bit, read or write) \n");
       i2cerr("   state %i\n", status);
 
-      /* set condition to terminate ISR and wake waiting thread */
+      /* Set condition to terminate ISR and wake waiting thread */
 
       priv->dcnt = -1;
       priv->msgc = 0;
@@ -1855,7 +1856,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
   if ((status & I2C_SR1_ERRORMASK) != 0)
     {
-      stm32_i2c_traceevent(priv, I2CEVENT_ERROR, status & I2C_SR1_ERRORMASK);
+      stm32_i2c_traceevent(priv, I2CEVENT_ISR_SR1ERROR, status & I2C_SR1_ERRORMASK);
 
       /* Clear interrupt flags */
 
