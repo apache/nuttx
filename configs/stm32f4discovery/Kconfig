@@ -47,7 +47,7 @@ config STM32F4DISCO_USBHOST_PRIO
 config STM32F4DISCO_QETIMER
 	int "Timer to use with QE encoder"
 	default 2
-	depends on QENCODER
+	depends on SENSORS_QENCODER
 
 config STM32F4DISCO_LIS3DSH
 	bool "Enable LIS3DSH driver for the IMU on STM32F4Discovery (rev. MB997C)"

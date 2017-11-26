@@ -8,7 +8,7 @@ if ARCH_BOARD_NUCLEO_F401RE
 config NUCLEO_F401RE_QETIMER
 	int "Timer to use with QE encoder"
 	default 3
-	depends on QENCODER
+	depends on SENSORS_QENCODER
 
 config NUCLEO_F401RE_AJOY_MINBUTTONS
 	bool "Minimal Joystick Buttons"

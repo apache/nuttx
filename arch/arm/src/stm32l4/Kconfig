@@ -3817,7 +3817,7 @@ config STM32L4_CAN_REGDEBUG
 endmenu
 
 menu "QEncoder Driver"
-	depends on QENCODER
+	depends on SENSORS_QENCODER
 	depends on STM32L4_TIM1 || STM32L4_TIM2 || STM32L4_TIM3 || STM32L4_TIM4 || STM32L4_TIM5 || STM32L4_TIM8
 
 config STM32L4_TIM1_QE

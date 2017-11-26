@@ -66,6 +66,6 @@ config STM32F103MINIMUM_FLASH_PART_NAMES
 config STM32F103MINIMUM_QETIMER
 	int "Timer to use with QE encoder"
 	default 4
-	depends on QENCODER
+	depends on SENSORS_QENCODER
 
 endif
