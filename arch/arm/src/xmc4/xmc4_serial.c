@@ -226,9 +226,9 @@
 /* Event sets */
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_DLIEN)
+#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_AIEN | USIC_CCR_DLIEN)
 #else
-#  define CCR_RX_EVENTS       (USIC_CCR_RIEN)
+#  define CCR_RX_EVENTS       (USIC_CCR_RIEN | USIC_CCR_AIEN)
 #endif
 
 #define CCR_TX_EVENTS         (USIC_CCR_TBIEN)

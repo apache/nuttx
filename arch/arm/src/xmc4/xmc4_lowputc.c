@@ -201,28 +201,28 @@ void xmc4_lowsetup(void)
    */
 
 #ifdef HAVE_UART0
-  (void)xmc4_gpio_config(GPIO_UART0_RXD0);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD0);
+  (void)xmc4_gpio_config(GPIO_UART0_RXD);
+  (void)xmc4_gpio_config(GPIO_UART0_TXD);
 #endif
 #ifdef HAVE_UART1
-  (void)xmc4_gpio_config(GPIO_UART0_RXD1);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD1);
+  (void)xmc4_gpio_config(GPIO_UART1_RXD);
+  (void)xmc4_gpio_config(GPIO_UART1_TXD);
 #endif
 #ifdef HAVE_UART2
-  (void)xmc4_gpio_config(GPIO_UART0_RXD2);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD2);
+  (void)xmc4_gpio_config(GPIO_UART2_RXD);
+  (void)xmc4_gpio_config(GPIO_UART2_TXD);
 #endif
 #ifdef HAVE_UART3
-  (void)xmc4_gpio_config(GPIO_UART0_RXD3);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD3);
+  (void)xmc4_gpio_config(GPIO_UART3_RXD);
+  (void)xmc4_gpio_config(GPIO_UART3_TXD);
 #endif
 #ifdef HAVE_UART4
-  (void)xmc4_gpio_config(GPIO_UART0_RXD4);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD4);
+  (void)xmc4_gpio_config(GPIO_UART4_RXD);
+  (void)xmc4_gpio_config(GPIO_UART4_TXD);
 #endif
 #ifdef HAVE_UART5
-  (void)xmc4_gpio_config(GPIO_UART0_RXD5);
-  (void)xmc4_gpio_config(GPIO_UART0_TXD5);
+  (void)xmc4_gpio_config(GPIO_UART5_RXD);
+  (void)xmc4_gpio_config(GPIO_UART5_TXD);
 #endif
 
 #ifdef HAVE_UART_CONSOLE
