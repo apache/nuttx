@@ -122,14 +122,10 @@ endif
 
 ifeq ($(CONFIG_LPC43_SPI),y)
 CHIP_CSRCS += lpc43_spi.c
-else
-ifeq ($(CONFIG_LPC43_SSP0),y)
+else ifeq ($(CONFIG_LPC43_SSP0),y)
 CHIP_CSRCS += lpc43_spi.c
-else
-ifeq ($(CONFIG_LPC43_SSP1),y)
+else ifeq ($(CONFIG_LPC43_SSP1),y)
 CHIP_CSRCS += lpc43_spi.c
-endif
-endif
 endif
 
 ifeq ($(CONFIG_LPC43_SPIFI),y)
@@ -138,10 +134,8 @@ endif
 
 ifeq ($(CONFIG_LPC43_SSP0),y)
 CHIP_CSRCS += lpc43_ssp.c
-else
-ifeq ($(CONFIG_LPC43_SSP1),y)
+else ifeq ($(CONFIG_LPC43_SSP1),y)
 CHIP_CSRCS += lpc43_ssp.c
-endif
 endif
 
 ifeq ($(CONFIG_LPC43_TIMER),y)
@@ -154,34 +148,24 @@ endif
 
 ifeq ($(CONFIG_LPC43_I2C0),y)
 CHIP_CSRCS += lpc43_i2c.c
-else
-ifeq ($(CONFIG_LPC43_I2C1),y)
+else ifeq ($(CONFIG_LPC43_I2C1),y)
 CHIP_CSRCS += lpc43_i2c.c
-endif
 endif
 
 ifeq ($(CONFIG_LPC43_CAN0),y)
 CHIP_CSRCS += lpc43_can.c
-else
-ifeq ($(CONFIG_LPC43_CAN1),y)
+else ifeq ($(CONFIG_LPC43_CAN1),y)
 CHIP_CSRCS += lpc43_can.c
-endif
 endif
 
 ifeq ($(CONFIG_LPC43_ADC0),y)
 CHIP_CSRCS += lpc43_adc.c
-else
-ifeq ($(CONFIG_LPC43_ADC1),y)
+else ifeq ($(CONFIG_LPC43_ADC1),y)
 CHIP_CSRCS += lpc43_adc.c
-endif
 endif
 
 ifeq ($(CONFIG_LPC43_DAC),y)
-CHIP_CSRCS += lpc43_adc.c
-else
-ifeq ($(CONFIG_LPC43_DAC),y)
-CHIP_CSRCS += lpc43_adc.c
-endif
+CHIP_CSRCS += lpc43_dac.c
 endif
 
 ifeq ($(CONFIG_LPC43_USBOTG),y)
