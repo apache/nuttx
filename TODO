@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 11, 2017)
+NuttX TODO List (Last updated November 27, 2017)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
-  (9)  Graphics Subsystem (graphics/)
+ (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
@@ -2013,6 +2013,27 @@ o Graphics Subsystem (graphics/)
 
   Status:      Open
   Priority:    Low for many, but I imagine higher in countries that use wide fonts
+
+  Title:       LOW-RES FRAMEBUFFER RENDERERING
+  Description: There are obvious issues in the low-res, < 8 BPP, implemenation of
+               the framebuffer rendereing logic of graphics/nxglib/fb.  I see two
+               obvious problems in reviewing nxglib_copyrectangle():
+
+               1. The masking logic might work 1 BPP, but is insufficient for other
+                  resolutions like 2-BPP and 4-BPP.
+               2. The use of lnlen will not handle multiple bits per pixel.  It
+                  would need to be converted to a byte count.
+
+               The function PDC_copy_glyph() in the file apps/graphics/pdcurs34/nuttx/pdcdisp.c
+               derives from nxglib_copyrectangle() and all of those issues have been
+               resolved in that file.
+
+               Other frambuffer rendering functions probably have similary issues.
+  Status:      Open
+  Priority:    Low.  It is not surprising that there would be bugs in this logic:
+               I have never encountered a hardware framebuffer with sub-byte pixel
+               depth.  If such a beast ever shows up, then this priority would be
+               higher.
 
 o Build system
   ^^^^^^^^^^^^
