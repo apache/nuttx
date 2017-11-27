@@ -54,6 +54,10 @@
 #  include <nuttx/ioex.h>
 #endif
 
+#ifdef CONFIG_SMP
+#  include <nuttx/spinlock.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -74,6 +78,10 @@ static FAR struct ioex_dev_s *g_ioex_dev;
 #define GPIO_VIRTUAL_NUM 32
 static FAR struct vgpio_ops_s *vgpio_ops[GPIO_VIRTUAL_NUM];
 #endif /* CONFIG_LC823450_VGPIO */
+
+#ifdef CONFIG_SMP
+static volatile spinlock_t g_gpio_lock;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -400,24 +408,34 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
 
       regaddr = lc823450_get_gpio_data(port);
 
+#ifdef CONFIG_SMP
+      flags = up_irq_save();
+      spin_lock(&g_gpio_lock);
+#else
       flags = enter_critical_section();
+#endif
 
       /* Write the value (0 or 1).  To the data register */
 
       regval  = getreg32(regaddr);
 
-    if (value)
-      {
-        regval |= (1 << pin);
-      }
-    else
-      {
-        regval &= ~(1 << pin);
-      }
+      if (value)
+        {
+          regval |= (1 << pin);
+        }
+      else
+        {
+          regval &= ~(1 << pin);
+        }
 
-    putreg32(regval, regaddr);
+      putreg32(regval, regaddr);
 
-    leave_critical_section(flags);
+#ifdef CONFIG_SMP
+      spin_unlock(&g_gpio_lock);
+      up_irq_restore(flags);
+#else
+      leave_critical_section(flags);
+#endif
   }
 #ifdef CONFIG_IOEX
   else if (port <= (GPIO_PORTEX >> GPIO_PORT_SHIFT))

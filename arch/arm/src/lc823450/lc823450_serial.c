@@ -1007,7 +1007,11 @@ static bool up_txready(struct uart_dev_s *dev)
     }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
+#ifndef CONFIG_SMP
   return ((up_serialin(priv, UART_USR) & UART_USR_TXFULL) == 0);
+#else
+  return (UART_USFS_TXFF_LV(up_serialin(priv, UART_USFS)) <= 1);
+#endif
 }
 
 /****************************************************************************

@@ -200,10 +200,6 @@ To play WAV file on uSD card,
   nxplayer> play /mnt/sd1/sample.wav
   nxplayer> volume 50
 
-Currently nxplayer does not work in SMP mode.
-
-  up_assert: Assertion failed at file:chip/lc823450_cpupause.c line: 279 task: wm8776
-
 
 TODO
 ^^^^

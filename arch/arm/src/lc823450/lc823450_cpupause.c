@@ -185,9 +185,6 @@ int up_cpu_paused(int cpu)
 
   up_restorestate(tcb->xcp.regs);
 
-  /* FIXME */
-  up_udelay(500);
-
   spin_unlock(&g_cpu_wait[cpu]);
 
   return OK;
