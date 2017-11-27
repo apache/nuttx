@@ -91,8 +91,9 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
   rows  = dest->pt2.y - dest->pt1.y + 1;
 
 #if NXGLIB_BITSPERPIXEL < 8
-# ifdef CONFIG_NX_PACKEDMSFIRST
+  /* REVISIT: Doesn't the following assume 8 pixels in a byte */
 
+# ifdef CONFIG_NX_PACKEDMSFIRST
   /* Get the mask for pixels that are ordered so that they pack from the
    * MS byte down.
    */
@@ -111,8 +112,11 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
 
   /* Then copy the image */
 
-  sline = (FAR const uint8_t *)src + NXGL_SCALEX(dest->pt1.x - origin->x) + (dest->pt1.y - origin->y) * srcstride;
-  dline = pinfo->fbmem + dest->pt1.y * deststride + NXGL_SCALEX(dest->pt1.x);
+  sline = (FAR const uint8_t *)src +
+          NXGL_SCALEX(dest->pt1.x - origin->x) +
+          (dest->pt1.y - origin->y) * srcstride;
+  dline = pinfo->fbmem + dest->pt1.y * deststride +
+          NXGL_SCALEX(dest->pt1.x);
 
   while (rows--)
     {
@@ -130,7 +134,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
           mask = 0xff;
           dptr++;
           sptr++;
-          lnlen--;
+          lnlen--;    /* REVISIT:  Is this correct? */
         }
 
       /* Handle masking of the fractional final byte */
@@ -139,7 +143,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
       if (lnlen > 0 && mask)
         {
           dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-          lnlen--;
+          lnlen--;    /* REVISIT:  Is this correct? */
         }
 
       /* Handle all of the unmasked bytes in-between */
