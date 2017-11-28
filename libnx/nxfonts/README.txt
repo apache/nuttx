@@ -151,13 +151,13 @@ CONFIG_NXFONTS
 CONFIG_NXFONTS_CHARBITS
   The number of bits in the character set.  Current options are only 7 and 8.
   The default is 7.
-CONFIG_NX_DISABLE_1BPP, CONFIG_NX_DISABLE_2BPP,
-CONFIG_NX_DISABLE_4BPP, CONFIG_NX_DISABLE_8BPP,
-CONFIG_NX_DISABLE_16BPP, CONFIG_NX_DISABLE_24BPP, and
-CONFIG_NX_DISABLE_32BPP
+CONFIG_NXFONTS_DISABLE_1BPP, CONFIG_NXFONTS_DISABLE_2BPP,
+CONFIG_NXFONTS_DISABLE_4BPP, CONFIG_NXFONTS_DISABLE_8BPP,
+CONFIG_NXFONTS_DISABLE_16BPP, CONFIG_NXFONTS_DISABLE_24BPP, and
+CONFIG_NXFONTS_DISABLE_32BPP
   NX supports a variety of pixel depths.  You can save some memory by disabling
   support for unused color depths.
-CONFIG_NX_PACKEDMSFIRST
+CONFIG_NXFONTS_PACKEDMSFIRST
   If a pixel depth of less than 8-bits is used, then NX needs to know if the
   pixels pack from the MS to LS or from LS to MS
 
