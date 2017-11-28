@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/input/ioctl.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
  ************************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_INPUT_IOCTL_H
-#define __INCLUDE_NUTTX_INPUT_IOCTL_H
+#define __INCLUDE_NUTTX_INPUT_IOCTL_H 1
 
 /****************************************************************************
  * Included Files
@@ -47,27 +47,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define _JOYIOC_MASK      (0x001f)
-#define _JOYIOC_TYPE(cmd) ((cmd) & ~_JOYIOC_MASK)
-#define _JOYIOC_NBR(cmd)  ((cmd) & _JOYIOC_MASK)
+#define _JOYIOC_MASK         (0x001f)
+#define _JOYIOC_TYPE(cmd)    ((cmd) & ~_JOYIOC_MASK)
+#define _JOYIOC_NBR(cmd)     ((cmd) & _JOYIOC_MASK)
 
 /* Discrete Joystick (see nuttx/include/input/djoystick.h */
 
-#define _DJOYBASE         (_JOYBASE | 0x0000)
+#define _DJOYBASE            (_JOYBASE | 0x0000)
 
-#define _DJOYIOCVALID(c)  (_JOYIOC_MASK(c)==_DJOYBASE)
-#define _DJOYIOC(nr)      _IOC(_DJOYBASE,nr)
+#define _DJOYIOCVALID(c)     (_JOYIOC_MASK(c)==_DJOYBASE)
+#define _DJOYIOC(nr)         _IOC(_DJOYBASE,nr)
 
 /* Analog Joystick (see nuttx/include/input/ajoystick.h */
 
-#define _AJOYBASE         (_JOYBASE | 0x0020)
+#define _AJOYBASE            (_JOYBASE | 0x0020)
 
-#define _AJOYIOCVALID(c)  (_JOYIOC_MASK(c)==_AJOYBASE)
-#define _AJOYIOC(nr)      _IOC(_AJOYBASE,nr)
+#define _AJOYIOCVALID(c)     (_JOYIOC_MASK(c)==_AJOYBASE)
+#define _AJOYIOC(nr)         _IOC(_AJOYBASE,nr)
 
 /* Nunchuck Wii controller */
 
-#define _NUNCKIOCBASE     (_JOYBASE | 0x0040)
+#define _NUNCKIOCBASE        (_JOYBASE | 0x0040)
 
 #define _NUNCHUCKIOCVALID(c) (_IOC_TYPE(c)==_NUNCKIOCBASE)
 #define _NUNCHUCKIOC(nr)     _IOC(_NUNCKIOCBASE,nr)

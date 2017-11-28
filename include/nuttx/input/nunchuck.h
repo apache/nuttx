@@ -1,7 +1,7 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/input/nunchuck.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* This header file provides definition for Nintendo Wii Nunchuck joystick
+ * interface.  The Nunchuck joystick  provides X/Y  positional data as integer
+ * values. The analog positional data may also be accompanied by discrete button
+ * data.
+ *
+ * The nunchuck joystick driver exports a standard character driver
+ * interface. By convention, the nunchuck joystick is registered as an input
+ * device at /dev/nunchuckN where N uniquely identifies the driver instance.
+ */
 
 #ifndef __INCLUDE_NUTTX_INPUT_NUNCHUCK_H
-#define __INCLUDE_NUTTX_INPUT_NUNCHUCK_H
+#define __INCLUDE_NUTTX_INPUT_NUNCHUCK_H 1
 
 /****************************************************************************
  * Included Files
@@ -44,14 +54,53 @@
 #include <nuttx/input/ioctl.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define NUNCHUCK_ADDR          0x52    /* Nunchuck at address 0x52 */
+#define NUNCHUCK_I2C_FREQ      100000  /* 100Khz */
+
+/* Joystick Interface *******************************************************/
 /* These definitions provide the meaning of all of the bits that may be
- * reported in the djoy_buttonset_t bitset.
+ * reported in the nunchuck_buttonset_t bitset.
  */
 
-#define NUNCHUCK_BUTTON_Z_BIT  (0)
-#define NUNCHUCK_BUTTON_C_BIT  (1)
+#define NUNCHUCK_BUTTON(n)         ((n)-1)              /* Bit n-1: Button n, n=1..2 */
+#define NUNCHUCK_BUTTON_Z          (0)                  /* Bit 0: Button Z */
+#define NUNCHUCK_BUTTON_C          (1)                  /* Bit 1: Button C */
+#define NUNCHUCK_NBUTTONS          (2)                  /* Total number of buttons */
+
+#define NUNCHUCK_BUTTON_Z_BIT      (1 << NUNCHUCK_BUTTON_Z) /* 1:Button C pressed */
+#define NUNCHUCK_BUTTON_C_BIT      (1 << NUNCHUCK_BUTTON_C) /* 1:Button Z pressed */
+#define NUNCHUCK_BUTTONS_ALL       0x3                      /* Set of all buttons */
+
+/* Typical usage */
+
+#define NUNCHUCK_BUTTON_SELECT     NUNCHUCK_BUTTON_C
+#define NUNCHUCK_BUTTON_FIRE       NUNCHUCK_BUTTON_Z
+#define NUNCHUCK_BUTTON_JUMP       0
+
+#define NUNCHUCK_BUTTON_SELECT_BIT NUNCHUCK_BUTTON_C_BIT
+#define NUNCHUCK_BUTTON_FIRE_BIT   NUNCHUCK_BUTTON_Z_BIT
+#define NUNCHUCK_BUTTON_JUMP_BIT   0
+
+/* IOCTL commands
+ *
+ * Nunchuck joystick drivers do not support the character driver write() or
+ * seek() methods.  The remaining driver methods behave as follows:
+ *
+ * 1) The read() method will always return a single value of size
+ *    struct nunchuck_sample_s represent the current joystick positional and the
+ *    state of all joystick buttons. read() never blocks.  X an Y position
+ *    data is raw converted data.  Zeroing and scaling must be performed by
+ *    the application.
+ * 2) The poll() method can be used to notify a client if there is a change
+ *    in any of the joystick button inputs. NOTE: that semantics of poll() for
+ *    POLLIN are atypical:  The successful poll means that the button data has
+ *    changed and has nothing to with the availability of data to be read;
+ *    data is always available to be read.
+ * 3) The ioctl() method supports the commands documented below:
+ */
 
 /* Command:     NUNCHUCKIOC_SUPPORTED
  * Description: Report the set of button events supported by the hardware;
@@ -61,7 +110,53 @@
  *              with the errno value set appropriately.
  */
 
-#define AJOYIOC_SUPPORTED  _NUNCHUCKIOC(0x0000)
+#define NUNCHUCKIOC_SUPPORTED  _NUNCHUCKIOC(0x0001)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This type is a bit set that contains the state of all analog joystick
+ * buttons.
+ */
+
+typedef uint8_t nunchuck_buttonset_t;
+
+/* This structure is returned by read() and provides the sample state of the
+ * nunchuck joystick.
+ *
+ * NOTE: that this structure is equivalent to the struct mouse_report_s
+ * structure (with no wheel) defined in include/nuttx/input/mouse.h and can
+ * be used interchangeably in certain contexts.
+ */
+
+struct nunchuck_sample_s
+{
+  /* Compatible with analog joystick */
+
+  nunchuck_buttonset_t nck_buttons; /* State of all buttons */
+                                    /* Possibly padded with 1 byte here */
+  int16_t          js_x;            /* X/horizontal position */
+  int16_t          js_y;            /* Y/vertical position */
+
+  /* Specific of the Nunchuck */
+
+  int8_t          acc_x;            /* Accelerometer X */
+  int8_t          acc_y;            /* Accelerometer Y */
+  int8_t          acc_z;            /* Accelerometer Z */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -71,11 +166,11 @@
  * Name: nunchuck_register
  *
  * Description:
- *   Register the composite character driver as the specific device.
+ *   Register the composite character driver as the specified device.
  *
  * Input Parameters:
- *   devname - The name of the analog joystick device to be registers.
- *     This should be a string of the form "/priv/nunchuckN" where N is the
+ *   devname - The name of the analog joystick device to be registered.
+ *     This should be a string of the form "/dev/nunchuckN" where N is the
  *     minor device number.
  *   i2c - An instance of the platform-specific I2C connected to Nunchuck.
  *
@@ -88,5 +183,9 @@
 struct i2c_master_s;
 int nunchuck_register(FAR const char *devname, FAR struct i2c_master_s *i2c);
 
-#endif /* __INCLUDE_NUTTX_INPUT_NUNCHUCK_H */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* __INCLUDE_NUTTX_INPUT_NUNCHUCK_H */

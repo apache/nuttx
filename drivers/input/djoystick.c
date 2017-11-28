@@ -404,9 +404,9 @@ static int djoy_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct djoy_upperhalf_s *priv;
-  FAR const struct djoy_lowerhalf_s *lower;
   FAR struct djoy_open_s *opriv;
 #ifndef CONFIG_DISABLE_POLL
+  FAR const struct djoy_lowerhalf_s *lower;
   djoy_buttonset_t supported;
 #endif
   int ret;
