@@ -454,6 +454,18 @@ int stm32_lis3dshinitialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: nunchuck_initialize
+ *
+ * Description:
+ *   Initialize and register the button joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_NUNCHUCK
+int nunchuck_initialize(FAR char *devname);
+#endif
+
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
