@@ -91,6 +91,10 @@ ifeq ($(CONFIG_AJOYSTICK),y)
   CSRCS += ajoystick.c
 endif
 
+ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
+  CSRCS += nunchuck.c
+endif
+
 # Include input device driver build support
 
 DEPPATH += --dep-path input

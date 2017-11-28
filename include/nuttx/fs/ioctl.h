@@ -72,31 +72,33 @@
 #define _WLCIOCBASE     (0x1300) /* Wireless modules ioctl character driver commands */
 #define _CFGDIOCBASE    (0x1400) /* Config Data device (app config) ioctl commands */
 #define _TCIOCBASE      (0x1500) /* Timer ioctl commands */
-#define _DJOYBASE       (0x1600) /* Discrete joystick ioctl commands */
-#define _AJOYBASE       (0x1700) /* Analog joystick ioctl commands */
-#define _PIPEBASE       (0x1800) /* FIFO/pipe ioctl commands */
-#define _RTCBASE        (0x1900) /* RTC ioctl commands */
-#define _RELAYBASE      (0x1a00) /* Relay devices ioctl commands */
-#define _CANBASE        (0x1b00) /* CAN ioctl commands */
-#define _BTNBASE        (0x1c00) /* Button ioctl commands */
-#define _ULEDBASE       (0x1d00) /* User LED ioctl commands */
-#define _ZCBASE         (0x1e00) /* Zero Cross ioctl commands */
-#define _LOOPBASE       (0x1f00) /* Loop device commands */
-#define _MODEMBASE      (0x2000) /* Modem ioctl commands */
-#define _I2CBASE        (0x2100) /* I2C driver commands */
-#define _SPIBASE        (0x2200) /* SPI driver commands */
-#define _GPIOBASE       (0x2300) /* GPIO driver commands */
-#define _CLIOCBASE      (0x2400) /* Contactless modules ioctl commands */
-#define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
-#define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
-#define _PWRBASE        (0x2700) /* Power-related ioctl commands */
-#define _FBIOCBASE      (0x2800) /* Frame buffer character driver ioctl commands */
+#define _JOYBASE        (0x1600) /* Joystick ioctl commands */
+#define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
+#define _RTCBASE        (0x1800) /* RTC ioctl commands */
+#define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
+#define _CANBASE        (0x1a00) /* CAN ioctl commands */
+#define _BTNBASE        (0x1b00) /* Button ioctl commands */
+#define _ULEDBASE       (0x1c00) /* User LED ioctl commands */
+#define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
+#define _LOOPBASE       (0x1e00) /* Loop device commands */
+#define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
+#define _I2CBASE        (0x2000) /* I2C driver commands */
+#define _SPIBASE        (0x2100) /* SPI driver commands */
+#define _GPIOBASE       (0x2200) /* GPIO driver commands */
+#define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
+#define _USBCBASE       (0x2400) /* USB-C controller ioctl commands */
+#define _MAC802154BASE  (0x2500) /* 802.15.4 MAC ioctl commands */
+#define _PWRBASE        (0x2600) /* Power-related ioctl commands */
+#define _FBIOCBASE      (0x2700) /* Frame buffer character driver ioctl commands */
 
 /* boardctl() commands share the same number space */
 
 #define _BOARDBASE      (0xff00) /* boardctl commands */
 
-/* Macros used to manage ioctl commands */
+/* Macros used to manage ioctl commands.  IOCTL commands are divided into
+ * groups of 256 commands for major, broad functional areas.  That makes
+ * them a limited resource.
+ */
 
 #define _IOC_MASK       (0x00ff)
 #define _IOC_TYPE(cmd)  ((cmd) & ~_IOC_MASK)
@@ -335,17 +337,11 @@
 #define _TCIOCVALID(c)    (_IOC_TYPE(c)==_TCIOCBASE)
 #define _TCIOC(nr)        _IOC(_TCIOCBASE,nr)
 
-/* Discrete joystick driver ioctl definitions *******************************/
-/* (see nuttx/include/input/djoystick.h */
+/* Joystick driver ioctl definitions ***************************************/
+/* Discrete Joystick (see nuttx/include/input/djoystick.h */
 
-#define _DJOYIOCVALID(c)  (_IOC_TYPE(c)==_DJOYBASE)
-#define _DJOYIOC(nr)      _IOC(_DJOYBASE,nr)
-
-/* Analog joystick driver ioctl definitions *********************************/
-/* (see nuttx/include/input/ajoystick.h */
-
-#define _AJOYIOCVALID(c)  (_IOC_TYPE(c)==_AJOYBASE)
-#define _AJOYIOC(nr)      _IOC(_AJOYBASE,nr)
+#define _JOYIOCVALID(c)   (_IOC_SMASK(c)==_JOYBASE)
+#define _JOYIOC(nr)       _IOC(_JOYBASE,nr)
 
 /* FIFOs and pipe driver ioctl definitions **********************************/
 

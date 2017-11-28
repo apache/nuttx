@@ -58,6 +58,12 @@
 #endif
 #endif /* CONFIG_NET */
 
+#ifdef CONFIG_INPUT
+/* Include input driver IOCTL definitions */
+
+#  include <nuttx/input/ioctl.h>
+#endif
+
 #ifdef CONFIG_DRIVERS_WIRELESS
 /* Include wireless character driver IOCTL definitions */
 

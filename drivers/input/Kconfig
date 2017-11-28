@@ -426,3 +426,22 @@ config AJOYSTICK_NPOLLWAITERS
 	depends on !DISABLE_POLL
 
 endif # AJOYSTICK
+
+config INPUT_NUNCHUCK
+	bool "Nintendo Wii Nunchuck Joystick (White Model)"
+	default n
+	select I2C
+	---help---
+		Enable a Nintendo Wii Nunchuck joystick upper half driver. The
+		nunchuck joystick provides position data as an integer value.The
+		analog positional data may also	be accompanied by discrete
+		button data.
+
+if INPUT_NUNCHUCK
+
+config NUNCHUCK_NPOLLWAITERS
+	int "Max Number of Poll Waiters"
+	default 2
+	depends on !DISABLE_POLL
+
+endif # INPUT_NUNCHUCK

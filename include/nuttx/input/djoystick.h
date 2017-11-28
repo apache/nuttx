@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/input/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
