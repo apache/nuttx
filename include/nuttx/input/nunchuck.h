@@ -57,8 +57,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NUNCHUCK_ADDR          0x52    /* Nunchuck at address 0x52 */
-#define NUNCHUCK_I2C_FREQ      100000  /* 100Khz */
+#define NUNCHUCK_ADDR              0x52    /* Nunchuck at address 0x52 */
+#define NUNCHUCK_I2C_FREQ          100000  /* 100Khz */
 
 /* Joystick Interface *******************************************************/
 /* These definitions provide the meaning of all of the bits that may be
@@ -94,12 +94,7 @@
  *    state of all joystick buttons. read() never blocks.  X an Y position
  *    data is raw converted data.  Zeroing and scaling must be performed by
  *    the application.
- * 2) The poll() method can be used to notify a client if there is a change
- *    in any of the joystick button inputs. NOTE: that semantics of poll() for
- *    POLLIN are atypical:  The successful poll means that the button data has
- *    changed and has nothing to with the availability of data to be read;
- *    data is always available to be read.
- * 3) The ioctl() method supports the commands documented below:
+ * 2) The ioctl() method supports the commands documented below:
  */
 
 /* Command:     NUNCHUCKIOC_SUPPORTED
@@ -136,14 +131,14 @@ struct nunchuck_sample_s
 
   nunchuck_buttonset_t nck_buttons; /* State of all buttons */
                                     /* Possibly padded with 1 byte here */
-  int16_t          js_x;            /* X/horizontal position */
-  int16_t          js_y;            /* Y/vertical position */
+  int16_t js_x;                     /* X/horizontal position */
+  int16_t js_y;                     /* Y/vertical position */
 
   /* Specific of the Nunchuck */
 
-  int8_t          acc_x;            /* Accelerometer X */
-  int8_t          acc_y;            /* Accelerometer Y */
-  int8_t          acc_z;            /* Accelerometer Z */
+  int8_t  acc_x;                    /* Accelerometer X */
+  int8_t  acc_y;                    /* Accelerometer Y */
+  int8_t  acc_z;                    /* Accelerometer Z */
 };
 
 /****************************************************************************
@@ -166,10 +161,10 @@ extern "C"
  * Name: nunchuck_register
  *
  * Description:
- *   Register the composite character driver as the specified device.
+ *   Register the Nunchuck character driver as the specified device.
  *
  * Input Parameters:
- *   devname - The name of the analog joystick device to be registered.
+ *   devname - The name of the Nunchuck joystick device to be registered.
  *     This should be a string of the form "/dev/nunchuckN" where N is the
  *     minor device number.
  *   i2c - An instance of the platform-specific I2C connected to Nunchuck.

@@ -559,11 +559,11 @@ static int nunchuck_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: nunchuck_register
  *
  * Description:
- *   Register the composite character driver as the specific device.
+ *   Register the Nunchuck character driver as the specified device.
  *
  * Input Parameters:
- *   devname - The name of the analog joystick device to be registers.
- *     This should be a string of the form "/priv/nunchuckN" where N is the
+ *   devname - The name of the Nunchuck joystick device to be registered.
+ *     This should be a string of the form "/dev/nunchuckN" where N is the
  *     minor device number.
  *   i2c - An instance of the platform-specific I2C connected to Nunchuck.
  *
