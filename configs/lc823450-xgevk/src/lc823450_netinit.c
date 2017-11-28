@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/src/lc823450_bringup.c
+ * configs/lc823450-xgevk/src/lc823450_netinit.c
  *
  *   Copyright (C) 2017 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -39,84 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/mount.h>
-
-#include <stdbool.h>
-#include <syslog.h>
-
-#ifdef CONFIG_RNDIS
-#  include <nuttx/usb/rndis.h>
-#endif
-
-#ifdef CONFIG_WATCHDOG
-#  include "lc823450_wdt.h"
-#endif
-
-#include "lc823450-xgevk.h"
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lc823450_bringup
- *
- * Description:
- *   Bring up board features
- *
+ * Name: up_netinitialize
  ****************************************************************************/
 
-int lc823450_bringup(void)
+void up_netinitialize(void)
 {
-  int ret;
-
-#ifdef CONFIG_WATCHDOG
-  lc823450_wdt_initialize();
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_FAT
-  ret = mount("/dev/mtdblock0p10", "/mnt/sd0", "vfat", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount vfat at /mnt/sd0: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_BMA250
-  lc823450_bma250initialize("/dev/accel");
-#endif
-
-#ifdef CONFIG_AUDIO_WM8776
-  lc823450_wm8776initialize(0);
-#endif
-
-#if defined(CONFIG_RNDIS) && defined(CONFIG_NSH_MACADDR)
-  uint8_t mac[6];
-  mac[0] = 0xaa; /* TODO */
-  mac[1] = (CONFIG_NSH_MACADDR >> (8 * 4)) & 0xff;
-  mac[2] = (CONFIG_NSH_MACADDR >> (8 * 3)) & 0xff;
-  mac[3] = (CONFIG_NSH_MACADDR >> (8 * 2)) & 0xff;
-  mac[4] = (CONFIG_NSH_MACADDR >> (8 * 1)) & 0xff;
-  mac[5] = (CONFIG_NSH_MACADDR >> (8 * 0)) & 0xff;
-  usbdev_rndis_initialize(mac);
-#endif
-
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
-
-  UNUSED(ret);
-  return OK;
 }
