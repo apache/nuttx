@@ -241,6 +241,18 @@ void stm32_spidev_initialize(void);
 int stm32_mmcsd_initialize(int minor);
 #endif
 
+/****************************************************************************
+ * Name: nunchuck_initialize
+ *
+ * Description:
+ *   Initialize and register the button joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_NUNCHUCK
+int nunchuck_initialize(FAR char *devname);
+#endif
+
 /************************************************************************************
  * Name: stm32_hcsr04_initialize
  *

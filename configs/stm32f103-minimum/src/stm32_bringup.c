@@ -284,6 +284,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_NUNCHUCK
+  /* Register the Nunchuck driver */
+
+  ret = nunchuck_initialize("/dev/nunchuck0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nunchuck_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 

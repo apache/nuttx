@@ -12,6 +12,7 @@ Contents
   - UARTs
   - Timer Inputs/Outputs
   - Using 128KiB of Flash instead of 64KiB
+  - Nintendo Wii Nunchuck
   - Quadrature Encoder
   - SDCard support
   - SPI NOR Flash
@@ -244,6 +245,39 @@ Using 128KiB of Flash instead of 64KiB
     > exit
 
   Now NuttX should start normally.
+
+Nintendo Wii Nunchuck:
+======================
+
+  There is a driver on NuttX to support Nintendo Wii Nunchuck Joystick. If you
+  want to use it please select these options:
+
+  - Enable the I2C1 at System Type -> STM32 Peripheral Support, it will enable:
+
+    CONFIG_STM32_I2C1=y
+
+  - Enable to Custom board/driver initialization at RTOS Features -> RTOS hooks
+
+    CONFIG_BOARD_INITIALIZE=y
+
+  - Enable the I2C Driver Support at Device Drivers, it will enable this symbol:
+
+    CONFIG_I2C=y
+
+  - Nintendo Wii Nunchuck Joystick at Device Drivers -> [*] Input Device Support
+
+    CONFIG_INPUT=y
+      CONFIG_INPUT_NUNCHUCK=y
+
+  - Enable the Nunchuck joystick example at Application Configuration -> Examples
+
+  CONFIG_EXAMPLES_NUNCHUCK=y
+    CONFIG_EXAMPLES_NUNCHUCK_DEVNAME="/dev/nunchuck0"
+
+  You need to connect GND and +3.3V pins from Nunchuck connector to GND and 3.3V
+  of stm32f103-minimum respectively (Nunchuck also can work connected to 5V, but
+  I don't recommend it). Connect I2C Clock from Nunchuck to SCK (PB6) and the
+  I2C Data to SDA (PB7).
 
 Quadrature Encoder:
 ===================
