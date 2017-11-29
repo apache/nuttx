@@ -86,10 +86,9 @@ void devif_forward(FAR struct forward_s *fwd)
                     fwd->f_iob->io_pktlen, 0);
 
   DEBUGASSERT(ret == fwd->f_iob->io_pktlen);
-  offset += fwd->f_iob->io_pktlen;
 
   fwd->f_dev->d_sndlen = 0;
-  fwd->f_dev->d_len    = offset;
+  fwd->f_dev->d_len    = fwd->f_iob->io_pktlen;
 
   UNUSED(ret);
 }
