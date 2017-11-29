@@ -441,7 +441,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   Register the framebuffer character device at /dev/fbN where N is the
  *   display number if the devices supports only a single plane.  If the
  *   hardware supports multiple color planes, then the device will be
- *   registered at /dev/fbN-M where N is the again display number but M
+ *   registered at /dev/fbN.M where N is the again display number but M
  *   is the display plane.
  *
  * Input Parameters:
@@ -530,7 +530,7 @@ int fb_register(int display, int plane)
     }
   else
     {
-      (void)snprintf(devname, 16, "/dev/fb%d-%d", display, plane);
+      (void)snprintf(devname, 16, "/dev/fb%d.%d", display, plane);
     }
 
   ret = register_driver(devname, &fb_fops, 0666, (FAR void *)fb);

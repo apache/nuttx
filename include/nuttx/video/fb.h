@@ -466,7 +466,7 @@ void up_fbuninitialize(int display);
  *   Register the framebuffer character device at /dev/fbN where N is the
  *   display number if the devices supports only a single plane.  If the
  *   hardware supports multiple color planes, then the device will be
- *   registered at /dev/fbN-M where N is the again display number but M
+ *   registered at /dev/fbN.M where N is the again display number but M
  *   is the display plane.
  *
  * Input Parameters:
