@@ -80,6 +80,8 @@
                                            *      0=Use normal memory region
                                            *      1=Use alternate/extended memory
                                            * OUT: None */
+#define MTDIOC_ECCSTATUS  _MTDIOC(0x0008) /* IN:  Pointer to uint8_t
+                                           * OUT: ECC status */
 
 /* Macros to hide implementation */
 
@@ -423,6 +425,15 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: mx35_initialize
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: rammtd_initialize

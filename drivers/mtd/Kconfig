@@ -497,6 +497,27 @@ config MX25L_DEBUG
 
 endif # MTD_MX25L
 
+config MTD_MX35
+	bool "SPI-based MX35LF1GE4AB / MX35LF2GE4AB"
+	default n
+	select SPI
+	---help---
+		SPI-based driver for Macronix MX35LF1GE4AB or MX35LF2GE4AB.
+
+if MTD_MX35
+
+config MX35_SPIMODE
+	int "MX35 SPI mode"
+	default 0
+
+config MX35_SPIFREQUENCY
+	int "MX35 SPI Frequency"
+	default 104000000
+	---help---
+		SPI frequency for MX35 is 104 MHz.
+
+endif # MTD_MX35
+
 config MTD_S25FL1
 	bool "QuadSPI-based S25FL1 FLASH"
 	default n
