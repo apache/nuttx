@@ -65,8 +65,6 @@
 
 FAR struct net_driver_s *pkt_find_device(FAR struct pkt_conn_s *conn)
 {
-  FAR struct net_driver_s *dev;
-
   /* REVISIT:  This is bogus.  A better network device lookup is needed. */
 
   return netdev_findbyname("eth0");

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/pkt/pkt_conn.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -43,13 +43,13 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/irq.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
