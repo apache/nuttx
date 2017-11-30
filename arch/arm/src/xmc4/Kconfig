@@ -45,7 +45,55 @@ config XMC4_USCI_LIN
 	bool
 	default n
 
+config XMC4_LIN0
+	bool
+	default n
+
+config XMC4_LIN1
+	bool
+	default n
+
+config XMC4_LIN2
+	bool
+	default n
+
+config XMC4_LIN3
+	bool
+	default n
+
+config XMC4_LIN4
+	bool
+	default n
+
+config XMC4_LIN5
+	bool
+	default n
+
 config XMC4_USCI_SPI
+	bool
+	default n
+
+config XMC4_SPI0
+	bool
+	default n
+
+config XMC4_SPI1
+	bool
+	default n
+
+config XMC4_SPI2
+	bool
+	default n
+
+config XMC4_SPI3
+	bool
+	default n
+
+config XMC4_SPI4
+	bool
+	default n
+
+config XMC4_SPI5
 	bool
 	default n
 
@@ -53,7 +101,55 @@ config XMC4_USCI_I2C
 	bool
 	default n
 
+config XMC4_I2C0
+	bool
+	default n
+
+config XMC4_I2C1
+	bool
+	default n
+
+config XMC4_I2C2
+	bool
+	default n
+
+config XMC4_I2C3
+	bool
+	default n
+
+config XMC4_I2C4
+	bool
+	default n
+
+config XMC4_I2C5
+	bool
+	default n
+
 config XMC4_USCI_I2S
+	bool
+	default n
+
+config XMC4_I2S0
+	bool
+	default n
+
+config XMC4_I2S1
+	bool
+	default n
+
+config XMC4_I2S2
+	bool
+	default n
+
+config XMC4_I2S3
+	bool
+	default n
+
+config XMC4_I2S4
+	bool
+	default n
+
+config XMC4_I2S5
 	bool
 	default n
 
@@ -105,25 +201,29 @@ config XMC4_USIC0_CHAN0_ISUART
 		Configure USIC0 Channel 0 as a UART
 
 config XMC4_USIC0_CHAN0_ISLIN
-	bool "LIN"
+	bool "LIN0"
+	select XMC4_LIN0
 	select XMC4_USCI_LIN
 	---help---
 		Configure USIC0 Channel 0 as a LIN UART
 
 config XMC4_USIC0_CHAN0_ISSPI
-	bool "SPI"
+	bool "SPI0"
+	select XMC4_SPI0
 	select XMC4_USCI_SPI
 	---help---
 		Configure USIC0 Channel 0 for SPI communications
 
 config XMC4_USIC0_CHAN0_ISI2C
-	bool "I2C"
+	bool "I2C0"
+	select XMC4_I2C0
 	select XMC4_USCI_I2C
 	---help---
 		Configure USIC0 Channel 0 for I2C communications
 
 config XMC4_USIC0_CHAN0_ISI2S
-	bool "I2S"
+	bool "I2S0"
+	select XMC4_I2S0
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC0 Channel 0 for I2S audio
@@ -148,25 +248,29 @@ config XMC4_USIC0_CHAN1_ISUART
 		Configure USIC0 Channel 1 as a UART
 
 config XMC4_USIC0_CHAN1_ISLIN
-	bool "LIN"
+	bool "LIN1"
+	select XMC4_LIN1
 	select XMC4_USCI_LIN
 	---help---
 		Configure USIC0 Channel 1 as a LIN UART
 
 config XMC4_USIC0_CHAN1_ISSPI
-	bool "SPI"
+	bool "SPI1"
+	select XMC4_SPI1
 	select XMC4_USCI_SPI
 	---help---
 		Configure USIC0 Channel 1 for SPI communications
 
 config XMC4_USIC0_CHAN1_ISI2C
-	bool "I2C"
+	bool "I2C1"
+	select XMC4_I2C1
 	select XMC4_USCI_I2C
 	---help---
 		Configure USIC0 Channel 1 for I2C communications
 
 config XMC4_USIC0_CHAN1_ISI2S
-	bool "I2S"
+	bool "I2S1"
+	select XMC4_I2S1
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC0 Channel 1 for I2S audio
@@ -191,25 +295,29 @@ config XMC4_USIC1_CHAN0_ISUART
 		Configure USIC1 Channel 0 as a UART
 
 config XMC4_USIC1_CHAN0_ISLIN
-	bool "LIN"
+	bool "LIN2"
+	select XMC4_LIN2
 	select XMC4_USCI_LIN
 	---help---
 		Configure USIC1 Channel 0 as a LIN UART
 
 config XMC4_USIC1_CHAN0_ISSPI
-	bool "SPI"
+	bool "SPI2"
+	select XMC4_SPI2
 	select XMC4_USCI_SPI
 	---help---
 		Configure USIC1 Channel 0 for SPI communications
 
 config XMC4_USIC1_CHAN0_ISI2C
-	bool "I2C"
+	bool "I2C2"
+	select XMC4_I2C2
 	select XMC4_USCI_I2C
 	---help---
 		Configure USIC1 Channel 0 for I2C communications
 
 config XMC4_USIC1_CHAN0_ISI2S
-	bool "I2S"
+	bool "I2S2"
+	select XMC4_I2S2
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC1 Channel 0 for I2S audio
@@ -234,25 +342,29 @@ config XMC4_USIC1_CHAN1_ISUART
 		Configure USIC1 Channel 1 as a UART
 
 config XMC4_USIC1_CHAN1_ISLIN
-	bool "LIN"
+	bool "LIN3"
+	select XMC4_LIN3
 	select XMC4_USCI_LIN
 	---help---
 		Configure USIC1 Channel 1 as a LIN UART
 
 config XMC4_USIC1_CHAN1_ISSPI
-	bool "SPI"
+	bool "SPI3"
+	select XMC4_SPI3
 	select XMC4_USCI_SPI
 	---help---
 		Configure USIC1 Channel 1 for SPI communications
 
 config XMC4_USIC1_CHAN1_ISI2C
-	bool "I2C"
+	bool "I2C3"
+	select XMC4_I2C3
 	select XMC4_USCI_I2C
 	---help---
 		Configure USIC1 Channel 1 for I2C communications
 
 config XMC4_USIC1_CHAN1_ISI2S
-	bool "I2S"
+	bool "I2S3"
+	select XMC4_I2S3
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC1 Channel 1 for I2S audio
@@ -277,25 +389,29 @@ config XMC4_USIC2_CHAN0_ISUART
 		Configure USIC2 Channel 0 as a UART
 
 config XMC4_USIC2_CHAN0_ISLIN
-	bool "LIN"
+	bool "LIN4"
+	select XMC4_LIN4
 	select XMC4_USCI_LIN
 	---help---
 		Configure USIC2 Channel 0 as a LIN UART
 
 config XMC4_USIC2_CHAN0_ISSPI
-	bool "SPI"
+	bool "SPI4"
+	select XMC4_SPI4
 	select XMC4_USCI_SPI
 	---help---
 		Configure USIC2 Channel 0 for SPI communications
 
 config XMC4_USIC2_CHAN0_ISI2C
-	bool "I2C"
+	bool "I2C4"
+	select XMC4_I2C4
 	select XMC4_USCI_I2C
 	---help---
 		Configure USIC2 Channel 0 for I2C communications
 
 config XMC4_USIC2_CHAN0_ISI2S
-	bool "I2S"
+	bool "I2S4"
+	select XMC4_I2S4
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC2 Channel 0 for I2S audio
@@ -320,25 +436,29 @@ config XMC4_USIC2_CHAN1_ISUART
 		Configure USIC2 Channel 1 as a UART
 
 config XMC4_USIC2_CHAN1_ISLIN
-	bool "LIN"
+	bool "LIN5"
+	select XMC4_LIN5
 	select XMC4_USCI_LIN
 	---help---
 		Configure USIC2 Channel 1 as a LIN UART
 
 config XMC4_USIC2_CHAN1_ISSPI
-	bool "SPI"
+	bool "SPI5"
+	select XMC4_SPI5
 	select XMC4_USCI_SPI
 	---help---
 		Configure USIC2 Channel 1 for SPI communications
 
 config XMC4_USIC2_CHAN1_ISI2C
-	bool "I2C"
+	bool "I2C5"
+	select XMC4_I2C5
 	select XMC4_USCI_I2C
 	---help---
 		Configure USIC2 Channel 1 for I2C communications
 
 config XMC4_USIC2_CHAN1_ISI2S
-	bool "I2S"
+	bool "I2S5"
+	select XMC4_I2S5
 	select XMC4_USCI_I2S
 	---help---
 		Configure USIC2 Channel 1 for I2S audio
