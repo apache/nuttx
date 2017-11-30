@@ -98,25 +98,31 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
         {
           if (group->tg_atexitfunc[index])
             {
-              /* Call the atexit function */
-
-              (*group->tg_atexitfunc[index])();
+              atexitfunc_t func;
 
               /* Nullify the atexit function to prevent its reuse. */
 
+              func = group->tg_atexitfunc[index];
               group->tg_atexitfunc[index] = NULL;
+
+              /* Call the atexit function */
+
+              (*func)();
             }
         }
 #else
       if (group->tg_atexitfunc)
         {
-          /* Call the atexit function */
-
-          (*group->tg_atexitfunc)();
+          atexitfunc_t func;
 
           /* Nullify the atexit function to prevent its reuse. */
 
+          func = group->tg_atexitfunc;
           group->tg_atexitfunc = NULL;
+
+          /* Call the atexit function */
+
+          (*func)();
         }
 #endif
     }
@@ -166,25 +172,31 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
         {
           if (group->tg_onexitfunc[index])
             {
-              /* Call the on_exit function */
-
-              (*group->tg_onexitfunc[index])(status, group->tg_onexitarg[index]);
+              onexitfunc_t func;
 
               /* Nullify the on_exit function to prevent its reuse. */
 
+              func = group->tg_onexitfunc[index];
               group->tg_onexitfunc[index] = NULL;
+
+              /* Call the on_exit function */
+
+              (*func)(status, group->tg_onexitarg[index]);
             }
         }
 #else
       if (group->tg_onexitfunc)
         {
-          /* Call the on_exit function */
-
-          (*group->tg_onexitfunc)(status, group->tg_onexitarg);
+          onexitfunc_t func;
 
           /* Nullify the on_exit function to prevent its reuse. */
 
+          func = group->tg_onexitfunc;
           group->tg_onexitfunc = NULL;
+
+          /* Call the on_exit function */
+
+          (*func)(status, group->tg_onexitarg);
         }
 #endif
     }
