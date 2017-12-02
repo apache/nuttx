@@ -689,7 +689,7 @@ Where <subdir> is one of the following:
       nsh> fb
 
     Also included is the touchscreen test of apps/examples/touchscreen.  This
-    example will simply open the touchscrren driver then collect and display
+    example will simply open the touchscreen driver then collect and display
     touch inputs:
 
       nsh> tc 1
