@@ -16728,4 +16728,1444 @@
 	  was not freeing resources when a wait was completed.  From Boris
 	  Astardzhiev (2017-09-04).
 
-7.23 2017-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.23 2017-12-04 Gregory Nutt <gnutt@nuttx.org>
+
+	* STM32L4: ADC, Kconfig small changes:
+	    - STM32L4 ADC: port analog watchdog ioctls from the Motorola MDK
+	    - STM32L4: Kconfig: add some L486 and L496 chips, remove duplicates
+	  From Juha Niskanen (2017-09-06).
+	* 6LoWPAN:  Correct an error in uncompressing multicast address
+	  (2017-09-08).
+	* sem_open() should return SEM_FAILED on any failures.  This is change
+	  in the POSIX specification since the original sem_open() was written
+	  so many years ago (2017-09-08).
+	* STM32: Add logic for enabling wakeup pins.  From Oleg Evseev
+	  (2017-09-08).
+	* Update/fix last commit:  On some STM32's, the CSR regiser is 18 vs. 16
+	  bits wide.  Need to use 32-bit register accesses (2017-09-08).
+	* 6LoWPAN: I believe, based on RFC review, that with the last multicast
+	  change, the NuttX 6LoWPAN is now compliant with RFC 6282 (2017-09-08).
+	* arch/arm/Kconfig:  Add more classic ARM11 architecture selections
+	  (2017-09-09).
+	* 6LoWPAN/Radio:  Rename radio property sp_pktlen to sp_framelen.  Add
+	  6LoWPAN utility to get the max frame length (not yet hooked in)
+	  (2017-09-10).
+	* 6LoWPAN: Remove the option to disable fragmentation support.  Two
+	  reasons:  (1) First fragementation is always required because IPv6
+	  requires an MTU of 1280 bytes.  The is no application use case that can
+	  work without fragmentation support.  And (2) it greatly reduces the
+	  complexity of the code (2017-09-10).
+	* net/sixlowpan: Remove CONFIG_NET_6LOWPAN_FRAMELEN.  In this case where
+	  multiple radios are supported, this may not be a constant.  6LoWPAN now
+	  always queries the driver to get the maximum frame length (2017-09-10).
+	* drivers/smps.c: fix error messages.  From Mateusz Szafoni (2017-09-10).
+	* configs/stm32f334-disco: beginning of lower half driver for high power
+	  LED (powerled).  From Mateusz Szafoni (2017-09-10).
+	* Misc STM32 fixes
+	    - stm32f33xxx_hrtim.h: fix definition
+	    - stm32_hrtim: fix pclk calculation
+	    - stm32_hrtim.c: cosmetics
+	    - add upper-half driver for high power LED driver (powerled)
+	  From Mateusz Szafoni (2017-09-10).
+	* drivers/video/fb.c:  Add framebuffer character device (2017-09-11).
+	* drivers/video/fb.c:  Add support for LCD drivers that use a simulated
+	  framebuffer and must receive explicit notification when there is an
+	  update to a region in the framebuffer (2017-09-11).
+	* configs/lc823450-xgevk: Enable ADC and watchdog driver.  From Masayuki
+	  Ishikawa (2017-09-12).
+	* arch/arm/src/lc823450:  Conform to the NuttX coding style, merge the
+	  latest fix in lc823450_rtc.c, add ADC driver, add watchdog driver.  From
+	  Masayuki Ishikawa (2017-09-12).
+	* net/sock: recvfrom:  Fix double leave_cancellation_point on error
+	  path.  From Jussi Kivilinna (2017-09-12).
+	* net/socket:  Do not enter cancellation point in psock_send() as this
+	  is already done in send().  From Jussi Kivilinna (2017-09-12).
+	* net/socket: send: verify that sockfd is valid, fixes assert when using
+	  send on closed socket.  From Jussi Kivilinna (2017-09-12).
+	* drivers/video/fb.c and include/nuttx/video.fb.h:  Some improvements
+	  and fixes from early testing sith the sim/fb cnofiguration (2017-09-12).
+	* sim/configs/fb:  Add a configuration for non-graphical testing of the
+	  frambuffer character driver using apps/example/fb (2017-09-12).
+	* Rename CONFIG_VIDEO_DEVICES to CONFIG_DRIVERS_VIDEO to conform better
+	  to the evolving configuration naming standard (2017-09-12).
+	* Rename CONFIG_AUDIO_DEVICES to CONFIG_DRIVERS_AUDIO to conform better
+	  to the evolving configuration naming standard (2017-09-12).
+	* stm32:  stm32 alt I2C ensure proper error handling. Injecting data
+	  errors would cause the driver to continually reenter the isr with BERR
+	  an RxNE.  This fix allows the error to be cleared and propagated to the
+	  waiting task.  From David Sidrane (2017-09-12).
+	* stm32x i2c fixes, stm32: Fix coding standard error, stm32f7 I2C: fixed
+	  typo in comment.  From David Sidrane (2017-09-13).
+	* STM32 Tickless: Fixes compilation error when timer info/debug messages
+	  are enabled.  From Rajan Gill (2017-09-13).
+	* net/: Fix some errors found by Coverity.
+	* STM32/STM32 F7:  Fix some errors found by Coverity (2017-09-13).
+	* drivers/video/fb.c: File offset is in units of bytes, not pixels
+	  (2017-09-14).
+	* drivers/lis3dsh.c:  Added the argument parameter (FAR void *arg) to
+	  the interrupt handler provided by the LIS3DSH driver to fit the
+	  definition for ISRs in xcpt_t.  Changed the check for working queue
+	  availability in lis3dsh interrupt handler to use work_available() and
+	  not crash in case of an overrun.  From Florian Olbrich (2017-09-14).
+	* configs/stm32f4discover: Added initialization code and Kconfig entries
+	  to set up the LIS3DSH accelerometer driver on STM32F4Discovery rev. C
+	  boards and attach the associated interrupt callback.  From Florian
+	  Olbrich (2017-09-14).
+	* Added initialization code and Kconfig entries for LIS3DSH
+	  accelerometer on STM32F4Discovery + associated changes to LIS3DSH
+	  driver.  From Florian Olbrich (2017-09-14).
+	* LPC31xx: Change naming of some global variables to match coding
+	  standard (2017-09-14).
+	* wireless/ieee802154/: Moves MAC802154IOC from ieee802154_ioctl.h and
+	  renames ieee802154_ioctl.h to ieee802154_device.h since it only contains
+	  types relevant to the MAC char device now.  From Anthony Merlino
+	  (2017-09-15).
+	* wireless/ieee802154: Adds support for receiving MAC events via IOCTL
+	  through socket interface. Other small fixes and cleanup.  From Anthony
+	  Merlino (2017-09-15).
+	* drivers/wireless:  Adds XBee S2C (802.15.4 firmware) support. XBee
+	  driver emulates mac802154 interface.  From Anthony Merlino (2017-09-15).
+	* sched/waitpid.c: Eliminate a warning detected by GCC 6 (2017-09-15).
+	* drivers/xbee: Fixes a few warnings
+	    - drivers/xbee: Fixes a few warnings
+	    - configs/clicker2-stm32: Updates sections about i8sak usage in the
+	      README
+	  From Anthony Merlino (2017-09-15).
+	* STM32 Tickless: The attached patch removes the restriction to 16bit
+	  counts when a 32bit timer is used for the new tickless on the stm32. As
+	  it is now, the restriction is very limiting, especially if one wants
+	  high granularity and large achievable intervals and has the hardware
+	  (namely the 32bit timers) available.  From Rajan Gill (2017-09-16).
+	* configs/open1788:  Initialization now follows the pattern of other
+	  boards.  Add initialization of fb driver.  Add a configuration for
+	  testing the framebuffer driver (2017-09-16).
+	* drivers/video: fb driver now clears framebuffer initially.  Eliminates
+	  (or minimizes) initial garbage on the display (2017-09-16).
+	* SAMV71-XULT: Add support for fb_driver (2017-09-17).
+	* drivers/lcd:  Add suppose for a generic front-end that will convert
+	  any LCD driver into a framebuffer driver (2017-09-17).
+	* SAMv71-XULT:  Add a configuration to test the LCD framebuffer driver.
+	  Not quite yet working properly (2017-09-17).
+	* configs/stm3210e-eval:  Rename stm32_appinit.c to stm32_bringup.c so
+	  that the start up logic is compatible with other, new boards.  Bring in
+	  new stm32_appinit.c, add board_initialize(), add support for FB
+	  character driver (2017-09-17).
+	* configs/stm3240g-eval:  Rename stm32_appinit.c to stm32_bringup.c to
+	  better match other architectures.  Replace the old-style stm32_appinit.c
+	  with tne new one from the STM32F4-Discovery.  Add a configuration for
+	  testing the FB character driver at drivers/video/fb.c using the LCD
+	  frame driver front end at drivers/lcd/lcd_framebuffer.c.  Appears to be
+	  fully functional (2017-09-17).
+	* netinet/in.h:  Add missing IN6_IS_ADDR_V4COMPAT macro (2017-09-18).
+	* configs/stm32f4discovery: Update README.  Add summary of differences
+	  with the newest STM32F407G-DISC1 part.  Remove a lot of old discussion
+	  that is really no longer helpful (2017-09-18).
+	* Networking: sockgetname() files need to include udp/udp.h and
+	  tcp/tcp.h or otherwise NET_UDP_HAVE_STACK and NET_TCP_HAVE_STACK are
+	  undefined and the logic is never compiled.  Noted by Anthony Merlino
+	  (2017-09-18).
+	* Add driver for APA102 LED controller.  These LEDs are used on LED
+	  Strips and are controlled over SPI (2017-09-18).
+	* configs/stm32f103-minimum: Add board support for APA102 driver.  From
+	  Alan Carvalho de Assis (2017-09-18).
+	* sched/env_dup.c:  Fix an error in the duplication of the child tasks
+	  environment in the special case where the parent's environment was
+	  created, but then all of the variables were unset.  In that case, there
+	  is still an allocation in place but the size of the allocation is zero.
+	  This case was not being handled correctly when a child task attempts to
+	  create its environment and inherit the zero-size partent environment.
+	  Noted by Anthony Merlino (2017-09-18).
+	* STM32L4 DFSDM: add peripheral, DAC, TIM: small changes
+	    - STM32L4 DAC: do not configure output pin if it is not used
+	    - STM32L4 TIM: fix compilation of timers with complementary outputs
+	      when not PWM_MULTICHAN
+	    - STM32L4 DFSDM: peripheral for digital filters for sigma-delta ADCs
+	  Initial version. Timer trigger support is not completed and there is
+	  some issue with DMA.
+	  From Juha Niskanen (2017-09-19).
+	* stm3240g-eval: Remove some bad conditional compilation (2017-09-19).
+	* Networking: IPv4 getsockname(): Fix a typo that can cause a compile
+	  error (2017-09-19).
+	* viewtool-stm32f107: Enable NSH arch-specific initialization.  Rename
+	  stm32_appinit.c to stm32_bringup.c for consistency with other boards.
+	  Replace old stm32_appinit.c (now stm32_bringup.c) with 'standard'
+	  stm32_appinit.c from the STM32F4-Discovery.  Add CONFIG_BOARD_INITIALIZE
+	  logic to stm32_boot.c.  Add support to auto-mount the procfs file system
+	  (2017-09-19).
+	* Networking:  Add implementation of logic for SIOCGIFCONF and
+	  SIOCGLIFCOF IOCTL commnds (2017-09-19).
+	* Networking: drivers/net/loopback.c: Eliminate a warning.
+	  net/netdev/netdev_ifconfig.c: Was not returning all of the address info
+	  (2017-09-19).
+	* STM32L4 ADC, DFSDM: add routing of ADC data to DFSDM filters.   From
+	  Juha Niskanen
+	    - configs/nucleo-l496zg: add DFSDM initialization
+	    - STM32L4 ADC: add option for routing ADC data to DFSDM, fix DFSDM
+	      DMA (2017-09-20).
+	* SIOCGIFCONF and SIOCGLIFCONF IOCTL commands should only report on
+	  network adatpors in the UP state (2017-09-20).
+	* In some cases, packets are still not sent behind the router. I found
+	  that NuttX sends the ARP requests not to the router but to the target.
+	  Mistake in file net/route/netdev_router.c.  From Aleksandr Kazantsev
+	  (2017-09-20).
+	* stm32: stm32f40xxx I2C ensure proper isr handling.  Injecting data
+	  errors that causes a STOP to be perceived by the driver, will
+	  continually re-enter the isr with SB not set and BTF
+	  and RxNE set.  This changes allows the interrupts to be cleared and
+	  propagates a I2C_SR1_TIMEOUT to the waiting task.  From David Sidrane
+	  (2017-09-21).
+	* include/nuttx/net/net.h:  Add missing semicolon in prototype.  Fixes
+	  error in certain combinations of configuration options.  From Pavel Pisa
+	  (2017-09-21).
+	* drivers/pipes: pipe_common:  Fix writing large buffers not triggering
+	  POLLIN for reader poll.  From Jussi Kivilinna (2017-09-21).
+	* drivers/usbdev:  Add support for RX flow control to the CDC/ACM driver
+	  (2017-09-22).
+	* STM32 Serial:  Fix some incorrect conditional compilation (2017-09-23).
+	* drivers/usbdev:  Add support for flow control TERMIOs in CDC/ACM
+	  driver (2017-09-23).
+	* drivers/usbdev:  CDC/ACM should reset all 'irregular' notifications to
+	  zero after sending the SerialState packet (2017-09-23).
+	* drivers/usbdev:  Fix some bad conditional logic (2017-09-23).
+	* Fixes several errors preventing icmpv6_radvertise.c from being
+	  compiled. Fixes conversions to network byte order (namely vlifetime,
+	  plifetime, mtu).  IPv6 source address is set to link-local IP address
+	  instead of the address in the netdev structure. This is in compliance to
+	  RFC 4861. RA didn't work on Linux before this change.  Finally, router
+	  prefix and prefix length are derived from the IPv6 address and netmask
+	  in the netdev structure. This seems to make more sense than using a
+	  predefined, separate prefix from the config.  From Sakari Kapanen
+	  (2017-09-24).
+	* drivers/usbdev/usbdev: Add RNDIS-over-USB driver.  From Sakari Kapanen
+	  (2017-09-24).
+	* net/igmp/igmp_send.c:  Fix incoming IGMP checksum calculation.  From
+	  Louis Mayencourt (2017-09-25).
+	* Fixes for problems found by Coverity in the nuttx repository:
+	    - net/socket/recvfrom.c: Check fromlen integrity before using it.
+	    - net/socket/net_sockets.c: Always check for valid psock before using.
+	    - net/tcp/tcp_send_unbuffered.c:  Avoid using psock beforing
+	      checking its integrity.
+	    - sched/timer/timer_create.c: Fix watchdog resource leak if cannot
+	      allocate a new timer.
+	  From Bruno Herrera (2017-09-25).
+	* drivers/usbdev/Kconfig: Add comments in regard to RNDIS selection
+	  (2017-09-25).
+	* configs/nucleo-f410rb:  Add support for the nucleo-F410RB board.  From
+	  Gwenhael Goavec-Merou (2017-09-25).
+	* STM32 L4: Add SDMMC driver.  From Miha Vrhovnik (2017-09-26).
+	* Nucleo-L496ZG: Add support for SDMMC driver.  From Miha Vrhovnik
+	  (2017-09-26).
+	* drivers/usbdev/cdcacm.c: Avoid using priv before checking its
+	  validity.  From Juha Niskanen (2017-09-26).
+	* drivers/usbdev/cdcacm.c:  Change design for queuing RX packets that
+	  cannot be processed.  Previous design had a logic problem that could
+	  cause data loss (2017-09-26).
+	* drivers/usbdev/cdcacm.c:  Add a failsafe time to assure that the RX
+	  pending queue cannot stall indefinitely.  I can imagine a corner case
+	  where the serial driver's RX buffer is full and it stops accepting data
+	  and where all of the read requests are queued and there is not event to
+	  restart RX processing.  I am not sure that that scenario can really
+	  happen, but the failsafe timer gives me peace of mind (2017-09-26).
+	* Build break fix: define PWM_TIM2_CH1CFG for channel 1 PWM.  From
+	  Tomasz Wozniak (2017-09-26).
+	* Fixed directory unlocking in tmpfs_opendir.   From Dmitriy Linikov
+	  (2017-09-27).
+	* drivers/usbdev/cdcacm.c:  Add some missing logic when flow control is
+	  disabled.  Also make sure that the flowcontrol and rxint can handle
+	  being re-entered when cdcacm_release_rxpending() is called (2017-09-27).
+	* drivers/usbdev/cdcacm.c:  Fix confusion between flow control being
+	  enabled and being active.  Different things (2017-09-27).
+	* drivers/usbdev/cdcacm.c:  Change ordering of some operations to avoid
+	  races; Add missing uppder watermark logic that is normally in
+	  serial_io.c but must be duplicated in cdcacm.c (2017-09-27).
+	* Fixed directory unlocking in tmpfs_opendir.  From Dmitriy Linikov
+	  (2017-09-27).
+	* net/route: Permit IPv4 and IPv6 routing tables to be of different
+	  sizes (2017-09-27).
+	* ROMFS for STM32F4 Discovery board.  Tomasz Wozniak (2017-09-28).
+	* STM32 PWR:  Adds stm32_pwr_getsbf and stm32_pwr_getwuf functions that
+	  return the standby flag and the wakeup flag PWR power control/status
+	  register.  From Oleg Evseev (2017-09-28).
+	* net/arp/arp_out.c:  Fix IGMP Ethernet address computation.  From Louis
+	  Mayencourt (2017-09-28).
+	* net/route:  Adds support for read-only routing tables.  Prior to this
+	  change, routing tables were only support in RAM and had to be
+	  initialized with explicit logic to add the necessary routes to the
+	  routing table.  With this change, routes may be defined in the
+	  pre-initialized, read-only routing table provided by the board-specific
+	  logic
+
+	  This would be particularly useful, for example, in the case where
+	  there is only a single network adaptor and you want all output packets
+	  to go to the single adaptor in all cases.  So for that behavior you
+	  could add a read-only routing table to the board-specific long that
+	  contains a single entry, the default route: 0.0.0.0/0 (2017-09-28).
+	* fs/vfs:  file_seek() is an internal OS interface and should not errors
+	  via the errno (2017-09-28).
+	* fs/vfs:  file_read() is an internal OS interface and should not errors
+	  via the errno (2017-09-28).
+	* fs/vfs:  file_write() and file_pwrite() are internal OS interfaces and
+	  should not report errors via the errno (2017-09-28).
+	* STM32L4 FLASH, DFSDM: option bytes, JEXTSEL bits, ADC1 output to DFSDM
+	  chips change
+	    - STM32L4 FLASH: add function for modifying device option bytes
+	    - STM32L4 DFSDM: add JEXTSEL bits, ADC1 output to DFSDM chips change
+	  ST's documentation hints that ADC output can be routed to DFSDM on
+	  some STM32L4X3 chips, but I got confirmation from tech support that
+	  this is just a documentation error so remove this from Kconfig
+	  From Juha Niskanen (2017-09-29).
+	* This commit adds support for routing tables in files in a file
+	  system.  This might be useful for customized, per-unit routing tables.
+	  There are two issues with it however:
+	    1. Reading from file system on a per packet basis could be slow.  I
+	      think it probably should have a small, in-memory cache of most
+	      frequently used routes for good problem.
+	    2. Currently the delroute logic is disabled due to a problem with
+	      the design.  NuttX does not currently support truncate().
+	      Therefore, it is not possible to delete entries from the routing
+	      table file.
+	  In this current implementation, that leaves the last entry intact at
+	  the end of the file.  An alternative design might include a tag on
+	  each record to indicate if the record is valid or not.  That would
+	  work but would add complexity to the other routing table functions
+	  (2017-09-29).
+	* net/route:  Add support for an in-memory routing table cache in order
+	  to improve performance when the routing table is retained in a file.
+	  The cache holds the most recently used routing table entries and so can
+	  eliminate some file access.  Flush the in-memory cache when any entry is
+	  deleted from the routing table.  When a router matching an IP address is
+	  found, add the routing table entry to the cache (2017-09-29).
+	* fs/vfs:  null check for path on open and buf on write.  Null path
+	  check is depend on CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_ASSERTIONS,
+	  added null checking so it's always performed Added null checking on buf
+	  for write().  From Xiao Qin (2017-09-29).
+	* net/route:  File read/write logic should be able to handle short reads
+	  and writes (2017-09-29).
+	* drivers/syslog:  syslog internal functions should not set the errno
+	  variable:  ramlog_putc(), syslog_dev_putc(), syslog_dev_write(),
+	  syslog_force() (2017-09-29).
+	* net/sockets:  psock_sendto() is an internal OS interface an should not
+	  set the errno variable (2017-09-29).
+	* net/sockets:  psock_send() is an internal OS interface an should not
+	  set the errno variable (2017-09-29).
+	* psock_send() no longer sets errno, so send() must now set it
+	  (2017-09-30).
+	* net/: Versions of psock_send() and pock_sendto() should not set
+	  errno.  That is taken care of at a higher level in the send()/sendto()
+	  implementation as appropriate (2017-09-30).
+	* net/: psock_accept() is an internal interface and should not set the
+	  errno (2017-09-30).
+	* net/: psock_bind() is an internal interface and should not set the
+	  errno (2017-09-30).
+	* net/: psock_connect(( is an internal interface and should not set the
+	  errno nor should it be a cancellation point (2017-09-30).
+	* net/: psock_listen() is an internal interface and should not set the
+	  errno (2017-09-30).
+	* net/: psock_getsockopt() is an internal interface and should not set
+	  the errno (2017-09-30).
+	* net/: psock_getsockopt() and psock_socket() are an internal interfaces
+	  and should not set the errno (2017-09-30).
+	* net/: psock_accept() is not a cancellation point (2017-09-30).
+	* net/: psock_recvfrom() is an internal interface and should not set the
+	  errno nor should it be a cancellation point (2017-09-30).
+	* net/ and fs/: net_vfcntl(), file_fcntl(), file_dup(), and file_dup2()
+	  are all internal OS interfaces and should not modify the errno value
+	  (2017-09-30).
+	* net_dupsd() and net_dupsd2() are internal OS functions and should not
+	  set the errno variable (2017-09-30).
+	* psock_ioctl() and netdev_ioctl() are internal OS functions and should
+	  not set the errno variable (2017-09-30).
+	* psock_close() and net_close() are internal OS functions and should not
+	  set the errno variable (2017-09-30).
+	* SAMv7, STM32, STM32 L4:  DAC and ADC drivers are not permitted to set
+	  the errno (2017-09-30).
+	* SIM LPC31xx:  Serial and console drivers are not permitted to set the
+	  errno (2017-09-30).
+	* STM32, STM32 F7:  LTDC and DMA2D drivers are not permitted to set the
+	  errno (2017-09-30).
+	* drivers/serial: 16550 UART driver IOCTL method must not set errno; it
+	  must return a negated errno value (2017-09-30).
+	* drivers/lcd: ILI9341 initialize method not permitted to set errno
+	  (2017-09-30).
+	* drivers/sensors:  LIS331DL driver not permitted to set errno
+	  (2017-09-30).
+	* drivers/wireless:  CC1101 driver not permitted to set errno
+	  (2017-09-30).
+	* configs/z80sim and xtrs:  Serial driver lower halfs ioctl methods
+	  should return a negated errno value, not set the errno variable
+	  (2017-10-30).
+	* compiler.h, limits.h, types.h:  Update SDCC/z80 files to include
+	  support for long long, inline, __FILE__, and __func__ (2017-10-01).
+	* z80 Make.defs:  Fixes dependency generation with newest SDCC compiler
+	  (2017-10-01).
+	* include/:  Add stdnoreturn.h (2017-10-01).
+	* tools/configure.sh: Add special support so that you can start with a
+	  windows native configuration and install on a different host (and vice
+	  versa). (2017-10-01).
+	* stm32_hrtim: add support for capture, chopper, deadtime and dump
+	  registers.  From Mateusz Szafoni (2017-10-01).
+	* tools/configure.c:  Duplicate new functionaity added to configure.sh
+	  (2017-10-01).
+	* tools/configure.sh:  Another fix for the script.  The last change only
+	  worked for Windows Cygwin; for Linux, it needed to remove some
+	  additional things from the defconfig file (2017-10-01).
+	* configs/z80sim: convert other configurations to default to Linux
+	  (2017-10-01).
+	* tools/:  configure.sh and configure.c should redirect stdout to
+	  /dev/null but should not suppress stderr output (2017-10-01).
+	* stdnoreturn.h:  Add definitions for the C11 noreturn keyword.  Also
+	  Remove C++11 dependency.  Applies to C too (2017-10-02).
+	* net/route:  Add logic to mark a route as most-recently-used in the
+	  route cache (2017-10-02).
+	* commit b2ea300b6fb7672cdb682a0957b5dd2cff63804d broke the STM32L4 port
+	  for people not using the L496xx or L4A6xx.  That was because
+	  stm32l4_sdmmc.h is included from the stm32l4.h global header, and this
+	  header fires an #error for other chips.  I see that ALL stm32l4 have the
+	  same SDMMC except the stm32l4x2, which has none.  From Sebastien Lorquet
+	  (2017-10-02).
+	* net/route:  Fix an error in cache list management (2017-10-02).
+	* Add support for Micron MT25Q series MT25Q128.  From Sebastien Lorquet
+	  (2017-10-02).
+	* binfmt/:  Don't schedule starthook if there are no constructors
+	  (2017-10-02).
+	* binfmt/: exec_module(), load_module(), unload_module(), and
+	  schedule_unload() are internal OS functions and must not alter the errno
+	  variable (2017-10-02).
+	* stm32f103-minimum: Add ADC support on stm32f103-minimum board.  From
+	  Alan Carvalho de Assis (2017-10-02).
+	* syscall/:  The non-standard interface exec() is now enshrined as a
+	  official NuttX API.  I really dislike doing this but I think that this
+	  is probably the only want to load programs in the protected mode.  It is
+	  currently used by some example code under apps/ that generate their own
+	  symbol tables for linking.  Other file execution APIs relay on a symbol
+	  table provided by the OS.  In the protected mode, the OS cannot provide
+	  any meaning symbol table for execution of code in the user-space blob so
+	  that is they exec() is really needed in that build case.  And, finally,
+	  the interface is completely useless and will not be supported in the
+	  KERNEL build mode where the contrary is true:  An application process
+	  cannot provide any meaning symbolic information for use in linking a
+	  different process (2017-10-03).
+	* STM32L4 RTC, PM: small fixes to subseconds handling, ADC
+	  power-management hooks
+	    - STM32L4 ADC: add PM hooks from Motorola MDK
+	    - STM32L4 RTC: add up_rtc_getdatetime_with_subseconds
+	    - STM32 RTC: workaround for potential subseconds race condition.  In
+	      all recent STM32 chips reading either RTC_SSR or RTC_TR is supposed
+	      to lock the values in the higher-order calendar shadow registers
+	      until RTC_DR is read. However many old chips have in their errata
+	      this silicon bug (at least F401xB/C, F42xx, F43xx, L15xxE, L15xVD
+	      and likely others):  "When reading the calendar registers with
+	      BYPSHAD=0, the RTC_TR and RTC_DR registers may not be locked after
+	      reading the RTC_SSR register. This happens if the read operation is
+	      initiated one APB clock period before the shadow registers are
+	      updated. This can result in a non-consistency of the three
+	      registers. Similarly, RTC_DR register can be updated after reading
+	      the RTC_TR register instead of being locked."
+	    - STM32L4 RTC: correct RTC_SSR and RTC_TR read ordering.  In all
+	      recent STM32 chips reading either RTC_SSR or RTC_TR is supposed to
+	      lock the values in the higher-order calendar shadow registers until
+	      RTC_DR is read. Change the register read ordering to match this and
+	      don't keep a workaround for a hypothetical race condition (not in
+	      any L4 errata, lets for once assume ST's silicon works as it is
+	      documented...)
+	    - STM32L4 PM: remove useless #ifdefs and old non-L4 STM32 code
+	  From Juha Niskanen (2017-10-03).
+	* sched/semaphoate:  Rename sem_reset() to nxsem_reset() so that it is
+	  clear this is an internal OS function (2017-10-03).
+	* sched/semaphore:  Rename sem_tickwait() to nxsem_tickwait() so that it
+	  is clear this is an internal OS function (2017-10-03).
+	* libc/semaphore:  Add nxsem_init() which is identical to sem_init()
+	  except that it never modifies the errno variable.  Changed all
+	  references to sem_init in the OS to nxsem_init() (2017-10-03).
+	* sched/semaphore:  Rename all internal private functions from sem_xyz
+	  to nxsem_xyz.  The sem_ prefix is (will be) reserved only for the
+	  application semaphore interfaces (2017-10-03).
+	* libc/semaphore:  Add nxsem_getvalue() which is identical to
+	  sem_getvalue() except that it never modifies the errno variable.
+	  Changed all references to sem_getvalue in the OS to nxsem_getvalue()
+	  (2017-10-03).
+	* libc/semaphore and sched/semaphore:  Add nxsem_getprotocol() and
+	  nxsem_setprotocola which are identical to sem_getprotocol() and
+	  set_setprotocol() except that they never modifies the errno variable.
+	  Changed all references to sem_setprotocol in the OS to
+	  nxsem_setprotocol().  sem_getprotocol() was not used in the OS
+	  (2017-10-03).
+	* sched/semaphore:  Add nxsem_destroy() which is identical to
+	  sem_destroy() except that it never modifies the errno variable.  Changed
+	  all references to sem_destroy() in the OS to nxsem_destroy() (2017-10-03).
+	* sched/semaphore:  Add nxsem_post() which is identical to sem_post()
+	  except that it never modifies the errno variable.  Changed all
+	  references to sem_post in the OS to nxsem_post() (2017-10-03).
+	* sched/semaphore:  Add the function nxsem_wait().  This is a new
+	  internal OS interface.  It is functionally equivalent to sem_wait()
+	  except that (1) it is not a cancellation point, and (2) it does not set
+	  the per-thread errno value on return.  In all OS functions (not
+	  libraries), change sem_wait() to nxsem_wait().  This will prevent the OS
+	  from creating bogus cancellation points and from modifying the per-task
+	  errno variable.  This commit also backs out most of commit
+	  b4747286b19d3b15193b2a5e8a0fe48fa0a8638c.  That change was added because
+	  sem_wait() would sometimes cause cancellation points inappropriately.
+	  But with these recent changes, nxsem_wait() is used instead and it is
+	  not a cancellation point (2017-10-04).
+	* sched/semaphore:  sem_timedwait() is a cancellation point and, hence,
+	  cannot be called from within the OS.  Created nxsem_timedwait() that is
+	  equivalent but does not modify the errno and does not cause
+	  cancellation.  All calls to sem_timedwait() change to calls to
+	  nxsem_timedwait() in the OS (2017-10-05).
+	* sched/semaphore:  sem_trywait() modifies the errno value and, hence,
+	  should not be used within the OS.  Use nxsem_trywait() instead
+	  (2017-10-05).
+	* This change renames all internal, private NuttX signal-related
+	  functions to use the prefix nxsig_ so that they cannot be confused with
+	  application interfaces that begin, primarily, with sig_.  This is
+	  analogous to similar renaming that was done previously for semaphores
+	  (2017-10-05).
+	* drivers/input/cypress_mbr3108:  Add missing variable for nxsem_wait
+	  return value.  From Jussi Kivilinna (2017-10-06).
+	* fs/vfs and net/socket:  fcntl() is not return success fail for
+	  F_SETFL.  Reported by Jussi Kivilinna (2017-10-06).
+	* This commit adds internal versions of the signal interfaces:
+	    - sigtimedwait() -> nxsig_timedwait()
+	    - sigwaitinfo()  -> nxsig_waitinfo()
+	    - nanosleep()    -> nxsig_nanosleep()
+	  Replace all usage of sigwaitinfo(), sigtimedwait(), and nanosleep()
+	  with the OS internal counterparts nxsig_waitinfo(), nxsig_timedwait(),
+	  and nxsig_nanosleep().  The internal OS versions differ from the
+	  standard application interfaces in that they do not create
+	  cancellation points and they do not modify the application's errno
+	  variable (2017-10-06).
+	* Adds new OS internal functions nxsig_sleep() and nxsig_usleep.  These
+	  differ from the standard sleep() and usleep() in that (1) they don't
+	  cause cancellation points, and (2) don't set the errno variable (if
+	  applicable).  All calls to sleep() and usleep() changed to calls to
+	  nxsig_sleep() and nxsig_usleep() (2017-10-06).
+	* drivers/serial/tcdrain:  tcdrain() was recently added to the NuttX C
+	  library.  But there is a problem.  The specification of tcdrain()
+	  requires that it be a cancellation point.  In order to do this, tcdrain
+	  was moved from the C library into the OS and the addition cancellation
+	  point hooks were added.  In non-FLAT builds, access via system calls is
+	  also now supported (2017-10-06).
+	* net/Kconfig: Remove improper use of comma in syntax (2017-10-06).
+	* mm/: Heap semaphore logic needs to use nxsem_* interfaces when
+	  available, but the standard semaphores only when implementing a
+	  user-space heap.  Not this does introduce and issue:  the memory
+	  management functions them become cancellation points because of the use
+	  of sem_wait (2017-10-07).
+	* syscall/: Fix some backward conditional compilation (2017-10-07).
+	* sched/signal:  Add nxsig_kill() which is functionally equivalent to
+	  kill() except that it does not modify the errno variable.  Replace all
+	  usage kill() in the OS proper with nxsig_kill() (2017-10-07).
+	* graphics/vnc/server:  Fix an error in the VNC server introduced with
+	  recent big set of changes (2017-10-07).
+	* sched/signal:  Add nxsig_queue() which is functionally equivalent to
+	  sigqueue() except that it does not modify the errno variable.  Replace
+	  all calls to sigqueue() in the OS proper with calls to nxsig_queue() to
+	  avoid accessing the errno variable (2017-10-07).
+	* sched/signal:  Add internal OS interface nxsig_procmask().  This
+	  internal interface is equivalent to the standard sigprocmask() used by
+	  applications except that it does not modify the errno value.  Also fixes
+	  a problem in that the original sigprocmask() was not setting the errno.
+	  Replace all calls to sigprocmask() in the OS proper with calls to
+	  nxsig_procmask(). (2017-10-07).
+	* sama5d4-ek:  Remove a really old defconfig example file that is so far
+	  out of date that it can only be misleading (2017-10-07).
+	* Fix some build problems after recent separation of internal OS from
+	  application interfaces.  The build problem only occurs in the PROTECTED
+	  and KERNEL builds where separate libraries are built for the
+	  applications and for use within the OS. In these cases, the correct
+	  interfaces must be used.  This commit fixes a few of these, so I can get
+	  through build testing, but there are many more that need fixin'
+	  (2017-10-08).
+	* SDCC Fixes:  Change some prototypes and some assumptions about the
+	  size of unsigned int to get to a clean SDCC compile (2017-10-08).
+	* Fix some problems in the previous commits:  Forgot to update sigset()
+	  after change to prototype.  Also there was a stray semicolon in the
+	  change signal() (2017-10-08).
+	* libc/stdio:  Build the lib_noflush() and lib_snoflush() stubs even if
+	  CONFIG_FILE_DESCRIPTORS=0.  They may still be needed (2017-10-08).
+	* configs/z80sim: Fix a naming problem.  Also, don't try to build the
+	  serial driver if CONFIG_NFILE_DESCRIPTOR=0 (2017-10-08).
+	*  libc and libnx:  When the libraries are built into two libraries, a
+	  user space library and a OS space library (as in the PROTECTED and
+	  KERNEL build).  Then the user space library must not use the OS internal
+	  interfaces; similarly, the OS must avoid using the userspace interfaces
+	  so that it does not muck the errno value or create spurious cancellation
+	  points (2017-10-08).
+	* Misc STM32 Fixes
+	    - stm32_hrtim.c: fix burst mode prescaler update
+	    - stm32f334-disco: add flash mode support for powerled driver +
+	      cosmetics
+	  From Mateusz Szafoni (2017-10-08).
+	* powerled.h:  Add fault field to state structure.  From Mateusz Szafoni
+	  (2017-10-08).
+	* libc/termios:  Adds tcflow() (2017-10-09).
+	* RNDIS: Use CONFIG_USBDEV_MAXPOWER instead of hardcoded value.  Use
+	  LPWORK for network operations by default.  From Sakari Kapanen
+	  (2017-10-09).
+	* sched/mqueue:  Rename all OS internal functions declared in
+	  sched/mqueue/mqueue.h to begin with nxmq_ vs. mq_.  The mq_ prefix is
+	  reserved for standard application interfaces.  Rename all private static
+	  functions for use the nxmq_ vs. mq_ naming (2017-10-09).
+	* task:  Add new cancellation point interface,
+	  check_cancellation_point() (2017-10-09).
+	* STM32, STM32L4 serial changes:
+	    - stm32: serial: add interface to get uart_dev_t by USART number,
+	      stm32_serial_get_uart
+	    - stm32: serial: do not stop processing input in SW flow-control mode
+	    - stm32l4: serial: do not stop processing input in SW flow-control
+	      mode
+	    - stm32l4: serial: suspend serial for Stop mode
+	  From Juha Niskanen (2017-10-09).
+	* Misc STM32 Fixes
+	    - stm32_powerled.c: cosmetics
+	    - stm32_hrtim.c: cosmetics
+	    - stm32/Kconfig: add HRTIM configuration and add DAC external
+	      trigger configuration
+	    - stm32f334-disco: Add powerled example configuration.  From Mateusz
+	      Szafoni (2017-10-09).
+	* drivers/power: Add powerled to Kconfig.  From Mateusz Szafoni
+	  (2017-10-09).
+	* BCM2708:  Add enough infrastructrue (more stubs) to get a clean
+	  compilation of the Pi Zero configuration (with many undefined things at
+	  link time).   This includes several register definition header files
+	  (some from Alan Carvalho de Assis), basic interrupt handling logic,
+	  boot-up files, GPIO support, build and configuration logic, basic board
+	  support at configs/pizero (2017-10-09).
+	* sched/mqueue:  Add internal function nxmq_send() and nxmq_timedsend()
+	  that are equivalent to mq_send() and mq_timedsend() except that they do
+	  not create cancellation points and do to not modify the errno variable.
+	  Change all calls to mq_send() and mq_timedsend() in the OS to calls to
+	  nxmq_send() and nxmq_timedsend(), making appropriate changes for
+	  differences in return values (2017-10-10).
+	* sched/mqueue:  Add nxmq_receive() and mxmq_timedreceive() which are
+	  functionally equivalent to the standard mq_receive and mq_timedreceive()
+	  except that (1) they do not create cancellation points, and (2) the do
+	  not modify the application's errno variable.  Change all calls to
+	  mq_receive() and mq_timedreceive() in the OS to calls to nxmq_receive()
+	  and nxmq_timedreceive(), making appropriate changes for differences in
+	  return values (2017-10-10).
+	* Fix a few places where there was a semicolon following the 'if'
+	  condition, making the following logic unconditional (2017-10-10).
+	* The INA219 is a combined voltage and current sensor that can measure
+	  up to 26 volts and a current that depends on an external shunt
+	  resistor.  Connection happens via i2c/smbus and the chip features a
+	  power supply rail that is independent from the measured voltage, so it
+	  can measure low voltages.
+
+	  This commit adds a driver for this chip.  Right now it measures bus
+	  voltage and current, and does not use the internal calibrated current
+	  reading, nor the available power measurement.  From Sebastien Lorquet
+	  (2017-10-10).
+	* configs/clicker2-stm32: Adds SD card, automount, and syslog file
+	  support and fixes a few minor issues
+	    - Moves defines for xbee from clicker2-stm32.h to stm32_xbee.h
+	    - Adds support for uSD click boards and automount support
+	    - Fixes minor guard clause
+	    - Bring-up automounter before MMCSD
+	    - MRF24J40 interrupt should only fire on falling edge.
+	    - Adds file syslog support for logging to file on SD card
+	  From Anthony Merlino (2017-10-11).
+	* Z80:  Makefile fix for use with current SDCC (2017-10-11).
+	* fs/vfs:  Change the return value of internal function fs_getfilep().
+	  It no longer sets the errno variable but, rather, returns errors in the
+	  same manner as other internal OS functions (2017-10-11).
+	* Adds OS internal functions nx_send(), ns_recv(), and nx_recvfrom()
+	  which are functionally equivalent to send(), recv(), and recvfrom()
+	  except that they do not set the errno variable and do not cause
+	  cancellation points (2017-10-11).
+	* Adds OS internal function nx_write() which is functionally equivalent
+	  to write() except that it does not set the errno variable and do not
+	  cause cancellation points (2017-10-11).
+	* sched/task:  task_exithook.c fails to link if signals are disabled
+	  because was unconditionally trying to send the SIGCHLD signal to the
+	  parent in certain configurations.  Noted by Jeongchan Kim (2017-10-11).
+	* arch/arm/src/samv7:  Correct an error in RX DMA setup.  From Manish
+	  Kumar Sharma (2017-10-11).
+	* net/socket: psock_send/psock_sendto: remove assert check for null
+	  psock and buf input pointers.  Removes check as 'psock == NULL'
+	  altogether because that checked for later in psock_send and
+	  psock_sendto. Change null check for 'buf' so that it is handled same as
+	  in recvfrom.c (return -EINVAL instead of assert).  From Jussi Kivilinna
+	  (2017-10-11).
+	* fs/vfs:  Add new internal OS interface nx_read().  nx_read() is
+	  functionally equivalent to read() except that it does not modify the
+	  errno variable and it is not a cancellation point.  Changed all
+	  references to read() in the OS to nx_read() (2017-10-11).
+	* sched/signal:  Add logic to wake up a thread that is waiting on a
+	  signal if it is canceled (2017-10-12).
+	* nxsig_timedwait: Add logic to suppress the wait if there is a pending
+	  cancellation (2017-10-12).
+	* stm32 SPI: Add missing include required when CONFIG_SPI_CALLBACK is
+	  enabled.  From Anthony Merlino (2017-10-12).
+	* STM32L4 RTC fixes:
+	    - STM32L4 RTC: init mode was never exited because nested locking in
+	      rtc_synchwait() disabled backup domain access
+	    - STM32L4 RTC:  Use backup register magic value instead of INITS
+	      bit.  The INITS (bit 4) of RTC_ISR register cannot be used to
+	      reliably detect backup domain reset. This is because we can operate
+	      our device without ever initializing the year field in the RTC
+	      calendar if our application does not care about correct date being
+	      set.  Hardware also clears the bit when RTC date is set back to year
+	      2000.
+	    - STM32L4 RTC: put back the SSR race condition workaround.  ST has
+	      confirmed that the issue has not been fixed, and that it applies to
+	      STM32L4 too (was not in errata sheets due to documentation bug) See
+	      discussion:        https://community.st.com/thread/43710-issue-with-rtc-maximum-time-resolution
+	    - STM32F4, STM32L4, STM32F7 RTC: add more CONFIG_RTC_NALARMS > 1 to
+	      reduce code size
+	    - STM32L4: rename stm32l4_rtcc.c to stm32l4_rtc.c to better match
+	      STM32F7
+	    - STM32, STM32L4, STM32F7 RTC: stray comment and typos in
+	      chip/stm32_rtcc.h
+	    - STM32L4 RTC: change maximum alarm time from 24h to one month
+	  From Juha Niskanen (2017-10-13).
+	* TCP Networking:  When CONFIG_NET_TCP_WRITE_BUFF=y there is a situation
+	  where a NULL pointer may be dereferenced.  In this configuration, the
+	  TCP connection's 'semi-permnanent' callback, s_sndcb was nullified in
+	  tcp_close_disconnect.  However, other logic in tcp_lost_connection()
+	  attempt to use that callback reference after it was nullifed.  Fixed in
+	  tcp_lost_connectino() by adding a NULL pointer change before the
+	  access.  This was reported by Dmitriy Linikov in Bitbucket Issue 72
+	  (2017-10-13).
+	* stm32f7 BBSRAM: stm32_bbsram: avoid assert in stm32_bbsram_savepanic.
+	  If panic happens before stm32_bbsram is initialized,
+	  stm32_bbsram_savepanic caused additional assert panic. Function has null
+	  pointer check, so drop DEBUGASSERT.  From Jussi Kivilinna (2017-10-13).
+	* FS FAT: Fix hard-fault when listing contents of FAT root.  From Jussi
+	  Kivilinna (2017-10-13).
+	* configs/stm32f4discovery:  Add a USB MSC configuration.  From Alan
+	  Carvalho de Assis (2017-10-13).
+	* 6LoWPAN:  Correct a bug in handling uncompressed frames (IPv6
+	  dispatch) (2017-10-13).
+	* 6LoWPAN:  Fix a whole in the logic of the previous commit.  It turns
+	  out that g_uncomp_hdrlen has other usages so it cannot be modified as I
+	  was doing.  Instead, I needed to add a separate localt variable,
+	  protosize, to keep track of the two usages of g_uncomp_hdrlen
+	  (2017-10-13).
+	* configs/: The nx and nxtext examples no longer supports single user
+	  mode (2017-10-14).
+	* The lcdrw example has been removed because it violates the portable OS
+	  interface (2017-10-14).
+	* All configurations that use NXIMAGE or NXHELLO must select
+	  NX_MULTIUSER.  All configuratinos that use examples/nxterm must enable
+	  CONFIG_LIB_BOARDCTL (2017-10-14).
+	* configs/stm32f103-minimum: Add support for LM75 in the
+	  stm32f103-minimum board.  From Alan Carvalho de Assis (2017-10-14).
+	* configs/: All configurations that use NXLINES must select
+	  NX_MULTIUSER.  All configurations that use the NX server need to have
+	  larger POSIX messages (2017-10-14).
+	* boardctl():  Remove the BOARDIOC_GRAPHICS_SETUP command (2017-10-15).
+	* Initial ADC support for the STM32F33XX
+	    - stm32_adc.h: add JEXTSEL definitions and hrtim trigger configuration
+	    - stm32_adc.c: move STM32F33 ADC logic to a separate file
+	  From Mateusz Szafoni (2017-10-15).
+	* configs/sim: Update touchscreen driver initialization to use only
+	  multiple-user NX server logic (2017-10-15).
+	* configs/sim:  Convert the traveler configuration so that it uses the
+	  framebuffer driver (2017-10-16).
+	* task_delete():  Do not permit user applications to delete kernel
+	  threads (2017-10-16).
+	* kthread_create():  Rename kernel_thread() to kthread_create() for
+	  better naming consistency with task_create() and kthread_delete()
+	  (2017-10-16).
+	* All other STM32: SHIFTR_SUBFS_MASK was correct in STM32F0 only
+	    - STM32L1: use correct EXTI line definitions (2017-10-17).
+	* STM32 RTC fixes:
+	    - RTC: canceling an alarm marks it as inactive
+	    - STM32L4, STM32F4, STM32F7 RTC: fix reading alarm value that is
+	      more than 24h in future
+	    - STM32F0 RTC: fix backup register count in stm32_rtcc.h
+	  From Juha Niskanen (2017-10-17)
+	* BCM2708: Add system timer register definitions and a partial
+	  implementation of the tickless mode timer (2017-10-17).
+	* BCM2708: Add support for AUX interrupts.  Add some build configuration
+	  and support logic for low-level serial otput (2017-10-17).
+	* drivers/usbdev: Correct input flow control logic when watermarks are
+	  not enabled.  Problem noedt by and change based on suggestion by Juha
+	  Niskanen (2017-10-18).
+	* BCM2708:  Add hooks to support both Mini- and PL011 UARTs (2017-10-18).
+	* BCM2708: Fleshes out GPIO interrupt logic (2017-10-18).
+	* fs/vfs:  Fix after recent changes.  write() was return negative values
+	  in errno. Noted by Jussi Kivilinna (2017-10-18).
+	* drivers/usbdev:  Move test for NULL pointer before the pointer is
+	  deferences.  Noted by Juha Niskanen (2017-10-18).
+	* net/:  Fix some build issues noted when both IPv4 and IPv6 are
+	  enabled.  From Anthony Merlino (2017-10-18).
+	* photon:  Support SPI1 and SPI3.  From Anthony Merlino (2017-10-18).
+	* BCM2708: Allow pass parameters with AUX interrupts; Add mini-UART
+	  break capability.  BCM2708: Add Mini-UART logic.  Still missing UART
+	  configuration logic (2017-10-18).
+	* Alexey T, Bitbuck Issue 73:  Lower part of STM32 CAN driver
+	  arch/arm/src/stm32/stm32_can.c uses all three hw tx mailboxes and clears
+	  TXFP bit in the CAN_MCR register (it means transmission order is defined
+	  by identifier and mailbox number).
+
+	  This creates situation when order frames are put in upper part of CAN
+	  driver (via can_write) and order frames are sent on bus can be
+	  different (and I experience this in wild).  Since CAN driver API
+	  pretends to be "file like" I expect data to be read from fd the same
+	  order it is written. So I consider described behaviour to be a bug.
+
+	  I propose either to set TXFP bit in the CAN_MCR register (FIFO
+	  transmit order) or to use only one mailbox (2017-10-19).
+	* The timer frequencies (BOARD_TIMx_FREQUENCY) are incorrectly defined
+	  in configs/stm3240g-eval/include/board.h.  Since the APB prescalers are
+	  set to divide by 4 and 2 respectively, the frequencies should be
+	  "2xAPBx" as said in the comment.  The correct frequencies are already
+	  defined but as STM32_APBx_TIMx_CLKIN.  From Mattias Edlund (2017-10-19).
+	* drivers/ioexpander:  The IRQ subsystem now supports passing a void *
+	  parameter to IRQ handlers.  Use that method to support multiple pc9555
+	  devices, by passing a pointer to the device to the board defined irq
+	  handler.  Now the CONFIG_ for multiple PCA devices just allocates device
+	  structures dynamically instead of statically when not enabled.
+
+	  The same interrupt handler is entered with the device structure
+	  parameter in all situations, multiple or single PCA. One should still
+	  be careful if multiple PCA devices share the same IRQ.  From Sebastien
+	  Lorquet (2017-10-19).
+	* libc/match:  Use of exp() vs expf() in logf() caused function to be
+	  slow.  From Alan Carvalho de Assis (2017-10-19).
+	* drivrs/mtd/filemtd.c: add block device MTD interface.  Block MTD
+	  interface allows using block device directly as MTD instead of having to
+	  use file-system in between.  NOTE that this provides the opposite
+	  capability of FTL which will let you use an MTD interface directly as a
+	  block device.  From Jussi Kivilinna (2017-10-19).
+	* There was a reference counting problem in the TPC logic of
+	  net_clone().  net_clone() which is the common logic underlying dup() and
+	  dup2() for sockets.  When net_clone() calls net_start_monitor() and
+	  net_start_monitor() returns a failure (because the underlying TCP
+	  connection) then net_clone() must back out the reference count on the
+	  structure.  Problem noted by Pascal Speck and this implementation of the
+	  solution is based on his suggestion (2017-10-19).
+	* There was a possible recursion that could eventually overflow the
+	  stack.  The error occurred when closing the socket with inet_close()
+	  while a socket callback was still queued.  When the socket callback was
+	  executed by devif_conn_event(), this resulted in a call to
+	  psock_send_eventhandler() with TCP_CLOSE flag set which then called
+	  tcp_lost_connection().  tcp_shutdown_monitor() then called
+	  tcp_callback() again, which again called psock_send_eventhandler(), and
+	  so on....  Noted by Pascal Speck.  Solution is also similar to a
+	  solution proposed by Pascal Speck (2017-10-19).
+	* nucleo-f334r8/adc: change serial console to USART2 (STLINK COM).  From
+	  Mateusz Szafoni (2017-10-19).
+	* stm32f33xxx_adc.c: fix some warnings and compilation error when extsel
+	  not in use.  From Mateusz Szafoni (2017-10-19).
+	* net/tcp:  Same change to tcp_send_buffered.c probably also applies to
+	  tcp_send_unbuffered.c (2017-10-19).
+	* net/tcp:  Same change to tcp_send_buffered.c probably also applies to
+	  tcp_sendfile.c (2017-10-19).
+	* tcp_lost_connection() is called from two places in tcp_sendfile.c
+	  (2017-10-19).
+	* net/tcp:  Same change to tcp_send_buffered.c probably also applies to
+	  sixlowpan_tcpsend.c and inet_recvfrom.c (2017-10-19).
+	* drivers/sensor: Add driver for the APDS-9960 gesture sensor.  From
+	  Alan Carvalho de Assis (2017-10-20).
+	* include/nuttx/sensors/ioctl: deduplicate SNIOC_CFGR.  From Jussi
+	  Kivilinna (2017-10-20).
+	* drivers/sensors/hts221: power-on sensor for loading calibration data.
+	  From Jussi Kivilinna (2017-10-20).
+	* arch/arm/src/stm32f7/i2c: fix I2C_M_NORESTART handling.  From Jussi
+	  Kivilinna (2017-10-20).
+	* drivers/sensors/apds9960.c: Use work_queue to read/process data when
+	  receive an IRQ.  From Alan Carvalho de Assis (2017-10-20).
+	* STM32L1, STM32L4 RTC: add periodic interrupts, update L1 RTC
+	  implementation
+	    - STM32L4 RTC: add support experimental CONFIG_RTC_PERIODIC
+	    - STM32 RTC: separate STM32L1 RTC into a separate file
+	  STM32L1 RTC is very close to F4 or L4 versions, with two alarms and
+	  periodic wakeup support so backported L4 peripheral to L1.
+	    - RTC: Add periodic alarms to upper and lower halves
+	 From Juha Niskanen (2017-10-20).
+	* stm32_adc.c: clear pending interrupts.  From Mateusz Szafoni
+	  (2017-10-20).
+	* drivers/bch:  The character driver to block device access now supports
+	  an IOCTL to get the geomtry of the underlying block device (2017-10-20).
+	* fs/fat:  Remove mkfatfs from the OS.  This is a user-space application
+	  and belongs in apps, not in the OS (2017-10-20).
+	* configs/nucleo-f334r8: add logic for zero latency high priority
+	  interrupts example.  From Mateusz Szafoni (2017-10-22).
+	* Misc STM32 chagnes
+	    - STM32 HRTIM:  Fix warnings related with RCC
+	    - STM32F33xxx ADC:  Add some publicly visable interfaces and some
+	      code to support injected channels
+	    - STM32F33xxx DMA:  Add public interface to handle with DMA interrupts
+	  From Mateusz Szafoni (2017-10-22).
+	* stm32f103-minimum:  Add an ADPS-9960 example configuration.  From Alan
+	  Carvalho de Assis (2017-10-23).
+	* net/icmp: This change adds support for semi-standard IPPROTO_ICMP
+	  AF_INET datagram sockets.  This replaces the old ad hoc, nonstandard way
+	  of implementing ping with a more standard, socket interface (2017-10-23).
+	* net/inet:  Add check for protocol before handing out TCP and UDP
+	  sockets (2017-10-23).
+	* arch/arm/common/up_checkstack: fix assert panic when both TLS and
+	  interrupt stack are enable.  From Jussi Kivilinna (2017-10-23).
+	* net/icmp:  Correct some comments, typings, spacing problems from last
+	  big ICMP socket change (2017-10-23).
+	* configs/:  All defconfig filess that include
+	  CONFIG_NET_ICMPv6_SOCKET=y need to select CONFIG_SYSTEM_PING6=y and
+	  deselect CONFIG_DISABLE_POLL (2017-10-24).
+	* net/icmpv6: This commit adds support for semi-standard IPPROTO_ICMP6
+	  sockets.  This is a replacement for the non-standard ICMPv6 ping support
+	  that violated the portable POSIX OS interface (2017-10-24).
+	* mm/mm-heap: memalign: fix heap corruption caused by using unaligned
+	  chuck size.  Unaligned nodes generated by memalign later cause heap
+	  corruptions when nodes are shrink further (for example, 24 bytes -> 8
+	  bytes, when alignment is 16 bytes).  From Jussi Kivilinna (2017-10-24).
+	* lm3s8962:  NX configuration needs CONFIG_NXSTART_EXTERNINIT=y
+	  (2017-10-24).
+	* sched/:  move POSIX thread specific data from pthread TCB to common
+	  TCB structure.  This change allows using
+	  pthread_getspecific/pthread_setspecific from main thread. Patch also
+	  enables using pthread data with config option CONFIG_DISABLE_PTHREAD=y.
+	  From Jussi Kivilinna (2017-10-25).
+	* net/local: fix typo in config macro name.  From Juha Niskanen
+	  (2017-10-25).
+	* Olimex stm32-h407 serial support for the on-board UEXT connector
+	  (fixed style & defconfig).  Add USART6 for UEXT connector.   Add
+	  nsh_uext configuration and README update.  From Jan Pobříslo (2017-10-26).
+	* configs/nucleo-l496zg/nsh: enable I2C4 bus with i2ctool.  From Jussi
+	  Kivilinna (2017-10-26).
+	* arch/arm/stm32f7: i2c: restore bus frequency after I2C reset.  Copy
+	  frequency restoration fix from STM32L4 I2C driver to STM32F7 I2C
+	  driver.  From Jussi Kivilinna (2017-10-26).
+	* arch/stm32l4: port STM32F7 I2C driver to STM32L4.  STM32L4 I2C driver
+	  is in work-in-progress state (plentiful of TODOs and #warnings) and lags
+	  many features found in more up-to-date STM32 I2C drivers. The peripheral
+	  on STM32F7 and STM32L4 are identical except for L4's 'wakeup from stop
+	  mode' flag and STM32F7's I2C driver is in more 'ready to use' state.
+
+	  Commit ports the STM32F7 I2C driver to STM32L4. The I2C clock
+	  configuration is kept the same as before (I2CCLK = PCLK1 80 Mhz)
+	  instead of switching to STM32F7 arch default that is I2CCLK=HSI.
+	  Further work would be to add configuration option for choosing I2C
+	  clock source instead of current hard-coded default.  From Jussi
+	  Kivilinna (2017-10-26).
+	* drivers/sensors/lis2dh: fixes for self-test.  From Jussi Kivilinna
+	  (2017-10-26).
+	* include/nuttx/fs/:  Move prototype of foreach_mountpoint out of
+	  include/nuttx/fs/fs.h to fs/mount/mount.h (2017-10-26).
+	* fs/mount:  Implements procfs /proc/fs/blocks and /proc/fs/usage files,
+	  replacing the NSH df command.  Also implements procfs /proc/fs/mount
+	  file, replacing the NSH mount command when there are no arguments
+	  (2017-10-26).
+	* Correct a problem that was causing an apparent directory to be
+	  reported as a file instead of a directory by opendir.  This happened
+	  after adding these three new procfs entries: fs/block, fs/mount, and
+	  fs/usage.  Of course, there is no directory fs in this case, only three
+	  files that have fs/ in their relative pathnames.  The logic was
+	  detecting that fs was the name of the enty to report, but it was then
+	  declaring that fs was a file (because fs/block is of type file).  This
+	  was fixed by adding a check for matching lenghts.  i.e., if strlen(fs)
+	  != strlen(fs/block), then report fs as a directory instead of a file
+	  (2017-10-26).
+	* fs/procfs: Missing some conditional logic for cases where mountpoint
+	  procfd entries excluded (2017-10-27).
+	* drivers/can/mcp2515.c: Fix the MCP2515 Bit Rate Prescale
+	  calculation.   Fix BRP for SET_BITTIMING ioctl as well.  From Alan
+	  Carvalho de Assis (2017-10-27).
+	* sensors/lis2dh:  Fix use of obsolete dbg macro.  From Jussi Kivilinna
+	  (2017-10-27).
+	* nucleo-f334r8:  Add highpri example configuration.  From Mateusz
+	  Szafoni (2017-10-28).
+	* STM32 F33xx:  Add ADC DMA support to STM32F33 configuration.  From
+	  Mateusz Szafoni (2017-10-28).
+	* drivers/net:  Remove the old, unfinished Crystal LAN driver.  I don't
+	  even have the hardware that it goes with anymore (2017-10-28).
+	* configs/mx1ads:  This commit removes board support for the mx1ads
+	  board.  That board support was never completed and I no longer even have
+	  the hardware.  The unfinished board support is still available in the
+	  Obsoleted repository if anyone would ever like to resurrect it
+	  (2017-10-28).
+	* STM32 ADC:  Added support for ADC's IO_ENABLE_TEMPER_VOLT_CH ioctl on
+	  STM32F10XX and STM32F20XX.  From Dmitriy Linikov (2017-10-30).
+	* STM32 F2: Fixed build for STM32F20XX platforms when
+	  CONFIG_STM32_DMACAPABLE is enabled.  From Dmitriy Linikov (2017-10-30).
+	* fs/userfs:  This completes coding of the UserFS client and of the
+	  UserFS feature in general.  This feature is being merged to main now
+	  because I believe it is innocuous.  It is, however, untesed.  The next
+	  step will be to develop a test case to verify the feature.  Uses Unix
+	  domain local sockets instead of message queues.  Easier to transfer big
+	  data in local sockets than message queues (2017-10-30).
+	* Fix DEBUGASSERT() issues with nxhello on lc823450-xgevk
+	    - sched/task: Remove DEBUGASSERT in task_exitstatus() and
+	      task_groupexit()
+	    - graphics: Change DEBUGASSERT condition in nx_runinstance()
+	  From Masayuki Ishikawa (2017-10-31).
+	* Fix GPIO operation of STMPE811 driver.
+	  1. STMPE811_GPIO_DIR was defined for register name and later was
+	  redefined to be the pin direction mask for `stmpe811_gpioconfig`.  I
+	  decided to change register name to be STMPE811_GPIO_DIR_REG, and keep
+	  pin direction mask STMPE811_GPIO_DIR, so that any external code that
+	  already use this driver will be unchanged.
+	  2. The STMPE811 register GPIO_DIR uses bit value 1 for output and 0
+	  for input, but `stmpe811_gpioconfig` set the opposite.
+	  3. The call to `stmpe811_gpiowrite` from inside of
+	  `stmpe811_gpioconfig` leaded to deadlock.
+	  From Dmitriy Linikov (2017-10-31).
+	* sim/userfs:  Add a configuration for testing the UserFS using
+	  apps/examples/userfs (2017-10-31).
+	* Fixes a memory leak that is caused because the client message queue is
+	  not unlinked after the client disconnects from the NX server.  From
+	  Masayuki Ishikawa (2017-10-31).
+	* drivers/wireless/ieee80211:  Fix typos and spelling errors as needed
+	  for Photon build.  From Anthony Merlino (2017-11-01).
+	* net/icmpv6:  Add some header file necessary for correct build.  From
+	  Anthony Merlinoo (2017-11-01).
+	* libc/userfs: Correct return value from dispatchers.  Should return
+	  zero on success, not the number of bytes sent (2017-11-01).
+	* net/ipforward: Fixes typo that caused build error when IP forwarding
+	  was enabled with CONFIG_NET_ICMPv6_NEIGHBOR enabled as well.  From
+	  Anthony Merlino (2017-11-01).
+	* ieee802154: Simplifies notify() and rxframe() calls to a single
+	  notify() call. dataind's and all other "notifs" are now "primitives"
+	  which aligns with standard terminology  From Anthony Merlino (2017-11-01).
+	* fs/userfs: Correct check for response type (2017-11-01).
+	* net/local: This commit modifies the Unix domain local socket design.
+	  Local sockets are built on top of pipes.  The Local socket
+	  implementation maintained file descriptors to interrupt with the pipes.
+	  File descriptors have the bad property that they are valid only while
+	  running on the thread within the task that created the local socket.
+
+	  As a policy, all internal OS implementations must use "detached" files
+	  which are valid in any context and do not depend on the validity of a
+	  file descriptor at any point in time.  This commit converts the usage
+	  of file descriptors to detached files throughout the local socket
+	  implementation (2017-11-02).
+	* fs/userfs:  There are some deadlock issues that make the UserFS
+	  un-usable at the current time.  Added to the TODO list; also feature is
+	  now marked EXPERIMENTAL (2017-11-02).
+	* drivers/serial/serial.c:  Optimize wait time in tcdram() for buffer
+	  emptying.  According to the specification, the close function must wait
+	  until all data has been written before it closes the file (except
+	  O_NONBLOCK is set). The maximum waiting time for this is not specified.
+
+	  To be able to edit the file list of the process, the close function
+	  has to lock the file list semaphore. After that the close function of
+	  the serial driver is called.
+
+	  Waiting for the complete transmission of all data is done in the
+	  serial driver.  This causes the semaphore to remain locked until all
+	  data has been sent.  However, no other thread of the process can edit
+	  the file list for that time  (open, close, dup2, etc.). This is not
+	  optimal in a multithreaded environment.  Therefore, we have to keep
+	  the waiting time within the driver as short as possible.  From Frank
+	  Benkert (2017-11-02).
+	* drivers/loop: Don't use file descriptors... Use the internal file
+	  system interfaces so that the loop device can be shared across threads
+	  (2017-11-02).
+	* drivers/mtd/filemtd.c: Don't use file descriptors... Use the internal
+	  file system interfaces so that the loop device can be shared across
+	  threads (2017-11-02).
+	* mac802154: Fixes a warning for unused variable and returns -1 from
+	  macnet_notify() if event is not used.  From Anthony Merlino (2017-11-03).
+	* drivers/lcd/max7219.c: Add support to MAX7219 LED Matrix as LCD
+	  interface.  From Alan Carvalho de Assis (2017-11-04).
+	* configs/stm32f103-minimum: Add board support for MAX7219 LED Matrix
+	  controller.  From Alan Carvalho de Assis (2017-11-04).
+	* stm32f334-disco, nucleo-f334r8: add missing ram_vectors configuration
+	  in linker script.  From Mateusz Szafoni (2017-11-04).
+	* Kconfigs: Add CONFIG_LCD_UPDATE that works like CONFIG_NX_UPDATE but
+	  can be enabled without enabling the graphics subsystem (2017-11-04).
+	* SAMv71-XULT:  Remove non-functional framebuffer configuration
+	  (2017-11-05).
+	* stm32f103-minimum: Remove warning when selecting MMCSD support, Add
+	  board_usbmsc_initialize to stm32f103-minimum.  From Alan Carvalho de
+	  Assis (2017-11-05).
+	* nucleo-f334r8/highpri: missing ADC trigger configuration.  From
+	  Mateusz Szafoni (2017-11-05).
+	* stm32f334-Disco: beginning of lower-half driver for SMPS (buck-boost
+	  onboard converter).  From Mateusz Szafoni
+	* Misc. STM32 Fixes:
+	    - STM32 HRTIM: add helper macros
+	    - STM32F33xxx ADC: injected channels support, fix some definitions,
+	      add interface to disable interrupts
+	  From Mateusz Szafoni (2017-11-05).
+	* fs/userfs:  This commit converts the underlying IPC used by the
+	  UserFS from Unix domain local sockets to UDP LocalHost loopback
+	  sockets.  The problem with the local sockets is that they do require
+	  operations on the top level psuedo-file system inode tree.  That tree
+	  must be locked during certain traversals such as enumerate mountpoints
+	  or enumerating directory entries.
+
+	  This conversion is unfortunate in the sense that Unix local domain
+	  sockets are relatively lightweight.  LocalHost UDP sockets are much
+	  heavier weight since they rely on the full UDP stack.  If anyone is
+	  up for a complete redesign, then using some shared memory and a POSIX
+	  message queue would be lightweight again.
+
+	  This commit also fixes several bugs that were not testable before the
+	  inode tree deadlock.  I cannot say that the logic is 100% stable but
+	  it does not have basic functionality (2017-11-05).
+	* fs/userfs:  Fix return value from dup method.  In order to return a
+	  pointer, the parameter must be a pointer to a pointer (2017-11-06).
+	* configs/stm32f429i-disco/ltdc:  This configuration has been deleted
+	  because it violated the portable POSIX OS interface.  It used
+	  apps/examples/ltdc and include ltdc.h and dma2d.h which were also
+	  removed for the same reason (2017-11-06).
+	* arch/arm/include/stm32 and stm32f7:  Remove ltdc.h and dma2d.h.
+	  Those header files in that location permitted inclusion into
+	  application space logic and, hence, facilitated and encouraged calling
+	  into the OS and violating the portable POSIX OS interface.  The
+	  definitions in those header files were move the appropriate location in
+	  the counterpart, architecture specific files at arch/arm/src/stm32 and
+	  stm32f7 dma2d.h and ltdc.h (2017-11-06).
+	* lpc43xx Ethernet:  Fix some backward logic setting full-duplex and
+	  100mbps when autoconfiguration is disabled.  Noted by Anonymous in
+	  Issue #76 (2017-11-06).
+	* sched/sched/sched_cpuselect.c:  For SMP, In order to find the cpu
+	  with the lowest priority thread, we have to remember the already found
+	  lowest priority.  Noted by Anonymous in Issue #75 (2017-11-06).
+	* Add IPL2 support for LC823450
+	    - arch/arm/src/lc823450: Add IPL2 support
+	    - configs/lc823450-xgevk: Add IPL2 support
+	  From Masayuki Ishikawa (2017-11-07).
+	* drivers/lcd/max7219.c:   Add support for MAX7219 vertically organized
+	  display.  From Alan Carvalho de Assis (2017-11-07).
+	* drivers/audio: Add WM8774 support.  From Masayuki Ishikawa
+	  (2017-11-08).
+	* lc823450-xgevk audio support
+	    - arch/arm/src/lc823450: Add IPL2 support
+	    - configs/lc823450-xgevk: Add IPL2 support
+	    - libc/audio: Fix compilation error in lib_buffer.c
+	    - arch/arm/src/lc823450: Add I2S support
+	    - configs/lc823450-xgevk: Add WM8774 support
+	  From Masayuki Ishikawa (2017-11-08).
+	* drivers/usbdev/rndis.c: fix packet receiving logic.  The logic didn't
+	  take single-byte termination frames in account.  From Sakari Kapanen
+	  (2017-11-08).
+	* net/icmpv6/icmpv6_radvertise.c: Add option to manually specify router
+	  prefix.  From Sakari Kapanen (2017-11-08).
+	* net/icmpv6/icmpv6_radvertise.c: set the prefix length to
+	  preconfigured value (2017-11-08).
+	* STM32 L4 RCC: restore backup-registers after backup-domain reset.
+	  From Jussi Kivilinna (2017-11-08).
+	* STM32 L4: Build stm32l4_idle.c only if  CONFIG_ARCH_IDLE_CUSTOM is
+	  not enabled.  From Jussi Kivilinna (2017-11-08).
+	* drivers/power/bq2429x.c: Add BATIO_OPRTN_SYSON for enabling BATFET
+	  after SYSOFF.  From Jussi Kivilinna (2017-11-08).
+	* lc823450 auto LED support
+	    - arch/arm/src/lc823450: Add auto LED for CPU activity
+	    - configs/lc823450-xgevk: Add auto LED support
+	  From Masayuki Ishikawa (2017-11-09).
+	* tools/configure.sh: This commit adds a -m option for macOS. For
+	  anyone not aware, Apple renamed OSX to macOS recently; thus the 'm'
+	  instead of 'o'. This does not change the other uses of *_OSX to macOS.
+	  From jeditekunum (2017-11-09).
+	* tools/configure.c:  Update functionality to match last change to
+	  tools/configure.sh (2017-11-10).
+	* STM32L4 serial PM interface improvements:  Check rx/tx buffers for
+	  pending data in pmprepare.  Remove adhoc PM interfaces and move serial
+	  suspend functionality behind CONFIG_PM.  From Jussi Kivilinna
+	  (2017-11-10).
+	* procfs: Fix uptime being clse to maximum 32-bit value in certain
+	  config.  From Juha Niskanen (2017-11-10).
+	* libc:  Add support for readv() and write(). Also includes some
+	  cosmetic changes to some unrelated files (2017-11-11).
+	* libc/signal:  Add support for sigwait() (2017-11-11).
+	* sched/signal/sig_nanosleep.c and libc/time/lib_nanosleep.c:
+	  Implement clock_nanosleep().  nanosleep() is now reduced to a libc
+	  wrapper around clock_nanosleep() (2017-11-11).
+	* Changes from review of clock_nanosleep():  Misplaced right bracket,
+	  but return value in one failure case (2017-11-11).
+	* include/netinet/tcp.h:  Add trivial standard tcp.h header file
+	  (2017-11-12).
+	* Trivial re-ordering of socket option bit numbers to match order
+	  presented on OpenGroup.org (2017-11-12).
+	* arch/arm/src/stm32/stm32f33xx_adc.c:  Eliminate warnings about
+	  cj_channels and j_chanlist being set but not used (2017-11-12).
+	* configs/stm32l476-mdk: Add support for the on-board LEDs (2017-11-12).
+	* include/netinet/tcp.h:  Add trivial standard tcp.h header file
+	  (2017-11-12).
+	* configs/stm32l476-mdk:  Repartition bring-up logic so that it is more
+	  like other board directories.  Add support for USERLED driver.  Add
+	  bring-up initialization logic for the USERLED driver (2017-11-12).
+	* drivers/usbdev/rndis.c:  Fix some issues in rndis.c  Introduce
+	  rndis_transmit() and change rndis_rxdispatch() to avoid packet
+	  corruption. Introduce max packet size for dual speed whichis mainly
+	  used for high speed mode. Fix adjusting MTU warning on Linux host. Fix
+	  data corruption if a packet size excceds MTU.  NOTE: Max packet size is
+	  not configured dynamically. This should be fixed in the future
+	  version.  Change HPWORK to ETHWORK.  NOTE: In the commit 07b98ccbb5,
+	  max packet size of bulkout was assumed to be 64. In this commit,
+	  priv->epbulkout->maxpacket is used instead.  From Masayuki Ishikawa
+	  (2017-11-13).
+	* configs/stm32f4discovery: RNDIS support on STM32F4Discovery
+	    - Add rndis configuration.  NOTE: STM32F4Discovery + DM-STF4BB
+	    - Add stm32_netinit.c to avoid a compilation error
+	    - Add rndis initialization in stm32_bringup.c
+	  NOTE: MAC address for the host side starts 0xaa.  This assignment
+	  scheme should be fixed later.  From Masayuki Ishikawa (2017-11-13).
+	* configs/:  apps/system/free has been deleted because it violates the
+	  portable POSIX OS interface.  Remove CONFIG_SYSTEM_FREE=y from all
+	  defconfig files (2017-11-13).
+	* fs/procfs/fs_procfsprogrem:  Add /proc/progmem.  This is an
+	  alternative way to get the information that was previoulsy available in
+	  apps/system/free.  apps/system/free was removed beause it made illegal
+	  calls into the OS violating the portable interface.  This new procfs
+	  entry provides the same information with no such violation (2017-11-13).
+	* Nucleo-F746ZG: Use the serial console over /dev/ttyACM0 by default.
+	  The Nucleo-F746ZG doesn't come with Arduio RS-232 shield, then it is
+	  better to use the serial over the /dev/ttyACM0 that is created
+	  automatically when the board is plugged in the computer.  From Alan
+	  Carvalho de Assis (2017-11-13).
+	* SAMA5/SAMv7:  It is necessary to disable pre-emption and interrupts
+	  around a loop that copies TX data into the hardware in order to avoid a
+	  TX data underrun condition.  From Anthony Merlino (2017-11-13).
+	* fs/profcs:  Add file to show user space heap.  This replaces the NSH
+	  free command (2017-11-13).
+	* fs/procfs:  Optimization of previous commits.  /proc/umm and
+	  proc/progmem are deleted.  /proc/kmm is renamed /proc/meminfo and
+	  contains the output that was in all three files previously (2017-11-13).
+	* configs/stm32f439i-disco:  Add an fb configuration (2017-11-13).
+	* configs/stm32f429i-disco/fb:  Fix a compile issue.  Disable all NX
+	  features in the fb configuration.  NX is not needed (2017-11-13).
+	* configs/stm32f429i-disco/fb:  Refactor initialization logic so that
+	  it is a little more like other boards.  Remove double initialization of
+	  framebuffer or LCD drivers (whichever is enabled) (2017-11-13).
+	* configs/stm32f429i-disco:  Add logic to auto-mount procfs.  Enable
+	  procfs in all configurations that use NSH (2017-11-13).
+	* configs/stm32f429-disco/fb:  Enable support for the STMPE811
+	  touchscreen controller and also for the apps/exmaples/touchscreen test
+	  (2017-11-14).
+	* Remove CONFIG_GRAN_SINGLE.  It adds no technical benefit (other than
+	  some minor reduction in the number of interface arguments) but adds a
+	  lot of code complexity.  Better without it (2017-11-14).
+	* mm/mm_gran:  Add a function to get information about the state of the
+	  granuale allocator (2017-11-14).
+	* fs/procfs:  Add logic to show the state of the page allocator in
+	  /proc/meminfo (2017-11-14).
+	* mm/mm_gran:  Fix some issues found during test of the new gran_info()
+	  interface (2017-11-14).
+	* configs/stm32429i-disco/src:  Fix a compile error when
+	  CONFIG_BOARD_INITIALIZE is defined (2017-11-14).
+	* configs/lc823450-xgevk: Fix compilation errors on Cygwin.  From
+	  Masayuki Ishikawa (2017-11-15).
+	* mm/mm_gran:  Combine some common logic into a function (also fixes a
+	  subtle bug) (2017-11-15).
+	* Build system:  Fix CONFIG_BUILD_KERNEL logic directories that have
+	  ubin and kbin subdirectories.  Conditional logic was fine for
+	  CONFIG_BUILD_FLAT and CONFIG_BUILD_PROTECTED but generated useless
+	  dependencies if CONFIG_BUILD_KERNEL (2017-11-15).
+	* arch/arm/src/lpc43: Add LPC43xx CAN driver.  From Alexander Vasiljev
+	  (2017-11-15).
+	* arch/arm/src/lpc43: UART_RX pins should be configured with input
+	  buffers enabled. Otherwise it cannot be read.  From Alexander Vasiljev
+	  (2017-11-15).
+	* Build system:  Fix CONFIG_BUILD_KERNEL logic directories that have
+	  ubin and kbin subdirectories.  Conditional logic was fine for
+	  CONFIG_BUILD_FLAT and CONFIG_BUILD_PROTECTED but generated useless
+	  dependencies if CONFIG_BUILD_KERNEL (2017-11-15).
+	* STM32F429i-Disco: Convert NxWM configuration to use LTDC framebuffer
+	  driver instead of SPI serial.  Also reduce number of layers from 4 to 1
+	  in fb configuration.  Only one layer is used (2017-11-15).
+	* configs/stm32f429i-disco/ide:  Remove the uVision IDE setup that goes
+	  along with the ltdc configuration that was removed on 2017-10-28
+	  (2017-11-16).
+	* configs/stm3220g-eval/ide:  Remove the uVision IDE setup.  This has
+	  not been used for years and it a maintenance problem for me (2017-11-16).
+	* arch/arm/src/xmc4: Fix XMC4xxx USIC UART sginal to be high level when
+	  in idle.  From Alan Carvalho de Assis (2017-11-16).
+	* arch/arm/src/xmc4: Kconfig was not selecting XMC4_USIC for USIC1.
+	  From Alan Carvalho de Assis (2017-11-16).
+	* configs/xmc4500-relax: Add config for UART3 on RXD P0.0 and TXD P0.1
+	  pins.  From Alan Carvalho de Assis (2017-11-16).
+	* STM32 F72xx and F73xx:  Add register definition header files and
+	  clocking logic.  From Bob Feretich (2017-11-17).
+	* STM32F7:  Fix typos in two RCC register definition header files.
+	  From Bob Feretich (2017-11-17).
+	* STM32F7:  Completes architecture support for the STM32 F72x and F73x
+	  families.  Adds support for the Nucleo-144 boards with STM32F722.  From
+	  Bob Feretich (2017-11-18).
+	* configs/sim:  Disable NX graphics support in the fb configuration.
+	* libnx:  Changes to allow the font subsystem to be built without
+	  enabling the entire graphics system (CONFIG_NX).  Adds CONFIG_NXFONTS
+	  and CONFIG_NXGLIB.  NX and NXFONTS are still pretty heavily entangled.
+	  Needed to duplicate some Kconfig setting for NXFONTs if it can be
+	  configured and built independently of NX.  Also includes some
+	  build-related fixes (2017-11-18).
+	* configs/mcb1700: Add support for Keil MCB1700 board.  From Alan
+	  Carvalho de Assis (2017-11-18).
+	* configs/open1788/pdcurses:  Add a configuration for testing pdcurses
+	  (2017-11-19).
+	* C library: Fix sscanf character conversion (%c): do not add '\0' at
+	  the end as for strings, cause, for example, parsing one character will
+	  fill two bytes: character itself and zero one '\0' after it, so will
+	  overflow one byte variable argument and corrupt memory for variables
+	  allocated after it.  From Oleg Evseev (2017-11-19).
+	* arch/arm/src/xmc4:xmc4_uart_configure() expects the channel# not
+	  uartbase as an input parameter.  From Alan Carvalho de Assis
+	  (2017-11-20).
+	* configs/open1788:  Add support for the discrete joystick driver.
+	  Update the pdcurses configuration to use apps/examples/djoystick
+	  (2017-11-20).
+	* net/icmpv6:  icmpv6_input() needs to set d_len to 0 after consuming
+	  echo reply, otherwise, garbage will get sent out.  From Anthony Merlino
+	  (2017-11-20).
+	* configs/open1788:  Enable discrete joystick input.  This is
+	  sufficient to get through all menuing that does not require text input
+	  (2017-11-20).
+	* net/sixlowpan:  Fix an endian-ness problem in 6LoWPAN address
+	  decompression.  From Anthony Merlino (2017-11-20).
+	* net/sixlowpan:  The logic that extracts interface identifier from the
+	  IP address needs to be generalized to handle cases where the address is
+	  not a link local address.  From Anthony Merlino (2017-11-20).
+	* arch/arm/src/xmc4 UART: Enable RX/TX status and small fixes.  From
+	  Alan Carvalho de Assis (2017-11-21).
+	* Various fixes for errors ound while debugging OTG on L496
+	    - STM32, STM32 L4, and STM32 M4: USB OTGFS DMA trace output fix
+	    - STM32: Add dump buffer feature to stm32 F4 series
+	    - STM32 and STM32 L4: Fix bad USB OTGFS register address
+	    - STM32 L4:  Fix typo in USB OTGFS register usage
+	    - STM32 L4:  Add check in USB OTGFS driver to assure that SYSCFG is
+	      enabled
+	    - Nucleo-L496ZG:  Make HSE on Nucleo-L496ZG default to enable USB
+	  From Miha Vrhovnik (2017-11-21).
+	* Two changes for STM32F7.
+	  1) The first enables building with CONFIG_ARCH_IDLE_CUSTOM enabled.
+	  2) The second allows changing voltage output scaling setting and
+	     prevents enabling over-drive mode for low frequencies (STM32 F74xx,
+	     75xx, 76xx, 77xx)
+	  From Jussi Kivilinna (2017-11-21).
+	* Replicate Jussi Kivilinna's change for the newly added STM32F2xx and
+	  F3xx family members.  This change allows selecting voltage output scale
+	  mode and enable over-drive only when needed (2017-11-21).
+	* mm:  Add a debug assertion to check for integer overflow in malloc
+	  (2017-11-21).
+	* net/icmpv6:  Fix an error in the poll logic.  It was assume that the
+	  input parmeter pvconn was valid.  It was not.  Instead, the poll logic
+	  must work like the sendto() and recvfrom() logic:  It must keep a copy
+	  of the conn structure in the private data (2017-11-21).
+	* net/icmpv6:  Remove the 'list' field from struct icmpv6_conn_s.  It
+	  is not used (2017-11-21).
+	* net/icmp:  Ports the changes in ICMPv6 of commits
+	  4629cf9461e5ac6f5f01ef8c9bee3ec9a60ce081 and
+	  74a633ea94bc308cd2eca0ec6c2be798d5794e72 to ICMP.  ICMP and ICMPv6
+	  sockets are nearly identical, bug-for-bug (2017-11-21).
+	* net/sixlowpan:  Add htohs() in arguments to debug statements that
+	  print IP addresses so that they are all shown in friendlier host
+	  order.  From Anthony Merlino (2017-11-21).
+	* stm32f33xxx_rcc:  Fix CAN clock enable.  From Mateusz Szafoni
+	  (2017-11-22).
+	* drivers/lcd_framebuffer.c:  If BPP is less then 8, then we need to
+	  byte-align the update region (2017-11-22).
+	* configs/stm32f103-minimum: Add framebuffer driver initialization for
+	  stm32f103-minimum board.  From Alan Carvalho de Assis (2017-11-22).
+	* mm: Fix a typo in a debug assertion (2017-11-22).
+	* stm32f33xxx_rcc:  Fix CAN clock enable.  From Mateusz Szafoni
+	  (2017-11-22).
+	* net/icmp and icmpv6:  Fix some errors in debug assertions introduced
+	  with last changes in this area.  Also updates a REAME.txt file
+	  (2017-11-22).
+	* net/:  Fix some issues with regard to UDP broadcast handling.  This
+	  is Bitbucket Issue #77.  This commit tentatively closes the issues,
+	  subject to verification (2017-11-22).
+	* sixlowpan: Support sending to a router that is on-link and may be
+	  able to forward the packet for us if the destination is not reachable
+	  directly.  From Anthony Merlino (2017-11-22).
+	* Pass header-payload offset to application for use when the MAC layer
+	  is in promiscuous mode
+	    - mac802154_device: When in promiscuous mode, the char driver sends
+	      the entire frame, including the MAC header.  This change adds an
+	      offset field indicating the header-payload boundary. It is set to 0
+	      when not in promiscuous mode as the header is not passed to the
+	      application
+	    - mac802154: Adds support for getting promiscuous mode state
+	  From Anthony Merlino (2017-11-22).
+	* USB RNDIS - Fixes minor build error while using USB RNDIS with USB
+	  debugging information enabled.  From Anthony Merlino (2017-11-22).
+	* clicker2-stm32: Adds support for USB RNDIS device.  From Anthony
+	  Merlino (2017-11-22).
+	* STM32 L4 USB OTGFS: Remove dumpbuffer feature added in the last
+	  commit.  I don't want in features that cannot be controlled be via
+	  Kconfig files and I do not accept debug code in the upstream GIT.  My
+	  mistake for merging it in the first place (2017-11-22).
+	* include/nuttx/video/fb.h:  Add definition for a Y2 color format.  I
+	  don't know if this standard but I do have 2-bit greyscale hardware so
+	  the definition is needed (2017-11-22).
+	* sixlowpan: Fixes build error introduced by recent PR when routing
+	  table is enabled.  From Anthony Merlino (2017-11-22).
+	* sixlowpan: Fixes build error introduced by recent PR when routing
+	  table is enabled.  From Anthony Merlino (2017-11-22).
+	* net/netdev:  Add support for the SIOCGIFBRDADDR ioctl() command
+	  (2017-11-22).
+	* include/nuttx/audio: Remove CONFIG_SCHED_WORKQUEUE check in pcm.h.
+	  From Masayuki Ishikawa (2017-11-23).
+	* sched/semaphore/spinlock.c: Disable local interrupts in spin_setbit()
+	  and spin_clrbit() in order to avoid a deadlock condition.  From
+	  Masayuki Ishikawa (2017-11-23).
+	* configs/stm32f4disovery: Add support for JLX12864G display on STM32F4
+	  Discovery board.  From Alan Carvalho de Assis (2017-11-23).
+	* configs:  All NX configuration... Because of recent changes to
+	  libnx/nxfonts, Supported bit per pixel must be separated specified for
+	  NXFONTs too and need to match the select BPP for NX (2017-11-24).
+	* fs/procfs:  Correct ordering of procfs entries.  For consistency, use
+	  alphbetical ordering (2017-11-24).
+	* configs/xmc4500-relax:  Setup max. freq. 120MHz and setup pull-up to
+	  UART RXD pin.  From Alan Carvalho de Assis (2017-11-24).
+	* arch/arm/src/xmc4:  Do not run at 144MHz unless BOARD_FCPU_144MHZ is
+	  selected in the board.h header file.  From Alan Carvalho de Assis
+	  (2017-11-24).
+	* configs/xtrs:  Removed the XTRS configuration This was an unverified
+	  port of NuttX to a TRS-80 simulator.  It was removed because (1) it is,
+	  as I said, unverified as well as unsupported, and (2) the TRS-80
+	  simulation is a sub-optimal platform.  That platform includes a 16-bit
+	  ROM image and only a 48Kb RAM space (2017-11-24).
+	* arch/arm/src/xmc4:  Remove hard-coded values in clock configuration.
+	  USB will be fixed later.  From Alan Carvalho de Assis (2017-11-25).
+	* drivers/lcd:  Add support for external LCD initialization required by
+	  some board logic.  configs/zpa214xpa:  Tried to get the LCD working
+	  again unsuccessfully.  Too much bit rot I suppose (2017-11-25).
+	* STM32F4 Discovery:  Fix some errors due to missing inclusion of
+	  stm32_gpio.h (2017-11-25).
+	* XMC4 Serial:  The Alternative Receive Interrupt was not being
+	  configured (2017-11-25).
+	* drivers/lcd:  Make LCD driver configuration indepently selected from
+	  NX graphics configuration.  This makes things awkward and loses some
+	  error checking but is a necessary step in order to make LCD drivers
+	  usable when the NX graphics system is disabled (2017-11-25).
+	* STM3240G-EVAL: Mount procfs if enabled (2017-11-25).
+	* arm/src/xmc4: Include Alt. Interrupt Enable to RX_EVENTS and rename
+	  serial GPIO configurations.  From Alan Carvalho de Assis (2017-11-25).
+	* configs/: CONFIG_QENCODER was renamed to CONFIG_SENSORS_QENCODER:
+	  update occurrences in several Kconfig files (2017-11-25).
+	* configs/stm3240g-eval:  Add support for pdcurses and the pdcurses
+	  demo programs in the 'fb' configuration (2017-11-26).
+	* arch/arm/src/stm32:  Fix compile error when trace is enabled.
+	  I2CEVENT_ERROR was used but never defined (2017-11-26).
+	* configs/lc823450-xgevk: Enable CONFIG_SMP for audio.Update README.txt
+	  regarding SMP audio.  From Masayuki Ishikawa (2017-11-27).
+	* lc823450 smp audio
+	    - arch/arm/src/lc823450: Remove a workaround in up_cpu_paused().
+	      Introduce g_gpio_lock to improve write performance in SMP mode.
+	      NOTE: This is a tentative solution and should be replaced with more
+	      generic one. Add a workaround in up_txready() to avoid data
+	      corruption.  From Masayuki Ishikawa (2017-11-27).
+	* arch/arm/src/lpc32xx:  lpc32_adc.c was being selected by the build
+	  system wehn DAC was selected (2017-11-27).
+	* configs/lc823450-xgevk: Add rndis configuration.  From Masayuki
+	  Ishikawa (2017-11-28).
+	* drivers/input/nunchuck.c: Add Nintendo Wii Nunchuck driver.  From
+	  Alan Carvalho de Assis (2017-11-28).
+	* configs/stm32f4discovery/include/board.h: Remove only I2C pin config,
+	  we can use PB6 and PB9.  From Alan Carvalho de Assis (2017-11-28).
+	* configs/stm32f4discovery/src:  Add stm32f4discovery board support for
+	  Nunchuck joystick.  From Alan Carvalho de Assis (2017-11-28).
+	* net/devif: Do not add link layer header size to d_len inside
+	  devif_forward().  From Anthony Merlino (2017-11-29).
+	* Framebuffer Driver:  Small modification convention for multi-planar
+	  displays (of which there are none) (2017-11-29).
+	* configs/stm32f103-minimum: Add Nunchuck board support for
+	  stm32f103-minimum board.  From Alan Carvalho de Assis (2017-11-29).
+	* drivers/mtd:  Add a driver for Macronix MX35LFxGE4AB serial NAND
+	  flash.  From Ekaterina Kovylova (2017-11-29).
+	* net/pkt: Eliminate a compile error due to missing include and also a
+	  warning (2017-11-29).
+	* sched/task/task_exithook.c:  Clear atexit() function pointer before
+	  calling it.  On most archs, up_assert() calls exit() so without this
+	  change, if atexit() function triggers an assertion we are in endless
+	  loop.  From Juha Niskanen (2017-11-30).
+	* arch/arm/src/xmc4/Kconfig: Define user friendly SPI, I2C, LIN, and
+	  I2S aliases to follow other arch names.  From Alan Carvalho de Assis
+	  (2017-11-30).
+
+7.24 2018-xx-xx Gregory Nutt <gnutt@nuttx.org>
