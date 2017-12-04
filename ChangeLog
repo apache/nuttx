@@ -14350,7 +14350,7 @@
 	* drivers/lcd/st7565.c:  Use ST7565_POWERCTRL_INT instead of
 	  ST7565_POWERCTRL_BRF.  From Masayuki Ishikawa (2017-03-21).
 	* SMP Kconfig: Change the minimum SMP_NCPUS to 1.  From Masayuki
-	  Ishikawa (2017-03-xx).
+	  Ishikawa (2017-03-21).
 	* SMP: Setting CONFIG_SMP_NCPUS=1 should only be permitted in a debug
 	  configuration (2017-03-22).
 	* Clicker2-STM32:  Create src/, kernel/, and scripts/ directories
@@ -14457,7 +14457,7 @@
 	  Assis (2017-03-27).
 	* AT86RF23x:  Clean-up, standardize lower half interface.  Take
 	  advantage of new OS features for interrupt parameter passing
-	  (2017-03-xx).
+	  (2017-03-27).
 	* MRF24J40: Take advantage of new OS features for interrupt parameter
 	  passing (2017-03-27).
 	* lcd/:  PCF8574 backpack logic needs to include poll.h
@@ -14781,7 +14781,7 @@
 	* STM32F0:  Add basic support for STM32F07x family (2017-04-17).
 	* STM32F0:  Move enabling of GPIO peripherals form UART setup to
 	  clockconfig.  This is not a UART function.  It is needed by all
-	  peripherals (2017-04-xx).
+	  peripherals (2017-04-17).
 	* STM32F0:  Add logic to enable other USARTs.  No UART4/5.  Rather
 	  USART4/5 (2017-04-17).
 	* STM32F7:  Warn if no DMA2 configured when using ADC with DMA.  Also
@@ -14960,7 +14960,7 @@
 	* Nucleo-F072RB:  Add support for the I2C driver used by I2C tools
 	  (2017-04-20).
 	* drivers/i2c:  Fix compile issus if CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-	  is enabled (2017-04-xx).
+	  is enabled (2017-04-30).
 	* STM32F0 I2C:  Update driver to use the standard interrupt parameter
 	  passing logic (2017-04-30).
 	* STM32F0 I2C:  Pin definitions should specify open drain (and probably
@@ -15601,7 +15601,7 @@
 	  a rejected association response frame.  From Anthony Merlino
 	  (2017-06-15).
 	* Rename configs/mrf24j40-radio to mrf24j40-mac (2017-06-15).
-	* clicker2-stm32: Add a configuratino that will, eventually, be used
+	* clicker2-stm32: Add a configuration that will, eventually, be used
 	  for 6loWPAN testing (2017-06-15).
 	* Fix a typo.  And typo in Kconfig file is reflect in all defconfig
 	  files (2017-06-15).
@@ -16978,11 +16978,9 @@
 	* drivers/usbdev/cdcacm.c:  Change ordering of some operations to avoid
 	  races; Add missing uppder watermark logic that is normally in
 	  serial_io.c but must be duplicated in cdcacm.c (2017-09-27).
-	* Fixed directory unlocking in tmpfs_opendir.  From Dmitriy Linikov
-	  (2017-09-27).
 	* net/route: Permit IPv4 and IPv6 routing tables to be of different
 	  sizes (2017-09-27).
-	* ROMFS for STM32F4 Discovery board.  Tomasz Wozniak (2017-09-28).
+	* ROMFS for STM32F4 Discovery board.  From Tomasz Wozniak (2017-09-28).
 	* STM32 PWR:  Adds stm32_pwr_getsbf and stm32_pwr_getwuf functions that
 	  return the standby flag and the wakeup flag PWR power control/status
 	  register.  From Oleg Evseev (2017-09-28).
@@ -17057,7 +17055,7 @@
 	  errno (2017-09-30).
 	* net/: psock_bind() is an internal interface and should not set the
 	  errno (2017-09-30).
-	* net/: psock_connect(( is an internal interface and should not set the
+	* net/: psock_connect() is an internal interface and should not set the
 	  errno nor should it be a cancellation point (2017-09-30).
 	* net/: psock_listen() is an internal interface and should not set the
 	  errno (2017-09-30).
@@ -17170,7 +17168,7 @@
 	      documented...)
 	    - STM32L4 PM: remove useless #ifdefs and old non-L4 STM32 code
 	  From Juha Niskanen (2017-10-03).
-	* sched/semaphoate:  Rename sem_reset() to nxsem_reset() so that it is
+	* sched/semaphore:  Rename sem_reset() to nxsem_reset() so that it is
 	  clear this is an internal OS function (2017-10-03).
 	* sched/semaphore:  Rename sem_tickwait() to nxsem_tickwait() so that it
 	  is clear this is an internal OS function (2017-10-03).
@@ -17421,7 +17419,7 @@
 	  From Juha Niskanen (2017-10-13).
 	* TCP Networking:  When CONFIG_NET_TCP_WRITE_BUFF=y there is a situation
 	  where a NULL pointer may be dereferenced.  In this configuration, the
-	  TCP connection's 'semi-permnanent' callback, s_sndcb was nullified in
+	  TCP connection's 'semi-permanent' callback, s_sndcb was nullified in
 	  tcp_close_disconnect.  However, other logic in tcp_lost_connection()
 	  attempt to use that callback reference after it was nullifed.  Fixed in
 	  tcp_lost_connectino() by adding a NULL pointer change before the
@@ -17479,7 +17477,7 @@
 	* BCM2708: Add system timer register definitions and a partial
 	  implementation of the tickless mode timer (2017-10-17).
 	* BCM2708: Add support for AUX interrupts.  Add some build configuration
-	  and support logic for low-level serial otput (2017-10-17).
+	  and support logic for low-level serial output (2017-10-17).
 	* drivers/usbdev: Correct input flow control logic when watermarks are
 	  not enabled.  Problem noedt by and change based on suggestion by Juha
 	  Niskanen (2017-10-18).
@@ -17819,8 +17817,6 @@
 	    - arch/arm/src/lc823450: Add IPL2 support
 	    - configs/lc823450-xgevk: Add IPL2 support
 	  From Masayuki Ishikawa (2017-11-07).
-	* drivers/lcd/max7219.c:   Add support for MAX7219 vertically organized
-	  display.  From Alan Carvalho de Assis (2017-11-07).
 	* drivers/audio: Add WM8774 support.  From Masayuki Ishikawa
 	  (2017-11-08).
 	* lc823450-xgevk audio support
@@ -17951,10 +17947,6 @@
 	* arch/arm/src/lpc43: UART_RX pins should be configured with input
 	  buffers enabled. Otherwise it cannot be read.  From Alexander Vasiljev
 	  (2017-11-15).
-	* Build system:  Fix CONFIG_BUILD_KERNEL logic directories that have
-	  ubin and kbin subdirectories.  Conditional logic was fine for
-	  CONFIG_BUILD_FLAT and CONFIG_BUILD_PROTECTED but generated useless
-	  dependencies if CONFIG_BUILD_KERNEL (2017-11-15).
 	* STM32F429i-Disco: Convert NxWM configuration to use LTDC framebuffer
 	  driver instead of SPI serial.  Also reduce number of layers from 4 to 1
 	  in fb configuration.  Only one layer is used (2017-11-15).
@@ -18051,8 +18043,6 @@
 	* configs/stm32f103-minimum: Add framebuffer driver initialization for
 	  stm32f103-minimum board.  From Alan Carvalho de Assis (2017-11-22).
 	* mm: Fix a typo in a debug assertion (2017-11-22).
-	* stm32f33xxx_rcc:  Fix CAN clock enable.  From Mateusz Szafoni
-	  (2017-11-22).
 	* net/icmp and icmpv6:  Fix some errors in debug assertions introduced
 	  with last changes in this area.  Also updates a REAME.txt file
 	  (2017-11-22).
@@ -18099,7 +18089,7 @@
 	  libnx/nxfonts, Supported bit per pixel must be separated specified for
 	  NXFONTs too and need to match the select BPP for NX (2017-11-24).
 	* fs/procfs:  Correct ordering of procfs entries.  For consistency, use
-	  alphbetical ordering (2017-11-24).
+	  alphabetical ordering (2017-11-24).
 	* configs/xmc4500-relax:  Setup max. freq. 120MHz and setup pull-up to
 	  UART RXD pin.  From Alan Carvalho de Assis (2017-11-24).
 	* arch/arm/src/xmc4:  Do not run at 144MHz unless BOARD_FCPU_144MHZ is
@@ -18140,7 +18130,7 @@
 	      NOTE: This is a tentative solution and should be replaced with more
 	      generic one. Add a workaround in up_txready() to avoid data
 	      corruption.  From Masayuki Ishikawa (2017-11-27).
-	* arch/arm/src/lpc32xx:  lpc32_adc.c was being selected by the build
+	* arch/arm/src/lpc43xx:  lpc43_adc.c was being selected by the build
 	  system wehn DAC was selected (2017-11-27).
 	* configs/lc823450-xgevk: Add rndis configuration.  From Masayuki
 	  Ishikawa (2017-11-28).
