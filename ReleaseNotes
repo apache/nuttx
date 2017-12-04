@@ -15881,7 +15881,7 @@ Additional new features and extended functionality:
 
       - LPC43xx:  Add LPC43xx CAN driver.  From Alexander Vasiljev.
 
-    * NXP Freescale LPC4exx Boards:
+    * NXP Freescale LPC43xx Boards:
 
       - MCB1700:  Add support for Keil MCB1700 board.  From Alan Carvalho de
         Assis.
@@ -15899,7 +15899,7 @@ Additional new features and extended functionality:
 
     * On Semiconductor LC823450 Boards
 
-      - LC823450-XGEVK: Enable ADC and watchdog driver.  From Masayuki
+      - LC823450-XGEVK:  Enable ADC and watchdog driver.  From Masayuki
         Ishikawa.
       - LC823450-XGEVK:  Add IPL2 support.  From Masayuki Ishikawa.
       - LC823450-XGEVK:  Add WM8774 support. From Masayuki Ishikawa.
@@ -15941,7 +15941,7 @@ Additional new features and extended functionality:
         Mateusz Szafoni.
       - STM32 F33xx ADC:  Add ADC DMA support to STM32F33 configuration.  From
         Mateusz Szafoni.
-      - STM32 L4 ADC: port analog watchdog ioctl commands from the Motorola
+      - STM32 L4 ADC:  Port analog watchdog ioctl commands from the Motorola
         MDK.  From Juha Niskanen
       - STM32 L4 ADC:  Add option for routing ADC data to DFSDM, fix DFSDM
         DMA. From Juha Niskanen
@@ -15999,7 +15999,7 @@ Additional new features and extended functionality:
         (powerled).  From Mateusz Szafoni.
       - STM32F334-DISCO:  Add flash mode support for powerled driver. From
         Mateusz Szafoni.
-      - STM32F334-DISCO: Add powerled example configuration.  From Mateusz
+      - STM32F334-DISCO:  Add powerled example configuration.  From Mateusz
         Szafoni.
       - STM32F334-DISCO:  Add lower-half driver for SMPS (buck-boost onboard
         converter).  From Mateusz Szafoni
@@ -16044,7 +16044,7 @@ Additional new features and extended functionality:
         layers from 4 to 1 in fb configuration.  Only one layer is used.
       - STM32L476-MDK:  Add support for the on-board LEDs.
       - Nucleo-L496ZG:  Add DFSDM initialization.  From Juha Niskanen
-      - Nucleo-L496ZG: Add support for SDMMC driver.  From Miha Vrhovnik.
+      - Nucleo-L496ZG:  Add support for SDMMC driver.  From Miha Vrhovnik.
       - Nucleo-L496ZG:  Enable I2C4 bus with i2ctool in NSH configuration.
         From Jussi Kivilinna.
       - Nucleo-L496ZG:  Make HSE on Nucleo-L496ZG default to enable USB.
@@ -16054,8 +16054,8 @@ Additional new features and extended functionality:
         better to use the serial over the /dev/ttyACM0 that is created
         automatically when the board is plugged in the computer.  From Alan
         Carvalho de Assis.
-      - Nucleo-144: Adds support for the Nucleo-144 boards with STM32F722.
-        From Bob Feretich.
+      - Nucleo-144:  Adds support for the Nucleo-144 boards with
+        STM32F722ZE.  From Bob Feretich.
 
     * ZiLOG Z80
 
@@ -16078,7 +16078,7 @@ Additional new features and extended functionality:
 
     * Tools:
 
-      - tools/configure.sh: Add special support so that you can start with a
+      - tools/configure.sh:  Add special support so that you can start with a
         windows native configuration and install on a different host (and
         vice versa).
       - tools/configure.c:  Duplicate new functionaity added to configure.sh.
@@ -16141,7 +16141,7 @@ Additional new features and extended functionality:
         the entire character set (7-bit only).  It adapts to the size of
         the framebuffer and, hence, can be used with very tiny displays.
         In fact it looks really dumb on big displays.
-      - apps/examples/nunchuck: Add Nunchuck example application.  From
+      - apps/examples/nunchuck:  Add Nunchuck example application.  From
         Alan Carvalho de Assis.
 
     * File System Utilies: apps/fsutils:
@@ -16187,7 +16187,7 @@ Additional new features and extended functionality:
         locally, so when performing a startpan or assoc, the channel
         previously set is still used, even though the MAC layer gets reset.
         From Anthony Merlino.
-      - apps/wireless/ieee802154/i8sak: Adds ability to get/set rxonidle
+      - apps/wireless/ieee802154/i8sak:  Adds ability to get/set rxonidle
         setting for MAC layer. From Anthony Merlino.
       - apps/wireless/ieee802154/i8shark:  Adds i8shark, a sniffer "adapter"
         that captures all 802.15.4 traffic, packages it into a Wireshark ZEP

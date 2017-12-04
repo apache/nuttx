@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 24, 2017</p>
+      <p>Last Updated: December 4, 2017</p>
     </td>
   </tr>
 </table>
@@ -560,6 +560,14 @@
   <td><br></td>
   <td>
     <p>
+      <li>UserFS - User application file system.</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li><code>procfs/</code> pseudo-filesystem support.</li>
     </p>
   </td>
@@ -808,7 +816,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Special <code>INET</code> protocol sockets:  Raw ICMP and ICMPv6 protocol ping sockets (<code>IPPROTO_ICMP</code>).</li>
+      <li>Special <code>INET</code> protocol sockets:  Raw ICMP and ICMPv6 protocol ping sockets (<code>IPPROTO_ICMP</code>/<code>IPPROTO_ICMP6</code>).</li>
     </p>
   </td>
 </tr>
@@ -1073,7 +1081,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Device-dependent USB class drivers available for USB serial (CDC/ACM and a PL2303 emulation), for USB mass storage, and for a dynamically configurable, composite USB devices.</li>
+      <li>Device-dependent USB class drivers available for USB serial (CDC/ACM and a PL2303 emulation), for USB mass storage, for RNDIS networking, and for a dynamically configurable, composite USB devices.</li>
     </p>
 </tr>
 <tr>
@@ -1417,11 +1425,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.22.
-  NuttX 7.22 is the 122<sup>nd</sup> release of NuttX.
-  It was released on September 6, 2017, and is available for download from the
+  The current release is NuttX 7.23.
+  NuttX 7.23 is the 123<sup>rd</sup> release of NuttX.
+  It was released on December 4, 2017, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.22.tar.gz</code> and <code>apps-7.22.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.23.tar.gz</code> and <code>apps-7.23.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1430,7 +1438,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.22 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.23 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1438,7 +1446,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.22 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.23 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1490,6 +1498,7 @@
       <li><a href="#arm920t">ARM920T</a> (1)</li>
       <li><a href="#arm926ejs">ARM926EJS</a> (4)</li>
       <li><a href="#armv4">Other ARMv4</a> (1)</li>
+      <li><a href="#arm1176jz">ARM1176JZ</a> (1)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (3)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
@@ -1497,7 +1506,7 @@
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (37)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (43)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (8)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (9)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1593,6 +1602,11 @@
       <li><a href="#at91sama5d4">Atmel SAMA5D4</a> <small>(ARM Cortex-A5)</small></li>
     </ul>
   </li>
+  <li>Broadcom
+    <ul>
+      <li><a href="#bcm2708">BCM2708</a> <small>(ARM1176JZ)</small></li>
+    </ul>
+  </li>
   <li>Expressif
     <ul>
       <li><a href="#esp32">ESP32</a> <small>(Dual Xtensa LX6)</small></li>
@@ -1635,18 +1649,18 @@
     <ul>
       <li><a href="#m68hcs12">M68HCS12</a></li>
     </ul>
-    <ul>
-      <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
-      <li><a href="#freescaleimx6">Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
-      <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
-      <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
-      <li><a href="#kinetisk20">FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>NXP/Freescale (Continued)
     <ul>
+    <ul>
+      <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
+      <li><a href="#freescaleimx6">Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
+      <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#freescalekl26z">FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#kinetisk20">FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#kinetisk40">FreeScale Kinetis K40</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#kinetisk60">FreeScale Kinetis K60</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#kinetisk64">FreeScale Kinetis K64</a> <small>(ARM Cortex-M4)</small></li>
@@ -1716,6 +1730,7 @@
       <li><a href="#stm32l475">STMicro STM32 L475</a> <small>(STM32 L4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32l476">STMicro STM32 L476</a> <small>(STM32 L4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32l496">STMicro STM32 L496</a> <small>(STM32 L4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f72x3x">STMicro STM32 F72x/F73x</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f76xx77xx">STMicro STM32 F76xx/F77xx</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
@@ -2062,6 +2077,26 @@
       <a name="moxart"><b>MoxaRT</b></a>
       A port to the Moxa NP51x0 series of 2-port advanced RS-232/422/485 serial device servers was contributed by Anton D. Kachalov in NuttX-7.11.
       This port includes a NuttShell (NSH) configuraion with support for the Faraday FTMAC100 Ethernet MAC Driver.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="arm1176jz"><b>ARM1176JZ</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="bcm2708"><b>Broadcom BCM2708</b></a>.
+      Very basic support for the Broadcom BCM2708 was released with NuttX-7.23.
+    </p>
+      <a name="pizero"><b>Raspberry Pi Zero</b><a/>.
+      This support was provided for the Raspberry Pi Zero which is based on the BCM2835.
+      Basic logic is in place but the port is incomplete and completely untested as of the NuttX-7.23 released.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pizero/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -3467,10 +3502,13 @@ nsh>
         <li>
           A version of the LPCXPresso LPC1768 board with special support for the U-Blox model evaluation board.
         </li>
+        <li>
+          Support for the Keil MCB1700 was contributed by Alan Carvalho de Assis in NuttX-7.23.
+        </li>
       </ul>
     </p>
     <p>
-      The Nucleus 2G board, the mbed board, and the LPCXpresso all feature the NXP LPC1768 MCU;
+      The Nucleus 2G board, the mbed board, the LPCXpresso, and the MCB1700 all feature the NXP LPC1768 MCU;
       the Olimex LPC1766-STK board features an LPC1766.
       All use a GNU arm-nuttx-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
     </p>
@@ -3589,6 +3627,12 @@ nsh>
            See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/u-blox-c027/README.txt" target="_blank">README</a> file for further information about this port.
         </p>
       </li>
+      <li>
+        <p><b>Keil MCB1700 (LPC1768)</b></p>
+        <p>
+           This board configuration was contributed by Alan Carvalho de Assis in NuttX-7.23.
+        </p>
+      </li>
       </ol>
      </ul>
      <p>
@@ -3645,6 +3689,7 @@ nsh>
     </p>
     <p>
       This port is intended to test LC823450 features including SMP. Supported peripherals include UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, and USB device.
+      ADC, Watchdog, IPC2, and I2S support was added by Masayuki Ishakawa in NuttX-7.23.
     </p>
   </td>
 </tr>
@@ -3661,8 +3706,7 @@ nsh>
   <td>
     <p>
       <a name="xmd45xx"><b>Infineon XMC45xx</b>.</a>
-      An initial but still incomplete port to the XMC4500 Relax board was released with NuttX-7.21 (although it is not really ready for prime time).
-      Much is functional but there are still some issues with the output to the NSH serial console.
+      An initial but still incomplete port to the XMC4500 Relax board was released with NuttX-7.21 (although it is not really ready for prime time).  Basic NSH functionality was a serial console was added by Alan Carvahlo de Assis in NuttX-7.23.
     </p>
     <p>
       This initial porting effort uses the Infineon XMC4500 Relax v1 board as described on the manufacturer's <a href="http://www.infineon.com/cms/en/product/evaluation-boards/KIT_XMC45_RELAX_V1/productType.html?productType=db3a304437849205013813b23ac17763">website</a>.
@@ -4559,6 +4603,10 @@ nsh>
         <p><b>NuttX-7.17</b>
         EMC support was extended to include support SDRAM by Vytautas Lukenska.
       </li>
+      <li>
+        <p><b>NuttX-7.23</b>
+        A CAN driver was contributed by Alexander Vasiljev in NuttX-7.23.
+      </li>
     </ul>
   </td>
 </tr>
@@ -5005,6 +5053,29 @@ Mem:         29232       5920      23312      23312
       Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/same70-xplained/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f72x3x"><b>STMicro STM32 F72x/F73x</b>.</a>
+      Support for the F72x/F73x family was provided by Bob Feretich in NuttX-7.23.
+      A single board is supported in this family:
+    </p>
+    <ul>
+      <p>
+        <b>Nucleo F722ZE</b>.
+        This is a member of the common board support for the common Nucleo-144 boards, this one featuring the STM32F722ZE.
+        This port was also provided by Bob Feretich in NuttX-7.23.
+        See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
 <tr>
   <td><br></td>
   <td><hr></td>
