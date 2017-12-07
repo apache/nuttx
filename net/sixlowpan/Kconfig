@@ -91,13 +91,49 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_0
 	hex "Address context 0 Prefix 0"
 	default 0xaa
 	---help---
-		Prefix 0 for address context ze0ro (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+		Prefix 0 for address context zero (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
 
 config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_1
 	hex "Address context 0 Prefix 1"
 	default 0xaa
 	---help---
 		Prefix 1 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_2
+	hex "Address context 0 Prefix 2"
+	default 0xaa
+	---help---
+		Prefix 2 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_3
+	hex "Address context 0 Prefix 3"
+	default 0xaa
+	---help---
+		Prefix 3 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_4
+	hex "Address context 0 Prefix 4"
+	default 0xaa
+	---help---
+		Prefix 4 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_5
+	hex "Address context 0 Prefix 5"
+	default 0xaa
+	---help---
+		Prefix 5 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_6
+	hex "Address context 0 Prefix 6"
+	default 0xaa
+	---help---
+		Prefix 6 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_7
+	hex "Address context 0 Prefix 6"
+	default 0xaa
+	---help---
+		Prefix 7 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
 
 config NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
 	bool "Pre-initialize address context 1"
@@ -120,6 +156,42 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_1
 	default 0xaa
 	---help---
 		Prefix 1 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_2
+	hex "Address context 1 Prefix 2"
+	default 0xaa
+	---help---
+		Prefix 2 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_3
+	hex "Address context 1 Prefix 3"
+	default 0xaa
+	---help---
+		Prefix 3 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_4
+	hex "Address context 1 Prefix 4"
+	default 0xaa
+	---help---
+		Prefix 4 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_5
+	hex "Address context 1 Prefix 5"
+	default 0xaa
+	---help---
+		Prefix 5 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_6
+	hex "Address context 1 Prefix 6"
+	default 0xaa
+	---help---
+		Prefix 6 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_7
+	hex "Address context 1 Prefix 7"
+	default 0xaa
+	---help---
+		Prefix 7 for address context 1 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 1)
 
 endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_1
 
@@ -146,7 +218,43 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1
 	---help---
 		Prefix 1 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
 
-endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_0
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_2
+	hex "Address context 2 Prefix 2"
+	default 0xaa
+	---help---
+		Prefix 2 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_3
+	hex "Address context 2 Prefix 3"
+	default 0xaa
+	---help---
+		Prefix 3 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_4
+	hex "Address context 2 Prefix 4"
+	default 0xaa
+	---help---
+		Prefix 4 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_5
+	hex "Address context 2 Prefix 5"
+	default 0xaa
+	---help---
+		Prefix 5 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_6
+	hex "Address context 2 Prefix 6"
+	default 0xaa
+	---help---
+		Prefix 6 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_7
+	hex "Address context 2 Prefix 7"
+	default 0xaa
+	---help---
+		Prefix 7 for address context 2 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 2)
+
+endif # NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_2
 endif # NET_6LOWPAN_COMPRESSION_HC06
 
 config NET_6LOWPAN_EXTENDEDADDR
