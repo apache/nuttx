@@ -146,6 +146,20 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
+ * otherwise frequency is 2xAPBx.
+ * Note: TIM1,8 are on APB2, others on APB1
+ */
+
+#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
+#define BOARD_TIM2_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM3_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM4_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM5_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM6_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
+
 /* USB OTG HS definitions ***********************************************************/
 /* Do not enable external PHY clock or OTG_HS module will not work */
 
