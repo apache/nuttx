@@ -704,7 +704,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
       else
         {
-          nbytes = (dev->d_bufsize - 1) + dev->d_wrndx - dev->d_rdndx;
+          nbytes = dev->d_bufsize + dev->d_wrndx - dev->d_rdndx;
         }
 
       /* Notify the POLLOUT event if the pipe is not full, but only if
