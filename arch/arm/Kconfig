@@ -171,6 +171,17 @@ config ARCH_CHIP_LPC43XX
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
+config ARCH_CHIP_LPC54XX
+	bool "NXP LPC54XX"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_CMNVECTOR
+	select ARMV7M_CMNVECTOR
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	---help---
+		NPX LPC54XX architectures (ARM Cortex-M4).
+
 config ARCH_CHIP_MOXART
 	bool "MoxART"
 	select ARCH_ARM7TDMI
@@ -522,6 +533,7 @@ config ARCH_CHIP
 	default "lpc2378"	if ARCH_CHIP_LPC2378
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
+	default "lpc54xx"	if ARCH_CHIP_LPC54XX
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
@@ -762,6 +774,9 @@ source arch/arm/src/lpc31xx/Kconfig
 endif
 if ARCH_CHIP_LPC43XX
 source arch/arm/src/lpc43xx/Kconfig
+endif
+if ARCH_CHIP_LPC54XX
+source arch/arm/src/lpc54xx/Kconfig
 endif
 if ARCH_CHIP_MOXART
 source arch/arm/src/moxart/Kconfig

@@ -329,6 +329,13 @@ config ARCH_BOARD_LPCXPRESSO
 		Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
 		is based on the NXP LPC1768.  The Code Red toolchain is used by default.
 
+config ARCH_BOARD_LPCXPRESSO_LPC54628
+	bool "NXP LPCXpresso LPC54628"
+	depends on ARCH_CHIP_LPC54628
+	select ARCH_HAVE_LEDS
+	---help---
+		LPCXpresso LPC54626 board featuring the NXP LPC54628 MCU.
+
 config ARCH_BOARD_BAMBINO_200E
 	bool "Micromint Bambino 200E"
 	depends on ARCH_CHIP_LPC4330FBD144
@@ -1595,6 +1602,7 @@ config ARCH_BOARD
 	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
 	default "lpcxpresso-lpc1115"       if ARCH_BOARD_LPCXPRESSO_LPC1115
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
+	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "mbed"                     if ARCH_BOARD_MBED
 	default "mcb1700"                  if ARCH_BOARD_MCB1700
@@ -1850,6 +1858,9 @@ source "configs/lpc4370-link2/Kconfig"
 endif
 if ARCH_BOARD_LPCXPRESSO
 source "configs/lpcxpresso-lpc1768/Kconfig"
+endif
+if ARCH_BOARD_LPCXPRESSO_LPC54628
+source "configs/lpcxpresso-lpc54628/Kconfig"
 endif
 if ARCH_BOARD_MAPLE
 source "configs/maple/Kconfig"

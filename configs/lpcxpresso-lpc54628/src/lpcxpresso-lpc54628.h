@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc43/lpc43_clrpend.c
+ * configs/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,66 +33,54 @@
  *
  ****************************************************************************/
 
+#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
+#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <arch/irq.h>
-
-#include "nvic.h"
-#include "up_arch.h"
-
-#include "lpc43_irq.h"
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* LED definitions **********************************************************/
+/* to be provided */
+
+/* Button definitions *******************************************************/
+/* to be provided */
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_clrpend
+ * Name: lpc54_bringup
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC4366 Ethernet EMAC
- *   interrupt definitely needs it!
+ *   Perform architecture-specific initialization
  *
- *   This function is logically a part of lpc43_irq.c, but I will keep it in
- *   a separate file so that it will not increase the footprint on LPC43xx
- *   platforms that do not need this function.
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void lpc43_clrpend(int irq)
-{
-  /* Check for external interrupt */
+int lpc54_bringup(void);
 
-  if (irq >= LPC43_IRQ_EXTINT)
-    {
-      if (irq < (LPC43_IRQ_EXTINT + 32))
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
-        }
-      else if (irq < LPC43M4_IRQ_NIRQS)
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
-        }
-    }
-}
+#endif /* __ASSEMBLY__ */
+#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */

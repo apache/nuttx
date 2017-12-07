@@ -197,7 +197,7 @@ static inline bool lpc43_tl_get_interrupt(void)
 
 /* Converters */
 
-static uint32_t commonDev(uint32_t a, uint32_t b)
+static uint32_t common_dev(uint32_t a, uint32_t b)
 {
   while (b != 0)
     {
@@ -449,17 +449,17 @@ static void lpc43_tl_looped_forced_set_compare(void)
 static bool lpc43_tl_set_calc_arm(uint32_t curr, uint32_t to_set, bool arm)
 {
 
-  uint32_t calcTime;
+  uint32_t calc_time;
 
   if (curr < TO_RESET_NEXT)
     {
-      calcTime = min(TO_RESET_NEXT, to_set);
+      calc_time = min(TO_RESET_NEXT, to_set);
     }
   else
     {
       if (curr < TO_END)
         {
-          calcTime = min(curr + RESET_TICKS, to_set);
+          calc_time = min(curr + RESET_TICKS, to_set);
         }
       else
         {
@@ -468,9 +468,9 @@ static bool lpc43_tl_set_calc_arm(uint32_t curr, uint32_t to_set, bool arm)
         }
     }
 
-  bool set = lpc43_tl_set_safe_compare(calcTime);
+  bool set = lpc43_tl_set_safe_compare(calc_time);
 
-  if (arm && set && (calcTime == to_set))
+  if (arm && set && (calc_time == to_set))
     {
       armed = true;
     }
@@ -557,17 +557,17 @@ static int lpc43_tl_isr(int irq, FAR void *context, FAR void *arg)
         {
           if (alarm_time_set) /* need to set alarm time */
             {
-              uint32_t toSet = lpc43_tl_calc_to_set();
+              uint32_t toset = lpc43_tl_calc_to_set();
 
-              if (toSet > curr)
+              if (toset > curr)
                 {
-                  if (toSet > TO_END)
+                  if (toset > TO_END)
                     {
                       lpc43_tl_set_default_compare(curr);
                     }
                   else
                     {
-                      bool set = lpc43_tl_set_calc_arm(curr, toSet, true);
+                      bool set = lpc43_tl_set_calc_arm(curr, toset, true);
                       if (!set)
                         {
                           lpc43_tl_alarm(curr);
@@ -605,7 +605,7 @@ void arm_timer_initialize(void)
   mask_cache = getreg32(LPC43_RIT_MASK);
   compare_cache = getreg32(LPC43_RIT_COMPVAL);
 
-  COMMON_DEV = commonDev(NSEC_PER_SEC, LPC43_CCLK);
+  COMMON_DEV = common_dev(NSEC_PER_SEC, LPC43_CCLK);
   MIN_TICKS = LPC43_CCLK/COMMON_DEV;
   MIN_NSEC = NSEC_PER_SEC/COMMON_DEV;
 
@@ -651,16 +651,16 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   if (lpc43_tl_get_reset_on_match())
     {
-      bool resetAfter = lpc43_tl_get_interrupt();
+      bool reset_after = lpc43_tl_get_interrupt();
 
       /* Was a reset during processing? get new counter */
 
-      if (reset != resetAfter)
+      if (reset != reset_after)
         {
           count = lpc43_tl_get_counter();
         }
 
-      if (resetAfter)
+      if (reset_after)
         {
           /* Count should be smaller then UINT32_MAX-TO_END -> no overflow */
 
@@ -710,19 +710,19 @@ int up_alarm_start(FAR const struct timespec *ts)
   alarm_time_ts.tv_sec = ts->tv_sec;
   alarm_time_ts.tv_nsec = ts->tv_nsec;
 
-  uint32_t toSet = lpc43_tl_calc_to_set();
+  uint32_t toset = lpc43_tl_calc_to_set();
 
   uint32_t curr = lpc43_tl_get_counter();
 
-  if (toSet > curr)
+  if (toset > curr)
     {
-      if (toSet > TO_END) /* Future set */
+      if (toset > TO_END) /* Future set */
         {
           lpc43_tl_set_default_compare(curr);
         }
       else
         {
-          bool set = lpc43_tl_set_calc_arm(curr, toSet, true);
+          bool set = lpc43_tl_set_calc_arm(curr, toset, true);
           if (!set) /* Signal call, force interrupt handler */
             {
               call = true;

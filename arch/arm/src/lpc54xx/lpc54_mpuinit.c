@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc43/lpc43_clrpend.c
+ * arch/arm/src/lpc54xx/lpc54_mpuinit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,60 +39,78 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <assert.h>
 
-#include "nvic.h"
-#include "up_arch.h"
+#include <nuttx/userspace.h>
 
-#include "lpc43_irq.h"
+#include "mpu.h"
+#include "lpc54_mpuinit.h"
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#ifndef MAX
+#  define MAX(a,b) a > b ? a : b
+#endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef MIN
+#  define MIN(a,b) a < b ? a : b
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_clrpend
+ * Name: lpc54_mpuinitialize
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC4366 Ethernet EMAC
- *   interrupt definitely needs it!
- *
- *   This function is logically a part of lpc43_irq.c, but I will keep it in
- *   a separate file so that it will not increase the footprint on LPC43xx
- *   platforms that do not need this function.
+ *   Configure the MPU to permit user-space access to only restricted SAM3U
+ *   resources.
  *
  ****************************************************************************/
 
-void lpc43_clrpend(int irq)
+void lpc54_mpuinitialize(void)
 {
-  /* Check for external interrupt */
+  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
 
-  if (irq >= LPC43_IRQ_EXTINT)
-    {
-      if (irq < (LPC43_IRQ_EXTINT + 32))
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
-        }
-      else if (irq < LPC43M4_IRQ_NIRQS)
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
-        }
-    }
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
+              dataend >= datastart);
+
+  /* Show MPU information */
+
+  mpu_showtype();
+
+  /* Configure user flash and SRAM space */
+
+  mpu_user_flash(USERSPACE->us_textstart,
+                 USERSPACE->us_textend - USERSPACE->us_textstart);
+
+  mpu_user_intsram(datastart, dataend - datastart);
+
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
 }
+
+/****************************************************************************
+ * Name: lpc54_mpu_uheap
+ *
+ * Description:
+ *  Map the user-heap region.
+ *
+ *  This logic may need an extension to handle external SDRAM).
+ *
+ ****************************************************************************/
+
+void lpc54_mpu_uheap(uintptr_t start, size_t size)
+{
+  mpu_user_intsram(start, size);
+}
+
+#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
+

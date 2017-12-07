@@ -1,0 +1,228 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LPC54xx Configuration Options"
+
+choice
+	prompt "LPC54XX Chip Selection"
+	default ARCH_CHIP_LPC54628
+	depends on ARCH_CHIP_LPC54XX
+
+config ARCH_CHIP_LPC54628
+	bool "LPC54628"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_HSUSB
+	select ARCH_LPC54_HAVE_ETHERNET
+	select ARCH_LPC54_HAVE_CAN20
+	select ARCH_LPC54_HAVE_CANFD
+	select ARCH_LPC54_HAVE_LCD
+	select ARCH_LPC54_HAVE_SHA
+
+config ARCH_CHIP_LPC54618
+	bool "LPC54618"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_HSUSB
+	select ARCH_LPC54_HAVE_ETHERNET
+	select ARCH_LPC54_HAVE_CAN20
+	select ARCH_LPC54_HAVE_CANFD
+	select ARCH_LPC54_HAVE_LCD
+
+config ARCH_CHIP_LPC54616
+	bool "LPC54616"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_HSUSB
+	select ARCH_LPC54_HAVE_ETHERNET
+	select ARCH_LPC54_HAVE_CAN20
+	select ARCH_LPC54_HAVE_CANFD
+
+config ARCH_CHIP_LPC54608
+	bool "LPC54608"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_ETHERNET
+	select ARCH_LPC54_HAVE_CAN20
+	select ARCH_LPC54_HAVE_LCD
+
+config ARCH_CHIP_LPC54607
+	bool "LPC54607"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_HSUSB
+	select ARCH_LPC54_HAVE_ETHERNET
+
+config ARCH_CHIP_LPC54606
+	bool "LPC54606"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_HSUSB
+	select ARCH_LPC54_HAVE_ETHERNET
+	select ARCH_LPC54_HAVE_CAN20
+
+config ARCH_CHIP_LPC54605
+	bool "LPC54605"
+	select ARCH_FAMILY_LPC546XX
+	select ARCH_LPC54_HAVE_FSUSB
+	select ARCH_LPC54_HAVE_HSUSB
+
+endchoice # LPC54XX Chip Selection
+
+# LPC54xx Families
+
+config ARCH_FAMILY_LPC546XX
+	bool
+	default n
+
+# Peripheral support
+
+config ARCH_LPC54_HAVE_FSUSB
+	bool
+	default n
+
+config ARCH_LPC54_HAVE_HSUSB
+	bool
+	default n
+
+config ARCH_LPC54_HAVE_ETHERNET
+	bool
+	default n
+
+config ARCH_LPC54_HAVE_CAN20
+	bool
+	default n
+
+config ARCH_LPC54_HAVE_CANFD
+	bool
+	default n
+
+config ARCH_LPC54_HAVE_LCD
+	bool
+	default n
+
+config ARCH_LPC54_HAVE_SHA
+	bool
+	default n
+
+# Peripheral Selection
+
+config LPC54_HAVE_FLEXCOMM
+	bool
+	default n
+
+config LPC54_FLEXCOMM0
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM1
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM2
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM3
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM4
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM5
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM6
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM7
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM8
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+config LPC54_FLEXCOMM9
+	bool
+	default n
+	select LPC54_HAVE_FLEXCOMM
+
+menu "LPC54xx Peripheral Selection"
+
+config LPC54_USART0
+	bool "USART0"
+	default n
+	select LPC54_FLEXCOMM0
+	select USART0_SERIALDRIVER
+
+config LPC54_USART1
+	bool "USART1"
+	default n
+	select LPC54_FLEXCOMM1
+	select USART1_SERIALDRIVER
+
+config LPC54_USART2
+	bool "USART2"
+	default n
+	select LPC54_FLEXCOMM2
+	select USART2_SERIALDRIVER
+
+config LPC54_USART3
+	bool "USART3"
+	default n
+	select LPC54_FLEXCOMM3
+	select USART3_SERIALDRIVER
+
+config LPC54_USART4
+	bool "USART4"
+	default n
+	select LPC54_FLEXCOMM4
+	select USART4_SERIALDRIVER
+
+config LPC54_USART5
+	bool "USART5"
+	default n
+	select LPC54_FLEXCOMM5
+	select USART5_SERIALDRIVER
+
+config LPC54_USART6
+	bool "USART6"
+	default n
+	select LPC54_FLEXCOMM6
+	select USART6_SERIALDRIVER
+
+config LPC54_USART7
+	bool "USART7"
+	default n
+	select LPC54_FLEXCOMM7
+	select USART7_SERIALDRIVER
+
+config LPC54_USART8
+	bool "USART8"
+	default n
+	select LPC54_FLEXCOMM8
+	select USART8_SERIALDRIVER
+
+config LPC54_USART9
+	bool "USART9"
+	default n
+	select LPC54_FLEXCOMM9
+	select USART9_SERIALDRIVER
+
+endmenu # LPC54xx Peripheral Selection

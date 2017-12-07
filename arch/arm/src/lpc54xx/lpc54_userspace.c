@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc43/lpc43_clrpend.c
+ * arch/arm/src/lpc54xx/lpc54_userspace.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,60 +39,69 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include "nvic.h"
-#include "up_arch.h"
+#include <nuttx/userspace.h>
 
-#include "lpc43_irq.h"
+#include "lpc54_mpuinit.h"
+#include "lpc54_userspace.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_clrpend
+ * Name: lpc54_userspace
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC4366 Ethernet EMAC
- *   interrupt definitely needs it!
- *
- *   This function is logically a part of lpc43_irq.c, but I will keep it in
- *   a separate file so that it will not increase the footprint on LPC43xx
- *   platforms that do not need this function.
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
  ****************************************************************************/
 
-void lpc43_clrpend(int irq)
+void lpc54_userspace(void)
 {
-  /* Check for external interrupt */
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
 
-  if (irq >= LPC43_IRQ_EXTINT)
+  /* Clear all of user-space .bss */
+
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+
+  dest = (uint8_t *)USERSPACE->us_bssstart;
+  end  = (uint8_t *)USERSPACE->us_bssend;
+
+  while (dest != end)
     {
-      if (irq < (LPC43_IRQ_EXTINT + 32))
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
-        }
-      else if (irq < LPC43M4_IRQ_NIRQS)
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
-        }
+      *dest++ = 0;
     }
+
+  /* Initialize all of user-space .data */
+
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t *)USERSPACE->us_datasource;
+  dest = (uint8_t *)USERSPACE->us_datastart;
+  end  = (uint8_t *)USERSPACE->us_dataend;
+
+  while (dest != end)
+    {
+      *dest++ = *src++;
+    }
+
+  /* Configure the MPU to permit user-space access to its FLASH and RAM */
+
+  lpc54_mpuinitialize();
 }
+
+#endif /* CONFIG_BUILD_PROTECTED */
+

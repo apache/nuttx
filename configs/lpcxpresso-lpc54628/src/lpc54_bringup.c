@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc43/lpc43_clrpend.c
+ * configs/lpcxpresso-lpc54628/src/lpc54_bringup.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,60 +39,44 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <syslog.h>
 
-#include "nvic.h"
-#include "up_arch.h"
-
-#include "lpc43_irq.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "lpcxpresso-lpc54628.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_clrpend
+ * Name: lpc54_bringup
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... but the LPC4366 Ethernet EMAC
- *   interrupt definitely needs it!
+ *   Perform architecture-specific initialization
  *
- *   This function is logically a part of lpc43_irq.c, but I will keep it in
- *   a separate file so that it will not increase the footprint on LPC43xx
- *   platforms that do not need this function.
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void lpc43_clrpend(int irq)
+int lpc54_bringup(void)
 {
-  /* Check for external interrupt */
+  int ret;
 
-  if (irq >= LPC43_IRQ_EXTINT)
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
     {
-      if (irq < (LPC43_IRQ_EXTINT + 32))
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
-        }
-      else if (irq < LPC43M4_IRQ_NIRQS)
-        {
-          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
-        }
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
+#endif
+
+  UNUSED(ret);
+  return OK;
 }
