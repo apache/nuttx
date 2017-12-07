@@ -320,7 +320,7 @@ static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #endif
 
-/* This describes the state of the Kinetis UART0 port. */
+/* This describes the state of the XMC4 UART0 port. */
 
 #ifdef HAVE_UART0
 static struct xmc4_dev_s g_uart0priv =
@@ -355,7 +355,7 @@ static uart_dev_t g_uart0port =
 };
 #endif
 
-/* This describes the state of the Kinetis UART1 port. */
+/* This describes the state of the XMC4 UART1 port. */
 
 #ifdef HAVE_UART1
 static struct xmc4_dev_s g_uart1priv =
@@ -390,7 +390,7 @@ static uart_dev_t g_uart1port =
 };
 #endif
 
-/* This describes the state of the Kinetis UART2 port. */
+/* This describes the state of the XMC4 UART2 port. */
 
 #ifdef HAVE_UART2
 static struct xmc4_dev_s g_uart2priv =
@@ -425,7 +425,7 @@ static uart_dev_t g_uart2port =
 };
 #endif
 
-/* This describes the state of the Kinetis UART3 port. */
+/* This describes the state of the XMC4 UART3 port. */
 
 #ifdef HAVE_UART3
 static struct xmc4_dev_s g_uart3priv =
@@ -460,7 +460,7 @@ static uart_dev_t g_uart3port =
 };
 #endif
 
-/* This describes the state of the Kinetis UART4 port. */
+/* This describes the state of the XMC4 UART4 port. */
 
 #ifdef HAVE_UART4
 static struct xmc4_dev_s g_uart4priv =
@@ -495,7 +495,7 @@ static uart_dev_t g_uart4port =
 };
 #endif
 
-/* This describes the state of the Kinetis UART5 port. */
+/* This describes the state of the XMC4 UART5 port. */
 
 #ifdef HAVE_UART5
 static struct xmc4_dev_s g_uart5priv =
@@ -916,7 +916,7 @@ static bool xmc4_rxavailable(struct uart_dev_s *dev)
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
   uint32_t regval;
 
-  /* Return true if the transmit buffer/fifo is not "empty." */
+  /* Return true if the receive buffer/fifo is not "empty." */
 
   regval = xmc4_serialin(priv, XMC4_USIC_TRBSR_OFFSET);
   return ((regval & USIC_TRBSR_REMPTY) == 0);
