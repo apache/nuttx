@@ -249,6 +249,13 @@ config SPINLOCK
 		Enables suppport for spinlocks.  Spinlocks are current used only for
 		SMP suppport.
 
+config SPINLOCK_IRQ
+	bool "Support Spinlocks with IRQ control"
+	default n
+	---help---
+		Enables suppport for spinlocks with IRQ control. This feature can be
+		used to protect data in SMP mode.
+
 config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
