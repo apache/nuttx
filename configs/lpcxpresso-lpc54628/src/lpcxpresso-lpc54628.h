@@ -56,15 +56,15 @@
 
 #define GPIO_LED_D9 \
   (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
+   GPIO_PULLUP | GPIO_MODE_DIGITAL)
 
 #define GPIO_LED_D11 \
   (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
+   GPIO_PULLUP | GPIO_MODE_DIGITAL)
 
 #define GPIO_LED_D12 \
   (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
+   GPIO_PULLUP | GPIO_MODE_DIGITAL)
 
 /* Button definitions *******************************************************/
 /* to be provided */

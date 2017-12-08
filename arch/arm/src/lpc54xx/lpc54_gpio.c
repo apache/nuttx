@@ -59,7 +59,7 @@
 /* Default input pin configuration */
 
 #define PORTPIN_MASK      (GPIO_PORT_MASK|GPIO_PIN_MASK)
-#define DEFAULT_INPUT     (GPIO_INPUT|GPIO_PULLUP)
+#define DEFAULT_INPUT     (GPIO_INPUT|GPIO_PULLUP|GPIO_MODE_DIGITAL)
 
 /* Pin types */
 
@@ -385,7 +385,7 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
 
       /* Set the IOCON bits */
 
-      lpc54_setiocon(definput, port, pin);
+      lpc54_setiocon(cfgset, port, pin);
 
       /* Handle according to pin function */
 
