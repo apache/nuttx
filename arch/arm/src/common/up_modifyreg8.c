@@ -64,10 +64,10 @@ void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits)
   irqstate_t flags;
   uint8_t    regval;
 
-  flags   = enter_critical_section();
+  flags   = spin_lock_irqsave();
   regval  = getreg8(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg8(regval, addr);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }

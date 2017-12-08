@@ -538,7 +538,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
    * against that possibility.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
 
   /* Add the completed buffer to the end of our doneq.  We do not yet
    * decrement the reference count.
@@ -555,7 +555,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
   /* REVISIT:  This can be overwritten */
 
   priv->result = result;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 
   /* Now send a message to the worker thread, informing it that there are
    * buffers in the done queue that need to be cleaned up.
@@ -590,13 +590,13 @@ static void wm8776_returnbuffers(FAR struct wm8776_dev_s *priv)
    * use interrupt controls to protect against that possibility.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   while (dq_peek(&priv->doneq) != NULL)
     {
       /* Take the next buffer from the queue of completed transfers */
 
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
 
       audinfo("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
               apb, apb->curbyte, apb->nbytes, apb->flags);
@@ -631,10 +631,10 @@ static void wm8776_returnbuffers(FAR struct wm8776_dev_s *priv)
 #else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
 #endif
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave();
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -682,9 +682,9 @@ static int wm8776_sendbuffer(FAR struct wm8776_dev_s *priv)
        * to avoid a possible race condition.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave();
       priv->inflight++;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
 
       shift  = (priv->bpsamp == 8) ? 14 - 3 : 14 - 4;
       shift -= (priv->nchannels > 1) ? 1 : 0;
@@ -1153,6 +1153,7 @@ static void *wm8776_workerthread(pthread_addr_t pvarg)
   FAR struct ap_buffer_s *apb;
   int msglen;
   int prio;
+  struct mq_attr attr;
 
   audinfo("Entry\n");
 
@@ -1186,6 +1187,8 @@ static void *wm8776_workerthread(pthread_addr_t pvarg)
 
           wm8776_sendbuffer(priv);
         }
+
+repeat:
 
       /* Wait for messages from our message queue */
 
@@ -1241,6 +1244,16 @@ static void *wm8776_workerthread(pthread_addr_t pvarg)
             auderr("ERROR: Ignoring message ID %d\n", msg.msgId);
             break;
         }
+
+      (void)mq_getattr(priv->mq, &attr);
+
+      /* If there is a message in the queue, process it */
+
+      if (0 < attr.mq_curmsgs)
+        {
+          goto repeat;
+        }
+
     }
 
   /* Reset the WM8776 hardware */

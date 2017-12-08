@@ -280,9 +280,9 @@ static uint32_t lc823450_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 
 static int _i2s_isr(int irq, FAR void *context, FAR void *arg)
 {
-  /* disable interrupt */
+  /* Disable Buffer F Under Level IRQ */
 
-  up_disable_irq(LC823450_IRQ_AUDIOBUF0);
+  putreg32(0, ABUFIRQEN0);
 
   /* post semaphore for the waiter */
 
@@ -298,9 +298,9 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                              i2s_callback_t callback, void *arg,
                              uint32_t timeout)
 {
-  /* Enable IRQ for Audio Buffer */
+  /* Enable Buffer F Under Level IRQ */
 
-  up_enable_irq(LC823450_IRQ_AUDIOBUF0);
+  putreg32(ABUFIRQEN0_BFULIRQEN, ABUFIRQEN0);
 
   /* Wait for Audio Buffer */
 
@@ -373,10 +373,6 @@ static int lc823450_i2s_configure(void)
   /* Buffer Under Level = 1KB */
 
   putreg32(1024, BUF_F_ULVL);
-
-  /* Enable Buffer F Under Level IRQ */
-
-  putreg32(ABUFIRQEN0_BFULIRQEN, ABUFIRQEN0);
 
   /* Clear Audio Buffer */
 
@@ -465,6 +461,10 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
   nxsem_init(&_sem_buf_under, 0, 0);
 
   irq_attach(LC823450_IRQ_AUDIOBUF0, _i2s_isr, NULL);
+
+  /* Enable IRQ for Audio Buffer */
+
+  up_enable_irq(LC823450_IRQ_AUDIOBUF0);
 
   /* Success exit */
 

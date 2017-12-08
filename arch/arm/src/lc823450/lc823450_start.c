@@ -259,9 +259,12 @@ void __start(void)
 #endif /* CONFIG_LC823450_IPL2 */
 #endif /* CONFIG_LC823450_SPIFLASH_BOOT */
 
-  /* Mutex enable */
+  /* Enable Mutex */
+  /* NOTE: modyfyreg32() can not be used because it might use spin_lock */
 
-  modifyreg32(MRSTCNTBASIC, 0, MRSTCNTBASIC_MUTEX_RSTB);
+  uint32_t val = getreg32(MRSTCNTBASIC);
+  val |= MRSTCNTBASIC_MUTEX_RSTB;
+  putreg32(val, MRSTCNTBASIC);
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
