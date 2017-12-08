@@ -226,3 +226,7 @@ config LPC54_USART9
 	select USART9_SERIALDRIVER
 
 endmenu # LPC54xx Peripheral Selection
+
+config LPC54_GPIOIRQ
+	bool "Support GPIO Interrupts"
+	default n

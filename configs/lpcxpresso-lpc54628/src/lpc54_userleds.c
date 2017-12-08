@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
+ * configs/lpcxpresso-lpc54628/src/lpc54_userleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,71 +33,79 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* LED definitions **********************************************************/
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
  * LEDs are for application use. They are illuminated when the driving
  * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
  * P3-3 (D11) and P3-14 (D12).
  */
 
-#define GPIO_LED_D9 \
-  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
-
-#define GPIO_LED_D11 \
-  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
-
-#define GPIO_LED_D12 \
-  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
-
-/* Button definitions *******************************************************/
-/* to be provided */
-
 /****************************************************************************
- * Public Types
+ * Included Files
  ****************************************************************************/
 
-/****************************************************************************
- * Public data
- ****************************************************************************/
+#include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "lpc54_gpio.h"
+#include "lpcxpresso-lpc54628.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int lpc54_bringup(void);
+void board_userled_initialize(void)
+{
+#ifndef CONFIG_ARCH_LEDS
+  /* Configure LED GPIOs for output */
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */
+  lpc54_gpio_config(GPIO_LED_D9);
+  lpc54_gpio_config(GPIO_LED_D11);
+  lpc54_gpio_config(GPIO_LED_D12);
+#endif
+}
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if (led == BOARD_D9)
+    {
+      lpc54_gpio_write(GPIO_LED_D9, !ledon); /* Low illuminates */
+    }
+  else if (led == BOARD_D11)
+    {
+      lpc54_gpio_write(GPIO_LED_D11, !ledon); /* Low illuminates */
+    }
+#ifndef CONFIG_ARCH_LEDS
+  else if (led == BOARD_D12)
+    {
+      lpc54_gpio_write(GPIO_LED_D12, !ledon); /* Low illuminates */
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  /* Low illuminates */
+
+  lpc54_gpio_write(GPIO_LED_D9,  (ledset & BOARD_D9_BIT)  == 0);
+  lpc54_gpio_write(GPIO_LED_D11, (ledset & BOARD_D11_BIT) == 0);
+#ifndef CONFIG_ARCH_LEDS
+  lpc54_gpio_write(GPIO_LED_D12, (ledset & BOARD_D12_BIT) == 0);
+#endif
+}

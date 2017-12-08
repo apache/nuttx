@@ -60,6 +60,11 @@
 
 void lpc54_board_initialize(void)
 {
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
+
+  board_autoled_initialize();
+#endif
 }
 
 /****************************************************************************

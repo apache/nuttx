@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
+ * configs/lpcxpresso-lpc54628/src/lpc54_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,71 +33,101 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
+/* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
+ * LEDs are for application use. They are illuminated when the driving
+ * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
+ * P3-3 (D11) and P3-14 (D12).
+ *
+ * These LEDs are not used by the NuttX port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/lpc54_autoleds.c.  The LEDs are used to encode
+ * OS-related events as follows:
+ *                                  D9     D11    D12
+ * LED_STARTED                0     OFF    OFF    OFF
+ * LED_HEAPALLOCATE           1     ON     OFF    OFF
+ * LED_IRQSENABLED            2     OFF    ON     OFF
+ * LED_STACKCREATED           3     OFF    OFF    OFF
+ *
+ * LED_INIRQ                  4     NC     NC     ON  (momentary)
+ * LED_SIGNAL                 4     NC     NC     ON  (momentary)
+ * LED_ASSERTION              4     NC     NC     ON  (momentary)
+ * LED_PANIC                  4     NC     NC     ON  (2Hz flashing)
+ * LED_IDLE                         Sleep mode indication not supported
+ *
+ * After booting, LEDs D9 and D11 are avaible for use by the user.  If the
+ * system booted properly, D9 and D11 should be OFF and D12 should be glowing
+ * to indicate that interrupts are occurring.  If D12 is flash at 2Hz, then
+ * the system has crashed.
+ */
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
-/* LED definitions **********************************************************/
-/* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
- * LEDs are for application use. They are illuminated when the driving
- * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
- * P3-3 (D11) and P3-14 (D12).
- */
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#define GPIO_LED_D9 \
-  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
+#include "lpc54_gpio.h"
+#include "lpcxpresso-lpc54628.h"
 
-#define GPIO_LED_D11 \
-  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
-
-#define GPIO_LED_D12 \
-  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP)
-
-/* Button definitions *******************************************************/
-/* to be provided */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-int lpc54_bringup(void);
+void board_autoled_initialize(void)
+{
+  /* Configure LED GPIOs for output */
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */
+  lpc54_gpio_config(GPIO_LED_D9);
+  lpc54_gpio_config(GPIO_LED_D11);
+  lpc54_gpio_config(GPIO_LED_D12);
+}
+
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  /* D9 and D11 are only changed during boot up states */
+
+  if ((unsigned int)led <= 3)
+    {
+      bool d9off  = (led != 1);
+      bool d11off = (led != 2);
+
+      lpc54_gpio_write(GPIO_LED_D9,  d9off);   /* Low illuminates */
+      lpc54_gpio_write(GPIO_LED_D11, d11off);  /* Low illuminates */
+      lpc54_gpio_write(GPIO_LED_D12, true);    /* Low illuminates */
+    }
+  else
+    {
+      lpc54_gpio_write(GPIO_LED_D12, false);    /* Low illuminates */
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (led == 4)
+    {
+      lpc54_gpio_write(GPIO_LED_D12, true);    /* Low illuminates */
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */

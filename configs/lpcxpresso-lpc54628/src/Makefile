@@ -36,7 +36,11 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = lpc54_boot.c lpc54_bringup.c
+CSRCS = lpc54_boot.c lpc54_bringup.c lpc54_userleds.c
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += lpc54_autoleds.c
+endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc54_appinit.c

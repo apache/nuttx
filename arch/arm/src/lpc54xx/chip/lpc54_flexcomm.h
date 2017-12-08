@@ -43,6 +43,10 @@
 #include <nuttx/config.h>
 #include "chip/lpc54_memorymap.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
 /* Register offsets *****************************************************************/
 
 #define LPC54_FLEXCOMM_PSELID_OFFSET   0x0ff8  /* Peripheral Select /Flexcomm Interface ID */

@@ -370,15 +370,16 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ARCH_IRQPRIO
   /* up_prioritize_irq(LPC54_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
+
 #ifdef CONFIG_ARMV7M_USEBASEPRI
   lpc54_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
 
+#ifdef CONFIG_ARM_MPU
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.
    */
 
-#ifdef CONFIG_ARM_MPU
   irq_attach(LPC54_IRQ_MEMFAULT, up_memfault, NULL);
   up_enable_irq(LPC54_IRQ_MEMFAULT);
 #endif
@@ -399,20 +400,26 @@ void up_irqinitialize(void)
 
   lpc54_dumpnvic("initial", LPC54_IRQ_NIRQS);
 
+#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
   /* If a debugger is connected, try to prevent it from catching hardfaults.
    * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
    * operation.
    */
 
-#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
   regval  = getreg32(NVIC_DEMCR);
   regval &= ~NVIC_DEMCR_VCHARDERR;
   putreg32(regval, NVIC_DEMCR);
 #endif
 
-  /* And finally, enable interrupts */
+#ifdef CONFIG_LPC54_GPIOIRQ
+  /* Initialize GPIO interrupts */
+
+  lpc54_gpio_irqinitialize();
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* And finally, enable interrupts */
+
   up_irq_enable();
 #endif
 }

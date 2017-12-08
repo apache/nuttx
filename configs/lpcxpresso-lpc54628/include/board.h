@@ -189,14 +189,20 @@
 
 #define BOARD_D9                   0
 #define BOARD_D11                  1
-#define BOARD_D12                  2
-#define BOARD_NLEDS                3
+#ifndef CONFIG_ARCH_LEDS
+#  define BOARD_D12                2
+#  define BOARD_NLEDS              3
+#else
+#  define BOARD_NLEDS              2
+#endif
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_D9_BIT               (1 << BOARD_D9)
 #define BOARD_D11_BIT              (1 << BOARD_D11)
-#define BOARD_D12_BIT              (1 << BOARD_D12)
+#ifndef CONFIG_ARCH_LEDS
+#  define BOARD_D12_BIT            (1 << BOARD_D12)
+#endif
 
 /* These LEDs are not used by the NuttX port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
@@ -214,6 +220,12 @@
 #define LED_ASSERTION              4  /* NC     NC     ON  (momentary) */
 #define LED_PANIC                  4  /* NC     NC     ON  (2Hz flashing) */
 #undef  LED_IDLE                      /* Sleep mode indication not supported */
+
+/* After booting, LEDs D9 and D11 are avaible for use by the user.  If the
+ * system booted properly, D9 and D11 should be OFF and D12 should be glowing
+ * to indicate that interrupts are occurring.  If D12 is flash at 2Hz, then
+ * the system has crashed.
+ */
 
 /* Button definitions *******************************************************/
 /* To be provided */

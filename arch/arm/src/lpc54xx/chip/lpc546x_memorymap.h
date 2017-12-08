@@ -106,36 +106,36 @@
 
 /* APB Bridge 0 */
 
-#define LP54_SYSCON_BASE     0x40000000  /* Syscon */
-#define LP54_IOCON_BASE      0x40001000  /* IOCON */
-#define LP54_GINT0_BASE      0x40002000  /* GINT0 */
-#define LP54_GINT1_BASE      0x40003000  /* GINT1 */
-#define LP54_PINT_BASE       0x40004000  /* Pin Interrupts (PINT) */
-#define LP54_MUX_BASE        0x40005000  /* Input muxes */
-#define LP54_CTIMER0_BASE    0x40008000  /* CTIMER0 */
-#define LP54_CTIMER1_BASE    0x40009000  /* CTIMER1 */
-#define LP54_WDT_BASE        0x4000c000  /* WDT */
-#define LP54_MRT_BASE        0x4000d000  /* MRT */
-#define LP54_MTICK_BASE      0x4000e000  /* Micro-Tick */
-#define LP54_EEPROMC_BASE    0x40014000  /* EEPROM controller */
-#define LP54_OTP_BASE        0x40016000  /* OTP controller */
+#define LPC54_SYSCON_BASE    0x40000000  /* Syscon */
+#define LPC54_IOCON_BASE     0x40001000  /* IOCON */
+#define LPC54_GINT0_BASE     0x40002000  /* GINT0 */
+#define LPC54_GINT1_BASE     0x40003000  /* GINT1 */
+#define LPC54_PINT_BASE      0x40004000  /* Pin Interrupts (PINT) */
+#define LPC54_MUX_BASE       0x40005000  /* Input muxes */
+#define LPC54_CTIMER0_BASE   0x40008000  /* CTIMER0 */
+#define LPC54_CTIMER1_BASE   0x40009000  /* CTIMER1 */
+#define LPC54_WDT_BASE       0x4000c000  /* WDT */
+#define LPC54_MRT_BASE       0x4000d000  /* MRT */
+#define LPC54_MTICK_BASE     0x4000e000  /* Micro-Tick */
+#define LPC54_EEPROMC_BASE   0x40014000  /* EEPROM controller */
+#define LPC54_OTP_BASE       0x40016000  /* OTP controller */
 
 /* APB Bridge 1 */
 
-#define LP54_OSYSCON_BASE    0x40020000  /* Other system registers */
-#define LP54_CTIMER2_BASE    0x40028000  /* CTIMER2 */
-#define LP54_RTC_BASE        0x4002c000  /* RTC */
-#define LP54_RIT_BASE        0x4002d000  /* RIT */
-#define LP54_FLASHC_BASE     0x40034000  /* Flash controller */
-#define LP54_SMARCARD0_BASE  0x40036000  /* Smart card 0 */
-#define LP54_SMARCARD1_BASE  0x40037000  /* Smart card 1 */
-#define LP54_RNG_BASE        0x4003a000  /* RNG */
+#define LPC54_OSYSCON_BASE   0x40020000  /* Other system registers */
+#define LPC54_CTIMER2_BASE   0x40028000  /* CTIMER2 */
+#define LPC54_RTC_BASE       0x4002c000  /* RTC */
+#define LPC54_RIT_BASE       0x4002d000  /* RIT */
+#define LPC54_FLASHC_BASE    0x40034000  /* Flash controller */
+#define LPC54_SMARCARD0_BASE 0x40036000  /* Smart card 0 */
+#define LPC54_SMARCARD1_BASE 0x40037000  /* Smart card 1 */
+#define LPC54_RNG_BASE       0x4003a000  /* RNG */
 
 /* Asynchronous APB bridge */
 
-#define LP54_ASYSCON_BASE    0x40040000  /* Asynchronous Syscon */
-#define LP54_CTIMER3_BASE    0x40048000  /* CTIMER3 */
-#define LP54_CTIMER4_BASE    0x40049000  /* CTIMER4 */
+#define LPC54_ASYSCON_BASE   0x40040000  /* Asynchronous Syscon */
+#define LPC54_CTIMER3_BASE   0x40048000  /* CTIMER3 */
+#define LPC54_CTIMER4_BASE   0x40049000  /* CTIMER4 */
 
 /****************************************************************************************************
  * Public Types
