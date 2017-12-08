@@ -414,9 +414,11 @@ void xmc4_clock_configure(void)
   regval = SCU_EBUCLKCR_EBUDIV(BOARD_EBUDIV);
   putreg32(regval, XMC4_SCU_EBUCLKCR);
 
+#ifdef BOARD_ENABLE_USBPLL
   /* Setup USB clock */
 
   putreg32(USBCLKCR_VALUE | USB_DIV, XMC4_SCU_USBCLKCR);
+#endif
 
   /* Setup EXT */
 
