@@ -166,15 +166,15 @@ static void lpc54_setpinfunction(unsigned int port, unsigned int pin,
 }
 
 /****************************************************************************
- * Name: lpc54_configinput
+ * Name: lpc54_gpio_input
  *
  * Description:
  *   Configure a GPIO input pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-static inline void lpc54_configinput(lpc54_pinset_t cfgset,
-                                     unsigned int port, unsigned int pin)
+static inline void lpc54_gpio_input(lpc54_pinset_t cfgset,
+                                    unsigned int port, unsigned int pin)
 {
   uintptr_t regaddr;
   uint32_t regval;
@@ -193,29 +193,15 @@ static inline void lpc54_configinput(lpc54_pinset_t cfgset,
 }
 
 /****************************************************************************
- * Name: lpc54_configinterrupt
- *
- * Description:
- *   Configure a GPIO interrupt pin based on bit-encoded description of the pin.
- *
- ****************************************************************************/
-
-static inline void lpc54_configinterrupt(lpc54_pinset_t cfgset,
-                                         unsigned int port, unsigned int pin)
-{
-#warning Missing logic
-}
-
-/****************************************************************************
- * Name: lpc54_configoutput
+ * Name: lpc54_gpio_output
  *
  * Description:
  *   Configure a GPIO output pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-static inline void lpc54_configoutput(lpc54_pinset_t cfgset,
-                                      unsigned int port, unsigned int pin)
+static inline void lpc54_gpio_output(lpc54_pinset_t cfgset,
+                                     unsigned int port, unsigned int pin)
 {
   uintptr_t regaddr;
   uint32_t regval;
@@ -233,7 +219,7 @@ static inline void lpc54_configoutput(lpc54_pinset_t cfgset,
 }
 
 /****************************************************************************
- * Name: lpc54_configalternate
+ * Name: lpc54_gpio_alternate
  *
  * Description:
  *   Configure a GPIO alternate function pin based on bit-encoded description
@@ -241,9 +227,9 @@ static inline void lpc54_configoutput(lpc54_pinset_t cfgset,
  *
  ****************************************************************************/
 
-static inline void lpc54_configalternate(lpc54_pinset_t cfgset,
-                                         unsigned int port, unsigned int pin,
-                                         uint32_t alt)
+static inline void lpc54_gpio_alternate(lpc54_pinset_t cfgset,
+                                        unsigned int port, unsigned int pin,
+                                        uint32_t alt)
 {
   /* Select the alternate pin function */
 
@@ -251,15 +237,15 @@ static inline void lpc54_configalternate(lpc54_pinset_t cfgset,
 }
 
 /****************************************************************************
- * Name: lpc54_setiocon
+ * Name: lpc54_gpio_iocon
  *
  * Description:
  *   Configure the pin IOCON register.
  *
  ****************************************************************************/
 
-static void lpc54_setiocon(lpc54_pinset_t cfgset, unsigned int port,
-                           unsigned int pin)
+static void lpc54_gpio_iocon(lpc54_pinset_t cfgset, unsigned int port,
+                             unsigned int pin)
 {
   uintptr_t regaddr;
   uint32_t iocon;
@@ -381,11 +367,11 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
        */
 
       definput = (cfgset & PORTPIN_MASK) | DEFAULT_INPUT;
-      lpc54_configinput(definput, port, pin);
+      lpc54_gpio_input(definput, port, pin);
 
       /* Set the IOCON bits */
 
-      lpc54_setiocon(cfgset, port, pin);
+      lpc54_gpio_iocon(cfgset, port, pin);
 
       /* Handle according to pin function */
 
@@ -394,42 +380,44 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
         case GPIO_INPUT:   /* GPIO input pin */
           break;           /* Already configured */
 
+#ifdef CONFIG_LPC54_GPIOIRQ
         case GPIO_INTFE:   /* GPIO interrupt falling edge */
         case GPIO_INTRE:   /* GPIO interrupt rising edge */
         case GPIO_INTBOTH: /* GPIO interrupt both edges */
-          lpc54_configinterrupt(cfgset, port, pin);
+          lpc54_gpio_interrupt(cfgset, port, pin);
           break;
+#endif
 
         case GPIO_OUTPUT:  /* GPIO outpout pin */
-          lpc54_configoutput(cfgset, port, pin);
+          lpc54_gpio_output(cfgset, port, pin);
           break;
 
         case GPIO_ALT1:    /* Alternate function 1 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT1);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT1);
           break;
 
         case GPIO_ALT2:    /* Alternate function 2 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT2);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT2);
           break;
 
         case GPIO_ALT3:    /* Alternate function 3 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT3);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT3);
           break;
 
         case GPIO_ALT4:    /* Alternate function 4 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT4);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT4);
           break;
 
         case GPIO_ALT5:    /* Alternate function 5 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT5);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT5);
           break;
 
         case GPIO_ALT6:    /* Alternate function 6 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT6);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT6);
           break;
 
         case GPIO_ALT7:    /* Alternate function 7 */
-          lpc54_configalternate(cfgset, port, pin, IOCON_FUNC_ALT7);
+          lpc54_gpio_alternate(cfgset, port, pin, IOCON_FUNC_ALT7);
           break;
 
         default:

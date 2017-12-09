@@ -67,7 +67,7 @@
  */
 
  /* Analog-to-Digital Conversion (ADC) */
- 
+
 #define GPIO_ADC0_0                  (GPIO_INPUT | GPIO_MODE_ANALOG | GPIO_PORT0 | GPIO_PIN10) /* Type A */
 #define GPIO_ADC0_1                  (GPIO_INPUT | GPIO_MODE_ANALOG | GPIO_PORT0 | GPIO_PIN11) /* Type A */
 #define GPIO_ADC0_2                  (GPIO_INPUT | GPIO_MODE_ANALOG | GPIO_PORT0 | GPIO_PIN12) /* Type A */
@@ -423,7 +423,7 @@
 #define GPIO_FC1_SCK_1               (GPIO_ALT2 | GPIO_MODE_DIGITAL | GPIO_PORT1 | GPIO_PIN9)
 #define GPIO_FC1_SCK_2               (GPIO_ALT3 | GPIO_MODE_DIGITAL | GPIO_PORT3 | GPIO_PIN11)
 #define GPIO_FC1_SCK_3               (GPIO_ALT4 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN7)
-#define GPIO_FC1_SCK_1               (GPIO_ALT4 | GPIO_MODE_DIGITAL | GPIO_PORT4 | GPIO_PIN27)
+#define GPIO_FC1_SCK_4               (GPIO_ALT4 | GPIO_MODE_DIGITAL | GPIO_PORT4 | GPIO_PIN27)
 #define GPIO_FC1_TXD_SCL_MISO_1      (GPIO_ALT2 | GPIO_MODE_DIGITAL | GPIO_PORT1 | GPIO_PIN11)
 #define GPIO_FC1_TXD_SCL_MISO_2      (GPIO_ALT3 | GPIO_MODE_DIGITAL | GPIO_PORT2 | GPIO_PIN4)
 #define GPIO_FC1_TXD_SCL_MISO_3      (GPIO_ALT4 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN10) /* Type A */
@@ -825,8 +825,8 @@
 /* SWD */
 
 #define GPIO_SWDIO                   (GPIO_ALT6 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN12) /* Type A */
-#define GPIO_SWO                     (GPIO_ALT4 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN8)
-#define GPIO_SWO                     (GPIO_ALT6 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN10) /* Type A */
+#define GPIO_SWO_1                   (GPIO_ALT4 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN8)
+#define GPIO_SWO_2                   (GPIO_ALT6 | GPIO_MODE_DIGITAL | GPIO_PORT0 | GPIO_PIN10) /* Type A */
 
 /* Trace */
 

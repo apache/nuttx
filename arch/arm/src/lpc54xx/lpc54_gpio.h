@@ -73,7 +73,7 @@
  *
  * .... .... TTTT TTTT  .... .... .... ....
  */
- 
+
 #define GPIO_I2CSLEW_SHIFT       (16)      /* Bit 16:  Controls slew rate of I2C pad */
 #define GPIO_I2CSLEW_MASK        (1 << GPIO_I2CSLEW_SHIFT)
 #  define GPIO_I2CSLEW_I2C       (0)
@@ -238,15 +238,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************************************/
 
 /************************************************************************************
  * Name: lpc54_gpio_irqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support interrupting GPIO pins.  This function is called by
+ *   the OS inialization logic and is not a user interface.
  *
  ************************************************************************************/
 
@@ -267,6 +268,20 @@ void lpc54_gpio_irqinitialize(void);
 int lpc54_gpio_config(lpc54_pinset_t cfgset);
 
 /************************************************************************************
+ * Name: lpc54_gpio_interrupt
+ *
+ * Description:
+ *   Configure a GPIO interrupt pin based on bit-encoded description of the pin.
+ *   This function is called by lpc54_gpio_config to setup interrupting pins.  It is
+ *   not a user interface.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC54_GPIOIRQ
+void lpc54_gpio_interrupt(lpc54_pinset_t pinset);
+#endif
+
+/************************************************************************************
  * Name: lpc54_gpio_write
  *
  * Description:
@@ -285,34 +300,6 @@ void lpc54_gpio_write(lpc54_pinset_t pinset, bool value);
  ************************************************************************************/
 
 bool lpc54_gpio_read(lpc54_pinset_t pinset);
-
-/************************************************************************************
- * Name: lpc54_gpio_irqenable
- *
- * Description:
- *   Enable the interrupt for specified GPIO IRQ
- *
- ************************************************************************************/
-
-#ifdef CONFIG_LPC54_GPIOIRQ
-void lpc54_gpio_irqenable(int irq);
-#else
-#  define lpc54_gpio_irqenable(irq)
-#endif
-
-/************************************************************************************
- * Name: lpc54_gpio_disable
- *
- * Description:
- *   Disable the interrupt for specified GPIO IRQ
- *
- ************************************************************************************/
-
-#ifdef CONFIG_LPC54_GPIOIRQ
-void lpc54_gpio_disable(int irq);
-#else
-#  define lpc54_gpio_disable(irq)
-#endif
 
 /************************************************************************************
  * Function:  lpc54_gpio_dump

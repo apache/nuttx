@@ -97,3 +97,7 @@ endif
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += lpc54_idle.c
 endif
+
+ifneq ($(CONFIG_LPC54_GPIOIRQ),y)
+CHIP_CSRCS += lpc54_gpioirq.c
+endif

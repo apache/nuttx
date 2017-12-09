@@ -50,12 +50,16 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+
 #include "chip/lpc54_memorymap.h"
 #include "chip/lpc54_syscon.h"
 #include "chip/lpc54_flexcomm.h"
+#include "chip/lpc54_pinmux.h"
 #include "chip/lpc54_usart.h"
+
 #include "lpc54_config.h"
 #include "lpc54_clockconfig.h"
+#include "lpc54_gpio.h"
 #include "lpc54_lowputc.h"
 
 #include <arch/board/board.h>
@@ -389,7 +393,16 @@ static void lp54_setbaud(uintptr_t base, FAR const struct uart_config_s *config)
 
 void lpc54_lowsetup(void)
 {
-  /* TODO: Configure Fractional Rate Generate in case it is selected as a Flexcomm
+  /* Enable the IOCON and all GPIO modules */
+
+  putreg32(SYSCON_AHBCLKCTRL0_IOCON | SYSCON_AHBCLKCTRL0_GPIO0 |
+           SYSCON_AHBCLKCTRL0_GPIO1 | SYSCON_AHBCLKCTRL0_GPIO2 |
+           SYSCON_AHBCLKCTRL0_GPIO3, LPC54_SYSCON_AHBCLKCTRLSET0);
+
+  putreg32(SYSCON_AHBCLKCTRL2_GPIO4 | SYSCON_AHBCLKCTRL2_GPIO5,
+           LPC54_SYSCON_AHBCLKCTRLSET2);
+
+  /* TODO: Configure Fractional Rate Generator in case it is selected as a Flexcomm
    * clock source.
    */
 
@@ -403,6 +416,17 @@ void lpc54_lowsetup(void)
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM0_PSELID);
+
+   /* Configure USART0 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART0_RXD);
+  lpc54_gpio_config(GPIO_USART0_TXD);
+#ifdef CONFIG_USART0_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART0_CTS);
+#endif
+#ifdef CONFIG_USART0_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART0_RTS);
+#endif
 
   /* Set up the FLEXCOMM0 function clock */
 
@@ -419,6 +443,17 @@ void lpc54_lowsetup(void)
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM1_PSELID);
 
+   /* Configure USART1 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART1_RXD);
+  lpc54_gpio_config(GPIO_USART1_TXD);
+#ifdef CONFIG_USART1_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART1_CTS);
+#endif
+#ifdef CONFIG_USART1_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART1_RTS);
+#endif
+
   /* Set up the FLEXCOMM1 function clock */
 
   putreg32(BOARD_FLEXCOMM1_CLKSEL, LPC54_SYSCON_FCLKSEL1);
@@ -433,6 +468,17 @@ void lpc54_lowsetup(void)
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM2_PSELID);
+
+   /* Configure USART2 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART2_RXD);
+  lpc54_gpio_config(GPIO_USART2_TXD);
+#ifdef CONFIG_USART2_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART2_CTS);
+#endif
+#ifdef CONFIG_USART2_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART2_RTS);
+#endif
 
   /* Set up the FLEXCOMM0 function clock */
 
@@ -449,6 +495,17 @@ void lpc54_lowsetup(void)
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM3_PSELID);
 
+   /* Configure USART3 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART3_RXD);
+  lpc54_gpio_config(GPIO_USART3_TXD);
+#ifdef CONFIG_USART3_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART3_CTS);
+#endif
+#ifdef CONFIG_USART3_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART3_RTS);
+#endif
+
   /* Set up the FLEXCOMM3 function clock */
 
   putreg32(BOARD_FLEXCOMM3_CLKSEL, LPC54_SYSCON_FCLKSEL3);
@@ -463,6 +520,17 @@ void lpc54_lowsetup(void)
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
          LPC54_FLEXCOMM4_PSELID);
+
+   /* Configure USART4 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART4_RXD);
+  lpc54_gpio_config(GPIO_USART4_TXD);
+#ifdef CONFIG_USART4_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART4_CTS);
+#endif
+#ifdef CONFIG_USART4_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART4_RTS);
+#endif
 
   /* Set up the FLEXCOMM4 function clock */
 
@@ -479,6 +547,17 @@ void lpc54_lowsetup(void)
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM5_PSELID);
 
+   /* Configure USART5 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART5_RXD);
+  lpc54_gpio_config(GPIO_USART5_TXD);
+#ifdef CONFIG_USART5_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART5_CTS);
+#endif
+#ifdef CONFIG_USART5_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART5_RTS);
+#endif
+
   /* Set up the FLEXCOMM5 function clock */
 
   putreg32(BOARD_FLEXCOMM5_CLKSEL, LPC54_SYSCON_FCLKSEL5);
@@ -493,6 +572,17 @@ void lpc54_lowsetup(void)
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM6_PSELID);
+
+   /* Configure USART6 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART6_RXD);
+  lpc54_gpio_config(GPIO_USART6_TXD);
+#ifdef CONFIG_USART6_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART6_CTS);
+#endif
+#ifdef CONFIG_USART6_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART6_RTS);
+#endif
 
   /* Set up the FLEXCOMM6 function clock */
 
@@ -509,6 +599,17 @@ void lpc54_lowsetup(void)
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM7_PSELID);
 
+   /* Configure USART7 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART7_RXD);
+  lpc54_gpio_config(GPIO_USART7_TXD);
+#ifdef CONFIG_USART7_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART7_CTS);
+#endif
+#ifdef CONFIG_USART7_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART7_RTS);
+#endif
+
   /* Set up the FLEXCOMM7 function clock */
 
   putreg32(BOARD_FLEXCOMM7_CLKSEL, LPC54_SYSCON_FCLKSEL7);
@@ -524,6 +625,17 @@ void lpc54_lowsetup(void)
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM8_PSELID);
 
+   /* Configure USART8 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART8_RXD);
+  lpc54_gpio_config(GPIO_USART8_TXD);
+#ifdef CONFIG_USART8_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART8_CTS);
+#endif
+#ifdef CONFIG_USART8_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART8_RTS);
+#endif
+
   /* Set up the FLEXCOMM0 function clock */
 
   putreg32(BOARD_FLEXCOMM8_CLKSEL, LPC54_SYSCON_FCLKSEL8);
@@ -538,6 +650,17 @@ void lpc54_lowsetup(void)
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM9_PSELID);
+
+   /* Configure USART9 pins (defined in board.h) */
+
+  lpc54_gpio_config(GPIO_USART9_RXD);
+  lpc54_gpio_config(GPIO_USART9_TXD);
+#ifdef CONFIG_USART9_OFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART9_CTS);
+#endif
+#ifdef CONFIG_USART9_IFLOWCONTROL
+  lpc54_gpio_config(GPIO_USART9_RTS);
+#endif
 
   /* Set up the FLEXCOMM9 function clock */
 

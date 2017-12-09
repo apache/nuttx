@@ -45,7 +45,7 @@
 #if defined(CONFIG_ARCH_FAMILY_LPC546XX)
 #  include "chip/lpc546x_memorymap.h"
 #else
-#  error "Unsupported LPC54 memory map"
+#  error "Unsupported LPC54 family"
 #endif
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_MEMORYMAP_H */

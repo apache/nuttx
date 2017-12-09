@@ -231,7 +231,19 @@
 /* To be provided */
 
 /* Pin Disambiguation *******************************************************/
-/* To be provided */
+/* Flexcomm0/USART0
+ *
+ * USART0 connects to the serial bridge on LPC4322JET100 and is typlical used
+ * for the serial console.
+ *
+ *   BRIDGE_UART_RXD -> P0_29-ISP_FC0_RXD -> P0.29  GPIO_FC0_RXD_SDA_MOSI_2
+ *   BRIDGE_UART_TXD <- P0_30-ISP_FC0_TXD <- P0.30  GPIO_FC0_TXD_SCL_MISO_2
+ */
+
+#ifdef CONFIG_LPC54_USART0
+#  define GPIO_USART0_RXD          (GPIO_FC0_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
+#  define GPIO_USART0_TXD          (GPIO_FC0_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
+#endif
 
 /****************************************************************************
  * Public Types

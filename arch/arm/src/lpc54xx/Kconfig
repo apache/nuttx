@@ -230,3 +230,8 @@ endmenu # LPC54xx Peripheral Selection
 config LPC54_GPIOIRQ
 	bool "Support GPIO Interrupts"
 	default n
+
+config LPC54_GPIOIRQ_GROUPS
+	bool "Support GPIO Interrupt groupe"
+	default n
+	depends on LPC54_GPIOIRQ && EXPERIMENTAL
