@@ -29,7 +29,7 @@ STATUS
 
   2017-12-10:  The basic NSH configuration is functional at 220MHz with a
     Serial console, timer and LED support.  Added support for the external
-    SDRAM and for the RAM test utility.
+    SDRAM and for the RAM test utility -- UNTESTED!
 
 Configurations
 ==============
@@ -92,9 +92,10 @@ Configurations
 
   nsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  This
-    configuration is focused on low level, command-line driver testing.  It
-    has no network.
+    Configures the NuttShell (nsh) application located at examples/nsh.
+    This configuration was used to bring up the board support and, hence,
+    is focused on low level, command-line driver testing.  It has no
+    network.
 
     NOTES:
 

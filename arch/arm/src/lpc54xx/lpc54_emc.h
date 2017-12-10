@@ -221,8 +221,8 @@ void lpc54_emc_initialize(FAR const struct emc_config_s *config);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC54_EMC_DYNAMIC
-void lpc54_emc_sdram_initialize(FAR struct emc_dynamic_timing_config_s *timing,
-                                FAR struct emc_dynamic_chip_config_s *chconfig,
+void lpc54_emc_sdram_initialize(FAR const struct emc_dynamic_timing_config_s *timing,
+                                FAR const struct emc_dynamic_chip_config_s *chconfig,
                                 unsigned int nchips);
 #endif /* CONFIG_LPC54_EMC_DYNAMIC */
 
