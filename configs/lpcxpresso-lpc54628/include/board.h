@@ -178,6 +178,15 @@
 #define BOARD_FLEXCOMM0_CLKSEL   SYSCON_FCLKSEL_FRO12M
 #define BOARD_FLEXCOMM0_FCLK     LPC54_FRO_12MHZ
 
+/* EMC */
+
+#ifdef BOARD_220MHz
+#define BOARD_EMC_CLKDIV         3     /* EMC Clock = CPU FREQ/3 */
+#else /* if BOARD_180MHz */
+#define BOARD_EMC_CLKDIV         2     /* EMC Clock = CPU FREQ/2 */
+#endif
+#define BOARD_EMC_FREQUENCY      (BOARD_CPU_FREQUENCY / BOARD_EMC_CLKDIV)
+
 /* LED definitions *********************************************************/
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
  * LEDs are for application use. They are illuminated when the driving

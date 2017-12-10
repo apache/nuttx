@@ -619,7 +619,7 @@
 
 #define SYSCON_EMCCLKDIV_DIV_SHIFT             (9)       /* Bits 0-7: Clock divider value */
 #define SYSCON_EMCCLKDIV_DIV_MASK              (0xff <<SYSCON_EMCCLKDIV_DIV_SHIFT)
-#  define SYSCON_EMCCLKDIV_DIV(n)              ((uint32)((n)-1) <<SYSCON_EMCCLKDIV_DIV_SHIFT)
+#  define SYSCON_EMCCLKDIV_DIV(n)              ((uint32_t)((n)-1) <<SYSCON_EMCCLKDIV_DIV_SHIFT)
 #define SYSCON_EMCCLKDIV_RESET                 (1 << 29) /* Bit 29: Resets the divider counter */
 #define SYSCON_EMCCLKDIV_ HALT                 (1 << 30) /* Bit 30: Halts the divider counter */
 #define SYSCON_EMCCLKDIV_REQFLAG               (1 << 31) /* Bit 31: Divider status flag */

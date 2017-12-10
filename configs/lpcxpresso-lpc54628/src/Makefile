@@ -46,4 +46,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc54_appinit.c
 endif
 
+ifeq ($(CONFIG_LPC54_EMC),y)
+ifeq ($(CONFIG_LPC54_EMC_DYNAMIC),y)
+CSRCS += lpc54_sdram.c
+endif
+endif
+
 include $(TOPDIR)/configs/Board.mk

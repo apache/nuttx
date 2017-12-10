@@ -253,6 +253,6 @@ config LPC54_EMC_STATIC
 
 config LPC54_EMC_DYNAMIC
 	bool "EMC dynamic memory support"
-	default n
+	default y
 
 endmenu # LPC54xx Peripheral Selection

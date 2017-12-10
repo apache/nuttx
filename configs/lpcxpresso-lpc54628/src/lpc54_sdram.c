@@ -44,7 +44,13 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_LPC54_EMC
+#if defined(CONFIG_LPC54_EMC) && defined(CONFIG_LPC54_EMC_DYNAMIC)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define EMC_CLOCK_PERIOD_NS  (1000000000 / BOARD_EMC_FREQUENCY)
 
 /****************************************************************************
  * Private Data
@@ -63,6 +69,37 @@ static const struct emc_config_s g_emc_config =
 #endif
 };
 
+/* Dynamic memory timing configuration. */
+
+static const struct emc_dynamic_timing_config_s g_emc_dynconfig =
+{
+  .rdconfig = EMC_CMDDELAY;
+  .refresh  = (64 * 1000000 / 4096) /* 4096 rows/ 64ms */;
+  .rp       = 18;
+  .ras      = 42;
+  .srex     = 67;
+  .apr      = 18;
+  .wr       = EMC_CLOCK_PERIOD_NS + 6; /* one clk + 6ns */
+  .dal      = EMC_CLOCK_PERIOD_NS + 24;
+  .rc       = 60;
+  .rfc      = 60;
+  .xsr      = 67;
+  .rrd      = 23;
+  .mrd      = 2;
+};
+
+/* Dynamic memory chip specific configuration: Chip 0 - MTL48LC8M16A2B4-6A */
+
+static onst struct emc_dynamic_chip_config_s g_emc_dynchipconfig;
+{
+  .chndx    = 0;
+  .dyndev   = EMC_SDRAM;
+  .rasnclk  = 2;
+  .mode     = 0x23;
+  .extmode  = 0;    /* LPSDRAM only */
+  .addrmap  = 0x09; /* 128Mbits (8M*16, 4banks, 12 rows, 9 columns)*/
+};
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -77,18 +114,13 @@ static const struct emc_config_s g_emc_config =
 
 void lpc54_sdram_initialize(void)
 {
-  /* Dynamic memory timing configuration. */
-#warning Missing logic
-
-  /* Dynamic memory chip specific configuration: Chip 0 - MTL48LC8M16A2B4-6A */
-#warning Missing logic
-
   /* EMC Basic configuration. */
 
-  lpc54_emc_initialize(EMC, &g_emc_config);
+  lpc54_emc_initialize(&g_emc_config);
 
   /* EMC Dynamc memory configuration. */
-#warning Missing logic
+
+  lpc54_emc_dram_initialize(&g_emc_dynconfig, &g_emc_dynchipconfig, 1);
 }
 
-#endif /* CONFIG_LPC54_EMC */
+#endif /* CONFIG_LPC54_EMC && CONFIG_LPC54_EMC_DYNAMIC */

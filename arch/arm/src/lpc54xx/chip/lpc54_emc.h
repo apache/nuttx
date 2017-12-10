@@ -47,10 +47,11 @@
  * Pre-processor Definitions
  ****************************************************************************************************/
 
-#define LPC54_EMC_CS0       0
-#define LPC54_EMC_CS1       1
-#define LPC54_EMC_CS2       2
-#define LPC54_EMC_CS3       3
+#define LPC54_EMC_CS0                     0
+#define LPC54_EMC_CS1                     1
+#define LPC54_EMC_CS2                     2
+#define LPC54_EMC_CS3                     3
+#define LPC54_EMC_NCS                     4
 
 /* Register offsets *********************************************************************************/
 
@@ -75,16 +76,16 @@
 
 /* Per-chip select dynamic memory registers */
 
-#define LPC54_EMC_DYNCS_OFFSET(n)         (0x0100 + (n) << 5)
+#define LPC54_EMC_DYNCS_OFFSET(n)         (0x0100 + ((uintptr_t)(n) << 5))
 #define LPC54_EMC_DYNCONFIG_OFFSET        0x0000  /* Configuration information for CSn */
 #define LPC54_EMC_DYNRASCAS_OFFSET        0x0004  /* RAS and CAS latencies for CSn */
 
-#define LPC54_EMC_DYNCONFIGn_OFFSET(n)    (0x0100 + (n) << 5)
-#define LPC54_EMC_DYNRASCASn_OFFSET(n)    (0x0104 + (n) << 5)
+#define LPC54_EMC_DYNCONFIGn_OFFSET(n)    (0x0100 + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_DYNRASCASn_OFFSET(n)    (0x0104 + ((uintptr_t)(n) << 5))
 
 /* Per-chip select static memory registers */
 
-#define LPC54_EMC_STATCS_OFFSET(n)        (0x0200 + (n) << 5)
+#define LPC54_EMC_STATCS_OFFSET(n)        (0x0200 + ((uintptr_t)(n) << 5))
 #define LPC54_EMC_STATCONFIG_OFFSET       0x0000  /* Configuration for CSn */
 #define LPC54_EMC_STATWAITWEN_OFFSET      0x0004  /* Delay to write enable */
 #define LPC54_EMC_STATWAITOEN_OFFSET      0x0008  /* Delay to output enable */
@@ -93,13 +94,13 @@
 #define LPC54_EMC_STATWAITWR_OFFSET       0x0014  /* Delay from EMC_CS0 to a write access */
 #define LPC54_EMC_STATWAITTURN_OFFSET     0x0018  /* Number of bus turnaround cycles */
 
-#define LPC54_EMC_STATCONFIGn_OFFSET(n)   (0x0200 + (n) << 5)
-#define LPC54_EMC_STATWAITWENn_OFFSET(n)  (0x0204 + (n) << 5)
-#define LPC54_EMC_STATWAITOENn_OFFSET(n)  (0x0208 + (n) << 5)
-#define LPC54_EMC_STATWAITRDn_OFFSET(n)   (0x020c + (n) << 5)
-#define LPC54_EMC_STATWAITPAGEn_OFFSET(n) (0x0210 + (n) << 5)
-#define LPC54_EMC_STATWAITWRn_OFFSET(n)   (0x0214 + (n) << 5)
-#define LPC54_EMC_STATWAITTURNn_OFFSET(n) (0x0218 + (n) << 5)
+#define LPC54_EMC_STATCONFIGn_OFFSET(n)   (0x0200 + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_STATWAITWENn_OFFSET(n)  (0x0204 + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_STATWAITOENn_OFFSET(n)  (0x0208 + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_STATWAITRDn_OFFSET(n)   (0x020c + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_STATWAITPAGEn_OFFSET(n) (0x0210 + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_STATWAITWRn_OFFSET(n)   (0x0214 + ((uintptr_t)(n) << 5))
+#define LPC54_EMC_STATWAITTURNn_OFFSET(n) (0x0218 + ((uintptr_t)(n) << 5))
 
 /* Register addresses *******************************************************************************/
 
@@ -163,8 +164,8 @@
 #define EMC_DYNCONTROL_CE                 (1 << 0)  /* Bit 0:  Dynamic memory clock enable */
 #define EMC_DYNCONTROL_CS                 (1 << 1)  /* Bit 1:  Dynamic memory clock control */
 #define EMC_DYNCONTROL_SR                 (1 << 2)  /* Bit 2:  Self-refresh request, EMCSREFREQ */
-#define EMC_DYNCONTROL_MMC                (1 << 5)  /* Bit 5  Memory clock control */
-#define EMC_DYNCONTROL_I_SHIFT            (7)       /* Bit 7-8: SDRAM initialization */ */
+#define EMC_DYNCONTROL_MMC                (1 << 5)  /* Bit 5:  Memory clock control */
+#define EMC_DYNCONTROL_I_SHIFT            (7)       /* Bit 7-8: SDRAM initialization */
 #define EMC_DYNCONTROL_I_MASK             (3 << EMC_DYNCONTROL_I_SHIFT)
 #  define EMC_DYNCONTROL_I_NORMAL         (0 << EMC_DYNCONTROL_I_SHIFT) /* Issue SDRAM NORMAL operation command */
 #  define EMC_DYNCONTROL_I_MODE           (1 << EMC_DYNCONTROL_I_SHIFT) /* Issue SDRAM MODE command */
@@ -182,9 +183,10 @@
 
 #define EMC_DYNREADCONFIG_SHIFT           (0)       /* Bits 0-1: Read data strategy */
 #define EMC_DYNREADCONFIG_MASK            (3 << EMC_DYNREADCONFIG_SHIFT)
+#  define EMC_DYNREADCONFIG(n)            ((uint32_t)(n) << EMC_DYNREADCONFIG_SHIFT)
 #  define EMC_DYNREADCONFIG_PLUS0         (1 << EMC_DYNREADCONFIG_SHIFT) /* Using EMCCLKDELAY */
-#  define EMC_DYNREADCONFIG_PLUS1         (2 << EMC_DYNREADCONFIG_SHIFT)  /* Plus one clock cycle using EMCCLKDELAY */
-#  define EMC_DYNREADCONFIG_PLUS2         (3 << EMC_DYNREADCONFIG_SHIFT)  /* Plus two clock cycles using EMCCLKDELAY */
+#  define EMC_DYNREADCONFIG_PLUS1         (2 << EMC_DYNREADCONFIG_SHIFT) /* Plus one clock cycle using EMCCLKDELAY */
+#  define EMC_DYNREADCONFIG_PLUS2         (3 << EMC_DYNREADCONFIG_SHIFT) /* Plus two clock cycles using EMCCLKDELAY */
 
 /* Precharge command period */
 
@@ -214,7 +216,7 @@
 
 #define EMC_DYNDAL_SHIFT                  (0)       /* Bits 0-3: Data-in to active command */
 #define EMC_DYNDAL_MASK                   (15 << EMC_DYNDAL_SHIFT)
-#  define EMC_DYNDAL(n)                   ((uint32_t)((n)-1) << EMC_DYNDAL_SHIFT)
+#  define EMC_DYNDAL(n)                   ((uint32_t)(n) << EMC_DYNDAL_SHIFT)
 
 /* Write recovery time */
 
@@ -263,6 +265,7 @@
 #define EMC_DYNCONFIG_
 #define EMC_DYNCONFIG_MD_SHIFT            (3)       /* Bits 3-4: Memory device */
 #define EMC_DYNCONFIG_MD_MASK             (3 << EMC_DYNCONFIG_MD_SHIFT)
+#  define EMC_DYNCONFIG_MD(n)             ((uint32_t)(n) << EMC_DYNCONFIG_MD_SHIFT)
 #  define EMC_DYNCONFIG_MD_SDRAM          (0 << EMC_DYNCONFIG_MD_SHIFT) /* SDRAM */
 #  define EMC_DYNCONFIG_MD_LPDRAM         (1 << EMC_DYNCONFIG_MD_SHIFT) /* Low-power SDRAM */
 #define EMC_DYNCONFIG_AM0_SHIFT           (7)       /* Bits 7-12: See Table 656 in User Manual */
@@ -272,12 +275,16 @@
 #define EMC_DYNCONFIG_B                   (1 << 19) /* Bit 19: Buffer enable */
 #define EMC_DYNCONFIG_P                   (1 << 20) /* Bit 20: Write protect */
 
+#define EMC_DYNCONFIG_ADDRMAP_SHIFT       EMC_DYNCONFIG_AM0_SHIFT
+#define EMC_DYNCONFIG_ADDRMAP_MASK        (EMC_DYNCONFIG_AM0_MASK | EMC_DYNCONFIG_AM1)
+#  define EMC_DYNCONFIG_ADDRMAP(n)        ((uint32_t)(n) << EMC_DYNCONFIG_ADDRMAP_SHIFT)
+
 /* Dynamic Memory RAS and CAS Delay registers */
 
 #define EMC_DYNRASCAS_RAS_SHIFT           (0)       /* Bits 0-1: RAS latency */
 #define EMC_DYNRASCAS_RAS_MASK            (3 << EMC_DYNRASCAS_RAS_SHIFT)
 #  define EMC_DYNRASCAS_RAS(n)            ((uint32_t)(n) << EMC_DYNRASCAS_RAS_SHIFT)
-#define EMC_DYNRASCAS_CAS_SHIFT           (8)       /* Bits 9-9: CAS latency */
+#define EMC_DYNRASCAS_CAS_SHIFT           (8)       /* Bits 8-9: CAS latency */
 #define EMC_DYNRASCAS_CAS_MASK            (3 << EMC_DYNRASCAS_CAS_SHIFT)
 #  define EMC_DYNRASCAS_CAS(n)            ((uint32_t)(n) << EMC_DYNRASCAS_CAS_SHIFT)
 
