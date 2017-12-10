@@ -46,6 +46,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/clock.h>
 
@@ -293,6 +294,8 @@ void lpc54_emc_sdram_initialize(FAR struct emc_dynamic_timing_config_s *timing,
   unsigned int i;
   volatile unsigned int j;
 
+  DEBUGASSERT(timing != NULL && chconfig != NULL && nchips > 0);
+
   /* Setting for dynamic memory controller chip independent configuration */
 
   for (i = 0, config = chconfig;
@@ -456,5 +459,82 @@ void lpc54_emc_sdram_initialize(FAR struct emc_dynamic_timing_config_s *timing,
     }
 }
 #endif /* CONFIG_LPC54_EMC_DYNAMIC */
+
+/****************************************************************************
+ * Name: lpc54_emc_sram_initialize
+ *
+ * Description:
+ *   This function initializes the static memory controller in external
+ *   memory controller. This function must be called after lpc54_emc_initialize
+ *   and before accessing the external dynamic memory.
+ *
+ * Input Parameters:
+ *   extwait    - The extended wait timeout or the read/write transfer time.
+ *                This is common for all static memory chips and set with
+ *                NULL if not required.
+ *   statconfig - The EMC static memory controller chip independent
+ *                configuration array.  The dimension of the array is nchips.
+ *   nchips     - The total static memory chip numbers been used and the
+ *                number of entries in the statconfig array.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC54_EMC_STATIC
+void lpc54_emc_sram_initialize(FAR uint32_t *extwait,
+                               FAR const struct emc_static_chip_config_s *statconfig,
+                               uint32_t nchips)
+{
+  FAR const struct emc_static_chip_config_s *config;
+  uint32_t regval;
+  unsigned int i;
+
+  /* Initialize extended wait. */
+ 
+  DEBUGASSERT(statconfig != NULL && nchips > 0);
+
+  if (extwait)
+    {
+#ifdef CONFIG_DEBUG_ASSERTIONS
+      for (i = 0, config = statconfig;
+           i < nchips && config != NULL; i++,
+           config++)
+        {
+          DEBUGASSERT(config->specconfig & EMC_ASYNCPAGEENABLE);
+        }
+#endif
+
+      regval = lpc54_emc_timercycles(*extwait, 1, 1024);
+      putreg32(EMC_STATEXTWAIT(regval), LPC54_EMC_STATEXTWAIT);
+    }
+
+    /* Initialize the static memory chip specific configure. */
+
+  for (i = 0, config = statconfig;
+       i < nchips && config != NULL; i++,
+       config++)
+    {
+      regval = config->specconfig | config->memwidth;
+      putreg32(regval, LPC54_EMC_STATCONFIG(config->chndx));
+
+      regval = lpc54_emc_timercycles(config->waitwriteen, 1, 16);
+      putreg32(EMC_STATWAITWEN(regval), LPC54_EMC_STATWAITWEN(config->chndx));
+
+      regval = lpc54_emc_timercycles(config->waitouten, 0, 15);
+      putreg32(EMC_STATWAITOEN(regval), LPC54_EMC_STATWAITOEN(config->chndx));
+
+      regval = lpc54_emc_timercycles(config->waitread, 1, 32);
+      putreg32(EMC_STATWAITRD(regval), LPC54_EMC_STATWAITRD(config->chndx));
+
+      regval = lpc54_emc_timercycles(config->waitreadpage, 1, 32);
+      putreg32(EMC_STATWAITPAGE(regval), LPC54_EMC_STATWAITPAGE(config->chndx));
+
+      regval = lpc54_emc_timercycles(config->waitwrite, 2, 33);
+      putreg32(EMC_STATWAITWR(regval), LPC54_EMC_STATWAITWR(config->chndx));
+
+      regval = lpc54_emc_timercycles(config->waitturn, 1, 16);
+      putreg32(EMC_STATWAITTURN(regval), LPC54_EMC_STATWAITTURN(config->chndx));
+    }
+}
+#endif /* CONFIG_LPC54_EMC_STATIC */
 
 #endif /* CONFIG_LPC54_EMC */

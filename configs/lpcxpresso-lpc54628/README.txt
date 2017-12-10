@@ -28,7 +28,8 @@ STATUS
 ======
 
   2017-12-10:  The basic NSH configuration is functional at 220MHz with a
-    Serial console, timer and LED support.
+    Serial console, timer and LED support.  Added support for the external
+    SDRAM and for the RAM test utility.
 
 Configurations
 ==============
@@ -104,3 +105,7 @@ Configurations
 
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+    2. SDRAM support is enabled, but the SDRAM is *not* added to the system
+       heap.  The apps/system/ramtest utility is include in the build as an
+       NSH builtin function that can be used to verify the SDRAM.
