@@ -294,7 +294,7 @@ static const struct uart_config_s g_console_config=
   .parity    = CONSOLE_PARITY,
   .bits      = CONSOLE_BITS,
   .txlevel   = LPC54_USART_FIFO_DEPTH / 2,
-  .rxlevel   = LPC54_USART_FIFO_DEPTH - 1,
+  .rxlevel   = 0,
   .stopbits2 = CONSOLE_STOPBITS2,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .iflow     = CONSOLE_IFLOW,

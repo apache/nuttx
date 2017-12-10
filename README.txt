@@ -1681,6 +1681,8 @@ nuttx/
  |   |   `- README.txt
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
+ |   |- lpcxpresso-lpc54628/
+ |   |   `- README.txt
  |   |- maple/
  |   |   `- README.txt
  |   |- mbed/

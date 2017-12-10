@@ -384,8 +384,8 @@
  */
 
 #define USART_FIFOINT_TXERR             (1 << 0)  /* Bit 0:  Transmit FIFO error interrupt */
-#define USART_FIFOINT_RXERR             (1 << 2)  /* Bit 1:  Receive ERROR error interrupt */
-#define USART_FIFOINT_TXLVL             (1 << 3)  /* Bit 2:  Transmit FIFO level interrupt */
+#define USART_FIFOINT_RXERR             (1 << 1)  /* Bit 1:  Receive ERROR error interrupt */
+#define USART_FIFOINT_TXLVL             (1 << 2)  /* Bit 2:  Transmit FIFO level interrupt */
 #define USART_FIFOINT_RXLVL             (1 << 3)  /* Bit 3:  Receive FIFO level interrupt */
 #define USART_FIFOINTSTAT_PERINT        (1 << 4)  /* Bit 4:  Peripheral interrupt (Status only) */
 

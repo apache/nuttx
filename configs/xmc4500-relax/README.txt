@@ -81,9 +81,10 @@ Configurations
   Each XMC4500 Relax configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh xmc5400-relax/<subdir>
-    cd -
+    .tools/configure.sh xmc5400-relax/<subdir>
+
+  See '.tools/configure.sh -h' for a list of all options.  The most typical
+  are -l to select the Linux host or -c to select the Windows Cygwin host.
 
   Before starting the build, make sure that your PATH environment variable
   includes the correct path to your toolchain.
@@ -91,7 +92,6 @@ Configurations
   And then build NuttX by simply typing the following.  At the conclusion of
   the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
 
-    make oldconfig
     make
 
   The <subdir> that is provided above as an argument to the tools/configure.sh

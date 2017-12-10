@@ -634,13 +634,13 @@
 
 #define SYSCON_SYSPLLCTRL_SELR_SHIFT           (0)       /* Bits 0-3: Bandwidth select R value */
 #define SYSCON_SYSPLLCTRL_SELR_MASK            (15 << SYSCON_SYSPLLCTRL_SELR_SHIFT)
-#  define SYSCON_SYSPLLCTRL_SELR(n)            ((uint32_t)((n)-1) << SYSCON_SYSPLLCTRL_SELR_SHIFT)
+#  define SYSCON_SYSPLLCTRL_SELR(n)            ((uint32_t)(n) << SYSCON_SYSPLLCTRL_SELR_SHIFT)
 #define SYSCON_SYSPLLCTRL_SELI_SHIFT           (4)       /* Bits 4-9: Bandwidth select I value */
 #define SYSCON_SYSPLLCTRL_SELI_MASK            (0x3f << SYSCON_SYSPLLCTRL_SELI_SHIFT)
-#  define SYSCON_SYSPLLCTRL_SELI(n)            ((uint32_t)((n)-1) << SYSCON_SYSPLLCTRL_SELI_SHIFT)
+#  define SYSCON_SYSPLLCTRL_SELI(n)            ((uint32_t)(n) << SYSCON_SYSPLLCTRL_SELI_SHIFT)
 #define SYSCON_SYSPLLCTRL_SELP_SHIFT           (10)      /* Bits 10-14: Bandwidth select P value */
 #define SYSCON_SYSPLLCTRL_SELP_MASK            (0x1f << SYSCON_SYSPLLCTRL_SELP_SHIFT)
-#  define SYSCON_SYSPLLCTRL_SELP(n)            ((uint32_t)((n)-1) << SYSCON_SYSPLLCTRL_SELP_SHIFT)
+#  define SYSCON_SYSPLLCTRL_SELP(n)            ((uint32_t)(n) << SYSCON_SYSPLLCTRL_SELP_SHIFT)
 #define SYSCON_SYSPLLCTRL_BYPASS               (1 << 15) /* Bit 15: PLL bypass control */
 #define SYSCON_SYSPLLCTRL_UPLIMOFF             (1 << 17) /* Bit 17: Disable upper frequency limiter */
 #define SYSCON_SYSPLLCTRL_DIRECTI              (1 << 19) /* Bit 19: PLL direct input enable */
@@ -654,21 +654,21 @@
 
 #define SYSCON_SYSPLLNDEC_NDEC_SHIFT           (0)       /* Bits 0-9: Decoded N-divider coefficient */
 #define SYSCON_SYSPLLNDEC_NDEC_MASK            (0x3ff << SYSCON_SYSPLLNDEC_NDEC_SHIFT)
-#  define SYSCON_SYSPLLNDEC_NDEC(n)            ((uint32_t)((n)-1) << SYSCON_SYSPLLNDEC_NDEC_SHIFT)
+#  define SYSCON_SYSPLLNDEC_NDEC(n)            ((uint32_t)(n) << SYSCON_SYSPLLNDEC_NDEC_SHIFT)
 #define SYSCON_SYSPLLNDEC_NREQ                 (1 << 10) /* Bit 10:  NDEC reload request */
 
 /* PLL P divider */
 
 #define SYSCON_SYSPLLPDEC_PDEC_SHIFT           (0)       /* Bits 0-6: Decoded P-divider coefficient */
 #define SYSCON_SYSPLLPDEC_PDEC_MASK            (0x7f << SYSCON_SYSPLLPDEC_PDEC_SHIFT)
-#  define SYSCON_SYSPLLPDEC_PDEC(n)            ((uint32_t)((n)-1) << SYSCON_SYSPLLPDEC_PDEC_SHIFT)
+#  define SYSCON_SYSPLLPDEC_PDEC(n)            ((uint32_t)(n) << SYSCON_SYSPLLPDEC_PDEC_SHIFT)
 #define SYSCON_SYSPLLPDEC_PREQ                 (1 << 7)  /* Bit 7:  PDEC reload request */
 
 /* System PLL M divider */
 
 #define SYSCON_SYSPLLMDEC_MDEC_SHIFT           (0)       /* Bits 0-16: Decoded M-divider coefficient */
 #define SYSCON_SYSPLLMDEC_MDEC_MASK            (0xffff << SYSCON_SYSPLLMDEC_MDEC_SHIFT)
-#  define SYSCON_SYSPLLMDEC_MDEC(n)            ((uint32_t)((n)-1) << SYSCON_SYSPLLMDEC_MDEC_SHIFT)
+#  define SYSCON_SYSPLLMDEC_MDEC(n)            ((uint32_t)(n) << SYSCON_SYSPLLMDEC_MDEC_SHIFT)
 #define SYSCON_SYSPLLMDEC_MREQ                 (1 << 17) /* Bit 17:  MDEC reload request */
 
 /* Audio PLL control */

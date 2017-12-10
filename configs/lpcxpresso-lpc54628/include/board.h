@@ -120,10 +120,10 @@
 /* CPU Clock:
  *
  *   AHB Clock Divider:          1
- *   AHB Clock Frequency:        220,000,000
+ *   AHB Clock Frequency:        180,000,000 or 220,000,000
  */
 
-#define BOARD_AHBCLKDIV          1
+#define BOARD_AHBCLKDIV          1                 /* (un-decremented) */
 #define BOARD_AHB_FREQUENCY      (BOARD_MAIN_CLK / BOARD_AHBCLKDIV)
 #define BOARD_CPU_FREQUENCY      BOARD_AHB_FREQUENCY
 

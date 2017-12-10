@@ -76,16 +76,16 @@ static void lpc54_setvoltage(uint32_t freq)
   if (freq == 12000000)
     {
       putreg32(0x21e, 0x40020040);
-      putreg32(4, 0x40000620);
+      putreg32(4, LPC54_SYSCON_PDRUNCFGSET0);
     }
   else if (freq == 48000000)
     {
       putreg32(0x31e, 0x40020040);
-      putreg32(4, 0x40000620);
+      putreg32(4, LPC54_SYSCON_PDRUNCFGSET0);
     }
   else
     {
-      putreg32(4, 0x40000630);
+      putreg32(4, LPC54_SYSCON_PDRUNCFGCLR0);
     }
 }
 
@@ -99,7 +99,7 @@ static void lpc54_setvoltage(uint32_t freq)
 
 static void lpc54_power_pll(void)
 {
-  putreg32(0x04000000, 0x40000630);
+  lpc54_vd3_enable();
   while ((getreg32(0x40020054) & (1 << 6)) == 0)
     {
     }
@@ -200,7 +200,7 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
        */
 
       volatile uint32_t delay;
-      uint32_t maxcco = (1 << 18) | 0x5dd2; /* CCO = 1.6Ghz + MDEC enabled*/
+      uint32_t maxcco = (1 << 18) | 0x5dd2; /* CCO = 1.6Ghz + MDEC enabled */
       uint32_t ssctrl = getreg32(LPC54_SYSCON_SYSPLLMDEC) & ~SYSCON_SYSPLLMDEC_MREQ;
 
       /* Initialize and power up PLL */

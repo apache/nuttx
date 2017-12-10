@@ -1,0 +1,106 @@
+README
+======
+
+  This directory contains the port to the NXP LPCXpress-LPC54628 board
+  (OMI1309UL).  This board features:
+
+    - LPC54628 Cortex-M4 microcontroller running at up to 220MHz
+    - 272x480 color LCD with capacitive touch screen
+    - On-board, high-speed USB, Link2 debug probe with CMSIS-DAP and SEGGER
+      J-Link protocol options
+    - UART and SPI port bridging from LPC546xx target to USB via the on-
+      board debug probe
+    - Support for external debug probe
+    - 3 x user LEDs, plus Reset, ISP (3) and user buttons
+    - Multiple Expansion options, including Arduino UNO and PMod
+    - Built-in power consumption measurement for target LPC546xx MCU
+    - 128Mb Micron MT25QL128 Quad-SPI flash
+    - 16MB Micron MT48LC8M16A2B4 SDRAM
+    - Knowles SPH0641LM4H digital microphone
+    - Full size SD/MMC card slot
+    - NXP MMA8652FCR1 accelerometer
+    - Stereo audio codec with line in/out
+    - High and full speed USB ports with micro A/B connector for host or
+      device functionality
+    - 10/100Mbps Ethernet (RJ45 connector)
+
+STATUS
+======
+
+  2017-12-10:  The basic NSH configuration is functional at 220MHz with a
+    Serial console, timer and LED support.
+
+Configurations
+==============
+
+  Information Common to All Configurations
+  ----------------------------------------
+  Each LPCXpresso-LPC54628 configuration is maintained in a sub-directory
+  and can be selected as follow:
+
+    .tools/configure.sh [OPTIONS] xmc5400-relax/<subdir>
+
+  See '.tools/configure.sh -h' for a list of all options.  The most typical
+  are -l to select the Linux host or -c to select the Windows Cygwin host.
+
+  Before starting the build, make sure that your PATH environment variable
+  includes the correct path to your toolchain.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+  NOTES:
+
+    1. These configurations use the mconf-based configuration tool.  To
+      change any of these configurations using that tool, you should:
+
+      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+         see additional README.txt files in the NuttX tools repository.
+
+      b. Execute 'make menuconfig' in nuttx/ in order to start the
+         reconfiguration process.
+
+    2. Unless stated otherwise, all configurations generate console
+       output on USART0 (aka Flexcomm0).  USART0 connects to the serial
+       bridge on LPC4322JET100 and should be available as a USB serial
+       device on your host PC.
+
+    3. All of these configurations are set up to build under Windows using
+       the  "GNU Tools for ARM Embedded Processors" that is maintained by
+       ARM (unless stated otherwise in the description of the configuration).
+
+         https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
+
+       That toolchain selection can easily be reconfigured using
+       'make menuconfig'.  Here are the relevant current settings:
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y               : Window environment
+         CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+
+  Configuration sub-directories
+  -----------------------------
+
+  nsh:
+
+    Configures the NuttShell (nsh) located at examples/nsh.  This
+    configuration is focused on low level, command-line driver testing.  It
+    has no network.
+
+    NOTES:
+
+    1. NSH built-in applications are supported.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y           : Enable support for built-in programs
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line

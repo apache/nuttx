@@ -478,7 +478,7 @@ static struct lpc54_dev_s g_uart0priv =
     .parity       = CONFIG_USART0_PARITY,
     .bits         = CONFIG_USART0_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART0_2STOP,
 #ifdef CONFIG_USART0_IFLOWCONTROL
     .iflow        = true,
@@ -520,7 +520,7 @@ static struct lpc54_dev_s g_uart1priv =
     .parity       = CONFIG_USART1_PARITY,
     .bits         = CONFIG_USART1_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART1_2STOP,
 #ifdef CONFIG_USART1_IFLOWCONTROL
     .iflow        = true,
@@ -562,7 +562,7 @@ static struct lpc54_dev_s g_uart2priv =
     .parity       = CONFIG_USART2_PARITY,
     .bits         = CONFIG_USART2_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART2_2STOP,
 #ifdef CONFIG_USART2_IFLOWCONTROL
     .iflow        = true,
@@ -604,7 +604,7 @@ static struct lpc54_dev_s g_uart3priv =
     .parity       = CONFIG_USART3_PARITY,
     .bits         = CONFIG_USART3_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART3_2STOP,
 #ifdef CONFIG_USART3_IFLOWCONTROL
     .iflow        = true,
@@ -646,7 +646,7 @@ static struct lpc54_dev_s g_uart4priv =
     .parity       = CONFIG_USART4_PARITY,
     .bits         = CONFIG_USART4_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART4_2STOP,
 #ifdef CONFIG_USART4_IFLOWCONTROL
     .iflow        = true,
@@ -688,7 +688,7 @@ static struct lpc54_dev_s g_uart5priv =
     .parity       = CONFIG_USART5_PARITY,
     .bits         = CONFIG_USART5_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART5_2STOP,
 #ifdef CONFIG_USART5_IFLOWCONTROL
     .iflow        = true,
@@ -730,7 +730,7 @@ static struct lpc54_dev_s g_uart6priv =
     .parity       = CONFIG_USART6_PARITY,
     .bits         = CONFIG_USART6_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART6_2STOP,
 #ifdef CONFIG_USART6_IFLOWCONTROL
     .iflow        = true,
@@ -772,7 +772,7 @@ static struct lpc54_dev_s g_uart7priv =
     .parity       = CONFIG_USART7_PARITY,
     .bits         = CONFIG_USART7_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART7_2STOP,
 #ifdef CONFIG_USART7_IFLOWCONTROL
     .iflow        = true,
@@ -814,7 +814,7 @@ static struct lpc54_dev_s g_uart8priv =
     .parity       = CONFIG_USART8_PARITY,
     .bits         = CONFIG_USART8_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART8_2STOP,
 #ifdef CONFIG_USART8_IFLOWCONTROL
     .iflow        = true,
@@ -856,7 +856,7 @@ static struct lpc54_dev_s g_uart9priv =
     .parity       = CONFIG_USART9_PARITY,
     .bits         = CONFIG_USART9_BITS,
     .txlevel      = LPC54_USART_FIFO_DEPTH / 2,
-    .rxlevel      = LPC54_USART_FIFO_DEPTH - 1,
+    .rxlevel      = 0,
     .stopbits2    = CONFIG_USART9_2STOP,
 #ifdef CONFIG_USART9_IFLOWCONTROL
     .iflow        = true,
@@ -1110,7 +1110,7 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
        * Check if the received FIFO is not empty.
        */
 
-      if ((regval & USART_FIFOINT_RXLVL) == 0)
+      if ((regval & USART_FIFOINT_RXLVL) != 0)
         {
           /* Process incoming bytes */
 
@@ -1122,7 +1122,7 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
        * Check if the received FIFO is not full.
        */
 
-      if ((regval & USART_FIFOINT_TXLVL) == 0)
+      if ((regval & USART_FIFOINT_TXLVL) != 0)
         {
           /* Process outgoing bytes */
 
@@ -1133,7 +1133,7 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for error conditions */
 
-      if ((regval & CCR_ERROR_EVENTS) == 0)
+      if ((regval & CCR_ERROR_EVENTS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
 #warning Misssing logic
