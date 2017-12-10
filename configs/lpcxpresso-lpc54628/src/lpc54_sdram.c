@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
+ * configs/lpcxpresso-lpc54628/src/lpc54_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,71 +33,39 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+#include "lpc54_emc.h.h"
+#include "lpcxpresso-lpc54628.h"
+
+#include <arch/board/board.h>
+
+#ifdef CONFIG_LPC54_EMC
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-/* LED definitions **********************************************************/
-/* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
- * LEDs are for application use. They are illuminated when the driving
- * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
- * P3-3 (D11) and P3-14 (D12).
- */
+/* EMC basic configuration. */
 
-#define GPIO_LED_D9 \
-  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-#define GPIO_LED_D11 \
-  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-#define GPIO_LED_D12 \
-  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-/* Button definitions *******************************************************/
-/* to be provided */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+static const struct emc_config_s g_emc_config =
+{
+  .bigendian = false,           /* Little endian */
+  .clksrc    = EMC_INTLOOPBACK; /* Internal loop back from EMC_CLK output */
+#ifdef BOARD_220MHz
+  .clkdiv    = 3;               /* EMC Clock = CPU FREQ/3 */
+#else /* if BOARD_180MHz */
+  .clkdiv    = 2;               /* EMC Clock = CPU FREQ/2 */
+#endif
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc54_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
- ****************************************************************************/
-
-int lpc54_bringup(void);
 
 /****************************************************************************
  * Name: lpc54_sdram_initialize
@@ -107,9 +75,20 @@ int lpc54_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LPC54_EMC
-void lpc54_sdram_initialize(void);
-#endif
+void lpc54_sdram_initialize(void)
+{
+  /* Dynamic memory timing configuration. */
+#warning Missing logic
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */
+  /* Dynamic memory chip specific configuration: Chip 0 - MTL48LC8M16A2B4-6A */
+#warning Missing logic
+
+  /* EMC Basic configuration. */
+
+  lpc54_emc_initialize(EMC, &g_emc_config);
+
+  /* EMC Dynamc memory configuration. */
+#warning Missing logic
+}
+
+#endif /* CONFIG_LPC54_EMC */

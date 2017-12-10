@@ -1,8 +1,14 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
+ * arch/arm/src/lpc54/lpc54_clrpend.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Parts of this file were adapted from sample code provided for the LPC54xx
+ * family from NXP which has a compatible BSD license.
+ *
+ *   Copyright (c) 2016, Freescale Semiconductor, Inc.
+ *   Copyright (c) 2016 - 2017 , NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,83 +39,61 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "up_arch.h"
 
-/* LED definitions **********************************************************/
-/* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
- * LEDs are for application use. They are illuminated when the driving
- * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
- * P3-3 (D11) and P3-14 (D12).
- */
+#include "chip/lpc54_emc.h"
+#include "lpc54_emc.h"
 
-#define GPIO_LED_D9 \
-  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-#define GPIO_LED_D11 \
-  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-#define GPIO_LED_D12 \
-  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-/* Button definitions *******************************************************/
-/* to be provided */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#ifdef CONFIG_LPC54_EMC
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_bringup
+ * Name: lpc54_emc_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ *   This function enables the EMC clock, initializes the emc system 
+ *   configuration, and enable the EMC module.
  *
  ****************************************************************************/
 
-int lpc54_bringup(void);
+void lpc54_emc_initialize(uintptr_t base,
+                          FAR const struct emc_config_s *config)
+{
+  uint32_t regval;
 
-/****************************************************************************
- * Name: lpc54_sdram_initialize
- *
- * Description:
- *   Initialize external SDRAM
- *
- ****************************************************************************/
+  /* Enable EMC clock */
 
-#ifdef CONFIG_LPC54_EMC
-void lpc54_sdram_initialize(void);
-#endif
+  putreg32(SYSCON_AHBCLKCTRL2_EMC, LPC54_SYSCON_AHBCLKCTRLSET2);
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */
+  /* Reset the EMC */
+
+  putreg32(SYSCON_PRESETCTRL2_EMC, LPC54_SYSCON_PRESETCTRLSET2);
+  putreg32(SYSCON_PRESETCTRL2_EMC, LPC54_SYSCON_PRESETCTRLCLR2);
+  
+  /* Set the EMC sytem configure */
+
+  putreg32(SYSCON_EMCCLKDIV_DIV(config->clkdiv), LPC54_SYSCON_EMCCLKDIV);
+
+  regval = config->clksrc ? SYSCON_EMCSYSCTRL_FBCLKINSEL : 0;
+  putreg32(regval, LPC54_SYSCON_EMCSYSCTRL);
+
+  /* Set the endian mode */
+
+  regval = config->endian ? EMC_CONFIG_EM : 0;
+  putreg32(regval, LPC54_EMC_CONFIG);
+
+  /* Enable the EMC module with normal memory map mode and normal work mode. */
+
+  putreg32(EMC_CONTROL_E, LPC54_EMC_CONTROL);
+}
+
+#endif /* CONFIG_LPC54_EMC */

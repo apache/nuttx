@@ -101,3 +101,8 @@ endif
 ifneq ($(CONFIG_LPC54_GPIOIRQ),y)
 CHIP_CSRCS += lpc54_gpioirq.c
 endif
+
+ifneq ($(CONFIG_LPC54_EMC),y)
+CHIP_CSRCS += lpc54_emc.c
+endif
+

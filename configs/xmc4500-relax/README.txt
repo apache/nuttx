@@ -128,21 +128,21 @@ Configurations
          CONFIG_UART0_2STOP=0
 
 
-  3. All of these configurations are set up to build under Windows using the
-     "GNU Tools for ARM Embedded Processors" that is maintained by ARM
-     (unless stated otherwise in the description of the configuration).
+    3. All of these configurations are set up to build under Windows using
+       the  "GNU Tools for ARM Embedded Processors" that is maintained by
+       ARM (unless stated otherwise in the description of the configuration).
 
-       https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
+         https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
-     That toolchain selection can easily be reconfigured using
-     'make menuconfig'.  Here are the relevant current settings:
+       That toolchain selection can easily be reconfigured using
+       'make menuconfig'.  Here are the relevant current settings:
 
-     Build Setup:
-       CONFIG_HOST_WINDOWS=y               : Window environment
-       CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y               : Window environment
+         CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
-     System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
   Configuration sub-directories
   -----------------------------

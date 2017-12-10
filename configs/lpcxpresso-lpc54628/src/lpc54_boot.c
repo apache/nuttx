@@ -65,6 +65,12 @@ void lpc54_board_initialize(void)
 
   board_autoled_initialize();
 #endif
+
+#ifdef CONFIG_LPC54_EMC
+  /* Initialize SDRAM */
+
+  lpc54_sdram_initialize();
+#endif
 }
 
 /****************************************************************************

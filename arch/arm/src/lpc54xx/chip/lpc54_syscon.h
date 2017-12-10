@@ -347,24 +347,69 @@
 #define SYSCON_PIORESCAP0_
 /* Reset captured value of port 1 */
 #define SYSCON_PIORESCAP1_
-/* Peripheral reset control 0 */
-#define SYSCON_PRESETCTRL0_
-/* Peripheral reset control 1 */
-#define SYSCON_PRESETCTRL1_
-/* Peripheral reset control 2 */
-#define SYSCON_PRESETCTRL2_
-/* Set bits in PRESETCTRL0 */
-#define SYSCON_PRESETCTRLSET0_
-/* Set bits in PRESETCTRL1 */
-#define SYSCON_PRESETCTRLSET1_
-/* Set bits in PRESETCTRL2 */
-#define SYSCON_PRESETCTRLSET2_
-/* Clear bits in PRESETCTRL0 */
-#define SYSCON_PRESETCTRLCLR0_
-/* Clear bits in PRESETCTRL1 */
-#define SYSCON_PRESETCTRLCLR1_
-/* Clear bits in PRESETCTRL2 */
-#define SYSCON_PRESETCTRLCLR2_
+
+/* Peripheral reset control 0: PRESETCTRL0, PRESETCTRLSET0, and PRESETCTRLCLR0 */
+
+#define SYSCON_PRESETCTRL0_FLASH               (1 << 7)  /* Bit 7:  Reset the flash controller */
+#define SYSCON_PRESETCTRL0_FMC                 (1 << 8)  /* Bit 8:  Reset the Flash accelerator */
+#define SYSCON_PRESETCTRL0_EEPROM              (1 << 9)  /* Bit 9:  Reset EEPROM */
+#define SYSCON_PRESETCTRL0_SPIFI               (1 << 10) /* Bit 10: Reset the SPIFI */
+#define SYSCON_PRESETCTRL0_INPUTMUX            (1 << 11) /* Bit 11: Reset the input muxes */
+#define SYSCON_PRESETCTRL0_IOCON               (1 << 13) /* Bit 13: Reset the IOCON block */
+#define SYSCON_PRESETCTRL0_GPIO0               (1 << 14) /* Bit 14: Reset the GPIO0 port registers */
+#define SYSCON_PRESETCTRL0_GPIO1               (1 << 15) /* Bit 15: Reset the GPIO1 port registers */
+#define SYSCON_PRESETCTRL0_GPIO2               (1 << 16) /* Bit 16: Reset the GPIO2 port registers */
+#define SYSCON_PRESETCTRL0_GPIO3               (1 << 17) /* Bit 17: Reset the GPIO3 port registers */
+#define SYSCON_PRESETCTRL0_PINT                (1 << 18) /* Bit 18: Reset the pin interrupt block */
+#define SYSCON_PRESETCTRL0_GINT                (1 << 19) /* Bit 19: Reset the grouped pin interrupt block */
+#define SYSCON_PRESETCTRL0_DMA                 (1 << 20) /* Bit 20: Reset the DMA controller */
+#define SYSCON_PRESETCTRL0_CRC                 (1 << 21) /* Bit 21: Reset the CRC engine */
+#define SYSCON_PRESETCTRL0_WWDT                (1 << 22) /* Bit 22: Reset the Watchdog Timer */
+#define SYSCON_PRESETCTRL0_RTC                 (1 << 23) /* Bit 23: Enables the bus clock for the RTC */
+#define SYSCON_PRESETCTRL0_ADC0                (1 << 27) /* Bit 27: Reset the ADC0 register interface */
+
+/* Peripheral reset control 2: PRESETCTRL1, PRESETCTRLSET1, and PRESETCTRLCLR1 */
+
+#define SYSCON_PRESETCTRL1_MRT                 (1 << 0)  /* Bit 0:  Reset the Multi-Rate Timer */
+#define SYSCON_PRESETCTRL1_SCT0                (1 << 2)  /* Bit 2:  Reset SCT0 */
+#define SYSCON_PRESETCTRL1_MCAN0               (1 << 7)  /* Bit 7:  Reset MCAN0 */
+#define SYSCON_PRESETCTRL1_MCAN1               (1 << 8)  /* Bit 8:  Reset MCAN1 */
+#define SYSCON_PRESETCTRL1_UTICK               (1 << 10) /* Bit 10: Reset the Micro-tick Timer */
+#define SYSCON_PRESETCTRL1_FLEXCOMM0           (1 << 11) /* Bit 11: Reset Flexcomm Interface 0 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM1           (1 << 12) /* Bit 12: Reset Flexcomm Interface 1 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM2           (1 << 13) /* Bit 13: Reset Flexcomm Interface 2 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM3           (1 << 14) /* Bit 14: Reset Flexcomm Interface 3 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM4           (1 << 15) /* Bit 15: Reset Flexcomm Interface 4 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM5           (1 << 16) /* Bit 16: Reset Flexcomm Interface 5 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM6           (1 << 17) /* Bit 17: Reset Flexcomm Interface 6 */
+#define SYSCON_PRESETCTRL1_FLEXCOMM7           (1 << 18) /* Bit 18: Reset Flexcomm Interface 7 */
+#define SYSCON_PRESETCTRL1_DMIC                (1 << 19) /* Bit 19: Reset the digital microphone interface */
+#define SYSCON_PRESETCTRL1_CTIMER2             (1 << 22) /* Bit 22: Reset CTIMER 2 */
+#define SYSCON_PRESETCTRL1_USB0D               (1 << 25) /* Bit 25: Reset the USB0 device interface */
+#define SYSCON_PRESETCTRL1_CTIMER0             (1 << 26) /* Bit 26: Reset timer CTIMER0 */
+#define SYSCON_PRESETCTRL1_CTIMER1             (1 << 27) /* Bit 27: Reset timer CTIMER1 */
+
+/* Peripheral reset control 2: PRESETCTRL2, PRESETCTRL2, and PRESETCTRLCLR2 */
+
+#define SYSCON_PRESETCTRL2_LCD                 (1 << 2)  /* Bit 2:  Reset the LCD interface */
+#define SYSCON_PRESETCTRL2_SDIO                (1 << 3)  /* Bit 3:  Reset the SDIO interface */
+#define SYSCON_PRESETCTRL2_USB1H               (1 << 4)  /* Bit 4:  Reset the USB1 host interface */
+#define SYSCON_PRESETCTRL2_USB1D               (1 << 5)  /* Bit 5:  Reset the USB1 device interface */
+#define SYSCON_PRESETCTRL2_USB1RAM             (1 << 6)  /* Bit 6:  Reset the USB1 RAM interface */
+#define SYSCON_PRESETCTRL2_EMC                 (1 << 7)  /* Bit 7:  Reset the EMC interface */
+#define SYSCON_PRESETCTRL2_ETH                 (1 << 8)  /* Bit 8:  Reset the ethernet interface */
+#define SYSCON_PRESETCTRL2_GPIO4               (1 << 9)  /* Bit 9:  Reset the GPIO4 interface */
+#define SYSCON_PRESETCTRL2_GPIO5               (1 << 10) /* Bit 10: Reset the GPIO5 interface */
+#define SYSCON_PRESETCTRL2_OTP                 (1 << 12) /* Bit 12: Reset the OTP interface */
+#define SYSCON_PRESETCTRL2_RNG                 (1 << 13) /* Bit 13: Reset the RNG interface */
+#define SYSCON_PRESETCTRL2_FLEXCOMM8           (1 << 14) /* Bit 14: Reset the Flexcomm Interface 8 */
+#define SYSCON_PRESETCTRL2_FLEXCOMM9           (1 << 15) /* Bit 15: Reset the Flexcomm Interface 9 */
+#define SYSCON_PRESETCTRL2_USB0HMR             (1 << 16) /* Bit 16: Reset the USB host master interface */
+#define SYSCON_PRESETCTRL2_USB0HSL             (1 << 17) /* Bit 17: Reset the USB host slave interface */
+#define SYSCON_PRESETCTRL2_SHA                 (1 << 18) /* Bit 18: Reset the SHA interface */
+#define SYSCON_PRESETCTRL2_SC0                 (1 << 19) /* Bit 19: Reset the Smart card0 interface */
+#define SYSCON_PRESETCTRL2_SC1                 (1 << 20) /* Bit 20: Reset the Smart card1 interface */
+
 /* System reset status register */
 #define SYSCON_SYSRSTSTAT_
 
@@ -558,8 +603,8 @@
 #define SYSCON_FRGCTRL_DIV_MASK                (0xff << SYSCON_FRGCTRL_DIV_SHIFT)
 #  define SYSCON_FRGCTRL_DIV(n)                ((uint32_t)((n)-1) << SYSCON_FRGCTRL_DIV_SHIFT)
 #define SYSCON_FRGCTRL_MULT_SHIFT              (8)       /* Bit 8-15: Numerator of the fractional divider */
-#define SYSCON_FRGCTRL_MULT_MASK                (0xff << SYSCON_FRGCTRL_MULT_SHIFT)
-#  define SYSCON_FRGCTRL_MULT(n)                ((uint32_t)(n) << SYSCON_FRGCTRL_MULT_SHIFT)
+#define SYSCON_FRGCTRL_MULT_MASK               (0xff << SYSCON_FRGCTRL_MULT_SHIFT)
+#  define SYSCON_FRGCTRL_MULT(n)               ((uint32_t)(n) << SYSCON_FRGCTRL_MULT_SHIFT)
 
 /* DMIC clock divider */
 #define SYSCON_DMICCLKDIV_
@@ -569,8 +614,16 @@
 #define SYSCON_LCDCLKDIV_
 /* SCT/PWM clock divider */
 #define SYSCON_SCTCLKDIV_
+
 /* EMC clock divider */
-#define SYSCON_EMCCLKDIV_
+
+#define SYSCON_EMCCLKDIV_DIV_SHIFT             (9)       /* Bits 0-7: Clock divider value */
+#define SYSCON_EMCCLKDIV_DIV_MASK              (0xff <<SYSCON_EMCCLKDIV_DIV_SHIFT)
+#  define SYSCON_EMCCLKDIV_DIV(n)              ((uint32)((n)-1) <<SYSCON_EMCCLKDIV_DIV_SHIFT)
+#define SYSCON_EMCCLKDIV_RESET                 (1 << 29) /* Bit 29: Resets the divider counter */
+#define SYSCON_EMCCLKDIV_ HALT                 (1 << 30) /* Bit 30: Halts the divider counter */
+#define SYSCON_EMCCLKDIV_REQFLAG               (1 << 31) /* Bit 31: Divider status flag */
+
 /* SDIO clock divider */
 #define SYSCON_SDIOCLKDIV_
 
@@ -605,8 +658,14 @@
 #define SYSCON_USB1CLKCTRL_
 /* USB1 clock status */
 #define SYSCON_USB1CLKSTAT_
+
 /* EMC system control */
-#define SYSCON_EMCSYSCTRL_
+
+#define SYSCON_EMCSYSCTRL_SC                   (1 << 0)  /* Bit 0:  EMC Shift Control */
+#define SYSCON_EMCSYSCTRL_RD                   (1 << 1)  /* Bit 1:  EMC Reset Disable */
+#define SYSCON_EMCSYSCTRL_BC                   (1 << 2)  /* Bit 2:  External Memory Controller burst control */
+#define SYSCON_EMCSYSCTRL_FBCLKINSEL           (1 << 3)  /* Bit 3:  External Memory Controller clock select */
+
 /* EMC clock delay control */
 #define SYSCON_EMCDLYCTRL_
 /* EMC delay chain calibration control */

@@ -165,6 +165,10 @@ config LPC54_FLEXCOMM9
 
 menu "LPC54xx Peripheral Selection"
 
+config LPC54_EMC
+	bool "External Memory Controller (EMC)"
+	default n
+
 config LPC54_USART0
 	bool "USART0"
 	default n
@@ -227,6 +231,8 @@ config LPC54_USART9
 
 endmenu # LPC54xx Peripheral Selection
 
+menu "GPIO Interrupt Configuration"
+
 config LPC54_GPIOIRQ
 	bool "Support GPIO Interrupts"
 	default n
@@ -235,3 +241,18 @@ config LPC54_GPIOIRQ_GROUPS
 	bool "Support GPIO Interrupt groupe"
 	default n
 	depends on LPC54_GPIOIRQ && EXPERIMENTAL
+
+endmenu # LPC54xx Peripheral Selection
+
+menu "EMC Configuration"
+depends on LPC54_EMC
+
+config LPC54_EMC_STATIC
+	bool "EMC static memory support"
+	default n
+
+config LPC54_EMC_DYNAMIC
+	bool "EMC dynamic memory support"
+	default n
+
+endmenu # LPC54xx Peripheral Selection

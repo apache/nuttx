@@ -1,8 +1,14 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
+ * arch/arm/src/lpc54xx/lpc54_emc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Parts of this file were adapted from sample code provided for the LPC54xx
+ * family from NXP which has a compatible BSD license.
+ *
+ *   Copyright (c) 2016, Freescale Semiconductor, Inc.
+ *   Copyright (c) 2016 - 2017 , NXP
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,83 +39,54 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_EMC_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_EMC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+#include "lpc54_config.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* LED definitions **********************************************************/
-/* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
- * LEDs are for application use. They are illuminated when the driving
- * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
- * P3-3 (D11) and P3-14 (D12).
- */
-
-#define GPIO_LED_D9 \
-  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-#define GPIO_LED_D11 \
-  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-#define GPIO_LED_D12 \
-  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
-
-/* Button definitions *******************************************************/
-/* to be provided */
+#ifdef CONFIG_LPC54_EMC
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public data
- ****************************************************************************/
+/* EMC Feedback clock input source selection */
 
-#ifndef __ASSEMBLY__
+enum _emc_fbclk_src_e
+{
+  EMC_INTLOOPBACK = 0, /* Use the internal loop back from EMC_CLK output */
+  EMC_FBCLLK           /* Use the external EMC_FBCLK input */
+};
+
+/* EMC module basic configuration structure */
+
+struct emc_config_s
+{
+  bool bigendian;    /* True: Memory is big-endian */
+  uint8_t clksrc;    /* The feedback clock source. */
+  uint8_t clkdiv;    /* EMC_CLK = AHB_CLK / (emc_clkDiv + 1). */
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_bringup
+ * Name: lpc54_emc_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ *   This function enables the EMC clock, initializes the emc system 
+ *   configuration, and enable the EMC module.
  *
  ****************************************************************************/
 
-int lpc54_bringup(void);
+void lpc54_emc_initialize(uintptr_t base,
+                          FAR const struct emc_config_s *config);
 
-/****************************************************************************
- * Name: lpc54_sdram_initialize
- *
- * Description:
- *   Initialize external SDRAM
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LPC54_EMC
-void lpc54_sdram_initialize(void);
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */
+#endif /* CONFIG_LPC54_EMC */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_EMC_H */
