@@ -109,6 +109,10 @@ config ARCH_LPC54_HAVE_SHA
 
 # Peripheral Selection
 
+config LPC54_HAVE_I2C
+	bool
+	default n
+
 config LPC54_HAVE_FLEXCOMM
 	bool
 	default n
@@ -163,71 +167,229 @@ config LPC54_FLEXCOMM9
 	default n
 	select LPC54_HAVE_FLEXCOMM
 
+config LPC54_HAVE_SPI
+	bool
+	default n
+
+config LPC54_HAVE_USART
+	bool
+	default n
+
 menu "LPC54xx Peripheral Selection"
+
+config LPC54_I2C0
+	bool "I2C0"
+	default n
+	select LPC54_FLEXCOMM0
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C1
+	bool "I2C1"
+	default n
+	select LPC54_FLEXCOMM1
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C2
+	bool "I2C2"
+	default n
+	select LPC54_FLEXCOMM2
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C3
+	bool "I2C3"
+	default n
+	select LPC54_FLEXCOMM3
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C4
+	bool "I2C4"
+	default n
+	select LPC54_FLEXCOMM4
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C5
+	bool "I2C5"
+	default n
+	select LPC54_FLEXCOMM5
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C6
+	bool "I2C6"
+	default n
+	select LPC54_FLEXCOMM6
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C7
+	bool "I2C7"
+	default n
+	select LPC54_FLEXCOMM7
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C8
+	bool "I2C8"
+	default n
+	select LPC54_FLEXCOMM8
+	select LPC54_HAVE_I2C
+
+config LPC54_I2C9
+	bool "I2C9"
+	default n
+	select LPC54_FLEXCOMM9
+	select LPC54_HAVE_I2C
 
 config LPC54_EMC
 	bool "External Memory Controller (EMC)"
 	default n
 
+config LPC54_SPI0
+	bool "SPI0"
+	default n
+	depends on !LPC54_I2C0
+	select LPC54_FLEXCOMM0
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI1
+	bool "SPI1"
+	default n
+	depends on !LPC54_I2C1
+	select LPC54_FLEXCOMM1
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI2
+	bool "SPI2"
+	default n
+	depends on !LPC54_I2C2
+	select LPC54_FLEXCOMM2
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI3
+	bool "SPI3"
+	default n
+	depends on !LPC54_I2C3
+	select LPC54_FLEXCOMM3
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI4
+	bool "SPI4"
+	default n
+	depends on !LPC54_I2C4
+	select LPC54_FLEXCOMM4
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI5
+	bool "SPI5"
+	default n
+	depends on !LPC54_I2C5
+	select LPC54_FLEXCOMM5
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI6
+	bool "SPI6"
+	default n
+	depends on !LPC54_I2C6
+	select LPC54_FLEXCOMM6
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI7
+	bool "SPI7"
+	default n
+	depends on !LPC54_I2C7
+	select LPC54_FLEXCOMM7
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI8
+	bool "SPI8"
+	default n
+	depends on !LPC54_I2C8
+	select LPC54_FLEXCOMM8
+	select LPC54_HAVE_SPI
+
+config LPC54_SPI9
+	bool "SPI9"
+	default n
+	depends on !LPC54_I2C9
+	select LPC54_FLEXCOMM9
+	select LPC54_HAVE_SPI
+
 config LPC54_USART0
 	bool "USART0"
 	default n
+	depends on !LPC54_I2C0 && !LPC54_SPI0
 	select LPC54_FLEXCOMM0
 	select USART0_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART1
 	bool "USART1"
 	default n
+	depends on !LPC54_I2C1 && !LPC54_SPI1
 	select LPC54_FLEXCOMM1
 	select USART1_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART2
 	bool "USART2"
 	default n
+	depends on !LPC54_I2C2 && !LPC54_SPI2
 	select LPC54_FLEXCOMM2
 	select USART2_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART3
 	bool "USART3"
 	default n
+	depends on !LPC54_I2C3 && !LPC54_SPI3
 	select LPC54_FLEXCOMM3
 	select USART3_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART4
 	bool "USART4"
 	default n
+	depends on !LPC54_I2C4 && !LPC54_SPI4
 	select LPC54_FLEXCOMM4
 	select USART4_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART5
 	bool "USART5"
 	default n
+	depends on !LPC54_I2C5 && !LPC54_SPI5
 	select LPC54_FLEXCOMM5
 	select USART5_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART6
 	bool "USART6"
 	default n
+	depends on !LPC54_I2C6 && !LPC54_SPI6
 	select LPC54_FLEXCOMM6
 	select USART6_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART7
 	bool "USART7"
 	default n
+	depends on !LPC54_I2C7 && !LPC54_SPI7
 	select LPC54_FLEXCOMM7
 	select USART7_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART8
 	bool "USART8"
 	default n
+	depends on !LPC54_I2C8 && !LPC54_SPI8
 	select LPC54_FLEXCOMM8
 	select USART8_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 config LPC54_USART9
 	bool "USART9"
 	default n
+	depends on !LPC54_I2C9 && !LPC54_SPI9
 	select LPC54_FLEXCOMM9
 	select USART9_SERIALDRIVER
+	select LPC54_HAVE_USART
 
 endmenu # LPC54xx Peripheral Selection
 
