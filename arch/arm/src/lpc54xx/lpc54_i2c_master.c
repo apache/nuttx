@@ -66,6 +66,8 @@
 #include "lpc54_config.h"
 #include "lpc54_i2c_master.h"
 
+#include <arch/board/board.h>
+
 #ifdef HAVE_SPI_MASTER_DEVICE
 
 /****************************************************************************
@@ -79,9 +81,9 @@
 struct lpc54_i2cdev_s
 {
   struct i2c_master_s dev;     /* Generic I2C device */
-  unsigned int     base;       /* Base address of registers */
-  uint16_t         irqid;      /* IRQ for this device */
-  uint32_t         inclck;     /* I2C input clock frequency */
+  uintptr_t        base;       /* Base address of Flexcomm registers */
+  uint16_t         irq;        /* Flexcomm IRQ number */
+  uint32_t         fclock;     /* Flexcomm function clock frequency */
 
   sem_t            exclsem;    /* Only one thread can access at a time */
   sem_t            waitsem;    /* Supports wait for state machine completion */
@@ -95,13 +97,6 @@ struct lpc54_i2cdev_s
   uint16_t         wrcnt;      /* number of bytes sent to tx fifo */
   uint16_t         rdcnt;      /* number of bytes read from rx fifo */
 };
-
-#ifdef CONFIG_LPC54_I2C0_MASTER
-static struct lpc54_i2cdev_s g_i2c0_dev;
-#endif
-#ifdef CONFIG_LPC54_I2C1_MASTER
-static struct lpc54_i2cdev_s g_i2c1_dev;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -131,6 +126,37 @@ struct i2c_ops_s lpc54_i2c_ops =
 #endif
 };
 
+#ifdef CONFIG_LPC54_I2C0_MASTER
+static struct lpc54_i2cdev_s g_i2c0_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C1_MASTER
+static struct lpc54_i2cdev_s g_i2c1_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C2_MASTER
+static struct lpc54_i2cdev_s g_i2c2_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C3_MASTER
+static struct lpc54_i2cdev_s g_i2c3_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C4_MASTER
+static struct lpc54_i2cdev_s g_i2c4_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C5_MASTER
+static struct lpc54_i2cdev_s g_i2c5_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C6_MASTER
+static struct lpc54_i2cdev_s g_i2c6_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C7_MASTER
+static struct lpc54_i2cdev_s g_i2c7_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C8_MASTER
+static struct lpc54_i2cdev_s g_i2c8_dev;
+#endif
+#ifdef CONFIG_LPC54_I2C9_MASTER
+static struct lpc54_i2cdev_s g_i2c9_dev;
+#endif
+
 /****************************************************************************
  * Name: lpc54_i2c_setfrequency
  *
@@ -149,7 +175,7 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
       /* Yes.. instantiate the new I2C frequency */
 #warning Missing logic
 
-      priv->frequency =  frequency;
+      priv->frequency = frequency;
     }
 }
 
@@ -364,8 +390,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c0_dev;
       priv->base     = LPC54_FLEXCOMM0_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM0;
-      priv->inclck   = BOARD_FLEXCOMM0_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM0;
+      priv->fclock   = BOARD_FLEXCOMM0_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -374,7 +400,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM0 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM0_CLKSEL, LPC54_SYSCON_FCLKSEL0);
 
       /* Set the default I2C frequency */
 
@@ -400,8 +426,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c1_dev;
       priv->base     = LPC54_FLEXCOMM1_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM1;
-      priv->inclck   = BOARD_FLEXCOMM1_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM1;
+      priv->fclock   = BOARD_FLEXCOMM1_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -410,7 +436,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM1 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM1_CLKSEL, LPC54_SYSCON_FCLKSEL1);
 
       /* Set the default I2C frequency */
 
@@ -436,8 +462,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c2_dev;
       priv->base     = LPC54_FLEXCOMM2_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM2;
-      priv->inclck   = BOARD_FLEXCOMM2_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM2;
+      priv->fclock   = BOARD_FLEXCOMM2_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -472,8 +498,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c3_dev;
       priv->base     = LPC54_FLEXCOMM3_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM3;
-      priv->inclck   = BOARD_FLEXCOMM3_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM3;
+      priv->fclock   = BOARD_FLEXCOMM3_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -482,7 +508,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM3 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM3_CLKSEL, LPC54_SYSCON_FCLKSEL3);
 
       /* Set the default I2C frequency */
 
@@ -508,8 +534,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c4_dev;
       priv->base     = LPC54_FLEXCOMM4_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM4;
-      priv->inclck   = BOARD_FLEXCOMM4_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM4;
+      priv->fclock   = BOARD_FLEXCOMM4_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -518,7 +544,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM4 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM4_CLKSEL, LPC54_SYSCON_FCLKSEL4);
 
       /* Set the default I2C frequency */
 
@@ -544,8 +570,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c5_dev;
       priv->base     = LPC54_FLEXCOMM5_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM5;
-      priv->inclck   = BOARD_FLEXCOMM5_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM5;
+      priv->fclock   = BOARD_FLEXCOMM5_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -554,7 +580,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM5 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM5_CLKSEL, LPC54_SYSCON_FCLKSEL5);
 
       /* Set the default I2C frequency */
 
@@ -580,8 +606,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c6_dev;
       priv->base     = LPC54_FLEXCOMM6_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM6;
-      priv->inclck   = BOARD_FLEXCOMM6_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM6;
+      priv->fclock   = BOARD_FLEXCOMM6_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -590,7 +616,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM6 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM6_CLKSEL, LPC54_SYSCON_FCLKSEL6);
 
       /* Set the default I2C frequency */
 
@@ -616,8 +642,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c7_dev;
       priv->base     = LPC54_FLEXCOMM7_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM7;
-      priv->inclck   = BOARD_FLEXCOMM7_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM7;
+      priv->fclock   = BOARD_FLEXCOMM7_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -626,7 +652,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM7 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM7_CLKSEL, LPC54_SYSCON_FCLKSEL7);
 
       /* Set the default I2C frequency */
 
@@ -652,8 +678,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c8_dev;
       priv->base     = LPC54_FLEXCOMM8_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM8;
-      priv->inclck   = BOARD_FLEXCOMM8_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM8;
+      priv->fclock   = BOARD_FLEXCOMM8_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -662,7 +688,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM8 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM8_CLKSEL, LPC54_SYSCON_FCLKSEL8);
 
       /* Set the default I2C frequency */
 
@@ -688,8 +714,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c9_dev;
       priv->base     = LPC54_FLEXCOMM9_BASE;
-      priv->irqid    = LPC54_IRQ_FLEXCOMM9;
-      priv->inclck   = BOARD_FLEXCOMM9_FCLK;
+      priv->irq      = LPC54_IRQ_FLEXCOMM9;
+      priv->fclock   = BOARD_FLEXCOMM9_FCLK;
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -698,7 +724,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       /* Set up the FLEXCOMM9 function clock */
 
-      putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
+      putreg32(BOARD_FLEXCOMM9_CLKSEL, LPC54_SYSCON_FCLKSEL9);
 
       /* Set the default I2C frequency */
 
@@ -737,11 +763,11 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
   /* Attach Interrupt Handler */
 
-  irq_attach(priv->irqid, lpc54_i2c_interrupt, priv);
+  irq_attach(priv->irq, lpc54_i2c_interrupt, priv);
 
   /* Enable Interrupt Handler */
 
-  up_enable_irq(priv->irqid);
+  up_enable_irq(priv->irq);
 
   /* Install our operations */
 
@@ -764,15 +790,13 @@ int lpc54_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   /* Disable I2C interrupts */
 #warning Missing logic
 
-  /* Disable the I2C perifpheral */
+  /* Disable the I2C peripheral */
+ #warning Missing logic
 
-  putreg32(0, base + LPC54_USART_CFG_OFFSET);
-#warning Missing logic
+  /* Disable the Flexcomm interface at the NVIC and detach the interrupt. */
 
-  /* Disables the Flexcomm interface at the NVIC and detach the interrupt. */
-
-  up_disable_irq(priv->irqid);
-  irq_detach(priv->irqid);
+  up_disable_irq(priv->irq);
+  irq_detach(priv->irq);
   return OK;
 }
 
