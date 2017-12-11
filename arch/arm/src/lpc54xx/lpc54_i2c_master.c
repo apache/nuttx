@@ -80,22 +80,22 @@
 
 struct lpc54_i2cdev_s
 {
-  struct i2c_master_s dev;     /* Generic I2C device */
-  uintptr_t        base;       /* Base address of Flexcomm registers */
-  uint16_t         irq;        /* Flexcomm IRQ number */
-  uint32_t         fclock;     /* Flexcomm function clock frequency */
+  struct i2c_master_s dev;  /* Generic I2C device */
+  uintptr_t base;           /* Base address of Flexcomm registers */
 
-  sem_t            exclsem;    /* Only one thread can access at a time */
-  sem_t            waitsem;    /* Supports wait for state machine completion */
-  volatile uint8_t state;      /* State of state machine */
-  WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
-  uint32_t         frequency;  /* Current I2C frequency */
+  WDOG_ID timeout;          /* Watchdog to timeout when bus hung */
+  uint32_t frequency;       /* Current I2C frequency */
+  uint32_t fclock;          /* Flexcomm function clock frequency */
 
-  struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
-  unsigned int     nmsg;       /* number of transfer remaining */
+  struct i2c_msg_s *msgs;   /* Remaining transfers (first is in progress) */
+  unsigned int nmsg;        /* Number of transfer remaining */
 
-  uint16_t         wrcnt;      /* number of bytes sent to tx fifo */
-  uint16_t         rdcnt;      /* number of bytes read from rx fifo */
+  sem_t exclsem;            /* Only one thread can access at a time */
+  sem_t waitsem;            /* Supports wait for state machine completion */
+  uint16_t irq;             /* Flexcomm IRQ number */
+  uint16_t wrcnt;           /* Number of bytes sent to tx fifo */
+  uint16_t rdcnt;           /* Number of bytes read from rx fifo */
+  volatile uint8_t state;   /* State of state machine */
 };
 
 /****************************************************************************

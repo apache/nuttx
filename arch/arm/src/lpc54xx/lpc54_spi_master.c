@@ -238,7 +238,8 @@ static int lpc54_spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t lpc54_spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t lpc54_spi_setfrequency(FAR struct spi_dev_s *dev,
+                                       uint32_t frequency)
 {
   FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
   uint32_t actual;
@@ -281,7 +282,8 @@ static uint32_t lpc54_spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequ
  *
  ****************************************************************************/
 
-static void lpc54_spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void lpc54_spi_setmode(FAR struct spi_dev_s *dev,
+                              enum spi_mode_e mode)
 {
   FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
   uint32_t regval;
@@ -407,7 +409,8 @@ static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
-static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
+                               FAR const void *buffer, size_t nwords)
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
@@ -444,7 +447,8 @@ static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer
  *
  ****************************************************************************/
 
-static void lpc54_spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void lpc54_spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                                size_t nwords)
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
@@ -508,12 +512,13 @@ static void lpc54_spidev_initialize(FAR struct lpc54_spidev_s *priv)
  *
  * Description:
  *   Initialize the selected SPI port
- *   0 - SPI
- *   1 - SSP0
- *   2 - SSP1
+ *   0 - SPI0
+ *   1 - SPI1
+ *   ...
+ *   9 - SSP9
  *
  * Input Parameter:
- *   Port number (for hardware that has multiple SPI interfaces)
+ *   port - SPI peripheral number.  0..9
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
