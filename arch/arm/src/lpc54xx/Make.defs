@@ -105,12 +105,12 @@ ifeq ($(CONFIG_LPC54_HAVE_USART),y)
 CHIP_CSRCS += lpc54_serial.c
 endif
 
-ifeq ($(CONFIG_LPC54_HAVE_I2C),y)
-CHIP_CSRCS += lpc54_i2c.c
+ifeq ($(CONFIG_LPC54_HAVE_I2C_MASTER),y)
+CHIP_CSRCS += lpc54_i2c_master.c
 endif
 
-ifeq ($(CONFIG_LPC54_HAVE_SPI),y)
-CHIP_CSRCS += lpc54_spi.c
+ifeq ($(CONFIG_LPC54_HAVE_SPI_MASTER),y)
+CHIP_CSRCS += lpc54_spi_master.c
 endif
 
 ifeq ($(CONFIG_LPC54_EMC),y)

@@ -109,7 +109,7 @@ config ARCH_LPC54_HAVE_SHA
 
 # Peripheral Selection
 
-config LPC54_HAVE_I2C
+config LPC54_HAVE_I2C_MASTER
 	bool
 	default n
 
@@ -167,7 +167,7 @@ config LPC54_FLEXCOMM9
 	default n
 	select LPC54_HAVE_FLEXCOMM
 
-config LPC54_HAVE_SPI
+config LPC54_HAVE_SPI_MASTER
 	bool
 	default n
 
@@ -177,144 +177,144 @@ config LPC54_HAVE_USART
 
 menu "LPC54xx Peripheral Selection"
 
-config LPC54_I2C0
-	bool "I2C0"
+config LPC54_I2C0_MASTER
+	bool "I2C0 Master"
 	default n
 	select LPC54_FLEXCOMM0
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C1
-	bool "I2C1"
+config LPC54_I2C1_MASTER
+	bool "I2C1 Master"
 	default n
 	select LPC54_FLEXCOMM1
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C2
-	bool "I2C2"
+config LPC54_I2C2_MASTER
+	bool "I2C2 Master"
 	default n
 	select LPC54_FLEXCOMM2
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C3
-	bool "I2C3"
+config LPC54_I2C3_MASTER
+	bool "I2C3 Master"
 	default n
 	select LPC54_FLEXCOMM3
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C4
-	bool "I2C4"
+config LPC54_I2C4_MASTER
+	bool "I2C4 Master"
 	default n
 	select LPC54_FLEXCOMM4
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C5
-	bool "I2C5"
+config LPC54_I2C5_MASTER
+	bool "I2C5 Master"
 	default n
 	select LPC54_FLEXCOMM5
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C6
-	bool "I2C6"
+config LPC54_I2C6_MASTER
+	bool "I2C6 Master"
 	default n
 	select LPC54_FLEXCOMM6
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C7
-	bool "I2C7"
+config LPC54_I2C7_MASTER
+	bool "I2C7 Master"
 	default n
 	select LPC54_FLEXCOMM7
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C8
-	bool "I2C8"
+config LPC54_I2C8_MASTER
+	bool "I2C8 Master"
 	default n
 	select LPC54_FLEXCOMM8
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_I2C9
-	bool "I2C9"
+config LPC54_I2C9_MASTER
+	bool "I2C9 Master"
 	default n
 	select LPC54_FLEXCOMM9
-	select LPC54_HAVE_I2C
+	select LPC54_HAVE_I2C_MASTER
 
 config LPC54_EMC
 	bool "External Memory Controller (EMC)"
 	default n
 
-config LPC54_SPI0
-	bool "SPI0"
+config LPC54_SPI0_MASTER
+	bool "SPI0 Master"
 	default n
-	depends on !LPC54_I2C0
+	depends on !LPC54_I2C0_MASTER
 	select LPC54_FLEXCOMM0
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI1
-	bool "SPI1"
+config LPC54_SPI1_MASTER
+	bool "SPI1 Master"
 	default n
-	depends on !LPC54_I2C1
+	depends on !LPC54_I2C1_MASTER
 	select LPC54_FLEXCOMM1
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI2
-	bool "SPI2"
+config LPC54_SPI2_MASTER
+	bool "SPI2 Master"
 	default n
-	depends on !LPC54_I2C2
+	depends on !LPC54_I2C2_MASTER
 	select LPC54_FLEXCOMM2
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI3
-	bool "SPI3"
+config LPC54_SPI3_MASTER
+	bool "SPI3 Master"
 	default n
-	depends on !LPC54_I2C3
+	depends on !LPC54_I2C3_MASTER
 	select LPC54_FLEXCOMM3
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI4
-	bool "SPI4"
+config LPC54_SPI4_MASTER
+	bool "SPI4 Master"
 	default n
-	depends on !LPC54_I2C4
+	depends on !LPC54_I2C4_MASTER
 	select LPC54_FLEXCOMM4
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI5
-	bool "SPI5"
+config LPC54_SPI5_MASTER
+	bool "SPI5 Master"
 	default n
-	depends on !LPC54_I2C5
+	depends on !LPC54_I2C5_MASTER
 	select LPC54_FLEXCOMM5
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI6
-	bool "SPI6"
+config LPC54_SPI6_MASTER
+	bool "SPI6 Master"
 	default n
-	depends on !LPC54_I2C6
+	depends on !LPC54_I2C6_MASTER
 	select LPC54_FLEXCOMM6
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI7
-	bool "SPI7"
+config LPC54_SPI7_MASTER
+	bool "SPI7 Master"
 	default n
-	depends on !LPC54_I2C7
+	depends on !LPC54_I2C7_MASTER
 	select LPC54_FLEXCOMM7
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI8
-	bool "SPI8"
+config LPC54_SPI8_MASTER
+	bool "SPI8 Master"
 	default n
-	depends on !LPC54_I2C8
+	depends on !LPC54_I2C8_MASTER
 	select LPC54_FLEXCOMM8
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
-config LPC54_SPI9
-	bool "SPI9"
+config LPC54_SPI9_MASTER
+	bool "SPI9 Master"
 	default n
-	depends on !LPC54_I2C9
+	depends on !LPC54_I2C9_MASTER
 	select LPC54_FLEXCOMM9
-	select LPC54_HAVE_SPI
+	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_USART0
 	bool "USART0"
 	default n
-	depends on !LPC54_I2C0 && !LPC54_SPI0
+	depends on !LPC54_I2C0_MASTER && !LPC54_SPI0_MASTER
 	select LPC54_FLEXCOMM0
 	select USART0_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -322,7 +322,7 @@ config LPC54_USART0
 config LPC54_USART1
 	bool "USART1"
 	default n
-	depends on !LPC54_I2C1 && !LPC54_SPI1
+	depends on !LPC54_I2C1_MASTER && !LPC54_SPI1_MASTER
 	select LPC54_FLEXCOMM1
 	select USART1_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -330,7 +330,7 @@ config LPC54_USART1
 config LPC54_USART2
 	bool "USART2"
 	default n
-	depends on !LPC54_I2C2 && !LPC54_SPI2
+	depends on !LPC54_I2C2_MASTER && !LPC54_SPI2_MASTER
 	select LPC54_FLEXCOMM2
 	select USART2_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -338,7 +338,7 @@ config LPC54_USART2
 config LPC54_USART3
 	bool "USART3"
 	default n
-	depends on !LPC54_I2C3 && !LPC54_SPI3
+	depends on !LPC54_I2C3_MASTER && !LPC54_SPI3_MASTER
 	select LPC54_FLEXCOMM3
 	select USART3_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -346,7 +346,7 @@ config LPC54_USART3
 config LPC54_USART4
 	bool "USART4"
 	default n
-	depends on !LPC54_I2C4 && !LPC54_SPI4
+	depends on !LPC54_I2C4_MASTER && !LPC54_SPI4_MASTER
 	select LPC54_FLEXCOMM4
 	select USART4_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -354,7 +354,7 @@ config LPC54_USART4
 config LPC54_USART5
 	bool "USART5"
 	default n
-	depends on !LPC54_I2C5 && !LPC54_SPI5
+	depends on !LPC54_I2C5_MASTER && !LPC54_SPI5_MASTER
 	select LPC54_FLEXCOMM5
 	select USART5_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -362,7 +362,7 @@ config LPC54_USART5
 config LPC54_USART6
 	bool "USART6"
 	default n
-	depends on !LPC54_I2C6 && !LPC54_SPI6
+	depends on !LPC54_I2C6_MASTER && !LPC54_SPI6_MASTER
 	select LPC54_FLEXCOMM6
 	select USART6_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -370,7 +370,7 @@ config LPC54_USART6
 config LPC54_USART7
 	bool "USART7"
 	default n
-	depends on !LPC54_I2C7 && !LPC54_SPI7
+	depends on !LPC54_I2C7_MASTER && !LPC54_SPI7_MASTER
 	select LPC54_FLEXCOMM7
 	select USART7_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -378,7 +378,7 @@ config LPC54_USART7
 config LPC54_USART8
 	bool "USART8"
 	default n
-	depends on !LPC54_I2C8 && !LPC54_SPI8
+	depends on !LPC54_I2C8_MASTER && !LPC54_SPI8_MASTER
 	select LPC54_FLEXCOMM8
 	select USART8_SERIALDRIVER
 	select LPC54_HAVE_USART
@@ -386,7 +386,7 @@ config LPC54_USART8
 config LPC54_USART9
 	bool "USART9"
 	default n
-	depends on !LPC54_I2C9 && !LPC54_SPI9
+	depends on !LPC54_I2C9_MASTER && !LPC54_SPI9_MASTER
 	select LPC54_FLEXCOMM9
 	select USART9_SERIALDRIVER
 	select LPC54_HAVE_USART
