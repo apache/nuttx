@@ -213,7 +213,10 @@ static inline void lpc54_gpio_output(lpc54_pinset_t cfgset,
   regval |= (1 << pin);
   putreg32(regval, regaddr);
 
-  /* Set the initial value of the output */
+  /* Set the initial value of the output.  Apparently this cannot be done
+   * before cofiguring the pin as an output.  I don't see anyway to avoid
+   * glitch.
+   */
 
   lpc54_gpio_write(cfgset, ((cfgset & GPIO_VALUE) != GPIO_VALUE_ZERO));
 }
@@ -438,7 +441,7 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
 
 void lpc54_gpio_write(lpc54_pinset_t pinset, bool value)
 {
-  unsigned int portpin = pinset & GPIO_PIN_MASK;
+  unsigned int portpin = pinset & PORTPIN_MASK;
   putreg8((uint32_t)value, LPC54_GPIO_B(portpin));
 }
 
@@ -452,6 +455,6 @@ void lpc54_gpio_write(lpc54_pinset_t pinset, bool value)
 
 bool lpc54_gpio_read(lpc54_pinset_t pinset)
 {
-  unsigned int portpin = pinset & GPIO_PIN_MASK;
+  unsigned int portpin = pinset & PORTPIN_MASK;
   return (bool)getreg8(LPC54_GPIO_B(portpin));
 }

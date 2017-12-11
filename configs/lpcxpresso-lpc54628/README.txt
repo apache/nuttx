@@ -30,6 +30,35 @@ STATUS
   2017-12-10:  The basic NSH configuration is functional at 220MHz with a
     Serial console, timer and LED support.  Added support for the external
     SDRAM and for the RAM test utility -- UNTESTED!
+  2017-12-11:  Fixed an error in board LEDs.  SDRAM is marginally functional:
+
+      nsh> mw a0000000=55555555
+      a0000000 = 0x00000000 -> 0x55555555
+      nsh> mw a0000000
+      a0000000 = 0x55555555
+
+    But does not pass the ramtest.  These tests all pass:
+
+      nsh> ramtest a0000000 16
+      nsh> ramtest a0000000 32
+      nsh> ramtest a0000000 64
+      nsh> ramtest a0000000 126
+
+    But this fails the marching one's test (only):
+
+      nsh> ramtest a0000000 128
+      RAMTest: Marching ones: a0000000 128
+      RAMTest: ERROR: Address a0000006 Found: 0002 Expected 0001
+      RAMTest: ERROR: Address a0000008 Found: 0002 Expected 0001
+      ...
+      RAMTest: ERROR: Address a000007e Found: d47e Expected 0001
+      RAMTest: Marching zeroes: a0000000 128
+      RAMTest: Pattern test: a0000000 128 55555555 aaaaaaaa
+      RAMTest: Pattern test: a0000000 128 66666666 99999999
+      RAMTest: Pattern test: a0000000 128 33333333 cccccccc
+      RAMTest: Address-in-address test: a0000000 128
+
+    Additional test fail as the size of the test increases.
 
 Configurations
 ==============
@@ -110,3 +139,21 @@ Configurations
     2. SDRAM support is enabled, but the SDRAM is *not* added to the system
        heap.  The apps/system/ramtest utility is include in the build as an
        NSH builtin function that can be used to verify the SDRAM.
+
+         nsh> ramtest -h
+         RAMTest: Missing required arguments
+
+         Usage: <noname> [-w|h|b] <hex-address> <decimal-size>
+
+         Where:
+           <hex-address> starting address of the test.
+           <decimal-size> number of memory locations (in bytes).
+           -w Sets the width of a memory location to 32-bits.
+           -h Sets the width of a memory location to 16-bits (default).
+           -b Sets the width of a memory location to 8-bits.
+
+       The  MTL48LC8M16A2B4-6A SDRAM is on CS0 which corresponds to address
+       0xa0000000, the size of the memory is 128Mbits or 16Mb.  So the DRAM
+       may be tested with this command:
+
+         nsh> ramtest a0000000 16777216

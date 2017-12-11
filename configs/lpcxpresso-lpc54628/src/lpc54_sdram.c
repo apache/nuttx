@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include "chip/lpc54_pinmux.h"
+#include "lpc54_gpio.h"
 #include "lpc54_emc.h"
 #include "lpcxpresso-lpc54628.h"
 
@@ -68,6 +70,31 @@ static const struct emc_config_s g_emc_config =
   .clkdiv    = 2,               /* EMC Clock = CPU FREQ/2 */
 #endif
 };
+
+/* Pin configuration */
+
+static const lpc54_pinset_t g_emc_pinset[] =
+{
+  /* Control signals */
+
+  GPIO_EMC_CASN, GPIO_EMC_RASN,   GPIO_EMC_WEN,  GPIO_EMC_CLK0,
+  GPIO_EMC_CKE0, GPIO_EMC_DYCSN0, GPIO_EMC_DQM0, GPIO_EMC_DQM1,
+
+  /* Address lines */
+
+  GPIO_EMC_A0,  GPIO_EMC_A1,  GPIO_EMC_A2,  GPIO_EMC_A3,  GPIO_EMC_A4,
+  GPIO_EMC_A5,  GPIO_EMC_A6,  GPIO_EMC_A7,  GPIO_EMC_A8,  GPIO_EMC_A9,
+  GPIO_EMC_A10, GPIO_EMC_A11, GPIO_EMC_A12, GPIO_EMC_A13, GPIO_EMC_A14,
+
+  /* Data lines */
+
+  GPIO_EMC_D0,  GPIO_EMC_D1,  GPIO_EMC_D2,  GPIO_EMC_D3,  GPIO_EMC_D4,
+  GPIO_EMC_D5,  GPIO_EMC_D6,  GPIO_EMC_D7,  GPIO_EMC_D8,  GPIO_EMC_D9,
+  GPIO_EMC_D10, GPIO_EMC_D11, GPIO_EMC_D12, GPIO_EMC_D13, GPIO_EMC_D14,
+  GPIO_EMC_D15
+};
+
+#define EMC_NPINS (sizeof(g_emc_pinset) / sizeof(lpc54_pinset_t))
 
 /* Dynamic memory timing configuration. */
 
@@ -114,9 +141,18 @@ static const struct emc_dynamic_chip_config_s g_emc_dynchipconfig =
 
 void lpc54_sdram_initialize(void)
 {
+  int i;
+
   /* EMC Basic configuration. */
 
   lpc54_emc_initialize(&g_emc_config);
+
+  /* Configured pins used on the board */
+
+  for (i = 0; i < EMC_NPINS; i++)
+    {
+      lpc54_gpio_config(g_emc_pinset[i]);
+    }
 
   /* EMC Dynamc memory configuration. */
 

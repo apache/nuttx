@@ -57,12 +57,11 @@
  ************************************************************************************/
 /* Bit-encoded input to lpc54_gpio_config() ******************************************/
 
-/* 32-Bit Encoding: .... .... TTTT TTTT  FFFF ...V PPPN NNNN
+/* 32-Bit Encoding: .... .... TTTT TTTT  FFFF MM.V PPPN NNNN
  *
  *   Special Pin Functions: TTTT TTTT
  *   Pin Function:          FFFF
  *   Pin Mode bits:         MM
- *   Open drain:            O (output pins)
  *   Initial value:         V (output pins)
  *   Port number:           PPP (0-5)
  *   Pin number:            NNNNN (0-31)
