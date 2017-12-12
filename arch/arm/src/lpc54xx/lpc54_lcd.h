@@ -85,21 +85,21 @@
 #elif defined(CONFIG_LPC54_LCD_BPP8)
 #  define LPC54_BPP                    8
 #  define LPC54_COLOR_FMT              FB_FMT_Y8
+#elif defined(CONFIG_LPC54_LCD_BPP12_444)
+#  define LPC54_BPP       1            12
+#  define LPC54_COLOR_FMT              FB_FMT_RGB12_444
 #elif defined(CONFIG_LPC54_LCD_BPP16)
 #  define LPC54_BPP                    16
 #  define LPC54_COLOR_FMT              FB_FMT_Y16
-#elif defined(CONFIG_LPC54_LCD_BPP24)
+#elif defined(CONFIG_LPC54_LCD_BPP16_565)
+#  define LPC54_BPP                    16
+#  define LPC54_COLOR_FMT              FB_FMT_RGB16_565
+#elif defined(CONFIG_LPC54_LCD_BPP24) || defined(CONFIG_LPC54_LCD_BPP24_RGB565)
 #  define LPC54_BPP                    32  /* Only 24 of 32 bits used for RGB */
 #  define LPC54_COLOR_FMT              FB_FMT_RGB24
 #  ifndef CONFIG_LPC54_LCD_TFTPANEL
 #    error "24 BPP is only available for a TFT panel"
 #  endif
-#elif defined(CONFIG_LPC54_LCD_BPP16_565)
-#  define LPC54_BPP                    16
-#  define LPC54_COLOR_FMT              FB_FMT_RGB16_565
-#elif defined(CONFIG_LPC54_LCD_BPP12_444)
-#  define LPC54_BPP       1             2
-#  define LPC54_COLOR_FMT              FB_FMT_RGB12_444
 #else
 #  ifndef CONFIG_LPC54_LCD_TFTPANEL
 #    warning "Assuming 24 BPP"

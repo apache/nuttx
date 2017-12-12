@@ -640,12 +640,6 @@ config LPC54_LCD_VRAMBASE
 		Base address of the video RAM frame buffer.  The default is
 		(LPC54_EXTDRAM_CS0 + 0x00010000)
 
-config LPC54_LCD_USE_VD012
-	bool "Use VD0, VD1, and VD2 pins"
-	default y
-	---help---
-		Some LCDs do not connect these pins.
-
 config LPC54_LCD_USE_CLKIN
 	bool "Use optional input clock"
 	default n
@@ -698,32 +692,53 @@ choice
 	default LPC54_LCD_BPP16_565 if !LPC54_LCD_TFTPANEL
 
 config LPC54_LCD_BPP1
-	bool "1 bit per pixel"
+	bool "1 BPP"
+	depends on LPC54_LCD_MONOCHROME
 
 config LPC54_LCD_BPP2
-	bool "2 bit per pixel"
+	bool "2 BPP"
+	depends on LPC54_LCD_MONOCHROME
 
 config LPC54_LCD_BPP4
-	bool "4 bit per pixel"
+	bool "4 BPP"
+	depends on LPC54_LCD_MONOCHROME
 
 config LPC54_LCD_BPP8
-	bool "8 bit per pixel"
-
-config LPC54_LCD_BPP16
-	bool "16 bit per pixel"
-	depends on !LPC54_LCD_MONOCHROME
-
-config LPC54_LCD_BPP24
-	bool "24 bit per pixel"
-	depends on LPC54_LCD_TFTPANEL
-
-config LPC54_LCD_BPP16_565
-	bool "16 bpp, 5:6:5 mode"
-	depends on !LPC54_LCD_MONOCHROME
+	bool "8 BPP"
+	depends on LPC54_LCD_MONOCHROME
 
 config LPC54_LCD_BPP12_444
 	bool "12 bpp, 4:4:4 mode"
 	depends on !LPC54_LCD_MONOCHROME
+
+config LPC54_LCD_BPP16
+	bool "16 BPP"
+	depends on LPC54_LCD_MONOCHROME
+
+config LPC54_LCD_BPP16_565
+	bool "16 BPP, 5:6:5 mode"
+	depends on !LPC54_LCD_MONOCHROME
+
+config LPC54_LCD_BPP24_RGB565
+	bool "24 BPP, 5:6:5 mode"
+	depends on !LPC54_LCD_MONOCHROME && LPC54_LCD_TFTPANEL
+	---help---
+		16-bit color is, by default, provide on LCD VD0-VD15; 24-bit color
+		is provided on VD0-23:
+
+		  RRRRRGGG GGGB BBBB
+		  ........ RRRRRRRR GGGGGGGG BBBBBBBB
+
+		This option selects an alternative pin configuration where 16-bit
+		RGB565 is provided on VD3-7, VD10-15, and VD19-23.  This essentially
+		accepts 32-bit RGB888 color as input but only uses the RGB565 color
+		resolution:
+
+		  ........ RRRRR... GGGGGG.. BBBBB...
+
+config LPC54_LCD_BPP24
+	bool "24 BPP, 8:8:8 mode"
+	depends on LPC54_LCD_TFTPANEL
 
 endchoice
 

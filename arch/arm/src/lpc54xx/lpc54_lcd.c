@@ -481,7 +481,7 @@ int up_fbinitialize(int display)
 
   lcdinfo("Configuring pins\n");
 
-#ifdef CONFIG_LPC54_LCD_USE_VD012
+#ifndef CONFIG_LPC54_LCD_BPP24_RGB565
   lpc54_gpio_config(GPIO_LCD_VD0);
   lpc54_gpio_config(GPIO_LCD_VD1);
   lpc54_gpio_config(GPIO_LCD_VD2);
@@ -492,8 +492,10 @@ int up_fbinitialize(int display)
   lpc54_gpio_config(GPIO_LCD_VD6);
   lpc54_gpio_config(GPIO_LCD_VD7);
 
+#ifndef CONFIG_LPC54_LCD_BPP24_RGB565
   lpc54_gpio_config(GPIO_LCD_VD8);
   lpc54_gpio_config(GPIO_LCD_VD9);
+#endif
   lpc54_gpio_config(GPIO_LCD_VD10);
   lpc54_gpio_config(GPIO_LCD_VD11);
   lpc54_gpio_config(GPIO_LCD_VD12);
@@ -501,10 +503,12 @@ int up_fbinitialize(int display)
   lpc54_gpio_config(GPIO_LCD_VD14);
   lpc54_gpio_config(GPIO_LCD_VD15);
 
-#if LPC54_BPP > 16
+#if LPC54_BPP > 16 && !defined(CONFIG_LPC54_LCD_BPP24_RGB565)
   lpc54_gpio_config(GPIO_LCD_VD16);
-  lpc54_gpio_config(GPIO_LCD_VD54);
+  lpc54_gpio_config(GPIO_LCD_VD17);
   lpc54_gpio_config(GPIO_LCD_VD18);
+#endif
+#if LPC54_BPP > 16
   lpc54_gpio_config(GPIO_LCD_VD19);
   lpc54_gpio_config(GPIO_LCD_VD20);
   lpc54_gpio_config(GPIO_LCD_VD21);
