@@ -111,7 +111,7 @@ static const struct emc_dynamic_timing_config_s g_emc_dynconfig =
   .rc       = 60,
   .rfc      = 60,
   .xsr      = 67,
-  .rrd      = 23,
+  .rrd      = 12,
   .mrd      = 2,
 };
 
