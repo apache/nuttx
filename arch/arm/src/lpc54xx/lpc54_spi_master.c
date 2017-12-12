@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_spi.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,8 @@ struct lpc54_spidev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static inline bool lpc54_spi_16bitmode(FAR struct lpc54_spidev_s *priv);
+
 /* SPI methods */
 
 static int      lpc54_spi_lock(FAR struct spi_dev_s *dev, bool lock);
@@ -100,10 +102,20 @@ static void     lpc54_spi_setmode(FAR struct spi_dev_s *dev,
                   enum spi_mode_e mode);
 static void     lpc54_spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+#ifdef CONFIG_LPC54_SPI_MASTER_DMA
+static void     lpc54_spi_exchange_nodma(FAR struct spi_dev_s *dev,
+                   FAR const void *txbuffer, FAR void *rxbuffer,
+                   size_t nwords)
+#endif
+static void     lpc54_spi_exchange(FAR struct spi_dev_s *dev,
+                  FAR const void *txbuffer, FAR void *rxbuffer,
+                  size_t nwords);
+#ifndef CONFIG_SPI_EXCHANGE
 static void     lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
                   FAR const void *buffer, size_t nwords);
 static void     lpc54_spi_recvblock(FAR struct spi_dev_s *dev,
                   FAR void *buffer, size_t nwords);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -124,8 +136,12 @@ static const struct spi_ops_s g_spi_ops =
   .cmddata           = lpc54_spicmddata,
 #endif
   .send              = lpc54_spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = lpc54_spi_exchange,
+#else
   .sndblock          = lpc54_spi_sndblock,
   .recvblock         = lpc54_spi_recvblock,
+#endif
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = lpc54_spiregister, /* Provided externally */
 #else
@@ -171,6 +187,26 @@ static struct lpc54_spidev_s g_spi9_dev;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc54_spi_16bitmode
+ *
+ * Description:
+ *   Check if the SPI is operating in > 8-bit mode (16-bit accesses)
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *
+ * Returned Value:
+ *   true: 16-bit mode, false: 8-bit mode
+ *
+ ****************************************************************************/
+
+static inline bool lpc54_spi_16bitmode(FAR struct lpc54_spidev_s *priv)
+{
+#warning Missing logic
+  return false;
+}
 
 /****************************************************************************
  * Name: lpc54_spi_lock
@@ -391,6 +427,147 @@ static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 }
 
 /****************************************************************************
+ * Name: lpc54_spi_exchange (no DMA).  aka lpc54_spi_exchange_nodma
+ *
+ * Description:
+ *   Exchange a block of data on SPI without using DMA
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchaned in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_LPC54_SPI_MASTER_DMA
+static void lpc54_spi_exchange(FAR struct spi_dev_s *dev,
+                               FAR const void *txbuffer, FAR void *rxbuffer,
+                               size_t nwords)
+#else
+static void lpc54_spi_exchange_nodma(FAR struct spi_dev_s *dev,
+                                     FAR const void *txbuffer,
+                                     FAR void *rxbuffer, size_t nwords)
+#endif
+{
+  FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
+  DEBUGASSERT(priv && priv->base);
+
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
+          txbuffer, rxbuffer, nwords);
+
+  /* 8- or 16-bit mode? */
+
+  if (lpc54_spi_16bitmode(priv))
+    {
+      /* 16-bit mode */
+
+      const uint16_t *src  = (const uint16_t *)txbuffer;
+            uint16_t *dest = (uint16_t *)rxbuffer;
+            uint16_t  word;
+
+      while (nwords-- > 0)
+        {
+          /* Get the next word to write.  Is there a source buffer? */
+
+          if (src)
+            {
+              word = *src++;
+            }
+          else
+            {
+              word = 0xffff;
+            }
+
+          /* Exchange one word */
+
+          word = spi_send(dev, word);
+
+          /* Is there a buffer to receive the return value? */
+
+          if (dest)
+            {
+              *dest++ = word;
+            }
+        }
+    }
+  else
+    {
+      /* 8-bit mode */
+
+      const uint8_t *src  = (const uint8_t *)txbuffer;
+            uint8_t *dest = (uint8_t *)rxbuffer;
+            uint8_t  word;
+
+      while (nwords-- > 0)
+        {
+          /* Get the next word to write.  Is there a source buffer? */
+
+          if (src)
+            {
+              word = *src++;
+            }
+          else
+            {
+              word = 0xff;
+            }
+
+          /* Exchange one word */
+
+          word = (uint8_t)spi_send(dev, (uint16_t)word);
+
+          /* Is there a buffer to receive the return value? */
+
+          if (dest)
+            {
+              *dest++ = word;
+            }
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_exchange (no DMA).  aka lpc54_spi_exchange_nodma
+ *
+ * Description:
+ *   Exchange a block of data on SPI without using DMA
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchaned in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC54_SPI_MASTER_DMA
+static void lpc54_spi_exchange(FAR struct spi_dev_s *dev,
+                               FAR const void *txbuffer, FAR void *rxbuffer,
+                               size_t nwords)
+{
+  /* If the transfer is small, then perform the exchange without using DMA. */
+#warning Missing logic
+
+  /* Otherwise, use DMA */
+#warning Missing logic
+}
+#endif /* CONFIG_LPC54_SPI_MASTER_DMA */
+
+/****************************************************************************
  * Name: lpc54_spi_sndblock
  *
  * Description:
@@ -402,7 +579,8 @@ static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -412,20 +590,8 @@ static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
                                FAR const void *buffer, size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
-  uint8_t data;
-
-  spiinfo("nwords: %d\n", nwords);
-  while (nwords > 0)
-    {
-      /* Write the data to transmitted to the SPI Data Register */
-#warning Missing logic
-
-      /* Read the SPI Status Register again to clear the status bit */
-#warning Missing logic
-
-      nwords--;
-    }
+  spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
+  return lpc54_spi_exchange(dev, txbuffer, NULL, nwords);
 }
 
 /****************************************************************************
@@ -437,10 +603,11 @@ static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords - the length of data that can be received in the buffer in
+ *            number of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -450,57 +617,8 @@ static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
 static void lpc54_spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                                 size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
-
-  spiinfo("nwords: %d\n", nwords);
-  while (nwords)
-    {
-      /* Write some dummy data to the SPI Data Register in order to clock the
-       * read data.
-       */
-#warning Missing logic
-
-
-      /* Read the received data from the SPI Data Register */
-#warning Missing logic
-
-      nwords--;
-    }
-}
-
-/****************************************************************************
- * Name: lpc54_spidev_initialize
- *
- * Description:
- *   Initialize the SPI port
- *
- * Input Parameter:
- *   priv - The private data structure for the SPI device
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static void lpc54_spidev_initialize(FAR struct lpc54_spidev_s *priv)
-{
-  /* Configure 8-bit SPI mode and master mode */
-#warning Missing logic
-
-  /* Set the initial SPI configuration */
-
-  priv->frequency = 0;
-  priv->nbits     = 8;
-  priv->mode      = SPIDEV_MODE0;
-  priv->dev.ops   = &g_spi_ops;
-
-  /* Select a default frequency of approx. 400KHz */
-
-  lpc54_spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
-
-  nxsem_init(&priv->exclsem, 0, 1);
+  spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
+  return lpc54_spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 
 /****************************************************************************
@@ -873,9 +991,24 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
 
   leave_critical_section(flags);
 
-  /* Enable the SPI peripheral and configure master  mode */
+  /* Enable the SPI peripheral*/
+  /* Configure 8-bit SPI mode and master mode */
+#warning Missing logic
 
-  (void)lpc54_spidev_initialize(priv);
+  /* Set the initial SPI configuration */
+
+  priv->frequency = 0;
+  priv->nbits     = 8;
+  priv->mode      = SPIDEV_MODE0;
+  priv->dev.ops   = &g_spi_ops;
+
+  /* Select a default frequency of approx. 400KHz */
+
+  lpc54_spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
+
+  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+
+  nxsem_init(&priv->exclsem, 0, 1);
   return &priv->dev;
 }
 

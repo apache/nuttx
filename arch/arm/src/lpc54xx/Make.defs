@@ -117,3 +117,6 @@ ifeq ($(CONFIG_LPC54_EMC),y)
 CHIP_CSRCS += lpc54_emc.c
 endif
 
+ifeq ($(CONFIG_LPC54_LCD),y)
+CHIP_CSRCS += lpc54_lcd.c
+endif

@@ -55,19 +55,43 @@
  */
 
 #define GPIO_LED_D9 \
-  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
+  (GPIO_PORT2 | GPIO_PIN2 | GPIO_VALUE_ONE | GPIO_OUTPUT | \
+   GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
 #define GPIO_LED_D11 \
-  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
+  (GPIO_PORT3 | GPIO_PIN3 | GPIO_VALUE_ONE | GPIO_OUTPUT | \
+   GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
 #define GPIO_LED_D12 \
-  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | GPIO_PUSHPULL | \
-   GPIO_PULLUP | GPIO_MODE_DIGITAL)
+  (GPIO_PORT3 | GPIO_PIN14 | GPIO_VALUE_ONE | GPIO_OUTPUT | \
+   GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
 /* Button definitions *******************************************************/
 /* to be provided */
+
+/* LCD/TSC definitions ******************************************************/
+/* The backlight is controlled by P3.31 and is intended to connect via PWM
+ * to control the brightness level.  For simplicity here, it configured as a
+ * simple GPIO output.
+ *
+ * The output goes to the enable (EN) pin of a AP5724 step-up DC/DC
+ * converter designed to drive white LEDs with a constant current.  A high
+ * input at EN turns the converter on, and a low input turns it off.
+ */
+
+#define GPIO_LCD_BL \
+  (GPIO_PORT3 | GPIO_PIN31 | GPIO_VALUE_ZERO | GPIO_OUTPUT | \
+   GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
+
+/* The integrated touchscreen uses one GPIO out and one GPIO interrupting GPIO input;
+ *
+ *   P2.27  CT_RSTn
+ *   P4.0   INTR
+ */
+
+#define GPIO_LCD_CTRSTn \
+  (GPIO_PORT2 | GPIO_PIN27 | GPIO_VALUE_ZERO | GPIO_OUTPUT | \
+   GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
 /****************************************************************************
  * Public Types
@@ -110,6 +134,16 @@ int lpc54_bringup(void);
 #ifdef CONFIG_LPC54_EMC
 void lpc54_sdram_initialize(void);
 #endif
+
+/****************************************************************************
+ * Name: lpc54_lcd_initialize
+ *
+ * Description:
+ *   Initialize the LCD.  Setup backlight (initially off)
+ *
+ ****************************************************************************/
+
+void lpc54_lcd_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */

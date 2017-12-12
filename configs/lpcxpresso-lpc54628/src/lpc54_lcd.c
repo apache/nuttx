@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/src/lpc54_boot.c
+ * configs/lpcxpresso_lpc54628/src/lpc54_lcd.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include "lpc54_lcd.h"
+#include "lpc54_gpio.h"
 
 #include "lpcxpresso-lpc54628.h"
 
@@ -48,56 +52,36 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_board_initialize
+ * Name: lpc54_lcd_initialize
  *
  * Description:
- *   All LPC54xx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after
- *   clocking and memory have been configured but before caches have been
- *   enabled and before any devices have been initialized.
+ *   Initialize the LCD.  Setup backlight (initially off)
  *
  ****************************************************************************/
 
-void lpc54_board_initialize(void)
+void lpc54_lcd_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Configure the LCD backlight (and turn the backlight off) */
 
-  board_autoled_initialize();
-#endif
+  lpc54_gpio_config(GPIO_LCD_BL);
 
-  /* Configure the LCD GPIOs if LCD support has been selected. This is done
-   * unconditionally because even if the LCD is not configured, we will
-   * still want to turn the backlight off.
-   */
+  /* Initialize touchscreen controller GPIOs here too (for now) */
 
-  lpc54_lcd_initialize();
-
-#ifdef CONFIG_LPC54_EMC
-  /* Initialize SDRAM */
-
-  lpc54_sdram_initialize();
-#endif
+  lpc54_gpio_config(GPIO_LCD_CTRSTn);
 }
 
 /****************************************************************************
- * Name: board_initialize
+ * Name: lpc54_backlight
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   If CONFIG_LPC54_LCD_BACKLIGHT is defined, then the board-specific
+ *   logic must provide this interface to turn the backlight on and off.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
+#ifdef CONFIG_LPC54_LCD_BACKLIGHT
+void lpc54_backlight(bool blon)
 {
-  /* Perform board-specific initialization */
-
-  (void)lpc54_bringup();
+  lpc54_gpio_write(GPIO_LCD_BL, blon); /* Hight illuminates */
 }
 #endif

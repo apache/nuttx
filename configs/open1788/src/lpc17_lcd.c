@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/open1788/src/lpc17_lcd.c
- * arch/arm/src/board/lpc17_lcd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
