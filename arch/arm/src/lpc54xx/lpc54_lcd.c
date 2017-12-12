@@ -471,62 +471,69 @@ static int lpc54_setcursor(FAR struct fb_vtable_s *vtable,
 int up_fbinitialize(int display)
 {
   uint32_t regval;
+  uint32_t lcddiv;
   int i;
 
   lcdinfo("Entry\n");
 
-  /* Give LCD bus priority */
-
-  regval = ((SYSCON_MATRIXARB_PRI_ICODE(SYSCON_MATRIXARB_PRI_LOW)) |
-            (SYSCON_MATRIXARB_PRI_DCODE(SYSCON_MATRIXARB_PRI_HIGHEST)) |
-            (SYSCON_MATRIXARB_PRI_LCD(SYSCON_MATRIXARB_PRI_HIGHEST)));
-  putreg32(regval, LPC54_SYSCON_MATRIXARB);
-
   /* Configure pins */
-  /* Video data */
+  /* LCD panel data. Pins used depend on the panel configuration */
 
   lcdinfo("Configuring pins\n");
 
-  lpc54_configgpio(GPIO_LCD_VD0);
-  lpc54_configgpio(GPIO_LCD_VD1);
-  lpc54_configgpio(GPIO_LCD_VD2);
-  lpc54_configgpio(GPIO_LCD_VD3);
-  lpc54_configgpio(GPIO_LCD_VD4);
-  lpc54_configgpio(GPIO_LCD_VD5);
-  lpc54_configgpio(GPIO_LCD_VD6);
-  lpc54_configgpio(GPIO_LCD_VD7);
+#ifdef CONFIG_LPC54_LCD_USE_VD012
+  lpc54_gpio_config(GPIO_LCD_VD0);
+  lpc54_gpio_config(GPIO_LCD_VD1);
+  lpc54_gpio_config(GPIO_LCD_VD2);
+#endif
+  lpc54_gpio_config(GPIO_LCD_VD3);
+  lpc54_gpio_config(GPIO_LCD_VD4);
+  lpc54_gpio_config(GPIO_LCD_VD5);
+  lpc54_gpio_config(GPIO_LCD_VD6);
+  lpc54_gpio_config(GPIO_LCD_VD7);
 
-  lpc54_configgpio(GPIO_LCD_VD8);
-  lpc54_configgpio(GPIO_LCD_VD9);
-  lpc54_configgpio(GPIO_LCD_VD10);
-  lpc54_configgpio(GPIO_LCD_VD11);
-  lpc54_configgpio(GPIO_LCD_VD12);
-  lpc54_configgpio(GPIO_LCD_VD13);
-  lpc54_configgpio(GPIO_LCD_VD14);
-  lpc54_configgpio(GPIO_LCD_VD15);
+  lpc54_gpio_config(GPIO_LCD_VD8);
+  lpc54_gpio_config(GPIO_LCD_VD9);
+  lpc54_gpio_config(GPIO_LCD_VD10);
+  lpc54_gpio_config(GPIO_LCD_VD11);
+  lpc54_gpio_config(GPIO_LCD_VD12);
+  lpc54_gpio_config(GPIO_LCD_VD13);
+  lpc54_gpio_config(GPIO_LCD_VD14);
+  lpc54_gpio_config(GPIO_LCD_VD15);
 
 #if LPC54_BPP > 16
-  lpc54_configgpio(GPIO_LCD_VD16);
-  lpc54_configgpio(GPIO_LCD_VD54);
-  lpc54_configgpio(GPIO_LCD_VD18);
-  lpc54_configgpio(GPIO_LCD_VD19);
-  lpc54_configgpio(GPIO_LCD_VD20);
-  lpc54_configgpio(GPIO_LCD_VD21);
-  lpc54_configgpio(GPIO_LCD_VD22);
-  lpc54_configgpio(GPIO_LCD_VD23);
+  lpc54_gpio_config(GPIO_LCD_VD16);
+  lpc54_gpio_config(GPIO_LCD_VD54);
+  lpc54_gpio_config(GPIO_LCD_VD18);
+  lpc54_gpio_config(GPIO_LCD_VD19);
+  lpc54_gpio_config(GPIO_LCD_VD20);
+  lpc54_gpio_config(GPIO_LCD_VD21);
+  lpc54_gpio_config(GPIO_LCD_VD22);
+  lpc54_gpio_config(GPIO_LCD_VD23);
 #endif
 
   /* Other pins */
 
-  lpc54_configgpio(GPIO_LCD_DCLK);
-  lpc54_configgpio(GPIO_LCD_LP);
-  lpc54_configgpio(GPIO_LCD_FP);
-  lpc54_configgpio(GPIO_LCD_ENABM);
-  lpc54_configgpio(GPIO_LCD_PWR);
+  lpc54_gpio_config(GPIO_LCD_AC);    /* STN AC bias drive or TFT data enable output */
+  lpc54_gpio_config(GPIO_LCD_DCLK);  /* LCD panel clock */
+  lpc54_gpio_config(GPIO_LCD_FP);    /* Frame pulse (STN).
+                                      * Vertical synchronization pulse (TFT) */
+  lpc54_gpio_config(GPIO_LCD_LE);    /* Line end signal */
+  lpc54_gpio_config(GPIO_LCD_LP);    /* Line synchronization pulse (STN).
+                                      * Horizontal synchronization pulse (TFT) */
+  lpc54_gpio_config(GPIO_LCD_PWR);   /* LCD panel power enable */
 
-  /* Turn on LCD clock */
+#ifdef CONFIG_LPC54_LCD_USE_CLKIN
+  lpc54_gpio_config(GPIO_LCD_CLKIN); /* Optional clock input */
+#endif
 
-  modifyreg32(LPC54_SYSCON_PCONP, 0, SYSCON_PCONP_PCLCD);
+  /* Route Main clock (or LCK CLKIN) to LCD. */
+
+#ifdef CONFIG_LPC54_LCD_USE_CLKIN
+  putreg32(SYSCON_LCDCLKSEL_LCDCLKIN, LPC54_SYSCON_LCDCLKSEL);
+#else
+  putreg32(SYSCON_LCDCLKSEL_MAINCLK, LPC54_SYSCON_LCDCLKSEL);
+#endif
 
   lcdinfo("Configuring the LCD controller\n");
 
@@ -544,10 +551,16 @@ int up_fbinitialize(int display)
 
   putreg32(0, LPC54_LCD_CTRL);
 
-  /* Initialize pixel clock (assuming clock source is the peripheral clock) */
+  /* Initialize pixel clock */
 
-  putreg32(((uint32_t)BOARD_PCLK_FREQUENCY / (uint32_t)LPC54_LCD_PIXEL_CLOCK)+1,
-           LPC54_SYSCON_LCDCFG);
+#ifdef CONFIG_LPC54_LCD_USE_CLKIN
+  lcddiv = ((uint32_t)CONFIG_LPC54_LCD_CLKIN_FREQUENCY /
+            (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1
+#else
+  lcddiv = ((uint32_t)BOARD_MAIN_CLK / (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1
+#endif
+  putreg32(lcddiv, LPC54_SYSCON_LCDCLKDIV);
+  putreg32(lcddiv | SYSCON_LCDCLKDIV_REQFLAG, LPC54_SYSCON_LCDCLKDIV);
 
   /* Set the bits per pixel */
 
@@ -781,7 +794,7 @@ void up_fbuninitialize(int display)
 
   /* Turn off clocking to the LCD. modifyreg32() can do this atomically. */
 
-  modifyreg32(LPC54_SYSCON_PCONP, SYSCON_PCONP_PCLCD, 0);
+  putreg32(SYSCON_LCDCLKSEL_NONE, LPC54_SYSCON_LCDCLKSEL);
 }
 
 /****************************************************************************

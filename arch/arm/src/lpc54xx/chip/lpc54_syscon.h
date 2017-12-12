@@ -553,8 +553,16 @@
 #define SYSCON_DMICCLKSEL_
 /* SCTimer/PWM clock source select */
 #define SYSCON_SCTCLKSEL_
+
 /* LCD clock source select */
-#define SYSCON_LCDCLKSEL_
+
+#define SYSCON_LCDCLKSEL_SHIFT                 (0)       /* Bits 0-1: LCD clock source select */
+#define SYSCON_LCDCLKSEL_MASK                  (3 << SYSCON_LCDCLKSEL_SHIFT)
+#  define SYSCON_LCDCLKSEL_MAINCLK             (0 << SYSCON_LCDCLKSEL_SHIFT) /* Main clock (main_clk) */
+#  define SYSCON_LCDCLKSEL_LCDCLKIN            (1 << SYSCON_LCDCLKSEL_SHIFT) /* LCD external clock input (LCD_CLKIN) */
+#  define SYSCON_LCDCLKSEL_FROHF               (2 << SYSCON_LCDCLKSEL_SHIFT) /* FRO 96 or 48 MHz (fro_hf) */
+#  define SYSCON_LCDCLKSEL_NONE                (3 << SYSCON_LCDCLKSEL_SHIFT) /* None */
+
 /* SDIO clock source select */
 #define SYSCON_SDIOCLKSEL_
 
@@ -610,8 +618,16 @@
 #define SYSCON_DMICCLKDIV_
 /* I2S MCLK clock divider */
 #define SYSCON_MCLKDIV_
+
 /* LCD clock divider */
-#define SYSCON_LCDCLKDIV_
+
+#define SYSCON_LCDCLKDIV_DIV_SHIFT             (0)       /* Bits 0-7: Clock divider value */
+#define SYSCON_LCDCLKDIV_DIV_MASK              (0xff <<SYSCON_LCDCLKDIV_DIV_SHIFT)
+#  define SYSCON_LCDCLKDIV_DIV(n)              ((uint32_t)((n)-1) << SYSCON_LCDCLKDIV_DIV_SHIFT)
+#define SYSCON_LCDCLKDIV_RESET                 (1 << 29) /* Bit 29: Resets the divider counter */
+#define SYSCON_LCDCLKDIV_HALT                  (1 << 30) /* Bit 30: Halts the divider counter */
+#define SYSCON_LCDCLKDIV_REQFLAG               (1 << 31) /* Bit 31: Divider status flag */
+
 /* SCT/PWM clock divider */
 #define SYSCON_SCTCLKDIV_
 
@@ -621,7 +637,7 @@
 #define SYSCON_EMCCLKDIV_DIV_MASK              (0xff <<SYSCON_EMCCLKDIV_DIV_SHIFT)
 #  define SYSCON_EMCCLKDIV_DIV(n)              ((uint32_t)((n)-1) << SYSCON_EMCCLKDIV_DIV_SHIFT)
 #define SYSCON_EMCCLKDIV_RESET                 (1 << 29) /* Bit 29: Resets the divider counter */
-#define SYSCON_EMCCLKDIV_ HALT                 (1 << 30) /* Bit 30: Halts the divider counter */
+#define SYSCON_EMCCLKDIV_HALT                  (1 << 30) /* Bit 30: Halts the divider counter */
 #define SYSCON_EMCCLKDIV_REQFLAG               (1 << 31) /* Bit 31: Divider status flag */
 
 /* SDIO clock divider */

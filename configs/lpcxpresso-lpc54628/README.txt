@@ -34,6 +34,12 @@ STATUS
     but not reliable.  Added framework for future I2C and SPI flexcomm
     drivers (mostly empty files for now)
   2017-12-12:  The SDRAM is now functional passes the commplete RAM test.
+    Included configurations and logic to add none, portions, or all of the
+    external SDRAM to the system heap.  Brought in the LPC1788 LCD driver.
+    The LPC1788 LCD registers are identical to the LPC54xx (other than a
+    minor clock source setting).  That port required modifications only
+    for differences in some SYSCON and pin-related settings.  No testing
+    has yet been performed.
 
 Configurations
 ==============

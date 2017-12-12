@@ -640,6 +640,21 @@ config LPC54_LCD_VRAMBASE
 		Base address of the video RAM frame buffer.  The default is
 		(LPC54_EXTDRAM_CS0 + 0x00010000)
 
+config LPC54_LCD_USE_VD012
+	bool "Use VD0, VD1, and VD2 pins"
+	default y
+	---help---
+		Some LCDs do not connect these pins.
+
+config LPC54_LCD_USE_CLKIN
+	bool "Use optional input clock"
+	default n
+
+config LPC54_LCD_CLKIN_FREQUENCY
+	int "Input clock frequency"
+	default 0
+	depends on LPC54_LCD_USE_CLKIN
+
 config LPC54_LCD_REFRESH_FREQ
 	int "LCD refesh rate (Hz)"
 	default 50
