@@ -57,6 +57,12 @@
 #include "smartfs.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define WORKBUFFER_SIZE 256
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -269,7 +275,7 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
   if (nextfs == NULL)
     {
       fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
-      fs->fs_workbuffer = (char *) kmm_malloc(256);
+      fs->fs_workbuffer = (char *) kmm_malloc(WORKBUFFER_SIZE);
     }
 
   /* Now add ourselves to the linked list of SMART mounts */
@@ -293,7 +299,7 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
 #endif
 
   fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
-  fs->fs_workbuffer = (char *) kmm_malloc(256);
+  fs->fs_workbuffer = (char *) kmm_malloc(WORKBUFFER_SIZE);
   fs->fs_rootsector = SMARTFS_ROOT_DIR_SECTOR;
 
 #endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
@@ -526,6 +532,14 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
         {
           seglen++;
           ptr++;
+        }
+
+      /* Check to avoid buffer overflow */
+
+      if (seglen >= WORKBUFFER_SIZE)
+        {
+          ret = -ENAMETOOLONG;
+          goto errout;
         }
 
       strncpy(fs->fs_workbuffer, segment, seglen);
