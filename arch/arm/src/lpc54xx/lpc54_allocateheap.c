@@ -48,10 +48,13 @@
 #include <nuttx/board.h>
 #include <nuttx/userspace.h>
 
-#include <arch/board/board.h>
-
 #include "up_arch.h"
 #include "up_internal.h"
+
+#include "chip/lpc54_memorymap.h"
+#include "lpc54_mpuinit.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,6 +75,57 @@
  * in this case, we need only be concerned about initializing the single
  * kernel heap here.
  */
+
+/* .bss and .data is always positioned in internal SRAM.  The remaining SRAM
+ * after the static .bss, .data, and IDLE stack allocations are always added
+ * to the heap.
+ *
+ * If the EMC is enabled, if there is SRAM or SDRAM configured into the
+ * AND if the request heap size is non-zero, then that external RAM will
+ * also be added to the system according to the following definitions:
+ */
+
+#undef HAVE_STATIC_CS0
+#undef HAVE_STATIC_CS1
+#undef HAVE_STATIC_CS2
+#undef HAVE_STATIC_CS3
+
+#undef HAVE_DYNAMIC_CS0
+#undef HAVE_DYNAMIC_CS1
+#undef HAVE_DYNAMIC_CS2
+#undef HAVE_DYNAMIC_CS3
+
+#ifdef CONFIG_LPC54_EMC
+#  ifdef CONFIG_LPC54_EMC_STATIC
+#    if defined(CONFIG_LPC54_EMC_STATIC_CS0) && CONFIG_LPC54_EMC_STATIC_CS0_SIZE > 0
+#      define HAVE_STATIC_CS0  1
+#    endif
+#    if defined(CONFIG_LPC54_EMC_STATIC_CS1) && CONFIG_LPC54_EMC_STATIC_CS1_SIZE > 0
+#      define HAVE_STATIC_CS1  1
+#    endif
+#    if defined(CONFIG_LPC54_EMC_STATIC_CS0) && CONFIG_LPC54_EMC_STATIC_CS0_SIZE > 0
+#      define HAVE_STATIC_CS2  1
+#    endif
+#    if defined(CONFIG_LPC54_EMC_STATIC_CS3) && CONFIG_LPC54_EMC_STATIC_CS3_SIZE > 0
+#      define HAVE_STATIC_CS3  1
+#    endif
+#  endif /* CONFIG_LPC54_EMC_STATIC */
+#  ifdef CONFIG_LPC54_EMC_DYNAMIC
+#    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS0) && CONFIG_LPC54_EMC_DYNAMIC_CS0_SIZE > 0
+#      define HAVE_DYNAMIC_CS0 1
+#    endif
+#    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS1) && CONFIG_LPC54_EMC_DYNAMIC_CS1_SIZE > 0
+#      define HAVE_DYNAMIC_CS1 1
+#    endif
+#    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS0) && CONFIG_LPC54_EMC_DYNAMIC_CS0_SIZE > 0
+#      define HAVE_DYNAMIC_CS2 1
+#    endif
+#    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS3) && CONFIG_LPC54_EMC_DYNAMIC_CS3_SIZE > 0
+#      define HAVE_DYNAMIC_CS3 1
+#    endif
+#  endif /* CONFIG_LPC54_EMC_DYNAMIC */
+#endif /* CONFIG_LPC54_EMC */
+
 
 /****************************************************************************
  * Public Data
@@ -206,5 +260,152 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-}
+  int remaining = CONFIG_MM_REGIONS;
+  FAR void *heapstart;
+  size_t heapsize;
+
+#ifdef HAVE_STATIC_CS0
+  if (remaining > 0)
+    {
+      /* Add the SRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_SRAMCS0_BASE + CONFIG_LPC54_EMC_STATIC_CS0_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_STATIC_CS0_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
 #endif
+      remaining--;
+    }
+#endif /* HAVE_STATIC_CS0 */
+
+#ifdef HAVE_STATIC_CS1
+  if (remaining > 0)
+    {
+      /* Add the SRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_SRAMCS1_BASE + CONFIG_LPC54_EMC_STATIC_CS1_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_STATIC_CS1_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_STATIC_CS1 */
+
+#ifdef HAVE_STATIC_CS2
+  if (remaining > 0)
+    {
+      /* Add the SRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_SRAMCS2_BASE + CONFIG_LPC54_EMC_STATIC_CS2_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_STATIC_CS2_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_STATIC_CS2 */
+
+#ifdef HAVE_STATIC_CS3
+  if (remaining > 0)
+    {
+      /* Add the SRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_SRAMCS3_BASE + CONFIG_LPC54_EMC_STATIC_CS3_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_STATIC_CS3_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_STATIC_CS3 */
+
+#ifdef HAVE_DYNAMIC_CS0
+  if (remaining > 0)
+    {
+      /* Add the SDRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_DRAMCS2_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS0_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS0_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_DYNAMIC_CS0 */
+
+#ifdef HAVE_DYNAMIC_CS1
+  if (remaining > 0)
+    {
+      /* Add the SDRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_DRAMCS1_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS1_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS1_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_DYNAMIC_CS1 */
+
+#ifdef HAVE_DYNAMIC_CS2
+  if (remaining > 0)
+    {
+      /* Add the SDRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_DRAMCS2_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS2_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS2_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_DYNAMIC_CS2 */
+
+#ifdef HAVE_DYNAMIC_CS3
+  if (remaining > 0)
+    {
+      /* Add the SDRAM to the user heap */
+
+      heapstart = (FAR void *)(LPC54_DRAMCS3_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS3_OFFSET);
+      heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS3_SIZE;
+      mem_addregion(heapstart, heapsize);
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Allow user-mode access to the SDRAM heap */
+
+      lpc54_mpu_uheap((uintptr_t)heapstart, heapsize);
+#endif
+      remaining--;
+    }
+#endif /* HAVE_DYNAMIC_CS3 */
+}
+#endif /* CONFIG_MM_REGIONS > 1 */

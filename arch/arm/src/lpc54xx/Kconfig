@@ -418,9 +418,215 @@ config LPC54_EMC_STATIC
 	bool "EMC static memory support"
 	default n
 
+if LPC54_EMC_STATIC
+
+config LPC54_EMC_STATIC_CS0
+	bool "SRAM on CS0"
+	default n
+
+if LPC54_EMC_STATIC_CS0
+
+config LPC54_EMC_STATIC_CS0_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SRAM for other
+		usage.
+
+config LPC54_EMC_STATIC_CS0_SIZE
+	hex "SRAM size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SRAM form other purpose, or
+		it may be the full SRAM size to add the entire SRAM to the heap
+
+endif # LPC54_EMC_STATIC_CS0
+
+config LPC54_EMC_STATIC_CS1
+	bool "SRAM on CS1"
+	default n
+
+if LPC54_EMC_STATIC_CS1
+
+config LPC54_EMC_STATIC_CS1_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SRAM for other
+		usage.
+
+config LPC54_EMC_STATIC_CS1_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SRAM form other purpose, or
+		it may be the full SRAM size to add the entire SRAM to the heap
+
+endif # LPC54_EMC_STATIC_CS1
+
+config LPC54_EMC_STATIC_CS2
+	bool "SRAM on CS2"
+	default n
+
+if LPC54_EMC_STATIC_CS2
+
+config LPC54_EMC_STATIC_CS2_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SRAM for other
+		usage.
+
+config LPC54_EMC_STATIC_CS2_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SRAM form other purpose, or
+		it may be the full SRAM size to add the entire SRAM to the heap
+
+endif # LPC54_EMC_STATIC_CS2
+
+config LPC54_EMC_STATIC_CS3
+	bool "SRAM on CS3"
+	default n
+
+if LPC54_EMC_STATIC_CS3
+
+config LPC54_EMC_STATIC_CS3_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SRAM for other
+		usage.
+
+config LPC54_EMC_STATIC_CS3_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SRAM form other purpose, or
+		it may be the full SRAM size to add the entire SRAM to the heap
+
+endif # LPC54_EMC_STATIC_CS3
+endif # LPC54_EMC_STATIC
+
 config LPC54_EMC_DYNAMIC
 	bool "EMC dynamic memory support"
 	default y
+
+if LPC54_EMC_DYNAMIC
+
+config LPC54_EMC_DYNAMIC_CS0
+	bool "SDRAM on CS0"
+	default n
+
+if LPC54_EMC_DYNAMIC_CS0
+
+config LPC54_EMC_DYNAMIC_CS0_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SDRAM for other
+		usage.
+
+config LPC54_EMC_DYNAMIC_CS0_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SDRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SDRAM form other purpose, or
+		it may be the full SDRAM size to add the entire SDRAM to the heap
+
+endif # LPC54_EMC_DYNAMIC_CS0
+
+config LPC54_EMC_DYNAMIC_CS1
+	bool "SDRAM on CS1"
+	default n
+
+if LPC54_EMC_DYNAMIC_CS1
+
+config LPC54_EMC_DYNAMIC_CS1_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SDRAM for other
+		usage.
+
+config LPC54_EMC_DYNAMIC_CS1_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SDRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SDRAM form other purpose, or
+		it may be the full SDRAM size to add the entire SDRAM to the heap
+
+endif # LPC54_EMC_DYNAMIC_CS1
+
+config LPC54_EMC_DYNAMIC_CS2
+	bool "SDRAM on CS2"
+	default n
+
+if LPC54_EMC_DYNAMIC_CS2
+
+config LPC54_EMC_DYNAMIC_CS2_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SDRAM for other
+		usage.
+
+config LPC54_EMC_DYNAMIC_CS2_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SDRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SDRAM form other purpose, or
+		it may be the full SDRAM size to add the entire SDRAM to the heap
+
+endif # LPC54_EMC_DYNAMIC_CS2
+
+config LPC54_EMC_DYNAMIC_CS3
+	bool "SDRAM on CS3"
+	default n
+
+if LPC54_EMC_DYNAMIC_CS3
+
+config LPC54_EMC_DYNAMIC_CS3_OFFSET
+	hex "Heap offset"
+	default 0x0
+	---help---
+		May be used to reserve memory at the beginning of SDRAM for other
+		usage.
+
+config LPC54_EMC_DYNAMIC_CS3_SIZE
+	hex "Heap size"
+	default 0x0
+	---help---
+		Total amount of RAM (after the heap offset) that will be added to
+		the heap.  The may be zero, in which case none of the SDRAM will be
+		added to heap, it may be less than the size of heap if memory of
+		reserved at the beginning or end of the SDRAM form other purpose, or
+		it may be the full SDRAM size to add the entire SDRAM to the heap
+
+endif # LPC54_EMC_DYNAMIC_CS3
+endif # LPC54_EMC_DYNAMIC
 
 endmenu # EMC Configuration
 
