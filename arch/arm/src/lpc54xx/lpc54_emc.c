@@ -54,6 +54,7 @@
 
 #include "chip/lpc54_syscon.h"
 #include "chip/lpc54_emc.h"
+#include "lpc54_reset.h"
 #include "lpc54_emc.h"
 
 #ifdef CONFIG_LPC54_EMC
@@ -240,8 +241,7 @@ void lpc54_emc_initialize(FAR const struct emc_config_s *config)
 
   /* Reset the EMC */
 
-  putreg32(SYSCON_PRESETCTRL2_EMC, LPC54_SYSCON_PRESETCTRLSET2);
-  putreg32(SYSCON_PRESETCTRL2_EMC, LPC54_SYSCON_PRESETCTRLCLR2);
+  lpc54_reset_emc();
 
   /* Set the EMC sytem configure */
 

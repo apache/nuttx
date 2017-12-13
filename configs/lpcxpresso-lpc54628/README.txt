@@ -40,9 +40,8 @@ STATUS
     minor clock source setting).  That port required modifications only
     for differences in some SYSCON and pin-related settings.
   2017-12-13:  Created the fb configuration for testing the LCD.  Only
-    minimal testing has been performed.  As of this writing, there is
-    no video output from the apps/examples/fb test:  The backlight is on
-    but the display is blank/white.
+    minimal testing has been performed.  As of this writing, the system
+    hangs while initializing the LCD.
 
 Configurations
 ==============

@@ -53,6 +53,7 @@
 #include "chip/lpc54_syscon.h"
 #include "chip/lpc54_pinmux.h"
 #include "lpc54_gpio.h"
+#include "lpc54_reset.h"
 #include "lpc54_lcd.h"
 
 #include <arch/board/board.h>
@@ -191,10 +192,6 @@ struct fb_vtable_s g_fbobject =
   .setcursor     = lpc54_setcursor,
 #endif
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -534,6 +531,12 @@ int up_fbinitialize(int display)
   lpc54_gpio_config(GPIO_LCD_CLKIN); /* Optional clock input */
 #endif
 
+  lcdinfo("Enable clocking to the LCD controller\n");
+
+  /* Enable clocking to the LCD peripheral */
+
+  putreg32(SYSCON_AHBCLKCTRL2_LCD, LPC54_SYSCON_AHBCLKCTRLSET2);
+
   /* Route Main clock (or LCK CLKIN) to the LCD. */
 
 #ifdef CONFIG_LPC54_LCD_USE_CLKIN
@@ -541,6 +544,10 @@ int up_fbinitialize(int display)
 #else
   putreg32(SYSCON_LCDCLKSEL_MAINCLK, LPC54_SYSCON_LCDCLKSEL);
 #endif
+
+  /* Reset the LCD */
+
+  lpc54_reset_lcd();
 
   lcdinfo("Configuring the LCD controller\n");
 
@@ -558,7 +565,7 @@ int up_fbinitialize(int display)
 
   putreg32(0, LPC54_LCD_CTRL);
 
-  /* Initialize pixel clock */
+  /* Initialize pixel clock.  Set the LCD clock divier. */
 
 #ifdef CONFIG_LPC54_LCD_USE_CLKIN
   lcddiv = ((uint32_t)CONFIG_LPC54_LCD_CLKIN_FREQUENCY /
@@ -707,7 +714,9 @@ int up_fbinitialize(int display)
   putreg32(0, LPC54_LCD_INTMSK);
   lcdinfo("Enabling the display\n");
 
-  for (i = LPC54_LCD_PWREN_DELAY; i; i--);
+  for (i = LPC54_LCD_PWREN_DELAY; i; i--)
+    {
+    }
 
   /* Enable LCD */
 
@@ -717,7 +726,9 @@ int up_fbinitialize(int display)
 
   /* Enable LCD power */
 
-  for (i = LPC54_LCD_PWREN_DELAY; i; i--);
+  for (i = LPC54_LCD_PWREN_DELAY; i; i--)
+    {
+    }
 
   regval  = getreg32(LPC54_LCD_CTRL);
   regval |= LCD_CTRL_LCDPWR;
@@ -793,7 +804,9 @@ void up_fbuninitialize(int display)
   regval &= ~LCD_CTRL_LCDPWR;
   putreg32(regval, LPC54_LCD_CTRL);
 
-  for (i = LPC54_LCD_PWRDIS_DELAY; i; i--);
+  for (i = LPC54_LCD_PWRDIS_DELAY; i; i--)
+    {
+    }
 
   regval &= ~LCD_CTRL_LCDEN;
   putreg32(regval, LPC54_LCD_CTRL);
@@ -801,6 +814,10 @@ void up_fbuninitialize(int display)
   /* Turn off clocking to the LCD. modifyreg32() can do this atomically. */
 
   putreg32(SYSCON_LCDCLKSEL_NONE, LPC54_SYSCON_LCDCLKSEL);
+
+  /* Disable clocking to the LCD peripheral */
+
+  putreg32(SYSCON_AHBCLKCTRL2_LCD, LPC54_SYSCON_AHBCLKCTRLCLR2);
 }
 
 /****************************************************************************
