@@ -67,7 +67,23 @@
    GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
 /* Button definitions *******************************************************/
-/* to be provided */
+/* The LPCXpresso has four switches:
+ *
+ *   SW2 ISP2         P0.6
+ *   SW3 ISP1         P0.5
+ *   SW4 ISP0         P0.4
+ *   SW5 User Button  P1.1
+ *
+ * In all cased, the signal is low when the button is pressed.
+ *
+ * SW2, SW3, SW4 can be used to force the LPC546xx in to ISP boot modes.
+ * After boot these buttons could be used as user buttons.  However, they are
+ * not available when the on-board SRDRAM is used because P0.4, P0.5, and
+ * P0.6 are also used as EMC_D2, EMC_D3, and EMC_D4, respectively.
+ *
+ * So SW5 is really the only button that that is generally available for
+ * software usage.
+ */
 
 /* LCD/TSC definitions ******************************************************/
 /* The backlight is controlled by P3.31 and is intended to connect via PWM

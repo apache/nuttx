@@ -321,10 +321,10 @@ static const struct uart_config_s g_console_config=
 static void lp54_setbaud(uintptr_t base, FAR const struct uart_config_s *config)
 {
   uint32_t bestdiff = (uint32_t)-1;
-  uint32_t bestosr = 15;
-  uint32_t bestbrg = (uint32_t)-1;
-  uint32_t lastosr;
-  uint32_t lastbrg;
+  uint32_t bestosr  = 15;
+  uint32_t bestbrg  = (uint32_t)-1;
+  uint32_t lastosr  = 0;  /* Initialized only to avoid warnings */
+  uint32_t lastbrg  = 0;
   uint32_t osr;
   uint32_t brg;
   uint32_t diff;

@@ -46,6 +46,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 
 #include "up_arch.h"
@@ -103,7 +104,7 @@
 #    if defined(CONFIG_LPC54_EMC_STATIC_CS1) && CONFIG_LPC54_EMC_STATIC_CS1_SIZE > 0
 #      define HAVE_STATIC_CS1  1
 #    endif
-#    if defined(CONFIG_LPC54_EMC_STATIC_CS0) && CONFIG_LPC54_EMC_STATIC_CS0_SIZE > 0
+#    if defined(CONFIG_LPC54_EMC_STATIC_CS2) && CONFIG_LPC54_EMC_STATIC_CS2_SIZE > 0
 #      define HAVE_STATIC_CS2  1
 #    endif
 #    if defined(CONFIG_LPC54_EMC_STATIC_CS3) && CONFIG_LPC54_EMC_STATIC_CS3_SIZE > 0
@@ -117,7 +118,7 @@
 #    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS1) && CONFIG_LPC54_EMC_DYNAMIC_CS1_SIZE > 0
 #      define HAVE_DYNAMIC_CS1 1
 #    endif
-#    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS0) && CONFIG_LPC54_EMC_DYNAMIC_CS0_SIZE > 0
+#    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS2) && CONFIG_LPC54_EMC_DYNAMIC_CS2_SIZE > 0
 #      define HAVE_DYNAMIC_CS2 1
 #    endif
 #    if defined(CONFIG_LPC54_EMC_DYNAMIC_CS3) && CONFIG_LPC54_EMC_DYNAMIC_CS3_SIZE > 0
@@ -125,7 +126,6 @@
 #    endif
 #  endif /* CONFIG_LPC54_EMC_DYNAMIC */
 #endif /* CONFIG_LPC54_EMC */
-
 
 /****************************************************************************
  * Public Data
@@ -271,7 +271,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_SRAMCS0_BASE + CONFIG_LPC54_EMC_STATIC_CS0_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS0_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -289,7 +289,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_SRAMCS1_BASE + CONFIG_LPC54_EMC_STATIC_CS1_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS1_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -307,7 +307,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_SRAMCS2_BASE + CONFIG_LPC54_EMC_STATIC_CS2_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS2_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -325,7 +325,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_SRAMCS3_BASE + CONFIG_LPC54_EMC_STATIC_CS3_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS3_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -341,9 +341,9 @@ void up_addregion(void)
     {
       /* Add the SDRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_DRAMCS2_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS0_OFFSET);
+      heapstart = (FAR void *)(LPC54_DRAMCS0_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS0_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS0_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -361,7 +361,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_DRAMCS1_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS1_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS1_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -379,7 +379,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_DRAMCS2_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS2_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS2_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */
@@ -397,7 +397,7 @@ void up_addregion(void)
 
       heapstart = (FAR void *)(LPC54_DRAMCS3_BASE + CONFIG_LPC54_EMC_DYNAMIC_CS3_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS3_SIZE;
-      mem_addregion(heapstart, heapsize);
+      kumm_addregion(heapstart, heapsize);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the SDRAM heap */

@@ -4,6 +4,9 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * This driver derives from the LPC1788 LCD driver.  The LPC1788 LCD is
+ * identical tot he LPC54628 LCD other than some minor clocking differences.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -45,12 +48,14 @@
 #include <debug.h>
 
 #include <nuttx/video/fb.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip/lpc54_syscon.h"
+#include "chip/lpc54_pinmux.h"
 #include "lpc54_gpio.h"
 #include "lpc54_lcd.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -474,8 +479,6 @@ int up_fbinitialize(int display)
   uint32_t lcddiv;
   int i;
 
-  lcdinfo("Entry\n");
-
   /* Configure pins */
   /* LCD panel data. Pins used depend on the panel configuration */
 
@@ -503,12 +506,12 @@ int up_fbinitialize(int display)
   lpc54_gpio_config(GPIO_LCD_VD14);
   lpc54_gpio_config(GPIO_LCD_VD15);
 
-#if LPC54_BPP > 16 && !defined(CONFIG_LPC54_LCD_BPP24_RGB565)
+#if LPC54_BPP > 16
+#ifndef CONFIG_LPC54_LCD_BPP24_RGB565
   lpc54_gpio_config(GPIO_LCD_VD16);
   lpc54_gpio_config(GPIO_LCD_VD17);
   lpc54_gpio_config(GPIO_LCD_VD18);
 #endif
-#if LPC54_BPP > 16
   lpc54_gpio_config(GPIO_LCD_VD19);
   lpc54_gpio_config(GPIO_LCD_VD20);
   lpc54_gpio_config(GPIO_LCD_VD21);
@@ -531,7 +534,7 @@ int up_fbinitialize(int display)
   lpc54_gpio_config(GPIO_LCD_CLKIN); /* Optional clock input */
 #endif
 
-  /* Route Main clock (or LCK CLKIN) to LCD. */
+  /* Route Main clock (or LCK CLKIN) to the LCD. */
 
 #ifdef CONFIG_LPC54_LCD_USE_CLKIN
   putreg32(SYSCON_LCDCLKSEL_LCDCLKIN, LPC54_SYSCON_LCDCLKSEL);
@@ -551,7 +554,7 @@ int up_fbinitialize(int display)
 
   putreg32(LCD_INTCLR_ALL, LPC54_LCD_INTCLR);
 
-  /* Disable GLCD controller */
+  /* Disable the LCD controller */
 
   putreg32(0, LPC54_LCD_CTRL);
 
@@ -559,9 +562,9 @@ int up_fbinitialize(int display)
 
 #ifdef CONFIG_LPC54_LCD_USE_CLKIN
   lcddiv = ((uint32_t)CONFIG_LPC54_LCD_CLKIN_FREQUENCY /
-            (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1
+            (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1;
 #else
-  lcddiv = ((uint32_t)BOARD_MAIN_CLK / (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1
+  lcddiv = ((uint32_t)BOARD_MAIN_CLK / (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1;
 #endif
   putreg32(lcddiv, LPC54_SYSCON_LCDCLKDIV);
   putreg32(lcddiv | SYSCON_LCDCLKDIV_REQFLAG, LPC54_SYSCON_LCDCLKDIV);
@@ -654,7 +657,10 @@ int up_fbinitialize(int display)
             (CONFIG_LPC54_LCD_VBACKPORCH)  << LCD_TIMV_VBP_SHIFT);
   putreg32(regval, LPC54_LCD_TIMV);
 
-  /* Initialize clock and signal polarity */
+  /* Initialize clock and signal polarity.
+   *
+   * REVISIT:  These need to be configurable.
+   */
 
   regval = getreg32(LPC54_LCD_POL);
 
@@ -681,10 +687,6 @@ int up_fbinitialize(int display)
   /* LCD_ENAB_M is active high */
 
   regval &= ~LCD_POL_IOE;
-
-  /* Select CCLK for the LCD block clock source */
-
-  regval &= ~LCD_POL_CLKSEL;
   putreg32(regval, LPC54_LCD_POL);
 
   /* Frame base address doubleword aligned */

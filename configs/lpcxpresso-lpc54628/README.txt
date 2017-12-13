@@ -38,8 +38,11 @@ STATUS
     external SDRAM to the system heap.  Brought in the LPC1788 LCD driver.
     The LPC1788 LCD registers are identical to the LPC54xx (other than a
     minor clock source setting).  That port required modifications only
-    for differences in some SYSCON and pin-related settings.  No testing
-    has yet been performed.
+    for differences in some SYSCON and pin-related settings.
+  2017-12-13:  Created the fb configuration for testing the LCD.  Only
+    minimal testing has been performed.  As of this writing, there is
+    no video output from the apps/examples/fb test:  The backlight is on
+    but the display is blank/white.
 
 Configurations
 ==============
@@ -99,6 +102,29 @@ Configurations
 
   Configuration sub-directories
   -----------------------------
+
+  fb:
+
+    A simple NSH configuration used for some basic debug of LCD using the
+    framebuffer character drivers.  This configuration provides the test
+    programs:
+
+      - apps/examples/pdcurses, and
+      - apps/examples/fb
+
+    as NSH built-in applications.
+
+    NOTES:
+    1, This configuration enables SDRAM to hold the LCD framebuffer and
+       enables the LPC54xx LCD driver in order to support the LPCXpresso's
+       TFT panel.  In this configuration, the framebuffer resides in the
+       the lower half megabyte of SDRAM beginning at address 0xa0000000
+       (only 522,240 bytes actually used for the framebuffer).  The
+       remainder of the SDRAM from 0xa0080000 up to 0xa1000000 is added
+       to the heap.
+
+    2. The pdcurses test relies on some positional input device and so
+       is not yet usable.
 
   nsh:
 

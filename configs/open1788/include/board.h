@@ -375,7 +375,7 @@
 #define GPIO_LCD_VD6                GPIO_LCD_VD6_2
 #define GPIO_LCD_VD7                GPIO_LCD_VD7_2
 
-/* LED G:
+/* LCD G:
  *
  * VD8    --- Connected to P0[6]
  * VD9    --- Connected to P0[7]

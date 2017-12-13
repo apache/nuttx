@@ -237,7 +237,28 @@
  */
 
 /* Button definitions *******************************************************/
-/* To be provided */
+/* The LPCXpresso has four switches:
+ *
+ *   SW2 ISP2         P0.6
+ *   SW3 ISP1         P0.5
+ *   SW4 ISP0         P0.4
+ *   SW5 User Button  P1.1
+ *
+ * In all cased, the signal is low when the button is pressed.
+ *
+ * SW2, SW3, SW4 can be used to force the LPC546xx in to ISP boot modes.
+ * After boot these buttons could be used as user buttons.  However, they are
+ * not available when the on-board SRDRAM is used because P0.4, P0.5, and
+ * P0.6 are also used as EMC_D2, EMC_D3, and EMC_D4, respectively.
+ *
+ * So SW5 is really the only button that that is generally available for
+ * software usage.
+ */
+
+#define BOARD_BUTTON_USER          0
+#define BOARD_NUM_BUTTONS          1
+
+#define BOARD_BUTTON_USER_BIT      (1 << BOARD_BUTTON_USER)
 
 /* Pin Disambiguation *******************************************************/
 /* Flexcomm0/USART0
@@ -249,10 +270,17 @@
  *   BRIDGE_UART_TXD <- P0_30-ISP_FC0_TXD <- P0.30  GPIO_FC0_TXD_SCL_MISO_2
  */
 
-#ifdef CONFIG_LPC54_USART0
-#  define GPIO_USART0_RXD          (GPIO_FC0_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
-#  define GPIO_USART0_TXD          (GPIO_FC0_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
-#endif
+#define GPIO_USART0_RXD            (GPIO_FC0_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
+#define GPIO_USART0_TXD            (GPIO_FC0_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
+
+/* LCD
+ *
+ *   There are no alternatives for LCD pins except for the VD0-VD3 pins. 
+ *   VD0-VD2 are not used in this hardware configuration.  VD3 is on
+ *   P2.21.
+ */
+
+#define GPIO_LCD_VD3               GPIO_LCD_VD3_1
 
 /****************************************************************************
  * Public Types
