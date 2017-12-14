@@ -140,6 +140,7 @@
 
 #define LCD_POL_PCDLO_SHIFT             (0)       /* Bits 0-4: Lower 5 bits of panel clock divisor */
 #define LCD_POL_PCDLO_MASK              (0x1f << LCD_POL_PCDLO_SHIFT)
+#  define LCD_POL_PCDLO(n)              ((uint32_t)(n) << LCD_POL_PCDLO_SHIFT)
                                                   /* Bit 5:  Reserved */
 #define LCD_POL_ACB_SHIFT               (6)       /* Bits 6-10: AC bias pin frequency */
 #define LCD_POL_ACB_MASK                (0x1f << LCD_POL_ACB_SHIFT)
@@ -150,9 +151,11 @@
                                                   /* Bit 15: Reserved */
 #define LCD_POL_CPL_SHIFT               (16)      /* Bit 16-25: Clocks per line */
 #define LCD_POL_CPL_MASK                (0x3ff << LCD_POL_CPL_SHIFT)
+#  define LCD_POL_CPL(n)                ((uint32_t)(n) << LCD_POL_CPL_SHIFT)
 #define LCD_POL_BCD                     (1 << 26) /* Bit 26: Bypass pixel clock divider */
 #define LCD_POL_PCDHI_SHIFT             (27)      /* Bits 27-31: Upper 5 bits of panel clock divisor */
 #define LCD_POL_PCDHI_MASK              (0x1f << LCD_POL_PCDHI_SHIFT)
+#  define LCD_POL_PCDHI(n)              ((uint32_t)(n) << LCD_POL_PCDHI_SHIFT)
 
 /* LCD_LE - Line End Control Register */
 

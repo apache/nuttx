@@ -40,8 +40,10 @@ STATUS
     minor clock source setting).  That port required modifications only
     for differences in some SYSCON and pin-related settings.
   2017-12-13:  Created the fb configuration for testing the LCD.  Only
-    minimal testing has been performed.  As of this writing, the system
-    hangs while initializing the LCD.
+    minimal testing has been performed.  As of this writing, thre is
+    some framebuffer functionality.  There are recognizable but corrupted
+    patterns on the LCD.  There are color formatting problems and some
+    horizontal elongation.
 
 Configurations
 ==============

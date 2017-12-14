@@ -473,7 +473,8 @@ static int lpc54_setcursor(FAR struct fb_vtable_s *vtable,
 int up_fbinitialize(int display)
 {
   uint32_t regval;
-  uint32_t lcddiv;
+  uint32_t bcd;
+  uint32_t pcd;
   int i;
 
   /* Configure pins */
@@ -545,6 +546,12 @@ int up_fbinitialize(int display)
   putreg32(SYSCON_LCDCLKSEL_MAINCLK, LPC54_SYSCON_LCDCLKSEL);
 #endif
 
+  /* Set the LCD clock divider to one. */
+
+  putreg32(SYSCON_LCDCLKDIV_DIV(1), LPC54_SYSCON_LCDCLKDIV);
+  putreg32(SYSCON_LCDCLKDIV_DIV(1) | SYSCON_LCDCLKDIV_REQFLAG,
+           LPC54_SYSCON_LCDCLKDIV);
+
   /* Reset the LCD */
 
   lpc54_reset_lcd();
@@ -564,17 +571,6 @@ int up_fbinitialize(int display)
   /* Disable the LCD controller */
 
   putreg32(0, LPC54_LCD_CTRL);
-
-  /* Initialize pixel clock.  Set the LCD clock divier. */
-
-#ifdef CONFIG_LPC54_LCD_USE_CLKIN
-  lcddiv = ((uint32_t)CONFIG_LPC54_LCD_CLKIN_FREQUENCY /
-            (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1;
-#else
-  lcddiv = ((uint32_t)BOARD_MAIN_CLK / (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1;
-#endif
-  putreg32(lcddiv, LPC54_SYSCON_LCDCLKDIV);
-  putreg32(lcddiv | SYSCON_LCDCLKDIV_REQFLAG, LPC54_SYSCON_LCDCLKDIV);
 
   /* Set the bits per pixel */
 
@@ -664,6 +660,37 @@ int up_fbinitialize(int display)
             (CONFIG_LPC54_LCD_VBACKPORCH)  << LCD_TIMV_VBP_SHIFT);
   putreg32(regval, LPC54_LCD_TIMV);
 
+  /* Get the pixel clock divider */
+
+#ifdef CONFIG_LPC54_LCD_USE_CLKIN
+  pcd = ((uint32_t)CONFIG_LPC54_LCD_CLKIN_FREQUENCY /
+         (uint32_t)LPC54_LCD_PIXEL_CLOCK) + 1;
+#else
+  pcd = ((uint32_t)BOARD_MAIN_CLK / (uint32_t)LPC54_LCD_PIXEL_CLOCK);
+#endif
+
+  /* Check the range of pcd */
+
+  bcd = 0;
+
+#ifndef CONFIG_LPC54_LCD_TFTPANEL
+  DEBUGASSERT(pcd >= 2);
+#else
+  if (pcd <= 1)
+    {
+      /* Just bypass the LCD divider */
+
+      pcd = 0;
+      bcd = LCD_POL_BCD;
+    }
+  else
+#endif
+    {
+      /* The register value is PCD - 2 */
+
+      pcd -= 2;
+    }
+
   /* Initialize clock and signal polarity.
    *
    * REVISIT:  These need to be configurable.
@@ -685,11 +712,36 @@ int up_fbinitialize(int display)
 
   /* Set number of clocks per line */
 
-  regval |= ((CONFIG_LPC54_LCD_HWIDTH-1) << LCD_POL_CPL_SHIFT);
+  regval &= ~LCD_POL_CPL_MASK;
 
-  /* Bypass internal pixel clock divider */
+#if defined(CONFIG_LPC54_LCD_TFTPANEL)
+  /* TFT panel */
 
-  regval |= LCD_POL_BCD;
+  regval |= LCD_POL_CPL(CONFIG_LPC54_LCD_HWIDTH - 1);
+#else
+  /* STN panel */
+
+#if defined(CONFIG_LPC54_LCD_BPP8)
+  /* 8-bit monochrome STN panel */
+
+  regval |= LCD_POL_CPL((CONFIG_LPC54_LCD_HWIDTH / 8) - 1);
+#elif defined(CONFIG_LPC54_LCD_BPP4)
+  /* 4-bit monochrome STN panel */
+
+  regval |= LCD_POL_CPL((CONFIG_LPC54_LCD_HWIDTH / 4) - 1);
+#else
+  /* Color STN panel. */
+
+  regval |= LCD_POL_CPL(((CONFIG_LPC54_LCD_HWIDTH * 3) / 8) - 1);
+#endif
+#endif /* CONFIG_LPC54_LCD_TFTPANEL */
+
+  /* Set pixel clock divisor (or bypass) */
+
+  regval &= ~(LCD_POL_PCDLO_MASK | LCD_POL_PCDHI_MASK | LCD_POL_BCD);
+  regval |= LCD_POL_PCDLO(pcd) & LCD_POL_PCDLO_MASK;
+  regval |= LCD_POL_PCDHI(pcd >> 5) & LCD_POL_PCDHI_MASK;
+  regval |= bcd;
 
   /* LCD_ENAB_M is active high */
 
