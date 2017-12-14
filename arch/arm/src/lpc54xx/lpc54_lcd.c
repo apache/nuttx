@@ -52,6 +52,8 @@
 #include "up_arch.h"
 #include "chip/lpc54_syscon.h"
 #include "chip/lpc54_pinmux.h"
+#include "lpc54_config.h"
+#include "lpc54_enableclk.h"
 #include "lpc54_gpio.h"
 #include "lpc54_reset.h"
 #include "lpc54_lcd.h"
@@ -532,7 +534,7 @@ int up_fbinitialize(int display)
 
   /* Enable clocking to the LCD peripheral */
 
-  putreg32(SYSCON_AHBCLKCTRL2_LCD, LPC54_SYSCON_AHBCLKCTRLSET2);
+  lpc54_lcd_enableclk();
 
   /* Route Main clock (or LCK CLKIN) to the LCD. */
 
@@ -873,7 +875,7 @@ void up_fbuninitialize(int display)
 
   /* Disable clocking to the LCD peripheral */
 
-  putreg32(SYSCON_AHBCLKCTRL2_LCD, LPC54_SYSCON_AHBCLKCTRLCLR2);
+  lpc54_lcd_disableclk();
 }
 
 /****************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpc54_reset.h
+ * arch/arm/src/lpc54xx/lpc54_enableclk.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_RESET_H
-#define __ARCH_ARM_SRC_LPC54XX_LPC54_RESET_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_ENABLECLK_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_ENABLECLK_H
 
 /****************************************************************************
  * Included Files
@@ -45,24 +45,9 @@
 /* Include the correct definitions for the configured chip */
 
 #if defined(CONFIG_ARCH_FAMILY_LPC546XX)
-#  include "lpc546x_reset.h"
+#  include "lpc546x_enableclk.h"
 #else
 #  error "Unsupported LPC54 architecture"
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc54_reset
- *
- * Description:
- *   Reset the selected peripheral
- *
- ****************************************************************************/
-
-void lpc54_reset(uintptr_t setreg, uintptr_t clrreg,
-                 uintptr_t statreg, uint32_t mask);
-
-#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_RESET_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_ENABLECLK_H */

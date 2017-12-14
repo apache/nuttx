@@ -824,12 +824,11 @@
 #define SYSCON_ASYNCPRESET_CTIMER3             (1 << 13) /* Bit 13:  CTIMER3 reset control */
 #define SYSCON_ASYNCPRESET_CTIMER4             (1 << 14) /* Bit 14:  CTIMER4 reset control */
 
-/* Async peripheral clock control */
-#define SYSCON_ASYNCAPBCLKCTRL_
-/* Set bits in ASYNCAPBCLKCTRL  */
-#define SYSCON_ASYNCAPBCLKCTRLSET_
-/* Clear bits in ASYNCAPBCLKCTRL */
-#define SYSCON_ASYNCAPBCLKCTRLCLR_
+/* Async peripheral clock control, set and clear registers */
+
+#define SYSCON_ASYNCAPBCLKCTRL_CTIMER3         (1 << 13) /* Bit 13:  CTIMER3 clock control */
+#define SYSCON_ASYNCAPBCLKCTRL_CTIMER4         (1 << 14) /* Bit 14:  CTIMER4 clock control */
+
 /* Async APB clock source select A */
 #define SYSCON_ASYNCAPBCLKSELA_
 

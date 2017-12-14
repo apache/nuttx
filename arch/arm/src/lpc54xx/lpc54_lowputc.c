@@ -58,6 +58,7 @@
 #include "chip/lpc54_usart.h"
 
 #include "lpc54_config.h"
+#include "lpc54_enableclk.h"
 #include "lpc54_clockconfig.h"
 #include "lpc54_gpio.h"
 #include "lpc54_lowputc.h"
@@ -410,7 +411,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART0
   /* Attach 12 MHz clock to FLEXCOMM0 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM0, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm0_enableclk();
 
   /* Set FLEXCOMM0 to the USART peripheral, locking that configuration in place. */
 
@@ -436,7 +437,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART1
   /* Attach 12 MHz clock to FLEXCOMM1 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM1, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm1_enableclk();
 
   /* Set FLEXCOMM1 to the USART peripheral, locking that configuration in place. */
 
@@ -462,7 +463,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART2
   /* Attach 12 MHz clock to FLEXCOMM2 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM2, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm2_enableclk();
 
   /* Set FLEXCOMM2 to the USART peripheral, locking that configuration in place. */
 
@@ -488,7 +489,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART3
   /* Attach 12 MHz clock to FLEXCOMM3 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM3, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm3_enableclk();
 
   /* Set FLEXCOMM3 to the USART peripheral, locking that configuration in place. */
 
@@ -514,7 +515,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART4
   /* Attach 12 MHz clock to FLEXCOMM4 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM4, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm4_enableclk();
 
   /* Set FLEXCOMM4 to the USART peripheral, locking that configuration in place. */
 
@@ -540,7 +541,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART5
   /* Attach 12 MHz clock to FLEXCOMM5 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM5, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm5_enableclk();
 
   /* Set FLEXCOMM5 to the USART peripheral, locking that configuration in place. */
 
@@ -566,7 +567,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART6
   /* Attach 12 MHz clock to FLEXCOMM6 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM6, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm6_enableclk();
 
   /* Set FLEXCOMM6 to the USART peripheral, locking that configuration in place. */
 
@@ -592,7 +593,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART7
   /* Attach 12 MHz clock to FLEXCOMM7 */
 
-  putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM7, LPC54_SYSCON_AHBCLKCTRLSET1);
+  lpc54_flexcomm7_enableclk();
 
   /* Set FLEXCOMM7 to the USART peripheral, locking that configuration in place. */
 
@@ -618,7 +619,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART8
   /* Attach 12 MHz clock to FLEXCOMM8 */
 
-  putreg32(SYSCON_AHBCLKCTRL2_FLEXCOMM8, LPC54_SYSCON_AHBCLKCTRLSET2);
+  lpc54_flexcomm8_enableclk();
 
   /* Set FLEXCOMM8 to the USART peripheral, locking that configuration in place. */
 
@@ -644,7 +645,7 @@ void lpc54_lowsetup(void)
 #ifdef HAVE_USART9
   /* Attach 12 MHz clock to FLEXCOMM9 */
 
-  putreg32(SYSCON_AHBCLKCTRL2_FLEXCOMM9, LPC54_SYSCON_AHBCLKCTRLSET2);
+  lpc54_flexcomm9_enableclk();
 
   /* Set FLEXCOMM9 to the USART peripheral, locking that configuration in place. */
 

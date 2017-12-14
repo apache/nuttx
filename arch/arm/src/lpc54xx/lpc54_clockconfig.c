@@ -99,7 +99,7 @@ static void lpc54_setvoltage(uint32_t freq)
 
 static void lpc54_power_pll(void)
 {
-  lpc54_vd3_enable();
+  lpc54_vd3_powerup();
   while ((getreg32(0x40020054) & (1 << 6)) == 0)
     {
     }
@@ -176,7 +176,7 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 
   /* Power off PLL during setup changes */
 
-  lpc54_syspll_disable();
+  lpc54_syspll_powerdown();
 
   /* Write PLL setup data */
 
@@ -206,7 +206,7 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
       /* Initialize and power up PLL */
 
       putreg32(maxcco, LPC54_SYSCON_SYSPLLMDEC);
-      lpc54_syspll_enable();
+      lpc54_syspll_powerup();
 
       /* Set MREQ to activate */
 
@@ -228,7 +228,7 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 
       /* Enable PLL */
 
-      lpc54_syspll_enable();
+      lpc54_syspll_powerup();
     }
 
   /* Wait for the lock? */
@@ -261,7 +261,7 @@ void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup)
   /* Set up the clock sources */
   /* Power up the FRO 12MHz clock source */
 
-  lpc54_fro_enable();
+  lpc54_fro_powerup();
 
   /* Switch to FRO 12MHz first to ensure we can change voltage without
    * accidentally being below the voltage for current speed.

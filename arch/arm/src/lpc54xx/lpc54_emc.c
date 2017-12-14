@@ -54,6 +54,8 @@
 
 #include "chip/lpc54_syscon.h"
 #include "chip/lpc54_emc.h"
+#include "lpc54_config.h"
+#include "lpc54_enableclk.h"
 #include "lpc54_reset.h"
 #include "lpc54_emc.h"
 
@@ -237,7 +239,7 @@ void lpc54_emc_initialize(FAR const struct emc_config_s *config)
 
   /* Enable EMC clock */
 
-  putreg32(SYSCON_AHBCLKCTRL2_EMC, LPC54_SYSCON_AHBCLKCTRLSET2);
+  lpc54_emc_enableclk();
 
   /* Reset the EMC */
 

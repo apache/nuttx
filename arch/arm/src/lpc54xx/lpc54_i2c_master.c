@@ -64,6 +64,7 @@
 #include "chip/lpc54_flexcomm.h"
 #include "chip/lpc54_i2c.h"
 #include "lpc54_config.h"
+#include "lpc54_enableclk.h"
 #include "lpc54_i2c_master.h"
 
 #include <arch/board/board.h>
@@ -115,7 +116,7 @@ static int lpc54_i2c_reset(FAR struct i2c_master_s * dev);
 #endif
 
 /****************************************************************************
- * I2C device operations
+ * Private Data
  ****************************************************************************/
 
 struct i2c_ops_s lpc54_i2c_ops =
@@ -158,6 +159,38 @@ static struct lpc54_i2cdev_s g_i2c9_dev;
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc54_i2c_putreg
+ *
+ * Description:
+ *   Set the frequency for the next transfer
+ *
+ ****************************************************************************/
+
+static inline void lpc54_i2c_putreg(struct lpc54_i2cdev_s *priv,
+                                    unsigned int regoffset, uint32_t regval)
+{
+  putreg32(value, priv->base + regoffset);
+}
+
+/****************************************************************************
+ * Name: lpc54_i2c_gettreg
+ *
+ * Description:
+ *   Set the frequency for the next transfer
+ *
+ ****************************************************************************/
+
+static inline void lpc54_i2c_gettreg(struct lpc54_i2cdev_s *priv,
+                                     unsigned int regoffset)
+{
+  return getreg32(priv->base + regoffset);
+}
+
+/****************************************************************************
  * Name: lpc54_i2c_setfrequency
  *
  * Description:
@@ -168,12 +201,70 @@ static struct lpc54_i2cdev_s g_i2c9_dev;
 static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
                                    uint32_t frequency)
 {
+  uint32_t scl;
+  uint32_t divider;
+  uint32_t best_scl;
+  uint32_t best_div;
+  uint32_t err;
+  uint32_t best_err;
+  uint32_t regval;
+
   /* Has the I2C frequency changed? */
 
   if (frequency != priv->frequency)
     {
       /* Yes.. instantiate the new I2C frequency */
-#warning Missing logic
+
+      best_err = 0;
+
+      for (scl = 9; scl >= 2; scl--)
+        {
+          /* Calculate ideal divider value for the current scl candidate.
+           *
+           *   SCL High Time:  Thi = divider * SCLhi
+           *   SCL High Time:  Tlo = divider * SCLlo
+           *                   Fscl = Finput / (Thi + Tlo)
+           *
+           * If Thi == TloL:   Fscl = Finput / (divider * SCL * 2)
+           * Or:               divider = Finput / (Fscl * SCL * 2)
+           */
+
+          divider = priv->fclock / (frequency * scl * 2);
+
+          /* Adjust it if it is out of range */
+
+          if (divider > 0x00010000)
+            {
+              divider = 0x00010000;
+            }
+
+          /* Calculate the frequency error */
+
+          err = priv->fclock - (frequency * scl * 2 * divider);
+          if (err < best_err || best_err == 0)
+            {
+              best_div = divider;
+              best_scl = scl;
+              best_err = err;
+            }
+
+          if (err == 0 || divider >= 0x10000)
+            {
+              /* Break out of the loop early ifeither exact value was found or
+               * the divider is at its maximum value.
+               */
+
+              break;
+            }
+        }
+
+      /* Instantiate the new I2C frequency */
+
+      regval = I2C_CLKDIV(best_div);
+      lpc54_i2c_putreg(priv, LPC54_I2C_CLKDIV_OFFSET, regval);
+
+      regval = I2C_MSTTIME_SCLLOW(n) | I2C_MSTTIME_SCLHIGH(n);
+      lpc54_i2c_putreg(LPC54_I2C_MSTTIME_OFFSET, regval);
 
       priv->frequency = frequency;
     }
@@ -189,7 +280,25 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
 
 static int lpc54_i2c_start(struct lpc54_i2cdev_s *priv)
 {
-#warning Missing logic
+  struct i2c_msg_s *msg = priv->msgs;
+  uint32_t regval;
+
+  /* Write the address with the R/W bit */
+
+  if ((I2C_M_READ & msg->flags) == I2C_M_READ)
+    {
+      regval = I2C_READADDR8(msg->addr);
+    }
+  else
+    {
+      regval = I2C_WRITEADDR8(msg->addr);
+    }
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET, regval);
+
+  /* Initiate the Start */
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTART);
   return priv->nmsg;
 }
 
@@ -249,6 +358,21 @@ void lpc32_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
 }
 
 /****************************************************************************
+ * Name: lpc54_i2c_statemachine
+ *
+ * Description:
+ *   This is the I2C transfer state machine that implements the actual
+ *   transfer.  It may be called from the interrupt level or is may be used
+ *   without interrupts in a polled mode.
+ *
+ ****************************************************************************/
+
+static void lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
+{
+#warning Missing logic
+}
+
+/****************************************************************************
  * Name: lpc54_i2c_interrupt
  *
  * Description:
@@ -264,7 +388,7 @@ static int lpc54_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  state = getreg32(priv->base + LPC54_I2C_STAT_OFFSET);
+  state = lpc54_i2c_getreg(priv, LPC54_I2C_STAT_OFFSET);
   msg  = priv->msgs;
 #warning Missing logic
 
@@ -377,7 +501,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM0 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM0, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm0_enableclk();
 
       /* Set FLEXCOMM0 to the I2C peripheral, locking that configuration
        * in place.
@@ -413,7 +537,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM1 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM1, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm1_enableclk();
 
       /* Set FLEXCOMM1 to the I2C peripheral, locking that configuration
        * in place.
@@ -449,7 +573,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM2 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM2, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm2_enableclk();
 
       /* Set FLEXCOMM2 to the I2C peripheral, locking that configuration
        * in place.
@@ -485,7 +609,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM3 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM3, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm3_enableclk();
 
       /* Set FLEXCOMM3 to the I2C peripheral, locking that configuration
        * in place.
@@ -521,7 +645,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM4 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM4, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm4_enableclk();
 
       /* Set FLEXCOMM4 to the I2C peripheral, locking that configuration
        * in place.
@@ -557,7 +681,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM5 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM5, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm5_enableclk();
 
       /* Set FLEXCOMM5 to the I2C peripheral, locking that configuration
        * in place.
@@ -593,7 +717,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM6 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM6, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm6_enableclk();
 
       /* Set FLEXCOMM6 to the I2C peripheral, locking that configuration
        * in place.
@@ -629,7 +753,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM7 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM7, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm7_enableclk();
 
       /* Set FLEXCOMM7 to the I2C peripheral, locking that configuration
        * in place.
@@ -665,7 +789,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM8 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM8, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm8_enableclk();
 
       /* Set FLEXCOMM8 to the I2C peripheral, locking that configuration
        * in place.
@@ -701,7 +825,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM9 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM9, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm9_enableclk();
 
       /* Set FLEXCOMM9 to the I2C peripheral, locking that configuration
        * in place.
@@ -738,8 +862,16 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
   leave_critical_section(flags);
 
-  /* Enable the I2C peripheral and configure master  mode */
-#Missing logic
+  /* Install our operations */
+
+  priv->dev.ops = &lpc54_i2c_ops;
+
+  /* Enable the I2C peripheral in the master  mode */
+
+  regval  = lpc54_i2c_getreg(priv, LPC54_I2C_CFG_OFFSET);
+  regval &= I2C_CFG_ALLENABLES;
+  regval |= I2C_CFG_MSTEN;
+  lpc54_i2c_putreg(priv, LPC54_I2C_CFG_OFFSET, regval)
 
   /* Set the default I2C frequency */
 
@@ -765,13 +897,13 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
   irq_attach(priv->irq, lpc54_i2c_interrupt, priv);
 
-  /* Enable Interrupt Handler */
+  /* Disable interrupts at the I2C peripheral */
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_INT_ALL);
+
+  /* Enable interrupts at the NVIC */
 
   up_enable_irq(priv->irq);
-
-  /* Install our operations */
-
-  priv->dev.ops = &lpc54_i2c_ops;
   return &priv->dev;
 }
 
@@ -786,11 +918,18 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 int lpc54_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 {
   struct lpc54_i2cdev_s *priv = (struct lpc54_i2cdev_s *) dev;
+  uint32_t regval;
 
   /* Disable I2C interrupts */
 #warning Missing logic
 
   /* Disable the I2C peripheral */
+
+  regval  = lpc54_i2c_getreg(priv, LPC54_I2C_CFG_OFFSET);
+  regval &= I2C_CFG_ALLENABLES;
+  regval &= ~I2C_CFG_MSTEN;
+  lpc54_i2c_putreg(priv, LPC54_I2C_CFG_OFFSET, regval)
+
  #warning Missing logic
 
   /* Disable the Flexcomm interface at the NVIC and detach the interrupt. */

@@ -58,6 +58,7 @@
 #include "chip/lpc54_flexcomm.h"
 #include "chip/lpc54_spi.h"
 #include "lpc54_config.h"
+#include "lpc54_enableclk.h"
 #include "lpc54_spi_master.h"
 
 #ifdef HAVE_SPI_MASTER_DEVICE
@@ -660,7 +661,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM0 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM0, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm0_enableclk();
 
       /* Set FLEXCOMM0 to the SPI peripheral, locking that configuration
        * in place.
@@ -693,7 +694,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM1 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM1, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm1_enableclk();
 
       /* Set FLEXCOMM1 to the SPI peripheral, locking that configuration
        * in place.
@@ -726,7 +727,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM2 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM2, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm2_enableclk();
 
       /* Set FLEXCOMM2 to the SPI peripheral, locking that configuration
        * in place.
@@ -759,7 +760,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM3 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM3, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm3_enableclk();
 
       /* Set FLEXCOMM3 to the SPI peripheral, locking that configuration
        * in place.
@@ -792,7 +793,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM4 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM4, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm4_enableclk();
 
       /* Set FLEXCOMM4 to the SPI peripheral, locking that configuration
        * in place.
@@ -825,7 +826,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM5 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM5, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm5_enableclk();
 
       /* Set FLEXCOMM5 to the SPI peripheral, locking that configuration
        * in place.
@@ -858,7 +859,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM6 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM6, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm6_enableclk();
 
       /* Set FLEXCOMM6 to the SPI peripheral, locking that configuration
        * in place.
@@ -891,7 +892,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM7 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM7, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm7_enableclk();
 
       /* Set FLEXCOMM7 to the SPI peripheral, locking that configuration
        * in place.
@@ -924,7 +925,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM8 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM8, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm8_enableclk();
 
       /* Set FLEXCOMM8 to the SPI peripheral, locking that configuration
        * in place.
@@ -957,7 +958,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
     {
       /* Attach 12 MHz clock to FLEXCOMM9 */
 
-      putreg32(SYSCON_AHBCLKCTRL1_FLEXCOMM9, LPC54_SYSCON_AHBCLKCTRLSET1);
+      lpc54_flexcomm9_enableclk();
 
       /* Set FLEXCOMM9 to the SPI peripheral, locking that configuration
        * in place.
