@@ -719,28 +719,18 @@ config LPC54_LCD_BPP16_565
 	bool "16 BPP, 5:6:5 mode"
 	depends on !LPC54_LCD_MONOCHROME
 
-config LPC54_LCD_BPP24_RGB565
-	bool "24 BPP, 5:6:5 mode"
-	depends on !LPC54_LCD_MONOCHROME && LPC54_LCD_TFTPANEL
-	---help---
-		16-bit color is, by default, provided on LCD VD0-VD15; 24-bit color
-		is provided on VD0-23:
-
-		  16-bit: RRRRRGGG GGGB BBBB
-		  24-bit: ........ RRRRRRRR GGGGGGGG BBBBBBBB
-
-		This option selects an alternative pin configuration where 16-bit
-		RGB565 is provided on VD3-7, VD10-15, and VD19-23.  This essentially
-		accepts 32-bit RGB888 color as input but only uses the RGB565 color
-		resolution:
-
-		  24-bit: ........ RRRRR... GGGGGG.. BBBBB...
-
 config LPC54_LCD_BPP24
 	bool "24 BPP, 8:8:8 mode"
 	depends on LPC54_LCD_TFTPANEL
 
 endchoice
+
+config LPC54_LCD_BGR
+	bool "Blue-Green-Red color order"
+	default n
+	depends on !LPC54_LCD_MONOCHROME
+	---help---
+		This option selects BGR color order vs. default RGB
 
 config LPC54_LCD_BACKCOLOR
 	hex "Initial background color"

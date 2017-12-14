@@ -40,10 +40,12 @@ STATUS
     minor clock source setting).  That port required modifications only
     for differences in some SYSCON and pin-related settings.
   2017-12-13:  Created the fb configuration for testing the LCD.  Only
-    minimal testing has been performed.  As of this writing, thre is
+    minimal testing has been performed.  As of this writing, there is
     some framebuffer functionality.  There are recognizable but corrupted
     patterns on the LCD.  There are color formatting problems and some
     horizontal elongation.
+  2017-12-14:  Corrected a misconception about how the video data lines
+    were configured.  Now the LCD appears to be fully functional.
 
 Configurations
 ==============
@@ -120,12 +122,16 @@ Configurations
        enables the LPC54xx LCD driver in order to support the LPCXpresso's
        TFT panel.  In this configuration, the framebuffer resides in the
        the lower half megabyte of SDRAM beginning at address 0xa0000000
-       (only 522,240 bytes actually used for the framebuffer).  The
-       remainder of the SDRAM from 0xa0080000 up to 0xa1000000 is added
+       The remainder of the SDRAM from 0xa0080000 up to 0xa1000000 is added
        to the heap.
 
-    2. The pdcurses test relies on some positional input device and so
-       is not yet usable.
+       The is wasteful of SDRAM:  Only 261,120 bytes actually used for the
+       framebuffer.  This memory could be reclaimed by changing the DRAM
+       CS0 offset value in the .config file.
+
+    2. Some of the pdcurses test rely on some positional input device and so
+       is not yet usable.  Others work fine with no user include:  charset,
+       xmas, firework, worms, rain, for examples.
 
   nsh:
 
@@ -173,4 +179,3 @@ Configurations
          RAMTest: Pattern test: a0000000 16777216 33333333 cccccccc
          RAMTest: Address-in-address test: a0000000 16777216
          nsh>
-

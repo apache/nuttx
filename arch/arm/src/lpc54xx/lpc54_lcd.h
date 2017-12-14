@@ -94,7 +94,7 @@
 #elif defined(CONFIG_LPC54_LCD_BPP16_565)
 #  define LPC54_BPP                    16
 #  define LPC54_COLOR_FMT              FB_FMT_RGB16_565
-#elif defined(CONFIG_LPC54_LCD_BPP24) || defined(CONFIG_LPC54_LCD_BPP24_RGB565)
+#elif defined(CONFIG_LPC54_LCD_BPP24)
 #  define LPC54_BPP                    32  /* Only 24 of 32 bits used for RGB */
 #  define LPC54_COLOR_FMT              FB_FMT_RGB24
 #  ifndef CONFIG_LPC54_LCD_TFTPANEL

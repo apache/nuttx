@@ -74,34 +74,13 @@
 
 /* Framebuffer characteristics in bytes */
 
-#if defined(CONFIG_LPC54_LCD_BPP1)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 1 + 7) / 8)
-#elif defined(CONFIG_LPC54_LCD_BPP2)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 2 + 7) / 8)
-#elif defined(CONFIG_LPC54_LCD_BPP4)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 4 + 7) / 8)
-#elif defined(CONFIG_LPC54_LCD_BPP8)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 8 + 7) / 8)
-#elif defined(CONFIG_LPC54_LCD_BPP16)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 16 + 7) / 8)
-#elif defined(CONFIG_LPC54_LCD_BPP24)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 32 + 7) / 8)
-#elif defined(CONFIG_LPC54_LCD_BPP16_565)
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 16 + 7) / 8)
-#else /* defined(CONFIG_LPC54_LCD_BPP12_444) */
-#  define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * 16 + 7) / 8)
-#endif
-
+#define LPC54_STRIDE ((CONFIG_LPC54_LCD_HWIDTH * LPC54_BPP + 7) / 8)
 #define LPC54_FBSIZE (LPC54_STRIDE * CONFIG_LPC54_LCD_VHEIGHT)
 
 /* Delays */
 
 #define LPC54_LCD_PWRDIS_DELAY 10000
 #define LPC54_LCD_PWREN_DELAY  10000
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
@@ -478,39 +457,56 @@ int up_fbinitialize(int display)
   int i;
 
   /* Configure pins */
-  /* LCD panel data. Pins used depend on the panel configuration */
+  /* LCD panel data. Pins used depend on the panel configuration:
+   *
+   * STN  4BPP: VD0-VD3           (single panel)
+   *            VD0-VD3, VD8-VD11 (dual panel)
+   * STN  8BPP: VD0-VD7           (single panel)
+   *            VD0-VD15          (dual panel)
+   * TFT 12BPP: VD4-VD7, VD12-VD15, VD20-VD23
+   * TFT 16BPP: VD3-VD7, VD10-VD15, VD19-VD23
+   * TFT 24BPP: VD0-VD23
+  */
 
   lcdinfo("Configuring pins\n");
 
-#ifndef CONFIG_LPC54_LCD_BPP24_RGB565
+#if !defined(CONFIG_LPC54_LCD_BPP16_565) && !defined(CONFIG_LPC54_LCD_BPP12_444)
   lpc54_gpio_config(GPIO_LCD_VD0);
   lpc54_gpio_config(GPIO_LCD_VD1);
   lpc54_gpio_config(GPIO_LCD_VD2);
 #endif
+#ifndef CONFIG_LPC54_LCD_BPP12_444
   lpc54_gpio_config(GPIO_LCD_VD3);
+#endif
   lpc54_gpio_config(GPIO_LCD_VD4);
   lpc54_gpio_config(GPIO_LCD_VD5);
   lpc54_gpio_config(GPIO_LCD_VD6);
   lpc54_gpio_config(GPIO_LCD_VD7);
 
-#ifndef CONFIG_LPC54_LCD_BPP24_RGB565
+#if LPC54_BPP > 8 /* Or STN 8-BPP Dual panel */
+#if !defined(CONFIG_LPC54_LCD_BPP16_565) && !defined(CONFIG_LPC54_LCD_BPP12_444)
   lpc54_gpio_config(GPIO_LCD_VD8);
   lpc54_gpio_config(GPIO_LCD_VD9);
 #endif
+#ifndef CONFIG_LPC54_LCD_BPP12_444
   lpc54_gpio_config(GPIO_LCD_VD10);
   lpc54_gpio_config(GPIO_LCD_VD11);
+#endif
   lpc54_gpio_config(GPIO_LCD_VD12);
   lpc54_gpio_config(GPIO_LCD_VD13);
   lpc54_gpio_config(GPIO_LCD_VD14);
   lpc54_gpio_config(GPIO_LCD_VD15);
+#endif
 
-#if LPC54_BPP > 16
-#ifndef CONFIG_LPC54_LCD_BPP24_RGB565
+#if LPC54_BPP > 16 || defined(CONFIG_LPC54_LCD_TFTPANEL)
+#if !defined(CONFIG_LPC54_LCD_BPP16_565) && !defined(CONFIG_LPC54_LCD_BPP12_444)
   lpc54_gpio_config(GPIO_LCD_VD16);
   lpc54_gpio_config(GPIO_LCD_VD17);
   lpc54_gpio_config(GPIO_LCD_VD18);
 #endif
+#ifndef CONFIG_LPC54_LCD_BPP12_444
   lpc54_gpio_config(GPIO_LCD_VD19);
+#endif
   lpc54_gpio_config(GPIO_LCD_VD20);
   lpc54_gpio_config(GPIO_LCD_VD21);
   lpc54_gpio_config(GPIO_LCD_VD22);
@@ -595,15 +591,23 @@ int up_fbinitialize(int display)
   regval |= LCD_CTRL_LCDBPP_444;    /* 12 bpp, 4:4:4 mode */
 #endif
 
+#ifdef CONFIG_LPC54_LCD_TFTPANEL
   /* TFT panel */
 
-#ifdef CONFIG_LPC54_LCD_TFTPANEL
   regval |= LCD_CTRL_LCDTFT;
+#else
+  /* STN panel */
+
+  regval &= ~LCD_CTRL_LCDTFT;
 #endif
 
+#ifdef CONFIG_LPC54_LCD_BGR
   /* Swap red and blue.  The colors will be 0x00RRGGBB, not 0x00BBGGRR. */
 
   regval |= LCD_CTRL_BGR;
+#else
+  regval &= ~LCD_CTRL_BGR;
+#endif
 
   /* Single panel */
 
@@ -618,11 +622,11 @@ int up_fbinitialize(int display)
 
   /* Select 4- or 8-bit monochrome interface */
 
-#  if LPC54_BPP > 4
+#if LPC54_BPP > 4
   regval |= LCD_CTRL_LCDMONO8;
-#  else
+#else
   regval &= ~LCD_CTRL_LCDMONO8;
-#  endif
+#endif
 
 #else
   /* Select color LCD */
