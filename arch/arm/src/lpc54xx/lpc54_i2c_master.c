@@ -166,7 +166,7 @@ static struct lpc54_i2cdev_s g_i2c9_dev;
  * Name: lpc54_i2c_putreg
  *
  * Description:
- *   Set the frequency for the next transfer
+ *   Write a value to a register at the offset from the Flexcomm base.
  *
  ****************************************************************************/
 
@@ -177,17 +177,44 @@ static inline void lpc54_i2c_putreg(struct lpc54_i2cdev_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_i2c_gettreg
+ * Name: lpc54_i2c_getreg
  *
  * Description:
- *   Set the frequency for the next transfer
+ *   Read the content of a register at the offset from the Flexcomm base.
  *
  ****************************************************************************/
 
-static inline void lpc54_i2c_gettreg(struct lpc54_i2cdev_s *priv,
-                                     unsigned int regoffset)
+static inline void lpc54_i2c_getreg(struct lpc54_i2cdev_s *priv,
+                                    unsigned int regoffset)
 {
   return getreg32(priv->base + regoffset);
+}
+
+/****************************************************************************
+ * Name: lpc54_wait_pendingstatus
+ *
+ * Description:
+ *   Wait for status update to complete and clear the I2C state.
+ *
+ ****************************************************************************/
+
+static uint32_t lpc54_wait_pendingstatus(struct lpc54_i2cdev_s *priv)
+{
+  uint32_t regval;
+
+  /* Wait until status is no longer pending */
+
+  do
+    {
+      regval = lpc54_i2c_getreg(priv, LPC54_I2C_STAT_OFFSET);
+    }
+  while ((regval & I2C_INT_MSTPENDING) == 0);
+
+  /* Clear controller state and return the last status */
+
+  lpc43_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET,
+                   (I2C_STAT_MSTARBLOSS_MASK | I2C_STAT_MSTSTSTPERR_MASK));
+  return regval;
 }
 
 /****************************************************************************
@@ -263,7 +290,7 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
       regval = I2C_CLKDIV(best_div);
       lpc54_i2c_putreg(priv, LPC54_I2C_CLKDIV_OFFSET, regval);
 
-      regval = I2C_MSTTIME_SCLLOW(n) | I2C_MSTTIME_SCLHIGH(n);
+      regval = I2C_MSTTIME_SCLLOW(best_scl) | I2C_MSTTIME_SCLHIGH(best_scl);
       lpc54_i2c_putreg(LPC54_I2C_MSTTIME_OFFSET, regval);
 
       priv->frequency = frequency;
@@ -312,7 +339,8 @@ static int lpc54_i2c_start(struct lpc54_i2cdev_s *priv)
 
 static void lpc54_i2c_stop(struct lpc54_i2cdev_s *priv)
 {
-#warning Missing logic
+  (void)lpc54_wait_pendingstatus(priv);
+  lpc54_i2c_putreg(pric, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTOP);
   nxsem_post(&priv->waitsem);
 }
 

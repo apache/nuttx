@@ -182,12 +182,36 @@ static struct lpc54_spidev_s g_spi9_dev;
 #endif
 
 /****************************************************************************
- * Public Data
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Name: lpc54_spi_putreg
+ *
+ * Description:
+ *   Write a value to a register at the offset from the Flexcomm base.
+ *
  ****************************************************************************/
+
+static inline void lpc54_spi_putreg(struct lpc54_spidev_s *priv,
+                                    unsigned int regoffset, uint32_t regval)
+{
+  putreg32(value, priv->base + regoffset);
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_gettreg
+ *
+ * Description:
+ *   Read the content of a register at the offset from the Flexcomm base.
+ *
+ ****************************************************************************/
+
+static inline void lpc54_spi_gettreg(struct lpc54_spidev_s *priv,
+                                     unsigned int regoffset)
+{
+  return getreg32(priv->base + regoffset);
+}
 
 /****************************************************************************
  * Name: lpc54_spi_16bitmode
