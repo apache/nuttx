@@ -173,10 +173,15 @@
 #  define BOARD_SYSTICK_CLOCK    (BOARD_AHB_FREQUENCY / BOARD_SYSTICKCLKDIV)
 #endif
 
-/* Flexcomm0:  REVIST */
+/* Flexcomm0:  USART0 (REVIST) */
 
 #define BOARD_FLEXCOMM0_CLKSEL   SYSCON_FCLKSEL_FRO12M
 #define BOARD_FLEXCOMM0_FCLK     LPC54_FRO_12MHZ
+
+/* Flexcomm2:  I2C2 (REVIST) */
+
+#define BOARD_FLEXCOMM2_CLKSEL   SYSCON_FCLKSEL_FRO12M
+#define BOARD_FLEXCOMM2_FCLK     LPC54_FRO_12MHZ
 
 /* EMC */
 
@@ -272,6 +277,41 @@
 
 #define GPIO_USART0_RXD            (GPIO_FC0_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
 #define GPIO_USART0_TXD            (GPIO_FC0_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
+
+/* Flexomm2/I2C
+ *
+ * For I2C:
+ *   Type A & D pins need:
+ *     GPIO_OPENDRAIN + GPIO_FILTER_OFF
+ *   Type I pins need for Standard mode I2C need:
+ *     GPIO_FILTER_OFF + GPIO_I2C_FILTER_ON + GPIO_I2CDRIVE_LOW
+ *   Type I pins need for fast speed I2C need:
+ *     GPIO_FILTER_OFF + GPIO_I2C_FILTER_ON or OFF +
+ *     GPIO_I2CDRIVE_LOW or HIGH
+ *   Type I pins need for high speed I2C need:
+ *     GPIO_FILTER_OFF + GPIO_I2C_FILTER_OFF + GPIO_I2CDRIVE_HIGH
+ *
+ * The touchscreen controller is on I2C2: SCL P3.24, SDA P3.23.  These are
+ * both Type D/I pins.
+ */
+
+#if defined(CONFIG_LPC54_I2C_FAST)
+#  define _I2CFILTER               GPIO_I2C_FILTER_OFF
+#  define _I2CDRIVE                GPIO_I2CDRIVE_HIGH
+#elif defined(CONFIG_LPC54_I2C_HIGH)
+#  define _I2CFILTER               GPIO_I2C_FILTER_OFF
+#  define _I2CDRIVE                GPIO_I2CDRIVE_HIGH
+#else
+#  define _I2CFILTER               GPIO_I2C_FILTER_ON
+#  define _I2CDRIVE                GPIO_I2CDRIVE_LOW
+#endif
+
+#define GPIO_I2C2_SCL              (GPIO_FC2_RTS_SCL_SSEL1_2 | \
+                                    GPIO_FILTER_OFF | _I2CFILTER | \
+                                    _I2CDRIVE)
+#define GPIO_I2C2_SDA              (GPIO_FC2_CTS_SDA_SSEL0_2 | \
+                                    GPIO_FILTER_OFF | _I2CFILTER | \
+                                    _I2CDRIVE)
 
 /* LCD
  *

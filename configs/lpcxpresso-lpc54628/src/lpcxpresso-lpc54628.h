@@ -43,9 +43,20 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include "lpc54_config.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define HAVE_I2CTOOL  1
+
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER) || \
+    !defined(HAVE_I2C_MASTER_DEVICE)
+#  undef HAVE_I2CTOOL
+#endif
 
 /* LED definitions **********************************************************/
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These

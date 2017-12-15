@@ -46,6 +46,23 @@ STATUS
     horizontal elongation.
   2017-12-14:  Corrected a misconception about how the video data lines
     were configured.  Now the LCD appears to be fully functional.
+  2017-12-15:  Added an I2C driver.  This is the first step on the road
+    to getting support for the capacitive touchscreen on the TFT panel.
+    Not yet functional:
+
+      nsh> i2c dev -b 2 3 77
+           0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+      00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+      10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      70: -- -- -- -- -- -- -- --
+
+      I believe that the on-board Accelerometer, Audio Codec, and touch panel controller should have been detected (but perhaps that are not properly
+      powered in this configuration?)
 
 Configurations
 ==============
@@ -118,7 +135,7 @@ Configurations
     as NSH built-in applications.
 
     NOTES:
-    1, This configuration enables SDRAM to hold the LCD framebuffer and
+    1. This configuration enables SDRAM to hold the LCD framebuffer and
        enables the LPC54xx LCD driver in order to support the LPCXpresso's
        TFT panel.  In this configuration, the framebuffer resides in the
        the lower half megabyte of SDRAM beginning at address 0xa0000000
@@ -179,3 +196,20 @@ Configurations
          RAMTest: Pattern test: a0000000 16777216 33333333 cccccccc
          RAMTest: Address-in-address test: a0000000 16777216
          nsh>
+
+     3. I2C2 is enabled (will be used with the capacitive touchscreen).  In
+        order to verify I2C functionality, the I2C tool at apps/system/i2ctool
+        is enabled in this configuration.
+
+         nsh> i2c bus
+          BUS   EXISTS?
+         Bus 0: NO
+         Bus 1: NO
+         Bus 2: YES
+         Bus 3: NO
+         Bus 4: NO
+         Bus 5: NO
+         Bus 6: NO
+         Bus 7: NO
+         Bus 8: NO
+         Bus 9: NO

@@ -313,6 +313,8 @@
 #define I2C_SLAVE_STATE_RXAVAIL     (1)       /* Received data is available (Slave Receiver mode) */
 #define I2C_SLAVE_STATE_TXOK        (2)       /* Data can be transmitted (Slave Transmitter mode) */
 
+/* Interrupt status, set and read, and clear registers */
+
 #define I2C_INT_MSTPENDING          (1 << 0)  /* Bit 0  Master Pending interrupt */
 #define I2C_STAT_MSTSTATE_SHIFT     (1)       /* Bits 1-3: Master State code (status only) */
 #define I2C_STAT_MSTSTATE_MASK      (7 << I2C_STAT_MSTSTATE_SHIFT)
@@ -345,7 +347,7 @@
 #define I2C_INT_EVENTTIMEOUT        (1 << 24) /* Bit 24: Event time-out interrupt */
 #define I2C_INT_SCLTIMEOUT          (1 << 25) /* Bit 25: SCL time-out interrupt */
 
-#define I2C_INT_MSTPENDING          (1 << 0)  /* Bit 0  Master Pending interrupt */
+#define I2C_INT_MSTPENDING          (1 << 0)  /* Bit 0   Master Pending interrupt */
 #define I2C_INT_MSTARBLOSS          (1 << 4)  /* Bit 4:  Master Arbitration Loss interrupt */
 #define I2C_INT_MSTSTSTPERR         (1 << 6)  /* Bit 6:  Master Start/Stop Error interrupt */
 #define I2C_INT_SLVPENDING          (1 << 8)  /* Bit 8:  Slave Pending interrupt */
@@ -360,16 +362,17 @@
 #define I2C_INT_ALL                 0x030b8951
 
 /* Time-out value */
-#define I2C_TIMEOUT_
+
+#define I2C_TIMEOUT_SHIFT           (0)       /* Bits 0-15: Time out value
+                                               * Bits 0-3 hardwired to 0xff */
+#define I2C_TIMEOUT_MASK            (0xffff << I2C_TIMEOUT_SHIFT)
+#  define I2C_TIMEOUT(n)            ((uint32_t)((n)-1) << I2C_TIMEOUT_SHIFT)
 
 /* Clock pre-divider for the entire I2C interface */
 
 #define I2C_CLKDIV_SHIFT            (0)       /* Bits 0-15: I2C clock divider */
 #define I2C_CLKDIV_MASK             (0xffff << I2C_CLKDIV_SHIFT)
 #  define I2C_CLKDIV(n)             ((uint32_t)((n)-1) << I2C_CLKDIV_SHIFT)
-
-/* Interrupt status register for shared functions */
-#define I2C_INTSTAT_
 
 /* Master control */
 
@@ -388,7 +391,11 @@
 #  define I2C_MSTTIME_SCLHIGH(n)    ((uint32_t)((n)-2) << I2C_MSTTIME_SCLHIGH_SHIFT)
 
 /* Combined Master receiver and transmitter data */
-#define I2C_MSTDAT_
+
+#define I2C_MSTDAT_SHIFT            (0)       /* Bits 0-7:  Master function data */
+#define I2C_MSTDAT_MASK             (0xff << I2C_MSTDAT_SHIFT)
+#  define I2C_MSTDAT(n)             ((uint32_t)(n) << I2C_MSTDAT_SHIFT)
+
 /* Slave control */
 #define I2C_SLVCTL_
 /* Combined Slave receiver and transmitter data */

@@ -4,6 +4,12 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Parts of this file were adapted from sample code provided for the LPC54xx
+ * family from NXP which has a compatible BSD license.
+ *
+ *   Copyright (c) 2016, Freescale Semiconductor, Inc.
+ *   Copyright 2016-2017 NXP
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -49,6 +55,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -64,20 +71,53 @@
 #include "chip/lpc54_flexcomm.h"
 #include "chip/lpc54_i2c.h"
 #include "lpc54_config.h"
+#include "lpc54_clockconfig.h"
 #include "lpc54_enableclk.h"
+#include "lpc54_gpio.h"
 #include "lpc54_i2c_master.h"
 
 #include <arch/board/board.h>
 
-#ifdef HAVE_SPI_MASTER_DEVICE
+#ifdef HAVE_I2C_MASTER_DEVICE
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* 20 Millisecond timeout in system clock ticks. */
+
+#define I2C_WDOG_TIMEOUT MSEC2TICK(20)
+
+/* Default I2C frequency */
+
+#if defined(CONFIG_LPC54_I2C_FAST) || defined(CONFIG_LPC54_I2C_HIGH)
+#  define I2C_DEFAULT_FREQUENCY 1000000
+#else
+#  define I2C_DEFAULT_FREQUENCY 400000
+#endif
+
+/* I2C Master Interrupts */
+
+#define I2C_MASTER_INTS \
+  (I2C_INT_MSTPENDING | I2C_INT_MSTARBLOSS | I2C_INT_MSTSTSTPERR)
+
 /****************************************************************************
- * Private Data
+ * Private Types
  ****************************************************************************/
+
+/* I2C state */
+
+enum lpc54_i2cstate_e
+{
+  I2CSTATE_IDLE = 0,
+  I2CSTATE_TRANSMIT,
+  I2CSTATE_RECEIVE,
+  I2CSTATE_START,
+  I2CSTATE_STOP,
+  I2CSTATE_WAITDONE
+};
+
+/* This structure provides the overall state of the I2C driver */
 
 struct lpc54_i2cdev_s
 {
@@ -89,13 +129,15 @@ struct lpc54_i2cdev_s
   uint32_t fclock;          /* Flexcomm function clock frequency */
 
   struct i2c_msg_s *msgs;   /* Remaining transfers (first is in progress) */
-  unsigned int nmsg;        /* Number of transfer remaining */
+  int16_t nmsgs;            /* Number of transfer remaining */
+  int16_t result;           /* The result of the transfer */
 
   sem_t exclsem;            /* Only one thread can access at a time */
+#ifndef CONFIG_I2C_POLLED
   sem_t waitsem;            /* Supports wait for state machine completion */
   uint16_t irq;             /* Flexcomm IRQ number */
-  uint16_t wrcnt;           /* Number of bytes sent to tx fifo */
-  uint16_t rdcnt;           /* Number of bytes read from rx fifo */
+#endif
+  uint16_t xfrd;            /* Number of bytes transferred */
   volatile uint8_t state;   /* State of state machine */
 };
 
@@ -103,16 +145,26 @@ struct lpc54_i2cdev_s
  * Private Functions
  ****************************************************************************/
 
-static int  lpc54_i2c_start(struct lpc54_i2cdev_s *priv);
-static void lpc54_i2c_stop(struct lpc54_i2cdev_s *priv);
-static int  lpc54_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
-static void lpc54_i2c_timeout(int argc, uint32_t arg, ...);
+static inline void lpc54_i2c_putreg(struct lpc54_i2cdev_s *priv,
+              unsigned int regoffset, uint32_t regval);
+static inline uint32_t lpc54_i2c_getreg(struct lpc54_i2cdev_s *priv,
+              unsigned int regoffset);
+
 static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
               uint32_t frequency);
+static void lpc54_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc54_i2c_xfrsetup(struct lpc54_i2cdev_s *priv);
+static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv);
+static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv);
+#ifndef CONFIG_I2C_POLLED
+static int  lpc54_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
+#else
+static int  lpc54_i2c_poll(struct lpc54_i2cdev_s *priv);
+#endif
 static int  lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
               FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int lpc54_i2c_reset(FAR struct i2c_master_s * dev);
+static int  lpc54_i2c_reset(FAR struct i2c_master_s * dev);
 #endif
 
 /****************************************************************************
@@ -173,7 +225,7 @@ static struct lpc54_i2cdev_s g_i2c9_dev;
 static inline void lpc54_i2c_putreg(struct lpc54_i2cdev_s *priv,
                                     unsigned int regoffset, uint32_t regval)
 {
-  putreg32(value, priv->base + regoffset);
+  putreg32(regval, priv->base + regoffset);
 }
 
 /****************************************************************************
@@ -184,37 +236,10 @@ static inline void lpc54_i2c_putreg(struct lpc54_i2cdev_s *priv,
  *
  ****************************************************************************/
 
-static inline void lpc54_i2c_getreg(struct lpc54_i2cdev_s *priv,
-                                    unsigned int regoffset)
+static inline uint32_t lpc54_i2c_getreg(struct lpc54_i2cdev_s *priv,
+                                        unsigned int regoffset)
 {
   return getreg32(priv->base + regoffset);
-}
-
-/****************************************************************************
- * Name: lpc54_wait_pendingstatus
- *
- * Description:
- *   Wait for status update to complete and clear the I2C state.
- *
- ****************************************************************************/
-
-static uint32_t lpc54_wait_pendingstatus(struct lpc54_i2cdev_s *priv)
-{
-  uint32_t regval;
-
-  /* Wait until status is no longer pending */
-
-  do
-    {
-      regval = lpc54_i2c_getreg(priv, LPC54_I2C_STAT_OFFSET);
-    }
-  while ((regval & I2C_INT_MSTPENDING) == 0);
-
-  /* Clear controller state and return the last status */
-
-  lpc43_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET,
-                   (I2C_STAT_MSTARBLOSS_MASK | I2C_STAT_MSTSTSTPERR_MASK));
-  return regval;
 }
 
 /****************************************************************************
@@ -291,57 +316,10 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
       lpc54_i2c_putreg(priv, LPC54_I2C_CLKDIV_OFFSET, regval);
 
       regval = I2C_MSTTIME_SCLLOW(best_scl) | I2C_MSTTIME_SCLHIGH(best_scl);
-      lpc54_i2c_putreg(LPC54_I2C_MSTTIME_OFFSET, regval);
+      lpc54_i2c_putreg(priv, LPC54_I2C_MSTTIME_OFFSET, regval);
 
       priv->frequency = frequency;
     }
-}
-
-/****************************************************************************
- * Name: lpc54_i2c_start
- *
- * Description:
- *   Perform a I2C transfer start
- *
- ****************************************************************************/
-
-static int lpc54_i2c_start(struct lpc54_i2cdev_s *priv)
-{
-  struct i2c_msg_s *msg = priv->msgs;
-  uint32_t regval;
-
-  /* Write the address with the R/W bit */
-
-  if ((I2C_M_READ & msg->flags) == I2C_M_READ)
-    {
-      regval = I2C_READADDR8(msg->addr);
-    }
-  else
-    {
-      regval = I2C_WRITEADDR8(msg->addr);
-    }
-
-  lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET, regval);
-
-  /* Initiate the Start */
-
-  lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTART);
-  return priv->nmsg;
-}
-
-/****************************************************************************
- * Name: lpc54_i2c_stop
- *
- * Description:
- *   Perform a I2C transfer stop
- *
- ****************************************************************************/
-
-static void lpc54_i2c_stop(struct lpc54_i2cdev_s *priv)
-{
-  (void)lpc54_wait_pendingstatus(priv);
-  lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTOP);
-  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -356,32 +334,141 @@ static void lpc54_i2c_timeout(int argc, uint32_t arg, ...)
 {
   struct lpc54_i2cdev_s *priv = (struct lpc54_i2cdev_s *)arg;
 
+#ifndef CONFIG_I2C_POLLED
   irqstate_t flags = enter_critical_section();
-  priv->state = 0xff;
+#endif
+
+  /* Disable further I2C interrupts and return to the IDLE state with the
+   * timeout result.
+   */
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
+  priv->state  = I2CSTATE_IDLE;
+  priv->result = -ETIMEDOUT;
+
+#ifndef CONFIG_I2C_POLLED
+  /* Wake up any waiters */
+
   nxsem_post(&priv->waitsem);
   leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************
- * Name: lpc32_i2c_nextmsg
+ * Name: lpc54_i2c_xfrsetup
  *
  * Description:
- *   Setup for the next message.
+ *   Setup to initiate a transfer.
  *
  ****************************************************************************/
 
-void lpc32_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
+static void lpc54_i2c_xfrsetup(struct lpc54_i2cdev_s *priv)
 {
-  priv->nmsg--;
+  struct i2c_msg_s *msg;
 
-  if (priv->nmsg > 0)
+  DEBUGASSERT(priv != NULL && priv->msgs != NULL);
+  msg = priv->msgs;
+
+  /* Disable I2C interrupts while configuring for the transfer */
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
+
+  /* Set up for the transfer */
+
+  priv->xfrd = 0;
+
+  /* Select the initial state */
+
+  if ((msg->flags & I2C_M_NORESTART) != 0)
     {
-      priv->msgs++;
-#warning Missing logic
+      /* Start condition will be ommited.  Begin the tranfer in the data
+       * phase.
+       */
+
+      if (msg->length == 0)
+        {
+          priv->state = I2CSTATE_STOP;
+        }
+      else if ((I2C_M_READ & msg->flags) == I2C_M_READ)
+        {
+          priv->state = I2CSTATE_RECEIVE;
+        }
+      else
+        {
+          priv->state = I2CSTATE_TRANSMIT;
+        }
     }
   else
     {
-      lpc54_i2c_stop(priv);
+      priv->state = I2CSTATE_START;
+    }
+
+  /* Set the I2C frequency if provided in this message.  Otherwise, use the
+   * current I2C frequency setting.
+   */
+
+  if (msg->frequency > 0)
+    {
+      (void)lpc54_i2c_setfrequency(priv, msg->frequency);
+    }
+
+  /* Clear error status bits */
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET, I2C_INT_MSTARBLOSS |
+                         I2C_INT_MSTSTSTPERR);
+
+#ifndef CONFIG_I2C_POLLED
+  /* Enable I2C master interrupts */
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_INTENSET_OFFSET, I2C_MASTER_INTS);
+#endif
+}
+
+/****************************************************************************
+ * Name: lpc54_i2c_nextmsg
+ *
+ * Description:
+ *   Called at the completion of each message.  If there are more messages,
+ *   this function will perform the setup for the next message.
+ *
+ ****************************************************************************/
+
+static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
+{
+  irqstate_t flags;
+
+  /* Disable interrupts to prevent the timeout while we make the decision
+   * here.
+   */
+
+  flags = enter_critical_section();
+
+  /* Decrement the number of messages remaining. */
+
+  if (--priv->nmsgs > 0)
+    {
+      /* There are more messages, set up for the next message */
+
+      priv->msgs++;
+      lpc54_i2c_xfrsetup(priv);
+
+      leave_critical_section(flags);
+      return false;
+    }
+  else
+    {
+      /* That was the last message... we are done. */
+      /* Cancel any timeout */
+
+      wd_cancel(priv->timeout);
+
+      /* Disable further I2C interrupts  and return to the IDLE state */
+
+      lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
+      priv->state = I2CSTATE_IDLE;
+
+      leave_critical_section(flags);
+      return true;
     }
 }
 
@@ -395,9 +482,190 @@ void lpc32_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
+static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
 {
-#warning Missing logic
+  struct i2c_msg_s *msg;
+  uint32_t status;
+  uint32_t mstate;
+
+  DEBUGASSERT(priv != NULL && priv->msgs != NULL);
+  msg = priv->msgs;
+
+  status = lpc54_i2c_getreg(priv, LPC54_I2C_STAT_OFFSET);
+
+  if (status & I2C_INT_MSTARBLOSS)
+    {
+      lpc54_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET, I2C_INT_MSTARBLOSS);
+      priv->result = -EIO;
+      return true;
+    }
+
+  if (status & I2C_INT_MSTSTSTPERR)
+    {
+      lpc54_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET, I2C_INT_MSTSTSTPERR);
+      priv->result = -EIO;
+      return true;
+    }
+
+  if ((status & I2C_INT_MSTPENDING) == 0)
+    {
+      priv->result = -EBUSY;
+      return true;
+    }
+
+  /* Get the state of the I2C module */
+
+  mstate = (status & I2C_STAT_MSTSTATE_MASK) >> I2C_STAT_MSTSTATE_SHIFT;
+
+  if ((mstate == I2C_MASTER_STATE_ADDRNAK) ||
+      (mstate == I2C_MASTER_STATE_DATANAK))
+    {
+      /* Slave NACKed last byte, issue stop and return error */
+
+      lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTOP);
+      priv->result = -EPERM;
+      priv->state  = I2CSTATE_WAITDONE;
+      return false;
+    }
+
+  switch (priv->state)
+    {
+      case I2CSTATE_START:
+        {
+          enum lpc54_i2cstate_e newstate;
+
+          if ((msg->flags & I2C_M_READ) == I2C_M_READ)
+            {
+              lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET,
+                               I2C_READADDR8(msg->addr));
+              newstate = I2CSTATE_TRANSMIT;
+            }
+          else
+            {
+              lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET,
+                               I2C_WRITEADDR8(msg->addr));
+              newstate = I2CSTATE_RECEIVE;
+            }
+
+          if (priv->xfrd >= msg->length)
+            {
+              /* No more data, setup for STOP */
+
+              newstate = I2CSTATE_STOP;
+            }
+
+          priv->state = newstate;
+
+          /* Send START condition */
+
+          lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
+                           I2C_MSTCTL_MSTSTART);
+        }
+        break;
+
+      case I2CSTATE_TRANSMIT:
+        {
+          if (mstate != I2C_MASTER_STATE_TXOK)
+            {
+              priv->result = -EINVAL;
+              return true;
+            }
+
+          lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET,
+                           msg->buffer[priv->xfrd]);
+          lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
+                           I2C_MSTCTL_MSTCONTINUE);
+          priv->xfrd++;
+
+          if (priv->xfrd >= msg->length)
+            {
+              /* No more data, schedule stop condition */
+
+              priv->state = I2CSTATE_STOP;
+            }
+        }
+        break;
+
+      case I2CSTATE_RECEIVE:
+        {
+          if (mstate != I2C_MASTER_STATE_RXAVAIL)
+            {
+              priv->result = -EINVAL;
+              return true;
+            }
+
+          msg->buffer[priv->xfrd] =
+            lpc54_i2c_getreg(priv, LPC54_I2C_MSTDAT_OFFSET);
+
+          priv->xfrd++;
+          if (priv->xfrd < msg->length)
+            {
+              lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
+                               I2C_MSTCTL_MSTCONTINUE);
+            }
+          else
+            {
+              /* No more data expected, issue NACK and STOP right away */
+
+              lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
+                               I2C_MSTCTL_MSTSTOP);
+              priv->state = I2CSTATE_WAITDONE;
+            }
+        }
+        break;
+
+      case I2CSTATE_STOP:
+        {
+          bool dostop = true;
+
+          /* Is this the last message? */
+
+          if (priv->nmsgs > 1)
+            {
+              struct i2c_msg_s *nextmsg;
+
+              /* No.. Is there a start on the next message?  If so, it
+               * should be preceded by a STOP.
+               */
+
+              nextmsg = msg + 1;
+              dostop  = ((nextmsg->flags & I2C_M_NORESTART) != 0);
+            }
+
+          if (dostop)
+            {
+              /* Stop condition is omitted, we are done. Start the next
+               * message (or return to the IDLE state if none).
+               */
+
+              return lpc54_i2c_nextmsg(priv);
+            }
+          else
+            {
+              /* Send stop condition */
+
+              lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
+                               I2C_MSTCTL_MSTSTOP);
+              priv->state = I2CSTATE_WAITDONE;
+            }
+        }
+        break;
+
+      case I2CSTATE_WAITDONE:
+        {
+          /* Start the next message (or return to the IDLE state if none). */
+
+          return lpc54_i2c_nextmsg(priv);
+        }
+        break;
+
+      case I2CSTATE_IDLE:
+      default:
+        priv->result = -EINVAL;
+        return true;
+    }
+
+  return false;
 }
 
 /****************************************************************************
@@ -408,30 +676,31 @@ static void lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_I2C_POLLED
 static int lpc54_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   struct lpc54_i2cdev_s *priv = (struct lpc54_i2cdev_s *)arg;
-  struct i2c_msg_s *msg;
-  uint32_t state;
+  bool done;
 
   DEBUGASSERT(priv != NULL);
 
-  state = lpc54_i2c_getreg(priv, LPC54_I2C_STAT_OFFSET);
-  msg  = priv->msgs;
-#warning Missing logic
+  /* Run the I2C state machine */
 
-  priv->state = state;
-  switch (state)
+  done = lpc54_i2c_statemachine(priv);
+  if (done)
     {
-#warning Missing logic
-    default:
-      lpc54_i2c_stop(priv);
-      break;
+      /* Disable further I2C interrupts. */
+
+      lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
+
+      /* Wake up wake up any waiters */
+
+      nxsem_post(&priv->waitsem);
     }
 
-#warning Missing logic
   return OK;
 }
+#endif /* CONFIG_I2C_POLLED */
 
 /****************************************************************************
  * Name: lpc54_i2c_transfer
@@ -455,23 +724,33 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Set up for the transfer */
 
-  priv->wrcnt = 0;
-  priv->rdcnt = 0;
+  priv->xfrd  = 0;
   priv->msgs  = msgs;
-  priv->nmsg  = count;
+  priv->nmsgs = count;
 
-  /* Configure the I2C frequency.
-   * REVISIT: Note that the frequency is set only on the first message.
-   * This could be extended to support different transfer frequencies for
-   * each message segment.
-   */
+  /* Set up the transfer timeout */
+  /* wd_start(priv->timeout ...);  */
 
-  lpc54_i2c_setfrequency(priv, msgs->frequency);
+  wd_start(priv->timeout, I2C_WDOG_TIMEOUT, lpc54_i2c_timeout, 1,
+           (uint32_t)priv);
 
-  /* Perform the transfer */
+  /* Initiate the transfer */
 
-  ret = lpc54_i2c_start(priv);
+  lpc54_i2c_xfrsetup(priv);
 
+  /* Loop until the transfer is complete or until a timeout occurs */
+
+  do
+    {
+#ifndef CONFIG_I2C_POLLED
+       nxsem_wait(&priv->waitsem);
+#else
+       (void)lpc54_i2c_statemachine(priv);
+#endif
+    }
+  while (priv->state != I2CSTATE_IDLE);
+
+  ret = priv->result;
   nxsem_post(&priv->exclsem);
   return ret;
 }
@@ -515,7 +794,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   struct lpc54_i2cdev_s *priv;
   irqstate_t flags;
   uint32_t regval;
-  uint32_t deffreq;
 
   flags = enter_critical_section();
 
@@ -542,8 +820,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c0_dev;
       priv->base     = LPC54_FLEXCOMM0_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM0;
       priv->fclock   = BOARD_FLEXCOMM0_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM0;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -553,10 +833,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM0 function clock */
 
       putreg32(BOARD_FLEXCOMM0_CLKSEL, LPC54_SYSCON_FCLKSEL0);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C0_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -578,8 +854,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c1_dev;
       priv->base     = LPC54_FLEXCOMM1_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM1;
       priv->fclock   = BOARD_FLEXCOMM1_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM1;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -589,10 +867,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM1 function clock */
 
       putreg32(BOARD_FLEXCOMM1_CLKSEL, LPC54_SYSCON_FCLKSEL1);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C1_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -614,8 +888,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c2_dev;
       priv->base     = LPC54_FLEXCOMM2_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM2;
       priv->fclock   = BOARD_FLEXCOMM2_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM2;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -625,10 +901,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM2 function clock */
 
       putreg32(BOARD_FLEXCOMM2_CLKSEL, LPC54_SYSCON_FCLKSEL2);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C2_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -650,8 +922,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c3_dev;
       priv->base     = LPC54_FLEXCOMM3_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM3;
       priv->fclock   = BOARD_FLEXCOMM3_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM3;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -661,10 +935,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM3 function clock */
 
       putreg32(BOARD_FLEXCOMM3_CLKSEL, LPC54_SYSCON_FCLKSEL3);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C3_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -686,8 +956,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c4_dev;
       priv->base     = LPC54_FLEXCOMM4_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM4;
       priv->fclock   = BOARD_FLEXCOMM4_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM4;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -697,10 +969,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM4 function clock */
 
       putreg32(BOARD_FLEXCOMM4_CLKSEL, LPC54_SYSCON_FCLKSEL4);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C4_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -722,8 +990,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c5_dev;
       priv->base     = LPC54_FLEXCOMM5_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM5;
       priv->fclock   = BOARD_FLEXCOMM5_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM5;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -733,10 +1003,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM5 function clock */
 
       putreg32(BOARD_FLEXCOMM5_CLKSEL, LPC54_SYSCON_FCLKSEL5);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C5_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -758,8 +1024,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c6_dev;
       priv->base     = LPC54_FLEXCOMM6_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM6;
       priv->fclock   = BOARD_FLEXCOMM6_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM6;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -769,10 +1037,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM6 function clock */
 
       putreg32(BOARD_FLEXCOMM6_CLKSEL, LPC54_SYSCON_FCLKSEL6);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C6_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -794,8 +1058,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c7_dev;
       priv->base     = LPC54_FLEXCOMM7_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM7;
       priv->fclock   = BOARD_FLEXCOMM7_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM7;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -805,10 +1071,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM7 function clock */
 
       putreg32(BOARD_FLEXCOMM7_CLKSEL, LPC54_SYSCON_FCLKSEL7);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C7_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -830,8 +1092,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c8_dev;
       priv->base     = LPC54_FLEXCOMM8_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM8;
       priv->fclock   = BOARD_FLEXCOMM8_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM8;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -841,10 +1105,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM8 function clock */
 
       putreg32(BOARD_FLEXCOMM8_CLKSEL, LPC54_SYSCON_FCLKSEL8);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C8_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -866,8 +1126,10 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
       priv           = &g_i2c9_dev;
       priv->base     = LPC54_FLEXCOMM9_BASE;
-      priv->irq      = LPC54_IRQ_FLEXCOMM9;
       priv->fclock   = BOARD_FLEXCOMM9_FCLK;
+#ifndef CONFIG_I2C_POLLED
+      priv->irq      = LPC54_IRQ_FLEXCOMM9;
+#endif
 
       /* Configure I2C pins (defined in board.h) */
 
@@ -877,10 +1139,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
       /* Set up the FLEXCOMM9 function clock */
 
       putreg32(BOARD_FLEXCOMM9_CLKSEL, LPC54_SYSCON_FCLKSEL9);
-
-      /* Set the default I2C frequency */
-
-      deffreq = I2C9_DEFAULT_FREQUENCY;
     }
   else
 #endif
@@ -899,15 +1157,16 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   regval  = lpc54_i2c_getreg(priv, LPC54_I2C_CFG_OFFSET);
   regval &= I2C_CFG_ALLENABLES;
   regval |= I2C_CFG_MSTEN;
-  lpc54_i2c_putreg(priv, LPC54_I2C_CFG_OFFSET, regval)
+  lpc54_i2c_putreg(priv, LPC54_I2C_CFG_OFFSET, regval);
 
   /* Set the default I2C frequency */
 
-  lpc54_i2c_setfrequency(priv, deffreq);
+  lpc54_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
   /* Initialize semaphores */
 
   nxsem_init(&priv->exclsem, 0, 1);
+#ifndef CONFIG_I2C_POLLED
   nxsem_init(&priv->waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
@@ -915,23 +1174,28 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
    */
 
   nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+#endif
 
   /* Allocate a watchdog timer */
 
   priv->timeout = wd_create();
   DEBUGASSERT(priv->timeout != 0);
 
+#ifndef CONFIG_I2C_POLLED
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irq, lpc54_i2c_interrupt, priv);
+#endif
 
   /* Disable interrupts at the I2C peripheral */
 
   lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_INT_ALL);
 
+#ifndef CONFIG_I2C_POLLED
   /* Enable interrupts at the NVIC */
 
   up_enable_irq(priv->irq);
+#endif
   return &priv->dev;
 }
 
@@ -949,22 +1213,24 @@ int lpc54_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   uint32_t regval;
 
   /* Disable I2C interrupts */
-#warning Missing logic
+
+  lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
 
   /* Disable the I2C peripheral */
 
   regval  = lpc54_i2c_getreg(priv, LPC54_I2C_CFG_OFFSET);
   regval &= I2C_CFG_ALLENABLES;
   regval &= ~I2C_CFG_MSTEN;
-  lpc54_i2c_putreg(priv, LPC54_I2C_CFG_OFFSET, regval)
+  lpc54_i2c_putreg(priv, LPC54_I2C_CFG_OFFSET, regval);
 
- #warning Missing logic
-
+#ifndef CONFIG_I2C_POLLED
   /* Disable the Flexcomm interface at the NVIC and detach the interrupt. */
 
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
+#endif
+
   return OK;
 }
 
-#endif /* HAVE_SPI_MASTER_DEVICE */
+#endif /* HAVE_I2C_MASTER_DEVICE */
