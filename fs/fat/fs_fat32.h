@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -228,6 +228,12 @@
 #ifdef CONFIG_FAT_LFN
 
 /* Sizes and limits */
+
+# if CONFIG_FAT_MAXFNAME > CONFIG_NAME_MAX
+#   warning CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
+#   undef  CONFIG_FAT_MAXFNAME
+#   define CONFIG_FAT_MAXFNAME CONFIG_NAME_MAX
+# endif
 
 # ifndef CONFIG_FAT_MAXFNAME   /* The maximum support filename can be limited */
 #   define LDIR_MAXFNAME   255 /* Max unicode characters in file name */

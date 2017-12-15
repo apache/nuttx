@@ -340,7 +340,7 @@ static int lpc54_i2c_start(struct lpc54_i2cdev_s *priv)
 static void lpc54_i2c_stop(struct lpc54_i2cdev_s *priv)
 {
   (void)lpc54_wait_pendingstatus(priv);
-  lpc54_i2c_putreg(pric, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTOP);
+  lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTOP);
   nxsem_post(&priv->waitsem);
 }
 
