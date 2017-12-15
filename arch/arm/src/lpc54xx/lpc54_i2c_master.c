@@ -86,7 +86,11 @@
 
 /* 20 Millisecond timeout in system clock ticks. */
 
-#define I2C_WDOG_TIMEOUT MSEC2TICK(20)
+#ifdef CONFIG_DEBUG_I2C_INFO
+#  define I2C_WDOG_TIMEOUT MSEC2TICK(50)
+#else
+#  define I2C_WDOG_TIMEOUT MSEC2TICK(20)
+#endif
 
 /* Default I2C frequency */
 
@@ -114,7 +118,7 @@ enum lpc54_i2cstate_e
   I2CSTATE_RECEIVE,
   I2CSTATE_START,
   I2CSTATE_STOP,
-  I2CSTATE_WAITDONE
+  I2CSTATE_WAITSTOP
 };
 
 /* This structure provides the overall state of the I2C driver */
@@ -261,6 +265,8 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
   uint32_t best_err;
   uint32_t regval;
 
+  i2cinfo("frequency %ld (%ld)\n", (long)frequency, (long)priv->frequency);
+
   /* Has the I2C frequency changed? */
 
   if (frequency != priv->frequency)
@@ -338,13 +344,19 @@ static void lpc54_i2c_timeout(int argc, uint32_t arg, ...)
   irqstate_t flags = enter_critical_section();
 #endif
 
+  i2cerr("ERROR: Timeout! state=%u\n", priv->state);
+
   /* Disable further I2C interrupts and return to the IDLE state with the
    * timeout result.
    */
 
   lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
   priv->state  = I2CSTATE_IDLE;
-  priv->result = -ETIMEDOUT;
+
+  if (priv->result == OK)
+    {
+      priv->result = -ETIMEDOUT;
+    }
 
 #ifndef CONFIG_I2C_POLLED
   /* Wake up any waiters */
@@ -443,15 +455,18 @@ static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
 
   flags = enter_critical_section();
 
+  i2cinfo("nmsgs=%u\n", priv->nmsgs - 1);
+
   /* Decrement the number of messages remaining. */
 
-  if (--priv->nmsgs > 0)
+  if (--priv->nmsgs > 0 && priv->result == OK)
     {
       /* There are more messages, set up for the next message */
 
       priv->msgs++;
       lpc54_i2c_xfrsetup(priv);
 
+      i2cinfo("state=%u\n", priv->state);
       leave_critical_section(flags);
       return false;
     }
@@ -467,6 +482,7 @@ static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
       lpc54_i2c_putreg(priv, LPC54_I2C_INTENCLR_OFFSET, I2C_MASTER_INTS);
       priv->state = I2CSTATE_IDLE;
 
+      i2cinfo("state=%u\n", priv->state);
       leave_critical_section(flags);
       return true;
     }
@@ -491,10 +507,14 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
   DEBUGASSERT(priv != NULL && priv->msgs != NULL);
   msg = priv->msgs;
 
+  i2cinfo("state=%u\n", priv->state);
+
   status = lpc54_i2c_getreg(priv, LPC54_I2C_STAT_OFFSET);
 
   if (status & I2C_INT_MSTARBLOSS)
     {
+      i2cerr("ERROR: Arbitation loss\n");
+
       lpc54_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET, I2C_INT_MSTARBLOSS);
       priv->result = -EIO;
       return true;
@@ -502,6 +522,8 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
 
   if (status & I2C_INT_MSTSTSTPERR)
     {
+      i2cerr("ERROR: Start/stop error\n");
+
       lpc54_i2c_putreg(priv, LPC54_I2C_STAT_OFFSET, I2C_INT_MSTSTSTPERR);
       priv->result = -EIO;
       return true;
@@ -509,6 +531,8 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
 
   if ((status & I2C_INT_MSTPENDING) == 0)
     {
+      i2cerr("ERROR: Busy\n");
+
       priv->result = -EBUSY;
       return true;
     }
@@ -516,6 +540,7 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
   /* Get the state of the I2C module */
 
   mstate = (status & I2C_STAT_MSTSTATE_MASK) >> I2C_STAT_MSTSTATE_SHIFT;
+  i2cinfo("mstate=%u\n", mstate);
 
   if ((mstate == I2C_MASTER_STATE_ADDRNAK) ||
       (mstate == I2C_MASTER_STATE_DATANAK))
@@ -524,7 +549,9 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
 
       lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET, I2C_MSTCTL_MSTSTOP);
       priv->result = -EPERM;
-      priv->state  = I2CSTATE_WAITDONE;
+      priv->state  = I2CSTATE_WAITSTOP;
+
+      i2cerr("ERROR:  NAKed, state=%u\n", priv->state);
       return false;
     }
 
@@ -538,13 +565,13 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
             {
               lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET,
                                I2C_READADDR8(msg->addr));
-              newstate = I2CSTATE_TRANSMIT;
+              newstate = I2CSTATE_RECEIVE;
             }
           else
             {
               lpc54_i2c_putreg(priv, LPC54_I2C_MSTDAT_OFFSET,
                                I2C_WRITEADDR8(msg->addr));
-              newstate = I2CSTATE_RECEIVE;
+              newstate = I2CSTATE_TRANSMIT;
             }
 
           if (priv->xfrd >= msg->length)
@@ -567,6 +594,9 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
         {
           if (mstate != I2C_MASTER_STATE_TXOK)
             {
+              i2cerr("ERROR bad state=%u, expected %u\n",
+                     mstate, I2C_MASTER_STATE_TXOK);
+
               priv->result = -EINVAL;
               return true;
             }
@@ -590,6 +620,9 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
         {
           if (mstate != I2C_MASTER_STATE_RXAVAIL)
             {
+              i2cerr("ERROR bad state=%u, expected %u\n",
+                     mstate, I2C_MASTER_STATE_RXAVAIL);
+
               priv->result = -EINVAL;
               return true;
             }
@@ -609,7 +642,7 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
 
               lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
                                I2C_MSTCTL_MSTSTOP);
-              priv->state = I2CSTATE_WAITDONE;
+              priv->state = I2CSTATE_WAITSTOP;
             }
         }
         break;
@@ -646,12 +679,12 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
 
               lpc54_i2c_putreg(priv, LPC54_I2C_MSTCTL_OFFSET,
                                I2C_MSTCTL_MSTSTOP);
-              priv->state = I2CSTATE_WAITDONE;
+              priv->state = I2CSTATE_WAITSTOP;
             }
         }
         break;
 
-      case I2CSTATE_WAITDONE:
+      case I2CSTATE_WAITSTOP:
         {
           /* Start the next message (or return to the IDLE state if none). */
 
@@ -665,6 +698,7 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
         return true;
     }
 
+  i2cinfo("state=%u\n", priv->state);
   return false;
 }
 
@@ -716,7 +750,8 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
   struct lpc54_i2cdev_s *priv = (struct lpc54_i2cdev_s *)dev;
   int ret;
 
-  DEBUGASSERT(dev != NULL);
+  i2cinfo("count=%d\n", count);
+  DEBUGASSERT(dev != NULL && msgs != NULL);
 
   /* Get exclusive access to the I2C bus */
 
@@ -724,15 +759,16 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Set up for the transfer */
 
-  priv->xfrd  = 0;
-  priv->msgs  = msgs;
-  priv->nmsgs = count;
+  priv->xfrd   = 0;
+  priv->msgs   = msgs;
+  priv->nmsgs  = count;
+  priv->result = OK;
 
   /* Set up the transfer timeout */
   /* wd_start(priv->timeout ...);  */
 
-  wd_start(priv->timeout, I2C_WDOG_TIMEOUT, lpc54_i2c_timeout, 1,
-           (uint32_t)priv);
+  wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT, lpc54_i2c_timeout,
+           1, (uint32_t)priv);
 
   /* Initiate the transfer */
 
@@ -751,6 +787,8 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
   while (priv->state != I2CSTATE_IDLE);
 
   ret = priv->result;
+  i2cinfo("Done, result=%d\n", ret);
+
   nxsem_post(&priv->exclsem);
   return ret;
 }
@@ -794,6 +832,8 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   struct lpc54_i2cdev_s *priv;
   irqstate_t flags;
   uint32_t regval;
+
+  i2cinfo("port=%d\n", port);
 
   flags = enter_critical_section();
 
@@ -1143,6 +1183,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   else
 #endif
     {
+      i2cerr("ERROR: Unsupported port=%d\n", port);
       return NULL;
     }
 

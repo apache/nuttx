@@ -48,21 +48,7 @@ STATUS
     were configured.  Now the LCD appears to be fully functional.
   2017-12-15:  Added an I2C driver.  This is the first step on the road
     to getting support for the capacitive touchscreen on the TFT panel.
-    Not yet functional:
-
-      nsh> i2c dev -b 2 3 77
-           0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-      00:          -- -- -- -- -- -- -- -- -- -- -- -- --
-      10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      70: -- -- -- -- -- -- -- --
-
-      I believe that the on-board Accelerometer, Audio Codec, and touch panel controller should have been detected (but perhaps that are not properly
-      powered in this configuration?)
+    The I2C driver appears to be functional but is not yet well-tested.
 
 Configurations
 ==============
@@ -213,3 +199,21 @@ Configurations
          Bus 7: NO
          Bus 8: NO
          Bus 9: NO
+         nsh> i2c dev -b 2 3 77
+              0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+         00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+         10: -- -- -- -- -- -- -- -- -- -- 1a -- -- 1d -- --
+         20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         70: -- -- -- -- -- -- -- --
+
+        I believe that the on-board Accelerometer, Audio Codec, and touch
+        panel controller should have been detected (but perhaps the touch
+        panel is not powered in this configuration?)
+
+          Codec I2C address:        0x1a
+          Accel I2C address:        0x1d
+          Touch panel I2C address:  0x38

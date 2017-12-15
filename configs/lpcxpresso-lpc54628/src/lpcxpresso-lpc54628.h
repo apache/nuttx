@@ -110,7 +110,8 @@
   (GPIO_PORT3 | GPIO_PIN31 | GPIO_VALUE_ZERO | GPIO_OUTPUT | \
    GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
-/* The integrated touchscreen uses one GPIO out and one GPIO interrupting GPIO input;
+/* The integrated touchscreen uses one GPIO out and one GPIO interrupting
+ * GPIO input:
  *
  *   P2.27  CT_RSTn
  *   P4.0   INTR
@@ -119,6 +120,12 @@
 #define GPIO_LCD_CTRSTn \
   (GPIO_PORT2 | GPIO_PIN27 | GPIO_VALUE_ZERO | GPIO_OUTPUT | \
    GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
+
+/* I2C addresses (7-bit): */
+
+#define CODEC_I2C_ADDRESS   0x1a
+#define ACCEL_I2C_ADDRESS   0x1d
+#define TSC_I2C_ADDRESS     0x38
 
 /****************************************************************************
  * Public Types
