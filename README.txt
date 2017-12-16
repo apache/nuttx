@@ -1657,6 +1657,8 @@ nuttx/
  |   |   `- README.txt
  |   |- hymini-stm32v/
  |   |   `- README.txt
+ |   |- indium-f7
+ |   |   `- README.txt
  |   |- kwikstik-k40/
  |   |   `- README.txt
  |   |- launchxl-tms57004/
