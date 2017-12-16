@@ -46,6 +46,10 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/i2c/i2c_master.h>
 
+#ifdef CONFIG_BUTTONS_LOWER
+#  include <nuttx/input/buttons.h>
+#endif
+
 #include "lpc54_config.h"
 #include "lpc54_i2c_master.h"
 #include "lpcxpresso-lpc54628.h"
@@ -175,6 +179,16 @@ int lpc54_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

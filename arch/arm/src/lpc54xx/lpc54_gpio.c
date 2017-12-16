@@ -59,7 +59,6 @@
 /* Default input pin configuration */
 
 #define PORTPIN_MASK      (GPIO_PORT_MASK|GPIO_PIN_MASK)
-#define DEFAULT_INPUT     (GPIO_INPUT|GPIO_PULLUP|GPIO_MODE_DIGITAL)
 
 /* Pin types */
 
@@ -173,8 +172,7 @@ static void lpc54_setpinfunction(unsigned int port, unsigned int pin,
  *
  ****************************************************************************/
 
-static inline void lpc54_gpio_input(lpc54_pinset_t cfgset,
-                                    unsigned int port, unsigned int pin)
+static inline void lpc54_gpio_input(unsigned int port, unsigned int pin)
 {
   uintptr_t regaddr;
   uint32_t regval;
@@ -349,7 +347,6 @@ static void lpc54_gpio_iocon(lpc54_pinset_t cfgset, unsigned int port,
 
 int lpc54_gpio_config(lpc54_pinset_t cfgset)
 {
-  lpc54_pinset_t definput;
   unsigned int port;
   unsigned int pin;
 
@@ -369,8 +366,7 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
        * configuration.
        */
 
-      definput = (cfgset & PORTPIN_MASK) | DEFAULT_INPUT;
-      lpc54_gpio_input(definput, port, pin);
+      lpc54_gpio_input(port, pin);
 
       /* Set the IOCON bits */
 
@@ -387,7 +383,9 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset)
         case GPIO_INTFE:   /* GPIO interrupt falling edge */
         case GPIO_INTRE:   /* GPIO interrupt rising edge */
         case GPIO_INTBOTH: /* GPIO interrupt both edges */
-          lpc54_gpio_interrupt(cfgset, port, pin);
+        case GPIO_INTLOW:  /* GPIO interrupt low level */
+        case GPIO_INTHIGH: /* GPIO interrupt high level */
+          lpc54_gpio_interrupt(cfgset);
           break;
 #endif
 

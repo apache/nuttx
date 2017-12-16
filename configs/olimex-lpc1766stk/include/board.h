@@ -194,7 +194,7 @@
 #define BOARD_JOYSTICK_LEFT        6
 #define BOARD_JOYSTICK_RIGHT       7
 
-#define BOARD_NUM_BUTTONS          8
+#define NUM_BUTTONS                8
 
 #define BOARD_BUTTON_BUTTON1_BIT   (1 << BOARD_BUTTON_1)
 #define BOARD_BUTTON_BUTTON2_BIT   (1 << BOARD_BUTTON_2)

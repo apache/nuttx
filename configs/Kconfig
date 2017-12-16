@@ -333,6 +333,8 @@ config ARCH_BOARD_LPCXPRESSO_LPC54628
 	bool "NXP LPCXpresso LPC54628"
 	depends on ARCH_CHIP_LPC54628
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		LPCXpresso LPC54626 board featuring the NXP LPC54628 MCU.
 

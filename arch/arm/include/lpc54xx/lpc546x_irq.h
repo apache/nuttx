@@ -51,7 +51,7 @@
 #define LPC54_IRQ_GINT0         (LPC54_IRQ_EXTINT+2)   /* GPIO group 0 */
 #define LPC54_IRQ_GINT1         (LPC54_IRQ_EXTINT+3)   /* GPIO group 1 */
 #define LPC54_IRQ_PININT0       (LPC54_IRQ_EXTINT+4)   /* Pin interrupt 0 or pattern match engine slice 0 */
-#define LPC54_IRQ_PININT1       (LPC54_IRQ_EXTINT+5)   /* Pin interrupt 1or pattern match engine slice 1 */
+#define LPC54_IRQ_PININT1       (LPC54_IRQ_EXTINT+5)   /* Pin interrupt 1 or pattern match engine slice 1 */
 #define LPC54_IRQ_PININT2       (LPC54_IRQ_EXTINT+6)   /* Pin interrupt 2 or pattern match engine slice 2 */
 #define LPC54_IRQ_PININT3       (LPC54_IRQ_EXTINT+7)   /* Pin interrupt 3 or pattern match engine slice 3 */
 #define LPC54_IRQ_UTICK         (LPC54_IRQ_EXTINT+8)   /* Micro-tick Timer */

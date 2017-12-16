@@ -52,6 +52,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "lpc54_gpio.h"
 #include "lpc54_irq.h"
 
 /****************************************************************************

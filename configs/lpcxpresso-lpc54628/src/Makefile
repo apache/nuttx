@@ -42,6 +42,10 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += lpc54_autoleds.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += lpc54_buttons.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc54_appinit.c
 endif

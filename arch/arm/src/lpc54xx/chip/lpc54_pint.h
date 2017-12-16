@@ -113,7 +113,6 @@
 
 /* Pattern match interrupt bit-slice source */
 
-
 /* PINTSELn=1 indicates that PINSETn is the source to bit slice m. */
 
 #define PINT_PMSRC_PINTSEL0       0

@@ -93,8 +93,13 @@
  * P0.6 are also used as EMC_D2, EMC_D3, and EMC_D4, respectively.
  *
  * So SW5 is really the only button that that is generally available for
- * software usage.
+ * software usage.  When pressed, it will be sensed low.
+ *
+ * P1.1 is a Type D pin.
  */
+
+#define GPIO_BUTTON_USER \
+  (GPIO_PORT1 | GPIO_PIN1 | GPIO_INTBOTH | GPIO_MODE_DIGITAL | GPIO_FILTER_ON)
 
 /* LCD/TSC definitions ******************************************************/
 /* The backlight is controlled by P3.31 and is intended to connect via PWM

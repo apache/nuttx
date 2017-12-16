@@ -57,10 +57,10 @@
  ************************************************************************************/
 /* Bit-encoded input to lpc54_gpio_config() ******************************************/
 
-/* 32-Bit Encoding: .... .... TTTT TTTT  FFFF MM.V PPPN NNNN
+/* 32-Bit Encoding: .... .... TTTT TTTT  FFFF FMMV PPPN NNNN
  *
  *   Special Pin Functions: TTTT TTTT
- *   Pin Function:          FFFF
+ *   Pin Function:          FFFF F
  *   Pin Mode bits:         MM
  *   Initial value:         V (output pins)
  *   Port number:           PPP (0-5)
@@ -115,47 +115,54 @@
 /* Pin Function bits:
  * Only meaningful when the GPIO function is GPIO_PIN
  *
- * .... .... .... ....  FFFF .... .... ....
+ * .... .... .... ....  FFFF F... .... ....
  */
 
-#define GPIO_FUNC_SHIFT         (12)    /* Bits 12-15: GPIO mode */
-#define GPIO_FUNC_MASK          (15 << GPIO_FUNC_SHIFT)
-#  define GPIO_INPUT            (0 << GPIO_FUNC_SHIFT)  /* 0000 GPIO input pin */
-#  define GPIO_INTFE            (1 << GPIO_FUNC_SHIFT)  /* 0001 GPIO interrupt falling edge */
-#  define GPIO_INTRE            (2 << GPIO_FUNC_SHIFT)  /* 0010 GPIO interrupt rising edge */
-#  define GPIO_INTBOTH          (3 << GPIO_FUNC_SHIFT)  /* 0011 GPIO interrupt both edges */
-#  define GPIO_OUTPUT           (4 << GPIO_FUNC_SHIFT)  /* 0100 GPIO outpout pin */
-#  define GPIO_ALT1             (5 << GPIO_FUNC_SHIFT)  /* 0101 Alternate function 1 */
-#  define GPIO_ALT2             (6 << GPIO_FUNC_SHIFT)  /* 0110 Alternate function 2 */
-#  define GPIO_ALT3             (7 << GPIO_FUNC_SHIFT)  /* 0111 Alternate function 3 */
-#  define GPIO_ALT4             (8 << GPIO_FUNC_SHIFT)  /* 1000 Alternate function 4 */
-#  define GPIO_ALT5             (9 << GPIO_FUNC_SHIFT)  /* 1001 Alternate function 5 */
-#  define GPIO_ALT6             (10 << GPIO_FUNC_SHIFT) /* 1010 Alternate function 6 */
-#  define GPIO_ALT7             (11 << GPIO_FUNC_SHIFT) /* 1011 Alternate function 7 */
+#define GPIO_FUNC_SHIFT         (11)    /* Bits 11-15: GPIO mode */
+#define GPIO_FUNC_MASK          (0x1f << GPIO_FUNC_SHIFT)
+#  define GPIO_INPUT            (0x00 << GPIO_FUNC_SHIFT)  /* 00000 GPIO input pin */
+#  define GPIO_OUTPUT           (0x01 << GPIO_FUNC_SHIFT)  /* 00001 GPIO output pin */
 
-#define GPIO_EDGE_SHIFT         (12)      /* Bits 12-13: Interrupt edge bits */
-#define GPIO_EDGE_MASK          (3 << GPIO_EDGE_SHIFT)
+#  define GPIO_INTFE            (0x09 << GPIO_FUNC_SHIFT)  /* 01001 GPIO interrupt falling edge */
+#  define GPIO_INTRE            (0x0a << GPIO_FUNC_SHIFT)  /* 01010 GPIO interrupt rising edge */
+#  define GPIO_INTBOTH          (0x0b << GPIO_FUNC_SHIFT)  /* 01011 GPIO interrupt both edges */
+#  define GPIO_INTLOW           (0x0d << GPIO_FUNC_SHIFT)  /* 01101 GPIO interrupt low level */
+#  define GPIO_INTHIGH          (0x0e << GPIO_FUNC_SHIFT)  /* 01110 GPIO interrupt high level */
 
-#define GPIO_INOUT_MASK         GPIO_OUTPUT
-#define GPIO_FE_MASK            GPIO_INTFE
-#define GPIO_RE_MASK            GPIO_INTRE
+#  define GPIO_ALT1             (0x11 << GPIO_FUNC_SHIFT)  /* 10001 Alternate function 1 */
+#  define GPIO_ALT2             (0x12 << GPIO_FUNC_SHIFT)  /* 10010 Alternate function 2 */
+#  define GPIO_ALT3             (0x13 << GPIO_FUNC_SHIFT)  /* 10011 Alternate function 3 */
+#  define GPIO_ALT4             (0x14 << GPIO_FUNC_SHIFT)  /* 10100 Alternate function 4 */
+#  define GPIO_ALT5             (0x15 << GPIO_FUNC_SHIFT)  /* 10101 Alternate function 5 */
+#  define GPIO_ALT6             (0x16 << GPIO_FUNC_SHIFT)  /* 10110 Alternate function 6 */
+#  define GPIO_ALT7             (0x17 << GPIO_FUNC_SHIFT)  /* 10111 Alternate function 7 */
 
-#define GPIO_ISGPIO(ps)         ((uint16_t(ps) & GPIO_FUNC_MASK) <= GPIO_OUTPUT)
-#define GPIO_ISALT(ps)          ((uint16_t(ps) & GPIO_FUNC_MASK) > GPIO_OUTPUT)
-#define GPIO_ISINPUT(ps)        (((ps) & GPIO_FUNC_MASK) == GPIO_INPUT)
-#define GPIO_ISOUTPUT(ps)       (((ps) & GPIO_FUNC_MASK) == GPIO_OUTPUT)
-#define GPIO_ISINORINT(ps)      (((ps) & GPIO_INOUT_MASK) == 0)
-#define GPIO_ISOUTORALT(ps)     (((ps) & GPIO_INOUT_MASK) != 0)
-#define GPIO_ISINTERRUPT(ps)    (GPIO_ISOUTPUT(ps) && !GPIO_ISINPUT(ps))
-#define GPIO_ISFE(ps)           (((ps) & GPIO_FE_MASK) != 0)
-#define GPIO_ISRE(ps)           (((ps) & GPIO_RE_MASK) != 0)
+#define GPIO_GPIO_MASK          (0x1e << GPIO_FUNC_SHIFT)  /* 1111x */
+#define GPIO_GPIO_CODE          (0x00 << GPIO_FUNC_SHIFT)  /* 0000x */
+#define GPIO_IS_GPIO(ps)        (((uint32_t)(ps) & GPIO_GPIO_MASK) == GPIO_GPIO_CODE)
+#define GPIO_IS_GPIOINPUT(ps)   ((uint32_t)(ps) == GPIO_INPUT)
+#define GPIO_IS_GPIOOUTPUT(ps)  ((uint32_t)(ps) == GPIO_OUTPUT)
+
+#define GPIO_INTR_MASK          (0x18 << GPIO_FUNC_SHIFT)  /* 11xxx */
+#define GPIO_INTR_CODE          (0x08 << GPIO_FUNC_SHIFT)  /* 01xxx */
+#define GPIO_IS_INTR(ps)        (((uint32_t)(ps) & GPIO_INTR_MASK) == GPIO_INTR_CODE)
+
+#define GPIO_TRIG_MASK          (0x18 << GPIO_FUNC_SHIFT)  /* 111xx */
+#define GPIO_TRIG_LEVEL_CODE    (0x08 << GPIO_FUNC_SHIFT)  /* 010xx */
+#define GPIO_TRIG_EDGE_CODE     (0x0c << GPIO_FUNC_SHIFT)  /* 011xx */
+#define GPIO_IS_INTLEVEL(ps)    (((uint32_t)(ps) & GPIO_TRIG_MASK) == GPIO_TRIG_LEVEL_CODE)
+#define GPIO_IS_INTEDGE(ps)     (((uint32_t)(ps) & GPIO_TRIG_MASK) == GPIO_TRIG_EDGE_CODE)
+
+#define GPIO_ALT_MASK           (0x18 << GPIO_FUNC_SHIFT)  /* 11xxx */
+#define GPIO_ALT_CODE           (0x10 << GPIO_FUNC_SHIFT)  /* 10xxx */
+#define GPIO_IS_ALT(ps)         (((uint32_t)(ps) & GPIO_ALT_MASK) == GPIO_ALT_CODE)
 
 /* Pin Mode: MM
  *
- * .... .... .... ....  .... MM.. .... ....
+ * .... .... .... ....  .... .MM. .... ....
  */
 
-#define GPIO_MODE_SHIFT         (10)      /* Bits 10-11: Pin pull-up mode */
+#define GPIO_MODE_SHIFT         (9)      /* Bits 9-10: Pin pull-up mode */
 #define GPIO_MODE_MASK          (3 << GPIO_MODE_SHIFT)
 #  define GPIO_FLOAT            (IOCON_MODE_FLOAT    << GPIO_MODE_SHIFT) /* Neither pull-up nor -down */
 #  define GPIO_PULLDOWN         (IOCON_MODE_PULLDOWN << GPIO_MODE_SHIFT) /* Pull-down resistor enabled */
@@ -163,13 +170,18 @@
 #  define GPIO_REPEATER         (IOCON_MODE_REPEATER << GPIO_MODE_SHIFT) /* Repeater mode enabled */
 
 /* Initial value: V
+ *
+ * .... .... .... ....  .... ...V .... ....
  */
 
 #define GPIO_VALUE              (1 << 8)  /* Bit 8: Initial GPIO output value */
 #  define GPIO_VALUE_ONE        GPIO_VALUE
 #  define GPIO_VALUE_ZERO       (0)
 
-/* Port number: PPP (0-5) */
+/* Port number: PPP (0-5)
+ *
+ * .... .... .... ....  .... .... PPP. ....
+ */
 
 #define GPIO_PORT_SHIFT         (5)       /* Bit 5-7:  Port number */
 #define GPIO_PORT_MASK          (7 << GPIO_PORT_SHIFT)
@@ -180,7 +192,10 @@
 #  define GPIO_PORT4            (4 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT5            (5 << GPIO_PORT_SHIFT)
 
-/* Pin number: NNNNN (0-31) */
+/* Pin number: NNNNN (0-31)
+ *
+ * .... .... .... ....  .... .... ...N NNNN
+ */
 
 #define GPIO_PIN_SHIFT          0         /* Bits 0-4: GPIO number: 0-31 */
 #define GPIO_PIN_MASK           (31 << GPIO_PIN_SHIFT)
@@ -277,7 +292,20 @@ int lpc54_gpio_config(lpc54_pinset_t cfgset);
  ************************************************************************************/
 
 #ifdef CONFIG_LPC54_GPIOIRQ
-void lpc54_gpio_interrupt(lpc54_pinset_t pinset);
+int lpc54_gpio_interrupt(lpc54_pinset_t pinset);
+#endif
+
+/************************************************************************************
+ * Name: lpc54_gpio_irqno
+ *
+ * Description:
+ *   Returns the IRQ number that was associated with an interrupt pin after it was
+ *   configured.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC54_GPIOIRQ
+int lpc54_gpio_irqno(lpc54_pinset_t pinset);
 #endif
 
 /************************************************************************************

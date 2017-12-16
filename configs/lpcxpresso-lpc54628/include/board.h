@@ -260,10 +260,10 @@
  * software usage.
  */
 
-#define BOARD_BUTTON_USER          0
-#define BOARD_NUM_BUTTONS          1
+#define BUTTON_USER                0
+#define NUM_BUTTONS                1
 
-#define BOARD_BUTTON_USER_BIT      (1 << BOARD_BUTTON_USER)
+#define BUTTON_USER_BIT            (1 << BUTTON_USER)
 
 /* Pin Disambiguation *******************************************************/
 /* Flexcomm0/USART0

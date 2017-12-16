@@ -290,7 +290,7 @@
 #define BOARD_JOYSTICK_D           6
 #define BOARD_JOYSTICK_CTR         7
 
-#define BOARD_NUM_BUTTONS          8
+#define NUM_BUTTONS                8
 
 #define BOARD_BUTTON_USER1_BIT     (1 << BOARD_BUTTON_USER1)
 #define BOARD_BUTTON_USER2_BIT     (1 << BOARD_BUTTON_USER2)

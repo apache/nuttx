@@ -405,7 +405,7 @@ config LPC54_GPIOIRQ
 	default n
 
 config LPC54_GPIOIRQ_GROUPS
-	bool "Support GPIO Interrupt groupe"
+	bool "Support GPIO Interrupt groups"
 	default n
 	depends on LPC54_GPIOIRQ && EXPERIMENTAL
 

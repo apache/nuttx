@@ -49,6 +49,10 @@ STATUS
   2017-12-15:  Added an I2C driver.  This is the first step on the road
     to getting support for the capacitive touchscreen on the TFT panel.
     The I2C driver appears to be functional but is not yet well-tested.
+  2017-12-16:  Added support for LPC54xx GPIO interrupts; added button
+    support (with interrupts) to the NSH configuration.  The button
+    test is partially functional but appears to miss a lot of button-
+    related events.  More testing is needed.
 
 Configurations
 ==============
@@ -183,9 +187,9 @@ Configurations
          RAMTest: Address-in-address test: a0000000 16777216
          nsh>
 
-     3. I2C2 is enabled (will be used with the capacitive touchscreen).  In
-        order to verify I2C functionality, the I2C tool at apps/system/i2ctool
-        is enabled in this configuration.
+    3. I2C2 is enabled (will be used with the capacitive touchscreen).  In
+       order to verify I2C functionality, the I2C tool at apps/system/i2ctool
+       is enabled in this configuration.
 
          nsh> i2c bus
           BUS   EXISTS?
@@ -210,10 +214,15 @@ Configurations
          60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          70: -- -- -- -- -- -- -- --
 
-        I believe that the on-board Accelerometer, Audio Codec, and touch
-        panel controller should have been detected (but perhaps the touch
-        panel is not powered in this configuration?)
+       I believe that the on-board Accelerometer, Audio Codec, and touch
+       panel controller should have been detected (but perhaps the touch
+       panel is not powered in this configuration since the LCD is not
+       configured?)
 
-          Codec I2C address:        0x1a
-          Accel I2C address:        0x1d
-          Touch panel I2C address:  0x38
+         Codec I2C address:        0x1a
+         Accel I2C address:        0x1d
+         Touch panel I2C address:  0x38
+
+    4. Support for the on-board USER button is included as well as the
+       button test program at apps/examples/buttons.  This test is useful
+       for verifying the functionality of GPIO interrupts.
