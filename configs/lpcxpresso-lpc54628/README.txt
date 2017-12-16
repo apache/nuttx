@@ -51,8 +51,12 @@ STATUS
     The I2C driver appears to be functional but is not yet well-tested.
   2017-12-16:  Added support for LPC54xx GPIO interrupts; added button
     support (with interrupts) to the NSH configuration.  The button
-    test is partially functional but appears to miss a lot of button-
-    related events.  More testing is needed.
+    test appears to functional functional.  There are noticeable delays
+    in receiving the button events, especially when the button is
+    released.  But if you do not press the buttons too quickly all events
+    are processed.  This, I suspect, is a consequence of the strong glitch
+    filtering that is enbled in the pin configuration.  Snappier
+    response my be obtainble with filtering off.
 
 Configurations
 ==============
@@ -226,3 +230,26 @@ Configurations
     4. Support for the on-board USER button is included as well as the
        button test program at apps/examples/buttons.  This test is useful
        for verifying the functionality of GPIO interrupts.
+
+         NuttShell (NSH) NuttX-7.23
+         nsh> buttons
+         buttons_main: Starting the button_daemon
+         buttons_main: button_daemon started
+         button_daemon: Running
+         button_daemon: Opening /dev/buttons
+         button_daemon: Supported BUTTONs 0x01
+         nsh> Sample = 1
+         Sample = 0
+         Sample = 1
+         Sample = 0
+         Sample = 1
+         Sample = 0
+         Sample = 1
+         etc.
+
+       There are noticeable delays in receiving the button events,
+       especially when the button is released.  But if you do not press the
+       buttons too quickly all events are processed.  This, I suspect, is a
+       consequence of the strong glitch filtering that is enbled in the pin
+       configuration.  Snappier response my be obtainble with filtering off
+       if desired.

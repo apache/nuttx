@@ -243,7 +243,7 @@ int lpc54_gpio_interrupt(lpc54_pinset_t pinset)
       /* Write to CIENR to disable rising-edge or level interrupts */
 
       case GPIO_INTFE:    /* GPIO interrupt falling edge */
-        putreg32(mask, LPC54_PINT_SIENR);
+        putreg32(mask, LPC54_PINT_CIENR);
         break;
 
       default:
@@ -260,7 +260,7 @@ int lpc54_gpio_interrupt(lpc54_pinset_t pinset)
       case GPIO_INTFE:    /* GPIO interrupt falling edge */
       case GPIO_INTBOTH:  /* GPIO interrupt both edges */
       case GPIO_INTHIGH:  /* GPIO interrupt high level */
-        putreg32(mask, LPC54_PINT_SIENR);
+        putreg32(mask, LPC54_PINT_SIENF);
         break;
 
       /* Write to CIENF to disable falling-edge or enable active-low level
@@ -269,7 +269,7 @@ int lpc54_gpio_interrupt(lpc54_pinset_t pinset)
 
       case GPIO_INTRE:    /* GPIO interrupt rising edge */
       case GPIO_INTLOW:   /* GPIO interrupt low level */
-        putreg32(mask, LPC54_PINT_SIENR);
+        putreg32(mask, LPC54_PINT_CIENF);
         break;
 
       default:
@@ -315,6 +315,48 @@ int lpc54_gpio_irqno(lpc54_pinset_t pinset)
 
   leave_critical_section(flags);
   return -ENOENT;
+}
+
+/************************************************************************************
+ * Name: lpc54_gpio_ackedge
+ *
+ * Description:
+ *   Acknowledge edge interrupts by clearing the associated bits in the rising and
+ *   falling registers.  This acknowledgemment is, of course, not needed for level
+ *   interupts.
+ *
+ ************************************************************************************/
+
+int lpc54_gpio_ackedge(int irq)
+{
+  uint32_t regval;
+  uint32_t mask;
+  unsigned int pinint;
+
+  /* Map the IRQ number to a pin interrupt number */
+
+  if (irq >= LPC54_IRQ_PININT0 && irq <= LPC54_IRQ_PININT3)
+    {
+      pinint = irq - LPC54_IRQ_PININT0;
+    }
+  else if (irq >= LPC54_IRQ_PININT4 && irq <= LPC54_IRQ_PININT7)
+    {
+      pinint = irq - LPC54_IRQ_PININT4 + 4;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  /* Acknowledge the pin interrupt */
+
+  mask   = (1 << pinint);
+  regval = getreg32(LPC54_PINT_RISE) & mask;
+  putreg32(regval, LPC54_PINT_RISE);
+
+  regval = getreg32(LPC54_PINT_FALL) & mask;
+  putreg32(regval, LPC54_PINT_FALL);
+  return OK;
 }
 
 #endif /* CONFIG_LPC54_GPIOIRQ */

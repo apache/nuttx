@@ -56,6 +56,46 @@
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_LPC54_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+static uint8_t g_button_irq;
+static xcpt_t  g_button_handler;
+static void   *g_button_arg;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_button_interrupt
+ *
+ * Description:
+ *   This function intermediates the interrupt provided to the application
+ *   logic that attached the interrupt.  This is necessary to properly
+ *   clear the pending button interrupts.
+ *
+ ****************************************************************************/
+
+static int board_button_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  /* Acknowledge the button interrupt */
+
+  (void)lpc54_gpio_ackedge(irq);
+
+  /* Transfer control to the attached interrupt handler */
+
+  if (g_button_handler != NULL)
+    {
+      return g_button_handler(irq, context, arg);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -72,7 +112,22 @@
 
 void board_button_initialize(void)
 {
-  (void)lpc54_gpio_config(GPIO_BUTTON_USER);
+  int ret;
+
+  /* Configure the button GPIO interrupt */
+
+  ret = lpc54_gpio_config(GPIO_BUTTON_USER);
+  if (ret >= 0)
+    {
+#if defined(CONFIG_LPC54_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+      /* Get the IRQ that is associated with the PIN interrupt and attach the
+       * intermediate button interrupt handler to that interrupt.
+       */
+
+      g_button_irq = lpc54_gpio_irqno(GPIO_BUTTON_USER);
+      (void)irq_attach(g_button_irq, board_button_interrupt, NULL);
+#endif
+    }
 }
 
 /****************************************************************************
@@ -115,35 +170,26 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   if (id == BUTTON_USER)
     {
-      int irq;
-
-      /* Get the IRQ number assigned to the port/pin when it was condfigured. */
-
-      irq = lpc54_gpio_irqno(GPIO_BUTTON_USER);
-      if (irq < 0)
-        {
-          return irq;
-        }
-
       /* Are we attaching or detaching? */
 
       if (irqhandler != NULL)
         {
           /* Yes.. Attach and enable the interrupt */
 
-          ret = irq_attach(irq, irqhandler, arg);
-          if (ret >= 0)
-            {
-              up_enable_irq(irq);
-            }
+          g_button_handler = irqhandler;
+          g_button_arg     = arg;
+          up_enable_irq(g_button_irq);
         }
       else
         {
           /* No.. Disable and detach the interrupt */
 
-          up_disable_irq(irq);
-          ret = irq_detach(irq);
+          up_disable_irq(g_button_irq);
+          g_button_handler = NULL;
+          g_button_arg     = NULL;
         }
+
+      ret = OK;
     }
 
   return ret;

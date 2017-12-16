@@ -148,10 +148,10 @@
 #define GPIO_IS_INTR(ps)        (((uint32_t)(ps) & GPIO_INTR_MASK) == GPIO_INTR_CODE)
 
 #define GPIO_TRIG_MASK          (0x18 << GPIO_FUNC_SHIFT)  /* 111xx */
-#define GPIO_TRIG_LEVEL_CODE    (0x08 << GPIO_FUNC_SHIFT)  /* 010xx */
-#define GPIO_TRIG_EDGE_CODE     (0x0c << GPIO_FUNC_SHIFT)  /* 011xx */
-#define GPIO_IS_INTLEVEL(ps)    (((uint32_t)(ps) & GPIO_TRIG_MASK) == GPIO_TRIG_LEVEL_CODE)
+#define GPIO_TRIG_EDGE_CODE     (0x08 << GPIO_FUNC_SHIFT)  /* 010xx */
+#define GPIO_TRIG_LEVEL_CODE    (0x0c << GPIO_FUNC_SHIFT)  /* 011xx */
 #define GPIO_IS_INTEDGE(ps)     (((uint32_t)(ps) & GPIO_TRIG_MASK) == GPIO_TRIG_EDGE_CODE)
+#define GPIO_IS_INTLEVEL(ps)    (((uint32_t)(ps) & GPIO_TRIG_MASK) == GPIO_TRIG_LEVEL_CODE)
 
 #define GPIO_ALT_MASK           (0x18 << GPIO_FUNC_SHIFT)  /* 11xxx */
 #define GPIO_ALT_CODE           (0x10 << GPIO_FUNC_SHIFT)  /* 10xxx */
@@ -306,6 +306,20 @@ int lpc54_gpio_interrupt(lpc54_pinset_t pinset);
 
 #ifdef CONFIG_LPC54_GPIOIRQ
 int lpc54_gpio_irqno(lpc54_pinset_t pinset);
+#endif
+
+/************************************************************************************
+ * Name: lpc54_gpio_ackedge
+ *
+ * Description:
+ *   Acknowledge edge interrupts by clearing the associated bits in the rising and
+ *   falling registers.  This acknowledgemment is, of course, not needed for level
+ *   interupts.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC54_GPIOIRQ
+int lpc54_gpio_ackedge(int irq);
 #endif
 
 /************************************************************************************
