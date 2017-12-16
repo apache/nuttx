@@ -114,7 +114,7 @@
 #define LPC54_MUX_BASE       0x40005000  /* Input muxes */
 #define LPC54_CTIMER0_BASE   0x40008000  /* CTIMER0 */
 #define LPC54_CTIMER1_BASE   0x40009000  /* CTIMER1 */
-#define LPC54_WDT_BASE       0x4000c000  /* WDT */
+#define LPC54_WWDT_BASE      0x4000c000  /* WDT */
 #define LPC54_MRT_BASE       0x4000d000  /* MRT */
 #define LPC54_MTICK_BASE     0x4000e000  /* Micro-Tick */
 #define LPC54_EEPROMC_BASE   0x40014000  /* EEPROM controller */
