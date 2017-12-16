@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32F72|3xxx family share the same
+/* Alternate Pin Functions.  All members of the STM32F72|73xxx family share the same
  * pin multiplexing (although they may differ in the pins physically available).
  *
  * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.

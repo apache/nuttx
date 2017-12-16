@@ -159,6 +159,7 @@
 
 /* AHB1 Base Addresses **************************************************************/
 
+#define STM32_GPIO_INCR      0x400          /* 1K spacing between GPIO groups */
 #define STM32_GPIOA_BASE     0x40020000     /* 0x40020000-0x400203ff: GPIOA */
 #define STM32_GPIOB_BASE     0x40020400     /* 0x40020400-0x400207ff: GPIOB */
 #define STM32_GPIOC_BASE     0x40020800     /* 0x40020800-0x40020bff: GPIOC */
