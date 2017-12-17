@@ -81,7 +81,7 @@
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
 
-static const lpc17_pinset_t g_buttoncfg[BOARD_NUM_BUTTONS] =
+static const lpc17_pinset_t g_buttoncfg[NUM_BUTTONS] =
 {
   GPIO_USER1, GPIO_USER2, GPIO_USER3, GPIO_JOY_A,
   GPIO_JOY_B, GPIO_JOY_C, GPIO_JOY_D, GPIO_JOY_CTR
@@ -92,7 +92,7 @@ static const lpc17_pinset_t g_buttoncfg[BOARD_NUM_BUTTONS] =
  * numbers.
  */
 
-static const uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
+static const uint8_t g_buttonirq[NUM_BUTTONS] =
 {
   0,              GPIO_USER2_IRQ, GPIO_USER3_IRQ, GPIO_JOY_A_IRQ,
   GPIO_JOY_B_IRQ, GPIO_JOY_C_IRQ, GPIO_JOY_D_IRQ, GPIO_JOY_CTR_IRQ
@@ -120,7 +120,7 @@ void board_button_initialize(void)
 
   /* Configure the GPIO pins as interrupting inputs. */
 
-  for (i = 0; i < BOARD_NUM_BUTTONS; i++)
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
       lpc17_configgpio(g_buttoncfg[i]);
     }
@@ -149,7 +149,7 @@ uint32_t board_buttons(void)
 
   /* Check that state of each key */
 
-  for (i = 0; i < BOARD_NUM_BUTTONS; i++)
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
        /* A LOW value means that the key is pressed. */
 
@@ -196,7 +196,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   /* Verify that the button ID is within range */
 
-  if ((unsigned)id < BOARD_NUM_BUTTONS)
+  if ((unsigned)id < NUM_BUTTONS)
     {
       /* Get the IRQ number for the button; A value of zero indicates that
        * the button does not support the interrupt function.

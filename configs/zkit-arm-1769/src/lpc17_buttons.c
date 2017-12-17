@@ -68,10 +68,10 @@
  * Private Data
  ****************************************************************************/
 /* Pin configuration for each zkit-arm-1769 button.  This array is indexed by
- * BOARD_NUM_BUTTONS in board.h
+ * NUM_BUTTONS in board.h
  */
 
-static const uint16_t g_buttons[BOARD_NUM_BUTTONS] =
+static const uint16_t g_buttons[NUM_BUTTONS] =
 {
   ZKITARM_KEY1, ZKITARM_KEY2, ZKITARM_KEY3, ZKITARM_KEY4, ZKITARM_KEY5
 };
@@ -99,7 +99,7 @@ void board_button_initialize(void)
    * configured for some pins but NOT used in this file
    */
 
-  for (i = 0; i < BOARD_NUM_BUTTONS; i++)
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
       lpc17_configgpio(g_buttons[i]);
     }
@@ -117,7 +117,7 @@ uint32_t board_buttons(void)
 
   /* Check that state of each key */
 
-  for (i = 0; i < BOARD_NUM_BUTTONS; i++)
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
       released = lpc17_gpioread(g_buttons[i]);
 

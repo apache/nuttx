@@ -64,7 +64,7 @@
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
 
-static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
+static const uint16_t g_buttoncfg[NUM_BUTTONS] =
 {
   LINCOLN60_BUT1
 };
@@ -74,7 +74,7 @@ static const uint16_t g_buttoncfg[BOARD_NUM_BUTTONS] =
  * numbers.
  */
 
-static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
+static uint8_t g_buttonirq[NUM_BUTTONS] =
 {
   LINCOLN60_BUT1_IRQ
 };
@@ -105,7 +105,7 @@ void board_button_initialize(void)
 
   /* Configure the GPIO pins as interrupting inputs. */
 
-  for (i = 0; i < BOARD_NUM_BUTTONS; i++)
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
       lpc17_configgpio(g_buttoncfg[i]);
     }
@@ -134,7 +134,7 @@ uint32_t board_buttons(void)
 
   /* Check that state of each key */
 
-  for (i = 0; i < BOARD_NUM_BUTTONS; i++)
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
        /* A LOW value means that the key is pressed. */
 
@@ -179,7 +179,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 
   /* Verify that the button ID is within range */
 
-  if ((unsigned)id < BOARD_NUM_BUTTONS)
+  if ((unsigned)id < NUM_BUTTONS)
     {
       /* Disable interrupts until we are done */
 
