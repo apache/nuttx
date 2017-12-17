@@ -34,7 +34,7 @@ config FAT_MAXFNAME
 	int "FAT maximum file name size"
 	depends on FAT_LFN
 	default 32
-	range 1 255
+	range 12 255
 	---help---
 		If FAT_LFN is defined, then the default, maximum long file
 		name is 255 bytes.  This can eat up a lot of memory (especially stack
@@ -44,7 +44,7 @@ config FAT_MAXFNAME
 		limit the visibility of longer file names anyway.
 
 		This setting may not exceed NAME_MAX.  That will be verified at compile
-		time.
+		time.  The minimum values is 12 due to assumptions in internal logic.
 
 config FS_FATTIME
 	bool "FAT timestamps"

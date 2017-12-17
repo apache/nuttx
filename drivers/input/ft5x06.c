@@ -378,6 +378,12 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
       ntouches = maxtouches;
     }
 
+  if (ntouches < 1)
+    {
+      priv->valid = false;
+      return 0;  /* No touches read. */
+    }
+
   /* User data buffer points (sink) */
 
   sample = (FAR struct touch_sample_s *)buffer;
