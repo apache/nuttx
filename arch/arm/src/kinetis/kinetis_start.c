@@ -44,7 +44,6 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -57,6 +56,8 @@
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
 #endif
+
+#include "kinetis_start.h"
 
 /****************************************************************************
  * Private Function prototypes

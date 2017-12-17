@@ -65,6 +65,9 @@ STATUS
     P1.m, m=0..31.  Does this mean that TSC interrupts are not supported?
     I think so!  I think that a polled solution will have to be used.
 
+    If you want to use the fb configuration in the near future, you should
+    disable CONFIG_INPUT_FT5x06 to prevent this assertion.
+
 Configurations
 ==============
 

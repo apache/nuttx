@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_start.h
+ * arch/arm/src/kinetis/kinetis_start.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_START_H
-#define __ARCH_ARM_SRC_STM32_STM32_START_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_START_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_START_H
 
 /************************************************************************************
  * Included Files
@@ -47,16 +47,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: kinetis_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry
+ *   All Kinetis architectures must provide the following entry point.  This entry
  *   point is called early in the initialization -- after clocking and memory have
  *   been configured but before caches have been enabled and before any devices have
  *   been initialized.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void);
+void kinetis_boardinitialize(void);
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_START_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_START_H */
