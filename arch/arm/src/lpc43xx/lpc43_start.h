@@ -59,5 +59,4 @@
 
 void lpc43_boardinitialize(void);
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_START_H */

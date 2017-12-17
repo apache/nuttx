@@ -37,7 +37,7 @@ config INPUT_TSC2007
 if INPUT_TSC2007
 
 config TSC2007_8BIT
-	bool "8-bit Conversions"
+	bool "TSC2007 8-bit Conversions"
 	default n
 	---help---
 		Use faster, but less accurate, 8-bit conversions.  Default: 12-bit conversions.
@@ -49,13 +49,38 @@ config TSC2007_MULTIPLE
 		Can be defined to support multiple TSC2007 devices on board.
 
 config TSC2007_NPOLLWAITERS
-	int "Number poll waiters"
+	int "Number TSC2007 poll waiters"
 	default 4
 	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
-endif
+endif # INPUT_TSC2007
+
+config INPUT_FT5X06
+	bool "FocalTech FT5x06 multi-touch, capacitive touch panel controller"
+	default n
+	select I2C
+	---help---
+		Enable support for the FocalTech FT5x06 multi-touch, capacitive
+		touch panel controller
+
+config INPUT_FT5336
+	bool "FocalTech FT5336 multi-touch, capacitive touch panel controller"
+	default n
+	select I2C
+	select INPUT_FT5X06
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for the FocalTech FT5x06 multi-touch, capacitive
+		touch panel controller
+
+config FT5X06_NPOLLWAITERS
+	int "Number FT5336/FT5x06 poll waiters"
+	default 4
+	depends on !DISABLE_POLL && INPUT_FT5X06
+	---help---
+		Maximum number of threads that can be waiting on poll()
 
 config INPUT_ADS7843E
 	bool "TI ADS7843/TSC2046 touchscreen controller"

@@ -65,9 +65,9 @@ void lpc54_lcd_initialize(void)
 
   lpc54_gpio_config(GPIO_LCD_BL);
 
-  /* Initialize touchscreen controller GPIOs here too (for now) */
+  /* Initiale touchscreen controller nRST GPIOs here (putting it into reset) */
 
-  lpc54_gpio_config(GPIO_LCD_CTRSTn);
+  lpc54_gpio_config(GPIO_FT5x06_CTRSTn);
 }
 
 /****************************************************************************

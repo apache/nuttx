@@ -50,6 +50,18 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc54_appinit.c
 endif
 
+ifeq ($(CONFIG_LPC54_HAVE_I2C_MASTER),y)
+CSRCS += lpc54_i2c.c
+endif
+
+ifeq ($(CONFIG_SYSTEM_I2CTOOL),y)
+CSRCS += lpc54_i2ctool.c
+endif
+
+ifeq ($(CONFIG_INPUT_FT5X06),y)
+CSRCS += lpc54_ft5x06.c
+endif
+
 ifeq ($(CONFIG_LPC54_EMC),y)
 ifeq ($(CONFIG_LPC54_EMC_DYNAMIC),y)
 CSRCS += lpc54_sdram.c

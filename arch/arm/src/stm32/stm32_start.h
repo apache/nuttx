@@ -59,5 +59,4 @@
 
 void stm32_boardinitialize(void);
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_START_H */

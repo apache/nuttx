@@ -50,6 +50,7 @@
  ****************************************************************************/
 
 #define HAVE_I2CTOOL  1
+#define HAVE_FT5x06   1
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */
 
@@ -57,6 +58,106 @@
     !defined(HAVE_I2C_MASTER_DEVICE)
 #  undef HAVE_I2CTOOL
 #endif
+
+/* Do we need to register FT5x06 touch panel driver? */
+
+#if !defined(CONFIG_INPUT_FT5X06) || !defined(CONFIG_LPC54_I2C2_MASTER) || \
+    !defined(CONFIG_LPC54_GPIOIRQ)
+#  undef HAVE_FT5x06
+#endif
+
+/* Indices into a sparse I2C array.  Used with lpc54_i2c_handle() */
+
+#ifdef CONFIG_LPC54_I2C0_MASTER
+#  define I2C0NDX  0
+#  define I2C0CNT  1
+#  define __I2C1NX 1
+#else
+#  define I2C0CNT  0
+#  define __I2C1NX 0
+#endif
+
+#ifdef CONFIG_LPC54_I2C1_MASTER
+#  define I2C1NDX  __I2C1NX
+#  define I2C1CNT   1
+#  define __I2C2NX (__I2C1NX + 1)
+#else
+#  define I2C1CNT  0
+#  define __I2C2NX 0
+#endif
+
+#ifdef CONFIG_LPC54_I2C2_MASTER
+#  define I2C2NDX  __I2C2NX
+#  define I2C2CNT  1
+#  define __I2C3NX (__I2C2NX + 1)
+#else
+#  define I2C2CNT  0
+#  define __I2C3NX __I2C2NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C3_MASTER
+#  define I2C3NDX  __I2C3NX
+#  define I2C3CNT  1
+#  define __I2C4NX (__I2C3NX + 1)
+#else
+#  define I2C3CNT  0
+#  define __I2C4NX __I2C3NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C4_MASTER
+#  define I2C4NDX  __I2C4NX
+#  define I2C4CNT  1
+#  define __I2C5NX (__I2C4NX + 1)
+#else
+#  define I2C4CNT  0
+#  define __I2C5NX __I2C4NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C5_MASTER
+#  define I2C5NDX  __I2C5NX
+#  define I2C5CNT  1
+#  define __I2C6NX (__I2C5NX + 1)
+#else
+#  define I2C5CNT  0
+#  define __I2C6NX __I2C5NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C6_MASTER
+#  define I2C6NDX  __I2C6NX
+#  define I2C6CNT  1
+#  define __I2C7NX (__I2C6NX + 1)
+#else
+#  define I2C6CNT  0
+#  define __I2C7NX __I2C6NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C7_MASTER
+#  define I2C7NDX  __I2C7NX
+#  define I2C7CNT  1
+#  define __I2C8NX (__I2C7NX + 1)
+#else
+#  define I2C7CNT  0
+#  define __I2C8NX __I2C7NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C8_MASTER
+#  define I2C8NDX   __I2C8NX
+#  define I2C8CNT  1
+#  define __I2C9NX (__I2C8NX + 1)
+#else
+#  define I2C8CNT  0
+#  define __I2C9NX __I2C8NX
+#endif
+
+#ifdef CONFIG_LPC54_I2C9_MASTER
+#  define I2CNDX   __I2C9NX
+#  define I2C9CNT  1
+#else
+#  define I2C9CNT  0
+#endif
+
+#define NI2C (I2C0CNT + I2C1CNT + I2C2CNT + I2C3CNT + I2C4CNT + \
+              I2C5CNT + I2C6CNT + I2C7CNT + I2C8CNT + I2C9CNT )
 
 /* LED definitions **********************************************************/
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
@@ -118,19 +219,24 @@
 /* The integrated touchscreen uses one GPIO out and one GPIO interrupting
  * GPIO input:
  *
- *   P2.27  CT_RSTn
- *   P4.0   INTR
+ *   P2.27  CT_RSTn  Active low
+ *   P4.0   INTR     On falling edge, I belieive
+ *
+ * The FT4x06's WAKE-UP interrupt pin is not brought out.
  */
 
-#define GPIO_LCD_CTRSTn \
+#define GPIO_FT5x06_CTRSTn \
   (GPIO_PORT2 | GPIO_PIN27 | GPIO_VALUE_ZERO | GPIO_OUTPUT | \
    GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
+
+#define GPIO_FT5x06_INTR \
+  (GPIO_PORT4 | GPIO_PIN20 | GPIO_INTFE | GPIO_MODE_DIGITAL | GPIO_FILTER_OFF)
 
 /* I2C addresses (7-bit): */
 
 #define CODEC_I2C_ADDRESS   0x1a
 #define ACCEL_I2C_ADDRESS   0x1d
-#define TSC_I2C_ADDRESS     0x38
+#define FT5x06_I2C_ADDRESS  0x38
 
 /****************************************************************************
  * Public Types
@@ -183,6 +289,54 @@ void lpc54_sdram_initialize(void);
  ****************************************************************************/
 
 void lpc54_lcd_initialize(void);
+
+/****************************************************************************
+ * Name: lpc54_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+void lpc54_i2ctool(void);
+#endif
+
+/****************************************************************************
+ * Name: lpc54_ft5x06_register
+ *
+ * Description:
+ *   Register the FT5x06 touch panel driver
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_FT5x06
+int lpc54_ft5x06_register(void);
+#endif
+
+/****************************************************************************
+ * Name: lpc54_i2c_handle
+ *
+ * Description:
+ *   Create (or reuse) an I2C handle
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_I2CTOOL) || defined(HAVE_FT5x06)
+FAR struct i2c_master_s *lpc54_i2c_handle(int bus, int ndx);
+#endif
+
+/****************************************************************************
+ * Name: lpc54_i2c_free
+ *
+ * Description:
+ *   Free an I2C handle created by lpc54_i2c_handle
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_I2CTOOL) || defined(HAVE_FT5x06)
+void lpc54_i2c_free(int ndx);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */

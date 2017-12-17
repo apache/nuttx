@@ -59,5 +59,4 @@
 
 void lpc17_boardinitialize(void);
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_START_H */

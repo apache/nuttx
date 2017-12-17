@@ -43,98 +43,15 @@
 #include <sys/mount.h>
 #include <syslog.h>
 
-#include <nuttx/video/fb.h>
-#include <nuttx/i2c/i2c_master.h>
+#ifdef CONFIG_VIDEO_FB
+#  include <nuttx/video/fb.h>
+#endif
 
 #ifdef CONFIG_BUTTONS_LOWER
 #  include <nuttx/input/buttons.h>
 #endif
 
-#include "lpc54_config.h"
-#include "lpc54_i2c_master.h"
 #include "lpcxpresso-lpc54628.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc54_i2c_register
- *
- * Description:
- *   Register one I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#ifdef HAVE_I2CTOOL
-static void lpc54_i2c_register(int bus)
-{
-  FAR struct i2c_master_s *i2c;
-  int ret;
-
-  i2c = lpc54_i2cbus_initialize(bus);
-  if (i2c == NULL)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
-    }
-  else
-    {
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
-                 bus, ret);
-          lpc54_i2cbus_uninitialize(i2c);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: lpc54_i2ctool
- *
- * Description:
- *   Register I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#ifdef HAVE_I2CTOOL
-static void lpc54_i2ctool(void)
-{
-#ifdef CONFIG_LPC54_I2C0_MASTER
-  lpc54_i2c_register(0);
-#endif
-#ifdef CONFIG_LPC54_I2C1_MASTER
-  lpc54_i2c_register(1);
-#endif
-#ifdef CONFIG_LPC54_I2C2_MASTER
-  lpc54_i2c_register(2);
-#endif
-#ifdef CONFIG_LPC54_I2C3_MASTER
-  lpc54_i2c_register(3);
-#endif
-#ifdef CONFIG_LPC54_I2C4_MASTER
-  lpc54_i2c_register(4);
-#endif
-#ifdef CONFIG_LPC54_I2C5_MASTER
-  lpc54_i2c_register(5);
-#endif
-#ifdef CONFIG_LPC54_I2C6_MASTER
-  lpc54_i2c_register(6);
-#endif
-#ifdef CONFIG_LPC54_I2C7_MASTER
-  lpc54_i2c_register(7);
-#endif
-#ifdef CONFIG_LPC54_I2C8_MASTER
-  lpc54_i2c_register(8);
-#endif
-#ifdef CONFIG_LPC54_I2C9_MASTER
-  lpc54_i2c_register(9);
-#endif
-}
-#else
-#  define lpc54_i2ctool()
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -168,9 +85,11 @@ int lpc54_bringup(void)
     }
 #endif
 
+#ifdef HAVE_I2CTOOL
   /* Register I2C drivers on behalf of the I2C tool */
 
   lpc54_i2ctool();
+#endif
 
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
@@ -179,6 +98,16 @@ int lpc54_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_FT5x06
+  /* Register the FT5x06 touch panel driver */
+
+  ret = lpc54_ft5x06_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc54_ft5x06_register() failed: %d\n", ret);
     }
 #endif
 
