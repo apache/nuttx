@@ -483,7 +483,10 @@ int up_fbinitialize(int display)
   putreg32(regval, LPC17_SYSCON_MATRIXARB);
 
   /* Configure pins */
-  /* Video data */
+  /* Video data:
+   *
+   * REVISIT:  The conditional logic is not correct here.  See arch/arm/src/lpc54xx/lpc454_lcd.c
+   */
 
   lcdinfo("Configuring pins\n");
 

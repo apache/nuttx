@@ -490,5 +490,4 @@
 #define GPIO_USART2_RX     GPIO_USART2_RX_1
 #define GPIO_USART2_TX     GPIO_USART2_TX_1
 
-#endif /* __ASSEMBLY__ */
 #endif  /* __CONFIG_INDIUM_F7_INCLUDE_BOARD_H */
