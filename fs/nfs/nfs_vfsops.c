@@ -2638,7 +2638,7 @@ static void nfs_stat_common(FAR struct nfs_statinfo_s *info,
 
   /* Now OR in the file type */
 
-  switch (info->ns_mode)
+  switch (info->ns_type)
     {
     default:
     case NFNON:   /* Unknown type */
