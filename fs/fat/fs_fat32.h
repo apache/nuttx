@@ -230,7 +230,9 @@
 /* Sizes and limits */
 
 # if CONFIG_FAT_MAXFNAME > CONFIG_NAME_MAX
-#   warning CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
+#   ifdef CONFIG_FAT_LFN
+#     warning CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
+#   endif
 #   undef  CONFIG_FAT_MAXFNAME
 #   define CONFIG_FAT_MAXFNAME CONFIG_NAME_MAX
 # endif
