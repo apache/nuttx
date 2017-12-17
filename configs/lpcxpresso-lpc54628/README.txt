@@ -59,8 +59,11 @@ STATUS
     response my be obtainble with filtering off.
   2017-12-17:  Added a driver for the FT5x06 capacitive, multi-touch
     controller.  Add support logic for the LPCXpresso-LPC54528 to
-    initialize and the register the FT5x06 driver.  Untested on initial
-    commit
+    initialize and the register the FT5x06 driver.  Currently, the
+    system asserts during boot up.  This is because the FT5x06 interrupt
+    is on pin P4.0 but pin interrupts are only supported on P0.m and
+    P1.m, m=0..31.  Does this mean that TSC interrupts are not supported?
+    I think so!  I think that a polled solution will have to be used.
 
 Configurations
 ==============
