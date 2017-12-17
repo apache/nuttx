@@ -237,6 +237,11 @@
 #   define CONFIG_FAT_MAXFNAME CONFIG_NAME_MAX
 # endif
 
+# if CONFIG_FAT_MAXFNAME < 12
+#   undef  CONFIG_FAT_MAXFNAME
+#   define CONFIG_FAT_MAXFNAME 12
+# endif
+
 # ifndef CONFIG_FAT_MAXFNAME   /* The maximum support filename can be limited */
 #   define LDIR_MAXFNAME   255 /* Max unicode characters in file name */
 # elif CONFIG_FAT_MAXFNAME <= 255
