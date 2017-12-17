@@ -246,37 +246,4 @@
 #define ADC3_DMA_CHAN DMACHAN_ADC3
 #define ADC4_DMA_CHAN DMACHAN_ADC4_1
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_boardinitialize
- *
- * Description:
- *   All STM32 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
- *
- ****************************************************************************/
-
-void stm32_boardinitialize(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif /* __CONFIG_NUCLEO_F303RE_INCLUDE_BOARD_H */

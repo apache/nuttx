@@ -181,45 +181,11 @@
 #define GPIO_USART3_CTS   GPIO_USART3_CTS_1 //PB13
 #define GPIO_USART3_RTS   GPIO_USART3_RTS_1 //PB14
 
-//CAN:
+/* CAN: */
+
 #define GPIO_CAN1_RX      GPIO_CAN1_RX_2 //PB8
 #define GPIO_CAN1_TX      GPIO_CAN1_TX_2 //PB9
 #define GPIO_CAN2_RX      GPIO_CAN1_RX_2 //PB5
 #define GPIO_CAN2_TX      GPIO_CAN1_TX_2 //PB6
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: stm32_boardinitialize
- *
- * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void stm32_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_STM32_H405_INCLUDE_BOARD_H */
