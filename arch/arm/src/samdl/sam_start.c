@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_start.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -53,6 +52,7 @@
 #include "sam_lowputc.h"
 #include "sam_clockconfig.h"
 #include "sam_userspace.h"
+#include "sam_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions

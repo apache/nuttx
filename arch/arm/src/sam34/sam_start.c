@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_start.c
  *
- *   Copyright (C) 2009-2010, 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2013, 2015, 2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +45,6 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -57,6 +57,8 @@
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
 #endif
+
+#include "sam_start.h"
 
 /****************************************************************************
  * Private Function prototypes

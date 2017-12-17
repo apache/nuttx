@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_boot.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,14 +66,7 @@
 #include "sam_lowputc.h"
 #include "sam_serial.h"
 #include "sam_lcd.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#include "sam_boot.h"
 
 /****************************************************************************
  * Public Data
@@ -83,10 +76,6 @@
 
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
