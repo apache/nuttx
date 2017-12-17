@@ -188,23 +188,4 @@
 #define GPIO_EN0_LED1     GPIO_EN0_LED1_1
 #define GPIO_EN0_LED2     GPIO_EN0_LED2_1
 
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Name: tiva_boardinitialize
- *
- * Description:
- *   All Tiva architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void tiva_boardinitialize(void);
-
-#endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H */

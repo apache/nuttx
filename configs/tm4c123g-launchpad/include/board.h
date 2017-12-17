@@ -184,23 +184,4 @@
 #define GPIO_UART1_RX     GPIO_UART1_RX_1
 #define GPIO_UART1_TX     GPIO_UART1_TX_1
 
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Name: tiva_boardinitialize
- *
- * Description:
- *   All Tiva architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void tiva_boardinitialize(void);
-
-#endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_TMC4C123G_LAUNCHPAD_INCLUDE_BOARD_H */

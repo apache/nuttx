@@ -174,23 +174,4 @@
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Name: tiva_boardinitialize
- *
- * Description:
- *   All Tiva architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void tiva_boardinitialize(void);
-
-#endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_CC3200_LAUNCHPAD_INCLUDE_BOARD_H */

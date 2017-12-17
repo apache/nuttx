@@ -139,17 +139,6 @@ extern "C"
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-/************************************************************************************
- * Name: nr5_boardinitialize
- *
- * Description:
- *   All NR5 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void nr5_boardinitialize(void);
 
 /************************************************************************************
  * Name:  nr5_ledinit, nr5_setled, and nr5_setleds

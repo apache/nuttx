@@ -250,17 +250,6 @@ extern "C" {
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-/************************************************************************************
- * Name: kl_boardinitialize
- *
- * Description:
- *   All Kinetis L architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void kl_boardinitialize(void);
 
 /************************************************************************************
  * Name: kl_tsi_initialize

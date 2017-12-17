@@ -283,17 +283,6 @@ extern "C"
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-/************************************************************************************
- * Name: sam_boardinitialize
- *
- * Description:
- *   All SAM4E architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void sam_boardinitialize(void);
 
 /************************************************************************************
  * Name:  sam_lcdclear

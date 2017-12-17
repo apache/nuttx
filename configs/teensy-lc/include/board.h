@@ -138,40 +138,4 @@
 #define PIN_SPI1_MISO  (PIN_SPI1_MISO_2 | PIN_ALT2_PULLUP) // Pin 1: PTB17
 #define PIN_SPI1_MOSI  (PIN_SPI0_MOSI_1 | PIN_ALT2_PULLUP) // Pin 0: PTB16
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: kl_boardinitialize
- *
- * Description:
- *   All Kinetis L architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void kl_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_BOARD_BOARD_H */

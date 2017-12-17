@@ -330,17 +330,6 @@ extern "C" {
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-/************************************************************************************
- * Name: lpc17_boardinitialize
- *
- * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void lpc17_boardinitialize(void);
 
 /************************************************************************************
  * Name: lpc17_led

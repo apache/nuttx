@@ -317,46 +317,4 @@
 #define PINCONF_SSP1_MOSI PINCONF_SSP1_MOSI_1
 #define PINCONF_SSP1_SCK  PINCONF_SSP1_SCK_2
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc43_boardinitialize
- *
- * Description:
- *   All LPC43xx architectures must provide the following entry point.  This
- *   entry point is called early in the intitialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
- *
- ****************************************************************************/
-
-void lpc43_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_LPC4337_WS_INCLUDE_BOARD_H */

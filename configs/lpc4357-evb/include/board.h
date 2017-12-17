@@ -286,45 +286,4 @@
 #define PINCONF_U3_RXD  PINCONF_U3_RXD_4
 #define PINCONF_U3_DIR  PINCONF_U3_DIR_3
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc43_boardinitialize
- *
- * Description:
- *   All LPC43xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ****************************************************************************/
-
-void lpc43_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif  /* _CONFIGS_LPC4357_EVB_INCLUDE_BOARD_H */

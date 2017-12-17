@@ -160,45 +160,5 @@
 #define BUTTON1               1 /* Bit 0: Button 1 */
 #define BUTTON2               2 /* Bit 1: Button 2 */
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: avr32_boardinitialize
- *
- * Description:
- *   All AVR32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void avr32_boardinitialize(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_AVR32DEV1_INCLUDE_BOARD_H */
 
