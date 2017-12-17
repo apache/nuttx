@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_start.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,6 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
-#include <arch/board/board.h>
 #include <arch/irq.h>
 
 #include "up_arch.h"
@@ -74,6 +73,7 @@
 #include "lpc43_emc.h"
 #include "lpc43_uart.h"
 #include "lpc43_userspace.h"
+#include "lpc43_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions
