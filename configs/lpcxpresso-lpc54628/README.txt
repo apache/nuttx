@@ -57,6 +57,10 @@ STATUS
     are processed.  This, I suspect, is a consequence of the strong glitch
     filtering that is enbled in the pin configuration.  Snappier
     response my be obtainble with filtering off.
+  2017-12-17:  Added a driver for the FT5x06 capacitive, multi-touch
+    controller.  Add support logic for the LPCXpresso-LPC54528 to
+    initialize and the register the FT5x06 driver.  Untested on initial
+    commit
 
 Configurations
 ==============
