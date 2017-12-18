@@ -201,6 +201,11 @@ Configurations
            pressure : 0
          etc.
 
+      NOTE that the touchscreen controlled must run in a polled mode!  The
+      FT5x06 interrupt GPIO is on P4.0 and, as far as I know, GPIO
+      interrupts are not supported on P4.  So polled mode only for this
+      puppy.
+
   nsh:
 
     Configures the NuttShell (nsh) application located at examples/nsh.
@@ -314,24 +319,30 @@ Configurations
   nxwm:
 
     This is a special configuration setup for the NxWM window manager
-    UnitTest.  The NxWM window manager can be found here:
+    UnitTest.  This builds on top of the features that were unit tested in
+    by the fb configuration.
 
-      nuttx-code/NxWidgets/nxwm
+    The NxWM window manager can be found here:
+
+      <nuttx-code>/NxWidgets/nxwm
 
     The NxWM unit test can be found at:
 
-      nuttx-code/NxWidgets/UnitTests/nxwm
+      <nuttx-code>/NxWidgets/UnitTests/nxwm
 
     Documentation for installing the NxWM unit test can be found here:
 
-      nuttx-code/NxWidgets/UnitTests/README.txt
+      <nuttx-code>/NxWidgets/UnitTests/README.txt
+
+    Where <nuttx-code> is whatever path you have select to install
+    NuttX.
 
     Here is the quick summary of the build steps (Assuming that all of
-    the required packages are available in a directory ~/nuttx-code):
+    the required packages are available in a directory ~/<nuttx-code>):
 
     1. Install the nxwm configuration
 
-       $ cd ~/nuttx-code/nuttx
+       $ cd ~/<nuttx-code>/nuttx
        $ tools/configure.sh [OPTIONS] lpcxpresso-lpc54628/nxwm
 
        Use the -l option with the configure.sh script if you are using a
@@ -344,24 +355,24 @@ Configurations
 
     3. Install the nxwm unit test
 
-       $ cd ~/nuttx-code/NxWidgets
-       $ tools/install.sh ~/nuttx-code/apps nxwm
+       $ cd ~/<nuttx-code>/NxWidgets
+       $ tools/install.sh ~/<nuttx-code>/apps nxwm
        Creating symbolic link
-        - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-code/apps/external
+        - To ~/<nuttx-code>/NxWidgets/UnitTests/nxwm
+        - At ~/<nuttx-code>/apps/external
 
     4. Build the NxWidgets library
 
-       $ cd ~/nuttx-code/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-code/nuttx
+       $ cd ~/<nuttx-code>/NxWidgets/libnxwidgets
+       $ make TOPDIR=~/<nuttx-code>/nuttx
 
     5. Build the NxWM library
 
-       $ cd ~/nuttx-code/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-code/nuttx
+       $ cd ~/<nuttx-code>/NxWidgets/nxwm
+       $ make TOPDIR=~/<nuttx-code>/nuttx
 
     6. Built NuttX with the installed unit test as the application
 
-       $ cd ~/nuttx-code/nuttx
+       $ cd ~/<nuttx-code>/nuttx
        $ make
 

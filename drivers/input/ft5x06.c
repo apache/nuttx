@@ -275,7 +275,6 @@ static void ft5x06_data_worker(FAR void *arg)
   FAR struct ft5x06_touch_data_s *sample;
   struct i2c_msg_s msg[2];
   uint8_t regaddr;
-  uint8_t ntouches;
   int ret;
 
   /* Get a pointer the callbacks for convenience */
@@ -307,7 +306,7 @@ static void ft5x06_data_worker(FAR void *arg)
 
   /* Set up the data read operation.
    *
-   * REVISIT:  If CONFIG_FT5X06_SINGLEPOINT is selected, we we not just
+   * REVISIT:  If CONFIG_FT5X06_SINGLEPOINT is selected, could we not just
    * set the length for one sample?  Or is there some reason why we have to
    * read all of the points?
    */
@@ -319,34 +318,43 @@ static void ft5x06_data_worker(FAR void *arg)
   msg[1].length    = FT5x06_TOUCH_DATA_LEN;
 
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
-
-  sample   = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
-  ntouches = sample->tdstatus;
-
-  if (ret >= 0 && ntouches > 0)
+  if (ret >= 0)
     {
-      /* Notify any waiters that new FT5x06 data is available */
+      /* In polled mode, we may read invalid touch data.  If there is
+       * no touch data, the FT5x06 returns all 0xff.
+       */
 
-      priv->valid = true;
-      ft5x06_notify(priv);
-    }
+      sample = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
+
+      /* Notify waiters (only if we ready some valid data) */
+
+      if (sample->tdstatus <= FT5x06_MAX_TOUCHES)
+        {
+          /* Notify any waiters that new FT5x06 data is available */
+
+          priv->valid = true;
+          ft5x06_notify(priv);
+        }
+
 #ifdef CONFIG_FT5X06_POLLMODE
-  else
-    {
-      ntouches = 0;
+      /* Update the poll rate */
+
+      if (sample->tdstatus > 0 && sample->tdstatus <= FT5x06_MAX_TOUCHES)
+        {
+          /* Keep it at the minimum if touches are detected. */
+
+          priv->delay = POLL_MINDELAY;
+        }
+      else if (priv->delay < POLL_MAXDELAY)
+        {
+          /* Let it rise gradually to the maximum if there is no touch */
+
+          priv->delay += POLL_INCREMENT;
+        }
+#endif
     }
 
-  /* Update the poll rate */
-
-  if (ntouches > 0)
-    {
-      priv->delay = POLL_MINDELAY;
-    }
-  else if (priv->delay < POLL_MAXDELAY)
-    {
-      priv->delay += POLL_INCREMENT;
-    }
-
+#ifdef CONFIG_FT5X06_POLLMODE
   /* Exit, re-starting the poll (unless there is no longer any task waiting
    * for touch data).
    */
