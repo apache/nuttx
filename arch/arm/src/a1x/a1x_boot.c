@@ -54,7 +54,7 @@
 #include "up_arch.h"
 
 #include "a1x_lowputc.h"
-#include "a1x_start.h"
+#include "a1x_boot.h"
 
 /****************************************************************************
  * Pre-processor Definitions
