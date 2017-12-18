@@ -120,6 +120,12 @@ struct ft5x06_dev_s
                                              * FT5x06 data */
   volatile bool valid;                      /* True:  New, valid touch data in
                                              * touchbuf[] */
+#ifdef CONFIG_FT5X06_SINGLEPOINT
+  uint8_t lastid;                           /* Last reported touch id */
+  uint8_t lastevent;                        /* Last reported event */
+  int16_t lastx;                            /* Last reported X position */
+  int16_t lasty;                            /* Last reported Y position */
+#endif
   sem_t devsem;                             /* Manages exclusive access to this
                                              * structure */
   sem_t waitsem;                            /* Used to wait for the
@@ -299,7 +305,12 @@ static void ft5x06_data_worker(FAR void *arg)
   msg[0].buffer    = &regaddr;              /* Send one byte of data (no STOP) */
   msg[0].length    = 1;
 
-  /* Set up the data read operation */
+  /* Set up the data read operation.
+   *
+   * REVISIT:  If CONFIG_FT5X06_SINGLEPOINT is selected, we we not just
+   * set the length for one sample?  Or is there some reason why we have to
+   * read all of the points?
+   */
 
   msg[1].frequency = priv->frequency;       /* I2C frequency */
   msg[1].addr      = config->address;       /* 7-bit address */
@@ -427,6 +438,7 @@ static int ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg)
  * Name: ft5x06_sample
  ****************************************************************************/
 
+#ifdef CONFIG_FT5X06_SINGLEPOINT
 static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
                              size_t len)
 {
@@ -434,8 +446,114 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   FAR struct ft5x06_touch_point_s *touch;
   FAR struct touch_sample_s *sample;
   FAR struct touch_point_s *point;
-  unsigned int ntouches;
+  int16_t x;
+  int16_t y;
+  uint8_t event;
+  uint8_t id;
+
+  if (!priv->valid)
+    {
+      return 0;  /* Nothing to read */
+    }
+
+  /* Raw data pointers (source) */
+
+  raw = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
+
+  if (raw->tdstatus != 1)
+    {
+      priv->valid = false;
+      return 0;  /* No touches read. */
+    }
+
+  /* Get the reported X and Y positions */
+
+  touch = raw->touch;
+
+  #ifdef CONFIG_FT5X06_SWAPXY
+  y = TOUCH_POINT_GET_X(touch[0]);
+  x = TOUCH_POINT_GET_Y(touch[0]);
+#else
+  x = TOUCH_POINT_GET_X(touch[0]);
+  y = TOUCH_POINT_GET_Y(touch[0]);
+#endif
+
+  /* Get the touch point ID and event */
+
+  event = TOUCH_POINT_GET_EVENT(touch[0]);
+  id    = TOUCH_POINT_GET_ID(touch[0]);
+
+  if (id == priv->lastid && event == priv->lastevent)
+    {
+      int16_t deltax;
+      int16_t deltay;
+
+      /* Same ID and event.. Compare the change in position from the last
+       * report.
+       */
+
+      deltax = (x - priv->lastx);
+      if (deltax < 0)
+        {
+          deltax = -deltax;
+        }
+
+      if (deltax < CONFIG_FT5X06_THRESHX)
+        {
+          /* There as been no significant change in X, try Y */
+
+          deltay = (y - priv->lasty);
+          if (deltay < 0)
+            {
+              deltay = -deltay;
+            }
+
+          if (deltax < CONFIG_FT5X06_THRESHX)
+            {
+             /* Ignore... no significant change in Y either */
+
+              priv->valid = false;
+              return 0;  /* No new touches read. */
+            }
+        }
+    }
+
+  priv->lastid      = id;
+  priv->lastevent   = event;
+  priv->lastx       = x;
+  priv->lasty       = y;
+
+  /* User data buffer points (sink) */
+
+  /* Return the number of touches read */
+
+  sample            = (FAR struct touch_sample_s *)buffer;
+  sample->npoints   = 1;
+
+  /* Decode and return the single touch point */
+
+  point             = sample->point;
+  point[0].id       = id;
+  point[0].flags    = g_event_map[event];
+  point[0].x        = x;
+  point[0].y        = y;
+  point[0].h        = 0;
+  point[0].w        = 0;
+  point[0].pressure = 0;
+
+  priv->valid       = false;
+  return SIZEOF_TOUCH_SAMPLE_S(1);
+}
+#else
+static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
+                             size_t len)
+{
+  FAR struct ft5x06_touch_data_s *raw;
+  FAR struct ft5x06_touch_point_s *touch;
+  FAR struct touch_sample_s *sample;
+  FAR struct touch_point_s *point;
   unsigned int maxtouches;
+  unsigned int ntouches;
   int i;
 
   maxtouches = (len - sizeof(int)) / sizeof(struct touch_point_s);
@@ -454,6 +572,8 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   /* Decode number of touches */
 
   ntouches = raw->tdstatus;
+  DEBUGASSERT(ntouches <= FT5x06_MAX_TOUCHES);
+
   if (ntouches > maxtouches)
     {
       ntouches = maxtouches;
@@ -464,8 +584,6 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
       priv->valid = false;
       return 0;  /* No touches read. */
     }
-
-  DEBUGASSERT(ntouches <= FT5x06_MAX_TOUCHES);
 
   /* User data buffer points (sink) */
 
@@ -478,14 +596,19 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
 
   /* Decode and return the touch points */
 
-  for (i = 0; i < raw->tdstatus; i++)
+  for (i = 0; i < ntouches; i++)
     {
       int event         = TOUCH_POINT_GET_EVENT(touch[i]);
 
       point[i].id       = TOUCH_POINT_GET_ID(touch[i]);
       point[i].flags    = g_event_map[event];
+#ifdef CONFIG_FT5X06_SWAPXY
+      point[i].y        = TOUCH_POINT_GET_X(touch[i]);
+      point[i].x        = TOUCH_POINT_GET_Y(touch[i]);
+#else
       point[i].x        = TOUCH_POINT_GET_X(touch[i]);
       point[i].y        = TOUCH_POINT_GET_Y(touch[i]);
+#endif
       point[i].h        = 0;
       point[i].w        = 0;
       point[i].pressure = 0;
@@ -494,6 +617,7 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   priv->valid = false;
   return SIZEOF_TOUCH_SAMPLE_S(ntouches);
 }
+#endif /* CONFIG_FT5X06_SINGLEPOINT */
 
 /****************************************************************************
  * Name: ft5x06_waitsample

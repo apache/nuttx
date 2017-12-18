@@ -67,10 +67,7 @@ STATUS
   2017-12-18:  Added an option to the FT5x06 driver to support a timer-
     based poll instead of interrupts.  This is very inefficient in that it
     will introduce delays in touchscreen response and will consume more CPU
-    bandwidth.
-
-    The FT5x06 driver is not, however, functional.  It is generating hard
-    faults.
+    bandwidth.  The driver appears to be functional.
 
 Configurations
 ==============
@@ -178,8 +175,23 @@ Configurations
          Touch panel I2C address:  0x38
 
     4. The touchscreen test program at apps/examples/touchscreen is also
-       included in this configuration.  As of this writing, touchscreen
-       is not yet functional, however.
+       included in this configuration.
+
+         nsh> tc 5
+         tc_main: nsamples: 2
+         tc_main: Initializing external touchscreen device
+         tc_main: Opening /dev/input0
+         Sample     :
+            npoints : 1
+         Point 1    :
+                 id : 0
+              flags : 1a
+                  x : 230
+                  y : 84
+                  h : 0
+                  w : 0
+           pressure : 0
+         etc.
 
   nsh:
 
