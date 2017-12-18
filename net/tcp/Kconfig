@@ -192,4 +192,13 @@ config NET_SENDFILE
 		files out a TCP connection.
 
 endif # NET_TCP && !NET_TCP_NO_STACK
+
+config NET_TCP_RWND_CONTROL
+	bool "Receive window control based on IOBuffer"
+	default n
+	depends on MM_IOB && EXPERIMENTAL
+	---help---
+		Support receive window control based on I/O buffer.  This feature
+		is still experimental.
+
 endmenu # TCP/IP Networking
