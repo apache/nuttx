@@ -299,7 +299,7 @@ static void ft5x06_data_worker(FAR void *arg)
 
   /* Exit, re-enabling FT5x06 interrupts */
 
-  config->enable(config, FT5X06_DATA_SOURCE, true);
+  config->enable(config, true);
   nxsem_post(&priv->devsem);
 }
 
@@ -322,7 +322,7 @@ static int ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Disable further interrupts */
 
-  config->enable(config, FT5X06_DATA_SOURCE, false);
+  config->enable(config, false);
 
   /* Transfer processing to the worker thread.  Since FT5x06 interrupts are
    * disabled while the work is pending, no special action should be required
@@ -338,7 +338,7 @@ static int ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Clear any pending interrupts and return success */
 
-  config->clear(config, FT5X06_DATA_SOURCE);
+  config->clear(config);
   return OK;
 }
 
@@ -383,6 +383,8 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
       priv->valid = false;
       return 0;  /* No touches read. */
     }
+
+  DEBUGASSERT(ntouches <= FT5x06_MAX_TOUCHES);
 
   /* User data buffer points (sink) */
 
@@ -523,8 +525,8 @@ static int ft5x06_bringup(FAR struct ft5x06_dev_s *priv)
 
   /* Enable FT5x06 interrupts */
 
-  config->clear(config, FT5X06_DATA_SOURCE);
-  config->enable(config, FT5X06_DATA_SOURCE, true);
+  config->clear(config);
+  config->enable(config, true);
   return OK;
 }
 
@@ -536,17 +538,14 @@ static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
 {
   FAR const struct ft5x06_config_s *config = priv->config;
 
-  /* Make sure that interrupts are disabled */
+  /* Make sure that the FT5x06 interrupt is disabled */
 
-  config->clear(config, FT5X06_DATA_SOURCE);
-  config->enable(config, FT5X06_DATA_SOURCE, false);
-
-  config->clear(config, FT5X06_WAKE_SOURCE);
-  config->enable(config, FT5X06_WAKE_SOURCE, false);
+  config->clear(config);
+  config->enable(config, false);
 
   /* Attach the interrupt handler */
 
-  (void)config->attach(config, FT5X06_DATA_SOURCE, NULL, NULL);
+  (void)config->attach(config, NULL, NULL);
 }
 
 /****************************************************************************
@@ -957,17 +956,14 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 
   nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
-  /* Make sure that interrupts are disabled */
+  /* Make sure that the FT5x06 interrupt interrupt is disabled */
 
-  config->clear(config, FT5X06_DATA_SOURCE);
-  config->enable(config, FT5X06_DATA_SOURCE, false);
-
-  config->clear(config, FT5X06_WAKE_SOURCE);
-  config->enable(config, FT5X06_WAKE_SOURCE, false);
+  config->clear(config);
+  config->enable(config, false);
 
   /* Attach the interrupt handler */
 
-  ret = config->attach(config, FT5X06_DATA_SOURCE, ft5x06_data_interrupt,
+  ret = config->attach(config, ft5x06_data_interrupt,
                        priv);
   if (ret < 0)
     {

@@ -776,6 +776,7 @@ static FAR void *pcf8574_attach(FAR struct ioexpander_dev_s *dev,
  *   0 on success, else a negative error code
  *
  ****************************************************************************/
+
 #ifdef CONFIG_PCF8574_INT_ENABLE
 static int pcf8574_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 {

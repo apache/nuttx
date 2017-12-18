@@ -85,22 +85,6 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* The FT5x08 provides two interrupts pins:
- *
- *   INT  -A n interrupt signal to inform the host processor that touch data
- *          is ready for ready to be read.
- *   WAKE - An interrupt signal for the host to change FT5x06 from Hibernate
- *          to Active mode.
- *
- * A value from this enumeration must be passed to each interrupt-related
- * interface method to distinguish the interrupt sources.
- */
-
-enum ft5x06_irqsource_e
-{
-  FT5X06_DATA_SOURCE = 0,
-  FT5X06_WAKE_SOURCE,
-};
 
 /* A reference to a structure of this type must be passed to the FT5X06
  * driver.  This structure provides information about the configuration
@@ -126,15 +110,17 @@ struct ft5x06_config_s
    * attach  - Attach an FT5x06 interrupt handler to a GPIO interrupt
    * enable  - Enable or disable a GPIO interrupt
    * clear   - Acknowledge/clear any pending GPIO interrupt
+   * wakeup  - Issue WAKE interrupt to FT5x06 to change the FT5x06 from
+   *           Hibernate to Active mode.
    * nreset  - Control the chip reset pin (active low)
+
    */
 
-  int  (*attach)(FAR const struct ft5x06_config_s *config,
-                 enum ft5x06_irqsource_e irqsrc, xcpt_t isr, FAR void *arg);
-  void (*enable)(FAR const struct ft5x06_config_s *config,
-                 enum ft5x06_irqsource_e irqsrc, bool enable);
-  void (*clear)(FAR const struct ft5x06_config_s *config,
-                 enum ft5x06_irqsource_e irqsrc);
+  int  (*attach)(FAR const struct ft5x06_config_s *config, xcpt_t isr,
+                 FAR void *arg);
+  void (*enable)(FAR const struct ft5x06_config_s *config, bool enable);
+  void (*clear)(FAR const struct ft5x06_config_s *config);
+  void (*wakeup)(FAR const struct ft5x06_config_s *config);
   void (*nreset)(FAR const struct ft5x06_config_s *config,
                  bool state);
 };

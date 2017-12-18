@@ -63,11 +63,11 @@
  ****************************************************************************/
 
 static int  lpc54_ft5x06_attach(FAR const struct ft5x06_config_s *config,
-              enum ft5x06_irqsource_e irqsrc, xcpt_t isr, FAR void *arg);
+              xcpt_t isr, FAR void *arg);
 static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
-              enum ft5x06_irqsource_e irqsrc, bool enable);
-static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config,
-              enum ft5x06_irqsource_e irqsrc);
+              bool enable);
+static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config);
+static void lpc54_ft5x06_wakeup(FAR const struct ft5x06_config_s *config);
 static void lpc54_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
               bool state);
 
@@ -82,6 +82,7 @@ static const struct ft5x06_config_s g_ft5x06_config =
   .attach    = lpc54_ft5x06_attach,
   .enable    = lpc54_ft5x06_enable,
   .clear     = lpc54_ft5x06_clear,
+  .wakeup    = lpc54_ft5x06_wakeup,
   .nreset    = lpc54_ft5x06_nreset
 };
 
@@ -100,17 +101,9 @@ static uint8_t g_ft5x06_irq;
  ****************************************************************************/
 
 static int lpc54_ft5x06_attach(FAR const struct ft5x06_config_s *config,
-                               enum ft5x06_irqsource_e irqsrc, xcpt_t isr,
-                               FAR void *arg)
+                               xcpt_t isr, FAR void *arg)
 {
-  if (irqsrc == FT5X06_DATA_SOURCE)
-    {
-      return irq_attach(g_ft5x06_irq, isr, arg);
-    }
-  else
-    {
-      return -ENOSYS;
-    }
+  return irq_attach(g_ft5x06_irq, isr, arg);
 }
 
 /****************************************************************************
@@ -122,11 +115,15 @@ static int lpc54_ft5x06_attach(FAR const struct ft5x06_config_s *config,
  ****************************************************************************/
 
 static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
-                                enum ft5x06_irqsource_e irqsrc, bool enable)
+                                bool enable)
 {
-  if (irqsrc == FT5X06_DATA_SOURCE)
+  if (enable)
     {
       up_enable_irq(g_ft5x06_irq);
+    }
+  else
+    {
+      up_disable_irq(g_ft5x06_irq);
     }
 }
 
@@ -138,13 +135,23 @@ static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
  *
  ****************************************************************************/
 
-static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config,
-                               enum ft5x06_irqsource_e irqsrc)
+static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config)
 {
-  if (irqsrc == FT5X06_DATA_SOURCE)
-    {
-      (void)lpc54_gpio_ackedge(g_ft5x06_irq);
-    }
+  (void)lpc54_gpio_ackedge(g_ft5x06_irq);
+}
+
+/****************************************************************************
+ * Name: lpc54_ft5x06_wakeup
+ *
+ * Description:
+ *   Issue WAKE interrupt to FT5x06 to change the FT5x06 from Hibernate to
+ *   Active mode.
+ *
+ ****************************************************************************/
+
+static void lpc54_ft5x06_wakeup(FAR const struct ft5x06_config_s *config)
+{
+  /* We do not have access to the WAKE pin in the implementation */
 }
 
 /****************************************************************************
