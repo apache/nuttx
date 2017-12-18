@@ -39,8 +39,8 @@ config ARCH_BOARD_AVR32DEV1
 	bool "Atmel AVR32DEV1 board"
 	depends on ARCH_CHIP_AT32UC3B0256
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
+#	select ARCH_HAVE_BUTTONS
+#	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
 		based on the Atmel AT32UC3B0256 MCU and uses a specially patched

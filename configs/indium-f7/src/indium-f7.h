@@ -85,6 +85,7 @@
  */
 
 /* GPIO_LED_RED is defined above in the Oscillator section. */
+
 #define GPIO_LED_GREEN (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_INIT_TO_0 | \
                         GPIO_PORTC | GPIO_PIN1)
 #define GPIO_LED_BLUE  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_INIT_TO_0 | \
