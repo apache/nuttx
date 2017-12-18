@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/stm32ldiscovery/include/board.h
- * include/arch/board/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIG_STM32LDISCOVERY_INCLUDE_BOARD_H
-#define __CONFIG_STM32LDISCOVERY_INCLUDE_BOARD_H
+#ifndef __CONFIGS_STM32LDISCOVERY_INCLUDE_BOARD_H
+#define __CONFIGS_STM32LDISCOVERY_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -275,19 +274,20 @@
 
 #endif
 
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#  define EXTERN extern "C"
+extern "C"
+{
+#else
+#  define EXTERN extern
+#endif
 
 /****************************************************************************
  * Name: stm32_slcd_initialize
@@ -308,4 +308,4 @@ int stm32_slcd_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIG_STM32LDISCOVERY_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_STM32LDISCOVERY_INCLUDE_BOARD_H */
