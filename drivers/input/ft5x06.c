@@ -78,9 +78,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/random.h>
+#include <nuttx/wdog.h>
 
-#include <nuttx/signal.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ft5x06.h>
 
@@ -95,8 +94,17 @@
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT   "/dev/input%d"
-#define DEV_NAMELEN  16
+#define DEV_FORMAT     "/dev/input%d"
+#define DEV_NAMELEN    16
+
+/* In polled mode, the polling rate will decrease when there is no touch
+ * activity.  These definitions represent the maximum and the minimum
+ * polling rates.
+ */
+
+#define POLL_MINDELAY  MSEC2TICK(50)
+#define POLL_MAXDELAY  MSEC2TICK(200)
+#define POLL_INCREMENT MSEC2TICK(10)
 
 /****************************************************************************
  * Private Types
@@ -117,11 +125,17 @@ struct ft5x06_dev_s
   sem_t waitsem;                            /* Used to wait for the
                                              * availability of data */
   uint32_t frequency;                       /* Current I2C frequency */
+#ifdef CONFIG_FT5X06_POLLMODE
+  uint32_t delay;                           /* Current poll delay */
+#endif
 
   FAR const struct ft5x06_config_s *config; /* Board configuration data */
   FAR struct i2c_master_s *i2c;             /* Saved I2C driver instance */
   struct work_s work;                       /* Supports the interrupt handling
                                              * "bottom half" */
+#ifdef CONFIG_FT5X06_POLLMODE
+  WDOG_ID polltimer;                        /* Poll timer */
+#endif
   uint8_t touchbuf[FT5x06_TOUCH_DATA_LEN];  /* Raw touch data */
 
 #ifndef CONFIG_DISABLE_POLL
@@ -140,7 +154,11 @@ struct ft5x06_dev_s
 
 static void ft5x06_notify(FAR struct ft5x06_dev_s *priv);
 static void ft5x06_data_worker(FAR void *arg);
+#ifdef CONFIG_FT5X06_POLLMODE
+static void ft5x06_poll_timeout(int argc, wdparm_t arg1, ...);
+#else
 static int  ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg);
+#endif
 static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
                              size_t len);
 static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
@@ -248,8 +266,10 @@ static void ft5x06_data_worker(FAR void *arg)
 {
   FAR struct ft5x06_dev_s *priv = (FAR struct ft5x06_dev_s *)arg;
   FAR const struct ft5x06_config_s *config;
+  FAR struct ft5x06_touch_data_s *sample;
   struct i2c_msg_s msg[2];
   uint8_t regaddr;
+  uint8_t ntouches;
   int ret;
 
   /* Get a pointer the callbacks for convenience */
@@ -281,32 +301,92 @@ static void ft5x06_data_worker(FAR void *arg)
 
   /* Set up the data read operation */
 
-  msg[0].frequency = priv->frequency;       /* I2C frequency */
-  msg[0].addr      = config->address;       /* 7-bit address */
-  msg[0].flags     = I2C_M_READ;            /* Read transaction with Re-START */
-  msg[0].buffer    = priv->touchbuf;        /* Read all touch data */
-  msg[0].length    = FT5x06_TOUCH_DATA_LEN;
-
+  msg[1].frequency = priv->frequency;       /* I2C frequency */
+  msg[1].addr      = config->address;       /* 7-bit address */
+  msg[1].flags     = I2C_M_READ;            /* Read transaction with Re-START */
+  msg[1].buffer    = priv->touchbuf;        /* Read all touch data */
+  msg[1].length    = FT5x06_TOUCH_DATA_LEN;
 
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret >= 0)
+
+  sample   = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
+  ntouches = sample->tdstatus;
+
+  if (ret >= 0 && ntouches > 0)
     {
       /* Notify any waiters that new FT5x06 data is available */
 
       priv->valid = true;
       ft5x06_notify(priv);
     }
+#ifdef CONFIG_FT5X06_POLLMODE
+  else
+    {
+      ntouches = 0;
+    }
 
+  /* Update the poll rate */
+
+  if (ntouches > 0)
+    {
+      priv->delay = POLL_MINDELAY;
+    }
+  else if (priv->delay < POLL_MAXDELAY)
+    {
+      priv->delay += POLL_INCREMENT;
+    }
+
+  /* Exit, re-starting the poll (unless there is no longer any task waiting
+   * for touch data).
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      (void)wd_start(priv->polltimer, priv->delay, ft5x06_poll_timeout, 1,
+                     priv);
+    }
+
+#else
   /* Exit, re-enabling FT5x06 interrupts */
 
   config->enable(config, true);
+#endif
+
   nxsem_post(&priv->devsem);
 }
+
+/****************************************************************************
+ * Name: ft5x06_poll_timeout
+ ****************************************************************************/
+
+#ifdef CONFIG_FT5X06_POLLMODE
+static void ft5x06_poll_timeout(int argc, wdparm_t arg1, ...)
+{
+  FAR struct ft5x06_dev_s *priv = (FAR struct ft5x06_dev_s *)arg1;
+  int ret;
+
+  /* Transfer processing to the worker thread.  Since FT5x06 poll timer is
+   * disabled while the work is pending, no special action should be
+   * required to protected the work queue.
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      DEBUGASSERT(priv->work.worker == NULL);
+      ret = work_queue(HPWORK, &priv->work, ft5x06_data_worker, priv, 0);
+      if (ret != 0)
+        {
+          ierr("ERROR: Failed to queue work: %d\n", ret);
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: ft5x06_data_interrupt
  ****************************************************************************/
 
+#ifndef CONFIG_FT5X06_POLLMODE
 static int ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ft5x06_dev_s *priv = (FAR struct ft5x06_dev_s *)arg;
@@ -341,6 +421,7 @@ static int ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg)
   config->clear(config);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: ft5x06_sample
@@ -442,9 +523,31 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
 
   while (!priv->valid)
     {
-      /* Wait for a change in the FT5x06 state */
+      /* Increment the count of waiters */
 
       priv->nwaiters++;
+
+#ifdef CONFIG_FT5X06_POLLMODE
+      /* The poll timer is stopped when there are no waiters.  So we may
+       * need to restart with at the maximum rate.
+       */
+
+      if (priv->nwaiters == 1)
+        {
+          priv->delay = POLL_MINDELAY;
+
+          ret = wd_start(priv->polltimer, priv->delay, ft5x06_poll_timeout,
+                         1, priv);
+          if (ret < 0)
+            {
+              ierr("ERROR: nxsem_wait failed: %d\n", ret);
+              goto errout;
+            }
+        }
+#endif
+
+      /* Wait for a change in the FT5x06 state */
+
       ret = nxsem_wait(&priv->waitsem);
       priv->nwaiters--;
 
@@ -523,10 +626,12 @@ static int ft5x06_bringup(FAR struct ft5x06_dev_s *priv)
       return ret;
     }
 
+#ifndef CONFIG_FT5X06_POLLMODE
   /* Enable FT5x06 interrupts */
 
   config->clear(config);
   config->enable(config, true);
+#endif
   return OK;
 }
 
@@ -536,6 +641,12 @@ static int ft5x06_bringup(FAR struct ft5x06_dev_s *priv)
 
 static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
 {
+#ifdef CONFIG_FT5X06_POLLMODE
+  /* Stop the poll timer */
+
+  (void)wd_cancel(priv->polltimer);
+
+#else
   FAR const struct ft5x06_config_s *config = priv->config;
 
   /* Make sure that the FT5x06 interrupt is disabled */
@@ -546,6 +657,7 @@ static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
   /* Attach the interrupt handler */
 
   (void)config->attach(config, NULL, NULL);
+#endif
 }
 
 /****************************************************************************
@@ -597,7 +709,7 @@ static int ft5x06_open(FAR struct file *filep)
       ret = ft5x06_bringup(priv);
       if (ret < 0)
         {
-          ierr("ERROR: nxsem_wait failed: %d\n", ret);
+          ierr("ERROR: ft5x06_bringup failed: %d\n", ret);
           goto errout_with_sem;
         }
     }
@@ -929,8 +1041,13 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   /* Debug-only sanity checks */
 
   DEBUGASSERT(i2c != NULL && config != NULL && minor >= 0 && minor < 100);
-  DEBUGASSERT(config->attach != NULL && config->enable  != NULL &&
-              config->clear  != NULL && config->nreset != NULL);
+#ifdef CONFIG_FT5X06_POLLMODE
+  DEBUGASSERT(config->wakeup != NULL && config->nreset != NULL);
+#else
+  DEBUGASSERT(config->attach != NULL && config->enable != NULL &&
+              config->clear  != NULL && config->wakeup != NULL &&
+              config->nreset != NULL);
+#endif
 
   /* Create and initialize a FT5x06 device driver instance */
 
@@ -956,6 +1073,17 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 
   nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
+#ifdef CONFIG_FT5X06_POLLMODE
+  /* Allocate a timer for polling the FT5x06 */
+
+  priv->delay     = POLL_MAXDELAY;
+  priv->polltimer = wd_create();
+  if (priv->polltimer == NULL)
+    {
+      ierr("ERROR: Failed to allocate polltimer\n");
+      goto errout_with_priv;
+    }
+#else
   /* Make sure that the FT5x06 interrupt interrupt is disabled */
 
   config->clear(config);
@@ -968,8 +1096,9 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       ierr("ERROR: Failed to attach interrupt\n");
-      goto errout_with_priv;
+      goto errout_with_timer;
     }
+#endif
 
   /* Register the device as an input device */
 
@@ -980,7 +1109,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);
-      goto errout_with_priv;
+      goto errout_with_timer;
     }
 
   /* Schedule work to perform the initial sampling and to set the data
@@ -991,12 +1120,17 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (ret != 0)
     {
       ierr("ERROR: Failed to queue work: %d\n", ret);
-      goto errout_with_priv;
+      goto errout_with_timer;
     }
 
   /* And return success */
 
   return OK;
+
+errout_with_timer:
+#ifdef CONFIG_FT5X06_POLLMODE
+  (void)wd_delete(priv->polltimer);
+#endif
 
 errout_with_priv:
   nxsem_destroy(&priv->devsem);

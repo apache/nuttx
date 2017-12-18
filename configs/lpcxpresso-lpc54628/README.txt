@@ -63,10 +63,14 @@ STATUS
     system asserts during boot up.  This is because the FT5x06 interrupt
     is on pin P4.0 but pin interrupts are only supported on P0.m and
     P1.m, m=0..31.  Does this mean that TSC interrupts are not supported?
-    I think so!  I think that a polled solution will have to be used.
+    I think so!
+  2017-12-18:  Added an option to the FT5x06 driver to support a timer-
+    based poll instead of interrupts.  This is very inefficient in that it
+    will introduce delays in touchscreen response and will consume more CPU
+    bandwidth.
 
-    If you want to use the fb configuration in the near future, you should
-    disable CONFIG_INPUT_FT5x06 to prevent this assertion.
+    The FT5x06 driver is not, however, functional.  It is generating hard
+    faults.
 
 Configurations
 ==============
@@ -153,6 +157,29 @@ Configurations
     2. Some of the pdcurses test rely on some positional input device and so
        is not yet usable.  Others work fine with no user include:  charset,
        xmas, firework, worms, rain, for examples.
+
+    3. I2C2 is enabled (will be used with the capacitive touchscreen).  In
+       order to verify I2C functionality, the I2C tool at apps/system/i2ctool
+       is enabled in this configuration.
+
+         nsh> i2c dev -b 2 3 77
+              0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+         00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+         10: -- -- -- -- -- -- -- -- -- -- 1a -- -- 1d -- --
+         20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         30: -- -- -- -- -- -- -- -- 38 -- -- -- -- -- -- --
+         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         70: -- -- -- -- -- -- -- --
+
+         Codec I2C address:        0x1a
+         Accel I2C address:        0x1d
+         Touch panel I2C address:  0x38
+
+    4. The touchscreen test program at apps/examples/touchscreen is also
+       included in this configuration.  As of this writing, touchscreen
+       is not yet functional, however.
 
   nsh:
 

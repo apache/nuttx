@@ -62,11 +62,14 @@
  * Private Function Ptototypes
  ****************************************************************************/
 
+#ifndef CONFIG_FT5X06_POLLMODE
 static int  lpc54_ft5x06_attach(FAR const struct ft5x06_config_s *config,
               xcpt_t isr, FAR void *arg);
 static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
               bool enable);
 static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config);
+#endif
+
 static void lpc54_ft5x06_wakeup(FAR const struct ft5x06_config_s *config);
 static void lpc54_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
               bool state);
@@ -79,14 +82,18 @@ static const struct ft5x06_config_s g_ft5x06_config =
 {
   .address   = FT5x06_I2C_ADDRESS,
   .frequency = FT5x06_FREQUENCY,
+#ifndef CONFIG_FT5X06_POLLMODE
   .attach    = lpc54_ft5x06_attach,
   .enable    = lpc54_ft5x06_enable,
   .clear     = lpc54_ft5x06_clear,
+#endif
   .wakeup    = lpc54_ft5x06_wakeup,
   .nreset    = lpc54_ft5x06_nreset
 };
 
+#ifndef CONFIG_FT5X06_POLLMODE
 static uint8_t g_ft5x06_irq;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -100,11 +107,13 @@ static uint8_t g_ft5x06_irq;
  *
  ****************************************************************************/
 
+#ifndef CONFIG_FT5X06_POLLMODE
 static int lpc54_ft5x06_attach(FAR const struct ft5x06_config_s *config,
                                xcpt_t isr, FAR void *arg)
 {
   return irq_attach(g_ft5x06_irq, isr, arg);
 }
+#endif
 
 /****************************************************************************
  * Name: lpc54_ft5x06_enable
@@ -114,6 +123,7 @@ static int lpc54_ft5x06_attach(FAR const struct ft5x06_config_s *config,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_FT5X06_POLLMODE
 static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
                                 bool enable)
 {
@@ -126,6 +136,7 @@ static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
       up_disable_irq(g_ft5x06_irq);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: lpc54_ft5x06_clear
@@ -135,10 +146,12 @@ static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_FT5X06_POLLMODE
 static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config)
 {
   (void)lpc54_gpio_ackedge(g_ft5x06_irq);
 }
+#endif
 
 /****************************************************************************
  * Name: lpc54_ft5x06_wakeup
@@ -183,8 +196,10 @@ static void lpc54_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
 int lpc54_ft5x06_register(void)
 {
   FAR struct i2c_master_s *i2c;
-  int irq;
   int ret;
+
+#ifndef CONFIG_FT5X06_POLLMODE
+  int irq;
 
   /* Initialize GPIO pins.  NOTE:  The nRST pin was already configured during
    * early LCD initialization.  The Part is in reset now.
@@ -199,6 +214,7 @@ int lpc54_ft5x06_register(void)
 
   lpc54_gpio_ackedge(irq);
   up_disable_irq(irq);
+#endif
 
   /* Take the FT5x06 out of reset */
 

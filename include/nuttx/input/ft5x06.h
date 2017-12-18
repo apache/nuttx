@@ -116,10 +116,12 @@ struct ft5x06_config_s
 
    */
 
+#ifndef CONFIG_FT5X06_POLLMODE
   int  (*attach)(FAR const struct ft5x06_config_s *config, xcpt_t isr,
                  FAR void *arg);
   void (*enable)(FAR const struct ft5x06_config_s *config, bool enable);
   void (*clear)(FAR const struct ft5x06_config_s *config);
+#endif
   void (*wakeup)(FAR const struct ft5x06_config_s *config);
   void (*nreset)(FAR const struct ft5x06_config_s *config,
                  bool state);
