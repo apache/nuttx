@@ -235,7 +235,6 @@ bool sched_mergepending(void)
           /* Remove the task from the pending task list */
 
           tcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
-          DEBUGASSERT(tcb == ptcb);
 
           /* Add the pending task to the correct ready-to-run list. */
 
