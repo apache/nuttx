@@ -1205,6 +1205,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (priv->polltimer == NULL)
     {
       ierr("ERROR: Failed to allocate polltimer\n");
+      ret = -EBUSY;
       goto errout_with_priv;
     }
 #else
@@ -1241,7 +1242,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
    */
 
   ret = work_queue(HPWORK, &priv->work, ft5x06_data_worker, priv, 0);
-  if (ret != 0)
+  if (ret < 0)
     {
       ierr("ERROR: Failed to queue work: %d\n", ret);
       goto errout_with_timer;
