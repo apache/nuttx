@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/a1x/a1x_boot.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,6 @@
 #  include <nuttx/page.h>
 #endif
 
-#include <arch/board/board.h>
-
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
@@ -56,6 +54,7 @@
 #include "up_arch.h"
 
 #include "a1x_lowputc.h"
+#include "a1x_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,10 +74,6 @@
 #if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_ARCH_ROMPGTABLE)
 #  error High vector remap cannot be performed if we are using a ROM page table
 #endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data

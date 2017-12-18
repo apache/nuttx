@@ -40,25 +40,20 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include <arch/board/board.h>
-
 #include "chip.h"
 #include "arm.h"
 #include "up_internal.h"
 #include "up_arch.h"
-
-#include "lpc31_syscreg.h"
-#include "lpc31_cgudrvr.h"
-#include "lpc31.h"
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>
 #  include "pg_macros.h"
 #endif
 
-/************************************************************************************
- * Private Types
- ************************************************************************************/
+#include "lpc31_syscreg.h"
+#include "lpc31_cgudrvr.h"
+#include "lpc31.h"
+#include "lpc31_boot.h"
 
 /************************************************************************************
  * Private Types

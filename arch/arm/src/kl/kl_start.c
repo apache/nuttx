@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_start.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -56,6 +55,7 @@
 #include "kl_lowputc.h"
 #include "kl_userspace.h"
 #include "kl_clockconfig.h"
+#include "kl_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions

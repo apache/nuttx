@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sama5/sam_boot.h
+ * arch/arm/src/nuc1xx/nuc_start.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_BOOT_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_BOOT_H
+#ifndef __ARCH_ARM_SRC_NUC1XX_NUC_START_H
+#define __ARCH_ARM_SRC_NUC1XX_NUC_START_H
 
 /************************************************************************************
  * Included Files
@@ -47,16 +47,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_boardinitialize
+ * Name: nuc_boardinitialize
  *
  * Description:
- *   All SAMA5 architectures must provide the following entry point.  This entry
+ *   All NUC1xx architectures must provide the following entry point.  This entry
  *   point is called early in the initialization -- after clocking and memory have
  *   been configured but before caches have been enabled and before any devices have
  *   been initialized.
  *
  ************************************************************************************/
 
-void sam_boardinitialize(void);
+void nuc_boardinitialize(void);
 
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_BOOT_H */
+#endif /* __ARCH_ARM_SRC_NUC1XX_NUC_START_H */

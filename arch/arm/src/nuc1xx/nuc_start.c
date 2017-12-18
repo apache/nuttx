@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/nuc1xx/nuc_start.c
- * arch/arm/src/chip/nuc_start.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +44,6 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -54,6 +52,7 @@
 #include "nuc_lowputc.h"
 #include "nuc_clockconfig.h"
 #include "nuc_userspace.h"
+#include "nuc_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions
