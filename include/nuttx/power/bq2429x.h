@@ -110,7 +110,7 @@
 #define BQ2429XR2_ICHG_MASK          (0x3f << BQ2429XR2_ICHG_SHIFT)
 
 #define BQ2429XR2_BCOLD              (1 << 1) /* Boost Mode temperature threshold config for boost disable 0=76% 1=79% */
-#define BQ2429XR2_FORCE_20PCT        (1 << 0) /* Charge Configuration Threshold 0=Fast 1=less */
+#define BQ2429XR2_FORCE_20PCT        (1 << 0) /* Charge type 0=Fast (default), 1=Trickle charge with 20% current */
 
 /* REG03 Pre-charge Termination Control Register */
 

@@ -968,14 +968,47 @@ static inline int bq2429x_setcurr(FAR struct bq2429x_dev_s *priv,
 {
   uint8_t regval;
   int ret, idx;
+  bool force_20pct = false;
 
-  /* Verify if voltage is in the acceptable range */
+  /* If requested current is below the minimum for fast charge,
+   * configure for trickle charging. Trickle charging uses 20%
+   * of current programmed to ICHG bits, so we multiply by five.
+   */
+
+  if (req_current < BQ2429X_CURRCHG_MIN)
+    {
+      force_20pct = true;
+      req_current *= 5;
+    }
+
+  /* Verify if current is in the acceptable range. */
 
   if (req_current < BQ2429X_CURRCHG_MIN || req_current > BQ2429X_CURRCHG_MAX)
     {
-      baterr("ERROR: Current %d mA is out of range.\n", req_current);
+      baterr("ERROR: Current %d mA is out of range.\n",
+             force_20pct ? req_current / 5 : req_current);
       return -EINVAL;
     }
+
+  /* According to the "Termination when REG02[0] = 1" section of
+   * the bq24296M datasheet, the trickle charge could be less than
+   * the termination current so it is recommended to turn off the
+   * termination function.
+   *
+   * This means that the user will have to manually turn off the
+   * charging when in 20% mode. Otherwise there could be battery
+   * damage if we continuously trickle charge full battery until
+   * safety timer finally stops it after 10 hours (timer is running
+   * in half speed in 20% mode.)
+   */
+
+  ret = bq2429x_en_term(priv, !force_20pct);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Read previous current and charge type. */
 
   ret = bq2429x_getreg8(priv, BQ2429X_REG02, &regval, 1);
   if (ret < 0)
@@ -984,15 +1017,24 @@ static inline int bq2429x_setcurr(FAR struct bq2429x_dev_s *priv,
       return ret;
     }
 
-  /* Current starts at _MIN mV and increases in steps of 64mA */
+  /* Current starts at _MIN mA and increases in steps of 64mA. */
 
   idx = req_current - BQ2429X_CURRCHG_MIN;
   idx = idx / 64;
 
-  /* Clear previous current and set new value */
+  /* Clear previous current and charge type and set new values. */
 
   regval &= ~(BQ2429XR2_ICHG_MASK);
   regval |= (idx << BQ2429XR2_ICHG_SHIFT);
+
+  if (force_20pct)
+    {
+      regval |= BQ2429XR2_FORCE_20PCT;
+    }
+  else
+    {
+      regval &= ~BQ2429XR2_FORCE_20PCT;
+    }
 
   ret = bq2429x_putreg8(priv, BQ2429X_REG02, regval);
   if (ret < 0)
@@ -1082,12 +1124,13 @@ static int bq2429x_input_current(FAR struct battery_charger_dev_s *dev,
  * Name: bq2429x_operate
  *
  * Description:
- *   Do miscellaneous battery ioctl().
+ *   Do miscellaneous battery operation. There are numerous options that are
+ *   configurable on the bq2429x that go beyond what the NuttX battery charger
+ *   API provide access to. This operate() function allows changing some of them.
  *
- *   Set the battery charger current rate for charging
  *   REG00 EN_HIZ
- *   REG01 BOOST
- *   REG01 CHARGE
+ *   REG01[1] BOOST_LIM 1A/1.5A Default:1.5A
+ *   REG01 CHG_CONFIG
  *   REG02[1] BCOLD
  *   REG02[1] FORCE_20PCT
  *   REG05[1] EN_TERM Charging Termination Enable
@@ -1101,14 +1144,13 @@ static int bq2429x_input_current(FAR struct battery_charger_dev_s *dev,
  *   REG07[1] INT_MASK1 - Allow INT on CHRG_FAULT Default: 1 Allow
  *   REG07[1] INT_MASK0 - Allow INT on BAT_FAULT  Default: 1 Allow
  *
- *   _provision
+ *   Set by other battery charger methods:
  *   REG00[3] InputCurrent Limit 100mA 3000mA with PSEL
- *   REG01[1] BOOST_LIM 1A/1.5A Default:1.5A
  *   REG02[1] ICHG Fast Charge Current Limit,  512-3008mA Default 2048mA
  *   REG03[4] IPRECHG Pre-charge current Limit 128-2048mA Default: 128mA
  *   REG03[3] ITERM Termination Current Limit  128-1024mA Default: 256mA
  *
- *   also System output voltage
+ *   System output voltage related:
  *   REG00[4] VINDPM 3.88-5.08V Default:4.36V
  *   REG01[3] Min Sys Voltage Range3.0-3.7V
  *   REG04[6] Charge Voltage Limit 3504-4400mV Default: 4208mV
@@ -1127,25 +1169,6 @@ static int bq2429x_operate(FAR struct battery_charger_dev_s *dev,
   int ret = OK;
 
   bq2429x_dump_regs(priv);
-
-#if 0
-  static bool wdg_disabled = 0;
-
-  /* Tickle watchdog periodically or disable */
-
-  if (!wdg_disabled)
-    {
-      wdg_disabled = true;
-      bq2429x_reset(priv);
-
-      ret = bq2429x_watchdog(priv, false); /* Disable */
-      if (ret < 0)
-        {
-          baterr("ERROR: Failed to disable BQ2429x watchdog: %d\n", ret);
-          return ret;
-        }
-    }
-#endif
 
   op = msg->operate_type;
   value = (int)msg->u32;
