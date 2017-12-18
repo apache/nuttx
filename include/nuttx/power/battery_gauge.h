@@ -200,7 +200,7 @@ int battery_gauge_register(FAR const char *devpath,
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_MAX1704X)
 struct i2c_master_s; /* Forward reference */
 
-FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c
+FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c,
                                                     uint8_t addr,
                                                     uint32_t frequency);
 #endif
