@@ -328,7 +328,12 @@ static void ft5x06_data_worker(FAR void *arg)
 
       sample = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
 
-      /* Notify waiters (only if we ready some valid data) */
+      /* Notify waiters (only if we ready some valid data).
+       *
+       * REVISIT: For improved performance consider moving the duplicate
+       * report and thresholding logic from ft5x06_sample() to here.  That
+       * would save a context switch.
+       */
 
       if (sample->tdstatus <= FT5x06_MAX_TOUCHES)
         {
@@ -491,7 +496,7 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   if (event == FT5x06_INVALID)
     {
       priv->lastevent = FT5x06_INVALID;
-      goto drop;
+      goto reset_and_drop;
     }
 
   if (id == priv->lastid && event == priv->lastevent)
@@ -502,7 +507,7 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
         {
           /* No... no new touch data */
 
-          goto drop;
+          goto reset_and_drop;
         }
       else
         {
@@ -563,9 +568,10 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   priv->valid       = false;
   return SIZEOF_TOUCH_SAMPLE_S(1);
 
-drop:
+reset_and_drop:
   priv->lastx = 0;
   priv->lasty = 0;
+drop:
   priv->valid = false;
   return 0;  /* No new touches read. */
 }
@@ -1280,9 +1286,9 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 errout_with_timer:
 #ifdef CONFIG_FT5X06_POLLMODE
   (void)wd_delete(priv->polltimer);
-#endif
 
 errout_with_priv:
+#endif
   nxsem_destroy(&priv->devsem);
   kmm_free(priv);
   return ret;

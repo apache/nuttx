@@ -29,26 +29,18 @@ STATUS
 
   2017-12-10:  The basic NSH configuration is functional at 220MHz with a
     Serial console, timer and LED support.  Added support for the external
-    SDRAM and for the RAM test utility -- UNTESTED!
-  2017-12-11:  Fixed an error in board LEDs.  SDRAM is partially functional
-    but not reliable.  Added framework for future I2C and SPI flexcomm
-    drivers (mostly empty files for now)
-  2017-12-12:  The SDRAM is now functional passes the commplete RAM test.
-    Included configurations and logic to add none, portions, or all of the
-    external SDRAM to the system heap.  Brought in the LPC1788 LCD driver.
-    The LPC1788 LCD registers are identical to the LPC54xx (other than a
-    minor clock source setting).  That port required modifications only
-    for differences in some SYSCON and pin-related settings.
-  2017-12-13:  Created the fb configuration for testing the LCD.  Only
-    minimal testing has been performed.  As of this writing, there is
-    some framebuffer functionality.  There are recognizable but corrupted
-    patterns on the LCD.  There are color formatting problems and some
-    horizontal elongation.
+    SDRAM and for the RAM test utility.
+  2017-12-11:  Fixed an error in board LEDs.  Added framework for future
+    I2C and SPI flexcomm drivers.
+  2017-12-12:  The SDRAM is now functional and passes the commplete RAM
+    test.  Added configuration options and logic to add none, portions, or
+    all of the external SDRAM to the system heap.  Brought in the LPC1788
+    LCD driver.  The LPC1788 LCD registers are identical to the LPC54xx
+    (other than a minor clock source setting).
+  2017-12-13:  Created the fb configuration for testing the LCD.
   2017-12-14:  Corrected a misconception about how the video data lines
-    were configured.  Now the LCD appears to be fully functional.
-  2017-12-15:  Added an I2C driver.  This is the first step on the road
-    to getting support for the capacitive touchscreen on the TFT panel.
-    The I2C driver appears to be functional but is not yet well-tested.
+    were configured.  The LCD now appears to be fully functional.
+  2017-12-15:  Added an I2C driver.
   2017-12-16:  Added support for LPC54xx GPIO interrupts; added button
     support (with interrupts) to the NSH configuration.  The button
     test appears to functional functional.  There are noticeable delays
@@ -59,15 +51,13 @@ STATUS
     response my be obtainble with filtering off.
   2017-12-17:  Added a driver for the FT5x06 capacitive, multi-touch
     controller.  Add support logic for the LPCXpresso-LPC54528 to
-    initialize and the register the FT5x06 driver.  Currently, the
-    system asserts during boot up.  This is because the FT5x06 interrupt
-    is on pin P4.0 but pin interrupts are only supported on P0.m and
-    P1.m, m=0..31.  Does this mean that TSC interrupts are not supported?
-    I think so!
+    initialize and the register the FT5x06 driver.  Unfortunately, the
+    FT5x06 interrupt is on pin P4.0 but pin interrupts are only supported
+    on P0.m and P1.m, m=0..31.
   2017-12-18:  Added an option to the FT5x06 driver to support a timer-
     based poll instead of interrupts.  This is very inefficient in that it
     will introduce delays in touchscreen response and will consume more CPU
-    bandwidth.  The driver appears to be functional.  Added the nxwm
+    bandwidth.  The driver appears to be functional.  Added the NxWM
     configuration to do some integrated testing.  NxWM seems to be fully
     functional.  However, the action of the touchscreen could use some
     human factors improvements.  I imagine that this is a consequence of
