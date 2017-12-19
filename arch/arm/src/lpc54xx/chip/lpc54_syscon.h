@@ -564,7 +564,14 @@
 #  define SYSCON_LCDCLKSEL_NONE                (3 << SYSCON_LCDCLKSEL_SHIFT) /* None */
 
 /* SDIO clock source select */
-#define SYSCON_SDIOCLKSEL_
+
+#define SYSCON_SDIOCLKSEL_SHIFT                (0)       /* Bits 0-2: SDIO clock source select */
+#define SYSCON_SDIOCLKSEL_MASK                 (7 << SYSCON_SDIOCLKSEL_SHIFT)
+#  define SYSCON_SDIOCLKSEL_MAINCLK            (0 << SYSCON_SDIOCLKSEL_SHIFT) /* Main clock (main_clk) */
+#  define SYSCON_SDIOCLKSEL_PLLCLK             (1 << SYSCON_SDIOCLKSEL_SHIFT) /* System PLL output (pll_clk) */
+#  define SYSCON_SDIOCLKSEL_USBPLLCLK          (2 << SYSCON_SDIOCLKSEL_SHIFT) /* USB PLL clock (usb_pll_clk) */
+#  define SYSCON_SDIOCLKSEL_FROHF              (3 << SYSCON_SDIOCLKSEL_SHIFT) /* FRO 96 or 48 MHz (fro_hf) */
+#  define SYSCON_SDIOCLKSEL_AUDIOPLLCLK        (4 << SYSCON_SDIOCLKSEL_SHIFT) /* Audio PLL clock (audio_pll_clk) */
 
 /* SYSTICK clock divider */
 
@@ -641,7 +648,13 @@
 #define SYSCON_EMCCLKDIV_REQFLAG               (1 << 31) /* Bit 31: Divider status flag */
 
 /* SDIO clock divider */
-#define SYSCON_SDIOCLKDIV_
+
+#define SYSCON_SDIOCLKDIV_DIV_SHIFT            (0)       /* Bits 0-7: Clock divider value */
+#define SYSCON_SDIOCLKDIV_DIV_MASK             (0xff <<SYSCON_SDIOCLKDIV_DIV_SHIFT)
+#  define SYSCON_SDIOCLKDIV_DIV(n)             ((uint32_t)((n)-1) << SYSCON_SDIOCLKDIV_DIV_SHIFT)
+#define SYSCON_SDIOCLKDIV_RESET                (1 << 29) /* Bit 29: Resets the divider counter */
+#define SYSCON_SDIOCLKDIV_HALT                 (1 << 30) /* Bit 30: Halts the divider counter */
+#define SYSCON_SDIOCLKDIV_REQFLAG              (1 << 31) /* Bit 31: Divider status flag */
 
 /* Flash wait states configuration */
 
@@ -690,8 +703,31 @@
 #define SYSCON_ETHPHYSEL_
 /* Ethernet SBD flow control */
 #define SYSCON_ETHSBDCTRL_
+
 /* SDIO CCLKIN phase and delay control */
-#define SYSCON_SDIOCLKCTRL_
+
+#define SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT      (0)       /* Bit 0-1: cclk_in_drv phase */
+#define SYSCON_SDIOCLKCTRL_DRVPHASE_MASK       (3 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT)
+#  define SYSCON_SDIOCLKCTRL_DRVPHASE_0        (0 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 0 degree shift */
+#  define SYSCON_SDIOCLKCTRL_DRVPHASE_90       (1 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 90 degree shift */
+#  define SYSCON_SDIOCLKCTRL_DRVPHASE_180      (2 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 180 degree shift */
+#  define SYSCON_SDIOCLKCTRL_DRVPHASE_270      (3 << SYSCON_SDIOCLKCTRL_DRVPHASE_SHIFT) /* 270 degree shift */
+#define SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT      (2)       /* Bits 2-3: cclk_in_sample delay */
+#define SYSCON_SDIOCLKCTRL_SMPPHASE_MASK       (3 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT)
+#  define SYSCON_SDIOCLKCTRL_SMPPHASE_0        (0 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 0 degree shift */
+#  define SYSCON_SDIOCLKCTRL_SMPPHASE_90       (1 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 90 degree shift */
+#  define SYSCON_SDIOCLKCTRL_SMPPHASE_180      (2 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 180 degree shift */
+#  define SYSCON_SDIOCLKCTRL_SMPPHASE_270      (3 << SYSCON_SDIOCLKCTRL_SMPPHASE_SHIFT) /* 270 degree shift */
+#define SYSCON_SDIOCLKCTRL_PHASEACTIVE         (1 << 7)  /* Bit 7:  Enables the delays */
+#define SYSCON_SDIOCLKCTRL_DRVDLY_SHIFT        (16)      /* Bits 16-20: cclk_in_drv delay */
+#define SYSCON_SDIOCLKCTRL_DRVDLY_MASK         (0x1f << SYSCON_SDIOCLKCTRL_DRVDLY_SHIFT)
+#  define SYSCON_SDIOCLKCTRL_DRVDLY(n)         ((uint32_t)((n)-1) << SYSCON_SDIOCLKCTRL_DRVDLY_SHIFT)
+#define SYSCON_SDIOCLKCTRL_DRVDLYACTIVE        (1 << 23) /* Bit 23: Enables drive delay */
+#define SYSCON_SDIOCLKCTRL_SMP_DLY_SHIFT       (24)      /* Bits 24-28: cclk_in_sample delay */
+#define SYSCON_SDIOCLKCTRL_SMP_DLY_MASK        (0x1f << SYSCON_SDIOCLKCTRL_SMP_DLY_SHIFT)
+#  define SYSCON_SDIOCLKCTRL_SMP_DLY(n)        ((uint32_t)((n)-1) << SYSCON_SDIOCLKCTRL_SMP_DLY_SHIFT)
+#define SYSCON_SDIOCLKCTRL_CCLK_SMPDLYACTIVE   (1 << 31) /* Bit 31: Enables sample delay */
+
 /* FRO oscillator control */
 #define SYSCON_FROCTRL_
 /* System oscillator control */

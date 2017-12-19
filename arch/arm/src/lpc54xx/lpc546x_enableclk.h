@@ -107,7 +107,7 @@
 #define lpc54_ctimer1_enableclk()    lpc54_periph1_enableclk(SYSCON_AHBCLKCTRL1_CTIMER1)
 
 #define lpc54_lcd_enableclk()        lpc54_periph2_enableclk(SYSCON_AHBCLKCTRL2_LCD)
-#define lpc54_sdio_enableclk()       lpc54_periph2_enableclk(SYSCON_AHBCLKCTRL2_SDIO)
+#define lpc54_sdmmc_enableclk()      lpc54_periph2_enableclk(SYSCON_AHBCLKCTRL2_SDIO)
 #define lpc54_usb1h_enableclk()      lpc54_periph2_enableclk(SYSCON_AHBCLKCTRL2_USB1H)
 #define lpc54_usb1d_enableclk()      lpc54_periph2_enableclk(SYSCON_AHBCLKCTRL2_USB1D)
 #define lpc54_usb1ram_enableclk()    lpc54_periph2_enableclk(SYSCON_AHBCLKCTRL2_USB1RAM)
@@ -173,7 +173,7 @@
 #define lpc54_ctimer1_disableclk()   lpc54_periph1_disableclk(SYSCON_AHBCLKCTRL1_CTIMER1)
 
 #define lpc54_lcd_disableclk()       lpc54_periph2_disableclk(SYSCON_AHBCLKCTRL2_LCD)
-#define lpc54_sdio_disableclk()      lpc54_periph2_disableclk(SYSCON_AHBCLKCTRL2_SDIO)
+#define lpc54_sdmmc_disableclk()     lpc54_periph2_disableclk(SYSCON_AHBCLKCTRL2_SDIO)
 #define lpc54_usb1h_disableclk()     lpc54_periph2_disableclk(SYSCON_AHBCLKCTRL2_USB1H)
 #define lpc54_usb1d_disableclk()     lpc54_periph2_disableclk(SYSCON_AHBCLKCTRL2_USB1D)
 #define lpc54_usb1ram_disableclk()   lpc54_periph2_disableclk(SYSCON_AHBCLKCTRL2_USB1RAM)
@@ -239,7 +239,7 @@
 #define lpc54_ctimer1_isenabled()    lpc54_periph1_isenabled(SYSCON_AHBCLKCTRL1_CTIMER1)
 
 #define lpc54_lcd_isenabled()        lpc54_periph2_isenabled(SYSCON_AHBCLKCTRL2_LCD)
-#define lpc54_sdio_isenabled()       lpc54_periph2_isenabled(SYSCON_AHBCLKCTRL2_SDIO)
+#define lpc54_sdmmc_isenabled()      lpc54_periph2_isenabled(SYSCON_AHBCLKCTRL2_SDIO)
 #define lpc54_usb1h_isenabled()      lpc54_periph2_isenabled(SYSCON_AHBCLKCTRL2_USB1H)
 #define lpc54_usb1d_isenabled()      lpc54_periph2_isenabled(SYSCON_AHBCLKCTRL2_USB1D)
 #define lpc54_usb1ram_isenabled()    lpc54_periph2_isenabled(SYSCON_AHBCLKCTRL2_USB1RAM)

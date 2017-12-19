@@ -141,6 +141,7 @@
  */
 
 /* Revisit: FRGCLK <= 48MHz cannot be realized with the MainClk source */
+
 #define BOARD FRGCLK_CLKSEL      SYSCON_FRGCLKSEL_MAINCLK
 #define BOARD_FRGCLK_INPUT       BOARD_MAIN_CLK   /* FRG input frequency */
 #define BOARD_FRGCLK             48000000         /* May not be exact */
@@ -191,6 +192,15 @@
 #define BOARD_EMC_CLKDIV         2     /* EMC Clock = CPU FREQ/2 */
 #endif
 #define BOARD_EMC_FREQUENCY      (BOARD_CPU_FREQUENCY / BOARD_EMC_CLKDIV)
+
+/* SD/MMC or SDIO interface
+ *
+ * NOTE: The SDIO function clock to the interface can be up to 50 MHZ.
+ */
+
+#define BOARD_SDMMC_CLKSRC       SYSCON_SDIOCLKSEL_MAINCLK
+#define BOARD_SDMMC_CLKDIV       (BOARD_MAIN_CLK / 50000000)
+#define BOARD_SDMMC_FREQUENCY    (BOARD_MAIN_CLK / BOARD_SDMMC_CLKDIV)
 
 /* LED definitions *********************************************************/
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
@@ -312,6 +322,29 @@
 #define GPIO_I2C2_SDA              (GPIO_FC2_CTS_SDA_SSEL0_2 | \
                                     GPIO_FILTER_OFF | _I2CFILTER | \
                                     _I2CDRIVE)
+
+/* SD/MMC
+ *
+ *  P2_10-SD_CDn
+ *  P2_6-SD_D0
+ *  P2_7-SD_D1
+ *  P2_8-SD_D2
+ *  P2_9-SD_D3
+ *  P2_3-SD_CLK
+ *  P2_4-SD_CMD
+ *  P2_5-SD_POW_EN
+ *  P3_15-SD_WPn
+ */
+
+#define GPIO_SD_CARD_DET_N         GPIO_SD_CARD_DET_N_2     /* P2.10 */
+#define GPIO_SD_D0                 GPIO_SD_D0_3             /* P2.9 */
+#define GPIO_SD_D1                 GPIO_SD_D1_3             /* P2.7 */
+#define GPIO_SD_D2                 GPIO_SD_D2_3             /* P2.8 */
+#define GPIO_SD_D3                 GPIO_SD_D3_3             /* P2.9 */
+#define GPIO_SD_CLK                GPIO_SD_CLK_3            /* P2.3 */
+#define GPIO_SD_CMD                GPIO_SD_CMD_3            /* P2.4 */
+#define GPIO_SD_POW_EN             GPIO_SD_POW_EN_2         /* P2.5 */
+#define GPIO_SD_WR_PRT             GPIO_SD_WR_PRT_2         /* P2.15 */
 
 /* LCD
  *

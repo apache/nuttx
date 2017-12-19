@@ -628,7 +628,7 @@
 #define GPIO_MCLK_4                  (GPIO_ALT2 | GPIO_MODE_DIGITAL | GPIO_PORT5 | GPIO_PIN7)
 #define GPIO_MCLK_5                  (GPIO_ALT3 | GPIO_MODE_DIGITAL | GPIO_PORT2 | GPIO_PIN21)
 
-/* MIcrophone (PDM) */
+/* Microphone (PDM) */
 
 #define GPIO_PDM0_CLK_1              (GPIO_ALT2 | GPIO_MODE_DIGITAL | GPIO_PORT3 | GPIO_PIN0)
 #define GPIO_PDM0_CLK_2              (GPIO_ALT2 | GPIO_MODE_DIGITAL | GPIO_PORT5 | GPIO_PIN8)

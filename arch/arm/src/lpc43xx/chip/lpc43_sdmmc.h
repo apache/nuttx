@@ -174,7 +174,7 @@
                                                     /* Bits 2-31:  Reserved */
 /* Clock enable register CLKENA */
 
-#define SDMMC_CLKENA_EMABLE               (1 << 0)  /* Bit 0:  Clock enable */
+#define SDMMC_CLKENA_ENABLE               (1 << 0)  /* Bit 0:  Clock enable */
                                                     /* Bits 1-15:  Reserved */
 #define SDMMC_CLKENA_LOWPOWER             (1 << 16) /* Bit 16: Low-power mode */
                                                     /* Bits 17-31:  Reserved */
