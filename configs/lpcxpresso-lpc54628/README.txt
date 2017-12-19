@@ -68,7 +68,8 @@ STATUS
 
   There is still no support for the Accelerometer, SPIFI, SD card, Ethernet,
   or USB.  There is a partial SPI driver, but no on-board SPI devices to
-  test it.
+  test it.  The SD/MMC interface is essentially the same as on the LPC43xx
+  and there is an unverified leverage in place for that.
 
 Configurations
 ==============

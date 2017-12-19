@@ -163,7 +163,7 @@
 
 #define SDMMC_CLKDIV0_SHIFT              (0)       /* Bits 0-7: Clock divider 0 value */
 #define SDMMC_CLKDIV0_MASK               (255 << SDMMC_CLKDIV0_SHIFT)
-#  define SDMMC_CLKDIV0_MASK(n)          ((((n) + 1) >> 1) << SDMMC_CLKDIV0_SHIFT)
+#  define SDMMC_CLKDIV0(n)               ((((n) + 1) >> 1) << SDMMC_CLKDIV0_SHIFT)
                                                    /* Bits 8-31:  Reserved */
 
 /* Clock enable register CLKENA */

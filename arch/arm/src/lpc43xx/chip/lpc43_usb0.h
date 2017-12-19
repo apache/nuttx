@@ -58,6 +58,7 @@
 #define LPC43_USBDEV_DCCPARAMS_OFFSET        0x0124 /* Device controller capability parameters */
 
 /* Device/host/OTG operational registers */
+
 #define LPC43_USBOTG_HCOR_OFFSET             0x0140 /* Offset to EHCI Host Controller Operational Registers */
 #define LPC43_USBOTG_USBCMD_OFFSET           0x0140 /* USB command (both) */
 #define LPC43_USBOTG_USBSTS_OFFSET           0x0144 /* USB status (both) */
