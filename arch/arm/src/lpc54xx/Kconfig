@@ -250,6 +250,7 @@ config LPC54_SDMMC
 	bool "SD/MMC"
 	default n
 	select ARCH_HAVE_SDIO
+	depends on EXPERIMENTAL
 
 config LPC54_SPI0_MASTER
 	bool "SPI0 Master"
@@ -641,7 +642,6 @@ menu "SD/MMC Configuration"
 config LPC54_SDMMC_DMA
 	bool "Support DMA data transfers"
 	default y
-	select SDIO_SETUP_DMA_BEFORE_WRITE
 	---help---
 		Support DMA data transfers.
 

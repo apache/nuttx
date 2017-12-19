@@ -341,8 +341,8 @@ struct lpc54_dev_s g_scard_dev =
 #ifdef CONFIG_SDIO_MUXBUS
     .lock             = lpc54_lock,
 #endif
-    .capabilities     = lpc54_capabilities,
     .reset            = lpc54_reset,
+    .capabilities     = lpc54_capabilities,
     .status           = lpc54_status,
     .widebus          = lpc54_widebus,
     .clock            = lpc54_clock,

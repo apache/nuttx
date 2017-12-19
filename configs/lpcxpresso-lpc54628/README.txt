@@ -62,6 +62,9 @@ STATUS
     functional.  However, the action of the touchscreen could use some
     human factors improvements.  I imagine that this is a consequence of
     the polled solution.
+  2017-12-29:   Brought in Alan Carvalho de Assis' LPC43xx SD/MMC driver from
+    https://github.com/Smoothieware/smoothie-nuttx/tree/master/nuttx/arch/arm/src/lpc43xx
+    and adapted it for use by the LPC54xx.  Unverified as of this writing.
 
   There is still no support for the Accelerometer, SPIFI, SD card, Ethernet,
   or USB.  There is a partial SPI driver, but no on-board SPI devices to
