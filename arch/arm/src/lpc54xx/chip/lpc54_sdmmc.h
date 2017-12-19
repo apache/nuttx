@@ -1,7 +1,7 @@
 /************************************************************************************************
- * arch/arm/src/lpc43xx/lpc43_sdmmc.h
+ * arch/arm/src/lpc54xx/lpc54_sdmmc.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,15 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_CHIP_LPC43_SDMMC_H
-#define __ARCH_ARM_SRC_LPC43XX_CHIP_LPC43_SDMMC_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SDMMC_H
+#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SDMMC_H
 
 /************************************************************************************************
  * Included Files
  ************************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip/lpc54_memorymap.h"
 
 /************************************************************************************************
  * Pre-processor Definitions
@@ -48,81 +49,82 @@
 
 /* MCI register offsets (with respect to the MCI base) ******************************************/
 
-#define LPC43_SDMMC_CTRL_OFFSET          0x0000 /* Control register */
-#define LPC43_SDMMC_PWREN_OFFSET         0x0004 /* Power Enable Register */
-#define LPC43_SDMMC_CLKDIV_OFFSET        0x0008 /* Clock-divider register */
-#define LPC43_SDMMC_CLKSRC_OFFSET        0x000c /* Clock-source register */
-#define LPC43_SDMMC_CLKENA_OFFSET        0x0010 /* Clock-enable register */
-#define LPC43_SDMMC_TMOUT_OFFSET         0x0014 /* Time-out register */
-#define LPC43_SDMMC_CTYPE_OFFSET         0x0018 /* Card-type register */
-#define LPC43_SDMMC_BLKSIZ_OFFSET        0x001c /* Block-size register */
-#define LPC43_SDMMC_BYTCNT_OFFSET        0x0020 /* Byte-count register */
-#define LPC43_SDMMC_INTMASK_OFFSET       0x0024 /* Interrupt-mask register */
-#define LPC43_SDMMC_CMDARG_OFFSET        0x0028 /* Command-argument register */
-#define LPC43_SDMMC_CMD_OFFSET           0x002c /* Command register */
-#define LPC43_SDMMC_RESP0_OFFSET         0x0030 /* Response-0 register */
-#define LPC43_SDMMC_RESP1_OFFSET         0x0034 /* Response-1 register */
-#define LPC43_SDMMC_RESP2_OFFSET         0x0038 /* Response-2 register */
-#define LPC43_SDMMC_RESP3_OFFSET         0x003c /* Response-3 register */
-#define LPC43_SDMMC_MINTSTS_OFFSET       0x0040 /* Masked interrupt-status register */
-#define LPC43_SDMMC_RINTSTS_OFFSET       0x0044 /* Raw interrupt-status register */
-#define LPC43_SDMMC_STATUS_OFFSET        0x0048 /* Status register */
-#define LPC43_SDMMC_FIFOTH_OFFSET        0x004c /* FIFO threshold register */
-#define LPC43_SDMMC_CDETECT_OFFSET       0x0050 /* Card-detect register value */
-#define LPC43_SDMMC_WRTPRT_OFFSET        0x0054 /* Write-protect register */
-                                                /* 0x58: Reserved */
-#define LPC43_SDMMC_TCBCNT_OFFSET        0x005c /* Transferred CIU card byte count */
-#define LPC43_SDMMC_TBBCNT_OFFSET        0x0060 /* Transferred cpu/DMA to/from BIU-FIFO byte count */
-#define LPC43_SDMMC_DEBNCE_OFFSET        0x0064 /* Debounce count register */
-                                                /* 0x0068-0x0074: Reserved */
-#define LPC43_SDMMC_RSTN_OFFSET          0x0078 /* Hardware Reset */
-#define LPC43_SDMMC_BMOD_OFFSET          0x0080 /* Bus Mode Register */
-#define LPC43_SDMMC_PLDMND_OFFSET        0x0084 /* Poll Demand Register */
-#define LPC43_SDMMC_DBADDR_OFFSET        0x0088 /* Descriptor List Base Address Register */
-#define LPC43_SDMMC_IDSTS_OFFSET         0x008c /* Internal DMAC Status Register */
-#define LPC43_SDMMC_IDINTEN_OFFSET       0x0090 /* Internal DMAC Interrupt Enable Register */
-#define LPC43_SDMMC_DSCADDR_OFFSET       0x0094 /* Current Host Descriptor Address Register */
-#define LPC43_SDMMC_BUFADDR_OFFSET       0x0098 /* Current Buffer Descriptor Address Register */
-                                                /* 0x009c-0x00ff: Reserved */
-#define LPC43_SDMMC_DATA_OFFSET          0x0100 /* Data FIFO read/write (>=) */
+#define LPC54_SDMMC_CTRL_OFFSET          0x0000 /* Control register */
+#define LPC54_SDMMC_PWREN_OFFSET         0x0004 /* Power Enable Register */
+#define LPC54_SDMMC_CLKDIV_OFFSET        0x0008 /* Clock-divider register */
+#define LPC54_SDMMC_CLKENA_OFFSET        0x0010 /* Clock-enable register */
+#define LPC54_SDMMC_TMOUT_OFFSET         0x0014 /* Time-out register */
+#define LPC54_SDMMC_CTYPE_OFFSET         0x0018 /* Card-type register */
+#define LPC54_SDMMC_BLKSIZ_OFFSET        0x001c /* Block-size register */
+#define LPC54_SDMMC_BYTCNT_OFFSET        0x0020 /* Byte-count register */
+#define LPC54_SDMMC_INTMASK_OFFSET       0x0024 /* Interrupt-mask register */
+#define LPC54_SDMMC_CMDARG_OFFSET        0x0028 /* Command-argument register */
+#define LPC54_SDMMC_CMD_OFFSET           0x002c /* Command register */
+#define LPC54_SDMMC_RESP0_OFFSET         0x0030 /* Response-0 register */
+#define LPC54_SDMMC_RESP1_OFFSET         0x0034 /* Response-1 register */
+#define LPC54_SDMMC_RESP2_OFFSET         0x0038 /* Response-2 register */
+#define LPC54_SDMMC_RESP3_OFFSET         0x003c /* Response-3 register */
+#define LPC54_SDMMC_MINTSTS_OFFSET       0x0040 /* Masked interrupt-status register */
+#define LPC54_SDMMC_RINTSTS_OFFSET       0x0044 /* Raw interrupt-status register */
+#define LPC54_SDMMC_STATUS_OFFSET        0x0048 /* Status register */
+#define LPC54_SDMMC_FIFOTH_OFFSET        0x004c /* FIFO threshold register */
+#define LPC54_SDMMC_CDETECT_OFFSET       0x0050 /* Card-detect register value */
+#define LPC54_SDMMC_WRTPRT_OFFSET        0x0054 /* Write-protect register */
+#define LPC54_SDMMC_TCBCNT_OFFSET        0x005c /* Transferred CIU card byte count */
+#define LPC54_SDMMC_TBBCNT_OFFSET        0x0060 /* Transferred host to BIU-FIFO byte count */
+#define LPC54_SDMMC_DEBNCE_OFFSET        0x0064 /* Debounce count register */
+#define LPC54_SDMMC_RSTN_OFFSET          0x0078 /* Hardware Reset */
+#define LPC54_SDMMC_BMOD_OFFSET          0x0080 /* Bus Mode Register */
+#define LPC54_SDMMC_PLDMND_OFFSET        0x0084 /* Poll Demand Register */
+#define LPC54_SDMMC_DBADDR_OFFSET        0x0088 /* Descriptor List Base Address Register */
+#define LPC54_SDMMC_IDSTS_OFFSET         0x008c /* Internal DMAC Status Register */
+#define LPC54_SDMMC_IDINTEN_OFFSET       0x0090 /* Internal DMAC Interrupt Enable Register */
+#define LPC54_SDMMC_DSCADDR_OFFSET       0x0094 /* Current Host Descriptor Address Register */
+#define LPC54_SDMMC_BUFADDR_OFFSET       0x0098 /* Current Buffer Descriptor Address Register */
+#define LPC54_SDMMC_CARDTHRCTL_OFFSET    0x0100 /* Card threshold control */
+#define LPC54_SDMMC_BACKENDPWRL_OFFSET   0x0104 /* Power control */
+
+#define LPC54_SDMMC_DATA_OFFSET          0x0200 /* Data FIFO read/write (>=) */
 
 /* MCI register (virtual) addresses *************************************************************/
 
-#define LPC43_SDMMC_CTRL                 (LPC43_SDMMC_BASE+LPC43_SDMMC_CTRL_OFFSET)
-#define LPC43_SDMMC_PWREN                (LPC43_SDMMC_BASE+LPC43_SDMMC_PWREN_OFFSET)
-#define LPC43_SDMMC_CLKDIV               (LPC43_SDMMC_BASE+LPC43_SDMMC_CLKDIV_OFFSET)
-#define LPC43_SDMMC_CLKSRC               (LPC43_SDMMC_BASE+LPC43_SDMMC_CLKSRC_OFFSET)
-#define LPC43_SDMMC_CLKENA               (LPC43_SDMMC_BASE+LPC43_SDMMC_CLKENA_OFFSET)
-#define LPC43_SDMMC_TMOUT                (LPC43_SDMMC_BASE+LPC43_SDMMC_TMOUT_OFFSET)
-#define LPC43_SDMMC_CTYPE                (LPC43_SDMMC_BASE+LPC43_SDMMC_CTYPE_OFFSET)
-#define LPC43_SDMMC_BLKSIZ               (LPC43_SDMMC_BASE+LPC43_SDMMC_BLKSIZ_OFFSET)
-#define LPC43_SDMMC_BYTCNT               (LPC43_SDMMC_BASE+LPC43_SDMMC_BYTCNT_OFFSET)
-#define LPC43_SDMMC_INTMASK              (LPC43_SDMMC_BASE+LPC43_SDMMC_INTMASK_OFFSET)
-#define LPC43_SDMMC_CMDARG               (LPC43_SDMMC_BASE+LPC43_SDMMC_CMDARG_OFFSET)
-#define LPC43_SDMMC_CMD                  (LPC43_SDMMC_BASE+LPC43_SDMMC_CMD_OFFSET)
-#define LPC43_SDMMC_RESP0                (LPC43_SDMMC_BASE+LPC43_SDMMC_RESP0_OFFSET)
-#define LPC43_SDMMC_RESP1                (LPC43_SDMMC_BASE+LPC43_SDMMC_RESP1_OFFSET)
-#define LPC43_SDMMC_RESP2                (LPC43_SDMMC_BASE+LPC43_SDMMC_RESP2_OFFSET)
-#define LPC43_SDMMC_RESP3                (LPC43_SDMMC_BASE+LPC43_SDMMC_RESP3_OFFSET)
-#define LPC43_SDMMC_MINTSTS              (LPC43_SDMMC_BASE+LPC43_SDMMC_MINTSTS_OFFSET)
-#define LPC43_SDMMC_RINTSTS              (LPC43_SDMMC_BASE+LPC43_SDMMC_RINTSTS_OFFSET)
-#define LPC43_SDMMC_STATUS               (LPC43_SDMMC_BASE+LPC43_SDMMC_STATUS_OFFSET)
-#define LPC43_SDMMC_FIFOTH               (LPC43_SDMMC_BASE+LPC43_SDMMC_FIFOTH_OFFSET)
-#define LPC43_SDMMC_CDETECT              (LPC43_SDMMC_BASE+LPC43_SDMMC_CDETECT_OFFSET)
-#define LPC43_SDMMC_WRTPRT               (LPC43_SDMMC_BASE+LPC43_SDMMC_WRTPRT_OFFSET)
-#define LPC43_SDMMC_TCBCNT               (LPC43_SDMMC_BASE+LPC43_SDMMC_TCBCNT_OFFSET)
-#define LPC43_SDMMC_TBBCNT               (LPC43_SDMMC_BASE+LPC43_SDMMC_TBBCNT_OFFSET)
-#define LPC43_SDMMC_TBBCNT               (LPC43_SDMMC_BASE+LPC43_SDMMC_TBBCNT_OFFSET)
-#define LPC43_SDMMC_DEBNCE               (LPC43_SDMMC_BASE+LPC43_SDMMC_DEBNCE_OFFSET)
-#define LPC43_SDMMC_RSTN                 (LPC43_SDMMC_BASE+LPC43_SDMMC_RSTN_OFFSET)
-#define LPC43_SDMMC_BMOD                 (LPC43_SDMMC_BASE+LPC43_SDMMC_BMOD_OFFSET)
-#define LPC43_SDMMC_PLDMND               (LPC43_SDMMC_BASE+LPC43_SDMMC_PLDMND_OFFSET)
-#define LPC43_SDMMC_DBADDR               (LPC43_SDMMC_BASE+LPC43_SDMMC_DBADDR_OFFSET)
-#define LPC43_SDMMC_IDSTS                (LPC43_SDMMC_BASE+LPC43_SDMMC_IDSTS_OFFSET)
-#define LPC43_SDMMC_IDINTEN              (LPC43_SDMMC_BASE+LPC43_SDMMC_IDINTEN_OFFSET)
-#define LPC43_SDMMC_DSCADDR              (LPC43_SDMMC_BASE+LPC43_SDMMC_DSCADDR_OFFSET)
-#define LPC43_SDMMC_BUFADDR              (LPC43_SDMMC_BASE+LPC43_SDMMC_BUFADDR_OFFSET)
-#define LPC43_SDMMC_DATA                 (LPC43_SDMMC_BASE+LPC43_SDMMC_DATA_OFFSET)
+#define LPC54_SDMMC_CTRL                 (LPC54_SDMMC_BASE + LPC54_SDMMC_CTRL_OFFSET)
+#define LPC54_SDMMC_PWREN                (LPC54_SDMMC_BASE + LPC54_SDMMC_PWREN_OFFSET)
+#define LPC54_SDMMC_CLKDIV               (LPC54_SDMMC_BASE + LPC54_SDMMC_CLKDIV_OFFSET)
+#define LPC54_SDMMC_CLKENA               (LPC54_SDMMC_BASE + LPC54_SDMMC_CLKENA_OFFSET)
+#define LPC54_SDMMC_TMOUT                (LPC54_SDMMC_BASE + LPC54_SDMMC_TMOUT_OFFSET)
+#define LPC54_SDMMC_CTYPE                (LPC54_SDMMC_BASE + LPC54_SDMMC_CTYPE_OFFSET)
+#define LPC54_SDMMC_BLKSIZ               (LPC54_SDMMC_BASE + LPC54_SDMMC_BLKSIZ_OFFSET)
+#define LPC54_SDMMC_BYTCNT               (LPC54_SDMMC_BASE + LPC54_SDMMC_BYTCNT_OFFSET)
+#define LPC54_SDMMC_INTMASK              (LPC54_SDMMC_BASE + LPC54_SDMMC_INTMASK_OFFSET)
+#define LPC54_SDMMC_CMDARG               (LPC54_SDMMC_BASE + LPC54_SDMMC_CMDARG_OFFSET)
+#define LPC54_SDMMC_CMD                  (LPC54_SDMMC_BASE + LPC54_SDMMC_CMD_OFFSET)
+#define LPC54_SDMMC_RESP0                (LPC54_SDMMC_BASE + LPC54_SDMMC_RESP0_OFFSET)
+#define LPC54_SDMMC_RESP1                (LPC54_SDMMC_BASE + LPC54_SDMMC_RESP1_OFFSET)
+#define LPC54_SDMMC_RESP2                (LPC54_SDMMC_BASE + LPC54_SDMMC_RESP2_OFFSET)
+#define LPC54_SDMMC_RESP3                (LPC54_SDMMC_BASE + LPC54_SDMMC_RESP3_OFFSET)
+#define LPC54_SDMMC_MINTSTS              (LPC54_SDMMC_BASE + LPC54_SDMMC_MINTSTS_OFFSET)
+#define LPC54_SDMMC_RINTSTS              (LPC54_SDMMC_BASE + LPC54_SDMMC_RINTSTS_OFFSET)
+#define LPC54_SDMMC_STATUS               (LPC54_SDMMC_BASE + LPC54_SDMMC_STATUS_OFFSET)
+#define LPC54_SDMMC_FIFOTH               (LPC54_SDMMC_BASE + LPC54_SDMMC_FIFOTH_OFFSET)
+#define LPC54_SDMMC_CDETECT              (LPC54_SDMMC_BASE + LPC54_SDMMC_CDETECT_OFFSET)
+#define LPC54_SDMMC_WRTPRT               (LPC54_SDMMC_BASE + LPC54_SDMMC_WRTPRT_OFFSET)
+#define LPC54_SDMMC_TCBCNT               (LPC54_SDMMC_BASE + LPC54_SDMMC_TCBCNT_OFFSET)
+#define LPC54_SDMMC_TBBCNT               (LPC54_SDMMC_BASE + LPC54_SDMMC_TBBCNT_OFFSET)
+#define LPC54_SDMMC_TBBCNT               (LPC54_SDMMC_BASE + LPC54_SDMMC_TBBCNT_OFFSET)
+#define LPC54_SDMMC_DEBNCE               (LPC54_SDMMC_BASE + LPC54_SDMMC_DEBNCE_OFFSET)
+#define LPC54_SDMMC_RSTN                 (LPC54_SDMMC_BASE + LPC54_SDMMC_RSTN_OFFSET)
+#define LPC54_SDMMC_BMOD                 (LPC54_SDMMC_BASE + LPC54_SDMMC_BMOD_OFFSET)
+#define LPC54_SDMMC_PLDMND               (LPC54_SDMMC_BASE + LPC54_SDMMC_PLDMND_OFFSET)
+#define LPC54_SDMMC_DBADDR               (LPC54_SDMMC_BASE + LPC54_SDMMC_DBADDR_OFFSET)
+#define LPC54_SDMMC_IDSTS                (LPC54_SDMMC_BASE + LPC54_SDMMC_IDSTS_OFFSET)
+#define LPC54_SDMMC_IDINTEN              (LPC54_SDMMC_BASE + LPC54_SDMMC_IDINTEN_OFFSET)
+#define LPC54_SDMMC_DSCADDR              (LPC54_SDMMC_BASE + LPC54_SDMMC_DSCADDR_OFFSET)
+#define LPC54_SDMMC_BUFADDR              (LPC54_SDMMC_BASE + LPC54_SDMMC_BUFADDR_OFFSET)
+#define LPC54_SDMMC_CARDTHRCTL           (LPC54_SDMMC_BASE + LPC54_SDMMC_CARDTHRCTL_OFFSET)
+#define LPC54_SDMMC_BACKENDPWRL          (LPC54_SDMMC_BASE + LPC54_SDMMC_BACKENDPWRL_OFFSET)
+
+#define LPC54_SDMMC_DATA                 (LPC54_SDMMC_BASE + LPC54_SDMMC_DATA_OFFSET)
 
 /* MCI register bit definitions *****************************************************************/
 
@@ -151,33 +153,19 @@
 /* Power Enable Register (PWREN) */
 
 #define SDMMC_PWREN                      (1 << 0)  /* Bit 0: Power on/off switch */
-                                                     /* Bits 1-31:  Reserved */
+                                                   /* Bits 1-31:  Reserved */
 /* Clock divider register CLKDIV */
 
-#define SDMMC_CLKDIV0_SHIFT               (0)       /* Bits 0-7: Clock divider 0 value */
-#define SDMMC_CLKDIV0_MASK                (255 << SDMMC_CLKDIV0_SHIFT)
-#define SDMMC_CLKDIV1_SHIFT               (8)       /* Bits 8-15: Clock divider 1 value */
-#define SDMMC_CLKDIV1_MASK                (255 << SDMMC_CLKDIV1_SHIFT)
-#define SDMMC_CLKDIV2_SHIFT               (16)      /* Bits 16-23: Clock divider 2 value */
-#define SDMMC_CLKDIV2_MASK                (255 << SDMMC_CLKDIV2_SHIFT)
-#define SDMMC_CLKDIV3_SHIFT               (24)      /* Bits 24-31: Clock divider 3 value */
-#define SDMMC_CLKDIV3_MASK                (255 << SDMMC_CLKDIV3_SHIFT)
+#define SDMMC_CLKDIV0_SHIFT              (0)       /* Bits 0-7: Clock divider 0 value */
+#define SDMMC_CLKDIV0_MASK               (255 << SDMMC_CLKDIV0_SHIFT)
+                                                   /* Bits 8-31:  Reserved */
 
-/* Clock source register CLKSRC */
-
-#define SDMMC_CLKSRC_SHIFT                (0)       /* Bits 0-1: Clock divider source for SD card */
-#define SDMMC_CLKSRC_MASK                 (3 << SDMMC_CLKSRC_SHIFT)
-#  define SDMMC_CLKSRC_CLKDIV0            (0 << SDMMC_CLKSRC_SHIFT) /* Clock divider 0 */
-#  define SDMMC_CLKSRC_CLKDIV1            (1 << SDMMC_CLKSRC_SHIFT) /* Clock divider 1 */
-#  define SDMMC_CLKSRC_CLKDIV2            (2 << SDMMC_CLKSRC_SHIFT) /* Clock divider 2 */
-#  define SDMMC_CLKSRC_CLKDIV3            (3 << SDMMC_CLKSRC_SHIFT) /* Clock divider 3 */
-                                                    /* Bits 2-31:  Reserved */
 /* Clock enable register CLKENA */
 
-#define SDMMC_CLKENA_EMABLE               (1 << 0)  /* Bit 0:  Clock enable */
-                                                    /* Bits 1-15:  Reserved */
-#define SDMMC_CLKENA_LOWPOWER             (1 << 16) /* Bit 16: Low-power mode */
-                                                    /* Bits 17-31:  Reserved */
+#define SDMMC_CLKENA_EMABLE              (1 << 0)  /* Bit 0:  Clock enable */
+                                                   /* Bits 1-15:  Reserved */
+#define SDMMC_CLKENA_LOWPOWER            (1 << 16) /* Bit 16: Low-power mode */
+                                                   /* Bits 17-31:  Reserved */
 /*Timeout register TMOUT */
 
 #define SDMMC_TMOUT_RESPONSE_SHIFT        (0)       /* Bits 0-7: Response timeout value */
@@ -217,7 +205,7 @@
 #define SDMMC_INT_SBE                     (1 << 13) /* Bit 13: Start-bit error */
 #define SDMMC_INT_ACD                     (1 << 14) /* Bit 14: Auto command done */
 #define SDMMC_INT_EBE                     (1 << 15) /* Bit 15: End-bit error (read)/Write no CRC */
-#define SDMMC_INT_SDIO                    (1 << 16) /* Bit 16: Mask SDIO interrupt */
+#define SDMMC_INT_SDMMC                   (1 << 16) /* Bit 16: Mask SD/MMC interrupt */
                                                     /* Bits 17-31: Reserved */
 #define SDMMC_INT_ALL                     (0x1ffff)
 
@@ -244,7 +232,8 @@
 #define SDMMC_CMD_DISBOOT                 (1 << 26) /* Bit 26: Disable Boot */
 #define SDMMC_CMD_BOOTMODE                (1 << 27) /* Bit 27: Boot Mode */
 #define SDMMC_CMD_VSWITCH                 (1 << 28) /* Bit 28: Voltage switch bit */
-                                                    /* Bits 29-30:  Reserved */
+#define SDMMC_CMD_USEHOLD                 (1 << 29) /* Bit 29: Use Hold Registert */
+                                                    /* Bit 30: Reserved */
 #define SDMMC_CMD_STARTCMD                (1 << 31) /* Bit 31: Start command */
 
 /* Status register STATUS */
@@ -375,16 +364,16 @@
 #define SDMMC_IDINTEN_AIS                 (1 << 9)  /* Bit 9:  Abnormal Interrupt Summary */
                                                     /* Bits 10-31: Reserved */
 
-/************************************************************************************************
- * Public Types
- ************************************************************************************************/
+/* Card threshold control */
 
-/************************************************************************************************
- * Public Data
- ************************************************************************************************/
+#define SDMMC_CARDTHRCTL_CARDRDTHREN      (1 << 0)  /* Bit 0:  Card read threshold enable */
+#define SDMMC_CARDTHRCTL_BSYCLRINTEN      (1 << 1)  /* Bit 1:  Busy clear interrupt enable */
+                                                    /* Bits 1-15: Reserved */
+#define SDMMC_CARDTHRCTL_CARDTHRESHOLD_SHIFT (16)   /* Bits 16-23: Card threshold size */
+#define SDMMC_CARDTHRCTL_CARDTHRESHOLD_MASK  (0xff << SDMMC_CARDTHRCTL_CARDTHRESHOLD_SHIFT)
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/* Power control */
 
-#endif /* __ARCH_ARM_SRC_LPC43XX_CHIP_LPC43_SDMMC_H */
+#define SDMMC_BACKENDPWRL                 (1 << 0)  /* Bit 0: Back-end Power control for card application. */
+
+#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SDMMC_H */

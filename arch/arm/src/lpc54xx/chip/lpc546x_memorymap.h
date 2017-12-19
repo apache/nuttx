@@ -93,7 +93,7 @@
 #define LPC54_FLEXCOMM7_BASE 0x40098000  /* Flexcomm 7 */
 #define LPC54_FLEXCOMM8_BASE 0x40099000  /* Flexcomm 8 */
 #define LPC54_FLEXCOMM9_BASE 0x4009a000  /* Flexcomm 9 */
-#define LPC54_SDIO_BASE      0x4009b000  /* SDIO */
+#define LPC54_SDMMC_BASE     0x4009b000  /* SD/MMC */
 #define LPC54_ISPAP_BASE     0x4009c000  /* ISP-AP interface */
 #define LPC54_CAN0_BASE      0x4009d000  /* CAN 0 */
 #define LPC54_CAN1_BASE      0x4009e000  /* CAN 1 */

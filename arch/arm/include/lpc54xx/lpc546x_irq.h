@@ -88,7 +88,7 @@
 #define LPC54_IRQ_SPIFI         (LPC54_IRQ_EXTINT+39)  /* SPI flash interface */
 #define LPC54_IRQ_FLEXCOMM8     (LPC54_IRQ_EXTINT+40)  /* Flexcomm Interface 8 (USART, SPI, I2C) */
 #define LPC54_IRQ_FLEXCOMM9     (LPC54_IRQ_EXTINT+41)  /* Flexcomm Interface 9 (USART, SPI, I2C) */
-#define LPC54_IRQ_SDIO          (LPC54_IRQ_EXTINT+42)  /* SD/MMC interrupt */
+#define LPC54_IRQ_SDMMC         (LPC54_IRQ_EXTINT+42)  /* SD/MMC interrupt */
 #define LPC54_IRQ_CAN0IRQ0      (LPC54_IRQ_EXTINT+43)  /* CAN0 interrupt 0 */
 #define LPC54_IRQ_CAN0IRQ1      (LPC54_IRQ_EXTINT+44)  /* CAN0 interrupt 1 */
 #define LPC54_IRQ_CAN1IRQ0      (LPC54_IRQ_EXTINT+45)  /* CAN1 interrupt 0 */

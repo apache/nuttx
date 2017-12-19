@@ -63,6 +63,10 @@ STATUS
     human factors improvements.  I imagine that this is a consequence of
     the polled solution.
 
+  There is still no support for the Accelerometer, SPIFI, SD card, Ethernet,
+  or USB.  There is a partial SPI driver, but no on-board SPI devices to
+  test it.
+
 Configurations
 ==============
 
