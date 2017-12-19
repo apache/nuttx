@@ -68,14 +68,10 @@ STATUS
     based poll instead of interrupts.  This is very inefficient in that it
     will introduce delays in touchscreen response and will consume more CPU
     bandwidth.  The driver appears to be functional.  Added the nxwm
-    configuration to do some integrated testing.  It does not yet work and
-    I have not yet looked into the cause of the problem:
-
-      Initialize the NSH library
-      createTaskbar: Create CTaskbar instance
-      createTaskbar: Connect CTaskbar instance to the NX server
-      createTaskbar: ERROR: Failed to connect CTaskbar instance to the NX server
-      nxwm_main: ERROR: Failed to create the task bar
+    configuration to do some integrated testing.  NxWM seems to be fully
+    functional.  However, the action of the touchscreen could use some
+    human factors improvements.  I imagine that this is a consequence of
+    the polled solution.
 
 Configurations
 ==============

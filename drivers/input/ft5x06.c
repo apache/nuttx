@@ -212,7 +212,7 @@ static const struct file_operations ft5x06_fops =
 static const uint8_t g_event_map[4] =
 {
   (TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID), /* FT5x06_DOWN */
-  (TOUCH_UP   | TOUCH_ID_VALID | TOUCH_POS_VALID), /* FT5x06_UP */
+  (TOUCH_UP   | TOUCH_ID_VALID),                   /* FT5x06_UP */
   (TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID), /* FT5x06_CONTACT */
   TOUCH_ID_VALID                                   /* FT5x06_INVALID */
 };
@@ -321,7 +321,9 @@ static void ft5x06_data_worker(FAR void *arg)
   if (ret >= 0)
     {
       /* In polled mode, we may read invalid touch data.  If there is
-       * no touch data, the FT5x06 returns all 0xff.
+       * no touch data, the FT5x06 returns all 0xff the very first time.
+       * After that, it returns the same old stale data when there is
+       * no touch data.
        */
 
       sample = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
@@ -347,7 +349,9 @@ static void ft5x06_data_worker(FAR void *arg)
         }
       else if (priv->delay < POLL_MAXDELAY)
         {
-          /* Let it rise gradually to the maximum if there is no touch */
+          /* Otherwise, let the poll rate rise gradually up to the maximum
+           * if there is no touch.
+           */
 
           priv->delay += POLL_INCREMENT;
         }
@@ -467,16 +471,9 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   /* Raw data pointers (source) */
 
   raw = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
-
-  if (raw->tdstatus != 1)
-    {
-      priv->valid = false;
-      return 0;  /* No touches read. */
-    }
+  touch = raw->touch;
 
   /* Get the reported X and Y positions */
-
-  touch = raw->touch;
 
   #ifdef CONFIG_FT5X06_SWAPXY
   y = TOUCH_POINT_GET_X(touch[0]);
@@ -491,37 +488,51 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
   event = TOUCH_POINT_GET_EVENT(touch[0]);
   id    = TOUCH_POINT_GET_ID(touch[0]);
 
+  if (event == FT5x06_INVALID)
+    {
+      priv->lastevent = FT5x06_INVALID;
+      goto drop;
+    }
+
   if (id == priv->lastid && event == priv->lastevent)
     {
-      int16_t deltax;
-      int16_t deltay;
+      /* Same ID and event..  Is there positional data? */
 
-      /* Same ID and event.. Compare the change in position from the last
-       * report.
-       */
-
-      deltax = (x - priv->lastx);
-      if (deltax < 0)
+      if (raw->tdstatus == 0 || event == FT5x06_UP)
         {
-          deltax = -deltax;
+          /* No... no new touch data */
+
+          goto drop;
         }
-
-      if (deltax < CONFIG_FT5X06_THRESHX)
+      else
         {
-          /* There as been no significant change in X, try Y */
+          int16_t deltax;
+          int16_t deltay;
 
-          deltay = (y - priv->lasty);
-          if (deltay < 0)
+          /* Compare the change in position from the last report. */
+
+          deltax = (x - priv->lastx);
+          if (deltax < 0)
             {
-              deltay = -deltay;
+              deltax = -deltax;
             }
 
           if (deltax < CONFIG_FT5X06_THRESHX)
             {
-             /* Ignore... no significant change in Y either */
+              /* There as been no significant change in X, try Y */
 
-              priv->valid = false;
-              return 0;  /* No new touches read. */
+              deltay = (y - priv->lasty);
+              if (deltay < 0)
+                {
+                  deltay = -deltay;
+                }
+
+              if (deltax < CONFIG_FT5X06_THRESHX)
+                {
+                  /* Ignore... no significant change in Y either */
+
+                  goto drop;
+                }
             }
         }
     }
@@ -551,6 +562,12 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
 
   priv->valid       = false;
   return SIZEOF_TOUCH_SAMPLE_S(1);
+
+drop:
+  priv->lastx = 0;
+  priv->lasty = 0;
+  priv->valid = false;
+  return 0;  /* No new touches read. */
 }
 #else
 static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
