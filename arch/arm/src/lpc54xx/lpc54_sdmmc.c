@@ -1309,7 +1309,7 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
   lpc54_setclock(clkdiv);
 
-  /* Enable disable clock */
+  /* Enable the new clock */
 
   lpc54_sdcard_clock(enabled);
 }

@@ -196,10 +196,14 @@
 /* SD/MMC or SDIO interface
  *
  * NOTE: The SDIO function clock to the interface can be up to 50 MHZ.
+ * Example:  BOARD_MAIN_CLK=220MHz, CLKDIV=5
  */
 
+#define BOARD_SDMMC_MAXFREQ      50000000
+#define BOARD_SDMMC_CEIL(a,b)    (((a) + (b) - 1) / (b))
+
 #define BOARD_SDMMC_CLKSRC       SYSCON_SDIOCLKSEL_MAINCLK
-#define BOARD_SDMMC_CLKDIV       (BOARD_MAIN_CLK / 50000000)
+#define BOARD_SDMMC_CLKDIV       BOARD_SDMMC_CEIL(BOARD_MAIN_CLK, BOARD_SDMMC_MAXFREQ)
 #define BOARD_SDMMC_FREQUENCY    (BOARD_MAIN_CLK / BOARD_SDMMC_CLKDIV)
 
 /* LED definitions *********************************************************/
