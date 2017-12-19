@@ -177,6 +177,8 @@ config LPC54_HAVE_USART
 
 menu "LPC54xx Peripheral Selection"
 
+menu "Flexcomm Peripherals"
+
 config LPC54_I2C0_MASTER
 	bool "I2C0 Master"
 	default n
@@ -237,88 +239,73 @@ config LPC54_I2C9_MASTER
 	select LPC54_FLEXCOMM9
 	select LPC54_HAVE_I2C_MASTER
 
-config LPC54_EMC
-	bool "External Memory Controller (EMC)"
-	default n
-
-config LPC54_LCD
-	bool "LCD controller"
-	default n
-	depends on ARCH_LPC54_HAVE_LCD
-
-config LPC54_SDMMC
-	bool "SD/MMC"
-	default n
-	select ARCH_HAVE_SDIO
-	depends on EXPERIMENTAL
-
 config LPC54_SPI0_MASTER
 	bool "SPI0 Master"
 	default n
-	depends on !LPC54_I2C0_MASTER
+	depends on !LPC54_I2C0_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM0
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI1_MASTER
 	bool "SPI1 Master"
 	default n
-	depends on !LPC54_I2C1_MASTER
+	depends on !LPC54_I2C1_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM1
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI2_MASTER
 	bool "SPI2 Master"
 	default n
-	depends on !LPC54_I2C2_MASTER
+	depends on !LPC54_I2C2_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM2
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI3_MASTER
 	bool "SPI3 Master"
 	default n
-	depends on !LPC54_I2C3_MASTER
+	depends on !LPC54_I2C3_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM3
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI4_MASTER
 	bool "SPI4 Master"
 	default n
-	depends on !LPC54_I2C4_MASTER
+	depends on !LPC54_I2C4_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM4
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI5_MASTER
 	bool "SPI5 Master"
 	default n
-	depends on !LPC54_I2C5_MASTER
+	depends on !LPC54_I2C5_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM5
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI6_MASTER
 	bool "SPI6 Master"
 	default n
-	depends on !LPC54_I2C6_MASTER
+	depends on !LPC54_I2C6_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM6
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI7_MASTER
 	bool "SPI7 Master"
 	default n
-	depends on !LPC54_I2C7_MASTER
+	depends on !LPC54_I2C7_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM7
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI8_MASTER
 	bool "SPI8 Master"
 	default n
-	depends on !LPC54_I2C8_MASTER
+	depends on !LPC54_I2C8_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM8
 	select LPC54_HAVE_SPI_MASTER
 
 config LPC54_SPI9_MASTER
 	bool "SPI9 Master"
 	default n
-	depends on !LPC54_I2C9_MASTER
+	depends on !LPC54_I2C9_MASTER && EXPERIMENTAL
 	select LPC54_FLEXCOMM9
 	select LPC54_HAVE_SPI_MASTER
 
@@ -401,6 +388,23 @@ config LPC54_USART9
 	select LPC54_FLEXCOMM9
 	select USART9_SERIALDRIVER
 	select LPC54_HAVE_USART
+
+endmenu # Flexcomm Peripherals
+
+config LPC54_EMC
+	bool "External Memory Controller (EMC)"
+	default n
+
+config LPC54_LCD
+	bool "LCD controller"
+	default n
+	depends on ARCH_LPC54_HAVE_LCD
+
+config LPC54_SDMMC
+	bool "SD/MMC"
+	default n
+	select ARCH_HAVE_SDIO
+	depends on EXPERIMENTAL
 
 endmenu # LPC54xx Peripheral Selection
 
