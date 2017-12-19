@@ -115,13 +115,6 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
-/* Clock Division */
-
-#define LPC54_CLKDIV_INIT       165 /* Divide by 165 = 400KHz */
-#define SDCARD_CLOCK_MMCXFR     2   /* SDCARD_MMCXFR_CLKDIV   */
-#define SDCARD_CLOCK_SDWIDEXFR  2   /* SDCARD_SDXFR_CLKDIV    */
-#define SDCARD_CLOCK_SDXFR      2   /* SDCARD_SDXFR_CLKDIV    */
-
 /* Timing */
 
 #define SDCARD_CMDTIMEOUT       (10000)
@@ -536,7 +529,7 @@ static inline void lpc54_setclock(uint32_t clkdiv)
 
   /* Set Divider0 to desired value */
 
-  lpc54_putreg(clkdiv & SDMMC_CLKDIV0_MASK, LPC54_SDMMC_CLKDIV);
+  lpc54_putreg(clkdiv, LPC54_SDMMC_CLKDIV);
 
   /* Inform CIU */
 
@@ -555,7 +548,7 @@ static inline void lpc54_setclock(uint32_t clkdiv)
  * Name: lpc54_settype
  *
  * Description: Define the Bus Size of SDCard (1, 4 or 8-bit)
- *   
+ *
  * Input Parameters:
  *   ctype - A new CTYPE (Card Type Register) value
  *
@@ -574,7 +567,7 @@ static inline void lpc54_settype(uint32_t ctype)
  * Name: lpc54_sdcard_clock
  *
  * Description: Enable/Disable the SDCard clock
- *   
+ *
  * Input Parameters:
  *   enable - False = clock disabled; True = clock enabled.
  *
@@ -1145,7 +1138,7 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   regval  = SDMMC_BMOD_DE;
   regval |= SDMMC_BMOD_PBL_4XFRS;
-  regval |= ((4) << SDMMC_BMOD_DSL_SHIFT) & SDMMC_BMOD_DSL_MASK;
+  regval |= ((4) << SDMMC_BMOD_DSL_SHIFT);
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
 
   /* Disable clock to CIU (needs latch) */
@@ -1260,8 +1253,8 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       default:
       case CLOCK_SDIO_DISABLED:
-        clkdiv = LPC54_CLKDIV_INIT;
-        ctype  = SDCARD_BUS_D1;
+        clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_INIT);
+        ctype   = SDCARD_BUS_D1;
         enabled = false;
         return;
         break;
@@ -1269,16 +1262,16 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* Enable in initial ID mode clocking (<400KHz) */
 
       case CLOCK_IDMODE:
-        clkdiv = LPC54_CLKDIV_INIT;
-        ctype = SDCARD_BUS_D1;
+        clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_INIT);
+        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
 
       /* Enable in MMC normal operation clocking */
 
       case CLOCK_MMC_TRANSFER:
-        clkdiv = SDCARD_CLOCK_MMCXFR;
-        ctype  = SDCARD_BUS_D1;
+        clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_MMCXFR);
+        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
 
@@ -1286,8 +1279,8 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_SD_TRANSFER_4BIT:
 #ifndef CONFIG_LPC54_SDMMC_WIDTH_D1_ONLY
-        clkdiv = SDCARD_CLOCK_SDWIDEXFR;
-        ctype  = SDCARD_BUS_D4;
+        clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDWIDEXFR);
+        ctype   = SDCARD_BUS_D4;
         enabled = true;
         break;
 #endif
@@ -1295,8 +1288,8 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* SD normal operation clocking (narrow 1-bit mode) */
 
       case CLOCK_SD_TRANSFER_1BIT:
-        clkdiv = SDCARD_CLOCK_SDXFR;
-        ctype  = SDCARD_BUS_D1;
+        clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDXFR);
+        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
     }
@@ -2318,7 +2311,7 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
       g_sdmmc_dmadd[0].des1 = 512;
       g_sdmmc_dmadd[0].des2 = priv->buffer;
       g_sdmmc_dmadd[0].des3 = (uint32_t) &g_sdmmc_dmadd[1];
-    
+
       lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
     }
 
@@ -2443,7 +2436,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   lpc54_putreg(BOARD_SDMMC_CLKSRC, LPC54_SYSCON_SDIOCLKSEL);
 
-  /* Set up the clock divider to obtain the desired clock rate. 
+  /* Set up the clock divider to obtain the desired clock rate.
    * NOTE: The SDIO function clock to the interface can be up to 50 MHZ.
    */
 

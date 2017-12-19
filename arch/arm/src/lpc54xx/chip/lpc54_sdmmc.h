@@ -154,10 +154,16 @@
 
 #define SDMMC_PWREN                      (1 << 0)  /* Bit 0: Power on/off switch */
                                                    /* Bits 1-31:  Reserved */
-/* Clock divider register CLKDIV */
+/* Clock divider register CLKDIV
+ *
+ * Clock division is 2*n. For example, value of 0 means divide by 2 * 0 = 0 (no division,
+ * bypass), value of 1 means divide by 2 * 1 = 2, value of 255 means divide by 2 * 255 = 510,
+ * and so on.
+ */
 
 #define SDMMC_CLKDIV0_SHIFT              (0)       /* Bits 0-7: Clock divider 0 value */
 #define SDMMC_CLKDIV0_MASK               (255 << SDMMC_CLKDIV0_SHIFT)
+#  define SDMMC_CLKDIV0_MASK(n)          ((((n) + 1) >> 1) << SDMMC_CLKDIV0_SHIFT)
                                                    /* Bits 8-31:  Reserved */
 
 /* Clock enable register CLKENA */
@@ -166,7 +172,7 @@
                                                    /* Bits 1-15:  Reserved */
 #define SDMMC_CLKENA_LOWPOWER            (1 << 16) /* Bit 16: Low-power mode */
                                                    /* Bits 17-31:  Reserved */
-/*Timeout register TMOUT */
+/* Timeout register TMOUT */
 
 #define SDMMC_TMOUT_RESPONSE_SHIFT        (0)       /* Bits 0-7: Response timeout value */
 #define SDMMC_TMOUT_RESPONSE_MASK         (255 << SDMMC_TMOUT_RESPONSE_SHIFT)

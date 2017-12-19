@@ -193,10 +193,11 @@
 #endif
 #define BOARD_EMC_FREQUENCY      (BOARD_CPU_FREQUENCY / BOARD_EMC_CLKDIV)
 
-/* SD/MMC or SDIO interface
+/* SD/MMC or SDIO interface/
+/* SD/MMC function clock
  *
  * NOTE: The SDIO function clock to the interface can be up to 50 MHZ.
- * Example:  BOARD_MAIN_CLK=220MHz, CLKDIV=5, Fsdmmc=44MHz.
+ * Example:  BOARD_MAIN_CLK=220MHz, CLKDIV=5, Finput=44MHz.
  */
 
 #define BOARD_SDMMC_MAXFREQ      50000000
@@ -205,6 +206,29 @@
 #define BOARD_SDMMC_CLKSRC       SYSCON_SDIOCLKSEL_MAINCLK
 #define BOARD_SDMMC_CLKDIV       BOARD_SDMMC_CEIL(BOARD_MAIN_CLK, BOARD_SDMMC_MAXFREQ)
 #define BOARD_SDMMC_FREQUENCY    (BOARD_MAIN_CLK / BOARD_SDMMC_CLKDIV)
+
+/* Mode-dependent function clock division
+ *
+ * Example:  BOARD_SDMMC_FREQUENCY=44MHz
+ *           BOARD_CLKDIV_INIT=110,    Fsdmmc=400KHz  (400KHz max)
+ *           BOARD_CLKDIV_MMCXFR=4[3], Fsdmmc=11Mhz   (20MHz max) See NOTE:
+ *           BOARD_CLKDIV_SDWIDEXFR=2, Fsdmmc=22MHz   (25MHz max)
+ *           BOARD_CLKDIV_SDXFR=2,     Fsdmmc=22MHz   (25MHz max)
+ *
+ * NOTE:  *lock division is 2*n. For example, value of 0 means divide by
+ * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
+ * of 255 means divide by 2 * 255 = 510, and so on.
+ *
+ * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.  So an
+ * odd value calculated below will be moved up to next higher divider value.  So
+ * the value 3 will cause 2 to be written as the divider value and the effective
+ * divider will be 4.
+ */
+
+#define BOARD_CLKDIV_INIT       BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 400000)
+#define BOARD_CLKDIV_MMCXFR     BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 20000000)
+#define BOARD_CLKDIV_SDWIDEXFR  BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
+#define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 
 /* LED definitions *********************************************************/
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
@@ -352,7 +376,7 @@
 
 /* LCD
  *
- *   There are no alternatives for LCD pins except for the VD0-VD3 pins. 
+ *   There are no alternatives for LCD pins except for the VD0-VD3 pins.
  *   VD0-VD2 are not used in this hardware configuration.  VD3 is on
  *   P2.21.
  */
