@@ -291,9 +291,11 @@
 
 #define SDMMC_FIFOTH_TXWMARK_SHIFT        (0)       /* Bits 0-11: FIFO threshold level when transmitting */
 #define SDMMC_FIFOTH_TXWMARK_MASK         (0xfff << SDMMC_FIFOTH_TXWMARK_SHIFT)
+#  define SDMMC_FIFOTH_TXWMARK(n)         ((uint32_t)(n) << SDMMC_FIFOTH_TXWMARK_SHIFT)
                                                     /* Bits 12-15: Reserved */
 #define SDMMC_FIFOTH_RXWMARK_SHIFT        (16)      /* Bits 16-27: FIFO threshold level when receiving */
 #define SDMMC_FIFOTH_RXWMARK_MASK         (0xfff << SDMMC_FIFOTH_RXWMARK_SHIFT)
+#  define SDMMC_FIFOTH_RXWMARK(n)         ((uint32_t)(n) << SDMMC_FIFOTH_RXWMARK_SHIFT)
 #define SDMMC_FIFOTH_DMABURST_SHIFT       (28)      /* Bits 28-30: Burst size for multiple transaction */
 #define SDMMC_FIFOTH_DMABURST_MASK        (7 << SDMMC_FIFOTH_DMABURST_SHIFT)
 #  define SDMMC_FIFOTH_DMABURST_1XFR      (0 << SDMMC_FIFOTH_DMABURST_SHIFT) /* 1 transfer */

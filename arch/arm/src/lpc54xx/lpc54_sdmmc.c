@@ -145,7 +145,6 @@
 #define SDCARD_RECV_MASK        (SDMMC_INT_DCRC | SDMMC_INT_RCRC | SDMMC_INT_DRTO | \
                                  SDMMC_INT_RTO | SDMMC_INT_EBE | SDMMC_INT_RXDR | \
                                  SDMMC_INT_SBE)
-
 #define SDCARD_SEND_MASK        (SDMMC_INT_DCRC | SDMMC_INT_RCRC | SDMMC_INT_DRTO | \
                                  SDMMC_INT_RTO | SDMMC_INT_EBE | SDMMC_INT_TXDR | \
                                  SDMMC_INT_DTO | SDMMC_INT_SBE)
@@ -238,8 +237,9 @@ struct lpc54_dev_s
   /* Interrupt mode data transfer support */
 
   uint32_t          *buffer;     /* Address of current R/W buffer */
-  size_t             remaining;  /* Number of bytes remaining in the transfer */
   uint32_t           xfrmask;    /* Interrupt enables for data transfer */
+  ssize_t            remaining;  /* Number of bytes remaining in the transfer */
+  bool               wrdir;      /* True: Writing False: Reading */
 
   /* DMA data transfer support */
 
@@ -928,9 +928,74 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
       pending = enabled & priv->xfrmask;
       if (pending != 0)
         {
-          /* Handle data end events */
+          /* Handle data request events */
 
-          if ((pending & SDMMC_INT_DTO) != 0 || (pending & SDMMC_INT_TXDR) != 0)
+          if ((pending & SDMMC_INT_TXDR) != 0)
+            {
+              uint32_t status;
+
+              /* Transfer data to the TX FIFO */
+
+              mcinfo("Write FIFO\n");
+              DEBUGASSERT(priv->wrdir);
+
+              for (status = lpc54_getreg(LPC54_SDMMC_STATUS);
+                   (status & SDMMC_STATUS_FIFOFULL) == 0 &&
+                   priv->remaining > 0;
+                   status = lpc54_getreg(LPC54_SDMMC_STATUS))
+                {
+                  lpc54_putreg(*priv->buffer, LPC54_SDMMC_DATA);
+                  priv->buffer++;
+                  priv->remaining -= 4;
+                }
+
+              /* If all of the data has been transferred to the FIFO, then
+               * disable further TX data requests and wait for the data end
+               * event.
+               */
+
+              if (priv->remaining <= 0)
+                {
+                  uint32_t intmask = lpc54_getreg(LPC54_SDMMC_INTMASK);
+                  intmask &= ~SDMMC_INT_TXDR;
+                  lpc54_putreg(intmask, LPC54_SDMMC_INTMASK);
+                }
+            }
+          else if ((pending & SDMMC_INT_RXDR) != 0)
+            {
+              uint32_t status;
+
+              /* Transfer data from the RX FIFO */
+
+              mcinfo("Read from FIFO\n");
+              DEBUGASSERT(!priv->wrdir);
+
+              for (status = lpc54_getreg(LPC54_SDMMC_STATUS);
+                   (status & SDMMC_STATUS_FIFOEMPTY) == 0 &&
+                   priv->remaining > 0;
+                   status = lpc54_getreg(LPC54_SDMMC_STATUS))
+                {
+                  *priv->buffer = lpc54_getreg(LPC54_SDMMC_DATA);
+                  priv->buffer++;
+                  priv->remaining -= 4;
+                }
+
+              /* If all of the data has been transferred to the FIFO, then
+               * disable further RX data requests and wait for the data end
+               * event.
+               */
+
+              if (priv->remaining <= 0)
+                {
+                  uint32_t intmask = lpc54_getreg(LPC54_SDMMC_INTMASK);
+                  intmask &= ~SDMMC_INT_RXDR;
+                  lpc54_putreg(intmask, LPC54_SDMMC_INTMASK);
+                }
+            }
+
+          /* Handle data end events.  Note that RXDR may accompany DTO. */
+
+          if ((pending & SDMMC_INT_DTO) != 0)
             {
               /* Finish the transfer */
 
@@ -1148,9 +1213,6 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   lpc54_putreg(SDCARD_LONGTIMEOUT, LPC54_SDMMC_TMOUT);
 
-  regval = 16 | (15 << SDMMC_FIFOTH_RXWMARK_SHIFT);
-  lpc54_putreg(regval, LPC54_SDMMC_FIFOTH);
-
   /* Enable internal DMA, burst size of 4, fixed burst */
 
   regval  = SDMMC_BMOD_DE;
@@ -1356,7 +1418,6 @@ static int lpc54_attach(FAR struct sdio_dev_s *dev)
   ret = irq_attach(LPC54_IRQ_SDMMC, lpc54_interrupt, NULL);
   if (ret == OK)
     {
-
       /* Disable all interrupts at the SD card controller and clear static
        * interrupt flags
        */
@@ -1502,22 +1563,37 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
+  priv->wrdir     = false;
 #ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode   = false;
 #endif
 
   /* Then set up the SD card data path */
 
-  blocksize = 64;
-  bytecnt   = 512;
+  if (nbytes < 64)
+    {
+      blocksize = nbytes;
+      bytecnt   = nbytes;
+    }
+  else
+    {
+      blocksize = 64;
+      bytecnt   = nbytes;
+      DEBUGASSERT((nbytes & ~0x3f) == 0);
+    }
 
   lpc54_putreg(blocksize, LPC54_SDMMC_BLKSIZ);
   lpc54_putreg(bytecnt, LPC54_SDMMC_BYTCNT);
 
-  /* And enable interrupts */
+  /* Configure the FIFO so that we will receive the RXDR interrupt whenever
+   * there are more than 1 words (at least 8 bytes) in the RX FIFO.
+   */
+
+  lpc54_putreg(SDMMC_FIFOTH_RXWMARK(1), LPC54_SDMMC_FIFOTH);
+
+  /* Configure the transfer interrupts */
 
   lpc54_configxfrints(priv, SDCARD_RECV_MASK);
-
   return OK;
 }
 
@@ -1525,9 +1601,9 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  * Name: lpc54_sendsetup
  *
  * Description:
- *   Setup hardware in preparation for data transfer from the card.  This method
- *   will do whatever controller setup is necessary.  This would be called
- *   for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
+ *   Setup hardware in preparation for data transfer from the card.  This
+ *   method will do whatever controller setup is necessary.  This would be
+ *   called for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
  *   (WRITE_MULTIPLE_BLOCK), ... and before SDCARD_SENDDATA is called.
  *
  * Input Parameters:
@@ -1554,10 +1630,21 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
+  priv->wrdir     = true;
 #ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode   = false;
 #endif
 
+  /* Configure the FIFO so that we will receive the TXDR interrupt whenever
+   * there the TX FIFO is at least half empty.
+   */
+
+  lpc54_putreg(SDMMC_FIFOTH_TXWMARK(LPC54_TXFIFO_DEPTH / 2),
+               LPC54_SDMMC_FIFOTH);
+
+  /* Configure the transfer interrupts */
+
+  lpc54_configxfrints(priv, SDCARD_SEND_MASK);
   return OK;
 }
 
@@ -1624,6 +1711,9 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
   int32_t timeout;
   uint32_t events;
+#ifdef CONFIG_DEBUG_MEMCARD_WARN
+  uint32_t nfifo;
+#endif
 
   mcinfo("cmd=%08x\n", cmd);
 
@@ -1659,18 +1749,20 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
   events |= SDCARD_CMDDONE_STA;
 
   mcinfo("cmd: %08x events: %08x STATUS: %08x RINTSTS: %08x\n",
-               cmd, events, lpc54_getreg(LPC54_SDMMC_STATUS), lpc54_getreg(LPC54_SDMMC_RINTSTS));
+         cmd, events, lpc54_getreg(LPC54_SDMMC_STATUS),
+         lpc54_getreg(LPC54_SDMMC_RINTSTS));
 
   /* Any interrupt error? */
 
   if (lpc54_getreg(LPC54_SDMMC_RINTSTS) & SDCARD_INT_ERROR)
     {
-      mcerr("Error interruption!\n");
-      return -ETIMEDOUT;
+      mcerr("ERROR: RINSTS=%08x\n", lpc54_getreg(LPC54_SDMMC_RINTSTS));
+      return -EIO;
     }
 
-  if (cmd == 0x451)
+  if (cmd == MMCSD_CMD17)
     {
+      mcwarn("CMD17:  Not waiting for response\n");
       events = 0;
     }
 
@@ -1682,15 +1774,20 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
         {
           mcerr("ERROR: Timeout cmd: %08x events: %08x STA: %08x RINTSTS: %08x\n",
                cmd, events, lpc54_getreg(LPC54_SDMMC_STATUS), lpc54_getreg(LPC54_SDMMC_RINTSTS));
-
           return -ETIMEDOUT;
         }
     }
 
-  if ((lpc54_getreg(LPC54_SDMMC_STATUS) & SDMMC_STATUS_FIFOCOUNT_MASK) > 0)
+#ifdef CONFIG_DEBUG_MEMCARD_WARN
+  nfifo = ((lpc54_getreg(LPC54_SDMMC_STATUS) & SDMMC_STATUS_FIFOCOUNT_MASK) >>
+          SDMMC_STATUS_FIFOCOUNT_SHIFT);
+
+  if (nfifo > 0)
     {
-      mcinfo("There is data on FIFO!\n");
+      mcwarn("WARNING: There is data on FIFO.  %lu bytes\n",
+             (unsigned long)nfifo << 2);
     }
+#endif
 
   lpc54_putreg(SDCARD_CMDDONE_ICR, LPC54_SDMMC_RINTSTS);
   return OK;
@@ -2172,16 +2269,17 @@ static int lpc54_registercallback(FAR struct sdio_dev_s *dev,
 static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
-  struct lpc54_dev_s *priv;
+  struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
   uint32_t regval;
   uint32_t ctrl;
   uint32_t maxs;
-  int ret;
   int i;
 
   /* Don't bother with DMA if the entire transfer will fit in the RX FIFO or
    * if we do not have a 4-bit wide bus.
    */
+
+  DEBUGASSERT(priv != NULL);
 
   if (buflen <= LPC54_RXFIFO_SIZE || !priv->widebus)
     {
@@ -2189,15 +2287,13 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
     }
 
   mcinfo("buflen=%lu\n", (unsigned long)buflen);
-
-  priv = (struct lpc54_dev_s *)dev;
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0 && ((uint32_t)buffer & 3) == 0);
 
   /* Save the destination buffer information for use by the interrupt handler */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
+  priv->wrdir     = false;
   priv->dmamode   = true;
 
   /* Reset DMA */
@@ -2209,6 +2305,13 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
     {
     }
+
+  /* Configure the FIFO so that we will receive the DMA/FIFO requests whenever
+   * there more than than (FIFO_DEPTH/2) - 1 words in the FIFO.
+   */
+
+  lpc54_putreg(SDMMC_FIFOTH_RXWMARK(LPC54_RXFIFO_DEPTH / 2 - 1),
+               LPC54_SDMMC_FIFOTH);
 
   /* Setup DMA list */
 
@@ -2296,16 +2399,15 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
    * if we do not have a 4-bit wide bus.
    */
 
+  DEBUGASSERT(priv != NULL);
+
   if (buflen <= LPC54_TXFIFO_SIZE || !priv->widebus)
     {
       return lpc54_sendsetup(dev, buffer, buflen);
     }
 
   mcinfo("buflen=%lu\n", (unsigned long)buflen);
-
-  priv = (struct lpc54_dev_s *)dev;
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+  DEBUGASSERT(buffer != NULL && buflen > 0 && ((uint32_t)buffer & 3) == 0);
 
   /* Save the destination buffer information for use by the interrupt
    * handler.
@@ -2313,6 +2415,7 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
+  priv->wrdir     = true;
   priv->dmamode   = true;
 
   /* Reset DMA */
@@ -2323,6 +2426,13 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
   while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
     {
     }
+
+  /* Configure the FIFO so that we will receive the DMA/FIFO requests whenever
+   * there are FIFO_DEPTH/2 or fewer words in the FIFO.
+   */
+
+  lpc54_putreg(SDMMC_FIFOTH_TXWMARK(LPC54_TXFIFO_DEPTH / 2),
+               LPC54_SDMMC_FIFOTH);
 
   /* Setup DMA descriptor list */
 
