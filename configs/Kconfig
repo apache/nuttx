@@ -1169,7 +1169,16 @@ config ARCH_BOARD_STM32F051_DISCOVERY
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro STM32F-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8 MCU.
+		STMicro STM32F051-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8 MCU.
+
+config ARCH_BOARD_STM32F072_DISCOVERY
+	bool "STMicro STM32F072-Discovery board"
+	depends on ARCH_CHIP_STM32F072RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32F072-Discovery board based on the STMicro ARCH_CHIP_STM32F072RB MCU.
 
 config ARCH_BOARD_STM32F3_DISCOVERY
 	bool "STMicro STM32F3-Discovery board"
@@ -1687,6 +1696,7 @@ config ARCH_BOARD
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f051-discovery"      if ARCH_BOARD_STM32F051_DISCOVERY
+	default "stm32f072-discovery"      if ARCH_BOARD_STM32F072_DISCOVERY
 	default "stm32f103-minimum"        if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm3210e-eval"            if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"            if ARCH_BOARD_STM3220G_EVAL
@@ -2080,6 +2090,9 @@ source "configs/stm32_tiny/Kconfig"
 endif
 if ARCH_BOARD_STM32F051_DISCOVERY
 source "configs/stm32f051-discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32F072_DISCOVERY
+source "configs/stm32f072-discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32F103_MINIMUM
 source "configs/stm32f103-minimum/Kconfig"

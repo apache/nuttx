@@ -678,6 +678,10 @@ configs/stm32f051-discovery
   STMicro STM32F051-Discovery board based on the STMicro ARCH_CHIP_STM32F051R8
   MCU.
 
+configs/stm32f072-discovery
+  STMicro STM32F072-Discovery board based on the STMicro ARCH_CHIP_STM32F072RB
+  MCU.
+
 configs/stm32f103-minimum
   Generic STM32F103C8T6 Minimum ARM Development Board.
 
