@@ -150,9 +150,11 @@ static int dma_interrupt_core(void *context)
   struct lc823450_phydmach_s *pdmach;
   struct lc823450_dmach_s *dmach;
   sq_entry_t *q_ent;
+  irqstate_t flags;
 
   pdmach = (struct lc823450_phydmach_s *)context;
 
+  flags = spin_lock_irqsave();
   q_ent = pdmach->req_q.tail;
   DEBUGASSERT(q_ent);
   dmach = (struct lc823450_dmach_s *)q_ent;
@@ -160,10 +162,16 @@ static int dma_interrupt_core(void *context)
   if (dmach->nxfrs == 0)
     {
       /* finish one transfer */
+
       sq_remlast(&pdmach->req_q);
+      spin_unlock_irqrestore(flags);
 
       if (dmach->callback)
         dmach->callback((DMA_HANDLE)dmach, dmach->arg, 0);
+    }
+  else
+    {
+      spin_unlock_irqrestore(flags);
     }
 
   up_disable_clk(LC823450_CLOCK_DMA);

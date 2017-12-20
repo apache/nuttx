@@ -109,6 +109,11 @@
 #  define rMT30CNT  (LC823450_MTM3_REGBASE + LC823450_MTM_0CNT)
 #endif /* CONFIG_PROFILE */
 
+#ifndef container_of
+#  define container_of(ptr, type, member) \
+    ((type *)((void *)(ptr) - offsetof(type, member)))
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -175,7 +180,7 @@ static void hrt_queue_refresh(void)
   struct hrt_s *tmp;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   elapsed = (uint64_t)getreg32(rMT20CNT) * (1000 * 1000) * 10 / XT1OSC_CLK;
 
   for (pent = hrt_timer_queue.head; pent; pent = dq_next(pent))
@@ -193,7 +198,9 @@ cont:
       if (tmp->usec <= 0)
         {
           dq_rem(pent, &hrt_timer_queue);
+          spin_unlock_irqrestore(flags);
           nxsem_post(&tmp->sem);
+          flags = spin_lock_irqsave();
           goto cont;
         }
       else
@@ -202,12 +209,12 @@ cont:
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 #endif
 
 /****************************************************************************
- * Name: hrt_queue_refresh
+ * Name: hrt_usleep_setup
  ****************************************************************************/
 
 #ifdef CONFIG_HRT_TIMER
@@ -217,7 +224,7 @@ static void hrt_usleep_setup(void)
   struct hrt_s *head;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   head = container_of(hrt_timer_queue.head, struct hrt_s, ent);
   if (head == NULL)
     {
@@ -225,7 +232,7 @@ static void hrt_usleep_setup(void)
 
       modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2C_CLKEN, 0x0);
       modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2_CLKEN, 0x0);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
       return;
     }
 
@@ -244,12 +251,10 @@ static void hrt_usleep_setup(void)
   putreg32(0, rMT20CNT);   /* counter */
   putreg32(count, rMT20A); /* AEVT counter */
 
-  up_enable_irq(LC823450_IRQ_MTIMER20);
-
   /* Enable MTM2-Ch0 */
 
   putreg32(1, rMT2OPR);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 #endif
 
@@ -273,6 +278,10 @@ static int hrt_interrupt(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
+/****************************************************************************
+ * Name: hrt_usleep_add
+ ****************************************************************************/
+
 static void hrt_usleep_add(struct hrt_s *phrt)
 {
   dq_entry_t *pent;
@@ -284,7 +293,7 @@ static void hrt_usleep_add(struct hrt_s *phrt)
 
   hrt_queue_refresh();
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
 
   /* add phrt to hrt_timer_queue */
 
@@ -305,7 +314,7 @@ static void hrt_usleep_add(struct hrt_s *phrt)
       dq_addlast(&phrt->ent, &hrt_timer_queue);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 
   hrt_usleep_setup();
 }
@@ -350,21 +359,20 @@ int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
    /* Process timer interrupt */
 
 #ifdef CONFIG_DVFS
-    extern void lc823450_dvfs_tick_callback(void);
-    lc823450_dvfs_tick_callback();
+  lc823450_dvfs_tick_callback();
 #endif
 
 #ifdef CONFIG_LC823450_MTM0_TICK
-   /* Clear the interrupt (BEVT) */
+  /* Clear the interrupt (BEVT) */
 
-   putreg32(1 << 1, rMT00STS);
+  putreg32(1 << 1, rMT00STS);
 #endif
 
-   sched_process_timer();
+  sched_process_timer();
 
 #ifdef CONFIG_LCA_SOUNDSKIP_CHECK
-   extern void lca_check_soundskip(void);
-   lca_check_soundskip();
+  extern void lca_check_soundskip(void);
+  lca_check_soundskip();
 #endif
 
 #ifdef CHECK_INTERVAL
@@ -375,7 +383,7 @@ int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
   hsuart_wdtimer();
 #endif /* CONFIG_HSUART */
 
-   return 0;
+  return 0;
 }
 
 /****************************************************************************
@@ -474,6 +482,8 @@ void arm_timer_initialize(void)
   modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2_CLKEN, 0);
 
   (void)irq_attach(LC823450_IRQ_MTIMER20, (xcpt_t)hrt_interrupt, NULL);
+  up_enable_irq(LC823450_IRQ_MTIMER20);
+
 #endif /* CONFIG_HRT_TIMER */
 #ifdef CONFIG_PROFILE
 
@@ -619,7 +629,7 @@ int up_hr_gettime(FAR struct timespec *tp)
   irqstate_t   flags;
   uint64_t f;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
 
   /* Get the elapsed time */
 
@@ -630,7 +640,7 @@ int up_hr_gettime(FAR struct timespec *tp)
   f = up_get_timer_fraction();
   elapsed += f;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 
   tmrinfo("elapsed = %lld \n", elapsed);
 

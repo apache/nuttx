@@ -54,10 +54,6 @@
 #  include <nuttx/ioex.h>
 #endif
 
-#ifdef CONFIG_SMP
-#  include <nuttx/spinlock.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -78,10 +74,6 @@ static FAR struct ioex_dev_s *g_ioex_dev;
 #define GPIO_VIRTUAL_NUM 32
 static FAR struct vgpio_ops_s *vgpio_ops[GPIO_VIRTUAL_NUM];
 #endif /* CONFIG_LC823450_VGPIO */
-
-#ifdef CONFIG_SMP
-static volatile spinlock_t g_gpio_lock;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -247,12 +239,12 @@ int lc823450_gpio_mux(uint16_t gpiocfg)
 
   if (port <= (GPIO_PORT5 >> GPIO_PORT_SHIFT))
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave();
       val = getreg32(PMDCNT0 + (port * 4));
       val &= ~(3 << (2 * pin));
       val |= (mux << (2 *pin));
       putreg32(val, PMDCNT0 + (port * 4));
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
     }
   else
     {
@@ -295,7 +287,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
 
       /* Handle the GPIO configuration by the basic mode of the pin */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave();
 
       /* pull up/down specified */
 
@@ -320,7 +312,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
             break;
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
     }
 #ifdef CONFIG_IOEX
   else if (port <= (GPIO_PORTEX >> GPIO_PORT_SHIFT))
@@ -408,12 +400,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
 
       regaddr = lc823450_get_gpio_data(port);
 
-#ifdef CONFIG_SMP
-      flags = up_irq_save();
-      spin_lock(&g_gpio_lock);
-#else
-      flags = enter_critical_section();
-#endif
+      flags = spin_lock_irqsave();
 
       /* Write the value (0 or 1).  To the data register */
 
@@ -430,12 +417,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
 
       putreg32(regval, regaddr);
 
-#ifdef CONFIG_SMP
-      spin_unlock(&g_gpio_lock);
-      up_irq_restore(flags);
-#else
-      leave_critical_section(flags);
-#endif
+      spin_unlock_irqrestore(flags);
   }
 #ifdef CONFIG_IOEX
   else if (port <= (GPIO_PORTEX >> GPIO_PORT_SHIFT))

@@ -27,6 +27,15 @@ Settings
 ^^^^^^^^
 
 1. eMMC boot and SRAM boot via openocd are supported.
+
+If you do SRAM boot via openocd+gdb, please specify hookpost-load in .gdbinit
+to set MSP (main stack pointer) as follows.
+
+  define hookpost-load
+    print *(uint32_t *)0x02040000
+    set $sp=$
+  end
+
 2. If SWD connection is lost, please specify lower adaptor clock.
 3. Both CPUs are running at 160MHz.
 4. Internal SRAMs (seg0 to seg5) are used.
@@ -36,9 +45,8 @@ Settings
 SMP related Status
 ^^^^^^^^^^^^^^^^^^
 
-Currently SMP feature works on the board but might not be stable.
-In addition, console output might be corrupted if the both CPUs
-output into the console because UART operates in FIFO mode.
+Currently all applications except for ostest work in SMP mode but might stop
+due to deadlocks or ASSERT().
 
 CPU activities are shown at D9 (CPU0) and D10 (CPU1) respectively.
 
@@ -188,7 +196,7 @@ then dd the files to the kernel partition (/dev/mtdblock0p4) and the IPL2 partit
 
 10. Audio playback (WAV/44.1k/16bit/2ch only)
 
-Firstly, please check the jumper pin settings as follows.
+Firstly, please make sure that the jumper pins are set as follows.
 
   JP1, JP2 => short
   JP3, JP4 => open
@@ -199,6 +207,46 @@ To play WAV file on uSD card,
   nsh> nxplayer
   nxplayer> play /mnt/sd1/sample.wav
   nxplayer> volume 50
+
+Please note that a WAV file which contains sub-chunks other than "fmt"
+and "data" is not supported in pcm_decode.c So, if your wav file contains
+meta-data, please remove the sub-chunks before playing.
+
+11. Networking
+
+lc823450/rndis configuration supports networking features with RNDIS.
+To use this feature, you have to connect the board to a RNDIS host.
+Currently Linux host is only tested but Windows host should work.
+
+If DHCP server is available, you would see ifconfig results like:
+
+nsh> ifconfig
+eth0 Link encap:Ethernet HWaddr 00:e0:de:ad:be:ff at UP
+     inet addr:192.168.1.244 DRaddr:192.168.1.1 Mask:255.255.255.0
+
+
+lo   Link encap:Local Loopback at UP
+     inet addr:127.0.0.1 DRaddr:127.0.0.1 Mask:255.0.0.0
+
+
+             IPv4   TCP   UDP  ICMP
+Received     0007  0000  0006  0000
+Dropped      0001  0000  0000  0000
+  IPv4        VHL: 0000   Frg: 0001
+  Checksum   0000  0000  0000  ----
+  TCP         ACK: 0000   SYN: 0000
+              RST: 0000  0000
+  Type       0000  ----  ----  0000
+Sent         0003  0000  0003  0000
+  Rexmit     ----  0000  ----  ----
+
+However, you might need to add a routing table if you want to send
+a packet via the router.
+
+nsh> addroute 0.0.0.0/0 192.168.1.1
+nsh> route
+SEQ TARGET NETMASK ROUTER
+   1. 0.0.0.0 0.0.0.0 192.168.1.1
 
 
 TODO

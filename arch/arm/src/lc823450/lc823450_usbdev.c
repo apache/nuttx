@@ -716,10 +716,13 @@ static int lc823450_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct lc823450_req_s *privreq = (struct lc823450_req_s *)req;
   struct lc823450_ep_s *privep = (struct lc823450_ep_s *)ep;
+  irqstate_t flags;
 
   /* remove request from req_queue */
 
+  flags = spin_lock_irqsave();
   sq_remafter(&privreq->q_ent, &privep->req_q);
+  spin_unlock_irqrestore(flags);
   return 0;
 }
 
@@ -1251,6 +1254,9 @@ static void subintr_epin(uint8_t epnum, struct lc823450_ep_s *privep)
 {
   /* Send packet done */
 
+  irqstate_t flags;
+  flags = spin_lock_irqsave();
+
   if (privep->req_q.tail)
     {
       struct usbdev_req_s *req;
@@ -1259,6 +1265,9 @@ static void subintr_epin(uint8_t epnum, struct lc823450_ep_s *privep)
       /* Dequeue from TXQ */
 
       q_ent = sq_remlast(&privep->req_q);
+
+      spin_unlock_irqrestore(flags);
+
       req = &container_of(q_ent, struct lc823450_req_s, q_ent)->req;
 
       /* Write to TX FIFO */
@@ -1272,6 +1281,7 @@ static void subintr_epin(uint8_t epnum, struct lc823450_ep_s *privep)
     }
   else
     {
+      spin_unlock_irqrestore(flags);
       epcmd_write(epnum, USB_EPCMD_EMPTY_CLR);
     }
 }
@@ -1288,6 +1298,9 @@ static void subintr_epout(uint8_t epnum, struct lc823450_ep_s *privep)
 {
   /* Packet receive from host */
 
+  irqstate_t flags;
+  flags = spin_lock_irqsave();
+
   if (privep->req_q.tail)
     {
       struct usbdev_req_s *req;
@@ -1296,6 +1309,7 @@ static void subintr_epout(uint8_t epnum, struct lc823450_ep_s *privep)
       /* Dequeue from Reqbuf poll */
 
       q_ent = sq_remlast(&privep->req_q);
+
       req = &container_of(q_ent, struct lc823450_req_s, q_ent)->req;
       if (privep->req_q.tail == NULL)
         {
@@ -1303,6 +1317,8 @@ static void subintr_epout(uint8_t epnum, struct lc823450_ep_s *privep)
 
           lc823450_epack(epnum, 0);
         }
+
+      spin_unlock_irqrestore(flags);
 
       /* PIO */
 
@@ -1315,6 +1331,7 @@ static void subintr_epout(uint8_t epnum, struct lc823450_ep_s *privep)
     }
   else
     {
+      spin_unlock_irqrestore(flags);
       uinfo("REQ Buffer Exhault\n");
       epcmd_write(epnum, USB_EPCMD_READY_CLR);
     }
