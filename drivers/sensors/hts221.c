@@ -321,7 +321,7 @@ static int hts221_config_ctrl_reg3(FAR struct hts221_dev_s *priv,
   uint8_t data_to_write[2] = { 0 };
 
   ret = hts221_read_reg(priv, &addr, &regval);
-  hts221_dbg("CTRL_REG3: 0x%02X\n", regval);
+  hts221_dbg("CTRL_REG%d: 0x%02X\n", 3, regval);
   if (ret < 0)
     {
       return ERROR;
@@ -336,6 +336,15 @@ static int hts221_config_ctrl_reg3(FAR struct hts221_dev_s *priv,
   data_to_write[1] = regval;
 
   ret = hts221_write_reg8(priv, data_to_write);
+  if (ret >= 0)
+    {
+      ret = hts221_read_reg(priv, &addr, &regval);
+      if (ret >= 0)
+        {
+          hts221_dbg("wrote 0x%02X => CTRL_REG%d: 0x%02X\n",
+                     data_to_write[1], 3, regval);
+        }
+    }
 
   return ret;
 }
@@ -348,21 +357,65 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
   uint8_t addr = HTS221_CTRL_REG2;
   const uint8_t mask = 0x80;
   uint8_t data_to_write[2] = { 0 };
+  int retries = 5;
+
+  if (!settings->is_boot)
+    {
+      return OK;
+    }
 
   ret = hts221_read_reg(priv, &addr, &regval);
-  hts221_dbg("CTRL_REG2: 0x%02X\n", regval);
+  hts221_dbg("CTRL_REG%d: 0x%02X\n", 2, regval);
+
   if (ret < 0)
     {
       return ERROR;
     }
 
   regval &= ~mask;
-  regval |= (uint8_t)(settings->is_boot ? HTS221_CTRL_REG2_BOOT : 0);
+  regval |= HTS221_CTRL_REG2_BOOT;
 
   data_to_write[0] = addr;
   data_to_write[1] = regval;
 
   ret = hts221_write_reg8(priv, data_to_write);
+  if (ret >= 0)
+    {
+      /* Wait until boot bit is cleared. */
+
+      do
+        {
+          ret = hts221_read_reg(priv, &addr, &regval);
+          if (ret >= 0)
+            {
+              hts221_dbg("wrote 0x%02X => CTRL_REG%d: 0x%02X\n",
+                         data_to_write[1], 2, regval);
+            }
+          else
+            {
+              break;
+            }
+
+          if ((regval & HTS221_CTRL_REG2_BOOT) == 0)
+            {
+              /* After boot bit is cleared, wait additional 5 msec as
+               * recommended in HTS221 application note.
+               */
+
+              up_mdelay(5);
+              break;
+            }
+
+          usleep(10 * 1000);
+          retries--;
+        }
+      while (retries);
+
+      if (ret >= 0 && (regval & HTS221_CTRL_REG2_BOOT) != 0)
+        {
+          ret = -ETIMEDOUT;
+        }
+    }
 
   return ret;
 }
@@ -377,7 +430,7 @@ static int hts221_config_ctrl_reg1(FAR struct hts221_dev_s *priv,
   uint8_t data_to_write[2] = { 0 };
 
   ret = hts221_read_reg(priv, &addr, &regval);
-  hts221_dbg("CTRL_REG1: 0x%02X\n", regval);
+  hts221_dbg("CTRL_REG%d: 0x%02X\n", 1, regval);
   if (ret < 0)
     {
       return ERROR;
@@ -391,6 +444,15 @@ static int hts221_config_ctrl_reg1(FAR struct hts221_dev_s *priv,
   data_to_write[1] = regval;
 
   ret = hts221_write_reg8(priv, data_to_write);
+  if (ret >= 0)
+    {
+      ret = hts221_read_reg(priv, &addr, &regval);
+      if (ret >= 0)
+        {
+          hts221_dbg("wrote 0x%02X => CTRL_REG%d: 0x%02X\n",
+                     data_to_write[1], 1, regval);
+        }
+    }
 
   return ret;
 }
@@ -403,7 +465,7 @@ static int hts221_power_on_off(FAR struct hts221_dev_s *priv, bool on)
   uint8_t data_to_write[2];
 
   ret = hts221_read_reg(priv, &addr, &regval);
-  hts221_dbg("CTRL_REG1: 0x%02X\n", regval);
+  hts221_dbg("CTRL_REG%d: 0x%02X\n", 1, regval);
   if (ret < 0)
     {
       return ret;
@@ -421,6 +483,15 @@ static int hts221_power_on_off(FAR struct hts221_dev_s *priv, bool on)
   data_to_write[1] = regval;
 
   ret = hts221_write_reg8(priv, data_to_write);
+  if (ret >= 0)
+    {
+      ret = hts221_read_reg(priv, &addr, &regval);
+      if (ret >= 0)
+        {
+          hts221_dbg("wrote 0x%02X => CTRL_REG%d: 0x%02X\n",
+                     data_to_write[1], 1, regval);
+        }
+    }
 
   return ret;
 }
@@ -430,6 +501,12 @@ static int hts221_config(FAR struct hts221_dev_s *priv,
 {
   int ret = OK;
 
+  ret = hts221_config_ctrl_reg2(priv, cfgr); /* Performs sensor reset. */
+  if (ret < 0)
+    {
+      return ERROR;
+    }
+
   ret = hts221_cfgr_resolution(priv, cfgr);
   if (ret < 0)
     {
@@ -437,12 +514,6 @@ static int hts221_config(FAR struct hts221_dev_s *priv,
     }
 
   ret = hts221_config_ctrl_reg3(priv, cfgr);
-  if (ret < 0)
-    {
-      return ERROR;
-    }
-
-  ret = hts221_config_ctrl_reg2(priv, cfgr);
   if (ret < 0)
     {
       return ERROR;
@@ -511,7 +582,7 @@ static int hts221_read_raw_data(FAR struct hts221_dev_s *priv,
   uint8_t addr_humid_high = HTS221_HUM_OUT_H;
   uint8_t addr_temp_low = HTS221_TEMP_OUT_L;
   uint8_t addr_temp_high = HTS221_TEMP_OUT_H;
-  uint32_t flags;
+  irqstate_t flags;
 
   ret = hts221_read_reg(priv, &addr_humid_low, &data->humid_low_bits);
   if (ret < 0)
@@ -1033,7 +1104,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode *inode;
   FAR struct hts221_dev_s *priv;
-  uint32_t flags;
+  irqstate_t flags;
   int ret;
   int i;
 
