@@ -125,7 +125,7 @@
 /* Used with setlogmask() */
 
 #define LOG_MASK(p)   (1 << (p))
-#define LOG_UPTO(p)   ((1 << (p)) - 1)
+#define LOG_UPTO(p)   ((1 << ((p)+1)) - 1)
 #define LOG_ALL       0xff
 
 /****************************************************************************
