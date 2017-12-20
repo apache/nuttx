@@ -55,31 +55,67 @@
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */
 
-#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER) || \
-    !defined(HAVE_I2C_MASTER_DEVICE)
+#ifdef CONFIG_SYSTEM_I2CTOOL
+
+#  ifndef CONFIG_I2C_DRIVER
+#    warning CONFIG_SYSTEM_I2CTOOL requires CONFIG_I2C_DRIVER
+#    undef HAVE_I2CTOOL
+#  endif
+
+#  ifndef HAVE_I2C_MASTER_DEVICE
+#    warning CONFIG_SYSTEM_I2CTOOL requires HAVE_I2C_MASTER_DEVICE
+#    undef HAVE_I2CTOOL
+#  endif
+
+#else
 #  undef HAVE_I2CTOOL
 #endif
 
 /* Do we need to register FT5x06 touch panel driver? */
 
-#if !defined(CONFIG_INPUT_FT5X06) || !defined(CONFIG_LPC54_I2C2_MASTER) || \
-    !defined(CONFIG_LPC54_GPIOIRQ)
+#ifdef CONFIG_INPUT_FT5X06
+
+#  ifndef CONFIG_LPC54_I2C2_MASTER
+#    warning CONFIG_INPUT_FT5X06 requires CONFIG_LPC54_I2C2_MASTER
+#    undef HAVE_FT5x06
+#  endif
+
+#  ifdef CONFIG_FT5X06_POLLMODE
+#    warning CONFIG_INPUT_FT5X06 requires CONFIG_FT5X06_POLLMODE
+#    undef HAVE_FT5x06
+#  endif
+
+#else
 #  undef HAVE_FT5x06
 #endif
 
 /* MMC/SD support */
 
-#if !defined(CONFIG_LPC54_SDMMC) || !defined(CONFIG_MMCSD) || \
-    !defined(CONFIG_MMCSD_SDIO) || defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef HAVE_MMCSD
-#endif
+#ifdef CONFIG_LPC54_SDMMC
 
-/* Select the MMCSD minor number */
+#  ifndef CONFIG_MMCSD
+#    warning MMC/SD support requires CONFIG_MMCSD
+#    undef HAVE_MMCSD
+#  endif
 
-#ifdef CONFIG_NSH_MMCSDMINOR
-#  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#  ifndef CONFIG_MMCSD_SDIO
+#    warning MMC/SD support requires CONFIG_MMCSD_SDIO
+#    undef HAVE_MMCSD
+#  endif
+
+#  ifdef CONFIG_DISABLE_MOUNTPOINT
+#    warning MMC/SD cannot be supported with CONFIG_DISABLE_MOUNTPOINT
+#    undef HAVE_MMCSD
+#  endif
+
+#  ifdef CONFIG_NSH_MMCSDMINOR
+#    define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define MMCSD_MINOR 0
+#  endif
+
 #else
-#  define MMCSD_MINOR 0
+#  undef HAVE_MMCSD
 #endif
 
 /* Indices into a sparse I2C array.  Used with lpc54_i2c_handle() */

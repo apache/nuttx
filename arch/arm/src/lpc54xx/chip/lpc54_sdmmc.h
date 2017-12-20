@@ -131,7 +131,7 @@
 /* Control register CTRL */
 
 #define SDMMC_CTRL_CNTLRRESET            (1 << 0)  /* Bit 0:  Reset Module controller */
-#define SDMMC_CTRL_FIFORESET             (1 << 1)  /* Bit 1:  Reset to data FIFO To reset FIFO pointers */
+#define SDMMC_CTRL_FIFORESET             (1 << 1)  /* Bit 1:  Reset to data FIFO to reset FIFO pointers */
 #define SDMMC_CTRL_DMARESET              (1 << 2)  /* Bit 2:  Reset internal DMA interface control logic */
                                                    /* Bit 3:  Reserved */
 #define SDMMC_CTRL_INTENABLE             (1 << 4)  /* Bit 4:  Enable interrupts */
