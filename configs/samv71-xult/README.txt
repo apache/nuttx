@@ -279,7 +279,7 @@ Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card 
     CONFIG_MMCSD=y                        : Enable MMC/SD support
     CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
     CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
-    CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+    CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
     CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
     CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
     CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support

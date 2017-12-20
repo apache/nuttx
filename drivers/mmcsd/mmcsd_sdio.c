@@ -3011,7 +3011,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
    * else
    */
 
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
   if (priv->probed && SDIO_PRESENT(priv->dev))
     {
       return OK;
@@ -3038,7 +3038,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           ferr("ERROR: Failed to initialize card: %d\n", ret);
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
           SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 #endif
         }
@@ -3075,7 +3075,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
               finfo("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
               priv->mediachanged = true;
 
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
               /* Set up to receive asynchronous, media removal events */
 
               SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
@@ -3096,7 +3096,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       /* There is no card in the slot */
 
       finfo("No card\n");
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
       SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 #endif
       ret = -ENODEV;

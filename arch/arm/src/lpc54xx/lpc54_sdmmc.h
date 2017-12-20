@@ -66,7 +66,7 @@ extern "C"
  * Name: lpc54_sdmmc_initialize
  *
  * Description:
- *   Initialize SDIO for operation.
+ *   Initialize the SD/MMC peripheral for normal operation.
  *
  * Input Parameters:
  *   slotno - Not used.
@@ -78,50 +78,6 @@ extern "C"
 
 struct lpc54_sdmmc_dev_s; /* See include/nuttx/sdio.h */
 FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno);
-
-/****************************************************************************
- * Name: lpc54_sdmmc_mediachange
- *
- * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
- *   in order to signal to the driver that a card has been inserted or
- *   removed from the slot
- *
- * Input Parameters:
- *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a
- *                card has been removed from the slot.  Only transitions
- *                (inserted->removed or removed->inserted should be reported)
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void lpc54_sdmmc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
-
-/****************************************************************************
- * Name: lpc54_sdmmc_wrprotect
- *
- * Description:
- *   Called by board-specific logic to report if the card in the slot is
- *   mechanically write protected.
- *
- * Input Parameters:
- *   dev       - An instance of the SDIO driver device state structure.
- *   wrprotect - true is a card is writeprotected.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void lpc54_sdmmc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_SDMMC_H */

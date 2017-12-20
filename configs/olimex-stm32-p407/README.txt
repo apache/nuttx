@@ -98,7 +98,7 @@ microSD Card Interface
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                           : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                    : One slot per driver instance
-      # CONFIG_MMCSD_HAVECARDDETECT is not set : No card-detect GPIO
+      # CONFIG_MMCSD_HAVE_CARDDETECT is not set : No card-detect GPIO
       # CONFIG_MMCSD_MMCSUPPORT is not set     : Interferes with some SD cards
       # CONFIG_MMCSD_SPI is not set            : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                      : SDIO-based MMC/SD support

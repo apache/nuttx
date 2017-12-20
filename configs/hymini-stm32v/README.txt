@@ -286,7 +286,7 @@ HY-Mini specific Configuration Options
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
-    CONFIG_MMCSD_HAVECARDDETECT - Select if SDIO driver card detection
+    CONFIG_MMCSD_HAVE_CARDDETECT - Select if SDIO driver card detection
       is 100% accurate  (it is on the  HY-MiniSTM32V)
 
   HY-MiniSTM32V CAN Configuration

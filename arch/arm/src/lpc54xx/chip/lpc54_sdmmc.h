@@ -214,7 +214,6 @@
 #define SDMMC_INT_SDMMC                   (1 << 16) /* Bit 16: Mask SD/MMC interrupt */
                                                     /* Bits 17-31: Reserved */
 #define SDMMC_INT_ALL                     (0x1ffff)
-#define SDMMC_INT_RESET                   (0)
 
 /* Command register CMD */
 

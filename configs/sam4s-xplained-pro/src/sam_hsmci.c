@@ -94,7 +94,7 @@ static struct sam_hsmci_state_s g_hsmci;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
 static int sam_hsmci_cardetect_int(int irq, void *regs, FAR void *arg)
 {
   bool inserted;
@@ -160,7 +160,7 @@ int sam_hsmci_initialize(void)
           return ret;
         }
 
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
       /* Initialize card-detect GPIO.  There is no write-protection GPIO. */
 
       sam_configgpio(GPIO_MCI_CD);
@@ -183,7 +183,7 @@ int sam_hsmci_initialize(void)
 
       /* Enable card detect interrupts */
 
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
       sam_gpioirqenable(MCI_CD_IRQ);
 #endif
     }
@@ -199,7 +199,7 @@ int sam_hsmci_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MMCSD_HAVECARDDETECT
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
 bool sam_cardinserted(int slotno)
 {
   bool removed;

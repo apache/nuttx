@@ -150,6 +150,12 @@
                                  SDMMC_INT_FRUN | SDMMC_INT_HLE | SDMMC_INT_SBE | \
                                  SDMMC_INT_EBE)
 
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+#  define SDCARD_INT_CDET        SDMMC_INT_CDET
+#else
+#  define SDCARD_INT_CDET        0
+#endif
+
 #define SDCARD_CMDDONE_STA      (SDMMC_INT_CDONE)
 #define SDCARD_RESPDONE_STA     (0)
 
@@ -517,7 +523,7 @@ static void lpc54_takesem(struct lpc54_dev_s *priv)
 
 static inline void lpc54_setclock(uint32_t clkdiv)
 {
-  mcinfo("Entry!\n");
+  mcinfo("clkdiv=%08lx\n", (unsigned long)clkdiv);
 
   /* Disable the clock before setting frequency */
 
@@ -559,7 +565,7 @@ static inline void lpc54_setclock(uint32_t clkdiv)
 
 static inline void lpc54_settype(uint32_t ctype)
 {
-  mcinfo("Entry!\n");
+  mcinfo("cteype=%08lx\n", (unsigned long)ctype);
   lpc54_putreg(ctype, LPC54_SDMMC_CTYPE);
 }
 
@@ -607,7 +613,7 @@ static int lpc54_ciu_sendcmd(uint32_t cmd, uint32_t arg)
 {
   volatile int32_t tmo = SDCARD_CMDTIMEOUT;
 
-  mcinfo("Entry!\n");
+  mcinfo("cmd=%08lx arg=%08lx\n", (unsigned long)cmd, (unsigned long)arg);
 
   /* set command arg reg */
 
@@ -643,20 +649,23 @@ static void lpc54_configwaitints(struct lpc54_dev_s *priv, uint32_t waitmask,
                                  sdio_eventset_t wkupevent)
 {
   irqstate_t flags;
+  uint32_t regval;
 
-  mcinfo("Entry!\n");
+  mcinfo("waitmask=%08lx waitevents=%08x wkupevent=%08x\n",
+         (unsigned long)waitmask, (unsigned)waitevents, (unsigned)wkupevent);
 
   /* Save all of the data and set the new interrupt mask in one, atomic
    * operation.
    */
 
-  flags = enter_critical_section();
+  flags            = enter_critical_section();
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
   priv->xfrmask    = waitmask;
 
-  lpc54_putreg(priv->xfrmask | priv->waitmask, LPC54_SDMMC_INTMASK);
+  regval           = priv->xfrmask | priv->waitmask | SDCARD_INT_CDET;
+  lpc54_putreg(regval, LPC54_SDMMC_INTMASK);
   leave_critical_section(flags);
 }
 
@@ -677,12 +686,17 @@ static void lpc54_configwaitints(struct lpc54_dev_s *priv, uint32_t waitmask,
 
 static void lpc54_configxfrints(struct lpc54_dev_s *priv, uint32_t xfrmask)
 {
-  mcinfo("Entry!\n");
+  uint32_t regval;
+
+  mcinfo("xfrmask=%08x\n", xfrmask);
 
   irqstate_t flags;
   flags = enter_critical_section();
+
   priv->xfrmask = xfrmask;
-  lpc54_putreg(priv->xfrmask | priv->waitmask, LPC54_SDMMC_INTMASK);
+
+  regval = priv->xfrmask | priv->waitmask | SDCARD_INT_CDET;
+  lpc54_putreg(regval, LPC54_SDMMC_INTMASK);
   leave_critical_section(flags);
 }
 
@@ -704,9 +718,10 @@ static void lpc54_configxfrints(struct lpc54_dev_s *priv, uint32_t xfrmask)
 #if 0 /* Not used */
 static void lpc54_setpwrctrl(uint32_t pwrctrl)
 {
-  mcinfo("Entry!\n");
+  mcinfo("pwrctrl=%08lx\n", (unsigned long)pwrctrl);
 }
 #endif
+
 /****************************************************************************
  * Name: lpc54_getpwrctrl
  *
@@ -725,7 +740,7 @@ static void lpc54_setpwrctrl(uint32_t pwrctrl)
 
 static inline uint32_t lpc54_getpwrctrl(void)
 {
-  mcinfo("Entry!\n");
+  mcinfo("Returning zero\n");
   return 0;
 }
 
@@ -747,7 +762,7 @@ static uint8_t lpc54_log2(uint16_t value)
 {
   uint8_t log2 = 0;
 
-  mcinfo("Entry!\n");
+  mcinfo("value=%04x\n", value);
 
   /* 0000 0000 0000 0001 -> return 0,
    * 0000 0000 0000 001x -> return 1,
@@ -791,7 +806,7 @@ static void lpc54_eventtimeout(int argc, uint32_t arg)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)arg;
 
-  mcinfo("Entry!\n");
+  mcinfo("argc=%d, arg=%08lx\n", argc, (unsigned long)arg);
 
   /* There is always race conditions with timer expirations. */
 
@@ -828,7 +843,7 @@ static void lpc54_eventtimeout(int argc, uint32_t arg)
 
 static void lpc54_endwait(struct lpc54_dev_s *priv, sdio_eventset_t wkupevent)
 {
-  mcinfo("Entry!\n");
+  mcinfo("wkupevent=%08x\n", (unsigned)wkupevent);
 
   /* Cancel the watchdog timeout */
 
@@ -865,7 +880,7 @@ static void lpc54_endwait(struct lpc54_dev_s *priv, sdio_eventset_t wkupevent)
 
 static void lpc54_endtransfer(struct lpc54_dev_s *priv, sdio_eventset_t wkupevent)
 {
-  mcinfo("Entry!\n");
+  mcinfo("wkupevent=%08x\n", (unsigned)wkupevent);
 
   /* Disable all transfer related interrupts */
 
@@ -918,9 +933,50 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
 
   while ((enabled = lpc54_getreg(LPC54_SDMMC_RINTSTS) & lpc54_getreg(LPC54_SDMMC_INTMASK)) != 0)
     {
-      /* Handle in progress, interrupt driven data transfers ****************/
-      pending  = enabled & priv->xfrmask;
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+      /* Handle in card detection events ************************************/
 
+      if ((enabled & SDMMC_INT_CDET) != 0)
+        {
+          sdio_statset_t cdstatus;
+
+          /* Update card status */
+
+          cdstatus = priv->cdstatus;
+          if ((getreg32(LPC54_SDMMC_CDETECT) & SDMMC_CDETECT_NOTPRESENT) == 0)
+            {
+              priv->cdstatus |= SDIO_STATUS_PRESENT;
+
+#ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
+              if ((getreg32(LPC54_SDMMC_WRTPRT) & SDMMC_WRTPRT_PROTECTED) != 0)
+                {
+                  priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
+                }
+              else
+#endif
+                {
+                  priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
+                }
+            }
+          else
+            {
+              priv->cdstatus &= ~(SDIO_STATUS_PRESENT | SDIO_STATUS_WRPROTECTED);
+            }
+
+          mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+
+          /* Perform any requested callback if the status has changed */
+
+          if (cdstatus != priv->cdstatus)
+            {
+              lpc54_callback(priv);
+            }
+        }
+#endif
+
+      /* Handle in progress, interrupt driven data transfers ****************/
+
+      pending = enabled & priv->xfrmask;
       if (pending != 0)
         {
           /* Handle data end events */
@@ -986,7 +1042,7 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
 
       /* Handle wait events *************************************************/
 
-      pending  = enabled & priv->waitmask;
+      pending = enabled & priv->waitmask;
       if (pending != 0)
         {
           /* Is this a response completion event? */
@@ -999,7 +1055,8 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
                 {
                   /* Yes.. wake the thread up */
 
-                  lpc54_putreg(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC54_SDMMC_RINTSTS);
+                  lpc54_putreg(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR,
+                               LPC54_SDMMC_RINTSTS);
                   lpc54_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
@@ -1020,6 +1077,7 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
             }
         }
     }
+
   return OK;
 }
 
@@ -1071,7 +1129,7 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
   irqstate_t flags;
   uint32_t regval;
 
-  mcinfo("Entry!\n");
+  mcinfo("Resetting...\n");
 
   flags = enter_critical_section();
 
@@ -1102,7 +1160,8 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   /* DMA data transfer support */
 
-  priv->widebus    = true;  /* Required for DMA support */
+  priv->widebus    = true;   /* Required for DMA support */
+  priv->cdstatus   = 0;      /* Card status is unknown */
 
   regval = 0;
 
@@ -1119,9 +1178,9 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
   regval |= SDMMC_CTRL_INTENABLE;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
-  /* Disable Interrupts */
+  /* Disable Interrupts except for card detection. */
 
-  lpc54_putreg(0, LPC54_SDMMC_INTMASK);
+  lpc54_putreg(SDCARD_INT_CDET, LPC54_SDMMC_INTMASK);
 
   /* Clear to Interrupts */
 
@@ -1195,7 +1254,7 @@ static sdio_statset_t lpc54_status(FAR struct sdio_dev_s *dev)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
 
-  mcinfo("Entry!\n");
+  mcinfo("cdstatus=%02x\n", priv->cdstatus);
 
   return priv->cdstatus;
 }
@@ -1221,7 +1280,7 @@ static void lpc54_widebus(FAR struct sdio_dev_s *dev, bool wide)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
 
-  mcinfo("Entry!\n");
+  mcinfo("wide=%d\n", wide);
 
   priv->widebus = wide;
 }
@@ -1326,7 +1385,7 @@ static int lpc54_attach(FAR struct sdio_dev_s *dev)
   int ret;
   uint32_t regval;
 
-  mcinfo("Entry!\n");
+  mcinfo("Attaching..\n");
 
   /* Attach the SD card interrupt handler */
 
@@ -1338,7 +1397,7 @@ static int lpc54_attach(FAR struct sdio_dev_s *dev)
        * interrupt flags
        */
 
-      lpc54_putreg(SDMMC_INT_RESET, LPC54_SDMMC_INTMASK);
+      lpc54_putreg(0, LPC54_SDMMC_INTMASK);
       lpc54_putreg(SDMMC_INT_ALL  , LPC54_SDMMC_RINTSTS);
 
       /* Enable Interrupts to happen when the INTMASK is activated */
@@ -1346,6 +1405,10 @@ static int lpc54_attach(FAR struct sdio_dev_s *dev)
       regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
       regval |= SDMMC_CTRL_INTENABLE;
       lpc54_putreg(regval, LPC54_SDMMC_CTRL);
+
+      /* Enable card detection interrupts */
+
+      lpc54_putreg(SDCARD_INT_CDET, LPC54_SDMMC_INTMASK);
 
       /* Enable SD card interrupts at the NVIC.  They can now be enabled at
        * the SD card controller as needed.
@@ -1378,7 +1441,7 @@ static int lpc54_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
   uint32_t regval = 0;
   uint32_t cmdidx;
 
-  mcinfo("Entry!\n");
+  mcinfo("cmd=%08x arg=%08x\n", cmd, arg);
 
   /* The CMD0 needs the SENDINIT CMD */
 
@@ -1431,7 +1494,8 @@ static int lpc54_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
   /* Write the SD card CMD */
 
-  lpc54_putreg(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC54_SDMMC_RINTSTS);
+  lpc54_putreg(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR,
+               LPC54_SDMMC_RINTSTS);
   lpc54_ciu_sendcmd(regval, arg);
 
   return OK;
@@ -1465,7 +1529,7 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   uint32_t blocksize;
   uint32_t bytecnt;
 
-  mcinfo("Entry!\n");
+  mcinfo("nbytes=%ld\n", (long) nbytes);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -1517,7 +1581,7 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
 
-  mcinfo("Entry!\n");
+  mcinfo("nbytes=%ld\n", (long)nbytes);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -1552,9 +1616,9 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
 static int lpc54_cancel(FAR struct sdio_dev_s *dev)
 {
-  mcinfo("Entry!\n");
-
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
+
+  mcinfo("Cancelling..\n");
 
   /* Disable all transfer- and event- related interrupts */
 
@@ -1608,10 +1672,10 @@ static int lpc54_cancel(FAR struct sdio_dev_s *dev)
 
 static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
-  mcinfo("Entry!\n");
-
   int32_t timeout;
   uint32_t events;
+
+  mcinfo("cmd=%08x\n", cmd);
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
@@ -1710,7 +1774,7 @@ static int lpc54_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 
   int ret = OK;
 
-  mcinfo("Entry! CMD = %08x\n", cmd);
+  mcinfo("cmd=%08x\n", cmd);
 
   /* R1  Command response (48-bit)
    *     47        0               Start bit
@@ -1783,8 +1847,7 @@ static int lpc54_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
   uint32_t regval;
   int ret = OK;
 
-  mcinfo("Entry!\n");
-
+  mcinfo("cmd=%08x\n", cmd);
 
   /* R2  CID, CSD register (136-bit)
    *     135       0               Start bit
@@ -1840,7 +1903,7 @@ static int lpc54_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
   uint32_t regval;
   int ret = OK;
 
-  mcinfo("Entry!\n");
+  mcinfo("cmd=%08x\n", cmd);
 
   /* R3  OCR (48-bit)
    *     47        0               Start bit
@@ -1886,12 +1949,12 @@ static int lpc54_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
 
 /* MMC responses not supported */
 
-static int lpc54_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
+static int lpc54_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                             uint32_t *rnotimpl)
 {
-  mcinfo("Entry!\n");
+  mcinfo("cmd=%08x\n", cmd);
 
   lpc54_putreg(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC54_SDMMC_RINTSTS);
-
   return -ENOSYS;
 }
 
@@ -1925,8 +1988,7 @@ static void lpc54_waitenable(FAR struct sdio_dev_s *dev,
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
   uint32_t waitmask;
 
-  mcinfo("Entry!\n");
-
+  mcinfo("eventset=%08x\n", (unsigned int)eventset);
   DEBUGASSERT(priv != NULL);
 
   /* Disable event-related interrupts */
@@ -1987,7 +2049,7 @@ static sdio_eventset_t lpc54_eventwait(FAR struct sdio_dev_s *dev,
   irqstate_t flags;
   int ret;
 
-  mcinfo("Entry!\n");
+  mcinfo("timeout=%lu\n", (unsigned long)timeout);
 
   /* There is a race condition here... the event may have completed before
    * we get here.  In this case waitevents will be zero, but wkupevents will
@@ -2090,8 +2152,6 @@ static void lpc54_callbackenable(FAR struct sdio_dev_s *dev,
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
 
-  mcinfo("Entry!\n");
-
   mcinfo("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
@@ -2126,7 +2186,7 @@ static int lpc54_registercallback(FAR struct sdio_dev_s *dev,
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
 
-  mcinfo("Entry!\n");
+  mcinfo("callback=%p arg=%p\n", callback, arg);
 
   /* Disable callbacks and register this callback and is argument */
 
@@ -2283,7 +2343,7 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
   uint32_t regval;
   int ret = OK;
 
-  mcinfo("Entry!\n");
+  mcinfo("buflen=%lu\n", (unsigned long)buflen);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2336,7 +2396,7 @@ static void lpc54_callback(void *arg)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)arg;
 
-  mcinfo("Entry!\n");
+  mcinfo("arg=%p\n", arg);
 
   /* Is a callback registered? */
 
@@ -2406,10 +2466,10 @@ static void lpc54_callback(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sdio_initialize
+ * Name: lpc54_sdmmc_initialize
  *
  * Description:
- *   Initialize SD card for operation.
+ *   Initialize the SD/MMC peripheral for normal operation.
  *
  * Input Parameters:
  *   slotno - Not used.
@@ -2419,12 +2479,12 @@ static void lpc54_callback(void *arg)
  *
  ****************************************************************************/
 
-FAR struct sdio_dev_s *sdio_initialize(int slotno)
+FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 {
   irqstate_t flags;
   uint32_t regval;
 
-  mcinfo("Entry!\n");
+  mcinfo("slotno=%d\n", slotno);
 
   flags = enter_critical_section();
 
@@ -2475,11 +2535,15 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   lpc54_gpio_config(GPIO_SD_D2);
   lpc54_gpio_config(GPIO_SD_D3);
 #endif
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
   lpc54_gpio_config(GPIO_SD_CARD_DET_N);
+#endif
   lpc54_gpio_config(GPIO_SD_CLK);
   lpc54_gpio_config(GPIO_SD_CMD);
   lpc54_gpio_config(GPIO_SD_POW_EN);
+#ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
   lpc54_gpio_config(GPIO_SD_WR_PRT);
+#endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.
@@ -2494,94 +2558,4 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   return &g_scard_dev.dev;
 }
 
-/****************************************************************************
- * Name: sdio_mediachange
- *
- * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
- *   in order to signal to the driver that a card has been inserted or
- *   removed from the slot
- *
- * Input Parameters:
- *   dev        - An instance of the SD card driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a
- *                card has been removed from the slot.  Only transitions
- *                (inserted->removed or removed->inserted should be reported)
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
-{
-  struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
-  sdio_statset_t cdstatus;
-  irqstate_t flags;
-
-  mcinfo("Entry!\n");
-
-  /* Update card status */
-
-  flags = enter_critical_section();
-  cdstatus = priv->cdstatus;
-  if (cardinslot)
-    {
-      priv->cdstatus |= SDIO_STATUS_PRESENT;
-    }
-  else
-    {
-      priv->cdstatus &= ~SDIO_STATUS_PRESENT;
-    }
-
-  mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
-
-  /* Perform any requested callback if the status has changed */
-
-  if (cdstatus != priv->cdstatus)
-    {
-      lpc54_callback(priv);
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: sdio_wrprotect
- *
- * Description:
- *   Called by board-specific logic to report if the card in the slot is
- *   mechanically write protected.
- *
- * Input Parameters:
- *   dev       - An instance of the SD card driver device state structure.
- *   wrprotect - true is a card is writeprotected.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
-{
-  struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
-  irqstate_t flags;
-
-  mcinfo("Entry!\n");
-
-  /* Update card status */
-
-  flags = enter_critical_section();
-  if (wrprotect)
-    {
-      priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
-    }
-  else
-    {
-      priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
-    }
-
-  mcinfo("cdstatus: %02x\n", priv->cdstatus);
-  leave_critical_section(flags);
-}
 #endif /* CONFIG_LPC54_SDMMC */

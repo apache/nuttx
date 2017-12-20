@@ -197,7 +197,7 @@ int sam_hsmci_initialize(void);
  *
  ************************************************************************************/
 
-#if defined(HAVE_HSMCI) && defined(CONFIG_MMCSD_HAVECARDDETECT)
+#if defined(HAVE_HSMCI) && defined(CONFIG_MMCSD_HAVE_CARDDETECT)
 bool sam_cardinserted(int slotno);
 #endif
 

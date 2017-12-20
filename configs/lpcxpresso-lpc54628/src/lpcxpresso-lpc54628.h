@@ -51,6 +51,7 @@
 
 #define HAVE_I2CTOOL  1
 #define HAVE_FT5x06   1
+#define HAVE_MMCSD    1
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */
 
@@ -64,6 +65,21 @@
 #if !defined(CONFIG_INPUT_FT5X06) || !defined(CONFIG_LPC54_I2C2_MASTER) || \
     !defined(CONFIG_LPC54_GPIOIRQ)
 #  undef HAVE_FT5x06
+#endif
+
+/* MMC/SD support */
+
+#if !defined(CONFIG_LPC54_SDMMC) || !defined(CONFIG_MMCSD) || \
+    !defined(CONFIG_MMCSD_SDIO) || defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef HAVE_MMCSD
+#endif
+
+/* Select the MMCSD minor number */
+
+#ifdef CONFIG_NSH_MMCSDMINOR
+#  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#else
+#  define MMCSD_MINOR 0
 #endif
 
 /* Indices into a sparse I2C array.  Used with lpc54_i2c_handle() */

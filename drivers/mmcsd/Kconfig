@@ -31,12 +31,17 @@ config MMCSD_MMCSUPPORT
 	---help---
 		Enable support for MMC cards
 
-config MMCSD_HAVECARDDETECT
-	bool "MMC/SD card detection"
+config MMCSD_HAVE_CARDDETECT
+	bool "MMC/SD card detect pin"
 	default y
 	---help---
-		SDIO driver card detection is
-		100% accurate
+		SDIO driver card present detection is supported.
+
+config MMCSD_HAVE_WRITEPROTECT
+	bool "MMC/SD write protect pin"
+	default y
+	---help---
+		SDIO driver write protection detection is supported.
 
 config MMCSD_SPI
 	bool "MMC/SD SPI transfer support"

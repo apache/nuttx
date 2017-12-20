@@ -438,7 +438,7 @@ Configurations
        Device Drivers -> MMC/SD Driver Support
          CONFIG_MMCSD=y                       : Enable MMC/SD support
          CONFIG_MMSCD_NSLOTS=1                : One slot per driver instance
-         CONFIG_MMCSD_HAVECARDDETECT=y        : Supports card-detect PIOs
+         CONFIG_MMCSD_HAVE_CARDDETECT=y        : Supports card-detect PIOs
          CONFIG_MMCSD_SDIO=y                  : SDIO-based MMC/SD support
          CONFIG_SDIO_DMA=y                    : Use SDIO DMA
          CONFIG_SDIO_BLOCKSETUP=y             : Needs to know block sizes
