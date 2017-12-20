@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm32f0discovery/src/Makefile
+# configs/stm32f051-discovery/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

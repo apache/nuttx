@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f0discovery/src/stm32_appinit.c
+ * config/stm32f051-discovery/src/stm32_appinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 
 #include <nuttx/board.h>
 
-#include "stm32f0discovery.h"
+#include "stm32f051-discovery.h"
 
 /****************************************************************************
  * Public Functions

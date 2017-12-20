@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * configs/stm32f0discovery/src/stm32f0discovery.h
+ * configs/stm32f051-discovery/src/stm32f051-discovery.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM32F0DISCOVERY_SRC_STM32F0DISCOVERY_H
-#define __CONFIGS_STM32F0DISCOVERY_SRC_STM32F0DISCOVERY_H
+#ifndef __CONFIGS_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H
+#define __CONFIGS_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H
 
 /****************************************************************************************************
  * Included Files
@@ -132,4 +132,4 @@
 int stm32_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F0DISCOVERY_SRC_STM32F0DISCOVERY_H */
+#endif /* __CONFIGS_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H */

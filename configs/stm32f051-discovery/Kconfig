@@ -3,6 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_BOARD_STM32F0_DISCOVERY
+if ARCH_BOARD_STM32F051_DISCOVERY
 
 endif

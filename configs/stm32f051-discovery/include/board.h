@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f0discovery/include/board.h
+ * configs/stm32f051-discovery/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H
-#define __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H
+#ifndef __CONFIG_STM32F051_DISCOVERY_INCLUDE_BOARD_H
+#define __CONFIG_STM32F051_DISCOVERY_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -244,4 +244,4 @@
 #define GPIO_I2C1_SCL            GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA            GPIO_I2C1_SDA_1
 
-#endif  /* __CONFIG_STM32F0DISCOVERY_INCLUDE_BOARD_H */
+#endif  /* __CONFIG_STM32F051_DISCOVERY_INCLUDE_BOARD_H */

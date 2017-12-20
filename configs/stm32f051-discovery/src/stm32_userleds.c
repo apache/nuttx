@@ -1,8 +1,9 @@
 /****************************************************************************
- * config/stm32f0discovery/src/stm32_bringup.c
+ * configs/stm32f051-discovery/src/stm32_userleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,43 +40,71 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
-#include "stm32f0discovery.h"
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "stm32.h"
+#include "stm32f051-discovery.h"
+
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int stm32_bringup(void)
+void board_userled_initialize(void)
 {
-  int ret;
+  /* Configure LED1-2 GPIOs for output */
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return OK;
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
 }
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  uint32_t ledcfg;
+
+  if (led == BOARD_LED1)
+    {
+      ledcfg = GPIO_LED1;
+    }
+  else if (led == BOARD_LED2)
+    {
+      ledcfg = GPIO_LED2;
+    }
+  else
+    {
+      return;
+    }
+
+  stm32_gpiowrite(ledcfg, ledon);
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  bool ledon;
+
+  ledon = ((ledset & BOARD_LED1_BIT) != 0);
+  stm32_gpiowrite(GPIO_LED1, ledon);
+
+  ledon = ((ledset & BOARD_LED2_BIT) != 0);
+  stm32_gpiowrite(GPIO_LED2, ledon);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

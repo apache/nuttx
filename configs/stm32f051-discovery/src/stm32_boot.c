@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f0discovery/src/stm32f0_boot.c
+ * configs/stm32f051-discovery/src/stm32f0_boot.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm32f0discovery.h"
+#include "stm32f051-discovery.h"
 
 /************************************************************************************
  * Public Functions

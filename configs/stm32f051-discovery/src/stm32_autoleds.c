@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f0discovery/src/stm32_userleds.c
+ * configs/stm32f051-discovery/src/stm32_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,67 +44,94 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "stm32.h"
-#include "stm32f0discovery.h"
+#include "stm32f051-discovery.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on
+ * board the STM32L-Discovery.  The following definitions describe how NuttX
+ * controls the LEDs:
+ *
+ *   SYMBOL                Meaning                 LED state
+ *                                                   LED1     LED2
+ *   -------------------  -----------------------  -------- --------
+ *   LED_STARTED          NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED     Idle stack created         ON       OFF
+ *   LED_INIRQ            In an interrupt              No change
+ *   LED_SIGNAL           In a signal handler          No change
+ *   LED_ASSERTION        An assertion failed          No change
+ *   LED_PANIC            The system has crashed     OFF      Blinking
+ *   LED_IDLE             STM32 is is sleep mode       Not used
+ */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+void board_autoled_initialize(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
-  stm32_configgpio(GPIO_LED1);
-  stm32_configgpio(GPIO_LED2);
+  stm32f0_configgpio(GPIO_LED1);
+  stm32f0_configgpio(GPIO_LED2);
 }
 
 /****************************************************************************
- * Name: board_userled
+ * Name: board_autoled_on
  ****************************************************************************/
 
-void board_userled(int led, bool ledon)
+void board_autoled_on(int led)
 {
-  uint32_t ledcfg;
+  bool led1on = false;
+  bool led2on = false;
 
-  if (led == BOARD_LED1)
+  switch (led)
     {
-      ledcfg = GPIO_LED1;
-    }
-  else if (led == BOARD_LED2)
-    {
-      ledcfg = GPIO_LED2;
-    }
-  else
-    {
-      return;
+      case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
+        break;
+
+      case 1:  /* LED_STACKCREATED */
+        led1on = true;
+        break;
+
+      default:
+      case 2:  /* LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
+        return;
+
+      case 3:  /* LED_PANIC */
+        led2on = true;
+        break;
     }
 
-  stm32_gpiowrite(ledcfg, ledon);
+  stm32f0_gpiowrite(GPIO_LED1, led1on);
+  stm32f0_gpiowrite(GPIO_LED2, led2on);
 }
 
 /****************************************************************************
- * Name: board_userled_all
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_autoled_off(int led)
 {
-  bool ledon;
-
-  ledon = ((ledset & BOARD_LED1_BIT) != 0);
-  stm32_gpiowrite(GPIO_LED1, ledon);
-
-  ledon = ((ledset & BOARD_LED2_BIT) != 0);
-  stm32_gpiowrite(GPIO_LED2, ledon);
+  if (led != 2)
+    {
+      stm32f0_gpiowrite(GPIO_LED1, false);
+      stm32f0_gpiowrite(GPIO_LED2, false);
+    }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */
