@@ -643,19 +643,19 @@ endmenu # EMC Configuration
 menu "SD/MMC Configuration"
 	depends on LPC54_SDMMC
 
+config LPC54_SDMMC_PWRCTRL
+	bool "Power-enable pin"
+	default n
+	---help---
+		Select if the board supports a power-enable pin that must be selected
+		to provide power to the SD card.
+
 config LPC54_SDMMC_DMA
 	bool "Support DMA data transfers"
 	default y
+	select SDIO_DMA
 	---help---
 		Support DMA data transfers.
-
-config LPC54_SDMMC_WIDTH_D1_ONLY
-	bool "Use D1 only"
-	default n
-	---help---
-		Select 1-bit transfer mode.  This may be selected to force the driver
-		operate with only a single data line (the default is to use all
-		4 SD data lines).Default: 4-bit transfer mode.
 
 config LPC54_SDMMC_REGDEBUG
 		bool "Register level debug"

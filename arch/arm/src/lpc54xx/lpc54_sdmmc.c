@@ -92,21 +92,30 @@
 #define MCI_DMADES1_BS1(x)      (x)
 
 /* Configuration ************************************************************/
-/* Required system configuration options:
+/* Required system configuration options in the sched/Kconfig:
  *
  *   CONFIG_SCHED_WORKQUEUE -- Callback support requires work queue support.
  *
- * Driver-specific configuration options:
+ * Driver-specific configuration options in the drivers/mmcd Kdonfig:
  *
  *   CONFIG_SDIO_MUXBUS - Setting this configuration enables some locking
  *     APIs to manage concurrent accesses on the SD card bus.  This is not
- *     needed for the simple case of a single SD card, for example.
- *   CONFIG_SDIO_DMA - Enable SD card DMA.  This is a marginally optional.
- *     For most usages, SD accesses will cause data overruns if used without DMA.
- *     NOTE the above system DMA configuration options.
- *   CONFIG_LPC54_SDMMC_WIDTH_D1_ONLY - This may be selected to force the driver
+ *     needed for the simple case of a single SD card slot, for example.
+ *   CONFIG_SDIO_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
+ *   CONFIG_MMCSD_HAVE_CARDDETECT - Select if the SD slot supports a card
+ *     detect pin.
+ *   CONFIG_MMCSD_HAVE_WRITEPROTECT - Select if the SD slots supports a
+ *     write protected pin.
+ *
+ * Driver-specific configuration options in the arch/arm/src/lpc54xx/Kconfig
+ *
+ *   CONFIG_LPC54_SDMMC_PWRCTRL - Select if the board supports an output
+ *     pin to enable power to the SD slot.
+ *   CONFIG_LPC54_SDMMC_DMA - Enable SD card DMA.  This is a marginally
+ *     optional.  For most usages, SD accesses will cause data overruns if
+ *     used without DMA.  This will also select CONFIG_SDIO_DMA.
  *   CONFIG_LPC54_SDMMC_REGDEBUG - Enables some very low-level debug output
  *     This also requires CONFIG_DEBUG_MEMCARD_INFO
  */
@@ -178,6 +187,15 @@
 #define SDCARD_DMADONE_FLAG     (2)
 #define SDCARD_ALLDONE          (3)
 
+
+/* Card debounce time.  Number of host clocks (SD_CLK) used by debounce
+ * filter logic for card detect.  typical debounce time is 5-25 ms.
+ *
+ * Eg. Fsd = 44MHz, ticks = 660,000
+ */
+
+#define DEBOUNCE_TICKS          (15 * BOARD_SDMMC_FREQUENCY / 1000)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -222,7 +240,7 @@ struct lpc54_dev_s
   /* DMA data transfer support */
 
   bool               widebus;    /* Required for DMA support */
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
   bool               dmamode;    /* true: DMA mode transfer */
 #endif
 };
@@ -252,16 +270,9 @@ static int  lpc54_ciu_sendcmd(uint32_t cmd, uint32_t arg);
 static void lpc54_configwaitints(struct lpc54_dev_s *priv, uint32_t waitmask,
               sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
 static void lpc54_configxfrints(struct lpc54_dev_s *priv, uint32_t xfrmask);
-#if 0 /* Not used */
-static void lpc54_setpwrctrl(uint32_t pwrctrl);
-#endif
-static inline uint32_t lpc54_getpwrctrl(void);
 
 /* Data Transfer Helpers ****************************************************/
 
-#if 0 /* Not used */
-static uint8_t lpc54_log2(uint16_t value);
-#endif
 static void lpc54_eventtimeout(int argc, uint32_t arg);
 static void lpc54_endwait(struct lpc54_dev_s *priv, sdio_eventset_t wkupevent);
 static void lpc54_endtransfer(struct lpc54_dev_s *priv, sdio_eventset_t wkupevent);
@@ -322,7 +333,7 @@ static int  lpc54_registercallback(FAR struct sdio_dev_s *dev,
 
 /* DMA */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
 static int  lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -362,14 +373,14 @@ struct lpc54_dev_s g_scard_dev =
     .eventwait        = lpc54_eventwait,
     .callbackenable   = lpc54_callbackenable,
     .registercallback = lpc54_registercallback,
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
     .dmarecvsetup     = lpc54_dmarecvsetup,
     .dmasendsetup     = lpc54_dmasendsetup,
 #endif
   },
 };
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
 static struct sdmmc_dma_s g_sdmmc_dmadd[1 + (0x10000 / MCI_DMADES1_MAXTR)];
 #endif
 
@@ -701,89 +712,6 @@ static void lpc54_configxfrints(struct lpc54_dev_s *priv, uint32_t xfrmask)
 }
 
 /****************************************************************************
- * Name: lpc54_setpwrctrl
- *
- * Description:
- *   Change the PWRCTRL field of the SD card POWER register to turn the SD card
- *   ON or OFF
- *
- * Input Parameters:
- *   clkcr - A new PWRCTRL setting
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static void lpc54_setpwrctrl(uint32_t pwrctrl)
-{
-  mcinfo("pwrctrl=%08lx\n", (unsigned long)pwrctrl);
-}
-#endif
-
-/****************************************************************************
- * Name: lpc54_getpwrctrl
- *
- * Description:
- *   Return the current value of the  the PWRCTRL field of the SD card P
- *   register.  This function can be used to see if the SD card is powered ON
- *   or OFF
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The current value of the  the PWRCTRL field of the SD card PWR register.
- *
- ****************************************************************************/
-
-static inline uint32_t lpc54_getpwrctrl(void)
-{
-  mcinfo("Returning zero\n");
-  return 0;
-}
-
-/****************************************************************************
- * Data Transfer Helpers
- ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc54_log2
- *
- * Description:
- *   Take (approximate) log base 2 of the provided number (Only works if the
- *   provided number is a power of 2).
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static uint8_t lpc54_log2(uint16_t value)
-{
-  uint8_t log2 = 0;
-
-  mcinfo("value=%04x\n", value);
-
-  /* 0000 0000 0000 0001 -> return 0,
-   * 0000 0000 0000 001x -> return 1,
-   * 0000 0000 0000 01xx -> return 2,
-   * 0000 0000 0000 1xxx -> return 3,
-   * ...
-   * 1xxx xxxx xxxx xxxx -> return 15,
-   */
-
-  DEBUGASSERT(value > 0);
-  while (value != 1)
-    {
-      value >>= 1;
-      log2++;
-    }
-
-  return log2;
-}
-#endif
-
-/****************************************************************************
  * Name: lpc54_eventtimeout
  *
  * Description:
@@ -931,8 +859,12 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
    * bits remaining, then we have work to do here.
    */
 
-  while ((enabled = lpc54_getreg(LPC54_SDMMC_RINTSTS) & lpc54_getreg(LPC54_SDMMC_INTMASK)) != 0)
+  while ((enabled = lpc54_getreg(LPC54_SDMMC_MINTSTS)) != 0)
     {
+      /* Clear pending status */
+
+      lpc54_putreg(enabled, LPC54_SDMMC_RINTSTS);
+
 #ifdef CONFIG_MMCSD_HAVE_CARDDETECT
       /* Handle in card detection events ************************************/
 
@@ -943,12 +875,12 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
           /* Update card status */
 
           cdstatus = priv->cdstatus;
-          if ((getreg32(LPC54_SDMMC_CDETECT) & SDMMC_CDETECT_NOTPRESENT) == 0)
+          if ((lpc54_getreg(LPC54_SDMMC_CDETECT) & SDMMC_CDETECT_NOTPRESENT) == 0)
             {
               priv->cdstatus |= SDIO_STATUS_PRESENT;
 
 #ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
-              if ((getreg32(LPC54_SDMMC_WRTPRT) & SDMMC_WRTPRT_PROTECTED) != 0)
+              if ((lpc54_getreg(LPC54_SDMMC_WRTPRT) & SDMMC_WRTPRT_PROTECTED) != 0)
                 {
                   priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
                 }
@@ -957,10 +889,23 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
                 {
                   priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
                 }
+
+#ifdef CONFIG_LPC54_SDMMC_PWRCTRL
+              /* Enable/ power to the SD card */
+
+              lpc54_putreg(SDMMC_PWREN, LPC54_SDMMC_PWREN);
+#endif
+
             }
           else
             {
               priv->cdstatus &= ~(SDIO_STATUS_PRESENT | SDIO_STATUS_WRPROTECTED);
+
+#ifdef CONFIG_LPC54_SDMMC_PWRCTRL
+              /* Disable power to the SD card */
+
+              lpc54_putreg(0, LPC54_SDMMC_PWREN);
+#endif
             }
 
           mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
@@ -1165,7 +1110,7 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   regval = 0;
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode    = false;  /* true: DMA mode transfer */
 
   /* Use the Internal DMA */
@@ -1181,6 +1126,15 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
   /* Disable Interrupts except for card detection. */
 
   lpc54_putreg(SDCARD_INT_CDET, LPC54_SDMMC_INTMASK);
+
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+  /* Set the card debounce time.  Number of host clocks (SD_CLK) used by
+   * debounce filter logic for card detect.  typical debounce time is 5-25
+   * ms.
+   */
+
+  lpc54_putreg(DEBOUNCE_TICKS, LPC54_SDMMC_DEBNCE);
+#endif
 
   /* Clear to Interrupts */
 
@@ -1204,6 +1158,12 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   lpc54_putreg(0, LPC54_SDMMC_CLKENA);
   leave_critical_section(flags);
+
+#if defined(CONFIG_LPC54_SDMMC_PWRCTRL) && !defined(CONFIG_MMCSD_HAVE_CARDDETECT)
+  /* Enable power to the SD card */
+
+  lpc54_putreg(enable ? SDMMC_PWREN : 0, LPC54_SDMMC_PWREN);
+#endif
 }
 
 /****************************************************************************
@@ -1226,10 +1186,10 @@ static sdio_capset_t lpc54_capabilities(FAR struct sdio_dev_s *dev)
 
   caps |= SDIO_CAPS_DMABEFOREWRITE;
 
-#ifdef CONFIG_LPC54_SDMMC_WIDTH_D1_ONLY
+#ifdef CONFIG_SDIO_WIDTH_D1_ONLY
   caps |= SDIO_CAPS_1BIT_ONLY;
 #endif
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
 
@@ -1337,7 +1297,7 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* SD normal operation clocking (wide 4-bit mode) */
 
       case CLOCK_SD_TRANSFER_4BIT:
-#ifndef CONFIG_LPC54_SDMMC_WIDTH_D1_ONLY
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDWIDEXFR);
         ctype   = SDCARD_BUS_D4;
         enabled = true;
@@ -1538,7 +1498,7 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode   = false;
 #endif
 
@@ -1590,7 +1550,7 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode   = false;
 #endif
 
@@ -1637,7 +1597,7 @@ static int lpc54_cancel(FAR struct sdio_dev_s *dev)
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
   if (priv->dmamode)
     {
       /* Make sure that the DMA is stopped (it will be stopped automatically
@@ -2218,7 +2178,7 @@ static int lpc54_registercallback(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
 static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
@@ -2333,15 +2293,13 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SDIO_DMA
+#ifdef CONFIG_LPC54_SDMMC_DMA
 static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
-  uint32_t blocksize;
-  uint32_t bytecnt;
   uint32_t regval;
-  int ret = OK;
+  int ret = -EPERM;
 
   mcinfo("buflen=%lu\n", (unsigned long)buflen);
 
@@ -2352,7 +2310,9 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   if (priv->widebus)
     {
-      /* Save the destination buffer information for use by the interrupt handler */
+      /* Save the destination buffer information for use by the interrupt
+       * handler.
+       */
 
       priv->buffer    = (uint32_t *)buffer;
       priv->remaining = buflen;
@@ -2365,14 +2325,15 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
       lpc54_putreg(regval, LPC54_SDMMC_CTRL);
       while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET);
 
-      /* Setup DMA list */
+      /* Setup DMA descriptor list */
 
       g_sdmmc_dmadd[0].des0 = MCI_DMADES0_OWN | MCI_DMADES0_CH | MCI_DMADES0_LD;
       g_sdmmc_dmadd[0].des1 = 512;
-      g_sdmmc_dmadd[0].des2 = priv->buffer;
-      g_sdmmc_dmadd[0].des3 = (uint32_t) &g_sdmmc_dmadd[1];
+      g_sdmmc_dmadd[0].des2 = (uint32_t)priv->buffer;
+      g_sdmmc_dmadd[0].des3 = (uint32_t)&g_sdmmc_dmadd[1];
 
       lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
+      ret = OK;
     }
 
   return ret;
@@ -2428,7 +2389,7 @@ static void lpc54_callback(void *arg)
             {
               /* No... return without performing the callback */
 
-              mcinfo("Media is not Ejected!\n");
+              mcinfo("Media is not present\n");
               return;
             }
         }
@@ -2481,16 +2442,12 @@ static void lpc54_callback(void *arg)
 
 FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 {
+  struct lpc54_dev_s *priv = &g_scard_dev;
   irqstate_t flags;
   uint32_t regval;
 
   mcinfo("slotno=%d\n", slotno);
-
   flags = enter_critical_section();
-
-  /* There is only one slot */
-
-  struct lpc54_dev_s *priv = &g_scard_dev;
 
   /* Set the SD/MMMC clock source */
 
@@ -2501,8 +2458,8 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
    */
 
   regval = SYSCON_SDIOCLKDIV_DIV(BOARD_SDMMC_CLKDIV);
-  lpc54_putreg(regval, LPC54_SYSCON_SDIOCLKSEL);
-  lpc54_putreg(regval | SYSCON_SDIOCLKDIV_REQFLAG, LPC54_SYSCON_SDIOCLKSEL);
+  lpc54_putreg(regval, LPC54_SYSCON_SDIOCLKDIV);
+  lpc54_putreg(regval | SYSCON_SDIOCLKDIV_REQFLAG, LPC54_SYSCON_SDIOCLKDIV);
 
   /* Enable clocking to the SD/MMC peripheral */
 
@@ -2525,12 +2482,12 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
   /* Create a watchdog timer */
 
   priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
+  DEBUGASSERT(priv->waitwdog != NULL);
 
   /* Configure GPIOs for 4-bit, wide-bus operation */
 
   lpc54_gpio_config(GPIO_SD_D0);
-#ifndef CONFIG_LPC54_SDMMC_WIDTH_D1_ONLY
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
   lpc54_gpio_config(GPIO_SD_D1);
   lpc54_gpio_config(GPIO_SD_D2);
   lpc54_gpio_config(GPIO_SD_D3);
@@ -2540,7 +2497,9 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 #endif
   lpc54_gpio_config(GPIO_SD_CLK);
   lpc54_gpio_config(GPIO_SD_CMD);
+#ifdef CONFIG_LPC54_SDMMC_PWRCTRL
   lpc54_gpio_config(GPIO_SD_POW_EN);
+#endif
 #ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
   lpc54_gpio_config(GPIO_SD_WR_PRT);
 #endif
@@ -2552,9 +2511,6 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
   lpc54_reset(&priv->dev);
 
   leave_critical_section(flags);
-
-  mcinfo("Leaving!\n");
-
   return &g_scard_dev.dev;
 }
 
