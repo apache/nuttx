@@ -135,6 +135,11 @@
 #define SDCARD_BUS_D4           1
 #define SDCARD_BUS_D8           0x100
 
+/* FIFO size in bytes */
+
+#define LPC54_TXFIFO_SIZE       (LPC54_TXFIFO_DEPTH | LPC54_TXFIFO_WIDTH)
+#define LPC54_RXFIFO_SIZE       (LPC54_RXFIFO_DEPTH | LPC54_RXFIFO_WIDTH)
+
 /* Data transfer interrupt mask bits */
 
 #define SDCARD_RECV_MASK        (SDMMC_INT_DCRC | SDMMC_INT_RCRC | SDMMC_INT_DRTO | \
@@ -186,7 +191,6 @@
 #define SDCARD_XFRDONE_FLAG     (1)
 #define SDCARD_DMADONE_FLAG     (2)
 #define SDCARD_ALLDONE          (3)
-
 
 /* Card debounce time.  Number of host clocks (SD_CLK) used by debounce
  * filter logic for card detect.  typical debounce time is 5-25 ms.
@@ -1595,20 +1599,6 @@ static int lpc54_cancel(FAR struct sdio_dev_s *dev)
 
   (void)wd_cancel(priv->waitwdog);
 
-  /* If this was a DMA transfer, make sure that DMA is stopped */
-
-#ifdef CONFIG_LPC54_SDMMC_DMA
-  if (priv->dmamode)
-    {
-      /* Make sure that the DMA is stopped (it will be stopped automatically
-       * on normal transfers, but not necessarily when the transfer terminates
-       * on an error condition.
-       */
-
-      //lpc54_dmastop(priv->dma);
-    }
-#endif
-
   /* Mark no transfer in progress */
 
   priv->remaining = 0;
@@ -2182,95 +2172,97 @@ static int lpc54_registercallback(FAR struct sdio_dev_s *dev,
 static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
-  struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
+  struct lpc54_dev_s *priv;
   uint32_t regval;
-  uint32_t ctrl = 0;
-  uint32_t maxs = 0;
-  int ret = OK;
-  int i = 0;
+  uint32_t ctrl;
+  uint32_t maxs;
+  int ret;
+  int i;
 
-  mcinfo("DMA size: %d\n", buflen);
+  /* Don't bother with DMA if the entire transfer will fit in the RX FIFO or
+   * if we do not have a 4-bit wide bus.
+   */
 
+  if (buflen <= LPC54_RXFIFO_SIZE || !priv->widebus)
+    {
+      return lpc54_recvsetup(dev, buffer, buflen);
+    }
+
+  mcinfo("buflen=%lu\n", (unsigned long)buflen);
+
+  priv = (struct lpc54_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  ctrl = MCI_DMADES0_OWN | MCI_DMADES0_CH;
+  /* Save the destination buffer information for use by the interrupt handler */
 
-  /* Wide bus operation is required for DMA */
+  priv->buffer    = (uint32_t *)buffer;
+  priv->remaining = buflen;
+  priv->dmamode   = true;
 
-  if (priv->widebus)
+  /* Reset DMA */
+
+  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
+  regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
+  lpc54_putreg(regval, LPC54_SDMMC_CTRL);
+
+  while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
     {
-      /* Save the destination buffer information for use by the interrupt handler */
-
-      priv->buffer    = (uint32_t *)buffer;
-      priv->remaining = buflen;
-      priv->dmamode   = true;
-
-      /* Reset DMA */
-
-      regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-      regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
-      lpc54_putreg(regval, LPC54_SDMMC_CTRL);
-
-      while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
-        {
-        }
-
-      /* Setup DMA list */
-
-      while(buflen > 0)
-        {
-          /* Limit size of the transfer to maximum buffer size */
-
-          maxs = buflen;
-
-          if (maxs > MCI_DMADES1_MAXTR)
-            {
-              maxs = MCI_DMADES1_MAXTR;
-            }
-
-          buflen -= maxs;
-
-          /* Set buffer size */
-
-          g_sdmmc_dmadd[i].des1 = MCI_DMADES1_BS1(maxs);
-
-          /* Setup buffer address (chained) */
-
-          g_sdmmc_dmadd[i].des2 = (uint32_t) priv->buffer + (i * MCI_DMADES1_MAXTR);
-
-          /* Setup basic control */
-
-          ctrl = MCI_DMADES0_OWN | MCI_DMADES0_CH;
-
-          if (i == 0)
-            {
-              ctrl |= MCI_DMADES0_FS; /* First DMA buffer */
-            }
-
-          /* No more data? Then this is the last descriptor */
-
-          if (!buflen)
-            {
-              ctrl |= MCI_DMADES0_LD;
-            }
-          else
-            {
-              ctrl |= MCI_DMADES0_DIC;
-            }
-
-          /* Another descriptor is needed */
-
-          g_sdmmc_dmadd[i].des0 = ctrl;
-          g_sdmmc_dmadd[i].des3 = (uint32_t) &g_sdmmc_dmadd[i + 1];
-
-          i++;
-        }
-
-      lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
     }
 
-  return ret;
+  /* Setup DMA list */
+
+  i = 0;
+  while (buflen > 0)
+    {
+      /* Limit size of the transfer to maximum buffer size */
+
+      maxs = buflen;
+
+      if (maxs > MCI_DMADES1_MAXTR)
+        {
+          maxs = MCI_DMADES1_MAXTR;
+        }
+
+      buflen -= maxs;
+
+      /* Set buffer size */
+
+      g_sdmmc_dmadd[i].des1 = MCI_DMADES1_BS1(maxs);
+
+      /* Setup buffer address (chained) */
+
+      g_sdmmc_dmadd[i].des2 = (uint32_t) priv->buffer + (i * MCI_DMADES1_MAXTR);
+
+      /* Setup basic control */
+
+      ctrl = MCI_DMADES0_OWN | MCI_DMADES0_CH;
+
+      if (i == 0)
+        {
+          ctrl |= MCI_DMADES0_FS; /* First DMA buffer */
+        }
+
+      /* No more data? Then this is the last descriptor */
+
+      if (!buflen)
+        {
+          ctrl |= MCI_DMADES0_LD;
+        }
+      else
+        {
+          ctrl |= MCI_DMADES0_DIC;
+        }
+
+      /* Another descriptor is needed */
+
+      g_sdmmc_dmadd[i].des0 = ctrl;
+      g_sdmmc_dmadd[i].des3 = (uint32_t) &g_sdmmc_dmadd[i + 1];
+      i++;
+    }
+
+  lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
+  return OK;
 }
 #endif
 
@@ -2299,44 +2291,48 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
   uint32_t regval;
-  int ret = -EPERM;
+
+  /* Don't bother with DMA if the entire transfer will fit in the TX FIFO or
+   * if we do not have a 4-bit wide bus.
+   */
+
+  if (buflen <= LPC54_TXFIFO_SIZE || !priv->widebus)
+    {
+      return lpc54_sendsetup(dev, buffer, buflen);
+    }
 
   mcinfo("buflen=%lu\n", (unsigned long)buflen);
 
+  priv = (struct lpc54_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Wide bus operation is required for DMA */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
-  if (priv->widebus)
+  priv->buffer    = (uint32_t *)buffer;
+  priv->remaining = buflen;
+  priv->dmamode   = true;
+
+  /* Reset DMA */
+
+  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
+  regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
+  lpc54_putreg(regval, LPC54_SDMMC_CTRL);
+  while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
     {
-      /* Save the destination buffer information for use by the interrupt
-       * handler.
-       */
-
-      priv->buffer    = (uint32_t *)buffer;
-      priv->remaining = buflen;
-      priv->dmamode   = true;
-
-      /* Reset DMA */
-
-      regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-      regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
-      lpc54_putreg(regval, LPC54_SDMMC_CTRL);
-      while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET);
-
-      /* Setup DMA descriptor list */
-
-      g_sdmmc_dmadd[0].des0 = MCI_DMADES0_OWN | MCI_DMADES0_CH | MCI_DMADES0_LD;
-      g_sdmmc_dmadd[0].des1 = 512;
-      g_sdmmc_dmadd[0].des2 = (uint32_t)priv->buffer;
-      g_sdmmc_dmadd[0].des3 = (uint32_t)&g_sdmmc_dmadd[1];
-
-      lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
-      ret = OK;
     }
 
-  return ret;
+  /* Setup DMA descriptor list */
+
+  g_sdmmc_dmadd[0].des0 = MCI_DMADES0_OWN | MCI_DMADES0_CH | MCI_DMADES0_LD;
+  g_sdmmc_dmadd[0].des1 = 512;
+  g_sdmmc_dmadd[0].des2 = (uint32_t)priv->buffer;
+  g_sdmmc_dmadd[0].des3 = (uint32_t)&g_sdmmc_dmadd[1];
+
+  lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
+  return OK;
 }
 #endif
 

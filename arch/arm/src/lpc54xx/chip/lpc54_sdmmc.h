@@ -47,6 +47,11 @@
  * Pre-processor Definitions
  ************************************************************************************************/
 
+#define LPC54_TXFIFO_DEPTH               32
+#define LPC54_TXFIFO_WIDTH               4
+#define LPC54_RXFIFO_DEPTH               32
+#define LPC54_RXFIFO_WIDTH               4
+
 /* MCI register offsets (with respect to the MCI base) ******************************************/
 
 #define LPC54_SDMMC_CTRL_OFFSET          0x0000 /* Control register */
