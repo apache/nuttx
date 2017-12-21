@@ -113,7 +113,7 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
       /* Convert the mode string into standard file open mode flags. */
 
       oflags = lib_mode2oflags(mode);
-      if (oflags == 0)
+      if (oflags < 0)
         {
           return NULL;
         }
