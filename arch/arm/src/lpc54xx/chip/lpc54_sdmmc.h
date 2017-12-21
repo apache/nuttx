@@ -331,6 +331,7 @@
 #define SDMMC_BMOD_FB                     (1 << 1)  /* Bit 1:  Fixed Burst */
 #define SDMMC_BMOD_DSL_SHIFT              (2)       /* Bits 2-6: Descriptor Skip Length */
 #define SDMMC_BMOD_DSL_MASK               (31 << SDMMC_BMOD_DSL_SHIFT)
+#  define SDMMC_BMOD_DSL(n)               ((uint32_t)(n) << SDMMC_BMOD_DSL_SHIFT)
 #define SDMMC_BMOD_DE                     (1 << 7)  /* Bit 7:  SD/MMC DMA Enable */
 #define SDMMC_BMOD_PBL_SHIFT              (8)       /* Bits 8-10: Programmable Burst Length */
 #define SDMMC_BMOD_PBL_MASK               (7 << SDMMC_BMOD_PBL_SHIFT)
