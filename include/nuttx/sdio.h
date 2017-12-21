@@ -84,7 +84,7 @@
 
 /* Media events are used for enable/disable registered event callbacks */
 
-#define SDIOMEDIA_EJECTED       (1 << 0) /* Bit 0: Mmedia removed */
+#define SDIOMEDIA_EJECTED       (1 << 0) /* Bit 0: Media removed */
 #define SDIOMEDIA_INSERTED      (1 << 1) /* Bit 1: Media inserted */
 
 /* Commands are bit-encoded to provide as much information to the SDIO driver as

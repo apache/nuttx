@@ -677,7 +677,6 @@ static void lpc54_configwaitints(struct lpc54_dev_s *priv, uint32_t waitmask,
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
-  priv->xfrmask    = waitmask;
 
   regval           = priv->xfrmask | priv->waitmask | SDCARD_INT_CDET;
   lpc54_putreg(regval, LPC54_SDMMC_INTMASK);
@@ -959,6 +958,8 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
                   uint32_t intmask = lpc54_getreg(LPC54_SDMMC_INTMASK);
                   intmask &= ~SDMMC_INT_TXDR;
                   lpc54_putreg(intmask, LPC54_SDMMC_INTMASK);
+
+                  priv->xfrmask &= ~SDMMC_INT_TXDR;
                 }
             }
           else if ((pending & SDMMC_INT_RXDR) != 0)
@@ -987,9 +988,17 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
 
               if (priv->remaining <= 0)
                 {
+#if 0 /* Kludge for missing DTO interrupt */
                   uint32_t intmask = lpc54_getreg(LPC54_SDMMC_INTMASK);
                   intmask &= ~SDMMC_INT_RXDR;
                   lpc54_putreg(intmask, LPC54_SDMMC_INTMASK);
+
+                  priv->xfrmask &= ~SDMMC_INT_TXDR;
+#else
+                  /* Force the DTO event */
+
+                  pending |= SDMMC_INT_DTO;
+#endif
                 }
             }
 
@@ -2235,7 +2244,7 @@ static int lpc54_registercallback(FAR struct sdio_dev_s *dev,
 
   mcinfo("callback=%p arg=%p\n", callback, arg);
 
-  /* Disable callbacks and register this callback and is argument */
+  /* Disable callbacks and register this callback and its argument */
 
   mcinfo("Register %p(%p)\n", callback, arg);
   DEBUGASSERT(priv != NULL);
@@ -2483,7 +2492,7 @@ static void lpc54_callback(void *arg)
             {
               /* No... return without performing the callback */
 
-              mcinfo("Media is not Inserted!\n");
+              mcinfo("Media inserted but callback not enabled\n");
               return;
             }
         }
@@ -2495,7 +2504,7 @@ static void lpc54_callback(void *arg)
             {
               /* No... return without performing the callback */
 
-              mcinfo("Media is not present\n");
+              mcinfo("Media removed but callback not enabled\n");
               return;
             }
         }
