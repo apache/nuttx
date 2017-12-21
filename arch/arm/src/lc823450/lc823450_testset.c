@@ -95,12 +95,15 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock)
     }
   while (getreg32(MUTEX_REG_MUTEX0) != val);
 
+  SP_DMB();
+
   ret = *lock;
 
   if (ret == SP_UNLOCKED)
     {
       *lock = SP_LOCKED;
     }
+  SP_DMB();
 
   val = (up_cpu_index() << 16) | 0x0;
   putreg32(val, MUTEX_REG_MUTEX0);
