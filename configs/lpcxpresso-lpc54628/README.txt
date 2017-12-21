@@ -62,9 +62,13 @@ STATUS
     functional.  However, the action of the touchscreen could use some
     human factors improvements.  I imagine that this is a consequence of
     the polled solution.
-  2017-12-29:   Brought in Alan Carvalho de Assis' LPC43xx SD/MMC driver from
+  2017-12-19:  Brought in Alan Carvalho de Assis' LPC43xx SD/MMC driver from
     https://github.com/Smoothieware/smoothie-nuttx/tree/master/nuttx/arch/arm/src/lpc43xx
     and adapted it for use by the LPC54xx.  Unverified as of this writing.
+  2017-12-21:  Some things are working with he SDMMC drivers but read DMAs
+    are non-functional and, hence not usable.  The nature of the problem is
+    this:  The DMA appears to complete normally, however, the application
+    receive buffer is not modified.  Nothing is actually received.
 
   There is still no support for the Accelerometer, SPIFI, SD card, Ethernet,
   or USB.  There is a partial SPI driver, but no on-board SPI devices to
@@ -309,6 +313,33 @@ Configurations
        consequence of the strong glitch filtering that is enbled in the pin
        configuration.  Snappier response my be obtainble with filtering off
        if desired.
+
+    5. This configuration has been used for testing the SDMMC driver with
+       these configuration additions:
+
+         CONFIG_EXPERIMENTAL=y
+
+         CONFIG_LPC54_SDMMC=y
+         CONFIG_LPC54_SDMMC_PWRCTRL=y
+         CONFIG_LPC54_SDMMC_DMA=y
+
+         CONFIG_SIG_SIGWORK=17
+         CONFIG_SCHED_WORKQUEUE=y
+         CONFIG_SCHED_HPWORK=y
+         CONFIG_SCHED_HPWORKPRIORITY=224
+         CONFIG_SCHED_HPWORKPERIOD=50000
+         CONFIG_SCHED_HPWORKSTACKSIZE=2048
+
+         CONFIG_MMCSD=y
+         CONFIG_MMCSD_NSLOTS=1
+         CONFIG_MMCSD_MULTIBLOCK_DISABLE=y
+         CONFIG_MMCSD_HAVE_CARDDETECT=y
+         CONFIG_MMCSD_HAVE_WRITEPROTECT=y
+         CONFIG_ARCH_HAVE_SDIO=y
+         CONFIG_SDIO_DMA=y
+         CONFIG_MMCSD_SDIO=y
+
+         CONFIG_NSH_MMCSDSLOTNO=0
 
   nxwm:
 

@@ -680,7 +680,7 @@ static void lpc54_setupints(struct lpc54_dev_s *priv)
 
 #else
   mcinfo("waitmask=%04lx xfrmask=%04lx\n",
-         (unsigned long)waitmask, (unsigned long)priv->xfrmask);
+         (unsigned long)priv->waitmask, (unsigned long)priv->xfrmask);
 #endif
 
   /* Enable SDMMC interrupts */
@@ -1671,7 +1671,7 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
     {
       blocksize = 64;
       bytecnt   = nbytes;
-      DEBUGASSERT((nbytes & ~0x3f) == 0);
+      DEBUGASSERT((nbytes & 0x3f) == 0);
     }
 
   lpc54_putreg(blocksize, LPC54_SDMMC_BLKSIZ);
@@ -2423,7 +2423,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Setup buffer address (chained) */
 
-      g_sdmmc_dmadd[i].des2 = (uint32_t) priv->buffer + (i * MCI_DMADES1_MAXTR);
+      g_sdmmc_dmadd[i].des2 = (uint32_t)priv->buffer + (i * MCI_DMADES1_MAXTR);
 
       /* Setup basic control */
 
@@ -2436,7 +2436,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* No more data? Then this is the last descriptor */
 
-      if (!buflen)
+      if (buflen == 0)
         {
           ctrl |= MCI_DMADES0_LD;
         }
