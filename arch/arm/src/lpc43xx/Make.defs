@@ -112,6 +112,10 @@ ifeq ($(CONFIG_LPC43_GPIO_IRQ),y)
 CHIP_CSRCS += lpc43_gpioint.c
 endif
 
+ifeq ($(CONFIG_LPC43_WWDT),y)
+CHIP_CSRCS += lpc43_wwdt.c
+endif
+
 ifeq ($(CONFIG_LPC43_ETHERNET),y)
 CHIP_CSRCS += lpc43_ethernet.c
 endif
