@@ -165,8 +165,9 @@ void spin_unlock(FAR volatile spinlock_t *lock)
   sched_note_spinunlock(this_task(), lock);
 #endif
 
-  *lock = SP_UNLOCKED;
   SP_DMB();
+  *lock = SP_UNLOCKED;
+  SP_DSB();
 }
 #endif
 
