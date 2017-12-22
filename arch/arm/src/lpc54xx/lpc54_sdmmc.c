@@ -290,7 +290,7 @@ static void lpc54_endtransfer(struct lpc54_dev_s *priv, sdio_eventset_t wkupeven
 
 /* Interrupt Handling *******************************************************/
 
-static int  lpc54_interrupt(int irq, void *context, FAR void *arg);
+static int  lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg);
 
 /* SD Card Interface Methods ************************************************/
 
@@ -904,7 +904,7 @@ static void lpc54_endtransfer(struct lpc54_dev_s *priv, sdio_eventset_t wkupeven
 }
 
 /****************************************************************************
- * Name: lpc54_interrupt
+ * Name: lpc54_sdmmc_interrupt
  *
  * Description:
  *   SD card interrupt handler
@@ -917,7 +917,7 @@ static void lpc54_endtransfer(struct lpc54_dev_s *priv, sdio_eventset_t wkupeven
  *
  ****************************************************************************/
 
-static int lpc54_interrupt(int irq, void *context, FAR void *arg)
+static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 {
   struct lpc54_dev_s *priv = &g_scard_dev;
   uint32_t enabled;
@@ -1507,7 +1507,7 @@ static int lpc54_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the SD card interrupt handler */
 
-  ret = irq_attach(LPC54_IRQ_SDMMC, lpc54_interrupt, NULL);
+  ret = irq_attach(LPC54_IRQ_SDMMC, lpc54_sdmmc_interrupt, NULL);
   if (ret == OK)
     {
       /* Disable all interrupts at the SD card controller and clear static

@@ -216,7 +216,7 @@
 #define SDMMC_INT_SBE                     (1 << 13) /* Bit 13: Start-bit error */
 #define SDMMC_INT_ACD                     (1 << 14) /* Bit 14: Auto command done */
 #define SDMMC_INT_EBE                     (1 << 15) /* Bit 15: End-bit error (read)/Write no CRC */
-#define SDMMC_INT_SDMMC                   (1 << 16) /* Bit 16: Mask SD/MMC interrupt */
+#define SDMMC_INT_SDMMC                   (1 << 16) /* Bit 16: SD/MMC interrupt */
                                                     /* Bits 17-31: Reserved */
 #define SDMMC_INT_ALL                     (0x1ffff)
 
