@@ -242,7 +242,7 @@ struct lpc43_dev_s
 
   /* DMA data transfer support */
 
-  bool               widebus;    /* Required for DMA support */
+  bool               widebus;    /* Wide bus required for DMA support */
 #ifdef CONFIG_LPC43_SDMMC_DMA
   bool               dmamode;    /* true: DMA mode transfer */
 #endif
@@ -267,7 +267,6 @@ static void lpc43_checksetup(void);
 static void lpc43_takesem(struct lpc43_dev_s *priv);
 #define     lpc43_givesem(priv) (sem_post(&priv->waitsem))
 static inline void lpc43_setclock(uint32_t clkdiv);
-static inline void lpc43_settype(uint32_t ctype);
 static inline void lpc43_sdcard_clock(bool enable);
 static int  lpc43_ciu_sendcmd(uint32_t cmd, uint32_t arg);
 static void lpc43_configwaitints(struct lpc43_dev_s *priv, uint32_t waitmask,
@@ -569,25 +568,6 @@ static inline void lpc43_setclock(uint32_t clkdiv)
   /* Inform CIU */
 
   lpc43_ciu_sendcmd(SDMMC_CMD_UPDCLOCK | SDMMC_CMD_WAITPREV, 0);
-}
-
-/****************************************************************************
- * Name: lpc43_settype
- *
- * Description: Define the Bus Size of SDCard (1, 4 or 8-bit)
- *
- * Input Parameters:
- *   ctype - A new CTYPE (Card Type Register) value
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void lpc43_settype(uint32_t ctype)
-{
-  mcinfo("cteype=%08lx\n", (unsigned long)ctype);
-  lpc43_putreg(ctype, LPC43_SDMMC_CTYPE);
 }
 
 /****************************************************************************
@@ -1251,8 +1231,10 @@ static void lpc43_reset(FAR struct sdio_dev_s *dev)
   lpc43_putreg(SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET |
                SDMMC_CTRL_DMARESET, LPC43_SDMMC_CTRL);
 
-  while ((regval = lpc43_getreg(LPC43_SDMMC_CTRL)) &
-         (SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET));
+  while ((lpc43_getreg(LPC43_SDMMC_CTRL) &
+         (SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
+     {
+     }
 
   /* Reset data */
 
@@ -1273,21 +1255,20 @@ static void lpc43_reset(FAR struct sdio_dev_s *dev)
 
   /* DMA data transfer support */
 
-  priv->widebus    = true;   /* Required for DMA support */
+  priv->widebus    = false;  /* Wide bus required for DMA support */
   priv->cdstatus   = 0;      /* Card status is unknown */
-
-  regval = 0;
 
 #ifdef CONFIG_LPC43_SDMMC_DMA
   priv->dmamode    = false;  /* true: DMA mode transfer */
-
-  /* Use the Internal DMA */
-
-  regval = SDMMC_CTRL_INTDMA;
 #endif
+
+  /* Select 1-bit wide bus */
+
+  lpc43_putreg(SDMMC_CTYPE_WIDTH1, LPC43_SDMMC_CTYPE);
 
   /* Enable interrupts */
 
+  regval  = lpc43_getreg(LPC43_SDMMC_CTRL);
   regval |= SDMMC_CTRL_INTENABLE;
   lpc43_putreg(regval, LPC43_SDMMC_CTRL);
 
@@ -1400,7 +1381,10 @@ static void lpc43_widebus(FAR struct sdio_dev_s *dev, bool wide)
 
   mcinfo("wide=%d\n", wide);
 
-  priv->widebus = wide;
+  /* Select 4-bit wide bus */
+
+  priv->widebus = true;
+  lpc43_putreg(SDMMC_CTYPE_WIDTH4, LPC43_SDMMC_CTYPE);
 }
 
 /****************************************************************************
@@ -1421,7 +1405,6 @@ static void lpc43_widebus(FAR struct sdio_dev_s *dev, bool wide)
 static void lpc43_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint8_t clkdiv;
-  uint8_t ctype;
   bool enabled = false;
 
   switch (rate)
@@ -1431,7 +1414,6 @@ static void lpc43_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       default:
       case CLOCK_SDIO_DISABLED:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_INIT);
-        ctype   = SDCARD_BUS_D1;
         enabled = false;
         return;
         break;
@@ -1440,7 +1422,6 @@ static void lpc43_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_IDMODE:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_INIT);
-        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
 
@@ -1448,7 +1429,6 @@ static void lpc43_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_MMC_TRANSFER:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_MMCXFR);
-        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
 
@@ -1457,7 +1437,6 @@ static void lpc43_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       case CLOCK_SD_TRANSFER_4BIT:
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDWIDEXFR);
-        ctype   = SDCARD_BUS_D4;
         enabled = true;
         break;
 #endif
@@ -1466,14 +1445,9 @@ static void lpc43_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_SD_TRANSFER_1BIT:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDXFR);
-        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
     }
-
-  /* Setup the type of card bus wide */
-
-  lpc43_settype(ctype);
 
   /* Set the new clock frequency division */
 
@@ -1646,6 +1620,9 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
   uint32_t blocksize;
   uint32_t bytecnt;
+#ifdef CONFIG_LPC43_SDMMC_DMA
+  uint32_t regval;
+#endif
 
   mcinfo("nbytes=%ld\n", (long) nbytes);
 
@@ -1684,9 +1661,15 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   lpc43_putreg(SDMMC_FIFOTH_RXWMARK(1), LPC43_SDMMC_FIFOTH);
 
+#ifdef CONFIG_LPC43_SDMMC_DMA
   /* Make sure that internal DMA is disabled */
 
   lpc43_putreg(0, LPC43_SDMMC_BMOD);
+
+  regval  = lpc43_getreg(LPC43_SDMMC_CTRL);
+  regval &= ~SDMMC_CTRL_INTDMA
+  lpc43_putreg(regval, LPC43_SDMMC_CTRL);
+#endif
 
   /* Configure the transfer interrupts */
 
@@ -1717,6 +1700,9 @@ static int lpc43_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
                            size_t nbytes)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
+#ifdef CONFIG_LPC43_SDMMC_DMA
+  uint32_t regval;
+#endif
 
   mcinfo("nbytes=%ld\n", (long)nbytes);
 
@@ -1739,9 +1725,15 @@ static int lpc43_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
   lpc43_putreg(SDMMC_FIFOTH_TXWMARK(LPC43_TXFIFO_DEPTH / 2),
                LPC43_SDMMC_FIFOTH);
 
+#ifdef CONFIG_LPC43_SDMMC_DMA
   /* Make sure that internal DMA is disabled */
 
   lpc43_putreg(0, LPC43_SDMMC_BMOD);
+
+  regval  = lpc43_getreg(LPC43_SDMMC_CTRL);
+  regval &= ~SDMMC_CTRL_INTDMA
+  lpc43_putreg(regval, LPC43_SDMMC_CTRL);
+#endif
 
   /* Configure the transfer interrupts */
 
@@ -2463,6 +2455,10 @@ static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS | SDMMC_BMOD_DSL(4);
   lpc43_putreg(regval, LPC43_SDMMC_BMOD);
 
+  regval  = lpc43_getreg(LPC43_SDMMC_CTRL);
+  regval |= SDMMC_CTRL_INTDMA
+  lpc43_putreg(regval, LPC43_SDMMC_CTRL);
+
   /* Setup DMA error interrupts */
 
   lpc43_configxfrints(priv, SDCARD_DMARECV_MASK);
@@ -2531,6 +2527,7 @@ static int lpc43_dmasendsetup(FAR struct sdio_dev_s *dev,
   regval  = lpc43_getreg(LPC43_SDMMC_CTRL);
   regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
   lpc43_putreg(regval, LPC43_SDMMC_CTRL);
+
   while (lpc43_getreg(LPC43_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
     {
     }
@@ -2556,6 +2553,10 @@ static int lpc43_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS | SDMMC_BMOD_DSL(4);
   lpc43_putreg(regval, LPC43_SDMMC_BMOD);
+
+  regval  = lpc43_getreg(LPC43_SDMMC_CTRL);
+  regval |= SDMMC_CTRL_INTDMA
+  lpc43_putreg(regval, LPC43_SDMMC_CTRL);
 
   /* Setup DMA error interrupts */
 
