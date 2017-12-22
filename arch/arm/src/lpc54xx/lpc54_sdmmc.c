@@ -1668,7 +1668,7 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   lpc54_putreg(0, LPC54_SDMMC_BMOD);
 
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval &= ~SDMMC_CTRL_INTDMA;
+  regval &= ~SDMMC_CTRL_INTDMA
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 #endif
 
@@ -1732,7 +1732,7 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
   lpc54_putreg(0, LPC54_SDMMC_BMOD);
 
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval &= ~SDMMC_CTRL_INTDMA;
+  regval &= ~SDMMC_CTRL_INTDMA
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 #endif
 
@@ -2457,7 +2457,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
 
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval |= SDMMC_CTRL_INTDMA;
+  regval |= SDMMC_CTRL_INTDMA
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
   /* Setup DMA error interrupts */
@@ -2556,7 +2556,7 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
 
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval |= SDMMC_CTRL_INTDMA;
+  regval |= SDMMC_CTRL_INTDMA
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
   /* Setup DMA error interrupts */
