@@ -247,7 +247,7 @@ struct lpc54_dev_s
 
   /* DMA data transfer support */
 
-  bool               widebus;    /* Wide bus required for DMA support */
+  bool               widebus;    /* Required for DMA support */
 #ifdef CONFIG_LPC54_SDMMC_DMA
   bool               dmamode;    /* true: DMA mode transfer */
 #endif
@@ -272,6 +272,7 @@ static void lpc54_checksetup(void);
 static void lpc54_takesem(struct lpc54_dev_s *priv);
 #define     lpc54_givesem(priv) (sem_post(&priv->waitsem))
 static inline void lpc54_setclock(uint32_t clkdiv);
+static inline void lpc54_settype(uint32_t ctype);
 static inline void lpc54_sdcard_clock(bool enable);
 static int  lpc54_ciu_sendcmd(uint32_t cmd, uint32_t arg);
 static void lpc54_configwaitints(struct lpc54_dev_s *priv, uint32_t waitmask,
@@ -569,6 +570,25 @@ static inline void lpc54_setclock(uint32_t clkdiv)
   /* Inform CIU */
 
   lpc54_ciu_sendcmd(SDMMC_CMD_UPDCLOCK | SDMMC_CMD_WAITPREV, 0);
+}
+
+/****************************************************************************
+ * Name: lpc54_settype
+ *
+ * Description: Define the Bus Size of SDCard (1, 4 or 8-bit)
+ *
+ * Input Parameters:
+ *   ctype - A new CTYPE (Card Type Register) value
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void lpc54_settype(uint32_t ctype)
+{
+  mcinfo("cteype=%08lx\n", (unsigned long)ctype);
+  lpc54_putreg(ctype, LPC54_SDMMC_CTYPE);
 }
 
 /****************************************************************************
@@ -1232,10 +1252,8 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
   lpc54_putreg(SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET |
                SDMMC_CTRL_DMARESET, LPC54_SDMMC_CTRL);
 
-  while ((lpc54_getreg(LPC54_SDMMC_CTRL) &
-          (SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
-    {
-    }
+  while ((regval = lpc54_getreg(LPC54_SDMMC_CTRL)) &
+         (SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET));
 
   /* Reset data */
 
@@ -1256,20 +1274,21 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   /* DMA data transfer support */
 
-  priv->widebus    = false;  /* Wide bus required for DMA support */
+  priv->widebus    = true;   /* Required for DMA support */
   priv->cdstatus   = 0;      /* Card status is unknown */
+
+  regval = 0;
 
 #ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode    = false;  /* true: DMA mode transfer */
+
+  /* Use the Internal DMA */
+
+  regval = SDMMC_CTRL_INTDMA;
 #endif
-
-  /* Select 1-bit wide bus */
-
-  lpc54_putreg(SDMMC_CTYPE_WIDTH1, LPC54_SDMMC_CTYPE);
 
   /* Enable interrupts */
 
-  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
   regval |= SDMMC_CTRL_INTENABLE;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
@@ -1382,10 +1401,7 @@ static void lpc54_widebus(FAR struct sdio_dev_s *dev, bool wide)
 
   mcinfo("wide=%d\n", wide);
 
-  /* Select 4-bit wide bus */
-
-  priv->widebus = true;
-  lpc54_putreg(SDMMC_CTYPE_WIDTH4, LPC54_SDMMC_CTYPE);
+  priv->widebus = wide;
 }
 
 /****************************************************************************
@@ -1406,6 +1422,7 @@ static void lpc54_widebus(FAR struct sdio_dev_s *dev, bool wide)
 static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint8_t clkdiv;
+  uint8_t ctype;
   bool enabled = false;
 
   switch (rate)
@@ -1415,6 +1432,7 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       default:
       case CLOCK_SDIO_DISABLED:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_INIT);
+        ctype   = SDCARD_BUS_D1;
         enabled = false;
         return;
         break;
@@ -1423,6 +1441,7 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_IDMODE:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_INIT);
+        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
 
@@ -1430,6 +1449,7 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_MMC_TRANSFER:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_MMCXFR);
+        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
 
@@ -1438,6 +1458,7 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       case CLOCK_SD_TRANSFER_4BIT:
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDWIDEXFR);
+        ctype   = SDCARD_BUS_D4;
         enabled = true;
         break;
 #endif
@@ -1446,9 +1467,14 @@ static void lpc54_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_SD_TRANSFER_1BIT:
         clkdiv  = SDMMC_CLKDIV0(BOARD_CLKDIV_SDXFR);
+        ctype   = SDCARD_BUS_D1;
         enabled = true;
         break;
     }
+
+  /* Setup the type of card bus wide */
+
+  lpc54_settype(ctype);
 
   /* Set the new clock frequency division */
 
@@ -1621,9 +1647,6 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
   uint32_t blocksize;
   uint32_t bytecnt;
-#ifdef CONFIG_LPC54_SDMMC_DMA
-  uint32_t regval;
-#endif
 
   mcinfo("nbytes=%ld\n", (long) nbytes);
 
@@ -1662,15 +1685,9 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   lpc54_putreg(SDMMC_FIFOTH_RXWMARK(1), LPC54_SDMMC_FIFOTH);
 
-#ifdef CONFIG_LPC54_SDMMC_DMA
   /* Make sure that internal DMA is disabled */
 
   lpc54_putreg(0, LPC54_SDMMC_BMOD);
-
-  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval &= ~SDMMC_CTRL_INTDMA
-  lpc54_putreg(regval, LPC54_SDMMC_CTRL);
-#endif
 
   /* Configure the transfer interrupts */
 
@@ -1701,9 +1718,6 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
                            size_t nbytes)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
-#ifdef CONFIG_LPC54_SDMMC_DMA
-  uint32_t regval;
-#endif
 
   mcinfo("nbytes=%ld\n", (long)nbytes);
 
@@ -1726,15 +1740,9 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
   lpc54_putreg(SDMMC_FIFOTH_TXWMARK(LPC54_TXFIFO_DEPTH / 2),
                LPC54_SDMMC_FIFOTH);
 
-#ifdef CONFIG_LPC54_SDMMC_DMA
   /* Make sure that internal DMA is disabled */
 
   lpc54_putreg(0, LPC54_SDMMC_BMOD);
-
-  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval &= ~SDMMC_CTRL_INTDMA
-  lpc54_putreg(regval, LPC54_SDMMC_CTRL);
-#endif
 
   /* Configure the transfer interrupts */
 
@@ -2456,10 +2464,6 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS | SDMMC_BMOD_DSL(4);
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
 
-  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval |= SDMMC_CTRL_INTDMA
-  lpc54_putreg(regval, LPC54_SDMMC_CTRL);
-
   /* Setup DMA error interrupts */
 
   lpc54_configxfrints(priv, SDCARD_DMARECV_MASK);
@@ -2528,7 +2532,6 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
   regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
-
   while (lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET)
     {
     }
@@ -2554,10 +2557,6 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS | SDMMC_BMOD_DSL(4);
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
-
-  regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
-  regval |= SDMMC_CTRL_INTDMA
-  lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
   /* Setup DMA error interrupts */
 
