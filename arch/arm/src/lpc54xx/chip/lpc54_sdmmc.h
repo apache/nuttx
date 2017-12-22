@@ -186,6 +186,7 @@
 
 /* Card type register CTYPE */
 
+#define SDMMC_CTYPE_WIDTH1                (0)       /* 1-bit mode */
 #define SDMMC_CTYPE_WIDTH4                (1 << 0)  /* Bit 0:  4-bit mode */
                                                     /* Bits 1-15:  Reserved */
 #define SDMMC_CTYPE_WIDTH8                (1 << 16) /* Bit 16: 8-bit mode */
@@ -383,6 +384,7 @@
 #define SDMMC_IDINTEN_NIS                 (1 << 8)  /* Bit 8:  Normal Interrupt Summary */
 #define SDMMC_IDINTEN_AIS                 (1 << 9)  /* Bit 9:  Abnormal Interrupt Summary */
                                                     /* Bits 10-31: Reserved */
+#define SDMMC_IDINTEN_ALL                 0x00000333
 
 /* Card threshold control */
 
