@@ -63,10 +63,8 @@
 
 #include <nuttx/irq.h>
 
-#include "chip.h"
 #include "up_arch.h"
 
-#include "chip/lpc43_pinconfig.h"
 #include "lpc43_cgu.h"
 #include "lpc43_ccu.h"
 #include "lpc43_gpio.h"
@@ -2665,24 +2663,20 @@ FAR struct sdio_dev_s *lpc43_sdmmc_initialize(int slotno)
   mcinfo("slotno=%d\n", slotno);
   flags = enter_critical_section();
 
-/* Configure clocking */
+  /* Set up the clock source */
 
   regval  = getreg32(LPC43_BASE_SDIO_CLK);
   regval &= ~BASE_SDIO_CLK_CLKSEL_MASK;
   regval |= (BOARD_SDIO_CLKSRC | BASE_SDIO_CLK_AUTOBLOCK);
   putreg32(regval, LPC43_BASE_SDIO_CLK);
 
-  /* Enable clocking to the SDIO block */
+  /* Enable clocking to the SD/MMC peripheral */
 
   regval  = lpc43_getreg(LPC43_CCU1_M4_SDIO_CFG);
   regval |= CCU_CLK_CFG_RUN;
   regval |= CCU_CLK_CFG_AUTO;
   regval |= CCU_CLK_CFG_WAKEUP;
   lpc43_putreg(regval, LPC43_CCU1_M4_SDIO_CFG);
-
-  /* REVISIT: The delay values on the sample and drive inputs and outputs
-   * can be adjusted using the SDIOCLKCTRL register in the SYSCON block.
-   */
 
   /* Initialize semaphores */
 
@@ -2718,6 +2712,12 @@ FAR struct sdio_dev_s *lpc43_sdmmc_initialize(int slotno)
 #ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
   lpc43_pin_config(GPIO_SD_WR_PRT);
 #endif
+
+  regval  = getreg32(LPC43_SCU_SFSCLK2);
+  regval |= (2 << 3);   /* Disable pull-down and pull-up resistor */
+  regval |= (1 << 6);   /* Enable Input buffer */
+  regval |= (4);        /* Selects pin function 4 */
+  putreg32(regval, LPC43_SCU_SFSCLK2);
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

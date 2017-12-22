@@ -365,7 +365,7 @@
  */
 
 #define GPIO_SD_CARD_DET_N         GPIO_SD_CARD_DET_N_2     /* P2.10 */
-#define GPIO_SD_D0                 GPIO_SD_D0_3             /* P2.9 */
+#define GPIO_SD_D0                 GPIO_SD_D0_3             /* P2.6 */
 #define GPIO_SD_D1                 GPIO_SD_D1_3             /* P2.7 */
 #define GPIO_SD_D2                 GPIO_SD_D2_3             /* P2.8 */
 #define GPIO_SD_D3                 GPIO_SD_D3_3             /* P2.9 */
