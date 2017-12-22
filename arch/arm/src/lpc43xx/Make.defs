@@ -116,6 +116,10 @@ ifeq ($(CONFIG_LPC43_WWDT),y)
 CHIP_CSRCS += lpc43_wwdt.c
 endif
 
+ifeq ($(CONFIG_LPC43_SDMMC),y)
+CHIP_CSRCS += lpc43_sdmmc.c
+endif
+
 ifeq ($(CONFIG_LPC43_ETHERNET),y)
 CHIP_CSRCS += lpc43_ethernet.c
 endif

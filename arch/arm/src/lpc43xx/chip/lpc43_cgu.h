@@ -643,6 +643,31 @@
 #  define BASE_VADC_CLKSEL_IDIVD        (15 << BASE_VADC_CLK_CLKSEL_SHIFT) /* IDIVD */
 #  define BASE_VADC_CLKSEL_IDIVE        (16 << BASE_VADC_CLK_CLKSEL_SHIFT) /* IDIVE */
                                                  /* Bits 29-31:  Reserved */
+
+/* Output stage 13 control register (BASE_SDIO_CLK) */
+/* NOTE: Clocks 4-19 are identical */
+
+#define BASE_SDIO_CLK_PD                (1 << 0)  /* Bit 0:  Output stage power down */
+                                                  /* Bits 1-10: Reserved */
+#define BASE_SDIO_CLK_AUTOBLOCK         (1 << 11) /* Bit 11: Block clock during frequency change */
+                                                  /* Bits 12-23: Reserved */
+#define BASE_SDIO_CLK_CLKSEL_SHIFT      (24)      /* Bits 24-28: Clock source selection */
+#define BASE_SDIO_CLK_CLKSEL_MASK       (31 << BASE_SDIO_CLK_CLKSEL_SHIFT)
+#  define BASE_SDIO_CLKSEL_32KHZOSC     (0 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* 32 kHz oscillator */
+#  define BASE_SDIO_CLKSEL_IRC          (1 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* IRC (default) */
+#  define BASE_SDIO_CLKSEL_ENET_RXCLK   (2 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* ENET_RX_CLK */
+#  define BASE_SDIO_CLKSEL_ENET_TXCLK   (3 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* ENET_TX_CLK */
+#  define BASE_SDIO_CLKSEL_GPCLKIN      (4 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* GP_CLKIN */
+#  define BASE_SDIO_CLKSEL_XTAL         (6 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* Crystal oscillator */
+#  define BASE_SDIO_CLKSEL_PLL0AUDIO    (8 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* PLL0AUDIO */
+#  define BASE_SDIO_CLKSEL_PLL1         (9 << BASE_SDIO_CLK_CLKSEL_SHIFT)  /* PLL1 */
+#  define BASE_SDIO_CLKSEL_IDIVA        (12 << BASE_SDIO_CLK_CLKSEL_SHIFT) /* IDIVA */
+#  define BASE_SDIO_CLKSEL_IDIVB        (13 << BASE_SDIO_CLK_CLKSEL_SHIFT) /* IDIVB */
+#  define BASE_SDIO_CLKSEL_IDIVC        (14 << BASE_SDIO_CLK_CLKSEL_SHIFT) /* IDIVC */
+#  define BASE_SDIO_CLKSEL_IDIVD        (15 << BASE_SDIO_CLK_CLKSEL_SHIFT) /* IDIVD */
+#  define BASE_SDIO_CLKSEL_IDIVE        (16 << BASE_SDIO_CLK_CLKSEL_SHIFT) /* IDIVE */
+                                                  /* Bits 29-31:  Reserved */
+
 /* Output stage 14 control register (BASE_SSP0_CLK) */
 /* NOTE: Clocks 4-19 are identical */
 

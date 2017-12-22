@@ -46,6 +46,11 @@
  * Pre-processor Definitions
  ************************************************************************************************/
 
+#define LPC43_TXFIFO_DEPTH               32
+#define LPC43_TXFIFO_WIDTH               4
+#define LPC43_RXFIFO_DEPTH               32
+#define LPC43_RXFIFO_WIDTH               4
+
 /* MCI register offsets (with respect to the MCI base) ******************************************/
 
 #define LPC43_SDMMC_CTRL_OFFSET          0x0000 /* Control register */
@@ -156,12 +161,16 @@
 
 #define SDMMC_CLKDIV0_SHIFT               (0)       /* Bits 0-7: Clock divider 0 value */
 #define SDMMC_CLKDIV0_MASK                (255 << SDMMC_CLKDIV0_SHIFT)
+#  define SDMMC_CLKDIV0(n)               ((((n) + 1) >> 1) << SDMMC_CLKDIV0_SHIFT)
 #define SDMMC_CLKDIV1_SHIFT               (8)       /* Bits 8-15: Clock divider 1 value */
 #define SDMMC_CLKDIV1_MASK                (255 << SDMMC_CLKDIV1_SHIFT)
+#  define SDMMC_CLKDIV1(n)               ((((n) + 1) >> 1) << SDMMC_CLKDIV1_SHIFT)
 #define SDMMC_CLKDIV2_SHIFT               (16)      /* Bits 16-23: Clock divider 2 value */
 #define SDMMC_CLKDIV2_MASK                (255 << SDMMC_CLKDIV2_SHIFT)
+#  define SDMMC_CLKDIV2(n)               ((((n) + 1) >> 1) << SDMMC_CLKDIV2_SHIFT)
 #define SDMMC_CLKDIV3_SHIFT               (24)      /* Bits 24-31: Clock divider 3 value */
 #define SDMMC_CLKDIV3_MASK                (255 << SDMMC_CLKDIV3_SHIFT)
+#  define SDMMC_CLKDIV3(n)               ((((n) + 1) >> 1) << SDMMC_CLKDIV3_SHIFT)
 
 /* Clock source register CLKSRC */
 
@@ -217,7 +226,7 @@
 #define SDMMC_INT_SBE                     (1 << 13) /* Bit 13: Start-bit error */
 #define SDMMC_INT_ACD                     (1 << 14) /* Bit 14: Auto command done */
 #define SDMMC_INT_EBE                     (1 << 15) /* Bit 15: End-bit error (read)/Write no CRC */
-#define SDMMC_INT_SDIO                    (1 << 16) /* Bit 16: Mask SDIO interrupt */
+#define SDMMC_INT_SDIO                    (1 << 16) /* Bit 16: SDIO interrupt */
                                                     /* Bits 17-31: Reserved */
 #define SDMMC_INT_ALL                     (0x1ffff)
 
@@ -227,6 +236,11 @@
 #define SDMMC_CMD_CMDINDEX_MASK           (63 << SDMMC_CMD_CMDINDEX_SHIFT)
 #define SDMMC_CMD_RESPONSE                (1 << 6)  /* Bit 6:  Response expected from card */
 #define SDMMC_CMD_LONGRESP                (1 << 7)  /* Bit 7:  Long response expected from card */
+#define SDMMC_CMD_WAITRESP_SHIFT          (6)       /* Bits 6-7: Response expected */
+#define SDMMC_CMD_WAITRESP_MASK           (3 << SDMMC_CMD_WAITRESP_SHIFT)
+#  define SDMMC_CMD_NORESPONSE            (0 << SDMMC_CMD_WAITRESP_SHIFT) /* x0: No response */
+#  define SDMMC_CMD_SHORTRESPONSE         (1 << SDMMC_CMD_WAITRESP_SHIFT) /* 01: Short response */
+#  define SDMMC_CMD_LONGRESPONSE          (3 << SDMMC_CMD_WAITRESP_SHIFT) /* 11: Long response */
 #define SDMMC_CMD_RESPCRC                 (1 << 8)  /* Bit 8:  Check response CRC */
 #define SDMMC_CMD_DATAXFREXPTD            (1 << 9)  /* Bit 9:  Data transfer expected (read/write) */
 #define SDMMC_CMD_WRITE                   (1 << 10) /* Bit 10: Write to card */
@@ -285,9 +299,11 @@
 
 #define SDMMC_FIFOTH_TXWMARK_SHIFT        (0)       /* Bits 0-11: FIFO threshold level when transmitting */
 #define SDMMC_FIFOTH_TXWMARK_MASK         (0xfff << SDMMC_FIFOTH_TXWMARK_SHIFT)
+#  define SDMMC_FIFOTH_TXWMARK(n)         ((uint32_t)(n) << SDMMC_FIFOTH_TXWMARK_SHIFT)
                                                     /* Bits 12-15: Reserved */
 #define SDMMC_FIFOTH_RXWMARK_SHIFT        (16)      /* Bits 16-27: FIFO threshold level when receiving */
 #define SDMMC_FIFOTH_RXWMARK_MASK         (0xfff << SDMMC_FIFOTH_RXWMARK_SHIFT)
+#  define SDMMC_FIFOTH_RXWMARK(n)         ((uint32_t)(n) << SDMMC_FIFOTH_RXWMARK_SHIFT)
 #define SDMMC_FIFOTH_DMABURST_SHIFT       (28)      /* Bits 28-30: Burst size for multiple transaction */
 #define SDMMC_FIFOTH_DMABURST_MASK        (7 << SDMMC_FIFOTH_DMABURST_SHIFT)
 #  define SDMMC_FIFOTH_DMABURST_1XFR      (0 << SDMMC_FIFOTH_DMABURST_SHIFT) /* 1 transfer */
@@ -323,6 +339,7 @@
 #define SDMMC_BMOD_FB                     (1 << 1)  /* Bit 1:  Fixed Burst */
 #define SDMMC_BMOD_DSL_SHIFT              (2)       /* Bits 2-6: Descriptor Skip Length */
 #define SDMMC_BMOD_DSL_MASK               (31 << SDMMC_BMOD_DSL_SHIFT)
+#  define SDMMC_BMOD_DSL(n)               ((uint32_t)(n) << SDMMC_BMOD_DSL_SHIFT)
 #define SDMMC_BMOD_DE                     (1 << 7)  /* Bit 7:  SD/MMC DMA Enable */
 #define SDMMC_BMOD_PBL_SHIFT              (8)       /* Bits 8-10: Programmable Burst Length */
 #define SDMMC_BMOD_PBL_MASK               (7 << SDMMC_BMOD_PBL_SHIFT)

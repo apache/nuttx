@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/lpc54_sdmmc.h
+ * arch/arm/src/lpc43xx/lpc43_sdmmc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_SDMMC_H
-#define __ARCH_ARM_SRC_LPC54XX_LPC54_SDMMC_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_SDMMC_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_SDMMC_H
 
 /************************************************************************************
  * Included Files
@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/lpc54_sdmmc.h"
+#include "chip/lpc43_sdmmc.h"
 
 /************************************************************************************
  * Public Functions
@@ -63,7 +63,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: lpc54_sdmmc_initialize
+ * Name: lpc43_sdmmc_initialize
  *
  * Description:
  *   Initialize the SD/MMC peripheral for normal operation.
@@ -76,8 +76,8 @@ extern "C"
  *
  ****************************************************************************/
 
-struct lpc54_sdmmc_dev_s; /* See include/nuttx/sdio.h */
-FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno);
+struct lpc43_sdmmc_dev_s; /* See include/nuttx/sdio.h */
+FAR struct sdio_dev_s *lpc43_sdmmc_initialize(int slotno);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -85,4 +85,4 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_SDMMC_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_SDMMC_H */
