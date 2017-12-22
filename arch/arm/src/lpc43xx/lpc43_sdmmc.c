@@ -337,9 +337,9 @@ static void lpc43_callback(struct lpc43_dev_s *priv);
 static int  lpc43_registercallback(FAR struct sdio_dev_s *dev,
               worker_t callback, void *arg);
 
+#ifdef CONFIG_LPC43_SDMMC_DMA
 /* DMA */
 
-#ifdef CONFIG_LPC43_SDMMC_DMA
 static int  lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  lpc43_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -1553,7 +1553,8 @@ static int lpc43_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int lpc43_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static int lpc43_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                         uint32_t arg)
 {
   uint32_t regval = 0;
   uint32_t cmdidx;
@@ -1775,6 +1776,9 @@ static int lpc43_cancel(FAR struct sdio_dev_s *dev)
 
   lpc43_configxfrints(priv, 0);
   lpc43_configwaitints(priv, 0, 0, 0);
+#ifdef CONFIG_LPC43_SDMMC_DMA
+  lpc43_configdmaints(priv, 0);
+#endif
 
   /* Clearing pending interrupt status on all transfer- and event- related
    * interrupts
@@ -1965,7 +1969,7 @@ static int lpc43_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   lpc43_putreg(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC43_SDMMC_RINTSTS);
   *rshort = lpc43_getreg(LPC43_SDMMC_RESP0);
-  mcinfo("CRC = %04x\n", *rshort);
+  mcinfo("CRC=%04x\n", *rshort);
 
   return ret;
 }
