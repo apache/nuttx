@@ -154,12 +154,12 @@ cp15_invalidate_icache:
 
 cp15_invalidate_dcache:
 	bic		r0, r0, #CACHE_DLINESIZE - 1
-	mcr		p15, 0, r0, c7, c6, 1		/* Invalidate D entry */
+1:	mcr		p15, 0, r0, c7, c6, 1		/* Invalidate D entry */
 	add		r0, r0, #CACHE_DLINESIZE
 	cmp		r0, r1
 	blo		1b
 	mov		pc, lr
-	.size	cp15_flush_idcache, .-cp15_flush_idcache
+	.size	cp15_invalidate_dcache, .-cp15_invalidate_dcache
 
 #if 0 /* Not used */
 /* Invalidate Dcache */
