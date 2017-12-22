@@ -141,6 +141,8 @@
 
 #endif
 
+#define BOARD_MAIN_CLK              BOARD_FCCO_FREQUENCY   /* Main clock frequency */
+
 /* This is the clock setup we configure for:
  *
  *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
@@ -178,6 +180,10 @@
 
 #define BOARD_SSP1_CLKSRC           BASE_SSP1_CLKSEL_IDIVA
 #define BOARD_SSP1_BASEFREQ         BOARD_IDIVA_FREQUENCY
+
+/* SDIO Clocking */
+
+#define BOARD_SDIO_CLKSRC           BASE_SDIO_CLKSEL_PLL1
 
 /* USB0 ********************************************************************/
 /* Settings needed in lpc43_cpu.c */
@@ -217,6 +223,41 @@
 #  define BOARD_SPIFI_DIVIDER       (14)        /* 204MHz / 14 = 14.57MHz */
 #  define BOARD_SPIFI_FREQUENCY     (102000000) /* 204MHz / 14 = 14.57MHz */
 #endif
+
+/* SD/MMC or SDIO interface
+ *
+ * NOTE: The SDIO function clock to the interface can be up to 50 MHZ.
+ * Example:  BOARD_MAIN_CLK=220MHz, CLKDIV=5, Finput=44MHz.
+ */
+
+#define BOARD_SDMMC_MAXFREQ      50000000
+#define BOARD_SDMMC_CEIL(a,b)    (((a) + (b) - 1) / (b))
+
+#define BOARD_SDMMC_CLKDIV       BOARD_SDMMC_CEIL(BOARD_MAIN_CLK, BOARD_SDMMC_MAXFREQ)
+#define BOARD_SDMMC_FREQUENCY    (BOARD_MAIN_CLK / BOARD_SDMMC_CLKDIV)
+
+/* Mode-dependent function clock division
+ *
+ * Example:  BOARD_SDMMC_FREQUENCY=44MHz
+ *           BOARD_CLKDIV_INIT=110,    Fsdmmc=400KHz  (400KHz max)
+ *           BOARD_CLKDIV_MMCXFR=4[3], Fsdmmc=11Mhz   (20MHz max) See NOTE:
+ *           BOARD_CLKDIV_SDWIDEXFR=2, Fsdmmc=22MHz   (25MHz max)
+ *           BOARD_CLKDIV_SDXFR=2,     Fsdmmc=22MHz   (25MHz max)
+ *
+ * NOTE:  *lock division is 2*n. For example, value of 0 means divide by
+ * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
+ * of 255 means divide by 2 * 255 = 510, and so on.
+ *
+ * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.  So an
+ * odd value calculated below will be moved up to next higher divider value.  So
+ * the value 3 will cause 2 to be written as the divider value and the effective
+ * divider will be 4.
+ */
+
+#define BOARD_CLKDIV_INIT       BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 400000)
+#define BOARD_CLKDIV_MMCXFR     BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 20000000)
+#define BOARD_CLKDIV_SDWIDEXFR  BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
+#define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 
 /* UART clocking ***********************************************************/
 /* Configure all U[S]ARTs to use the XTAL input frequency */
@@ -314,5 +355,15 @@
 #define PINCONF_ENET_RESET  PINCONF_GPIO0p4
 #define GPIO_ENET_RESET     (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN4)
 #define PINCONF_ENET_MDC    PINCONF_ENET_MDC_3
+
+/* SD/MMC pinout */
+
+#define GPIO_SD_CARD_DET_N         PINCONF_SD_CD_1
+#define GPIO_SD_D0                 PINCONF_SD_DAT0_1
+#define GPIO_SD_D1                 PINCONF_SD_DAT1_1
+#define GPIO_SD_D2                 PINCONF_SD_DAT2_1
+#define GPIO_SD_D3                 PINCONF_SD_DAT3_1
+#define GPIO_SD_CMD                PINCONF_SD_CMD_1
+#define GPIO_SD_CLK                CLKCONF_SD_CLK_2
 
 #endif  /* __CONFIG_BAMBINO_200E_INCLUDE_BOARD_H */

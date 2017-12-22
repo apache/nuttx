@@ -51,6 +51,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define HAVE_MMCSD    1
+
 /****************************************************************************
  *   LEDs GPIO                         PIN     SIGNAL NAME
  *  -------------------------------- ------- --------------
@@ -98,6 +100,36 @@
 #    define GPIO_USB_PWRD  (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
 #  endif
 #endif
+
+/* MMC/SD support */
+
+#ifdef CONFIG_LPC43_SDMMC
+
+#  ifndef CONFIG_MMCSD
+#    warning MMC/SD support requires CONFIG_MMCSD
+#    undef HAVE_MMCSD
+#  endif
+
+#  ifndef CONFIG_MMCSD_SDIO
+#    warning MMC/SD support requires CONFIG_MMCSD_SDIO
+#    undef HAVE_MMCSD
+#  endif
+
+#  ifdef CONFIG_DISABLE_MOUNTPOINT
+#    warning MMC/SD cannot be supported with CONFIG_DISABLE_MOUNTPOINT
+#    undef HAVE_MMCSD
+#  endif
+
+#  ifdef CONFIG_NSH_MMCSDMINOR
+#    define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define MMCSD_MINOR 0
+#  endif
+
+#else
+#  undef HAVE_MMCSD
+#endif
+
 
 /****************************************************************************
  * Public Types
