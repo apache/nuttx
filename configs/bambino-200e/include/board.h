@@ -244,7 +244,7 @@
  *           BOARD_CLKDIV_SDWIDEXFR=2, Fsdmmc=22MHz   (25MHz max)
  *           BOARD_CLKDIV_SDXFR=2,     Fsdmmc=22MHz   (25MHz max)
  *
- * NOTE:  *lock division is 2*n. For example, value of 0 means divide by
+ * NOTE:  Clock division is 2*n. For example, value of 0 means divide by
  * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
  * of 255 means divide by 2 * 255 = 510, and so on.
  *

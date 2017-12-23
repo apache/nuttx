@@ -354,24 +354,24 @@
 
 /* Pin types by port */
 
-#define IOCON_PIO0_TYPED_MASK (0x7f7e63ff) /* P0-9,13-14,17-22,24-30 */
-#define IOCON_PIO1_TYPED_MASK (0xfffffffe) /* P1-31 */
-#define IOCON_PIO2_TYPED_MASK (0xfffffffc) /* P2-31 */
-#define IOCON_PIO3_TYPED_MASK (0xfe000000) /* P25-31 */
-#define IOCON_PIO4_TYPED_MASK (0xffffffff) /* P0-31 */
-#define IOCON_PIO5_TYPED_MASK (0x000007ff) /* P0-10 */
+#define IOCON_PIO0_TYPED_MASK (0x7f7e63ff) /* P0.0-9,13-14,17-22,24-30 */
+#define IOCON_PIO1_TYPED_MASK (0xfffffffe) /* P1.1-31 */
+#define IOCON_PIO2_TYPED_MASK (0xfffffffc) /* P2.2-31 */
+#define IOCON_PIO3_TYPED_MASK (0xfe000000) /* P3.25-31 */
+#define IOCON_PIO4_TYPED_MASK (0xffffffff) /* P4.0-31 */
+#define IOCON_PIO5_TYPED_MASK (0x000007ff) /* P5.0-10 */
 
-#define IOCON_PIO0_TYPEI_MASK (0x00006000) /* P013-14 */
+#define IOCON_PIO0_TYPEI_MASK (0x00006000) /* P0.13-14 */
 #define IOCON_PIO1_TYPEI_MASK (0x00000000) /* None */
 #define IOCON_PIO2_TYPEI_MASK (0x00000000) /* None */
-#define IOCON_PIO3_TYPEI_MASK (0x00006000) /* P23-24 */
+#define IOCON_PIO3_TYPEI_MASK (0x01800000) /* P3.23-24 */
 #define IOCON_PIO4_TYPEI_MASK (0x00000000) /* None */
 #define IOCON_PIO5_TYPEI_MASK (0x00000000) /* None */
 
-#define IOCON_PIO0_TYPEA_MASK (0x80831c00) /* p10-12,15-16,23,31 */
-#define IOCON_PIO1_TYPEA_MASK (0x00000001) /* p0 */
-#define IOCON_PIO2_TYPEA_MASK (0x00000003) /* p0-1 */
-#define IOCON_PIO3_TYPEA_MASK (0x00600000) /* p21-22 */
+#define IOCON_PIO0_TYPEA_MASK (0x80831c00) /* p0.10-12,15-16,23,31 */
+#define IOCON_PIO1_TYPEA_MASK (0x00000001) /* p1.0 */
+#define IOCON_PIO2_TYPEA_MASK (0x00000003) /* p2.0-1 */
+#define IOCON_PIO3_TYPEA_MASK (0x00600000) /* p3.21-22 */
 #define IOCON_PIO4_TYPEA_MASK (0x00000000) /* None */
 #define IOCON_PIO5_TYPEA_MASK (0x00000000) /* None */
 

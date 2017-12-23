@@ -215,7 +215,7 @@
  *           BOARD_CLKDIV_SDWIDEXFR=2, Fsdmmc=22MHz   (25MHz max)
  *           BOARD_CLKDIV_SDXFR=2,     Fsdmmc=22MHz   (25MHz max)
  *
- * NOTE:  *lock division is 2*n. For example, value of 0 means divide by
+ * NOTE:  Clock division is 2*n. For example, value of 0 means divide by
  * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
  * of 255 means divide by 2 * 255 = 510, and so on.
  *
@@ -316,7 +316,7 @@
 #define GPIO_USART0_RXD            (GPIO_FC0_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
 #define GPIO_USART0_TXD            (GPIO_FC0_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
 
-/* Flexomm2/I2C
+/* Flexcomm2/I2C
  *
  * For I2C:
  *   Type A & D pins need:

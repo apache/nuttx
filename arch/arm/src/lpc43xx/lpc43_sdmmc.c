@@ -1086,7 +1086,6 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               mcerr("ERROR: Data CRC failure, pending=%08x remaining: %d\n",
                     pending, priv->remaining);
-              lpc43_putreg(SDMMC_INT_DCRC, LPC43_SDMMC_RINTSTS);
               lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1144,7 +1143,6 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
             {
               /* Finish the transfer */
 
-              lpc43_putreg(SDCARD_XFRDONE_CLEAR, LPC43_SDMMC_RINTSTS);
               lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
         }
@@ -1164,8 +1162,6 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
                 {
                   /* Yes.. wake the thread up */
 
-                  lpc43_putreg(SDCARD_RESPDONE_CLEAR | SDCARD_CMDDONE_CLEAR,
-                               LPC43_SDMMC_RINTSTS);
                   lpc43_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
 
@@ -1175,7 +1171,6 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
                 {
                   /* Yes.. wake the thread up */
 
-                  lpc43_putreg(SDCARD_CMDDONE_CLEAR, LPC43_SDMMC_RINTSTS);
                   lpc43_endwait(priv, SDIOWAIT_CMDDONE);
                 }
             }
@@ -2478,7 +2473,7 @@ static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
           ctrl |= MCI_DMADES0_FS; /* First DMA buffer */
         }
 
-      /* No more data? Then this is the last descriptor */
+      /* No more data?  Then this is the last descriptor */
 
       if (buflen == 0)
         {
@@ -2496,7 +2491,7 @@ static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       i++;
     }
 
-  lpc43_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC43_SDMMC_DBADDR);
+  lpc43_putreg((uint32_t)&g_sdmmc_dmadd[0], LPC43_SDMMC_DBADDR);
 
    /* Enable internal DMA, burst size of 4, fixed burst */
 
