@@ -67,7 +67,6 @@
 struct lpc54_dmach_s
 {
   bool inuse;              /* True: The channel is in use */
-  uint16_t nxfrs;          /* Number of bytes to transfers */
   dma_callback_t callback; /* DMA completion callback function */
   void *arg;               /* Argument to pass to the callback function */
 };

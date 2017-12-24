@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip/lpc54_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -74,7 +75,7 @@
 #define WWDT_MOD_WDTOF              (1 << 2)   /* Bit 2: Watchdog time-out */
 #define WWDT_MOD_WDINT              (1 << 3)   /* Bit 3: Watchdog interrupt */
 #define WWDT_MOD_WDPROTECT          (1 << 4)   /* Bit 4: Watchdog update mode */
-#define WWDT_MOD_WDPROTECT          (1 << 5)   /* Bit 5: Watchdog lock */
+#define WWDT_MOD_LOCK               (1 << 5)   /* Bit 5: Prevent disabling WDT */
                                                /* Bits 6-31: Reserved */
 /* Watchdog timer constant register */
 
