@@ -102,7 +102,7 @@ static void   lpc54_setwarning(uint32_t warning);
 
 /* Interrupt hanlding *******************************************************/
 
-static int    lpc54_interrupt(int irq, FAR void *context);
+static int    lpc54_wwdt_interrupt(int irq, FAR void *context);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -199,7 +199,7 @@ static void lpc54_setwarning(uint32_t warning)
 }
 
 /****************************************************************************
- * Name: lpc54_interrupt
+ * Name: lpc54_wwdt_interrupt
  *
  * Description:
  *   WWDT warning interrupt
@@ -212,7 +212,7 @@ static void lpc54_setwarning(uint32_t warning)
  *
  ****************************************************************************/
 
-static int lpc54_interrupt(int irq, FAR void *context)
+static int lpc54_wwdt_interrupt(int irq, FAR void *context)
 {
   FAR struct lpc54_lowerhalf_wwdt_s *priv = &g_wdgdev;
   uint32_t regval;
@@ -533,7 +533,7 @@ static xcpt_t lpc54_capture(FAR struct watchdog_lowerhalf_s *lower,
       regval |= WWDT_MOD_WDINT;
       putreg32(regval, LPC54_WWDT_MOD);
 
-      up_enable_irq(LPC54M4_IRQ_WWDT);
+      up_enable_irq(LPC54_IRQ_WDT);
     }
   else
     {
@@ -542,7 +542,7 @@ static xcpt_t lpc54_capture(FAR struct watchdog_lowerhalf_s *lower,
       regval &= ~WWDT_MOD_WDINT;
       putreg32(regval, LPC54_WWDT_MOD);
 
-      up_disable_irq(LPC54M4_IRQ_WWDT);
+      up_disable_irq(LPC54_IRQ_WDT);
     }
 
   leave_critical_section(flags);
@@ -639,15 +639,15 @@ void lpc54_wwdt_initialize(FAR const char *devpath)
 
   priv->ops = &g_wdgops;
 
-  /* Turn on and configure the Watchdog oscillator. See the PDEN_WDT_OSC bit
-   * in the PDRUNCG0 register, and the Watchdog oscillator control register,
-   * WDTOSCCTRL.
+  /* Turn on and configure the Watchdog oscillator. Set the PDEN_WDT_OSC bit
+   * in the PDRUNCG0 register and setup the Watchdog oscillator control
+   * register, WDTOSCCTRL.
    */
 
   lpc54_wdtosc_powerup();
-#warning "Mising logic"
+#warning "Mising WDTOSCCTRL setup"
 
-  /* Enable the register interface (WWDT bus clock): set the WWDT bit in the
+  /* Enable the register interface (WWDT bus clock):  Set the WWDT bit in the
    * AHBCLKCTRL0 register.
    */
 
@@ -657,13 +657,13 @@ void lpc54_wwdt_initialize(FAR const char *devpath)
    * wake-up in the STARTER0 register.
    */
 
-  /* Set watchdog mode register  o zero */
+  /* Set watchdog mode register to zero */
 
   putreg32(0, LPC54_WWDT_MOD);
 
   /* Attach our watchdog interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(LPC54M4_IRQ_WWDT, lpc54_interrupt);
+  (void)irq_attach(LPC54_IRQ_WDT, lpc54_wwdt_interrupt);
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

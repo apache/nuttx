@@ -412,6 +412,11 @@ config LPC54_SDMMC
 	select ARCH_HAVE_SDIO
 	depends on EXPERIMENTAL
 
+config LPC54_WWDT
+	bool "Windowing Watchdog Timer (WWDT)"
+	default n
+	depends on EXPERIMENTAL
+
 endmenu # LPC54xx Peripheral Selection
 
 menu "GPIO Interrupt Configuration"
