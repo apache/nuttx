@@ -70,6 +70,7 @@ STATUS
   2017-12-23:  SDMMC is still non-functional.  The first DMA read of 512 bytes
     fails with a CRC error.  Similar result if clock is reduced, if 1-bit bus
     is used, if DMA is disabled., if DEBUG output is disabled.
+  2017-12-24:  Added fragmentary DMA support.  Much more still needed.
 
   There is still no support for the Accelerometer, SPIFI, Ethernet, or USB.
   There is a complete, but not-yet-functional SD card drirver.  There is a

@@ -48,6 +48,7 @@
  ********************************************************************************************/
 
 #define LPC54_DMA_NCHANNELS         30      /* Channels 0..29 */
+#define LPC54_DMA_MAXXFRS           1024    /* Maximum number of transfers per DMA */
 
 /* Register offsets *************************************************************************/
 
@@ -200,5 +201,78 @@
 #define DMA_XFERCFG_XFERCOUNT_SHIFT (16)      /* Bits 16-25: Total number of transfers to be performed */
 #define DMA_XFERCFG_XFERCOUNT_MASK  (0x3ff << DMA_XFERCFG_XFERCOUNT_SHIFT)
 #  define DMA_XFERCFG_XFERCOUNT(n)  ((uint32_t)((n)-1) << DMA_XFERCFG_XFERCOUNT_SHIFT)
+
+/* DMA requests *****************************************************************************/
+/* DMA requests are directly connected to the peripherals. Each channel supports one DMA
+ * request line and one trigger input. Some DMA requests allow a selection of requests
+ * sources. DMA triggers are selected from many possible input sources.
+ */
+
+/* Peripheral request inputs to DMA channel.  For DMA channel 'n', the corresponding DMA
+ * trigger input is provided by the setting of the INPUT MUX register DMA_ITRIG_INMUXn
+ */
+
+#define FLEXCOMM0_RX_DMACHAN        (0)       /* Flexcomm Interface 0 RX */
+#define FLEXCOMM0_I2CSLAVE_DMACHAN  (0)       /* Flexcomm Interface 0 I2C Slave */
+#define FLEXCOMM0_TX_DMACHAN        (1)       /* Flexcomm Interface 0 TX */
+#define FLEXCOMM0_I2CMASTER_DMACHAN (1)       /* Flexcomm Interface 0 I2C Master */
+#define FLEXCOMM1_RX_DMACHAN        (2)       /* Flexcomm Interface 1 RX */
+#define FLEXCOMM1_I2CSLAVE_DMACHAN  (2)       /* Flexcomm Interface 1 I2C Slave */
+#define FLEXCOMM1_TX_DMACHAN        (3)       /* Flexcomm Interface 1 TX */
+#define FLEXCOMM1_I2CMASTER_DMACHAN (3)       /* Flexcomm Interface 1 I2C Master */
+#define FLEXCOMM2_RX_DMACHAN        (4)       /* Flexcomm Interface 2 RX */
+#define FLEXCOMM2_I2CSLAVE_DMACHAN  (4)       /* Flexcomm Interface 2 I2C Slave */
+#define FLEXCOMM2_TX_DMACHAN        (5)       /* Flexcomm Interface 2 TX */
+#define FLEXCOMM2_I2CMASTER_DMACHAN (5)       /* Flexcomm Interface 2 I2C Master */
+#define FLEXCOMM3_RX_DMACHAN        (6)       /* Flexcomm Interface 3 RX */
+#define FLEXCOMM3_I2CSLAVE_DMACHAN  (6)       /* Flexcomm Interface 3 I2C Slave */
+#define FLEXCOMM3_TX_DMACHAN        (7)       /* Flexcomm Interface 3 TX */
+#define FLEXCOMM3_I2CMASTER_DMACHAN (7)       /* Flexcomm Interface 3 I2C Master */
+#define FLEXCOMM4_RX_DMACHAN        (8)       /* Flexcomm Interface 4 RX */
+#define FLEXCOMM4_I2CSLAVE_DMACHAN  (8)       /* Flexcomm Interface 4 I2C Slave */
+#define FLEXCOMM4_TX_DMACHAN        (9)       /* Flexcomm Interface 4 TX */
+#define FLEXCOMM4_I2CMASTER_DMACHAN (9)       /* Flexcomm Interface 4 I2C Master */
+#define FLEXCOMM5_RX_DMACHAN        (10)      /* Flexcomm Interface 5 RX */
+#define FLEXCOMM5_I2CSLAVE_DMACHAN  (10)      /* Flexcomm Interface 5 I2C Slave */
+#define FLEXCOMM5_TX_DMACHAN        (11)      /* Flexcomm Interface 5 TX */
+#define FLEXCOMM5_I2CMASTER_DMACHAN (11)      /* Flexcomm Interface 5 I2C Master */
+#define FLEXCOMM6_RX_DMACHAN        (12)      /* Flexcomm Interface 6 RX */
+#define FLEXCOMM6_I2CSLAVE_DMACHAN  (12)      /* Flexcomm Interface 6 I2C Slave */
+#define FLEXCOMM6_TX_DMACHAN        (13)      /* Flexcomm Interface 6 TX */
+#define FLEXCOMM6_I2CMASTER_DMACHAN (13)      /* Flexcomm Interface 6 I2C Master */
+#define FLEXCOMM7_RX_DMACHAN        (14)      /* Flexcomm Interface 7 RX */
+#define FLEXCOMM7_I2CSLAVE_DMACHAN  (14)      /* Flexcomm Interface 7 I2C Slave */
+#define FLEXCOMM7_TX_DMACHAN        (15)      /* Flexcomm Interface 7 TX */
+#define FLEXCOMM7_I2CMASTER_DMACHAN (15)      /* Flexcomm Interface 7 I2C Master */
+#define DMIC0_DMACHAN               (16)      /* DMIC0 */
+#define DMIC1_DMACHAN               (17)      /* DMIC1 */
+#define SPIFI_DMACHAN               (18)      /* SPIFI */
+#define SHA_DMACHAN                 (19)      /* SHA  */
+#define FLEXCOMM8_RX_DMACHAN        (20)      /* Flexcomm Interface 8 RX */
+#define FLEXCOMM8_I2CSLAVE_DMACHAN  (20)      /* Flexcomm Interface 8 I2C Slave */
+#define FLEXCOMM8_TX_DMACHAN        (21)      /* Flexcomm Interface 8 TX */
+#define FLEXCOMM8_I2CMASTER_DMACHAN (21)      /* Flexcomm Interface 8 I2C Slave (?) */
+#define FLEXCOMM9_RX_DMACHAN        (22)      /* Flexcomm Interface 9 RX */
+#define FLEXCOMM9_I2CSLAVE_DMACHAN  (22)      /* Flexcomm Interface 9 I2C Slave */
+#define FLEXCOMM9_TX_DMACHAN        (23)      /* Flexcomm Interface 9 TX */
+#define FLEXCOMM9_I2CMASTER_DMACHAN (23)      /* Flexcomm Interface 9 I2C Slave (?) */
+#define SMARTCARD0_RX_DMACHAN       (24)      /* SMARTCARD0_RX */
+#define SMARTCARD0_TX_DMACHAN       (25)      /* SMARTCARD0_TX */
+#define SMARTCARD1_RX_DMACHAN       (26)      /* SMARTCARD1_RX */
+#define SMARTCARD1_TX_DMACHAN       (27)      /* SMARTCARD1_TX */
+
+/********************************************************************************************
+ * Public Types
+ ********************************************************************************************/
+
+/* DMA channel descriptor */
+
+struct lpc54_dmachan_desc_s
+{
+  uint32_t reserved;
+  uint32_t srcend;    /* Source data end address */
+  uint32_t dstend;    /* Destination end address */
+  uint32_t link;      /* Link to next descriptor */
+};
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_DMA_H */

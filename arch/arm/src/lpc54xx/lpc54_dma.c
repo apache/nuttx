@@ -50,6 +50,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "chip/lpc54_inputmux.h"
 #include "chip/lpc54_dma.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_reset.h"
@@ -65,9 +66,7 @@
 
 struct lpc54_dmach_s
 {
-  uint8_t chn;             /* The DMA channel number */
   bool inuse;              /* True: The channel is in use */
-  bool inprogress;         /* True: DMA is in progress on this channel */
   uint16_t nxfrs;          /* Number of bytes to transfers */
   dma_callback_t callback; /* DMA completion callback function */
   void *arg;               /* Argument to pass to the callback function */
@@ -85,10 +84,6 @@ struct lpc54_dma_s
 };
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -96,83 +91,16 @@ struct lpc54_dma_s
 
 static struct lpc54_dma_s g_dma;
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* If the following value is zero, then there is no DMA in progress. This
- * value is needed in the IDLE loop to determine if the IDLE loop should
- * go into lower power power consumption modes.  According to the LPC54xx
- * User Manual: "The DMA controller can continue to work in Sleep mode, and
- * has access to the peripheral SRAMs and all peripheral registers. The
- * flash memory and the Main SRAM are not available in Sleep mode, they are
- * disabled in order to save power."
+/* The SRAMBASE register must be configured with an address (preferably in
+ * on-chip SRAM) where DMA descriptors will be stored.  Each DMA channel has
+ * an entry for the channel descriptor in the SRAM table.
  */
 
-volatile uint8_t g_dma_inprogress;
+static struct lpc54_dmachan_desc_s g_dma_desc[LPC54_DMA_NCHANNELS];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc54_dma_inprogress
- *
- * Description:
- *   Another DMA has started. Increment the g_dma_inprogress counter.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void lpc54_dma_inprogress(struct lpc54_dmach_s *dmach)
-{
-  irqstate_t flags;
-
-  /* Increment the DMA in progress counter */
-
-  flags = enter_critical_section();
-  DEBUGASSERT(!dmach->inprogress && g_dma_inprogress < LPC54_DMA_NCHANNELS);
-  g_dma_inprogress++;
-  dmach->inprogress = true;
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: lpc54_dma_done
- *
- * Description:
- *   A DMA has completed. Decrement the g_dma_inprogress counter.
- *
- *   This function is called only from lpc54_dmastop which, in turn, will be
- *   called either by the user directly, by the user indirectly via
- *   lpc54_dmafree(), or from lpc54_dma_interrupt when the transfer completes.
- *
- *   NOTE: In the first two cases, we must be able to handle the case where
- *   there is no DMA in progress and gracefully ignore the call.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void lpc54_dma_done(struct lpc54_dmach_s *dmach)
-{
-  irqstate_t flags;
-
-  /* Increment the DMA in progress counter */
-
-  flags = enter_critical_section();
-  if (dmach->inprogress)
-    {
-      DEBUGASSERT(g_dma_inprogress > 0);
-      dmach->inprogress = false;
-      g_dma_inprogress--;
-    }
-
-  leave_critical_section(flags);
-}
 
 /****************************************************************************
  * Name: lpc54_dma_dispatch
@@ -196,14 +124,14 @@ static void lpc54_dma_dispatch(int ch, int result)
     {
       /* Perform the callback */
 
-      dmach->callback((DMA_HANDLE)dmach, dmach->arg, result);
+      dmach->callback(ch, dmach->arg, result);
     }
 
   /* Disable this channel, mask any further interrupts for this channel, and
    * clear any pending interrupts.
    */
 
-  lpc54_dmastop((DMA_HANDLE)dmach);
+  lpc54_dmastop(ch);
 }
 
 /****************************************************************************
@@ -302,9 +230,7 @@ static int lpc54_dma_interrupt(int irq, FAR void *context, FAR void *arg)
 
 void weak_function up_dmainitialize(void)
 {
-  uint32_t regval;
   int ret;
-  int ch;
 
   /* Enable clocking to the DMA block */
 
@@ -313,13 +239,6 @@ void weak_function up_dmainitialize(void)
   /* Reset the DMA peripheral */
 
   lpc54_reset_dma();
-
-  /* Reset all channel configurations */
-
-  for (ch = 0; ch < LPC54_DMA_NCHANNELS; ch++)
-    {
-#warning Missing logic
-    }
 
   /* Disable and clear all DMA interrupts */
 
@@ -332,11 +251,11 @@ void weak_function up_dmainitialize(void)
 
   nxsem_init(&g_dma.exclsem, 0, 1);
 
-  for (ch = 0; ch < LPC54_DMA_NCHANNELS; ch++)
-    {
-      g_dma.dmach[ch].chn   = ch;     /* Channel number */
-      g_dma.dmach[ch].inuse = false;  /* Channel is not in-use */
-    }
+  /* Set the SRAMBASE to the beginning a array of DMA descriptors, one for
+   * each DMA channel.
+   */
+
+  putreg32((uint32_t)g_dma_desc, LPC54_DMA_SRAMBASE);
 
   /* Attach and enable the DMA interrupt handler */
 
@@ -352,112 +271,190 @@ void weak_function up_dmainitialize(void)
 }
 
 /****************************************************************************
- * Name: lpc54_dmachannel
- *
- * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and
- *   gives the caller exclusive access to the DMA channel.
- *
- * Returned Value:
- *   One success, this function returns a non-NULL, void* DMA channel
- *   handle.  NULL is returned on any failure.  This function can fail only
- *   if no DMA channel is available.
- *
- ****************************************************************************/
-
-DMA_HANDLE lpc54_dmachannel(void)
-{
-  struct lpc54_dmach_s *dmach = NULL;
-  int ret;
-  int ch;
-
-  /* Get exclusive access to the DMA state structure */
-
-  do
-    {
-      ret = nxsem_wait(&g_dma.exclsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret < 0);
-
-  /* Find an available DMA channel */
-
-  for (ch = 0; ch < LPC54_DMA_NCHANNELS; ch++)
-    {
-      if (!g_dma.dmach[ch].inuse)
-        {
-          /* Found one! */
-
-          dmach = &g_dma.dmach[ch];
-          g_dma.dmach[ch].inuse = true;
-          break;
-        }
-    }
-
-  /* Return what we found (or not) */
-
-  nxsem_post(&g_dma.exclsem);
-  return (DMA_HANDLE)dmach;
-}
-
-/****************************************************************************
- * Name: lpc54_dmafree
- *
- * Description:
- *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until lpc54_dmachannel() is called again to re-gain
- *   a valid handle.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void lpc54_dmafree(DMA_HANDLE handle)
-{
-  struct lpc54_dmach_s *dmach = (DMA_HANDLE)handle;
-
-  DEBUGASSERT(dmach && dmach->inuse);
-
-  /* Make sure that the DMA channel was properly stopped */
-
-  lpc54_dmastop(handle);
-
-  /* Mark the channel available.  This is an atomic operation and needs no
-   * special protection.
-   */
-
-  dmach->inuse = false;
-}
-
-/****************************************************************************
- * Name: lpc54_dmasetup
+ * Name: lpc54_dma_setup
  *
  * Description:
  *   Configure DMA for one transfer.
  *
+ * Input Parameters:
+ *   ch      - DMA channel number
+ *   cfg     - The content of the DMA channel configuration register.  See
+ *             peripheral channel definitions in chip/lpc54_dma.h.  The
+ *             caller must provide all fields:  PERIPHREQEN, TRIGPOL,
+ *             TRIGTYPE, TRIGBURST, BURSTPOWER, SRCBURSTWRAP, DSTBURSTWRAP,
+ *             and CHPRIORITY.
+ *   xfrcfg  - The content of the DMA channel configuration register.  See
+ *             peripheral channel definitions in chip/lpc54_dma.h.  The
+ *             caller must provide all fields:  WIDTH, SRCINC, and DSTINC.\
+ *             All of fields are managed by the DMA driver
+ *   trigsrc - See input mux DMA trigger ITRIG_INMUX_* definitions in
+ *             chip/lpc54_inputmux.h.
+ *   srcaddr  - Source address of the DMA transfer
+ *   dstaddr  - Destination address of the DMA transfer
+ *   nbytes   - Number of bytes to transfer
+ *
  ****************************************************************************/
 
-int lpc54_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
+int lpc54_dma_setup(int ch, uint32_t cfg, uint32_t xfrcfg, uint8_t trigsrc,
+                    uintptr_t srcaddr, uintptr_t dstaddr, size_t nbytes)
 {
-  struct lpc54_dmach_s *dmach = (DMA_HANDLE)handle;
-  uint32_t bitmask;
-  uint32_t regval;
+  struct lpc54_dmach_s *dmach;
   uintptr_t base;
+  uintptr_t regaddr;
+  uint32_t nxfrs;
+  uint32_t width;
+  uint32_t incr;
+  int ret;
 
-  DEBUGASSERT(dmach && dmach->inuse && nbytes < 4096);
+  DEBUGASSERT((unsigned)ch < LPC54_DMA_NCHANNELS && nbytes < 4096);
+  dmach = &g_dma.dmach[ch];
 
-  bitmask = DMA_CHANNEL((uint32_t)dmach->chn);
-  base    = LPC54_DMA_CHAN_BASE((uint32_t)dmach->chn);
+  /* Get exclusive access to the DMA data structures and interface */
 
-  /* Put the channel in a known state. */
-#warning Missing logic
+  ret = nxsem_wait(&g_dma.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  /* Program the DMA channel */
-#warning Missing logic
+  /* Make sure that the DMA channel is not in use */
 
-  return OK;
+  DEBUGASSERT(!dmach->inuse);
+  if (dmach->inuse)
+    {
+      ret = -EBUSY;
+      goto errout_with_exclsem;
+    }
+
+  dmach->inuse = true;
+
+  /* Make sure that the trigger is not active */
+
+  base = LPC54_DMA_CHAN_BASE(ch);
+  putreg32(0, base + LPC54_DMA_CFG_OFFSET);
+
+  /* Number of transfers */
+
+  switch (xfrcfg & DMA_XFERCFG_WIDTH_MASK)
+   {
+     default:
+     case DMA_XFERCFG_WIDTH_8BIT:
+       width = 1;
+       nxfrs = nbytes;
+       break;
+
+     case DMA_XFERCFG_WIDTH_16BIT:
+       width = 2;
+       nxfrs = ((nbytes + 1) >> 1);
+       break;
+
+     case DMA_XFERCFG_WIDTH_32BIT:
+       width = 4;
+       nxfrs = ((nbytes + 3) >> 2);
+       break;
+   }
+
+  /* Check if the number of transfers can be performed */
+
+  if (nxfrs > LPC54_DMA_MAXXFRS)
+    {
+      return -E2BIG;
+    }
+
+  /* Set up the channel DMA descriptor */
+
+  g_dma_desc[ch].reserved = 0;
+
+  switch (cfg & DMA_XFERCFG_SRCINC_MASK)
+    {
+      default:
+      case DMA_XFERCFG_SRCINC_NONE:
+        incr = 0;
+        break;
+
+      case DMA_XFERCFG_SRCINC_1X:
+        incr = width;
+        break;
+
+      case DMA_XFERCFG_SRCINC_2X:
+        incr = width << 1;
+        break;
+
+      case DMA_XFERCFG_SRCINC_4X:
+        incr = width << 2;
+        incr = 0;
+        break;
+    }
+
+  g_dma_desc[ch].srcend = (uint32_t)srcaddr + nxfrs * incr;
+
+  switch (cfg & DMA_XFERCFG_DSTINC_MASK)
+    {
+      default:
+      case DMA_XFERCFG_DSTINC_NONE:
+        incr = 0;
+        break;
+
+      case DMA_XFERCFG_DSTINC_1X:
+        incr = width;
+        break;
+
+      case DMA_XFERCFG_DSTINC_2X:
+        incr = width << 1;
+        break;
+
+      case DMA_XFERCFG_DSTINC_4X:
+        incr = width << 2;
+        incr = 0;
+        break;
+    }
+
+  g_dma_desc[ch].dstend = (uint32_t)dstaddr + nxfrs * incr;
+  g_dma_desc[ch].link   = 0;
+
+  /* Set the trigger source */
+
+  regaddr = LPC54_MUX_DMA_ITRIG_INMUX(ch);
+  putreg32(MUX_DMA_ITRIG_INMUX(trigsrc), regaddr);
+
+  /* Set the channel configuration register.
+   *
+   *   PERIPHREQEN  - Provided by caller
+   *   TRIGPOL      - Provided by caller
+   *   TRIGTYPE     - Provided by caller
+   *   TRIGBURST    - Provided by caller
+   *   BURSTPOWER   - Provided by caller
+   *   SRCBURSTWRAP - Provided by caller
+   *   DSTBURSTWRAP - Provided by caller
+   *   CHPRIORITY   - Provided by caller
+   */
+
+  putreg32(cfg, base + LPC54_DMA_CFG_OFFSET);
+
+  /* Set the channel transfer configuration register
+   *
+   *   CFGVALID  - Current channel descriptor is valid.
+   *   RELOAD    - No reload
+   *   SWTRIG    - No software trigger
+   *   CLRTRIG   - Trigger cleared when descriptor is exhausted
+   *   SETINTA   - Use interrupt A
+   *   SETINTB   - Don't use interrupt B
+   *   WIDTH     - Provided by caller
+   *   SRCINC    - Provided by caller
+   *   DSTINC    - Provided by caller
+   *   XFERCOUNT - Derived from with and nbytes
+   */
+
+  xfrcfg &= ~(DMA_XFERCFG_RELOAD | DMA_XFERCFG_SWTRIG | DMA_XFERCFG_SETINTB |
+              DMA_XFERCFG_XFERCOUNT_MASK);
+  xfrcfg |= (DMA_XFERCFG_CFGVALID | DMA_XFERCFG_CLRTRIG | DMA_XFERCFG_SETINTA);
+  xfrcfg |= DMA_XFERCFG_XFERCOUNT(nxfrs);
+  putreg32(xfrcfg, base + LPC54_DMA_XFERCFG_OFFSET);
+  ret = OK;
+
+errout_with_exclsem:
+  nxsem_post(&g_dma.exclsem);
+  return ret;
 }
 
 /****************************************************************************
@@ -468,41 +465,37 @@ int lpc54_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
  *
  ****************************************************************************/
 
-int lpc54_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
+int lpc54_dmastart(int ch, dma_callback_t callback, void *arg)
 {
-  struct lpc54_dmach_s *dmach = (DMA_HANDLE)handle;
-  uint32_t regval;
+  struct lpc54_dmach_s *dmach;
+  uintptr_t regaddr;
   uint32_t bitmask;
-  uintptr_t base;
 
-  DEBUGASSERT(dmach && dmach->inuse && callback);
+  DEBUGASSERT((unsigned)ch < LPC54_DMA_NCHANNELS);
+  dmach = &g_dma.dmach[ch];
+  DEBUGASSERT(dmach->inuse && callback != NULL);
 
   /* Save the callback information */
 
   dmach->callback = callback;
   dmach->arg      = arg;
 
-  /* Increment the count of DMAs in-progress.  This count will be
-   * decremented when lpc54_dmastop() is called, either by the user,
-   * indirectly via lpc54_dmafree(), or from lpc54_dma_interrupt when the
-   * transfer completes.
-   */
-
-  lpc54_dma_inprogress(dmach);
-
   /* Clear any pending DMA interrupts */
 
-  bitmask = DMA_CHANNEL((uint32_t)dmach->chn);
+  bitmask = DMA_CHANNEL(ch);
   putreg32(bitmask, LPC54_DMA_ERRINT0);
   putreg32(bitmask, LPC54_DMA_INTA0);
   putreg32(bitmask, LPC54_DMA_INTB0);
 
-  /* Enable terminal count interrupt. */
-#warning Missing logic
+  /* Enable the channel and enable interrupt A and error interrupts. */
 
-  /* Enable the channel and unmask terminal count and error interrupts. */
-#warning Missing logic
+  putreg32(bitmask, LPC54_DMA_ENABLESET0); /* Enable the channel */
+  putreg32(bitmask, LPC54_DMA_INTENSET0);  /* Enable channel interrupts */
 
+  /* Enable the trigger for this channel */
+
+  regaddr = LPC54_DMA_CTLSTAT(ch);
+  modifyreg32(regaddr, 0, DMA_CTLSTAT_TRIG);
   return OK;
 }
 
@@ -520,30 +513,32 @@ int lpc54_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
  *
  ****************************************************************************/
 
-void lpc54_dmastop(DMA_HANDLE handle)
+void lpc54_dmastop(int ch)
 {
-  struct lpc54_dmach_s *dmach = (DMA_HANDLE)handle;
-  uintptr_t regaddr;
-  uint32_t regval;
+  struct lpc54_dmach_s *dmach;
   uint32_t bitmask;
 
-  DEBUGASSERT(dmach && dmach->inuse);
+  DEBUGASSERT((unsigned)ch < LPC54_DMA_NCHANNELS);
+  dmach = &g_dma.dmach[ch];
+  DEBUGASSERT(dmach->inuse);
 
   /* Disable this channel and mask any further interrupts from the channel.
    * this channel.
    */
-#warning Missing logic
+
+  bitmask = DMA_CHANNEL(ch);
+  putreg32(bitmask, LPC54_DMA_INTENCLR0);  /* Disable channel interrupts */
+  putreg32(bitmask, LPC54_DMA_ENABLECLR0); /* Disable the channel */
 
   /* Clear any pending interrupts for this channel */
 
-  bitmask = DMA_CHANNEL((uint32_t)dmach->chn);
   putreg32(bitmask, LPC54_DMA_ERRINT0);
   putreg32(bitmask, LPC54_DMA_INTA0);
   putreg32(bitmask, LPC54_DMA_INTB0);
 
-  /* Decrement the count of DMAs in progress */
+  /* This channel is no longer in use */
 
-  lpc54_dma_done(dmach);
+  g_dma.dmach[ch].inuse = false;
 }
 
 /****************************************************************************
@@ -555,12 +550,11 @@ void lpc54_dmastop(DMA_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void lpc54_dmasample(DMA_HANDLE handle, struct lpc54_dmaregs_s *regs)
+void lpc54_dmasample(int ch, struct lpc54_dmaregs_s *regs)
 {
-  struct lpc54_dmach_s *dmach = (DMA_HANDLE)handle;
   uintptr_t base;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT((unsigned)ch <  LPC54_DMA_NCHANNELS);
 
   /* Sample the global DMA registers */
 
@@ -577,7 +571,7 @@ void lpc54_dmasample(DMA_HANDLE handle, struct lpc54_dmaregs_s *regs)
 
   /* Sample the DMA channel registers */
 
-  base                  = LPC54_DMA_CHAN_BASE((uint32_t)dmach->chn);
+  base                  = LPC54_DMA_CHAN_BASE(ch);
   regs->ch.cfg          = getreg32(base + LPC54_DMA_CFG_OFFSET);
   regs->ch.ctlstat      = getreg32(base + LPC54_DMA_CTLSTAT_OFFSET);
   regs->ch.xfercfg      = getreg32(base + LPC54_DMA_XFERCFG_OFFSET);
@@ -593,12 +587,12 @@ void lpc54_dmasample(DMA_HANDLE handle, struct lpc54_dmaregs_s *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void lpc54_dmadump(DMA_HANDLE handle, const struct lpc54_dmaregs_s *regs, const char *msg)
+void lpc54_dmadump(int ch, const struct lpc54_dmaregs_s *regs,
+                   const char *msg)
 {
-  struct lpc54_dmach_s *dmach = (DMA_HANDLE)handle;
   uintptr_t base;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT((unsigned)ch <  LPC54_DMA_NCHANNELS && regs != NULL && msg != NULL);
 
   /* Dump the sampled global DMA registers */
 
@@ -626,9 +620,9 @@ void lpc54_dmadump(DMA_HANDLE handle, const struct lpc54_dmaregs_s *regs, const 
 
   /* Dump the DMA channel registers */
 
-  base = LPC54_DMA_CHAN_BASE((uint32_t)dmach->chn);
+  base = LPC54_DMA_CHAN_BASE(ch);
 
-  dmainfo("Channel DMA Registers: %d\n", dmach->chn);
+  dmainfo("Channel DMA Registers: %d\n", ch);
 
   dmainfo("         CFG[%08x]: %08lx\n",
           base + LPC54_DMA_CFG_OFFSET, (unsigned long)regs->ch.cfg);

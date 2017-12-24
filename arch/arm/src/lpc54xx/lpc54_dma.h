@@ -55,8 +55,7 @@
 
 #ifndef __ASSEMBLY__
 
-typedef FAR void *DMA_HANDLE;
-typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
+typedef void (*dma_callback_t)(int ch, void *arg, int result);
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
@@ -116,46 +115,32 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_dmachannel
- *
- * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and
- *   gives the caller exclusive access to the DMA channel.
- *
- * Returned Value:
- *   One success, this function returns a non-NULL, void* DMA channel
- *   handle.  NULL is returned on any failure.  This function can fail only
- *   if no DMA channel is available.
- *
- ****************************************************************************/
-
-DMA_HANDLE lpc54_dmachannel(void);
-
-/****************************************************************************
- * Name: lpc54_dmafree
- *
- * Description:
- *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until lpc54_dmachannel() is called again to re-gain
- *   a valid handle.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void lpc54_dmafree(DMA_HANDLE handle);
-
-/****************************************************************************
- * Name: lpc54_dmasetup
+ * Name: lpc54_dma_setup
  *
  * Description:
  *   Configure DMA for one transfer.
  *
+ * Input Parameters:
+ *   ch      - DMA channel number
+ *   cfg     - The content of the DMA channel configuration register.  See
+ *             peripheral channel definitions in chip/lpc54_dma.h.  The
+ *             caller must provide all fields:  PERIPHREQEN, TRIGPOL,
+ *             TRIGTYPE, TRIGBURST, BURSTPOWER, SRCBURSTWRAP, DSTBURSTWRAP,
+ *             and CHPRIORITY.
+ *   xfrcfg  - The content of the DMA channel configuration register.  See
+ *             peripheral channel definitions in chip/lpc54_dma.h.  The
+ *             caller must provide all fields:  WIDTH, SRCINC, and DSTINC.\
+ *             All of fields are managed by the DMA driver
+ *   trigsrc - See input mux DMA trigger ITRIG_INMUX_* definitions in
+ *             chip/lpc54_inputmux.h.
+ *   srcaddr  - Source address of the DMA transfer
+ *   dstaddr  - Destination address of the DMA transfer
+ *   nbytes   - Number of bytes to transfer
+ *
  ****************************************************************************/
 
-int lpc54_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
+int lpc54_dma_setup(int ch, uint32_t cfg, uint32_t xfrcfg, uint8_t trigsrc,
+                    uintptr_t srcaddr, uintptr_t dstaddr, size_t nbytes);
 
 /****************************************************************************
  * Name: lpc54_dmastart
@@ -165,7 +150,7 @@ int lpc54_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
  *
  ****************************************************************************/
 
-int lpc54_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
+int lpc54_dmastart(int ch, dma_callback_t callback, void *arg);
 
 /****************************************************************************
  * Name: lpc54_dmastop
@@ -177,7 +162,7 @@ int lpc54_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  *
  ****************************************************************************/
 
-void lpc54_dmastop(DMA_HANDLE handle);
+void lpc54_dmastop(int ch);
 
 /****************************************************************************
  * Name: lpc54_dmasample
@@ -188,7 +173,7 @@ void lpc54_dmastop(DMA_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void lpc54_dmasample(DMA_HANDLE handle, struct lpc54_dmaregs_s *regs);
+void lpc54_dmasample(int ch, struct lpc54_dmaregs_s *regs);
 #else
 #  define lpc54_dmasample(handle,regs)
 #endif
@@ -202,7 +187,7 @@ void lpc54_dmasample(DMA_HANDLE handle, struct lpc54_dmaregs_s *regs);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void lpc54_dmadump(DMA_HANDLE handle, const struct lpc54_dmaregs_s *regs,
+void lpc54_dmadump(int ch, const struct lpc54_dmaregs_s *regs,
                    const char *msg);
 #else
 #  define lpc54_dmadump(handle,regs,msg)

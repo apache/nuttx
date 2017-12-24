@@ -214,8 +214,32 @@
 
 /* Trigger select register for DMA channel 0-29 */
 
+#define ITRIG_INMUX_ADC0A                   (0)      /*  ADC0 Sequence A interrupt */
+#define ITRIG_INMUX_ADC0B                   (1)      /* ADC0 Sequence B interrupt */
+#define ITRIG_INMUX_SCT0DMA0                (2)      /* SCT0 DMA request 0 */
+#define ITRIG_INMUX_SCT0DMA1                (3)      /* SCT0 DMA request 1 */
+#define ITRIG_INMUX_PININT0                 (4)      /* Pin interrupt 0 */
+#define ITRIG_INMUX_PININT1                 (5)      /* Pin interrupt 1 */
+#define ITRIG_INMUX_PININT2                 (6)      /* Pin interrupt 2 */
+#define ITRIG_INMUX_PININT3                 (7)      /* Pin interrupt 3 */
+#define ITRIG_INMUX_CTIMER0MAT0             (8)      /* Timer CTIMER0 Match 0 */
+#define ITRIG_INMUX_CTIMER0MAT1             (9)      /* Timer CTIMER0 Match 1 */
+#define ITRIG_INMUX_CTIMER1MAT0             (10)     /* Timer CTIMER1 Match 0 */
+#define ITRIG_INMUX_CTIMER1MAT1             (11)     /* Timer CTIMER1 Match 1 */
+#define ITRIG_INMUX_CTIMER2MAT0             (12)     /* Timer CTIMER2 Match 0 */
+#define ITRIG_INMUX_CTIMER2MAT1             (13)     /* Timer CTIMER2 Match 1 */
+#define ITRIG_INMUX_CTIMER3MAT0             (14)     /* Timer CTIMER3 Match 0 */
+#define ITRIG_INMUX_CTIMER3MAT1             (15)     /* Timer CTIMER3 Match 1 */
+#define ITRIG_INMUX_CTIMER4MAT0             (16)     /* Timer CTIMER4 Match 0 */
+#define ITRIG_INMUX_CTIMER4MAT1             (17)     /* Timer CTIMER4 Match 1 */
+#define ITRIG_INMUX_DMAMUX0                 (18)     /* DMA output trigger mux 0 */
+#define ITRIG_INMUX_DMAMUX1                 (19)     /* DMA output trigger mux 1 */
+#define ITRIG_INMUX_DMAMUX2                 (20)     /* DMA output trigger mux 2 */
+#define ITRIG_INMUX_DMAMUX3                 (21)     /* DMA output trigger mux 3 */
+
 #define MUX_DMA_ITRIG_INMUX_SHIFT           (0)      /* Bit 0-4: Trigger input number for DMA channel n (n = 0 to 29) */
 #define MUX_DMA_ITRIG_INMUX_MASK            (31 << MUX_DMA_ITRIG_INMUX_SHIFT)
+#  define MUX_DMA_ITRIG_INMUX(n)            ((uint32_t)(n) << MUX_DMA_ITRIG_INMUX_SHIFT)
 #  define MUX_DMA_ITRIG_INMUX_ADC0A         (0 << MUX_DMA_ITRIG_INMUX_SHIFT) /*  ADC0 Sequence A interrupt */
 #  define MUX_DMA_ITRIG_INMUX_ADC0B         (1  << MUX_DMA_ITRIG_INMUX_SHIFT) /* ADC0 Sequence B interrupt */
 #  define MUX_DMA_ITRIG_INMUX_SCT0DMA0      (2  << MUX_DMA_ITRIG_INMUX_SHIFT) /* SCT0 DMA request 0 */
