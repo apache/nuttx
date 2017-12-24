@@ -83,7 +83,7 @@ Configurations
   Each LPCXpresso-LPC54628 configuration is maintained in a sub-directory
   and can be selected as follow:
 
-    .tools/configure.sh [OPTIONS] xmc5400-relax/<subdir>
+    .tools/configure.sh [OPTIONS] lpcxpresso-lpc54628/<subdir>
 
   See '.tools/configure.sh -h' for a list of all options.  The most typical
   are -l to select the Linux host or -c to select the Windows Cygwin host.

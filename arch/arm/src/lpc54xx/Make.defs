@@ -93,6 +93,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += lpc54_userspace.c lpc54_mpuinit.c
 endif
 
+ifeq ($(CONFIG_LPC54_DMA),y)
+CHIP_CSRCS += lpc54_dma.c
+endif
+
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += lpc54_idle.c
 endif

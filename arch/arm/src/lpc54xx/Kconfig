@@ -177,6 +177,12 @@ config LPC54_HAVE_USART
 
 menu "LPC54xx Peripheral Selection"
 
+config LPC54_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+	depends on EXPERIMENTAL
+
 menu "Flexcomm Peripherals"
 
 config LPC54_I2C0_MASTER

@@ -628,7 +628,7 @@ void lpc43_dmastop(DMA_HANDLE handle)
   DEBUGASSERT(dmach && dmach->inuse);
 
   /* Disable this channel and mask any further interrupts from the channel.
-   * this channel.  The channel is disabled by clearning the channel
+   * this channel.  The channel is disabled by clearing the channel
    * enable bit. Any outstanding data in the FIFOs is lost.
    */
 
