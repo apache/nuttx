@@ -66,14 +66,14 @@ STATUS
     https://github.com/Smoothieware/smoothie-nuttx/tree/master/nuttx/arch/arm/src/lpc43xx
     and adapted it for use by the LPC54xx.  Unverified as of this writing.
   2017-12-21:  Some things are working with he SDMMC drivers but read DMAs
-    are non-functional and, hence not usable.  The nature of the problem is
-    this:  The DMA appears to complete normally, however, the application
-    receive buffer is not modified.  Nothing is actually received.
+    are non-functional and, hence not usable.
+  2017-12-23:  SDMMC is still non-functional.  The first DMA read of 512 bytes
+    fails with a CRC error.  Similar result if clock is reduced, if 1-bit bus
+    is used, if DMA is disabled., if DEBUG output is disabled.
 
-  There is still no support for the Accelerometer, SPIFI, SD card, Ethernet,
-  or USB.  There is a partial SPI driver, but no on-board SPI devices to
-  test it.  The SD/MMC interface is essentially the same as on the LPC43xx
-  and there is an unverified leverage in place for that.
+  There is still no support for the Accelerometer, SPIFI, Ethernet, or USB.
+  There is a complete, but not-yet-functional SD card drirver.  There is a
+  partial SPI driver, but no on-board SPI devices to test it.
 
 Configurations
 ==============

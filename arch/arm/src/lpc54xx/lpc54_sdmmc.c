@@ -1152,9 +1152,25 @@ static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
       pending = enabled & priv->waitmask;
       if (pending != 0)
         {
+          /* Is this a response error event? */
+
+          if ((pending & SDCARD_INT_RESPERR) != 0)
+            {
+              /* If response errors are enabled, then we must certainly be
+               * waiting for a response.
+               */
+
+              DEBUGASSERT((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0);
+
+              /* Wake the thread up */
+
+              mcerr("ERROR: Response error, pending=%08x\n", pending);
+              lpc54_endwait(priv, SDIOWAIT_RESPONSEDONE | SDIOWAIT_ERROR);
+            }
+
           /* Is this a command (plus response) completion event? */
 
-          if ((pending & SDMMC_INT_CDONE) != 0)
+          else if ((pending & SDMMC_INT_CDONE) != 0)
             {
               /* Yes.. Is their a thread waiting for response done? */
 
