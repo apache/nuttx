@@ -49,9 +49,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HAVE_I2CTOOL  1
-#define HAVE_FT5x06   1
-#define HAVE_MMCSD    1
+#define HAVE_I2CTOOL    1
+#define HAVE_FT5x06     1
+#define HAVE_MMCSD      1
+#define HAVE_RTC_DRIVER 1
 
 /* Do we need to register I2C drivers on behalf of the I2C tool? */
 
@@ -116,6 +117,12 @@
 
 #else
 #  undef HAVE_MMCSD
+#endif
+
+/* Check if we can support the RTC driver */
+
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
 #endif
 
 /* Indices into a sparse I2C array.  Used with lpc54_i2c_handle() */

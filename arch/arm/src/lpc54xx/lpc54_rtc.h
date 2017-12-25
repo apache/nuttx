@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_rtc.h
+ * arch/arm/src/lpc54xx/lpc54_rtc.h
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
- *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,86 +37,31 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_RTC_H
-#define __ARCH_ARM_SRC_STM32_STM32_RTC_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_RTC_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_RTC_H
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/* The STM32 F1 has a simple battery-backed counter for its RTC and has a separate
- * block for the BKP registers.
- */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  include "chip/stm32_rtc.h"
-#  include "chip/stm32_bkp.h"
-
-/* The other families use a more traditional Realtime Clock/Calendar (RTCC) with
- * broken-out data/time in BCD format.  The backup registers are integrated into
- * the RTCC in these families.
- */
-
-#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  include "chip/stm32_rtcc.h"
-#endif
-
-/* Alarm function differs from part to part */
-
-#if defined(CONFIG_STM32_STM32F4XXX)
-#  include "stm32f40xxx_alarm.h"
-#elif defined(CONFIG_STM32_STM32L15XX)
-#  include "stm32l15xxx_alarm.h"
-#else
-#  include "stm32_alarm.h"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32_RTC_PRESCALER_SECOND 32767    /* Default prescaler to get a
-                                             * second base */
-#define STM32_RTC_PRESCALER_MIN    1        /* Maximum speed of 16384 Hz */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-/* RTC is only a counter, store RTC data in backup domain register DR1 (if
- * CONFIG_RTC_HIRES) and DR2 (state).
- */
-
-#if !defined(CONFIG_RTC_MAGIC)
-#  define CONFIG_RTC_MAGIC         (0xface) /* only 16 bit */
-#endif
-
-#define RTC_MAGIC_REG              STM32_BKP_DR2
-
-#else /* !CONFIG_STM32_STM32F10XX */
-
-#if !defined(CONFIG_RTC_MAGIC)
-#  define CONFIG_RTC_MAGIC         (0xfacefeed)
-#endif
-
-#if !defined(CONFIG_RTC_MAGIC_REG)
-#  define CONFIG_RTC_MAGIC_REG     (0)
-#endif
-
-#define RTC_MAGIC_REG              STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
-
-#endif /* CONFIG_STM32_STM32F10XX */
-
-#define RTC_MAGIC                  CONFIG_RTC_MAGIC
-#define RTC_MAGIC_TIME_SET         CONFIG_RTC_MAGIC_TIME_SET
-
-#if !defined(CONFIG_RTC_MAGIC_TIME_SET)
-#  define CONFIG_RTC_MAGIC_TIME_SET (CONFIG_RTC_MAGIC + 1)
-#endif
+#define RTC_MAGIC               (0xfacefeed)
+#define RTC_MAGIC_REG            LPC54_RTC_GPREG(0)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+#ifdef CONFIG_RTC_ALARM
+/* The form of an alarm callback */
+
+typedef CODE void (*alarmcb_t)(void);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -138,80 +81,73 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_rtc_irqinitialize
+ * Name: lpc54_rtc_setalarm
  *
  * Description:
- *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
- *   up_irqinitialize is called later.
+ *   Set up an alarm.
  *
  * Input Parameters:
- *   None
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int stm32_rtc_irqinitialize(void);
-
-/****************************************************************************
- * Name: stm32_rtc_getdatetime_with_subseconds
- *
- * Description:
- *   Get the current date and time from the date/time RTC.  This interface
- *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS
- *   during initialization to set up the system time when CONFIG_RTC and
- *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
- *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
- *   Thatsub-second accuracy is returned through 'nsec'.
- *
- * Input Parameters:
- *   tp - The location to return the high resolution time value.
- *   nsec - The location to return the subsecond time value.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
-int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
+#ifdef CONFIG_RTC_ALARM
+struct timespec;
+int lpc54_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 #endif
 
 /****************************************************************************
- * Name: stm32_rtc_setdatetime
+ * Name: lpc54_rtc_rdalarm
  *
  * Description:
- *   Set the RTC to the provided time. RTC implementations which provide
- *   up_rtc_getdatetime() (CONFIG_RTC_DATETIME is selected) should provide
- *   this function.
+ *   Query an alarm configured in hardware.
  *
  * Input Parameters:
- *   tp - the time to use
+ *  time - Current alarm setting.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_DATETIME
+#ifdef CONFIG_RTC_ALARM
 struct tm;
-int stm32_rtc_setdatetime(FAR const struct tm *tp);
+int lpc54_rtc_rdalarm(FAR struct tm *time);
 #endif
 
 /****************************************************************************
- * Name: stm32_rtc_lowerhalf
+ * Name: lpc54_rtc_cancelalarm
  *
  * Description:
- *   Instantiate the RTC lower half driver for the STM32.  General usage:
+ *   Cancel a pending alarm alarm
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int lpc54_rtc_cancelalarm(void);
+#endif
+
+/****************************************************************************
+ * Name: lpc54_rtc_lowerhalf
+ *
+ * Description:
+ *   Instantiate the RTC lower half driver for the LPC54.  General usage:
  *
  *     #include <nuttx/timers/rtc.h>
- *     #include "stm32_rtc.h"
+ *     #include "lpc54_rtc.h"
  *
  *     struct rtc_lowerhalf_s *lower;
- *     lower = stm32_rtc_lowerhalf();
+ *     lower = lpc54_rtc_lowerhalf();
  *     rtc_initialize(0, lower);
  *
  * Input Parameters:
@@ -225,7 +161,7 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp);
 
 #ifdef CONFIG_RTC_DRIVER
 struct rtc_lowerhalf_s;
-FAR struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
+FAR struct rtc_lowerhalf_s *lpc54_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN
@@ -233,4 +169,4 @@ FAR struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_RTC_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_RTC_H */

@@ -105,6 +105,13 @@ ifeq ($(CONFIG_LPC54_GPIOIRQ),y)
 CHIP_CSRCS += lpc54_gpioirq.c
 endif
 
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += lpc54_rtc.c
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += lpc54_rtc_lowerhalf.c
+endif
+endif
+
 ifeq ($(CONFIG_LPC54_WWDT),y)
 CHIP_CSRCS += lpc54_wwdt.c
 endif

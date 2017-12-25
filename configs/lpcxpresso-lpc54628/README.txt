@@ -73,6 +73,8 @@ STATUS
   2017-12-24:  Added basic DMA support; brought in the WWDT driver from the
     LPC43 which has the same peripheral.  Neither tested; almost certainly
     non-functional without some additional investment.
+  2017-12-25:  Added an RTC driver.  It appears to be functional but has not
+    been well tested.
 
   There is still no support for the Accelerometer, SPIFI, Ethernet, or USB.
   There is a complete, but not-yet-functional SD card drirver.  There is a
@@ -343,6 +345,21 @@ Configurations
          CONFIG_MMCSD_SDIO=y
 
          CONFIG_NSH_MMCSDSLOTNO=0
+
+    6. The RTC is enabled in this configuration.
+
+         NuttShell (NSH) NuttX-7.23
+         nsh> date
+         Jan 01 00:00:06 1970
+         nsh> date -s "DEC 25 08:00:00 2017"
+         nsh> date
+         Dec 25 08:00:01 2017
+
+       After reset:
+
+         NuttShell (NSH) NuttX-7.23
+         nsh> date
+         Dec 25 08:00:05 2017
 
   nxwm:
 

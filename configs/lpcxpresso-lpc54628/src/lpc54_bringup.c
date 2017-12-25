@@ -57,6 +57,11 @@
 #  include "lpc54_sdmmc.h"
 #endif
 
+#ifdef CONFIG_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "lpc54_rtc.h"
+#endif
+
 #include "lpcxpresso-lpc54628.h"
 
 /****************************************************************************
@@ -82,6 +87,9 @@ int lpc54_bringup(void)
 #ifdef HAVE_MMCSD
   struct sdio_dev_s *sdmmc;
 #endif
+#ifdef HAVE_RTC_DRIVER
+  struct rtc_lowerhalf_s *rtc;
+#endif
   int ret;
 
 #ifdef CONFIG_FS_PROCFS
@@ -94,8 +102,30 @@ int lpc54_bringup(void)
     }
 #endif
 
-FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno);
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
 
+  rtc = lpc54_rtc_lowerhalf();
+  if (rtc == NULL)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, rtc);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
+        }
+    }
+#endif
 
 #ifdef HAVE_I2CTOOL
   /* Register I2C drivers on behalf of the I2C tool */
