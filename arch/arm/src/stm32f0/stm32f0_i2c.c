@@ -5,7 +5,7 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregroy Nutt <gnutt@nuttx.org>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Author: John Wharington
  *   Author: Sebastien Lorquet
  *   Author: dev@ziggurat29.com

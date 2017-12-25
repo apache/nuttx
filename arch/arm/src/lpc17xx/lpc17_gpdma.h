@@ -141,19 +141,6 @@ EXTERN volatile uint8_t g_dma_inprogress;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dmainitialize
- *
- * Description:
- *   Initialize the GPDMA subsystem (also prototyped in up_internal.h).
- *
- * Returned Value:
- *   Zero on success; A negated errno value on failure.
- *
- ****************************************************************************/
-
-void weak_function up_dmainitialize(void);
-
-/****************************************************************************
  * Name: lpc17_dmaconfigure
  *
  * Description:

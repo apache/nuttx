@@ -8,7 +8,7 @@
  * With extensions and modifications for the F1, F2, and F4 by:
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregroy Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            John Wharington
  *            David Sidrane <david_s5@nscdg.com>
  *            Bob Feretich <bob.feretich@rafresearch.com>

@@ -8,7 +8,7 @@
  * With extensions and modifications for the F1, F2, and F4 by:
  *
  *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregroy Nutt <gnutt@nuttx.org>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * And this version for the STM32 F3 by
  *

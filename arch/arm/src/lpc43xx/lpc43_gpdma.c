@@ -269,13 +269,14 @@ static int gpdma_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_dmainitialize
+ * Name: up_dmainitialize
  *
  * Description:
- *   Initialize the GPDMA subsystem.
+ *   Initialize the GPDMA subsystem.  Called from up_initialize() early in the
+ *   boot-up sequence.  Prototyped in up_internal.h.
  *
  * Returned Value:
- *   Zero on success; A negated errno value on failure.
+ *   None
  *
  ****************************************************************************/
 

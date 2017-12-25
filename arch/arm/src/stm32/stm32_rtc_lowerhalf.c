@@ -839,6 +839,7 @@ static int stm32_periodic_callback(void)
  *   on any failure.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_RTC_PERIODIC
 static int stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct lower_setperiodic_s *alarminfo)

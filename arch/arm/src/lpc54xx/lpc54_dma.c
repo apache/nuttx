@@ -220,10 +220,11 @@ static int lpc54_dma_interrupt(int irq, FAR void *context, FAR void *arg)
  * Name: up_dmainitialize
  *
  * Description:
- *   Initialize the DMA subsystem.
+ *   Initialize the DMA subsystem.  Called from up_initialize() early in the
+ *   boot-up sequence.  Prototyped in up_internal.h.
  *
  * Returned Value:
- *   Zero on success; A negated errno value on failure.
+ *   None
  *
  ****************************************************************************/
 
