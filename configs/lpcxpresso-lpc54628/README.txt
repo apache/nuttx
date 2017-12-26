@@ -75,6 +75,11 @@ STATUS
     non-functional without some additional investment.
   2017-12-25:  Added an RTC driver.  It appears to be functional but has not
     been well tested.
+  2017-12-26:  Added an RNG driver.  The RNG is actually controlled by a ROM
+    function.  This driver seems to work fine when single stepping.  However,
+    if I collect samples indefinitely, I do a reserved interrupt.  I suspect
+    that to use the ROM at high frequencies it may be necessary to modify the
+    ROM access timing in some way.
 
   There is still no support for the Accelerometer, SPIFI, Ethernet, or USB.
   There is a complete, but not-yet-functional SD card drirver.  There is a

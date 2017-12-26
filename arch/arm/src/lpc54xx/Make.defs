@@ -116,6 +116,10 @@ ifeq ($(CONFIG_LPC54_WWDT),y)
 CHIP_CSRCS += lpc54_wwdt.c
 endif
 
+ifeq ($(CONFIG_LPC54_RNG),y)
+CHIP_CSRCS += lpc54_rng.c
+endif
+
 ifeq ($(CONFIG_LPC54_HAVE_USART),y)
 CHIP_CSRCS += lpc54_serial.c
 endif

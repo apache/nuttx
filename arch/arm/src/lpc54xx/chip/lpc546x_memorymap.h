@@ -70,6 +70,10 @@
 #define LPC54_DRAMCS3_BASE   0xb8000000  /* Dynamic memory chip select 3 (<=256MB) */
 #define LPC54_CORTEXM4_BASE  0xe0000000  /* Cortex-M4 Private Peripheral Bus */
 
+/* ROM Driver Table */
+
+#define LPC54_ROM_DRIVERTAB  0x03000200  /* Beginning of the ROM driver table */
+
 /* AHB Peripherals */
 
 #define LPC54_SPIFI_BASE     0x40080000  /* SPIFI registers */

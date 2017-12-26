@@ -147,8 +147,6 @@ static int lpc54_rtc_interrupt(int irq, void *context, FAR void *arg)
 
 int up_rtc_initialize(void)
 {
-  uint32_t regval;
-
   /* Enable the clock to the RTC register interface and peripheral clock. */
 
   lpc54_rtc_enableclk();

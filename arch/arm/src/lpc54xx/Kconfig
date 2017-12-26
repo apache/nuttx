@@ -406,8 +406,13 @@ config LPC54_LCD
 	default n
 	depends on ARCH_LPC54_HAVE_LCD
 
+config LPC54_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	select ARCH_HAVE_RNG
+
 config LPC54_RTC
-	bool "RTC"
+	bool "Real Time Clock (RTC)"
 	default n
 	select RTC
 
