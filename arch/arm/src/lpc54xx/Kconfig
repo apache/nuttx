@@ -401,6 +401,13 @@ config LPC54_EMC
 	bool "External Memory Controller (EMC)"
 	default n
 
+config LPC54_ETHERNET
+	bool "Ethernet"
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	depends on EXPERIMENTAL
+
 config LPC54_LCD
 	bool "LCD controller"
 	default n

@@ -4,7 +4,7 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Derives from the LPC43xx tickless most logic
+ * Derives from the LPC43xx tickless mode logic
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
