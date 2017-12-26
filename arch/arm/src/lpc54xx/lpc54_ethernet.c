@@ -62,6 +62,8 @@
 
 #include "up_arch.h"
 #include "chip/lpc54_ethernet.h"
+#include "lpc54_enableclk.h"
+#include "lpc54_reset.h"
 
 #ifdef CONFIG_LPC54_ETHERNET
 
@@ -138,6 +140,10 @@ static struct lpc54_ethdriver_s g_ethdriver;
  * Private Function Prototypes
  ****************************************************************************/
 
+/* PHY_related logic */
+
+static int  lpc54_phy_initialize(FAR struct lpc54_ethdriver_s *priv);
+
 /* Common TX logic */
 
 static int  lpc54_eth_transmit(FAR struct lpc54_ethdriver_s *priv);
@@ -186,6 +192,26 @@ static int  lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc54_phy_initialize
+ *
+ * Description:
+ *   Initialize the PHY.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int lpc54_phy_initialize(FAR struct lpc54_ethdriver_s *priv)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
 
 /****************************************************************************
  * Name: lpc54_eth_transmit
@@ -805,7 +831,22 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
+  /* Initialize the PHY */
+
+  ret = lpc54_phy_initialize(priv);
+  if (ret < 0)
+    {
+      nerr("ERROR: lpc54_phy_initialize failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Initialize the Ethernet interface, and setup up Ethernet interrupts */
+#warning Missing logic
+
+  /* Set the Ethernet mode to RMII or MII in the ETHPHYSEL register */
+#warning Missing logic
+
+  /* Set the sideband flow control for each channel */
 #warning Missing logic
 
   /* Instantiate the MAC address from priv->eth_dev.d_mac.ether.ether_addr_octet */
@@ -863,8 +904,11 @@ static int lpc54_eth_ifdown(FAR struct net_driver_s *dev)
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the lpc54_eth_ifup() always
    * successfully brings the interface back up.
+   *
+   * Reset the Ethernet interface.
    */
-#warning Missing logic
+
+  lpc54_reset_eth();
 
   /* Mark the device "down" */
 
@@ -1129,10 +1173,13 @@ static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_eth_initialize
+ * Name: up_netinitialize
  *
  * Description:
- *   Initialize the Ethernet controller and driver
+ *   Initialize the Ethernet controller and driver.
+ *
+ *   This is the "standard" network initialization logic called from the
+ *   low-level initialization logic in up_initialize.c.
  *
  * Parameters:
  *   intf - In the case where there are multiple EMACs, this value
@@ -1145,7 +1192,7 @@ static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-int lpc54_eth_initialize(int intf)
+int up_netinitialize(int intf)
 {
   FAR struct lpc54_ethdriver_s *priv;
 
@@ -1153,9 +1200,6 @@ int lpc54_eth_initialize(int intf)
 
   DEBUGASSERT(intf == 0);
   priv = &g_ethdriver;
-
-  /* Check if a Ethernet chip is recognized at its I/O base */
-#warning Missing logic
 
   /* Attach the IRQ to the driver */
 
@@ -1189,18 +1233,68 @@ int lpc54_eth_initialize(int intf)
 
   DEBUGASSERT(priv->eth_txpoll != NULL && priv->eth_txtimeout != NULL);
 
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling lpc54_eth_ifdown().
-   */
-#warning Missing logic
+  /* Configure GPIO pins to support Ethernet */
+  /* Common MIIM interface */
 
-  /* Read the MAC address from the hardware into priv->eth_dev.d_mac.ether.ether_addr_octet */
-#warning Missing logic
+  lpc54_gpio_config(GPIO_ENET_MDIO);    /* Ethernet MIIM data input and output */
+  lpc54_gpio_config(GPIO_ENET_MDC);     /* Ethernet MIIM clock */
+
+#ifdef CONFIG_LPC54_MII
+  /* MII interface */
+
+  lpc54_gpio_config(GPIO_ENET_RXD0);    /* Ethernet receive data 0-3 */
+  lpc54_gpio_config(GPIO_ENET_RXD1);
+  lpc54_gpio_config(GPIO_ENET_RXD2);
+  lpc54_gpio_config(GPIO_ENET_RXD3);
+  lpc54_gpio_config(GPIO_ENET_TXD0);    /* Ethernet transmit data 0-3 */
+  lpc54_gpio_config(GPIO_ENET_TXD1);
+  lpc54_gpio_config(GPIO_ENET_TXD2);
+  lpc54_gpio_config(GPIO_ENET_TXD3);
+  lpc54_gpio_config(GPIO_ENET_COL);     /* Ethernet collision detect */
+  lpc54_gpio_config(GPIO_ENET_CRS);     /* Ethernet carrier sense */
+  lpc54_gpio_config(GPIO_ENET_RX_ER);   /* Ethernet transmit error */
+  lpc54_gpio_config(GPIO_ENET_TX_CLK);  /* Ethernet transmit clock */
+  lpc54_gpio_config(GPIO_ENET_RX_CLK);  /* Ethernet receive clock */
+  lpc54_gpio_config(GPIO_ENET_TX_ER);   /* Ethernet receive error */
+  lpc54_gpio_config(GPIO_ENET_TX_EN);   /* Ethernet transmit enable */
+#else
+  /* RMII interface */
+
+  lpc54_gpio_config(GPIO_ENET_RXD0);    /* Ethernet receive data 0-1 */
+  lpc54_gpio_config(GPIO_ENET_RXD1);
+  lpc54_gpio_config(GPIO_ENET_TXD0);    /* Ethernet transmit data 0-1 */
+  lpc54_gpio_config(GPIO_ENET_TXD1);
+  lpc54_gpio_config(GPIO_ENET_RX_DV);   /* Ethernet receive data valid */
+  lpc54_gpio_config(GPIO_ENET_TX_EN);   /* Ethernet transmit data enable */
+#endif
+
+  /* Enable clocking to the Ethernet peripheral */
+
+  lpc54_eth_enableclk();
+
+  /* Put the interface in the down state.  This amounts to resetting the
+   * device by calling lpc54_eth_ifdown().
+   */
+
+  ret = lpc54_eth_ifdown(&priv->eth_dev);
+  if (ret < 0)
+    {
+      goto errout_with_clock;
+    }
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->eth_dev, NET_LL_ETHERNET);
+  ret = netdev_register(&priv->eth_dev, NET_LL_ETHERNET);
+  if (ret < 0)
+    {
+      goto errout_with_clock:
+    }
+
   return OK;
+
+errout_with_clock:
+  lpc54_eth_disableclk();
+  return ret;
 }
 
 #endif /* CONFIG_LPC54_ETHERNET */

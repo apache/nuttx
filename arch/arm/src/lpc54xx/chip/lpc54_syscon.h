@@ -700,9 +700,17 @@
 /* EMC delay chain calibration control */
 #define SYSCON_EMCDLYCAL_
 /* Ethernet PHY selection */
-#define SYSCON_ETHPHYSEL_
+
+#define SYSCON_ETHPHYSEL                       (1 << 2)  /* Bit 2:  PHY_SEL PHY interface */
+#  define SYSCON_ETHPHYSEL_MII                 (0)       /*         Select MII PHY Interface */
+#  define SYSCON_ETHPHYSEL_RMII                (1 << 2)  /*         Select RMII PHY Interface */
+
 /* Ethernet SBD flow control */
-#define SYSCON_ETHSBDCTRL_
+
+#define SYSCON_ETHSBDCTRL_SHIFT                (0)       /* Bits 0-1: Sideband Flow Control */
+#define SYSCON_ETHSBDCTRL_MASK                 (3 << SYSCON_ETHSBDCTRL_SHIFT)
+#  define SYSCON_ETHSBDCTRL CHAN1              (0 << SYSCON_ETHSBDCTRL_SHIFT) /* Controls channel 0 */
+#  define SYSCON_ETHSBDCTRL_CHAN2              (2 << SYSCON_ETHSBDCTRL_SHIFT) /* Controls channel 1 */
 
 /* SDIO CCLKIN phase and delay control */
 

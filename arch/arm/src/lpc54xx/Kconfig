@@ -668,6 +668,17 @@ endif # LPC54_EMC_DYNAMIC
 
 endmenu # EMC Configuration
 
+menu "Ethernet configuration"
+	depends on LPC54_ETHERNET
+
+config LPC54_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.  Default:  Use RMII interface.
+
+endmenu # Ethernet configuration
+
 menu "SD/MMC Configuration"
 	depends on LPC54_SDMMC
 
