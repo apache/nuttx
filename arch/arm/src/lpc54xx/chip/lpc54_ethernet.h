@@ -341,13 +341,42 @@
 #define ETH_MAC_HW_FEAT2_
 
 /* MIDO address */
-#define ETH_MAC_MDIO_ADDR_
+
+#define ETH_MAC_MDIO_ADDR_MB                   (1 << 0)  /* Bit 0  MII busy */
+#define ETH_MAC_MDIO_ADDR_MOC_SHIFT            (2)       /* Bits 2-3: MII operation command */
+#define ETH_MAC_MDIO_ADDR_MOC_MASK             (3 << ETH_MAC_MDIO_ADDR_MOC_SHIFT)
+#  define ETH_MAC_MDIO_ADDR_MOC_WRITE          (1 << ETH_MAC_MDIO_ADDR_MOC_SHIFT) /* Write */
+#  define ETH_MAC_MDIO_ADDR_MOC_READ           (3 << ETH_MAC_MDIO_ADDR_MOC_SHIFT) /* Read */
+#define ETH_MAC_MDIO_ADDR_CR_SHIFT             (8)       /* Bits 8-11: CSR clock range */
+#define ETH_MAC_MDIO_ADDR_CR_MASK              (15 << ETH_MAC_MDIO_ADDR_CR_SHIFT)
+#  define ETH_MAC_MDIO_ADDR_CR_DIV42           (0 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=60-100 MHz; MDC=CSR/42 */
+#  define ETH_MAC_MDIO_ADDR_CR_DIV62           (1 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=100-150 MHz; MDC=CSR/62 */
+#  define ETH_MAC_MDIO_ADDR_CR_DIV16           (2 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=20-35 MHz; MDC=CSR/16 */
+#  define ETH_MAC_MDIO_ADDR_CR_DIV26           (3 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=35-60 MHz; MDC=CSR/26 */
+#define ETH_MAC_MDIO_ADDR_NTC_SHIFT            (12)      /* Bits 12-14: Number of training clocks */
+#define ETH_MAC_MDIO_ADDR_NTC_MASK             (7 << ETH_MAC_MDIO_ADDR_NTC_SHIFT)
+#  define ETH_MAC_MDIO_ADDR_NTC(n)             ((uint32_t)(n) << ETH_MAC_MDIO_ADDR_NTC_SHIFT)
+#define ETH_MAC_MDIO_ADDR_RDA_SHIFT            (16)      /* Bits 16-20: Register/device address */
+#define ETH_MAC_MDIO_ADDR_RDA_MASK             (31 << ETH_MAC_MDIO_ADDR_RDA_SHIFT)
+#  define ETH_MAC_MDIO_ADDR_RDA(n)             ((uint32_t)(n) << ETH_MAC_MDIO_ADDR_RDA_SHIFT)
+#define ETH_MAC_MDIO_ADDR_PA_SHIFT             (21)      /* Bits  21-25: Physical layer address */
+#define ETH_MAC_MDIO_ADDR_PA_MASK              (31 << ETH_MAC_MDIO_ADDR_PA_SHIFT)
+#  define ETH_MAC_MDIO_ADDR_PA(n)              ((uint32_t)(n) << ETH_MAC_MDIO_ADDR_PA_SHIFT)
+#define ETH_MAC_MDIO_ADDR_BTB                  (1 << 26) /* Bit 26  Back to back transactions */
+#define ETH_MAC_MDIO_ADDR_PSE                  (1 << 27) /* Bit 27  Preamble suppression enable */
+
 /* MDIO data */
-#define ETH_MAC_MDIO_DATA_
+
+#define ETH_MAC_MDIO_DATA_MASK                 0xffff    /* Bits 0-15: 16 bit PHY data */
+
 /* MAC address0 high */
-#define ETH_MAC_ADDR_HIGH_
-/* MAC address0 low */
-#define ETH_MAC_ADDR_LOW_
+
+#define ETH_MAC_ADDR_HIGH_A32_47_SHIFT         (0)       /* MAC address 32-47 */
+#define ETH_MAC_ADDR_HIGH_A32_47_MASK          (0xffff << ETH_MAC_ADDR_HIGH_A32_47_SHIFT)
+#  define ETH_MAC_ADDR_HIGH_A32_47(n)          ((uint32_t)(n) << ETH_MAC_ADDR_HIGH_A32_47_SHIFT)
+#define ETH_MAC_ADDR_HIGH_DCS                  (1 << 16) /* Bit 16: DMA channel select */
+
+/* MAC address0 low (32-bit MAC address 0-31) */
 
 /* Timestamp control */
 #define ETH_MAC_TIMESTAMP_CTRL_

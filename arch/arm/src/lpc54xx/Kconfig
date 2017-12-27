@@ -671,6 +671,12 @@ endmenu # EMC Configuration
 menu "Ethernet configuration"
 	depends on LPC54_ETHERNET
 
+config LPC54_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
 config LPC54_MII
 	bool "Use MII interface"
 	default n

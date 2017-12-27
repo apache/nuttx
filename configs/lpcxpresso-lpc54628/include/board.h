@@ -383,6 +383,48 @@
 
 #define GPIO_LCD_VD3               GPIO_LCD_VD3_1
 
+/* Ethernet Clock
+ *
+ * The Lpcxpresso-LPC546258 uses a LAN8720A PHY in RMII mode.  Clocking is
+ * provided via a 25MHz crystal (Y1).  CLKOUT on P3.12 is an option if JS4
+ * is reversed.
+ */
+
+#define BOARD_PHY_CLOCK            25000000  /* 25MHz crystal */
+
+/* Ethernet RMII mode pins:
+ *
+ *   P4_16-ENET_MDIO     Ethernet MIIM data input and output
+ *   P4_15-ENET_MDC      Ethernet MIIM clock
+ *
+ *   P4_11-ENET_RXD0     Ethernet receive data 0-1
+ *   P4_12-ENET_RXD1
+ *   P4_8-ENET_TXD0      Ethernet transmit data 0-1
+ *   P0_17-ENET_TXD1
+ *   P4_10-ENET_CRS_DV   Ethernet receive data valid
+ *   P4_13-ENET_TX_EN    Ethernet transmit data enable
+ *
+ *   P4_14-ENET_RX_CLK   REF_CLK, Reference clock (Not used)
+ *   P2_26-ENET_PHY_RSTn nRST (Controlled by board logic)
+ *
+ * NOTE:  You must set JP11 and JP12 to close 1-2 to enable Ethernet
+ * port functionality.  Some pins are shared with USB0 overcurrent
+ * feature.
+ */
+
+
+#define GPIO_ENET_MDIO             GPIO_ENET_MDIO_2   /* P4.16 */
+#define GPIO_ENET_MDC              GPIO_ENET_MDC_2    /* P4.15 */
+
+#define GPIO_ENET_RXD0             GPIO_ENET_RXD0_2   /* P4.11 */
+#define GPIO_ENET_RXD1             GPIO_ENET_RXD1_2   /* P4.12 */
+#define GPIO_ENET_TXD0             GPIO_ENET_TXD0_3   /* P4.8 */
+#define GPIO_ENET_TXD1             GPIO_ENET_TXD1_4   /* P0.17 */
+#define GPIO_ENET_RX_DV            GPIO_ENET_RX_DV_2  /* P4.10 */
+#define GPIO_ENET_TX_EN            GPIO_ENET_TX_EN_2  /* P4.13 */
+
+#define GPIO_ENET_RX_CLK           GPIO_ENET_RX_CLK_2 /* P4.14 */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

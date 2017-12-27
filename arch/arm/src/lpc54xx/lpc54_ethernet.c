@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/ioctl.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -53,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
@@ -61,6 +63,7 @@
 #endif
 
 #include "up_arch.h"
+#include "chip/lpc54_syscon.h"
 #include "chip/lpc54_ethernet.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_reset.h"
@@ -91,6 +94,16 @@
 
 #define LPC54_TXTIMEOUT (60*CLK_TCK)
 
+/* PHY-related definitions */
+
+#define LPC54_PHY_TIMEOUT 0x00ffffff    /* Timeout for PHY register accesses */
+
+#ifdef CONFIG_ETH0_PHY_LAN8720
+#  define LPC54_PHYID1_VAL MII_PHYID1_LAN8720
+#else
+#  error Unrecognized PHY selection
+#endif
+
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->eth_dev.d_buf)
@@ -106,6 +119,8 @@
 struct lpc54_ethdriver_s
 {
   bool eth_bifup;               /* true:ifup false:ifdown */
+  bool eth_fullduplex;          /* true:Full duplex false:Half duplex mode */
+  bool eth_100mbps;             /* true:100mbps false:10mbps */
   WDOG_ID eth_txpoll;           /* TX poll timer */
   WDOG_ID eth_txtimeout;        /* TX timeout timer */
   struct work_s eth_irqwork;    /* For deferring interupt work to the work queue */
@@ -139,10 +154,6 @@ static struct lpc54_ethdriver_s g_ethdriver;
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/* PHY_related logic */
-
-static int  lpc54_phy_initialize(FAR struct lpc54_ethdriver_s *priv);
 
 /* Common TX logic */
 
@@ -189,29 +200,20 @@ static int  lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
 
+/* Initialization/PHY control */
+
+static void lpc54_set_csrdiv(void);
+static uint16_t lpc54_phy_read(FAR struct lpc54_ethdriver_s *priv,
+              uint8_t phyreg);
+static void lpc54_phy_write(FAR struct lpc54_ethdriver_s *priv,
+              uint8_t phyreg, uint16_t phyval);
+static inline bool lpc54_phy_linkstatus(ENET_Type *base);
+static int  lpc54_phy_autonegotiate(FAR struct lpc54_ethdriver_s *priv);
+static int  lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lpc54_phy_initialize
- *
- * Description:
- *   Initialize the PHY.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int lpc54_phy_initialize(FAR struct lpc54_ethdriver_s *priv)
-{
-#warning Missing logic
-  return -ENOSYS;
-}
 
 /****************************************************************************
  * Name: lpc54_eth_transmit
@@ -833,17 +835,14 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
 
   /* Initialize the PHY */
 
-  ret = lpc54_phy_initialize(priv);
+  ret = lpc54_phy_autonegotiate(priv);
   if (ret < 0)
     {
-      nerr("ERROR: lpc54_phy_initialize failed: %d\n", ret);
+      nerr("ERROR: lpc54_phy_autonegotiate failed: %d\n", ret);
       return ret;
     }
 
   /* Initialize the Ethernet interface, and setup up Ethernet interrupts */
-#warning Missing logic
-
-  /* Set the Ethernet mode to RMII or MII in the ETHPHYSEL register */
 #warning Missing logic
 
   /* Set the sideband flow control for each channel */
@@ -890,6 +889,7 @@ static int lpc54_eth_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
   irqstate_t flags;
+  uint32_t regval;
 
   /* Disable the Ethernet interrupt */
 
@@ -909,6 +909,28 @@ static int lpc54_eth_ifdown(FAR struct net_driver_s *dev)
    */
 
   lpc54_reset_eth();
+
+  /* Select MII or RMII mode */
+
+  regval  = getreg32(LPC54_SYSCON_ETHPHYSEL);
+  regval &= ~SYSCON_ETHPHYSEL_MASK;
+#ifdef CONFIG_LPC54_MII
+  retval |= SYSCON_ETHPHYSEL_MII;
+#else
+  retval |= SYSCON_ETHPHYSEL_RMII;
+#endif
+  putreg32(regval, LPC54_SYSCON_ETHPHYSEL);
+
+  /* Reset the PHY and bring it to an operational state.  We must be capable
+   * of handling PHY ioctl commands while the network is down.
+   */
+
+  ret = lpc54_phy_reset(priv);
+  if (ret < 0)
+    {
+      nerr("ERROR: lpc54_phy_reset failed: %d\n", ret);
+      return ret;
+    }
 
   /* Mark the device "down" */
 
@@ -1156,8 +1178,29 @@ static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   switch (cmd)
     {
-      /* Add cases here to support the IOCTL commands */
-#warning Missing logic
+     case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = CONFIG_LPC54_PHYADDR;
+          ret = OK;
+        }
+        break;
+
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->val_out = lpc54_phy_read(priv, req->reg_num);
+          ret = OK
+        }
+        break;
+
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          lpc54_phy_write(priv, req->reg_num, req->val_in);
+          ret = OK
+        }
+        break;
 
       default:
         nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
@@ -1167,6 +1210,288 @@ static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: lpc54_set_csrdiv
+ *
+ * Description:
+ *   Set the CSR clock divider.  The MDC clock derives from the divided down
+ *   CSR clock (aka core clock or main clock).
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_set_csrdiv(void)
+{
+  uint32_t srcclk = BOARD_MAIN_CLK / 1000000;
+  uint32_t regval;
+
+  regval = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
+  regval &= ~ETH_MAC_MDIO_ADDR_CR_MASK;
+
+  if (srcclk < 35)
+    {
+      regval |= ETH_MAC_MDIO_ADDR_CR_DIV16;    /* CSR=20-35 MHz; MDC=CSR/16 */
+    }
+  else if (srcclk < 60)
+    {
+      regval |= ETH_MAC_MDIO_ADDR_CR_DIV26;    /* CSR=35-60 MHz; MDC=CSR/26 */
+    }
+  else if (srcclk < 100)
+    {
+      regval |= ETH_MAC_MDIO_ADDR_CR_ DIV42;   /* CSR=60-100 MHz; MDC=CSR/42 */
+    }
+  else /* if (srcclk < 150) */
+    {
+      regval |= ETH_MAC_MDIO_ADDR_CR_DIV62;    /* CSR=100-150 MHz; MDC=CSR/62 */
+    }
+
+  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+}
+
+/****************************************************************************
+ * Name: lpc54_phy_read
+ *
+ * Description:
+ *   Read the content from one PHY register.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *   phyreg - The 5-bit PHY address to read
+ *
+ * Returned Value:
+ *   The 16-bit value read from the specified PHY register
+ *
+ ****************************************************************************/
+
+static uint16_t lpc54_phy_read(FAR struct lpc54_ethdriver_s *priv,
+                               uint8_t phyreg)
+{
+  uint32_t regval = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
+
+  /* Set the MII read command. */
+
+  regval  = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
+  regval &= ETH_MAC_MDIO_ADDR_CR_MASK;
+  regval |= ETH_MAC_MDIO_ADDR_MOC_READ | ETH_MAC_MDIO_ADDR_RDA(phyreg) |
+            ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_PHYADDR);
+  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+
+  /* Initiate the read */
+
+  regval |= ETH_MAC_MDIO_ADDR_MB;
+  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+
+  /* Wait until the SMI is no longer busy with the read */
+
+  while ((getreg32(LPC54_ETH_MAC_MDIO_ADDR) & ETH_MAC_MDIO_ADDR_MB) != 0)
+    {
+    }
+
+  return (uint16_t)getreg32(LPC54_ETH_MAC_MDIO_DATA);
+}
+
+/****************************************************************************
+ * Name: lpc54_phy_write
+ *
+ * Description:
+ *   Write a new value to of one PHY register.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *   phyreg - The 5-bit PHY address to write
+ *   phyval - The 16-bit value to write to the PHY register
+ *
+ * Returned Value:
+ *   The 16-bit value read from the specified PHY register
+ *
+ ****************************************************************************/
+
+static void lpc54_phy_write(FAR struct lpc54_ethdriver_s *priv,
+                            uint8_t phyreg, uint16_t phyval)
+{
+  uint32_t regval = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
+
+  /* Set the MII write command. */
+
+  regval  = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
+  regval &= ETH_MAC_MDIO_ADDR_CR_MASK;
+  regval |= ETH_MAC_MDIO_ADDR_MOC_WRITE | ETH_MAC_MDIO_ADDR_RDA(phyreg) |
+            ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_PHYADDR);
+  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+
+  /* Set the write data */
+
+  putreg32((uint32_t)phyval, LPC54_ETH_MAC_MDIO_DATA);
+
+  /* Initiate the write */
+
+  regval |= ETH_MAC_MDIO_ADDR_MB;
+  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+
+  /* Wait until the SMI is no longer busy with the write */
+
+  while ((getreg32(LPC54_ETH_MAC_MDIO_ADDR) & ETH_MAC_MDIO_ADDR_MB) != 0)
+    {
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_phy_linkstatus
+ *
+ * Description:
+ *   Read the MII status register and return tru if the link is up.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   true if the link is up
+ *
+ ****************************************************************************/
+
+static inline bool lpc54_phy_linkstatus(ENET_Type *base)
+{
+  /* Read the status register and return tru of the linkstatus bit is set. */
+
+  return ((lpc54_phy_read(priv, MII_MSR) & MII_MSR_LINKSTATUS) != 0);
+}
+
+/****************************************************************************
+ * Name: lpc54_phy_autonegotiate
+ *
+ * Description:
+ *   Initialize the PHY.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int lpc54_phy_autonegotiate(FAR struct lpc54_ethdriver_s *priv)
+{
+  volatile int32_t timeout;
+  uint16_t phyid1;
+  uint16_t phyval;
+
+  /* Advertise our cabilities. */
+
+  phyval = (MII_ADVERTISE_CSMA | MII_ADVERTISE_10BASETXHALF |
+            MII_ADVERTISE_10BASETXFULL | MII_ADVERTISE_100BASETXHALF |
+            MII_ADVERTISE_100BASETXFULL);
+  lpc54_phy_write(priv, MII_ADVERTISE, phyval);
+
+  /* Start Auto negotiation and wait until auto negotiation completion */
+
+  phyval = (MII_MCR_ANENABLE | MII_MCR_ANRESTART);
+  lpc54_phy_write(priv, MII_MCR, phyval);
+
+  /* Wait for the completion of autonegotiation. */
+
+#ifdef CONFIG_ETH0_PHY_LAN8720
+  timeout = LPC54_PHY_TIMEOUT;
+  do
+    {
+      if (timeout-- <= 0)
+        {
+          return -ETIMEDOUT;
+        }
+
+      phyval = lpc54_phy_read(priv, MII_LAN8720_SCSR);
+
+    }
+  while ((phyval & MII_LAN8720_SPSCR_ANEGDONE) == 0);
+#else
+#  error Unrecognized PHY
+#endif
+
+  /* Wait for the link to be in the UP state */
+
+  timeout = LPC54_PHY_TIMEOUT;
+  do
+    {
+      if (timeout-- <= 0)
+        {
+          return -ETIMEDOUT;
+        }
+    }
+  while (!lpc54_phy_linkstatus(priv));
+
+  /* Get the negotiate PHY link mode. */
+
+#ifdef CONFIG_ETH0_PHY_LAN8720
+  /* Read the LAN8720 SPCR register. */
+
+  phyval               = lpc54_phy_read(priv, MII_LAN8720_SCSR);
+  priv->eth_fullduplex = ((phyval & MII_LAN8720_SPSCR_DUPLEX) != 0);
+  priv->eth_100mbps    = ((phyval & MII_LAN8720_SPSCR_100MBPS) != 0);
+#else
+#  error Unrecognized PHY
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: lpc54_phy_reset
+ *
+ * Description:
+ *   Reset the PHY and bring it to the operational status
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv)
+{
+  volatile int32_t timeout;
+  uint16_t phyid1;
+  uint16_t phyval;
+
+  /* Read and verify the PHY ID1 register */
+
+  timeout = LPC54_PHY_TIMEOUT;
+  do
+    {
+      if (timeout-- <= 0)
+        {
+          return -ETIMEDOUT;
+        }
+
+      phyid1 = lpc54_phy_read(priv, MII_PHYID1);
+    }
+  while (phyid1 != LPC54_PHYID1_VAL);
+
+  /* Reset PHY and wait until completion. */
+
+  lpc54_phy_write(priv, MII_MCR, MII_MCR_RESET);
+
+  timeout = LPC54_PHY_TIMEOUT;
+  do
+    {
+      if (timeout-- <= 0)
+        {
+          return -ETIMEDOUT;
+        }
+
+      phyval = lpc54_phy_read(base, CONFIG_LPC54_PHYADDR, MII_MCR, &reg);
+    }
+  while ((phyval & MII_MCR_RESET) != 0);
+
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -1207,6 +1532,7 @@ int up_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
+      nerr("ERROR:  irq_attach failed\n");
       return -EAGAIN;
     }
 
@@ -1258,7 +1584,11 @@ int up_netinitialize(int intf)
   lpc54_gpio_config(GPIO_ENET_TX_ER);   /* Ethernet receive error */
   lpc54_gpio_config(GPIO_ENET_TX_EN);   /* Ethernet transmit enable */
 #else
-  /* RMII interface */
+  /* RMII interface.
+   *
+   *   REF_CLK may be available in some implementations
+   *   RX_ER is optional on switches
+   */
 
   lpc54_gpio_config(GPIO_ENET_RXD0);    /* Ethernet receive data 0-1 */
   lpc54_gpio_config(GPIO_ENET_RXD1);
@@ -1272,6 +1602,10 @@ int up_netinitialize(int intf)
 
   lpc54_eth_enableclk();
 
+  /* Set the CSR clock divider */
+
+  lpc43_set_crsdiv();
+
   /* Put the interface in the down state.  This amounts to resetting the
    * device by calling lpc54_eth_ifdown().
    */
@@ -1279,6 +1613,7 @@ int up_netinitialize(int intf)
   ret = lpc54_eth_ifdown(&priv->eth_dev);
   if (ret < 0)
     {
+      nerr("ERROR:  lpc54_eth_ifdown failed: %d\n", ret);
       goto errout_with_clock;
     }
 
@@ -1287,6 +1622,7 @@ int up_netinitialize(int intf)
   ret = netdev_register(&priv->eth_dev, NET_LL_ETHERNET);
   if (ret < 0)
     {
+      nerr("ERROR:  netdev_register failed: %d\n", ret);
       goto errout_with_clock:
     }
 

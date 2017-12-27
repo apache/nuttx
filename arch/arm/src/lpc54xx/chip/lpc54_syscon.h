@@ -701,7 +701,7 @@
 #define SYSCON_EMCDLYCAL_
 /* Ethernet PHY selection */
 
-#define SYSCON_ETHPHYSEL                       (1 << 2)  /* Bit 2:  PHY_SEL PHY interface */
+#define SYSCON_ETHPHYSEL_MASK                  (1 << 2)  /* Bit 2:  PHY_SEL PHY interface */
 #  define SYSCON_ETHPHYSEL_MII                 (0)       /*         Select MII PHY Interface */
 #  define SYSCON_ETHPHYSEL_RMII                (1 << 2)  /*         Select RMII PHY Interface */
 

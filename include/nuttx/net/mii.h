@@ -351,6 +351,14 @@
 #define MII_PHYID1_LAN8720           0x0007    /* ID1 value for LAN8720 */
 #define MII_PHYID2_LAN8720           0xc0f1    /* ID2 value for LAN8720 */
 
+/* SMSC LAN8720 SPCR register bits */
+
+#define MII_LAN8720_SPSCR_10MBPS     (1 << 2)  /* Bit 2:  10MBPS speed */
+#define MII_LAN8720_SPSCR_100MBPS    (1 << 3)  /* Bit 3:  100MBPS speed */
+#define MII_LAN8720_SPSCR_DUPLEX     (1 << 4)  /* Bit 4:  Duplex mode */
+#define MII_LAN8720_SPSCR_MODEMASK   0x1c      /*         Mode/speed mask */
+#define MII_LAN8720_SPSCR_ANEGDONE   (1 << 12) /* Bit 12: Autonegotiation complete */
+
 /* SMSC LAN8740 MII ID1/2 register bits */
 
 #define MII_PHYID1_LAN8740           0x0007    /* ID1 value for LAN8740 */
