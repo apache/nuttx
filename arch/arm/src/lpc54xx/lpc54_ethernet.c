@@ -33,6 +33,12 @@
  *
  ****************************************************************************/
 
+/* TODO:
+ *
+ * Timestamps not supported
+ * Multi-queuing not supported.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -820,6 +826,10 @@ static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
 static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  uintptr_t base;
+  uint32_t regval;
+  uint32_t burstlen;
+  int i;
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
@@ -842,7 +852,57 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  /* Initialize the Ethernet interface, and setup up Ethernet interrupts */
+  /* Initialize the Ethernet interface */
+  /* Initialize Ethernet DMA */
+  /* Reset DMA */
+
+  regval  = getreg32(LPC54_ETH_DMA_MODE);
+  regval |= ETH_DMA_MODE_SWR;
+  putreg32(regval, LPC54_ETH_DMA_MODE);
+
+  /* Wait for the reset bit to be cleared at the completion of the reset */
+
+  while ((getreg32(LPC54_ETH_DMA_MODE) & ETH_DMA_MODE_SWR) != 0)
+    {
+    }
+
+  /* Set the burst length for each DMA descriptor ring */
+
+  for (i = 0; i < ENET_RING_NUM_MAX; i++)
+    {
+      base = LPC54_ETH_DMA_CH_CTRL_BASE(i);
+
+      /* REVISIT: burstlen setting for the case of multi-queuing.
+       * REVISIT: Additional logic needed if burstlen > 32.
+       */
+
+      burstlen = 1;  /* DMA burst length = 1 */
+
+      /* REVISIT: We would need to set ETH_DMACH_CTRL_PBLx8 in LPC54_ETH_DMACH_CTRL
+       * is required for the burst length setting.
+       */
+
+      putreg32(0, base + LPC54_ETH_DMACH_CTRL_OFFSET);
+
+      regval  = getreg(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
+      regval &= ~ETH_DMACH_TX_CTRL_TxPBL_MASK;
+      regval |= ETH_DMACH_TX_CTRL_TxPBL(burstlen);
+      putreg32(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
+
+
+      regval = getreg(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
+      regval &= ~ETH_DMACH_RX_CTRL_RxPBL_MASK;
+      regval |= ETH_DMACH_RX_CTRL_RxPBL(burstlen);
+      putreg32(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
+    }
+
+  /* Initializes the Ethernet MTL */
+#warning Missing logic
+
+  /* Initialize the Ethernet MAC */
+#warning Missing logic
+
+  /* Setup up Ethernet interrupts */
 #warning Missing logic
 
   /* Set the sideband flow control for each channel */

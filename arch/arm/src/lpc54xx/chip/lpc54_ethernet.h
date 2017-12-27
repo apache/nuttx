@@ -129,42 +129,26 @@
 #define LPC54_ETH_DMA_INTR_STAT_OFFSET                   0x1008  /* DMA interrupt status */
 #define LPC54_ETH_DMA_DBG_STAT_OFFSET                    0x100c  /* DMA debug status */
 
-#define LPC54_ETH_DMA_CH0_CTRL_OFFSET                    0x1100  /* DMA channel 0 control */
-#define LPC54_ETH_CH0_TX_CTRL_OFFSET                     0x1104  /* DMA channel 0 transmit control */
-#define LPC54_ETH_DMA_CH0_RX_CTRL_OFFSET                 0x1108  /* DMA channel 0 receive control */
-#define LPC54_ETH_DMA_CH0_TXDESC_LIST_ADDR_OFFSET        0x1114  /* Channel 0 Tx descriptor list address */
-#define LPC54_ETH_DMA_CH0_RXDESC_LIST_ADDR_OFFSET        0x111c  /* Channel 0 Rx descriptor list address */
-#define LPC54_ETH_DMA_CH0_TXDESC_TAIL_PTR_OFFSET         0x1120  /* Channel 0 Tx descriptor tail pointer */
-#define LPC54_ETH_DMA_CH0_RXDESC_TAIL_PTR_OFFSET         0x1128  /* Channel 0 Rx descriptor tail pointer */
-#define LPC54_ETH_DMA_CH0_TXDESC_RING_LENGTH_OFFSET      0x112c  /* Channel 0 Tx descriptor ring length */
-#define LPC54_ETH_DMA_CH0_RXDESC_RING_LENGTH_OFFSET      0x1130  /* Channel 0 Rx descriptor ring length */
-#define LPC54_ETH_DMA_CH0_INT_EN_OFFSET                  0x1134  /* Channel 0 interrupt enable */
-#define LPC54_ETH_DMA_CH0_RX_INT_WDTIMER_OFFSET          0x1138  /* Receive interrupt watchdog timer */
-#define LPC54_ETH_DMA_CH0_SLOT_FUNC_CTRL_STAT_OFFSET     0x113c  /** Slot function control and status */
-#define LPC54_ETH_DMA_CH0_CUR_HST_TXDESC_OFFSET          0x1144  /* Channel 0 current host transmit descriptor */
-#define LPC54_ETH_DMA_CH0_CUR_HST_RXDESC_OFFSET          0x114c  /** Channel 0 current host receive descriptor */
-#define LPC54_ETH_DMA_CH0_CUR_HST_TXBUF_OFFSET           0x1154  /* Channel 0 current host transmit buffer address */
-#define LPC54_ETH_DMA_CH0_CUR_HST_RXBUF_OFFSET           0x115c  /* Channel 0 current application receive buffer address */
-#define LPC54_ETH_DMA_CH0_STAT_OFFSET                    0x1160  /* Channel 0 DMA status */
-#define LPC54_ETH_DMA_CH0_MISS_FRAME_CNT_OFFSET          0x116c  /** Channel 0 missed frame count */
-#define LPC54_ETH_DMA_CH1_CTRL_OFFSET                    0x1180  /* DMA channel 1 control */
-#define LPC54_ETH_DMA_CH1_TX_CTRL_OFFSET                 0x1184  /* DMA channel 1 transmit control */
-#define LPC54_ETH_DMA_CH1_RX_CTRL_OFFSET                 0x1188  /* The DMA channel 1 receive control */
-#define LPC54_ETH_DMA_CH1_TXDESC_LIST_ADDR_OFFSET        0x1194  /* The channel 1 Tx descriptor list address */
-#define LPC54_ETH_DMA_CH1_RXDESC_LIST_ADDR_OFFSET        0x119c  /* The channel 1 Rx descriptor list address */
-#define LPC54_ETH_DMA_CH1_TXDESC_TAIL_PTR_OFFSET         0x11a0  /* The channel 1 Tx descriptor tail pointer */
-#define LPC54_ETH_DMA_CH1_RXDESC_TAIL_PTR_OFFSET         0x11a8  /* The channel 1 Rx descriptor tail pointer */
-#define LPC54_ETH_DMA_CH1_TXDESC_RING_LENGTH_OFFSET      0x11ac  /* Channel 1 Tx descriptor ring length */
-#define LPC54_ETH_DMA_CH1_RXDESC_RING_LENGTH_OFFSET      0x11b0  /* The channel 1 Rx descriptor ring length */
-#define LPC54_ETH_DMA_CH1_INT_EN_OFFSET                  0x11b4  /* The channel 1 interrupt enable */
-#define LPC54_ETH_DMA_CH1_RX_INT_WDTIMER_OFFSET          0x11b8  /* The channel 1 receive interrupt watchdog timer */
-#define LPC54_ETH_DMA_CH1_SLOT_FUNC_CTRL_STAT_OFFSET     0x11bc  /* The channel 1 slot function control and status */
-#define LPC54_ETH_DMA_CH1_CUR_HST_TXDESC_OFFSET          0x11c4  /* The channel 1 current host transmit descriptor */
-#define LPC54_ETH_DMA_CH1_CUR_HST_RXDESC_OFFSET          0x11cc  /* The channel 1 current host receive descriptor */
-#define LPC54_ETH_DMA_CH1_CUR_HST_TXBUF_OFFSET           0x11d4  /* The channel 1 current host transmit buffer address */
-#define LPC54_ETH_DMA_CH1_CUR_HST_RXBUF_OFFSET           0x11dc  /** The channel 1 current host receive buffer address */
-#define LPC54_ETH_DMA_CH1_STAT_OFFSET                    0x11e0  /* Channel 1 DMA status */
-#define LPC54_ETH_DMA_CH1_MISS_FRAME_CNT_OFFSET          0x11ec  /* Channel 1 missed frame count */
+#define LPC54_ETH_DMACH_CTRL_OFFSET(n)                   (0x1100 + ((n) << 7))
+
+#define LPC54_ETH_DMACH_CTRL_OFFSET                      0x0000  /* DMA channel n control */
+#define LPC54_ETH_DMACH_TX_CTRL_OFFSET                   0x0004  /* DMA channel n transmit control */
+#define LPC54_ETH_DMACH_RX_CTRL_OFFSET                   0x0008  /* DMA channel n receive control */
+#define LPC54_ETH_DMACH_TXDESC_LIST_ADDR_OFFSET          0x0014  /* DMA channel n Tx descriptor list address */
+#define LPC54_ETH_DMACH_RXDESC_LIST_ADDR_OFFSET          0x001c  /* DMA channel n Rx descriptor list address */
+#define LPC54_ETH_DMACH_TXDESC_TAIL_PTR_OFFSET           0x0020  /* DMA channel n Tx descriptor tail pointer */
+#define LPC54_ETH_DMACH_RXDESC_TAIL_PTR_OFFSET           0x0028  /* DMA channel n Rx descriptor tail pointer */
+#define LPC54_ETH_DMACH_TXDESC_RING_LENGTH_OFFSET        0x002c  /* DMA channel n Tx descriptor ring length */
+#define LPC54_ETH_DMACH_RXDESC_RING_LENGTH_OFFSET        0x0030  /* DMA channel n Rx descriptor ring length */
+#define LPC54_ETH_DMACH_INT_EN_OFFSET                    0x0034  /* DMA channel n interrupt enable */
+#define LPC54_ETH_DMACH_RX_INT_WDTIMER_OFFSET            0x0038  /* DMA channel n receive interrupt watchdog timer */
+#define LPC54_ETH_DMACH_SLOT_FUNC_CTRL_STAT_OFFSET       0x003c  /* DMA channel n slot function control and status */
+#define LPC54_ETH_DMACH_CUR_HST_TXDESC_OFFSET            0x0044  /* DMA channel n current host transmit descriptor */
+#define LPC54_ETH_DMACH_CUR_HST_RXDESC_OFFSET            0x004c  /* DMA channel n current host receive descriptor */
+#define LPC54_ETH_DMACH_CUR_HST_TXBUF_OFFSET             0x0054  /* DMA channel n current host transmit buffer address */
+#define LPC54_ETH_DMACH_CUR_HST_RXBUF_OFFSET             0x005c  /* DMA channel n current application receive buffer address */
+#define LPC54_ETH_DMACH_STAT_OFFSET                      0x0060  /* DMA channel n DMA status */
+#define LPC54_ETH_DMACH_MISS_FRAME_CNT_OFFSET            0x006c  /* DMA channel n missed frame count */
 
 /* Register addresses ***************************************************************************************/
 
@@ -248,42 +232,26 @@
 #define LPC54_ETH_DMA_INTR_STAT                          (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_INTR_STAT_OFFSET)
 #define LPC54_ETH_DMA_DBG_STAT                           (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_DBG_STAT_OFFSET)
 
-#define LPC54_ETH_DMA_CH0_CTRL                           (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_CTRL_OFFSET)
-#define LPC54_ETH_CH0_TX_CTRL                            (LPC54_ETHERNET_BASE + LPC54_ETH_CH0_TX_CTRL_OFFSET)
-#define LPC54_ETH_DMA_CH0_RX_CTRL                        (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_RX_CTRL_OFFSET)
-#define LPC54_ETH_DMA_CH0_TXDESC_LIST_ADDR               (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_TXDESC_LIST_ADDR_OFFSET)
-#define LPC54_ETH_DMA_CH0_RXDESC_LIST_ADDR               (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_RXDESC_LIST_ADDR_OFFSET)
-#define LPC54_ETH_DMA_CH0_TXDESC_TAIL_PTR                (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_TXDESC_TAIL_PTR_OFFSET)
-#define LPC54_ETH_DMA_CH0_RXDESC_TAIL_PTR                (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_RXDESC_TAIL_PTR_OFFSET)
-#define LPC54_ETH_DMA_CH0_TXDESC_RING_LENGTH             (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_TXDESC_RING_LENGTH_OFFSET)
-#define LPC54_ETH_DMA_CH0_RXDESC_RING_LENGTH             (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_RXDESC_RING_LENGTH_OFFSET)
-#define LPC54_ETH_DMA_CH0_INT_EN                         (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_INT_EN_OFFSET)
-#define LPC54_ETH_DMA_CH0_RX_INT_WDTIMER                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_RX_INT_WDTIMER_OFFSET)
-#define LPC54_ETH_DMA_CH0_SLOT_FUNC_CTRL_STAT            (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_SLOT_FUNC_CTRL_STAT_OFFSET)
-#define LPC54_ETH_DMA_CH0_CUR_HST_TXDESC                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_CUR_HST_TXDESC_OFFSET)
-#define LPC54_ETH_DMA_CH0_CUR_HST_RXDESC                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_CUR_HST_RXDESC_OFFSET)
-#define LPC54_ETH_DMA_CH0_CUR_HST_TXBUF                  (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_CUR_HST_TXBUF_OFFSET)
-#define LPC54_ETH_DMA_CH0_CUR_HST_RXBUF                  (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_CUR_HST_RXBUF_OFFSET)
-#define LPC54_ETH_DMA_CH0_STAT                           (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_STAT_OFFSET)
-#define LPC54_ETH_DMA_CH0_MISS_FRAME_CNT                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH0_MISS_FRAME_CNT_OFFSET)
-#define LPC54_ETH_DMA_CH1_CTRL                           (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_CTRL_OFFSET)
-#define LPC54_ETH_DMA_CH1_TX_CTRL                        (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_TX_CTRL_OFFSET)
-#define LPC54_ETH_DMA_CH1_RX_CTRL                        (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_RX_CTRL_OFFSET)
-#define LPC54_ETH_DMA_CH1_TXDESC_LIST_ADDR               (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_TXDESC_LIST_ADDR_OFFSET)
-#define LPC54_ETH_DMA_CH1_RXDESC_LIST_ADDR               (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_RXDESC_LIST_ADDR_OFFSET)
-#define LPC54_ETH_DMA_CH1_TXDESC_TAIL_PTR                (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_TXDESC_TAIL_PTR_OFFSET)
-#define LPC54_ETH_DMA_CH1_RXDESC_TAIL_PTR                (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_RXDESC_TAIL_PTR_OFFSET)
-#define LPC54_ETH_DMA_CH1_TXDESC_RING_LENGTH             (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_TXDESC_RING_LENGTH_OFFSET)
-#define LPC54_ETH_DMA_CH1_RXDESC_RING_LENGTH             (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_RXDESC_RING_LENGTH_OFFSET)
-#define LPC54_ETH_DMA_CH1_INT_EN                         (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_INT_EN_OFFSET)
-#define LPC54_ETH_DMA_CH1_RX_INT_WDTIMER                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_RX_INT_WDTIMER_OFFSET)
-#define LPC54_ETH_DMA_CH1_SLOT_FUNC_CTRL_STAT            (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_SLOT_FUNC_CTRL_STAT_OFFSET)
-#define LPC54_ETH_DMA_CH1_CUR_HST_TXDESC                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_CUR_HST_TXDESC_OFFSET)
-#define LPC54_ETH_DMA_CH1_CUR_HST_RXDESC                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_CUR_HST_RXDESC_OFFSET)
-#define LPC54_ETH_DMA_CH1_CUR_HST_TXBUF                  (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_CUR_HST_TXBUF_OFFSET)
-#define LPC54_ETH_DMA_CH1_CUR_HST_RXBUF                  (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_CUR_HST_RXBUF_OFFSET)
-#define LPC54_ETH_DMA_CH1_STAT                           (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_STAT_OFFSET)
-#define LPC54_ETH_DMA_CH1_MISS_FRAME_CNT                 (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_CH1_MISS_FRAME_CNT_OFFSET)
+#define LPC54_ETH_DMACH_CTRL_BASE(n)                     (LPC54_ETHERNET_BASE + LPC54_ETH_DMACH_CTRL_OFFSET(n))
+
+#define LPC54_ETH_DMACH_CTRL(n)                          (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_CTRL_OFFSET)
+#define LPC54_ETH_DMACH_TX_CTRL(n)                       (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_TX_CTRL_OFFSET)
+#define LPC54_ETH_DMACH_RX_CTRL(n)                       (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RX_CTRL_OFFSET)
+#define LPC54_ETH_DMACH_TXDESC_LIST_ADDR(n)              (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_TXDESC_LIST_ADDR_OFFSET)
+#define LPC54_ETH_DMACH_RXDESC_LIST_ADDR(n)              (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RXDESC_LIST_ADDR_OFFSET)
+#define LPC54_ETH_DMACH_TXDESC_TAIL_PTR(n)               (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_TXDESC_TAIL_PTR_OFFSET)
+#define LPC54_ETH_DMACH_RXDESC_TAIL_PTR(n)               (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RXDESC_TAIL_PTR_OFFSET)
+#define LPC54_ETH_DMACH_TXDESC_RING_LENGTH(n)            (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_TXDESC_RING_LENGTH_OFFSET)
+#define LPC54_ETH_DMACH_RXDESC_RING_LENGTH(n)            (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RXDESC_RING_LENGTH_OFFSET)
+#define LPC54_ETH_DMACH_INT_EN(n)                        (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_INT_EN_OFFSET)
+#define LPC54_ETH_DMACH_RX_INT_WDTIMER(n)                (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RX_INT_WDTIMER_OFFSET)
+#define LPC54_ETH_DMACH_SLOT_FUNC_CTRL_STAT(n)           (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_SLOT_FUNC_CTRL_STAT_OFFSET)
+#define LPC54_ETH_DMACH_CUR_HST_TXDESC(n)                (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_CUR_HST_TXDESC_OFFSET)
+#define LPC54_ETH_DMACH_CUR_HST_RXDESC(n)                (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_CUR_HST_RXDESC_OFFSET)
+#define LPC54_ETH_DMACH_CUR_HST_TXBUF(n)                 (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_CUR_HST_TXBUF_OFFSET)
+#define LPC54_ETH_DMACH_CUR_HST_RXBUF(n)                 (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_CUR_HST_RXBUF_OFFSET)
+#define LPC54_ETH_DMACH_STAT(n)                          (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_STAT_OFFSET)
+#define LPC54_ETH_DMACH_MISS_FRAME_CNT(n)                (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_MISS_FRAME_CNT_OFFSET)
 
 /* Register bit definitions *********************************************************************************/
 
@@ -462,85 +430,96 @@
 #define ETH_MTL_RXQ1_CTRL_
 
 /* DMA mode */
-#define ETH_DMA_MODE_
+
+#define ETH_DMA_MODE_SWR                       (1 << 0)  /* Bit 0:  Software reset */
+#define ETH_DMA_MODE_DA_MASK                   (1 << 1)  /* Bit 1:  DMA Tx or Rx arbitration scheme */
+#  define ETH_DMA_MODE_DA_WRR                  (0)       /* Weighted round-robin with Rx:Tx or Tx:Rx */
+#  define ETH_DMA_MODE_DA_FIXED                (1 << 1)  /* Fixed priority */
+#define ETH_DMA_MODE_TAA_SHIFT                 (2)       /* Bits 2-4: Transmit arbitration algorithm */
+#define ETH_DMA_MODE_TAA_MASK                  (7 << ETH_DMA_MODE_TAA_SHIFT)
+#  define ETH_DMA_MODE_TAA_FIXED               (0 << ETH_DMA_MODE_TAA_SHIFT) /* Fixed priority */
+#  define ETH_DMA_MODE_TAA_WSP                 (1 << ETH_DMA_MODE_TAA_SHIFT) /* Weighted strict priority */
+#  define ETH_DMA_MODE_TAA_WRR                 (2 << ETH_DMA_MODE_TAA_SHIFT) /* Weighted round-robin */
+#define ETH_DMA_MODE_TXPR                      (1 << 11) /* Bit 11: Transmit priority */
+#define ETH_DMA_MODE_PR_SHIFT                  (12)      /* Bits 12-14: Priority ratio */
+#define ETH_DMA_MODE_PR_MASK                   (7 << ETH_DMA_MODE_PR_SHIFT)
+# define ETH_DMA_MODE_PR_1TO1                  (0 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 1:1 */
+# define ETH_DMA_MODE_PR_3TO1                  (2 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 3:1 */
+# define ETH_DMA_MODE_PR_4TO1                  (3 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 4:1 */
+# define ETH_DMA_MODE_PR_5TO1                  (4 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 5:1 */
+# define ETH_DMA_MODE_PR_6TO1                  (5 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 6:1 */
+# define ETH_DMA_MODE_PR_7TO1                  (6 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 7:1 */
+# define ETH_DMA_MODE_PR_8TO1                  (7 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 8:1 */
+
 /* DMA system bus mode */
-#define ETH_DMA_SYSBUS_MODE_
+
+#define ETH_DMA_SYSBUS_MODE_FB                 (1 << 0)  /* Bit 0:  Fixed burst length */
+#define ETH_DMA_SYSBUS_MODE_AAL                (1 << 12) /* Bit 12: Address-aligned beats */
+#define ETH_DMA_SYSBUS_MODE_MB                 (1 << 14) /* Bit 14: Mixed burst */
+#define ETH_DMA_SYSBUS_MODE_RB                 (1 << 15) /* Bit 15: Rebuild INCRx burst */
+
 /* DMA interrupt status */
-#define ETH_DMA_INTR_STAT_
+
+#define ETH_DMA_INTR_STAT_DC0IS                (1 << 0)  /* Bit 0:  DMA channel 0 interrupt status */
+#define ETH_DMA_INTR_STAT_DC1IS                (1 << 1)  /* Bit 1:  DMA channel 1 interrupt status */
+#define ETH_DMA_INTR_STAT_MTLIS                (1 << 16) /* Bit 16: MTL interrupt status */
+#define ETH_DMA_INTR_STAT_MACIS                (1 << 17) /* Bit 17: MAC interrupt status */
+
 /* DMA debug status */
 #define ETH_DMA_DBG_STAT_
 
-/* DMA channel 0 control */
-#define ETH_DMA_CH0_CTRL_
-/* DMA channel 0 transmit control */
-#define ETH_CH0_TX_CTRL_
-/* DMA channel 0 receive control */
-#define ETH_DMA_CH0_RX_CTRL_
-/* Channel 0 Tx descriptor list address */
-#define ETH_DMA_CH0_TXDESC_LIST_ADDR_
-/* Channel 0 Rx descriptor list address */
-#define ETH_DMA_CH0_RXDESC_LIST_ADDR_
-/* Channel 0 Tx descriptor tail pointer */
-#define ETH_DMA_CH0_TXDESC_TAIL_PTR_
-/* Channel 0 Rx descriptor tail pointer */
-#define ETH_DMA_CH0_RXDESC_TAIL_PTR_
-/* Channel 0 Tx descriptor ring length */
-#define ETH_DMA_CH0_TXDESC_RING_LENGTH_
-/* Channel 0 Rx descriptor ring length */
-#define ETH_DMA_CH0_RXDESC_RING_LENGTH_
-/* Channel 0 interrupt enable */
-#define ETH_DMA_CH0_INT_EN_
-/* Receive interrupt watchdog timer */
-#define ETH_DMA_CH0_RX_INT_WDTIMER_
-/* Slot function control and status */
-#define ETH_DMA_CH0_SLOT_FUNC_CTRL_STAT_
-/* Channel 0 current host transmit descriptor */
-#define ETH_DMA_CH0_CUR_HST_TXDESC_
-/* Channel 0 current host receive descriptor */
-#define ETH_DMA_CH0_CUR_HST_RXDESC_
-/* Channel 0 current host transmit buffer address */
-#define ETH_DMA_CH0_CUR_HST_TXBUF_
-/* Channel 0 current application receive buffer address */
-#define ETH_DMA_CH0_CUR_HST_RXBUF_
-/* Channel 0 DMA status */
-#define ETH_DMA_CH0_STAT_
-/** Channel 0 missed frame count */
-#define ETH_DMA_CH0_MISS_FRAME_CNT_
-/* DMA channel 1 control */
-#define ETH_DMA_CH1_CTRL_
-/* DMA channel 1 transmit control */
-#define ETH_DMA_CH1_TX_CTRL_
-/* The DMA channel 1 receive control */
-#define ETH_DMA_CH1_RX_CTRL_
-/* The channel 1 Tx descriptor list address */
-#define ETH_DMA_CH1_TXDESC_LIST_ADDR_
-/* The channel 1 Rx descriptor list address */
-#define ETH_DMA_CH1_RXDESC_LIST_ADDR_
-/* The channel 1 Tx descriptor tail pointer */
-#define ETH_DMA_CH1_TXDESC_TAIL_PTR_
-/* The channel 1 Rx descriptor tail pointer */
-#define ETH_DMA_CH1_RXDESC_TAIL_PTR_
-/* Channel 1 Tx descriptor ring length */
-#define ETH_DMA_CH1_TXDESC_RING_LENGTH_
-/* The channel 1 Rx descriptor ring length */
-#define ETH_DMA_CH1_RXDESC_RING_LENGTH_
-/* The channel 1 interrupt enable */
-#define ETH_DMA_CH1_INT_EN_
-/* The channel 1 receive interrupt watchdog timer */
-#define ETH_DMA_CH1_RX_INT_WDTIMER_
-/* The channel 1 slot function control and status */
-#define ETH_DMA_CH1_SLOT_FUNC_CTRL_STAT_
-/* The channel 1 current host transmit descriptor */
-#define ETH_DMA_CH1_CUR_HST_TXDESC_
-/* The channel 1 current host receive descriptor */
-#define ETH_DMA_CH1_CUR_HST_RXDESC_
-/* The channel 1 current host transmit buffer address */
-#define ETH_DMA_CH1_CUR_HST_TXBUF_
-/** The channel 1 current host receive buffer address */
-#define ETH_DMA_CH1_CUR_HST_RXBUF_
-/* Channel 1 DMA status */
-#define ETH_DMA_CH1_STAT_
-/* Channel 1 missed frame count */
-#define ETH_DMA_CH1_MISS_FRAME_CNT_
+/* DMA channel n control */
+
+#define ETH_DMACH_CTRL_PBLx8                   (1 << 16) /* Bit 16: 8xPBL mode */
+#define ETH_DMACH_CTRL_DSL_SHIFT               (18)      /* Bits 18-20: Skip length */
+
+/* DMA channel n transmit control */
+
+#define ETH_DMACH_TX_CTRL_ST                   (1 << 0)  /* Bit 0:  Start or stop transmission command */
+#define ETH_DMACH_TX_CTRL_TCW_SHIFT            (1)       /* Bits 1-3: Transmit channel weight */
+#define ETH_DMACH_TX_CTRL_TCW_MASK             (7 << ETH_DMACH_TX_CTRL_TCW_SHIFT)
+#  define ETH_DMACH_TX_CTRL_TCW(n)             ((uint32_t)(n) << ETH_DMACH_TX_CTRL_TCW_SHIFT)
+#define ETH_DMACH_TX_CTRL_OSF                  (1 << 4)  /* Bit 4:  Operate on second frame */
+#define ETH_DMACH_TX_CTRL_TxPBL_SHIFT          (16)      /* Bits 16-21: Transmit programmable burst length */
+#define ETH_DMACH_TX_CTRL_TxPBL_MASK           (0x3f << ETH_DMACH_TX_CTRL_TxPBL_SHIFT)
+#  define ETH_DMACH_TX_CTRL_TxPBL(n)           ((uint32_t)(n) << ETH_DMACH_TX_CTRL_TxPBL_SHIFT)
+
+/* DMA channel n receive control */
+
+#define ETH_DMACH_RX_CTRL_SR                   (1 << 0)  /* Bit 0:  Start or stop receive command */
+#define ETH_DMACH_RX_CTRL_RBSZ_SHIFT           (3)       /* Bits 3-14: Receive buffer size */
+#define ETH_DMACH_RX_CTRL_MASK                 (0xfff << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
+#  define ETH_DMACH_RX_CTRL(n)                 ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
+
+/* DMA channel n Tx descriptor list address */
+#define ETH_DMACH_TXDESC_LIST_ADDR_
+/* DMA channel n Rx descriptor list address */
+#define ETH_DMACH_RXDESC_LIST_ADDR_
+/* DMA channel n Tx descriptor tail pointer */
+#define ETH_DMACH_TXDESC_TAIL_PTR_
+/* DMA channel n Rx descriptor tail pointer */
+#define ETH_DMACH_RXDESC_TAIL_PTR_
+/* DMA channel n Tx descriptor ring length */
+#define ETH_DMACH_TXDESC_RING_LENGTH_
+/* DMA channel n Rx descriptor ring length */
+#define ETH_DMACH_RXDESC_RING_LENGTH_
+/* DMA channel n interrupt enable */
+#define ETH_DMACH_INT_EN_
+/* DMA channel n receive interrupt watchdog timer */
+#define ETH_DMACH_RX_INT_WDTIMER_
+/* DMA channel n slot function control and status */
+#define ETH_DMACH_SLOT_FUNC_CTRL_STAT_
+/* DMA channel n current host transmit descriptor */
+#define ETH_DMACH_CUR_HST_TXDESC_
+/* DMA channel n current host receive descriptor */
+#define ETH_DMACH_CUR_HST_RXDESC_
+/* DMA channel n current host transmit buffer address */
+#define ETH_DMACH_CUR_HST_TXBUF_
+/* DMA channel n current application receive buffer address */
+#define ETH_DMACH_CUR_HST_RXBUF_
+/* DMA channel n DMA status */
+#define ETH_DMACH_STAT_
+/* DMA channel n missed frame count */
+#define ETH_DMACH_MISS_FRAME_CNT_
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ETHERNET_H */
