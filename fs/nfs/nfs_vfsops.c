@@ -834,7 +834,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
     {
       /* Make sure that the attempted read size does not exceed the RPC maximum */
 
-      readsize = buflen;
+      readsize = buflen - bytesread;
       if (readsize > nmp->nm_rsize)
         {
           readsize = nmp->nm_rsize;
