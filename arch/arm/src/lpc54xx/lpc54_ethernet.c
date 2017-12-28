@@ -110,6 +110,12 @@
 #  error Unrecognized PHY selection
 #endif
 
+/* MTL-related definitions */
+
+#define LPC54_MTL_QUEUE_UNIT    256
+#define LPC54_MTL_RXQUEUE_UNITS 8    /* Rx queue size = 2048 bytes */
+#define LPC54_MTL_TXQUEUE_UNITS 8    /* Tx queue size = 2048 bytes */
+
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->eth_dev.d_buf)
@@ -826,6 +832,7 @@ static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
 static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  FAR uint8_t *mptr;
   uintptr_t base;
   uint32_t regval;
   uint32_t burstlen;
@@ -843,7 +850,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  /* Initialize the PHY */
+  /* Initialize the PHY *****************************************************/
 
   ret = lpc54_phy_autonegotiate(priv);
   if (ret < 0)
@@ -852,8 +859,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
       return ret;
     }
 
-  /* Initialize the Ethernet interface */
-  /* Initialize Ethernet DMA */
+  /* Initialize Ethernet DMA ************************************************/
   /* Reset DMA */
 
   regval  = getreg32(LPC54_ETH_DMA_MODE);
@@ -872,11 +878,14 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
     {
       base = LPC54_ETH_DMA_CH_CTRL_BASE(i);
 
-      /* REVISIT: burstlen setting for the case of multi-queuing.
-       * REVISIT: Additional logic needed if burstlen > 32.
-       */
+#ifdef CONFIG_LPC54_MULTIQUEUE
+      /* REVISIT: burstlen setting for the case of multi-queuing. */
+#  warning Missing logic
+#else
+      /* REVISIT: Additional logic needed if burstlen > 32 */
 
       burstlen = 1;  /* DMA burst length = 1 */
+#endif
 
       /* REVISIT: We would need to set ETH_DMACH_CTRL_PBLx8 in LPC54_ETH_DMACH_CTRL
        * is required for the burst length setting.
@@ -890,25 +899,106 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
       putreg32(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
 
 
-      regval = getreg(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
+      regval  = getreg(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_RX_CTRL_RxPBL_MASK;
       regval |= ETH_DMACH_RX_CTRL_RxPBL(burstlen);
       putreg32(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
     }
 
-  /* Initializes the Ethernet MTL */
+  /* Initializes the Ethernet MTL *******************************************/
+  /* Set transmit operation mode
+   *
+   * FTQ   - Set to flush the queue
+   * TSF   - Depends on configuration
+   * TXQEN - Queue 0 disabled; queue 1 enabled
+   * TTC   - Set to 32 bytes (ignored if TSF set)
+   * TQS   - Set to 2048 bytes
+   */
+
+#ifdef CONFIG_LPC54_TX_STRFWD
+  regval = ETH_MTL_TXQ_OP_MODE_TSF;
+#else
+  regval = 0;
+#endif
+
+  regval |= ETH_MTL_TXQ_OP_MODE_FTQ | ETH_MTL_TXQ_OP_MODE_TTC_32 |
+            ETH_MTL_TXQ_OP_MODE_TQS(LPC54_MTL_TXQUEUE_UNITS);
+  putreg (regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
+          LPC54_ETH_MTL_TXQ_OP_MODE(0));
+  putreg (regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
+          LPC54_ETH_MTL_TXQ_OP_MODE(1));
+
+  /* Set receive operation mode (queue 0 only)
+   *
+   * RTC        - Set to 64 bytes (ignored if RSF selected)
+   * FUP        - enabled
+   * FEP        - disabled
+   * RSF        - Depends on configuration
+   * DIS_TCP_EF - Not disabled
+   * RQS        - Set to 2048 bytes
+   */
+
+#ifdef CONFIG_LPC54_RX_STRFWD
+  regval = ETH_MTL_RXQ_OP_MODE_RSF;
+#else
+  regval = 0;
+#endif
+
+  regval |= ETH_MTL_RXQ_OP_MODE_RTC_64 | ETH_MTL_RXQ_OP_MODE_FUP |
+            ETH_MTL_RXQ_OP_MODE_RQS(LPC54_MTL_RXQUEUE_UNITS);
+  putreg (regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
+
+#ifdef CONFIG_LPC54_MULTIQUEUE
+  /* Set the schedule/arbitration(set for multiple queues) */
+      /* Set the rx queue mapping to dma channel */
+      /* Set the tx/rx queue weight. */
+  /* REVISIT:  Missing multi-queue configuration here. */
+#  warning Missing Logic
+#endif
+
+  /* Initialize the Ethernet MAC ********************************************/
+  /* Instantiate the MAC address that appliation logic should have set in the
+   * device structure:
+   */
+
+  mptr   = (FAR uint8_t *)priv->eth_dev.d_mac.ether.ether_addr_octet;
+  regval = ((uint32_t)mptr[3] << 24) | ((uint32_t)mptr[2] << 16) |
+           ((uint32_t)mptr[1] << 8)  | ((uint32_t)mptr[0]);
+  putreg32(regval, LPC54_ETH_MAC_ADDR_LOW);
+
+  regval = ((uint32_t)mptr[5] << 8)  | ((uint32_t)mptr[4]);
+  putreg32(regval, LPC54_ETH_MAC_ADDR_LOW);
+
+  /* Set the receive address filter */
+
+  regval  = ETH_MAC_FRAME_FILTER_PCF_NONE;
+#ifdef CONFIG_LPC54_RX_PROMISCUOUS
+  regval |= ETH_MAC_FRAME_FILTER_PR;
+#endif
+#ifndef CONFIG_LPC54_RX_BROADCAST
+  regval |= ETH_MAC_FRAME_FILTER_DBF;
+#endif
+#ifdef CONFIG_LPC54_RX_ALLMULTICAST
+  regval |= ETH_MAC_FRAME_FILTER_PM;
+#endif
+  putreg32(regval, LPC54_ETH_MAC_FRAME_FILTER).
+
+  /* Configure flow control */
 #warning Missing logic
 
-  /* Initialize the Ethernet MAC */
+  /* Set the 1us ticket */
+#warning Missing logic
+
+  /* Set the speed and duplex. */
+#warning Missing logic
+
+  /* Enable the Rx channel */
 #warning Missing logic
 
   /* Setup up Ethernet interrupts */
 #warning Missing logic
 
   /* Set the sideband flow control for each channel */
-#warning Missing logic
-
-  /* Instantiate the MAC address from priv->eth_dev.d_mac.ether.ether_addr_octet */
 #warning Missing logic
 
 #ifdef CONFIG_NET_ICMPv6
@@ -1664,7 +1754,7 @@ int up_netinitialize(int intf)
 
   /* Set the CSR clock divider */
 
-  lpc43_set_crsdiv();
+  lpc54_set_crsdiv();
 
   /* Put the interface in the down state.  This amounts to resetting the
    * device by calling lpc54_eth_ifdown().

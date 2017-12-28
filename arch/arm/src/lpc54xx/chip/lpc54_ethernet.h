@@ -99,30 +99,22 @@
 #define LPC54_ETH_MTL_INTR_STAT_OFFSET                   0x0c20  /* MTL interrupt status */
 #define LPC54_ETH_MTL_RXQ_DMA_MAP_OFFSET                 0x0c30  /* MTL Rx Queue and DMA channel mapping */
 
-#define LPC54_ETH_MTL_TXQ0_OP_MODE_OFFSET                0x0d00  /* MTL TxQ0 operation mode */
-#define LPC54_ETH_MTL_TXQ0_UNDRFLW_OFFSET                0x0d04  /* MTL TxQ0 underflow */
-#define LPC54_ETH_MTL_TXQ0_DBG_OFFSET                    0x0d08  /* MTL TxQ0 debug */
-#define LPC54_ETH_MTL_TXQ0_ETS_STAT_OFFSET               0x0d14  /* MTL TxQ0 ETS status */
-#define LPC54_ETH_MTL_TXQ0_QNTM_WGHT_OFFSET              0x0d18  /* Queue 0 quantum or weights */
-#define LPC54_ETH_MTL_TXQ0_INTCTRL_STAT_OFFSET           0x0d2c  /* MTL TxQ0 interrupt control status */
-#define LPC54_ETH_MTL_RXQ0_OP_MODE_OFFSET                0x0d30  /* MTL RxQ0 operation mode */
-#define LPC54_ETH_MTL_RXQ0_MISSPKT_OVRFLW_CNT_OFFSET     0x0d34  /* MTL RxQ0 missed packet overflow counter */
-#define LPC54_ETH_MTL_RXQ0_DBG_OFFSET                    0x0d38  /* MTL RxQ0 debug */
-#define LPC54_ETH_MTL_RXQ0_CTRL_OFFSET                   0x0d3c  /* MTL RxQ0 control */
-#define LPC54_ETH_MTL_TXQ1_OP_MODE_OFFSET                0x0d40  /* MTL TxQ1 operation mode */
-#define LPC54_ETH_MTL_TXQ1_UNDRFLW_OFFSET                0x0d44  /* MTL TxQ1 underflow */
-#define LPC54_ETH_MTL_TXQ1_DBG_OFFSET                    0x0d48  /* MTL TxQ1 debug */
-#define LPC54_ETH_MTL_TXQ1_ETS_CTRL_OFFSET               0x0d50  /* MTL TxQ1 ETS control */
-#define LPC54_ETH_MTL_TXQ1_ETS_STAT_OFFSET               0x0d54  /* MTL TxQ1 ETS status */
-#define LPC54_ETH_MTL_TXQ1_QNTM_WGHT_OFFSET              0x0d58  /* MTL TxQ1 quantum Weight */
-#define LPC54_ETH_MTL_TXQ1_SNDSLP_CRDT_OFFSET            0x0d5c  /* MTL TxQ1 SendSlopCredit */
-#define LPC54_ETH_MTL_TXQ1_HI_CRDT_OFFSET                0x0d60  /* MTL TxQ1 hiCredit */
-#define LPC54_ETH_MTL_TXQ1_LO_CRDT_OFFSET                0x0d64  /* MTL TxQ1 loCredit */
-#define LPC54_ETH_MTL_TXQ1_INTCTRL_STAT_OFFSET           0x0d6c  /* MTL TxQ1 interrupt control status */
-#define LPC54_ETH_MTL_RXQ1_OP_MODE_OFFSET                0x0d70  /* MTL RxQ1 operation mode */
-#define LPC54_ETH_MTL_RXQ1_MISSPKT_OVRFLW_CNT_OFFSET     0x0d74  /* MTL RxQ1 missed packet overflow counter */
-#define LPC54_ETH_MTL_RXQ1_DBG_OFFSET                    0x0d78  /* MTL RxQ1 debug */
-#define LPC54_ETH_MTL_RXQ1_CTRL_OFFSET                   0x0d7c  /* MTL RxQ1 control */
+#define LPC54_ETH_MTL_Q_OFFSET(n)                        (0x0d00 + ((n) << 6))
+
+#define LPC54_ETH_MTL_TXQ_OP_MODE_OFFSET                 0x0000  /* MTL TxQn operation mode */
+#define LPC54_ETH_MTL_TXQ_UNDRFLW_OFFSET                 0x0004  /* MTL TxQn underflow */
+#define LPC54_ETH_MTL_TXQ_DBG_OFFSET                     0x0008  /* MTL TxQn debug */
+#define LPC54_ETH_MTL_TXQ_ETS_CTRL_OFFSET                0x0010  /* MTL TxQ1 (only) ETS control */
+#define LPC54_ETH_MTL_TXQ_ETS_STAT_OFFSET                0x0014  /* MTL TxQn ETS status */
+#define LPC54_ETH_MTL_TXQ_QNTM_WGHT_OFFSET               0x0018  /* MTL TxQn quantum or weights */
+#define LPC54_ETH_MTL_TXQ_SNDSLP_CRDT_OFFSET             0x001c  /* MTL TxQ1 (only) SendSlopCredit */
+#define LPC54_ETH_MTL_TXQ_HI_CRDT_OFFSET                 0x0020  /* MTL TxQ1 (only) hiCredit */
+#define LPC54_ETH_MTL_TXQ_LO_CRDT_OFFSET                 0x0024  /* MTL TxQ1 (only) loCredit */
+#define LPC54_ETH_MTL_TXQ_INTCTRL_STAT_OFFSET            0x002c  /* MTL TxQn interrupt control status */
+#define LPC54_ETH_MTL_RXQ_OP_MODE_OFFSET                 0x0030  /* MTL RxQn operation mode */
+#define LPC54_ETH_MTL_RXQ_MISSPKT_OVRFLW_CNT_OFFSET      0x0034  /* MTL RxQn missed packet overflow counter */
+#define LPC54_ETH_MTL_RXQ_DBG_OFFSET                     0x0038  /* MTL RxQn debug */
+#define LPC54_ETH_MTL_RXQ_CTRL_OFFSET                    0x003c  /* MTL RxQn control */
 
 #define LPC54_ETH_DMA_MODE_OFFSET                        0x1000  /* DMA mode */
 #define LPC54_ETH_DMA_SYSBUS_MODE_OFFSET                 0x1004  /* DMA system bus mode */
@@ -202,30 +194,22 @@
 #define LPC54_ETH_MTL_INTR_STAT                          (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_INTR_STAT_OFFSET)
 #define LPC54_ETH_MTL_RXQ_DMA_MAP                        (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ_DMA_MAP_OFFSET)
 
-#define LPC54_ETH_MTL_TXQ0_OP_MODE                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ0_OP_MODE_OFFSET)
-#define LPC54_ETH_MTL_TXQ0_UNDRFLW                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ0_UNDRFLW_OFFSET)
-#define LPC54_ETH_MTL_TXQ0_DBG                           (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ0_DBG_OFFSET)
-#define LPC54_ETH_MTL_TXQ0_ETS_STAT                      (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ0_ETS_STAT_OFFSET)
-#define LPC54_ETH_MTL_TXQ0_QNTM_WGHT                     (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ0_QNTM_WGHT_OFFSET)
-#define LPC54_ETH_MTL_TXQ0_INTCTRL_STAT                  (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ0_INTCTRL_STAT_OFFSET)
-#define LPC54_ETH_MTL_RXQ0_OP_MODE                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ0_OP_MODE_OFFSET)
-#define LPC54_ETH_MTL_RXQ0_MISSPKT_OVRFLW_CNT            (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ0_MISSPKT_OVRFLW_CNT_OFFSET)
-#define LPC54_ETH_MTL_RXQ0_DBG                           (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ0_DBG_OFFSET)
-#define LPC54_ETH_MTL_RXQ0_CTRL                          (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ0_CTRL_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_OP_MODE                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_OP_MODE_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_UNDRFLW                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_UNDRFLW_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_DBG                           (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_DBG_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_ETS_CTRL                      (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_ETS_CTRL_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_ETS_STAT                      (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_ETS_STAT_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_QNTM_WGHT                     (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_QNTM_WGHT_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_SNDSLP_CRDT                   (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_SNDSLP_CRDT_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_HI_CRDT                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_HI_CRDT_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_LO_CRDT                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_LO_CRDT_OFFSET)
-#define LPC54_ETH_MTL_TXQ1_INTCTRL_STAT                  (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_TXQ1_INTCTRL_STAT_OFFSET)
-#define LPC54_ETH_MTL_RXQ1_OP_MODE                       (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ1_OP_MODE_OFFSET)
-#define LPC54_ETH_MTL_RXQ1_MISSPKT_OVRFLW_CNT            (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ1_MISSPKT_OVRFLW_CNT_OFFSET)
-#define LPC54_ETH_MTL_RXQ1_DBG                           (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ1_DBG_OFFSET)
-#define LPC54_ETH_MTL_RXQ1_CTRL                          (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_RXQ1_CTRL_OFFSET)
+#define LPC54_ETH_MTL_Q_BASE(n)                          (LPC54_ETHERNET_BASE + LPC54_ETH_MTL_Q_OFFSET(n))
+
+#define LPC54_ETH_MTL_TXQ_OP_MODE(n)                     (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_OP_MODE_OFFSET)
+#define LPC54_ETH_MTL_TXQ_UNDRFLW(n)                     (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_UNDRFLW_OFFSET)
+#define LPC54_ETH_MTL_TXQ_DBG(n)                         (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_DBG_OFFSET)
+#define LPC54_ETH_MTL_TXQ_ETS_CTRL(n)                    (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_ETS_CTRL_OFFSET)
+#define LPC54_ETH_MTL_TXQ_ETS_STAT(n)                    (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_ETS_STAT_OFFSET)
+#define LPC54_ETH_MTL_TXQ_QNTM_WGHT(n)                   (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_QNTM_WGHT_OFFSET)
+#define LPC54_ETH_MTL_TXQ_SNDSLP_CRDT(n)                 (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_SNDSLP_CRDT_OFFSET)
+#define LPC54_ETH_MTL_TXQ_HI_CRDT(n)                     (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_HI_CRDT_OFFSET)
+#define LPC54_ETH_MTL_TXQ_LO_CRDT(n)                     (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_LO_CRDT_OFFSET)
+#define LPC54_ETH_MTL_TXQ_INTCTRL_STAT(n)                (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_TXQ_INTCTRL_STAT_OFFSET)
+#define LPC54_ETH_MTL_RXQ_OP_MODE(n)                     (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_RXQ_OP_MODE_OFFSET)
+#define LPC54_ETH_MTL_RXQ_MISSPKT_OVRFLW_CNT(n)          (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_RXQ_MISSPKT_OVRFLW_CNT_OFFSET)
+#define LPC54_ETH_MTL_RXQ_DBG(n)                         (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_RXQ_DBG_OFFSET)
+#define LPC54_ETH_MTL_RXQ_CTRL(n)                        (LPC54_ETH_MTL_Q_BASE(n) + LPC54_ETH_MTL_RXQ_CTRL_OFFSET)
 
 #define LPC54_ETH_DMA_MODE                               (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_MODE_OFFSET)
 #define LPC54_ETH_DMA_SYSBUS_MODE                        (LPC54_ETHERNET_BASE + LPC54_ETH_DMA_SYSBUS_MODE_OFFSET)
@@ -259,8 +243,23 @@
 #define ETH_MAC_CONFIG_
 /* MAC extended configuration */
 #define ETH_MAC_EXT_CONFIG_
+
 /* MAC frame filter */
-#define ETH_MAC_FRAME_FILTER_
+
+#define ETH_MAC_FRAME_FILTER_PR                          (1 << 0)  /* Bit 0:  Promiscuous mode */
+#define ETH_MAC_FRAME_FILTER_DAIF                        (1 << 3)  /* Bit 3:  DA inverse filtering */
+#define ETH_MAC_FRAME_FILTER_PM                          (1 << 4)  /* Bit 4:  Pass all multicast */
+#define ETH_MAC_FRAME_FILTER_DBF                         (1 << 5)  /* Bit 5:  Disable broadcast frames */
+#define ETH_MAC_FRAME_FILTER_PCF_SHIFT                   (6)       /* Bits 6-7: Pass control frames */
+#define ETH_MAC_FRAME_FILTER_PCF_MASK                    (3 << ETH_MAC_FRAME_FILTER_PCF_SHIFT)
+#  define ETH_MAC_FRAME_FILTER_PCF_NONE                  (0 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* All control frames filtered */
+#  define ETH_MAC_FRAME_FILTER_PCF_PAUSE                 (1 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* All but pause control frames accepted */
+#  define ETH_MAC_FRAME_FILTER_PCF_ALL                   (2 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* All control frames accepted */
+#  define ETH_MAC_FRAME_FILTER_PCF_FILTERED              (3 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* Control frames accepted if pass the address filter */
+#define ETH_MAC_FRAME_FILTER_SAIF                        (1 << 8)  /* Bit 8:  SA inverse filtering */
+#define ETH_MAC_FRAME_FILTER_SAF                         (1 << 9)  /* Bit 9:  Source address filter enable */
+#define ETH_MAC_FRAME_FILTER_RA                          (1 << 31) /* Bit 31:  Receive all */
+
 /* MAC watchdog timeout */
 #define ETH_MAC_WD_TIMEROUT_
 /* VLAN tag */
@@ -380,54 +379,69 @@
 /* MTL Rx Queue and DMA channel mapping */
 #define ETH_MTL_RXQ_DMA_MAP_
 
-/* MTL TxQ0 operation mode */
-#define ETH_MTL_TXQ0_OP_MODE_
-/* MTL TxQ0 underflow */
-#define ETH_MTL_TXQ0_UNDRFLW_
-/* MTL TxQ0 debug */
-#define ETH_MTL_TXQ0_DBG_
-/* MTL TxQ0 ETS status */
-#define ETH_MTL_TXQ0_ETS_STAT_
-/* Queue 0 quantum or weights */
-#define ETH_MTL_TXQ0_QNTM_WGHT_
-/* MTL TxQ0 interrupt control status */
-#define ETH_MTL_TXQ0_INTCTRL_STAT_
-/* MTL RxQ0 operation mode */
-#define ETH_MTL_RXQ0_OP_MODE_
-/* MTL RxQ0 missed packet overflow counter */
-#define ETH_MTL_RXQ0_MISSPKT_OVRFLW_CNT_
-/* MTL RxQ0 debug */
-#define ETH_MTL_RXQ0_DBG_
-/* MTL RxQ0 control */
-#define ETH_MTL_RXQ0_CTRL_
-/* MTL TxQ1 operation mode */
-#define ETH_MTL_TXQ1_OP_MODE_
-/* MTL TxQ1 underflow */
-#define ETH_MTL_TXQ1_UNDRFLW_
-/* MTL TxQ1 debug */
-#define ETH_MTL_TXQ1_DBG_
-/* MTL TxQ1 ETS control */
+/* MTL TxQn operation mode */
+
+#define ETH_MTL_TXQ_OP_MODE_FTQ                (1 << 0)  /* Bit 0:  Flush Tx Queue */
+#define ETH_MTL_TXQ_OP_MODE_TSF                (1 << 1)  /* Bit 1:  Transmit store and forward */
+#define ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT        (2)       /* Bits 2-3: Tx Queue enable */
+#define ETH_MTL_TXQ_OP_MODE_TXQEN_MASK         (3 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE     (0 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Not enabled */
+#  define ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE    (2 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Enabled */
+#define ETH_MTL_TXQ_OP_MODE_TTC_SHIFT          (4)       /* Bits 4-6: Transmit threshold control */
+#define ETH_MTL_TXQ_OP_MODE_TTC_MASK           (7 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_32           (0 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_64           (1 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_96           (2 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_128          (3 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_192          (4 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_256          (5 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_384          (6 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TTC_512          (7 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
+#define ETH_MTL_TXQ_OP_MODE_TQS_SHIFT          (16)      /* Bits 16-18: Tx Queue size (x256) */
+#define ETH_MTL_TXQ_OP_MODE_TQS_MASK           (7 << ETH_MTL_TXQ_OP_MODE_TQS_SHIFT)
+#  define ETH_MTL_TXQ_OP_MODE_TQS(n)           ((uint32_t)((n)-1) << ETH_MTL_TXQ_OP_MODE_TQS_SHIFT)
+
+/* MTL TxQn underflow */
+#define ETH_MTL_TXQ_UNDRFLW_
+/* MTL TxQn debug */
+#define ETH_MTL_TXQ_DBG_
+/* MTL TxQ1 (only) ETS control */
 #define ETH_MTL_TXQ1_ETS_CTRL_
-/* MTL TxQ1 ETS status */
-#define ETH_MTL_TXQ1_ETS_STAT_
-/* MTL TxQ1 quantum Weight */
-#define ETH_MTL_TXQ1_QNTM_WGHT_
-/* MTL TxQ1 SendSlopCredit */
+/* MTL TxQn ETS status */
+#define ETH_MTL_TXQ_ETS_STAT_
+/* Queue 0 quantum or weights */
+#define ETH_MTL_TXQ_QNTM_WGHT_
+/* MTL TxQ1 (only) SendSlopCredit */
 #define ETH_MTL_TXQ1_SNDSLP_CRDT_
-/* MTL TxQ1 hiCredit */
+/* MTL TxQ1 (only) hiCredit */
 #define ETH_MTL_TXQ1_HI_CRDT_
-/* MTL TxQ1 loCredit */
+/* MTL TxQ1 (only) loCredit */
 #define ETH_MTL_TXQ1_LO_CRDT_
-/* MTL TxQ1 interrupt control status */
-#define ETH_MTL_TXQ1_INTCTRL_STAT_
-/* MTL RxQ1 operation mode */
-#define ETH_MTL_RXQ1_OP_MODE_
-/* MTL RxQ1 missed packet overflow counter */
-#define ETH_MTL_RXQ1_MISSPKT_OVRFLW_CNT_
-/* MTL RxQ1 debug */
-#define ETH_MTL_RXQ1_DBG_
-/* MTL RxQ1 control */
-#define ETH_MTL_RXQ1_CTRL_
+/* MTL TxQn interrupt control status */
+#define ETH_MTL_TXQ_INTCTRL_STAT_
+
+/* MTL RxQn operation mode */
+
+#define ETH_MTL_RXQ_OP_MODE_RTC_SHIFT          (0)       /* Bits 0-1:  Rx Queue threshold control */
+#define ETH_MTL_RXQ_OP_MODE_RTC_MASK           (3 << ETH_MTL_RXQ_OP_MODE_RTC_SHIFT)
+#  define ETH_MTL_RXQ_OP_MODE_RTC_64           (0 << ETH_MTL_RXQ_OP_MODE_RTC_SHIFT)
+#  define ETH_MTL_RXQ_OP_MODE_RTC_32           (1 << ETH_MTL_RXQ_OP_MODE_RTC_SHIFT)
+#  define ETH_MTL_RXQ_OP_MODE_RTC_96           (2 << ETH_MTL_RXQ_OP_MODE_RTC_SHIFT)
+#  define ETH_MTL_RXQ_OP_MODE_RTC_128          (3 << ETH_MTL_RXQ_OP_MODE_RTC_SHIFT)
+#define ETH_MTL_RXQ_OP_MODE_FUP                (1 << 3)  /* Bit 3  Forward undersized good packets */
+#define ETH_MTL_RXQ_OP_MODE_FEP                (1 << 4)  /* Bit 4  Forward error packets */
+#define ETH_MTL_RXQ_OP_MODE_RSF                (1 << 5)  /* Bit 5  Rx Queue store and forward */
+#define ETH_MTL_RXQ_OP_MODE_DIS_TCP_EF         (1 << 6)  /* Bit 6  Disable dropping of TCP/IP checksum error packets */
+#define ETH_MTL_RXQ_OP_MODE_RQS_SHIFT          (20)      /* Bits 20-22: Rx Queue size (x256) */
+#define ETH_MTL_RXQ_OP_MODE_RQS_MASK           (7 << ETH_MTL_RXQ_OP_MODE_RQS_SHIFT)
+#  define ETH_MTL_RXQ_OP_MODE_RQS(n)           ((uint32_t)((n)-1) << ETH_MTL_RXQ_OP_MODE_RQS_SHIFT)
+
+/* MTL RxQn missed packet overflow counter */
+#define ETH_MTL_RXQ_MISSPKT_OVRFLW_CNT_
+/* MTL RxQn debug */
+#define ETH_MTL_RXQ_DBG_
+/* MTL RxQn control */
+#define ETH_MTL_RXQ_CTRL_
 
 /* DMA mode */
 
@@ -488,8 +502,12 @@
 
 #define ETH_DMACH_RX_CTRL_SR                   (1 << 0)  /* Bit 0:  Start or stop receive command */
 #define ETH_DMACH_RX_CTRL_RBSZ_SHIFT           (3)       /* Bits 3-14: Receive buffer size */
-#define ETH_DMACH_RX_CTRL_MASK                 (0xfff << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
+#define ETH_DMACH_RX_CTRL_RBSZ_MASK            (0xfff << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
 #  define ETH_DMACH_RX_CTRL(n)                 ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
+#define ETH_DMACH_RX_CTRL_RxPBL_SHIFT          (16)      /* Bits 16-21: Receive programmable burst length */
+#define ETH_DMACH_RX_CTRL_RxPBL_MASK           (0x3f << ETH_DMACH_RX_CTRL_RxPBL_SHIFT)
+#  define ETH_DMACH_RX_CTRL_RxPBL(n)           ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RxPBL_SHIFT)
+#define ETH_DMACH_RX_CTRL_RPF                  (1 << 31) /* Bit 31: DMA Rx channel n packet flush */
 
 /* DMA channel n Tx descriptor list address */
 #define ETH_DMACH_TXDESC_LIST_ADDR_
