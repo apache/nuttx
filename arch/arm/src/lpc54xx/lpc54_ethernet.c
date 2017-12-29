@@ -60,6 +60,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/clock.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -102,7 +103,7 @@
 
 /* PHY-related definitions */
 
-#define LPC54_PHY_TIMEOUT 0x00ffffff    /* Timeout for PHY register accesses */
+#define LPC54_PHY_TIMEOUT 0x00ffffff  /* Timeout for PHY register accesses */
 
 #ifdef CONFIG_ETH0_PHY_LAN8720
 #  define LPC54_PHYID1_VAL MII_PHYID1_LAN8720
@@ -113,10 +114,31 @@
 /* MTL-related definitions */
 
 #define LPC54_MTL_QUEUE_UNIT    256
-#define LPC54_MTL_RXQUEUE_UNITS 8    /* Rx queue size = 2048 bytes */
-#define LPC54_MTL_TXQUEUE_UNITS 8    /* Tx queue size = 2048 bytes */
+#define LPC54_MTL_RXQUEUE_UNITS 8     /* Rx queue size = 2048 bytes */
+#define LPC54_MTL_TXQUEUE_UNITS 8     /* Tx queue size = 2048 bytes */
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* MAC-related definitinons */
+
+#define LPC54_MAC_HALFDUPLEX_IPG ETH_MAC_CONFIG_IPG_64 /* Default half-duplex IPG */
+
+/* DMA descriptor definitions */
+
+#define LPC54_MIN_RINGLEN       4     /* Min length of a ring */
+#define LPC54_MAX_RINGS         2     /* Max number of tx/rx descriptor rings */
+
+/* Interrupt masks */
+
+#define LPC54_ABNORM_INTMASK    (ETH_DMACH_INT_TS  | ETH_DMACH_INT_RBU | \
+                                 ETH_DMACH_INT_RS  | ETH_DMACH_INT_RWT | \
+                                 ETH_DMACH_INT_FBE | ETH_DMACH_INT_ETI | \
+                                 ETH_DMACH_INT_AI)
+#define LPC54_NORM_INTMASK      (ETH_DMACH_INT_TI  | ETH_DMACH_INT_TBU | \
+                                 ETH_DMACH_INT_RI  | ETH_DMACH_INT_ERI | \
+                                 ETH_DMACH_INT_NI)
+
+/* This is a helper pointer for accessing the contents of the Ethernet
+ * header.
+ */
 
 #define BUF ((struct eth_hdr_s *)priv->eth_dev.d_buf)
 
@@ -878,7 +900,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
     {
       base = LPC54_ETH_DMA_CH_CTRL_BASE(i);
 
-#ifdef CONFIG_LPC54_MULTIQUEUE
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
       /* REVISIT: burstlen setting for the case of multi-queuing. */
 #  warning Missing logic
 #else
@@ -915,7 +937,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
    * TQS   - Set to 2048 bytes
    */
 
-#ifdef CONFIG_LPC54_TX_STRFWD
+#ifdef CONFIG_LPC54_ETH_TX_STRFWD
   regval = ETH_MTL_TXQ_OP_MODE_TSF;
 #else
   regval = 0;
@@ -938,7 +960,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
    * RQS        - Set to 2048 bytes
    */
 
-#ifdef CONFIG_LPC54_RX_STRFWD
+#ifdef CONFIG_LPC54_ETH_RX_STRFWD
   regval = ETH_MTL_RXQ_OP_MODE_RSF;
 #else
   regval = 0;
@@ -948,7 +970,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
             ETH_MTL_RXQ_OP_MODE_RQS(LPC54_MTL_RXQUEUE_UNITS);
   putreg (regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
 
-#ifdef CONFIG_LPC54_MULTIQUEUE
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
   /* Set the schedule/arbitration(set for multiple queues) */
       /* Set the rx queue mapping to dma channel */
       /* Set the tx/rx queue weight. */
@@ -972,33 +994,79 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
   /* Set the receive address filter */
 
   regval  = ETH_MAC_FRAME_FILTER_PCF_NONE;
-#ifdef CONFIG_LPC54_RX_PROMISCUOUS
+#ifdef CONFIG_LPC54_ETH_RX_PROMISCUOUS
   regval |= ETH_MAC_FRAME_FILTER_PR;
 #endif
-#ifndef CONFIG_LPC54_RX_BROADCAST
+#ifndef CONFIG_LPC54_ETH_RX_BROADCAST
   regval |= ETH_MAC_FRAME_FILTER_DBF;
 #endif
-#ifdef CONFIG_LPC54_RX_ALLMULTICAST
+#ifdef CONFIG_LPC54_ETH_RX_ALLMULTICAST
   regval |= ETH_MAC_FRAME_FILTER_PM;
 #endif
   putreg32(regval, LPC54_ETH_MAC_FRAME_FILTER).
 
+#ifdef CONFIG_LPC54_ETH_FLOWCONTROL
   /* Configure flow control */
-#warning Missing logic
 
-  /* Set the 1us ticket */
-#warning Missing logic
+  regval = ETH_MAC_RX_FLOW_CTRL_RFE | ETH_MAC_RX_FLOW_CTRL_UP;
+  putreg32(regval, LPC54_ETH_MAC_RX_FLOW_CTRL);
 
-  /* Set the speed and duplex. */
-#warning Missing logic
+  regval = ETH_MAC_TX_FLOW_CTRL_Q_PT(CONFIG_LPC54_ETH_TX_PAUSETIME);
+  putreg32(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q0);
+  putreg32(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q1);
+#endif
 
-  /* Enable the Rx channel */
-#warning Missing logic
+  /* Set the 1us tick counter*/
+
+  regval = ETH_MAC_1US_TIC_COUNTR(BOARD_MAIN_CLK / USEC_PER_SEC);
+  putreg32(regval, LPC54_ETH_MAC_1US_TIC_COUNTR);
+
+  /* Set the speed and duplex using the values previously determined through
+   * autonegotiaion.
+   */
+
+  regval = ETH_MAC_CONFIG_ECRSFD | ETH_MAC_CONFIG_PS;
+
+#ifdef CONFIG_LPC54_ETH_8023AS2K
+  regval |= ENET_MAC_CONFIG_S2KP;
+#endif
+
+  if (priv->eth_fullduplex)
+    {
+      regval |= ETH_MAC_CONFIG_DM;
+    }
+  else
+    {
+      regval |= LPC54_MAC_HALFDUPLEX_IPG;
+    }
+
+  if (priv->eth_100mbps)
+    {
+      regval |= ETH_MAC_CONFIG_FES;
+    }
+
+  putreg32(regval, LPC54_ETH_MAC_CONFIG);
+
+  /* Enable Rx queues  */
+
+  regval = ETH_MAC_RXQ_CTRL0_RXQ0EN_ENABLE | ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE;
+  putreg32(regval, LPC54_ETH_MAC_RXQ_CTRL0);
 
   /* Setup up Ethernet interrupts */
+
+  regval = LPC54_NORM_INTMASK | LPC54_ABNORM_INTMASK;
+  putreg32(regval, LPC54_ETH_DMACH_INT_EN(0));
+  putreg32(regval, LPC54_ETH_DMACH_INT_EN(1));
+
+  putreg32(0, LPC54_ETH_MAC_INTR_EN);
+
+  /* Initialize descriptors */
 #warning Missing logic
 
-  /* Set the sideband flow control for each channel */
+  /* Activate Rx and Tx */
+#warning Missing logic
+
+  /* Set the sideband flow control for each channel (see UserManual) */
 #warning Missing logic
 
 #ifdef CONFIG_NET_ICMPv6
@@ -1064,7 +1132,7 @@ static int lpc54_eth_ifdown(FAR struct net_driver_s *dev)
 
   regval  = getreg32(LPC54_SYSCON_ETHPHYSEL);
   regval &= ~SYSCON_ETHPHYSEL_MASK;
-#ifdef CONFIG_LPC54_MII
+#ifdef CONFIG_LPC54_ETH_MII
   retval |= SYSCON_ETHPHYSEL_MII;
 #else
   retval |= SYSCON_ETHPHYSEL_RMII;
@@ -1331,7 +1399,7 @@ static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
      case SIOCGMIIPHY: /* Get MII PHY address */
         {
           struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          req->phy_id = CONFIG_LPC54_PHYADDR;
+          req->phy_id = CONFIG_LPC54_ETH_PHYADDR;
           ret = OK;
         }
         break;
@@ -1429,7 +1497,7 @@ static uint16_t lpc54_phy_read(FAR struct lpc54_ethdriver_s *priv,
   regval  = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
   regval &= ETH_MAC_MDIO_ADDR_CR_MASK;
   regval |= ETH_MAC_MDIO_ADDR_MOC_READ | ETH_MAC_MDIO_ADDR_RDA(phyreg) |
-            ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_PHYADDR);
+            ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_ETH_PHYADDR);
   putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
 
   /* Initiate the read */
@@ -1472,7 +1540,7 @@ static void lpc54_phy_write(FAR struct lpc54_ethdriver_s *priv,
   regval  = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
   regval &= ETH_MAC_MDIO_ADDR_CR_MASK;
   regval |= ETH_MAC_MDIO_ADDR_MOC_WRITE | ETH_MAC_MDIO_ADDR_RDA(phyreg) |
-            ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_PHYADDR);
+            ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_ETH_PHYADDR);
   putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
 
   /* Set the write data */
@@ -1636,7 +1704,7 @@ static int lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv)
           return -ETIMEDOUT;
         }
 
-      phyval = lpc54_phy_read(base, CONFIG_LPC54_PHYADDR, MII_MCR, &reg);
+      phyval = lpc54_phy_read(base, CONFIG_LPC54_ETH_PHYADDR, MII_MCR);
     }
   while ((phyval & MII_MCR_RESET) != 0);
 
@@ -1715,7 +1783,7 @@ int up_netinitialize(int intf)
   lpc54_gpio_config(GPIO_ENET_MDIO);    /* Ethernet MIIM data input and output */
   lpc54_gpio_config(GPIO_ENET_MDC);     /* Ethernet MIIM clock */
 
-#ifdef CONFIG_LPC54_MII
+#ifdef CONFIG_LPC54_ETH_MII
   /* MII interface */
 
   lpc54_gpio_config(GPIO_ENET_RXD0);    /* Ethernet receive data 0-3 */

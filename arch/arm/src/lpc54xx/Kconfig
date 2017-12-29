@@ -671,33 +671,33 @@ endmenu # EMC Configuration
 menu "Ethernet configuration"
 	depends on LPC54_ETHERNET
 
-config LPC54_PHYADDR
+config LPC54_ETH_PHYADDR
 	int "PHY address"
 	default 1
 	---help---
 		The 5-bit address of the PHY on the board.  Default: 1
 
-config LPC54_MII
+config LPC54_ETH_MII
 	bool "Use MII interface"
 	default n
 	---help---
 		Support Ethernet MII interface.  Default:  Use RMII interface.
 
-config LPC54_MULTIQUEUE
+config LPC54_ETH_MULTIQUEUE
 	bool "Use multiple queues"
 	default n
 	depends on EXPERIMENTAL
 	---help---
 		Support not yet implemented.
 
-config LPC54_TX_STRFWD
+config LPC54_ETH_TX_STRFWD
 	bool "Tx store and forward"
 	default n
 	---help---
 		Transmission starts when a full packet resides in the MTL Tx Queue.
 		This disables the default Tx threshold controls.
 
-config LPC54_RX_STRFWD
+config LPC54_ETH_RX_STRFWD
 	bool "Rx store and forward"
 	default n
 	---help---
@@ -705,21 +705,21 @@ config LPC54_RX_STRFWD
 		been written to it. By default, the Rx Queue operates in the
 		threshold (cut-through) mode.
 
-config LPC54_RX_PROMISCUOUS
+config LPC54_ETH_RX_PROMISCUOUS
 	bool "Enable Rx promiscuous mode"
 	default n
 	---help---
 		If selected, the address filter module accepts all incoming frames
 		regardless of its destination or source address.
 
-config LPC54_RX_BROADCAST
+config LPC54_ETH_RX_BROADCAST
 	bool "Enable Rx broadcast"
 	default y
 	---help---
 		If selected, all received frames with a broadcast destination
 		address are accepted.
 
-config LPC54_RX_ALLMULTICAST
+config LPC54_ETH_RX_ALLMULTICAST
 	bool "Accept all multicast packets"
 	default y if NET_BROADCAST
 	default n if !NET_BROADCAST
@@ -727,6 +727,25 @@ config LPC54_RX_ALLMULTICAST
 		If selected, all received frames with a multicast destination
 		address (first bit in the destination address field is '1') are
 		accepted.
+
+config LPC54_ETH_FLOWCONTROL
+	bool "Enable flow control"
+	default n
+	---help---
+		Enable TX and RX flow control.
+
+config LPC54_ETH_TX_PAUSETIME
+	int "Tx pause time"
+	default 0
+	range 0 65535
+	depends on LPC54_ETH_FLOWCONTROL
+	---help---
+		Value to be used in the pause time field in the transmit control
+		frame.
+
+config LPC54_ETH_8023AS2K
+	bool "Enable 8023as support for 2K packets"
+	default n
 
 endmenu # Ethernet configuration
 
