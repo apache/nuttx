@@ -240,8 +240,10 @@ static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv);
-static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
+static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
 
 static void lpc54_eth_interrupt_work(void *arg);
 static int  lpc54_eth_interrupt(int irq, void *context, void *arg);
@@ -438,6 +440,7 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *   chan - The channel with the completed Rx transfer
  *
  * Returned Value:
  *   None
@@ -447,7 +450,8 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
+                              unsigned int chan)
 {
   do
     {
@@ -583,6 +587,7 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *   chan - The channel with the completed Tx transfer
  *
  * Returned Value:
  *   None
@@ -592,7 +597,8 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
+                             unsigned int chan)
 {
   int delay;
 
@@ -619,6 +625,90 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv)
 }
 
 /****************************************************************************
+ * Name: lpc54_eth_channel_work
+ *
+ * Description:
+ *   Perform interrupt related work for a channel DMA interrupt
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *   chan - The channel that received the interrupt event.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void lpc54_eth_channel_work(void *arg)
+{
+  uintptr_t regaddr;
+  uint32_t status;
+
+  /* Read the DMA status register for this channel */
+
+  regaddr = LPC54_ETH_DMACH_STAT(chan)
+  status  = getre32(regaddr);
+
+  /* Check for abnormal interrupts */
+
+  if ((status & LPC54_ABNORM_INTMASK) != 0)
+    {
+      /* Acknowledge the normal receive interrupt */
+
+      putreg32(LPC54_ABNORM_INTMASK, regaddr);
+
+      /* Handle the incoming packet */
+
+      nerr("ERROR: Abnormal interrupt received: %08lx\n", (unsigned long)status);
+      status &= ~LPC54_ABNORM_INTMASK;
+    }
+
+  /* Check for a receive interrupt */
+
+  if ((status & ETH_DMACH_INT_RI) != 0)
+    {
+      /* Acknowledge the normal receive interrupt */
+
+      putreg32(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
+      status &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
+
+      /* Handle the incoming packet */
+
+      lpc54_eth_receive(priv, channel);
+    }
+
+  /* Check for a transmit interrupt */
+
+  if ((status & ETH_DMACH_INT_TI) != 0)
+    {
+      /* Acknowledge the normal receive interrupt */
+
+      putreg32(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI, regaddr);
+      status &= ~(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI);
+
+      /* Handle the Tx completion event.  Reclaim the completed Tx
+       * descriptors, free packet buffers, and check if we can start a new
+       * transmissin.
+       */
+
+      lpc54_eth_txdone(priv, channel);
+    }
+
+  /* Check for unhandled interrupts */
+
+  if (status != 0)
+    {
+      nwarn("WARNING: Unhandled interrupts: %08lx\n",
+            (unsigned int)status);
+      putreg32(status, regaddr);
+
+    }
+}
+
+/****************************************************************************
  * Name: lpc54_eth_interrupt_work
  *
  * Description:
@@ -638,40 +728,32 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv)
 static void lpc54_eth_interrupt_work(void *arg)
 {
   struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
+  uint32_t intrstat;
+  uint32_t chstat;
 
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
+  /* Lock the network to serialize driver operations. */
 
   net_lock();
 
-  /* Process pending Ethernet interrupts */
-#warning Missing logic
+  /* Check if interrupt is from DMA channel 0. */
 
-  /* Get and clear interrupt status bits */
-#warning Missing logic
+  intrstat = getreg32(LPC54_ETH_DMA_INTR_STAT);
+  if ((intrstat & ETH_DMA_INTR_STAT_DC0IS) != 0)
+    {
+      lpc54_eth_channel_work(priv, 0);
+    }
 
-  /* Handle interrupts according to status bit settings */
-#warning Missing logic
+  /* Check if interrupt is from DMA channel 1. */
 
-  /* Check if we received an incoming packet, if so, call lpc54_eth_receive() */
-#warning Missing logic
+  intrstat = getreg32(LPC54_ETH_DMA_INTR_STAT);
+  if ((intrstat & ETH_DMA_INTR_STAT_DC1IS) != 0)
+    {
+      lpc54_eth_channel_work(priv, 1);
+    }
 
-  lpc54_eth_receive(priv);
+  /* Un-lock the network and re-enable Ethernet interrupts */
 
-  /* Check if a packet transmission just completed.  If so, call lpc54_eth_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * transmissions.
-   */
-#warning Missing logic
-
-  lpc54_eth_txdone(priv);
   net_unlock();
-
-  /* Re-enable Ethernet interrupts */
-
   up_enable_irq(LPC54_IRQ_ETHERNET);
 }
 
@@ -759,7 +841,7 @@ static int  lpc54_pmt_interrupt(int irq, void *context, void *arg)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static int  lpc54_mac_interrupt(int irq, void *context, void *arg)
+static int lpc54_mac_interrupt(int irq, void *context, void *arg)
 {
   return OK;
 }
@@ -2117,6 +2199,7 @@ int up_netinitialize(int intf)
       return -EAGAIN;
     }
 
+#if 0 /* Not used */
   if (irq_attach(LPC54_IRQ_ETHERNETPMT, lpc54_pmt_interrupt, priv))
     {
       /* We could not attach the ISR to the interrupt */
@@ -2132,6 +2215,7 @@ int up_netinitialize(int intf)
       nerr("ERROR:  irq_attach for MAC failed\n");
       return -EAGAIN;
     }
+#endif
 
   /* Initialize the driver structure */
 

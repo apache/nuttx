@@ -501,9 +501,6 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
  * Returned Value:
  *   OK on success
  *
- * Assumptions:
- *   The network is locked.
- *
  ****************************************************************************/
 
 static void skel_interrupt_work(FAR void *arg)
