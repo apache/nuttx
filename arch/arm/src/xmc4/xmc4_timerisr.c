@@ -67,7 +67,7 @@
  * common system clock of 10 msec/tick cannot be exactly represented with
  * that value.
  *
- * In the second case, the SysTick counter may run to rapidly to support
+ * In the second case, the SysTick counter may run too rapidly to support
  * longer timer tick intervals.  For example, if the CPU clock is 144Mhz,
  * then that 10 msec interval would correspond to a reload value of 1,440,000
  * or 0x0015f900.
@@ -134,7 +134,7 @@ void arm_timer_initialize(void)
 
   /* Set the SysTick interrupt to the default priority */
 
-  regval = getreg32(NVIC_SYSH12_15_PRIORITY);
+  regval  = getreg32(NVIC_SYSH12_15_PRIORITY);
   regval &= ~NVIC_SYSH_PRIORITY_PR15_MASK;
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
@@ -150,7 +150,7 @@ void arm_timer_initialize(void)
    *   CLKSOURCE=1: fCPU
    */
 
-  regval = getreg32(NVIC_SYSTICK_CTRL);
+  regval  = getreg32(NVIC_SYSTICK_CTRL);
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
   putreg32(regval, NVIC_SYSTICK_CTRL);
 #endif

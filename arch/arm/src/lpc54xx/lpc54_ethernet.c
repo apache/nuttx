@@ -4,6 +4,13 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Some of the logic in this file was developed using sample code provided by
+ * NXP that has a compatible BSD license:
+ *
+ *   Copyright (c) 2016, Freescale Semiconductor, Inc.
+ *   Copyright 2016-2017 NXP
+ *   All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -143,6 +150,11 @@
 #define LPC54_MIN_RINGLEN       4     /* Min length of a ring */
 #define LPC54_MAX_RINGLEN       1023  /* Max length of a ring */
 #define LPC54_MAX_RINGS         2     /* Max number of tx/rx descriptor rings */
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+#  define LPC54_NRINGS          2     /* Use 2 Rx and Tx rings */
+#else
+#  define LPC54_NRINGS          1     /* Use 1 Rx and 1 Tx ring */
+#endif
 
 /* Interrupt masks */
 
@@ -150,6 +162,9 @@
                                  ETH_DMACH_INT_RS  | ETH_DMACH_INT_RWT | \
                                  ETH_DMACH_INT_FBE | ETH_DMACH_INT_ETI | \
                                  ETH_DMACH_INT_AI)
+#define LPC54_TXERR_INTMASK     (ETH_DMACH_INT_TS  | ETH_DMACH_INT_ETI)
+#define LPC54_RXERR_INTMASK     (ETH_DMACH_INT_RBU | ETH_DMACH_INT_RS  | \
+                                 ETH_DMACH_INT_RWT)
 #define LPC54_NORM_INTMASK      (ETH_DMACH_INT_TI  | ETH_DMACH_INT_TBU | \
                                  ETH_DMACH_INT_RI  | ETH_DMACH_INT_ERI | \
                                  ETH_DMACH_INT_NI)
@@ -163,6 +178,28 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* Describes the state of one Tx descriptor ring */
+
+struct lpc54_txring_s
+{
+  struct enet_txdesc_s *tr_desc; /* Tx descriptor base address */
+  uint16_t tr_genidx;            /* Tx generate index */
+  uint16_t tr_consumidx;         /* Tx consume index */
+  volatile uint16_t tr_inuse;    /* Number of Tx descriptors in-used */
+  uint16_t tr_ndesc;             /* Number or descriptors in the Tx ring */
+  uint32_t **tr_buffers;         /* Packet buffers assigned to the Rx ring */
+};
+
+/* Describes the state of one Rx descriptor ring */
+
+struct lpc54_rxring_s
+{
+  struct enet_rxdesc_s *rr_desc; /* Rx descriptor base address */
+  uint16_t rr_genidx;            /* Available Rx descriptor index */
+  uint16_t rr_ndesc;             /* Number or descriptors in the Rx ring */
+  uint32_t **rr_buffers;         /* Packet buffers assigned to the Rx ring */
+};
 
 /* The lpc54_ethdriver_s encapsulates all state information for a single
  * Ethernet interface
@@ -179,12 +216,10 @@ struct lpc54_ethdriver_s
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
   struct sq_queue_s eth_freebuf; /* Free packet buffers */
 
-  /* Packet buffers assigned to Rx descriptors */
+  /* Ring state */
 
-  uint32_t *eth_rxbuffers1[CONFIG_LPC54_ETH_NRXDESC0];
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  uint32_t *eth_rxbuffers2[CONFIG_LPC54_ETH_NRXDESC1];
-#endif
+  struct lpc54_txring_s eth_txring[LPC54_NRINGS];
+  struct lpc54_rxring_s eth_rxring[LPC54_NRINGS];
 
   /* This holds the information visible to the NuttX network */
 
@@ -228,6 +263,18 @@ static struct enet_txdesc_s g_ch1_txdesc[CONFIG_LPC54_ETH_NTXDESC1];
 /* Preallocated packet buffers */
 
 static uint32_t g_prealloc_buffers[LPC54_NBUFFERS * LPC54_BUFFER_WORDS];
+
+/* Packet buffers assigned to Rx and Tx descriptors.  The packet buffer
+ * addresses are lost in the DMA due to write-back from the DMA harware.
+ * So we have to remember the buffer assignments explicitly.
+ */
+
+static uint32_t *g_rxbuffers0[CONFIG_LPC54_ETH_NRXDESC0];
+static uint32_t *g_txbuffers0[CONFIG_LPC54_ETH_NTXDESC0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+static uint32_t *g_rxbuffers1[CONFIG_LPC54_ETH_NRXDESC1];
+static uint32_t *g_txbuffers1[CONFIG_LPC54_ETH_NTXDESC1];
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -291,15 +338,13 @@ static inline uint32_t *lpc54_pktbuf_alloc(struct lpc54_ethdriver_s *priv);
 static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
               uint32_t *pktbuf);
 
-/* DMA descriptors */
+/* DMA descriptor rings */
 
-static void lpc54_txdesc_initialize(struct lpc54_ethdriver_s *priv,
-              unsigned int chan, struct enet_txdesc_s *txdesc,
-              unsigned int ndesc);
-static void lpc54_rxdesc_initialize(struct lpc54_ethdriver_s *priv,
-              unsigned int chan, struct enet_txdesc_s *rxdesc,
-              unsigned int ndesc);
-static void lpc54_desc_initialize(struct lpc54_ethdriver_s *priv);
+static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
+static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
+static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv);
 
 /* Initialization/PHY control */
 
@@ -455,9 +500,6 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 {
   do
     {
-      /* Check for errors and update statistics */
-#warning Missing logic
-
       /* Check if the packet is a valid size for the network buffer
        * configuration.
        */
@@ -600,24 +642,60 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
                              unsigned int chan)
 {
+  struct lpc54_txring_s *txring;
+  struct enet_txdesc_s *txdesc;
+  uint32_t *pktbuf;
   int delay;
 
-  /* Check for errors and update statistics */
-#warning Missing logic
+  /* Reclaim the compled Tx descriptor */
 
-  NETDEV_TXDONE(priv->eth_dev);
+  txring = &priv->eth_txring[channel];
+  txdesc = txring->desc + txring->tr_consumidx;
 
-  /* Check if there are pending transmissions */
-#warning Missing logic
+  /* Update the first index for transmit buffer free. */
+
+  while (txring->tr_inuse > 0 &&
+         (txdesc->ctrlstat & ENET_TXDESCRIP_RD_OWN_MASK) == 0)
+    {
+      /* Update statistics */
+
+      NETDEV_TXDONE(priv->eth_dev);
+
+      /* Free the Tx buffer assigned to the descriptor */
+
+      pktbuf = txring->tr_buffers[txring->tr_consumidx];
+      DEBUGASSERT(pktbuf != NULL);
+      if (pktbuf != NULL)
+        {
+          lpc54_pktbuf_free(pktbuf);
+          txring->tr_buffers[txring->tr_consumidx] = NULL;
+        }
+
+      /* One less Tx descriptor in use */
+
+      txring->tr_inuse--;
+
+      /* Update the consume index and the descriptor pointer. */
+
+      if (++(txring->tr_consumidx) >= txring->tr_ndesc)
+        {
+          txring->tr_consumidx = 0;
+        }
+
+      txdesc = txring->desc + txring->tr_consumidx;
+    }
 
   /* If no further transmissions are pending, then cancel the TX timeout and
    * disable further Tx interrupts.
    */
 
-  wd_cancel(priv->eth_txtimeout);
+  if (txring->tr_inuse == 0)
+    {
+      wd_cancel(priv->eth_txtimeout);
 
-  /* And disable further TX interrupts. */
+      /* And disable further TX interrupts. */
 #warning Missing logic
+    }
 
   /* In any event, poll the network for new TX data */
 
@@ -664,6 +742,18 @@ static void lpc54_eth_channel_work(void *arg)
 
       nerr("ERROR: Abnormal interrupt received: %08lx\n", (unsigned long)status);
       status &= ~LPC54_ABNORM_INTMASK;
+
+      /* Check for Tx/Rx related errors and update statistics */
+
+      if ((status & LPC54_RXERR_INTMASK) != 0)
+        {
+          NETDEV_RXERRORS(priv->eth_dev);
+        }
+
+      if ((status & LPC54_TXERR_INTMASK) != 0)
+        {
+          NETDEV_TXERRORS(priv->eth_dev);
+        }
     }
 
   /* Check for a receive interrupt */
@@ -674,6 +764,10 @@ static void lpc54_eth_channel_work(void *arg)
 
       putreg32(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
       status &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
+
+      /* Update statistics */
+
+      NETDEV_RXPACKETS(priv->eth_dev);
 
       /* Handle the incoming packet */
 
@@ -704,7 +798,6 @@ static void lpc54_eth_channel_work(void *arg)
       nwarn("WARNING: Unhandled interrupts: %08lx\n",
             (unsigned int)status);
       putreg32(status, regaddr);
-
     }
 }
 
@@ -1264,7 +1357,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   /* Initialize descriptors */
 
-  lpc54_desc_initialize(priv);
+  lpc54_ring_initialize(priv);
 
   /* Activate DMA on channel 0 */
 
@@ -1709,7 +1802,7 @@ static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_txdesc_initialize
+ * Name: lpc54_txring_initialize
  *
  * Description:
  *   Initialize one Tx descriptor ring.
@@ -1717,41 +1810,40 @@ static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
  * Parameters:
  *   priv   - Reference to the driver state structure
  *   chan   - Channel being initialized
- *   txdesc - An array of pre-allocated Tx descriptors
- *   ndesc  - The number of descriptors in the array
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void lpc54_txdesc_initialize(struct lpc54_ethdriver_s *priv,
-                                    unsigned int chan,
-                                    struct enet_txdesc_s *txdesc,
-                                    unsigned int ndesc);
+static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
+                                    unsigned int chan);
 {
+  struct lpc54_txring_s *txring;
+  struct enet_txdesc_s *txdesc;
   uint32_t control;
   uint32_t regval;
   int i;
 
-  DEBUGASSERT(ndesc >= LPC54_MIN_RINGLEN && ndesc <= LPC54_MAX_RINGLEN);
+  txring  = &priv->eth_txring[chan];
+  txdesc  = txring->tr_desc;
 
   /* Set the word-aligned Tx descriptor start/tail pointers. */
 
-  regval = (uint32_t)txdesc;
+  regval  = (uint32_t)txdesc;
   putreg32(regval, LPC54_ETH_DMACH_TXDESC_LIST_ADDR(ch));
 
-  regval += ndesc * sizeof(struct enet_txdesc_s);
+  regval += txring->tr_ndesc * sizeof(struct enet_txdesc_s);
   putreg32(regval, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(ch));
 
   /* Set the Tx ring length */
 
-  regval = ETH_DMACH_TXDESC_RING_LENGTH(ndesc);
+  regval = ETH_DMACH_TXDESC_RING_LENGTH(txring->tr_ndesc);
   putreg32(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(ch));
 
   /* Inituialize the Tx desriptors . */
 
-  for (i = 0; i < ndesc; i++, txdesc++)
+  for (i = 0; i < txring->tr_ndesc; i++, txdesc++)
     {
       txdesc->buffer1  = 0;
       txdesc->buffer2  = 0;
@@ -1761,7 +1853,7 @@ static void lpc54_txdesc_initialize(struct lpc54_ethdriver_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_rxdesc_initialize
+ * Name: lpc54_rxring_initialize
  *
  * Description:
  *   Initialize one Rx descriptor ring.
@@ -1769,38 +1861,35 @@ static void lpc54_txdesc_initialize(struct lpc54_ethdriver_s *priv,
  * Parameters:
  *   priv   - Reference to the driver state structure
  *   chan   - Channel being initialized
- *   txdesc - An array of pre-allocated Tx descriptors
- *   ndesc  - The number of descriptors in the array
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void lpc54_rxdesc_initialize(struct lpc54_ethdriver_s *priv,
-                                    unsigned int chan,
-                                    struct enet_txdesc_s *rxdesc,
-                                    unsigned int ndesc)
+static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
+                                    unsigned int chan)
 {
+  struct lpc54_rxring_s *rxring;
+  struct enet_txdesc_s *txdesc;
   uint32_t regval;
   int i;
   int j;
 
-  DEBUGASSERT(ndesc >= LPC54_MIN_RINGLEN && ndesc <= LPC54_MAX_RINGLEN);
-
-#define LPC54_ETH_DMACH_RXDESC_RING_LENGTH(n)            (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RXDESC_RING_LENGTH_OFFSET)
+  rxring  = &priv->eth_rxring[chan];
+  rxdesc  = rxring->rr_desc;
 
   /* Set the word-aligned Rx descriptor start/tail pointers. */
 
-  regval = (uint32_t)rxdesc;
+  regval  = (uint32_t)rxdesc;
   putreg32(regval, LPC54_ETH_DMACH_RXDESC_LIST_ADDR(chan));
 
-  regval += ndesc * sizeof(struct enet_rxdesc_s);
+  regval += rxring->rr_ndesc * sizeof(struct enet_rxdesc_s);
   putreg32(regval, LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan));
 
   /* Set the Rx ring length */
 
-  regval = ETH_DMACH_RXDESC_RING_LENGTH(ndesc);
+  regval = ETH_DMACH_RXDESC_RING_LENGTH(rxring->rr_ndesc);
   putreg32(regval, LPC54_ETH_DMACH_RXDESC_RING_LENGTH(ch));
 
   /* Set the receive buffer size (in words) in the Rx control register */
@@ -1817,20 +1906,20 @@ static void lpc54_rxdesc_initialize(struct lpc54_ethdriver_s *priv,
   regval |= ETH_RXDES3_BUF2V;
 #endif
 
-  for (i = 0; i < ndesc; i++, rxdesc++)
+  for (i = 0; i < rxring->rr_ndesc; i++, rxdesc++)
     {
       /* Allocate the first Rx packet buffer */
 
       rxdesc->buffer1 = (uint32_t)lpc54_pktbuf_alloc(priv);
       DEBUGASSERT(rxdesc->buffer1 != NULL);
-      priv->eth_rxbuffers1[i] = rxdesc->buffer1;
+      priv->eth_rxbuffers[0][i] = rxdesc->buffer1;
 
 #ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
       /* Allocate the second Rx packet buffer */
 
       rxdesc->buffer2 = (uint32_t)lpc54_pktbuf_alloc(priv);
       DEBUGASSERT(rxdesc->buffer2 != NULL);
-      priv->eth_rxbuffers2[i] = rxdesc->buffer2;
+      priv->eth_rxbuffers[1][i] = rxdesc->buffer2;
 
 #else
       /* The second buffer is not used */
@@ -1845,32 +1934,56 @@ static void lpc54_rxdesc_initialize(struct lpc54_ethdriver_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_desc_initialize
+ * Name: lpc54_ring_initialize
  *
  * Description:
- *   Set the CSR clock divider.  The MDC clock derives from the divided down
- *   CSR clock (aka core clock or main clock).
+ *   Initialize the Rx and Tx rings for every channel.
  *
  * Parameters:
- *   None
+ *   priv   - Reference to the driver state structure
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void lpc54_desc_initialize(struct lpc54_ethdriver_s *priv)
+static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv)
 {
-  /* Initialize channel 0 descriptors */
+  /* Initialize ring descriptions */
 
-  lpc54_txdesc_initialize(priv, 0, g_ch0_txdesc, CONFIG_LPC54_ETH_NTXDESC0);
-  lpc54_rxdesc_initialize(priv, 0, g_ch0_rxdesc, CONFIG_LPC54_ETH_NRXDESC0);
+  memset(priv->eth_txring, 0, LPC54_NRINGS * sizeof(struct lpc54_txring_s));
+  memset(priv->eth_rxring, 0, LPC54_NRINGS * sizeof(struct lpc54_rxring_s));
+
+  /* Initialize channel 0 rings */
+
+  memset(g_txbuffers0, 0, CONFIG_LPC54_ETH_NTXDESC0 * sizeof(uint32_t *));
+  memset(g_rxbuffers0, 0, CONFIG_LPC54_ETH_NRXDESC0 * sizeof(uint32_t *));
+
+  priv->eth_txring[0].tr_desc    = g_ch0_txdesc;
+  priv->eth_txring[0].tr_ndesc   = CONFIG_LPC54_ETH_NTXDESC0;
+  priv->eth_txring[0].tr_buffers = g_txbuffers0;
+  lpc54_txring_initialize(priv, 0);
+
+  priv->eth_rxring[0].rr_desc    = g_ch0_rxdesc;
+  priv->eth_rxring[0].rr_ndesc   = CONFIG_LPC54_ETH_NRXDESC0;
+  priv->eth_rxring[0].rr_buffers = g_rxbuffers0;
+  lpc54_rxring_initialize(priv, 0);
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  /* Initialize channel 1 descriptors */
+  /* Initialize channel 1 rings */
 
-  lpc54_txdesc_initialize(priv, 1, g_ch1_txdesc, CONFIG_LPC54_ETH_NTXDESC1);
-  lpc54_rxdesc_initialize(priv, 0, g_ch1_rxdesc, CONFIG_LPC54_ETH_NRXDESC1);
+  memset(g_txbuffers1, 0, CONFIG_LPC54_ETH_NTXDESC1 * sizeof(uint32_t *));
+  memset(g_rxbuffers1, 0, CONFIG_LPC54_ETH_NRXDESC1 * sizeof(uint32_t *));
+
+  priv->eth_txring[1].tr_desc    = g_ch1_txdesc;
+  priv->eth_txring[1].tr_ndesc   = CONFIG_LPC54_ETH_NTXDESC1;
+  priv->eth_txring[0].tr_buffers = g_txbuffers1;
+  lpc54_txring_initialize(priv, 1);
+
+  priv->eth_rxring[0].rr_desc    = g_ch1_rxdesc;
+  priv->eth_rxring[0].rr_ndesc   = CONFIG_LPC54_ETH_NRXDESC1;
+  priv->eth_rxring[0].rr_buffers = g_rxbuffers1;
+  lpc54_rxring_initialize(priv, 0);
 #endif
 }
 
