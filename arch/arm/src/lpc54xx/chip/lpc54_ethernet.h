@@ -578,24 +578,28 @@
 #define ETH_DMACH_RX_CTRL_SR                             (1 << 0)  /* Bit 0:  Start or stop receive command */
 #define ETH_DMACH_RX_CTRL_RBSZ_SHIFT                     (3)       /* Bits 3-14: Receive buffer size */
 #define ETH_DMACH_RX_CTRL_RBSZ_MASK                      (0xfff << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
-#  define ETH_DMACH_RX_CTRL(n)                           ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
+#  define ETH_DMACH_RX_CTRL_RBSZ(n)                      ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
 #define ETH_DMACH_RX_CTRL_RxPBL_SHIFT                    (16)      /* Bits 16-21: Receive programmable burst length */
 #define ETH_DMACH_RX_CTRL_RxPBL_MASK                     (0x3f << ETH_DMACH_RX_CTRL_RxPBL_SHIFT)
 #  define ETH_DMACH_RX_CTRL_RxPBL(n)                     ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RxPBL_SHIFT)
 #define ETH_DMACH_RX_CTRL_RPF                            (1 << 31) /* Bit 31: DMA Rx channel n packet flush */
 
-/* DMA channel n Tx descriptor list address */
-#define ETH_DMACH_TXDESC_LIST_ADDR_
-/* DMA channel n Rx descriptor list address */
-#define ETH_DMACH_RXDESC_LIST_ADDR_
-/* DMA channel n Tx descriptor tail pointer */
-#define ETH_DMACH_TXDESC_TAIL_PTR_
-/* DMA channel n Rx descriptor tail pointer */
-#define ETH_DMACH_RXDESC_TAIL_PTR_
+/* DMA channel n Tx descriptor list address (32-bit, word-aligned address) */
+/* DMA channel n Rx descriptor list address (32-bit, word-aligned address) */
+/* DMA channel n Tx descriptor tail pointer (32-bit, word-aligned address) */
+/* DMA channel n Rx descriptor tail pointer (32-bit, word-aligned address) */
+
 /* DMA channel n Tx descriptor ring length */
-#define ETH_DMACH_TXDESC_RING_LENGTH_
+
+#define ETH_DMACH_TXDESC_RING_LENGTH_SHIFT               (0)       /* Bits 0-9: Transmit ring length */
+#define ETH_DMACH_TXDESC_RING_LENGTH_MASK                (0x3ff << ETH_DMACH_TXDESC_RING_LENGTH_SHIFT)
+#  define ETH_DMACH_TXDESC_RING_LENGTH(n)                ((uint32_t)((n)-1) << ETH_DMACH_TXDESC_RING_LENGTH_SHIFT)
+
 /* DMA channel n Rx descriptor ring length */
-#define ETH_DMACH_RXDESC_RING_LENGTH_
+
+#define ETH_DMACH_RXDESC_RING_LENGTH_SHIFT               (0)       /* Bits 0-9: Receive ring length */
+#define ETH_DMACH_RXDESC_RING_LENGTH_MASK                (0x3ff << ETH_DMACH_RXDESC_RING_LENGTH_SHIFT)
+#  define ETH_DMACH_RXDESC_RING_LENGTH(n)                ((uint32_t)((n)-1) << ETH_DMACH_RXDESC_RING_LENGTH_SHIFT)
 
 /* DMA channel n interrupt enable and DMA channel n DMA status */
 
@@ -790,7 +794,7 @@ struct enet_rxdesc_s
   uint32_t buffer1;   /* Buffer 1 address */
   uint32_t reserved;  /* Reserved */
   uint32_t buffer2;   /* Buffer 2 or next descriptor address */
-  uint32_t control;   /* Buffer 1/2 byte counts and control */
+  uint32_t ctrl;      /* Buffer 1/2 byte counts and control */
 };
 
 /* Transmit descriptor structure (read format) */

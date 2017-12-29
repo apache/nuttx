@@ -747,6 +747,56 @@ config LPC54_ETH_8023AS2K
 	bool "Enable 8023as support for 2K packets"
 	default n
 
+config LPC54_ETH_NRXDESC0
+	int "Number of Rx DMA descriptors (ch0)"
+	default 8
+	range 4 1024
+	---help---
+		The number of Rx DMA descriptors to configure for Rx Channel 0.  The
+		minimum is 4; the upper limit is 1024.
+
+		NOTE:  Each Rx descriptor will require a receive buffer at the size
+		of the configured MTU.
+
+config LPC54_ETH_NRXDESC1
+	int "Number of Rx DMA descriptors (ch1)"
+	default 8
+	range 4 1024
+	depends on LPC54_ETH_MULTIQUEUE
+	---help---
+		The number of Rx DMA descriptors to configure for Rx Channel 1.  The
+		minimum is 4; the upper limit is 1024.
+
+		NOTE:  Each Rx descriptor will require a receive buffer at the size
+		of the configured MTU.
+
+config LPC54_ETH_NTXDESC0
+	int "Number of Tx DMA descriptors (ch0)"
+	default 8
+	range 4 1024
+	---help---
+		The number of Tx DMA descriptors to configure for Rx Channel 0.  The
+		minimum is 4; the upper limit is 1024.
+
+		NOTE:  Each Rx descriptor will require a transmit buffer at the size
+		of the configured MTU.
+
+config LPC54_ETH_NTXDESC1
+	int "Number of Tx DMA descriptors (ch1)"
+	default 8
+	range 4 1024
+	depends on LPC54_ETH_MULTIQUEUE
+	---help---
+		The number of Tx DMA descriptors to configure for Rx Channel 1.  The
+		minimum is 4; the upper limit is 1024.
+
+		NOTE:  Each Rx descriptor will require a transmit buffer at the size
+		of the configured MTU.
+
+config LPC54_ETH_RX_DOUBLEBUFFER
+	bool "Enable Rx double buffering"
+	default n
+
 endmenu # Ethernet configuration
 
 menu "SD/MMC Configuration"

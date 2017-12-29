@@ -50,6 +50,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <queue.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -121,9 +122,26 @@
 
 #define LPC54_MAC_HALFDUPLEX_IPG ETH_MAC_CONFIG_IPG_64 /* Default half-duplex IPG */
 
+/* Packet-buffer definitions */
+
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+#  define LPC54_NBUFFERS        (CONFIG_LPC54_ETH_NRXDESC0 + \
+                                 CONFIG_LPC54_ETH_NRXDESC1 + \
+                                 CONFIG_LPC54_ETH_NTXDESC0 + \
+                                 CONFIG_LPC54_ETH_NTXDESC1)
+#else
+#  define LPC54_NBUFFERS        (CONFIG_LPC54_ETH_NRXDESC0 + \
+                                 CONFIG_LPC54_ETH_NTXDESC0)
+#endif
+
+#define LPC54_BUFFER_SIZE       MAX_NET_DEV_MTU
+#define LPC54_BUFFER_ALLOC      ((MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE + 3) & ~3)
+#define LPC54_BUFFER_WORDS      ((MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE + 3) >> 2)
+
 /* DMA descriptor definitions */
 
 #define LPC54_MIN_RINGLEN       4     /* Min length of a ring */
+#define LPC54_MAX_RINGLEN       1023  /* Max length of a ring */
 #define LPC54_MAX_RINGS         2     /* Max number of tx/rx descriptor rings */
 
 /* Interrupt masks */
@@ -152,17 +170,25 @@
 
 struct lpc54_ethdriver_s
 {
-  bool eth_bifup;               /* true:ifup false:ifdown */
-  bool eth_fullduplex;          /* true:Full duplex false:Half duplex mode */
-  bool eth_100mbps;             /* true:100mbps false:10mbps */
-  WDOG_ID eth_txpoll;           /* TX poll timer */
-  WDOG_ID eth_txtimeout;        /* TX timeout timer */
-  struct work_s eth_irqwork;    /* For deferring interupt work to the work queue */
-  struct work_s eth_pollwork;   /* For deferring poll work to the work queue */
+  bool eth_bifup;                /* true:ifup false:ifdown */
+  bool eth_fullduplex;           /* true:Full duplex false:Half duplex mode */
+  bool eth_100mbps;              /* true:100mbps false:10mbps */
+  WDOG_ID eth_txpoll;            /* TX poll timer */
+  WDOG_ID eth_txtimeout;         /* TX timeout timer */
+  struct work_s eth_irqwork;     /* For deferring interupt work to the work queue */
+  struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
+  struct sq_queue_s eth_freebuf; /* Free packet buffers */
+
+  /* Packet buffers assigned to Rx descriptors */
+
+  uint32_t *eth_rxbuffers1[CONFIG_LPC54_ETH_NRXDESC0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  uint32_t *eth_rxbuffers2[CONFIG_LPC54_ETH_NRXDESC1];
+#endif
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s eth_dev;  /* Interface understood by the network */
+  struct net_driver_s eth_dev;   /* Interface understood by the network */
 };
 
 /****************************************************************************
@@ -185,65 +211,104 @@ static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
 
 static struct lpc54_ethdriver_s g_ethdriver;
 
+/* Rx DMA descriptors */
+
+static struct enet_rxdesc_s g_ch0_rxdesc[CONFIG_LPC54_ETH_NRXDESC0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+static struct enet_rxdesc_s g_ch1_rxdesc[CONFIG_LPC54_ETH_NRXDESC1];
+#endif
+
+/* Tx DMA descriptors */
+
+static struct enet_txdesc_s g_ch0_txdesc[CONFIG_LPC54_ETH_NTXDESC0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+static struct enet_txdesc_s g_ch1_txdesc[CONFIG_LPC54_ETH_NTXDESC1];
+#endif
+
+/* Preallocated packet buffers */
+
+static uint32_t g_prealloc_buffers[LPC54_NBUFFERS * LPC54_BUFFER_WORDS];
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 /* Common TX logic */
 
-static int  lpc54_eth_transmit(FAR struct lpc54_ethdriver_s *priv);
-static int  lpc54_eth_txpoll(FAR struct net_driver_s *dev);
+static int  lpc54_eth_transmit(struct lpc54_ethdriver_s *priv);
+static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void lpc54_eth_receive(FAR struct lpc54_ethdriver_s *priv);
-static void lpc54_eth_txdone(FAR struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv);
 
-static void lpc54_eth_interrupt_work(FAR void *arg);
-static int  lpc54_eth_interrupt(int irq, FAR void *context, FAR void *arg);
+static void lpc54_eth_interrupt_work(void *arg);
+static int  lpc54_eth_interrupt(int irq, void *context, void *arg);
+#if 0 /* Not used */
+static int  lpc54_pmt_interrupt(int irq, void *context, void *arg);
+static int  lpc54_mac_interrupt(int irq, void *context, void *arg);
+#endif
 
 /* Watchdog timer expirations */
 
-static void lpc54_eth_txtimeout_work(FAR void *arg);
+static void lpc54_eth_txtimeout_work(void *arg);
 static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
-static void lpc54_eth_poll_work(FAR void *arg);
+static void lpc54_eth_poll_work(void *arg);
 static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  lpc54_eth_ifup(FAR struct net_driver_s *dev);
-static int  lpc54_eth_ifdown(FAR struct net_driver_s *dev);
+static int  lpc54_eth_ifup(struct net_driver_s *dev);
+static int  lpc54_eth_ifdown(struct net_driver_s *dev);
 
-static void lpc54_eth_txavail_work(FAR void *arg);
-static int  lpc54_eth_txavail(FAR struct net_driver_s *dev);
+static void lpc54_eth_txavail_work(void *arg);
+static int  lpc54_eth_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int  lpc54_eth_addmac(FAR struct net_driver_s *dev,
-              FAR const uint8_t *mac);
+static int  lpc54_eth_addmac(struct net_driver_s *dev,
+              const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
-static int  lpc54_eth_rmmac(FAR struct net_driver_s *dev,
-              FAR const uint8_t *mac);
+static int  lpc54_eth_rmmac(struct net_driver_s *dev,
+              const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
-static void lpc54_eth_ipv6multicast(FAR struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_ipv6multicast(struct lpc54_ethdriver_s *priv);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int  lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
+static int  lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
+
+/* Packet buffers */
+
+static void lpc54_pktbuf_initialize(struct lpc54_ethdriver_s *priv);
+static inline uint32_t *lpc54_pktbuf_alloc(struct lpc54_ethdriver_s *priv);
+static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
+              uint32_t *pktbuf);
+
+/* DMA descriptors */
+
+static void lpc54_txdesc_initialize(struct lpc54_ethdriver_s *priv,
+              unsigned int chan, struct enet_txdesc_s *txdesc,
+              unsigned int ndesc);
+static void lpc54_rxdesc_initialize(struct lpc54_ethdriver_s *priv,
+              unsigned int chan, struct enet_txdesc_s *rxdesc,
+              unsigned int ndesc);
+static void lpc54_desc_initialize(struct lpc54_ethdriver_s *priv);
 
 /* Initialization/PHY control */
 
 static void lpc54_set_csrdiv(void);
-static uint16_t lpc54_phy_read(FAR struct lpc54_ethdriver_s *priv,
+static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
               uint8_t phyreg);
-static void lpc54_phy_write(FAR struct lpc54_ethdriver_s *priv,
+static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
               uint8_t phyreg, uint16_t phyval);
 static inline bool lpc54_phy_linkstatus(ENET_Type *base);
-static int  lpc54_phy_autonegotiate(FAR struct lpc54_ethdriver_s *priv);
-static int  lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv);
+static int  lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv);
+static int  lpc54_phy_reset(struct lpc54_ethdriver_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -268,7 +333,7 @@ static int  lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv);
  *
  ****************************************************************************/
 
-static int lpc54_eth_transmit(FAR struct lpc54_ethdriver_s *priv)
+static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv)
 {
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
@@ -317,9 +382,9 @@ static int lpc54_eth_transmit(FAR struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-static int lpc54_eth_txpoll(FAR struct net_driver_s *dev)
+static int lpc54_eth_txpoll(struct net_driver_s *dev)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -382,7 +447,7 @@ static int lpc54_eth_txpoll(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc54_eth_receive(FAR struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv)
 {
   do
     {
@@ -527,7 +592,7 @@ static void lpc54_eth_receive(FAR struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc54_eth_txdone(FAR struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv)
 {
   int delay;
 
@@ -570,9 +635,9 @@ static void lpc54_eth_txdone(FAR struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc54_eth_interrupt_work(FAR void *arg)
+static void lpc54_eth_interrupt_work(void *arg)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -614,7 +679,7 @@ static void lpc54_eth_interrupt_work(FAR void *arg)
  * Name: lpc54_eth_interrupt
  *
  * Description:
- *   Hardware interrupt handler
+ *   Ethernet interrupt handler
  *
  * Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
@@ -623,13 +688,11 @@ static void lpc54_eth_interrupt_work(FAR void *arg)
  * Returned Value:
  *   OK on success
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-static int lpc54_eth_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc54_eth_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -659,6 +722,50 @@ static int lpc54_eth_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: lpc54_pmt_interrupt
+ *
+ * Description:
+ *   Ethernet power management interrupt handler
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static int  lpc54_pmt_interrupt(int irq, void *context, void *arg)
+{
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc54_mac_interrupt
+ *
+ * Description:
+ *   Ethernet MAC interrupt handler
+ *
+ * Parameters:
+ *   irq     - Number of the IRQ that generated the interrupt
+ *   context - Interrupt register state save info (architecture-specific)
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static int  lpc54_mac_interrupt(int irq, void *context, void *arg)
+{
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: lpc54_eth_txtimeout_work
  *
  * Description:
@@ -675,9 +782,9 @@ static int lpc54_eth_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void lpc54_eth_txtimeout_work(FAR void *arg)
+static void lpc54_eth_txtimeout_work(void *arg)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -721,7 +828,7 @@ static void lpc54_eth_txtimeout_work(FAR void *arg)
 
 static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
@@ -752,7 +859,7 @@ static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static inline void lpc54_eth_poll_process(FAR struct lpc54_ethdriver_s *priv)
+static inline void lpc54_eth_poll_process(struct lpc54_ethdriver_s *priv)
 {
 #warning Missing logic
 }
@@ -774,9 +881,9 @@ static inline void lpc54_eth_poll_process(FAR struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc54_eth_poll_work(FAR void *arg)
+static void lpc54_eth_poll_work(void *arg)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -827,7 +934,7 @@ static void lpc54_eth_poll_work(FAR void *arg)
 
 static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -851,10 +958,10 @@ static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
+static int lpc54_eth_ifup(struct net_driver_s *dev)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
-  FAR uint8_t *mptr;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  uint8_t *mptr;
   uintptr_t base;
   uint32_t regval;
   uint32_t burstlen;
@@ -983,7 +1090,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
    * device structure:
    */
 
-  mptr   = (FAR uint8_t *)priv->eth_dev.d_mac.ether.ether_addr_octet;
+  mptr   = (uint8_t *)priv->eth_dev.d_mac.ether.ether_addr_octet;
   regval = ((uint32_t)mptr[3] << 24) | ((uint32_t)mptr[2] << 16) |
            ((uint32_t)mptr[1] << 8)  | ((uint32_t)mptr[0]);
   putreg32(regval, LPC54_ETH_MAC_ADDR_LOW);
@@ -1016,7 +1123,7 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
   putreg32(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q1);
 #endif
 
-  /* Set the 1us tick counter*/
+  /* Set the 1uS tick counter*/
 
   regval = ETH_MAC_1US_TIC_COUNTR(BOARD_MAIN_CLK / USEC_PER_SEC);
   putreg32(regval, LPC54_ETH_MAC_1US_TIC_COUNTR);
@@ -1047,6 +1154,9 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
 
   putreg32(regval, LPC54_ETH_MAC_CONFIG);
 
+  /* Set the SYSCON sideband flow control for each channel (see UserManual) */
+#warning Missing logic
+
   /* Enable Rx queues  */
 
   regval = ETH_MAC_RXQ_CTRL0_RXQ0EN_ENABLE | ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE;
@@ -1060,20 +1170,38 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
 
   putreg32(0, LPC54_ETH_MAC_INTR_EN);
 
-  /* Initialize descriptors */
-#warning Missing logic
-
-  /* Activate Rx and Tx */
-#warning Missing logic
-
-  /* Set the sideband flow control for each channel (see UserManual) */
-#warning Missing logic
-
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
 
   lpc54_eth_ipv6multicast(priv);
 #endif
+
+  /* Initialize packet buffers */
+
+  lpc54_pktbuf_initialize(priv);
+
+  /* Initialize descriptors */
+
+  lpc54_desc_initialize(priv);
+
+  /* Activate DMA on channel 0 */
+
+  regval  = getreg32(LPC54_ETH_DMACH_RX_CTRL(0));
+  regval |= ETH_DMACH_RX_CTRL_SR;
+  putreg32(regval, LPC54_ETH_DMACH_RX_CTRL(0));
+
+  regval  = getreg32(LPC54_ETH_DMACH_TX_CTRL(0));
+  regval |= ETH_DMACH_TX_CTRL_ST;
+  putreg32(regval, LPC54_ETH_DMACH_TX_CTRL(0));
+
+  /* Then enable the Rx/Tx */
+
+  regval  = getreg32(LPC54_ETH_MAC_CONFIG);
+  regval |= ETH_MAC_CONFIG_RE;
+  putreg32(regval, LPC54_ETH_MAC_CONFIG);
+
+  regval |= ETH_MAC_CONFIG_TE;
+  putreg32(regval, LPC54_ETH_MAC_CONFIG);
 
   /* Set and activate a timer process */
 
@@ -1103,9 +1231,9 @@ static int lpc54_eth_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int lpc54_eth_ifdown(FAR struct net_driver_s *dev)
+static int lpc54_eth_ifdown(struct net_driver_s *dev)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
   irqstate_t flags;
   uint32_t regval;
 
@@ -1174,9 +1302,9 @@ static int lpc54_eth_ifdown(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc54_eth_txavail_work(FAR void *arg)
+static void lpc54_eth_txavail_work(void *arg)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)arg;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -1220,9 +1348,9 @@ static void lpc54_eth_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc54_eth_txavail(FAR struct net_driver_s *dev)
+static int lpc54_eth_txavail(struct net_driver_s *dev)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1256,9 +1384,9 @@ static int lpc54_eth_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int lpc54_eth_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int lpc54_eth_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 #warning Missing logic
@@ -1284,9 +1412,9 @@ static int lpc54_eth_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int lpc54_eth_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int lpc54_eth_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 #warning Missing logic
@@ -1310,9 +1438,9 @@ static int lpc54_eth_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void lpc54_eth_ipv6multicast(FAR struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_ipv6multicast(struct lpc54_ethdriver_s *priv)
 {
-  FAR struct net_driver_s *dev;
+  struct net_driver_s *dev;
   uint16_t tmp16;
   uint8_t mac[6];
 
@@ -1386,10 +1514,10 @@ static void lpc54_eth_ipv6multicast(FAR struct lpc54_ethdriver_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
-                      unsigned long arg)
+static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
+                           unsigned long arg)
 {
-  FAR struct lpc54_ethdriver_s *priv = (FAR struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
   int ret;
 
   /* Decode and dispatch the driver-specific IOCTL command */
@@ -1428,6 +1556,241 @@ static int lpc54_eth_ioctl(FAR struct net_driver_s *dev, int cmd,
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: lpc54_pktbuf_initialize
+ *
+ * Description:
+ *   Initialize packet buffers my placing all of the pre-allocated packet
+ *   buffers into a free list.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_pktbuf_initialize(struct lpc54_ethdriver_s *priv)
+{
+  uint32_t *pktbuf;
+  int i;
+
+  for (i = 0, pktbuf = g_prealloc_buffers;
+       i < LPC54_NBUFFERS;
+       i++, pktbuf += LPC54_BUFFER_WORDS)
+    {
+      sq_addlast((sq_entry_t *)pktbuf, priv->&eth_freebuf);
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_pktbuf_alloc
+ *
+ * Description:
+ *   Allocate one packet buffer by removing it from the free list.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   A pointer to the allocated packet buffer on succes; NULL is returned if
+ *   there are no available packet buffers.
+ *
+ ****************************************************************************/
+
+static inline uint32_t *lpc54_pktbuf_alloc(struct lpc54_ethdriver_s *priv)
+{
+  return (uint32_t *)sq_remfirst(priv->&eth_freebuf);
+}
+
+/****************************************************************************
+ * Name: lpc54_pktbuf_free
+ *
+ * Description:
+ *   Allocate one packet buffer by removing it from the free list.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *   pktbuf - The packet buffer to be freed
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
+                                     uint32_t *pktbuf)
+{
+  sq_addlast((sq_entry_t *)pktbuf, priv->&eth_freebuf);
+}
+
+/****************************************************************************
+ * Name: lpc54_txdesc_initialize
+ *
+ * Description:
+ *   Initialize one Tx descriptor ring.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *   chan   - Channel being initialized
+ *   txdesc - An array of pre-allocated Tx descriptors
+ *   ndesc  - The number of descriptors in the array
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_txdesc_initialize(struct lpc54_ethdriver_s *priv,
+                                    unsigned int chan,
+                                    struct enet_txdesc_s *txdesc,
+                                    unsigned int ndesc);
+{
+  uint32_t control;
+  uint32_t regval;
+  int i;
+
+  DEBUGASSERT(ndesc >= LPC54_MIN_RINGLEN && ndesc <= LPC54_MAX_RINGLEN);
+
+  /* Set the word-aligned Tx descriptor start/tail pointers. */
+
+  regval = (uint32_t)txdesc;
+  putreg32(regval, LPC54_ETH_DMACH_TXDESC_LIST_ADDR(ch));
+
+  regval += ndesc * sizeof(struct enet_txdesc_s);
+  putreg32(regval, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(ch));
+
+  /* Set the Tx ring length */
+
+  regval = ETH_DMACH_TXDESC_RING_LENGTH(ndesc);
+  putreg32(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(ch));
+
+  /* Inituialize the Tx desriptors . */
+
+  for (i = 0; i < ndesc; i++, txdesc++)
+    {
+      txdesc->buffer1  = 0;
+      txdesc->buffer2  = 0;
+      txdesc->buflen   = ETH_TXDES2_IOC;
+      txdesc->ctrlstat = 0;
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_rxdesc_initialize
+ *
+ * Description:
+ *   Initialize one Rx descriptor ring.
+ *
+ * Parameters:
+ *   priv   - Reference to the driver state structure
+ *   chan   - Channel being initialized
+ *   txdesc - An array of pre-allocated Tx descriptors
+ *   ndesc  - The number of descriptors in the array
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_rxdesc_initialize(struct lpc54_ethdriver_s *priv,
+                                    unsigned int chan,
+                                    struct enet_txdesc_s *rxdesc,
+                                    unsigned int ndesc)
+{
+  uint32_t regval;
+  int i;
+  int j;
+
+  DEBUGASSERT(ndesc >= LPC54_MIN_RINGLEN && ndesc <= LPC54_MAX_RINGLEN);
+
+#define LPC54_ETH_DMACH_RXDESC_RING_LENGTH(n)            (LPC54_ETH_DMACH_CTRL_BASE(n) + LPC54_ETH_DMACH0_RXDESC_RING_LENGTH_OFFSET)
+
+  /* Set the word-aligned Rx descriptor start/tail pointers. */
+
+  regval = (uint32_t)rxdesc;
+  putreg32(regval, LPC54_ETH_DMACH_RXDESC_LIST_ADDR(chan));
+
+  regval += ndesc * sizeof(struct enet_rxdesc_s);
+  putreg32(regval, LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan));
+
+  /* Set the Rx ring length */
+
+  regval = ETH_DMACH_RXDESC_RING_LENGTH(ndesc);
+  putreg32(regval, LPC54_ETH_DMACH_RXDESC_RING_LENGTH(ch));
+
+  /* Set the receive buffer size (in words) in the Rx control register */
+
+  regval  = getreg32(LPC54_ETH_DMACH_RX_CTRL(chan));
+  regval &= ~ETH_DMACH_RX_CTRL_RBSZ_MASK;
+  regval |= ETH_DMACH_RX_CTRL_RBSZ(LPC54_BUFFER_SIZE >> 2);
+  putreg32(regval, LPC54_ETH_DMACH_RX_CTRL(chan));
+
+  /* Initialize the Rx descriptor ring. */
+
+  regval = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+  regval |= ETH_RXDES3_BUF2V;
+#endif
+
+  for (i = 0; i < ndesc; i++, rxdesc++)
+    {
+      /* Allocate the first Rx packet buffer */
+
+      rxdesc->buffer1 = (uint32_t)lpc54_pktbuf_alloc(priv);
+      DEBUGASSERT(rxdesc->buffer1 != NULL);
+      priv->eth_rxbuffers1[i] = rxdesc->buffer1;
+
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+      /* Allocate the second Rx packet buffer */
+
+      rxdesc->buffer2 = (uint32_t)lpc54_pktbuf_alloc(priv);
+      DEBUGASSERT(rxdesc->buffer2 != NULL);
+      priv->eth_rxbuffers2[i] = rxdesc->buffer2;
+
+#else
+      /* The second buffer is not used */
+
+      rxdesc->buffer2 = 0;
+#endif
+
+      /* Set the valid and DMA own flag.*/
+
+      rxdesc->ctrl = regval;
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_desc_initialize
+ *
+ * Description:
+ *   Set the CSR clock divider.  The MDC clock derives from the divided down
+ *   CSR clock (aka core clock or main clock).
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_desc_initialize(struct lpc54_ethdriver_s *priv)
+{
+  /* Initialize channel 0 descriptors */
+
+  lpc54_txdesc_initialize(priv, 0, g_ch0_txdesc, CONFIG_LPC54_ETH_NTXDESC0);
+  lpc54_rxdesc_initialize(priv, 0, g_ch0_rxdesc, CONFIG_LPC54_ETH_NRXDESC0);
+
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  /* Initialize channel 1 descriptors */
+
+  lpc54_txdesc_initialize(priv, 1, g_ch1_txdesc, CONFIG_LPC54_ETH_NTXDESC1);
+  lpc54_rxdesc_initialize(priv, 0, g_ch1_rxdesc, CONFIG_LPC54_ETH_NRXDESC1);
+#endif
+}
 
 /****************************************************************************
  * Name: lpc54_set_csrdiv
@@ -1487,7 +1850,7 @@ static void lpc54_set_csrdiv(void)
  *
  ****************************************************************************/
 
-static uint16_t lpc54_phy_read(FAR struct lpc54_ethdriver_s *priv,
+static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
                                uint8_t phyreg)
 {
   uint32_t regval = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
@@ -1530,7 +1893,7 @@ static uint16_t lpc54_phy_read(FAR struct lpc54_ethdriver_s *priv,
  *
  ****************************************************************************/
 
-static void lpc54_phy_write(FAR struct lpc54_ethdriver_s *priv,
+static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
                             uint8_t phyreg, uint16_t phyval)
 {
   uint32_t regval = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
@@ -1594,7 +1957,7 @@ static inline bool lpc54_phy_linkstatus(ENET_Type *base)
  *
  ****************************************************************************/
 
-static int lpc54_phy_autonegotiate(FAR struct lpc54_ethdriver_s *priv)
+static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
 {
   volatile int32_t timeout;
   uint16_t phyid1;
@@ -1672,7 +2035,7 @@ static int lpc54_phy_autonegotiate(FAR struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-static int lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv)
+static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
 {
   volatile int32_t timeout;
   uint16_t phyid1;
@@ -1737,20 +2100,36 @@ static int lpc54_phy_reset(FAR struct lpc54_ethdriver_s *priv)
 
 int up_netinitialize(int intf)
 {
-  FAR struct lpc54_ethdriver_s *priv;
+  struct lpc54_ethdriver_s *priv;
 
   /* Get the interface structure associated with this interface number. */
 
   DEBUGASSERT(intf == 0);
   priv = &g_ethdriver;
 
-  /* Attach the IRQ to the driver */
+  /* Attach the three Ethernet-related IRQs to the handlers */
 
   if (irq_attach(LPC54_IRQ_ETHERNET, lpc54_eth_interrupt, priv))
     {
       /* We could not attach the ISR to the interrupt */
 
       nerr("ERROR:  irq_attach failed\n");
+      return -EAGAIN;
+    }
+
+  if (irq_attach(LPC54_IRQ_ETHERNETPMT, lpc54_pmt_interrupt, priv))
+    {
+      /* We could not attach the ISR to the interrupt */
+
+      nerr("ERROR:  irq_attach for PMTfailed\n");
+      return -EAGAIN;
+    }
+
+  if (irq_attach(LPC54_IRQ_ETHERNETMACLP, lpc54_mac_interrupt, priv))
+    {
+      /* We could not attach the ISR to the interrupt */
+
+      nerr("ERROR:  irq_attach for MAC failed\n");
       return -EAGAIN;
     }
 
@@ -1768,7 +2147,7 @@ int up_netinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->eth_dev.d_ioctl   = lpc54_eth_ioctl;    /* Handle network IOCTL commands */
 #endif
-  priv->eth_dev.d_private = (FAR void *)g_ethdriver; /* Used to recover private state from dev */
+  priv->eth_dev.d_private = (void *)g_ethdriver; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 

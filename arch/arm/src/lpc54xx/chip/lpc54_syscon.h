@@ -709,7 +709,7 @@
 
 #define SYSCON_ETHSBDCTRL_SHIFT                (0)       /* Bits 0-1: Sideband Flow Control */
 #define SYSCON_ETHSBDCTRL_MASK                 (3 << SYSCON_ETHSBDCTRL_SHIFT)
-#  define SYSCON_ETHSBDCTRL CHAN1              (0 << SYSCON_ETHSBDCTRL_SHIFT) /* Controls channel 0 */
+#  define SYSCON_ETHSBDCTRL_CHAN1              (0 << SYSCON_ETHSBDCTRL_SHIFT) /* Controls channel 0 */
 #  define SYSCON_ETHSBDCTRL_CHAN2              (2 << SYSCON_ETHSBDCTRL_SHIFT) /* Controls channel 1 */
 
 /* SDIO CCLKIN phase and delay control */
