@@ -50,6 +50,12 @@
  *    The second queue is intended to support QVLAN, AVB type packets.  That
  *    is awkward in the current design because we select the queue first,
  *    then poll for the data to send.
+ *
+ * 3. Multicast address filtering.  Unlike other hardware, this Ethernet
+ *    does not seem to support explicit Multicast address filtering as
+ *    needed for ICMPv6 and for IGMP.  In these cases, I am simply accepting
+ *    all multicast packets.  I am not sure if that is the right thing to
+ *    do.
  */
 
 /****************************************************************************
@@ -105,6 +111,18 @@
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
 #endif
 
+/* Multicast address filtering.  Unlike other hardware, this Ethernet does
+ * not seem to support explicit Multicast address filtering as needed for
+ * ICMPv6 and for IGMP.  In these cases, I am simply accepting all multicast
+ * packets.
+ */
+
+#undef LPC54_ACCEPT_ALLMULTICAST
+#if  defined(CONFIG_LPC54_ETH_RX_ALLMULTICAST) || \
+     defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#  define LPC54_ACCEPT_ALLMULTICAST 1
+#endif
+
 /* The low priority work queue is preferred.  If it is not enabled, LPWORK
  * will be the same as HPWORK.
  */
@@ -131,9 +149,21 @@
 
 /* MTL-related definitions */
 
-#define LPC54_MTL_QUEUE_UNIT    256
-#define LPC54_MTL_RXQUEUE_UNITS 8     /* Rx queue size = 2048 bytes */
-#define LPC54_MTL_TXQUEUE_UNITS 8     /* Tx queue size = 2048 bytes */
+#define LPC54_MTL_QUEUE_UNIT      256
+#define LPC54_MTL_RXQUEUE_UNITS   8     /* Rx queue size = 2048 bytes */
+#define LPC54_MTL_TXQUEUE_UNITS   8     /* Tx queue size = 2048 bytes */
+
+#ifdef CONFIG_LPC54_ETH_TXRR
+#  define LPC54_MTL_OPMODE_SCHALG ETH_MTL_OP_MODE_SHALG_WSP
+#else
+#  define LPC54_MTL_OPMODE_SCHALG ETH_MTL_OP_MODE_SHALG_SP
+#endif
+
+#ifdef CONFIG_LPC54_ETH_RXRR
+#  define LPC54_MTL_OPMODE_RAA    ETH_MTL_OP_MODE_RAA_WSP
+#else
+#  define LPC54_MTL_OPMODE_RAA    ETH_MTL_OP_MODE_RAA_SP
+#endif
 
 /* MAC-related definitinons */
 
@@ -156,7 +186,7 @@
 #define LPC54_BUFFER_WORDS      ((MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE + 3) >> 2)
 #define LPC54_BUFFER_MAX        16384
 
-/* DMA descriptor definitions */
+/* DMA and DMA descriptor definitions */
 
 #define LPC54_MIN_RINGLEN       4     /* Min length of a ring */
 #define LPC54_MAX_RINGLEN       1023  /* Max length of a ring */
@@ -165,6 +195,46 @@
 #  define LPC54_NRINGS          2     /* Use 2 Rx and Tx rings */
 #else
 #  define LPC54_NRINGS          1     /* Use 1 Rx and 1 Tx ring */
+#endif
+
+#ifndef CONFIG_LPC54_ETH_BURSTLEN
+#  define CONFIG_LPC54_ETH_BURSTLEN 1
+#endif
+
+#if CONFIG_LPC54_ETH_BURSTLEN < 2
+#  define LPC54_BURSTLEN        1
+#  define LPC54_PBLx8           0
+#elif CONFIG_LPC54_ETH_BURSTLEN < 4
+#  define LPC54_BURSTLEN        2
+#  define LPC54_PBLx8           0
+#elif CONFIG_LPC54_ETH_BURSTLEN < 8
+#  define LPC54_BURSTLEN        4
+#  define LPC54_PBLx8           0
+#elif CONFIG_LPC54_ETH_BURSTLEN < 16
+#  define LPC54_BURSTLEN        8
+#  define LPC54_PBLx8           0
+#elif CONFIG_LPC54_ETH_BURSTLEN < 32
+#  define LPC54_BURSTLEN        16
+#  define LPC54_PBLx8           0
+#elif CONFIG_LPC54_ETH_BURSTLEN < 64
+#  define LPC54_BURSTLEN        32
+#  define LPC54_PBLx8           0
+#elif CONFIG_LPC54_ETH_BURSTLEN < 128
+#  define LPC54_BURSTLEN        8
+#  define LPC54_PBLx8           ETH_DMACH_CTRL_PBLx8
+#elif CONFIG_LPC54_ETH_BURSTLEN < 256
+#  define LPC54_BURSTLEN        16
+#  define LPC54_PBLx8           ETH_DMACH_CTRL_PBLx8
+#else
+#  define LPC54_BURSTLEN        32
+#  define LPC54_PBLx8           ETH_DMACH_CTRL_PBLx8
+#endif
+
+#ifdef CONFIG_LPC54_ETH_DYNAMICMAP
+#  define LPC54_QUEUEMAP        (ETH_MTL_RXQ_DMA_MAP_Q0DDMACH | \
+                                 ETH_MTL_RXQ_DMA_MAP_Q1DDMACH)
+#else
+#  define LPC54_QUEUEMAP        ETH_MTL_RXQ_DMA_MAP_Q1MDMACH
 #endif
 
 /* Interrupt masks */
@@ -184,7 +254,8 @@
  * header.
  */
 
-#define BUF ((struct eth_hdr_s *)priv->eth_dev.d_buf)
+#define ETHBUF       ((struct eth_hdr_s *)priv->eth_dev.d_buf)
+#define ETH8021QWBUF ((struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -311,6 +382,9 @@ static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv);
 static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
+#if 0 /* Not used yet */
+static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv);
+#endif
 static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
 
@@ -344,16 +418,11 @@ static int  lpc54_eth_ifdown(struct net_driver_s *dev);
 static void lpc54_eth_txavail_work(void *arg);
 static int  lpc54_eth_txavail(struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int  lpc54_eth_addmac(struct net_driver_s *dev,
               const uint8_t *mac);
-#ifdef CONFIG_NET_IGMP
 static int  lpc54_eth_rmmac(struct net_driver_s *dev,
               const uint8_t *mac);
-#endif
-#ifdef CONFIG_NET_ICMPv6
-static void lpc54_eth_ipv6multicast(struct lpc54_ethdriver_s *priv);
-#endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
 static int  lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
@@ -647,7 +716,7 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
   /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-  if (BUF->type == HTONS(ETHTYPE_IP))
+  if (ETHBUF->type == HTONS(ETHTYPE_IP))
     {
       ninfo("IPv4 packet\n");
       NETDEV_RXIPV4(&priv->eth_dev);
@@ -688,7 +757,7 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(ETHTYPE_IP6))
+  if (ETHBUF->type == HTONS(ETHTYPE_IP6))
     {
       ninfo("Iv6 packet\n");
       NETDEV_RXIPV6(&priv->eth_dev);
@@ -726,7 +795,7 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (BUF->type == htons(ETHTYPE_ARP))
+  if (ETHBUF->type == htons(ETHTYPE_ARP))
     {
       arp_arpin(&priv->eth_dev);
       NETDEV_RXARP(&priv->eth_dev);
@@ -919,6 +988,50 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
       putreg32(regval, regaddr);
     }
 }
+
+/****************************************************************************
+ * Name: lpc54_eth_getring
+ *
+ * Description:
+ *   An output message is ready to send, but which queue should we send it
+ *   on?  The rule is this:
+ *
+ *   "Normal" packets (or CONFIG_LPC54_ETH_MULTIQUEUE not selected):
+ *     Always send on ring 0
+ *   8021QVLAN AVB packets (and CONFIG_LPC54_ETH_MULTIQUEUE not selected):
+ *     Always send on ring 1
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   The ring to use when sending the packet.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used yet */
+static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv)
+{
+  unsigned int ring = 0;
+
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  /* Choose the ring ID for different types of frames.  For 802.1q VLAN AVB
+   * frames, uses ring 1.  Everything else goes on ring 0.
+   */
+
+  if (ETH8021QWBUF->tpid == HTONS(TPID_8021QVLAN) &&
+      ETH8021QWBUF->type == HTONS(ETHTYPE_AVBTP))
+    {
+      ring = 1;
+    }
+#endif
+
+  return ring
+}
+#endif
 
 /****************************************************************************
  * Name: lpc54_eth_txdone
@@ -1534,7 +1647,6 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   uint8_t *mptr;
   uintptr_t base;
   uint32_t regval;
-  uint32_t burstlen;
   int ret;
   int i;
 
@@ -1577,39 +1689,36 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   for (i = 0; i < LPC54_NRINGS; i++)
     {
       base = LPC54_ETH_DMACH_CTRL_BASE(i);
-
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-      /* REVISIT: burstlen setting for the case of multi-queuing. */
-#  warning Missing logic
-#else
-      /* REVISIT: Additional logic needed if burstlen > 32 */
-
-      burstlen = 1;  /* DMA burst length = 1 */
-#endif
-
-      /* REVISIT: We would need to set ETH_DMACH_CTRL_PBLx8 in LPC54_ETH_DMACH_CTRL
-       * is required for the burst length setting.
-       */
-
-      putreg32(0, base + LPC54_ETH_DMACH_CTRL_OFFSET);
+      putreg32(LPC54_PBLx8, base + LPC54_ETH_DMACH_CTRL_OFFSET);
 
       regval  = getreg32(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_TX_CTRL_TxPBL_MASK;
-      regval |= ETH_DMACH_TX_CTRL_TxPBL(burstlen);
+      regval |= ETH_DMACH_TX_CTRL_TxPBL(LPC54_BURSTLEN);
       putreg32(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
 
       regval  = getreg32(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_RX_CTRL_RxPBL_MASK;
-      regval |= ETH_DMACH_RX_CTRL_RxPBL(burstlen);
+      regval |= ETH_DMACH_RX_CTRL_RxPBL(LPC54_BURSTLEN);
       putreg32(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
     }
 
   /* Initializes the Ethernet MTL *******************************************/
-  /* Set transmit operation mode
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  /* Set the schedule/arbitration for multiple queues */
+
+  putreg32(LPC54_MTL_OPMODE_SCHALG | LPC54_MTL_OPMODE_RAA,
+           LPC54_ETH_MTL_OP_MODE);
+
+  /* Set the Rx queue mapping to DMA channel. */
+
+  putreg32(LPC54_QUEUEMAP, LPC54_ETH_MTL_RXQ_DMA_MAP);
+#endif
+
+  /* Set transmit queue operation mode
    *
    * FTQ   - Set to flush the queue
    * TSF   - Depends on configuration
-   * TXQEN - Queue 0 disabled; queue 1 enabled
+   * TXQEN - Queue 0 enabled; queue 1 may be disabled
    * TTC   - Set to 32 bytes (ignored if TSF set)
    * TQS   - Set to 2048 bytes
    */
@@ -1622,12 +1731,17 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   regval |= ETH_MTL_TXQ_OP_MODE_FTQ | ETH_MTL_TXQ_OP_MODE_TTC_32 |
             ETH_MTL_TXQ_OP_MODE_TQS(LPC54_MTL_TXQUEUE_UNITS);
-  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
+  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
            LPC54_ETH_MTL_TXQ_OP_MODE(0));
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
   putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
            LPC54_ETH_MTL_TXQ_OP_MODE(1));
+#else
+  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
+           LPC54_ETH_MTL_TXQ_OP_MODE(1));
+#endif
 
-  /* Set receive operation mode (queue 0 only)
+  /* Set receive receive operation mode
    *
    * RTC        - Set to 64 bytes (ignored if RSF selected)
    * FUP        - enabled
@@ -1646,13 +1760,16 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   regval |= ETH_MTL_RXQ_OP_MODE_RTC_64 | ETH_MTL_RXQ_OP_MODE_FUP |
             ETH_MTL_RXQ_OP_MODE_RQS(LPC54_MTL_RXQUEUE_UNITS);
   putreg32(regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
-
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  /* Set the schedule/arbitration(set for multiple queues) */
-      /* Set the rx queue mapping to dma channel */
-      /* Set the tx/rx queue weight. */
-  /* REVISIT:  Missing multi-queue configuration here. */
-#  warning Missing Logic
+  putreg32(regval, LPC54_ETH_MTL_RXQ_OP_MODE(1));
+
+  /* Set the Tx/Rx queue weights. */
+
+  putreg32(CONFIG_LPC54_ETH_TXQ0WEIGHT, LPC54_ETH_MTL_TXQ_QNTM_WGHT(0));
+  putreg32(CONFIG_LPC54_ETH_TXQ1WEIGHT, LPC54_ETH_MTL_TXQ_QNTM_WGHT(1));
+
+  putreg32(CONFIG_LPC54_ETH_RXQ0WEIGHT, LPC54_ETH_MTL_RXQ_CTRL(0));
+  putreg32(CONFIG_LPC54_ETH_RXQ1WEIGHT, LPC54_ETH_MTL_RXQ_CTRL(1));
 #endif
 
   /* Initialize the Ethernet MAC ********************************************/
@@ -1677,7 +1794,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 #ifndef CONFIG_LPC54_ETH_RX_BROADCAST
   regval |= ETH_MAC_FRAME_FILTER_DBF;
 #endif
-#ifdef CONFIG_LPC54_ETH_RX_ALLMULTICAST
+#ifdef LPC54_ACCEPT_ALLMULTICAST
   regval |= ETH_MAC_FRAME_FILTER_PM;
 #endif
   putreg32(regval, LPC54_ETH_MAC_FRAME_FILTER);
@@ -1742,12 +1859,6 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   putreg32(regval, LPC54_ETH_DMACH_INT_EN(1));
 
   putreg32(0, LPC54_ETH_MAC_INTR_EN);
-
-#ifdef CONFIG_NET_ICMPv6
-  /* Set up IPv6 multicast address filtering */
-
-  lpc54_eth_ipv6multicast(priv);
-#endif
 
   /* Initialize packet buffers */
 
@@ -1960,13 +2071,13 @@ static int lpc54_eth_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#ifdef CONFIG_NET_IGMP
 static int lpc54_eth_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
-
-  /* Add the MAC address to the hardware multicast routing table */
-#warning Missing logic
+  /* Unlike other Ethernet hardware, the LPC54xx does not seem to support
+   * explicit Multicast address filtering as needed for ICMPv6 and for IGMP.
+   * In these cases, I am simply accepting all multicast packets.
+   */
 
   return OK;
 }
@@ -1991,86 +2102,14 @@ static int lpc54_eth_addmac(struct net_driver_s *dev, const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int lpc54_eth_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  /* Unlike other Ethernet hardware, the LPC54xx does not seem to support
+   * explicit Multicast address filtering as needed for ICMPv6 and for IGMP.
+   * In these cases, I am simply accepting all multicast packets.
+   */
 
-  /* Add the MAC address to the hardware multicast routing table */
-#warning Missing logic
-
-  return OK;
+  return -ENOSYS;
 }
 #endif
-
-/****************************************************************************
- * Name: lpc54_eth_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void lpc54_eth_ipv6multicast(struct lpc54_ethdriver_s *priv)
-{
-  struct net_driver_s *dev;
-  uint16_t tmp16;
-  uint8_t mac[6];
-
-  /* For ICMPv6, we need to add the IPv6 multicast address
-   *
-   * For IPv6 multicast addresses, the Ethernet MAC is derived by
-   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
-   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
-   * to the Ethernet MAC address 33:33:00:01:00:03.
-   *
-   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
-   * Message, but the ICMPv6 Neighbor Solicitation message seems to
-   * use 33:33:ff:01:00:03.
-   */
-
-  mac[0] = 0x33;
-  mac[1] = 0x33;
-
-  dev    = &priv->eth_dev;
-  tmp16  = dev->d_ipv6addr[6];
-  mac[2] = 0xff;
-  mac[3] = tmp16 >> 8;
-
-  tmp16  = dev->d_ipv6addr[7];
-  mac[4] = tmp16 & 0xff;
-  mac[5] = tmp16 >> 8;
-
-  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  (void)lpc54_eth_addmac(dev, mac);
-
-#ifdef CONFIG_NET_ICMPv6_AUTOCONF
-  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Advertisement
-   * packets.
-   */
-
-  (void)lpc54_eth_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
-
-#ifdef CONFIG_NET_ICMPv6_ROUTER
-  /* Add the IPv6 all link-local routers Ethernet address.  This is the
-   * address that we expect to receive ICMPv6 Router Solicitation
-   * packets.
-   */
-
-  (void)lpc54_eth_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-
-#endif /* CONFIG_NET_ICMPv6_ROUTER */
-}
-#endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Name: lpc54_eth_ioctl

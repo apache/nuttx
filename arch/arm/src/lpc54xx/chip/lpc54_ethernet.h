@@ -106,7 +106,7 @@
 #define LPC54_ETH_MTL_TXQ_DBG_OFFSET                     0x0008  /* MTL TxQn debug */
 #define LPC54_ETH_MTL_TXQ_ETS_CTRL_OFFSET                0x0010  /* MTL TxQ1 (only) ETS control */
 #define LPC54_ETH_MTL_TXQ_ETS_STAT_OFFSET                0x0014  /* MTL TxQn ETS status */
-#define LPC54_ETH_MTL_TXQ_QNTM_WGHT_OFFSET               0x0018  /* MTL TxQn quantum or weights */
+#define LPC54_ETH_MTL_TXQ_QNTM_WGHT_OFFSET               0x0018  /* MTL TxQn idleSlopeCredit, quantum or weights */
 #define LPC54_ETH_MTL_TXQ_SNDSLP_CRDT_OFFSET             0x001c  /* MTL TxQ1 (only) SendSlopCredit */
 #define LPC54_ETH_MTL_TXQ_HI_CRDT_OFFSET                 0x0020  /* MTL TxQ1 (only) hiCredit */
 #define LPC54_ETH_MTL_TXQ_LO_CRDT_OFFSET                 0x0024  /* MTL TxQ1 (only) loCredit */
@@ -448,11 +448,25 @@
 #define ETH_MAC_TIMESTAMP_EGRESS_CORR_NSEC_
 
 /* MTL operation mode */
-#define ETH_MTL_OP_MODE_
+
+#define ETH_MTL_OP_MODE_DTXSTS                           (1 << 1)  /* Bit 1:  Drop transmit status */
+#define ETH_MTL_OP_MODE_RAA                              (1 << 1)  /* Bit 2:  Receive arbitration algorithm */
+#  define ETH_MTL_OP_MODE_RAA_SP                         (0)       /*         Strict priority */
+#  define ETH_MTL_OP_MODE_RAA_WSP                        (1 << 1)  /*         Weighted Strict Priority */
+#define ETH_MTL_OP_MODE_SHALG_SHIFT                      (5)       /* Bits 5-6:  Tx Scheduling Algorithm */
+#define ETH_MTL_OP_MODE_SHALG_MASK                       (3 << ETH_MTL_OP_MODE_SHALG_SHIFT)
+#  define ETH_MTL_OP_MODE_SHALG_SP                       (0 << ETH_MTL_OP_MODE_SHALG_SHIFT) /* Strict priority */
+#  define ETH_MTL_OP_MODE_SHALG_WSP                      (3 << ETH_MTL_OP_MODE_SHALG_SHIFT) /* Weighted Strict */
+
 /* MTL interrupt status */
 #define ETH_MTL_INTR_STAT_
+
 /* MTL Rx Queue and DMA channel mapping */
-#define ETH_MTL_RXQ_DMA_MAP_
+
+#define ETH_MTL_RXQ_DMA_MAP_Q0MDMACH                     (1 << 0)  /* Bit 0:  Queue 0 mapped to DMA channel 1 */
+#define ETH_MTL_RXQ_DMA_MAP_Q0DDMACH                     (1 << 4)  /* Bit 4:  Queue 0 enabled for DA-based DMA channel selection */
+#define ETH_MTL_RXQ_DMA_MAP_Q1MDMACH                     (1 << 8)  /* Bit 8:  Queue 1 mapped to DMA channel 1 */
+#define ETH_MTL_RXQ_DMA_MAP_Q1DDMACH                     (1 << 12) /* Bit 12: Queue 1 enabled for DA-based DMA channel selection */
 
 /* MTL TxQn operation mode */
 
@@ -484,8 +498,11 @@
 #define ETH_MTL_TXQ1_ETS_CTRL_
 /* MTL TxQn ETS status */
 #define ETH_MTL_TXQ_ETS_STAT_
-/* Queue 0 quantum or weights */
-#define ETH_MTL_TXQ_QNTM_WGHT_
+
+/* MTL TxQn idleSlopeCredit,quantum or weights */
+
+#define ETH_MTL_TXQ_QNTM_WGHT_MASK                       0x001fffff /* Bits 0-20: IdleSlopeCredit, quantum or weights */
+
 /* MTL TxQ1 (only) SendSlopCredit */
 #define ETH_MTL_TXQ1_SNDSLP_CRDT_
 /* MTL TxQ1 (only) hiCredit */
@@ -508,15 +525,20 @@
 #define ETH_MTL_RXQ_OP_MODE_RSF                          (1 << 5)  /* Bit 5  Rx Queue store and forward */
 #define ETH_MTL_RXQ_OP_MODE_DIS_TCP_EF                   (1 << 6)  /* Bit 6  Disable dropping of TCP/IP checksum error packets */
 #define ETH_MTL_RXQ_OP_MODE_RQS_SHIFT                    (20)      /* Bits 20-22: Rx Queue size (x256) */
-#define ETH_MTL_RXQ_OP_MODE_RQS_MASK                    (7 << ETH_MTL_RXQ_OP_MODE_RQS_SHIFT)
+#define ETH_MTL_RXQ_OP_MODE_RQS_MASK                     (7 << ETH_MTL_RXQ_OP_MODE_RQS_SHIFT)
 #  define ETH_MTL_RXQ_OP_MODE_RQS(n)                     ((uint32_t)((n)-1) << ETH_MTL_RXQ_OP_MODE_RQS_SHIFT)
 
 /* MTL RxQn missed packet overflow counter */
 #define ETH_MTL_RXQ_MISSPKT_OVRFLW_CNT_
 /* MTL RxQn debug */
 #define ETH_MTL_RXQ_DBG_
+
 /* MTL RxQn control */
-#define ETH_MTL_RXQ_CTRL_
+
+#define ETH_MTL_RXQ_CTRL_WEGT_SHIFT                      (0)       /* Bits 0-2: Rx Queue weight */
+#define ETH_MTL_RXQ_CTRL_WEGT_MASK                       (7 << ETH_MTL_RXQ_CTRL_WEGT)
+#  define ETH_MTL_RXQ_CTRL_WEGT(n)                       ((uint32_t)(n) << ETH_MTL_RXQ_CTRL_WEGT)
+#define ETH_MTL_RXQ_CTRL_FRM_ARBIT                       (1 << 3)  /* Bit 3: Rx Queue packet arbitration */
 
 /* DMA mode */
 

@@ -688,7 +688,70 @@ config LPC54_ETH_MULTIQUEUE
 	default n
 	depends on EXPERIMENTAL
 	---help---
-		Support not yet implemented.
+		Enables software drivers for the special hardware support for
+		IEEE 802.1q VLAN Audio/Visual Bridge Types (AVBTP).  In this
+		configuration two queues are available:  One for normal traffic
+		and one dedicated to the AVBTP traffic.
+
+if LPC54_ETH_MULTIQUEUE
+
+config LPC54_ETH_BURSTLEN
+	bool "DMA Tx burst length"
+	default n
+	range 1 256
+	---help---
+		Transmit programmable burst length.  These bits indicate the maximum
+		number of beats to be transferred in one DMA data transfer. This is
+		the maximum value that is used in a single block read or write. The
+		DMA always attempts to burst as specified in PBL each time it starts
+		a burst transfer on the application bus. You can program PBL with
+		any of the following values: 1, 2, 4, 8, 16, 32, 64, 128, or 256.
+		Any other value results in undefined behavior.
+
+config LPC54_ETH_TXRR
+	bool "Tx round robin"
+	default y
+	---help---
+		Selects round-robin Tx scheduling.  The alternative is strict
+		priority scheduling.
+
+config LPC54_ETH_RXRR
+	bool "Rx round robin"
+	default y
+	---help---
+		Selects round-robin Rx scheduling.  The alternative is strict
+		priority scheduling.
+
+config LPC54_ETH_DYNAMICMAP
+	bool "Dynamic Rx queue mapping"
+	default n
+	---help---
+		If selected, the received frame in in Rx Qn, n=0..1, maps to the DMA
+		channel m, m=0..1 related with the same MAC.  Otherwise, static
+		mapping is used:  The received fame in Rx Qn, n=0..1 maps directly
+		to DMA channel n.
+
+config LPC54_ETH_RXQ0WEIGHT
+	int "Rx queue 0 weight"
+	default 0
+	range 0 7
+
+config LPC54_ETH_RXQ1WEIGHT
+	int "Rx queue 1 weight"
+	default 0
+	range 0 7
+
+config LPC54_ETH_TXQ0WEIGHT
+	int "Tx queue 0 weight"
+	default 0
+	range 0 2097151
+
+config LPC54_ETH_TXQ1WEIGHT
+	int "Tx queue 1 weight"
+	default 0
+	range 0 2097151
+
+endif # LPC54_ETH_MULTIQUEUE
 
 config LPC54_ETH_TX_STRFWD
 	bool "Tx store and forward"
@@ -727,6 +790,12 @@ config LPC54_ETH_RX_ALLMULTICAST
 		If selected, all received frames with a multicast destination
 		address (first bit in the destination address field is '1') are
 		accepted.
+
+		This feature will will be selected automatically if ICMPv6 or
+		IGMP are enabled.  Unlike other Ethernet hardware, the LPC54xx
+		does not seem to support explicit Multicast address filtering
+		as needed for ICMPv6 and for IGMP.  In these cases, I am simpl
+		accepting all multicast packets.
 
 config LPC54_ETH_FLOWCONTROL
 	bool "Enable flow control"
