@@ -82,9 +82,12 @@ STATUS
     call into ROM. Increasing the stack size does not seem to help.  Perhaps
     to use the ROM at high frequencies it may be necessary to modify the ROM
     access timing in some way???
+  2017-12-30:  Completed implementation of an Ethernet driver.  Untested as
+    of this writing.  Also added the netnsh configuration will, eventually,
+    be used to test the Ethernet diver.
 
-  There is still no support for the Accelerometer, SPIFI, Ethernet, or USB.
-  There is a complete, but not-yet-functional SD card drirver.  There is a
+  There is still no support for the Accelerometer, SPIFI, or USB.  There are
+  complete but not-yet-functional SD card and Ethernet drivers.  There is a
   partial SPI driver, but no on-board SPI devices to test it.
 
 Configurations
@@ -215,6 +218,24 @@ Configurations
       FT5x06 interrupt GPIO is on P4.0 and, as far as I know, GPIO
       interrupts are not supported on P4.  So polled mode only for this
       puppy.
+
+  netnsh:
+  ------
+    This is a special version of the NuttShell (nsh) configuration that is
+    tailored for network testing.  This version derives from nsh
+    configuration so manhy of the notes apply there except as noted below.
+
+    NOTES:
+
+    1. Networking is enabled.  The LPCXpressio-LPC54628 has an SMC _LAN8720 PHY
+       and RJ45 network connector.  Support is enabled for IPv4, IPv6, TCP/IP,
+       UDP, ICMP, ICMPv6, and ARP.
+
+    2. SD card and I2C support are not enabled.  The I2C tool application is
+       not enabled
+
+    3. SDRAM support is enabled and the SDRAM is added to the system heap. The
+       Ramtest applications is not enabled.
 
   nsh:
 

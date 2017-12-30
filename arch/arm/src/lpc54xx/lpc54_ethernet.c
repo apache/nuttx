@@ -42,8 +42,14 @@
 
 /* TODO:
  *
- * Timestamps not supported
- * Multi-queuing not supported.
+ * 1. Timestamps not supported
+ *
+ * 2. Multi-queuing not supported. There is logic in place now but it really
+ *    does not make sense.
+ *
+ *    The second queue is intended to support QVLAN, AVB type packets.  That
+ *    is awkward in the current design because we select the queue first,
+ *    then poll for the data to send.
  */
 
 /****************************************************************************
@@ -79,9 +85,13 @@
 
 #include "up_arch.h"
 #include "chip/lpc54_syscon.h"
+#include "chip/lpc54_pinmux.h"
 #include "chip/lpc54_ethernet.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_reset.h"
+#include "lpc54_gpio.h"
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_LPC54_ETHERNET
 
@@ -93,7 +103,7 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
+#endif
 
 /* The low priority work queue is preferred.  If it is not enabled, LPWORK
  * will be the same as HPWORK.
@@ -144,6 +154,7 @@
 #define LPC54_BUFFER_SIZE       MAX_NET_DEV_MTU
 #define LPC54_BUFFER_ALLOC      ((MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE + 3) & ~3)
 #define LPC54_BUFFER_WORDS      ((MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE + 3) >> 2)
+#define LPC54_BUFFER_MAX        16384
 
 /* DMA descriptor definitions */
 
@@ -184,10 +195,10 @@
 struct lpc54_txring_s
 {
   struct enet_txdesc_s *tr_desc; /* Tx descriptor base address */
-  uint16_t tr_genidx;            /* Tx generate index */
-  uint16_t tr_consumidx;         /* Tx consume index */
-  volatile uint16_t tr_inuse;    /* Number of Tx descriptors in-used */
+  uint16_t tr_supply;            /* Tx supplier ring index */
+  uint16_t tr_consume;           /* Tx consumer ring index */
   uint16_t tr_ndesc;             /* Number or descriptors in the Tx ring */
+  uint16_t tr_inuse;             /* Number of Tx descriptors in-use */
   uint32_t **tr_buffers;         /* Packet buffers assigned to the Rx ring */
 };
 
@@ -196,9 +207,12 @@ struct lpc54_txring_s
 struct lpc54_rxring_s
 {
   struct enet_rxdesc_s *rr_desc; /* Rx descriptor base address */
-  uint16_t rr_genidx;            /* Available Rx descriptor index */
+  uint16_t rr_supply;            /* Available Rx descriptor ring index */
   uint16_t rr_ndesc;             /* Number or descriptors in the Rx ring */
   uint32_t **rr_buffers;         /* Packet buffers assigned to the Rx ring */
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+  uint32_t **rr_buffer2s;        /* Packet buffers assigned to the Rx ring */
+#endif
 };
 
 /* The lpc54_ethdriver_s encapsulates all state information for a single
@@ -207,9 +221,11 @@ struct lpc54_rxring_s
 
 struct lpc54_ethdriver_s
 {
-  bool eth_bifup;                /* true:ifup false:ifdown */
-  bool eth_fullduplex;           /* true:Full duplex false:Half duplex mode */
-  bool eth_100mbps;              /* true:100mbps false:10mbps */
+  uint8_t eth_bifup : 1;         /* 1:ifup 0:ifdown */
+  uint8_t eth_fullduplex : 1;    /* 1:Full duplex 0:Half duplex mode */
+  uint8_t eth_100mbps : 1;       /* 1:100mbps 0:10mbps */
+  uint8_t eth_rxdiscard : 1;     /* 1:Discarding Rx data */
+  uint8_t eth_chan;              /* The current channel being operated on */
   WDOG_ID eth_txpoll;            /* TX poll timer */
   WDOG_ID eth_txtimeout;         /* TX timeout timer */
   struct work_s eth_irqwork;     /* For deferring interupt work to the work queue */
@@ -236,12 +252,6 @@ struct lpc54_ethdriver_s
  * dynamically.
  */
 
-/* A single packet buffer per device is used here.  There might be multiple
- * packet buffers in a more complex, pipelined design.
- */
-
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
-
 /* Driver state structure */
 
 static struct lpc54_ethdriver_s g_ethdriver;
@@ -267,6 +277,12 @@ static uint32_t g_prealloc_buffers[LPC54_NBUFFERS * LPC54_BUFFER_WORDS];
 /* Packet buffers assigned to Rx and Tx descriptors.  The packet buffer
  * addresses are lost in the DMA due to write-back from the DMA harware.
  * So we have to remember the buffer assignments explicitly.
+ *
+ * REVISIT:  According to the User manual, buffer1 and buffer2 addresses
+ * will be overwritten by DMA write-back data.  However, I see that the
+ * Rx buffer1 and buffer2 addresses are, indeed, used by the NXP example
+ * code after completion of DMA so the user manual must be wrong.  We
+ * could eliminate this extra array of saved allocation addresses.
  */
 
 static uint32_t *g_rxbuffers0[CONFIG_LPC54_ETH_NRXDESC0];
@@ -275,6 +291,10 @@ static uint32_t *g_txbuffers0[CONFIG_LPC54_ETH_NTXDESC0];
 static uint32_t *g_rxbuffers1[CONFIG_LPC54_ETH_NRXDESC1];
 static uint32_t *g_txbuffers1[CONFIG_LPC54_ETH_NTXDESC1];
 #endif
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+static uint32_t *g_rxbuffer2s0[CONFIG_LPC54_ETH_NRXDESC0];
+static uint32_t *g_rxbuffer2s1[CONFIG_LPC54_ETH_NRXDESC1];
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -282,16 +302,20 @@ static uint32_t *g_txbuffers1[CONFIG_LPC54_ETH_NTXDESC1];
 
 /* Common TX logic */
 
-static int  lpc54_eth_transmit(struct lpc54_ethdriver_s *priv);
+static int  lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
 static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
+static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv);
 static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
 static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
 
+static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
 static void lpc54_eth_interrupt_work(void *arg);
 static int  lpc54_eth_interrupt(int irq, void *context, void *arg);
 #if 0 /* Not used */
@@ -300,6 +324,11 @@ static int  lpc54_mac_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* Watchdog timer expirations */
+
+static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
+static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv,
+              unsigned int chan);
 
 static void lpc54_eth_txtimeout_work(void *arg);
 static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...);
@@ -353,7 +382,7 @@ static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
               uint8_t phyreg);
 static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
               uint8_t phyreg, uint16_t phyval);
-static inline bool lpc54_phy_linkstatus(ENET_Type *base);
+static inline bool lpc54_phy_linkstatus(struct lpc54_ethdriver_s *priv);
 static int  lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv);
 static int  lpc54_phy_reset(struct lpc54_ethdriver_s *priv);
 
@@ -370,33 +399,114 @@ static int  lpc54_phy_reset(struct lpc54_ethdriver_s *priv);
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *   chan - The channel to send the packet on
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
+ *   The network must be locked.
  *
  ****************************************************************************/
 
-static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv)
+static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
+                              unsigned int chan)
 {
+  struct lpc54_txring_s *txring;
+  struct enet_txdesc_s *txdesc;
+  uint8_t *buffer;
+  uint32_t regval;
+  unsigned int buflen;
+
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
+   * must have assured that we have the resources available to perform the
+   * send.
    */
-#warning Missing logic
 
-  /* Increment statistics */
+  txring = &priv->eth_txring[chan];
 
-  NETDEV_TXPACKETS(priv->eth_dev);
+  DEBUGASSERT(priv->eth_dev.d_buf != 0 && priv->eth_dev.d_len > 0 &&
+              priv->eth_dev.d_len <= LPC54_BUFFER_SIZE &&
+              txring->tr_ndesc < txring->tr_inuse);
 
-  /* Send the packet: address=priv->eth_dev.d_buf, length=priv->eth_dev.d_len */
-#warning Missing logic
+  /* Fill the descriptor. */
 
-  /* Enable Tx interrupts */
-#warning Missing logic
+  txdesc = txring->tr_desc + txring->tr_supply;
+  buffer = priv->eth_dev.d_buf;
+  buflen = priv->eth_dev.d_len;
+
+  if (buflen <= LPC54_BUFFER_MAX)
+    {
+      /* Prepare the Tx descriptor for transmission */
+
+      txdesc->buffer1 = (uint32_t)buffer;
+      txdesc->buffer2 = (uint32_t)NULL;
+
+      /* One buffer, no timestamp, interrupt on completion */
+
+      regval = ETH_TXDES2_B1L(buflen) | ETH_TXDES2_B2L(0) | ETH_TXDES2_IOC;
+      txdesc->buflen = regval;
+
+      /* Full packet length, last descriptor, first descriptor, owned by
+       * DMA.
+       */
+
+      regval = ETH_TXDES3_FL(buflen) | ETH_TXDES3_LD | ETH_TXDES3_FD |
+               ETH_TXDES3_OWN;
+      txdesc->ctrlstat = regval;
+    }
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
+  else
+    {
+      unsigned int buf2len = buflen - LPC54_BUFFER_MAX;
+      uint8_t *buffer2     = buffer + LPC54_BUFFER_MAX;
+
+      DEBUGASSERT(buf2len <= LPC54_BUFFER_MAX);
+
+      /* Prepare the Tx descriptor for transmission */
+
+      txdesc->buffer1 = (uint32_t)buffer;
+      txdesc->buffer2 = (uint32_t)buffer2;
+
+      /* Two buffers, no timestamp, interrupt on completion */
+
+      regval = ETH_TXDES2_B1L(LPC54_BUFFER_MAX) |
+               ETH_TXDES2_B2L(buf2len) | ETH_TXDES2_IOC;
+      txdesc->buflen = regval;
+
+      /* Full packet length, last descriptor, first descriptor, owned by
+       * DMA.
+       */
+
+      regval = ETH_TXDES3_FL(buflen) | ETH_TXDES3_LD | ETH_TXDES3_FD |
+               ETH_TXDES3_OWN;
+      txdesc->ctrlstat = regval;
+    }
+#endif
+
+  /* Increase the index */
+
+  if (++(txring->tr_supply) >= txring->tr_ndesc)
+    {
+      txring->tr_supply = 0;
+    }
+
+  /* Increment the number of descriptors in-use. */
+
+  txring->tr_inuse++;
+
+  /* Update the transmit tail address. */
+
+  txdesc = txring->tr_desc + txring->tr_supply;
+  if (txring->tr_supply == 0)
+    {
+      txdesc = txring->tr_desc + txring->tr_ndesc;
+    }
+
+  /* Update the DMA tail pointer */
+
+  putreg32((uint32_t)txdesc, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(chan));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -431,7 +541,15 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv)
 
 static int lpc54_eth_txpoll(struct net_driver_s *dev)
 {
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv;
+  struct lpc54_txring_s *txring;
+  unsigned int chan;
+
+  DEBUGASSERT(dev->d_private != NULL && dev->d_buf != NULL);
+  priv = (struct lpc54_ethdriver_s *)dev->d_private;
+
+  chan = priv->eth_chan;
+  DEBUGASSERT(chan < LPC54_NRINGS);
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -463,18 +581,170 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 
       /* Send the packet */
 
-      lpc54_eth_transmit(priv);
+      lpc54_eth_transmit(priv, priv->eth_chan);
 
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
+      /* We cannot continue the Tx poll now if all of the Tx descriptors for
+       * this channel are in-use.
        */
+
+      txring = &priv->eth_txring[chan];
+      if (txring->tr_inuse >= txring->tr_ndesc)
+        {
+          /* Stop the poll.. no more Tx descriptors */
+
+          return 1;
+        }
+
+      /* There is a free descriptor in the ring, allocate a new Tx buffer
+       * to perform the poll.
+       */
+
+       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
+       if (priv->eth_dev.d_buf == NULL)
+         {
+          /* Stop the poll.. no more packet buffers */
+
+          return 1;
+        }
+
+      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.  If there is nothing to be sent, we will return to
+   * the caller of devif_poll() with an allocated packet buffer.
    */
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: lpc54_eth_rxdispatch
+ *
+ * Description:
+ *   A new packet has been received and will be forwarded to the network
+ *   stack.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
+{
+#ifdef CONFIG_NET_PKT
+  /* When packet sockets are enabled, feed the frame into the packet tap */
+
+   pkt_input(&priv->eth_dev);
+#endif
+
+  /* We only accept IP packets of the configured type and ARP packets */
+
+#ifdef CONFIG_NET_IPv4
+  if (BUF->type == HTONS(ETHTYPE_IP))
+    {
+      ninfo("IPv4 packet\n");
+      NETDEV_RXIPV4(&priv->eth_dev);
+
+      /* Handle ARP on input then give the IPv4 packet to the network
+       * layer
+       */
+
+      arp_ipin(&priv->eth_dev);
+      ipv4_input(&priv->eth_dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+      if (priv->eth_dev.d_len > 0)
+        {
+          /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+          if (IFF_IS_IPv4(priv->eth_dev.d_flags))
+#endif
+            {
+              arp_out(&priv->eth_dev);
+            }
+#ifdef CONFIG_NET_IPv6
+          else
+            {
+              neighbor_out(&priv->eth_dev);
+            }
+#endif
+
+         /* And send the packet */
+
+         lpc54_eth_transmit(priv, priv->eth_chan);
+       }
+    }
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if (BUF->type == HTONS(ETHTYPE_IP6))
+    {
+      ninfo("Iv6 packet\n");
+      NETDEV_RXIPV6(&priv->eth_dev);
+
+      /* Give the IPv6 packet to the network layer */
+
+      ipv6_input(&priv->eth_dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+      if (priv->eth_dev.d_len > 0)
+        {
+          /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv4
+          if (IFF_IS_IPv4(priv->eth_dev.d_flags))
+            {
+              arp_out(&priv->eth_dev);
+            }
+          else
+#endif
+#ifdef CONFIG_NET_IPv6
+            {
+              neighbor_out(&priv->eth_dev);
+            }
+#endif
+
+          /* And send the packet */
+
+          lpc54_eth_transmit(priv, priv->eth_chan);
+        }
+    }
+  else
+#endif
+#ifdef CONFIG_NET_ARP
+  if (BUF->type == htons(ETHTYPE_ARP))
+    {
+      arp_arpin(&priv->eth_dev);
+      NETDEV_RXARP(&priv->eth_dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+      if (priv->eth_dev.d_len > 0)
+        {
+          lpc54_eth_transmit(priv, priv->eth_chan);
+        }
+    }
+  else
+#endif
+    {
+      NETDEV_RXDROPPED(&priv->eth_dev);
+    }
 }
 
 /****************************************************************************
@@ -498,127 +768,156 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
                               unsigned int chan)
 {
-  do
+  struct lpc54_rxring_s *rxring;
+  struct enet_rxdesc_s *rxdesc;
+  unsigned int framelen;
+  unsigned int pktlen;
+  unsigned int supply;
+  uint32_t regval;
+  bool lastframe = false;
+  bool suspend;
+
+  /* Get the Rx ring associated with this channel */
+
+  rxring  = &priv->eth_rxring[chan];
+
+  /* If no Rx descriptor is available, then suspend for now */
+
+  regval  = getreg32(LPC54_ETH_DMACH_STAT(chan));
+  suspend = ((regval & ETH_DMACH_INT_RBU) != 0);
+
+  /* Loop until the last received frame is encountered */
+
+  pktlen = 0;
+  while (!lastframe)
     {
-      /* Check if the packet is a valid size for the network buffer
-       * configuration.
-       */
-#warning Missing logic
+      /* Get the last Rx descriptor in the ring */
 
-      /* Copy the data data from the hardware to priv->eth_dev.d_buf.  Set
-       * amount of data in priv->eth_dev.d_len
-       */
-#warning Missing logic
+      supply = rxring->rr_supply;
+      rxdesc = rxring->rr_desc + supply;
 
-#ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* Set the supplier index to the next descriptor */
 
-       pkt_input(&priv->eth_dev);
-#endif
-
-      /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv4
-      if (BUF->type == HTONS(ETHTYPE_IP))
+      if (++(rxring->rr_supply) > rxring->rr_ndesc)
         {
-          ninfo("IPv4 frame\n");
-          NETDEV_RXIPV4(&priv->eth_dev);
+          rxring->rr_supply = 0;
+        }
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
+      /* Is this the last descriptor of the frame? */
+
+      if (rxdesc->ctrl & ETH_RXDES3_LD)
+        {
+          /* Have we been discarding Rx data?  If so, that was the last
+           * packet to be discarded.
            */
 
-          arp_ipin(&priv->eth_dev);
-          ipv4_input(&priv->eth_dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-          if (priv->eth_dev.d_len > 0)
+          if (priv->eth_rxdiscard)
             {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(priv->eth_dev.d_flags))
-#endif
-                {
-                  arp_out(&priv->eth_dev);
-                }
-#ifdef CONFIG_NET_IPv6
-              else
-                {
-                  neighbor_out(&kel->eth_dev);
-                }
-#endif
-
-              /* And send the packet */
-
-              lpc54_eth_transmit(priv);
+              priv->eth_rxdiscard = 0;
             }
-        }
-      else
-#endif
-#ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(ETHTYPE_IP6))
-        {
-          ninfo("Iv6 frame\n");
-          NETDEV_RXIPV6(&priv->eth_dev);
-
-          /* Give the IPv6 packet to the network layer */
-
-          ipv6_input(&priv->eth_dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-          if (priv->eth_dev.d_len > 0)
-           {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(priv->eth_dev.d_flags))
-                {
-                  arp_out(&priv->eth_dev);
-                }
-              else
-#endif
-#ifdef CONFIG_NET_IPv6
-                {
-                  neighbor_out(&priv->eth_dev);
-                }
-#endif
-
-              /* And send the packet */
-
-              lpc54_eth_transmit(priv);
-            }
-        }
-      else
-#endif
-#ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
-        {
-          arp_arpin(&priv->eth_dev);
-          NETDEV_RXARP(&priv->eth_dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
-
-          if (priv->eth_dev.d_len > 0)
+          else
             {
-              lpc54_eth_transmit(priv);
+              /* Last frame encountered.  This is a valid packet */
+
+              lastframe = true;
+              framelen  = (rxdesc->ctrl & ETH_RXDES3_PL_MASK);
+
+              pktlen += framelen;
+              if (pktlen > 0)
+                {
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+                  /* No logic in place to handle the double buffered case */
+#  warning Missing logic
+#endif
+                  /* Recover the buffer.
+                   *
+                   * REVISIT:  According to the User manual, buffer1 and
+                   * buffer2 addresses were overwritten by the write-back
+                   * data.  However, I see that the buffer1 and buffer2
+                   * addresses are, indeed, used by the NXP example code
+                   * so the user manual must be wrong.  We could eliminate
+                   * this extra array of saved allocation addresses.
+                   */
+
+                  priv->eth_dev.d_buf = (uint8_t *)(rxring->rr_buffers)[supply];
+                  (rxring->rr_buffers)[supply] = NULL;
+                  DEBUGASSERT(priv->eth_dev.d_buf != NULL);
+
+                  priv->eth_dev.d_len = pktlen;
+
+                  /* REVISIT: What should we do if there is no Tx buffer
+                   * available.  In receiving the packet, we could also
+                   * generate a new outgoing packet that could only be
+                   * handled if there is an available Tx descriptor.
+                   */
+
+                  lpc54_eth_rxdisptch(priv);
+
+                /* Allocate a new Rx buffer and update the Rx buffer
+                 * descriptor.
+                 */
+
+                rxdesc->buffer1 = (uint32_t)lpc54_pktbuf_alloc(priv);
+                DEBUGASSERT(rxdesc->buffer1 != 0);
+                (rxring->rr_buffers)[supply] = (uint32_t *)rxdesc->buffer1;
+
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
+                rxdesc->buffer2 = rxdesc->buffer1 + LPC54_BUFFER_MAX;
+
+#elif defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
+                /* Allocate the second Rx packet buffer */
+
+                rxdesc->buffer2 = (uint32_t)lpc54_pktbuf_alloc(priv);
+                DEBUGASSERT(rxdesc->buffer2 != NULL);
+                (rxring->rr_buffers2)[supply] = (uint32_t *)rxdesc->buffer2;
+
+#else
+                /* The second buffer is not used */
+
+                rxdesc->buffer2  = 0;
+#endif
+                rxdesc->reserved = 0;
+
+                /* Buffer1 (and maybe 2) valid, interrupt on completion,
+                 * owned by DMA.
+                 */
+
+                regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX || defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
+                regval |= ETH_RXDES3_BUF2V;
+#endif
+                rxdesc->ctrl = regval;
+                }
             }
         }
-      else
-#endif
+      else if (!priv->eth_rxdiscard)
         {
-          NETDEV_RXDROPPED(&priv->eth_dev);
+          /* Not the last Rx descriptor of the packet.
+           *
+           * We are attempting to receive a large packet spanning multiple
+           * Rx descriptors.  We cannot support that in this design.  We
+           * would like to:
+           *
+           * 1. Accumate the data in yet another Rx buffer,
+           * 2. Accumulate the size in the 'pktlen' local variable, then
+           * 3. Dispatch that extra Rx buffer when the last frame is
+           *    encountered.
+           */
+
+#warning Missing logic
+          priv->eth_rxdiscard = 1;
         }
     }
-  while (); /* While there are more packets to be processed */
+
+  /* Restart the recevier if it was suspended. */
+
+  if (suspend)
+    {
+      uintptr_t regaddr = LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan);
+
+      regval = getreg32(regaddr);
+      putreg32(regval, regaddr);
+    }
 }
 
 /****************************************************************************
@@ -645,17 +944,15 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
   struct lpc54_txring_s *txring;
   struct enet_txdesc_s *txdesc;
   uint32_t *pktbuf;
-  int delay;
 
   /* Reclaim the compled Tx descriptor */
 
-  txring = &priv->eth_txring[channel];
-  txdesc = txring->desc + txring->tr_consumidx;
+  txring = &priv->eth_txring[chan];
+  txdesc = txring->tr_desc + txring->tr_consume;
 
   /* Update the first index for transmit buffer free. */
 
-  while (txring->tr_inuse > 0 &&
-         (txdesc->ctrlstat & ENET_TXDESCRIP_RD_OWN_MASK) == 0)
+  while (txring->tr_inuse > 0 && (txdesc->ctrlstat & ETH_TXDES3_OWN) == 0)
     {
       /* Update statistics */
 
@@ -663,12 +960,12 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
 
       /* Free the Tx buffer assigned to the descriptor */
 
-      pktbuf = txring->tr_buffers[txring->tr_consumidx];
+      pktbuf = txring->tr_buffers[txring->tr_consume];
       DEBUGASSERT(pktbuf != NULL);
       if (pktbuf != NULL)
         {
-          lpc54_pktbuf_free(pktbuf);
-          txring->tr_buffers[txring->tr_consumidx] = NULL;
+          lpc54_pktbuf_free(priv, pktbuf);
+          txring->tr_buffers[txring->tr_consume] = NULL;
         }
 
       /* One less Tx descriptor in use */
@@ -677,29 +974,24 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
 
       /* Update the consume index and the descriptor pointer. */
 
-      if (++(txring->tr_consumidx) >= txring->tr_ndesc)
+      if (++(txring->tr_consume) >= txring->tr_ndesc)
         {
-          txring->tr_consumidx = 0;
+          txring->tr_consume = 0;
         }
 
-      txdesc = txring->desc + txring->tr_consumidx;
+      txdesc = txring->tr_desc + txring->tr_consume;
     }
 
-  /* If no further transmissions are pending, then cancel the TX timeout and
-   * disable further Tx interrupts.
-   */
+  /* If no further transmissions are pending, then cancel the TX timeout. */
 
   if (txring->tr_inuse == 0)
     {
       wd_cancel(priv->eth_txtimeout);
-
-      /* And disable further TX interrupts. */
-#warning Missing logic
     }
 
-  /* In any event, poll the network for new TX data */
+  /* Poll the network for new TX data. */
 
-  (void)devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
+  lpc54_eth_dopoll(priv, chan);
 }
 
 /****************************************************************************
@@ -720,15 +1012,16 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
  *
  ****************************************************************************/
 
-static void lpc54_eth_channel_work(void *arg)
+static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
+                                   unsigned int chan)
 {
   uintptr_t regaddr;
   uint32_t status;
 
   /* Read the DMA status register for this channel */
 
-  regaddr = LPC54_ETH_DMACH_STAT(chan)
-  status  = getre32(regaddr);
+  regaddr = LPC54_ETH_DMACH_STAT(chan);
+  status  = getreg32(regaddr);
 
   /* Check for abnormal interrupts */
 
@@ -771,7 +1064,7 @@ static void lpc54_eth_channel_work(void *arg)
 
       /* Handle the incoming packet */
 
-      lpc54_eth_receive(priv, channel);
+      lpc54_eth_receive(priv, chan);
     }
 
   /* Check for a transmit interrupt */
@@ -788,7 +1081,7 @@ static void lpc54_eth_channel_work(void *arg)
        * transmissin.
        */
 
-      lpc54_eth_txdone(priv, channel);
+      lpc54_eth_txdone(priv, chan);
     }
 
   /* Check for unhandled interrupts */
@@ -822,7 +1115,6 @@ static void lpc54_eth_interrupt_work(void *arg)
 {
   struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
   uint32_t intrstat;
-  uint32_t chstat;
 
   /* Lock the network to serialize driver operations. */
 
@@ -973,12 +1265,23 @@ static void lpc54_eth_txtimeout_work(void *arg)
 
   NETDEV_TXTIMEOUTS(priv->eth_dev);
 
-  /* Then reset the hardware */
-#warning Missing logic
+  /* Then reset the hardware by bringing it down and taking it back up
+   * again.
+   */
 
-  /* Then poll the network for new XMIT data */
+  (void)lpc54_eth_ifdown(&priv->eth_dev);
+  (void)lpc54_eth_ifup(&priv->eth_dev);
 
-  (void)devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
+  /* Then poll the network for new XMIT data -- both channels if needed */
+
+  lpc54_eth_dopoll(priv, 0);
+
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  /* REVISIT:  Should there be a separate timer for the second channel? */
+
+  lpc54_eth_dopoll(priv, 1);
+#endif
+
   net_unlock();
 }
 
@@ -1018,25 +1321,121 @@ static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
 }
 
 /****************************************************************************
- * Name: lpc54_eth_poll_process
+ * Name: lpc54_eth_dotimer
  *
  * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
+ *   Check if there are Tx descriptors available and, if so, allocate a Tx
+ *   then perform the normal Tx poll
  *
  * Parameters:
  *   priv - Reference to the driver state structure
+ *   chan - The channel to be polled
  *
  * Returned Value:
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void lpc54_eth_poll_process(struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
+                              unsigned int chan)
 {
-#warning Missing logic
+  struct lpc54_txring_s *txring;
+
+  DEBUGASSERT(priv->eth_dev.d_buf == NULL);
+
+  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
+   * channel are in-use.
+   */
+
+  txring = &priv->eth_txring[chan];
+  if (txring->tr_inuse < txring->tr_ndesc)
+    {
+      /* There is a free descriptor in the ring, allocate a new Tx buffer
+       * to perform the poll.
+       */
+
+      priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
+      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+      if (priv->eth_dev.d_buf != NULL)
+        {
+          priv->eth_chan = chan;
+          (void)devif_timer(&priv->eth_dev, lpc54_eth_txpoll);
+
+          /* Make sure that the Tx buffer remaining after the poll is
+           * freed.
+           */
+
+          if (priv->eth_dev.d_buf != NULL)
+            {
+              lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
+              (txring->tr_buffers)[txring->tr_supply] = NULL;
+              priv->eth_dev.d_buf = NULL;
+            }
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_eth_dopoll
+ *
+ * Description:
+ *   Check if there are Tx descriptors available and, if so, allocate a Tx
+ *   then perform the normal Tx poll
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *   chan - The channel to be polled
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv,
+                             unsigned int chan)
+{
+  struct lpc54_txring_s *txring;
+
+  DEBUGASSERT(priv->eth_dev.d_buf == NULL);
+
+  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
+   * channel are in-use.
+   */
+
+  txring = &priv->eth_txring[chan];
+  if (txring->tr_inuse < txring->tr_ndesc)
+    {
+      /* There is a free descriptor in the ring, allocate a new Tx buffer
+       * to perform the poll.
+       */
+
+      priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
+      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+      if (priv->eth_dev.d_buf != NULL)
+        {
+          priv->eth_chan = chan;
+          (void)devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
+
+          /* Make sure that the Tx buffer remaining after the poll is
+           * freed.
+           */
+
+          if (priv->eth_dev.d_buf != NULL)
+            {
+              lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
+              (txring->tr_buffers)[txring->tr_supply] = NULL;
+              priv->eth_dev.d_buf = NULL;
+            }
+        }
+    }
 }
 
 /****************************************************************************
@@ -1068,19 +1467,15 @@ static void lpc54_eth_poll_work(void *arg)
 
   net_lock();
 
-  /* Perform the poll */
+  /* Perform the timer poll -- both channels if needed. */
 
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-#warning Missing logic
+  lpc54_eth_dotimer(priv, 0);
 
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  /* REVISIT:  This doesn't make sense. */
 
-  (void)devif_timer(&priv->eth_dev, lpc54_eth_txpoll);
+  lpc54_eth_dotimer(priv, 1);
+#endif
 
   /* Setup the watchdog poll timer again */
 
@@ -1140,6 +1535,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   uintptr_t base;
   uint32_t regval;
   uint32_t burstlen;
+  int ret;
   int i;
 
 #ifdef CONFIG_NET_IPv4
@@ -1178,9 +1574,9 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   /* Set the burst length for each DMA descriptor ring */
 
-  for (i = 0; i < ENET_RING_NUM_MAX; i++)
+  for (i = 0; i < LPC54_NRINGS; i++)
     {
-      base = LPC54_ETH_DMA_CH_CTRL_BASE(i);
+      base = LPC54_ETH_DMACH_CTRL_BASE(i);
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
       /* REVISIT: burstlen setting for the case of multi-queuing. */
@@ -1197,13 +1593,12 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
       putreg32(0, base + LPC54_ETH_DMACH_CTRL_OFFSET);
 
-      regval  = getreg(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
+      regval  = getreg32(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_TX_CTRL_TxPBL_MASK;
       regval |= ETH_DMACH_TX_CTRL_TxPBL(burstlen);
       putreg32(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
 
-
-      regval  = getreg(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
+      regval  = getreg32(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_RX_CTRL_RxPBL_MASK;
       regval |= ETH_DMACH_RX_CTRL_RxPBL(burstlen);
       putreg32(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
@@ -1227,10 +1622,10 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   regval |= ETH_MTL_TXQ_OP_MODE_FTQ | ETH_MTL_TXQ_OP_MODE_TTC_32 |
             ETH_MTL_TXQ_OP_MODE_TQS(LPC54_MTL_TXQUEUE_UNITS);
-  putreg (regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
-          LPC54_ETH_MTL_TXQ_OP_MODE(0));
-  putreg (regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
-          LPC54_ETH_MTL_TXQ_OP_MODE(1));
+  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
+           LPC54_ETH_MTL_TXQ_OP_MODE(0));
+  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
+           LPC54_ETH_MTL_TXQ_OP_MODE(1));
 
   /* Set receive operation mode (queue 0 only)
    *
@@ -1250,7 +1645,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   regval |= ETH_MTL_RXQ_OP_MODE_RTC_64 | ETH_MTL_RXQ_OP_MODE_FUP |
             ETH_MTL_RXQ_OP_MODE_RQS(LPC54_MTL_RXQUEUE_UNITS);
-  putreg (regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
+  putreg32(regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
   /* Set the schedule/arbitration(set for multiple queues) */
@@ -1285,7 +1680,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 #ifdef CONFIG_LPC54_ETH_RX_ALLMULTICAST
   regval |= ETH_MAC_FRAME_FILTER_PM;
 #endif
-  putreg32(regval, LPC54_ETH_MAC_FRAME_FILTER).
+  putreg32(regval, LPC54_ETH_MAC_FRAME_FILTER);
 
 #ifdef CONFIG_LPC54_ETH_FLOWCONTROL
   /* Configure flow control */
@@ -1329,12 +1724,15 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   putreg32(regval, LPC54_ETH_MAC_CONFIG);
 
-  /* Set the SYSCON sideband flow control for each channel (see UserManual) */
-#warning Missing logic
+  /* REVISIT:  The User Manual says we need to set the SYSCON sideband flow
+   * control for each channel.  But it is not clear to me what setting that
+   * refers to nor do I see any such settings in the NXP sample code.
+   */
 
   /* Enable Rx queues  */
 
-  regval = ETH_MAC_RXQ_CTRL0_RXQ0EN_ENABLE | ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE;
+  regval = ETH_MAC_RXQ_CTRL0_RXQ0EN_ENABLE |
+           ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE;
   putreg32(regval, LPC54_ETH_MAC_RXQ_CTRL0);
 
   /* Setup up Ethernet interrupts */
@@ -1385,7 +1783,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  priv->eth_bifup = true;
+  priv->eth_bifup = 1;
   up_enable_irq(LPC54_IRQ_ETHERNET);
   return OK;
 }
@@ -1411,6 +1809,7 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
   struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
   irqstate_t flags;
   uint32_t regval;
+  int ret;
 
   /* Disable the Ethernet interrupt */
 
@@ -1436,9 +1835,9 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
   regval  = getreg32(LPC54_SYSCON_ETHPHYSEL);
   regval &= ~SYSCON_ETHPHYSEL_MASK;
 #ifdef CONFIG_LPC54_ETH_MII
-  retval |= SYSCON_ETHPHYSEL_MII;
+  regval |= SYSCON_ETHPHYSEL_MII;
 #else
-  retval |= SYSCON_ETHPHYSEL_RMII;
+  regval |= SYSCON_ETHPHYSEL_RMII;
 #endif
   putreg32(regval, LPC54_SYSCON_ETHPHYSEL);
 
@@ -1455,7 +1854,7 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
 
   /* Mark the device "down" */
 
-  priv->eth_bifup = false;
+  priv->eth_bifup = 0;
   leave_critical_section(flags);
   return OK;
 }
@@ -1493,12 +1892,15 @@ static void lpc54_eth_txavail_work(void *arg)
 
   if (priv->eth_bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
-#warning Missing logic
+      /* Poll the network for new XMIT data -- both channels if needed. */
 
-      /* If so, then poll the network for new XMIT data */
+      lpc54_eth_dopoll(priv, 0);
 
-      (void)devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+      /* REVISIT:  This doesn't make sense. */
+
+      lpc54_eth_dopoll(priv, 1);
+#endif
     }
 
   net_unlock();
@@ -1634,7 +2036,7 @@ static void lpc54_eth_ipv6multicast(struct lpc54_ethdriver_s *priv)
   mac[0] = 0x33;
   mac[1] = 0x33;
 
-  dev    = &priv->dev;
+  dev    = &priv->eth_dev;
   tmp16  = dev->d_ipv6addr[6];
   mac[2] = 0xff;
   mac[3] = tmp16 >> 8;
@@ -1756,7 +2158,7 @@ static void lpc54_pktbuf_initialize(struct lpc54_ethdriver_s *priv)
        i < LPC54_NBUFFERS;
        i++, pktbuf += LPC54_BUFFER_WORDS)
     {
-      sq_addlast((sq_entry_t *)pktbuf, priv->&eth_freebuf);
+      sq_addlast((sq_entry_t *)pktbuf, &priv->eth_freebuf);
     }
 }
 
@@ -1773,11 +2175,15 @@ static void lpc54_pktbuf_initialize(struct lpc54_ethdriver_s *priv)
  *   A pointer to the allocated packet buffer on succes; NULL is returned if
  *   there are no available packet buffers.
  *
+ * Assumptions:
+ *   The network must be locked.  Mutually exclusive access to the free list
+ *   is maintained by locking the network.
+ *
  ****************************************************************************/
 
 static inline uint32_t *lpc54_pktbuf_alloc(struct lpc54_ethdriver_s *priv)
 {
-  return (uint32_t *)sq_remfirst(priv->&eth_freebuf);
+  return (uint32_t *)sq_remfirst(&priv->eth_freebuf);
 }
 
 /****************************************************************************
@@ -1793,12 +2199,16 @@ static inline uint32_t *lpc54_pktbuf_alloc(struct lpc54_ethdriver_s *priv)
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   The network must be locked.  Mutually exclusive access to the free list
+ *   is maintained by locking the network.
+ *
  ****************************************************************************/
 
 static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
                                      uint32_t *pktbuf)
 {
-  sq_addlast((sq_entry_t *)pktbuf, priv->&eth_freebuf);
+  sq_addlast((sq_entry_t *)pktbuf, &priv->eth_freebuf);
 }
 
 /****************************************************************************
@@ -1817,11 +2227,10 @@ static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
  ****************************************************************************/
 
 static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
-                                    unsigned int chan);
+                                    unsigned int chan)
 {
   struct lpc54_txring_s *txring;
   struct enet_txdesc_s *txdesc;
-  uint32_t control;
   uint32_t regval;
   int i;
 
@@ -1831,15 +2240,15 @@ static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
   /* Set the word-aligned Tx descriptor start/tail pointers. */
 
   regval  = (uint32_t)txdesc;
-  putreg32(regval, LPC54_ETH_DMACH_TXDESC_LIST_ADDR(ch));
+  putreg32(regval, LPC54_ETH_DMACH_TXDESC_LIST_ADDR(chan));
 
   regval += txring->tr_ndesc * sizeof(struct enet_txdesc_s);
-  putreg32(regval, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(ch));
+  putreg32(regval, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(chan));
 
   /* Set the Tx ring length */
 
   regval = ETH_DMACH_TXDESC_RING_LENGTH(txring->tr_ndesc);
-  putreg32(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(ch));
+  putreg32(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(chan));
 
   /* Inituialize the Tx desriptors . */
 
@@ -1871,10 +2280,9 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
                                     unsigned int chan)
 {
   struct lpc54_rxring_s *rxring;
-  struct enet_txdesc_s *txdesc;
+  struct enet_rxdesc_s *rxdesc;
   uint32_t regval;
   int i;
-  int j;
 
   rxring  = &priv->eth_rxring[chan];
   rxdesc  = rxring->rr_desc;
@@ -1890,7 +2298,7 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
   /* Set the Rx ring length */
 
   regval = ETH_DMACH_RXDESC_RING_LENGTH(rxring->rr_ndesc);
-  putreg32(regval, LPC54_ETH_DMACH_RXDESC_RING_LENGTH(ch));
+  putreg32(regval, LPC54_ETH_DMACH_RXDESC_RING_LENGTH(chan));
 
   /* Set the receive buffer size (in words) in the Rx control register */
 
@@ -1901,8 +2309,8 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
 
   /* Initialize the Rx descriptor ring. */
 
-  regval = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+  regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX || defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
   regval |= ETH_RXDES3_BUF2V;
 #endif
 
@@ -1911,15 +2319,18 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
       /* Allocate the first Rx packet buffer */
 
       rxdesc->buffer1 = (uint32_t)lpc54_pktbuf_alloc(priv);
-      DEBUGASSERT(rxdesc->buffer1 != NULL);
-      priv->eth_rxbuffers[0][i] = rxdesc->buffer1;
+      DEBUGASSERT(rxdesc->buffer1 != 0);
+      (rxring->rr_buffers)[i] = (uint32_t *)rxdesc->buffer1;
 
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
+      rxdesc->buffer2 = rxdesc->buffer1 + LPC54_BUFFER_MAX;
+
+#elif defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
       /* Allocate the second Rx packet buffer */
 
       rxdesc->buffer2 = (uint32_t)lpc54_pktbuf_alloc(priv);
       DEBUGASSERT(rxdesc->buffer2 != NULL);
-      priv->eth_rxbuffers[1][i] = rxdesc->buffer2;
+      (rxring->rr_buffer2s)[i] = rxdesc->buffer2;
 
 #else
       /* The second buffer is not used */
@@ -1927,7 +2338,7 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
       rxdesc->buffer2 = 0;
 #endif
 
-      /* Set the valid and DMA own flag.*/
+      /* Buffer1 (and maybe 2) valid, interrupt on completion, owned by DMA. */
 
       rxdesc->ctrl = regval;
     }
@@ -1959,14 +2370,17 @@ static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv)
   memset(g_txbuffers0, 0, CONFIG_LPC54_ETH_NTXDESC0 * sizeof(uint32_t *));
   memset(g_rxbuffers0, 0, CONFIG_LPC54_ETH_NRXDESC0 * sizeof(uint32_t *));
 
-  priv->eth_txring[0].tr_desc    = g_ch0_txdesc;
-  priv->eth_txring[0].tr_ndesc   = CONFIG_LPC54_ETH_NTXDESC0;
-  priv->eth_txring[0].tr_buffers = g_txbuffers0;
+  priv->eth_txring[0].tr_desc     = g_ch0_txdesc;
+  priv->eth_txring[0].tr_ndesc    = CONFIG_LPC54_ETH_NTXDESC0;
+  priv->eth_txring[0].tr_buffers  = g_txbuffers0;
   lpc54_txring_initialize(priv, 0);
 
-  priv->eth_rxring[0].rr_desc    = g_ch0_rxdesc;
-  priv->eth_rxring[0].rr_ndesc   = CONFIG_LPC54_ETH_NRXDESC0;
-  priv->eth_rxring[0].rr_buffers = g_rxbuffers0;
+  priv->eth_rxring[0].rr_desc     = g_ch0_rxdesc;
+  priv->eth_rxring[0].rr_ndesc    = CONFIG_LPC54_ETH_NRXDESC0;
+  priv->eth_rxring[0].rr_buffers  = g_rxbuffers0;
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+  priv->eth_txring[0].tr_buffer2s = g_rxbuffer2s0;
+#endif
   lpc54_rxring_initialize(priv, 0);
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
@@ -1975,15 +2389,18 @@ static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv)
   memset(g_txbuffers1, 0, CONFIG_LPC54_ETH_NTXDESC1 * sizeof(uint32_t *));
   memset(g_rxbuffers1, 0, CONFIG_LPC54_ETH_NRXDESC1 * sizeof(uint32_t *));
 
-  priv->eth_txring[1].tr_desc    = g_ch1_txdesc;
-  priv->eth_txring[1].tr_ndesc   = CONFIG_LPC54_ETH_NTXDESC1;
-  priv->eth_txring[0].tr_buffers = g_txbuffers1;
+  priv->eth_txring[1].tr_desc     = g_ch1_txdesc;
+  priv->eth_txring[1].tr_ndesc    = CONFIG_LPC54_ETH_NTXDESC1;
+  priv->eth_txring[1].tr_buffers  = g_txbuffers1;
+#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
+  priv->eth_txring[1].tr_buffer2s = g_rxbuffer2s1;
+#endif
   lpc54_txring_initialize(priv, 1);
 
-  priv->eth_rxring[0].rr_desc    = g_ch1_rxdesc;
-  priv->eth_rxring[0].rr_ndesc   = CONFIG_LPC54_ETH_NRXDESC1;
-  priv->eth_rxring[0].rr_buffers = g_rxbuffers1;
-  lpc54_rxring_initialize(priv, 0);
+  priv->eth_rxring[1].rr_desc     = g_ch1_rxdesc;
+  priv->eth_rxring[1].rr_ndesc    = CONFIG_LPC54_ETH_NRXDESC1;
+  priv->eth_rxring[1].rr_buffers  = g_rxbuffers1;
+  lpc54_rxring_initialize(priv, 1);
 #endif
 }
 
@@ -2020,7 +2437,7 @@ static void lpc54_set_csrdiv(void)
     }
   else if (srcclk < 100)
     {
-      regval |= ETH_MAC_MDIO_ADDR_CR_ DIV42;   /* CSR=60-100 MHz; MDC=CSR/42 */
+      regval |= ETH_MAC_MDIO_ADDR_CR_DIV42;    /* CSR=60-100 MHz; MDC=CSR/42 */
     }
   else /* if (srcclk < 150) */
     {
@@ -2048,7 +2465,7 @@ static void lpc54_set_csrdiv(void)
 static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
                                uint8_t phyreg)
 {
-  uint32_t regval = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
+  uint32_t regval;
 
   /* Set the MII read command. */
 
@@ -2091,7 +2508,7 @@ static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
 static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
                             uint8_t phyreg, uint16_t phyval)
 {
-  uint32_t regval = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
+  uint32_t regval;
 
   /* Set the MII write command. */
 
@@ -2131,7 +2548,7 @@ static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
  *
  ****************************************************************************/
 
-static inline bool lpc54_phy_linkstatus(ENET_Type *base)
+static inline bool lpc54_phy_linkstatus(struct lpc54_ethdriver_s *priv)
 {
   /* Read the status register and return tru of the linkstatus bit is set. */
 
@@ -2155,7 +2572,6 @@ static inline bool lpc54_phy_linkstatus(ENET_Type *base)
 static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
 {
   volatile int32_t timeout;
-  uint16_t phyid1;
   uint16_t phyval;
 
   /* Advertise our cabilities. */
@@ -2262,7 +2678,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
           return -ETIMEDOUT;
         }
 
-      phyval = lpc54_phy_read(base, CONFIG_LPC54_ETH_PHYADDR, MII_MCR);
+      phyval = lpc54_phy_read(priv, MII_MCR);
     }
   while ((phyval & MII_MCR_RESET) != 0);
 
@@ -2296,6 +2712,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
 int up_netinitialize(int intf)
 {
   struct lpc54_ethdriver_s *priv;
+  int ret;
 
   /* Get the interface structure associated with this interface number. */
 
@@ -2333,7 +2750,6 @@ int up_netinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct lpc54_ethdriver_s));
-  priv->eth_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
   priv->eth_dev.d_ifup    = lpc54_eth_ifup;     /* I/F up (new IP address) callback */
   priv->eth_dev.d_ifdown  = lpc54_eth_ifdown;   /* I/F down callback */
   priv->eth_dev.d_txavail = lpc54_eth_txavail;  /* New TX data callback */
@@ -2344,7 +2760,7 @@ int up_netinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->eth_dev.d_ioctl   = lpc54_eth_ioctl;    /* Handle network IOCTL commands */
 #endif
-  priv->eth_dev.d_private = (void *)g_ethdriver; /* Used to recover private state from dev */
+  priv->eth_dev.d_private = (void *)&g_ethdriver; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
@@ -2398,7 +2814,7 @@ int up_netinitialize(int intf)
 
   /* Set the CSR clock divider */
 
-  lpc54_set_crsdiv();
+  lpc54_set_csrdiv();
 
   /* Put the interface in the down state.  This amounts to resetting the
    * device by calling lpc54_eth_ifdown().
@@ -2417,7 +2833,7 @@ int up_netinitialize(int intf)
   if (ret < 0)
     {
       nerr("ERROR:  netdev_register failed: %d\n", ret);
-      goto errout_with_clock:
+      goto errout_with_clock;
     }
 
   return OK;

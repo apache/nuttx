@@ -376,7 +376,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
               else
                 {
-                  neighbor_out(&kel->sk_dev);
+                  neighbor_out(&skel->sk_dev);
                 }
 #endif
 
@@ -659,27 +659,6 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->sk_irqwork, skel_txtimeout_work, priv, 0);
-}
-
-/****************************************************************************
- * Name: skel_poll_process
- *
- * Description:
- *   Perform the periodic poll.  This may be called either from watchdog
- *   timer logic or from the worker thread, depending upon the configuration.
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static inline void skel_poll_process(FAR struct skel_driver_s *priv)
-{
 }
 
 /****************************************************************************
