@@ -393,7 +393,7 @@ void xmc4_clock_configure(void)
 
   /* Setup peripheral clock divider */
 
-  putreg32(PBCLKCR_VALUE,  XMC4_SCU_PBCLKCR);
+  putreg32(PBCLKCR_VALUE, XMC4_SCU_PBCLKCR);
 
   /* Setup fCPU clock */
 

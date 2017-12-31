@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+
 #include <nuttx/irq.h>
 
 #include "irq/irq.h"
@@ -59,7 +61,7 @@
 int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 {
 #if NR_IRQS > 0
-  int ret = ERROR;
+  int ret = -EINVAL;
 
   if ((unsigned)irq < NR_IRQS)
     {

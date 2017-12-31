@@ -258,11 +258,9 @@ struct lpc54_dev_s
 #ifdef CONFIG_LPC54_SDMMC_REGDEBUG
 static uint32_t lpc54_getreg(uint32_t addr);
 static void lpc54_putreg(uint32_t val, uint32_t addr);
-static void lpc54_checksetup(void);
 #else
 # define lpc54_getreg(addr)      getreg32(addr)
 # define lpc54_putreg(val,addr)  putreg32(val,addr)
-# define lpc54_checksetup()
 #endif
 
 /* Low-level helpers ********************************************************/

@@ -237,6 +237,11 @@ Configurations
     3. SDRAM support is enabled and the SDRAM is added to the system heap. The
        Ramtest applications is not enabled.
 
+    4. This configuration does not include support for aysnchronous network
+       initialization.  As a consequence, NSH must bring up the network
+       before you get the NSH prompt.  If the network cable is unplugged,
+       this can mean a significant delay before you see the prompt.
+
   nsh:
 
     Configures the NuttShell (nsh) application located at examples/nsh.

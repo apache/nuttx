@@ -104,7 +104,7 @@
 
 /* Select the external crystal as the PLL clock source */
 
-#  define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == extnernal crystal */
+#  define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == external crystal */
 #  undef  BOARD_PLL_CLOCKSRC_OFI             /* PLL Clock source != internal fast oscillator */
 
 /* PLL Configuration:

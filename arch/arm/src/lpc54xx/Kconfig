@@ -862,6 +862,13 @@ config LPC54_ETH_NTXDESC1
 		NOTE:  Each Rx descriptor will require a transmit buffer at the size
 		of the configured MTU.
 
+config LPC54_ETH_REGDEBUG
+		bool "Register level debug"
+		default n
+		depends on DEBUG_NET_INFO
+		---help---
+				Output detailed register-level Ethernet debug information.
+
 endmenu # Ethernet configuration
 
 menu "SD/MMC Configuration"

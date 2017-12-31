@@ -363,6 +363,16 @@ static uint32_t *g_txbuffers1[CONFIG_LPC54_ETH_NTXDESC1];
  * Private Function Prototypes
  ****************************************************************************/
 
+/* Register level debug hooks */
+
+#ifdef CONFIG_LPC54_ETH_REGDEBUG
+static uint32_t lpc54_getreg(uintptr_t addr);
+static void lpc54_putreg(uint32_t val, uintptr_t addr);
+#else
+# define lpc54_getreg(addr)      getreg32(addr)
+# define lpc54_putreg(val,addr)  lpc54_putreg(val,addr)
+#endif
+
 /* Common TX logic */
 
 static int  lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
@@ -446,6 +456,107 @@ static int  lpc54_phy_reset(struct lpc54_ethdriver_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc54_getreg
+ *
+ * Description:
+ *   This function may to used to intercept an monitor all register accesses.
+ *   Clearly this is nothing you would want to do unless you are debugging
+ *   this driver.
+ *
+ * Input Parameters:
+ *   addr - The register address to read
+ *
+ * Returned Value:
+ *   The value read from the register
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC54_ETH_REGDEBUG
+static uint32_t lpc54_getreg(uintptr_t addr)
+{
+  static uintptr_t prevaddr = 0;
+  static uint32_t preval    = 0;
+  static uint32_t count     = 0;
+
+  /* Read the value from the register */
+
+  uint32_t val = getreg32(addr);
+
+  /* Is this the same value that we read from the same register last time?
+   * Are we polling the register?  If so, suppress some of the output.
+   */
+
+  if (addr == prevaddr && val == preval)
+    {
+      if (count == 0xffffffff || ++count > 3)
+        {
+          if (count == 4)
+            {
+              ninfo("...\n");
+            }
+
+          return val;
+        }
+    }
+
+  /* No this is a new address or value */
+
+  else
+    {
+      /* Did we print "..." for the previous value? */
+
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
+
+          ninfo("[repeats %d more times]\n", count-3);
+        }
+
+      /* Save the new address, value, and count */
+
+      prevaddr = addr;
+      preval   = val;
+      count    = 1;
+    }
+
+  /* Show the register value read */
+
+  ninfo("%08x->%08x\n", addr, val);
+  return val;
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc54_putreg
+ *
+ * Description:
+ *   This function may to used to intercept an monitor all register accesses.
+ *   Clearly this is nothing you would want to do unless you are debugging
+ *   this driver.
+ *
+ * Input Parameters:
+ *   val - The value to write to the register
+ *   addr - The register address to read
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC54_ETH_REGDEBUG
+static void lpc54_putreg(uint32_t val, uintptr_t addr)
+{
+  /* Show the register value being written */
+
+  ninfo("%08x<-%08x\n", addr, val);
+
+  /* Write the value */
+
+  putreg32(val, addr);
+}
+#endif
 
 /****************************************************************************
  * Name: lpc54_eth_transmit
@@ -563,7 +674,7 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
 
   /* Update the DMA tail pointer */
 
-  putreg32((uint32_t)txdesc, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(chan));
+  lpc54_putreg((uint32_t)txdesc, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(chan));
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -911,7 +1022,7 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 
   /* If no Rx descriptor is available, then suspend for now */
 
-  regval  = getreg32(LPC54_ETH_DMACH_STAT(chan));
+  regval  = lpc54_getreg(LPC54_ETH_DMACH_STAT(chan));
   suspend = ((regval & ETH_DMACH_INT_RBU) != 0);
 
   /* Loop until the last received frame is encountered */
@@ -1034,8 +1145,8 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
     {
       uintptr_t regaddr = LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan);
 
-      regval = getreg32(regaddr);
-      putreg32(regval, regaddr);
+      regval = lpc54_getreg(regaddr);
+      lpc54_putreg(regval, regaddr);
     }
 }
 
@@ -1153,7 +1264,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
   /* Read the DMA status register for this channel */
 
   regaddr = LPC54_ETH_DMACH_STAT(chan);
-  status  = getreg32(regaddr);
+  status  = lpc54_getreg(regaddr);
 
   /* Check for abnormal interrupts */
 
@@ -1161,11 +1272,13 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
     {
       /* Acknowledge the normal receive interrupt */
 
-      putreg32(LPC54_ABNORM_INTMASK, regaddr);
+      lpc54_putreg(LPC54_ABNORM_INTMASK, regaddr);
 
       /* Handle the incoming packet */
 
-      nerr("ERROR: Abnormal interrupt received: %08lx\n", (unsigned long)status);
+      nerr("ERROR: Abnormal interrupt received: %08lx\n",
+           (unsigned long)status);
+
       status &= ~LPC54_ABNORM_INTMASK;
 
       /* Check for Tx/Rx related errors and update statistics */
@@ -1187,7 +1300,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
     {
       /* Acknowledge the normal receive interrupt */
 
-      putreg32(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
+      lpc54_putreg(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
       status &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
 
       /* Update statistics */
@@ -1205,7 +1318,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
     {
       /* Acknowledge the normal receive interrupt */
 
-      putreg32(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI, regaddr);
+      lpc54_putreg(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI, regaddr);
       status &= ~(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI);
 
       /* Handle the Tx completion event.  Reclaim the completed Tx
@@ -1222,7 +1335,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
     {
       nwarn("WARNING: Unhandled interrupts: %08lx\n",
             (unsigned int)status);
-      putreg32(status, regaddr);
+      lpc54_putreg(status, regaddr);
     }
 }
 
@@ -1254,7 +1367,7 @@ static void lpc54_eth_interrupt_work(void *arg)
 
   /* Check if interrupt is from DMA channel 0. */
 
-  intrstat = getreg32(LPC54_ETH_DMA_INTR_STAT);
+  intrstat = lpc54_getreg(LPC54_ETH_DMA_INTR_STAT);
   if ((intrstat & ETH_DMA_INTR_STAT_DC0IS) != 0)
     {
       lpc54_eth_channel_work(priv, 0);
@@ -1262,7 +1375,7 @@ static void lpc54_eth_interrupt_work(void *arg)
 
   /* Check if interrupt is from DMA channel 1. */
 
-  intrstat = getreg32(LPC54_ETH_DMA_INTR_STAT);
+  intrstat = lpc54_getreg(LPC54_ETH_DMA_INTR_STAT);
   if ((intrstat & ETH_DMA_INTR_STAT_DC1IS) != 0)
     {
       lpc54_eth_channel_work(priv, 1);
@@ -1690,13 +1803,13 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   /* Initialize Ethernet DMA ************************************************/
   /* Reset DMA */
 
-  regval  = getreg32(LPC54_ETH_DMA_MODE);
+  regval  = lpc54_getreg(LPC54_ETH_DMA_MODE);
   regval |= ETH_DMA_MODE_SWR;
-  putreg32(regval, LPC54_ETH_DMA_MODE);
+  lpc54_putreg(regval, LPC54_ETH_DMA_MODE);
 
   /* Wait for the reset bit to be cleared at the completion of the reset */
 
-  while ((getreg32(LPC54_ETH_DMA_MODE) & ETH_DMA_MODE_SWR) != 0)
+  while ((lpc54_getreg(LPC54_ETH_DMA_MODE) & ETH_DMA_MODE_SWR) != 0)
     {
     }
 
@@ -1705,29 +1818,29 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   for (i = 0; i < LPC54_NRINGS; i++)
     {
       base = LPC54_ETH_DMACH_CTRL_BASE(i);
-      putreg32(LPC54_PBLx8, base + LPC54_ETH_DMACH_CTRL_OFFSET);
+      lpc54_putreg(LPC54_PBLx8, base + LPC54_ETH_DMACH_CTRL_OFFSET);
 
-      regval  = getreg32(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
+      regval  = lpc54_getreg(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_TX_CTRL_TxPBL_MASK;
       regval |= ETH_DMACH_TX_CTRL_TxPBL(LPC54_BURSTLEN);
-      putreg32(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
+      lpc54_putreg(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
 
-      regval  = getreg32(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
+      regval  = lpc54_getreg(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
       regval &= ~ETH_DMACH_RX_CTRL_RxPBL_MASK;
       regval |= ETH_DMACH_RX_CTRL_RxPBL(LPC54_BURSTLEN);
-      putreg32(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
+      lpc54_putreg(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
     }
 
   /* Initializes the Ethernet MTL *******************************************/
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
   /* Set the schedule/arbitration for multiple queues */
 
-  putreg32(LPC54_MTL_OPMODE_SCHALG | LPC54_MTL_OPMODE_RAA,
-           LPC54_ETH_MTL_OP_MODE);
+  lpc54_putreg(LPC54_MTL_OPMODE_SCHALG | LPC54_MTL_OPMODE_RAA,
+               LPC54_ETH_MTL_OP_MODE);
 
   /* Set the Rx queue mapping to DMA channel. */
 
-  putreg32(LPC54_QUEUEMAP, LPC54_ETH_MTL_RXQ_DMA_MAP);
+  lpc54_putreg(LPC54_QUEUEMAP, LPC54_ETH_MTL_RXQ_DMA_MAP);
 #endif
 
   /* Set transmit queue operation mode
@@ -1747,14 +1860,14 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   regval |= ETH_MTL_TXQ_OP_MODE_FTQ | ETH_MTL_TXQ_OP_MODE_TTC_32 |
             ETH_MTL_TXQ_OP_MODE_TQS(LPC54_MTL_TXQUEUE_UNITS);
-  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
-           LPC54_ETH_MTL_TXQ_OP_MODE(0));
+  lpc54_putreg(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
+               LPC54_ETH_MTL_TXQ_OP_MODE(0));
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
-           LPC54_ETH_MTL_TXQ_OP_MODE(1));
+  lpc54_putreg(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE,
+               LPC54_ETH_MTL_TXQ_OP_MODE(1));
 #else
-  putreg32(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
-           LPC54_ETH_MTL_TXQ_OP_MODE(1));
+  lpc54_putreg(regval | ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE,
+               LPC54_ETH_MTL_TXQ_OP_MODE(1));
 #endif
 
   /* Set receive receive operation mode
@@ -1775,17 +1888,17 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   regval |= ETH_MTL_RXQ_OP_MODE_RTC_64 | ETH_MTL_RXQ_OP_MODE_FUP |
             ETH_MTL_RXQ_OP_MODE_RQS(LPC54_MTL_RXQUEUE_UNITS);
-  putreg32(regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
+  lpc54_putreg(regval, LPC54_ETH_MTL_RXQ_OP_MODE(0));
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  putreg32(regval, LPC54_ETH_MTL_RXQ_OP_MODE(1));
+  lpc54_putreg(regval, LPC54_ETH_MTL_RXQ_OP_MODE(1));
 
   /* Set the Tx/Rx queue weights. */
 
-  putreg32(CONFIG_LPC54_ETH_TXQ0WEIGHT, LPC54_ETH_MTL_TXQ_QNTM_WGHT(0));
-  putreg32(CONFIG_LPC54_ETH_TXQ1WEIGHT, LPC54_ETH_MTL_TXQ_QNTM_WGHT(1));
+  lpc54_putreg(CONFIG_LPC54_ETH_TXQ0WEIGHT, LPC54_ETH_MTL_TXQ_QNTM_WGHT(0));
+  lpc54_putreg(CONFIG_LPC54_ETH_TXQ1WEIGHT, LPC54_ETH_MTL_TXQ_QNTM_WGHT(1));
 
-  putreg32(CONFIG_LPC54_ETH_RXQ0WEIGHT, LPC54_ETH_MTL_RXQ_CTRL(0));
-  putreg32(CONFIG_LPC54_ETH_RXQ1WEIGHT, LPC54_ETH_MTL_RXQ_CTRL(1));
+  lpc54_putreg(CONFIG_LPC54_ETH_RXQ0WEIGHT, LPC54_ETH_MTL_RXQ_CTRL(0));
+  lpc54_putreg(CONFIG_LPC54_ETH_RXQ1WEIGHT, LPC54_ETH_MTL_RXQ_CTRL(1));
 #endif
 
   /* Initialize the Ethernet MAC ********************************************/
@@ -1796,10 +1909,10 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   mptr   = (uint8_t *)priv->eth_dev.d_mac.ether.ether_addr_octet;
   regval = ((uint32_t)mptr[3] << 24) | ((uint32_t)mptr[2] << 16) |
            ((uint32_t)mptr[1] << 8)  | ((uint32_t)mptr[0]);
-  putreg32(regval, LPC54_ETH_MAC_ADDR_LOW);
+  lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_LOW);
 
   regval = ((uint32_t)mptr[5] << 8)  | ((uint32_t)mptr[4]);
-  putreg32(regval, LPC54_ETH_MAC_ADDR_LOW);
+  lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_LOW);
 
   /* Set the receive address filter */
 
@@ -1813,23 +1926,23 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 #ifdef LPC54_ACCEPT_ALLMULTICAST
   regval |= ETH_MAC_FRAME_FILTER_PM;
 #endif
-  putreg32(regval, LPC54_ETH_MAC_FRAME_FILTER);
+  lpc54_putreg(regval, LPC54_ETH_MAC_FRAME_FILTER);
 
 #ifdef CONFIG_LPC54_ETH_FLOWCONTROL
   /* Configure flow control */
 
   regval = ETH_MAC_RX_FLOW_CTRL_RFE | ETH_MAC_RX_FLOW_CTRL_UP;
-  putreg32(regval, LPC54_ETH_MAC_RX_FLOW_CTRL);
+  lpc54_putreg(regval, LPC54_ETH_MAC_RX_FLOW_CTRL);
 
   regval = ETH_MAC_TX_FLOW_CTRL_Q_PT(CONFIG_LPC54_ETH_TX_PAUSETIME);
-  putreg32(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q0);
-  putreg32(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q1);
+  lpc54_putreg(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q0);
+  lpc54_putreg(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q1);
 #endif
 
   /* Set the 1uS tick counter*/
 
   regval = ETH_MAC_1US_TIC_COUNTR(BOARD_MAIN_CLK / USEC_PER_SEC);
-  putreg32(regval, LPC54_ETH_MAC_1US_TIC_COUNTR);
+  lpc54_putreg(regval, LPC54_ETH_MAC_1US_TIC_COUNTR);
 
   /* Set the speed and duplex using the values previously determined through
    * autonegotiaion.
@@ -1855,7 +1968,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
       regval |= ETH_MAC_CONFIG_FES;
     }
 
-  putreg32(regval, LPC54_ETH_MAC_CONFIG);
+  lpc54_putreg(regval, LPC54_ETH_MAC_CONFIG);
 
   /* REVISIT:  The User Manual says we need to set the SYSCON sideband flow
    * control for each channel.  But it is not clear to me what setting that
@@ -1866,15 +1979,15 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   regval = ETH_MAC_RXQ_CTRL0_RXQ0EN_ENABLE |
            ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE;
-  putreg32(regval, LPC54_ETH_MAC_RXQ_CTRL0);
+  lpc54_putreg(regval, LPC54_ETH_MAC_RXQ_CTRL0);
 
   /* Setup up Ethernet interrupts */
 
   regval = LPC54_NORM_INTMASK | LPC54_ABNORM_INTMASK;
-  putreg32(regval, LPC54_ETH_DMACH_INT_EN(0));
-  putreg32(regval, LPC54_ETH_DMACH_INT_EN(1));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_INT_EN(0));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_INT_EN(1));
 
-  putreg32(0, LPC54_ETH_MAC_INTR_EN);
+  lpc54_putreg(0, LPC54_ETH_MAC_INTR_EN);
 
   /* Initialize packet buffers */
 
@@ -1886,22 +1999,22 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   /* Activate DMA on channel 0 */
 
-  regval  = getreg32(LPC54_ETH_DMACH_RX_CTRL(0));
+  regval  = lpc54_getreg(LPC54_ETH_DMACH_RX_CTRL(0));
   regval |= ETH_DMACH_RX_CTRL_SR;
-  putreg32(regval, LPC54_ETH_DMACH_RX_CTRL(0));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_RX_CTRL(0));
 
-  regval  = getreg32(LPC54_ETH_DMACH_TX_CTRL(0));
+  regval  = lpc54_getreg(LPC54_ETH_DMACH_TX_CTRL(0));
   regval |= ETH_DMACH_TX_CTRL_ST;
-  putreg32(regval, LPC54_ETH_DMACH_TX_CTRL(0));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_TX_CTRL(0));
 
   /* Then enable the Rx/Tx */
 
-  regval  = getreg32(LPC54_ETH_MAC_CONFIG);
+  regval  = lpc54_getreg(LPC54_ETH_MAC_CONFIG);
   regval |= ETH_MAC_CONFIG_RE;
-  putreg32(regval, LPC54_ETH_MAC_CONFIG);
+  lpc54_putreg(regval, LPC54_ETH_MAC_CONFIG);
 
   regval |= ETH_MAC_CONFIG_TE;
-  putreg32(regval, LPC54_ETH_MAC_CONFIG);
+  lpc54_putreg(regval, LPC54_ETH_MAC_CONFIG);
 
   /* Set and activate a timer process */
 
@@ -1948,7 +2061,7 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
   wd_cancel(priv->eth_txpoll);
   wd_cancel(priv->eth_txtimeout);
 
-  /* Put the EMAC in its reset, non-operational state.  This should be
+  /* Put the EMAC in its post-reset, non-operational state.  This should be
    * a known configuration that will guarantee the lpc54_eth_ifup() always
    * successfully brings the interface back up.
    *
@@ -1957,16 +2070,20 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
 
   lpc54_reset_eth();
 
+  /* Set the CSR clock divider */
+
+  lpc54_set_csrdiv();
+
   /* Select MII or RMII mode */
 
-  regval  = getreg32(LPC54_SYSCON_ETHPHYSEL);
+  regval  = lpc54_getreg(LPC54_SYSCON_ETHPHYSEL);
   regval &= ~SYSCON_ETHPHYSEL_MASK;
 #ifdef CONFIG_LPC54_ETH_MII
   regval |= SYSCON_ETHPHYSEL_MII;
 #else
   regval |= SYSCON_ETHPHYSEL_RMII;
 #endif
-  putreg32(regval, LPC54_SYSCON_ETHPHYSEL);
+  lpc54_putreg(regval, LPC54_SYSCON_ETHPHYSEL);
 
   /* Reset the PHY and bring it to an operational state.  We must be capable
    * of handling PHY ioctl commands while the network is down.
@@ -2289,15 +2406,15 @@ static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
   /* Set the word-aligned Tx descriptor start/tail pointers. */
 
   regval  = (uint32_t)txdesc;
-  putreg32(regval, LPC54_ETH_DMACH_TXDESC_LIST_ADDR(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_TXDESC_LIST_ADDR(chan));
 
   regval += txring->tr_ndesc * sizeof(struct enet_txdesc_s);
-  putreg32(regval, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_TXDESC_TAIL_PTR(chan));
 
   /* Set the Tx ring length */
 
   regval = ETH_DMACH_TXDESC_RING_LENGTH(txring->tr_ndesc);
-  putreg32(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(chan));
 
   /* Inituialize the Tx desriptors . */
 
@@ -2339,22 +2456,22 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
   /* Set the word-aligned Rx descriptor start/tail pointers. */
 
   regval  = (uint32_t)rxdesc;
-  putreg32(regval, LPC54_ETH_DMACH_RXDESC_LIST_ADDR(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_RXDESC_LIST_ADDR(chan));
 
   regval += rxring->rr_ndesc * sizeof(struct enet_rxdesc_s);
-  putreg32(regval, LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan));
 
   /* Set the Rx ring length */
 
   regval = ETH_DMACH_RXDESC_RING_LENGTH(rxring->rr_ndesc);
-  putreg32(regval, LPC54_ETH_DMACH_RXDESC_RING_LENGTH(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_RXDESC_RING_LENGTH(chan));
 
   /* Set the receive buffer size (in words) in the Rx control register */
 
-  regval  = getreg32(LPC54_ETH_DMACH_RX_CTRL(chan));
+  regval  = lpc54_getreg(LPC54_ETH_DMACH_RX_CTRL(chan));
   regval &= ~ETH_DMACH_RX_CTRL_RBSZ_MASK;
   regval |= ETH_DMACH_RX_CTRL_RBSZ(LPC54_BUFFER_SIZE >> 2);
-  putreg32(regval, LPC54_ETH_DMACH_RX_CTRL(chan));
+  lpc54_putreg(regval, LPC54_ETH_DMACH_RX_CTRL(chan));
 
   /* Initialize the Rx descriptor ring. */
 
@@ -2461,7 +2578,7 @@ static void lpc54_set_csrdiv(void)
   uint32_t srcclk = BOARD_MAIN_CLK / 1000000;
   uint32_t regval;
 
-  regval = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
+  regval = lpc54_getreg(LPC54_ETH_MAC_MDIO_ADDR);
   regval &= ~ETH_MAC_MDIO_ADDR_CR_MASK;
 
   if (srcclk < 35)
@@ -2481,7 +2598,7 @@ static void lpc54_set_csrdiv(void)
       regval |= ETH_MAC_MDIO_ADDR_CR_DIV62;    /* CSR=100-150 MHz; MDC=CSR/62 */
     }
 
-  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+  lpc54_putreg(regval, LPC54_ETH_MAC_MDIO_ADDR);
 }
 
 /****************************************************************************
@@ -2506,24 +2623,24 @@ static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
 
   /* Set the MII read command. */
 
-  regval  = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
+  regval  = lpc54_getreg(LPC54_ETH_MAC_MDIO_ADDR);
   regval &= ETH_MAC_MDIO_ADDR_CR_MASK;
   regval |= ETH_MAC_MDIO_ADDR_MOC_READ | ETH_MAC_MDIO_ADDR_RDA(phyreg) |
             ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_ETH_PHYADDR);
-  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+  lpc54_putreg(regval, LPC54_ETH_MAC_MDIO_ADDR);
 
   /* Initiate the read */
 
   regval |= ETH_MAC_MDIO_ADDR_MB;
-  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+  lpc54_putreg(regval, LPC54_ETH_MAC_MDIO_ADDR);
 
   /* Wait until the SMI is no longer busy with the read */
 
-  while ((getreg32(LPC54_ETH_MAC_MDIO_ADDR) & ETH_MAC_MDIO_ADDR_MB) != 0)
+  while ((lpc54_getreg(LPC54_ETH_MAC_MDIO_ADDR) & ETH_MAC_MDIO_ADDR_MB) != 0)
     {
     }
 
-  return (uint16_t)getreg32(LPC54_ETH_MAC_MDIO_DATA);
+  return (uint16_t)lpc54_getreg(LPC54_ETH_MAC_MDIO_DATA);
 }
 
 /****************************************************************************
@@ -2549,24 +2666,24 @@ static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
 
   /* Set the MII write command. */
 
-  regval  = getreg32(LPC54_ETH_MAC_MDIO_ADDR);
+  regval  = lpc54_getreg(LPC54_ETH_MAC_MDIO_ADDR);
   regval &= ETH_MAC_MDIO_ADDR_CR_MASK;
   regval |= ETH_MAC_MDIO_ADDR_MOC_WRITE | ETH_MAC_MDIO_ADDR_RDA(phyreg) |
             ETH_MAC_MDIO_ADDR_PA(CONFIG_LPC54_ETH_PHYADDR);
-  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+  lpc54_putreg(regval, LPC54_ETH_MAC_MDIO_ADDR);
 
   /* Set the write data */
 
-  putreg32((uint32_t)phyval, LPC54_ETH_MAC_MDIO_DATA);
+  lpc54_putreg((uint32_t)phyval, LPC54_ETH_MAC_MDIO_DATA);
 
   /* Initiate the write */
 
   regval |= ETH_MAC_MDIO_ADDR_MB;
-  putreg32(regval, LPC54_ETH_MAC_MDIO_ADDR);
+  lpc54_putreg(regval, LPC54_ETH_MAC_MDIO_ADDR);
 
   /* Wait until the SMI is no longer busy with the write */
 
-  while ((getreg32(LPC54_ETH_MAC_MDIO_ADDR) & ETH_MAC_MDIO_ADDR_MB) != 0)
+  while ((lpc54_getreg(LPC54_ETH_MAC_MDIO_ADDR) & ETH_MAC_MDIO_ADDR_MB) != 0)
     {
     }
 }
@@ -2631,6 +2748,7 @@ static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
     {
       if (timeout-- <= 0)
         {
+          nerr("ERROR: Autonegotion timed out\n");
           return -ETIMEDOUT;
         }
 
@@ -2649,6 +2767,7 @@ static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
     {
       if (timeout-- <= 0)
         {
+          nerr("ERROR: Link status UP timed out\n");
           return -ETIMEDOUT;
         }
     }
@@ -2696,6 +2815,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
     {
       if (timeout-- <= 0)
         {
+          nerr("ERROR: PHY start up timed out\n");
           return -ETIMEDOUT;
         }
 
@@ -2712,6 +2832,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
     {
       if (timeout-- <= 0)
         {
+          nerr("ERROR: PHY reset timed out\n");
           return -ETIMEDOUT;
         }
 
@@ -2758,28 +2879,31 @@ int up_netinitialize(int intf)
 
   /* Attach the three Ethernet-related IRQs to the handlers */
 
-  if (irq_attach(LPC54_IRQ_ETHERNET, lpc54_eth_interrupt, priv))
+  ret = irq_attach(LPC54_IRQ_ETHERNET, lpc54_eth_interrupt, priv);
+  if (ret < 0)
     {
       /* We could not attach the ISR to the interrupt */
 
-      nerr("ERROR:  irq_attach failed\n");
+      nerr("ERROR:  irq_attach failed: %d\n", ret);
       return -EAGAIN;
     }
 
 #if 0 /* Not used */
-  if (irq_attach(LPC54_IRQ_ETHERNETPMT, lpc54_pmt_interrupt, priv))
+  ret = irq_attach(LPC54_IRQ_ETHERNETPMT, lpc54_pmt_interrupt, priv);
+  if (ret < 0)
     {
       /* We could not attach the ISR to the interrupt */
 
-      nerr("ERROR:  irq_attach for PMTfailed\n");
+      nerr("ERROR:  irq_attach for PMT failed: %d\n", ret);
       return -EAGAIN;
     }
 
-  if (irq_attach(LPC54_IRQ_ETHERNETMACLP, lpc54_mac_interrupt, priv))
+  ret = irq_attach(LPC54_IRQ_ETHERNETMACLP, lpc54_mac_interrupt, priv);
+  if (ret < 0)
     {
       /* We could not attach the ISR to the interrupt */
 
-      nerr("ERROR:  irq_attach for MAC failed\n");
+      nerr("ERROR:  irq_attach for MAC failed: %d\n", ret);
       return -EAGAIN;
     }
 #endif
@@ -2848,10 +2972,6 @@ int up_netinitialize(int intf)
   /* Enable clocking to the Ethernet peripheral */
 
   lpc54_eth_enableclk();
-
-  /* Set the CSR clock divider */
-
-  lpc54_set_csrdiv();
 
   /* Put the interface in the down state.  This amounts to resetting the
    * device by calling lpc54_eth_ifdown().
