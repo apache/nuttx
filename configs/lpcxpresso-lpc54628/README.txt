@@ -242,6 +242,12 @@ Configurations
        before you get the NSH prompt.  If the network cable is unplugged,
        this can mean a significant delay before you see the prompt.
 
+    5. In this configuration, the network network does not come up
+       automatically after it has been initialized.  You will need to
+       explicitly bring the network up from the NSH command line:
+
+         nsh> ifup eth0
+
   nsh:
 
     Configures the NuttShell (nsh) application located at examples/nsh.

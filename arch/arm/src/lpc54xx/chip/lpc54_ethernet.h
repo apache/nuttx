@@ -480,8 +480,8 @@
 #define ETH_MTL_TXQ_OP_MODE_TSF                          (1 << 1)  /* Bit 1:  Transmit store and forward */
 #define ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT                  (2)       /* Bits 2-3: Tx Queue enable */
 #define ETH_MTL_TXQ_OP_MODE_TXQEN_MASK                   (3 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT)
-#  define ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE               (0 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Not enabled */
-#  define ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE              (2 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Enabled */
+#  define ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE              (0 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Not enabled */
+#  define ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE               (2 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Enabled */
 #define ETH_MTL_TXQ_OP_MODE_TTC_SHIFT                    (4)       /* Bits 4-6: Transmit threshold control */
 #define ETH_MTL_TXQ_OP_MODE_TTC_MASK                     (7 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
 #  define ETH_MTL_TXQ_OP_MODE_TTC_32                     (0 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)

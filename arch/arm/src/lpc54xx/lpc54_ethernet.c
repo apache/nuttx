@@ -240,13 +240,11 @@
 
 #define LPC54_ABNORM_INTMASK    (ETH_DMACH_INT_TS  | ETH_DMACH_INT_RBU | \
                                  ETH_DMACH_INT_RS  | ETH_DMACH_INT_RWT | \
-                                 ETH_DMACH_INT_FBE | ETH_DMACH_INT_ETI | \
-                                 ETH_DMACH_INT_AI)
-#define LPC54_TXERR_INTMASK     (ETH_DMACH_INT_TS  | ETH_DMACH_INT_ETI)
+                                 ETH_DMACH_INT_FBE | ETH_DMACH_INT_AI)
+#define LPC54_TXERR_INTMASK     (ETH_DMACH_INT_TS)
 #define LPC54_RXERR_INTMASK     (ETH_DMACH_INT_RBU | ETH_DMACH_INT_RS  | \
                                  ETH_DMACH_INT_RWT)
-#define LPC54_NORM_INTMASK      (ETH_DMACH_INT_TI  | ETH_DMACH_INT_TBU | \
-                                 ETH_DMACH_INT_RI  | ETH_DMACH_INT_ERI | \
+#define LPC54_NORM_INTMASK      (ETH_DMACH_INT_TI  | ETH_DMACH_INT_RI  | \
                                  ETH_DMACH_INT_NI)
 
 /* This is a helper pointer for accessing the contents of the Ethernet
@@ -1271,15 +1269,17 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 {
   uintptr_t regaddr;
   uint32_t status;
+  uint32_t pending;
 
   /* Read the DMA status register for this channel */
 
   regaddr = LPC54_ETH_DMACH_STAT(chan);
   status  = lpc54_getreg(regaddr);
+  pending = status & lpc54_getreg(LPC54_ETH_DMACH_INT_EN(chan));
 
   /* Check for abnormal interrupts */
 
-  if ((status & LPC54_ABNORM_INTMASK) != 0)
+  if ((pending & LPC54_ABNORM_INTMASK) != 0)
     {
       /* Acknowledge the normal receive interrupt */
 
@@ -1287,32 +1287,32 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 
       /* Handle the incoming packet */
 
-      nerr("ERROR: Abnormal interrupt received: %08lx\n",
-           (unsigned long)status);
-
-      status &= ~LPC54_ABNORM_INTMASK;
+      nerr("ERROR: Abnormal interrupt received: %08lx (%08lx)\n",
+           (unsigned long)pending, (unsigned long)status);
 
       /* Check for Tx/Rx related errors and update statistics */
 
-      if ((status & LPC54_RXERR_INTMASK) != 0)
+      if ((pending & LPC54_RXERR_INTMASK) != 0)
         {
           NETDEV_RXERRORS(priv->eth_dev);
         }
 
-      if ((status & LPC54_TXERR_INTMASK) != 0)
+      if ((pending & LPC54_TXERR_INTMASK) != 0)
         {
           NETDEV_TXERRORS(priv->eth_dev);
         }
+
+      pending &= ~LPC54_ABNORM_INTMASK;
     }
 
   /* Check for a receive interrupt */
 
-  if ((status & ETH_DMACH_INT_RI) != 0)
+  if ((pending & ETH_DMACH_INT_RI) != 0)
     {
       /* Acknowledge the normal receive interrupt */
 
       lpc54_putreg(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
-      status &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
+      pending &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
 
       /* Update statistics */
 
@@ -1325,12 +1325,12 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 
   /* Check for a transmit interrupt */
 
-  if ((status & ETH_DMACH_INT_TI) != 0)
+  if ((pending & ETH_DMACH_INT_TI) != 0)
     {
       /* Acknowledge the normal receive interrupt */
 
       lpc54_putreg(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI, regaddr);
-      status &= ~(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI);
+      pending &= ~(ETH_DMACH_INT_TI | ETH_DMACH_INT_NI);
 
       /* Handle the Tx completion event.  Reclaim the completed Tx
        * descriptors, free packet buffers, and check if we can start a new
@@ -1340,13 +1340,13 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
       lpc54_eth_txdone(priv, chan);
     }
 
-  /* Check for unhandled interrupts */
+  /* Check for unhandled interrupts (shouldn't be any) */
 
-  if (status != 0)
+  if (pending != 0)
     {
-      nwarn("WARNING: Unhandled interrupts: %08lx\n",
-            (unsigned int)status);
-      lpc54_putreg(status, regaddr);
+      nwarn("WARNING: Unhandled interrupts: %08lx (%08lx)\n",
+           (unsigned long)pending, (unsigned long)status);
+      lpc54_putreg(pending, regaddr);
     }
 }
 
@@ -1831,7 +1831,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   for (i = 0; i < LPC54_NRINGS; i++)
     {
-      base = LPC54_ETH_DMACH_CTRL_BASE(i);
+      base = LPC54_ETH_DMACH_BASE(i);
       lpc54_putreg(LPC54_PBLx8, base + LPC54_ETH_DMACH_CTRL_OFFSET);
 
       regval  = lpc54_getreg(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
@@ -1926,7 +1926,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_LOW);
 
   regval = ((uint32_t)mptr[5] << 8)  | ((uint32_t)mptr[4]);
-  lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_LOW);
+  lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_HIGH);
 
   /* Set the receive address filter */
 
@@ -1962,7 +1962,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
    * autonegotiaion.
    */
 
-  regval = ETH_MAC_CONFIG_ECRSFD | ETH_MAC_CONFIG_PS;
+  regval  = ETH_MAC_CONFIG_ECRSFD | ETH_MAC_CONFIG_PS;
 
 #ifdef CONFIG_LPC54_ETH_8023AS2K
   regval |= ENET_MAC_CONFIG_S2KP;
