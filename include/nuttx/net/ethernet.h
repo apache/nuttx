@@ -75,10 +75,10 @@
 
 #define ETHTYPE_AVBTP    0x22f0 /* Audio/Video bridging type */
 
-/* Size of the Ethernet header */
+/* Size of the Ethernet headers */
 
-#define ETH_HDRLEN       14     /* Minimum size: 2*6 + 2 */
-#define ETH_8021Q_HDRLEN 18     /* Minimum size: 2*6 + 4 + 2 */
+#define ETH_HDRLEN       14     /* Header size: 2*6 + 2 */
+#define ETH_8021Q_HDRLEN 18     /* Header size: 2*6 + 4 + 2 */
 
 /****************************************************************************
  * Public Types

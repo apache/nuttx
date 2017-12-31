@@ -44,12 +44,11 @@
  *
  * 1. Timestamps not supported
  *
- * 2. Multi-queuing not supported. There is logic in place now but it really
- *    does not make sense.
- *
- *    The second queue is intended to support QVLAN, AVB type packets.  That
- *    is awkward in the current design because we select the queue first,
- *    then poll for the data to send.
+ * 2. Multi-queuing not fully; supported.  The second queue is intended to
+ *    support QVLAN, AVB type packets which have an 18-byte IEEE 802.1q
+ *    Ethernet header.  That implies that we would need to support two
+ *    devices intstances:  One with a standard Ethernet header and one with
+ *    an IEEE 802.1q Ethernet header.
  *
  * 3. Multicast address filtering.  Unlike other hardware, this Ethernet
  *    does not seem to support explicit Multicast address filtering as
@@ -296,7 +295,6 @@ struct lpc54_ethdriver_s
   uint8_t eth_fullduplex : 1;    /* 1:Full duplex 0:Half duplex mode */
   uint8_t eth_100mbps : 1;       /* 1:100mbps 0:10mbps */
   uint8_t eth_rxdiscard : 1;     /* 1:Discarding Rx data */
-  uint8_t eth_chan;              /* The current channel being operated on */
   WDOG_ID eth_txpoll;            /* TX poll timer */
   WDOG_ID eth_txtimeout;         /* TX timeout timer */
   struct work_s eth_irqwork;     /* For deferring interupt work to the work queue */
@@ -375,6 +373,7 @@ static uint32_t *g_rxbuffer2s1[CONFIG_LPC54_ETH_NRXDESC1];
 
 static int  lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
+static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv);
 static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
@@ -382,9 +381,6 @@ static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv);
 static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
-#if 0 /* Not used yet */
-static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv);
-#endif
 static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
 
@@ -399,10 +395,8 @@ static int  lpc54_mac_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
-              unsigned int chan);
-static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv,
-              unsigned int chan);
+static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv);
 
 static void lpc54_eth_txtimeout_work(void *arg);
 static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...);
@@ -585,6 +579,48 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
 }
 
 /****************************************************************************
+ * Name: lpc54_eth_getring
+ *
+ * Description:
+ *   An output message is ready to send, but which queue should we send it
+ *   on?  The rule is this:
+ *
+ *   "Normal" packets (or CONFIG_LPC54_ETH_MULTIQUEUE not selected):
+ *     Always send on ring 0
+ *   8021QVLAN AVB packets (and CONFIG_LPC54_ETH_MULTIQUEUE not selected):
+ *     Always send on ring 1
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   The ring to use when sending the packet.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv)
+{
+  unsigned int ring = 0;
+
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  /* Choose the ring ID for different types of frames.  For 802.1q VLAN AVB
+   * frames, uses ring 1.  Everything else goes on ring 0.
+   */
+
+  if (ETH8021QWBUF->tpid == HTONS(TPID_8021QVLAN) &&
+      ETH8021QWBUF->type == HTONS(ETHTYPE_AVBTP))
+    {
+      ring = 1;
+    }
+#endif
+
+  return ring;
+}
+
+/****************************************************************************
  * Name: lpc54_eth_txpoll
  *
  * Description:
@@ -612,13 +648,14 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 {
   struct lpc54_ethdriver_s *priv;
   struct lpc54_txring_s *txring;
+  struct lpc54_txring_s *txring0;
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  struct lpc54_txring_s *txring1;
+#endif
   unsigned int chan;
 
   DEBUGASSERT(dev->d_private != NULL && dev->d_buf != NULL);
   priv = (struct lpc54_ethdriver_s *)dev->d_private;
-
-  chan = priv->eth_chan;
-  DEBUGASSERT(chan < LPC54_NRINGS);
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -650,14 +687,29 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 
       /* Send the packet */
 
-      lpc54_eth_transmit(priv, priv->eth_chan);
+      chan   = lpc54_eth_getring(priv);
+      txring = &priv->eth_txring[chan];
+      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
 
-      /* We cannot continue the Tx poll now if all of the Tx descriptors for
-       * this channel are in-use.
+      lpc54_eth_transmit(priv, chan);
+
+      txring0 = &priv->eth_txring[0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+      txring1 = &priv->eth_txring[1];
+
+      /* We cannot perform the Tx poll now if all of the Tx descriptors for
+       * both channels are in-use.
        */
 
-      txring = &priv->eth_txring[chan];
-      if (txring->tr_inuse >= txring->tr_ndesc)
+      if (txring0->tr_inuse >= txring0->tr_ndesc ||
+          txring1->tr_inuse >= txring1->tr_ndesc)
+#else
+      /* We cannot continue the Tx poll now if all of the Tx descriptors for
+       * this channel 0 are in-use.
+       */
+
+      if (txring0->tr_inuse >= txring0->tr_ndesc)
+#endif
         {
           /* Stop the poll.. no more Tx descriptors */
 
@@ -675,8 +727,6 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 
           return 1;
         }
-
-      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
     }
 
   /* If zero is returned, the polling will continue until all connections
@@ -707,6 +757,9 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 
 static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
 {
+  struct lpc54_txring_s *txring;
+  unsigned int chan;
+
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
@@ -749,10 +802,14 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
             }
 #endif
 
-         /* And send the packet */
+          /* And send the packet */
 
-         lpc54_eth_transmit(priv, priv->eth_chan);
-       }
+          chan   = lpc54_eth_getring(priv);
+          txring = &priv->eth_txring[chan];
+          (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+          lpc54_eth_transmit(priv, chan);
+        }
     }
   else
 #endif
@@ -789,7 +846,11 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
 
           /* And send the packet */
 
-          lpc54_eth_transmit(priv, priv->eth_chan);
+          chan   = lpc54_eth_getring(priv);
+          txring = &priv->eth_txring[chan];
+          (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+          lpc54_eth_transmit(priv, chan);
         }
     }
   else
@@ -806,7 +867,11 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
 
       if (priv->eth_dev.d_len > 0)
         {
-          lpc54_eth_transmit(priv, priv->eth_chan);
+          chan   = lpc54_eth_getring(priv);
+          txring = &priv->eth_txring[chan];
+          (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+          lpc54_eth_transmit(priv, chan);
         }
     }
   else
@@ -990,50 +1055,6 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_eth_getring
- *
- * Description:
- *   An output message is ready to send, but which queue should we send it
- *   on?  The rule is this:
- *
- *   "Normal" packets (or CONFIG_LPC54_ETH_MULTIQUEUE not selected):
- *     Always send on ring 0
- *   8021QVLAN AVB packets (and CONFIG_LPC54_ETH_MULTIQUEUE not selected):
- *     Always send on ring 1
- *
- * Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   The ring to use when sending the packet.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#if 0 /* Not used yet */
-static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv)
-{
-  unsigned int ring = 0;
-
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  /* Choose the ring ID for different types of frames.  For 802.1q VLAN AVB
-   * frames, uses ring 1.  Everything else goes on ring 0.
-   */
-
-  if (ETH8021QWBUF->tpid == HTONS(TPID_8021QVLAN) &&
-      ETH8021QWBUF->type == HTONS(ETHTYPE_AVBTP))
-    {
-      ring = 1;
-    }
-#endif
-
-  return ring
-}
-#endif
-
-/****************************************************************************
  * Name: lpc54_eth_txdone
  *
  * Description:
@@ -1104,7 +1125,7 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
 
   /* Poll the network for new TX data. */
 
-  lpc54_eth_dopoll(priv, chan);
+  lpc54_eth_dopoll(priv);
 }
 
 /****************************************************************************
@@ -1385,16 +1406,9 @@ static void lpc54_eth_txtimeout_work(void *arg)
   (void)lpc54_eth_ifdown(&priv->eth_dev);
   (void)lpc54_eth_ifup(&priv->eth_dev);
 
-  /* Then poll the network for new XMIT data -- both channels if needed */
+  /* Then poll the network for new XMIT data */
 
-  lpc54_eth_dopoll(priv, 0);
-
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  /* REVISIT:  Should there be a separate timer for the second channel? */
-
-  lpc54_eth_dopoll(priv, 1);
-#endif
-
+  lpc54_eth_dopoll(priv);
   net_unlock();
 }
 
@@ -1442,7 +1456,6 @@ static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *
  * Parameters:
  *   priv - Reference to the driver state structure
- *   chan - The channel to be polled
  *
  * Returned Value:
  *   None
@@ -1452,30 +1465,40 @@ static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
-                              unsigned int chan)
+static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv)
 {
-  struct lpc54_txring_s *txring;
+  struct lpc54_txring_s *txring0;
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  struct lpc54_txring_s *txring1;
+#endif
 
   DEBUGASSERT(priv->eth_dev.d_buf == NULL);
 
-  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
-   * channel are in-use.
+  txring0 = &priv->eth_txring[0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  txring1 = &priv->eth_txring[1];
+
+  /* We cannot perform the Tx poll now if all of the Tx descriptors for both
+   * channels are in-use.
    */
 
-  txring = &priv->eth_txring[chan];
-  if (txring->tr_inuse < txring->tr_ndesc)
+  if (txring0->tr_inuse < txring0->tr_ndesc &&
+      txring1->tr_inuse < txring1->tr_ndesc)
+#else
+  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
+   * channel 0 are in-use.
+   */
+
+  if (txring0->tr_inuse < txring0->tr_ndesc)
+#endif
     {
       /* There is a free descriptor in the ring, allocate a new Tx buffer
        * to perform the poll.
        */
 
       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
-      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
-
       if (priv->eth_dev.d_buf != NULL)
         {
-          priv->eth_chan = chan;
           (void)devif_timer(&priv->eth_dev, lpc54_eth_txpoll);
 
           /* Make sure that the Tx buffer remaining after the poll is
@@ -1485,7 +1508,6 @@ static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
           if (priv->eth_dev.d_buf != NULL)
             {
               lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
-              (txring->tr_buffers)[txring->tr_supply] = NULL;
               priv->eth_dev.d_buf = NULL;
             }
         }
@@ -1501,7 +1523,6 @@ static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
  *
  * Parameters:
  *   priv - Reference to the driver state structure
- *   chan - The channel to be polled
  *
  * Returned Value:
  *   None
@@ -1511,30 +1532,40 @@ static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv,
  *
  ****************************************************************************/
 
-static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv,
-                             unsigned int chan)
+static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv)
 {
-  struct lpc54_txring_s *txring;
+  struct lpc54_txring_s *txring0;
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  struct lpc54_txring_s *txring1;
+#endif
 
   DEBUGASSERT(priv->eth_dev.d_buf == NULL);
 
-  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
-   * channel are in-use.
+  txring0 = &priv->eth_txring[0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  txring1 = &priv->eth_txring[1];
+
+  /* We cannot perform the Tx poll now if all of the Tx descriptors for both
+   * channels are in-use.
    */
 
-  txring = &priv->eth_txring[chan];
-  if (txring->tr_inuse < txring->tr_ndesc)
+  if (txring0->tr_inuse < txring0->tr_ndesc &&
+      txring1->tr_inuse < txring1->tr_ndesc)
+#else
+  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
+   * channel 0 are in-use.
+   */
+
+  if (txring0->tr_inuse < txring0->tr_ndesc)
+#endif
     {
       /* There is a free descriptor in the ring, allocate a new Tx buffer
        * to perform the poll.
        */
 
       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
-      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
-
       if (priv->eth_dev.d_buf != NULL)
         {
-          priv->eth_chan = chan;
           (void)devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
 
           /* Make sure that the Tx buffer remaining after the poll is
@@ -1544,7 +1575,6 @@ static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv,
           if (priv->eth_dev.d_buf != NULL)
             {
               lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
-              (txring->tr_buffers)[txring->tr_supply] = NULL;
               priv->eth_dev.d_buf = NULL;
             }
         }
@@ -1580,15 +1610,9 @@ static void lpc54_eth_poll_work(void *arg)
 
   net_lock();
 
-  /* Perform the timer poll -- both channels if needed. */
+  /* Perform the timer poll */
 
-  lpc54_eth_dotimer(priv, 0);
-
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  /* REVISIT:  This doesn't make sense. */
-
-  lpc54_eth_dotimer(priv, 1);
-#endif
+  lpc54_eth_dotimer(priv);
 
   /* Setup the watchdog poll timer again */
 
@@ -2003,15 +2027,9 @@ static void lpc54_eth_txavail_work(void *arg)
 
   if (priv->eth_bifup)
     {
-      /* Poll the network for new XMIT data -- both channels if needed. */
+      /* Poll the network for new XMIT data. */
 
-      lpc54_eth_dopoll(priv, 0);
-
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-      /* REVISIT:  This doesn't make sense. */
-
-      lpc54_eth_dopoll(priv, 1);
-#endif
+      lpc54_eth_dopoll(priv);
     }
 
   net_unlock();

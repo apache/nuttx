@@ -325,7 +325,13 @@
 #define ETH_MAC_RX_FLOW_CTRL_UP                          (1 << 1)  /* Bit 1:  Unicast pause packet detect */
 
 /* Transmit Queue priority mapping */
-#define ETH_MAC_TXQ_PRIO_MAP_
+
+#define ETH_MAC_TXQ_PRIO_MAP_PSTQ0_SHIFT                 (0)       /* Bits 0-7: Priorities selected in Tx Queue 0 */
+#define ETH_MAC_TXQ_PRIO_MAP_PSTQ0_MASK                  (0xff << ETH_MAC_TXQ_PRIO_MAP_PSTQ0_SHIFT)
+#  define ETH_MAC_TXQ_PRIO_MAP_PSTQ0(n)                  ((uint32_t)(n) << ETH_MAC_TXQ_PRIO_MAP_PSTQ0_SHIFT)
+#define ETH_MAC_TXQ_PRIO_MAP_PSTQ1_SHIFT                 (8)       /* Bits 8-15: Priorities selected in Tx Queue 1 */
+#define ETH_MAC_TXQ_PRIO_MAP_PSTQ1_MASK                  (0xff << ETH_MAC_TXQ_PRIO_MAP_PSTQ1_SHIFT)
+#  define ETH_MAC_TXQ_PRIO_MAP_PSTQ1(n)                  ((uint32_t)(n) << ETH_MAC_TXQ_PRIO_MAP_PSTQ1_SHIFT)
 
 /* Receive Queue control 0 */
 

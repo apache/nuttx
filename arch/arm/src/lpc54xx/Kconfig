@@ -696,8 +696,8 @@ config LPC54_ETH_MULTIQUEUE
 if LPC54_ETH_MULTIQUEUE
 
 config LPC54_ETH_BURSTLEN
-	bool "DMA Tx burst length"
-	default n
+	int "DMA Tx burst length"
+	default 1
 	range 1 256
 	---help---
 		Transmit programmable burst length.  These bits indicate the maximum
