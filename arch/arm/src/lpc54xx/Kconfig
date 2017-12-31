@@ -684,11 +684,11 @@ config LPC54_ETH_MII
 		Support Ethernet MII interface.  Default:  Use RMII interface.
 
 config LPC54_ETH_MULTIQUEUE
-	bool "Use multiple queues"
+	bool "IEEE 802.1q VLAN AVBTP support"
 	default n
 	depends on EXPERIMENTAL
 	---help---
-		Enables software drivers for the special hardware support for
+		Enables software drivers for the special hardware support of
 		IEEE 802.1q VLAN Audio/Visual Bridge Types (AVBTP).  In this
 		configuration two queues are available:  One for normal traffic
 		and one dedicated to the AVBTP traffic.
@@ -861,10 +861,6 @@ config LPC54_ETH_NTXDESC1
 
 		NOTE:  Each Rx descriptor will require a transmit buffer at the size
 		of the configured MTU.
-
-config LPC54_ETH_RX_DOUBLEBUFFER
-	bool "Enable Rx double buffering"
-	default n
 
 endmenu # Ethernet configuration
 

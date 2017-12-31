@@ -280,9 +280,6 @@ struct lpc54_rxring_s
   uint16_t rr_supply;            /* Available Rx descriptor ring index */
   uint16_t rr_ndesc;             /* Number or descriptors in the Rx ring */
   uint32_t **rr_buffers;         /* Packet buffers assigned to the Rx ring */
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
-  uint32_t **rr_buffer2s;        /* Packet buffers assigned to the Rx ring */
-#endif
 };
 
 /* The lpc54_ethdriver_s encapsulates all state information for a single
@@ -299,6 +296,7 @@ struct lpc54_ethdriver_s
   WDOG_ID eth_txtimeout;         /* TX timeout timer */
   struct work_s eth_irqwork;     /* For deferring interupt work to the work queue */
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
+  struct work_s eth_timeoutwork; /* For deferring timeout work to the work queue */
   struct sq_queue_s eth_freebuf; /* Free packet buffers */
 
   /* Ring state */
@@ -359,10 +357,6 @@ static uint32_t *g_txbuffers0[CONFIG_LPC54_ETH_NTXDESC0];
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
 static uint32_t *g_rxbuffers1[CONFIG_LPC54_ETH_NRXDESC1];
 static uint32_t *g_txbuffers1[CONFIG_LPC54_ETH_NTXDESC1];
-#endif
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
-static uint32_t *g_rxbuffer2s0[CONFIG_LPC54_ETH_NRXDESC0];
-static uint32_t *g_rxbuffer2s1[CONFIG_LPC54_ETH_NRXDESC1];
 #endif
 
 /****************************************************************************
@@ -959,10 +953,6 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
               pktlen += framelen;
               if (pktlen > 0)
                 {
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
-                  /* No logic in place to handle the double buffered case */
-#  warning Missing logic
-#endif
                   /* Recover the buffer.
                    *
                    * REVISIT:  According to the User manual, buffer1 and
@@ -997,14 +987,6 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 
 #if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
                 rxdesc->buffer2 = rxdesc->buffer1 + LPC54_BUFFER_MAX;
-
-#elif defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
-                /* Allocate the second Rx packet buffer */
-
-                rxdesc->buffer2 = (uint32_t)lpc54_pktbuf_alloc(priv);
-                DEBUGASSERT(rxdesc->buffer2 != NULL);
-                (rxring->rr_buffers2)[supply] = (uint32_t *)rxdesc->buffer2;
-
 #else
                 /* The second buffer is not used */
 
@@ -1017,7 +999,7 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
                  */
 
                 regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
-#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX || defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
                 regval |= ETH_RXDES3_BUF2V;
 #endif
                 rxdesc->ctrl = regval;
@@ -1032,13 +1014,16 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
            * Rx descriptors.  We cannot support that in this design.  We
            * would like to:
            *
-           * 1. Accumate the data in yet another Rx buffer,
-           * 2. Accumulate the size in the 'pktlen' local variable, then
-           * 3. Dispatch that extra Rx buffer when the last frame is
-           *    encountered.
+           *   1. Accumate the data in yet another Rx buffer,
+           *   2. Accumulate the size in the 'pktlen' local variable, then
+           *   3. Dispatch that extra Rx buffer when the last frame is
+           *      encountered.
+           *
+           * The assumption here is that this will never happen if our MTU
+           * properaly advertised.
            */
 
-#warning Missing logic
+          NETDEV_RXDROPPED(&priv->eth_dev);
           priv->eth_rxdiscard = 1;
         }
     }
@@ -1076,6 +1061,10 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
                              unsigned int chan)
 {
   struct lpc54_txring_s *txring;
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  struct lpc54_txring_s *txring0;
+  struct lpc54_txring_s *txring1;
+#endif
   struct enet_txdesc_s *txdesc;
   uint32_t *pktbuf;
 
@@ -1118,9 +1107,18 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
 
   /* If no further transmissions are pending, then cancel the TX timeout. */
 
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  txring0 = &priv->eth_txring[0];
+  txring1 = &priv->eth_txring[1];
+
+  if (txring0->tr_inuse == 0 && txring1->tr_inuse == 0)
+
+#else
   if (txring->tr_inuse == 0)
+#endif
     {
       wd_cancel(priv->eth_txtimeout);
+      work_cancel(ETHWORK, &priv->eth_timeoutwork);
     }
 
   /* Poll the network for new TX data. */
@@ -1304,17 +1302,10 @@ static int lpc54_eth_interrupt(int irq, void *context, void *arg)
 
   up_disable_irq(LPC54_IRQ_ETHERNET);
 
-  /* TODO: Determine if a TX transfer just completed */
-#warning Missing logic
-
-    {
-      /* If a TX transfer just completed, then cancel the TX timeout so
-       * there will be no race condition between any subsequent timeout
-       * expiration and the deferred interrupt processing.
-       */
-
-       wd_cancel(priv->eth_txtimeout);
-    }
+  /* Note:  We have a race condition which, I believe is handled OK.  If
+   * there is a Tx timeout in place, then that timeout could expire
+   * anytime and queue additional work to handle the timeout.
+   */
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1444,7 +1435,8 @@ static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->eth_irqwork, lpc54_eth_txtimeout_work, priv, 0);
+  work_queue(ETHWORK, &priv->eth_timeoutwork, lpc54_eth_txtimeout_work,
+             priv, 0);
 }
 
 /****************************************************************************
@@ -2367,7 +2359,7 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
   /* Initialize the Rx descriptor ring. */
 
   regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
-#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX || defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
+#if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
   regval |= ETH_RXDES3_BUF2V;
 #endif
 
@@ -2380,15 +2372,9 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
       (rxring->rr_buffers)[i] = (uint32_t *)rxdesc->buffer1;
 
 #if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
+      /* Configure the second part of a large packet buffer as buffer2 */
+
       rxdesc->buffer2 = rxdesc->buffer1 + LPC54_BUFFER_MAX;
-
-#elif defined(CONFIG_LPC54_ETH_RX_DOUBLEBUFFER)
-      /* Allocate the second Rx packet buffer */
-
-      rxdesc->buffer2 = (uint32_t)lpc54_pktbuf_alloc(priv);
-      DEBUGASSERT(rxdesc->buffer2 != NULL);
-      (rxring->rr_buffer2s)[i] = rxdesc->buffer2;
-
 #else
       /* The second buffer is not used */
 
@@ -2435,9 +2421,6 @@ static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv)
   priv->eth_rxring[0].rr_desc     = g_ch0_rxdesc;
   priv->eth_rxring[0].rr_ndesc    = CONFIG_LPC54_ETH_NRXDESC0;
   priv->eth_rxring[0].rr_buffers  = g_rxbuffers0;
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
-  priv->eth_txring[0].tr_buffer2s = g_rxbuffer2s0;
-#endif
   lpc54_rxring_initialize(priv, 0);
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
@@ -2449,9 +2432,6 @@ static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv)
   priv->eth_txring[1].tr_desc     = g_ch1_txdesc;
   priv->eth_txring[1].tr_ndesc    = CONFIG_LPC54_ETH_NTXDESC1;
   priv->eth_txring[1].tr_buffers  = g_txbuffers1;
-#ifdef CONFIG_LPC54_ETH_RX_DOUBLEBUFFER
-  priv->eth_txring[1].tr_buffer2s = g_rxbuffer2s1;
-#endif
   lpc54_txring_initialize(priv, 1);
 
   priv->eth_rxring[1].rr_desc     = g_ch1_rxdesc;
