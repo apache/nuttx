@@ -404,7 +404,7 @@
  *   P4_10-ENET_CRS_DV   Ethernet receive data valid
  *   P4_13-ENET_TX_EN    Ethernet transmit data enable
  *
- *   P4_14-ENET_RX_CLK   REF_CLK, Reference clock (Not used)
+ *   P4_14-ENET_RX_CLK   REF_CLK, Reference clock
  *   P2_26-ENET_PHY_RSTn nRST (Controlled by board logic)
  *
  * NOTE:  You must set JP11 and JP12 to close 1-2 to enable Ethernet
@@ -423,7 +423,7 @@
 #define GPIO_ENET_RX_DV            GPIO_ENET_RX_DV_2  /* P4.10 */
 #define GPIO_ENET_TX_EN            GPIO_ENET_TX_EN_2  /* P4.13 */
 
-#define GPIO_ENET_RX_CLK           GPIO_ENET_RX_CLK_2 /* P4.14 */
+#define GPIO_ENET_REF_CLK          GPIO_ENET_RX_CLK_2 /* P4.14 */
 
 /****************************************************************************
  * Public Types

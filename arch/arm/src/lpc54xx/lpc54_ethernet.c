@@ -596,13 +596,16 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
 
   DEBUGASSERT(priv->eth_dev.d_buf != 0 && priv->eth_dev.d_len > 0 &&
               priv->eth_dev.d_len <= LPC54_BUFFER_SIZE &&
-              txring->tr_ndesc < txring->tr_inuse);
+              txring->tr_inuse < txring->tr_ndesc);
 
   /* Fill the descriptor. */
 
   txdesc = txring->tr_desc + txring->tr_supply;
   buffer = priv->eth_dev.d_buf;
   buflen = priv->eth_dev.d_len;
+
+  priv->eth_dev.d_buf = NULL;
+  priv->eth_dev.d_len = 0;
 
   if (buflen <= LPC54_BUFFER_MAX)
     {
@@ -794,7 +797,9 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 
       chan   = lpc54_eth_getring(priv);
       txring = &priv->eth_txring[chan];
-      (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+      (txring->tr_buffers)[txring->tr_supply] =
+        (uint32_t *)priv->eth_dev.d_buf;
 
       lpc54_eth_transmit(priv, chan);
 
@@ -911,7 +916,9 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
 
           chan   = lpc54_eth_getring(priv);
           txring = &priv->eth_txring[chan];
-          (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+          (txring->tr_buffers)[txring->tr_supply] =
+            (uint32_t *)priv->eth_dev.d_buf;
 
           lpc54_eth_transmit(priv, chan);
         }
@@ -953,7 +960,9 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
 
           chan   = lpc54_eth_getring(priv);
           txring = &priv->eth_txring[chan];
-          (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+          (txring->tr_buffers)[txring->tr_supply] =
+            (uint32_t *)priv->eth_dev.d_buf;
 
           lpc54_eth_transmit(priv, chan);
         }
@@ -974,7 +983,9 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
         {
           chan   = lpc54_eth_getring(priv);
           txring = &priv->eth_txring[chan];
-          (txring->tr_buffers)[txring->tr_supply] = (uint32_t *)priv->eth_dev.d_buf;
+
+          (txring->tr_buffers)[txring->tr_supply] =
+            (uint32_t *)priv->eth_dev.d_buf;
 
           lpc54_eth_transmit(priv, chan);
         }
@@ -1801,7 +1812,10 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
     }
 
   /* Initialize Ethernet DMA ************************************************/
-  /* Reset DMA */
+  /* Reset DMA.  Resets the logic and all internal registers of the OMA, MTL,
+   * and MAC.  This bit is automatically cleared after the reset operation
+   * is complete in all Ethernet Block clock domains.
+   */
 
   regval  = lpc54_getreg(LPC54_ETH_DMA_MODE);
   regval |= ETH_DMA_MODE_SWR;
@@ -2957,8 +2971,9 @@ int up_netinitialize(int intf)
 #else
   /* RMII interface.
    *
-   *   REF_CLK may be available in some implementations
-   *   RX_ER is optional on switches
+   *   REF_CLK may be available in some implementations.  Clocking from
+   *     PHY appears to be necessary for DMA reset operations.
+   *   RX_ER is optional on switches.
    */
 
   lpc54_gpio_config(GPIO_ENET_RXD0);    /* Ethernet receive data 0-1 */
@@ -2967,6 +2982,7 @@ int up_netinitialize(int intf)
   lpc54_gpio_config(GPIO_ENET_TXD1);
   lpc54_gpio_config(GPIO_ENET_RX_DV);   /* Ethernet receive data valid */
   lpc54_gpio_config(GPIO_ENET_TX_EN);   /* Ethernet transmit data enable */
+  lpc54_gpio_config(GPIO_ENET_REF_CLK); /* PHY reference clock */
 #endif
 
   /* Enable clocking to the Ethernet peripheral */
