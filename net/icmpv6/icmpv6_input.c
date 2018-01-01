@@ -126,7 +126,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   if (iob == NULL)
     {
       nerr("ERROR: Failed to create new I/O buffer chain\n");
-      return 0;
+      goto drop;
     }
 
   /* Put the IPv6 address at the beginning of the read-ahead buffer */
@@ -150,8 +150,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
        */
 
       nerr("ERROR: Failed to length to the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob);
-      return 0;
+      goto drop_with_chain;
     }
 
   offset = sizeof(uint8_t);
@@ -165,8 +164,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
        */
 
       nerr("ERROR: Failed to source address to the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob);
-      return 0;
+      goto drop_with_chain;
     }
 
   offset += sizeof(struct sockaddr_in6);
@@ -182,8 +180,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
        */
 
       nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob);
-      return 0;
+      goto drop_with_chain;
     }
 
   /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
@@ -194,12 +191,19 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob);
-      return 0;
+      goto drop_with_chain;
     }
 
   ninfo("Buffered %d bytes\n", buflen + addrsize + 1);
+  dev->d_len = 0;
   return buflen;
+
+drop_with_chain:
+  (void)iob_free_chain(iob);
+
+drop:
+  dev->d_len = 0;
+  return 0;
 }
 #endif
 
