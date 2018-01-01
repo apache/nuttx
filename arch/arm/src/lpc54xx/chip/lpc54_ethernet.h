@@ -345,9 +345,35 @@
 #  define ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE                (1 << ETH_MAC_RXQ_CTRL0_RXQ1EN_SHIFT) /* Queue 1 enabled for AV */
 
 /* Receive Queue control 1 */
-#define ETH_MAC_RXQ_CTRL1_
+
+#define ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT                    (0)       /* Bits 0-2: AV untagged control packets queue */
+#define ETH_MAC_RXQ_CTRL1_AVCPQ_MASK                     (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
+#  define ETH_MAC_RXQ_CTRL1_AVCPQ(n)                     ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
+#define ETH_MAC_RXQ_CTRL1_AVPTPQ_SHIFT                   (4)       /* Bits 4-6: AV PTP packets queue */
+#define ETH_MAC_RXQ_CTRL1_AVPTPQ_MASK                    (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
+#  define ETH_MAC_RXQ_CTRL1_AVPTPQ(n)                    ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
+#define ETH_MAC_RXQ_CTRL1_UPQ_SHIFT                      (12)      /* Bits 12-14: Untagged packet queue */
+#define ETH_MAC_RXQ_CTRL1_UPQ_MASK                       (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
+#  define ETH_MAC_RXQ_CTRL1_UPQ(n)                       ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
+#define ETH_MAC_RXQ_CTRL1_MCBCQ_SHIFT                    (16)      /* Bits 16-18: Multicast and broadcast queue */
+#define ETH_MAC_RXQ_CTRL1_MCBCQ_MASK                     (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
+#  define ETH_MAC_RXQ_CTRL1_MCBCQ(n)                     ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
+#define ETH_MAC_RXQ_CTRL1_MCBCQEN                        (1 << 20) /* Bit 20: Multicast and broadcast queue enable */
+
 /* Receive Queue control 2 */
-#define ETH_MAC_RXQ_CTRL2_
+
+#define ETH_MAC_RXQ_CTRL2_PSRQ0_SHIFT                    (0)       /* Bits 0-7:   Priorities selected in the Rx Queue 0 */
+#define ETH_MAC_RXQ_CTRL2_PSRQ0_MASK                     (0xff << ETH_MAC_RXQ_CTRL2_PSRQ0_SHIFT)
+#  define ETH_MAC_RXQ_CTRL2_PSRQ0(n)                     ((uint32_t)(n) << ETH_MAC_RXQ_CTRL2_PSRQ0_SHIFT)
+#define ETH_MAC_RXQ_CTRL2_PSRQ1_SHIFT                    (8)       /* Bits 8-15:  Priorities selected in the Rx Queue 1 */
+#define ETH_MAC_RXQ_CTRL2_PSRQ1_MASK                     (0xff << ETH_MAC_RXQ_CTRL2_PSRQ1_SHIFT)
+#  define ETH_MAC_RXQ_CTRL2_PSRQ1(n)                     ((uint32_t)(n) << ETH_MAC_RXQ_CTRL2_PSRQ1_SHIFT)
+#define ETH_MAC_RXQ_CTRL2_PSRQ2_SHIFT                    (16)      /* Bits 16-23: Priorities selected in the Rx Queue 2 */
+#define ETH_MAC_RXQ_CTRL2_PSRQ2_MASK                     (0xff << ETH_MAC_RXQ_CTRL2_PSRQ2_SHIFT)
+#  define ETH_MAC_RXQ_CTRL2_PSRQ2(n)                     ((uint32_t)(n) << ETH_MAC_RXQ_CTRL2_PSRQ2_SHIFT)
+#define ETH_MAC_RXQ_CTRL2_PSRQ3_SHIFT                    (24)      /* Bits 24-31: Priorities selected in the Rx Queue 3 */
+#define ETH_MAC_RXQ_CTRL2_PSRQ3_MASK                     (0xff << ETH_MAC_RXQ_CTRL2_PSRQ3_SHIFT)
+#  define ETH_MAC_RXQ_CTRL2_PSRQ3(n)                     ((uint32_t)(n) << ETH_MAC_RXQ_CTRL2_PSRQ3_SHIFT)
 
 /* Interrupt enable and interrupt status */
 

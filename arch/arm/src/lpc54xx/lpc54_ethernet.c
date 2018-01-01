@@ -164,7 +164,7 @@
 #  define LPC54_MTL_OPMODE_RAA    ETH_MTL_OP_MODE_RAA_SP
 #endif
 
-/* MAC-related definitinons */
+/* MAC-related definitions */
 
 #define LPC54_MAC_HALFDUPLEX_IPG ETH_MAC_CONFIG_IPG_64 /* Default half-duplex IPG */
 
@@ -1936,16 +1936,22 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 #endif
 
   /* Initialize the Ethernet MAC ********************************************/
-  /* Instantiate the MAC address that application logic should have set in the
-   * device structure:
+  /* Instantiate the MAC address that application logic should have set in
+   * the device structure.
+   *
+   * "Note that the first DA byte that is received on the MII interface
+   *  corresponds to the LS Byte (bits 7:0) of the MAC address low register.
+   *  For example, if 0x1122 3344 5566 is received (0x11 is the first byte)
+   *  on the MII as the destination address, then the MAC address
+   *  register[47:0] is compared with 0x6655 4433 2211."
    */
 
   mptr   = (uint8_t *)priv->eth_dev.d_mac.ether.ether_addr_octet;
-  regval = ((uint32_t)mptr[2] << 24) | ((uint32_t)mptr[3] << 16) |
-           ((uint32_t)mptr[4] << 8)  | ((uint32_t)mptr[5]);
+  regval = ((uint32_t)mptr[3] << 24) | ((uint32_t)mptr[2] << 16) |
+           ((uint32_t)mptr[1] << 8)  | ((uint32_t)mptr[0]);
   lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_LOW);
 
-  regval = ((uint32_t)mptr[0] << 8)  | ((uint32_t)mptr[1]);
+  regval = ((uint32_t)mptr[5] << 8)  | ((uint32_t)mptr[4]);
   lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_HIGH);
 
   /* Set the receive address filter */
