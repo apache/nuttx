@@ -253,7 +253,7 @@ Configurations
     Configures the NuttShell (nsh) application located at examples/nsh.
     This configuration was used to bring up the board support and, hence,
     is focused on low level, command-line driver testing.  It has no
-    network.
+    network and no graphics capability.
 
     NOTES:
 

@@ -47,7 +47,7 @@
  * 2. Multi-queuing not fully; supported.  The second queue is intended to
  *    support QVLAN, AVB type packets which have an 18-byte IEEE 802.1q
  *    Ethernet header.  That implies that we would need to support two
- *    devices intstances:  One with a standard Ethernet header and one with
+ *    devices instances:  One with a standard Ethernet header and one with
  *    an IEEE 802.1q Ethernet header.
  *
  * 3. Multicast address filtering.  Unlike other hardware, this Ethernet
@@ -292,7 +292,7 @@ struct lpc54_ethdriver_s
   uint8_t eth_rxdiscard : 1;     /* 1:Discarding Rx data */
   WDOG_ID eth_txpoll;            /* TX poll timer */
   WDOG_ID eth_txtimeout;         /* TX timeout timer */
-  struct work_s eth_irqwork;     /* For deferring interupt work to the work queue */
+  struct work_s eth_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
   struct work_s eth_timeoutwork; /* For deferring timeout work to the work queue */
   struct sq_queue_s eth_freebuf; /* Free packet buffers */
@@ -340,7 +340,7 @@ static struct enet_txdesc_s g_ch1_txdesc[CONFIG_LPC54_ETH_NTXDESC1];
 static uint32_t g_prealloc_buffers[LPC54_NBUFFERS * LPC54_BUFFER_WORDS];
 
 /* Packet buffers assigned to Rx and Tx descriptors.  The packet buffer
- * addresses are lost in the DMA due to write-back from the DMA harware.
+ * addresses are lost in the DMA due to write-back from the DMA hardware.
  * So we have to remember the buffer assignments explicitly.
  *
  * REVISIT:  According to the User manual, buffer1 and buffer2 addresses
@@ -571,7 +571,7 @@ static void lpc54_putreg(uint32_t val, uintptr_t addr)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   The network must be locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -745,8 +745,7 @@ static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -993,6 +992,21 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
     {
       NETDEV_RXDROPPED(&priv->eth_dev);
     }
+
+  /* On entry, d_buf refers to the receive buffer as set by logic in
+   * lpc54_eth_receive().  If lpc54_eth_transmit() was called to respond
+   * with an outgoing packet, then that packet was removed for transmission
+   * and d_buf was nullified.  Otherwise, d_buf still holds the stale
+   * receive buffer and we will need to dispose of it here.
+   */
+
+  if (priv->eth_dev.d_buf != NULL)
+    {
+      lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
+    }
+
+  priv->eth_dev.d_buf = NULL;
+  priv->eth_dev.d_len = 0;
 }
 
 /****************************************************************************
@@ -1097,32 +1111,32 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 
                   lpc54_eth_rxdisptch(priv);
 
-                /* Allocate a new Rx buffer and update the Rx buffer
-                 * descriptor.
-                 */
+                  /* Allocate a new Rx buffer and update the Rx buffer
+                   * descriptor.
+                   */
 
-                rxdesc->buffer1 = (uint32_t)lpc54_pktbuf_alloc(priv);
-                DEBUGASSERT(rxdesc->buffer1 != 0);
-                (rxring->rr_buffers)[supply] = (uint32_t *)rxdesc->buffer1;
+                  rxdesc->buffer1 = (uint32_t)lpc54_pktbuf_alloc(priv);
+                  DEBUGASSERT(rxdesc->buffer1 != 0);
+                  (rxring->rr_buffers)[supply] = (uint32_t *)rxdesc->buffer1;
 
 #if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
-                rxdesc->buffer2 = rxdesc->buffer1 + LPC54_BUFFER_MAX;
+                  rxdesc->buffer2 = rxdesc->buffer1 + LPC54_BUFFER_MAX;
 #else
-                /* The second buffer is not used */
+                  /* The second buffer is not used */
 
-                rxdesc->buffer2  = 0;
+                  rxdesc->buffer2  = 0;
 #endif
-                rxdesc->reserved = 0;
+                  rxdesc->reserved = 0;
 
-                /* Buffer1 (and maybe 2) valid, interrupt on completion,
-                 * owned by DMA.
-                 */
+                  /* Buffer1 (and maybe 2) valid, interrupt on completion,
+                   * owned by DMA.
+                   */
 
-                regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
+                  regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
 #if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
-                regval |= ETH_RXDES3_BUF2V;
+                  regval |= ETH_RXDES3_BUF2V;
 #endif
-                rxdesc->ctrl = regval;
+                  rxdesc->ctrl = regval;
                 }
             }
         }
@@ -1134,13 +1148,13 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
            * Rx descriptors.  We cannot support that in this design.  We
            * would like to:
            *
-           *   1. Accumate the data in yet another Rx buffer,
+           *   1. Accumulate the data in yet another Rx buffer,
            *   2. Accumulate the size in the 'pktlen' local variable, then
            *   3. Dispatch that extra Rx buffer when the last frame is
            *      encountered.
            *
            * The assumption here is that this will never happen if our MTU
-           * properaly advertised.
+           * properly advertised.
            */
 
           NETDEV_RXDROPPED(&priv->eth_dev);
@@ -1148,7 +1162,7 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
         }
     }
 
-  /* Restart the recevier if it was suspended. */
+  /* Restart the receiver if it was suspended. */
 
   if (suspend)
     {
@@ -1334,7 +1348,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 
       /* Handle the Tx completion event.  Reclaim the completed Tx
        * descriptors, free packet buffers, and check if we can start a new
-       * transmissin.
+       * transmission.
        */
 
       lpc54_eth_txdone(priv, chan);
@@ -1363,7 +1377,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
+ *   Runs on a worker thread.
  *
  ****************************************************************************/
 
@@ -1409,7 +1423,8 @@ static void lpc54_eth_interrupt_work(void *arg)
  *   context - Interrupt register state save info (architecture-specific)
  *
  * Returned Value:
- *   OK on success
+ *   Runs in the context of a the Ethernet interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -1448,7 +1463,8 @@ static int lpc54_eth_interrupt(int irq, void *context, void *arg)
  *   context - Interrupt register state save info (architecture-specific)
  *
  * Returned Value:
- *   OK on success
+ *   Runs in the context of a the Ethernet PMT interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -1470,7 +1486,8 @@ static int  lpc54_pmt_interrupt(int irq, void *context, void *arg)
  *   context - Interrupt register state save info (architecture-specific)
  *
  * Returned Value:
- *   OK on success
+ *   Runs in the context of a the Ethernet MAC handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -1494,7 +1511,7 @@ static int lpc54_mac_interrupt(int irq, void *context, void *arg)
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
+ *   Runs on a worker thread.
  *
  ****************************************************************************/
 
@@ -1542,7 +1559,8 @@ static void lpc54_eth_txtimeout_work(void *arg)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   Runs in the context of a the timer interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -1710,7 +1728,7 @@ static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv)
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
+ *   Run on a work queue thread.
  *
  ****************************************************************************/
 
@@ -1751,7 +1769,8 @@ static void lpc54_eth_poll_work(void *arg)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   Runs in the context of a the timer interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -1778,6 +1797,7 @@ static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1916,16 +1936,16 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 #endif
 
   /* Initialize the Ethernet MAC ********************************************/
-  /* Instantiate the MAC address that appliation logic should have set in the
+  /* Instantiate the MAC address that application logic should have set in the
    * device structure:
    */
 
   mptr   = (uint8_t *)priv->eth_dev.d_mac.ether.ether_addr_octet;
-  regval = ((uint32_t)mptr[3] << 24) | ((uint32_t)mptr[2] << 16) |
-           ((uint32_t)mptr[1] << 8)  | ((uint32_t)mptr[0]);
+  regval = ((uint32_t)mptr[2] << 24) | ((uint32_t)mptr[3] << 16) |
+           ((uint32_t)mptr[4] << 8)  | ((uint32_t)mptr[5]);
   lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_LOW);
 
-  regval = ((uint32_t)mptr[5] << 8)  | ((uint32_t)mptr[4]);
+  regval = ((uint32_t)mptr[0] << 8)  | ((uint32_t)mptr[1]);
   lpc54_putreg(regval, LPC54_ETH_MAC_ADDR_HIGH);
 
   /* Set the receive address filter */
@@ -2055,6 +2075,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -2130,7 +2151,7 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Called on the higher priority worker thread.
+ *   Runs on a work queue thread.
  *
  ****************************************************************************/
 
@@ -2173,7 +2194,7 @@ static void lpc54_eth_txavail_work(void *arg)
  *   None
  *
  * Assumptions:
- *   Called in normal user mode
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -2267,6 +2288,7 @@ static int lpc54_eth_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -2742,7 +2764,7 @@ static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
   volatile int32_t timeout;
   uint16_t phyval;
 
-  /* Advertise our cabilities. */
+  /* Advertise our capabilities. */
 
   phyval = (MII_ADVERTISE_CSMA | MII_ADVERTISE_10BASETXHALF |
             MII_ADVERTISE_10BASETXFULL | MII_ADVERTISE_100BASETXHALF |
@@ -2878,6 +2900,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
+ *   Called early in initialization before multi-tasking is initiated.
  *
  ****************************************************************************/
 
@@ -2937,7 +2960,7 @@ int up_netinitialize(int intf)
 #endif
   priv->eth_dev.d_private = (void *)&g_ethdriver; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->eth_txpoll        = wd_create();        /* Create periodic poll timer */
   priv->eth_txtimeout     = wd_create();        /* Create TX timeout timer */

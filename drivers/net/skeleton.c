@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_skeleton)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -60,6 +59,8 @@
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
+
+#ifdef CONFIG_NET_skeleton
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -110,7 +111,7 @@ struct skel_driver_s
   bool sk_bifup;               /* true:ifup false:ifdown */
   WDOG_ID sk_txpoll;           /* TX poll timer */
   WDOG_ID sk_txtimeout;        /* TX timeout timer */
-  struct work_s sk_irqwork;    /* For deferring interupt work to the work queue */
+  struct work_s sk_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -122,17 +123,20 @@ struct skel_driver_s
  * Private Data
  ****************************************************************************/
 
-/* These statically allocated structur eswould mean that only a single
+/* These statically allocated structures would mean that only a single
  * instance of the device could be supported.  In order to support multiple
  * devices instances, this data would have to be allocated dynamically.
  */
 
-/* A single packet buffer per device is used here.  There might be multiple
- * packet buffers in a more complex, pipelined design.
+/* A single packet buffer per device is used in this example.  There might
+ * be multiple packet buffers in a more complex, pipelined design.  Many
+ * contemporary Ethernet interfaces, for example,  use multiple, linked DMA
+ * descriptors in rings to implement such a pipeline.  This example assumes
+ * much simpler hardware that simply handles one packet at a time.
  *
  * NOTE that if CONFIG_skeleton_NINTERFACES were greater than 1, you would
- * need a minimum on one packetbuffer per instance.  Much better to be
- * allocated dynamically.
+ * need a minimum on one packet buffer per instance.  Much better to be
+ * allocated dynamically in cases where more than one are needed.
  */
 
 static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
@@ -208,8 +212,7 @@ static int  skel_ioctl(FAR struct net_driver_s *dev, int cmd,
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -254,8 +257,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
  *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   the network is locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -501,6 +503,9 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
  * Returned Value:
  *   OK on success
  *
+ * Assumptions:
+ *   Runs on a worker thread.
+ *
  ****************************************************************************/
 
 static void skel_interrupt_work(FAR void *arg)
@@ -552,6 +557,8 @@ static void skel_interrupt_work(FAR void *arg)
  *   OK on success
  *
  * Assumptions:
+ *   Runs in the context of a the Ethernet interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -597,9 +604,6 @@ static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
  * Returned Value:
  *   OK on success
  *
- * Assumptions:
- *   The network is locked.
- *
  ****************************************************************************/
 
 static void skel_txtimeout_work(FAR void *arg)
@@ -641,7 +645,8 @@ static void skel_txtimeout_work(FAR void *arg)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   Runs in the context of a the timer interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -674,7 +679,7 @@ static void skel_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
+ *   Run on a work queue thread.
  *
  ****************************************************************************/
 
@@ -724,7 +729,8 @@ static void skel_poll_work(FAR void *arg)
  *   None
  *
  * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
+ *   Runs in the context of a the timer interrupt handler.  Local
+ *   interrupts are disabled by the interrupt logic.
  *
  ****************************************************************************/
 
@@ -751,6 +757,7 @@ static void skel_poll_expiry(int argc, wdparm_t arg, ...)
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -805,6 +812,7 @@ static int skel_ifup(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -848,7 +856,7 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
  *   None
  *
  * Assumptions:
- *   Called on the higher priority worker thread.
+ *   Runs on a work queue thread.
  *
  ****************************************************************************/
 
@@ -893,7 +901,7 @@ static void skel_txavail_work(FAR void *arg)
  *   None
  *
  * Assumptions:
- *   Called in normal user mode
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1057,6 +1065,7 @@ static void skel_ipv6multicast(FAR struct skel_driver_s *priv)
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1100,6 +1109,7 @@ static int skel_ioctl(FAR struct net_driver_s *dev, int cmd,
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
+ *   Called early in initialization before multi-tasking is initiated.
  *
  ****************************************************************************/
 
@@ -1139,7 +1149,7 @@ int skel_initialize(int intf)
 #endif
   priv->sk_dev.d_private = (FAR void *)g_skel; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->sk_txpoll        = wd_create();   /* Create periodic poll timer */
   priv->sk_txtimeout     = wd_create();   /* Create TX timeout timer */
@@ -1160,4 +1170,4 @@ int skel_initialize(int intf)
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_skeleton */
+#endif /* CONFIG_NET_skeleton */
