@@ -368,7 +368,7 @@ static uint32_t lpc54_getreg(uintptr_t addr);
 static void lpc54_putreg(uint32_t val, uintptr_t addr);
 #else
 # define lpc54_getreg(addr)      getreg32(addr)
-# define lpc54_putreg(val,addr)  lpc54_putreg(val,addr)
+# define lpc54_putreg(val,addr)  putreg32(val,addr)
 #endif
 
 /* Common TX logic */
@@ -381,7 +381,7 @@ static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 /* Interrupt handling */
 
 static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv);
-static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
+static int  lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
 static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
@@ -1020,14 +1020,14 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
  *   chan - The channel with the completed Rx transfer
  *
  * Returned Value:
- *   None
+ *   The number of Rx descriptors processed
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
+static int lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
                               unsigned int chan)
 {
   struct lpc54_rxring_s *rxring;
@@ -1036,8 +1036,8 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
   unsigned int pktlen;
   unsigned int supply;
   uint32_t regval;
-  bool lastframe = false;
   bool suspend;
+  int ndesc;
 
   /* Get the Rx ring associated with this channel */
 
@@ -1048,15 +1048,30 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
   regval  = lpc54_getreg(LPC54_ETH_DMACH_STAT(chan));
   suspend = ((regval & ETH_DMACH_INT_RBU) != 0);
 
-  /* Loop until the last received frame is encountered */
+  /* Loop until the next full frame is encountered or until we encounter a
+   * descriptor still owned by the DMA.
+   */
 
   pktlen = 0;
-  while (!lastframe)
+  ndesc  = 0;
+
+  for (; ; )
     {
       /* Get the last Rx descriptor in the ring */
 
       supply = rxring->rr_supply;
       rxdesc = rxring->rr_desc + supply;
+
+      /* Is this frame still owned by the DMA? */
+
+      if ((rxdesc->ctrl & ETH_RXDES3_OWN) != 0)
+        {
+          /* Yes.. then bail */
+
+          return ndesc;
+        }
+
+      ndesc++;
 
       /* Set the supplier index to the next descriptor */
 
@@ -1067,7 +1082,7 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 
       /* Is this the last descriptor of the frame? */
 
-      if (rxdesc->ctrl & ETH_RXDES3_LD)
+      if ((rxdesc->ctrl & ETH_RXDES3_LD) != 0)
         {
           /* Have we been discarding Rx data?  If so, that was the last
            * packet to be discarded.
@@ -1081,10 +1096,9 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
             {
               /* Last frame encountered.  This is a valid packet */
 
-              lastframe = true;
               framelen  = (rxdesc->ctrl & ETH_RXDES3_PL_MASK);
+              pktlen   += framelen;
 
-              pktlen += framelen;
               if (pktlen > 0)
                 {
                   /* Recover the buffer.
@@ -1138,6 +1152,8 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 #endif
                   rxdesc->ctrl = regval;
                 }
+
+              return ndesc;
             }
         }
       else if (!priv->eth_rxdiscard)
@@ -1162,15 +1178,23 @@ static void lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
         }
     }
 
-  /* Restart the receiver if it was suspended. */
+  /* Restart the receiver and clear the RBU status if it was suspended. */
 
   if (suspend)
     {
       uintptr_t regaddr = LPC54_ETH_DMACH_RXDESC_TAIL_PTR(chan);
 
+      /* Clear the RBU status */
+
+      lpc54_putreg(ETH_DMACH_INT_RBU, LPC54_ETH_DMACH_STAT(chan));
+
+      /* Writing to the tail pointer register will restart the Rx processing */
+
       regval = lpc54_getreg(regaddr);
       lpc54_putreg(regval, regaddr);
     }
+
+  return ndesc;
 }
 
 /****************************************************************************
@@ -1295,9 +1319,12 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 
   if ((pending & LPC54_ABNORM_INTMASK) != 0)
     {
-      /* Acknowledge the normal receive interrupt */
+      /* Acknowledge the abnormal interrupt interrupts except for RBU...
+       * that is a special case where the status will be cleared in
+       * lpc54_eth_receive().  See comments below.
+       */
 
-      lpc54_putreg(LPC54_ABNORM_INTMASK, regaddr);
+      lpc54_putreg((LPC54_ABNORM_INTMASK & ~ETH_DMACH_INT_RBU), regaddr);
 
       /* Handle the incoming packet */
 
@@ -1316,6 +1343,25 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
           NETDEV_TXERRORS(priv->eth_dev);
         }
 
+      /* The Receive Buffer Unavailable (RBU) error is a special case.  It
+       * means that we have an Rx overrun condition:  All of the Rx buffers
+       * have been filled with packet data and there are no Rx descriptors
+       * available to receive the next packet.
+       *
+       * Often RBU is accompanied by RI but we need to force that condition
+       * in all cases.  In the case of RBU, we need to perform receive
+       * processing in order to recover from the situation and to resume.
+       *
+       * This is really a configuration problem:  It really means that we
+       * have not assigned enough Rx buffers for the environment and
+       * addressing filtering options that we have selected.
+       */
+
+      if ((pending & ETH_DMACH_INT_RBU) != 0)
+        {
+          pending |= ETH_DMACH_INT_RI;
+        }
+
       pending &= ~LPC54_ABNORM_INTMASK;
     }
 
@@ -1323,18 +1369,31 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
 
   if ((pending & ETH_DMACH_INT_RI) != 0)
     {
+      int ndesc;
+
       /* Acknowledge the normal receive interrupt */
 
       lpc54_putreg(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
       pending &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
 
-      /* Update statistics */
+      /* Loop until all available Rx packets in the ring have been processed */
 
-      NETDEV_RXPACKETS(priv->eth_dev);
+      for (; ; )
+        {
+          /* Dispatch the next packet from the Rx ring */
 
-      /* Handle the incoming packet */
+          ndesc = lpc54_eth_receive(priv, chan);
+          if (ndesc > 0)
+            {
+              /* Update statistics if a packet was dispatched */
 
-      lpc54_eth_receive(priv, chan);
+              NETDEV_RXPACKETS(priv->eth_dev);
+            }
+          else
+            {
+              break;
+            }
+        }
     }
 
   /* Check for a transmit interrupt */

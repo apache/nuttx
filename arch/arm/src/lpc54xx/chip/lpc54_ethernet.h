@@ -300,7 +300,7 @@
 #  define ETH_MAC_FRAME_FILTER_PCF_FILTERED              (3 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* Control frames accepted if pass the address filter */
 #define ETH_MAC_FRAME_FILTER_SAIF                        (1 << 8)  /* Bit 8:  SA inverse filtering */
 #define ETH_MAC_FRAME_FILTER_SAF                         (1 << 9)  /* Bit 9:  Source address filter enable */
-#define ETH_MAC_FRAME_FILTER_RA                          (1 << 31) /* Bit 31:  Receive all */
+#define ETH_MAC_FRAME_FILTER_RA                          (1 << 31) /* Bit 31: Receive all */
 
 /* MAC watchdog timeout */
 #define ETH_MAC_WD_TIMEROUT_

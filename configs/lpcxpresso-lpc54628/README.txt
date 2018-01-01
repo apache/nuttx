@@ -47,8 +47,8 @@ STATUS
     in receiving the button events, especially when the button is
     released.  But if you do not press the buttons too quickly all events
     are processed.  This, I suspect, is a consequence of the strong glitch
-    filtering that is enbled in the pin configuration.  Snappier
-    response my be obtainble with filtering off.
+    filtering that is enabled in the pin configuration.  Snappier
+    response my be obtainable with filtering off.
   2017-12-17:  Added a driver for the FT5x06 capacitive, multi-touch
     controller.  Add support logic for the LPCXpresso-LPC54528 to
     initialize and the register the FT5x06 driver.  Unfortunately, the
@@ -84,11 +84,13 @@ STATUS
     access timing in some way???
   2017-12-30:  Completed implementation of an Ethernet driver.  Untested as
     of this writing.  Also added the netnsh configuration will, eventually,
-    be used to test the Ethernet diver.
+    be used to test the Ethernet driver.
+  2018-01-01:  There Ethernet driver appears to be fully functional although
+    more testing is certainly needed.
 
-  There is still no support for the Accelerometer, SPIFI, or USB.  There are
-  complete but not-yet-functional SD card and Ethernet drivers.  There is a
-  partial SPI driver, but no on-board SPI devices to test it.
+  There is still no support for the Accelerometer, SPIFI, or USB.  There is a
+  complete but not-yet-functional SD card.  There is a partial SPI driver,
+  but no on-board SPI devices to test it.
 
 Configurations
 ==============
@@ -223,13 +225,17 @@ Configurations
   ------
     This is a special version of the NuttShell (nsh) configuration that is
     tailored for network testing.  This version derives from nsh
-    configuration so manhy of the notes apply there except as noted below.
+    configuration so many of the notes there apply here except as noted
+    below.
 
     NOTES:
 
     1. Networking is enabled.  The LPCXpressio-LPC54628 has an SMC _LAN8720 PHY
        and RJ45 network connector.  Support is enabled for IPv4, IPv6, TCP/IP,
        UDP, ICMP, ICMPv6, and ARP.
+
+       The default IP addresses are 10.0.0.2 (IPv4) and fc00::2 (IPv6).  You
+       should reconfigure these as appropriate for your test network.
 
     2. SD card and I2C support are not enabled.  The I2C tool application is
        not enabled
@@ -247,6 +253,16 @@ Configurations
        explicitly bring the network up from the NSH command line:
 
          nsh> ifup eth0
+
+    6. Telnet is supported, but the Telnet daemon must be started manually
+       like:
+
+         nsh> telnetd ipv4
+
+       Use the argument 'ipv6' to run telnet in the IPv6 address space.  With
+       the above command, you can create a remote Telnet session via:
+
+         $ telnet 10.0.0.2
 
   nsh:
 
@@ -354,8 +370,8 @@ Configurations
        There are noticeable delays in receiving the button events,
        especially when the button is released.  But if you do not press the
        buttons too quickly all events are processed.  This, I suspect, is a
-       consequence of the strong glitch filtering that is enbled in the pin
-       configuration.  Snappier response my be obtainble with filtering off
+       consequence of the strong glitch filtering that is enabled in the pin
+       configuration.  Snappier response my be obtainable with filtering off
        if desired.
 
     5. This configuration has been used for testing the SDMMC driver with
