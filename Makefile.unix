@@ -568,7 +568,6 @@ clean: subdir_clean
 	$(call DELFILE, _SAVED_APPS_config)
 	$(call DELFILE, nuttx-export*)
 	$(call DELFILE, nuttx_user*)
-	$(call DELFILE, .gdbinit)
 	$(call DELFILE, .cproject)
 	$(call DELFILE, .project)
 	$(call CLEAN)
@@ -587,6 +586,7 @@ endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
+	$(call DELFILE, .gdbinit)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,

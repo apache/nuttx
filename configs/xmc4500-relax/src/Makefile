@@ -52,4 +52,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += xmc4_appinit.c
 endif
 
+ifeq ($(CONFIG_EXAMPLES_OSTEST),y)
+CSRCS += xmc4_ostest.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
