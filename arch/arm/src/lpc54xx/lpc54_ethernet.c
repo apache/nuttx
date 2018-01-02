@@ -46,9 +46,8 @@
  *
  * 2. Multi-queuing not fully; supported.  The second queue is intended to
  *    support QVLAN, AVB type packets which have an 18-byte IEEE 802.1q
- *    Ethernet header.  That implies that we would need to support two
- *    devices instances:  One with a standard Ethernet header and one with
- *    an IEEE 802.1q Ethernet header.
+ *    Ethernet header.  I propose handling this case with a new network
+ *    interface qvlan_input().
  *
  * 3. Multicast address filtering.  Unlike other hardware, this Ethernet
  *    does not seem to support explicit Multicast address filtering as
@@ -380,7 +379,8 @@ static int  lpc54_eth_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv);
+static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv);
 static int  lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
               unsigned int chan);
 static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
@@ -845,6 +845,77 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: lpc54_eth_reply
+ *
+ * Description:
+ *   After a packet has been received and dispatched to the network, it
+ *   may return return with an outgoing packet.  This function checks for
+ *   that case and performs the transmission if necessary.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
+{
+  struct lpc54_txring_s *txring;
+  unsigned int chan;
+
+  /* If the packet dispatch resulted in data that should be sent out on the
+   * network, the field d_len will set to a value > 0.
+   */
+
+  if (priv->eth_dev.d_len > 0)
+    {
+      /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+       /* Check for an outgoing 802.1q VLAN packet */
+#warning Missing Logic
+#endif
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      /* Check for an outgoing IPv4 packet */
+
+      if (IFF_IS_IPv4(priv->eth_dev.d_flags))
+#endif
+        {
+          arp_out(&priv->eth_dev);
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      /* Otherwise, it must be an outgoing IPv6 packet */
+
+      else
+#endif
+        {
+          neighbor_out(&priv->eth_dev);
+        }
+#endif
+
+      /* And send the packet */
+
+      chan   = lpc54_eth_getring(priv);
+      txring = &priv->eth_txring[chan];
+
+      (txring->tr_buffers)[txring->tr_supply] =
+        (uint32_t *)priv->eth_dev.d_buf;
+
+      lpc54_eth_transmit(priv, chan);
+    }
+}
+
+/****************************************************************************
  * Name: lpc54_eth_rxdispatch
  *
  * Description:
@@ -862,11 +933,8 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
+static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
 {
-  struct lpc54_txring_s *txring;
-  unsigned int chan;
-
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
@@ -881,44 +949,14 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
       ninfo("IPv4 packet\n");
       NETDEV_RXIPV4(&priv->eth_dev);
 
-      /* Handle ARP on input then give the IPv4 packet to the network
-       * layer
-       */
+      /* Handle ARP on input, then dispatch IPv4 packet to the network layer */
 
       arp_ipin(&priv->eth_dev);
       ipv4_input(&priv->eth_dev);
 
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
+      /* Check for a reply to the IPv4 packet */
 
-      if (priv->eth_dev.d_len > 0)
-        {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-          if (IFF_IS_IPv4(priv->eth_dev.d_flags))
-#endif
-            {
-              arp_out(&priv->eth_dev);
-            }
-#ifdef CONFIG_NET_IPv6
-          else
-            {
-              neighbor_out(&priv->eth_dev);
-            }
-#endif
-
-          /* And send the packet */
-
-          chan   = lpc54_eth_getring(priv);
-          txring = &priv->eth_txring[chan];
-
-          (txring->tr_buffers)[txring->tr_supply] =
-            (uint32_t *)priv->eth_dev.d_buf;
-
-          lpc54_eth_transmit(priv, chan);
-        }
+      lpc54_eth_reply(priv);
     }
   else
 #endif
@@ -928,47 +966,40 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
       ninfo("Iv6 packet\n");
       NETDEV_RXIPV6(&priv->eth_dev);
 
-      /* Give the IPv6 packet to the network layer */
+      /* Dispatch IPv6 packet to the network layer */
 
       ipv6_input(&priv->eth_dev);
 
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
-       */
+      /* Check for a reply to the IPv6 packet */
 
-      if (priv->eth_dev.d_len > 0)
-        {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-          if (IFF_IS_IPv4(priv->eth_dev.d_flags))
-            {
-              arp_out(&priv->eth_dev);
-            }
-          else
+      lpc54_eth_reply(priv);
+    }
+  else
 #endif
-#ifdef CONFIG_NET_IPv6
-            {
-              neighbor_out(&priv->eth_dev);
-            }
-#endif
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+  if (ETH8021QWBUF->tpid == HTONS(TPID_8021QVLAN))
+    {
+      ninfo("IEEE 802.1q packet\n");
+      NETDEV_RXQVLAN(&priv->eth_dev);
 
-          /* And send the packet */
+      /* Dispatch the 802.1q VLAN packet to the network layer */
 
-          chan   = lpc54_eth_getring(priv);
-          txring = &priv->eth_txring[chan];
+      qvlan_input(&priv->eth_dev);
 
-          (txring->tr_buffers)[txring->tr_supply] =
-            (uint32_t *)priv->eth_dev.d_buf;
+      /* Check for a reply to the 802.1q VLAN packet */
 
-          lpc54_eth_transmit(priv, chan);
-        }
+      lpc54_eth_reply(priv);
     }
   else
 #endif
 #ifdef CONFIG_NET_ARP
   if (ETHBUF->type == htons(ETHTYPE_ARP))
     {
+      struct lpc54_txring_s *txring;
+      unsigned int chan;
+
+      /* Dispatch the ARP packet to the network layer */
+
       arp_arpin(&priv->eth_dev);
       NETDEV_RXARP(&priv->eth_dev);
 
@@ -994,7 +1025,7 @@ static void lpc54_eth_rxdisptch(struct lpc54_ethdriver_s *priv)
     }
 
   /* On entry, d_buf refers to the receive buffer as set by logic in
-   * lpc54_eth_receive().  If lpc54_eth_transmit() was called to respond
+   * lpc54_eth_receive().  If lpc54_eth_transmit() was called to reply
    * with an outgoing packet, then that packet was removed for transmission
    * and d_buf was nullified.  Otherwise, d_buf still holds the stale
    * receive buffer and we will need to dispose of it here.
@@ -1123,7 +1154,7 @@ static int lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
                    * handled if there is an available Tx descriptor.
                    */
 
-                  lpc54_eth_rxdisptch(priv);
+                  lpc54_eth_rxdispatch(priv);
 
                   /* Allocate a new Rx buffer and update the Rx buffer
                    * descriptor.

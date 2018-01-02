@@ -86,7 +86,16 @@ STATUS
     of this writing.  Also added the netnsh configuration will, eventually,
     be used to test the Ethernet driver.
   2018-01-01:  There Ethernet driver appears to be fully functional although
-    more testing is certainly needed.
+    more testing is certainly needed.  I believe that there is a memory
+    corruption issue that cause problems occasionally.  For example, after
+    a longer Telnet session, I sometimes see the following after exiting
+    the session from the host:
+
+      up_assert: Assertion failed at file:mm_heap/mm_free.c line: 129
+
+    which is a clear indication heap corruption.  Increasing the size of some
+    stacks might correct this problem, but I have not yet experimented with
+    that.
 
   There is still no support for the Accelerometer, SPIFI, or USB.  There is a
   complete but not-yet-functional SD card.  There is a partial SPI driver,
@@ -240,29 +249,22 @@ Configurations
     2. SD card and I2C support are not enabled.  The I2C tool application is
        not enabled
 
-    3. SDRAM support is enabled and the SDRAM is added to the system heap. The
-       Ramtest applications is not enabled.
+    3. SDRAM support is enabled and the SDRAM is added to the system heap.
+       The ramtest application is not enabled.
 
-    4. This configuration does not include support for aysnchronous network
+    4. This configuration does not include support for asynchronous network
        initialization.  As a consequence, NSH must bring up the network
        before you get the NSH prompt.  If the network cable is unplugged,
        this can mean a significant delay before you see the prompt.
 
-    5. In this configuration, the network network does not come up
-       automatically after it has been initialized.  You will need to
-       explicitly bring the network up from the NSH command line:
+    5. In this configuration, the network the network and the Telnet
+       daemon are available by the time that the NSH prompt is presented.
 
-         nsh> ifup eth0
+       Telnet defaults to IPv6 so to use it from the host PS, you would have
+       to do:
 
-    6. Telnet is supported, but the Telnet daemon must be started manually
-       like:
+         $ telnet fc00::42
 
-         nsh> telnetd ipv4
-
-       Use the argument 'ipv6' to run telnet in the IPv6 address space.  With
-       the above command, you can create a remote Telnet session via:
-
-         $ telnet 10.0.0.2
 
   nsh:
 

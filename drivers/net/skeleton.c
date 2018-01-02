@@ -156,6 +156,7 @@ static int  skel_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
+static void skel_reply(struct skel_driver_s *priv)
 static void skel_receive(FAR struct skel_driver_s *priv);
 static void skel_txdone(FAR struct skel_driver_s *priv);
 
@@ -310,6 +311,63 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: skel_reply
+ *
+ * Description:
+ *   After a packet has been received and dispatched to the network, it
+ *   may return return with an outgoing packet.  This function checks for
+ *   that case and performs the transmission if necessary.
+ *
+ * Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void skel_reply(struct skel_driver_s *priv)
+{
+  /* If the packet dispatch resulted in data that should be sent out on the
+   * network, the field d_len will set to a value > 0.
+   */
+
+  if (priv->sk_dev.d_len > 0)
+    {
+      /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      /* Check for an outgoing IPv4 packet */
+
+      if (IFF_IS_IPv4(priv->sk_dev.d_flags))
+#endif
+        {
+          arp_out(&priv->sk_dev);
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      /* Otherwise, it must be an outgoing IPv6 packet */
+
+      else
+#endif
+        {
+          neighbor_out(&skel->sk_dev);
+        }
+#endif
+
+      /* And send the packet */
+
+      skel_transmit(priv);
+    }
+}
+
+/****************************************************************************
  * Name: skel_receive
  *
  * Description:
@@ -354,38 +412,16 @@ static void skel_receive(FAR struct skel_driver_s *priv)
           ninfo("IPv4 frame\n");
           NETDEV_RXIPV4(&priv->sk_dev);
 
-          /* Handle ARP on input then give the IPv4 packet to the network
-           * layer
+          /* Handle ARP on input, then dispatch IPv4 packet to the network
+           * layer.
            */
 
           arp_ipin(&priv->sk_dev);
           ipv4_input(&priv->sk_dev);
 
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
+          /* Check for a reply to the IPv4 packet */
 
-          if (priv->sk_dev.d_len > 0)
-            {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(priv->sk_dev.d_flags))
-#endif
-                {
-                  arp_out(&priv->sk_dev);
-                }
-#ifdef CONFIG_NET_IPv6
-              else
-                {
-                  neighbor_out(&skel->sk_dev);
-                }
-#endif
-
-              /* And send the packet */
-
-              skel_transmit(priv);
-            }
+          skel_reply(priv);
         }
       else
 #endif
@@ -395,41 +431,21 @@ static void skel_receive(FAR struct skel_driver_s *priv)
           ninfo("Iv6 frame\n");
           NETDEV_RXIPV6(&priv->sk_dev);
 
-          /* Give the IPv6 packet to the network layer */
+          /* Dispatch IPv6 packet to the network layer */
 
           ipv6_input(&priv->sk_dev);
 
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
-           */
+          /* Check for a reply to the IPv6 packet */
 
-          if (priv->sk_dev.d_len > 0)
-           {
-              /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(priv->sk_dev.d_flags))
-                {
-                  arp_out(&priv->sk_dev);
-                }
-              else
-#endif
-#ifdef CONFIG_NET_IPv6
-                {
-                  neighbor_out(&priv->sk_dev);
-                }
-#endif
-
-              /* And send the packet */
-
-              skel_transmit(priv);
-            }
+          skel_reply(priv);
         }
       else
 #endif
 #ifdef CONFIG_NET_ARP
       if (BUF->type == htons(ETHTYPE_ARP))
         {
+          /* Dispatch ARP packet to the network layer */
+
           arp_arpin(&priv->sk_dev);
           NETDEV_RXARP(&priv->sk_dev);
 
