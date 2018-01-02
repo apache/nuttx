@@ -87,15 +87,15 @@ STATUS
     be used to test the Ethernet driver.
   2018-01-01:  There Ethernet driver appears to be fully functional although
     more testing is certainly needed.  I believe that there is a memory
-    corruption issue that cause problems occasionally.  For example, after
-    a longer Telnet session, I sometimes see the following after exiting
-    the session from the host:
+    corruption issue in the current configuration that cause problems
+    occasionally.  For example, after a longer Telnet session, I sometimes
+    see the following DEBUGASSERT after exiting the session from the host:
 
       up_assert: Assertion failed at file:mm_heap/mm_free.c line: 129
 
     which is a clear indication heap corruption.  Increasing the size of some
     stacks might correct this problem, but I have not yet experimented with
-    that.
+    that.  I have not seen the problem in any other context.
 
   There is still no support for the Accelerometer, SPIFI, or USB.  There is a
   complete but not-yet-functional SD card.  There is a partial SPI driver,

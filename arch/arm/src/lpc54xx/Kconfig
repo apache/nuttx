@@ -406,7 +406,6 @@ config LPC54_ETHERNET
 	default n
 	select NETDEVICES
 	select ARCH_HAVE_PHY
-	depends on EXPERIMENTAL
 
 config LPC54_LCD
 	bool "LCD controller"
