@@ -197,9 +197,9 @@ void arp_out(FAR struct net_driver_s *dev)
       peth->dest[0] = g_multicast_ethaddr[0];
       peth->dest[1] = g_multicast_ethaddr[1];
       peth->dest[2] = g_multicast_ethaddr[2];
-      peth->dest[3] = ip[2] & 0x7f;
-      peth->dest[4] = ip[3];
-      peth->dest[5] = ip[4];
+      peth->dest[3] = ip[1] & 0x7f;
+      peth->dest[4] = ip[2];
+      peth->dest[5] = ip[3];
 
       goto finish_header;
     }
