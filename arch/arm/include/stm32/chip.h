@@ -1689,21 +1689,21 @@
                                               * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
 #  define STM32_NGTIMNDMA                0   /* All timers have DMA */
 #  define STM32_NBTIM                    2   /* (2) Basic timers: TIM6 and TIM7 */
-#  define STM32_NDMA                     1   /* (2) DMA1 (7 channels) */
-#  define STM32_NSPI                     1   /* (3) SPI1 */
-#  define STM32_NI2S                     0   /* (0) I2S1 */
+#  define STM32_NDMA                     1   /* (1) DMA1 (7 channels) */
+#  define STM32_NSPI                     1   /* (1) SPI1 */
+#  define STM32_NI2S                     0   /* (0) No I2S1 */
 #  define STM32_NUSART                   2   /* (2) USART1-2 */
-#  define STM32_NI2C                     1   /* (2) I2C1 */
+#  define STM32_NI2C                     1   /* (1) I2C1 */
 #  define STM32_NCAN                     1   /* (1) CAN1 */
 #  define STM32_NSDIO                    0   /* (0) No SDIO */
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* (0) No USB */
 #  define STM32_NGPIO                    25  /* GPIOA-F */
-#  define STM32_NADC                     2   /* (3) 12-bit ADC1-2 */
-#  define STM32_NDAC                     3   /* (2) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
 #  define STM32_NCMP                     2   /* (2) Ultra-fast analog comparators: COMP2 and COMP4 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
-#  define STM32_NCAPSENSE                14  /* (14) No capacitive sensing channels */
+#  define STM32_NCAPSENSE                14  /* (14) Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
 #  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
@@ -1733,21 +1733,21 @@
                                               * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
 #  define STM32_NGTIMNDMA                0   /* All timers have DMA */
 #  define STM32_NBTIM                    2   /* (2) Basic timers: TIM6 and TIM7 */
-#  define STM32_NDMA                     1   /* (2) DMA1 (7 channels) */
-#  define STM32_NSPI                     1   /* (3) SPI1 */
-#  define STM32_NI2S                     0   /* (0) I2S1 */
-#  define STM32_NUSART                   3   /* (2) USART1-3 */
-#  define STM32_NI2C                     1   /* (2) I2C1 */
+#  define STM32_NDMA                     1   /* (1) DMA1 (7 channels) */
+#  define STM32_NSPI                     1   /* (1) SPI1 */
+#  define STM32_NI2S                     0   /* (0) No I2S1 */
+#  define STM32_NUSART                   3   /* (3) USART1-3 */
+#  define STM32_NI2C                     1   /* (1) I2C1 */
 #  define STM32_NCAN                     1   /* (1) CAN1 */
 #  define STM32_NSDIO                    0   /* (0) No SDIO */
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* (0) No USB */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
-#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
-#  define STM32_NDAC                     3   /* (2) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
 #  define STM32_NCMP                     3   /* (3) Ultra-fast analog comparators: COMP2, COMP4 and COMP6 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
-#  define STM32_NCAPSENSE                17  /* (17) No capacitive sensing channels */
+#  define STM32_NCAPSENSE                17  /* (17) Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
 #  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
@@ -1777,21 +1777,21 @@
                                               * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
 #  define STM32_NGTIMNDMA                0   /* All timers have DMA */
 #  define STM32_NBTIM                    2   /* (2) Basic timers: TIM6 and TIM7 */
-#  define STM32_NDMA                     1   /* (2) DMA1 (7 channels) */
-#  define STM32_NSPI                     1   /* (3) SPI1 */
-#  define STM32_NI2S                     0   /* (0) I2S1 */
-#  define STM32_NUSART                   3   /* (2) USART1-3 */
-#  define STM32_NI2C                     1   /* (2) I2C1 */
+#  define STM32_NDMA                     1   /* (1) DMA1 (7 channels) */
+#  define STM32_NSPI                     1   /* (1) SPI1 */
+#  define STM32_NI2S                     0   /* (0) No I2S1 */
+#  define STM32_NUSART                   3   /* (3) USART1-3 */
+#  define STM32_NI2C                     1   /* (1) I2C1 */
 #  define STM32_NCAN                     1   /* (1) CAN1 */
 #  define STM32_NSDIO                    0   /* (0) No SDIO */
 #  define STM32_NLCD                     0   /* (0) No LCD */
 #  define STM32_NUSBOTG                  0   /* (0) No USB */
 #  define STM32_NGPIO                    51  /* GPIOA-F */
-#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
-#  define STM32_NDAC                     3   /* (2) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
 #  define STM32_NCMP                     3   /* (3) Ultra-fast analog comparators: COMP2, COMP4 and COMP6 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
-#  define STM32_NCAPSENSE                18  /* (18) No capacitive sensing channels */
+#  define STM32_NCAPSENSE                18  /* (18) Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
 #  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
