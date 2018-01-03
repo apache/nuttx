@@ -32,7 +32,7 @@ STATUS
     SDRAM and for the RAM test utility.
   2017-12-11:  Fixed an error in board LEDs.  Added framework for future
     I2C and SPI flexcomm drivers.
-  2017-12-12:  The SDRAM is now functional and passes the commplete RAM
+  2017-12-12:  The SDRAM is now functional and passes the complete RAM
     test.  Added configuration options and logic to add none, portions, or
     all of the external SDRAM to the system heap.  Brought in the LPC1788
     LCD driver.  The LPC1788 LCD registers are identical to the LPC54xx

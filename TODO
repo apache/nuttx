@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 27, 2017)
+NuttX TODO List (Last updated January 3, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1766,7 +1766,8 @@ o File system / Generic drivers (fs/, drivers/)
 
                link, unlink, softlink, readlink - For symbolic links.  Only
                  the ROMFS file system currently supports hard and soft links,
-                 so this is not too important.
+                 so this is not too important.  The top-level, psuedo-file
+                 system supports soft links.
 
                File locking
 
@@ -1778,6 +1779,8 @@ o File system / Generic drivers (fs/, drivers/)
 
                True inodes - Standard Unix inodes.  Currently only supported
                  by ROMFs.
+
+               File times, for example as set by utimes().
 
                The primary obstacle to all these is that each would require
                changes to all existing file systems.  That number is pretty
