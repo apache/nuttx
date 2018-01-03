@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/userfs/fs_userfs.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,6 +118,7 @@ static int     userfs_sync(FAR struct file *filep);
 static int     userfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int     userfs_fstat(FAR const struct file *filep,
                  FAR struct stat *buf);
+static int     userfs_truncate(FAR struct file *filep, off_t length);
 
 static int     userfs_opendir(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct fs_dirent_s *dir);
@@ -167,6 +168,7 @@ const struct mountpt_operations userfs_operations =
   userfs_sync,       /* sync */
   userfs_dup,        /* dup */
   userfs_fstat,      /* fstat */
+  userfs_truncate,   /* truncate */
 
   userfs_opendir,    /* opendir */
   userfs_closedir,   /* closedir */
@@ -906,6 +908,85 @@ static int userfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   DEBUGASSERT(buf != NULL);
   memcpy(buf, &resp->buf, sizeof(struct stat));
+  return resp->ret;
+}
+
+/****************************************************************************
+ * Name: userfs_truncate
+ *
+ * Description:
+ *   Set the size of the regular file referred to by 'filep' to 'length'
+ *
+ ****************************************************************************/
+
+static int userfs_truncate(FAR struct file *filep, off_t length)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_truncate_request_s *req;
+  FAR struct userfs_truncate_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int ret;
+
+  DEBUGASSERT(filep != NULL &&
+              filep->f_inode != NULL &&
+              filep->f_inode->i_private != NULL);
+  priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = sem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req           = (FAR struct userfs_truncate_request_s *)priv->iobuffer;
+  req->req      = USERFS_REQ_FSTAT;
+  req->openinfo = filep->f_priv;
+  req->length   = length;
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       sizeof(struct userfs_truncate_request_s), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %d\n", (int)nsent);
+      sem_post(&priv->exclsem);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  sem_post(&priv->exclsem);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_truncate_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %u\n", (unsigned int)nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_truncate_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_FSTAT)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  /* Return the result of truncate operation */
+
+  DEBUGASSERT(buf != NULL);
   return resp->ret;
 }
 

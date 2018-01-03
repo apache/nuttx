@@ -47,6 +47,10 @@ ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 CSRCS += lib_execl.c
 endif
 
+ifneq ($(CONFIG_DISABLE_MOUNTPOINTS),y)
+CSRCS += lib_truncate.c
+endif
+
 ifeq ($(CONFIG_PIPES),y)
 CSRCS += lib_pipe.c
 endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_vfsops.c
  *
- *   Copyright (C) 2012-2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
  *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -191,6 +191,7 @@ const struct mountpt_operations nfs_operations =
   NULL,                         /* sync */
   nfs_dup,                      /* dup */
   nfs_fstat,                    /* fstat */
+  NULL,                         /* truncate */
 
   nfs_opendir,                  /* opendir */
   NULL,                         /* closedir */

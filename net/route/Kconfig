@@ -42,18 +42,6 @@ config ROUTE_IPv4_FILEROUTE
 	---help---
 		Select to used a IPv4 routing table in a file in a mounted file system.
 
-		REVISIT:  There is a problem with the current design.  NuttX does not
-		currently support truncate().  Therefore, it is not possible to delete
-		entries from the routing table file.
-
-		In this current implementation, that leaves the last entry intact at
-		the end of the file.  An alternative design might include a tag on
-		each record to indicate if the record is valid or not.  That would work
-		but would add complexity to the other routing table functions.
-
-		The existing 'delroute' implementation is available for testing purpose
-		only if CONFIG_EXPERIMENTAL=y.
-
 endchoice # IPv4 routing table
 
 config ROUTE_MAX_IPv4_RAMROUTES
@@ -110,18 +98,6 @@ config ROUTE_IPv6_FILEROUTE
 	bool "File"
 	---help---
 		Select to use a IPv6 routing table in a file in a mounted file system.
-
-		REVISIT:  There is a problem with the current design.  NuttX does not
-		currently support truncate().  Therefore, it is not possible to delete
-		entries from the routing table file.
-
-		In this current implementation, that leaves the last entry intact at
-		the end of the file.  An alternative design might include a tag on
-		each record to indicate if the record is valid or not.  That would work
-		but would add complexity to the other routing table functions.
-
-		The existing 'delroute' implementation is available for testing purpose
-		only if CONFIG_EXPERIMENTAL=y.
 
 endchoice # IPv6 routing table
 

@@ -149,6 +149,7 @@ const struct mountpt_operations smartfs_operations =
   smartfs_sync,          /* sync */
   smartfs_dup,           /* dup */
   smartfs_fstat,         /* fstat */
+  NULL,                  /* truncate */
 
   smartfs_opendir,       /* opendir */
   NULL,                  /* closedir */

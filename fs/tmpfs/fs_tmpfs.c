@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/tmpfs/fs_tmpfs.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,6 +140,7 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int  tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int  tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+static int  tmpfs_truncate(FAR struct file *filep, off_t length);
 
 static int  tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               FAR struct fs_dirent_s *dir);
@@ -177,16 +178,21 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_write,      /* write */
   tmpfs_seek,       /* seek */
   tmpfs_ioctl,      /* ioctl */
+
   NULL,             /* sync */
   tmpfs_dup,        /* dup */
   tmpfs_fstat,      /* fstat */
+  tmpfs_truncate,   /* truncate */
+
   tmpfs_opendir,    /* opendir */
   tmpfs_closedir,   /* closedir */
   tmpfs_readdir,    /* readdir */
   tmpfs_rewinddir,  /* rewinddir */
+
   tmpfs_bind,       /* bind */
   tmpfs_unbind,     /* unbind */
   tmpfs_statfs,     /* statfs */
+
   tmpfs_unlink,     /* unlink */
   tmpfs_mkdir,      /* mkdir */
   tmpfs_rmdir,      /* rmdir */
@@ -378,7 +384,7 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
   size_t allocsize;
   size_t delta;
 
-  /* Check if the current allocation is sufficent */
+  /* Check if the current allocation is sufficient */
 
   objsize = SIZEOF_TMPFS_FILE(newsize);
 
@@ -1619,7 +1625,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
 
   tmpfs_lock_file(tfo);
 
-  /* Handle attempts to read beyond the end of the file */
+  /* Handle attempts to write beyond the end of the file */
 
   startpos = filep->f_pos;
   nwritten = buflen;
@@ -1691,7 +1697,7 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
           return -EINVAL;
     }
 
-  /* Attempts to set the position beyound the end of file will
+  /* Attempts to set the position beyond the end of file will
    * work if the file is open for write access.
    *
    * REVISIT: This simple implementation has no per-open storage that
@@ -1812,6 +1818,63 @@ static int tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   tmpfs_unlock_file(tfo);
   return OK;
+}
+
+/****************************************************************************
+ * Name: tmpfs_truncate
+ ****************************************************************************/
+
+static int tmpfs_truncate(FAR struct file *filep, off_t length)
+{
+  FAR struct tmpfs_file_s *tfo;
+  size_t oldsize;
+  int ret = OK;
+
+  finfo("filep: %p length: %ld\n", filep, (long)length);
+  DEBUGASSERT(filep != NULL && length >= 0);
+
+  /* Recover our private data from the struct file instance */
+
+  tfo = filep->f_priv;
+
+  /* Get exclusive access to the file */
+
+  tmpfs_lock_file(tfo);
+
+  /* Get the old size of the file.  Do nothing if the file size is not
+   * changing.
+   */
+
+  oldsize = tfo->tfo_size;
+  if (oldsize != length)
+    {
+      /* The size is changing.. up or down.  Reallocate the file memory. */
+
+      ret = tmpfs_realloc_file(&tfo, (size_t)length);
+      if (ret < 0)
+        {
+          goto errout_with_lock;
+        }
+
+      filep->f_priv = tfo;
+
+      /* If the size has increased, then we need to zero the newly added
+       * memory.
+       */
+
+      if (length > oldsize)
+        {
+          memset(&tfo->tfo_data[oldsize], 0, length - oldsize);
+        }
+
+      ret = OK;
+    }
+
+  /* Release the lock on the file */
+
+errout_with_lock:
+  tmpfs_unlock_file(tfo);
+  return ret;
 }
 
 /****************************************************************************

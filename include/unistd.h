@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/unistd.h
  *
- *   Copyright (C) 2007-2009, 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,6 +164,7 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
+int     ftruncate(int fd, off_t length);
 
 /* Check if a file descriptor corresponds to a terminal I/O file */
 
@@ -190,6 +191,7 @@ FAR char *getcwd(FAR char *buf, size_t size);
 int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
 int     unlink(FAR const char *pathname);
+int     truncate(FAR const char *path, off_t length);
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
 int     link(FAR const char *path1, FAR const char *path2);

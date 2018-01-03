@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/fat/fs_fat32.c
  *
- *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -138,6 +139,7 @@ const struct mountpt_operations fat_operations =
   fat_sync,          /* sync */
   fat_dup,           /* dup */
   fat_fstat,         /* fstat */
+  NULL,              /* truncate */
 
   fat_opendir,       /* opendir */
   NULL,              /* closedir */

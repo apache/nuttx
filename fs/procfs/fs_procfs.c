@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfs.c
  *
- *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -257,6 +257,7 @@ const struct mountpt_operations procfs_operations =
   NULL,              /* sync */
   procfs_dup,        /* dup */
   procfs_fstat,      /* fstat */
+  NULL,              /* truncate */
 
   procfs_opendir,    /* opendir */
   procfs_closedir,   /* closedir */

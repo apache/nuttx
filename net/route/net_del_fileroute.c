@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_del_fileroute.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
@@ -55,26 +56,6 @@
 #include "route/route.h"
 
 #if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* REVISIT:  There is a problem with this design.  NuttX does not currently
- * support truncate().  Therefore, it is not possible to delete entries from
- * the routing table file.
- *
- * In this current implementation, that leaves the last entry intact at the
- * end of the file.  An alternative design might include a tag on each
- * record to indicate if the record is valid or not.  That would work but
- * would add complexity to the other routing table functions.
- *
- * The existing implementation is available only if CONFIG_EXPERIMENTAL=y.
- */
-
-#ifdef CONFIG_EXPERIMENTAL
-#  warning The implementation of delroute is incomplete
-#endif
 
 /****************************************************************************
  * Public Types
@@ -117,7 +98,6 @@ struct route_match_ipv6_s
  *
  ****************************************************************************/
 
-#ifdef CONFIG_EXPERIMENTAL
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 {
@@ -187,7 +167,6 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
   return 0;
 }
 #endif
-#endif /* CONFIG_EXPERIMENTAL */
 
 /****************************************************************************
  * Public Functions
@@ -209,10 +188,10 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
 {
-#ifdef CONFIG_EXPERIMENTAL
   struct route_match_ipv4_s match;
   struct net_route_ipv4_s route;
   struct file fshandle;
+  off_t filesize;
   ssize_t nwritten;
   ssize_t nread;
   off_t pos;
@@ -231,7 +210,7 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
        return ret;
     }
 
-  /* Get the size of the routing table entry (in entries) */
+  /* Get the size of the routing table (in entries) */
 
   nentries = net_routesize_ipv4();
   if (nentries < 0)
@@ -312,7 +291,7 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
         }
       else if (nread == 0)
         {
-          nerr("ERROR: Undexpected end of file\n");
+          nerr("ERROR: Unexpected end of file\n");
           ret = -EINVAL;
           goto errout_with_fshandle;
         }
@@ -341,29 +320,26 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
   /* Now truncate the one duplicate entry at the end of the file.  This may
    * result in a zero length file.
    */
-#warning Missing logic
 
-  ret = OK;
+  filesize = (nentries - 1) * sizeof(struct net_route_ipv4_s);
+  ret = file_truncate(&fshandle, filesize);
 
 errout_with_fshandle:
-  (void)net_closeroute_ipv4(&fshandle);
+  (void)net_closeroute_ipv4(&fshandle)S;
 
 errout_with_lock:
   (void)net_unlockroute_ipv4();
   return ret;
-#else
-  return -ENOSYS;
-#endif
 }
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
 {
-#ifdef CONFIG_EXPERIMENTAL
   struct route_match_ipv6_s match;
   struct net_route_ipv6_s route;
   struct file fshandle;
+  off_t filesize;
   ssize_t nwritten;
   ssize_t nread;
   off_t pos;
@@ -382,7 +358,7 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
        return ret;
     }
 
-  /* Get the size of the routing table entry (in entries) */
+  /* Get the size of the routing table (in entries) */
 
   nentries = net_routesize_ipv6();
   if (nentries < 0)
@@ -464,7 +440,7 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
         }
       else if (nread == 0)
         {
-          nerr("ERROR: Undexpected end of file\n");
+          nerr("ERROR: Unexpected end of file\n");
           ret = -EINVAL;
           goto errout_with_fshandle;
         }
@@ -493,9 +469,9 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
   /* Now truncate the one duplicate entry at the end of the file.  This may
    * result in a zero length file.
    */
-#warning Missing logic
 
-  ret = OK;
+  filesize = (nentries - 1) * sizeof(struct net_route_ipv6_s);
+  ret = file_truncate(&fshandle, filesize);
 
 errout_with_fshandle:
   (void)net_closeroute_ipv6(&fshandle);
@@ -503,9 +479,6 @@ errout_with_fshandle:
 errout_with_lock:
   (void)net_unlockroute_ipv6();
   return ret;
-#else
-  return -ENOSYS;
-#endif
 }
 #endif
 

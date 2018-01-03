@@ -1,7 +1,8 @@
 /****************************************************************************
  * rm/romfs/fs_romfs.h
  *
- *   Copyright (C) 2008-2009, 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -122,6 +123,7 @@ const struct mountpt_operations romfs_operations =
   NULL,            /* sync */
   romfs_dup,       /* dup */
   romfs_fstat,     /* fstat */
+  NULL,            /* truncate */
 
   romfs_opendir,   /* opendir */
   NULL,            /* closedir */

@@ -1759,11 +1759,6 @@ o File system / Generic drivers (fs/, drivers/)
                  intended for deeply embedded environments where there are
                  not multiple users with varying levels of trust.
 
-               truncate - The standard way of setting a fixed file size.
-                 Often used with random access, data base files.  There is no
-                 simple way of doing that now (other than just writing data
-                 to the file).
-
                link, unlink, softlink, readlink - For symbolic links.  Only
                  the ROMFS file system currently supports hard and soft links,
                  so this is not too important.  The top-level, psuedo-file

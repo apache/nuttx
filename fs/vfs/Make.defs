@@ -1,7 +1,7 @@
 ############################################################################
 # fs/vfs/Make.defs
 #
-#   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015, 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ CSRCS += fs_rmdir.c fs_statfs.c fs_stat.c fs_select.c fs_unlink.c fs_write.c
 # Certain interfaces are not available if there is no mountpoint support
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-CSRCS += fs_fsync.c
+CSRCS += fs_fsync.c fs_truncate.c
 endif
 
 # Support for positional file access

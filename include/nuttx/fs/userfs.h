@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/userfs.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,6 +140,7 @@ enum userfs_req_e
   USERFS_REQ_SYNC,
   USERFS_REQ_DUP,
   USERFS_REQ_FSTAT,
+  USERFS_REQ_TRUNCATE,
   USERFS_REQ_OPENDIR,
   USERFS_REQ_CLOSEDIR,
   USERFS_REQ_READDIR,
@@ -216,6 +217,7 @@ struct userfs_operations_s
   int     (*dup)(FAR void *volinfo, FAR void *oldinfo, FAR void **newinfo);
   int     (*fstat)(FAR void *volinfo, FAR void *openinfo,
             FAR struct stat *buf);
+  int     (*truncate)(FAR void *volinfo, FAR void *openinfo, off_t length);
   int     (*opendir)(FAR void *volinfo, FAR const char *relpath,
             FAR void **dir);
   int     (*closedir)(FAR void *volinfo, FAR void *dir);
@@ -355,7 +357,7 @@ struct userfs_dup_response_s
 struct userfs_fstat_request_s
 {
   uint8_t req;              /* Must be USERFS_REQ_FSTAT */
-  FAR void *openinfo;       /* Open file info for the dup'ed file */
+  FAR void *openinfo;       /* Open file info as returned by open() */
 };
 
 struct userfs_fstat_response_s
@@ -363,6 +365,19 @@ struct userfs_fstat_response_s
   uint8_t resp;             /* Must be USERFS_RESP_FSTAT */
   int ret;                  /* Result of the operation */
   FAR struct stat buf;      /* Returned file system status */
+};
+
+struct userfs_truncate_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_TRUNCATE */
+  FAR void *openinfo;       /* Open file info as returned by open() */
+  off_t length;             /* New length of the file */
+};
+
+struct userfs_truncate_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_FSTAT */
+  int ret;                  /* Result of the operation */
 };
 
 struct userfs_opendir_request_s

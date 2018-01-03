@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/binfs/fs_binfs.c
  *
- *   Copyright (C) 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,6 +111,7 @@ const struct mountpt_operations binfs_operations =
   NULL,              /* sync */
   binfs_dup,         /* dup */
   binfs_fstat,       /* fstat */
+  NULL,              /* truncate */
 
   binfs_opendir,     /* opendir */
   NULL,              /* closedir */

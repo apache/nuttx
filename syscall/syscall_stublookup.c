@@ -258,6 +258,7 @@ uintptr_t STUB_sched_getstreams(int nbr);
 ssize_t sendfile(int outfd, int infd, FAR off_t *offset, size_t count);
 
 uintptr_t STUB_fsync(int nbr, uintptr_t parm1);
+uintptr_t STUB_ftruncate(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mkdir(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mount(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);

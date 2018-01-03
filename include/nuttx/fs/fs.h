@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015-2017 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -280,7 +280,7 @@ struct mountpt_operations
             int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position
-   * because the struct file_operations and struct mountp_operations are
+   * because the struct file_operations and struct mountpt_operations are
    * treated like unions.
    */
 
@@ -301,6 +301,7 @@ struct mountpt_operations
   int     (*sync)(FAR struct file *filep);
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
   int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
+  int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* Directory operations */
 
@@ -370,7 +371,7 @@ union inode_ops_u
 #endif
 };
 
-/* This structure represents one inode in the Nuttx pseudo-file system */
+/* This structure represents one inode in the NuttX pseudo-file system */
 
 struct inode
 {
@@ -416,10 +417,10 @@ struct filelist
  *
  * When buffering us used, the following described the usage of the I/O buffer.
  * The buffer can be used for reading or writing -- but not both at the same time.
- * An fflush is implied between each change in directionof access.
+ * An fflush is implied between each change in direction of access.
  *
  * The field fs_bufread determines whether the buffer is being used for reading or
- * for writing as fillows:
+ * for writing as follows:
  *
  *              BUFFER
  *     +----------------------+ <- fs_bufstart Points to the beginning of the buffer.
@@ -431,7 +432,7 @@ struct filelist
  *     |                      |                RD: Points to next char to return
  *     +----------------------+
  *     | WR: Available        | <- fs_bufread  Top+1 of buffered read data
- *     | RD: Available        |                WR: =bufstart buffer used for writing.
+ *     | RD: Available        |                WR: bufstart buffer used for writing.
  *     |                      |                RD: Pointer to last buffered read char+1
  *     +----------------------+
  *                              <- fs_bufend   Points to end end of the buffer+1
@@ -498,7 +499,7 @@ void fs_initialize(void);
  * Input parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
- *   mode - inmode priviledges (not used)
+ *   mode - inmode privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -525,7 +526,7 @@ int register_driver(FAR const char *path,
  * Input parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
- *   mode - inmode priviledges (not used)
+ *   mode - inmode privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -624,7 +625,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  * Name: fs_dupfd OR dup
  *
  * Description:
- *   Clone a file descriptor 'fd' to an arbitray descriptor number (any value
+ *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any value
  *   greater than or equal to 'minfd'). If socket descriptors are
  *   implemented, then this is called by dup() for the case of file
  *   descriptors.  If socket descriptors are not implemented, then this
@@ -670,7 +671,7 @@ int file_dup(FAR struct file *filep, int minfd);
  *   then this function IS dup2().
  *
  *   This alternative naming is used when dup2 could operate on both file and
- *   socket descritors to avoid drawing unused socket support into the link.
+ *   socket descriptors to avoid drawing unused socket support into the link.
  *
  * Returned Value:
  *   fs_dupfd2 is sometimes an OS internal function and sometimes is a direct
@@ -1021,8 +1022,22 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)
 int file_fsync(FAR struct file *filep);
+#endif
+
+/****************************************************************************
+ * Name: file_truncate
+ *
+ * Description:
+ *   Equivalent to the standard ftruncate() function except that is accepts
+ *   a struct file instance instead of a file descriptor and it does not set
+ *   the errno variable.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)
+int file_truncate(FAR struct file *filep, off_t length);
 #endif
 
 /****************************************************************************

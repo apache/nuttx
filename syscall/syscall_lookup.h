@@ -269,6 +269,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(mount,                    5, STUB_mount)
 #    endif
   SYSCALL_LOOKUP(fsync,                    1, STUB_fsync)
+  SYSCALL_LOOKUP(ftruncate,                2, STUB_ftruncate)
   SYSCALL_LOOKUP(mkdir,                    2, STUB_mkdir)
   SYSCALL_LOOKUP(rename,                   2, STUB_rename)
   SYSCALL_LOOKUP(rmdir,                    1, STUB_rmdir)
