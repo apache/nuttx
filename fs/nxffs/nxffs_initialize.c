@@ -75,7 +75,7 @@ const struct mountpt_operations nxffs_operations =
   NULL,              /* sync -- No buffered data */
   nxffs_dup,         /* dup */
   nxffs_fstat,       /* fstat */
-  NULL,              /* truncate */
+  nxffs_truncate,    /* truncate */
 
   nxffs_opendir,     /* opendir */
   NULL,              /* closedir */

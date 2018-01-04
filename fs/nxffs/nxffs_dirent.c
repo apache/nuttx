@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_dirent.c
  *
- *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/dirent.h>

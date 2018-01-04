@@ -89,7 +89,7 @@ int file_truncate(FAR struct file *filep, off_t length)
     }
 
   /* A NULL write() method is an indicator of a read-only file system (but
-   * possible not the only indicator)
+   * possible not the only indicator -- sufficient, but not necessary")
    */
 
   if (inode->u.i_mops->write == NULL)

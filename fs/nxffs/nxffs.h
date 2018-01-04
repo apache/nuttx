@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs.h
  *
- *   Copyright (C) 2011, 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -871,6 +872,26 @@ int nxffs_updateinode(FAR struct nxffs_volume_s *volume,
                       FAR struct nxffs_entry_s *entry);
 
 /****************************************************************************
+ * Name: nxffs_wrextend
+ *
+ * Description:
+ *   Zero-extend a file.
+ *
+ * Input parameters
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the new inode entry
+ *   length - The new, extended length of the file
+ *
+ * Assumptions:
+ *   The caller holds the NXFFS semaphore.
+ *   The caller has verified that the file is writable.
+ *
+ ****************************************************************************/
+
+int nxffs_wrextend(FAR struct nxffs_volume_s *volume,
+                   FAR struct nxffs_wrfile_s *wrfile, off_t length);
+
+/****************************************************************************
  * Name: nxffs_wrreserve
  *
  * Description:
@@ -1091,12 +1112,16 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer,
                     size_t buflen);
 int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+
 int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp);
 int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+int nxffs_truncate(FAR struct file *filep, off_t length);
+
 int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                   FAR struct fs_dirent_s *dir);
 int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
 int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+
 int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
                FAR void **handle);
 int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver,

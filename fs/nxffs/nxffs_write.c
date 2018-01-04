@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_write.c
  *
- *   Copyright (C) 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
 
@@ -327,7 +328,7 @@ static inline int nxffs_reverify(FAR struct nxffs_volume_s *volume,
  *   volume - Describes the NXFFS volume
  *   wrfile - Describes the open file to be written.
  *   buffer - Address of buffer of data to be written.
- *   buflen - The number of bytes remaimining to be written
+ *   buflen - The number of bytes remaining to be written
  *
  * Returned Value:
  *   The number of bytes written is returned on success.  Otherwise, a
@@ -412,6 +413,96 @@ static inline ssize_t nxffs_wrappend(FAR struct nxffs_volume_s *volume,
   /* Return the number of bytes written to FLASH this time */
 
   return nbytestowrite;
+}
+
+/****************************************************************************
+ * Name: nxffs_zappend
+ *
+ * Description:
+ *   Zero-extend FLASH data to the data block.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   wrfile - Describes the open file to be written.
+ *   nzeros - The number of bytes of zeroed data to be written
+ *
+ * Returned Value:
+ *   The number of bytes written is returned on success.  Otherwise, a
+ *   negated errno value is returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
+                                    FAR struct nxffs_wrfile_s *wrfile,
+                                    off_t nzeros)
+{
+  ssize_t maxsize;
+  size_t nbytestoclear;
+  ssize_t remaining;
+  off_t offset;
+  int ret;
+
+  /* Get the offset to the start of unwritten data */
+
+  offset = volume->iooffset + wrfile->datlen + SIZEOF_NXFFS_DATA_HDR;
+
+  /* Determine that maximum amount of data that can be written to this
+   * block.
+   */
+
+  maxsize = volume->geo.blocksize - offset;
+  DEBUGASSERT(maxsize > 0);
+
+  /* Write as many bytes as we can into the data buffer */
+
+  nbytestoclear = MIN(maxsize, nzeros);
+  remaining     = maxsize - nbytestoclear;
+
+  if (nbytestoclear > 0)
+    {
+      /* Copy the data into the volume write cache */
+
+      memset(&volume->cache[offset], 0, nbytestoclear);
+
+      /* Increment the number of bytes written to the data block */
+
+      wrfile->datlen += nbytestoclear;
+
+      /* Re-calculate the CRC */
+
+      offset = volume->iooffset + SIZEOF_NXFFS_DATA_HDR;
+      wrfile->crc = crc32(&volume->cache[offset], wrfile->datlen);
+
+      /* And write the partial write block to FLASH -- unless the data
+       * block is full.  In that case, the block will be written below.
+       */
+
+      if (remaining > 0)
+        {
+          ret = nxffs_wrcache(volume);
+          if (ret < 0)
+            {
+              ferr("ERROR: nxffs_wrcache failed: %d\n", -ret);
+              return ret;
+            }
+        }
+    }
+
+  /* Check if the data block is now full */
+
+  if (remaining <= 0)
+    {
+      /* The data block is full, write the block to FLASH */
+
+      ret = nxffs_wrblkhdr(volume, wrfile);
+      if (ret < 0)
+        {
+          ferr("ERROR: nxffs_wrblkdhr failed: %d\n", -ret);
+          return ret;
+        }
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -532,6 +623,91 @@ errout_with_semaphore:
   nxsem_post(&volume->exclsem);
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxffs_wrextend
+ *
+ * Description:
+ *   Zero-extend a file.
+ *
+ * Input parameters
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the new inode entry
+ *   length - The new, extended length of the file
+ *
+ * Assumptions:
+ *   The caller holds the NXFFS semaphore.
+ *   The caller has verified that the file is writable.
+ *
+ ****************************************************************************/
+
+int nxffs_wrextend(FAR struct nxffs_volume_s *volume,
+                   FAR struct nxffs_wrfile_s *wrfile, off_t length)
+{
+  ssize_t remaining;
+  ssize_t nwritten;
+  off_t oldsize;
+  int ret;
+
+  finfo("Extend file to %ld bytes to offset %d\n", (long)length);
+  DEBUGASSERT(volume != NULL && wrfile != NULL);
+
+  oldsize = wrfile->ofile.entry.datlen;
+  DEBUGASSERT(length > oldsize);
+
+  /* Loop until we successfully appended all of the data to the file (or an
+   * error occurs)
+   */
+
+  remaining = length - oldsize;
+  while (remaining > 0)
+    {
+      /* Have we already allocated the data block? */
+
+      if (wrfile->doffset == 0)
+        {
+          /* No, allocate the data block now, re-packing if necessary. */
+
+          wrfile->datlen = 0;
+          ret = nxffs_wralloc(volume, wrfile, remaining);
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to allocate a data block: %d\n", -ret);
+              return ret;
+            }
+        }
+
+      /* Seek to the FLASH block containing the data block */
+
+      nxffs_ioseek(volume, wrfile->doffset);
+
+      /* Verify that the FLASH data that was previously written is still intact */
+
+      ret = nxffs_reverify(volume, wrfile);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to verify FLASH data block: %d\n", -ret);
+          return ret;
+        }
+
+      /* Append the data to the end of the data block and write the updated
+       * block to flash.
+       */
+
+      nwritten = nxffs_zappend(volume, wrfile, remaining);
+      if (nwritten < 0)
+        {
+          ferr("ERROR: Failed to zero extend FLASH data block: %d\n", -ret);
+          return (int)nwritten;
+        }
+
+      /* Decrement the number of bytes remaining to be written */
+
+      remaining -= nwritten;
+    }
+
+  return OK;
 }
 
 /****************************************************************************

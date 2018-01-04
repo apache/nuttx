@@ -135,11 +135,15 @@ struct nfsstats nfsstats;
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
-                   FAR const char *relpath, mode_t mode);
-static int     nfs_filetruncate(FAR struct nfsmount *nmp, struct nfsnode *np);
-static int     nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
-                   FAR const char *relpath, int oflags, mode_t mode);
+static int     nfs_filecreate(FAR struct nfsmount *nmp,
+                   FAR struct nfsnode *np, FAR const char *relpath,
+                   mode_t mode);
+static int     nfs_filetruncate(FAR struct nfsmount *nmp,
+                   FAR struct nfsnode *np, uint32_t length);
+static int     nfs_fileopen(FAR struct nfsmount *nmp,
+                   FAR struct nfsnode *np, FAR const char *relpath,
+                   int oflags, mode_t mode);
+
 static int     nfs_open(FAR struct file *filep, const char *relpath,
                    int oflags, mode_t mode);
 static int     nfs_close(FAR struct file *filep);
@@ -148,6 +152,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
                    size_t buflen);
 static int     nfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int     nfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+static int     nfs_truncate(FAR struct file *filep, off_t length);
 static int     nfs_opendir(struct inode *mountpt, const char *relpath,
                    struct fs_dirent_s *dir);
 static int     nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir);
@@ -191,7 +196,7 @@ const struct mountpt_operations nfs_operations =
   NULL,                         /* sync */
   nfs_dup,                      /* dup */
   nfs_fstat,                    /* fstat */
-  NULL,                         /* truncate */
+  nfs_truncate,                 /* truncate */
 
   nfs_opendir,                  /* opendir */
   NULL,                         /* closedir */
@@ -225,7 +230,7 @@ const struct mountpt_operations nfs_operations =
  *
  ****************************************************************************/
 
-static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
+static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
                           FAR const char *relpath, mode_t mode)
 {
   struct file_handle      fhandle;
@@ -408,7 +413,8 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, struct nfsnode *np,
  *
  ****************************************************************************/
 
-static int nfs_filetruncate(FAR struct nfsmount *nmp, struct nfsnode *np)
+static int nfs_filetruncate(FAR struct nfsmount *nmp,
+                            FAR struct nfsnode *np, uint32_t length)
 {
   FAR uint32_t *ptr;
   int           reqlen;
@@ -436,7 +442,7 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp, struct nfsnode *np)
   *ptr++  = nfs_false;                        /* Don't change uid */
   *ptr++  = nfs_false;                        /* Don't change gid */
   *ptr++  = nfs_true;                         /* Use the following size */
-  *ptr++  = 0;                                /* Truncate to zero length */
+  *ptr++  = length;                           /* Truncate to the specified length */
   *ptr++  = 0;
   *ptr++  = HTONL(NFSV3SATTRTIME_TOSERVER);   /* Use the server's time */
   *ptr++  = HTONL(NFSV3SATTRTIME_TOSERVER);   /* Use the server's time */
@@ -473,7 +479,7 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp, struct nfsnode *np)
  *
  ****************************************************************************/
 
-static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
+static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
                         FAR const char *relpath, int oflags, mode_t mode)
 {
   struct file_handle fhandle;
@@ -550,7 +556,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, struct nfsnode *np,
        * the SETATTR call by setting the length to zero.
        */
 
-      return nfs_filetruncate(nmp, np);
+      return nfs_filetruncate(nmp, np, 0);
     }
 
   return OK;
@@ -1202,7 +1208,7 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  * Description:
  *   Obtain information about an open file associated with the file
- *   descriptor 'fd', and will write it to the area pointed to by 'buf'.
+ *   structure 'filep', and will write it to the area pointed to by 'buf'.
  *
  ****************************************************************************/
 
@@ -1265,6 +1271,50 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   nfs_stat_common(&info, buf);
   ret = OK;
+
+errout_with_semaphore:
+  nfs_semgive(nmp);
+  return -error;
+}
+
+/****************************************************************************
+ * Name: nfs_truncate
+ *
+ * Description:
+ *   Set the length of the open, regular file associated with the file
+ *   structure 'filep' to 'length'.
+ *
+ ****************************************************************************/
+
+static int nfs_truncate(FAR struct file *filep, off_t length)
+{
+  struct nfsmount *nmp;
+  struct nfsnode *np;
+  int error;
+
+  finfo("Truncate to %ld bytes\n", (long)length);
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
+  np  = (FAR struct nfsnode *)filep->f_priv;
+
+  DEBUGASSERT(nmp != NULL);
+
+  /* Make sure that the mount is still healthy */
+
+  nfs_semtake(nmp);
+  error = nfs_checkmount(nmp);
+  if (error != OK)
+    {
+      ferr("ERROR: nfs_checkmount failed: %d\n", error);
+      goto errout_with_semaphore;
+    }
+
+  /* Then perform the SETATTR RPC to set the new file size */
+
+  error = nfs_filetruncate(nmp, np, length);
 
 errout_with_semaphore:
   nfs_semgive(nmp);
