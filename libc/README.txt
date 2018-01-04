@@ -35,9 +35,9 @@ we have:
   locale    - locale.h
   fixedmath - fixedmath.h
   inttypes  - inttypes.h
-  machine   - Various architecture-specifica implementations.
+  machine   - Various architecture-specific implementations.
   math      - math.h
-  modlib    - Part of module and shared libary logic: nuttx/lib/modlib.h
+  modlib    - Part of module and shared library logic: nuttx/lib/modlib.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
   pthread   - pthread.h
   queue     - queue.h

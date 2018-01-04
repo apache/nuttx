@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: October 24, 2017</p>
+      <p>Last Updated: January 4, 2018</p>
     </td>
   </tr>
 </table>
@@ -443,61 +443,67 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.60 Unmount a File System (umount)</a>
+    <a href="#cmdtruncate">2.60 Set the Size of a File (truncate)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.61 Print system information (uname)</a>
+    <a href="#cmdunmount">2.61 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.62 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.62 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.63 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.63 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.64 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.64 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduseradd">2.65 Add a New User (useradd)</a>
+    <a href="#cmdurlencode">2.65 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduserdel">2.66 Delete a user (userdel)</a>
+    <a href="#cmduseradd">2.66 Add a New User (useradd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.67 Wait for Microseconds (usleep)</a>
+    <a href="#cmduserdel">2.67 Delete a user (userdel)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.68 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.68 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.69 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.69 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.70 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -2977,7 +2983,35 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.60 Unmount a File System (umount)</h2></a>
+    <a name="cmdtruncate"><h2>2.60 Set the Size of a File (truncate)</h2></a>
+  </td>
+</tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+truncate -s &lt;length&gt; &lt;file-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Shrink or extend the size of the regular file at &lt;file-path&gt; to the
+  specified&lt;length&gt;.
+</p>
+<p>
+  A &lt;file-path&gt; argument that does not exist is created.  The &lt;length&gt;
+  option is NOT optional.
+</p>
+<p>
+  If a &lt;file-path&gt; is larger than the specified size, the extra data is
+  lost.  If a &lt;file-path&gt; is shorter, it is extended and the extended part
+  reads as zero bytes.
+</p>
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdunmount"><h2>2.61 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -3007,7 +3041,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.61 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.62 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -3074,7 +3108,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.62 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.63 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -3100,7 +3134,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.63 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.64 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -3117,7 +3151,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.64 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.65 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -3134,7 +3168,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduseradd"><h2>2.65 Add a New User (useradd)</h2></a>
+    <a name="cmduseradd"><h2>2.66 Add a New User (useradd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3151,7 +3185,7 @@ useradd &lt;username&gt; &lt;password&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduserdel"><h2>2.66 Delete a user (userdel)</h2></a>
+    <a name="cmduserdel"><h2>2.67 Delete a user (userdel)</h2></a>
   </td>
   </tr>
 </table>
@@ -3168,7 +3202,7 @@ userdel &lt;username&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.67 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.68 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -3185,7 +3219,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget"><h2>2.68 Get File Via HTTP (wget)</h2></a>
+    <a name="cmdwget"><h2>2.69 Get File Via HTTP (wget)</h2></a>
   </td>
   </tr>
 </table>
@@ -3212,7 +3246,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.69 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.70 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3638,6 +3672,11 @@ nsh&gt;
     <td><b><code>time</code></b></td>
     <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_TIME</code></td>
+  </tr>
+  <tr>
+    <td><b><code>truncate</code></b></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td><code>CONFIG_NSH_DISABLE_TRUNCATE</code></td>
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
@@ -5443,10 +5482,10 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSMOUNTPT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSSECTSIZE</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_STRERROR</code></a></li>
 </ul></td>
 <td width="33%" valign="top">
 <ul>
-  <li><a href="#nshconfiguration"><code>CONFIG_NSH_STRERROR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_TELNET</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_TMPDIR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_USBCONDEV</code></a></li>
@@ -5511,11 +5550,11 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#custinit"><code>mkromfsimg.sh</code></a></li>
   <li><a href="#cmdmount"><code>mount</code></a></li>
   <li><a href="#cmdmv"><code>mv</code></a></li>
+  <li><a href="#cmdnfsmount"><code>nfsmount</code></a></li>
+  <li><a href="#cmdoverview"><code>nice</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#cmdnfsmount"><code>nfsmount</code></a></li>
-  <li><a href="#cmdoverview"><code>nice</code></a></li>
   <li><a href="#custonshlib">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#nshlibrary">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>
@@ -5565,6 +5604,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdtelnetd"><code>telnetd</code></a></li>
   <li><a href="#cmdtest"><code>test</code></a></li>
   <li><a href="#cmdtime"><code>time</code></a></li>
+  <li><a href="#cmdtruncate"><code>truncate</code></a></li>
   <li><a href="#cmdunmount"><code>umount</code></a></li>
   <li><a href="#cmduname"><code>uname</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
