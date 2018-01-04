@@ -1126,6 +1126,7 @@ int fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster)
       if (nextcluster < 0)
         {
           /* Error! */
+
           return nextcluster;
         }
 
@@ -1148,7 +1149,7 @@ int fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster)
       /* Then set up to remove the next cluster */
 
       cluster = nextcluster;
-  }
+    }
 
   return OK;
 }
@@ -1424,7 +1425,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
  *
  ****************************************************************************/
 
-int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
+int fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
   unsigned int startcluster;
   uint32_t     writetime;

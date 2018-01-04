@@ -58,8 +58,8 @@
 /****************************************************************************
  * These offsets describes the master boot record.
  *
- * The folowing fields are common to FAT12/16/32 (but all value descriptions
- * refer to the interpretation under FAT32.
+ * The following fields are common to FAT12/16/32 (but all value descriptions
+ * refer to the interpretation under FAT32).
  */
 
 #define BS_JUMP             0 /*  3@0:  Jump instruction to boot code (ignored) */
