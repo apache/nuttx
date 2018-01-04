@@ -81,7 +81,7 @@
 #    undef HAVE_FT5x06
 #  endif
 
-#  ifdef CONFIG_FT5X06_POLLMODE
+#  ifndef CONFIG_FT5X06_POLLMODE
 #    warning CONFIG_INPUT_FT5X06 requires CONFIG_FT5X06_POLLMODE
 #    undef HAVE_FT5x06
 #  endif

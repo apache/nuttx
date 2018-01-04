@@ -449,7 +449,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 
       pixel[0] = (uint32_t)priv->bgcolor <<  8 | (uint32_t)priv->bgcolor >> 16;
       pixel[1] = (uint32_t)priv->bgcolor << 16 | (uint32_t)priv->bgcolor >> 8;
-      pixel[1] = (uint32_t)priv->bgcolor << 24 | (uint32_t)priv->bgcolor;
+      pixel[2] = (uint32_t)priv->bgcolor << 24 | (uint32_t)priv->bgcolor;
 
       for (row = 0; row < glyph->height; row++)
         {
