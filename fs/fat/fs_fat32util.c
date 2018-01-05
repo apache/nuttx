@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32util.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2015, 2017 Gregory Nutt. All
+ *   Copyright (C) 2007-2009, 2011, 2013, 2015, 2017-2018 Gregory Nutt. All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -1781,8 +1781,9 @@ int fat_fscacheflush(struct fat_mountpt_s *fs)
       if (fs->fs_currentsector >= fs->fs_fatbase &&
           fs->fs_currentsector < fs->fs_fatbase + fs->fs_nfatsects)
         {
-          /* Yes, then make the change in the FAT copy as well */
           int i;
+
+          /* Yes, then make the change in the FAT copy as well */
 
           for (i = fs->fs_fatnumfats; i >= 2; i--)
             {

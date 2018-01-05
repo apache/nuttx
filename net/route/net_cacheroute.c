@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
+
 #include "route/cacheroute.h"
 #include "route/route.h"
 
@@ -177,8 +179,8 @@ static sem_t g_ipv6_cachelock;
  *
  ****************************************************************************/
 
-#define net_lock_ipv4_cache() mxsem_wait(&g_ipv4_cachelock);
-#define net_lock_ipv6_cache() mxsem_wait(&g_ipv6_cachelock);
+#define net_lock_ipv4_cache() nxsem_wait(&g_ipv4_cachelock);
+#define net_lock_ipv6_cache() nxsem_wait(&g_ipv6_cachelock);
 
 /****************************************************************************
  * Name: net_unlock_ipv4_cache and net_unlock_ipv6_cache

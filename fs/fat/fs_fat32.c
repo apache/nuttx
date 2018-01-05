@@ -1755,14 +1755,6 @@ static int fat_truncate(FAR struct file *filep, off_t length)
       int ndx;
 
       /* We are shrinking the file. */
-      /* Flush any unwritten data in the file buffer */
-
-      ret = fat_ffcacheflush(fs, ff);
-      if (ret < 0)
-        {
-          goto errout_with_semaphore;
-        }
-
       /* Read the directory entry into the fs_buffer. */
 
       ret = fat_fscacheread(fs, ff->ff_dirsector);
