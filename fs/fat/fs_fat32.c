@@ -1071,10 +1071,13 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
    * also happen in other situation such as when SEEK_SET is used to assure
    * assure sequential access in a multi-threaded environment where there
    * may be are multiple users to the file descriptor.
+   * Effectively handles the situation when a new file position is within
+   * the current sector.
    */
 
-  if (position == filep->f_pos)
+  if (position / fs->fs_hwsectorsize == filep->f_pos / fs->fs_hwsectorsize)
     {
+      filep->f_pos = position;
       return OK;
     }
 
