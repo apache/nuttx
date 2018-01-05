@@ -260,7 +260,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
         {
           /* Truncate the file to zero length */
 
-          ret = fat_dirtruncate(fs, &dirinfo);
+          ret = fat_dirtruncate(fs, direntry);
           if (ret < 0)
             {
               goto errout_with_semaphore;
@@ -1702,12 +1702,7 @@ static int fat_truncate(FAR struct file *filep, off_t length)
   FAR struct inode *inode;
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_file_s *ff;
-  int32_t cluster;
-  off_t remaining;
   off_t oldsize;
-  off_t pos;
-  unsigned int zerosize;
-  int sectndx;
   int ret;
 
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
@@ -1750,172 +1745,72 @@ static int fat_truncate(FAR struct file *filep, off_t length)
   oldsize = ff->ff_size;
   if (oldsize == length)
     {
+      /* Do nothing but say that we did */
+
       ret = OK;
-      goto errout_with_semaphore;
     }
   else if (oldsize > length)
     {
-      /* We are shrinking the file */
-      /* REVISIT:  Logic to shrink the file has not yet been implemented */
+      FAR uint8_t *direntry;
+      int ndx;
 
-      ret = -ENOSYS;
-      goto errout_with_semaphore;
-    }
+      /* We are shrinking the file. */
+      /* Flush any unwritten data in the file buffer */
 
-  /* Otherwise we are extending the file.  This is essentially the same as a
-   * write except that (1) we write zeros and (2) we don't update the file
-   * position.
-   */
-
-  pos = ff->ff_size;
-
-  /* Get the first sector to write to. */
-
-  if (!ff->ff_currentsector)
-    {
-      /* Has the starting cluster been defined? */
-
-      if (ff->ff_startcluster == 0)
-        {
-          /* No.. we have to create a new cluster chain */
-
-          ff->ff_startcluster     = fat_createchain(fs);
-          ff->ff_currentcluster   = ff->ff_startcluster;
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-        }
-
-      /* The current sector can then be determined from the current cluster
-       * and the file offset.
-       */
-
-      ret = fat_currentsector(fs, ff, pos);
+      ret = fat_ffcacheflush(fs, ff);
       if (ret < 0)
         {
           goto errout_with_semaphore;
         }
+
+      /* Read the directory entry into the fs_buffer. */
+
+      ret = fat_fscacheread(fs, ff->ff_dirsector);
+      if (ret < 0)
+        {
+          goto errout_with_semaphore;
+        }
+
+      /* Recover a pointer to the specific directory entry in the sector
+       * using the saved directory index.
+       */
+
+      ndx      = (ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      direntry = &fs->fs_buffer[ndx];
+
+      /* Handle the simple case where we are shrinking the file to zero
+       * length.
+       */
+
+      if (length == 0)
+        {
+          /* Shrink to length == 0 */
+
+          ret = fat_dirtruncate(fs, direntry);
+        }
+      else
+        {
+          /* Shrink to 0 < length < oldsize */
+
+          ret = fat_dirshrink(fs, direntry, length);
+        }
     }
-
-  /* Loop until either (1) the file has been fully extended with zeroed data
-   * or (2) an error occurs.  We assume we start with the current sector in
-   * cache (ff_currentsector)
-   */
-
-  sectndx   = pos & SEC_NDXMASK(fs);
-  remaining = length - pos;
-
-  while (remaining > 0)
+  else
     {
-      /* Check if the current write stream has incremented to the next
-       * cluster boundary
+      /* Otherwise we are extending the file.  This is essentially the same
+       * as a write except that (1) we write zeros and (2) we don't update
+       * the file position.
        */
 
-      if (ff->ff_sectorsincluster < 1)
+      ret = fat_dirextend(fs, ff, length);
+      if (ret >= 0)
         {
-          /* Extend the current cluster by one (unless lseek was used to
-           * move the file position back from the end of the file)
-           */
+          /* The truncation has completed without error.  Update the file size */
 
-          cluster = fat_extendchain(fs, ff->ff_currentcluster);
-
-          /* Verify the cluster number */
-
-          if (cluster < 0)
-            {
-              ret = cluster;
-              goto errout_with_semaphore;
-            }
-          else if (cluster < 2 || cluster >= fs->fs_nclusters)
-            {
-              ret = -ENOSPC;
-              goto errout_with_semaphore;
-            }
-
-          /* Setup to zero the first sector from the new cluster */
-
-          ff->ff_currentcluster   = cluster;
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
+          ff->ff_size = length;
+          ret = OK;
         }
-
-      /* Decide whether we are performing a read-modify-write
-       * operation, in which case we have to read the existing sector
-       * into the buffer first.
-       *
-       * There are two cases where we can avoid this read:
-       *
-       * - If we are performing a whole-sector clear that was rejected
-       *   by fat_hwwrite(), i.e. sectndx == 0 and remaining >= sector size.
-       *
-       * - If the clear is aligned to the beginning of the sector and
-       *   extends beyond the end of the file, i.e. sectndx == 0 and
-       *   file pos + remaining >= file size.
-       */
-
-      if (sectndx == 0 && (remaining >= fs->fs_hwsectorsize ||
-          (pos + remaining) >= ff->ff_size))
-        {
-           /* Flush unwritten data in the sector cache. */
-
-           ret = fat_ffcacheflush(fs, ff);
-           if (ret < 0)
-             {
-               goto errout_with_semaphore;
-             }
-
-          /* Now mark the clean cache buffer as the current sector. */
-
-          ff->ff_cachesector = ff->ff_currentsector;
-        }
-      else
-        {
-          /* Read the current sector into memory (perhaps first flushing the
-           * old, dirty sector to disk).
-           */
-
-          ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
-          if (ret < 0)
-            {
-              goto errout_with_semaphore;
-            }
-        }
-
-      /* Copy the requested part of the sector from the user buffer */
-
-      zerosize = fs->fs_hwsectorsize - sectndx;
-      if (zerosize > remaining)
-        {
-          /* We will not zero to the end of the sector. */
-
-          zerosize = remaining;
-        }
-      else
-        {
-          /* We will zero to the end of the buffer (or beyond).  Bump up
-           * the current sector number (actually the next sector number).
-           */
-
-          ff->ff_sectorsincluster--;
-          ff->ff_currentsector++;
-        }
-
-      /* Zero the data into the cached sector and make sure that the cached
-       * sector is marked "dirty" so that it will be written back.
-       */
-
-      memset(&ff->ff_buffer[sectndx], 0, zerosize);
-      ff->ff_bflags |= (FFBUFF_DIRTY | FFBUFF_VALID | FFBUFF_MODIFIED);
-
-      /* Set up for the next sector */
-
-      pos       += zerosize;
-      remaining -= zerosize;
-      sectndx   = pos & SEC_NDXMASK(fs);
-   }
-
-  /* The truncation has completed without error.  Update the file size */
-
-  ff->ff_size = length;
-  ret = OK;
+    }
 
 errout_with_semaphore:
   fat_semgive(fs);

@@ -927,7 +927,11 @@ EXTERN int    fat_dirname2path(struct fat_mountpt_s *fs, struct fs_dirent_s *dir
 
 /* File creation and removal helpers */
 
-EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs, FAR uint8_t *direntry);
+EXTERN int    fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
+                            off_t length);
+EXTERN int    fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
+                            off_t length);
 EXTERN int    fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory);
 
