@@ -1786,6 +1786,16 @@ static int fat_truncate(FAR struct file *filep, off_t length)
 
           ret = fat_dirshrink(fs, direntry, length);
         }
+
+      if (ret >= 0)
+        {
+          /* The truncation has completed without error.  Update the file
+           * size.
+           */
+
+          ff->ff_size = length;
+          ret = OK;
+        }
     }
   else
     {
@@ -1797,7 +1807,9 @@ static int fat_truncate(FAR struct file *filep, off_t length)
       ret = fat_dirextend(fs, ff, length);
       if (ret >= 0)
         {
-          /* The truncation has completed without error.  Update the file size */
+          /* The truncation has completed without error.  Update the file
+           * size.
+           */
 
           ff->ff_size = length;
           ret = OK;
