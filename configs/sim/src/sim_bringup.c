@@ -46,6 +46,8 @@
 
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
@@ -98,6 +100,9 @@ int sim_bringup(void)
 #ifdef CONFIG_ONESHOT
   FAR struct oneshot_lowerhalf_s *oneshot;
 #endif
+#ifdef CONFIG_RAMMTD
+  FAR uint8_t *ramstart;
+#endif
   int ret;
 
 #ifdef CONFIG_LIB_ZONEINFO_ROMFS
@@ -112,13 +117,52 @@ int sim_bringup(void)
   (void)sim_gpio_initialize();
 #endif
 
+#ifdef CONFIG_RAMMTD
+  /* Create a RAM MTD device if configured */
+
+  ramstart = (FAR uint8_t *)kmm_malloc(32 * 1024);
+  if (ramstart == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Allocation for RAM MTD failed\n");
+    }
+  else
+    {
+      /* Initialized the RAM MTD */
+
+      FAR struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 32 * 1024);
+      if (mtd == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: rammtd_initialize failed\n");
+          kmm_free(ramstart);
+        }
+      else
+        {
+          /* Erase the RAM MTD */
+
+          ret = mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: IOCTL MTDIOC_BULKERASE failed\n");
+            }
+
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+          /* Initialize a SMART Flash block device and bind it to the MTD
+           * ./device.
+           */
+
+          smart_initialize(0, mtd, NULL);
+#endif
+        }
+    }
+#endif
+
 #ifdef CONFIG_ONESHOT
   /* Get an instance of the simulated oneshot timer */
 
   oneshot = oneshot_initialize(0, 0);
   if (oneshot == NULL)
     {
-      syslog(LOG_ERR, "ERROR: oneshot_initialize faile\n");
+      syslog(LOG_ERR, "ERROR: oneshot_initialize failed\n");
     }
   else
     {
