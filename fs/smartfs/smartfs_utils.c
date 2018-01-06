@@ -711,9 +711,9 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
 
                                   /* Add used bytes to the total and point to next sector */
 
-                                  if (*((uint16_t *) header->used) != SMARTFS_ERASEDSTATE_16BIT)
+                                  if (*((uint16_t *)header->used) != SMARTFS_ERASEDSTATE_16BIT)
                                     {
-                                      direntry->datlen += *((uint16_t *) header->used);
+                                      direntry->datlen += *((uint16_t *)header->used);
                                     }
 
                                   dirsector = SMARTFS_NEXTSECTOR(header);
@@ -936,7 +936,7 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
 
           /* Chain the next sector into this sector sector */
 
-          *((uint16_t *) chainheader->nextsector) = nextsector;
+          *((FAR uint16_t *)chainheader->nextsector) = nextsector;
           readwrite.offset = offsetof(struct smartfs_chain_header_s,
               nextsector);
           readwrite.count = sizeof(uint16_t);
@@ -1263,8 +1263,9 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
 
                   SMARTFS_NEXTSECTOR(header) = nextsector;
                   readwrite.offset = offsetof(struct smartfs_chain_header_s, nextsector);
-                  readwrite.count = sizeof(uint16_t);
+                  readwrite.count  = sizeof(uint16_t);
                   readwrite.buffer = header->nextsector;
+
                   ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
                   if (ret < 0)
                     {
@@ -1388,92 +1389,403 @@ errout:
 }
 
 /****************************************************************************
- * Name: smartfs_truncatefile
+ * Name: smartfs_sync_internal
  *
- * Description: Truncates an existing file on the device so that it occupies
- *              zero bytes and can be completely re-written.
+ * Description:
+ *   Synchronize the file state on disk to match internal, in-memory state.
  *
  ****************************************************************************/
 
-int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
-        struct smartfs_entry_s *entry, FAR struct smartfs_ofile_s *sf)
+int smartfs_sync_internal(FAR struct smartfs_mountpt_s *fs,
+                          FAR struct smartfs_ofile_s *sf)
 {
-  int                             ret;
-  uint16_t                        nextsector;
-  uint16_t                        sector;
-  struct smartfs_chain_header_s  *header;
-  struct smart_read_write_s       readwrite;
+  FAR struct smartfs_chain_header_s *header;
+  struct smart_read_write_s readwrite;
+  int ret = OK;
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  if (sf->bflags & SMARTFS_BFLAG_DIRTY)
+    {
+      /* Update the header with the number of bytes written */
+
+      header = (struct smartfs_chain_header_s *)sf->buffer;
+      if (*((uint16_t *)header->used) == SMARTFS_ERASEDSTATE_16BIT)
+        {
+          *((uint16_t *)header->used) = sf->byteswritten;
+        }
+      else
+        {
+          *((uint16_t *)header->used) += sf->byteswritten;
+        }
+
+      /* Write the entire sector to FLASH */
+
+      readwrite.logsector = sf->currsector;
+      readwrite.offset    = 0;
+      readwrite.count     = fs->fs_llformat.availbytes;
+      readwrite.buffer    = sf->buffer;
+
+      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error %d writing used bytes for sector %d\n",
+               ret, sf->currsector);
+          goto errout;
+        }
+
+      sf->byteswritten = 0;
+      sf->bflags = 0;
+    }
+#else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
+  /* Test if we have written bytes to the current sector that
+   * need to be recorded in the chain header's used bytes field. */
+
+  if (sf->byteswritten > 0)
+    {
+      finfo("Syncing sector %d\n", sf->currsector);
+
+      /* Read the existing sector used bytes value */
+
+      readwrite.logsector = sf->currsector;
+      readwrite.offset    = 0;
+      readwrite.buffer    = (uint8_t *) fs->fs_rwbuffer;
+      readwrite.count     = sizeof(struct smartfs_chain_header_s);
+
+      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error %d reading sector %d data\n",
+               ret, sf->currsector);
+          goto errout;
+        }
+
+      /* Add new byteswritten to existing value */
+
+      header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
+      if (*((uint16_t *) header->used) == SMARTFS_ERASEDSTATE_16BIT)
+        {
+          *((uint16_t *) header->used) = sf->byteswritten;
+        }
+      else
+        {
+          *((uint16_t *) header->used) += sf->byteswritten;
+        }
+
+      readwrite.offset = offsetof(struct smartfs_chain_header_s, used);
+      readwrite.count  = sizeof(uint16_t);
+      readwrite.buffer = (uint8_t *) &fs->fs_rwbuffer[readwrite.offset];
+
+      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error %d writing used bytes for sector %d\n",
+               ret, sf->currsector);
+          goto errout;
+        }
+
+      sf->byteswritten = 0;
+    }
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: smartfs_seek_internal
+ *
+ * Description:
+ *   Performs the logic of the seek function.  This is an internal function
+ *   because it does not provide semaphore protection and therefore must be
+ *   called from one of the other public interface routines (open, seek,
+ *   etc.).
+ *
+ ****************************************************************************/
+
+off_t smartfs_seek_internal(FAR struct smartfs_mountpt_s *fs,
+                            FAR struct smartfs_ofile_s *sf,
+                            off_t offset, int whence)
+{
+  FAR struct smartfs_chain_header_s *header;
+  struct smart_read_write_s readwrite;
+  off_t newpos;
+  off_t sectorstartpos;
+  int ret;
+
+  /* Test if this is a seek to get the current file pos */
+
+  if ((whence == SEEK_CUR) && (offset == 0))
+    {
+      return sf->filepos;
+    }
+
+  /* Test if we need to sync the file */
+
+  if (sf->byteswritten > 0)
+    {
+      /* Perform a sync */
+
+      smartfs_sync_internal(fs, sf);
+    }
+
+  /* Calculate the file position to seek to based on current position */
+
+  switch (whence)
+  {
+    case SEEK_SET:
+    default:
+      newpos = offset;
+      break;
+
+    case SEEK_CUR:
+      newpos = sf->filepos + offset;
+      break;
+
+    case SEEK_END:
+      newpos = sf->entry.datlen + offset;
+      break;
+  }
+
+  /* Ensure newpos is in range */
+
+  if (newpos < 0)
+    {
+      newpos = 0;
+    }
+
+  if (newpos > sf->entry.datlen)
+    {
+      newpos = sf->entry.datlen;
+    }
+
+  /* Now perform the seek.  Test if we are seeking within the current
+   * sector and can skip the search to save time.
+   */
+
+  sectorstartpos = sf->filepos - (sf->curroffset - sizeof(struct
+        smartfs_chain_header_s));
+
+  if (newpos >= sectorstartpos && newpos < sectorstartpos +
+      fs->fs_llformat.availbytes - sizeof(struct smartfs_chain_header_s))
+    {
+      /* Seeking within the current sector.  Just update the offset */
+
+      sf->curroffset = sizeof(struct smartfs_chain_header_s) + newpos-sectorstartpos;
+      sf->filepos = newpos;
+
+      return newpos;
+    }
+
+  /* Nope, we have to search for the sector and offset.  If the new pos is greater
+   * than the current pos, then we can start from the beginning of the current
+   * sector, otherwise we have to start from the beginning of the file.
+   */
+
+  if (newpos > sf->filepos)
+    {
+      sf->filepos = sectorstartpos;
+    }
+  else
+    {
+      sf->currsector = sf->entry.firstsector;
+      sf->filepos = 0;
+    }
+
+  header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
+  while ((sf->currsector != SMARTFS_ERASEDSTATE_16BIT) &&
+      (sf->filepos + fs->fs_llformat.availbytes -
+      sizeof(struct smartfs_chain_header_s) < newpos))
+    {
+      /* Read the sector's header */
+
+      readwrite.logsector = sf->currsector;
+      readwrite.offset    = 0;
+      readwrite.count     = sizeof(struct smartfs_chain_header_s);
+      readwrite.buffer    = (uint8_t *) fs->fs_rwbuffer;
+
+      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error %d reading sector %d header\n",
+               ret, sf->currsector);
+          goto errout;
+        }
+
+      /* Point to next sector and update filepos */
+
+      sf->currsector = SMARTFS_NEXTSECTOR(header);
+      sf->filepos += SMARTFS_USED(header);
+    }
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+
+  /* When using sector buffering, we must read in the last buffer to our
+   * sf->buffer in case any changes are made.
+   */
+
+  if (sf->currsector != SMARTFS_ERASEDSTATE_16BIT)
+    {
+      readwrite.logsector = sf->currsector;
+      readwrite.offset = 0;
+      readwrite.count = fs->fs_llformat.availbytes;
+      readwrite.buffer = (uint8_t *) sf->buffer;
+      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error %d reading sector %d header\n",
+               ret, sf->currsector);
+          goto errout;
+        }
+    }
+#endif
+
+  /* Now calculate the offset */
+
+  sf->curroffset = sizeof(struct smartfs_chain_header_s) + newpos - sf->filepos;
+  sf->filepos = newpos;
+  return newpos;
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: smartfs_shrinkfile
+ *
+ * Description:
+ *   Shrink the size existing file to to the specified length
+ *
+ ****************************************************************************/
+
+int smartfs_shrinkfile(FAR struct smartfs_mountpt_s *fs,
+                       FAR struct smartfs_ofile_s *sf, off_t length)
+{
+  FAR struct smartfs_chain_header_s *header;
+  FAR struct smartfs_entry_s *entry;
+  FAR uint8_t *dest;
+  struct smart_read_write_s readwrite;
+  uint16_t nextsector;
+  uint16_t sector;
+  off_t remaining;
+  off_t destsize;
+  off_t available;
+  off_t offset;
+  int ret;
 
   /* Walk through the directory's sectors and count entries */
 
+  entry      = &sf->entry;
   nextsector = entry->firstsector;
-  header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
+  header     = (struct smartfs_chain_header_s *)fs->fs_rwbuffer;
+  remaining  = length;
+  available  = fs->fs_llformat.availbytes - sizeof(struct smartfs_chain_header_s);
 
   while (nextsector != SMARTFS_ERASEDSTATE_16BIT)
     {
-      /* Read the next sector's header into our buffer */
+      /* Read the next sector into our buffer */
 
       readwrite.logsector = nextsector;
-      readwrite.offset = 0;
-      readwrite.count = sizeof(struct smartfs_chain_header_s);
-      readwrite.buffer = (uint8_t *) fs->fs_rwbuffer;
+      readwrite.offset    = 0;
+      readwrite.count     = fs->fs_llformat.availbytes;
+      readwrite.buffer    = (FAR uint8_t *)fs->fs_rwbuffer;
+
       ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
       if (ret < 0)
         {
           ferr("ERROR: Error reading sector %d header\n", nextsector);
-          goto errout;
+          return ret;
         }
 
       /* Get the next chained sector */
 
       sector = SMARTFS_NEXTSECTOR(header);
 
-      /* If this is the 1st sector of the file, then just overwrite
-       * the sector data with the erased state value.  The underlying
-       * SMART block driver will detect this and release the old
-       * sector and create a new one with the new (blank) data.
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+      /* When we have a sector buffer in use, simply skip the first sector.
+       * It will be handled below.
        */
 
       if (nextsector == entry->firstsector)
         {
-#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+          if (remaining > available)
+            {
+              remaining -= available;
+            }
+          else
+            {
+              remaining = 0;
+            }
+        }
+      else
+#endif
+      /* Are we retaining the sector it its entirety? */
 
-          /* When we have a sector buffer in use, simply skip the first sector */
+      if (remaining >= available)
+        {
+          /* Yes... skip to the next sector */
 
-          nextsector = sector;
-          continue;
+          remaining -= available;
+        }
 
-#else
+      /* Are we removing the sector it its entirety? */
 
-          /* Fill our buffer with erased data */
+      else if (remaining <= 0 && nextsector != entry->firstsector)
+        {
+          /* Yes.. just release the sector */
 
-          memset(fs->fs_rwbuffer, CONFIG_SMARTFS_ERASEDSTATE, fs->fs_llformat.availbytes);
+          ret = FS_IOCTL(fs, BIOC_FREESECT, (unsigned long)nextsector);
+          if (ret < 0)
+            {
+              ferr("ERROR: Error freeing sector %d\n", nextsector);
+              return ret;
+            }
+        }
+      else
+        {
+          /* No.. Fill our buffer with erased data, retaining any still-
+           * valid bytes at the beginning of the buffer.
+           *
+           * Because of the preceding tests we know that
+           * 0 <= remaining < available.  A special case is remaining == 0
+           * and nextsector == firstsector.  In that case, we need to
+           * overwrite the sector data with the erased state value.  The
+           * underlying SMART block driver will detect this and release the
+           * old sector and create a new one with the new (blank) data.
+           *
+           * Otherwise, we need to preserve the header and overwrite some of
+           * the data.
+           */
+
+          if (remaining == 0)
+            {
+              dest       = (FAR uint8_t *)fs->fs_rwbuffer;
+              destsize   = fs->fs_llformat.availbytes;
+            }
+          else
+            {
+              offset     = sizeof(struct smartfs_chain_header_s) + remaining;
+              dest       = (FAR uint8_t *)&fs->fs_rwbuffer[offset];
+              destsize   = fs->fs_llformat.availbytes - offset;
+
+              *((uint16_t *)header->used)       = remaining;
+              *((uint16_t *)header->nextsector) = SMARTFS_ERASEDSTATE_16BIT;
+
+              remaining  = 0;
+            }
+
+          memset(dest, CONFIG_SMARTFS_ERASEDSTATE, destsize);
           header->type = SMARTFS_SECTOR_TYPE_FILE;
 
           /* Now write the new sector data */
 
           readwrite.count = fs->fs_llformat.availbytes;
-          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+
+          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long)&readwrite);
           if (ret < 0)
             {
               ferr("ERROR: Error blanking 1st sector (%d) of file\n", nextsector);
-              goto errout;
-            }
-
-          /* Set the entry's data length to zero ... we just truncated */
-
-          entry->datlen = 0;
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
-        }
-      else
-        {
-          /* Not the 1st sector -- release it */
-
-          ret = FS_IOCTL(fs, BIOC_FREESECT, (unsigned long) nextsector);
-          if (ret < 0)
-            {
-              ferr("ERROR: Error freeing sector %d\n", nextsector);
-              goto errout;
+              return ret;
             }
         }
 
@@ -1482,34 +1794,292 @@ int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
       nextsector = sector;
     }
 
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
   /* Now deal with the first sector in the event we are using a sector buffer
    * like we would be if CRC is enabled.
+   *
+   * Using sector buffer and we have an open file context.  Just update the
+   * sector buffer in the open file context.
    */
 
-#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
-  if (sf)
+  if (length < fs->fs_llformat.availbytes)
     {
-      /* Using sector buffer and we have an open file context.  Just update
-       * the sector buffer in the open file context.
-       */
+      /* Read the entire sector */
 
       readwrite.logsector = entry->firstsector;
-      readwrite.offset = 0;
-      readwrite.count = sizeof(struct smartfs_chain_header_s);
-      readwrite.buffer = (uint8_t *) fs->fs_rwbuffer;
-      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
+      readwrite.offset    = 0;
+      readwrite.count     = fs->fs_llformat.availbytes;
+      readwrite.buffer    = (uint8_t *)sf->buffer;
 
-      memset(sf->buffer, CONFIG_SMARTFS_ERASEDSTATE, fs->fs_llformat.availbytes);
-      header = (struct smartfs_chain_header_s *) sf->buffer;
-      header->type = SMARTFS_SECTOR_TYPE_FILE;
-      sf->bflags = SMARTFS_BFLAG_DIRTY;
-      entry->datlen = 0;
+      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long)&readwrite);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Retain any valid data at the beginning of the sector, including the
+       * header.  Special case length == 0
+       */
+
+      if (length == 0)
+        {
+          dest       = (FAR uint8_t *)&sf->buffer;
+          destsize   = fs->fs_llformat.availbytes;
+      else
+        {
+          offset     = sizeof(struct smartfs_chain_header_s) + length;
+          dest       = (FAR uint8_t *)&sf->buffer[offset];
+          destsize   = fs->fs_llformat.availbytes - offset;
+
+          header     = (struct smartfs_chain_header_s *)sf->buffer;
+          *((uint16_t *)header->used)       = length;
+          *((uint16_t *)header->nextsector) = SMARTFS_ERASEDSTATE_16BIT;
+        }
+
+      memset(dest, CONFIG_SMARTFS_ERASEDSTATE, destsize);
+
+      header        = (struct smartfs_chain_header_s *)sf->buffer;
+      header->type  = SMARTFS_SECTOR_TYPE_FILE;
+      sf->bflags    = SMARTFS_BFLAG_DIRTY;
     }
 #endif
 
+  entry->datlen = length;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: smartfs_extendfile
+ *
+ * Description:
+ *   Zero-extend the length of a regular file to 'length'.
+ *
+ ****************************************************************************/
+
+int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
+                       FAR struct smartfs_ofile_s *sf, off_t length)
+{
+  struct smart_read_write_s readwrite;
+  FAR struct smartfs_chain_header_s *header;
+#ifndef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  FAR uint8_t *buffer;
+#endif
+  off_t remaining;
+  off_t savepos;
+  off_t oldsize;
+  int ret;
+
+  /* We are zero-extending the file.  This is essentially the same as a
+   * write except that (1) we write zeros and (2) we don't update the file
+   * position.
+   */
+
+#ifndef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  /* In order to perform the writes we will have to have a sector buffer.  If
+   * SmartFS is not configured with a sector buffer then we will, then we
+   * will, unfortunately, need to allocate one.
+   */
+
+  buffer = (FAR uint8_t *)kmm_malloc(SMARTFS_TRUNCBUFFER_SIZE);
+  if (buffer == NULL)
+    {
+      return -ENOMEM;
+    }
+#endif
+
+  /* Loop until either (1) the file has been fully extended with zeroed data
+   * or (2) an error occurs.  We assume we start with the current sector in
+   * cache (ff_currentsector)
+   */
+
+  oldsize   = sf->entry.datlen;
+  remaining = length - oldsize;
+  DEBUGASSERT(length > oldsize);
+
+  /* Seek to the end of the file for the append/write operation, remembering
+   * the current file position.  It will be retored before returneding; the
+   * truncate operation must not alter the file position.
+   */
+
+  savepos = sf->filepos;
+  (void)smartfs_seek_internal(fs, sf, 0, SEEK_END);
+
+  while (remaining > 0)
+    {
+      /* We will fill up the current sector. Write data to the current
+       * sector first.
+       */
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+      readwrite.count = fs->fs_llformat.availbytes - sf->curroffset;
+      if (readwrite.count > remaining)
+        {
+          readwrite.count = remaining;
+        }
+
+      memset(&sf->buffer[sf->curroffset], 0, readwrite.count);
+      sf->bflags |= SMARTFS_BFLAG_DIRTY;
+
+#else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+      readwrite.offset    = sf->curroffset;
+      readwrite.logsector = sf->currsector;
+      readwrite.buffer    = buffer;
+
+      /* Select max size that available in the current sector */
+
+      readwrite.count     = fs->fs_llformat.availbytes - sf->curroffset;
+      if (readwrite.count > remaining)
+        {
+          /* Limit the write to the size for our smaller working buffer*/
+
+          readwrite.count = SMARTFS_TRUNCBUFFER_SIZE;
+        }
+
+      if (readwrite.count > remaining)
+        {
+          /* Futher limit the write to the remaining bytes to write */
+
+          readwrite.count = remaining;
+        }
+
+      /* Perform the write */
+
+      if (readwrite.count > 0)
+        {
+          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+          if (ret < 0)
+            {
+              ferr("ERROR: Error %d writing sector %d data\n",
+                   ret, sf->currsector);
+              goto errout_with_buffer;
+            }
+        }
+#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
+      /* Update our control variables */
+
+      sf->entry.datlen += readwrite.count;
+      sf->byteswritten += readwrite.count;
+      sf->curroffset   += readwrite.count;
+      remaining        -= readwrite.count;
+
+      /* Test if we wrote a full sector of data */
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+      if (sf->curroffset == fs->fs_llformat.availbytes && remaining)
+        {
+          /* First get a new chained sector */
+
+          ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
+          if (ret < 0)
+            {
+              ferr("ERROR: Error %d allocating new sector\n", ret);
+              goto errout_with_buffer;
+            }
+
+          /* Copy the new sector to the old one and chain it */
+
+          header = (struct smartfs_chain_header_s *) sf->buffer;
+          *((uint16_t *)header->nextsector) = (uint16_t)ret;
+
+          /* Now sync the file to write this sector out */
+
+          ret = smartfs_sync_internal(fs, sf);
+          if (ret != OK)
+            {
+              goto errout_with_buffer;
+            }
+
+          /* Record the new sector in our tracking variables and reset the
+           * offset to "zero".
+           */
+
+          if (sf->currsector == SMARTFS_NEXTSECTOR(header))
+            {
+              /* Error allocating logical sector! */
+
+              ferr("ERROR: Duplicate logical sector %d\n", sf->currsector);
+            }
+
+          sf->bflags     = SMARTFS_BFLAG_DIRTY;
+          sf->currsector = SMARTFS_NEXTSECTOR(header);
+          sf->curroffset = sizeof(struct smartfs_chain_header_s);
+          memset(sf->buffer, CONFIG_SMARTFS_ERASEDSTATE, fs->fs_llformat.availbytes);
+          header->type   = SMARTFS_DIRENT_TYPE_FILE;
+        }
+#else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+
+      if (sf->curroffset == fs->fs_llformat.availbytes)
+        {
+          /* Sync the file to write this sector out */
+
+          ret = smartfs_sync_internal(fs, sf);
+          if (ret != OK)
+            {
+              goto errout_with_buffer;
+            }
+
+          /* Allocate a new sector if needed */
+
+          if (remaining > 0)
+            {
+              /* Allocate a new sector */
+
+              ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
+              if (ret < 0)
+                {
+                  ferr("ERROR: Error %d allocating new sector\n", ret);
+                  goto errout_with_buffer;
+                }
+
+              /* Copy the new sector to the old one and chain it */
+
+              header = (struct smartfs_chain_header_s *)fs->fs_rwbuffer;
+              *((FAR uint16_t *)header->nextsector) = (uint16_t)ret;
+
+              readwrite.offset = offsetof(struct smartfs_chain_header_s,
+                                          nextsector);
+              readwrite.buffer = (FAR uint8_t *)header->nextsector;
+              readwrite.count  = sizeof(uint16_t);
+
+              ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+              if (ret < 0)
+                {
+                  ferr("ERROR: Error %d writing next sector\n", ret);
+                  goto errout_with_buffer;
+                }
+
+              /* Record the new sector in our tracking variables and
+               * reset the offset to "zero".
+               */
+
+              if (sf->currsector == SMARTFS_NEXTSECTOR(header))
+                {
+                  /* Error allocating logical sector! */
+
+                  ferr("ERROR: Duplicate logical sector %d\n", sf->currsector);
+                }
+
+              sf->currsector = SMARTFS_NEXTSECTOR(header);
+              sf->curroffset = sizeof(struct smartfs_chain_header_s);
+            }
+        }
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+    }
+
+  /* The file was successfully extended with zeros */
+
   ret = OK;
 
-errout:
+errout_with_buffer:
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  /* Release the allocated buffer */
+
+  kmm_free(buffer);
+#endif
+  /* Restore the original file position */
+
+  (void)smartfs_seek_internal(fs, sf, savepos, SEEK_SET);
   return ret;
 }
 

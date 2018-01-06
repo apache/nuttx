@@ -16,6 +16,7 @@ if FS_SMARTFS
 config SMARTFS_ERASEDSTATE
 	hex "FLASH erased state"
 	default 0xff
+	range 0x00 0xff
 	---help---
 		The erased state of FLASH.
 		This must have one of the values of 0xff or 0x00.

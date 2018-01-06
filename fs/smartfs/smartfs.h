@@ -340,7 +340,7 @@ struct smartfs_mountpt_s
  ****************************************************************************/
 
 /****************************************************************************
- * Internal function prototypes
+ * Public Functions
  ****************************************************************************/
 
 /* Semaphore access for internal use */
@@ -354,28 +354,37 @@ struct smartfs_mountpt_s;
 
 /* Utility functions */
 
-int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable);
+int smartfs_mount(FAR struct smartfs_mountpt_s *fs, bool writeable);
 
-int smartfs_unmount(struct smartfs_mountpt_s *fs);
+int smartfs_unmount(FAR struct smartfs_mountpt_s *fs);
 
-int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
-        struct smartfs_entry_s *direntry, const char *relpath,
-        uint16_t *parentdirsector, const char **filename);
+int smartfs_finddirentry(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_entry_s *direntry, FAR const char *relpath,
+        FAR uint16_t *parentdirsector, FAR const char **filename);
 
-int smartfs_createentry(struct smartfs_mountpt_s *fs,
-        uint16_t parentdirsector, const char* filename,
+int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
+        uint16_t parentdirsector, FAR const char* filename,
         uint16_t type,
-        mode_t mode, struct smartfs_entry_s *direntry,
+        mode_t mode, FAR struct smartfs_entry_s *direntry,
         uint16_t sectorno, FAR struct smartfs_ofile_s *sf);
 
-int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
-        struct smartfs_entry_s *entry);
+int smartfs_deleteentry(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_entry_s *entry);
 
-int smartfs_countdirentries(struct smartfs_mountpt_s *fs,
-        struct smartfs_entry_s *entry);
+int smartfs_countdirentries(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_entry_s *entry);
 
-int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
-        struct smartfs_entry_s *entry, FAR struct smartfs_ofile_s *sf);
+int smartfs_sync_internal(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_ofile_s *sf);
+
+off_t smartfs_seek_internal(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_ofile_s *sf, off_t offset, int whence);
+
+int smartfs_shrinkfile(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_ofile_s *sf, off_t length);
+
+int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
+        FAR struct smartfs_ofile_s *sf, off_t length);
 
 uint16_t smartfs_rdle16(FAR const void *val);
 

@@ -147,7 +147,7 @@ int sim_bringup(void)
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
           /* Initialize a SMART Flash block device and bind it to the MTD
-           * ./device.
+           * device.
            */
 
           smart_initialize(0, mtd, NULL);
