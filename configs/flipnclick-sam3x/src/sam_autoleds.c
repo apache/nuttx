@@ -186,8 +186,6 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  switch (led)
-    {
   /* SYMBOL               MEANING                      LED STATE
    *                                               L   A   B   C   D
    * -------------------  ----------------------- --- --- --- --- ---

@@ -39,7 +39,7 @@
 
 MEMORY
 {
-    flash (rx)   : ORIGIN = 0x00080000, LENGTH = 1024K
+    flash (rx)   : ORIGIN = 0x00080000, LENGTH = 512K
     sram0 (rwx)  : ORIGIN = 0x20000000, LENGTH = 64K
     sram1 (rwx)  : ORIGIN = 0x20080000, LENGTH = 32K
     nfcram (rwx) : ORIGIN = 0x20100000, LENGTH = 4K
@@ -49,7 +49,8 @@ OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -65,23 +66,27 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > flash
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} >flash
 
 	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
+	.ARM.exidx :
+	{
 		*(.ARM.exidx*)
 	} >flash
 	__exidx_end = ABSOLUTE(.);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -91,7 +96,8 @@ SECTIONS
 
 	_eronly = LOADADDR(.data);
 
-	.ramfunc ALIGN(4): {
+	.ramfunc ALIGN(4):
+	{
 		_sramfuncs = ABSOLUTE(.);
 		*(.ramfunc  .ramfunc.*)
 		_eramfuncs = ABSOLUTE(.);
@@ -99,7 +105,8 @@ SECTIONS
 
 	_framfuncs = LOADADDR(.ramfunc);
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -108,6 +115,7 @@ SECTIONS
 	} > sram0
 
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

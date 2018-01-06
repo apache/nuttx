@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <stdio.h>
 #include <syslog.h>
 
@@ -88,6 +89,19 @@
 
 int sam_bringup(void)
 {
+  int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,"ERROR: Failed to mount procfs at /proc: %d\n",
+            ret);
+    }
+#endif
+
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
   /* Initialize the SPI-based MMC/SD slot */
@@ -104,5 +118,6 @@ int sam_bringup(void)
   }
 #endif
 
+  UNUSED(ret);
   return OK;
 }
