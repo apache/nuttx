@@ -196,6 +196,16 @@ config ARCH_BOARD_FIRE_STM32
 		and 3 of the boards are supported but only version 2 has been
 		tested.
 
+config ARCH_BOARD_FLIPNCLICK_SAM3X
+	bool "Mikroe Flip&Click SAM3X"
+	depends on ARCH_CHIP_ATSAM3X8E
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects the Mikroe Flip&Click STM32X board.  This board
+		is an Arduino-Due work-alike with four Mikroe Click bus interfaces.
+		Like the Arduino DUE, this board features the Atmel ATSAM3X8E MCU
+		running at 84 MHz.
+
 config ARCH_BOARD_FREEDOM_K64F
 	bool "NXP Freedom-k64f development board"
 	depends on ARCH_CHIP_MK64FN1M0VLL12
@@ -1609,6 +1619,7 @@ config ARCH_BOARD
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
+	default "flipnclick-sam3x"         if ARCH_BOARD_FLIPNCLICK_SAM3X
 	default "freedom-k64f"             if ARCH_BOARD_FREEDOM_K64F
 	default "freedom-k66f"             if ARCH_BOARD_FREEDOM_K66F
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
@@ -1832,6 +1843,9 @@ source "configs/ez80f910200zco/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
 source "configs/fire-stm32v2/Kconfig"
+endif
+if ARCH_BOARD_FLIPNCLICK_SAM3X
+source "configs/flipnclick-sam3x/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_K64F
 source "configs/freedom-k64f/Kconfig"

@@ -1,7 +1,7 @@
 ############################################################################
-# configs/arduino-due/src/Makefile
+# configs/flipnclick-sam3x/src/Makefile
 #
-#   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,23 +42,6 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else
 CSRCS += sam_userleds.c
-endif
-
-ifeq ($(CONFIG_ARDUINO_ITHEAD_TFT),y)
-
-ifeq ($(CONFIG_SPI_BITBANG),y)
-ifeq ($(CONFIG_MMCSD_SPI),y)
-CSRCS += sam_mmcsd.c
-endif
-
-ifeq ($(CONFIG_INPUT_ADS7843E),y)
-CSRCS += sam_touchscreen.c
-endif
-endif
-
-ifeq ($(CONFIG_LCD),y)
-CSRCS += sam_lcd.c
-endif
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

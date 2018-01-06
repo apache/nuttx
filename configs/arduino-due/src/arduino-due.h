@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/arduino-due/src/arduino-due.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -308,17 +308,21 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: sam_sram_initialize
+/****************************************************************************
+ * Name: sam_bringup
  *
  * Description:
- *   Configure and enable SRAM on board the SAM4S Xplained
+ *   Perform architecture-specific initialization
  *
- ************************************************************************************/
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_SAM34_EXTSRAM0
-void sam_sram_initialize(void);
-#endif
+int sam_bringup(void);
 
 /****************************************************************************
  * Name: sam_sdinitialize

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/arduino-due/src/sam_boot.c
+ * config/arduino-due/src/sam_bringup.c
  *
- *   Copyright (C) 2013, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,54 +39,70 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 
 #include "arduino-due.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_MMCSD_SPI)
+/* Support for the SD card slot on the ITEAD TFT shield */
+/* Verify NSH PORT and SLOT settings */
+
+#  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAM34_MMCSDSLOTNO
+#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
+#  endif
+
+/* Default MMC/SD minor number */
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_boardinitialize
+ * Name: sam_bringup
  *
  * Description:
- *   All SAM3/4 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void sam_boardinitialize(void)
+int sam_bringup(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_MMCSD_SPI)
+  /* Initialize the SPI-based MMC/SD slot */
 
-  board_autoled_initialize();
+  {
+    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+    if (ret < 0)
+      {
+        syslog(LOG_ERR,
+               "board_app_initialize: Failed to initialize MMC/SD slot: %d\n",
+               ret);
+       return ret;
+      }
+  }
 #endif
+
+  return OK;
 }
-
-/****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  (void)sam_bringup();
-}
-#endif

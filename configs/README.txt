@@ -260,6 +260,12 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/flipnclick-sam3x
+  Board support for the Mikroe Flip&Click STM32X board.  This board is an
+  Arduino-Due work-alike with four Mikroe Click bus interfaces.  Like the
+  Arduino DUE, this board features the Atmel ATSAM3X8E MCU running at 84
+  MHz.
+
 configs/freedom-k64f
   This port uses the NXP/FreeScale FREEDOM-K64F development board. This board
   uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.

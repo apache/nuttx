@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/arduino-due/src/sam_boot.c
+ * configs/flipnclick-sam3x/src/sam_boot.c
  *
- *   Copyright (C) 2013, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 
 #include <nuttx/board.h>
 
-#include "arduino-due.h"
+#include "flipnclick-sam3x.h"
 
 /****************************************************************************
  * Public Functions

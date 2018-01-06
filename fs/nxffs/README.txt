@@ -177,4 +177,9 @@ Things to Do
   a good but empty state... all ready for file system re-organization.
 - And worse, when NXFSS reorganization the FLASH a power cycle can
   damage the file system content if it happens at the wrong time.
+- The current design does not permit re-opening of files for write access
+  unless the file is truncated to zero length.  This effectively prohibits
+  implementation of a proper turncate() method which should alter the
+  size of a previously written file.  There is some fragmentray logic in
+  place but even this is conditioned out with __NO_TRUNCATE_SUPPORT__.
 

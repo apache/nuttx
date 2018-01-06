@@ -1,5 +1,5 @@
 README
-^^^^^^
+======
 
   This README discusses issues unique to NuttX configurations for the
   Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84 MHz.
@@ -17,7 +17,7 @@ README
   - ITEAD 2.4" TFT with Touch, Arduino Shield 1.0
 
 Contents
-^^^^^^^^
+========
 
   - PIO Pin Usage
   - Rev 2 vs. Rev 3
@@ -25,11 +25,11 @@ Contents
   - Buttons and LEDs
   - Serial Consoles
   - Loading Code
-  - SAM4S Xplained-specific Configuration Options
+  - Arduino Due-specific Configuration Options
   - Configurations
 
 PIO Pin Usage
-^^^^^^^^^^^^^
+=============
 
   PORTA                          PORTB                          PORTC
   ------------------------------ ------------------------------ --------------------------------
@@ -108,7 +108,7 @@ PIO Pin Usage
   ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
 
 Rev 2 vs. Rev 3
-^^^^^^^^^^^^^^^
+===============
 
   This port was performed on the Arduino Due Rev 2 board.  NuttX users
   have reported issues with the serial port on his Arduino Due Rev 3 board.
@@ -119,7 +119,7 @@ Rev 2 vs. Rev 3
     CONFIG_ARDUINO_DUE_REV3=y
 
 ITEAD 2.4" TFT with Touch
-^^^^^^^^^^^^^^^^^^^^^^^^^
+=========================
 
   The Arduino 2.4" TFT Touch Shield is designed for all the Arduino
   compatible boards. It works in 3.3V voltage level. It can be directly
@@ -245,7 +245,7 @@ ITEAD 2.4" TFT with Touch
   - /CS is connected to ground (XPT2046 is always selected)
 
 Buttons and LEDs
-^^^^^^^^^^^^^^^^
+================
 
   Buttons
   -------
@@ -291,7 +291,7 @@ Buttons and LEDs
   has halted.
 
 Serial Consoles
-^^^^^^^^^^^^^^^
+===============
 
   The SAM3X has a UART and 4 USARTS.  The Programming port uses a USB-to-
   serial chip connected to the first UART0 of the MCU (RX0 and TX0).  The
@@ -328,7 +328,7 @@ Serial Consoles
   USB virual COM port in the case of UART0).
 
 Loading Code
-^^^^^^^^^^^^
+============
 
   Installing the Arduino USB Driver under Windows:
   ------------------------------------------------
@@ -512,7 +512,7 @@ Loading Code
    have been unable to get the get the SAM-ICE to communicate with the Due.
 
 Arduino DUE-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==========================================
 
   CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
   be set to:
@@ -550,12 +550,9 @@ Arduino DUE-specific Configuration Options
   CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
   of delay loops
 
-  CONFIG_ENDIAN_BIG - define if big endian (default is little
-  endian)
-
   CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-    CONFIG_RAM_SIZE=0x00008000 (32Kb)
+    CONFIG_RAM_SIZE=65536 (64Kb)
 
   CONFIG_RAM_START - The start address of installed DRAM
 
@@ -564,37 +561,20 @@ Arduino DUE-specific Configuration Options
   CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
   have LEDs
 
-  CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-  stack. If defined, this symbol is the size of the interrupt
-  stack in bytes.  If not defined, the user task stacks will be
-  used during interrupt handling.
-
-  CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
-
-  CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
-
-  CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-  cause a 100 second delay during boot-up.  This 100 second delay
-  serves no purpose other than it allows you to calibrate
-  CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-  the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-  the delay actually is 100 seconds.
-
   Individual subsystems can be enabled:
 
+    CONFIG_SAM34_ADC12B      - 12-bit Analog To Digital Converter
+    CONFIG_SAM34_CAN0        - CAN Controller 0
+    CONFIG_SAM34_CAN1        - CAN Controller 1
+    CONFIG_SAM34_DACC        - Digital To Analog Converter
+    CONFIG_SAM34_DMAC0       - DMA Controller
+    CONFIG_SAM34_EMAC        - Ethernet MAC
+    CONFIG_SAM34_HSMCI       - High Speed Multimedia Card Interface
+    CONFIG_SAM34_PWM         - Pulse Width Modulation
     CONFIG_SAM34_RTC         - Real Time Clock
     CONFIG_SAM34_RTT         - Real Time Timer
-    CONFIG_SAM34_WDT         - Watchdog Timer
-    CONFIG_SAM34_UART0       - UART 0
-    CONFIG_SAM34_SMC         - Static Memory Controller
     CONFIG_SAM34_SDRAMC      - SDRAM Controller
-    CONFIG_SAM34_USART0      - USART 0
-    CONFIG_SAM34_USART1      - USART 1
-    CONFIG_SAM34_USART2      - USART 2
-    CONFIG_SAM34_USART3      - USART 3
-    CONFIG_SAM34_HSMCI       - High Speed Multimedia Card Interface
-    CONFIG_SAM34_TWI0        - Two-Wire Interface 0 (master/slave)
-    CONFIG_SAM34_TWI1        - Two-Wire Interface 1 (master/slave)
+    CONFIG_SAM34_SMC         - Static Memory Controller
     CONFIG_SAM34_SPI0        - Serial Peripheral Interface 0
     CONFIG_SAM34_SPI1        - Serial Peripheral Interface 1
     CONFIG_SAM34_SSC         - Synchronous Serial Controller
@@ -607,15 +587,16 @@ Arduino DUE-specific Configuration Options
     CONFIG_SAM34_TC6         - Timer Counter 6
     CONFIG_SAM34_TC7         - Timer Counter 7
     CONFIG_SAM34_TC8         - Timer Counter 8
-    CONFIG_SAM34_PWM         - Pulse Width Modulation
-    CONFIG_SAM34_ADC12B      - 12-bit Analog To Digital Converter
-    CONFIG_SAM34_DACC        - Digital To Analog Converter
-    CONFIG_SAM34_DMAC0       - DMA Controller
-    CONFIG_SAM34_UOTGHS      - USB OTG High Speed
     CONFIG_SAM34_TRNG        - True Random Number Generator
-    CONFIG_SAM34_EMAC        - Ethernet MAC
-    CONFIG_SAM34_CAN0        - CAN Controller 0
-    CONFIG_SAM34_CAN1        - CAN Controller 1
+    CONFIG_SAM34_TWIM/S0     - Two-Wire Interface 0 (master/slave)
+    CONFIG_SAM34_TWIM/S1     - Two-Wire Interface 1 (master/slave)
+    CONFIG_SAM34_UART0       - UART 0
+    CONFIG_SAM34_UOTGHS      - USB OTG High Speed
+    CONFIG_SAM34_USART0      - USART 0
+    CONFIG_SAM34_USART1      - USART 1
+    CONFIG_SAM34_USART2      - USART 2
+    CONFIG_SAM34_USART3      - USART 3
+    CONFIG_SAM34_WDT         - Watchdog Timer
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
@@ -626,33 +607,18 @@ Arduino DUE-specific Configuration Options
     CONFIG_SAM34_GPIOD_IRQ
     CONFIG_SAM34_GPIOE_IRQ
     CONFIG_SAM34_GPIOF_IRQ
-    CONFIG_USART0_SERIALDRIVER
-    CONFIG_USART1_SERIALDRIVER
-    CONFIG_USART2_SERIALDRIVER
-    CONFIG_USART3_SERIALDRIVER
-
-  ST91SAM4S specific device driver settings
-
-    CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
-           m (m=4,5) for the console and ttys0 (default is the USART1).
-    CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
-       This specific the size of the receive buffer
-    CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
-       being sent.  This specific the size of the transmit buffer
-    CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
-    CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
-    CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-    CONFIG_U[S]ARTn_2STOP - Two stop bits
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
-  Each SAM4S Xplained configuration is maintained in a sub-directory and
+  Each Arduino Due configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh arduino-due/<subdir>
-    cd -
+    tools/configure.sh [OPTIONS] arduino-due/<subdir>
+
+  Where typical options are -l to configure to build on Linux or -c to
+  configure for Cygwin under Linux.  'tools/configure.sh -h' will show
+  you all of the options.
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.
@@ -734,14 +700,11 @@ Configurations
      Atmel tools.  Try 'which arm-none-eabi-gcc' to make sure that you
      are selecting the right tool.
 
-     See also the "NOTE about Windows native toolchains" in the section call
-     "GNU Toolchain Options" above.
-
 Configuration sub-directories
 -----------------------------
 
   nsh:
-    This configuration directory will built the NuttShell.  See NOTES above.
+    This configuration directory will build the NuttShell.  See NOTES above.
 
     NOTES:
     1. NSH built-in applications are supported.  However, there are
@@ -750,7 +713,7 @@ Configuration sub-directories
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
 
-       Applicaton Configuration:
+       Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
     2. By default, this configuration uses UART0 and has support LEDs
@@ -865,7 +828,7 @@ Configuration sub-directories
        Library Support:
          CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
 
-       Applicaton Configuration:
+       Application Configuration:
          CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
 
        Defaults should be okay for related touchscreen settings.  Touchscreen

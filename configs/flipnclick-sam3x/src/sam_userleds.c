@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/arduino-due/src/sam_boot.c
+ * configs/flipnclick-sam3x/src/sam_userleds.c
  *
- *   Copyright (C) 2013, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+/* There are four LEDs on the top, blue side of the board.  Only one can be
+ * controlled by software:
+ *
+ *   LED L - PB27 (PWM13)
+ *
+ * There are also four LEDs on the back, white side of the board:
+ *
+ *   LED A - PC6
+ *   LED B - PC5
+ *   LED C - PC7
+ *   LED D - PC8
+ *
+ * A high output value illuminates the LEDs.
+ */
 
 /****************************************************************************
  * Included Files
@@ -39,54 +53,98 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#include "arduino-due.h"
+#include "chip.h"
+#include "sam_gpio.h"
+#include "flipnclick-sam3x.h"
+
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_boardinitialize
- *
- * Description:
- *   All SAM3/4 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void sam_boardinitialize(void)
+void board_userled_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+#ifndef CONFIG_ARCH_LEDS
+  /* Configure LED GPIOs for output */
 
-  board_autoled_initialize();
+  sam_configgpio(GPIO_LED_L);
+  sam_configgpio(GPIO_LED_A);
+  sam_configgpio(GPIO_LED_B);
+  sam_configgpio(GPIO_LED_C);
+  sam_configgpio(GPIO_LED_D);
 #endif
 }
 
 /****************************************************************************
- * Name: board_initialize
- *
- * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
+ * Name: board_userled
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
+void board_userled(int led, bool ledon)
 {
-  /* Perform board-specific initialization */
+  uint32_t ledcfg;
 
-  (void)sam_bringup();
+  switch (led)
+    {
+      case BOARD_LED_L:
+        ledcfg = GPIO_LED_L;
+        break;
+
+      case BOARD_LED_A:
+        ledcfg = GPIO_LED_A;
+        break;
+
+      case BOARD_LED_B:
+        ledcfg = GPIO_LED_B;
+        break;
+
+      case BOARD_LED_C:
+        ledcfg = GPIO_LED_C;
+        break;
+
+      case BOARD_LED_D:
+        ledcfg = GPIO_LED_D;
+        break;
+
+      default:
+        return;
+    }
+
+  sam_gpiowrite(ledcfg, ledon);
 }
-#endif
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+  bool ledon;
+
+  ledon = ((ledset & BOARD_LED_L_BIT) != 0);
+  sam_gpiowrite(GPIO_LED_L, ledon);
+
+  ledon = ((ledset & BOARD_LED_A_BIT) != 0);
+  sam_gpiowrite(GPIO_LED_A, ledon);
+
+  ledon = ((ledset & BOARD_LED_B_BIT) != 0);
+  sam_gpiowrite(GPIO_LED_B, ledon);
+
+  ledon = ((ledset & BOARD_LED_C_BIT) != 0);
+  sam_gpiowrite(GPIO_LED_C, ledon);
+
+  ledon = ((ledset & BOARD_LED_D_BIT) != 0);
+  sam_gpiowrite(GPIO_LED_D, ledon);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

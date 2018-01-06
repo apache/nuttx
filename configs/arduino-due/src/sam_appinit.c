@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/arduino-due/src/sam_appinit.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-
 #include <nuttx/board.h>
 
 #include "arduino-due.h"
@@ -50,22 +47,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
-    defined(CONFIG_MMCSD_SPI)
-/* Support for the SD card slot on the ITEAD TFT shield */
-/* Verify NSH PORT and SLOT settings */
-
-#  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
-
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAM34_MMCSDSLOTNO
-#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
-#  endif
-
-/* Default MMC/SD minor number */
-
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
+#ifndef OK
+#  define OK 0
 #endif
 
 /****************************************************************************
@@ -84,7 +67,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -99,21 +82,13 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
-    defined(CONFIG_MMCSD_SPI)
-  /* Initialize the SPI-based MMC/SD slot */
-
-  {
-    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR,
-               "board_app_initialize: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
-#endif
+#ifdef CONFIG_BOARD_INITIALIZE
+  /* Board initialization already performed by board_initialize() */
 
   return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return sam_bringup();
+#endif
 }
