@@ -290,7 +290,7 @@ static inline int nxffs_wralloc(FAR struct nxffs_volume_s *volume,
  ****************************************************************************/
 
 static inline int nxffs_reverify(FAR struct nxffs_volume_s *volume,
-                                FAR struct nxffs_wrfile_s *wrfile)
+                                 FAR struct nxffs_wrfile_s *wrfile)
 {
   uint32_t crc;
   off_t offset;
@@ -300,13 +300,13 @@ static inline int nxffs_reverify(FAR struct nxffs_volume_s *volume,
       /* Get the offset to the start of the data */
 
       offset = volume->iooffset + SIZEOF_NXFFS_DATA_HDR;
-      DEBUGASSERT(offset + wrfile->datlen < volume->geo.blocksize);
+      DEBUGASSERT(offset + wrfile->datlen <= volume->geo.blocksize);
 
       /* Calculate the CRC of the partial data block */
 
       crc = crc32(&volume->cache[offset], wrfile->datlen);
 
-      /* It must match the previoulsy calculated CRC value */
+      /* It must match the previously calculated CRC value */
 
       if (crc != wrfile->crc)
         {
@@ -427,18 +427,19 @@ static inline ssize_t nxffs_wrappend(FAR struct nxffs_volume_s *volume,
  *   nzeros - The number of bytes of zeroed data to be written
  *
  * Returned Value:
- *   The number of bytes written is returned on success.  Otherwise, a
+ *   The number of zero bytes written is returned on success.  Otherwise, a
  *   negated errno value is returned indicating the nature of the failure.
  *
  ****************************************************************************/
 
+#ifdef __NO_TRUNCATE_SUPPORT__
 static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
                                     FAR struct nxffs_wrfile_s *wrfile,
                                     off_t nzeros)
 {
   ssize_t maxsize;
   size_t nbytestoclear;
-  ssize_t remaining;
+  ssize_t nbytesleft;
   off_t offset;
   int ret;
 
@@ -456,11 +457,11 @@ static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
   /* Write as many bytes as we can into the data buffer */
 
   nbytestoclear = MIN(maxsize, nzeros);
-  remaining     = maxsize - nbytestoclear;
+  nbytesleft    = maxsize - nbytestoclear;
 
   if (nbytestoclear > 0)
     {
-      /* Copy the data into the volume write cache */
+      /* Zero the data into the volume write cache */
 
       memset(&volume->cache[offset], 0, nbytestoclear);
 
@@ -477,7 +478,7 @@ static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
        * block is full.  In that case, the block will be written below.
        */
 
-      if (remaining > 0)
+      if (nbytesleft > 0)
         {
           ret = nxffs_wrcache(volume);
           if (ret < 0)
@@ -490,7 +491,7 @@ static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
 
   /* Check if the data block is now full */
 
-  if (remaining <= 0)
+  if (nbytesleft <= 0)
     {
       /* The data block is full, write the block to FLASH */
 
@@ -502,8 +503,9 @@ static inline ssize_t nxffs_zappend(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  return 0;
+  return nbytestoclear;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -642,6 +644,7 @@ errout:
  *
  ****************************************************************************/
 
+#ifdef __NO_TRUNCATE_SUPPORT__
 int nxffs_wrextend(FAR struct nxffs_volume_s *volume,
                    FAR struct nxffs_wrfile_s *wrfile, off_t length)
 {
@@ -709,6 +712,7 @@ int nxffs_wrextend(FAR struct nxffs_volume_s *volume,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: nxffs_wrreserve

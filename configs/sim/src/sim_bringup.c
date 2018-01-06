@@ -48,6 +48,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/nxffs.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
@@ -151,6 +152,15 @@ int sim_bringup(void)
            */
 
           smart_initialize(0, mtd, NULL);
+#elif defined(CONFIG_FS_NXFFS)
+          /* Initialize to provide NXFFS on the MTD interface */
+
+          ret = nxffs_initialize(mtd);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: NXFFS initialization failed: %d\n",
+                     ret);
+            }
 #endif
         }
     }
