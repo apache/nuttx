@@ -188,6 +188,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_AT24
+  /* Initialize the AT24 driver */
+
+  ret = stm32_at24_automount(AT24_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_at24_automount failed: %d\n", ret);
+      return ret;
+    }
+#endif /* HAVE_AT24 */
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 

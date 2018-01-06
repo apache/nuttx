@@ -85,6 +85,12 @@ ifeq ($(CONFIG_MTD_W25),y)
   CSRCS += stm32_w25.c
 endif
 
+ifeq ($(CONFIG_MTD_AT24XX),y)
+ifeq ($(CONFIG_STM32_I2C1),y)
+CSRCS += stm32_at24.c
+endif
+endif
+
 ifeq ($(CONFIG_AUDIO_TONE),y)
   CSRCS += stm32_tone.c
 endif

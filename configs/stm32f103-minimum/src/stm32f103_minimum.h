@@ -44,6 +44,43 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+#define HAVE_AT24 1
+
+/* AT24 Serial EEPROM */
+
+#define AT24_I2C_BUS   1 /* AT24C256 connected to I2C1 */
+#define AT24_MINOR     0
+
+#if !defined(CONFIG_MTD_AT24XX) || !defined(CONFIG_STM32_I2C1)
+#  undef HAVE_AT24
+#endif
+
+/* Can't support AT24 features if mountpoints are disabled or if we were not
+ * asked to mount the AT25 part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || \
+   !defined(CONFIG_STM32F103MINIMUM_AT24_BLOCKMOUNT)
+#  undef HAVE_AT24
+#endif
+
+/* If we are going to mount the AT24, then they user must also have told
+ * us what to do with it by setting one of these.
+ */
+
+#ifndef CONFIG_FS_NXFFS
+#  undef CONFIG_STM32F103MINIMUM_AT24_NXFFS
+#endif
+
+#if !defined(CONFIG_STM32F103MINIMUM_AT24_FTL) && \
+    !defined(CONFIG_STM32F103MINIMUM_AT24_NXFFS)
+#  undef HAVE_AT24
+#endif
+
+#ifndef HAVE_AT24
+#error "HAVE_AT24 is not defined!\n"
+#endif
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
