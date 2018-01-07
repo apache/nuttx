@@ -230,7 +230,7 @@
  *
  *   There are four Click bus connectors with serial ports available as follows:
  *
- *      Click A:  USART0 RXD0 and TXD0 which are, again, PD10 and PD11.
+ *      Click A:  USART0 RXD0 and TXD0 which are, again, PA10 and PA11.
  *      Click B:  USART1 RXD1 and TXD1 which are PA12 and PA13, respectively.
  *      Click C:  USART3 RXD3 and TXD3 which are PD5 and PD4, respectively.
  *      Click D:  USART3 RXD3 and TXD3 which are, again, PD5 and PD4.

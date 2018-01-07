@@ -3,24 +3,49 @@ README
 
   This README discusses issues unique to NuttX configurations for the
   Mikroe Flip&Click STM32X board.  This board is an Arduino-Due work-alike
-  with four Mikroe Click bus interfaces.  Like the Arduino DUE, this board
+  with four Mikroe Click bus interfaces.  Like the Arduino-Due, this board
   features the Atmel ATSAM3X8E MCU running at 84 MHz.
 
 Contents
 ========
 
+  - STATUS
   - Buttons and LEDs
   - Serial Consoles
   - Loading Code
-  - Arduino Due-specific Configuration Options
+  - Flip&Click SAM3X-specific Configuration Options
   - Configurations
+
+STATUS
+======
+
+  2018-01-07:  Created the configuration.  At present it does not work; I
+    believe because of tool-related issues.  I do the following:
+
+    a) Open TeraTerm, select COM7 at 1200 baud, type a few ENTERs, and
+       close teraterm.
+
+    b) Execute the following command which claims to have successfully
+       written to FLASH.
+
+      /bossac.exe --info --debug --port COM7 --usb-port=0 --erase --write --verify -b nuttx.bin -R
+
+       But the code does not boot.  There is no indication of life.
+
+    c) Repeat a) then
+
+       bossac.exe --info --debug --port COM7 --usb-port=0 --verify -b nuttx.bin
+
+       And it says that the content of the FLASH is not good.
+
+
 
 Buttons and LEDs
 ================
 
   Buttons
   -------
-  There are no buttons on the Arduino Due board.
+  There are no buttons on the Flip&Click SAM3X board.
 
   LEDs
   ----
@@ -88,7 +113,7 @@ Serial Consoles
   2) Mikroe Click Serial Shield.  There are four Click bus connectors with
      serial ports available as follows:
 
-     Click A:  USART0 RXD0 and TXD0 which are, again, PD10 and PD11.
+     Click A:  USART0 RXD0 and TXD0 which are, again, PA10 and PA11.
      Click B:  USART1 RXD1 and TXD1 which are PA12 and PA13, respectively.
      Click C:  USART3 RXD3 and TXD3 which are PD5 and PD4, respectively.
      Click D:  USART3 RXD3 and TXD3 which are, again, PD5 and PD4.
@@ -103,37 +128,55 @@ Serial Consoles
 Loading Code
 ============
 
-  Installing the Arduino USB Driver under Windows:
-  ------------------------------------------------
-  1.  Download the Windows version of the Arduino software, not the 1.0.x
-      release but the latest 1.5.x that supports the Due. When the download
-      finishes, unzip the downloaded file.
-  2. Connect the Due to your computer with a USB cable via the Programming port.
+  Installing the Arduino USB Driver under Windows
+  -----------------------------------------------
+
+  1. Download the Windows version of the Arduino software, not the 1.0.x
+     release but the latest (1.5.x or later) that supports the Arduino
+     Due.  When the download finishes, unzip the downloaded file.
+
+     In the current 1.8.x release, the Arduino Due support is not included
+     in the base package but can be added by selecting the "Boards Manager"
+     from the "Tools" menu.
+
+  2. Connect the Flip&Click to your computer with a USB cable via the
+     Programming port.
+
   3. The Windows driver installation should fail.
+
   4. Open the Device Manger
+
   5. Look for the listing named "Ports (COM & LPT)". You should see an open
-     port named "Arduino Due Prog. Port".
-  6 Select the "Browse my computer for Driver software" option.
+     port named "Arduino Due Prog. Port".  Right click and select "Update
+     driver".
+
+  6. Select the "Browse my computer for Driver software" option.
+
   7. Right click on the "Arduino Due Prog. Port" and choose "Update Driver
      Software".
+
   8. Navigate to the folder with the Arduino IDE you downloaded and unzipped
-     earlier. Locate and select the "Drivers" folder in the main Arduino folder
-     (not the "FTDI USB Drivers" sub-directory).
+     earlier. Locate and select the "Drivers" folder in the main Arduino
+     folder (not the "FTDI USB Drivers" sub-directory).
 
-  Uploading NuttX to the Due Using Bossa:
-  ---------------------------------------
-  I don't think this can be done because the Arduino software is so dedicated
-  to "sketches".  However, Arduino uses BOSSA under the hood to load code and
-  you can use BOSSA outside of Arduino.
+  Loading NuttX to the Flip&Click Using Bossa
+  -------------------------------------------
 
-  Uploading NuttX to the Due Using Bossa:
-  ---------------------------------------
+  Arduino uses BOSSA under the hood to load code and you can use BOSSA
+  outside of Arduino.
+
   Where do you get it?
-    Generic BOSSA installation files are available here:
-    http://sourceforge.net/projects/b-o-s-s-a/?source=dlp
 
-    However, DUE uses a patched version of BOSSA available as source code here:
-    https://github.com/shumatech/BOSSA/tree/arduino
+    Generic BOSSA installation files are available here:
+    https://github.com/shumatech/BOSSA (formerly at
+    http://sourceforge.net/projects/b-o-s-s-a/?source=dlp)
+
+    Pre-built binaries are available: https://github.com/shumatech/BOSSA/releases
+
+    The original Arduino DUE used a patched version of BOSSA available
+    as source code here: https://github.com/shumatech/BOSSA/tree/arduino
+    But that has most likely been incorporated into the main github
+    repository.
 
     But, fortunately, since you already installed Arduino, you already have
     BOSSA installed.  In my installation, it is here:
@@ -141,26 +184,25 @@ Loading Code
     C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools\bossac.exe
 
   General Procedure
-  -----------------
 
-    1) Erase the FLASH and put the Due in bootloader mode
+    1) Erase the FLASH and put the Flip&Click in bootloader mode
     2) Write the file to FLASH
     3) Configure to boot from FLASH
-    4) Reset the DUE
+    4) Reset the Flip&Click
 
-  Erase FLASH and Put the Due in Bootloader Mode
-  ----------------------------------------------
+  Erase FLASH and Put the Flip&Click in Bootloader Mode
+
     This is accomplished by simply configuring the programming port in 1200
     baud and sending something on the programming port.  Here is some sample
     output from a Windows CMD.exe shell.  NOTE that my Arduino programming
-    port shows up as COM26.  It may be different on your system.
+    port shows up as COM7.  It may be different on your system.
 
     To enter boot mode, set the baud to 1200 and send anything to the
     programming port:
 
       C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>mode com26:1200,n,8,1
 
-      Status for device COM26:
+      Status for device COM7:
       ------------------------
           Baud:            1200
           Parity:          None
@@ -174,29 +216,28 @@ Loading Code
           DTR circuit:     ON
           RTS circuit:     ON
 
-      C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM26 -U false -i
-      Device       : ATSAM3X8
-      Chip ID      : 285e0a60
-      Version      : v1.1 Dec 15 2010 19:25:04
-      Address      : 524288
-      Pages        : 2048
-      Page Size    : 256 bytes
-      Total Size   : 512KB
-      Planes       : 2
-      Lock Regions : 32
-      Locked       : none
-      Security     : false
-      Boot Flash   : false
+      C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM7 --usb-port=false -i
+          Device       : ATSAM3X8
+          Version      : v1.1 Dec 15 2010 19:25:04
+          Address      : 0x80000
+          Pages        : 2048
+          Page Size    : 256 bytes
+          Total Size   : 512KB
+          Planes       : 2
+          Lock Regions : 32
+          Locked       : none
+          Security     : false
+          Boot Flash   : false
 
   Writing FLASH and Setting FLASH Boot Mode
-  -----------------------------------------
+
     In a Cygwin BaSH shell:
 
       export PATH="/cygdrive/c/Program Files (x86)/Arduino/arduino-1.5.2/hardware/tools":$PATH
 
     Erasing, writing, and verifying FLASH with bossac:
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      $ bossac.exe --port=COM7 --usb-port=false -e -w -v -b nuttx.bin -R
       Erase flash
       Write 86588 bytes to flash
       [==============================] 100% (339/339 pages)
@@ -208,19 +249,19 @@ Loading Code
 
     Some things that can go wrong:
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
-      No device found on COM26
+      $ bossac.exe --port=COM7 --usb-port=false -e -w -v -b nuttx.bin -R
+      No device found on COM7
 
-    This error means that there is code running on the Due already so the
-    bootloader cannot connect. Pressing reset and trying again
+    This error means that there is code running on the Flip&Click already
+    so the bootloader cannot connect. Press reset and try again
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
-      No device found on COM26
+      $ bossac.exe --port=COM7 --usb-port=false -e -w -v -b nuttx.bin -R
+      No device found on COM7
 
-    Sill No connection because Duo does not jump to bootloader after reset.
-    Press ERASE button and try again
+    Sill No connection because the board does not jump to bootloader after
+    reset.  Set the baud to 1200 and send something then try again
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      $ bossac.exe --port=COM7 --usb-port=false -e -w -v -b nuttx.bin -R
       Erase flash
       Write 86588 bytes to flash
       [==============================] 100% (339/339 pages)
@@ -230,13 +271,13 @@ Loading Code
       Set boot flash true
       CPU reset.
 
-  Other useful bossac things operations.
-  -------------------------------------
+  Other useful bossac operations.
+
     a) Write code to FLASH don't change boot mode and don't reset.  This lets
        you examine the FLASH contents that you just loaded while the bootloader
        is still active.
 
-       $ bossac.exe --port=COM26 -U false -e -w -v --boot=0 nuttx.bin
+       $ bossac.exe --port=COM7 --usb-port=false -e -w -v --boot=0 nuttx.bin
        Write 64628 bytes to flash
        [==============================] 100% (253/253 pages)
        Verify 64628 bytes of flash
@@ -245,24 +286,24 @@ Loading Code
 
     b) Verify the FLASH contents (the bootloader must be running)
 
-       $ bossac.exe --port=COM26 -U false -v nuttx.bin
+       $ bossac.exe --port=COM7 --usb-port=false -v nuttx.bin
        Verify 64628 bytes of flash
        [==============================] 100% (253/253 pages)
        Verify successful
 
     c) Read from FLASH to a file  (the bootloader must be running):
 
-       $ bossac.exe --port=COM26 -U false --read=4096 nuttx.dump
+       $ bossac.exe --port=COM7 --usb-port=false --read=4096 nuttx.dump
        Read 4096 bytes from flash
        [==============================] 100% (16/16 pages)
 
     d) Change to boot from FLASH
 
-       $ bossac.exe --port=COM26 -U false --boot=1
+       $ bossac.exe --port=COM7 --usb-port=false --boot=1
        Set boot flash true
 
-  Uploading NuttX to the Due Using JTAG:
-  -------------------------------------
+  Uploading NuttX to the Flip&Click Using JTAG
+  --------------------------------------------
 
   The JTAG/SWD signals are brought out to a 10-pin header JTAG connector:
 
@@ -279,13 +320,16 @@ Loading Code
      9  GND            GNDDetect
      10 MASTER-RESET   nReset
 
-   You should be able to use a 10- to 20-pin adapter to connect a SAM-ICE
-   debugger to the Arduino Due.  I have this Olimex adapter:
-   https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ . But so far I
-   have been unable to get the get the SAM-ICE to communicate with the Due.
+   NOTE:  The 10-pin JTAG connector is not populated on the Flip&Click SAM3X.
 
-Arduino DUE-specific Configuration Options
-==========================================
+   You should be able to use a 10- to 20-pin adapter to connect a SAM-ICE
+   debugger to the Flip&Click SAM3X.  I have this Olimex adapter:
+   https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ . But so far I
+   have been unable to get the get the SAM-ICE to communicate with the
+   Flip&Click.
+
+Flip&Click SAM3X-specific Configuration Options
+===============================================
 
   CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
   be set to:
@@ -314,7 +358,7 @@ Arduino DUE-specific Configuration Options
   CONFIG_ARCH_BOARD - Identifies the configs/ subdirectory and
   hence, the board that supports the particular chip or SoC.
 
-    CONFIG_ARCH_BOARD=flipnclick-sam3x (for the Arduino Due development board)
+    CONFIG_ARCH_BOARD=flipnclick-sam3x (for the Flip&Click SAM3X development board)
 
   CONFIG_ARCH_BOARD_name - For use in C code
 
@@ -384,7 +428,7 @@ Arduino DUE-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-  Each Arduino Due configuration is maintained in a sub-directory and
+  Each Flip&Click SAM3X configuration is maintained in a sub-directory and
   can be selected as follow:
 
     tools/configure.sh [OPTIONS] flipnclick-sam3x/<subdir>
@@ -397,7 +441,8 @@ Configurations
   correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
-  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+  the make, the nuttx binary will reside in an ELF file called, simply,
+  nuttx.
 
     make
 

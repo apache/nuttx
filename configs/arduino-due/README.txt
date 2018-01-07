@@ -332,35 +332,53 @@ Loading Code
 
   Installing the Arduino USB Driver under Windows:
   ------------------------------------------------
-  1.  Download the Windows version of the Arduino software, not the 1.0.x
-      release but the latest 1.5.x that supports the Due. When the download
-      finishes, unzip the downloaded file.
-  2. Connect the Due to your computer with a USB cable via the Programming port.
+
+  1. Download the Windows version of the Arduino software, not the 1.0.x
+     release but the latest (1.5.x or later) that supports the Due. When
+     the download finishes, unzip the downloaded file.
+
+     In the current 1.8.x release, the Arduino Due support is not included
+     in the base package but can be added by selecting the "Boards Manager"
+     from the "Tools" menu.
+
+  2. Connect the Due to your computer with a USB cable via the Programming
+     port.
+
   3. The Windows driver installation should fail.
+
   4. Open the Device Manger
+
   5. Look for the listing named "Ports (COM & LPT)". You should see an open
-     port named "Arduino Due Prog. Port".
-  6 Select the "Browse my computer for Driver software" option.
+     port named "Arduino Due Prog. Port".  Right click and select "Update
+     driver".
+
+  6. Select the "Browse my computer for Driver software" option.
+
   7. Right click on the "Arduino Due Prog. Port" and choose "Update Driver
      Software".
+
   8. Navigate to the folder with the Arduino IDE you downloaded and unzipped
      earlier. Locate and select the "Drivers" folder in the main Arduino folder
      (not the "FTDI USB Drivers" sub-directory).
 
-  Uploading NuttX to the Due Using Bossa:
-  ---------------------------------------
-  I don't think this can be done because the Arduino software is so dedicated
-  to "sketches".  However, Arduino uses BOSSA under the hood to load code and
-  you can use BOSSA outside of Arduino.
+  Loading NuttX to the Due Using Bossa:
+  -------------------------------------
 
-  Uploading NuttX to the Due Using Bossa:
-  ---------------------------------------
+  Arduino uses BOSSA under the hood to load code and you can use BOSSA
+  outside of Arduino.
+
   Where do you get it?
-    Generic BOSSA installation files are available here:
-    http://sourceforge.net/projects/b-o-s-s-a/?source=dlp
 
-    However, DUE uses a patched version of BOSSA available as source code here:
-    https://github.com/shumatech/BOSSA/tree/arduino
+    Generic BOSSA installation files are available here:
+    https://github.com/shumatech/BOSSA (formerly at
+    http://sourceforge.net/projects/b-o-s-s-a/?source=dlp)
+
+    Pre-built binaries are available: https://github.com/shumatech/BOSSA/releases
+
+    The original Arduino DUE used a patched version of BOSSA available
+    as source code here: https://github.com/shumatech/BOSSA/tree/arduino
+    But that has most likely been incorporated into the main github
+    repository.
 
     But, fortunately, since you already installed Arduino, you already have
     BOSSA installed.  In my installation, it is here:
@@ -368,7 +386,6 @@ Loading Code
     C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools\bossac.exe
 
   General Procedure
-  -----------------
 
     1) Erase the FLASH and put the Due in bootloader mode
     2) Write the file to FLASH
@@ -376,7 +393,7 @@ Loading Code
     4) Reset the DUE
 
   Erase FLASH and Put the Due in Bootloader Mode
-  ----------------------------------------------
+
     This is accomplished by simply configuring the programming port in 1200
     baud and sending something on the programming port.  Here is some sample
     output from a Windows CMD.exe shell.  NOTE that my Arduino programming
@@ -388,7 +405,7 @@ Loading Code
       C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>mode com26:1200,n,8,1
 
       Status for device COM26:
-      ------------------------
+
           Baud:            1200
           Parity:          None
           Data Bits:       8
@@ -401,7 +418,7 @@ Loading Code
           DTR circuit:     ON
           RTS circuit:     ON
 
-      C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM26 -U false -i
+      C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM26 --usb-port=false -i
       Device       : ATSAM3X8
       Chip ID      : 285e0a60
       Version      : v1.1 Dec 15 2010 19:25:04
@@ -423,7 +440,7 @@ Loading Code
 
     Erasing, writing, and verifying FLASH with bossac:
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      $ bossac.exe --port=COM26 --usb-port=false -e -w -v -b nuttx.bin -R
       Erase flash
       Write 86588 bytes to flash
       [==============================] 100% (339/339 pages)
@@ -435,19 +452,19 @@ Loading Code
 
     Some things that can go wrong:
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      $ bossac.exe --port=COM26 --usb-port=false -e -w -v -b nuttx.bin -R
       No device found on COM26
 
     This error means that there is code running on the Due already so the
-    bootloader cannot connect. Pressing reset and trying again
+    bootloader cannot connect. Press reset and try again
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      $ bossac.exe --port=COM26 --usb-port=false -e -w -v -b nuttx.bin -R
       No device found on COM26
 
     Sill No connection because Duo does not jump to bootloader after reset.
     Press ERASE button and try again
 
-      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      $ bossac.exe --port=COM26 --usb-port=false -e -w -v -b nuttx.bin -R
       Erase flash
       Write 86588 bytes to flash
       [==============================] 100% (339/339 pages)
@@ -457,13 +474,13 @@ Loading Code
       Set boot flash true
       CPU reset.
 
-  Other useful bossac things operations.
-  -------------------------------------
+  Other useful bossac operations.
+
     a) Write code to FLASH don't change boot mode and don't reset.  This lets
        you examine the FLASH contents that you just loaded while the bootloader
        is still active.
 
-       $ bossac.exe --port=COM26 -U false -e -w -v --boot=0 nuttx.bin
+       $ bossac.exe --port=COM26 --usb-port=false -e -w -v --boot=0 nuttx.bin
        Write 64628 bytes to flash
        [==============================] 100% (253/253 pages)
        Verify 64628 bytes of flash
@@ -472,23 +489,23 @@ Loading Code
 
     b) Verify the FLASH contents (the bootloader must be running)
 
-       $ bossac.exe --port=COM26 -U false -v nuttx.bin
+       $ bossac.exe --port=COM26 --usb-port=false -v nuttx.bin
        Verify 64628 bytes of flash
        [==============================] 100% (253/253 pages)
        Verify successful
 
     c) Read from FLASH to a file  (the bootloader must be running):
 
-       $ bossac.exe --port=COM26 -U false --read=4096 nuttx.dump
+       $ bossac.exe --port=COM26 --usb-port=false --read=4096 nuttx.dump
        Read 4096 bytes from flash
        [==============================] 100% (16/16 pages)
 
     d) Change to boot from FLASH
 
-       $ bossac.exe --port=COM26 -U false --boot=1
+       $ bossac.exe --port=COM26 --usb-port=false --boot=1
        Set boot flash true
 
-  Uploading NuttX to the Due Using JTAG:
+  Uploading NuttX to the Due Using JTAG
   -------------------------------------
 
   The JTAG/SWD signals are brought out to a 10-pin header JTAG connector:
