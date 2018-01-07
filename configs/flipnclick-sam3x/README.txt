@@ -38,8 +38,6 @@ STATUS
 
        And it says that the content of the FLASH is not good.
 
-
-
 Buttons and LEDs
 ================
 
@@ -496,5 +494,5 @@ Configuration sub-directories
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
 
-       Applicaton Configuration:
+       Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
