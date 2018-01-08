@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pic32mz-starterkit/include/board.h
+ * configs/flipnclick-pic32mz/include/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H
-#define __CONFIGS_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H
+#ifndef __CONFIGS_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H
+#define __CONFIGS_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -49,9 +49,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
 /* Clocking *****************************************************************/
+/* REVISIT:  The PIC32MZ2048EFH100 is capable of operating at 252MHz */
+
 /* Crystal frequencies
  *
  * - A 24 MHz oscillator circuit (Y4) is connected to the on-board
@@ -173,116 +173,135 @@
 #define BOARD_EMAC_MIIM_DIV    40        /* Ideal: 100MHz/40 = 2.5MHz */
 
 /* LED definitions **********************************************************/
-/* LED Configuration ********************************************************/
-/* The PIC32MZ Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
- * board:
+/* There are four LEDs on the top, red side of the board.  Only one can be
+ * controlled by software:
  *
- *   PIN  LED   Notes
- *   ---  ----- -------------------------
- *   RH0  LED1  High illuminates (RED)
- *   RH1  LED3  High illuminates (YELLOW)
- *   RH2  LED2  High illuminates (GREEN)
+ *   LED L      - RB14 (SPI3_SCK)
+ *
+ * There are also four LEDs on the back, white side of the board:
+ *
+ *   LED A      - RA6
+ *   LED B      - RA7
+ *   LED C      - RE0
+ *   LED D      - RE1
+ *
+ * A high output value illuminates the LEDs.
  */
 
-/* LED index values for use with board_userled() */
+#ifdef CONFIG_ARCH_LEDS
+/* LED index values for use with board_userled(): */
 
-#define PIC32MZ_STARTERKIT_LED1     0
-#define PIC32MZ_STARTERKIT_LED2     1
-#define PIC32MZ_STARTERKIT_LED3     2
-#define PIC32MZ_STARTERKIT_NLEDS    3
+#  define BOARD_LED_A     0
+#  define BOARD_LED_B     1
+#  define BOARD_LED_C     2
+#  define BOARD_LED_D     3
+#  define BOARD_NLEDS     4
 
 /* LED bits for use with board_userled_all() */
 
-#define PIC32MZ_STARTERKIT_LED1_BIT (1 << PIC32MZ_STARTERKIT_LED1)
-#define PIC32MZ_STARTERKIT_LED2_BIT (1 << PIC32MZ_STARTERKIT_LED2)
-#define PIC32MZ_STARTERKIT_LED3_BIT (1 << PIC32MZ_STARTERKIT_LED3)
+#  define BOARD_LED_A_BIT (1 << BOARD_LED_A)
+#  define BOARD_LED_B_BIT (1 << BOARD_LED_B)
+#  define BOARD_LED_C_BIT (1 << BOARD_LED_C)
+#  define BOARD_LED_D_BIT (1 << BOARD_LED_D)
+#else
+/* LED index values for use with board_userled(): */
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 3 LEDs
- * on board the Ethernet Starter Kit.  The following definitions
- * describe how NuttX controls the LEDs:
+#  define BOARD_LED_L     0
+#  define BOARD_LED_A     1
+#  define BOARD_LED_B     2
+#  define BOARD_LED_C     3
+#  define BOARD_LED_D     4
+#  define BOARD_NLEDS     5
+
+/* LED bits for use with board_userled_all() */
+
+#  define BOARD_LED_L_BIT (1 << BOARD_LED_L)
+#  define BOARD_LED_A_BIT (1 << BOARD_LED_A)
+#  define BOARD_LED_B_BIT (1 << BOARD_LED_B)
+#  define BOARD_LED_C_BIT (1 << BOARD_LED_C)
+#  define BOARD_LED_D_BIT (1 << BOARD_LED_D)
+#endif
+
+/* These LEDs are available to the application and are all available to the
+ * application unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by the
+ * board port is defined in include/board.h and src/sam_autoleds.c.  The LEDs are
+ * used to encode OS-related events as follows:
  *
- *                           ON                  OFF
- * ------------------------- ---- ---- ---- ---- ---- ----
- *                           LED1 LED2 LED3 LED1 LED2 LED3
- * ------------------------- ---- ---- ---- ---- ---- ----
- * LED_STARTED            0  OFF  OFF  OFF  ---  ---  ---
- * LED_HEAPALLOCATE       1  ON   OFF  N/C  ---  ---  ---
- * LED_IRQSENABLED        2  OFF  ON   N/C  ---  ---  ---
- * LED_STACKCREATED       3  ON   ON   N/C  ---  ---  ---
- * LED_INIRQ              4  N/C  N/C  ON   N/C  N/C  OFF
- * LED_SIGNAL             4  N/C  N/C  ON   N/C  N/C  OFF
- * LED_ASSERTION          4  N/C  N/C  ON   N/C  N/C  OFF
- * LED_PANIC              5  ON   N/C  N/C  OFF  N/C  N/C
+ *      SYMBOL                MEANING                        LED STATE
+ *                                                     L   A   B   C   D
+ *      ----------------      ----------------------- --- --- --- --- ---*/
+#define LED_STARTED      0 /* NuttX has been started  OFF ON  OFF OFF OFF */
+#define LED_HEAPALLOCATE 1 /* Heap has been allocated OFF OFF ON  OFF OFF */
+#define LED_IRQSENABLED  2 /* Interrupts enabled      OFF OFF OFF ON  OFF */
+#define LED_STACKCREATED 3 /* Idle stack created      OFF OFF OFF OFF ON  */
+#define LED_INIRQ        4 /* In an interrupt         GLO N/C N/C N/C N/C */
+#define LED_SIGNAL       4 /* In a signal handler     GLO N/C N/C N/C N/C */
+#define LED_ASSERTION    4 /* An assertion failed     GLO N/C N/C N/C N/C */
+#define LED_PANIC        4 /* The system has crashed  2Hz N/C N/C N/C N/C */
+#undef  LED_IDLE           /* MCU is is sleep mode    ---- Not used ----- */
+
+/* Thus if LED L is glowing on and all other LEDs are off (except LED D which
+ * was left on but is no longer controlled by NuttX and so may be in any state),
+ * NuttX has successfully booted and is, apparently, running normally and taking
+ * interrupts.  If any of LEDs A-D are statically set, then NuttX failed to boot
+ * and the LED indicates the initialization phase where the failure occurred.  If
+ * LED L is flashing at approximately 2Hz, then a fatal error has been detected and
+ * the system has halted.
+ *
+ * NOTE: After booting, LEDs A-D are no longer used by the system and may be
+ * controlled the application.
  */
-
-#define LED_STARTED            0
-#define LED_HEAPALLOCATE       1
-#define LED_IRQSENABLED        2
-#define LED_STACKCREATED       3
-#define LED_INIRQ              4
-#define LED_SIGNAL             4
-#define LED_ASSERTION          4
-#define LED_PANIC              5
-
-#define LED_NVALUES            6
 
 /* Switch definitions *******************************************************/
-/* The PIC32MZ Ethernet Starter kit has 3 user push buttons labelled SW1-3
- * on the board:
+/* The Flip&Click PIC32MZ has 2 user push buttons labeled T1 and T2 on the
+ * white side of the board:
  *
- *   PIN   LED  Notes
- *   ----  ---- -------------------------
- *   RB12  SW1  Active-low
- *   RB13  SW2  Active-low
- *   RB14  SW3  Active-low
+ * PIN   LED  Notes
+ * ----- ---- -------------------------
+ * RD10  T1   Sensed low when closed
+ * RD11  T2   Sensed low when closed
  *
- * The switches do not have any debounce circuitry and require internal pull-
- * up resistors. When Idle, the switches are pulled high (+3.3V), and they
- * are grounded when pressed.
+ * The switches have external pull-up resistors. The switches are pulled high
+ * (+3.3V) and grounded when pressed.
  */
 
-#define BUTTON_SW1             0
-#define BUTTON_SW2             1
-#define BUTTON_SW3             2
-#define NUM_BUTTONS            3
+#define BUTTON_T1              0
+#define BUTTON_T2              1
+#define NUM_BUTTONS            2
 
-#define BUTTON_SW1_BIT         (1 << BUTTON_SW1)
-#define BUTTON_SW2_BIT         (1 << BUTTON_SW2)
-#define BUTTON_SW3_BIT         (1 << BUTTON_SW3)
+#define BUTTON_T1_BIT          (1 << BUTTON_T1)
+#define BUTTON_T2_BIT          (1 << BUTTON_T2)
 
 /* UARTS ********************************************************************/
-/*  MEB-II
+/* Convenient U[S]ARTs that may be used as the Serial console include:
  *
- * By default, the UART1 is configured for the pins used by the MEB-II
- * board.  The UART1 signals are available at the MEB-II PICTail
- * connector:
+ * 1) An Arduino Serial Shield.  The RX and TX pins are available on the
+ *    Arduino connector D0 and D1 pins, respectively.  These are connected
+ *    to UART5, UART5_RX and UART5_TX which are RD14 and RD15, respectively.
  *
- *   --------------- --------- -------------- ------------
- *   PIC32MZ PIN     CONNECTOR MEB-II PIN     PICTAIL PIN
- *   FUNCTION        J1        NAME           J2
- *   --------------- --------- -------------- ------------
- *   RPA14/SCL1/RA14 124       SCL1/TOUCH_SCL 4
- *   RPA15/SDA1/RA15 126       SDA1/TOUCH_SDA 6
- *                             +3.3V          1,26
- *                             GND            28
- *   --------------- --------- -------------- ------------
+ * 2) Mikroe Click Serial Shield.  There are four Click bus connectors with
+ *    serial ports available as follows:
  *
- * The following pin assignment is used with the MEB-II board.  If you are
- * using signals from PIC32MZEC Adaptor Board (as described in the README
- * file), then UART1 signals are available at these locations on the adaptor
- * board:
- *
- *   JP7 Pin 2: RPC14
- *   JP8 Pin 2: RPB3
- *
- * And the following should be changed to:
- *
- *  #define BOARD_U1RX_PPS  U1RXR_RPC14
- *  #define BOARD_U1TX_PPS  U1TX_RPB3R
+ *    Click A:  UART4 UART4_RX and UART4_TX which are RG9 and RE3, respectively.
+ *    Click B:  UART3 UART3_RX and UART3_TX which are RF0 and RF1, respectively.
+ *    Click C:  UART1 UART1_RX and UART1_TX which are RC1 and RE5, respectively.
+ *    Click D:  UART2 UART2_RX and UART2_TX which are RC3 and RC2, respectively.
  */
 
-#define BOARD_U1RX_PPS  U1RXR_RPA14
-#define BOARD_U1TX_PPS  U1TX_RPA15R
+#define BOARD_U1RX_PPS  U1RXR_RPC1
+#define BOARD_U1TX_PPS  U1TX_RPE5R
+
+#define BOARD_U2RX_PPS  U2RXR_RPC3
+#define BOARD_U2TX_PPS  U2TX_RPC2R
+
+#define BOARD_U3RX_PPS  U3RXR_RPF0
+#define BOARD_U3TX_PPS  U3TX_RPF1R
+
+#define BOARD_U4RX_PPS  U4RXR_RPG9
+#define BOARD_U4TX_PPS  U4TX_RPE3R
+
+#define BOARD_U5RX_PPS  U5RXR_RPD14
+#define BOARD_U5TX_PPS  U5TX_RPD15R
 
 /****************************************************************************
  * Public Types
@@ -312,4 +331,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H */

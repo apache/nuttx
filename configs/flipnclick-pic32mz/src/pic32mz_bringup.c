@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/flipnclick-sam3x/src/sam_userleds.c
+ * config/flipnclick-pic32mz/src/pic32mz_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,20 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are four LEDs on the top, blue side of the board.  Only one can be
- * controlled by software:
- *
- *   LED L - PB27 (PWM13)
- *
- * There are also four LEDs on the back, white side of the board:
- *
- *   LED A - PC6
- *   LED B - PC5
- *   LED C - PC7
- *   LED D - PC8
- *
- * A high output value illuminates the LEDs.
- */
 
 /****************************************************************************
  * Included Files
@@ -53,102 +39,26 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
+#include <sys/types.h>
 
-#include <arch/board/board.h>
-
-#include "chip.h"
-#include "sam_gpio.h"
-#include "flipnclick-sam3x.h"
-
-#ifndef CONFIG_ARCH_LEDS
+#include "flipnclick-pic32mz.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: pic32mz_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+int pic32mz_bringup(void)
 {
-#ifndef CONFIG_ARCH_LEDS
-  /* Configure LED GPIOs for output */
+  int ret;
 
-  sam_configgpio(GPIO_LED_L);
-  sam_configgpio(GPIO_LED_A);
-  sam_configgpio(GPIO_LED_B);
-  sam_configgpio(GPIO_LED_C);
-  sam_configgpio(GPIO_LED_D);
-#endif
+  UNUSED(ret);
+  return OK;
 }
-
-/****************************************************************************
- * Name: board_userled
- ****************************************************************************/
-
-void board_userled(int led, bool ledon)
-{
-  uint32_t ledcfg;
-
-  switch (led)
-    {
-#ifndef CONFIG_ARCH_LEDS
-      case BOARD_LED_L:
-        ledcfg = GPIO_LED_L;
-        break;
-#endif
-
-      case BOARD_LED_A:
-        ledcfg = GPIO_LED_A;
-        break;
-
-      case BOARD_LED_B:
-        ledcfg = GPIO_LED_B;
-        break;
-
-      case BOARD_LED_C:
-        ledcfg = GPIO_LED_C;
-        break;
-
-      case BOARD_LED_D:
-        ledcfg = GPIO_LED_D;
-        break;
-
-      default:
-        return;
-    }
-
-  sam_gpiowrite(ledcfg, ledon);
-}
-
-/****************************************************************************
- * Name: board_userled_all
- ****************************************************************************/
-
-void board_userled_all(uint8_t ledset)
-{
-  bool ledon;
-
-#ifndef CONFIG_ARCH_LEDS
-  ledon = ((ledset & BOARD_LED_L_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_L, ledon);
-#endif
-
-  ledon = ((ledset & BOARD_LED_A_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_A, ledon);
-
-  ledon = ((ledset & BOARD_LED_B_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_B, ledon);
-
-  ledon = ((ledset & BOARD_LED_C_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_C, ledon);
-
-  ledon = ((ledset & BOARD_LED_D_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_D, ledon);
-}
-
-#endif /* !CONFIG_ARCH_LEDS */

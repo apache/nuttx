@@ -196,6 +196,20 @@ config ARCH_BOARD_FIRE_STM32
 		and 3 of the boards are supported but only version 2 has been
 		tested.
 
+config ARCH_BOARD_FLIPNCLICK_PIC32MZ
+	bool "Mikroe Flip&Click PIC32MZ"
+	depends on ARCH_CHIP_PIC32MZ2048EFH
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects the Mikroe Flip&Click PIC32MZ board.  This
+		board is an chipKit Arduino-compatible board (but can also be used
+		with the Mikroe bootloader).  It has with four Mikroe Click bus
+		interfaces in addition to standard Arduino connectors.  This board
+		features the Microchip PIC32MZ2048EFH100 MCU running at 200 MHz
+		(252Mhz capable).
+
 config ARCH_BOARD_FLIPNCLICK_SAM3X
 	bool "Mikroe Flip&Click SAM3X"
 	depends on ARCH_CHIP_ATSAM3X8E
@@ -1619,6 +1633,7 @@ config ARCH_BOARD
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
+	default "flipnclick-pic32mz"       if ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	default "flipnclick-sam3x"         if ARCH_BOARD_FLIPNCLICK_SAM3X
 	default "freedom-k64f"             if ARCH_BOARD_FREEDOM_K64F
 	default "freedom-k66f"             if ARCH_BOARD_FREEDOM_K66F
@@ -1843,6 +1858,9 @@ source "configs/ez80f910200zco/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
 source "configs/fire-stm32v2/Kconfig"
+endif
+if ARCH_BOARD_FLIPNCLICK_PIC32MZ
+source "configs/flipnclick-pic32mz/Kconfig"
 endif
 if ARCH_BOARD_FLIPNCLICK_SAM3X
 source "configs/flipnclick-sam3x/Kconfig"

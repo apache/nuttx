@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/flipnclick-sam3x/src/sam_autoleds.c
+ * configs/flipnclick-pic32mz/src/pic32mz_leds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,17 +32,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are four LEDs on the top, blue side of the board.  Only one can be
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "pic32mz-gpio.h"
+#include "flipnclick-pic32mz.h"
+
+#ifdef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* There are four LEDs on the top, red side of the board.  Only one can be
  * controlled by software:
  *
- *   LED L - PB27 (PWM13)
+ *   LED L      - RB14 (SPI3_SCK)
  *
  * There are also four LEDs on the back, white side of the board:
  *
- *   LED A - PC6
- *   LED B - PC5
- *   LED C - PC7
- *   LED D - PC8
+ *   LED A      - RA6
+ *   LED B      - RA7
+ *   LED C      - RE0
+ *   LED D      - RE1
  *
  * A high output value illuminates the LEDs.
  *
@@ -76,32 +101,6 @@
  * be controlled the application.
  */
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/board.h>
-
-#include "chip.h"
-#include "sam_gpio.h"
-#include "flipnclick-sam3x.h"
-
-/* The board.h file may override pin configurations defined in sam_pinmap.h */
-
-#include <arch/board/board.h>
-
-#ifdef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Processor Definitinos
- ****************************************************************************/
-
 /* LED indices */
 
 #define INDEX_LED_L     0
@@ -120,11 +119,11 @@ static void board_autoled_setone(int ledndx)
   bool ledon[NLEDS] = {false, false, false, false, false};
 
   ledon[ledndx] = true;
-  sam_gpiowrite(GPIO_LED_L, ledon[INDEX_LED_L]);
-  sam_gpiowrite(GPIO_LED_A, ledon[INDEX_LED_A]);
-  sam_gpiowrite(GPIO_LED_B, ledon[INDEX_LED_B]);
-  sam_gpiowrite(GPIO_LED_C, ledon[INDEX_LED_D]);
-  sam_gpiowrite(GPIO_LED_D, ledon[INDEX_LED_D]);
+  pic32mz_gpiowrite(GPIO_LED_L, ledon[INDEX_LED_L]);
+  pic32mz_gpiowrite(GPIO_LED_A, ledon[INDEX_LED_A]);
+  pic32mz_gpiowrite(GPIO_LED_B, ledon[INDEX_LED_B]);
+  pic32mz_gpiowrite(GPIO_LED_C, ledon[INDEX_LED_D]);
+  pic32mz_gpiowrite(GPIO_LED_D, ledon[INDEX_LED_D]);
 }
 
 /****************************************************************************
@@ -132,18 +131,18 @@ static void board_autoled_setone(int ledndx)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: pic32mz_led_initialize
  ****************************************************************************/
 
-void board_autoled_initialize(void)
+void pic32mz_led_initialize(void)
 {
   /* Configure LED GPIOs for output */
 
-  sam_configgpio(GPIO_LED_L);
-  sam_configgpio(GPIO_LED_A);
-  sam_configgpio(GPIO_LED_B);
-  sam_configgpio(GPIO_LED_C);
-  sam_configgpio(GPIO_LED_D);
+  pic32mz_configgpio(GPIO_LED_L);
+  pic32mz_configgpio(GPIO_LED_A);
+  pic32mz_configgpio(GPIO_LED_B);
+  pic32mz_configgpio(GPIO_LED_C);
+  pic32mz_configgpio(GPIO_LED_D);
 }
 
 /****************************************************************************
@@ -185,7 +184,7 @@ void board_autoled_on(int led)
         break;
 
       case 4:
-        sam_gpiowrite(GPIO_LED_L, true);
+        pic32mz_gpiowrite(GPIO_LED_L, true);
         break;
     }
 }
@@ -212,15 +211,15 @@ void board_autoled_off(int led)
   switch (led)
     {
       default:
-        sam_gpiowrite(GPIO_LED_L, false);
-        sam_gpiowrite(GPIO_LED_A, false);
-        sam_gpiowrite(GPIO_LED_B, false);
-        sam_gpiowrite(GPIO_LED_C, false);
-        sam_gpiowrite(GPIO_LED_D, false);
+        pic32mz_gpiowrite(GPIO_LED_L, false);
+        pic32mz_gpiowrite(GPIO_LED_A, false);
+        pic32mz_gpiowrite(GPIO_LED_B, false);
+        pic32mz_gpiowrite(GPIO_LED_C, false);
+        pic32mz_gpiowrite(GPIO_LED_D, false);
         break;
 
       case 4:
-        sam_gpiowrite(GPIO_LED_L, false);
+        pic32mz_gpiowrite(GPIO_LED_L, false);
         break;
     }
 }

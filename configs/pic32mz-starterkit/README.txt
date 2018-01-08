@@ -357,14 +357,32 @@ LEDs and Buttons
 Configurations
 ==============
 
+Information Common to All Configurations
+----------------------------------------
+
 Each PIC32MZ configuration is maintained in a sub-directory and can be
 selected as follow:
 
-    cd tools
-    ./configure.sh pic32mz-starterkit/<subdir>
-    cd -
+    tools/configure.sh [OPTIONS] pic32mz-starterkit/<subdir>
 
-Where <subdir> is one of the following:
+  Where typical options are -l to configure to build on Linux or -c to
+  configure for Cygwin under Linux.  'tools/configure.sh -h' will show
+  you all of the options.
+
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply,
+  nuttx.
+
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+Configuration Directories
+-------------------------
 
   nsh:
 

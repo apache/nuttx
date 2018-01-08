@@ -260,6 +260,13 @@ configs/fire-stm32v2
   STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2 and 3 of
   the boards are supported but only version 2 has been tested.
 
+configs/flipnclick-pic32mz
+  Board support for the Mikroe Flip&Click PIC32MZ board.  This board is an
+  chipKit Arduino-compatible board (but can also be used with the Mikroe
+  bootloader).  It has with four Mikroe Click bus interfaces in addition to
+  standard Arduino connectors.  This board features the Microchip
+  PIC32MZ2048EFH100 MCU running at 200 MHz (252Mhz capable).
+
 configs/flipnclick-sam3x
   Board support for the Mikroe Flip&Click STM32X board.  This board is an
   Arduino-Due work-alike with four Mikroe Click bus interfaces.  Like the

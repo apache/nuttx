@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/flipnclick-sam3x/src/sam_userleds.c
+ * config/flipnclick-pic32mz/src/pic32mz_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,20 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are four LEDs on the top, blue side of the board.  Only one can be
- * controlled by software:
- *
- *   LED L - PB27 (PWM13)
- *
- * There are also four LEDs on the back, white side of the board:
- *
- *   LED A - PC6
- *   LED B - PC5
- *   LED C - PC7
- *   LED D - PC8
- *
- * A high output value illuminates the LEDs.
- */
 
 /****************************************************************************
  * Included Files
@@ -53,102 +39,52 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
+#include <nuttx/board.h>
 
-#include <arch/board/board.h>
+#include "flipnclick-pic32mz.h"
 
-#include "chip.h"
-#include "sam_gpio.h"
-#include "flipnclick-sam3x.h"
-
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initalization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+int board_app_initialize(uintptr_t arg)
 {
-#ifndef CONFIG_ARCH_LEDS
-  /* Configure LED GPIOs for output */
+  /* If CONFIG_BOARD_INITIALIZE is selected then board initialization was
+   * already performed in board_initialize.
+   */
 
-  sam_configgpio(GPIO_LED_L);
-  sam_configgpio(GPIO_LED_A);
-  sam_configgpio(GPIO_LED_B);
-  sam_configgpio(GPIO_LED_C);
-  sam_configgpio(GPIO_LED_D);
+#ifndef CONFIG_BOARD_INITIALIZE
+  return pic32mz_bringup();
+#else
+  return OK;
 #endif
 }
 
-/****************************************************************************
- * Name: board_userled
- ****************************************************************************/
-
-void board_userled(int led, bool ledon)
-{
-  uint32_t ledcfg;
-
-  switch (led)
-    {
-#ifndef CONFIG_ARCH_LEDS
-      case BOARD_LED_L:
-        ledcfg = GPIO_LED_L;
-        break;
-#endif
-
-      case BOARD_LED_A:
-        ledcfg = GPIO_LED_A;
-        break;
-
-      case BOARD_LED_B:
-        ledcfg = GPIO_LED_B;
-        break;
-
-      case BOARD_LED_C:
-        ledcfg = GPIO_LED_C;
-        break;
-
-      case BOARD_LED_D:
-        ledcfg = GPIO_LED_D;
-        break;
-
-      default:
-        return;
-    }
-
-  sam_gpiowrite(ledcfg, ledon);
-}
-
-/****************************************************************************
- * Name: board_userled_all
- ****************************************************************************/
-
-void board_userled_all(uint8_t ledset)
-{
-  bool ledon;
-
-#ifndef CONFIG_ARCH_LEDS
-  ledon = ((ledset & BOARD_LED_L_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_L, ledon);
-#endif
-
-  ledon = ((ledset & BOARD_LED_A_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_A, ledon);
-
-  ledon = ((ledset & BOARD_LED_B_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_B, ledon);
-
-  ledon = ((ledset & BOARD_LED_C_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_C, ledon);
-
-  ledon = ((ledset & BOARD_LED_D_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_D, ledon);
-}
-
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_LIB_BOARDCTL */

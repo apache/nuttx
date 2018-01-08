@@ -32,7 +32,7 @@ config ARCH_CHIP_PIC32MZ2048EFH
 	---help---
 		Microchip PIC32MZ2048EFH (MIPS32 M14K) such as the
 		PIC32MZ2048EFH144-I/PH used in the PIC32MZ EF STARTER KIT or as the
-		PIC32MZ2048EFH100 used with the Mikro Flip&Clip for PIC32MZ.
+		PIC32MZ2048EFH100 used with the Mikroe Flip&Click for PIC32MZ.
 
 config ARCH_CHIP_PIC32MZ2048EFM
 	bool "PIC32MZ2048EFM"

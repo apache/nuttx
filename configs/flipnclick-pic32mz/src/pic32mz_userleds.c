@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/flipnclick-sam3x/src/sam_userleds.c
+ * configs/flipnclick-pic32mz/src/pic32mz_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,17 +32,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are four LEDs on the top, blue side of the board.  Only one can be
+/* There are four LEDs on the top, red side of the board.  Only one can be
  * controlled by software:
  *
- *   LED L - PB27 (PWM13)
+ *   LED L      - RB14 (SPI3_SCK)
  *
  * There are also four LEDs on the back, white side of the board:
  *
- *   LED A - PC6
- *   LED B - PC5
- *   LED C - PC7
- *   LED D - PC8
+ *   LED A      - RA6
+ *   LED B      - RA7
+ *   LED C      - RE0
+ *   LED D      - RE1
  *
  * A high output value illuminates the LEDs.
  */
@@ -59,9 +59,11 @@
 
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "sam_gpio.h"
-#include "flipnclick-sam3x.h"
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "pic32mz-gpio.h"
+#include "flipnclick-pic32mz.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -78,11 +80,11 @@ void board_userled_initialize(void)
 #ifndef CONFIG_ARCH_LEDS
   /* Configure LED GPIOs for output */
 
-  sam_configgpio(GPIO_LED_L);
-  sam_configgpio(GPIO_LED_A);
-  sam_configgpio(GPIO_LED_B);
-  sam_configgpio(GPIO_LED_C);
-  sam_configgpio(GPIO_LED_D);
+  pic32mz_configgpio(GPIO_LED_L);
+  pic32mz_configgpio(GPIO_LED_A);
+  pic32mz_configgpio(GPIO_LED_B);
+  pic32mz_configgpio(GPIO_LED_C);
+  pic32mz_configgpio(GPIO_LED_D);
 #endif
 }
 
@@ -122,7 +124,7 @@ void board_userled(int led, bool ledon)
         return;
     }
 
-  sam_gpiowrite(ledcfg, ledon);
+  pic32mz_gpiowrite(ledcfg, ledon);
 }
 
 /****************************************************************************
@@ -135,20 +137,20 @@ void board_userled_all(uint8_t ledset)
 
 #ifndef CONFIG_ARCH_LEDS
   ledon = ((ledset & BOARD_LED_L_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_L, ledon);
+  pic32mz_gpiowrite(GPIO_LED_L, ledon);
 #endif
 
   ledon = ((ledset & BOARD_LED_A_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_A, ledon);
+  pic32mz_gpiowrite(GPIO_LED_A, ledon);
 
   ledon = ((ledset & BOARD_LED_B_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_B, ledon);
+  pic32mz_gpiowrite(GPIO_LED_B, ledon);
 
   ledon = ((ledset & BOARD_LED_C_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_C, ledon);
+  pic32mz_gpiowrite(GPIO_LED_C, ledon);
 
   ledon = ((ledset & BOARD_LED_D_BIT) != 0);
-  sam_gpiowrite(GPIO_LED_D, ledon);
+  pic32mz_gpiowrite(GPIO_LED_D, ledon);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

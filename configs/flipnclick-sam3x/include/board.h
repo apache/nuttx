@@ -157,24 +157,41 @@
  *   LED D      - PC8
  *
  * A high output value illuminates the LEDs.
- *
- * LED index values for use with board_userled():
  */
 
-#define BOARD_LED_L       0
-#define BOARD_LED_A       1
-#define BOARD_LED_B       2
-#define BOARD_LED_C       3
-#define BOARD_LED_D       4
-#define BOARD_NLEDS       5
+#ifdef CONFIG_ARCH_LEDS
+/* LED index values for use with board_userled(): */
+
+#  define BOARD_LED_A     0
+#  define BOARD_LED_B     1
+#  define BOARD_LED_C     2
+#  define BOARD_LED_D     3
+#  define BOARD_NLEDS     4
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LED_L_BIT   (1 << BOARD_LED_L)
-#define BOARD_LED_A_BIT   (1 << BOARD_LED_A)
-#define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
-#define BOARD_LED_C_BIT   (1 << BOARD_LED_C)
-#define BOARD_LED_D_BIT   (1 << BOARD_LED_D)
+#  define BOARD_LED_A_BIT (1 << BOARD_LED_A)
+#  define BOARD_LED_B_BIT (1 << BOARD_LED_B)
+#  define BOARD_LED_C_BIT (1 << BOARD_LED_C)
+#  define BOARD_LED_D_BIT (1 << BOARD_LED_D)
+#else
+/* LED index values for use with board_userled(): */
+
+#  define BOARD_LED_L     0
+#  define BOARD_LED_A     1
+#  define BOARD_LED_B     2
+#  define BOARD_LED_C     3
+#  define BOARD_LED_D     4
+#  define BOARD_NLEDS     5
+
+/* LED bits for use with board_userled_all() */
+
+#  define BOARD_LED_L_BIT (1 << BOARD_LED_L)
+#  define BOARD_LED_A_BIT (1 << BOARD_LED_A)
+#  define BOARD_LED_B_BIT (1 << BOARD_LED_B)
+#  define BOARD_LED_C_BIT (1 << BOARD_LED_C)
+#  define BOARD_LED_D_BIT (1 << BOARD_LED_D)
+#endif
 
 /* These LEDs are available to the application and are all available to the
  * application unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by the

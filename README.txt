@@ -1647,7 +1647,9 @@ nuttx/
  |   |   `- README.txt
  |   |- fire-stm32v2/
  |   |   `- README.txt
- |   |-configs/flipnclick-sam3x/
+ |   |- flipnclick-pic32mz/
+ |   |   `- README.txt
+ |   |- flipnclick-sam3x/
  |   |   `- README.txt
  |   |- freedom-k64f/
  |   |   `- README.txt
