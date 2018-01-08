@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/mips/src/pic32mz/pic32mz-pps.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_PIC32MZEC)
 #  include "chip/pic32mzec-pps.h"
+#elif defined(CONFIG_ARCH_CHIP_PIC32MZEF)
+#  include "chip/pic32mzef-pps.h"
 #else
 #  error Unknown PIC32MZ family
 #endif

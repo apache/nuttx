@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/include/pic32mz/irq.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@
 
 #if defined(CHIP_PIC32MZEC)
 #  include <arch/pic32mz/irq_pic32mzxxxec.h>
+#elif defined(CHIP_PIC32MZEF)
+#  include <arch/pic32mz/irq_pic32mzxxxef.h>
 #else
 #  error "Unknown PIC32MZ family
 #endif

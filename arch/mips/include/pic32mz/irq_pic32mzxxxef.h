@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/include/pic32mz/irq_pic32mzxxxec.h
+ * arch/mips/include/pic32mz/irq_pic32mzxxxef.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_MIPS_INCLUDE_PIC32MZ_IRQ_PIC32MZXXXEC_H
-#define __ARCH_MIPS_INCLUDE_PIC32MZ_IRQ_PIC32MZXXXEC_H
+#ifndef __ARCH_MIPS_INCLUDE_PIC32MZ_IRQ_PIC32MZXXXEF_H
+#define __ARCH_MIPS_INCLUDE_PIC32MZ_IRQ_PIC32MZXXXEF_H
 
 /****************************************************************************
  * Included Files
@@ -101,7 +101,7 @@
 #define PIC32MZ_IRQ_IC9         42 /* Vector: 42,  Input Capture 9 */
 #define PIC32MZ_IRQ_OC9         43 /* Vector: 43,  Output Compare 9 */
 #define PIC32MZ_IRQ_AD1         44 /* Vector: 44,  ADC1 Global Interrupt */
-                                   /* Vector: 45,  Reserved */
+#define PIC32MZ_IRQ_AD1FIFO     45 /* Vector: 45,  ADC1 FIFO Data Ready Interrupt */
 #define PIC32MZ_IRQ_AD1CMP1     46 /* Vector: 46,  ADC1 Digital Comparator 1 */
 #define PIC32MZ_IRQ_AD1CMP2     47 /* Vector: 47,  ADC1 Digital Comparator 2 */
 #define PIC32MZ_IRQ_AD1CMP3     48 /* Vector: 48,  ADC1 Digital Comparator 3 */
@@ -115,7 +115,7 @@
 #define PIC32MZ_IRQ_AD1FLT4     55 /* Vector: 55,  ADC1 Digital Filter 4 */
 #define PIC32MZ_IRQ_AD1FLT5     56 /* Vector: 56,  ADC1 Digital Filter 5 */
 #define PIC32MZ_IRQ_AD1FLT6     57 /* Vector: 57,  ADC1 Digital Filter 6 */
-                                   /* Vector: 58,  Reserved */
+#define PIC32MZ_IRQ_AD1FAULT    59 /* Vector: 58,  ADC1 Fault */
 #define PIC32MZ_IRQ_AD1DAT0     59 /* Vector: 59,  ADC1 Data 0 */
 
 #define PIC32MZ_IRQ_AD1DAT1     60 /* Vector: 60,  ADC1 Data 1 */
@@ -262,9 +262,32 @@
 #define PIC32MZ_IRQ_U6RX       189 /* Vector: 189, UART6 Receive Done */
 
 #define PIC32MZ_IRQ_U6TX       190 /* Vector: 190, UART6 Transfer Done */
+                                   /* Vector: 191, Reserved */
+#define PIC32MZ_IRQ_ADCESR     192 /* Vector: ADC End of Scan Ready */
+#define PIC32MZ_IRQ_ADCACR     193 /* Vector: ADC Analog Circuits Ready */
+#define PIC32MZ_IRQ_ADCUR      194 /* Vector: ADC Update Ready */
+                                   /* Vector: 195, Reserved */
+#define PIC32MZ_IRQ_ADCGEIR    196 /* Vector: ADC Group Early Interrupt Request */
+                                   /* Vector: 197, Reserved */
+#define PIC32MZ_IRQ_ADC0ER     198 /* Vector: ADC0 Early Interrupt */
+#define PIC32MZ_IRQ_ADC1ER     199 /* Vector: ADC1 Early Interrupt */
+#define PIC32MZ_IRQ_ADC2ER     200 /* Vector: ADC2 Early Interrupt */
+#define PIC32MZ_IRQ_ADC3ER     201 /* Vector: ADC3 Early Interrupt */
+#define PIC32MZ_IRQ_ADC4ER     202 /* Vector: ADC4 Early Interrupt */
+                                   /* Vector: 203, Reserved */
+                                   /* Vector: 204, Reserved */
+#define PIC32MZ_IRQ_ADC7ER     205 /* Vector: ADC7 Early Interrupt */
+#define PIC32MZ_IRQ_ADC0WI     206 /* Vector: ADC0 Warm Interrupt */
+#define PIC32MZ_IRQ_ADC1WI     207 /* Vector: ADC1 Warm Interrupt */
+#define PIC32MZ_IRQ_ADC2WI     208 /* Vector: ADC2 Warm Interrupt */
+#define PIC32MZ_IRQ_ADC3WI     209 /* Vector: ADC3 Warm Interrupt */
+#define PIC32MZ_IRQ_ADC4WI     210 /* Vector: ADC4 Warm Interrupt */
+                                   /* Vector: 211, Reserved */
+                                   /* Vector: 212, Reserved */
+#define PIC32MZ_IRQ_ADC7WI     213 /* Vector: ADC7 Warm Interrupt */
 
-#define PIC32MZ_IRQ_BAD        191 /* Not a real IRQ number */
-#define NR_IRQS                191
+#define PIC32MZ_IRQ_BAD        214 /* Not a real IRQ number */
+#define NR_IRQS                214
 
 /****************************************************************************
  * Public Types
@@ -298,5 +321,5 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_INCLUDE_PIC32MZ_IRQ_PIC32MZXXXEC_H */
+#endif /* __ARCH_MIPS_INCLUDE_PIC32MZ_IRQ_PIC32MZXXXEF_H */
 

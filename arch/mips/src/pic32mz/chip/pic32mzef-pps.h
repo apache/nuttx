@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/mips/src/pic32mz/pic32mzec-pps.h
+ * arch/mips/src/pic32mz/pic32mzef-pps.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_PPS_H
-#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_PPS_H
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_PPS_H
+#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_PPS_H
 
 /********************************************************************************************
  * Included Files
@@ -180,6 +180,8 @@
 #  define PIC32MZ_RPG9R_OFFSET           0x16a4
 
 /* PPS Register Addresses *******************************************************************/
+
+/* Peripheral pin select input register map */
 
 #define PIC32MZ_INTnR(n)                 (PIC32MZ_SFR_K1BASE+PIC32MZ_INTnR_OFFSET(n))
 #  define PIC32MZ_INT1R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_INT1R_OFFSET)
@@ -772,8 +774,8 @@
 #define T2CKR_RPF1                       4
 #define T2CKR_RPF4                       2
 #define T2CKR_RPG1                       12
-#define T2CKR_RPG8                       1
 
+#define T2CKR_RPG8                       1
 #define T3CKR_RPB0                       5
 #define T3CKR_RPB7                       7
 #define T3CKR_RPB8                       2
@@ -1714,4 +1716,4 @@
 #define U6TX_RPG6R                       4, PIC32MZ_RPG6R
 #define U6TX_RPG9R                       4, PIC32MZ_RPG9R
 
-#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_PPS_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_PPS_H */

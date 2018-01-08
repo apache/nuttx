@@ -28,7 +28,7 @@ STATUS
     b) Execute the following command which claims to have successfully
        written to FLASH.
 
-      /bossac.exe --info --debug --port COM7 --usb-port=0 --erase --write --verify -b nuttx.bin -R
+       bossac.exe --info --debug --port COM7 --usb-port=0 --erase --write --verify -b nuttx.bin -R
 
        But the code does not boot.  There is no indication of life.
 

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/mips/src/pic32mz/chip/pic32mzec-features.h
+ * arch/mips/src/pic32mz/chip/pic32mzef-features.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_FEATURES_H
-#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_FEATURES_H
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_FEATURES_H
+#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_FEATURES_H
 
 /************************************************************************************
  * Included Files
@@ -58,46 +58,47 @@
 
 /* Alternate Device Configuration (Boot Flash PIC32MZ_BOOTCFG_K1BASE) */
 
-#define PIC32MZ_ADEVCFG3_OFFSET  0x0000 /* Alternate device configuration word 3 */
-#define PIC32MZ_ADEVCFG2_OFFSET  0x0004 /* Alternate device configuration word 2 */
-#define PIC32MZ_ADEVCFG1_OFFSET  0x0008 /* Alternate device configuration word 1 */
-#define PIC32MZ_ADEVCFG0_OFFSET  0x000c /* Alternate device configuration word 0 */
-#define PIC32MZ_ADEVCP3_OFFSET   0x0010 /* Alternate device code protect word 3 */
-#define PIC32MZ_ADEVCP2_OFFSET   0x0014 /* Alternate device code protect word 2 */
-#define PIC32MZ_ADEVCP1_OFFSET   0x0018 /* Alternate device code protect word 1 */
-#define PIC32MZ_ADEVCP0_OFFSET   0x001c /* Alternate device code protect word 0 */
-#define PIC32MZ_ADEVSIGN3_OFFSET 0x0020 /* Alternate device signature word 3 */
-#define PIC32MZ_ADEVSIGN2_OFFSET 0x0024 /* Alternate device signature word 2 */
-#define PIC32MZ_ADEVSIGN1_OFFSET 0x0028 /* Alternate device signature word 1 */
-#define PIC32MZ_ADEVSIGN0_OFFSET 0x002c /* Alternate device signature word 0 */
+#define PIC32MZ_ADEVCFG3_OFFSET  0x0040 /* Alternate device configuration word 3 */
+#define PIC32MZ_ADEVCFG2_OFFSET  0x0044 /* Alternate device configuration word 2 */
+#define PIC32MZ_ADEVCFG1_OFFSET  0x0048 /* Alternate device configuration word 1 */
+#define PIC32MZ_ADEVCFG0_OFFSET  0x004c /* Alternate device configuration word 0 */
+#define PIC32MZ_ADEVCP3_OFFSET   0x0050 /* Alternate device code protect word 3 */
+#define PIC32MZ_ADEVCP2_OFFSET   0x0054 /* Alternate device code protect word 2 */
+#define PIC32MZ_ADEVCP1_OFFSET   0x0058 /* Alternate device code protect word 1 */
+#define PIC32MZ_ADEVCP0_OFFSET   0x005c /* Alternate device code protect word 0 */
+#define PIC32MZ_ADEVSIGN3_OFFSET 0x0060 /* Alternate device signature word 3 */
+#define PIC32MZ_ADEVSIGN2_OFFSET 0x0064 /* Alternate device signature word 2 */
+#define PIC32MZ_ADEVSIGN1_OFFSET 0x0068 /* Alternate device signature word 1 */
+#define PIC32MZ_ADEVSIGN0_OFFSET 0x006c /* Alternate device signature word 0 */
 
 /* Device Configuration (Boot Flash PIC32MZ_BOOTCFG_K1BASE) */
 
-#define PIC32MZ_DEVCFG3_OFFSET   0x0080 /* Device configuration word 3 */
-#define PIC32MZ_DEVCFG2_OFFSET   0x0084 /* Device configuration word 2 */
-#define PIC32MZ_DEVCFG1_OFFSET   0x0088 /* Device configuration word 1 */
-#define PIC32MZ_DEVCFG0_OFFSET   0x008c /* Device configuration word 0 */
-#define PIC32MZ_DEVCP3_OFFSET    0x0090 /* Device code protect word 3 */
-#define PIC32MZ_DEVCP2_OFFSET    0x0094 /* Device code protect word 2 */
-#define PIC32MZ_DEVCP1_OFFSET    0x0098 /* Device code protect word 1 */
-#define PIC32MZ_DEVCP0_OFFSET    0x009c /* Device code protect word 0 */
-#define PIC32MZ_DEVSIGN3_OFFSET  0x00a0 /* Device signature word 3 */
-#define PIC32MZ_DEVSIGN2_OFFSET  0x00a4 /* Device signature word 2 */
-#define PIC32MZ_DEVSIGN1_OFFSET  0x00a8 /* Device signature word 1 */
-#define PIC32MZ_DEVSIGN0_OFFSET  0x00ac /* Device signature word 0 */
+#define PIC32MZ_DEVCFG3_OFFSET   0x00c0 /* Device configuration word 3 */
+#define PIC32MZ_DEVCFG2_OFFSET   0x00c4 /* Device configuration word 2 */
+#define PIC32MZ_DEVCFG1_OFFSET   0x00c8 /* Device configuration word 1 */
+#define PIC32MZ_DEVCFG0_OFFSET   0x00cc /* Device configuration word 0 */
+#define PIC32MZ_DEVCP3_OFFSET    0x00d0 /* Device code protect word 3 */
+#define PIC32MZ_DEVCP2_OFFSET    0x00d4 /* Device code protect word 2 */
+#define PIC32MZ_DEVCP1_OFFSET    0x00d8 /* Device code protect word 1 */
+#define PIC32MZ_DEVCP0_OFFSET    0x00dc /* Device code protect word 0 */
+#define PIC32MZ_DEVSIGN3_OFFSET  0x00e0 /* Device signature word 3 */
+#define PIC32MZ_DEVSIGN2_OFFSET  0x00e4 /* Device signature word 2 */
+#define PIC32MZ_DEVSIGN1_OFFSET  0x00e8 /* Device signature word 1 */
+#define PIC32MZ_DEVSIGN0_OFFSET  0x00ec /* Device signature word 0 */
 
-/* Device ADC Calibration (Boot Flash PIC32MZ_ADCCALIB_K1BASE) */
+/* Device ADC Calibration (Boot Flash PIC32MZ_DEVSN_K1BASE) */
 
-#define PIC32MZ_DEVADC1_OFFSET   0x0000 /* ADC1 Calibration */
-#define PIC32MZ_DEVADC2_OFFSET   0x0004 /* ADC2 Calibration */
-#define PIC32MZ_DEVADC3_OFFSET   0x0008 /* ADC3 Calibration */
-#define PIC32MZ_DEVADC4_OFFSET   0x000c /* ADC4 Calibration */
-#define PIC32MZ_DEVADC5_OFFSET   0x0010 /* ADC5 Calibration */
+#define PIC32MZ_DEVADC0_OFFSET   0x0000 /* ADC0 Calibration */
+#define PIC32MZ_DEVADC1_OFFSET   0x0004 /* ADC1 Calibration */
+#define PIC32MZ_DEVADC2_OFFSET   0x0008 /* ADC2 Calibration */
+#define PIC32MZ_DEVADC3_OFFSET   0x000c /* ADC3 Calibration */
+#define PIC32MZ_DEVADC4_OFFSET   0x0010 /* ADC4 Calibration */
+#define PIC32MZ_DEVADC7_OFFSET   0x001c /* ADC7 Calibration */
 
 /* Device Serial Number (Boot Flash PIC32MZ_DEVSN_K1BASE) */
 
-#define PIC32MZ_DEVSN0_OFFSET    0x0000 /* Device serial number 0 */
-#define PIC32MZ_DEVSN1_OFFSET    0x0004 /* Device serial number 1 */
+#define PIC32MZ_DEVSN0_OFFSET    0x0020 /* Device serial number 0 */
+#define PIC32MZ_DEVSN1_OFFSET    0x0024 /* Device serial number 1 */
 
 /* Register/Flash Addresses *********************************************************/
 
@@ -140,18 +141,19 @@
 #define PIC32MZ_DEVSIGN1         (PIC32MZ_BOOTCFG_K1BASE+PIC32MZ_DEVSIGN1_OFFSET)
 #define PIC32MZ_DEVSIGN0         (PIC32MZ_BOOTCFG_K1BASE+PIC32MZ_DEVSIGN0_OFFSET)
 
-/* Device ADC Calibration (Boot Flash PIC32MZ_ADCCALIB_K1BASE) */
+/* Device ADC Calibration (Boot Flash PIC32MZ_DEVSN_K1BASE) */
 
-#define PIC32MZ_DEVADC1          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC1_OFFSET)
-#define PIC32MZ_DEVADC2          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC2_OFFSET)
-#define PIC32MZ_DEVADC3          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC3_OFFSET)
-#define PIC32MZ_DEVADC4          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC4_OFFSET)
-#define PIC32MZ_DEVADC5          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC5_OFFSET)
+#define PIC32MZ_DEVADC0          (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVADC0_OFFSET)
+#define PIC32MZ_DEVADC1          (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVADC1_OFFSET)
+#define PIC32MZ_DEVADC2          (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVADC2_OFFSET)
+#define PIC32MZ_DEVADC3          (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVADC3_OFFSET)
+#define PIC32MZ_DEVADC4          (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVADC4_OFFSET)
+#define PIC32MZ_DEVADC7          (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVADC7_OFFSET)
 
 /* Device Serial Number (Boot Flash PIC32MZ_DEVSN_K1BASEPIC32MZ_DEVSN_K1BASE) */
 
-#define PIC32MZ_DEVSN0           (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVSN0_OFFSET)
-#define PIC32MZ_DEVSN1           (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVSN1_OFFSET)
+#define PIC32MZ_DEVSN0           (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVSN0_OFFSET)
+#define PIC32MZ_DEVSN1           (PIC32MZ_DEVSN_K1BASE+PIC32MZ_DEVSN1_OFFSET)
 
 /* Register/Flash Bit Field Definitions *********************************************/
 
@@ -171,6 +173,7 @@
 #  define CFGCON_ECCCON_DYNECC   (1 << CFGCON_ECCCON_SHIFT) /* Dynamic Flash ECC enabled */
 #  define CFGCON_ECCCON_DISLCK   (2 << CFGCON_ECCCON_SHIFT) /* ECC / dynamic ECC disabled (locked) */
 #  define CFGCON_ECCCON_DISWR    (3 << CFGCON_ECCCON_SHIFT) /* ECC / dynamic ECC disabled (writable) */
+#define CFGCON_IOANCPEN          (1 << 7)  /* Bit 7:  I/O Analog Charge Pump Enable bit */
 #define CFGCON_USBSSEN           (1 << 8)  /* Bit 8:  USB Suspend Sleep Enable bit */
 #define CFGCON_PGLOCK            (1 << 11) /* Bit 11: Permission Group Lock bit */
 #define CFGCON_PMDLOCK           (1 << 12) /* Bit 12: Peripheral Module Disable bit */
@@ -224,14 +227,24 @@
 
 /* External bus interface address pin control register */
 
+#define CFGEBIC_EBIDEN0          (1 << 0)  /* Bit 0: EBI Data Lower Byte Pin Enable bit */
+#define CFGEBIC_EBIDEN1          (1 << 1)  /* Bit 1: EBI Data Upper Byte Pin Enable bit */
+#define CFGEBIC_EBICSEN0         (1 << 4)  /* Bit 4: EBICS0 Pin Enable bit */
+#define CFGEBIC_EBICSEN1         (1 << 5)  /* Bit 5: EBICS1 Pin Enable bit */
+#define CFGEBIC_EBICSEN2         (1 << 6)  /* Bit 6: EBICS2 Pin Enable bit */
+#define CFGEBIC_EBICSEN3         (1 << 7)  /* Bit 7: EBICS3 Pin Enable bit */
+#define CFGEBIC_EBIBSEN0         (1 << 8)  /* Bit 8: EBIBS0 Pin Enable bit */
+#define CFGEBIC_EBIBSEN1         (1 << 9)  /* Bit 9: EBIBS1 Pin Enable bit */
+#define CFGEBIC_EBIOEEN          (1 << 12) /* Bit 12: EBIOE Pin Enable bit */
+#define CFGEBIC_EBIWEEN          (1 << 13) /* Bit 13: EBIWE Pin Enable bit */
 #define CFGEBIC_EBIRPEN          (1 << 16) /* Bit 16: EBIRP Pin Sensitivity Control bit */
 #define CFGEBIC_EBIRDYLVL        (1 << 17) /* Bit 17: EBIRDYx Pin Sensitivity Control bit */
-#define CFGEBIC_EBIRDYEN1        (1 << 24) /* Bit 24: EBIRDY1 Pin Enable bit */
-#define CFGEBIC_EBIRDYEN2        (1 << 25) /* Bit 25: EBIRDY2 Pin Enable bit */
-#define CFGEBIC_EBIRDYEN3        (1 << 26) /* Bit 26: EBIRDY3 Pin Enable bit */
-#define CFGEBIC_EBIRDYINV1       (1 << 28) /* Bit 28: EBIRDY1 Inversion Control bit */
-#define CFGEBIC_EBIRDYINV2       (1 << 29) /* Bit 29: EBIRDY2 Inversion Control bit */
-#define CFGEBIC_EBIRDYINV3       (1 << 30) /* Bit 30: EBIRDY3 Inversion Control bit */
+#define CFGEBIC_EBIRDYEN1        (1 << 25) /* Bit 25: EBIRDY1 Pin Enable bit */
+#define CFGEBIC_EBIRDYEN2        (1 << 26) /* Bit 26: EBIRDY2 Pin Enable bit */
+#define CFGEBIC_EBIRDYEN3        (1 << 27) /* Bit 27: EBIRDY3 Pin Enable bit */
+#define CFGEBIC_EBIRDYINV1       (1 << 29) /* Bit 29: EBIRDY1 Inversion Control bit */
+#define CFGEBIC_EBIRDYINV2       (1 << 30) /* Bit 30: EBIRDY2 Inversion Control bit */
+#define CFGEBIC_EBIRDYINV3       (1 << 31) /* Bit 31: EBIRDY3 Inversion Control bit */
 
 /* Permission group configuration register */
 
@@ -475,11 +488,24 @@
 #  define DEVCFG0_DBGPER_GROUP1  (2 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 1 regions */
 #  define DEVCFG0_DBGPER_GROUP2  (4 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 2 regions */
 #  define DEVCFG0_DBGPER_ALL     (7 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to all regions */
+#define DEVCFG0_SMCLR            (1 << 15) /* Bit 15: Soft Master Clear Enable bit */
+#define DEVCFG0_SOSCGAIN_SHIFT   (16)      /* Bits 16-17: Secondary Oscillator Gain Control bits */
+#define DEVCFG0_SOSCGAIN_MASK    (3 << DEVCFG0_SOSCGAIN_SHIFT)
+#  define DEVCFG0_SOSCGAIN(n)    ((uint32_t)(n) << DEVCFG0_SOSCGAIN_SHIFT)
+#  define DEVCFG0_SOSCGAIN_LOW   (0 << DEVCFG0_SOSCGAIN_SHIFT)
+#  define DEVCFG0_SOSCGAIN_HIGH  (3 << DEVCFG0_SOSCGAIN_SHIFT)
+#define DEVCFG0_SOSCBOOST        (1 << 18) /* Bit 18: Secondary Oscillator Boost Kick Start Enable bit */
+#define DEVCFG0_POSCGAIN_SHIFT   (19)      /* Bits 19-20: Primary Oscillator Gain Control bits */
+#define DEVCFG0_POSCGAIN_MASK    (3 << DEVCFG0_POSCGAIN_SHIFT)
+#  define DEVCFG0_POSCGAIN(n)    ((uint32_t)(n) << DEVCFG0_POSCGAIN_SHIFT)
+#  define DEVCFG0_POSCGAIN_LOW   (0 << DEVCFG0_POSCGAIN_SHIFT)
+#  define DEVCFG0_POSCGAIN_HIGH  (3 << DEVCFG0_POSCGAIN_SHIFT)
+#define DEVCFG0_POSCBOOST        (1 << 21) /* Bit 21: Primary Oscillator Boost Kick Start Enable bit */
 #define DEVCFG0_EJTAGBEN         (1 << 30) /* Bit 30: EJTAG Boot Enable bit */
 #  define DEVCFG0_EJTAG_NORMAL   (1 << 30) /*   Bit 30=1: Normal EJTAG functionality */
 #  define DEVCFG0_EJTAG_REDUCED  (0 << 30) /*   Bit 30=0: Reduced EJTAG functionality */
 
-#define DEVCFG0_RW0              0xbfff8880 /* Bits 7, 11, 15-29, 31: Reserved, write as one */
+#define DEVCFG0_RW0              0xbfe00880 /* Bits 7, 11, 21-29, 31: Reserved, write as one */
 
 /* Device code protect words 1-3 / Alternate device code protect words 1-3
  *
@@ -505,10 +531,10 @@
 #define DEVSIGN0_RWZ             0x80000000 /* Bit 31: Reserved, write as zero */
 #define DEVSIGN0_RWO             0x7fffffff /* Bits 0-30: Reserved, write as one */
 
-/* Device ADC Calibration (Boot Flash PIC32MZ_ADCCALIB_K1BASE) */
-/* ADC1-5 Calibration:  32-bit calibration values */
+/* Device ADC Calibration (Boot Flash PIC32MZ_DEVSN_K1BASE) */
+/* ADC0-4,7 Calibration:  32-bit calibration values */
 
 /* Device Serial Number (Boot Flash PIC32MZ_DEVSN_K1BASE) */
 /* Device serial number 0-1: 32-bit serial number data */
 
-#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_FEATURES_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_FEATURES_H */

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/mips/src/pic32mz/chip/pic32mzec-memorymap.h
+ * arch/mips/src/pic32mz/chip/pic32mzef-memorymap.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_MEMORYMAP_H
-#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_MEMORYMAP_H
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_MEMORYMAP_H
+#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -60,14 +60,13 @@
 /* Boot FLASH */
 
 #define PIC32MZ_LOWERBOOT_PBASE   0x1fc00000 /* Lower boot alias */
-#define PIC32MZ_BOOTCFG_PBASE     0x1fc0ff40 /* Configuration space */
+#define PIC32MZ_BOOTCFG_PBASE     0x1fc0ff00 /* Configuration space */
 #define PIC32MZ_UPPERBOOT_PBASE   0x1fc20000 /* Upper boot alias */
 #define PIC32MZ_BOOT1_PBASE       0x1fc40000 /* Boot flash 1 */
-#define PIC32MZ_SEQCFG1_PBASE     0x1fc4ff40 /* Sequence/configuration space 1 */
-#define PIC32MZ_ADCCALIB_PBASE    0x1fc54000 /* ADC calibration space */
-#define PIC32MZ_DEVSN_PBASE       0x1fc54020 /* Device serial number */
+#define PIC32MZ_SEQCFG1_PBASE     0x1fc4ff00 /* Sequence/configuration space 1 */
+#define PIC32MZ_DEVSN_PBASE       0x1fc54000 /* Device serial number */
 #define PIC32MZ_BOOT2_PBASE       0x1fc60000 /* Boot flash 2 */
-#define PIC32MZ_SEQCFG2_PBASE     0x1fc6ff40 /* Sequence/configuration space 2 */
+#define PIC32MZ_SEQCFG2_PBASE     0x1fc6ff00 /* Sequence/configuration space 2 */
 
 /* Virtual Memory Map ***************************************************************/
 
@@ -92,7 +91,6 @@
 #define PIC32MZ_UPPERBOOT_K0BASE    (KSEG0_BASE + PIC32MZ_UPPERBOOT_PBASE)
 #define PIC32MZ_BOOT1_K0BASE        (KSEG0_BASE + PIC32MZ_BOOT1_PBASE)
 #define PIC32MZ_SEQCFG1_K0BASE      (KSEG0_BASE + PIC32MZ_SEQCFG1_PBASE)
-#define PIC32MZ_ADCCALIB_K0BASE     (KSEG0_BASE + PIC32MZ_ADCCALIB_PBASE)
 #define PIC32MZ_DEVSN_K0BASE        (KSEG0_BASE + PIC32MZ_DEVSN_PBASE)
 #define PIC32MZ_BOOT2_K0BASE        (KSEG0_BASE + PIC32MZ_BOOT2_PBASE)
 #define PIC32MZ_SEQCFG2_K0BASE      (KSEG0_BASE + PIC32MZ_SEQCFG2_PBASE)
@@ -102,7 +100,6 @@
 #define PIC32MZ_UPPERBOOT_K1BASE    (KSEG1_BASE + PIC32MZ_UPPERBOOT_PBASE)
 #define PIC32MZ_BOOT1_K1BASE        (KSEG1_BASE + PIC32MZ_BOOT1_PBASE)
 #define PIC32MZ_SEQCFG1_K1BASE      (KSEG1_BASE + PIC32MZ_SEQCFG1_PBASE)
-#define PIC32MZ_ADCCALIB_K1BASE     (KSEG1_BASE + PIC32MZ_ADCCALIB_PBASE)
 #define PIC32MZ_DEVSN_K1BASE        (KSEG1_BASE + PIC32MZ_DEVSN_PBASE)
 #define PIC32MZ_BOOT2_K1BASE        (KSEG1_BASE + PIC32MZ_BOOT2_PBASE)
 #define PIC32MZ_SEQCFG2_K1BASE      (KSEG1_BASE + PIC32MZ_SEQCFG2_PBASE)
@@ -136,6 +133,7 @@
 
 #define PIC32MZ_CAN_K1BASE          (PIC32MZ_SFR_K1BASE + 0x00080000) /* CAN1 and CAN2 */
 #define PIC32MZ_ETH_K1BASE          (PIC32MZ_SFR_K1BASE + 0x00082000) /* Ethernet */
+#define PIC32MZ_USBCR_K1BASE        (PIC32MZ_SFR_K1BASE + 0x00084000) /* USBCR */
 
 #define PIC32MZ_PREFETCH_K1BASE     (PIC32MZ_SFR_K1BASE + 0x000e0000) /* Prefetch */
 #define PIC32MZ_EBI_K1BASE          (PIC32MZ_SFR_K1BASE + 0x000e1000) /* EBI */
@@ -146,4 +144,4 @@
 
 #define PIC32MZ_SYSBUS_K1BASE       (PIC32MZ_SFR_K1BASE + 0x000f0000) /* System Bus */
 
-#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEC_MEMORYMAP_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZEF_MEMORYMAP_H */
