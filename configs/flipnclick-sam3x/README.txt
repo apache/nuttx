@@ -2,9 +2,11 @@ README
 ======
 
   This README discusses issues unique to NuttX configurations for the
-  Mikroe Flip&Click STM32X board.  This board is an Arduino-Due work-alike
+  Mikroe Flip&Click SAM3X board.  This board is an Arduino-Due work-alike
   with four Mikroe Click bus interfaces.  Like the Arduino-Due, this board
   features the Atmel ATSAM3X8E MCU running at 84 MHz.
+
+  Thanks to John Legg for contributing the Flip&Click SAM3X board!
 
 Contents
 ========

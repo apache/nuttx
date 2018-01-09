@@ -1,8 +1,10 @@
 configs/flipnclick-pic32mz README
 ===============================
 
-This README file discusses the port of NuttX to the Mikroe Flip&Click PIC32MZ
-board.  That board features the PIC32MZ2048EFH100 MCU.
+  This README file discusses the port of NuttX to the Mikroe Flip&Click
+  PIC32MZ board.  That board features the PIC32MZ2048EFH100 MCU.
+
+  Thanks to John Legg for contributing the Flip&Click PIC32MZ board!
 
 Contents
 ========
@@ -21,27 +23,44 @@ Port Status
   2018-01-07:  Added architecture support for the PIC32MZ2048EFH100 used on
     the Flip&Click PIC32MZ board.
   2018-01-08:  Created the basic board configuration for the Mikroe
-    Flip&Click PIC32MZ board.  No testing has yet been performed.  I need
-    understand how the memory map is set up when used with the mikroBootloader.
+    Flip&Click PIC32MZ board.  No testing has yet been performed.  At this
+    point, I have not even figured out how I am going to load and debug
+    new firmware.  I need understand how the memory map is set up when used
+    with the mikroBootloader.
 
 On Board Debug Support
 ======================
 
   There are several debug options:
 
-  1. Using the Aduino IDE (chipKIT core).  This is available on the USB-UART
+  1. Using the Arduino IDE (chipKIT core).  This is available on the USB-UART
      port between the C and D MikroBUS sockets.  Usage is described in the
      Flip&Click User Manual.
+
+     I don't think trying to use the Arduino IDE is a good option.
 
   2. Using the mikroC USB HID bootloader.  This is is available on the USB
      port between the A and B MikroBUS sockets.  Usage is described in the
      Flip&Click User Manual.
+
+     There is a simple application available at Mikroe that will allow you
+     to write .hex files via the USB HID bootloader.  However, in order to
+     use the bootloader, you will have to control the memory map so that the
+     downloaded code does not clobber the bootloader.
+
+     At this point, I have found no documentation describing how to build
+     the code outside of the Mikroe toolchain for use with the Mikroe
+     bootloader.
 
   3. There is an undocumented and unpopulated PICKit3 connector between the
      B and C mikroBUS sockets.
 
   4. There is an undocumented and unpopulated mikroProg connector between
      the A and D mikroBUS sockets.
+
+     Since 3) and 4) are undocumented, this would require some research and
+     would, most likely, clobber the USB HID bootloader (and possibly the
+     Arduino support as well).
 
 Creating Compatible NuttX HEX files
 ===================================
