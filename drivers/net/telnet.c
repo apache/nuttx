@@ -84,6 +84,9 @@
 #define ISO_nl       0x0a
 #define ISO_cr       0x0d
 
+#define TELNET_SGA   0x03  /* Suppress Go Ahead */
+#define TELNET_ECHO  0x01
+
 #define TELNET_IAC   255
 #define TELNET_WILL  251
 #define TELNET_WONT  252
@@ -251,9 +254,11 @@ static void telnet_getchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 {
   register int index;
 
+#ifndef CONFIG_TELNET_CHARACTER_MODE
   /* Ignore carriage returns */
 
   if (ch != ISO_cr)
+#endif
     {
       /* Add all other characters to the destination buffer */
 
@@ -334,9 +339,32 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv, FAR const char *src
             break;
 
           case STATE_DO:
+#ifdef CONFIG_TELNET_CHARACTER_MODE
+            if (ch == TELNET_SGA)
+              {
+                /* If it received 'Suppress Go Ahead', reply with a WILL */
+
+                telnet_sendopt(priv, TELNET_WILL, ch);
+
+                /* Also, send 'WILL ECHO' */
+
+                telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
+              }
+            else if (ch == TELNET_ECHO)
+              {
+                /* If it received 'ECHO', then do nothing */
+              }
+            else
+              {
+                /* Reply with a WONT */
+
+                telnet_sendopt(priv, TELNET_WONT, ch);
+              }
+#else
             /* Reply with a WONT */
 
             telnet_sendopt(priv, TELNET_WONT, ch);
+#endif
             priv->td_state = STATE_NORMAL;
             break;
 
