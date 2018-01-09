@@ -41,6 +41,14 @@ config TELNET_DUMPBUFFER
 	default n
 	depends on DEBUG_NET
 
+config TELNET_CHARACTER_MODE
+	bool "Character mode"
+	default n
+	---help---
+		The Telnet daemon works in character mode. In this case, the deamon
+		will echo a character which telnet client sent. By default, it works
+		in line mode.
+
 endif # NETDEV_TELNET
 
 config ARCH_HAVE_NETDEV_STATISTICS
