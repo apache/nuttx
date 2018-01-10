@@ -1991,6 +1991,10 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
   /* Now scan the MTD device */
 
+  /* At first, set the loser sector as the invalid value */
+
+  loser = totalsectors;
+
   for (sector = 0; sector < totalsectors; sector++)
     {
       finfo("Scan sector %d\n", sector);
@@ -2310,6 +2314,13 @@ static int smart_scan(FAR struct smart_struct_s *dev)
               ferr("ERROR: Error %d releasing duplicate sector\n", -ret);
               goto err_out;
             }
+        }
+
+      /* Test if this sector is loser of duplicate logical sector */
+
+      if (sector == loser)
+        {
+          continue;
         }
 
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
