@@ -50,7 +50,7 @@
 #include "up_arch.h"
 
 #ifdef CONFIG_DVFS
-#  include "lc823450_dvfs.h"
+#  include "lc823450_dvfs2.h"
 #endif
 
 /****************************************************************************
@@ -61,6 +61,8 @@
 static int32_t  g_in_sleep;
 static uint64_t g_sleep_t0;
 #endif /* CONFIG_LC823450_SLEEP_MODE */
+
+static uint32_t g_idle_counter[2];
 
 /****************************************************************************
  * Private Functions
@@ -124,18 +126,21 @@ void up_idle(void)
   regval &= ~NVIC_SYSCON_SLEEPDEEP;
   putreg32(regval, NVIC_SYSCON);
 
+  leave_critical_section(flags);
+#endif /* CONFIG_LC823450_SLEEP_MODE */
+
 #ifdef CONFIG_DVFS
   lc823450_dvfs_enter_idle();
 #endif
-
-  leave_critical_section(flags);
-#endif /* CONFIG_LC823450_SLEEP_MODE */
 
   board_autoled_off(LED_CPU0 + up_cpu_index());
 
   /* Sleep until an interrupt occurs to save power */
 
   asm("WFI");
+
+  g_idle_counter[up_cpu_index()]++;
+
 #endif
 }
 

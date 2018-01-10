@@ -146,7 +146,8 @@ endif
 endif
 
 ifeq ($(CONFIG_DVFS),y)
-CHIP_CSRCS += lc823450_dvfs.c
+CHIP_CSRCS += lc823450_dvfs2.c
+CHIP_CSRCS += lc823450_procfs_dvfs.c
 endif
 
 ifeq ($(CONFIG_PM),y)

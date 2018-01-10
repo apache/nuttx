@@ -248,6 +248,26 @@ nsh> route
 SEQ TARGET NETMASK ROUTER
    1. 0.0.0.0 0.0.0.0 192.168.1.1
 
+12. DVFS (Dynamic Voltage and Frequency Scaling)
+
+lc823450-xgevk/audio and rndis configurations support DVFS.
+You can check the status via /proc/dvfs
+
+nsh> cat /proc/dvfs
+cur_freq 160
+enable 0
+
+By default, DVFS is disabled. To enable,
+
+nsh> echo "enable 1" > /proc/dvfs
+
+In addition, you can change CPU frequency to 160/80/40. To change the
+frequency, enable the DVFS first then do the following.
+
+nsh> echo "cur_freq 80" > /proc/dvfs.
+
+Currently, DVFS works in manual mode and Vdd1 is fixed to 1.2V
+which will be changed in the future version.
 
 TODO
 ^^^^

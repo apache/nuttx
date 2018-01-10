@@ -246,5 +246,8 @@ config HRT_TIMER
 	bool "High resolution timer"
 	default n
 
+config DVFS
+	bool "Dynamic Voltage and Frequencey Scaling"
+	default n
 
 endmenu

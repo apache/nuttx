@@ -58,7 +58,7 @@
 #include "lc823450_intc.h"
 
 #ifdef CONFIG_DVFS
-#  include "lc823450_dvfs.h"
+#  include "lc823450_dvfs2.h"
 #endif
 
 /****************************************************************************

@@ -57,6 +57,10 @@
 #  include "lc823450_wdt.h"
 #endif
 
+#ifdef CONFIG_DVFS
+#  include "lc823450_dvfs2.h"
+#endif
+
 #include "lc823450-xgevk.h"
 
 /****************************************************************************
@@ -80,6 +84,11 @@ int lc823450_bringup(void)
 #endif
 
 #ifdef CONFIG_FS_PROCFS
+
+#ifdef CONFIG_DVFS
+  (void)dvfs_procfs_register();
+#endif
+
   /* Mount the procfs file system */
 
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
