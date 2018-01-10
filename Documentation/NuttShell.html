@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: January 4, 2018</p>
+      <p>Last Updated: January 10, 2018</p>
     </td>
   </tr>
 </table>
@@ -1599,12 +1599,15 @@ dirname &lt;path&gt
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-echo [&lt;string|$name&gt; [&lt;string|$name&gt;...]]
+echo [-n] [&lt;string|$name&gt; [&lt;string|$name&gt;...]]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
   Copy the sequence of strings and expanded environment variables to
   console output (or to a file if the output is re-directed).
+</p>
+<p>
+  The <code>-n</code> option suppresses the trailing newline character.
 </p>
 
 <table width ="100%">
