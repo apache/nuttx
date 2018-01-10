@@ -4213,7 +4213,7 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
   header->seq = 0;
 #else
-  *((FAR uint16_t *) &header->crc8) = 0;
+  *((FAR uint16_t *) &header->seq) = 0;
 #endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
 #else
   header->seq = 0;
