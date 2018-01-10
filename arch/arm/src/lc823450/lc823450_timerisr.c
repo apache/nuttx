@@ -62,6 +62,13 @@
 #include "lc823450_clockconfig.h"
 #include "lc823450_serial.h"
 
+#ifdef CONFIG_DVFS
+#  include "lc823450_dvfs2.h"
+#endif
+
+#if !defined(CONFIG_LC823450_MTM0_TICK) && defined (CONFIG_DVFS)
+#  error "Use CONFIG_LC823450_MTM0_TICK=y"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
