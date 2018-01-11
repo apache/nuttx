@@ -1040,6 +1040,14 @@ NuttX Configuration Tool under DOS
   that can be used:
   http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
 
+  The configuration steps most recent versions of NuttX require the
+  kconfig-tweak tool that is not not available in the the above.  However,
+  there has been an update to this Kconfig Windows tools that does include
+  kconfig-tweak:  http://reclonelabs.com/more-kconfig-awesomeness-for-windows/
+
+  Source code is available here: https://github.com/reclone/kconfig-frontends-win32
+  and https://github.com/reclone/kconfig-frontends-win32/releases
+
   It is also possible to use the version of kconfig-frontends built
   under Cygwin outside of the Cygwin "sandbox" in a native Windows
   environment:
@@ -1260,7 +1268,7 @@ Build Targets and Options
 
     Perform the distclean operation only in the user application directory.
     The apps/.config file is preserved so that this is not a "full" distclean
-    but more of a configuration "reset."
+    but more of a configuration "reset" for the application directory.
 
   export
 
@@ -1317,7 +1325,6 @@ Native Windows Build
 
   The windows native build logic initiated if CONFIG_WINDOWS_NATIVE=y is
   defined in the NuttX configuration file:
-
 
   This build:
 

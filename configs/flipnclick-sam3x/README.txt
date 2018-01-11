@@ -309,7 +309,7 @@ Loading Code
 
     PIN SIGNAL         JTAG STANDARD     NOTES
     --- -------------- ----------------- --------------------------------
-     1  3.3V           VTref
+     1  VCC-3.3V       VTref
      2  JTAG_TMS       SWDIO/TMS         SAM3X pin 31, Pulled up on board
      3  GND            GND
      4  JTAG_TCK       SWDCLK/TCK        SAM3X pin 28, Pulled up on board
@@ -318,12 +318,16 @@ Loading Code
      7  N/C            Key
      8  JTAG_TDI       NC/EXTb/TDI       SAM3X pin 29, Pulled up on board
      9  GND            GNDDetect
-     10 MASTER-RESET   nReset
+    10  MRST           nReset
 
-   NOTE:  The 10-pin JTAG connector is not populated on the Flip&Click SAM3X.
+   NOTE:  The 10-pin JTAG connector is not populated on the Flip&Click
+   SAM3X.  This is the part number for the SMD connector recommended by
+   ARM.com:  Samtec FTSH-105-01-L-DV-K. For example:
+
+   https://www.digikey.com/product-detail/en/samtec-inc/FTSH-105-01-L-DV-K/SAM8799-ND/1875039
 
    You should be able to use a 10- to 20-pin adapter to connect a SAM-ICE
-   debugger to the Flip&Click SAM3X.  I have this Olimex adapter:
+   or J-Link debugger to the Flip&Click SAM3X.  I have this Olimex adapter:
    https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ . But so far I
    have been unable to get the get the SAM-ICE to communicate with the
    Flip&Click.
