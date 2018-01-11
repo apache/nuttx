@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_spi.c
  *
- *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1421,7 +1421,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   /* Set the SERCOM in SPI master mode (no address) */
 
   regval  = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
-  regval &= ~SPI_CTRLA_MODE_MASK;
+  regval &= ~(SPI_CTRLA_MODE_MASK | SPI_CTRLA_FORM_MASK);
   regval |= (SPI_CTRLA_MODE_MASTER | SPI_CTRLA_FORM_SPI);
   spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
@@ -1435,11 +1435,13 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
   (void)spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
-  /* Set MSB first data order and the configured pad mux setting,
-   * Note that SPI mode 0 is assumed initially (CPOL=0 and CPHA=0).
+  /* Set MSB first data order and the configured pad mux setting.
+   * SPI mode 0 is assumed initially (CPOL=0 and CPHA=0).
    */
 
-  regval = (SPI_CTRLA_MSBFIRST | priv->muxconfig);
+  regval &= ~(SPI_CTRLA_DOPO_MASK | SPI_CTRLA_DIPO_MASK);
+  regval &= ~(SPI_CTRLA_CPHA | SPI_CTRLA_CPOL);
+  regval |= (SPI_CTRLA_MSBFIRST | priv->muxconfig);
   spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
   /* Enable the receiver.  Note that 8-bit data width is assumed initially */

@@ -247,8 +247,8 @@
 #endif
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define SPI_INT_ SSL             (1 << 3)  /* Bit 3:  Slave select low interrupt */
-#  define SPI_INT_ ERROR           (1 << 7)  /* Bit 7:  Error interrupt */
+#  define SPI_INT_SSL              (1 << 3)  /* Bit 3:  Slave select low interrupt */
+#  define SPI_INT_ERROR            (1 << 7)  /* Bit 7:  Error interrupt */
 
 #  define SPI_INT_ALL              (0x8f)
 #endif
