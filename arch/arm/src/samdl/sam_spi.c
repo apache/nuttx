@@ -292,13 +292,13 @@ static struct sam_spidev_s g_spi1dev =
 static const struct spi_ops_s g_spi2ops =
 {
   .lock              = spi_lock,
-  .select            = sam_spi0select,
+  .select            = sam_spi2select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
-  .status            = sam_spi0status,
+  .status            = sam_spi2status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = sam_spi0cmddata,
+  .cmddata           = sam_spi2cmddata,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -314,7 +314,7 @@ static const struct spi_ops_s g_spi2ops =
 
 static struct sam_spidev_s g_spi2dev =
 {
-  .ops       = &g_spi1ops,
+  .ops       = &g_spi2ops,
   .sercom    = 2,
 #if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM2,
