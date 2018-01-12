@@ -57,6 +57,7 @@
 
 #include "chip.h"
 #include "sam_port.h"
+#include "sam_eic.h"
 
 /****************************************************************************
  * Private Data
@@ -189,7 +190,27 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
 
 static inline void sam_configinterrupt(uintptr_t base, port_pinset_t pinset)
 {
-#warning Missing logic
+  uint32_t func;
+  uint32_t regval;
+  int pin;
+
+  pin = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
+
+  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_PMUXEN | PORT_WRCONFIG_INEN);
+  regval |= PORT_WRCONFIG_PINMASK(pin);
+
+  func    = (pinset & PORT_FUNC_MASK) >> PORT_FUNC_SHIFT;
+  regval |= (func << PORT_WRCONFIG_PMUX_SHIFT);
+
+  putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
+
+  /* Configure the interrupt edge sensitivity in CONFIGn register of the EIC */
+
+  sam_eic_config(pin, pinset);
+
+#ifdef CONFIG_DEBUG_GPIO_INFO
+  sam_dumpport(pinset, "extint");
+#endif
 }
 
 /****************************************************************************
@@ -531,7 +552,7 @@ int sam_dumpport(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  pin  = sam_portpin(pinset);
+  pin = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
   port = (pinset & PORT_MASK) >> PORT_SHIFT;
   base = SAM_PORTN_BASE(port);
 

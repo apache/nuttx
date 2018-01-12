@@ -86,9 +86,9 @@
 #define SAM_IRQ_NINTS      (28)                    /* Total number of interrupts */
 #define SAM_IRQ_NIRQS      (SAM_IRQ_INTERRUPT+28)  /* The number of real interrupts */
 
-/* GPIO interrupts.  Up to 16 pins may be configured to support interrupts */
+/* EIC interrupts.  Up to 16 pins may be configured to support interrupts */
 
-#ifdef CONFIG_SAMDL_GPIOIRQ
+#ifdef CONFIG_SAMDL_EIC
 #  define SAM_IRQ_EXTINT0  (SAM_IRQ_NIRQS+0)       /* External interrupt 0 */
 #  define SAM_IRQ_EXTINT1  (SAM_IRQ_NIRQS+1)       /* External interrupt 1 */
 #  define SAM_IRQ_EXTINT2  (SAM_IRQ_NIRQS+2)       /* External interrupt 2 */

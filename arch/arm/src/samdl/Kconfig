@@ -572,6 +572,10 @@ config SAMDL_USB
 	default n
 	depends on SAMDL_HAVE_USB
 
+config SAMDL_EIC
+  bool "External Interrupt Controller"
+  default n
+
 config SAMDL_WDT
 	bool "Watchdog Timer"
 	default n
