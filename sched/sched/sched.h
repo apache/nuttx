@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched.h
  *
- *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,10 @@
  * OS functions (this is the only limitation in the number of
  * tasks built into the design).
  */
+
+#if CONFIG_MAX_TASKS & (CONFIG_MAX_TASKS - 1)
+#  error CONFIG_MAX_TASKS must be power of 2
+#endif
 
 #define MAX_TASKS_MASK           (CONFIG_MAX_TASKS-1)
 #define PIDHASH(pid)             ((pid) & MAX_TASKS_MASK)

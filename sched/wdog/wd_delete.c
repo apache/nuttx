@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/wdog/wd_delete.c
  *
- *   Copyright (C) 2007-2009, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,9 +114,7 @@ int wd_delete(WDOG_ID wdog)
       sched_kfree(wdog);
     }
 
-  /* This was a pre-allocated timer.  This function should not be called for
-   * statically allocated timers.
-   */
+  /* Check if this is pre-allocated timer. */
 
   else if (!WDOG_ISSTATIC(wdog))
     {
@@ -126,6 +125,13 @@ int wd_delete(WDOG_ID wdog)
       sq_addlast((FAR sq_entry_t *)wdog, &g_wdfreelist);
       g_wdnfree++;
       DEBUGASSERT(g_wdnfree <= CONFIG_PREALLOC_WDOGS);
+      leave_critical_section(flags);
+    }
+
+  /* This function should not be called for statically allocated timers. */
+
+  else
+    {
       leave_critical_section(flags);
     }
 
