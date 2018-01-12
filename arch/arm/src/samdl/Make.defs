@@ -102,3 +102,7 @@ endif
 ifeq ($(CONFIG_SAMDL_USB),y)
 CHIP_CSRCS += sam_usb.c
 endif
+
+ifeq ($(CONFIG_SAMDL_EIC),y)
+CHIP_CSRCS += sam_eic.c
+endif
