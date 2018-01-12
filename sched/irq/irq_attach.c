@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/irq/irq_attach.c
  *
- *   Copyright (C) 2007-2008, 2010, 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2010, 2012, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,6 +116,15 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 
       g_irqvector[ndx].handler = isr;
       g_irqvector[ndx].arg     = arg;
+#ifdef CONFIG_SCHED_IRQMONITOR
+      g_irqvector[ndx].start   = clock_systimer();
+#ifdef CONFIG_HAVE_LONG_LONG
+      g_irqvector[ndx].count   = 0;
+#else
+      g_irqvector[ndx].mscount = 0;
+      g_irqvector[ndx].lscount = 0;
+#endif
+#endif
 
       leave_critical_section(flags);
       ret = OK;

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/irq/irq_initialize.c
+ * sched/irq/irq_foreach.c
  *
- *   Copyright (C) 2007-2008, 2010, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
+
+#include <assert.h>
+#include <debug.h>
+
 #include <nuttx/irq.h>
 
 #include "irq/irq.h"
+
+#ifdef CONFIG_SCHED_IRQMONITOR
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -56,47 +61,58 @@
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This is the interrupt vector table */
-
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-struct irq_info_s g_irqvector[NR_IRQS];
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irq_initialize
+ * Name: irq_foreach
  *
  * Description:
- *   Configure the IRQ subsystem
+ *   This function traverses the internal list of interrupts and provides
+ *   information about each attached interrupt.
+ *
+ *   Some caution may be necessary:  If interrupts are disabled then the
+ *   counts may change during the traversal.  If pre-emption is enabled, then
+ *   the traversed sequence may be widely separated in time.
+ *
+ * Input Parameters:
+ *   callback - This function will be called for each attached interrupt
+ *              along with the IRQ number, an instance of struct irq_info_s,
+ *              and the caller provided argument
+ *   args     - This is an opaque argument provided with each call to the
+ *              callback function.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned after callback has been invoked for all of
+ *   the attached interrupts.  The callback function may terminate the
+ *   traversal at any time by returning a non-zero value.  In that case,
+ *   irq_foreach will return that non-zero value.
  *
  ****************************************************************************/
 
-void irq_initialize(void)
+int irq_foreach(irq_foreach_t callback, FAR void *arg)
 {
-  int i;
+  int irq;
+  int ret;
 
-  /* Point all interrupt vectors to the unexpected interrupt */
+  DEBUGASSERT(callback != NULL);
 
-  for (i = 0; i < TAB_SIZE; i++)
+  /* Visit each interrupt in the interrupt table */
+
+  for (irq = 0; irq < TAB_SIZE; irq++)
     {
-      g_irqvector[i].handler = irq_unexpected_isr;
-      g_irqvector[i].arg     = NULL;
-#ifdef CONFIG_SCHED_IRQMONITOR
-      g_irqvector[i].start   = 0;
-#ifdef CONFIG_HAVE_LONG_LONG
-      g_irqvector[i].count   = 0;
-#else
-      g_irqvector[i].mscount = 0;
-      g_irqvector[i].lscount = 0;
-#endif
-#endif
+      if (g_irqvector[irq].handler != NULL &&
+          g_irqvector[irq].handler != irq_unexpected_isr)
+        {
+          ret = callback(irq, &g_irqvector[irq], arg);
+          if (ret != 0)
+            {
+              return ret;
+            }
+        }
     }
+
+  return OK;
 }
+
+#endif /* CONFIG_SCHED_IRQMONITOR */

@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/irq/irq.h
  *
- *   Copyright (C) 2007, 2008, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013-2014, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,9 +72,25 @@
 
 struct irq_info_s
 {
-  xcpt_t handler;  /* Address of the interrupt handler */
-  FAR void *arg;   /* The argument provided to the interrupt handler. */
+  xcpt_t handler;    /* Address of the interrupt handler */
+  FAR void *arg;     /* The argument provided to the interrupt handler. */
+#ifdef CONFIG_SCHED_IRQMONITOR
+  systime_t start;   /* Time interrupt attached */
+#ifdef CONFIG_HAVE_LONG_LONG
+  uint64_t count;    /* Number of interrupts on this IRQ */
+#else
+  uint32_t mscount;  /* Number of interrupts on this IRQ (MS) */
+  uint32_t lscount;  /* Number of interrupts on this IRQ (LS) */
+#endif
+#endif
 };
+
+#ifdef CONFIG_SCHED_IRQMONITOR
+/* This is the type of the callback from irq_foreach(). */
+
+typedef CODE int (*irq_foreach_t)(int irq, FAR struct irq_info_s *info,
+                                  FAR void *arg);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -178,6 +195,36 @@ int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg);
 
 #ifdef CONFIG_SMP
 bool irq_cpu_locked(int cpu);
+#endif
+
+/****************************************************************************
+ * Name: irq_foreach
+ *
+ * Description:
+ *   This function traverses the internal list of interrupts and provides
+ *   information about each attached interrupt.
+ *
+ *   Some caution may be necessary:  If interrupts are disabled then the
+ *   counts may change during the traversal.  If pre-emption is enabled, then
+ *   the traversed sequence may be widely separated in time.
+ *
+ * Input Parameters:
+ *   callback - This function will be called for each attached interrupt
+ *              along with the IRQ number, an instance of struct irq_info_s,
+ *              and the caller provided argument
+ *   args     - This is an opaque argument provided with each call to the
+ *              callback function.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned after callback has been invoked for all of
+ *   the attached interrupts.  The callback function may terminate the
+ *   traversal at any time by returning a non-zero value.  In that case,
+ *   irq_foreach will return that non-zero value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_IRQMONITOR
+int irq_foreach(irq_foreach_t callback, FAR void *arg);
 #endif
 
 #undef EXTERN

@@ -623,6 +623,15 @@ endmenu # Pthread Options
 
 menu "Performance Monitoring"
 
+config SCHED_IRQMONITOR
+	bool "Enable IRQ monitoring"
+	default n
+	depends on FS_PROCFS
+	---help---
+		Enabling counting of interrupts from all interrupt sources.  These
+		counts will be available in the mounted procfs file systems at the
+		top-level file, "irqs".
+
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
 	default n

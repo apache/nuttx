@@ -114,8 +114,8 @@ typedef uint32_t irq_mapped_t;
 
 /* This struct defines the form of an interrupt service routine */
 
-typedef int (*xcpt_t)(int irq, FAR void *context, FAR void *arg);
-#endif
+typedef CODE int (*xcpt_t)(int irq, FAR void *context, FAR void *arg);
+#endif /* __ASSEMBLY__ */
 
 /* Now include architecture-specific types */
 
