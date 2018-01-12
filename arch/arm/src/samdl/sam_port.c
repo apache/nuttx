@@ -552,7 +552,6 @@ int sam_dumpport(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  //pin  = sam_portpin(pinset);
   pin = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
   port = (pinset & PORT_MASK) >> PORT_SHIFT;
   base = SAM_PORTN_BASE(port);
