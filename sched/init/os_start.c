@@ -229,7 +229,7 @@ struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
 /* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated
  * static task list (if there is one) as well as a a set of attribute flags
- * indicating properities of the list, for example, if the list is an
+ * indicating properties of the list, for example, if the list is an
  * ordered list or not.
  */
 
@@ -311,7 +311,7 @@ uint8_t g_os_initstate;  /* See enum os_initstate_e */
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This is an arry of task control block (TCB) for the IDLE thread of each
+/* This is an array of task control block (TCB) for the IDLE thread of each
  * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
  * there is one TCB per CPU.  NOTE: The system boots on CPU0 into the IDLE
  * task.  The IDLE task later starts the other CPUs and spawns the user
