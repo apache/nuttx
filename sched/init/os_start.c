@@ -115,7 +115,7 @@ volatile dq_queue_t g_readytorun;
  *    and
  *  - Tasks/threads that have not been assigned to a CPU.
  *
- * Otherwise, the TCB will be reatined in an assigned task list,
+ * Otherwise, the TCB will be retained in an assigned task list,
  * g_assignedtasks.  As its name suggests, on 'g_assignedtasks queue for CPU
  * 'n' would contain only tasks/threads that are assigned to CPU 'n'.  Tasks/
  * threads would be assigned a particular CPU by one of two mechanisms:
@@ -187,7 +187,7 @@ volatile dq_queue_t g_waitingforfill;
 
 volatile dq_queue_t g_inactivetasks;
 
-/* These are lists of dayed memory deallocations that need to be handled
+/* These are lists of delayed memory deallocations that need to be handled
  * within the IDLE loop or worker thread.  These deallocations get queued
  * by sched_kufree and sched_kfree() if the OS needs to deallocate memory
  * while it is within an interrupt handler.

@@ -260,33 +260,104 @@
 /* Register bit definitions *************************************************************************/
 
 /* SPI Configuration register */
-#define SPI_CFG_
+
+#define SPI_CFG_ENABLE                (1 << 0)  /* Bit 0:  SPI enable */
+#define SPI_CFG_MASTER                (1 << 2)  /* Bit 2:  Master mode select */
+#define SPI_CFG_LSBF                  (1 << 3)  /* Bit 3:  LSB First mode enable */
+#define SPI_CFG_CPHA                  (1 << 4)  /* Bit 4:  Clock Phase select */
+#define SPI_CFG_CPOL                  (1 << 5)  /* Bit 5:  Clock Polarity select */
+#define SPI_CFG_LOOP                  (1 << 7)  /* Bit 7:  Loopback mode enable */
+#define SPI_CFG_SPOL0                 (1 << 8)  /* Bit 8:  SSEL0 Polarity select */
+#define SPI_CFG_SPOL1                 (1 << 9)  /* Bit 9:  SSEL1 Polarity select */
+#define SPI_CFG_SPOL2                 (1 << 10) /* Bit 10: SSEL2 Polarity select */
+#define SPI_CFG_SPOL3                 (1 << 11) /* Bit 11: SSEL3 Polarity select */
+
 /* SPI Delay register */
-#define SPI_DLY_
+
+#define SPI_DLY_PRE_DELAY_SHIFT       (0)       /* Bits 0-3: Time between SSEL assertion and data transfer */
+#define SPI_DLY_PRE_DELAY_MASK        (15 << SPI_DLY_PRE_DELAY_SHIFT)
+#  define SPI_DLY_PRE_DELAY(n)        ((uint32_t)(n) << SPI_DLY_PRE_DELAY_SHIFT)
+#define SPI_DLY_POST_DELAY_SHIFT      (4)       /* Bits 4-7: Time between tdata transfer and SSEL deassertion */
+#define SPI_DLY_POST_DELAY_MASK       (15 << SPI_DLY_POST_DELAY_SHIFT)
+#  define SPI_DLY_POST_DELAY(n)       ((uint32_t)(n) << SPI_DLY_POST_DELAY_SHIFT)
+#define SPI_DLY_FRAME_DELAY_SHIFT     (8)       /* Bits 8-11: Minimum amount of time between frames */
+#define SPI_DLY_FRAME_DELAY_MASK      (15 << SPI_DLY_FRAME_DELAY_SHIFT)
+#  define SPI_DLY_FRAME_DELAY(n)      ((uint32_t)(n) << SPI_DLY_FRAME_DELAY_SHIFT)
+#define SPI_DLY_TRANSFER_DELAY_SHIFT  (12)      /* Bits 12-15: Time SSEL deasserted between transfers */
+#define SPI_DLY_TRANSFER_DELAY_MASK   (15 << SPI_DLY_TRANSFER_DELAY_SHIFT)
+#  define SPI_DLY_TRANSFER_DELAY(n)   ((uint32_t)(n) << SPI_DLY_TRANSFER_DELAY_SHIFT)
+
 /* SPI Status register */
 #define SPI_STAT_
 /* SPI Interrupt Enable read and set */
 #define SPI_INTENSET_
 /* SPI Interrupt Enable Clear */
 #define SPI_INTENCLR_
+
 /* SPI clock Divider */
-#define SPI_DIV_
+
+#define SPI_DIV_SHIFT                 (0)       /* Bits 0-15: Rate divider value */
+#define SPI_DIV_MASK                  (0xffff << SPI_DIV_SHIFT)
+#  define SPI_DIV(n)                  ((uint32_t)((n)-1) << SPI_DIV_SHIFT)
+
 /* SPI Interrupt Status */
 #define SPI_INTSTAT_
+
 /* FIFO configuration and enable register */
-#define SPI_FIFOCFG_
+
+#define SPI_FIFOCFG_ENABLETX          (1 << 0)  /* Bit 0:  Enable the transmit FIFO) */
+#define SPI_FIFOCFG_ENABLERX          (1 << 1)  /* Bit 1:  Enable the receive FIFO) */
+#define SPI_FIFOCFG_SIZE_SHIFT        (4)       /* Bits 4-5:  FIFO size configuration (read-only) */
+#define SPI_FIFOCFG_SIZE_MASK         (3 << SPI_FIFOCFG_SIZE_SHIFT)
+#  define SPI_FIFOCFG_SIZE_8x16       (1 << SPI_FIFOCFG_SIZE_SHIFT) /* FIFO is configured as 8 entries of 16 bits */
+#define SPI_FIFOCFG_DMATX             (1 << 12) /* Bit 12: DMA configuration for transmit */
+#define SPI_FIFOCFG_DMARX             (1 << 13) /* Bit 13: DMA configuration for receive */
+#define SPI_FIFOCFG_WAKETX            (1 << 14) /* Bit 14: Wake-up for transmit FIFO level */
+#define SPI_FIFOCFG_WAKERX            (1 << 15) /* Bit 15: Wake-up for receive FIFO level */
+#define SPI_FIFOCFG_EMPTYTX           (1 << 16) /* Bit 16: Empty command for the transmit FIFO) */
+#define SPI_FIFOCFG_EMPTYRX           (1 << 17) /* Bit 17: Empty command for the receive FIFO) */
+
 /* FIFO status register */
 #define SPI_FIFOSTAT_
+
 /* FIFO trigger level settings for interrupt and DMA request */
-#define SPI_FIFOTRIG_
+
+#define SPI_FIFOTRIG_TXLVLENA         (1 << 0)  /* Bit 0  Transmit FIFO level trigger enable */
+#define SPI_FIFOTRIG_RXLVLENA         (1 << 1)  /* Bit 1  Receive FIFO level trigger enable */
+#define SPI_FIFOTRIG_TXLVL_SHIFT      (8)       /* Bits 8-11: Transmit FIFO level trigger point */
+#define SPI_FIFOTRIG_TXLVL_MASK       (15 << SPI_FIFOTRIG_TXLVL_SHIFT)
+#  define SPI_FIFOTRIG_TXLVL(n)       ((uint32_t)(n) << SPI_FIFOTRIG_TXLVL_SHIFT)
+#  define SPI_FIFOTRIG_TXLVL_EMPTY    (0 << SPI_FIFOTRIG_TXLVL_SHIFT)
+#  define SPI_FIFOTRIG_TXLVL_NOTFULL  (7 << SPI_FIFOTRIG_TXLVL_SHIFT)
+#define SPI_FIFOTRIG_RXLVL_SHIFT      (16)      /* Bits 16-19: Receive FIFO level trigger point */
+#define SPI_FIFOTRIG_RXLVL_MASK       (15 << SPI_FIFOTRIG_RXLVL_SHIFT)
+#  define SPI_FIFOTRIG_RXLVL(n)       ((uint32_t)((n)-1) << SPI_FIFOTRIG_RXLVL_SHIFT)
+#  define SPI_FIFOTRIG_RXLVL_NOTEMPTY (0 << SPI_FIFOTRIG_RXLVL_SHIFT)
+#  define SPI_FIFOTRIG_RXLVL_FULL     (7 << SPI_FIFOTRIG_RXLVL_SHIFT)
+
 /* FIFO interrupt enable set (enable) and read register */
 #define SPI_FIFOINTENSET_
 /* FIFO interrupt enable clear (disable) and read register */
 #define SPI_FIFOINTENCLR_
 /* FIFO interrupt status register */
 #define SPI_FIFOINTSTAT_
+
 /* FIFO write data */
-#define SPI_FIFOWR_
+
+#define SPI_FIFOWR_TXDATA_SHIFT       (0)       /* Bits 0-15: Transmit data to the FIFO */
+#define SPI_FIFOWR_TXDATA_MASK        (0xffff << SPI_FIFOWR_TXDATA_SHIFT)
+#  define SPI_FIFOWR_TXDATA(n)        ((uint32_t)(n) << SPI_FIFOWR_TXDATA_SHIFT)
+#define SPI_FIFOWR_TXSSEL0_N          (1 << 16) /* Bit 16: Transmit Slave Select */
+#define SPI_FIFOWR_TXSSEL1_N          (1 << 17) /* Bit 17: Transmit Slave Select */
+#define SPI_FIFOWR_TXSSEL2_N          (1 << 18) /* Bit 18: Transmit Slave Select */
+#define SPI_FIFOWR_TXSSEL3_N          (1 << 19) /* Bit 19: Transmit Slave Select */
+#define SPI_FIFOWR_EOT                (1 << 20) /* Bit 20: End of Transfer */
+#define SPI_FIFOWR_EOF                (1 << 21) /* Bit 21: End of Frame */
+#define SPI_FIFOWR_RXIGNORE           (1 << 22) /* Bit 22: Receive Ignore */
+#define SPI_FIFOWR_LEN_SHIFT          (24)      /* Bits 24-27: Data Length */
+#define SPI_FIFOWR_LEN_MASK           (15 << SPI_FIFOWR_LEN_SHIFT)
+#  define SPI_FIFOWR_LEN(n)           ((uint32_t)((n)-1) << SPI_FIFOWR_LEN_SHIFT)
+
 /* FIFO read data */
 #define SPI_FIFORD_
 /* FIFO data read with no FIFO pop */
