@@ -440,7 +440,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
     {
       /* If that fails, then try to open the device read-only */
 
-      fd = open(filename, O_RDWR);
+      fd = open(filename, O_RDONLY);
       if (fd < 0)
         {
           ret = -get_errno();
