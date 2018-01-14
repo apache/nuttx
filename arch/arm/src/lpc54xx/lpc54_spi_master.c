@@ -33,6 +33,16 @@
  *
  ****************************************************************************/
 
+/* TODO:
+ *
+ *   - There are no interrupt driven transfers, only polled.  I don't
+ *     consider this a significant problem because of the higher rate that
+ *     would be necessary for interrupt driven transfers.
+ *   - Integrate DMA transfers.  This is fairly important because it can
+ *     a) improve the data transfer rates and b) free the CPU when the
+ *     SPI driver would otherwise be stuck in a tight polling loop.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -59,6 +69,7 @@
 #include "chip/lpc54_spi.h"
 #include "lpc54_config.h"
 #include "lpc54_enableclk.h"
+#include "lpc54_gpio.h"
 #include "lpc54_spi_master.h"
 
 #ifdef HAVE_SPI_MASTER_DEVICE
@@ -67,7 +78,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SPI_DUMMYDATA  0xff
+#define SPI_DUMMYDATA8   0xff
+#define SPI_DUMMYDATA16  0xffff
+
+#define SPI_MINWIDTH     4
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+#  define SPI_MAXWIDTH   16
+#else
+#  define SPI_MAXWIDTH   8
+#endif
 
 /****************************************************************************
  * Private Types
@@ -77,22 +96,110 @@
 
 struct lpc54_spidev_s
 {
-  struct spi_dev_s dev;  /* Externally visible part of the SPI interface */
-  uintptr_t base;        /* Base address of Flexcomm registers */
-  sem_t exclsem;         /* Held while chip is selected for mutual exclusion */
-  uint32_t fclock;       /* Flexcomm function clock frequency */
-  uint32_t frequency;    /* Requested clock frequency */
-  uint32_t actual;       /* Actual clock frequency */
-  uint16_t irq;          /* Flexcomm IRQ number */
-  uint8_t nbits;         /* Width of word in bits (8 to 16) */
-  uint8_t mode;          /* Mode 0,1,2,3 */
+  struct spi_dev_s dev;       /* Externally visible part of the SPI interface */
+  uintptr_t base;             /* Base address of Flexcomm registers */
+  sem_t exclsem;              /* Held while chip is selected for mutual exclusion */
+  uint32_t fclock;            /* Flexcomm function clock frequency */
+  uint32_t frequency;         /* Requested clock frequency */
+  uint32_t actual;            /* Actual clock frequency */
+  uint16_t irq;               /* Flexcomm IRQ number */
+  uint8_t nbits;              /* Width of word in bits (SPI_MINWIDTH to SPI_MAXWIDTH) */
+  uint8_t mode;               /* Mode 0,1,2,3 */
+};
+
+/* These structures describes the Rx side of an 8- or 16-bit SPI data
+ * exchange.
+ */
+
+struct lpc54_rxtransfer8_s
+{
+  FAR uint8_t *rxptr;         /* Pointer into receive buffer */
+  unsigned int remaining;     /* Bytes remaining in the receive buffer */
+  unsigned int expected;      /* Bytes expected to be received */
+};
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+struct lpc54_rxtransfer16_s
+{
+  FAR uint16_t *rxptr;        /* Pointer into receive buffer */
+  unsigned int remaining;     /* Hwords remaining in the receive buffer */
+  unsigned int expected;      /* Hwords expected to be received */
+};
+#endif
+
+/* These structures describes the Tx side of an 8- or 16-bit SPI data
+ * exchange.
+ */
+
+struct lpc54_txtransfer8_s
+{
+  uint32_t txctrl;            /* Tx control bits */
+  FAR const uint8_t *txptr;   /* Pointer into transmit buffer */
+  unsigned int remaining;     /* Bytes remaining in the transmit buffer */
+};
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+struct lpc54_txtransfer16_s
+{
+  uint32_t txctrl;            /* Tx control bits */
+  FAR const uint16_t *txptr;  /* Pointer into transmit buffer */
+  unsigned int remaining;     /* Hwords remaining in the transmit buffer */
+};
+#endif
+
+struct lpc54_txdummy_s
+{
+  uint32_t txctrl;            /* Tx control bits */
+  unsigned int remaining;     /* Bytes remaining in the transmit buffer */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline bool lpc54_spi_16bitmode(FAR struct lpc54_spidev_s *priv);
+/* Transfer helpers */
+
+static inline unsigned int lpc54_spi_fifodepth(FAR struct lpc54_spidev_s *priv);
+static inline bool lpc54_spi_txavailable(FAR struct lpc54_spidev_s *priv);
+static inline bool lpc54_spi_rxavailable(FAR struct lpc54_spidev_s *priv);
+
+static void     lpc54_spi_resetfifos(FAR struct lpc54_spidev_s *priv);
+static void     lpc54_spi_rxtransfer8(FAR struct lpc54_spidev_s *priv,
+                  FAR struct lpc54_rxtransfer8_s *xfr);
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static void     lpc54_spi_rxtransfer16(FAR struct lpc54_spidev_s *priv,
+                  FAR struct lpc54_rxtransfer16_s *xfr);
+#endif
+static bool     lpc54_spi_txtransfer8(FAR struct lpc54_spidev_s *priv,
+                  FAR struct lpc54_txtransfer8_s *xfr);
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static bool     lpc54_spi_txtransfer16(FAR struct lpc54_spidev_s *priv,
+                  FAR struct lpc54_txtransfer16_s *xfr);
+#endif
+static bool     lpc54_spi_txdummy(FAR struct lpc54_spidev_s *priv,
+                  FAR struct lpc54_txdummy_s *xfr);
+#ifdef CONFIG_SPI_EXCHANGE
+static void     lpc54_spi_exchange8(FAR struct lpc54_spidev_s *priv,
+                  FAR const void *txbuffer, FAR void *rxbuffer,
+                  size_t nwords);
+#ifdefCONFIG_LPC54_SPI_WIDEDATA
+static void     lpc54_spi_exchange16(FAR struct lpc54_spidev_s *priv,
+                  FAR const void *txbuffer, FAR void *rxbuffer,
+                  size_t nwords);
+#endif
+#endif
+static void     lpc54_spi_sndblock8(FAR struct lpc54_spidev_s *priv,
+                  FAR const void *buffer, size_t nwords);
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static void     lpc54_spi_sndblock16(FAR struct lpc54_spidev_s *priv,
+                  FAR const void *buffer, size_t nwords);
+#endif
+static void     lpc54_spi_recvblock8(FAR struct lpc54_spidev_s *priv,
+                  FAR void *buffer, size_t nwords);
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static void     lpc54_spi_recvblock16(FAR struct lpc54_spidev_s *priv,
+                  FAR void *buffer, size_t nwords);
+#endif
 
 /* SPI methods */
 
@@ -103,20 +210,15 @@ static void     lpc54_spi_setmode(FAR struct spi_dev_s *dev,
                   enum spi_mode_e mode);
 static void     lpc54_spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
-#ifdef CONFIG_LPC54_SPI_MASTER_DMA
-static void     lpc54_spi_exchange_nodma(FAR struct spi_dev_s *dev,
-                   FAR const void *txbuffer, FAR void *rxbuffer,
-                   size_t nwords)
-#endif
+#ifdef CONFIG_SPI_EXCHANGE
 static void     lpc54_spi_exchange(FAR struct spi_dev_s *dev,
                   FAR const void *txbuffer, FAR void *rxbuffer,
                   size_t nwords);
-#ifndef CONFIG_SPI_EXCHANGE
+#endif
 static void     lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
                   FAR const void *buffer, size_t nwords);
 static void     lpc54_spi_recvblock(FAR struct spi_dev_s *dev,
                   FAR void *buffer, size_t nwords);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -475,24 +577,666 @@ static inline uint32_t lpc54_spi_getreg(struct lpc54_spidev_s *priv,
 }
 
 /****************************************************************************
- * Name: lpc54_spi_16bitmode
+ * Name: lpc54_spi_fifodepth
  *
  * Description:
- *   Check if the SPI is operating in > 8-bit mode (16-bit accesses)
+ *   Return the depth of the SPI FIFOs.  This is a constant value and could
+ *   be hard coded.
  *
  * Input Parameters:
  *   priv - Device-specific state data
  *
  * Returned Value:
- *   true: 16-bit mode, false: 8-bit mode
+ *   The FIFO depth in words of the configured bit width.
  *
  ****************************************************************************/
 
-static inline bool lpc54_spi_16bitmode(FAR struct lpc54_spidev_s *priv)
+static inline unsigned int lpc54_spi_fifodepth(FAR struct lpc54_spidev_s *priv)
 {
-#warning Missing logic
+  uint32_t regval = lpc54_spi_getreg(priv, LPC54_SPI_FIFOCFG_OFFSET);
+  return ((regval & SPI_FIFOCFG_SIZE_MASK) >> SPI_FIFOCFG_SIZE_SHIFT) << 3;
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_txavailable
+ *
+ * Description:
+ *   Return true if the Tx FIFO is not full.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *
+ * Returned Value:
+ *   true: Tx FIFO is not full.
+ *
+ ****************************************************************************/
+
+static inline bool lpc54_spi_txavailable(FAR struct lpc54_spidev_s *priv)
+{
+  uint32_t regval = lpc54_spi_getreg(priv, LPC54_SPI_FIFOSTAT_OFFSET);
+  return ((regval & SPI_FIFOSTAT_TXNOTFULL) != 0);
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_rxavailable
+ *
+ * Description:
+ *   Return true if the Rx FIFO is not empty.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *
+ * Returned Value:
+ *   true: Rx FIFO is not empty.
+ *
+ ****************************************************************************/
+
+static inline bool lpc54_spi_rxavailable(FAR struct lpc54_spidev_s *priv)
+{
+  uint32_t regval = lpc54_spi_getreg(priv, LPC54_SPI_FIFOSTAT_OFFSET);
+  return ((regval & SPI_FIFOSTAT_RXNOTEMPTY) != 0);
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_rxdiscard
+ *
+ * Description:
+ *   Read and discard the data until the Rx FIFO is empty.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_spi_rxdiscard(FAR struct lpc54_spidev_s *priv)
+{
+  while (lpc54_spi_rxavailable(priv))
+    {
+      (void)lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
+    }
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_resetfifos
+ *
+ * Description:
+ *   Clear Tx/Rx errors and empty FIFOs.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_spi_resetfifos(FAR struct lpc54_spidev_s *priv)
+{
+  uint32_t regval;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  regval  = lpc54_spi_getreg(priv, LPC54_SPI_FIFOCFG_OFFSET);
+  regval |= (SPI_FIFOCFG_EMPTYTX | SPI_FIFOCFG_EMPTYRX);
+  lpc54_spi_putreg(priv, LPC54_SPI_FIFOCFG_OFFSET, regval);
+
+  regval  = lpc54_spi_getreg(priv, LPC54_SPI_FIFOSTAT_OFFSET);
+  regval |= (SPI_FIFOSTAT_TXERR | SPI_FIFOSTAT_RXERR);
+  lpc54_spi_putreg(priv, LPC54_SPI_FIFOSTAT_OFFSET, regval);
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_rxtransfer8 and lpc54_spi_rxtransfer16
+ *
+ * Description:
+ *   Receive one 8- or 16-bit value from the selected SPI device.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   xfr  - Describes the Rx transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_spi_rxtransfer8(FAR struct lpc54_spidev_s *priv,
+                                  FAR struct lpc54_rxtransfer8_s *xfr)
+{
+  /* Read one byte if available and expected */
+
+  if (lpc54_spi_rxavailable(priv))
+    {
+      /* There is something in the Rx FIFO to be read.  Are we expecting
+       * data in the Rx FIFO?  Is there space available in the Rx buffer?
+       */
+
+      if (xfr->expected == 0 || xfr->remaining == 0)
+        {
+          /* No.. then just read and discard the data until the Rx FIFO is empty */
+
+          lpc54_spi_rxdiscard(priv);
+          xfr->expected = 0;
+        }
+      else
+        {
+          /* Read and transfer one byte */
+
+          *xfr->rxptr = lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
+
+          /* Update pointers and counts */
+
+          xfr->rxptr++;
+          xfr->remaining--;
+          xfr->expected--;
+        }
+    }
+}
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static void lpc54_spi_rxtransfer16(FAR struct lpc54_spidev_s *priv,
+                                   FAR struct lpc54_rxtransfer16_s *xfr)
+{
+  /* Read one HWord if available and expected */
+
+  if (lpc54_spi_rxavailable(priv))
+    {
+      /* There is something in the Rx FIFO to be read.  Are we expecting
+       * data in the Rx FIFO?  Is there space available in the Rx buffer?
+       */
+
+      if (xfr->expected == 0 || xfr->remaining == 0)
+        {
+          /* No.. then just read and discard the data until the Rx FIFO
+           * is empty.
+           */
+
+          lpc54_spi_rxdiscard(priv);
+          xfr->expected = 0;
+        }
+      else
+        {
+          /* Read and transfer HWord */
+
+          *xfr->rxptr = lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
+
+          /* Update pointers and counts */
+
+          xfr->rxptr++;
+          xfr->remaining--;
+          xfr->expected--;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc54_spi_txtransfer8 and lpc54_spi_txtransfer16
+ *
+ * Description:
+ *   Send one 8- or 16-bit value to the selected SPI device.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   xfr  - Describes the Tx transfer
+ *
+ * Returned Value:
+ *   true:  The value was added to the TxFIFO
+ *
+ ****************************************************************************/
+
+static bool lpc54_spi_txtransfer8(FAR struct lpc54_spidev_s *priv,
+                                  FAR struct lpc54_txtransfer8_s *xfr)
+{
+  uint32_t regval;
+
+  /* Transmit if txFIFO is not full and there is more Tx data to be sent */
+
+  if (lpc54_spi_txavailable(priv) && xfr->remaining > 0)
+    {
+      /* Get the next byte to be sent */
+
+      regval = *xfr->txptr;
+
+      /* And send it */
+
+      regval |= xfr->txctrl;
+      lpc54_spi_putreg(priv, LPC54_SPI_FIFOWR_OFFSET, regval);
+
+      /* Update pointers and counts */
+
+      xfr->txptr++;
+      xfr->remaining--;
+
+      return true;
+    }
+
   return false;
 }
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static bool lpc54_spi_txtransfer16(FAR struct lpc54_spidev_s *priv,
+                                   FAR struct lpc54_txtransfer16_s *xfr)
+{
+  uint32_t regval;
+
+  /* Transmit if txFIFO is not full and there is more Tx data to be sent */
+
+  if (lpc54_spi_txavailable(priv) && xfr->remaining > 0)
+    {
+      /* Get the next byte to be sent */
+
+      regval = *xfr->txptr;
+
+      /* And send it */
+
+      regval |= xfr->txctrl;
+      lpc54_spi_putreg(priv, LPC54_SPI_FIFOWR_OFFSET, regval);
+
+      /* Update pointers and counts */
+
+      xfr->txptr++;
+      xfr->remaining--;
+
+      return true;
+    }
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc54_spi_txdummy
+ *
+ * Description:
+ *   Send dummy Tx data when we really only care about the Rx data.
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   xfr  - Describes the Tx transfer
+ *
+ * Returned Value:
+ *   true:  The dummy value was added to the TxFIFO
+ *
+ ****************************************************************************/
+
+static bool lpc54_spi_txdummy(FAR struct lpc54_spidev_s *priv,
+                              FAR struct lpc54_txdummy_s *xfr)
+{
+  /* Transmit if txFIFO is not full and there is more Tx data to be sent */
+
+  if (lpc54_spi_txavailable(priv) && xfr->remaining > 0)
+    {
+      /* Send the dummy data */
+
+      lpc54_spi_putreg(priv, LPC54_SPI_FIFOWR_OFFSET, xfr->txctrl);
+
+      /* Update counts */
+
+      xfr->remaining--;
+      return true;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: lpc54_spi_exchange8 and lpc54_spi_exchange16
+ *
+ * Description:
+ *   Implements the SPI exchange method for the case of 8- and 16-bit transfers.
+ *
+ * Input Parameters:
+ *   priv     - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_EXCHANGE
+static void lpc54_spi_exchange8(FAR struct lpc54_spidev_s *priv,
+                                FAR const void *txbuffer, FAR void *rxbuffer,
+                                size_t nwords)
+{
+  struct lpc54_rxtransfer8_s rxtransfer;
+  struct lpc54_txtransfer8_s txtransfer;
+  unsigned int depth;
+
+  DEBUGASSERT(rxbuffer != NULL && txbuffer != NULL);
+
+  /* Get the FIFO depth */
+
+  depth = lpc54_spi_fifodepth(priv);
+
+  /* Set up the transfer data */
+
+  txtransfer.txctrl    = SPI_FIFOWR_LEN(priv->nbits) | SPI_FIFOWR_TXSSELN_ALL;
+  txtransfer.txptr     = (FAR uint8_t *)txbuffer;
+  txtransfer.remaining = nwords;
+  rxtransfer.rxptr     = (FAR uint8_t *)rxbuffer;
+  rxtransfer.remaining = nwords;
+  rxtransfer.expected  = 0;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  lpc54_spi_resetfifos(priv);
+
+  /* Loop until all Tx data has been sent and until all Rx data has been
+   * received.
+   */
+
+  while (txtransfer.remaining != 0 || rxtransfer.remaining != 0)
+    {
+      /* Transfer one byte from the Rx FIFO to the caller's Rx buffer */
+
+      lpc54_spi_rxtransfer8(priv, &rxtransfer);
+
+      /* If sending another byte would exceed the capacity of the Rx FIFO
+       * then read-only until there space freed.
+       */
+
+      if (rxtransfer.expected < depth)
+        {
+          /* Attempt to transfer one byte from the caller's Tx buffer to
+           * the Tx FIFO.
+           */
+
+          if (lpc54_spi_txtransfer8(priv, &txtransfer))
+            {
+              /* Increment the Rx expected count if successful */
+
+              rxtransfer.expected++;
+            }
+        }
+    }
+}
+#endif /* CONFIG_SPI_EXCHANGE */
+
+#if defined(CONFIG_SPI_EXCHANGE) && defined(CONFIG_LPC54_SPI_WIDEDATA)
+static void lpc54_spi_exchange16(FAR struct lpc54_spidev_s *priv,
+                                 FAR const void *txbuffer, FAR void *rxbuffer,
+                                 size_t nwords)
+{
+  struct lpc54_rxtransfer16_s rxtransfer;
+  struct lpc54_txtransfer16_s txtransfer;
+  uint32_t regval;
+  unsigned int depth;
+
+  DEBUGASSERT(rxbuffer != NULL && ((uintptr_t)rxbuffer & 1) == 0);
+  DEBUGASSERT(txbuffer != NULL && ((uintptr_t)txbuffer & 1) == 0);
+
+  /* Get the FIFO depth */
+
+  depth = lpc54_spi_fifodepth(priv);
+
+  /* Set up the transfer data */
+
+  txtransfer.txctrl    = SPI_FIFOWR_LEN(priv->nbits) | SPI_FIFOWR_TXSSELN_ALL;
+  txtransfer.txptr     = (FAR uint16_t *)txbuffer;
+  txtransfer.remaining = nwords;
+  rxtransfer.rxptr     = (FAR uint16_t *)rxbuffer;
+  rxtransfer.remaining = nwords;
+  rxtransfer.expected  = 0;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  lpc54_spi_resetfifos(priv);
+
+  /* Loop until all Tx data has been sent and until all Rx data has been
+   * received.
+   */
+
+  while (txtransfer.remaining || rxtransfer.remaining || rxtransfer.expected)
+    {
+      /* Transfer one HWord from the Rx FIFO to the caller's Rx buffer */
+
+      lpc54_spi_rxtransfer16(priv, &rxtransfer);
+
+      /* If sending another byte would exceed the capacity of the Rx FIFO
+       * then read-only until there space freed.
+       */
+
+      if (rxtransfer.expected < depth)
+        {
+          /* Attempt to send one more byte */
+
+          if (lpc54_spi_txtransfer16(priv, &txtransfer))
+            {
+              /* Increment the Rx expected count if successful */
+
+              rxtransfer.expected++;
+            }
+        }
+    }
+}
+#endif /* CONFIG_SPI_EXCHANGE && CONFIG_LPC54_SPI_WIDEDATA */
+
+/****************************************************************************
+ * Name: lpc54_spi_sndblock8 and lpc54_spi_sndblock16
+ *
+ * Description:
+ *   Implements the SPI sndblock method for the case of 8- and 16-bit
+ *   transfers.
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   buffer - A pointer to the buffer of data to be sent
+ *   nwords - the length of data to send from the buffer in number of words.
+ *            The wordsize is determined by the number of bits-per-word
+ *            selected for the SPI interface.  If nbits <= 8, the data is
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_spi_sndblock8(FAR struct lpc54_spidev_s *priv,
+                                FAR const void *buffer, size_t nwords)
+{
+  struct lpc54_txtransfer8_s txtransfer;
+
+  DEBUGASSERT(buffer != NULL);
+
+  /* Set up the transfer data.  NOTE that we are ignoring returned Rx data */
+
+  txtransfer.txctrl    = SPI_FIFOWR_RXIGNORE | SPI_FIFOWR_LEN(priv->nbits) |
+                         SPI_FIFOWR_TXSSELN_ALL;
+  txtransfer.txptr     = (FAR uint8_t *)buffer;
+  txtransfer.remaining = nwords;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  lpc54_spi_resetfifos(priv);
+
+  /* Loop until all Tx data has been sent */
+
+  while (txtransfer.remaining != 0)
+    {
+      /* Attempt to transfer one byte from the caller's Tx buffer to the
+       * Tx FIFO.
+       */
+
+      (void)lpc54_spi_txtransfer8(priv, &txtransfer);
+    }
+}
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static void lpc54_spi_sndblock16(FAR struct lpc54_spidev_s *priv,
+                                 FAR const void *buffer, size_t nwords)
+{
+  struct lpc54_txtransfer16_s txtransfer;
+
+  DEBUGASSERT(buffer != NULL);
+
+  /* Set up the transfer data.  NOTE that we are ignoring returned Rx data */
+
+  txtransfer.txctrl    = SPI_FIFOWR_RXIGNORE | SPI_FIFOWR_LEN(priv->nbits) |
+                         SPI_FIFOWR_TXSSELN_ALL;
+  txtransfer.txptr     = (FAR uint16_t *)buffer;
+  txtransfer.remaining = nwords;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  lpc54_spi_resetfifos(priv);
+
+  /* Loop until all Tx data has been sent and until all Rx data has been
+   * received.
+   */
+
+  while (txtransfer.remaining != 0)
+    {
+      /* Attempt to transfer one byte from the caller's Tx buffer to the
+       * Tx FIFO.
+       */
+
+      lpc54_spi_txtransfer16(priv, &txtransfer);
+    }
+}
+#endif /*CONFIG_LPC54_SPI_WIDEDATA */
+
+/****************************************************************************
+ * Name: lpc54_spi_recvblock8 and lpc54_spi_recvblock16
+ *
+ * Description:
+ *   Implements the SPI recvblock method for the case of 8- and 16-bit
+ *   transfers.
+ *
+ * Input Parameters:
+ *   priv   - Device-specific state data
+ *   buffer - A pointer to the buffer in which to receive data
+ *   nwords - the length of data that can be received in the buffer in
+ *            number of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc54_spi_recvblock8(FAR struct lpc54_spidev_s *priv,
+                                 FAR void *buffer, size_t nwords)
+{
+  struct lpc54_rxtransfer8_s rxtransfer;
+  struct lpc54_txdummy_s txtransfer;
+  unsigned int depth;
+
+  DEBUGASSERT(buffer != NULL);
+
+  /* Get the FIFO depth */
+
+  depth = lpc54_spi_fifodepth(priv);
+
+  /* Set up the transfer data */
+
+  txtransfer.txctrl    = SPI_DUMMYDATA8 | SPI_FIFOWR_LEN(priv->nbits) |
+                         SPI_FIFOWR_TXSSELN_ALL;
+  txtransfer.remaining = nwords;
+  rxtransfer.rxptr     = (FAR uint8_t *)buffer;
+  rxtransfer.remaining = nwords;
+  rxtransfer.expected  = 0;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  lpc54_spi_resetfifos(priv);
+
+  /* Loop until all Tx data has been sent and until all Rx data has been
+   * received.
+   */
+
+  while (txtransfer.remaining != 0|| rxtransfer.remaining != 0)
+    {
+      /* Transfer one byte from the Rx FIFO to the caller's Rx buffer */
+
+      lpc54_spi_rxtransfer8(priv, &rxtransfer);
+
+      /* If sending another byte would exceed the capacity of the Rx FIFO
+       * then read-only until there space freed.
+       */
+
+      if (rxtransfer.expected < depth)
+        {
+          /* Attempt to transfer one dummy byte to the Tx FIFO. */
+
+          if (lpc54_spi_txdummy(priv, &txtransfer))
+            {
+              /* Increment the Rx expected count if successful */
+
+              rxtransfer.expected++;
+            }
+        }
+    }
+}
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+static void lpc54_spi_recvblock16(FAR struct lpc54_spidev_s *priv,
+                                  FAR void *buffer, size_t nwords)
+{
+  struct lpc54_rxtransfer16_s rxtransfer;
+  struct lpc54_txdummy_s txtransfer;
+  unsigned int depth;
+
+  DEBUGASSERT(buffer != NULL);
+
+  /* Get the FIFO depth */
+
+  depth = lpc54_spi_fifodepth(priv);
+
+  /* Set up the transfer data */
+
+  txtransfer.txctrl    = SPI_DUMMYDATA16 | SPI_FIFOWR_LEN(priv->nbits) |
+                         SPI_FIFOWR_TXSSELN_ALL;
+  txtransfer.remaining = nwords;
+  rxtransfer.rxptr     = (FAR uint16_t *)rxbuffer;
+  rxtransfer.remaining = nwords;
+  rxtransfer.expected  = 0;
+
+  /* Clear Tx/Rx errors and empty FIFOs */
+
+  lpc54_spi_resetfifos(priv);
+
+  /* Loop until all Tx data has been sent and until all Rx data has been
+   * received.
+   */
+
+  while (txtransfer.remaining || rxtransfer.remaining || rxtransfer.expected)
+    {
+      /* Transfer one HWord from the Rx FIFO to the caller's Rx buffer */
+
+      lpc54_spi_rxtransfer16(priv, &rxtransfer);
+
+      /* If sending another byte would exceed the capacity of the Rx FIFO
+       * then read-only until there space freed.
+       */
+
+      if (rxtransfer.expected < depth)
+        {
+          /* Attempt to transfer one dummy HWord to the Tx FIFO. */
+
+          if (lpc54_spi_txdummy(priv, &txtransfer))
+            {
+              /* Increment the Rx expected count if successful */
+
+              rxtransfer.expected++;
+            }
+        }
+    }
+}
+#endif /* CONFIG_LPC54_SPI_WIDEDATA */
 
 /****************************************************************************
  * Name: lpc54_spi_lock
@@ -686,11 +1430,11 @@ static void lpc54_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
 
-  /* The valid range of bit selections is 4 through 16 */
+  /* The valid range of bit selections is SPI_MINWIDTH through SPI_MAXWIDTH */
 
-  DEBUGASSERT(priv != NULL && nbits >=4 && nbits <= 16);
+  DEBUGASSERT(priv != NULL && nbits >= SPI_MINWIDTH && nbits <= SPI_MAXWIDTH);
 
-  if (nbits >= 4 && nbits <= 16)
+  if (nbits >= SPI_MINWIDTH && nbits <= SPI_MAXWIDTH)
     {
       /* Save the selection.  It will be applied when data is transferred. */
 
@@ -716,28 +1460,46 @@ static void lpc54_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
-  uint16_t ret;
+  FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
+  uint32_t regval;
 
-  /* Write the data to transmitted to the SPI Data Register */
-#warning Missing logic
+  DEBUGASSERT(priv != NULL);
 
-  /* Read the SPI Status Register again to clear the status bit */
-#warning Missing logic
+  /* Clear Tx/Rx errors and empty FIFOs */
 
-  return ret;
+  lpc54_spi_resetfifos(priv);
+
+  /* Send the word.  Since we just reset the FIFOs, we assume that the Tx
+   * FIFO is not full and that the Rx FIFO is empty.
+   */
+
+  DEBUGASSERT(lpc54_spi_txavailable(priv) || !lpc54_spi_rxavailable(priv));
+
+  regval = wd | SPI_FIFOWR_LEN(priv->nbits) | SPI_FIFOWR_TXSSELN_ALL;
+  lpc54_spi_putreg(priv, LPC54_SPI_FIFOWR_OFFSET, regval);
+
+  /* Wait for the Rx FIFO to become non-empty. */
+
+  while (!lpc54_spi_rxavailable(priv))
+    {
+    }
+
+  /* Then read and return the value from the Rx FIFO */
+
+  return (uint16_t)lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
 }
 
 /****************************************************************************
- * Name: lpc54_spi_exchange (no DMA).  aka lpc54_spi_exchange_nodma
+ * Name: lpc54_spi_exchange
  *
  * Description:
- *   Exchange a block of data on SPI without using DMA
+ *   Exchange a block of data on SPI
  *
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
+ *   nwords   - the length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
  *              packed into uint8_t's; if nbits >8, the data is packed into
@@ -748,125 +1510,52 @@ static uint16_t lpc54_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LPC54_SPI_MASTER_DMA
-static void lpc54_spi_exchange(FAR struct spi_dev_s *dev,
+#ifdef CONFIG_SPI_EXCHANGE
+static void lpc54_spi_exchange(FAR struct lpc54_spidev_s *priv,
                                FAR const void *txbuffer, FAR void *rxbuffer,
                                size_t nwords)
-#else
-static void lpc54_spi_exchange_nodma(FAR struct spi_dev_s *dev,
-                                     FAR const void *txbuffer,
-                                     FAR void *rxbuffer, size_t nwords)
-#endif
 {
   FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
-  DEBUGASSERT(priv && priv->base);
 
-  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
-          txbuffer, rxbuffer, nwords);
+  DEBUGASSERT(priv != NULL);
 
-  /* 8- or 16-bit mode? */
+  /* If there is no data sink, then handle this transfer with
+   * lpc54_spi_sndblock().
+   */
 
-  if (lpc54_spi_16bitmode(priv))
+  if (rxbuffer == NULL)
     {
-      /* 16-bit mode */
-
-      FAR const uint16_t *src  = (FAR const uint16_t *)txbuffer;
-      FAR uint16_t *dest = (FAR uint16_t *)rxbuffer;
-      uint16_t  word;
-
-      while (nwords-- > 0)
-        {
-          /* Get the next word to write.  Is there a source buffer? */
-
-          if (src)
-            {
-              word = *src++;
-            }
-          else
-            {
-              word = 0xffff;
-            }
-
-          /* Exchange one word */
-
-          word = lpc54_spi_send(dev, word);
-
-          /* Is there a buffer to receive the return value? */
-
-          if (dest)
-            {
-              *dest++ = word;
-            }
-        }
+      lpc54_spi_sndblock(priv, txbuffer, nwords)
     }
-  else
+
+  /* If there is no data source, then handle this transfer with
+   * lpc54_spi_recvblock().
+   */
+
+  else if (txbuffer == NULL)
     {
-      /* 8-bit mode */
+      lpc54_spi_recvblock(priv, rxbuffer, nwords)
+    }
 
-      FAR const uint8_t *src  = (FAR const uint8_t *)txbuffer;
-      FAR uint8_t *dest = (FAR uint8_t *)rxbuffer;
-      uint8_t  word;
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+  /* If the data with is > 8-bits, then handle this transfer with
+   * lpc54_spi_exchange16().
+   */
 
-      while (nwords-- > 0)
-        {
-          /* Get the next word to write.  Is there a source buffer? */
+  else if (priv->nbits > 8)
+    {
+      lpc54_spi_exchange16(priv, txbuffer, rxbuffer, nwords);
+    }
+#endif
 
-          if (src)
-            {
-              word = *src++;
-            }
-          else
-            {
-              word = 0xff;
-            }
+  /* Otherwise, let lpc54_spi_exchange8() do the job */
 
-          /* Exchange one word */
-
-          word = (uint8_t)lpc54_spi_send(dev, (uint16_t)word);
-
-          /* Is there a buffer to receive the return value? */
-
-          if (dest)
-            {
-              *dest++ = word;
-            }
-        }
+  else if (priv->nbits > 8)
+    {
+      lpc54_spi_exchange8(priv, txbuffer, rxbuffer, nwords);
     }
 }
-
-/****************************************************************************
- * Name: lpc54_spi_exchange (no DMA).  aka lpc54_spi_exchange_nodma
- *
- * Description:
- *   Exchange a block of data on SPI without using DMA
- *
- * Input Parameters:
- *   dev      - Device-specific state data
- *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into
- *              uint16_t's
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LPC54_SPI_MASTER_DMA
-static void lpc54_spi_exchange(FAR struct spi_dev_s *dev,
-                               FAR const void *txbuffer, FAR void *rxbuffer,
-                               size_t nwords)
-{
-  /* If the transfer is small, then perform the exchange without using DMA. */
-#warning Missing logic
-
-  /* Otherwise, use DMA */
-#warning Missing logic
-}
-#endif /* CONFIG_LPC54_SPI_MASTER_DMA */
+#endif /* CONFIG_SPI_EXCHANGE */
 
 /****************************************************************************
  * Name: lpc54_spi_sndblock
@@ -891,8 +1580,28 @@ static void lpc54_spi_exchange(FAR struct spi_dev_s *dev,
 static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
                                FAR const void *buffer, size_t nwords)
 {
-  spiinfo("txbuffer=%p nwords=%d\n", buffer, nwords);
-  return lpc54_spi_exchange(dev, buffer, NULL, nwords);
+  FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
+
+  spiinfo("buffer=%p nwords=%d\n", buffer, nwords);
+  DEBUGASSERT(priv != NULL && buffer != NULL);
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+  /* If the data with is > 8-bits, then handle this transfer with
+   * lpc54_spi_sndblock16().
+   */
+
+  if (priv->nbits > 8)
+    {
+      lpc54_spi_sndblock16(priv, buffer, nwords);
+    }
+
+  /* Otherwise, let lpc54_spi_sndblock8() do the job */
+
+  else if (priv->nbits > 8)
+#endif
+    {
+      lpc54_spi_sndblock8(priv, buffer, nwords);
+    }
 }
 
 /****************************************************************************
@@ -903,7 +1612,7 @@ static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in
  *            number of words.  The wordsize is determined by the number of
  *            bits-per-word selected for the SPI interface.  If nbits <= 8,
@@ -918,8 +1627,28 @@ static void lpc54_spi_sndblock(FAR struct spi_dev_s *dev,
 static void lpc54_spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                                 size_t nwords)
 {
-  spiinfo("rxbuffer=%p nwords=%d\n", buffer, nwords);
-  return lpc54_spi_exchange(dev, NULL, buffer, nwords);
+  FAR struct lpc54_spidev_s *priv = (FAR struct lpc54_spidev_s *)dev;
+
+  spiinfo("buffer=%p nwords=%d\n", buffer, nwords);
+  DEBUGASSERT(priv != NULL && buffer != NULL);
+
+#ifdef CONFIG_LPC54_SPI_WIDEDATA
+  /* If the data with is > 8-bits, then handle this transfer with
+   * lpc54_spi_recvblock16().
+   */
+
+  if (priv->nbits > 8)
+    {
+      lpc54_spi_recvblock16(priv, buffer, nwords);
+    }
+
+  /* Otherwise, let lpc54_spi_recvblock8() do the job */
+
+  else if (priv->nbits > 8)
+#endif
+    {
+      lpc54_spi_recvblock8(priv, buffer, nwords);
+    }
 }
 
 /****************************************************************************
@@ -952,7 +1681,7 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
 
   flags = enter_critical_section();
 
-  /* Configure the requestin SPI peripheral */
+  /* Configure the requested SPI peripheral */
   /* NOTE:  The basic FLEXCOMM initialization was performed in
    * lpc54_lowputc.c.
    */
@@ -1332,23 +2061,23 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port)
 
   /* Enable FIFOs */
 
-  regval  = lpc54_spi_getreg(priv, LPC54_SPI_CFG_OFFSET);
+  regval  = lpc54_spi_getreg(priv, LPC54_SPI_FIFOCFG_OFFSET);
   regval |= (SPI_FIFOCFG_EMPTYTX | SPI_FIFOCFG_EMPTYRX);
-  lpc54_spi_putreg(priv, LPC54_SPI_CFG_OFFSET, regval);
+  lpc54_spi_putreg(priv, LPC54_SPI_FIFOCFG_OFFSET, regval);
 
   regval |= (SPI_FIFOCFG_ENABLETX | SPI_FIFOCFG_ENABLERX);
-  lpc54_spi_putreg(priv, LPC54_SPI_CFG_OFFSET, regval);
+  lpc54_spi_putreg(priv, LPC54_SPI_FIFOCFG_OFFSET, regval);
 
   /* Set FIFO trigger levels:  Empty for Tx FIFO; 1 word for RxFIFO */
 
-  regval  = lpc54_spi_getreg(priv, LPC54_SPI_CFG_OFFSET);
+  regval  = lpc54_spi_getreg(priv, LPC54_SPI_FIFOCFG_OFFSET);
   regval &= ~(SPI_FIFOTRIG_TXLVL_MASK | SPI_FIFOTRIG_RXLVL_MASK);
   regval |= (SPI_FIFOTRIG_TXLVL_EMPTY | SPI_FIFOTRIG_RXLVL_NOTEMPTY);
 
   /* Enable generation of interrupts for selected FIFO trigger levels */
 
   regval |= (SPI_FIFOTRIG_TXLVLENA | SPI_FIFOTRIG_RXLVLENA);
-  lpc54_spi_putreg(priv, LPC54_SPI_CFG_OFFSET, regval);
+  lpc54_spi_putreg(priv, LPC54_SPI_FIFOCFG_OFFSET, regval);
 
   /* Set the delay configuration (not used) */
 

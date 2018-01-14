@@ -86,20 +86,13 @@ STATUS
     of this writing.  Also added the netnsh configuration will, eventually,
     be used to test the Ethernet driver.
   2018-01-01:  There Ethernet driver appears to be fully functional although
-    more testing is certainly needed.  I believe that there is a memory
-    corruption issue in the current configuration that cause problems
-    occasionally.  For example, after a longer Telnet session, I sometimes
-    see the following DEBUGASSERT after exiting the session from the host:
+    more testing is certainly needed.
+  2018-01-14:  The basic SPI driver is code complete but still untested.  It
+    is "basic" in the sense that it supports only polled mode (no DMA).
 
-      up_assert: Assertion failed at file:mm_heap/mm_free.c line: 129
-
-    which is a clear indication heap corruption.  Increasing the size of some
-    stacks might correct this problem, but I have not yet experimented with
-    that.  I have not seen the problem in any other context.
-
-  There is still no support for the Accelerometer, SPIFI, or USB.  There is a
-  complete but not-yet-functional SD card.  There is a partial SPI driver,
-  but no on-board SPI devices to test it.
+  There is still no support for the Accelerometer, SPIFI, or USB.  There are
+  complete but not-yet-functional SD card and SPI drivers.  There are no
+  on-board devices to support SPI testing.
 
 Configurations
 ==============

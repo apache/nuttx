@@ -263,7 +263,7 @@ int lpc54_spi8_register(FAR struct spi_dev_s *dev, spi_mediachange_t callback, v
 #ifdef CONFIG_LPC54_SPI9_MASTER
 int lpc54_spi9_register(FAR struct spi_dev_s *dev, spi_mediachange_t callback, void *arg);
 #endif
-#endif
+#endif /* CONFIG_SPI_CALLBACK */
 
 #undef EXTERN
 #if defined(__cplusplus)
