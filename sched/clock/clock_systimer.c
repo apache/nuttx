@@ -120,9 +120,9 @@ systime_t clock_systimer(void)
 
   /* 64-bit accesses are not atomic on most architectures. */
 
-  flags  = enter_critical_section();
+  flags  = spin_lock_irqsave();
   sample = g_system_timer;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
   return sample;
 
 # else /* CONFIG_SYSTEM_TIME64 */
