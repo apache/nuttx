@@ -24,6 +24,12 @@ README
       device functionality
     - 10/100Mbps Ethernet (RJ45 connector)
 
+CONTENTS
+========
+
+  - STATUS
+  - Configurations
+
 STATUS
 ======
 

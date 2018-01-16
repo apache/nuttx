@@ -306,7 +306,7 @@
 /* Pin Disambiguation *******************************************************/
 /* Flexcomm0/USART0
  *
- * USART0 connects to the serial bridge on LPC4322JET100 and is typlical used
+ * USART0 connects to the serial bridge on LPC4322JET100 and is typically used
  * for the serial console.
  *
  *   BRIDGE_UART_RXD -> P0_29-ISP_FC0_RXD -> P0.29  GPIO_FC0_RXD_SDA_MOSI_2
@@ -315,6 +315,18 @@
 
 #define GPIO_USART0_RXD            (GPIO_FC0_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
 #define GPIO_USART0_TXD            (GPIO_FC0_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
+
+/* An alternative for the serial console is a Arduino Uno compatible serial
+ * shield:
+ *
+ *   Arduino Uno  J13    Board Signal
+ *   ----------- ------ ----------------
+ *    D0 RX      Pin 15 P3_26-FC4_RXD
+ *    D1 TX      Pin 13 P3_27-FC4_TXD
+ */
+
+#define GPIO_USART4_RXD            (GPIO_FC4_RXD_SDA_MOSI_2 | GPIO_FILTER_OFF)
+#define GPIO_USART4_TXD            (GPIO_FC4_TXD_SCL_MISO_2 | GPIO_FILTER_OFF)
 
 /* Flexcomm2/I2C
  *
@@ -329,8 +341,14 @@
  *   Type I pins need for high speed I2C need:
  *     GPIO_FILTER_OFF + GPIO_I2C_FILTER_OFF + GPIO_I2CDRIVE_HIGH
  *
- * The touchscreen controller is on I2C2: SCL P3.24, SDA P3.23.  These are
- * both Type D/I pins.
+ * There are several on-board devices using I2C2:
+ *
+ *   Codec I2C address:        0x1a
+ *   Accel I2C address:        0x1d
+ *   Touch panel I2C address:  0x38
+ *
+ * In addition, these same I2C2 pins are brought out through D14 and D15 of
+ * the Arduino Uno connector.
  */
 
 #if defined(CONFIG_LPC54_I2C_FAST)
@@ -350,6 +368,35 @@
 #define GPIO_I2C2_SDA              (GPIO_FC2_CTS_SDA_SSEL0_2 | \
                                     GPIO_FILTER_OFF | _I2CFILTER | \
                                     _I2CDRIVE)
+
+/* Flexcomm2/SPI
+ *
+ * There are no SPI devices on board the LPCXpresso-LPC54628.  SPI is
+ * available on the Arduino Uno compatible connector, however:
+ *
+ *   Arduino Uno   J9     Board Signal   Pin Type
+ *   ----------- ------ ---------------- ---------
+ *    D10 SSEL   Pin 15 P3_20-FC9_SCK     Type D
+ *    D11 MOSI   Pin 13 P3_21-FC9_MOSI    Type A
+ *    D12 MISO   Pin 11 P3_22-FC9_MISO    Type A
+ *    D13 SCK    Pin 9  P3_30-FC9_SSELn0  Type D
+ *
+ * For SPI:
+ *   Type A & D pins need:
+ *     GPIO_PUSHPULL (on outputs) + GPIO_SLEW_STANDARD (Type D) +
+ *       GPIO_FILTER_OFF
+ *     GPIO_SLEW_FAST is optional for high data rates (Type D).
+ *   Type I need:
+ *     GPIO_I2C_FILTER_OFF + GPIO_I2CDRIVE_LOW + GPIO_FILTER_OFF +
+ *       GPIO_I2CSLEW_GPIO
+ */
+
+#define GPIO_FC9_RXD_SDA_MOSI      (GPIO_FC9_RXD_SDA_MOSI_1 | \
+                                    GPIO_PUSHPULL | GPIO_FILTER_OFF)
+#define GPIO_FC9_TXD_SCL_MISO      (GPIO_FC9_TXD_SCL_MISO_1 | \
+                                    GPIO_FILTER_OFF)
+#define GPIO_FC9_SCK               (GPIO_FC9_SCK_1 | GPIO_PUSHPULL | \
+                                    GPIO_SLEW_STANDARD | GPIO_FILTER_OFF)
 
 /* SD/MMC
  *
@@ -411,7 +458,6 @@
  * port functionality.  Some pins are shared with USB0 overcurrent
  * feature.
  */
-
 
 #define GPIO_ENET_MDIO             GPIO_ENET_MDIO_2   /* P4.16 */
 #define GPIO_ENET_MDC              GPIO_ENET_MDC_2    /* P4.15 */
