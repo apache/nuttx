@@ -103,11 +103,11 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
       goto errout;
     }
 
+#ifdef HAVE_TASK_GROUP
   /* Allocate a new task group with privileges appropriate for the parent
    * thread type.
    */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_allocate(tcb, ttype);
   if (ret < 0)
     {
@@ -157,9 +157,9 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 
   (void)task_argsetup(tcb, name, argv);
 
+#ifdef HAVE_TASK_GROUP
   /* Now we have enough in place that we can join the group */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_initialize(tcb);
   if (ret < 0)
     {

@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The LPC54628 on the LPCXPressio has 512Kb of FLASH at address 0x0000:0000.
+/* The LPC54628 on the LPCXPresso has 512Kb of FLASH at address 0x0000:0000.
  * The Main SRAM is comprised of up to a total 160 KB of contiguous, on-chip
  * static RAM memory beginning at address 0x2000:0000 (this is in addition
  * to SRAMX aso the total device SRAM can be up to 200 KB).

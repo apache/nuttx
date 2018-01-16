@@ -1,8 +1,7 @@
 /****************************************************************************
- * sched/wdog/wd_delete.c
+ * sched/irq/irq_foreach.c
  *
- *   Copyright (C) 2007-2009, 2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,102 +39,80 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
 #include <assert.h>
-#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/wdog.h>
-#include <nuttx/kmalloc.h>
 
-#include "wdog/wdog.h"
+#include "irq/irq.h"
+
+#ifdef CONFIG_SCHED_IRQMONITOR
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* This is the number of entries in the interrupt vector table */
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#  define TAB_SIZE CONFIG_ARCH_NUSER_INTERRUPTS
+#else
+#  define TAB_SIZE NR_IRQS
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_delete
+ * Name: irq_foreach
  *
  * Description:
- *   The wd_delete() function will deallocate a watchdog timer by returning
- *   it to the free pool of watchdog timers.  The watchdog timer will be
- *   removed from the active timer queue if had been started.
+ *   This function traverses the internal list of interrupts and provides
+ *   information about each attached interrupt.
  *
- * Parameters:
- *   wdog - The watchdog ID to delete.  This is actually a pointer to a
- *          watchdog structure.
+ *   Some caution may be necessary:  If interrupts are disabled then the
+ *   counts may change during the traversal.  If pre-emption is enabled, then
+ *   the traversed sequence may be widely separated in time.
  *
- * Return Value:
- *   Returns OK or ERROR
+ * Input Parameters:
+ *   callback - This function will be called for each attached interrupt
+ *              along with the IRQ number, an instance of struct irq_info_s,
+ *              and the caller provided argument
+ *   args     - This is an opaque argument provided with each call to the
+ *              callback function.
  *
- * Assumptions:
- *   The caller has assured that the watchdog is no longer in use.
+ * Returned Value:
+ *   Zero (OK) is returned after callback has been invoked for all of
+ *   the attached interrupts.  The callback function may terminate the
+ *   traversal at any time by returning a non-zero value.  In that case,
+ *   irq_foreach will return that non-zero value.
  *
  ****************************************************************************/
 
-int wd_delete(WDOG_ID wdog)
+int irq_foreach(irq_foreach_t callback, FAR void *arg)
 {
-  irqstate_t flags;
+  int irq;
+  int ret;
 
-  DEBUGASSERT(wdog);
+  DEBUGASSERT(callback != NULL);
 
-  /* The following steps are atomic... the watchdog must not be active when
-   * it is being deallocated.
-   */
+  /* Visit each interrupt in the interrupt table */
 
-  flags = enter_critical_section();
-
-  /* Check if the watchdog has been started. */
-
-  if (WDOG_ISACTIVE(wdog))
+  for (irq = 0; irq < TAB_SIZE; irq++)
     {
-      /* Yes.. stop it */
-
-      wd_cancel(wdog);
+      if (g_irqvector[irq].handler != NULL &&
+          g_irqvector[irq].handler != irq_unexpected_isr)
+        {
+          ret = callback(irq, &g_irqvector[irq], arg);
+          if (ret != 0)
+            {
+              return ret;
+            }
+        }
     }
-
-  /* Did this watchdog come from the pool of pre-allocated timers?  Or, was
-   * it allocated from the heap?
-   */
-
-  if (WDOG_ISALLOCED(wdog))
-    {
-      /* It was allocated from the heap.  Use sched_kfree() to release the
-       * memory.  If the timer was released from an interrupt handler,
-       * sched_kfree() will defer the actual deallocation of the memory
-       * until a more appropriate time.
-       *
-       * We don't need interrupts disabled to do this.
-       */
-
-      leave_critical_section(flags);
-      sched_kfree(wdog);
-    }
-
-  /* Check if this is pre-allocated timer. */
-
-  else if (!WDOG_ISSTATIC(wdog))
-    {
-      /* Put the timer back on the free list and increment the count of free
-       * timers, all with interrupts disabled.
-       */
-
-      sq_addlast((FAR sq_entry_t *)wdog, &g_wdfreelist);
-      g_wdnfree++;
-      DEBUGASSERT(g_wdnfree <= CONFIG_PREALLOC_WDOGS);
-      leave_critical_section(flags);
-    }
-
-  /* This function should not be called for statically allocated timers. */
-
-  else
-    {
-      leave_critical_section(flags);
-    }
-
-  /* Return success */
 
   return OK;
 }
+
+#endif /* CONFIG_SCHED_IRQMONITOR */

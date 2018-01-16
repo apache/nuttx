@@ -317,10 +317,11 @@ struct stm32_hrtim_chopper_s
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
 struct stm32_hrtim_deadtime_s
 {
+  uint8_t  en:1;                 /* Enable deadtime for timer */
   uint8_t  fsign_lock:1;         /* Deadtime falling sing lock */
   uint8_t  rsign_lock:1;         /* Deadtime rising sing lock */
-  uint8_t  rising_lock:1;        /* Deadtime rising value lock */
   uint8_t  falling_lock:1;       /* Deadtime falling value lock */
+  uint8_t  rising_lock:1;        /* Deadtime rising value lock */
   uint8_t  fsign:1;              /* Deadtime falling sign */
   uint8_t  rsign:1;              /* Deadtime rising sign */
   uint8_t  prescaler:3;          /* Deadtime prescaler */
@@ -645,6 +646,10 @@ static int hrtim_synch_config(FAR struct stm32_hrtim_s *priv);
 static int hrtim_outputs_config(FAR struct stm32_hrtim_s *priv);
 static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev, uint16_t outputs,
                                 bool state);
+static int hrtim_output_set_set(FAR struct hrtim_dev_s *dev, uint16_t output,
+                                uint32_t set);
+static int hrtim_output_rst_set(FAR struct hrtim_dev_s *dev, uint16_t output,
+                                 uint32_t rst);
 #endif
 #ifdef HRTIM_HAVE_ADC
 static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv);
@@ -658,13 +663,14 @@ static int hrtim_tim_dma_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                              uint16_t dma);
 #endif
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
-static int hrtim_deadtime_update(FAR struct stm32_dev_s *dev, uint8_t dt,
-                                 uint16_t value)
-static uint16_t hrtim_deadtime_get(FAR struct stm32_dev_s *dev, uint8_t dt);
+static int hrtim_deadtime_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                                 uint8_t dt, uint16_t value);
+static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t dt);
+static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer);
 static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv);
 #endif
 #ifdef CONFIG_STM32_HRTIM_CHOPPER
-static int hrtim_chopper_enable(FAR struct stm32_dev_s *dev, uint8_t timer,
+static int hrtim_chopper_enable(FAR struct hrtim_dev_s *dev, uint8_t timer,
                                 uint8_t chan, bool state);
 static int hrtim_tim_chopper_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer);
 static int hrtim_chopper_config(FAR struct stm32_hrtim_s *priv);
@@ -816,13 +822,14 @@ static struct stm32_hrtim_slave_priv_s g_tima_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMA_DT
     .dt =
     {
-      .fsign_lock   = HRTIM_TIMA_DT_RSLOCK,
+      .en           = 1,
+      .fsign_lock   = HRTIM_TIMA_DT_FSLOCK,
       .rsign_lock   = HRTIM_TIMA_DT_RSLOCK,
-      .rising_lock  = HRTIM_TIMA_DT_RVLOCK,
       .falling_lock = HRTIM_TIMA_DT_FVLOCK,
+      .rising_lock  = HRTIM_TIMA_DT_RVLOCK,
       .fsign        = HRTIM_TIMA_DT_FSIGN,
       .rsign        = HRTIM_TIMA_DT_RSIGN,
-      .prescaler    = HRTIM_TIMA_DT_PRESALER
+      .prescaler    = HRTIM_TIMA_DT_PRESCALER
     }
 #endif
   },
@@ -911,13 +918,14 @@ static struct stm32_hrtim_slave_priv_s g_timb_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMB_DT
     .dt =
     {
-      .fsign_lock   = HRTIM_TIMB_DT_RSLOCK,
+      .en           = 1,
+      .fsign_lock   = HRTIM_TIMB_DT_FSLOCK,
       .rsign_lock   = HRTIM_TIMB_DT_RSLOCK,
-      .rising_lock  = HRTIM_TIMB_DT_RVLOCK,
       .falling_lock = HRTIM_TIMB_DT_FVLOCK,
+      .rising_lock  = HRTIM_TIMB_DT_RVLOCK,
       .fsign        = HRTIM_TIMB_DT_FSIGN,
       .rsign        = HRTIM_TIMB_DT_RSIGN,
-      .prescaler    = HRTIM_TIMB_DT_PRESALER
+      .prescaler    = HRTIM_TIMB_DT_PRESCALER
     }
 #endif
   },
@@ -1006,13 +1014,14 @@ static struct stm32_hrtim_slave_priv_s g_timc_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMC_DT
     .dt =
     {
-      .fsign_lock   = HRTIM_TIMC_DT_RSLOCK,
+      .en           = 1,
+      .fsign_lock   = HRTIM_TIMC_DT_FSLOCK,
       .rsign_lock   = HRTIM_TIMC_DT_RSLOCK,
-      .rising_lock  = HRTIM_TIMC_DT_RVLOCK,
       .falling_lock = HRTIM_TIMC_DT_FVLOCK,
+      .rising_lock  = HRTIM_TIMC_DT_RVLOCK,
       .fsign        = HRTIM_TIMC_DT_FSIGN,
       .rsign        = HRTIM_TIMC_DT_RSIGN,
-      .prescaler    = HRTIM_TIMC_DT_PRESALER
+      .prescaler    = HRTIM_TIMC_DT_PRESCALER
     }
 #endif
   },
@@ -1101,13 +1110,14 @@ static struct stm32_hrtim_slave_priv_s g_timd_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMD_DT
     .dt =
     {
-      .fsign_lock   = HRTIM_TIMD_DT_RSLOCK,
+      .en           = 1,
+      .fsign_lock   = HRTIM_TIMD_DT_FSLOCK,
       .rsign_lock   = HRTIM_TIMD_DT_RSLOCK,
-      .rising_lock  = HRTIM_TIMD_DT_RVLOCK,
       .falling_lock = HRTIM_TIMD_DT_FVLOCK,
+      .rising_lock  = HRTIM_TIMD_DT_RVLOCK,
       .fsign        = HRTIM_TIMD_DT_FSIGN,
       .rsign        = HRTIM_TIMD_DT_RSIGN,
-      .prescaler    = HRTIM_TIMD_DT_PRESALER
+      .prescaler    = HRTIM_TIMD_DT_PRESCALER
     }
 #endif
   },
@@ -1196,13 +1206,14 @@ static struct stm32_hrtim_slave_priv_s g_time_priv =
 #ifdef CONFIG_STM32_HRTIM_TIME_DT
     .dt =
     {
-      .fsign_lock   = HRTIM_TIME_DT_RSLOCK,
+      .en           = 1,
+      .fsign_lock   = HRTIM_TIME_DT_FSLOCK,
       .rsign_lock   = HRTIM_TIME_DT_RSLOCK,
-      .rising_lock  = HRTIM_TIME_DT_RVLOCK,
       .falling_lock = HRTIM_TIME_DT_FVLOCK,
+      .rising_lock  = HRTIM_TIME_DT_RVLOCK,
       .fsign        = HRTIM_TIME_DT_FSIGN,
       .rsign        = HRTIM_TIME_DT_RSIGN,
-      .prescaler    = HRTIM_TIME_DT_PRESALER
+      .prescaler    = HRTIM_TIME_DT_PRESCALER
     }
 #endif
   },
@@ -1482,6 +1493,8 @@ static const struct stm32_hrtim_ops_s g_hrtim1ops =
 #endif
 #ifdef CONFIG_STM32_HRTIM_PWM
   .outputs_enable = hrtim_outputs_enable,
+  .output_rst_set = hrtim_output_rst_set,
+  .output_set_set = hrtim_output_set_set,
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
   .burst_enable  = hrtim_burst_enable,
@@ -2151,6 +2164,10 @@ static int hrtim_tim_clock_config(FAR struct stm32_hrtim_s *priv,
         }
     }
 
+  /* Write prescaler configuration */
+
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET, regval);
+
 errout:
   return ret;
 }
@@ -2637,9 +2654,8 @@ static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t time
 {
   FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
-
-  int ret = OK;
   uint32_t regval = 0;
+  int ret = OK;
 
   /* Master Timer has no outputs */
 
@@ -2718,6 +2734,24 @@ static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t time
                  HRTIM_TIMOUT_IDLES1 : 0);
 
       /* Write register  */
+
+      hrtim_tim_modifyreg(priv, timer, STM32_HRTIM_TIM_OUTR_OFFSET, 0,
+                          regval);
+    }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_DEADTIME
+  if (slave->pwm.dt.en == 1)
+    {
+      regval = 0;
+
+      /* Set deadtime enable */
+
+      regval |= HRTIM_TIMOUT_DTEN;
+
+      /* TODO: deadtime upon burst mode Idle entry */
+
+      /* Write register */
 
       hrtim_tim_modifyreg(priv, timer, STM32_HRTIM_TIM_OUTR_OFFSET, 0,
                           regval);
@@ -2841,6 +2875,243 @@ static int hrtim_outputs_enable(FAR struct hrtim_dev_s *dev,
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: output_tim_index_get
+ ****************************************************************************/
+
+static uint8_t output_tim_index_get(uint16_t output)
+{
+  uint8_t timer = 0;
+
+  switch(output)
+    {
+#ifdef CONFIG_STM32_HRTIM_TIMA
+      case HRTIM_OUT_TIMA_CH1:
+      case HRTIM_OUT_TIMA_CH2:
+        {
+          timer = HRTIM_TIMER_TIMA;
+          break;
+        }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMB
+      case HRTIM_OUT_TIMB_CH1:
+      case HRTIM_OUT_TIMB_CH2:
+        {
+          timer = HRTIM_TIMER_TIMB;
+          break;
+        }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMC
+      case HRTIM_OUT_TIMC_CH1:
+      case HRTIM_OUT_TIMC_CH2:
+        {
+          timer = HRTIM_TIMER_TIMC;
+          break;
+        }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIMD
+      case HRTIM_OUT_TIMD_CH1:
+      case HRTIM_OUT_TIMD_CH2:
+        {
+          timer = HRTIM_TIMER_TIMD;
+          break;
+        }
+#endif
+
+#ifdef CONFIG_STM32_HRTIM_TIME
+      case HRTIM_OUT_TIME_CH1:
+      case HRTIM_OUT_TIME_CH2:
+        {
+          timer = HRTIM_TIMER_TIME;
+          break;
+        }
+#endif
+
+      default:
+        {
+          timer = 0;
+          break;
+        }
+    }
+
+  return timer;
+}
+
+/****************************************************************************
+ * Name: output_tim_ch_get
+ ****************************************************************************/
+
+static uint8_t output_tim_ch_get(uint16_t output)
+{
+  uint8_t ch = 0;
+
+  switch (output)
+    {
+#ifdef CONFIG_STM32_HRTIM_TIMA
+      case HRTIM_OUT_TIMA_CH1:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMB
+      case HRTIM_OUT_TIMB_CH1:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMC
+      case HRTIM_OUT_TIMC_CH1:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMD
+      case HRTIM_OUT_TIMD_CH1:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIME
+      case HRTIM_OUT_TIME_CH1:
+#endif
+        {
+          ch = HRTIM_OUT_CH1;
+          break;
+        }
+
+#ifdef CONFIG_STM32_HRTIM_TIMA
+      case HRTIM_OUT_TIMA_CH2:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMB
+      case HRTIM_OUT_TIMB_CH2:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMC
+      case HRTIM_OUT_TIMC_CH2:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIMD
+      case HRTIM_OUT_TIMD_CH2:
+#endif
+#ifdef CONFIG_STM32_HRTIM_TIME
+      case HRTIM_OUT_TIME_CH2:
+#endif
+        {
+          ch = HRTIM_OUT_CH2;
+          break;
+        }
+
+      default:
+        {
+          ch = 0;
+          break;
+        }
+    }
+
+  return ch;
+}
+
+/****************************************************************************
+ * Name: hrtim_output_set_set
+ ****************************************************************************/
+
+static int hrtim_output_set_set(FAR struct hrtim_dev_s *dev, uint16_t output,
+                                uint32_t set)
+{
+  FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
+  FAR struct stm32_hrtim_tim_s* tim;
+  FAR struct stm32_hrtim_slave_priv_s* slave;
+  uint8_t timer = 0;
+  int ret = OK;
+
+  /* Get timer index from output */
+
+  timer = output_tim_index_get(output);
+
+  /* Get Timer data strucutre */
+
+  tim = hrtim_tim_get(priv, timer);
+  if (tim == NULL)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
+
+  /* Set new SET value */
+
+  switch (output_tim_ch_get(output))
+    {
+      case HRTIM_OUT_CH1:
+        {
+          slave->pwm.ch1.set = set;
+          hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_SET1R_OFFSET, set);
+          break;
+        }
+
+      case HRTIM_OUT_CH2:
+        {
+          slave->pwm.ch2.set = set;
+          hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_SET2R_OFFSET, set);
+          break;
+        }
+
+      default:
+        {
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: hrtim_output_rst_set
+ ****************************************************************************/
+static int hrtim_output_rst_set(FAR struct hrtim_dev_s *dev, uint16_t output,
+                                uint32_t rst)
+{
+  FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
+  FAR struct stm32_hrtim_tim_s* tim;
+  FAR struct stm32_hrtim_slave_priv_s* slave;
+  uint8_t timer = 0;
+  int ret = OK;
+
+  /* Get timer index from output */
+
+  timer = output_tim_index_get(output);
+
+  /* Get Timer data strucutre */
+
+  tim = hrtim_tim_get(priv, timer);
+  if (tim == NULL)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
+
+  /* Set new RST value */
+
+  switch (output_tim_ch_get(output))
+    {
+      case HRTIM_OUT_CH1:
+        {
+          slave->pwm.ch1.rst = rst;
+          hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_RST1R_OFFSET, rst);
+        }
+
+      case HRTIM_OUT_CH2:
+        {
+          slave->pwm.ch2.rst = rst;
+          hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_RST2R_OFFSET, rst);
+        }
+
+      default:
+        {
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+
+errout:
+  return ret;
+}
+
 #endif
 
 /****************************************************************************
@@ -3069,7 +3340,7 @@ static int hrtim_dma_cfg(FAR struct stm32_hrtim_s *priv)
  * Name: hrtim_deadtime_update
  ****************************************************************************/
 
-static int hrtim_deadtime_update(FAR struct stm32_dev_s *dev, uint8_t timer,
+static int hrtim_deadtime_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
                                  uint8_t dt, uint16_t value)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
@@ -3078,17 +3349,18 @@ static int hrtim_deadtime_update(FAR struct stm32_dev_s *dev, uint8_t timer,
   uint32_t shift  = 0;
   uint32_t mask   = 0;
 
-  /* Sanity check */
+  /* For safety reasons we saturate deadtime value if it exceeds
+   * the acceptable range.
+   */
 
   if (value > 0x1FF)
     {
-      ret = -EINVAL;
-      goto errout;
+      value = 0x1FF;
     }
 
   /* Get shift value */
 
-  switch (index)
+  switch (dt)
     {
       case HRTIM_DT_EDGE_RISING:
         {
@@ -3115,7 +3387,7 @@ static int hrtim_deadtime_update(FAR struct stm32_dev_s *dev, uint8_t timer,
 
   /* Update register */
 
-  hrtim_tim_modify(priv, timer, STM32_HRTIM_TIM_DTR_OFFSET, mask, regval);
+  hrtim_tim_modifyreg(priv, timer, STM32_HRTIM_TIM_DTR_OFFSET, mask, regval);
 
 errout:
   return ret;
@@ -3125,7 +3397,7 @@ errout:
  * Name: hrtim_deadtime_get
  ****************************************************************************/
 
-static uint16_t hrtim_deadtime_get(FAR struct stm32_dev_s *dev, uint8_t dt)
+static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t dt)
 {
 #warning missing logic
 }
@@ -3134,11 +3406,14 @@ static uint16_t hrtim_deadtime_get(FAR struct stm32_dev_s *dev, uint8_t dt)
  * Name: hrtim_tim_deadtime_cfg
  ****************************************************************************/
 
-static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
+static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 {
+  FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
   uint32_t regval = 0;
   int ret = OK;
+
+  /* Master Timer has no outputs */
 
   if (timer == HRTIM_TIMER_MASTER)
     {
@@ -3146,7 +3421,20 @@ static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
       goto errout;
     }
 
+  /* Get Timer data strucutre */
+
+  tim = hrtim_tim_get(priv, timer);
+  if (tim == NULL)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
   slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
+
+  /* Configure deadtime prescaler  */
+
+  regval |= slave->pwm.dt.prescaler  << HRTIM_TIMDT_DTPRSC_SHIFT;
 
   /* Configure rising deadtime  */
 
@@ -3158,14 +3446,14 @@ static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
 
   /* Configure falling deadtime sign */
 
-  if (slave->pwm.dt.fsign == HRTIM_DT_SIGN_POSITIVE)
+  if (slave->pwm.dt.fsign == HRTIM_DT_SIGN_NEGATIVE)
     {
       regval |= HRTIM_TIMDT_SDTF;
     }
 
   /* Configure risign deadtime sign */
 
-  if (slave->pwm.dt.rsign == HRTIM_DT_SIGN_POSITIVE)
+  if (slave->pwm.dt.rsign == HRTIM_DT_SIGN_NEGATIVE)
     {
       regval |= HRTIM_TIMDT_SDTR;
     }
@@ -3198,6 +3486,12 @@ static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t index)
       regval |= HRTIM_TIMDT_DTFLK;
     }
 
+  /* TODO: configure default deadtime values */
+
+  /* Write register */
+
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_DTR_OFFSET, regval);
+
 errout:
   return ret;
 }
@@ -3210,31 +3504,31 @@ static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv)
 {
   /* Configure Timer A deadtime */
 
-#ifdef CONFIG_STM32_HRTIM_TIMA
+#ifdef CONFIG_STM32_HRTIM_TIMA_DT
   hrtim_tim_deadtime_cfg(priv, HRTIM_TIMER_TIMA);
 #endif
 
   /* Configure Timer B deadtime */
 
-#ifdef CONFIG_STM32_HRTIM_TIMB
+#ifdef CONFIG_STM32_HRTIM_TIMB_DT
   hrtim_tim_deadtime_cfg(priv, HRTIM_TIMER_TIMB);
 #endif
 
   /* Configure Timer C deadtime */
 
-#ifdef CONFIG_STM32_HRTIM_TIMC
+#ifdef CONFIG_STM32_HRTIM_TIMC_DT
   hrtim_tim_deadtime_cfg(priv, HRTIM_TIMER_TIMC);
 #endif
 
   /* Configure Timer D deadtime */
 
-#ifdef CONFIG_STM32_HRTIM_TIMD
+#ifdef CONFIG_STM32_HRTIM_TIMD_DT
   hrtim_tim_deadtime_cfg(priv, HRTIM_TIMER_TIMD);
 #endif
 
   /* Configure Timer E deadtime */
 
-#ifdef CONFIG_STM32_HRTIM_TIME
+#ifdef CONFIG_STM32_HRTIM_TIME_DT
   hrtim_tim_deadtime_cfg(priv, HRTIM_TIMER_TIME);
 #endif
 
@@ -3260,7 +3554,7 @@ static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv)
  *
  ****************************************************************************/
 
-static int hrtim_chopper_enable(FAR struct stm32_dev_s *dev, uint8_t timer,
+static int hrtim_chopper_enable(FAR struct hrtim_dev_s *dev, uint8_t timer,
                                 uint8_t chan, bool state)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
@@ -4591,6 +4885,17 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
   if (ret != OK)
     {
       tmrerr("ERROR: HRTIM synchronisation configuration failed!\n");
+      goto errout;
+    }
+#endif
+
+  /* Configure HRTIM outputs deadtime */
+
+#if defined(CONFIG_STM32_HRTIM_DEADTIME)
+  ret = hrtim_deadtime_config(priv);
+  if (ret != OK)
+    {
+      tmrerr("ERROR: HRTIM deadtime configuration failed!\n");
       goto errout;
     }
 #endif

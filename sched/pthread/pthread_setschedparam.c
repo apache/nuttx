@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_setschedparam.c
  *
- *   Copyright (C) 2007, 2008, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012, 2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,10 +105,6 @@ int pthread_setschedparam(pthread_t thread, int policy,
   int ret;
 
   sinfo("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
-
-  /* Set the errno to some non-zero value (failsafe) */
-
-  set_errno(EINVAL);
 
   /* Let sched_setscheduler do all of the work */
 

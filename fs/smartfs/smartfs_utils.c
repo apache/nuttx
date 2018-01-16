@@ -2072,7 +2072,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
   ret = OK;
 
 errout_with_buffer:
-#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+#ifndef CONFIG_SMARTFS_USE_SECTOR_BUFFER
   /* Release the allocated buffer */
 
   kmm_free(buffer);

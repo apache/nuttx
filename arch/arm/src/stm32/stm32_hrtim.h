@@ -208,10 +208,12 @@
         (hrtim)->hd_ops->cmp_update(hrtim, tim, index, cmp)
 #define HRTIM_PER_SET(hrtim, tim, per)                      \
         (hrtim)->hd_ops->per_update(hrtim, tim, per)
-#define HRTIM_OUTPUTS_ENABLE(hrtim, tim, state)             \
-        (hrtim)->hd_ops->outputs_enable(hrtim, tim, state)
-#define HRTIM_OUTPUTS_ENABLE(hrtim, tim, state)             \
-        (hrtim)->hd_ops->outputs_enable(hrtim, tim, state)
+#define HRTIM_OUTPUTS_ENABLE(hrtim, outputs, state)         \
+        (hrtim)->hd_ops->outputs_enable(hrtim, outputs, state)
+#define HRTIM_OUTPUT_SET_SET(hrtim, output, set)            \
+        (hrtim)->hd_ops->output_set_set(hrtim, output, set)
+#define HRTIM_OUTPUT_RST_SET(hrtim, output, rst)            \
+        (hrtim)->hd_ops->output_rst_set(hrtim, output, rst)
 #define HRTIM_BURST_CMP_SET(hrtim, cmp)                     \
         (hrtim)->hd_ops->burst_cmp_set(hrtim, cmp)
 #define HRTIM_BURST_PER_SET(hrtim, per)                     \
@@ -220,6 +222,8 @@
         (hrtim)->hd_ops->burst_pre_set(hrtim, pre)
 #define HRTIM_BURST_ENABLE(hrtim, state)                    \
         (hrtim)->hd_ops->burst_enable(hrtim, state)
+#define HRTIM_DEADTIME_UPDATE(hrtim, tim, dt, val)          \
+        (hrtim)->hd_ops->deadtime_update(hrtim, tim, dt, val)
 
 /************************************************************************************
  * Public Types
@@ -229,23 +233,23 @@
 
 enum stm32_hrtim_tim_e
 {
-  HRTIM_TIMER_MASTER = 0,
+  HRTIM_TIMER_MASTER = (1<<0),
 #ifdef CONFIG_STM32_HRTIM_TIMA
-  HRTIM_TIMER_TIMA   = 1,
+  HRTIM_TIMER_TIMA   = (1<<1),
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMB
-  HRTIM_TIMER_TIMB   = 2,
+  HRTIM_TIMER_TIMB   = (1<<2),
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMC
-  HRTIM_TIMER_TIMC   = 3,
+  HRTIM_TIMER_TIMC   = (1<<3),
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMD
-  HRTIM_TIMER_TIMD   = 4,
+  HRTIM_TIMER_TIMD   = (1<<4),
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME
-  HRTIM_TIMER_TIME   = 5,
+  HRTIM_TIMER_TIME   = (1<<5),
 #endif
-  HRTIM_TIMER_COMMON = 6
+  HRTIM_TIMER_COMMON = (1<<6)
 };
 
 /* Source which can force the Tx1/Tx2 output to its inactive state */
@@ -571,7 +575,7 @@ enum stm32_outputs_e
 enum stm32_hrtim_deadtime_sign_e
 {
   HRTIM_DT_SIGN_POSITIVE = 0,
-  HRTIM_DT_DIGN_NEGATIVE = 1
+  HRTIM_DT_SIGN_NEGATIVE = 1
 };
 
 /* HRTIM Deadtime types  */
@@ -973,6 +977,10 @@ struct stm32_hrtim_ops_s
 #ifdef CONFIG_STM32_HRTIM_PWM
   int      (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
                              bool state);
+  int      (*output_set_set)(FAR struct hrtim_dev_s *dev, uint16_t output,
+                              uint32_t set);
+  int      (*output_rst_set)(FAR struct hrtim_dev_s *dev, uint16_t output,
+                              uint32_t rst);
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
   int      (*burst_enable)(FAR struct hrtim_dev_s *dev, bool state);
@@ -988,8 +996,10 @@ struct stm32_hrtim_ops_s
                              uint8_t chan, bool state);
 #endif
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
-  int      (*deadtime_update)(FAR struct hrtim_dev_s *dev, uint8_t dt, uint16_t value);
-  uint16_t (*deadtime_get)(FAR struct hrtim_dev_s *dev, uint8_t dt);
+  int      (*deadtime_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                              uint8_t dt, uint16_t value);
+  uint16_t (*deadtime_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                           uint8_t dt);
 #endif
 #ifdef CONFIG_STM32_HRTIM_CAPTURE
   uint16_t (*capture_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,

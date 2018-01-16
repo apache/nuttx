@@ -77,6 +77,7 @@
  ****************************************************************************/
 
 extern const struct procfs_operations proc_operations;
+extern const struct procfs_operations irq_operations;
 extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations meminfo_operations;
 extern const struct procfs_operations module_operations;
@@ -124,8 +125,12 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "cpuload",       &cpuload_operations,         PROCFS_FILE_TYPE   },
 #endif
 
+#ifdef CONFIG_SCHED_IRQMONITOR
+  { "irqs",          &irq_operations,             PROCFS_FILE_TYPE   },
+#endif
+
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMINFO
-  { "meminfo",        &meminfo_operations,        PROCFS_FILE_TYPE   },
+  { "meminfo",       &meminfo_operations,         PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
@@ -133,15 +138,15 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
-  { "fs/blocks",     &mount_procfsoperations,     PROCFS_FILE_TYPE },
+  { "fs/blocks",     &mount_procfsoperations,     PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
-  { "fs/mount",      &mount_procfsoperations,     PROCFS_FILE_TYPE },
+  { "fs/mount",      &mount_procfsoperations,     PROCFS_FILE_TYPE   },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
-  { "fs/usage",      &mount_procfsoperations,     PROCFS_FILE_TYPE },
+  { "fs/usage",      &mount_procfsoperations,     PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)

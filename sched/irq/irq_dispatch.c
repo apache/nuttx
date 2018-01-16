@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq_dispatch.c
  *
- *   Copyright (C) 2007, 2008, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,33 @@
 #include "irq/irq.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_IRQMONITOR
+#  ifdef CONFIG_HAVE_LONG_LONG
+#    define INCR_COUNT(ndx) \
+       do \
+         { \
+           g_irqvector[ndx].count++; \
+         } \
+       while (0)
+#  else
+#    define INCR_COUNT(ndx) \
+       do \
+         { \
+           if (++g_irqvector[ndx].lscount == 0) \
+             { \
+               g_irqvector[ndx].mscount++; \
+             } \
+         } \
+       while (0)
+#  endif
+#else
+#  define INCR_COUNT(ndx)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -86,13 +113,14 @@ void irq_dispatch(int irq, FAR void *context)
         {
           vector = g_irqvector[ndx].handler;
           arg    = g_irqvector[ndx].arg;
+          INCR_COUNT(ndx);
         }
 #else
       vector = g_irqvector[irq].handler;
       arg    = g_irqvector[irq].arg;
+      INCR_COUNT(irq);
 #endif
     }
-
 #else
   vector = irq_unexpected_isr;
   arg    = NULL;

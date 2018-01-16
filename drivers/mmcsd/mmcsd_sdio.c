@@ -1895,6 +1895,25 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
         }
     }
 
+  /* If Controller does not need DMA setup before the write then send CMD25
+   * now.
+   */
+
+  if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) == 0)
+    {
+      /* Send CMD25, WRITE_MULTIPLE_BLOCK, and verify that good R1 status
+       * is returned
+       */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD25, offset);
+      ret = mmcsd_recvR1(priv, MMCSD_CMD25);
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
+          return ret;
+        }
+    }
+
   /* Configure SDIO controller hardware for the write transfer */
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
@@ -1923,24 +1942,30 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   priv->wrbusy = true;
 
-  /* Send CMD25, WRITE_MULTIPLE_BLOCK, and verify that good R1 status
-   * is returned
-   */
+  /* If Controller needs DMA setup before write then only send CMD25 now. */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD25, offset);
-  ret = mmcsd_recvR1(priv, MMCSD_CMD25);
-  if (ret != OK)
+  if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
     {
-      ferr("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
-      return ret;
+      /* Send CMD25, WRITE_MULTIPLE_BLOCK, and verify that good R1 status
+       * is returned
+       */
+
+      mmcsd_sendcmdpoll(priv, MMCSD_CMD25, offset);
+      ret = mmcsd_recvR1(priv, MMCSD_CMD25);
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
+          return ret;
+        }
     }
 
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_WDATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                        nblocks * MMCSD_BLOCK_WDATADELAY);
   if (ret != OK)
     {
-      ferr("ERROR: CMD18 transfer failed: %d\n", ret);
+      ferr("ERROR: CMD25 transfer failed: %d\n", ret);
       return ret;
     }
 

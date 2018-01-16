@@ -124,7 +124,7 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
   /* Handle the remaining offset */
 
   srclen -= lnoffset;
-  dest   += lnoffset;
+  src    += lnoffset;
   *offset = 0;
 
   /* Copy the line into the user destination buffer */

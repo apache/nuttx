@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock/clock_systimer.c
  *
- *   Copyright (C) 2011, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* See nuttx/clock.h */
 
 #undef clock_systimer
+
+/* 32-bit mask for 64-bit timer values */
+
+#define TIMER_MASK32 0x00000000ffffffff
 
 /****************************************************************************
  * Public Functions
@@ -109,20 +114,34 @@ systime_t clock_systimer(void)
   /* Convert to a 64- then a 32-bit value */
 
   tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
-  return (systime_t)(tmp & 0x00000000ffffffff);
+  return (systime_t)(tmp & TIMER_MASK32);
 
 # endif /* CONFIG_SYSTEM_TIME64 */
 #else /* CONFIG_SCHED_TICKLESS */
 # ifdef CONFIG_SYSTEM_TIME64
 
-  irqstate_t flags;
   systime_t sample;
+  systime_t verify;
 
-  /* 64-bit accesses are not atomic on most architectures. */
+  /* 64-bit accesses are not atomic on most architectures.  The following
+   * loop samples the 64-bit timer twice and loops in the rare event that
+   * there was 32-bit rollover between samples.
+   *
+   * If there is no 32-bit rollover, then:
+   *
+   *  - The MS 32-bits of each sample will be the same, and
+   *  - The LS 32-bits of the second sample will be greater than or equal to
+   *    the LS 32-bits for the first sample.
+   */
 
-  flags  = enter_critical_section();
-  sample = g_system_timer;
-  leave_critical_section(flags);
+  do
+    {
+      verify = g_system_timer;
+      sample = g_system_timer;
+    }
+  while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
+         (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
+
   return sample;
 
 # else /* CONFIG_SYSTEM_TIME64 */
