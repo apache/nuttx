@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_sdmmc.c
  *
- *   Copyright (C) 2009, 2011-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -388,6 +388,10 @@ struct stm32_dev_s
   bool               dmamode;    /* true: DMA mode transfer */
   DMA_HANDLE         dma;        /* Handle for DMA channel */
 #endif
+
+  /* Misc */
+
+  uint32_t           blocksize;  /* Current block size */
 };
 
 /* Register logging support */
@@ -421,8 +425,8 @@ struct stm32_sampleregs_s
 
 /* Low-level helpers ********************************************************/
 
-static inline void sdmmc_putreg32(struct stm32_dev_s *priv, uint32_t value,\
-                                  int offset);
+static inline void sdmmc_putreg32(struct stm32_dev_s *priv, uint32_t value,
+              int offset);
 static inline uint32_t sdmmc_getreg32(struct stm32_dev_s *priv, int offset);
 static void stm32_takesem(struct stm32_dev_s *priv);
 #define     stm32_givesem(priv) (nxsem_post(&priv->waitsem))
@@ -438,7 +442,7 @@ static inline uint32_t stm32_getpwrctrl(struct stm32_dev_s *priv);
 #ifdef CONFIG_STM32F7_SDMMC_XFRDEBUG
 static void stm32_sampleinit(void);
 static void stm32_sdiosample(struct stm32_dev_s *priv,
-                             struct stm32_sdioregs_s *regs);
+              struct stm32_sdioregs_s *regs);
 static void stm32_sample(struct stm32_dev_s *priv, int index);
 static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg);
 static void stm32_dumpsample(struct stm32_dev_s *priv,
@@ -458,13 +462,15 @@ static void stm32_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg);
 
 static uint8_t stm32_log2(uint16_t value);
 static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
-                             uint32_t dlen, uint32_t dctrl);
+              uint32_t dlen, uint32_t dctrl);
 static void stm32_datadisable(struct stm32_dev_s *priv);
 static void stm32_sendfifo(struct stm32_dev_s *priv);
 static void stm32_recvfifo(struct stm32_dev_s *priv);
 static void stm32_eventtimeout(int argc, uint32_t arg);
-static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
-static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
+static void stm32_endwait(struct stm32_dev_s *priv,
+              sdio_eventset_t wkupevent);
+static void stm32_endtransfer(struct stm32_dev_s *priv,
+              sdio_eventset_t wkupevent);
 
 /* Interrupt Handling *******************************************************/
 
@@ -495,6 +501,8 @@ static int  stm32_attach(FAR struct sdio_dev_s *dev);
 
 static int  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+static void stm32_blocksetup(FAR struct sdio_dev_s *dev,
+              unsigned int blocksize, unsigned int nblocks);
 static int  stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  stm32_sendsetup(FAR struct sdio_dev_s *dev,
@@ -543,6 +551,7 @@ static void stm32_default(struct stm32_dev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 #ifdef CONFIG_STM32F7_SDMMC1
 struct stm32_dev_s g_sdmmcdev1 =
 {
@@ -558,9 +567,7 @@ struct stm32_dev_s g_sdmmcdev1 =
     .clock            = stm32_clock,
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
-#ifdef CONFIG_SDIO_BLOCKSETUP
-    .blocksetup       = stm32_blocksetup, /* Not implemented yet */
-#endif
+    .blocksetup       = stm32_blocksetup,
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
     .cancel           = stm32_cancel,
@@ -620,9 +627,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .clock            = stm32_clock,
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
-#ifdef CONFIG_SDIO_BLOCKSETUP
-    .blocksetup       = stm32_blocksetup, /* Not implemented yet */
-#endif
+    .blocksetup       = stm32_blocksetup,
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
     .cancel           = stm32_cancel,
@@ -1433,6 +1438,19 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
 static void stm32_endtransfer(struct stm32_dev_s *priv,
                               sdio_eventset_t wkupevent)
 {
+  /* Disable the DTEN bit (it should not be left set after previous read when
+   * the next write initialization starts).
+   */
+
+#if 1
+  sdmmc_putreg32(priv,
+                sdmmc_getreg32(priv, STM32_SDMMC_DCTRL_OFFSET) &
+                ~STM32_SDMMC_DCTRL_DTEN,
+                STM32_SDMMC_DCTRL_OFFSET);
+#else
+  stm32_datadisable(priv);
+#endif
+
   /* Disable all transfer related interrupts */
 
   stm32_configxfrints(priv, 0);
@@ -2058,6 +2076,30 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 }
 
 /****************************************************************************
+ * Name: stm32_blocksetup
+ *
+ * Description:
+ *   Configure block size and the number of blocks for next transfer.
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface.
+ *   blocksize - The selected block size.
+ *   nblocks   - The number of blocks to transfer.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocksize,
+                             unsigned int nblocks)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  priv->blocksize = blocksize;
+}
+
+/****************************************************************************
  * Name: stm32_recvsetup
  *
  * Description:
@@ -2103,7 +2145,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(nbytes) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, nbytes, dblocksize |
                    STM32_SDMMC_DCTRL_DTDIR);
 
@@ -2158,7 +2200,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(nbytes) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, nbytes, dblocksize);
 
   /* Enable TX interrupts */
@@ -2882,7 +2924,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(buflen) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, buflen, dblocksize |
                    STM32_SDMMC_DCTRL_DTDIR);
 
@@ -2975,7 +3017,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(buflen) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, buflen, dblocksize);
 
   /* Configure the TX DMA */
