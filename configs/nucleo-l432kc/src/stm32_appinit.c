@@ -51,6 +51,7 @@
 #include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/leds/userled.h>
 
 #include <stm32l4.h>
 #include <stm32l4_uart.h>
@@ -132,6 +133,16 @@ int board_app_initialize(uintptr_t arg)
              "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
              ret, errno);
       return ret;
+    }
+#endif
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

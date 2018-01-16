@@ -45,7 +45,9 @@
 # include <stdint.h>
 #endif
 
+#ifdef __KERNEL__
 #include <stm32l4.h>
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions

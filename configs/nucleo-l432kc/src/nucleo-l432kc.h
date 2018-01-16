@@ -87,6 +87,7 @@
 #define GPIO_LD2 \
   (GPIO_PORTA | GPIO_PIN5 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
    GPIO_SPEED_50MHz)
+#define LED_DRIVER_PATH "/dev/userleds"
 
 /* Buttons
  *
