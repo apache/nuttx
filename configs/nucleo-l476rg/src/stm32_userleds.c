@@ -172,7 +172,7 @@ void board_userled_initialize(void)
 {
   /* Configure LD2 GPIO for output */
 
-  stm32_configgpio(GPIO_LD2);
+  stm32l4_configgpio(GPIO_LD2);
 }
 
 /****************************************************************************
@@ -181,9 +181,9 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == 1)
+  if (led == BOARD_LD2)
     {
-      stm32_gpiowrite(GPIO_LD2, ldeon);
+      stm32l4_gpiowrite(GPIO_LD2, ledon);
     }
 }
 
@@ -193,10 +193,7 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-  if (led == 1)
-    {
-      stm32_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
-    }
+  stm32l4_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
 }
 
 /****************************************************************************

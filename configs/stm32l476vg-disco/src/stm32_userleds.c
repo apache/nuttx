@@ -192,11 +192,11 @@ void board_userled(int led, bool ledon)
   switch (led)
   {
   case BOARD_LED_RED:
-    stm32l4_gpiowrite(GPIO_LED_RED, ldeon);
+    stm32l4_gpiowrite(GPIO_LED_RED, ledon);
     break;
 
   case BOARD_LED_GRN:
-    stm32l4_gpiowrite(GPIO_LED_GRN, ldeon);
+    stm32l4_gpiowrite(GPIO_LED_GRN, ledon);
     break;
   }
 }
