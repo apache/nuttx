@@ -84,15 +84,15 @@ static int sam_eic_isr(int irq, FAR void *context, FAR void *arg)
   for(bit=0;bit<SAM_IRQ_NEXTINTS;bit++)
     {
       if (intflag >> bit & 0x1)
-      {
-        irq_dispatch(SAM_IRQ_EXTINT0 + bit, context);
-      }
+        {
+          irq_dispatch(SAM_IRQ_EXTINT0 + bit, context);
+        }
     }
 
   /* Clear the pending interrupt flags */
 
   putreg32(EIC_EXTINT_ALL, SAM_EIC_INTFLAG);
-  
+
   return 0;
 }
 
@@ -145,7 +145,7 @@ int sam_eic_initialize(uint8_t gclkgen)
   regval = GCLK_CLKCTRL_ID_EIC | GCLK_CLKCTRL_GEN(gclkgen) | GCLK_CLKCTRL_CLKEN;
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
-  putreg8(EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);  
+  putreg8(EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
   sam_eic_syncwait();
 
   irq_attach(SAM_IRQ_EIC, sam_eic_isr, NULL);
@@ -211,7 +211,7 @@ int sam_eic_config(uint8_t eirq, port_pinset_t pinset)
   if (eirq < 8)
     {
       reg = SAM_EIC_CONFIG0;
-    
+
       val = EIC_CONFIG0_SENSE_BOTH(eirq);
       if (pinset & PORT_INT_RISING)
         {

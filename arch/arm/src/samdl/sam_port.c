@@ -190,13 +190,15 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
 
 static inline void sam_configinterrupt(uintptr_t base, port_pinset_t pinset)
 {
+#ifdef CONFIG_SAMDL_EIC
   uint32_t func;
   uint32_t regval;
   int pin;
 
-  pin = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
+  pin     = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
 
-  regval = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_PMUXEN | PORT_WRCONFIG_INEN);
+  regval  = (PORT_WRCONFIG_WRPINCFG | PORT_WRCONFIG_WRPMUX |
+             PORT_WRCONFIG_PMUXEN | PORT_WRCONFIG_INEN);
   regval |= PORT_WRCONFIG_PINMASK(pin);
 
   func    = (pinset & PORT_FUNC_MASK) >> PORT_FUNC_SHIFT;
@@ -204,15 +206,14 @@ static inline void sam_configinterrupt(uintptr_t base, port_pinset_t pinset)
 
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 
-#ifdef CONFIG_SAMDL_EIC
   /* Configure the interrupt edge sensitivity in CONFIGn register of the EIC */
 
   sam_eic_config(pin, pinset);
-#endif
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
   sam_dumpport(pinset, "extint");
 #endif
+#endif /* CONFIG_SAMDL_EIC */
 }
 
 /****************************************************************************
@@ -554,7 +555,7 @@ int sam_dumpport(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  pin = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
+  pin  = (pinset & PORT_PIN_MASK) >> PORT_PIN_SHIFT;
   port = (pinset & PORT_MASK) >> PORT_SHIFT;
   base = SAM_PORTN_BASE(port);
 

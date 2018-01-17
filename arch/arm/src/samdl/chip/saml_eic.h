@@ -123,7 +123,7 @@
 
 #define EIC_EXTINT_SHIFT             (0)       /* Bits 0-15: External interrupt n */
 #define EIC_EXTINT_MASK              (0xffff << EIC_EXTINT_SHIFT)
-#  define EIC_EXTINT(n)              ((uint32_t)(n) << EIC_EXTINT_SHIFT)
+#  define EIC_EXTINT(n)              (1 << (n))
 #  define EIC_EXTINT_0               (1 << 0)  /* Bit 0: External interrupt 0 */
 #  define EIC_EXTINT_1               (1 << 1)  /* Bit 1: External interrupt 1 */
 #  define EIC_EXTINT_2               (1 << 2)  /* Bit 2: External interrupt 2 */

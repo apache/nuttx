@@ -86,6 +86,22 @@ extern "C"
 int sam_eic_initialize(uint8_t gclkgen);
 
 /****************************************************************************
+ * Name: sam_eic_initialize
+ *
+ * Description:
+ *   Enable a external interrupt.
+ *
+ * Input Parameters:
+ *   irq - SAM_IRQ_EXTINTn IRQ to be enabled
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int sam_eic_irq_enable(int irq);
+
+/****************************************************************************
  * Name: sam_eic_config
  *
  * Description:
