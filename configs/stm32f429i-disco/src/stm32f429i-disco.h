@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f429i-disco/src/stm32f429i-disco.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Marco Krahl <ocram.lhark@gmail.com>
  *
@@ -230,8 +230,8 @@ void weak_function stm32_spidev_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F429Discovery board.
+ *   Called from stm32_usbinitialize very early in inialization to setup USB-
+ *   related GPIO pins for the STM32F429Discovery board.
  *
  ****************************************************************************/
 
@@ -251,6 +251,27 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_STMPE811
+int stm32_tsc_setup(int minor);
 #endif
 
 /****************************************************************************
@@ -351,7 +372,6 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #ifdef CONFIG_STM32_SPI5
 FAR struct spi_dev_s *stm32_spi5initialize(void);
 #endif
-
 
 /****************************************************************************
  * Name: stm32_l3gd20initialize()

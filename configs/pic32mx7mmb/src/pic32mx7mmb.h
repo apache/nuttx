@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/pic32mx7mmb/src/pic32mx7mmb.h
  *
- *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,33 +119,33 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Mikroelektronika PIC32MX7
- *   MMB board.
+ *   Called to configure SPI chip select GPIO pins for the Mikroelektronika
+ *   PIC32MX7 MMB board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
 void weak_function pic32mx_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mx_led_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_bringup
  *
  * Description:
@@ -157,7 +157,7 @@ void pic32mx_led_initialize(void);
  *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int pic32mx_bringup(void);
 
@@ -172,6 +172,27 @@ int pic32mx_bringup(void);
  ****************************************************************************/
 
 void pic32mx_lcdinitialize(void);
+
+/****************************************************************************
+ * Name: pic32mx_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT
+int pic32mx_tsc_setup(int minor);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

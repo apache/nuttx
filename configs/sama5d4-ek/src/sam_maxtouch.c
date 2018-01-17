@@ -219,13 +219,12 @@ static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: sam_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -236,7 +235,7 @@ static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int sam_tsc_setup(int minor)
 {
   FAR struct i2c_master_s *i2c;
   static bool initialized = false;

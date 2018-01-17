@@ -729,10 +729,6 @@ nx11
        CONFIG_INPUT=y
        CONFIG_SIM_TOUCHSCREEN=y
 
-     Then you must also have some application logic that will call
-     board_tsc_setup(0) to register the touchscreen driver.  See
-     also configuration "touchscreen"
-
      NOTES:
 
      a. If you do not have the call to sim_tcinitialize(0), the build

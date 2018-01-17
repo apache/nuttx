@@ -114,12 +114,6 @@
  * ARG:           None
  * CONFIGURATION: CONFIG_NX
  * DEPENDENCIES:  Base graphics logic provides nx_start()
- *
- * CMD:           BOARDIOC_TSCTEST_SETUP
- * DESCRIPTION:   Touchscreen controller test configuration
- * ARG:           Touch controller device minor number
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
- * DEPENDENCIES:  Board logic must provide board_tsc_setup()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
@@ -130,7 +124,6 @@
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
 #define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0007)
 #define BOARDIOC_NX_START          _BOARDIOC(0x0008)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -139,7 +132,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000a)
+#define BOARDIOC_USER              _BOARDIOC(0x0009)
 
 /****************************************************************************
  * Public Type Definitions

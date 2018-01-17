@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/viewtool-stm32f107/src/stm32_bringup.c
  *
- *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,6 +162,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_sdinitialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_ADS7843E
+  /* Initialize the touchscreen */
+
+  ret = stm32_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
     }
 #endif
 

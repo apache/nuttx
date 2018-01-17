@@ -245,20 +245,4 @@ int lpc54_ft5x06_register(void)
   return OK;
 }
 
-/****************************************************************************
- * Name: board_tsc_setup
- *
- * Description:
- *   Stubs for expected interfaces.  This implementation does not permit the
- *   application to mange the touch screen controller.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_TSCTEST
-int board_tsc_setup(int minor)
-{
-  DEBUGASSERT(minor == 0);
-  return OK;
-}
-
 #endif /* HAVE_FT5x06*/

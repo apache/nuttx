@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sam4e-ek/src/sam_appinit.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,9 +89,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(HAVE_AT25) || defined(HAVE_HSMCI) || defined(HAVE_USBMONITOR)
   int ret;
-#endif
 
 #ifdef HAVE_AT25
   /* Initialize the AT25 driver */
@@ -115,6 +113,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_INPUT_ADS7843E
+  /* Initialize the touchscreen */
+
+  ret = sam_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
@@ -126,5 +134,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+  UNUSED(ret);
   return OK;
 }

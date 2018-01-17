@@ -68,12 +68,8 @@
 #endif
 
 /* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
- * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y), NxWM uses the
- * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
- * initialize the touchscreen for NxWM (NXWM_TOUCHSCREEN_DEVINIT=n). This
- * combination of settings is normally only used in the kernel build mode
- * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from
- * user-space.
+ * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y) and NxWM uses the
+ * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y).
  */
 
 #undef HAVE_TCINIT
@@ -82,14 +78,10 @@
 #  if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVNO)
 #    error CONFIG_NXWM_TOUCHSCREEN_DEVNO is not defined
 #  elif defined(CONFIG_INPUT_STMPE811)
-#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT)
-#      define HAVE_TCINIT
-#      include <nuttx/input/touchscreen.h>
-#    endif
+#    define HAVE_TCINIT
+#    include <nuttx/input/touchscreen.h>
 #  else
-#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_BUILD_PROTECTED)
-#      error CONFIG_INPUT_STMPE811=y is needed
-#    endif
+#    error CONFIG_INPUT_STMPE811=y is needed
 #  endif
 #endif
 

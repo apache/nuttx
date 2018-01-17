@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d4-ek/src/sama5d4-ek.h
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1060,17 +1060,39 @@ bool sam_writeprotected(int slotno);
 void weak_function sam_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host functionality.
+ *   This function will start a thread that will monitor for device connection/
+ *   disconnection events.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ***********************************************************************************/
+
+#ifdef HAVE_MAXTOUCH
+int sam_tsc_setup(int minor);
 #endif
 
 /************************************************************************************

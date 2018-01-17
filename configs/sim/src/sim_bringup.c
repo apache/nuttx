@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sim/src/sam_bringup.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,8 +68,7 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 #define NEED_FRAMEBUFFER 1
 
 /* If we are using the X11 touchscreen simulation, then the frame buffer
- * initialization happens in board_tsc_setup.  Otherwise, we will need to
- * do that here.
+ * initialization will need to be done here.
  */
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
@@ -198,6 +197,16 @@ int sim_bringup(void)
   /* Initialize the simulated analog joystick input device */
 
   sim_ajoy_initialize();
+#endif
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+  /* Initialize the touchscreen */
+
+  ret = sim_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_tsc_setup failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO

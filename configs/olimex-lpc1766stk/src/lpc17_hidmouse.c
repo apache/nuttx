@@ -71,17 +71,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: lpc1766stk_hidmouse_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this
- *   function.  This function is called by application-specific, setup logic
- *   to configure the USB HID mouse driver that emulates a touchscreen
- *   device.  This function will register the driver as /dev/mouseN where N
- *   is the minor device number.
+ *   This function is called by board-bringup logic to configure the HID
+ *   mouse device.  This function will register the driver as /dev/inputN
+ *   where N is the minor device number.
  *
  * Input Parameters:
- *   minor   - The mouse device minor number
+ *   minor - The mouse device minor number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -89,7 +87,7 @@
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int lpc1766stk_hidmouse_setup(int minor)
 {
   static bool initialized = false;
   int ret;

@@ -245,11 +245,10 @@ static int nsh_sdinitialize(void)
 
   lpc17_configgpio(GPIO_SD_CD);
 
+#ifdef NSH_HAVE_MMCSD_CDINT
   /* Attach an interrupt handler to get notifications when a card is
    * inserted or deleted.
    */
-
-#ifdef NSH_HAVE_MMCSD_CDINT
 
    (void)irq_attach(LPC17_IRQ_P0p13, nsh_cdinterrupt, NULL);
    up_enable_irq(LPC17_IRQ_P0p13);
@@ -361,7 +360,7 @@ static int nsh_usbhostinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_bringup
+ * Name: open1788_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -374,7 +373,7 @@ static int nsh_usbhostinitialize(void)
  *
  ****************************************************************************/
 
-int lpc17_bringup(void)
+int open1788_bringup(void)
 {
   int ret;
 
@@ -395,6 +394,16 @@ int lpc17_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_ADS7843E
+  /* Initialize the touchscreen */
+
+  ret = open1788_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: open1788_tsc_setup failed: %d\n", ret);
     }
 #endif
 

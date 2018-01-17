@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/stm3220g_eval/src/stm3220g.h
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -250,6 +250,26 @@ int stm32_usbhost_initialize(void);
 #endif
 
 /****************************************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen device.  This
+ *   function will register the driver as /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate the
+ *   nature of the failure.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_INPUT_STMPE811
+int stm32_tsc_setup(int minor);
+#endif
+
+/****************************************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
@@ -321,7 +341,7 @@ void stm32_extmemaddr(int naddrs);
 void stm32_extmemdata(int ndata);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_enablefsmc
  *
  * Description:
@@ -333,7 +353,7 @@ void stm32_extmemdata(int ndata);
 void stm32_enablefsmc(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_disablefsmc
  *
  * Description:
@@ -345,7 +365,7 @@ void stm32_enablefsmc(void);
 void stm32_disablefsmc(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_selectsram
  *
  * Description:
@@ -375,7 +395,7 @@ void stm32_disablefsmc(void);
 void stm32_selectsram(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_deselectsram
  *
  * Description:
@@ -387,7 +407,7 @@ void stm32_selectsram(void);
 void stm32_deselectsram(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_selectlcd
  *
  * Description:
@@ -399,7 +419,7 @@ void stm32_deselectsram(void);
 void stm32_selectlcd(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_deselectlcd
  *
  * Description:
@@ -413,4 +433,3 @@ void stm32_deselectlcd(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM3220G_EVAL_SRC_STM3220G_H */
-

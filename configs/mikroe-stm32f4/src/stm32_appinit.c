@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/mikroe_stm32f4/src/stm32_appinit.c
  *
- *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -347,6 +347,16 @@ int board_app_initialize(uintptr_t arg)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT
+  /* Initialize the touchscreen */
+
+  ret = stm32_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
     }
 #endif
 

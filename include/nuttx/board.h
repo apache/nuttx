@@ -286,33 +286,6 @@ FAR void *board_composite_connect(int port, int configid);
 #endif
 
 /****************************************************************************
- * Name: board_tsc_setup
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
- *
- *   This is an internal OS interface but may be invoked indirectly from
- *   application-level touchscreen testing logic (perhaps by
- *   apps/examples/touchscreen).  If CONFIG_LIB_BOARDCTL=y and
- *   CONFIG_BOARDCTL_TSCTEST=y, then this functions will be invoked via the
- *   (non-standard) boardctl() interface using the BOARDIOC_TSCTEST_SETUP
- *   command.
- *
- * Input Parameters:
- *   minor   - The input device minor number
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int board_tsc_setup(int minor);
-
-/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:

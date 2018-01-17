@@ -2351,14 +2351,6 @@ config BOARDCTL_USBDEVCTRL
 	---help---
 		Enables support for the BOARDIOC_USBDEV_CONTROL boardctl() command.
 
-config BOARDCTL_TSCTEST
-	bool "Enable touchscreen test interfaces"
-	default n
-	---help---
-		Enables support for the BOARDIOC_TSCTEST_SETUP and
-		BOARDIOC_TSCTEST_TEARDOWN boardctl() commands.  Architecture
-		specific logic must provide the board_tsc_setup() interface.
-
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n

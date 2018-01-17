@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/open1788/src/lpc17_touchscreen.c
- * arch/arm/src/board/lpc17_touchscreen.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -255,13 +254,12 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: open1788_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this
- *   function.  This function is called by application-specific, setup logic
- *   to configure the touchscreen device.  This function will register the
- *   driver as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
@@ -272,7 +270,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int open1788_tsc_setup(int minor)
 {
   static bool initialized = false;
   FAR struct spi_dev_s *dev;

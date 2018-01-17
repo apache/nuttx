@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/olimex-lpc1766stk/src/lpc17_appinit.c
  *
- *   Copyright (C) 2010, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -361,6 +361,16 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
     }
+
+#ifdef CONFIG_USBHOST_HIDMOUSE
+  /* Initialize the HID Mouse class */
+
+  ret = lpc1766stk_hidmouse_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc1766stk_hidmouse_setup failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_CAN
   /* Initialize CAN and register the CAN driver. */

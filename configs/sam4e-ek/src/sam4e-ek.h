@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4e-ek/src/sam4e-ek.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -440,19 +440,40 @@ bool sam_writeprotected(int slotno);
 #  define sam_writeprotected(slotno) (false)
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_at25_automount
  *
  * Description:
  *   Initialize, configure, and mount the AT25 serial FLASH.  The FLASH will
  *   be mounted at /dev/at25.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_AT25
 int sam_at25_automount(int minor);
 #else
 #  define sam_at25_automount(minor) (-ENOSYS)
+#endif
+
+/************************************************************************************
+ * Name: sam_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_INPUT_ADS7843E
+int sam_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */

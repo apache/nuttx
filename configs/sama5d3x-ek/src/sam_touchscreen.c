@@ -65,33 +65,16 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: sam_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this
- *   function.  This function is called by application-specific, setup logic
- *   to configure the touchscreen device.  This function will register the
- *   driver as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
@@ -102,7 +85,7 @@
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int sam_tsc_setup(int minor)
 {
   struct sam_adc_s *adc;
   static bool initialized = false;

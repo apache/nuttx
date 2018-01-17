@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sam3u-ek/src/sam_appinit.c
  *
- *   Copyright (C) 2010, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,9 +128,10 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+  int ret;
+
 #ifdef NSH_HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
-  int ret;
 
   /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
@@ -164,5 +165,17 @@ int board_app_initialize(uintptr_t arg)
 
    sdio_mediachange(sdio, sam_cardinserted(0));
 #endif
+
+#ifdef CONFIG_INPUT
+  /* Initialize the touchscreen */
+
+  ret = sam_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
