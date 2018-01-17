@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/sam_port.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -204,9 +204,11 @@ static inline void sam_configinterrupt(uintptr_t base, port_pinset_t pinset)
 
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 
+#ifdef CONFIG_SAMDL_EIC
   /* Configure the interrupt edge sensitivity in CONFIGn register of the EIC */
 
   sam_eic_config(pin, pinset);
+#endif
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
   sam_dumpport(pinset, "extint");
