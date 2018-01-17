@@ -88,38 +88,28 @@
 int sam_tsc_setup(int minor)
 {
   struct sam_adc_s *adc;
-  static bool initialized = false;
   int ret;
 
-  iinfo("initialized:%d minor:%d\n", initialized, minor);
+  iinfo("minor:%d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Since there is no uninitialized logic, this initialization can be
-   * performed only one time.
-   */
+  /* Initialize the ADC driver */
 
-  if (!initialized)
+  adc = sam_adc_initialize();
+  if (!adc)
     {
-      /* Initialize the ADC driver */
+      ierr("ERROR: Failed to initialize the ADC driver\n");
+      return -ENODEV;
+    }
 
-      adc = sam_adc_initialize();
-      if (!adc)
-        {
-          ierr("ERROR: Failed to initialize the ADC driver\n");
-          return -ENODEV;
-        }
+  /* Initialize and register the SPI touchscreen device */
 
-      /* Initialize and register the SPI touchscreen device */
-
-      ret = sam_tsd_register(adc, CONFIG_SAMA5D3xEK_TSD_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
-               CONFIG_SAMA5D3xEK_TSD_DEVMINOR, ret);
-          return -ENODEV;
-        }
-
-      initialized = true;
+  ret = sam_tsd_register(adc, CONFIG_SAMA5D3xEK_TSD_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
+           CONFIG_SAMA5D3xEK_TSD_DEVMINOR, ret);
+      return -ENODEV;
     }
 
   return OK;

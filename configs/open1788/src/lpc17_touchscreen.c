@@ -272,50 +272,40 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 
 int open1788_tsc_setup(int minor)
 {
-  static bool initialized = false;
   FAR struct spi_dev_s *dev;
   int ret;
 
-  iinfo("initialized:%d minor:%d\n", initialized, minor);
+  iinfo("minor:%d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Since there is no uninitialized logic, this initialization can be
-   * performed only one time.
-   */
+  /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
 
-  if (!initialized)
-    {
-      /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
+  (void)lpc17_configgpio(GPIO_TC_PENIRQ);
 
-      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
-
-      /* Configure the XPT2046 BUSY pin as a normal input. */
+  /* Configure the XPT2046 BUSY pin as a normal input. */
 
 #ifndef XPT2046_NO_BUSY
-      (void)lpc17_configgpio(GPIO_TC_BUSY);
+  (void)lpc17_configgpio(GPIO_TC_BUSY);
 #endif
 
-      /* Get an instance of the SPI interface */
+  /* Get an instance of the SPI interface */
 
-      dev = lpc17_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
-      if (!dev)
-        {
-          ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
-          return -ENODEV;
-        }
+  dev = lpc17_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
+  if (!dev)
+    {
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      return -ENODEV;
+    }
 
-      /* Initialize and register the SPI touchscreen device */
+  /* Initialize and register the SPI touchscreen device */
 
-      ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device minor=%d\n",
-               CONFIG_ADS7843E_DEVMINOR);
-       /* up_spiuninitialize(dev); */
-          return -ENODEV;
-        }
-
-      initialized = true;
+  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device minor=%d\n",
+           CONFIG_ADS7843E_DEVMINOR);
+      /* up_spiuninitialize(dev); */
+      return -ENODEV;
     }
 
   return OK;

@@ -237,52 +237,38 @@ static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
 int sam_tsc_setup(int minor)
 {
   FAR struct i2c_master_s *i2c;
-  static bool initialized = false;
   int ret;
 
   iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
-   */
+  /* Configure the maXTouch CHG interrupt pin */
 
-  if (!initialized)
+  (void)sam_configgpio(GPIO_MXT_CHG);
+
+  /* Get an instance of the I2C interface for the touchscreen chip select */
+
+  i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
+  if (!i2c)
     {
-      /* Configure the maXTouch CHG interrupt pin */
+      ierr("ERROR: Failed to initialize I2C%d\n", MXT_TWI_BUS);
+      return -ENODEV;
+    }
 
-      (void)sam_configgpio(GPIO_MXT_CHG);
+  /* Configure maXTouch CHG interrupts */
 
-      /* Get an instance of the I2C interface for the touchscreen chip select */
+  sam_gpioirq(GPIO_MXT_CHG);
+  (void)irq_attach(IRQ_MXT_CHG, mxt_interrupt, NULL);
 
-      i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
-      if (!i2c)
-        {
-          ierr("ERROR: Failed to initialize I2C%d\n", MXT_TWI_BUS);
-          return -ENODEV;
-        }
+  /* Initialize and register the I2C touchscreen device */
 
-      /* Configure maXTouch CHG interrupts */
-
-      sam_gpioirq(GPIO_MXT_CHG);
-      (void)irq_attach(IRQ_MXT_CHG, mxt_interrupt, NULL);
-
-      /* Initialize and register the I2C touchscreen device */
-
-      ret = mxt_register(i2c, &g_mxtinfo.lower, CONFIG_SAMV71XULT_MXT_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device\n");
-          irq_detach(IRQ_MXT_CHG);
-          /* sam_i2cbus_uninitialize(i2c); */
-          return -ENODEV;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = mxt_register(i2c, &g_mxtinfo.lower, CONFIG_SAMV71XULT_MXT_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device\n");
+      irq_detach(IRQ_MXT_CHG);
+      /* sam_i2cbus_uninitialize(i2c); */
+      return -ENODEV;
     }
 
   return OK;

@@ -258,46 +258,32 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 int stm32_tsc_setup(int minor)
 {
   FAR struct spi_dev_s *dev;
-  static bool initialized = false;
   int ret;
 
   iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
-   */
+  /* Configure the XPT2046 interrupt pin as an input */
 
-  if (!initialized)
+  (void)stm32_configgpio(GPIO_LCDTP_IRQ);
+
+  /* Get an instance of the SPI interface for the touchscreen chip select */
+
+  dev = stm32_spibus_initialize(TSC_DEVNUM);
+  if (!dev)
     {
-      /* Configure the XPT2046 interrupt pin as an input */
+      ierr("ERROR: Failed to initialize SPI%d\n", TSC_DEVNUM);
+      return -ENODEV;
+    }
 
-      (void)stm32_configgpio(GPIO_LCDTP_IRQ);
+  /* Initialize and register the SPI touchscreen device */
 
-      /* Get an instance of the SPI interface for the touchscreen chip select */
-
-      dev = stm32_spibus_initialize(TSC_DEVNUM);
-      if (!dev)
-        {
-          ierr("ERROR: Failed to initialize SPI%d\n", TSC_DEVNUM);
-          return -ENODEV;
-        }
-
-      /* Initialize and register the SPI touchscreen device */
-
-      ret = ads7843e_register(dev, &g_tscinfo.config, CONFIG_ADS7843E_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device\n");
-          /* up_spiuninitialize(dev); */
-          return -ENODEV;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = ads7843e_register(dev, &g_tscinfo.config, CONFIG_ADS7843E_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device\n");
+      /* up_spiuninitialize(dev); */
+      return -ENODEV;
     }
 
   return OK;
