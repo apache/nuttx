@@ -1825,6 +1825,7 @@ int smartfs_shrinkfile(FAR struct smartfs_mountpt_s *fs,
         {
           dest       = (FAR uint8_t *)&sf->buffer;
           destsize   = fs->fs_llformat.availbytes;
+        }
       else
         {
           offset     = sizeof(struct smartfs_chain_header_s) + length;
