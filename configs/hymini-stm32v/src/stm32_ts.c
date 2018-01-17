@@ -172,24 +172,3 @@ int board_tsc_setup(int minor)
 
   return ads7843e_register(dev, &ts_cfg, minor);
 }
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* FIXME What can/should we do here ? */
-}

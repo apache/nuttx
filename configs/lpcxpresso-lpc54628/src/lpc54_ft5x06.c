@@ -246,7 +246,7 @@ int lpc54_ft5x06_register(void)
 }
 
 /****************************************************************************
- * Name: board_tsc_setup and board_tsc_teardown
+ * Name: board_tsc_setup
  *
  * Description:
  *   Stubs for expected interfaces.  This implementation does not permit the
@@ -260,10 +260,5 @@ int board_tsc_setup(int minor)
   DEBUGASSERT(minor == 0);
   return OK;
 }
-
-void board_tsc_teardown(void)
-{
-}
-#endif
 
 #endif /* HAVE_FT5x06*/

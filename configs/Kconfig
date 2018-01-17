@@ -2357,8 +2357,7 @@ config BOARDCTL_TSCTEST
 	---help---
 		Enables support for the BOARDIOC_TSCTEST_SETUP and
 		BOARDIOC_TSCTEST_TEARDOWN boardctl() commands.  Architecture
-		specific logic must provide board_tsc_setup() and
-		board_tsc_teardown() interfaces.
+		specific logic must provide the board_tsc_setup() interface.
 
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"

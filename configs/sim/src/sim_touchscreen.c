@@ -263,23 +263,3 @@ errout:
   return ret;
 }
 
-/****************************************************************************
- * Name: board_tsc_teardown()
- *
- * Description:
- *   Perform architecuture-specific un-initialization of the touchscreen
- *   hardware.  This interface must be provided by all configurations
- *   using apps/examples/touchscreen
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* Shut down the touchscreen driver */
-
-  sim_tsc_uninitialize();
-
-  /* Close NX */
-
-  nx_disconnect(g_simtc.hnx);
-}

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,12 +120,6 @@
  * ARG:           Touch controller device minor number
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
  * DEPENDENCIES:  Board logic must provide board_tsc_setup()
- *
- * CMD:           BOARDIOC_TSCTEST_TEARDOWN
- * DESCRIPTION:   Touchscreen controller test configuration
- * ARG:           None
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_TSCTEST
- * DEPENDENCIES:  Board logic must provide board_tsc_teardown()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
@@ -137,7 +131,6 @@
 #define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0007)
 #define BOARDIOC_NX_START          _BOARDIOC(0x0008)
 #define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0009)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x000a)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -146,7 +139,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000b)
+#define BOARDIOC_USER              _BOARDIOC(0x000a)
 
 /****************************************************************************
  * Public Type Definitions

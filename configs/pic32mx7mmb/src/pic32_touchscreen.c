@@ -1435,25 +1435,4 @@ errout_with_priv:
   return ret;
 }
 
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* Need to unregister the /dev/inputN device here. */
-}
-
 #endif /* CONFIG_INPUT */
