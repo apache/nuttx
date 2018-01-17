@@ -94,6 +94,10 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen);
 
 static struct note_info_s g_note_info;
 
+#ifdef CONFIG_SMP
+static volatile spinlock_t g_note_lock;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -299,21 +303,10 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
     }
 #endif
 
-  /* REVISIT: In the single CPU case, the following should be safe because
-   * the logic is always called within a critical section, but in the SMP
-   * case we have protection.  One option would be to precalculate and
-   * advancing the new head entry before writing the data into the buffer.
-   * That will eliminate fatal race conditions (although could result in
-   * single notes being corrupted harmlessly).
-   *
-   * But there is a complexity: Advancing the head pointer where the note
-   * buffer is almost full could advance the head to wrap beyond the tail
-   * leaving the buffer in a bad state.  A solution to this would be to pre-
-   * remove entries at the tail of the buffer as necessary to make certain
-   * that there will be space for the new note at the beginning of the
-   * buffer.  I am less certain that this can be done safely in the SMP
-   * case.
-   */
+#ifdef CONFIG_SMP
+  irqstate_t flags = up_irq_save();
+  spin_lock_wo_note(&g_note_lock);
+#endif
 
   /* Get the index to the head of the circular buffer */
 
@@ -345,6 +338,11 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
     }
 
   g_note_info.ni_head = head;
+
+#ifdef CONFIG_SMP
+  spin_unlock_wo_note(&g_note_lock);
+  up_irq_restore(flags);
+#endif
 }
 
 /****************************************************************************
