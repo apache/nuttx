@@ -354,6 +354,26 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_NXSTART
+  /* Initialize the NX server */
+
+  ret = nx_start();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nx_start failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_TCINIT
+  /* Initialize the touchscreen */
+
+  ret = stm32_tsc_setup(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 

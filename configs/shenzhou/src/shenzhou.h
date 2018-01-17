@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/shenzhou/src/shenzhou.h
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -426,7 +426,7 @@ void weak_function stm32_spidev_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related GPIO pins for
+ *   Called from stm32_usbinitialize very early in initialization to setup USB-related GPIO pins for
  *   the STM3240G-EVAL board.
  *
  ****************************************************************************************************/
@@ -448,13 +448,34 @@ void weak_function stm32_usbinitialize(void);
 int stm32_usbhost_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_ADS7843E
+int stm32_tsc_setup(int minor);
+#endif
+
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);

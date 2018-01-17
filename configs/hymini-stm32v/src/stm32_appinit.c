@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/hymini-stm32v/src/stm32_appinit.c
  *
- *   Copyright (C) 2009, 2011, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -170,10 +170,11 @@ static int nsh_cdinterrupt(int irq, FAR void *context, FAR void *arg)
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef NSH_HAVEMMCSD
   int ret;
 
+#ifdef NSH_HAVEMMCSD
   /* Card detect */
+
   bool cd_status;
 
   /* Configure the card detect GPIO */
@@ -220,5 +221,17 @@ int board_app_initialize(uintptr_t arg)
 
   sdio_mediachange(g_sdiodev, cd_status);
 #endif
+
+#ifdef CONFIG_INPUT
+  /* Initialize the touchscreen */
+
+  ret = stm32_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

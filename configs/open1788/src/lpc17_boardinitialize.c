@@ -137,6 +137,6 @@ void board_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)lpc17_bringup();
+  (void)open1788_bringup();
 }
 #endif

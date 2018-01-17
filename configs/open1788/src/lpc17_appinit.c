@@ -89,6 +89,6 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
-  return lpc17_bringup();
+  return open1788_bringup();
 #endif
 }

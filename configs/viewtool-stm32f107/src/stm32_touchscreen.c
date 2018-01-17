@@ -239,13 +239,12 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: stm32_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -256,75 +255,38 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int stm32_tsc_setup(int minor)
 {
   FAR struct spi_dev_s *dev;
-  static bool initialized = false;
   int ret;
 
   iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
-   */
+  /* Configure the XPT2046 interrupt pin as an input */
 
-  if (!initialized)
+  (void)stm32_configgpio(GPIO_LCDTP_IRQ);
+
+  /* Get an instance of the SPI interface for the touchscreen chip select */
+
+  dev = stm32_spibus_initialize(TSC_DEVNUM);
+  if (!dev)
     {
-      /* Configure the XPT2046 interrupt pin as an input */
+      ierr("ERROR: Failed to initialize SPI%d\n", TSC_DEVNUM);
+      return -ENODEV;
+    }
 
-      (void)stm32_configgpio(GPIO_LCDTP_IRQ);
+  /* Initialize and register the SPI touchscreen device */
 
-      /* Get an instance of the SPI interface for the touchscreen chip select */
-
-      dev = stm32_spibus_initialize(TSC_DEVNUM);
-      if (!dev)
-        {
-          ierr("ERROR: Failed to initialize SPI%d\n", TSC_DEVNUM);
-          return -ENODEV;
-        }
-
-      /* Initialize and register the SPI touchscreen device */
-
-      ret = ads7843e_register(dev, &g_tscinfo.config, CONFIG_ADS7843E_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device\n");
-          /* up_spiuninitialize(dev); */
-          return -ENODEV;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = ads7843e_register(dev, &g_tscinfo.config, CONFIG_ADS7843E_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device\n");
+      /* up_spiuninitialize(dev); */
+      return -ENODEV;
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* No support for un-initializing the touchscreen XPT2046 device.  It will
-   * continue to run and process touch interrupts in the background.
-   */
 }
 
 #endif /* CONFIG_INPUT_ADS7843E */

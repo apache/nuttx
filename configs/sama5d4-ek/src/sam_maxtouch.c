@@ -219,13 +219,12 @@ static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: sam_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -236,81 +235,44 @@ static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int sam_tsc_setup(int minor)
 {
   FAR struct i2c_master_s *i2c;
-  static bool initialized = false;
   int ret;
 
   iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
-   */
+  /* Configure the maXTouch CHG interrupt pin */
 
-  if (!initialized)
+  (void)sam_configpio(PIO_CHG_MXT);
+
+  /* Get an instance of the I2C interface for the touchscreen chip select */
+
+  i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
+  if (!i2c)
     {
-      /* Configure the maXTouch CHG interrupt pin */
+      ierr("ERROR: Failed to initialize I2C%d\n", MXT_TWI_BUS);
+      return -ENODEV;
+    }
 
-      (void)sam_configpio(PIO_CHG_MXT);
+  /* Configure maXTouch CHG interrupts */
 
-      /* Get an instance of the I2C interface for the touchscreen chip select */
+  sam_pioirq(PIO_CHG_MXT);
+  (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt, NULL);
 
-      i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
-      if (!i2c)
-        {
-          ierr("ERROR: Failed to initialize I2C%d\n", MXT_TWI_BUS);
-          return -ENODEV;
-        }
+  /* Initialize and register the I2C touchscreen device */
 
-       /* Configure maXTouch CHG interrupts */
-
-      sam_pioirq(PIO_CHG_MXT);
-      (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt, NULL);
-
-      /* Initialize and register the I2C touchscreen device */
-
-      ret = mxt_register(i2c, &g_mxtinfo.lower, CONFIG_SAMA5D4EK_MXT_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device\n");
-          irq_detach(IRQ_CHG_MXT);
-          /* sam_i2cbus_uninitialize(i2c); */
-          return -ENODEV;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = mxt_register(i2c, &g_mxtinfo.lower, CONFIG_SAMA5D4EK_MXT_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device\n");
+      irq_detach(IRQ_CHG_MXT);
+      /* sam_i2cbus_uninitialize(i2c); */
+      return -ENODEV;
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* No support for un-initializing the touchscreen maXTouch device.  It will
-   * continue to run and process touch interrupts in the background.
-   */
 }
 
 #endif /* HAVE_MAXTOUCH */

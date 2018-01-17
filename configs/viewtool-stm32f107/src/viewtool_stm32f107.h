@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/viewtool-stm32f107/src/viewtool_stm32f107.h
  *
- *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -348,13 +348,34 @@ void stm32_led_initialize(void);
  * Name: stm32_usbdev_initialize
  *
  * Description:
- *   Called from stm32_usbdev_initialize very early in initialization to setup USB-related
- *   GPIO pins for the Viewtool STM32F107 board.
+ *   Called from stm32_usbdev_initialize very early in initialization to
+ *   setup USB-related GPIO pins for the Viewtool STM32F107 board.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBDEV)
 void weak_function stm32_usbdev_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_ADS7843E
+int stm32_tsc_setup(int minor);
 #endif
 
 /****************************************************************************

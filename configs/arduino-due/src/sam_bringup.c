@@ -118,6 +118,17 @@ int sam_bringup(void)
   }
 #endif
 
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_INPUT_ADS7843E)
+  /* Initialize the touchscreen */
+
+  ret = sam_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

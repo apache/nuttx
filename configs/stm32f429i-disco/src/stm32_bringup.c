@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f429i-disco/src/stm32_bringup.c
  *
- *   Copyright (C) 2012, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -342,6 +342,16 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_STMPE811
+  /* Initialize the touchscreen */
+
+  ret = stm32_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
     }
 #endif
 

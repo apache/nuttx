@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/hymini-stm32v/src/hymini-stm32v.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -122,7 +122,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function stm32_spidev_initialize(void);
+void weak_function stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize
@@ -132,7 +132,28 @@ extern void weak_function stm32_spidev_initialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function stm32_usbinitialize(void);
+void weak_function stm32_usbinitialize(void);
+
+/************************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_INPUT
+int stm32_tsc_setup(int minor);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_HYMINI_STM32V_H */

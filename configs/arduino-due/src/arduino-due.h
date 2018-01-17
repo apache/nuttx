@@ -166,7 +166,7 @@
  *    and the SD card.
  * 2. UART0 cannot be used.  USARTs on the COMM connector should be available.
  * 3. Parallel data is not contiguous in the PIO register
- * 4. Touchcontroller /CS pin is connected to ground (always selected).
+ * 4. Touch controller /CS pin is connected to ground (always selected).
  * 5. Either PA28 or PC29 may drive PWM10
  */
 
@@ -308,7 +308,7 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_bringup
  *
  * Description:
@@ -320,23 +320,44 @@
  *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 int sam_bringup(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_sdinitialize
  *
  * Description:
  *   Initialize the SPI-based SD card.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
 int sam_sdinitialize(int minor);
 #endif
 
+/************************************************************************************
+ * Name: sam_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_INPUT_ADS7843E)
+int sam_tsc_setup(int minor);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_ARDUINO_DUE_SRC_ARDUNO_DUE_H */

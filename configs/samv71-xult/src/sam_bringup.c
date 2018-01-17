@@ -507,6 +507,16 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef HAVE_MAXTOUCH
+  /* Initialize the touchscreen */
+
+  ret = sam_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_WM8904
   /* Configure WM8904 audio */
 

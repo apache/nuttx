@@ -264,7 +264,6 @@ Configurations
 
          $ telnet fc00::42
 
-
   nsh:
 
     Configures the NuttShell (nsh) application located at examples/nsh.

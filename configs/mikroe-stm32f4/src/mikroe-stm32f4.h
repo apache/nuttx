@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/mikroe-stm32f4/src/mikroe-stm32f4.h
  *
- *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -218,7 +218,7 @@ void weak_function stm32_spidev_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
+ *   Called from stm32_usbinitialize very early in initialization to setup USB-related
  *   GPIO pins for the Mikroe-stm32f4 board.
  *
  ****************************************************************************************************/
@@ -227,13 +227,13 @@ void weak_function stm32_spidev_initialize(void);
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
@@ -252,13 +252,13 @@ int stm32_pwm_setup(void);
 #  error "The Mikroe-STM32F4 board does not support HOST OTG, only device!"
 #endif
 
-/****************************************************************************
+/****************************************************************************************************
  * Name: stm32_qencoder_initialize
  *
  * Description:
  *   Initialize and register a qencoder
  *
- ****************************************************************************/
+ ****************************************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
 int stm32_qencoder_initialize(FAR const char *devpath, int timer);
@@ -275,6 +275,26 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 
 #if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
 void stm32_lcdinitialize(void);
+#endif
+
+/****************************************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen device.  This
+ *   function will register the driver as /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate the
+ *   nature of the failure.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_INPUT
+int stm32_tsc_setup(int minor);
 #endif
 
 /****************************************************************************************************

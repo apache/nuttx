@@ -264,13 +264,12 @@ static void stmpe811_clear(FAR struct stmpe811_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: stm32_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -281,7 +280,7 @@ static void stmpe811_clear(FAR struct stmpe811_config_s *state)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int stm32_tsc_setup(int minor)
 {
 #ifndef CONFIG_STMPE811_TSC_DISABLE
   FAR struct i2c_master_s *dev;
@@ -334,27 +333,6 @@ int board_tsc_setup(int minor)
 #else
   return -ENOSYS;
 #endif
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* No support for un-initializing the touchscreen STMPE811 device yet */
 }
 
 #endif /* CONFIG_INPUT_STMPE811 */

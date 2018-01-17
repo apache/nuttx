@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/pic32mx7mmb/src/pic32_bringup.c
  *
- *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -406,6 +406,16 @@ int pic32mx_bringup(void)
 
       ret = nsh_usbdevinitialize();
     }
+
+#ifdef CONFIG_INPUT
+  /* Initialize the touchscreen */
+
+  ret = pic32mx_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pic32mx_tsc_setup failed: %d\n", ret);
+    }
+#endif
 
   return ret;
 }

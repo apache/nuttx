@@ -57,19 +57,7 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -82,14 +70,10 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_eic_configure
+ * Name: sam_eic_initialize
  *
  * Description:
- *   Configure the EIC
+ *   Initialize the EIC
  *
  * Input Parameters:
  *   gclkgen - GCLK Generator
@@ -100,6 +84,38 @@ extern "C"
  ****************************************************************************/
 
 int sam_eic_initialize(uint8_t gclkgen);
+
+/****************************************************************************
+ * Name: sam_eic_initialize
+ *
+ * Description:
+ *   Enable a external interrupt.
+ *
+ * Input Parameters:
+ *   irq - SAM_IRQ_EXTINTn IRQ to be enabled
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int sam_eic_irq_enable(int irq);
+
+/****************************************************************************
+ * Name: sam_eic_config
+ *
+ * Description:
+ *   Configure the interrupt edge sensitivity in CONFIGn register of the EIC
+ *
+ * Input Parameters:
+ *   eirq    - Pin to be configured
+ *   pinset  - Configuration of the pin
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 int sam_eic_config(uint8_t eirq, port_pinset_t pinset);
 
 #undef EXTERN

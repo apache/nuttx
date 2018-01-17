@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d4-ek/src/sam_bringup.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -285,6 +285,16 @@ int sam_bringup(void)
   if (ret != OK)
     {
       _err("ERROR: Failed to start the USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_MAXTOUCH
+  /* Initialize the touchscreen */
+
+  ret = sam_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
     }
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * configs/stm3240g_eval/src/stm3240g_eval.h
  *
- *   Copyright (C) 2011-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -264,6 +264,26 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/****************************************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen device.  This
+ *   function will register the driver as /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate the
+ *   nature of the failure.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_INPUT_STMPE811
+int stm32_tsc_setup(int minor);
 #endif
 
 /****************************************************************************************************

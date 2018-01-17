@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/samv71-xult/src/samv71-xult.h
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -846,28 +846,49 @@ bool sam_writeprotected(int slotno);
 int sam_at24config(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
+ * Name: sam_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_MAXTOUCH
+int sam_tsc_setup(int minor);
+#endif
+
+/************************************************************************************
  * Name: sam_wm8904_initialize
  *
  * Description:
- *   This function is called by platform-specific, setup logic to configure
- *   and register the WM8904 device.  This function will register the driver
- *   as /dev/wm8904[x] where x is determined by the minor device number.
+ *   This function is called by platform-specific, setup logic to configure and
+ *   register the WM8904 device.  This function will register the driver as
+ *   /dev/wm8904[x] where x is determined by the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_WM8904
 int sam_wm8904_initialize(int minor);
 #endif /* HAVE_WM8904 */
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_audio_null_initialize
  *
  * Description:
@@ -877,26 +898,26 @@ int sam_wm8904_initialize(int minor);
  *   minor - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_AUDIO_NULL
 int sam_audio_null_initialize(int minor);
 #endif /* HAVE_AUDIO_NULL */
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_mrf24j40_initialize
  *
  * Description:
  *   Initialize the MRF24J40 device.
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned
+ *   to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_MRF24J40
 int sam_mrf24j40_initialize(void);

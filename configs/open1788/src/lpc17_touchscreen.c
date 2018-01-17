@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/open1788/src/lpc17_touchscreen.c
- * arch/arm/src/board/lpc17_touchscreen.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -255,13 +254,12 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: open1788_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this
- *   function.  This function is called by application-specific, setup logic
- *   to configure the touchscreen device.  This function will register the
- *   driver as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
@@ -272,76 +270,45 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int open1788_tsc_setup(int minor)
 {
-  static bool initialized = false;
   FAR struct spi_dev_s *dev;
   int ret;
 
-  iinfo("initialized:%d minor:%d\n", initialized, minor);
+  iinfo("minor:%d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Since there is no uninitialized logic, this initialization can be
-   * performed only one time.
-   */
+  /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
 
-  if (!initialized)
-    {
-      /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
+  (void)lpc17_configgpio(GPIO_TC_PENIRQ);
 
-      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
-
-      /* Configure the XPT2046 BUSY pin as a normal input. */
+  /* Configure the XPT2046 BUSY pin as a normal input. */
 
 #ifndef XPT2046_NO_BUSY
-      (void)lpc17_configgpio(GPIO_TC_BUSY);
+  (void)lpc17_configgpio(GPIO_TC_BUSY);
 #endif
 
-      /* Get an instance of the SPI interface */
+  /* Get an instance of the SPI interface */
 
-      dev = lpc17_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
-      if (!dev)
-        {
-          ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
-          return -ENODEV;
-        }
+  dev = lpc17_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
+  if (!dev)
+    {
+      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      return -ENODEV;
+    }
 
-      /* Initialize and register the SPI touchscreen device */
+  /* Initialize and register the SPI touchscreen device */
 
-      ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device minor=%d\n",
-               CONFIG_ADS7843E_DEVMINOR);
-       /* up_spiuninitialize(dev); */
-          return -ENODEV;
-        }
-
-      initialized = true;
+  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device minor=%d\n",
+           CONFIG_ADS7843E_DEVMINOR);
+      /* up_spiuninitialize(dev); */
+      return -ENODEV;
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* No support for un-initializing the touchscreen XPT2046 device yet */
 }
 
 #endif /* CONFIG_INPUT_ADS7843E */

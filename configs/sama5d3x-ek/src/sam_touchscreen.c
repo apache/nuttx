@@ -65,33 +65,16 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: sam_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this
- *   function.  This function is called by application-specific, setup logic
- *   to configure the touchscreen device.  This function will register the
- *   driver as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
@@ -102,65 +85,34 @@
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int sam_tsc_setup(int minor)
 {
   struct sam_adc_s *adc;
-  static bool initialized = false;
   int ret;
 
-  iinfo("initialized:%d minor:%d\n", initialized, minor);
+  iinfo("minor:%d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Since there is no uninitialized logic, this initialization can be
-   * performed only one time.
-   */
+  /* Initialize the ADC driver */
 
-  if (!initialized)
+  adc = sam_adc_initialize();
+  if (!adc)
     {
-      /* Initialize the ADC driver */
+      ierr("ERROR: Failed to initialize the ADC driver\n");
+      return -ENODEV;
+    }
 
-      adc = sam_adc_initialize();
-      if (!adc)
-        {
-          ierr("ERROR: Failed to initialize the ADC driver\n");
-          return -ENODEV;
-        }
+  /* Initialize and register the SPI touchscreen device */
 
-      /* Initialize and register the SPI touchscreen device */
-
-      ret = sam_tsd_register(adc, CONFIG_SAMA5D3xEK_TSD_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
-               CONFIG_SAMA5D3xEK_TSD_DEVMINOR, ret);
-          return -ENODEV;
-        }
-
-      initialized = true;
+  ret = sam_tsd_register(adc, CONFIG_SAMA5D3xEK_TSD_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
+           CONFIG_SAMA5D3xEK_TSD_DEVMINOR, ret);
+      return -ENODEV;
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* No support for un-initializing the touchscreen  yet */
 }
 
 #endif /* CONFIG_INPUT_ADS7843E */

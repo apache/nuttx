@@ -2,7 +2,7 @@
  * configs/open1788/src/open1788.h
  * arch/arm/src/board/open1788.n
  *
- *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,7 +162,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_bringup
+ * Name: open1788_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -175,7 +175,7 @@
  *
  ************************************************************************************/
 
-int lpc17_bringup(void);
+int open1788_bringup(void);
 
 /************************************************************************************
  * Name: open1788_sspdev_initialize
@@ -237,13 +237,34 @@ void open1788_nand_initialize(void);
 void open1788_lcd_initialize(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
+ * Name: open1788_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the touchscreen
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_INPUT_ADS7843E
+int open1788_tsc_setup(int minor);
+#endif
+
+/************************************************************************************
  * Name: lpc17_djoy_initialization
  *
  * Description:
  *   Initialize and register the discrete joystick driver
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_OPEN1788_DJOYSTICK
 int lpc17_djoy_initialization(void);

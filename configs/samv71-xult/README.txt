@@ -1231,7 +1231,6 @@ MXT Configuration Options
 
   Application Configuration -> Examples -> Touchscreen example
     CONFIG_EXAMPLES_TOUCHSCREEN=y          : Enables the example
-    CONFIG_EXAMPLES_TOUCHSCREEN_ARCHINIT=y : Have board-specific intialization
     CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
     CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0
 

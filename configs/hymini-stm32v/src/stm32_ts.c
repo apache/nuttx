@@ -53,7 +53,7 @@
 #include "hymini-stm32v.h"
 
 /************************************************************************************
- * Pre-processor Defintiions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #if !defined(CONFIG_STM32_SPI1)
@@ -136,13 +136,12 @@ static bool hymini_ts_pendown(FAR struct ads7843e_config_s *state)
 }
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: stm32_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -153,7 +152,7 @@ static bool hymini_ts_pendown(FAR struct ads7843e_config_s *state)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int stm32_tsc_setup(int minor)
 {
   FAR struct spi_dev_s *dev;
 
@@ -171,25 +170,4 @@ int board_tsc_setup(int minor)
   stm32_configgpio(GPIO_TS_IRQ);
 
   return ads7843e_register(dev, &ts_cfg, minor);
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* FIXME What can/should we do here ? */
 }

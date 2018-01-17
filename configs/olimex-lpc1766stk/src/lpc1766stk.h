@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/olimex-lpc1766stk/src/lpc1766stk.h
  *
- *   Copyright (C) 2010-2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -270,6 +270,27 @@ void weak_function lpc1766stk_sspdev_initialize(void);
 
 #ifdef CONFIG_CAN
 int lpc1766stk_can_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: lpc1766stk_hidmouse_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the HID mouse
+ *   device.  This function will register the driver as /dev/inputN where N is the
+ *   minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST_HIDMOUSE
+int lpc1766stk_hidmouse_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */

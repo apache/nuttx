@@ -336,13 +336,12 @@ static FAR struct spi_dev_s *sam_tsc_spiinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tsc_setup
+ * Name: sam_tsc_setup
  *
  * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the touchscreen device.  This function will register the driver
- *   as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -353,79 +352,42 @@ static FAR struct spi_dev_s *sam_tsc_spiinitialize(void)
  *
  ****************************************************************************/
 
-int board_tsc_setup(int minor)
+int sam_tsc_setup(int minor)
 {
   FAR struct spi_dev_s *dev;
-  static bool initialized = false;
   int ret;
 
   iinfo("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
-   */
+  /* Configure and enable the XPT2046 interrupt pin as an input */
 
-  if (!initialized)
+  (void)sam_configgpio(GPIO_TSC_IRQ);
+
+  /* Configure the PIO interrupt */
+
+  sam_gpioirq(SAM_TSC_IRQ);
+
+  /* Get an instance of the SPI interface for the touchscreen chip select */
+
+  dev = sam_tsc_spiinitialize();
+  if (!dev)
     {
-      /* Configure and enable the XPT2046 interrupt pin as an input */
+      ierr("ERROR: Failed to initialize bit bang SPI\n");
+      return -ENODEV;
+    }
 
-      (void)sam_configgpio(GPIO_TSC_IRQ);
+  /* Initialize and register the SPI touschscreen device */
 
-      /* Configure the PIO interrupt */
-
-      sam_gpioirq(SAM_TSC_IRQ);
-
-      /* Get an instance of the SPI interface for the touchscreen chip select */
-
-      dev = sam_tsc_spiinitialize();
-      if (!dev)
-        {
-          ierr("ERROR: Failed to initialize bit bang SPI\n");
-          return -ENODEV;
-        }
-
-      /* Initialize and register the SPI touschscreen device */
-
-      ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Failed to register touchscreen device\n");
-          /* up_spiuninitialize(dev); */
-          return -ENODEV;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
+  if (ret < 0)
+    {
+      ierr("ERROR: Failed to register touchscreen device\n");
+      /* up_spiuninitialize(dev); */
+      return -ENODEV;
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: board_tsc_teardown
- *
- * Description:
- *   Each board that supports a touchscreen device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   uninitialize the touchscreen device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void board_tsc_teardown(void)
-{
-  /* No support for un-initializing the touchscreen XPT2046 device.  It will
-   * continue to run and process touch interrupts in the background.
-   */
 }
 
 #endif /* CONFIG_ARDUINO_ITHEAD_TFT && CONFIG_SPI_BITBANG && CONFIG_INPUT_ADS7843E */

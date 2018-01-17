@@ -64,12 +64,8 @@
 #endif
 
 /* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
- * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y), NxWM uses the
- * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
- * initialize the touchscreen for NxWM (NXWM_TOUCHSCREEN_DEVINIT=n). This
- * combination of settings is normally only used in the kernel build mode
- * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from
- * user-space.
+ * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y) and NxWM uses the
+ * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y).
  */
 
 #undef HAVE_TCINIT
@@ -78,14 +74,10 @@
 #  if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVNO)
 #    error CONFIG_NXWM_TOUCHSCREEN_DEVNO is not defined
 #  elif defined(CONFIG_INPUT_STMPE811)
-#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT)
-#      define HAVE_TCINIT
-#      include <nuttx/input/touchscreen.h>
-#    endif
+#    define HAVE_TCINIT 1
+#    include <nuttx/input/touchscreen.h>
 #  else
-#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_BUILD_PROTECTED)
-#      error CONFIG_INPUT_STMPE811=y is needed
-#    endif
+#    error CONFIG_INPUT_STMPE811=y is needed
 #  endif
 #endif
 
@@ -143,36 +135,13 @@ static int board_initthread(int argc, char *argv[])
 {
   int ret;
 
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
+  /* Perform the board initialization on an initialization thread */
 
   ret = stm32_bringup();
   if (ret < 0)
     {
       gerr("ERROR: stm32_bringup failed: %d\n", ret);
     }
-
-#ifdef HAVE_NXSTART
-  /* Initialize the NX server */
-
-  ret = nx_start();
-  if (ret < 0)
-    {
-      gerr("ERROR: nx_start failed: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_TCINIT
-  /* Initialize the touchscreen */
-
-  ret = board_tsc_setup(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
-  if (ret < 0)
-    {
-      gerr("ERROR: board_tsc_setup failed: %d\n", ret);
-    }
-#endif
 
   return EXIT_SUCCESS;
 }
@@ -257,6 +226,11 @@ void board_initialize(void)
                           NULL);
   ASSERT(server > 0);
 #else
+  /* Perform the board initialization on the start-up thread.  Some
+   * initializations may fail in this case due to the limited capability of
+   * the start-up thread.
+   */
+
   (void)stm32_bringup();
 #endif
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,6 +121,27 @@ int sim_zoneinfo(int minor);
 
 #ifdef CONFIG_EXAMPLES_GPIO
 int sim_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: sim_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+int sim_tsc_setup(int minor);
 #endif
 
 #endif /* __CONFIGS_SIM_SRC_SIM_H */
