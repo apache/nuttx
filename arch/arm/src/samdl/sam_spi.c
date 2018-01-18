@@ -944,7 +944,12 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     {
       /* Yes... Set the mode appropriately */
 
+      /* First we need to disable SPI while we change the mode */
+
       regval = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+      spi_putreg32(priv, regval & ~SPI_CTRLA_ENABLE, SAM_SPI_CTRLA_OFFSET);
+      spi_wait_synchronization(priv);
+
       regval &= ~(SPI_CTRLA_CPOL | SPI_CTRLA_CPHA);
 
       switch (mode)
@@ -969,7 +974,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-      spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
+      spi_putreg32(priv, regval | SPI_CTRLA_ENABLE, SAM_SPI_CTRLA_OFFSET);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
