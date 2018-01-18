@@ -58,7 +58,8 @@
 #define INLCR     (1 << 5)  /* Bit 5:  Map NL to CR on input */
 #define INPCK     (1 << 6)  /* Bit 6:  Enable input parity check */
 #define ISTRIP    (1 << 7)  /* Bit 7:  Strip character */
-#define IUCLC     (1 << 8)  /* Bit 8:  Map upper-case to lower-case on input (LEGACY) */
+#define IUCLC     (1 << 8)  /* Bit 8:  Map upper-case to lower-case on input
+                             *         (LEGACY) */
 #define IXANY     (1 << 9)  /* Bit 9:  Enable any character to restart output */
 #define IXOFF     (1 << 10) /* Bit 10: Enable start/stop input control */
 #define IXON      (1 << 11) /* Bit 11: Enable start/stop output control */
@@ -67,7 +68,8 @@
 /* Terminal output modes (c_oflag in the termios structure) */
 
 #define OPOST     (1 << 0)  /* Bit 0:  Post-process output */
-#define OLCUC     (1 << 1)  /* Bit 1:  Map lower-case to upper-case on output (LEGACY) */
+#define OLCUC     (1 << 1)  /* Bit 1:  Map lower-case to upper-case on
+*                            *         output (LEGACY) */
 #define ONLCR     (1 << 2)  /* Bit 2:  Map NL to CR-NL on output */
 #define OCRNL     (1 << 3)  /* Bit 3:  Map CR to NL on output */
 #define ONOCR     (1 << 4)  /* Bit 4:  No CR output at column 0 */
@@ -116,22 +118,47 @@
 /* Local Modes (c_lflag in the termios structure) */
 
 #define ECHO      (1 << 0)  /* Bit 0:  Enable echo */
-#define ECHOE     (1 << 1)  /* Bit 1:  Echo erase character as error-correcting backspace */
+#define ECHOE     (1 << 1)  /* Bit 1:  Echo erase character as error-
+                             *         correcting backspace */
 #define ECHOK     (1 << 2)  /* Bit 2:  Echo KILL */
 #define ECHONL    (1 << 3)  /* Bit 3:  Echo NL */
-#define ICANON    (1 << 4)  /* Bit 4:  Canonical input (erase and kill processing) */
-#define IEXTEN    (1 << 5)  /* Bit 5:  Enable extended input character processing */
+#define ICANON    (1 << 4)  /* Bit 4:  Canonical input (erase and kill
+                             *         processing) */
+#define IEXTEN    (1 << 5)  /* Bit 5:  Enable extended input character
+                             *         processing */
 #define ISIG      (1 << 6)  /* Bit 6:  Enable signals */
 #define NOFLSH    (1 << 7)  /* Bit 7:  Disable flush after interrupt or quit */
 #define TOSTOP    (1 << 8)  /* Bit 8:  Send SIGTTOU for background output */
-#define XCASE     (1 << 9)  /* Bit 9:  Canonical upper/lower presentation (LEGACY) */
+#define XCASE     (1 << 9)  /* Bit 9:  Canonical upper/lower presentation
+                             *         (LEGACY) */
 
-/* The following are subscript names for the termios c_cc array */
+/* The following are subscript names for the termios c_cc array.
+ *
+ * Common characters:  VINTR, VQUIT, VSTART, VSTOP, VSUSP
+ *
+ *   VINTR:  Interrupt character   (Default ETX, Control-C)
+ *   VQUIT:  Quit character        (Default FS,  Control-\)
+ *   VSTART: Start character       (Default DC1, Control-Q)
+ *   VSTOP:  Stop character        (Default DC3, Control-S)
+ *   VSUSP:  Suspend character     (Default SUB, Control-Z)
+ *
+ * Canonical mode:     Adds VEOF, VEOL, VERASE, VKILL
+ *
+ *   VEOL:   End-of-file character (Default SUB, Control-Z)
+ *   VEOF:   End-of-line character (Default NUL)
+ *   VERASE: Erase character       (Default DEL or BS, Control-H)
+ *   VKILL:  Kill character        (Default NAK or BS, Control-U)
+ *
+ * Non-canonical mode: Adds VMIN, VTIME
+ *
+ *   VMIN:   Minimum number of characters for non-canonical read
+ *   VTIME:  Timeout in deciseconds for non-canonical read
+ */
 
 #define VEOF      0         /* Bit 0:  EOF character (canonical mode) */
-#define VMIN      VEOF      /* Bit 0:  MIN value (Non-canonical mode) */
+#define VMIN      VEOF      /* Bit 0:  MIN value (non-canonical mode) */
 #define VEOL      1         /* Bit 1:  EOL character (canonical mode) */
-#define VTIME     VEOL      /* Bit 1:  TIME value (Non-canonical mode) */
+#define VTIME     VEOL      /* Bit 1:  TIME value (non-canonical mode) */
 #define VERASE    2         /* Bit 2:  ERASE character (canonical mode) */
 #define VINTR     3         /* Bit 3:  INTR character */
 #define VKILL     4         /* Bit 4:  KILL character (canonical mode) */
@@ -139,11 +166,13 @@
 #define VSTART    6         /* Bit 6:  START character */
 #define VSTOP     7         /* Bit 7:  STOP character */
 #define VSUSP     8         /* Bit 8:  SUSP character */
-#define NCCS      9         /* Bit 9:  Size of the array c_cc for control characters */
+#define NCCS      9         /* Bit 9:  Size of the array c_cc for control
+                             *         characters */
 
-/* Baud Rate Selection.  These are instances of type speed_t.  Values of 38400
- * and below are specified by POSIX; values above 38400 are sometimes referred
- * to as extended values and most values appear in most termios.h implementations.
+/* Baud Rate Selection.  These are instances of type speed_t.  Values of
+ * 38400 and below are specified by POSIX; values above 38400 are sometimes
+ * referred to as extended values and most values appear in most termios.h
+ * implementations.
  *
  * NOTE that is NuttX that the encoding of the speed_t values is simply the
  * value of the baud itself.  So this opens a window for non-portable abuse
@@ -188,18 +217,23 @@
 
 #define TCSANOW   0         /* Change attributes immediately */
 #define TCSADRAIN 1         /* Change attributes when output has drained */
-#define TCSAFLUSH 2         /* Change attributes when output has drained; also flush pending input */
+#define TCSAFLUSH 2         /* Change attributes when output has drained;
+                             * also flush pending input */
 
 /* Line Control (used with tcflush()) */
 
-#define TCIFLUSH  0         /* Flush pending input. Flush untransmitted output */
-#define TCIOFLUSH 1         /* Flush both pending input and untransmitted output */
+#define TCIFLUSH  0         /* Flush pending input. Flush untransmitted
+                             * output */
+#define TCIOFLUSH 1         /* Flush both pending input and untransmitte
+                             * output */
 #define TCOFLUSH  2         /* Flush untransmitted output */
 
 /* Constants for use with tcflow() */
 
-#define TCIOFF    0         /* Transmit a STOP character, intended to suspend input data */
-#define TCION     1         /* Transmit a START character, intended to restart input data */
+#define TCIOFF    0         /* Transmit a STOP character, intended to
+                             * suspend input data */
+#define TCION     1         /* Transmit a START character, intended to
+                             * restart input data */
 #define TCOOFF    2         /* Suspend output */
 #define TCOON     3         /* Restart output */
 
