@@ -51,6 +51,10 @@
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
 
+#ifdef CONFIG_SMP
+#  include <nuttx/signal.h>
+#endif
+
 #include "up_arch.h"
 #include "lc823450_dma.h"
 #include "lc823450_i2s.h"
@@ -460,7 +464,31 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
   nxsem_init(&_sem_txdma, 0, 0);
   nxsem_init(&_sem_buf_under, 0, 0);
 
+#ifdef CONFIG_SMP
+  cpu_set_t cpuset0;
+  cpu_set_t cpuset1;
+
+  CPU_ZERO(&cpuset1);
+  CPU_SET(0, &cpuset1);
+
+  /* Backup the current affinity */
+
+  sched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+
+  /* Set the new affinity which assigns to CPU0 */
+
+  sched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
+  nxsig_usleep(10 * 1000);
+#endif
+
   irq_attach(LC823450_IRQ_AUDIOBUF0, _i2s_isr, NULL);
+
+#ifdef CONFIG_SMP
+  /* Restore the original affinity */
+
+  sched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  nxsig_usleep(10 * 1000);
+#endif
 
   /* Enable IRQ for Audio Buffer */
 

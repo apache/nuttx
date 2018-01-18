@@ -711,7 +711,9 @@ void up_ack_irq(int irq)
 #ifdef CONFIG_SMP
   if (irq > LC823450_IRQ_LPDSP0 && 1 == up_cpu_index())
     {
-      irqwarn("*** warning irq(%d) handled on CPU1.");
+      /* IRQ should be handled on CPU0 */
+
+      ASSERT(false);
     }
 #endif
 
