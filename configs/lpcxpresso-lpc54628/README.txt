@@ -475,4 +475,3 @@ Configurations
 
        $ cd ~/<nuttx-code>/nuttx
        $ make
-
