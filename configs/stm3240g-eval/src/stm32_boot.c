@@ -46,106 +46,8 @@
 #include "stm3240g-eval.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-/* Should we initialize the NX server using nx_start?  This is done for NxWidgets
- * (CONFIG_NXWIDGETS=y) and if the NxWidget::CNxServer class expects the RTOS do the
- * the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).  This combination of
- * settings is normally only used in the kernel build mode* (CONFIG_BUILD_PROTECTED)
- * when NxWidgets is unable to initialize NX from user-space.
- */
-
-#undef HAVE_NXSTART
-
-#if defined(CONFIG_NXWIDGETS) && !defined(CONFIG_NXWIDGET_SERVERINIT)
-#   define HAVE_NXSTART
-#   include <nuttx/nx/nx.h>
-#endif
-
-/* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
- * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y) and NxWM uses the
- * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y).
- */
-
-#undef HAVE_TCINIT
-
-#if defined(CONFIG_NXWM_TOUCHSCREEN)
-#  if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVNO)
-#    error CONFIG_NXWM_TOUCHSCREEN_DEVNO is not defined
-#  elif defined(CONFIG_INPUT_STMPE811)
-#    define HAVE_TCINIT 1
-#    include <nuttx/input/touchscreen.h>
-#  else
-#    error CONFIG_INPUT_STMPE811=y is needed
-#  endif
-#endif
-
-/* Check if we will need to support the initialization kernel thread */
-
-#undef HAVE_INITTHREAD
-
-#ifdef CONFIG_BOARD_INITIALIZE
-#  if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-#    define HAVE_INITTHREAD 1
-#  elif defined(HAVE_NXSTART)
-#    define HAVE_INITTHREAD 1
-#  elif defined(HAVE_TCINIT)
-#    define HAVE_INITTHREAD 1
-#  endif
-#endif
-
-#ifdef HAVE_INITTHREAD
-#  include <stdlib.h>
-#  include <assert.h>
-#  include <nuttx/kthread.h>
-#  ifndef CONFIG_STM3240G_BOARDINIT_PRIO
-#    define CONFIG_STM3240G_BOARDINIT_PRIO 196
-#  endif
-#  ifndef CONFIG_STM3240G_BOARDINIT_STACK
-#    define CONFIG_STM3240G_BOARDINIT_STACK 2048
-#  endif
-#endif
-
-/************************************************************************************
  * Private Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Name: board_initthread
- *
- * Description:
- *   Board initialization kernel thread.  This thread exists to support
- *   initialization when CONFIG_BOARD_INITIALIZE is defined.  It is started by
- *   board_initialize() which runs on the IDLE thread.
- *
- *   This function thread exists because some initialization steps may require
- *   waiting for events.  Such waiting is not possible on the IDLE thread.
- *
- * Input Parameters:
- *   Standard task start-up parameters (none of which are used)
- *
- * Returned Value:
- *   Always returns EXIT_SUCCESS.
- *
- ************************************************************************************/
-
-#ifdef HAVE_INITTHREAD
-static int board_initthread(int argc, char *argv[])
-{
-  int ret;
-
-  /* Perform the board initialization on an initialization thread */
-
-  ret = stm32_bringup();
-  if (ret < 0)
-    {
-      gerr("ERROR: stm32_bringup failed: %d\n", ret);
-    }
-
-  return EXIT_SUCCESS;
-}
-#endif
 
 /************************************************************************************
  * Public Functions
@@ -184,7 +86,7 @@ void stm32_boardinitialize(void)
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * the weak function stm32_usbinitialize() has been brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+   * Presumably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
 
   if (stm32_usbinitialize)
@@ -216,22 +118,11 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
-#ifdef HAVE_INITTHREAD
-  pid_t server;
-
-  /* Start the board initialization kernel thread */
-
-  server = kthread_create("Board Init", CONFIG_STM3240G_BOARDINIT_PRIO,
-                          CONFIG_STM3240G_BOARDINIT_STACK, board_initthread,
-                          NULL);
-  ASSERT(server > 0);
-#else
   /* Perform the board initialization on the start-up thread.  Some
    * initializations may fail in this case due to the limited capability of
    * the start-up thread.
    */
 
   (void)stm32_bringup();
-#endif
 }
 #endif

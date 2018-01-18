@@ -71,6 +71,10 @@
 #  include <nuttx/video/fb.h>
 #endif
 
+#ifdef CONFIG_INPUT_STMPE811
+#  include <nuttx/input/touchscreen.h>
+#endif
+
 #include "stm32.h"
 #include "stm32_i2c.h"
 #include "stm3240g-eval.h"
@@ -354,20 +358,12 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef HAVE_NXSTART
-  /* Initialize the NX server */
+#ifdef CONFIG_INPUT_STMPE811
+  /* Initialize the touchscreen.
+   * WARNING: stm32_tsc_setup() cannot be called from the IDLE thread.
+   */
 
-  ret = nx_start();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nx_start failed: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_TCINIT
-  /* Initialize the touchscreen */
-
-  ret = stm32_tsc_setup(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
+  ret = stm32_tsc_setup(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
