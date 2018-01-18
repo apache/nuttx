@@ -229,6 +229,27 @@ Configurations
       interrupts are not supported on P4.  So polled mode only for this
       puppy.
 
+  lvgl
+  ----
+    This is a demonstration of the LittlevGL graphics library running on
+    the NuttX frame buffer driver (as in the fb configuration).  You can
+    find LittlevGL here:
+
+      https://littlevgl.com/
+      https://github.com/littlevgl
+
+    This configuration uses the LittlevGL demonstration at apps/examples/lvgldemo.
+
+    NOTES:
+
+    1. The LittlevGL demonstration is quit large, due mostly to some large
+       graphic images.  So memory is tight in the LPC54628's 512Kb FLASH.  In
+       fact, if you disable optimization, the demo will not fit into FLASH
+       memory (at least not with debug output also enabled).
+
+       A longer term solution might load the large images into the abundant
+       SDRAM at runtime instead of linking it statically in FLASH.
+
   netnsh:
   ------
     This is a special version of the NuttShell (nsh) configuration that is
