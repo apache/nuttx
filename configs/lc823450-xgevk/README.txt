@@ -45,13 +45,33 @@ to set MSP (main stack pointer) as follows.
 SMP related Status
 ^^^^^^^^^^^^^^^^^^
 
-Currently all applications except for ostest work in SMP mode but might stop
-due to deadlocks or ASSERT().
-
 CPU activities are shown at D9 (CPU0) and D10 (CPU1) respectively.
 
-1. "nsh> smp" works but the result will be corrupted.
-2. "nsh> ostest" works but might cause a deadlock or assertion.
+Currently all applications except for ostest work in SMP mode but might stop
+due to deadlocks or ASSERT(). For a workaround, please try
+
+$ cd apps; git diff
+diff --git a/examples/ostest/waitpid.c b/examples/ostest/waitpid.c
+index 687f50ca..8418eff8 100644
+--- a/examples/ostest/waitpid.c
++++ b/examples/ostest/waitpid.c
+@@ -54,7 +54,7 @@
+  ****************************************************************************/
+ 
+ #define RETURN_STATUS 14
+-#define NCHILDREN     3
++#define NCHILDREN     2
+ #define PRIORITY      100
+ 
+ /****************************************************************************
+
+If other deadlocks or ASSERT() still happen, please try the following.
+
+$ cd nuttx; git revert e238c8b0904988b966c3b33e7df2ba3faba52e2b
+
+This will revert the changes for clock_systimer() for 64bit so that it can
+use spinlock to protect the internal data. We think that there still exist
+race conditions somewhere in SMP logic but the revert might relax the conditions.
 
 Other Status
 ^^^^^^^^^^^^
