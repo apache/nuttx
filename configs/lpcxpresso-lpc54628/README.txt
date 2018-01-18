@@ -95,10 +95,12 @@ STATUS
     more testing is certainly needed.
   2018-01-14:  The basic SPI driver is code complete but still untested.  It
     is "basic" in the sense that it supports only polled mode (no DMA).
+  2018-01-18:  Added the lvgl configuration.  See notes under "Configuration
+    Sub-directories" for additional status.
 
-  There is still no support for the Accelerometer, SPIFI, or USB.  There are
-  complete but not-yet-functional SD card and SPI drivers.  There are no
-  on-board devices to support SPI testing.
+  There is still no support for the Accelerometer, SPIFI, or USB.  There is
+  a complete but not-yet-functional SD card driver and and tested SPI
+  driver.  There are no on-board devices to support SPI testing.
 
 Configurations
 ==============
@@ -156,7 +158,7 @@ Configurations
        System Type -> Toolchain:
          CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
 
-  Configuration sub-directories
+  Configuration Sub-directories
   -----------------------------
 
   fb:
@@ -249,6 +251,18 @@ Configurations
 
        A longer term solution might load the large images into the abundant
        SDRAM at runtime instead of linking it statically in FLASH.
+
+    STATUS:
+
+      2018-01-18:  The demo is basically function but has some issues:
+
+        a) The font is too big on the "Write" screen.  They don't fit in on
+           the keyboard.
+        b) The "List" display is filled with a big box that says "Click a
+           button to copy its text to Text area."  There are no buttons and
+           nothing to click on (maybe they are behind the big box?).  This
+           may also be a font size issue.
+        c) The "Chart" display looks okay.
 
   netnsh:
   ------
