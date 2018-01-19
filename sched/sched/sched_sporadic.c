@@ -138,7 +138,7 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
        * state.
        */
 
-      tcb->base_priority = sporadic->low_priority;
+      tcb->base_priority = tcb->low_priority;
     }
 #endif
 
@@ -194,7 +194,7 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
     {
       /* Boosted... Do we still need to reprioritize? */
 
-      if (sporadic->hi_priority < sporadic->base_priority)
+      if (sporadic->hi_priority < tcb->base_priority)
         {
           /* No.. the current execution priority is lower than the
            * boosted priority.  Just reset the base priority.
@@ -322,7 +322,7 @@ static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
 
   /* Start the timer that will terminate the low priority cycle.  This timer
    * expiration is independent of what else may occur (except that it must
-   * be cancelled if the thread exits.
+   * be canceled if the thread exits.
    */
 
   DEBUGVERIFY(wd_start(&mrepl->timer, remainder, sporadic_interval_expire,
