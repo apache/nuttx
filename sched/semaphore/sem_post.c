@@ -165,6 +165,12 @@ int nxsem_post(FAR sem_t *sem)
 
               up_unblock_task(stcb);
             }
+          else
+            {
+              /* This should not happen. */
+
+              ASSERT(false);
+            }
         }
 
       /* Check if we need to drop the priority of any threads holding
