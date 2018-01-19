@@ -169,7 +169,7 @@ int nxsem_post(FAR sem_t *sem)
             {
               /* This should not happen. */
 
-              ASSERT(false);
+              DEBUGPANIC();
             }
         }
 
