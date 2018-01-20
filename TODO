@@ -745,7 +745,7 @@ o Kernel/Protected Build
   Title:       USER MODE TASKS CAN MODIFY PRIVILEGED TASKS
   Description: Certain interfaces, such as sched_setparam(),
                sched_setscheduler(), etc. can be used by user mode tasks to
-               modify the behavior of priviledged kernel threads.
+               modify the behavior of privileged kernel threads.
                For a truly secure system.  Privileges need to be checked in
                every interface that permits one thread to modify the
                properties of another thread.
@@ -1282,7 +1282,7 @@ o Network (net/, drivers/net)
                  however, because its priority is low and so it is blocked
                  from execution.
                - In the mean time, the remote host sends a
-                 packet which is presumeably caught in the read-ahead buffer.
+                 packet which is presumably caught in the read-ahead buffer.
               - Then the remote host closes the socket.  Nothing happens on
                  the target side because net_start_monitor() has not yet been
                  called.

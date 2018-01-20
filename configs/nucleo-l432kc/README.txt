@@ -230,11 +230,9 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     $ (cd tools; ./configure.sh nucleo-f4x1re/f401-nsh)
+     $ tools/configure.sh nucleo-f432kc/nsh
      $ make qconfig
      $ V=1 make context all 2>&1 | tee mout
-
-     Use the f411-nsh configuration if you have the Nucleo-F411RE board.
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -298,14 +296,13 @@ NXFLAT Toolchain
 mbed
 ====
 
-  The Nucleo-F401RE includes boot loader from mbed:
+  The Nucleo-F432KC includes boot loader from mbed:
 
-    https://mbed.org/platforms/ST-Nucleo-F401RE/
     https://mbed.org/handbook/Homepage
 
   Using the mbed loader:
 
-  1. Connect the Nucleo-F4x1RE to the host PC using the USB connector.
+  1. Connect the Nucleo-F432kc to the host PC using the USB connector.
   2. A new file system will appear called NUCLEO; open it with Windows
      Explorer (assuming that you are using Windows).
   3. Drag and drop nuttx.bin into the MBED window.  This will load the
@@ -322,7 +319,7 @@ Hardware
 
   LEDs
   ----
-  The Nucleo F401RE and Nucleo F411RE provide a single user LED, LD2.  LD2
+  The Nucleo F401RE and Nucleo F432KC provide a single user LED, LD2.  LD2
   is the green LED connected to Arduino signal D13 corresponding to MCU I/O
   PB3 (pin 26).
 
@@ -367,7 +364,7 @@ Serial Consoles
 
   TTL to RS-232 converter connection:
 
-    Nucleo CN10 STM32F4x1RE
+    Nucleo CN10 STM32F432KC
     ----------- ------------
     Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
     Pin 33 PA10 USART1_TX    some RS-232 converters
@@ -399,7 +396,7 @@ Serial Consoles
 
   TTL to RS-232 converter connection:
 
-    Nucleo CN9  STM32F4x1RE
+    Nucleo CN9  STM32F432KC
     ----------- ------------
     Pin 1  PA3  USART2_RX   *Warning you make need to reverse RX/TX on
     Pin 2  PA2  USART2_TX    some RS-232 converters
@@ -457,7 +454,7 @@ Configurations
   nsh:
   ---------
     Configures the NuttShell (nsh) located at apps/examples/nsh for the
-    Nucleo-F401RE board.  The Configuration enables the serial interfaces
+    Nucleo-F432KC board.  The Configuration enables the serial interfaces
     on UART2.  Support for builtin applications is enabled, but in the base
     configuration no builtin applications are selected (see NOTES below).
 
@@ -484,7 +481,7 @@ Configurations
        Consoles).  I have been using a TTL-to-RS-232 converter connected
        as shown below:
 
-       Nucleo CN10 STM32F4x1RE
+       Nucleo CN10 STM32F432KC
        ----------- ------------
        Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
        Pin 33 PA10 USART1_TX    some RS-232 converters
