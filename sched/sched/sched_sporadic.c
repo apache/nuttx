@@ -129,7 +129,19 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
-   * reset the base priority.
+   * reset the base priority and continue to run at the boosted priority.
+   *
+   * REVISIT:  There is a logic flaw here... If the priority was NOT
+   * boosted above the hi_priority, then it still may still need to
+   * boosted with respect to the lo_priority.  If the highest priority
+   * thread waiting on a semaphore held by the sporadic thread is greater
+   * than the low priority (but less than the hi_priority), the new
+   * sched_priority should be set to that priority, not to the lo_priority
+   *
+   * In order to do this we would need a list of all semaphores held by
+   * the thread.  We would need to select the highest priority from among
+   * all tasks waiting for the semaphores.  Unfortunately, at present we
+   * know nothing about the semaphores held by the sporadic thread.
    */
 
   if (tcb->sched_priority > tcb->base_priority)
@@ -140,18 +152,20 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
 
       tcb->base_priority = tcb->low_priority;
     }
+  else
 #endif
-
-  /* Otherwise drop the priority of thread, possible causing a context
-   * switch.
-   */
-
-  ret = sched_reprioritize(tcb, sporadic->low_priority);
-  if (ret < 0)
     {
-      int errcode = get_errno();
-      serr("ERROR: sched_reprioritize failed: %d\n", errcode);
-      return -errcode;
+      /* Otherwise drop the priority of thread, possible causing a context
+       * switch.
+       */
+
+      ret = sched_reprioritize(tcb, sporadic->low_priority);
+      if (ret < 0)
+        {
+          int errcode = get_errno();
+          serr("ERROR: sched_reprioritize failed: %d\n", errcode);
+          return -errcode;
+        }
     }
 
   return OK;
@@ -188,16 +202,27 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
    * reset the base priority.
+   *
+   * First, was the priority boosted above the lo_priority which should be
+   * the same as the base_priority here? (This is an unnecessary test.
+   * sched_priority > hi_priority would be sufficient).
    */
 
   if (tcb->sched_priority > tcb->base_priority)
     {
-      /* Boosted... Do we still need to reprioritize? */
+      /* Boosted... Do we still need to reprioritize?  If we were boosted to
+       * a priority above the hi_priority then we do not need to do anything
+       * except to adjust the base_priority
+       *
+       * REVISIT:  This logic is probably okay.  But may lead to problems
+       * when the hi_priority is resumed.  See REVISIT comments in
+       * sporadic_set_lowpriority().
+       */
 
-      if (sporadic->hi_priority < tcb->base_priority)
+      if (tcb->sched_priority > sporadic->hi_priority)
         {
-          /* No.. the current execution priority is lower than the
-           * boosted priority.  Just reset the base priority.
+          /* No.. the new execution priority is lower than the boosted
+           * priority.  Just reset the base priority.
            */
 
           tcb->base_priority = sporadic->hi_priority;
