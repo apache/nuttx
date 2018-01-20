@@ -324,7 +324,7 @@ Hardware
   ----
   The Nucleo F401RE and Nucleo F411RE provide a single user LED, LD2.  LD2
   is the green LED connected to Arduino signal D13 corresponding to MCU I/O
-  PA5 (pin 21) or PB13 (pin 34) depending on the STM32target.
+  PB3 (pin 26).
 
     - When the I/O is HIGH value, the LED is on.
     - When the I/O is LOW, the LED is off.

@@ -77,7 +77,7 @@
 #endif
 
 /* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
- * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the STM32
+ * corresponding to MCU I/O PB3 (pin 26)
  * target.
  *
  * - When the I/O is HIGH value, the LED is on.
@@ -85,7 +85,7 @@
  */
 
 #define GPIO_LD2 \
-  (GPIO_PORTA | GPIO_PIN5 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+  (GPIO_PORTB | GPIO_PIN3 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
    GPIO_SPEED_50MHz)
 #define LED_DRIVER_PATH "/dev/userleds"
 
