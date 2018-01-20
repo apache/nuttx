@@ -1422,6 +1422,22 @@ Installing GNUWin32
 CYGWIN BUILD PROBLEMS
 ^^^^^^^^^^^^^^^^^^^^^
 
+Performance
+-----------
+
+  Build performance under Cygwin is really not so bad, certainly not as good
+  as a Linux build.  However, often you will find that the performance is
+  not just bad but terrible.  If you are seeing awful performance.. like two
+  or three compilations per second.. the culprit is usually your Windows
+  Anti-Virus protection interfering with the build tool program execution.
+
+  I use Cygwin quite often and I use Windows Defender.  In order to get good
+  build performance, I routinely keep the Windows Defender "Virus & Threat
+  Protections Settings" screen up:  I disable "Real-Time Protection" just
+  before entering 'make' then turn "Real-Time Protection" back on when the
+  build completes.  With this additional nuisance step, I find that build
+  performance under Cygwin is completely acceptable.
+
 Strange Path Problems
 ---------------------
 
@@ -1475,6 +1491,7 @@ Window Native Toolchain Issues
      if you are using a native Windows toolchain.  That bring us to #3:
 
 General Pre-built Toolchain Issues
+----------------------------------
 
   To continue with the list of "Window Native Toolchain Issues" we can add
   the following.  These, however, are really just issues that you will have
@@ -1528,6 +1545,7 @@ General Pre-built Toolchain Issues
      binutils and possibly different ABIs.
 
 Building Original Linux Boards in Cygwin
+----------------------------------------
 
   Some default board configurations are set to build under Linux and others
   to build under Windows with Cygwin.  Various default toolchains may also
@@ -1546,6 +1564,7 @@ Building Original Linux Boards in Cygwin
   ("Run As" option, right button) you find errors like "Permission denied".
 
 Recovering from Bad Configurations
+----------------------------------
 
   Many people make the mistake of configuring NuttX with the "canned"
   configuration and then just typing 'make' with disastrous consequences;
