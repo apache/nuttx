@@ -138,10 +138,10 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
    * than the low priority (but less than the hi_priority), the new
    * sched_priority should be set to that priority, not to the lo_priority
    *
-   * In order to do this we would need a list of all semaphores held by
-   * the thread.  We would need to select the highest priority from among
-   * all tasks waiting for the semaphores.  Unfortunately, at present we
-   * know nothing about the semaphores held by the sporadic thread.
+   * In order to do this we would need to know the highest priority from
+   * among all tasks waiting for the all semaphores held by the sporadic
+   * task.  Perhaps that information could be retained by the priority
+   * inheritance logic for use here?
    */
 
   if (tcb->sched_priority > tcb->base_priority)
