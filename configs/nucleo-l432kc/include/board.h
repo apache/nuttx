@@ -146,7 +146,7 @@
 
 /* LEDs
  *
- * The Nucleo l476RG board provides a single user LED, LD2.  LD2
+ * The Nucleo l432kc board provides a single user LED, LD2.  LD2
  * is the green LED connected to Arduino signal D13 corresponding to
  * MCU I/O PB3 (pin 26).
  *
@@ -266,4 +266,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_NUCLEO_F476RG_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_NUCLEO_F432KC_INCLUDE_BOARD_H */
