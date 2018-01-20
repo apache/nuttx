@@ -46,7 +46,8 @@ On Board Debug Support
      There is a simple application available at Mikroe that will allow you
      to write .hex files via the USB HID bootloader.  However, in order to
      use the bootloader, you will have to control the memory map so that the
-     downloaded code does not clobber the bootloader.
+     downloaded code does not clobber the bootloader code FLASH, data
+     memory, exception vectors, etc.
 
      At this point, I have found no documentation describing how to build
      the code outside of the Mikroe toolchain for use with the Mikroe
