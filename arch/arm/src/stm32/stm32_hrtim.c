@@ -375,12 +375,13 @@ struct stm32_hrtim_capture_s
 struct stm32_hrtim_timcmn_s
 {
   uint32_t base;                /* The base adress of the timer */
-  uint32_t pclk;                /* The frequency of the peripheral clock
+  uint64_t fclk;                /* The frequency of the peripheral clock
                                  * that drives the timer module.
                                  */
+  uint8_t prescaler:3;          /* Prescaler */
   uint8_t mode;                 /* Timer mode */
   uint8_t dac:2;                /* DAC triggering */
-  uint8_t reserved:6;
+  uint8_t reserved:3;
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   uint16_t irq;                 /* interrupts configuration */
 #endif
@@ -623,6 +624,8 @@ static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                  uint32_t offset);
 static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv,
                                                    uint8_t timer);
+static FAR struct stm32_hrtim_slave_priv_s *hrtim_slave_get(FAR struct stm32_hrtim_s *priv,
+                                                            uint8_t timer);
 static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s *priv, uint8_t timer);
 
 /* Configuration */
@@ -665,7 +668,8 @@ static int hrtim_tim_dma_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
 static int hrtim_deadtime_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
                                  uint8_t dt, uint16_t value);
-static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t dt);
+static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                                   uint8_t dt);
 static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer);
 static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv);
 #endif
@@ -705,6 +709,7 @@ static int hrtim_per_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
 static uint16_t hrtim_per_get(FAR struct hrtim_dev_s *dev, uint8_t timer);
 static uint16_t hrtim_cmp_get(FAR struct hrtim_dev_s *dev, uint8_t timer,
                               uint8_t index);
+static uint64_t hrtim_fclk_get(FAR struct hrtim_dev_s *dev, uint8_t timer);
 static int hrtim_tim_reset_set(FAR struct stm32_hrtim_s *priv, uint8_t timer,
                                uint32_t reset);
 static int hrtim_reset_config(FAR struct stm32_hrtim_s *priv);
@@ -753,20 +758,21 @@ static struct stm32_hrtim_tim_s g_master =
     /* If MASTER is disabled, we need only MASTER base */
 
 #ifdef CONFIG_STM32_HRTIM_MASTER
-    .pclk  = HRTIM_CLOCK/(HRTIM_MASTER_PRESCALER+1),
-    .mode  = HRTIM_MASTER_MODE,
+    .fclk      = HRTIM_CLOCK/(1<<HRTIM_MASTER_PRESCALER),
+    .prescaler = HRTIM_MASTER_PRESCALER,
+    .mode      = HRTIM_MASTER_MODE,
 #  ifdef CONFIG_STM32_HRTIM_MASTER_DAC
-    .dac   = HRTIM_MASTER_DAC,
+    .dac       = HRTIM_MASTER_DAC,
 #  endif
 #  ifdef CONFIG_STM32_HRTIM_MASTER_IRQ
-    .irq   = HRTIM_MASTER_IRQ
+    .irq       = HRTIM_MASTER_IRQ
 #  endif
 #  ifdef CONFIG_STM32_HRTIM_MASTER_DMA
-    .dma   = HRTIM_MASTER_DMA
+    .dma       = HRTIM_MASTER_DMA
 #  endif
 #endif
   },
-  .priv = NULL,
+  .priv        = NULL,
 };
 
 #ifdef CONFIG_STM32_HRTIM_TIMA
@@ -849,20 +855,21 @@ static struct stm32_hrtim_tim_s g_tima =
 {
   .tim =
   {
-    .base  = STM32_HRTIM1_TIMERA_BASE,
-    .pclk  = HRTIM_CLOCK/(HRTIM_TIMA_PRESCALER+1),
-    .mode  = HRTIM_TIMA_MODE,
+    .base      = STM32_HRTIM1_TIMERA_BASE,
+    .fclk      = HRTIM_CLOCK/(1<<HRTIM_TIMA_PRESCALER),
+    .prescaler = HRTIM_TIMA_PRESCALER,
+    .mode      = HRTIM_TIMA_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMA_DAC
-    .dac   = HRTIM_TIMA_DAC,
+    .dac       = HRTIM_TIMA_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMA_IRQ
-    .irq   = HRTIM_TIMA_IRQ,
+    .irq       = HRTIM_TIMA_IRQ,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMA_DMA
-    .dma   = HRTIM_TIMA_DMA
+    .dma       = HRTIM_TIMA_DMA
 #endif
   },
-  .priv = &g_tima_priv
+  .priv        = &g_tima_priv
 };
 #endif
 
@@ -945,20 +952,21 @@ static struct stm32_hrtim_tim_s g_timb =
 {
   .tim =
   {
-    .base  = STM32_HRTIM1_TIMERB_BASE,
-    .pclk  = HRTIM_CLOCK/(HRTIM_TIMB_PRESCALER+1),
-    .mode  = HRTIM_TIMB_MODE,
+    .base      = STM32_HRTIM1_TIMERB_BASE,
+    .fclk      = HRTIM_CLOCK/(1<<HRTIM_TIMB_PRESCALER),
+    .prescaler = HRTIM_TIMB_PRESCALER,
+    .mode      = HRTIM_TIMB_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMB_DAC
-    .dac   = HRTIM_TIMB_DAC,
+    .dac       = HRTIM_TIMB_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMB_IRQ
-    .irq   = HRTIM_TIMB_IRQ,
+    .irq       = HRTIM_TIMB_IRQ,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMB_DMA
-    .dma   = HRTIM_TIMB_DMA
+    .dma       = HRTIM_TIMB_DMA
 #endif
   },
-  .priv = &g_timb_priv
+  .priv        = &g_timb_priv
 };
 #endif
 
@@ -1041,20 +1049,21 @@ static struct stm32_hrtim_tim_s g_timc =
 {
   .tim =
   {
-    .base  = STM32_HRTIM1_TIMERC_BASE,
-    .pclk  = HRTIM_CLOCK/(HRTIM_TIMC_PRESCALER+1),
-    .mode  = HRTIM_TIMC_MODE,
+    .base      = STM32_HRTIM1_TIMERC_BASE,
+    .fclk      = HRTIM_CLOCK/(1<<HRTIM_TIMC_PRESCALER),
+    .prescaler = HRTIM_TIMC_PRESCALER,
+    .mode      = HRTIM_TIMC_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMC_DAC
-    .dac   = HRTIM_TIMC_DAC,
+    .dac       = HRTIM_TIMC_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMC_IRQ
-    .irq   = HRTIM_TIMC_IRQ,
+    .irq       = HRTIM_TIMC_IRQ,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMC_DMA
-    .dma   = HRTIM_TIMC_DMA
+    .dma       = HRTIM_TIMC_DMA
 #endif
   },
-  .priv = &g_timc_priv
+  .priv        = &g_timc_priv
 };
 #endif
 
@@ -1137,20 +1146,21 @@ static struct stm32_hrtim_tim_s g_timd =
 {
   .tim =
   {
-    .base  = STM32_HRTIM1_TIMERD_BASE,
-    .pclk  = HRTIM_CLOCK/(HRTIM_TIMD_PRESCALER+1),
-    .mode  = HRTIM_TIMD_MODE,
+    .base      = STM32_HRTIM1_TIMERD_BASE,
+    .fclk      = HRTIM_CLOCK/(1<<HRTIM_TIMD_PRESCALER),
+    .prescaler = HRTIM_TIMD_PRESCALER,
+    .mode      = HRTIM_TIMD_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIMD_DAC
-    .dac   = HRTIM_TIMD_DAC,
+    .dac       = HRTIM_TIMD_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMD_IRQ
-    .irq   = HRTIM_TIMD_IRQ,
+    .irq       = HRTIM_TIMD_IRQ,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIMD_DMA
-    .dma   = HRTIM_TIMD_DMA
+    .dma       = HRTIM_TIMD_DMA
 #endif
   },
-  .priv = &g_timd_priv
+  .priv        = &g_timd_priv
 };
 #endif
 
@@ -1233,20 +1243,21 @@ static struct stm32_hrtim_tim_s g_time =
 {
   .tim =
   {
-    .base  = STM32_HRTIM1_TIMERE_BASE,
-    .pclk  = HRTIM_CLOCK/(HRTIM_TIME_PRESCALER+1),
-    .mode  = HRTIM_TIME_MODE,
+    .base      = STM32_HRTIM1_TIMERE_BASE,
+    .fclk      = HRTIM_CLOCK/(1<<HRTIM_TIME_PRESCALER),
+    .prescaler = HRTIM_TIME_PRESCALER,
+    .mode      = HRTIM_TIME_MODE,
 #ifdef CONFIG_STM32_HRTIM_TIME_DAC
-    .dac   = HRTIM_TIME_DAC,
+    .dac       = HRTIM_TIME_DAC,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME_IRQ
-    .irq   = HRTIM_TIME_IRQ,
+    .irq       = HRTIM_TIME_IRQ,
 #endif
 #ifdef CONFIG_STM32_HRTIM_TIME_DMA
-    .dma   = HRTIM_TIME_DMA
+    .dma       = HRTIM_TIME_DMA
 #endif
   },
-  .priv = &g_time_priv
+  .priv        = &g_time_priv
 };
 #endif
 
@@ -1488,6 +1499,7 @@ static const struct stm32_hrtim_ops_s g_hrtim1ops =
   .per_update     = hrtim_per_update,
   .per_get        = hrtim_per_get,
   .cmp_get        = hrtim_cmp_get,
+  .fclk_get       = hrtim_fclk_get,
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   .irq_ack        = hrtim_irq_ack,
 #endif
@@ -1701,7 +1713,7 @@ static void hrtim_cmn_modifyreg(FAR struct stm32_hrtim_s *priv,
  *   timer   - An HRTIM Timer index to get
  *
  * Returned Value:
- *   Base adress offset for given Timer index
+ *   Pointer to timer structure on success, NULL on failure
  *
  ****************************************************************************/
 
@@ -1766,6 +1778,53 @@ static FAR struct stm32_hrtim_tim_s *
     }
 
   return tim;
+}
+
+/****************************************************************************
+ * Name: hrtim_slave_get
+ *
+ * Description:
+ *   Get Slave private data structure for given HRTIM Timer index
+ *
+ * Input Parameters:
+ *   priv    - A reference to the HRTIM block
+ *   timer   - An HRTIM Slave Timer index to get
+ *
+ * Returned Value:
+ *   Pointer to slave structure  success, NULL on failure
+ *
+ ****************************************************************************/
+
+
+static FAR struct stm32_hrtim_slave_priv_s *
+  hrtim_slave_get(FAR struct stm32_hrtim_s *priv, uint8_t timer)
+{
+  FAR struct stm32_hrtim_tim_s* tim;
+  FAR struct stm32_hrtim_slave_priv_s* slave;
+
+  /* Sanity checking */
+
+  if (timer == HRTIM_TIMER_MASTER || timer == HRTIM_TIMER_COMMON)
+    {
+      slave = NULL;
+      goto errout;
+    }
+
+  /* Get Timer data strucutre */
+
+  tim = hrtim_tim_get(priv, timer);
+  if (tim == NULL)
+    {
+      slave = NULL;
+      goto errout;
+    }
+
+  /* Get Slave Timer data */
+
+  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
+
+errout:
+  return slave;
 }
 
 /****************************************************************************
@@ -2049,7 +2108,7 @@ static void hrtim_dumpregs(FAR struct stm32_hrtim_s *priv, uint8_t timer,
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2093,7 +2152,7 @@ static int hrtim_dll_cal(FAR struct stm32_hrtim_s *priv)
  *   timer  - An HRTIM Timer index
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2182,7 +2241,7 @@ errout:
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2264,7 +2323,7 @@ errout:
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2467,7 +2526,7 @@ static int hrtim_gpios_config(FAR struct stm32_hrtim_s *priv)
  *   capture - capture trigers configuration
  *
  * Returned Value:
- *   None
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2478,7 +2537,9 @@ static int hrtim_tim_capture_cfg(FAR struct stm32_hrtim_s *priv,
   int ret = OK;
   uint32_t offset = 0;
 
-  if (timer == HRTIM_TIMER_MASTER)
+  /* Sanity checking */
+
+  if (timer == HRTIM_TIMER_MASTER || timer == HRTIM_TIMER_COMMON)
     {
       ret = -EINVAL;
       goto errout;
@@ -2521,7 +2582,7 @@ errout:
  *   priv   - A reference to the HRTIM block
  *
  * Returned Value:
- *   None
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2574,7 +2635,7 @@ static int hrtim_capture_config(FAR struct stm32_hrtim_s *priv)
  *   index  - Capture register index
  *
  * Returned Value:
- *   None
+ *   Timer Capture value on success, 0 on failure
  *
  ****************************************************************************/
 
@@ -2623,7 +2684,7 @@ errout:
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2645,36 +2706,25 @@ static int hrtim_synch_config(FAR struct stm32_hrtim_s *priv)
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_HRTIM_PWM)
 static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 {
-  FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
   uint32_t regval = 0;
   int ret = OK;
 
-  /* Master Timer has no outputs */
+  /* Get Slave Timer data structure */
 
-  if (timer == HRTIM_TIMER_MASTER)
+  slave = hrtim_slave_get(priv, timer);
+  if (slave == NULL)
     {
       ret = -EINVAL;
       goto errout;
     }
-
-  /* Get Timer data strucutre */
-
-  tim = hrtim_tim_get(priv, timer);
-  if (tim == NULL)
-    {
-      ret = -EINVAL;
-      goto errout;
-    }
-
-  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
 
   /* Configure CH1 SET events */
 
@@ -2773,7 +2823,7 @@ errout:
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -2848,7 +2898,7 @@ errout:
  *   state   - Enable/disable operation
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -3009,7 +3059,6 @@ static int hrtim_output_set_set(FAR struct hrtim_dev_s *dev, uint16_t output,
                                 uint32_t set)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
-  FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
   uint8_t timer = 0;
   int ret = OK;
@@ -3018,16 +3067,14 @@ static int hrtim_output_set_set(FAR struct hrtim_dev_s *dev, uint16_t output,
 
   timer = output_tim_index_get(output);
 
-  /* Get Timer data strucutre */
+  /* Get Slave Timer data strucutre */
 
-  tim = hrtim_tim_get(priv, timer);
-  if (tim == NULL)
+  slave = hrtim_slave_get(priv, timer);
+  if (slave == NULL)
     {
       ret = -EINVAL;
       goto errout;
     }
-
-  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
 
   /* Set new SET value */
 
@@ -3065,7 +3112,6 @@ static int hrtim_output_rst_set(FAR struct hrtim_dev_s *dev, uint16_t output,
                                 uint32_t rst)
 {
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
-  FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
   uint8_t timer = 0;
   int ret = OK;
@@ -3074,16 +3120,14 @@ static int hrtim_output_rst_set(FAR struct hrtim_dev_s *dev, uint16_t output,
 
   timer = output_tim_index_get(output);
 
-  /* Get Timer data strucutre */
+  /* Get Salve Timer data strucutre */
 
-  tim = hrtim_tim_get(priv, timer);
-  if (tim == NULL)
+  slave = hrtim_slave_get(priv, timer);
+  if (slave == NULL)
     {
       ret = -EINVAL;
       goto errout;
     }
-
-  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
 
   /* Set new RST value */
 
@@ -3124,7 +3168,7 @@ errout:
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -3172,7 +3216,7 @@ static int hrtim_adc_config(FAR struct stm32_hrtim_s *priv)
  *   dac    - DAC synchronisation event configuration
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -3203,7 +3247,7 @@ static int hrtim_tim_dac_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -3267,6 +3311,14 @@ static int hrtim_tim_dma_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 {
   int ret = OK;
   uint32_t regval = 0;
+
+  /* Sanity checking */
+
+  if (timer == HRTIM_TIMER_COMMON)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
 
   if (timer == HRTIM_TIMER_MASTER)
     {
@@ -3397,7 +3449,8 @@ errout:
  * Name: hrtim_deadtime_get
  ****************************************************************************/
 
-static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t dt)
+static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                                   uint8_t dt)
 {
 #warning missing logic
 }
@@ -3408,29 +3461,26 @@ static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t dt)
 
 static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 {
-  FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
   uint32_t regval = 0;
   int ret = OK;
 
-  /* Master Timer has no outputs */
+  /* Sanity checking */
 
-  if (timer == HRTIM_TIMER_MASTER)
+  if (timer == HRTIM_TIMER_MASTER || timer == HRTIM_TIMER_COMMON)
     {
       ret = -EINVAL;
       goto errout;
     }
 
-  /* Get Timer data strucutre */
+  /* Get Slave Timer data strucutre */
 
-  tim = hrtim_tim_get(priv, timer);
-  if (tim == NULL)
+  slave = hrtim_slave_get(priv, timer);
+  if (slave == NULL)
     {
       ret = -EINVAL;
       goto errout;
     }
-
-  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
 
   /* Configure deadtime prescaler  */
 
@@ -3550,7 +3600,7 @@ static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv)
  *   state   - Enable/disable operation
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -3610,30 +3660,27 @@ errout:
 static int hrtim_tim_chopper_cfg(FAR struct stm32_hrtim_s *priv,
                                  uint8_t timer)
 {
-  FAR struct stm32_hrtim_tim_s* tim;
   FAR struct stm32_hrtim_slave_priv_s* slave;
 
   int ret = OK;
   uint32_t regval = 0;
 
-  /* Master Timer has no outputs */
+  /* Sanity checking */
 
-  if (timer == HRTIM_TIMER_MASTER)
+  if (timer == HRTIM_TIMER_MASTER || timer == HRTIM_TIMER_COMMON)
     {
       ret = -EINVAL;
       goto errout;
     }
 
-  /* Get Timer data strucutre */
+  /* Get Slave Timer data strucutre */
 
-  tim = hrtim_tim_get(priv, timer);
-  if (tim == NULL)
+  slave = hrtim_slave_get(priv, timer);
+  if (slave == NULL)
     {
       ret = -EINVAL;
       goto errout;
     }
-
-  slave = (struct stm32_hrtim_slave_priv_s*)tim->priv;
 
   /* Configure start pulsewidth */
 
@@ -3891,19 +3938,22 @@ static int hrtim_burst_config(FAR struct stm32_hrtim_s *priv)
  *   timer  - timer index
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
 static int hrtim_tim_faults_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 {
-  FAR struct stm32_hrtim_tim_s *tim;
   FAR struct stm32_hrtim_slave_priv_s *slave;
   uint32_t regval = 0;
+  int ret = OK;
 
-  tim = hrtim_tim_get(priv, timer);
-
-  slave = tim->priv;
+  slave = hrtim_slave_get(priv, timer);
+  if (slave == NULL)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
 
   /* Get lock configuration */
 
@@ -3917,7 +3967,8 @@ static int hrtim_tim_faults_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
 
   hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_FLTR_OFFSET, regval);
 
-  return OK;
+errout:
+  return ret;
 }
 
 /****************************************************************************
@@ -3931,7 +3982,7 @@ static int hrtim_tim_faults_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
  *   index  - Fault index
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4073,7 +4124,7 @@ errout:
  *  priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4147,7 +4198,7 @@ static int hrtim_faults_config(FAR struct stm32_hrtim_s *priv)
  *   index  - External Event index
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4322,7 +4373,7 @@ errout:
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4392,7 +4443,7 @@ static int hrtim_events_config(FAR struct stm32_hrtim_s *priv)
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4483,7 +4534,7 @@ static void hrtim_tim_mode_set(FAR struct stm32_hrtim_s *priv, uint8_t timer,
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  None
+ *   None
  *
  ****************************************************************************/
 
@@ -4515,6 +4566,77 @@ static void hrtim_mode_config(FAR struct stm32_hrtim_s *priv)
 }
 
 /****************************************************************************
+ * Name: hrtim_cmpcap_mask_get
+ *
+ * Description:
+ *   This function returns not significant bits in counter/capture
+ *   regsiters for given HRTIM Timer index.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the HRTIM structure
+ *   timer  - HRTIM Timer index
+ *
+ * Returned Value:
+ *   Not significant bits for counter/capture registers
+ *
+ ****************************************************************************/
+
+static uint8_t hrtim_cmpcap_mask_get(FAR struct stm32_hrtim_s *priv,
+                                     uint8_t timer)
+{
+  FAR struct stm32_hrtim_tim_s* tim;
+  uint8_t mask = 0;
+
+  /* Get Timer data strucutre */
+
+  tim = hrtim_tim_get(priv, timer);
+  if (tim == NULL)
+    {
+      mask = 0;
+      goto errout;
+    }
+
+  /* Not significant bits depens on timer prescaler */
+
+  switch(tim->tim.prescaler)
+    {
+      case HRTIM_PRESCALER_1:
+        {
+          mask = 0b11111;
+          break;
+        }
+      case HRTIM_PRESCALER_2:
+        {
+          mask = 0b1111;
+          break;
+        }
+      case HRTIM_PRESCALER_4:
+        {
+          mask = 0b111;
+          break;
+        }
+      case HRTIM_PRESCALER_8:
+        {
+          mask = 0b11;
+          break;
+        }
+      case HRTIM_PRESCALER_16:
+        {
+          mask = 0b1;
+          break;
+        }
+      default:
+        {
+          mask = 0;
+          break;
+        }
+    }
+
+errout:
+  return mask;
+}
+
+/****************************************************************************
  * Name: hrtim_cmp_update
  *
  * Description:
@@ -4527,7 +4649,7 @@ static void hrtim_mode_config(FAR struct stm32_hrtim_s *priv)
  *   cmp    - New compare register value
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4537,6 +4659,7 @@ static int hrtim_cmp_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
   int ret = OK;
   uint32_t offset = 0;
+  uint8_t mask = 0;
 
   switch (index)
     {
@@ -4571,6 +4694,16 @@ static int hrtim_cmp_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
         }
     }
 
+  /* REVISIT: what should we do if cmp value is not significant ?
+   * At this moment we set compare register to the nearest significant value.
+   */
+
+  mask = hrtim_cmpcap_mask_get(priv, timer);
+  if (cmp <= mask)
+    {
+      cmp = mask + 1;
+    }
+
   hrtim_tim_putreg(priv, timer, offset, cmp);
 
 errout:
@@ -4589,7 +4722,7 @@ errout:
  *   per    - New period register value
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   0 on success; a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -4613,7 +4746,7 @@ static int hrtim_per_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
  *   timer  - HRTIM Timer index
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   Timer period value
  *
  ****************************************************************************/
 
@@ -4636,7 +4769,7 @@ static uint16_t hrtim_per_get(FAR struct hrtim_dev_s *dev, uint8_t timer)
  *   index  - Compare register timer
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   Timer compare value
  *
  ****************************************************************************/
 
@@ -4687,6 +4820,42 @@ errout:
 }
 
 /****************************************************************************
+ * Name: hrtim_fclk_get
+ *
+ * Description:
+ *  Get HRTIM Timer clock value
+ *
+ * Input parameters:
+ *   dev    - HRTIM device structure
+ *   timer  - HRTIM Timer index
+ *
+ * Returned Value:
+ *   Timer clock value
+ *
+ ****************************************************************************/
+
+static uint64_t hrtim_fclk_get(FAR struct hrtim_dev_s *dev, uint8_t timer)
+{
+  FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
+  FAR struct stm32_hrtim_tim_s *tim;
+  uint64_t fclk = 0;
+
+  /* Get Slave Timer data structure */
+
+  tim = hrtim_tim_get(priv, timer);
+  if (tim == NULL)
+    {
+      fclk = 0;
+      goto errout;
+    }
+
+  fclk = tim->tim.fclk;
+
+errout:
+  return fclk;
+}
+
+/****************************************************************************
  * Name: hrtim_tim_reset_set
  *
  * Description:
@@ -4707,7 +4876,9 @@ static int hrtim_tim_reset_set(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 {
   int ret = OK;
 
-  if (timer == HRTIM_TIMER_MASTER)
+  /* Sanity checking */
+
+  if (timer == HRTIM_TIMER_MASTER || timer == HRTIM_TIMER_COMMON)
     {
       ret = -EINVAL;
       goto errout;
@@ -4811,7 +4982,7 @@ static int hrtim_update_config(FAR struct stm32_hrtim_s *priv)
  *   priv   - A reference to the HRTIM structure
  *
  * Returned Value:
- *  0 on success, a negated errno value on failure
+ *   0 on success, a negated errno value on failure
  *
  ****************************************************************************/
 
