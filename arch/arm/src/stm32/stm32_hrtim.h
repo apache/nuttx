@@ -187,7 +187,7 @@
 #      error "APB2 prescaler factor can not be greater than 2"
 #    else
 #      define HRTIM_HAVE_CLK_FROM_PLL 1
-#      define HRTIM_CLOCK 2*STM32_PLL_FREQUENCY
+#      define HRTIM_MAIN_CLOCK 2*STM32_PLL_FREQUENCY
 #    endif
 #  else
 #    error "Clock system must be set to PLL"
@@ -195,12 +195,16 @@
 #else
 #  error "Not supported yet: system freezes when no PLL selected."
 #  define HRTIM_HAVE_CLK_FROM_APB2 1
-#  if STM32_RCC_CFGR_PPRE2 ==  RCC_CFGR_PPRE2_HCLK
-#      define HRTIM_CLOCK STM32_PCLK2_FREQUENCY
+#  if STM32_RCC_CFGR_PPRE2 == RCC_CFGR_PPRE2_HCLK
+#      define HRTIM_MAIN_CLOCK STM32_PCLK2_FREQUENCY
 #  else
-#      define HRTIM_CLOCK 2*STM32_PCLK2_FREQUENCY
+#      define HRTIM_MAIN_CLOCK 2*STM32_PCLK2_FREQUENCY
 #  endif
 #endif
+
+/* High-resolution equivalent clock */
+
+#define HRTIM_CLOCK (HRTIM_MAIN_CLOCK*32ull)
 
 /* Helpers **************************************************************************/
 
@@ -208,6 +212,10 @@
         (hrtim)->hd_ops->cmp_update(hrtim, tim, index, cmp)
 #define HRTIM_PER_SET(hrtim, tim, per)                      \
         (hrtim)->hd_ops->per_update(hrtim, tim, per)
+#define HRTIM_PER_GET(hrtim, tim)                           \
+        (hrtim)->hd_ops->per_get(hrtim, tim)
+#define HRTIM_FCLK_GET(hrtim, tim)                          \
+        (hrtim)->hd_ops->fclk_get(hrtim, tim)
 #define HRTIM_OUTPUTS_ENABLE(hrtim, outputs, state)         \
         (hrtim)->hd_ops->outputs_enable(hrtim, outputs, state)
 #define HRTIM_OUTPUT_SET_SET(hrtim, output, set)            \
@@ -224,6 +232,11 @@
         (hrtim)->hd_ops->burst_enable(hrtim, state)
 #define HRTIM_DEADTIME_UPDATE(hrtim, tim, dt, val)          \
         (hrtim)->hd_ops->deadtime_update(hrtim, tim, dt, val)
+
+#define HRTIM_PER_MAX 0xFFFF
+#define HRTIM_CMP_MAX 0xFFFF
+#define HRTIM_CPT_MAX 0xFFFF
+#define HRTIM_REP_MAX 0xFF
 
 /************************************************************************************
  * Public Types
@@ -384,14 +397,14 @@ enum stm32_hrtim_tim_rst_e
 
 enum stm32_hrtim_tim_prescaler_e
 {
-  HRTIM_PRESCALER_1,
-  HRTIM_PRESCALER_2,
-  HRTIM_PRESCALER_4,
-  HRTIM_PRESCALER_8,
-  HRTIM_PRESCALER_16,
-  HRTIM_PRESCALER_32,
-  HRTIM_PRESCALER_64,
-  HRTIM_PRESCALER_128
+  HRTIM_PRESCALER_1,            /* CKPSC = 0 */
+  HRTIM_PRESCALER_2,            /* CKPSC = 1 */
+  HRTIM_PRESCALER_4,            /* CKPSC = 2 */
+  HRTIM_PRESCALER_8,            /* CKPSC = 3 */
+  HRTIM_PRESCALER_16,           /* CKPSC = 4 */
+  HRTIM_PRESCALER_32,           /* CKPSC = 5 */
+  HRTIM_PRESCALER_64,           /* CKPSC = 6 */
+  HRTIM_PRESCALER_128           /* CKPSC = 7 */
 };
 
 /* HRTIM Timer Master/Slave mode */
@@ -971,6 +984,7 @@ struct stm32_hrtim_ops_s
   uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                       uint8_t index);
+  uint64_t (*fclk_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   void     (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
 #endif
