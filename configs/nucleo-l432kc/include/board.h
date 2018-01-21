@@ -266,4 +266,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_NUCLEO_F432KC_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_NUCLEO_L432KC_INCLUDE_BOARD_H */
