@@ -1,15 +1,15 @@
-NuttX TODO List (Last updated January 3, 2018)
+NuttX TODO List (Last updated January 21, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
 standards, things that could be improved, and ideas for enhancements.  This
-TODO list does not include issues associated with individual boar ports. See
+TODO list does not include issues associated with individual board ports. See
 also the individual README.txt files in the configs/ sub-directories for
 issues related to each board port.
 
 nuttx/:
 
- (12)  Task/Scheduler (sched/)
+ (14)  Task/Scheduler (sched/)
   (1)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
@@ -47,7 +47,7 @@ o Task/Scheduler (sched/)
   Status:      Closed.  No, this behavior will not be implemented.
   Priority:    Medium, required for good emulation of process/pthread model.
                The current behavior allows for the main thread of a task to
-               exit() and any child pthreads will perist.  That does raise
+               exit() and any child pthreads will persist.  That does raise
                some issues:  The main thread is treated much like just-another-
                pthread but must follow the semantics of a task or a process.
                That results in some inconsistencies (for example, with robust
@@ -124,7 +124,7 @@ o Task/Scheduler (sched/)
                The fix for all of these issues it to have the callbacks
                run on the caller's thread as is currently done with
                signal handlers.  Signals are delivered differently in
-               PROTECTED and KERNEL modes:  The deliver is involes a
+               PROTECTED and KERNEL modes:  The delivery involves a
                signal handling trampoline function in the user address
                space and two signal handlers:  One to call the signal
                handler trampoline in user mode (SYS_signal_handler) and
@@ -198,7 +198,7 @@ o Task/Scheduler (sched/)
   Description: The internal NuttX logic uses the same interfaces as does
                the application.  That sometime produces a problem because
                there is "overloaded" functionality in those user interfaces
-               that are not desireable.
+               that are not desirable.
 
                For example, having cancellation points hidden inside of the
                OS can cause non-cancellation point interfaces to behave
@@ -326,6 +326,59 @@ o Task/Scheduler (sched/)
                  But no others.
   Status:     Open
   Priority:   Low, only needed for more complete debug.
+
+  Title:       PRIORITY INHERITANCE WITH SPORADIC SCHEDULER
+  Description: The sporadic scheduler manages CPU utilization by a task by
+               alternating between a high and a low priority.  In either
+               state, it may have its priority boosted.  However, under
+               some circumstances, it is impossible in the current design to
+               switch to the correct correct priority if a semaphore is
+               participating in priority inheritance:
+
+               There is an when switching from the high to the low priority
+               state.  If the priority was NOT boosted above the higher
+               priority, it still may still need to boosted with respect to
+               the lower priority.  If the highest priority thread waiting
+               on a semaphore held by the sporadic thread is higher in
+               priority than the low priority but less than the higher
+               priority, then new thread priority should be set to that
+               middle priority, not to the lower priority
+
+               In order to do this we would need to know the highest
+               priority from among all tasks waiting for the all semaphores
+               held by the sporadic task.  That information could be
+               retained by the priority inheritance logic for use by the
+               sporadic scheduler.  The boost priority could be retained in
+               a new field of the TCB (say, pend_priority).  That
+               pend_priority could then be used when switching from the
+               higher to the lower priority.
+  Status:      Open
+  Priority:    Low.  Does anyone actually use the sporadic scheduler?
+
+  Title:       SIMPLIFY SPORADIC SCHEDULER DESIGN
+  Description: I have been planning to re-implement sporadic scheduling for
+               some time.  I believe that the current implementation is
+               unnecessarily complex.  There is no clear statement for the
+               requirements of sporadic scheduling that I could find, so I
+               based the design on some behaviors of another OS that I saw
+               published (QNX as I recall).
+
+               But I think that the bottom line requirement for sporadic
+               scheduling is that is it should make a best attempt to
+               control a fixed percentage of CPU bandwidth for a task in
+               during an interval only by modifying it is priority between
+               a low and a high priority.  The current design involves
+               several timers:  A "budget" timer plus a variable number of
+               "replenishment" timers and a lot of nonsense to duplicate QNX
+               behavior that I think I not necessary.
+
+               It think that the sporadic scheduler could be re-implemented
+               with only the single "budget" timer.  Instead of starting a
+               new "replenishment" timer when the task is resumed, that
+               single timer could just be extended.
+  Status:      Open
+  Priority:    Low.  This is an enhancement.  And does anyone actually use
+               the sporadic scheduler?
 
 o SMP
   ^^^
@@ -572,7 +625,7 @@ o pthreads (sched/pthreads)
                group structure.  I am, however, hesitant to make this change:
                In the FLAT build model, there is nothing that prevents people
                from accessing the inter-thread controls from threads in
-               differnt task groups.  Making this change, while correct,
+               different task groups.  Making this change, while correct,
                might introduce subtle bugs in code by people who are not
                using NuttX correctly.
   Status:      Open
@@ -1838,7 +1891,7 @@ o File system / Generic drivers (fs/, drivers/)
                (using pctl() instead sysctl()).  My objective was to be able
                to control the number of available file descriptors on a task-
                by-task basis.  The complexity due to the partitioning of
-               desciptor space in a range for file descriptors and a range
+               descriptor space in a range for file descriptors and a range
                for socket descriptors made this feature nearly impossible to
                implement.
   Status:      Open
@@ -1920,8 +1973,8 @@ o File system / Generic drivers (fs/, drivers/)
                4) When comparing the checksum in the long file name
                   entry with the checksum of the short file name, the
                   checksum fails and the entire directory sequence is
-                  ignored by readder() logic.  This the file does not
-                  appear in the 'ls'.
+                  ignored by readdir() logic.  This is why the file does
+                  not appear in the 'ls'.
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2014,7 +2067,7 @@ o Graphics Subsystem (graphics/)
 
   Title:       LOW-RES FRAMEBUFFER RENDERERING
   Description: There are obvious issues in the low-res, < 8 BPP, implemenation of
-               the framebuffer rendereing logic of graphics/nxglib/fb.  I see two
+               the framebuffer rendering logic of graphics/nxglib/fb.  I see two
                obvious problems in reviewing nxglib_copyrectangle():
 
                1. The masking logic might work 1 BPP, but is insufficient for other
@@ -2026,7 +2079,7 @@ o Graphics Subsystem (graphics/)
                derives from nxglib_copyrectangle() and all of those issues have been
                resolved in that file.
 
-               Other frambuffer rendering functions probably have similary issues.
+               Other frambuffer rendering functions probably have similar issues.
   Status:      Open
   Priority:    Low.  It is not surprising that there would be bugs in this logic:
                I have never encountered a hardware framebuffer with sub-byte pixel
@@ -2279,11 +2332,11 @@ o Modbus (apps/modbus)
 
   Title:       MODBUS NOT USABLE WITH USB SERIAL
   Description: Modbus can be used with USB serial, however, if the USB
-               serial connectiont is lost, Modbus will hang in an infinite
+               serial connection is lost, Modbus will hang in an infinite
                loop.
 
                This is a problem in the handling of select() and read()
-               and could probabaly resolved by studying the Modbus error
+               and could probably resolved by studying the Modbus error
                handling.
 
                A more USB-friendly solution would be to: (1) Re-connect and
