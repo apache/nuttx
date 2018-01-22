@@ -944,7 +944,7 @@ static int userfs_truncate(FAR struct file *filep, off_t length)
   /* Construct and send the request to the server */
 
   req           = (FAR struct userfs_truncate_request_s *)priv->iobuffer;
-  req->req      = USERFS_REQ_FSTAT;
+  req->req      = USERFS_REQ_TRUNCATE;
   req->openinfo = filep->f_priv;
   req->length   = length;
 
@@ -986,7 +986,6 @@ static int userfs_truncate(FAR struct file *filep, off_t length)
 
   /* Return the result of truncate operation */
 
-  DEBUGASSERT(buf != NULL);
   return resp->ret;
 }
 
