@@ -332,17 +332,17 @@ o Task/Scheduler (sched/)
                alternating between a high and a low priority.  In either
                state, it may have its priority boosted.  However, under
                some circumstances, it is impossible in the current design to
-               switch to the correct correct priority if a semaphore is
-               participating in priority inheritance:
+               switch to the correct priority if a semaphore held by the
+               sporadic thread is participating in priority inheritance:
 
-               There is an when switching from the high to the low priority
-               state.  If the priority was NOT boosted above the higher
-               priority, it still may still need to boosted with respect to
-               the lower priority.  If the highest priority thread waiting
-               on a semaphore held by the sporadic thread is higher in
-               priority than the low priority but less than the higher
-               priority, then new thread priority should be set to that
-               middle priority, not to the lower priority
+               There is an issue when switching from the high to the low
+               priority state.  If the priority was NOT boosted above the
+               higher priority, it still may still need to boosted with
+               respect to the lower priority.  If the highest priority
+               thread waiting on a semaphore held by the sporadic thread is
+               higher in priority than the low priority but less than the
+               higher priority, then new thread priority should be set to
+               that middle priority, not to the lower priority.
 
                In order to do this we would need to know the highest
                priority from among all tasks waiting for the all semaphores

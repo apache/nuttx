@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp.h
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,23 +77,26 @@
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
 
-#  define WRB_SEQNO(wrb)          ((wrb)->wb_seqno)
-#  define WRB_PKTLEN(wrb)         ((wrb)->wb_iob->io_pktlen)
-#  define WRB_SENT(wrb)           ((wrb)->wb_sent)
-#  define WRB_NRTX(wrb)           ((wrb)->wb_nrtx)
-#  define WRB_IOB(wrb)            ((wrb)->wb_iob)
-#  define WRB_COPYOUT(wrb,dest,n) (iob_copyout(dest,(wrb)->wb_iob,(n),0))
-#  define WRB_COPYIN(wrb,src,n)   (iob_copyin((wrb)->wb_iob,src,(n),0,false))
+#  define TCPWB_SEQNO(wrb)           ((wrb)->wb_seqno)
+#  define TCPWB_PKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
+#  define TCPWB_SENT(wrb)            ((wrb)->wb_sent)
+#  define TCPWB_NRTX(wrb)            ((wrb)->wb_nrtx)
+#  define TCPWB_IOB(wrb)             ((wrb)->wb_iob)
+#  define TCPWB_COPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
+#  define TCPWB_COPYIN(wrb,src,n) \
+     (iob_copyin((wrb)->wb_iob,src,(n),0,false))
+#  define TCPWB_TRYCOPYIN(wrb,src,n) \
+     (iob_trycopyin((wrb)->wb_iob,src,(n),0,false))
 
-#  define WRB_TRIM(wrb,n) \
-  do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
+#  define TCPWB_TRIM(wrb,n) \
+     do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define WRB_DUMP(msg,wrb,len,offset) \
+#  define TCPWB_DUMP(msg,wrb,len,offset) \
      tcp_wrbuffer_dump(msg,wrb,len,offset)
-#else
-#  define WRB_DUMP(msg,wrb,len,offset)
-#endif
+#  else
+#    define TCPWB_DUMP(msg,wrb,len,offset)
+#  endif
 #endif
 
 /****************************************************************************
@@ -438,7 +441,7 @@ int tcp_local_ipv6_device(FAR struct tcp_conn_s *conn);
  *
  * Description:
  *   Select the network driver to use with the IPv6 TCP transaction based
- *   on the remotely conected IPv6 address
+ *   on the remotely connected IPv6 address
  *
  * Input Parameters:
  *   conn - TCP connection structure.  The remotely connected address, raddr,
@@ -558,7 +561,7 @@ int tcp_start_monitor(FAR struct socket *psock);
  *
  * Description:
  *   Stop monitoring TCP connection changes for a sockets associated with
- *   a given TCP connection stucture.
+ *   a given TCP connection structure.
  *
  * Input Parameters:
  *   conn - The TCP connection of interest
@@ -1282,7 +1285,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *
  * Returned Value:
  *   OK
- *     At least one byte of data could be succesfully written.
+ *     At least one byte of data could be successfully written.
  *   -EWOULDBLOCK
  *     There is no room in the output buffer.
  *   -EBADF
