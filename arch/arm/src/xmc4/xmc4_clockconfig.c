@@ -58,6 +58,7 @@
 #include "up_arch.h"
 #include "chip/xmc4_scu.h"
 #include "xmc4_clockconfig.h"
+#include "chip/xmc4_ports.h"
 
 #include <arch/board/board.h>
 
@@ -105,7 +106,7 @@
 #define CLKSET_VALUE      (0x00000000)
 #define USBCLKCR_VALUE    (0x00010000)
 
-#if BOARD_PBDIV == 1
+#if BOARD_PLL_PBDIV == 1
 #  define PBCLKCR_VALUE   SCU_PBCLKCR_PBDIV_FCPU
 #else /* BOARD_PBDIV == 2 */
 #  define PBCLKCR_VALUE   SCU_PBCLKCR_PBDIV_DIV2
@@ -387,8 +388,8 @@ void xmc4_clock_configure(void)
 
   /* Setup fSYS clock */
 
-  regval  = (BOARD_ENABLE_PLL << SCU_SYSCLKCR_SYSSEL);
-  regval |= SCU_SYSCLKCR_SYSDIV(BOARD_SYSDIV);
+  regval  = (BOARD_ENABLE_PLL ? SCU_SYSCLKCR_SYSSEL : 0);
+  regval |= SCU_SYSCLKCR_SYSDIV(BOARD_PLL_SYSDIV);
   putreg32(regval, XMC4_SCU_SYSCLKCR);
 
   /* Setup peripheral clock divider */
@@ -411,7 +412,7 @@ void xmc4_clock_configure(void)
 
   /* Setup EBU clock */
 
-  regval = SCU_EBUCLKCR_EBUDIV(BOARD_EBUDIV);
+  regval = SCU_EBUCLKCR_EBUDIV(BOARD_PLL_EBUDIV);
   putreg32(regval, XMC4_SCU_EBUCLKCR);
 
 #ifdef BOARD_ENABLE_USBPLL
@@ -423,7 +424,7 @@ void xmc4_clock_configure(void)
   /* Setup EXT */
 
   regval  = (BOARD_EXT_SOURCE << SCU_EXTCLKCR_ECKSEL_SHIFT);
-  regval |= SCU_EXTCLKCR_ECKDIV(BOARD_EXTDIV);
+  regval |= SCU_EXTCLKCR_ECKDIV(BOARD_PLL_ECKDIV);
   putreg32(regval, XMC4_SCU_EXTCLKCR);
 
 #if BOARD_ENABLE_PLL
@@ -561,4 +562,30 @@ void xmc4_clock_configure(void)
   /* Enable selected clocks */
 
   putreg32(CLKSET_VALUE, XMC4_SCU_CLKSET);
+
+#if BOARD_PLL_CLOCKSRC_XTAL == 1
+  regval = SCU_SLEEPCR_SYSSEL_FPLL;
+  putreg32(regval, XMC4_SCU_SLEEPCR);
+#endif /* BOARD_PLL_CLOCKSRC_XTAL == 1 */
+
+#if BOARD_EXTCKL_ENABLE
+#if BOARD_EXTCLK_PIN == EXTCLK_PIN_P0_8
+  /* enable EXTCLK output on P0.8 */
+  regval  = getreg32(XMC4_PORT0_HWSEL);
+  regval &= ~PORT_HWSEL_HW8_MASK;
+  putreg32(regval, XMC4_PORT0_HWSEL);
+
+  regval  = getreg32(XMC4_PORT0_PDR1);
+  regval &= ~PORT_PDR1_PD8_MASK;
+  putreg32(regval, XMC4_PORT0_PDR1);
+
+  regval  = getreg32(XMC4_PORT0_IOCR8);
+  regval &= ~PORT_IOCR8_PC8_MASK;
+  regval |= PORT_IOCR8_PC8(0x11);       /* push-pull output, alt func 1 */
+  putreg32(regval, XMC4_PORT0_IOCR8);
+#else
+  /* enable EXTCLK output on P1.15 */
+# warn "Not yet implemented"
+#endif
+#endif
 }

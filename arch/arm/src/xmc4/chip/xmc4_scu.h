@@ -938,7 +938,7 @@
 
 #define SCU_SLEEPCR_SYSSEL          (1 << 0)  /* Bit 0:  System Clock Selection Value */
 #  define SCU_SLEEPCR_SYSSEL_OFI    (0)       /*         0=fOFI */
-#  define SCU_SLEEPCR_SYSSEL_ PLL   (1 << 0)  /*         1=fPLL */
+#  define SCU_SLEEPCR_SYSSEL_FPLL   (1 << 0)  /*         1=fPLL */
 #define SCU_SLEEPCR_USBCR           (1 << 16) /* Bit 6:  USB Clock Control in Sleep Mode */
 #define SCU_SLEEPCR_MMCCR           (1 << 17) /* Bit 17: MMC Clock Control in Sleep Mode */
 #define SCU_SLEEPCR_ETH0CR          (1 << 18) /* Bit 18: Ethernet Clock Control in Sleep Mode */
