@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43/lpc43_eth.c
  *
- *   Copyright (C) 2011-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -621,7 +621,7 @@ static int  lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int  lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int  lpc43_ioctl(struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
@@ -2744,16 +2744,17 @@ static void lpc43_rxdescinit(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int lpc43_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)dev->d_private;
 #endif
   int ret;
 
   switch (cmd)
   {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
@@ -2791,6 +2792,7 @@ static int lpc43_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
       ret = lpc43_phywrite(req->phy_id, req->reg_num, req->val_in);
     }
     break;
+#endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
 
   default:
     ret = -ENOTTY;
@@ -2799,7 +2801,7 @@ static int lpc43_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
   return ret;
 }
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Function: lpc43_phyintenable
@@ -3823,12 +3825,12 @@ static inline int lpc43_ethinitialize(void)
   priv->dev.d_addmac  = lpc43_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = lpc43_rmmac;    /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = lpc43_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)&g_lpc43ethmac; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmission */
 
   priv->txpoll       = wd_create();   /* Create periodic poll timer */
   priv->txtimeout    = wd_create();   /* Create TX timeout timer */

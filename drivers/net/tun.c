@@ -891,7 +891,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
 
   nxsem_setprotocol(&priv->read_wait_sem, SEM_PRIO_NONE);
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll        = wd_create();  /* Create periodic poll timer */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_ethernet.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -732,7 +732,7 @@ static int  stm32_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int  stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int  stm32_ioctl(struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
@@ -2958,16 +2958,17 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
 #endif
   int ret;
 
   switch (cmd)
   {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
@@ -3005,6 +3006,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
       ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
     }
     break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
 
   default:
     ret = -ENOTTY;
@@ -3013,7 +3015,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
   return ret;
 }
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Function: stm32_phyintenable
@@ -4095,7 +4097,7 @@ int stm32_ethinitialize(int intf)
   priv->dev.d_addmac  = stm32_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = stm32_rmmac;    /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = stm32_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)g_stm32ethmac; /* Used to recover private state from dev */

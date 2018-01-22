@@ -1400,7 +1400,7 @@ int mac802154netdev_register(MACHANDLE mac)
 #endif
   dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->md_mac        = mac;               /* Save the MAC interface instance */
   priv->md_txpoll     = wd_create();       /* Create periodic poll timer */

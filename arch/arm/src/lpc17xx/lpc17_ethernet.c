@@ -3056,7 +3056,7 @@ static inline int lpc17_ethinitialize(int intf)
   priv->lp_irq           = ??;            /* Ethernet controller IRQ number */
 #endif
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->lp_txpoll        = wd_create();   /* Create periodic poll timer */
   priv->lp_txtimeout     = wd_create();   /* Create TX timeout timer */

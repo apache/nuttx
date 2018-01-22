@@ -2447,7 +2447,7 @@ void up_netinitialize(void)
 #endif
   g_c5471[0].c_dev.d_private = (void *)g_c5471; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   g_c5471[0].c_txpoll        = wd_create();     /* Create periodic poll timer */
   g_c5471[0].c_txtimeout     = wd_create();     /* Create TX timeout timer */

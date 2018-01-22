@@ -3384,7 +3384,7 @@ static inline int pic32mz_ethinitialize(int intf)
   priv->pd_irqsrc        = ??;            /* Ethernet controller IRQ source number */
 #endif
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->pd_txpoll        = wd_create();   /* Create periodic poll timer */
   priv->pd_txtimeout     = wd_create();   /* Create TX timeout timer */

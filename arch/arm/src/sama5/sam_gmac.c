@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_gmac.c
  *
- *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -338,7 +338,7 @@ static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int  sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
 #endif
 
@@ -2300,82 +2300,86 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
   struct sam_gmac_s *priv = (struct sam_gmac_s *)dev->d_private;
+#endif
   int ret;
 
   switch (cmd)
-  {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
-  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
-      struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-
-      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
-      if (ret == OK)
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          /* Enable PHY link up/down interrupts */
+          struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
 
-          ret = sam_phyintenable(priv);
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = sam_phyintenable(priv);
+            }
         }
-    }
-    break;
+        break;
 #endif
 
-  case SIOCGMIIPHY: /* Get MII PHY address */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = priv->phyaddr;
-      ret = OK;
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = priv->phyaddr;
+          ret = OK;
+        }
+        break;
+
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          /* Enable the management port */
+
+          sam_enablemdio(priv);
+
+          /* Read from the requested register */
+
+          ret = sam_phyread(priv, req->phy_id, req->reg_num, &req->val_out);
+
+          /* Disable the management port */
+
+          sam_disablemdio(priv);
+        }
+        break;
+
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+          /* Enable the management port */
+
+          sam_enablemdio(priv);
+
+          /* Write to the requested register */
+
+          ret = sam_phywrite(priv, req->phy_id, req->reg_num, req->val_in);
+
+          /* Disable the management port */
+
+          sam_disablemdio(priv);
+        }
+        break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+      default:
+        ret = -ENOTTY;
+        break;
     }
-    break;
-
-  case SIOCGMIIREG: /* Get register from MII PHY */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-
-      /* Enable the management port */
-
-      sam_enablemdio(priv);
-
-      /* Read from the requested register */
-
-      ret = sam_phyread(priv, req->phy_id, req->reg_num, &req->val_out);
-
-      /* Disable the management port */
-
-      sam_disablemdio(priv);
-    }
-    break;
-
-  case SIOCSMIIREG: /* Set register in MII PHY */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-
-      /* Enable the management port */
-
-      sam_enablemdio(priv);
-
-      /* Write to the requested register */
-
-      ret = sam_phywrite(priv, req->phy_id, req->reg_num, req->val_in);
-
-      /* Disable the management port */
-
-      sam_disablemdio(priv);
-    }
-    break;
-
-  default:
-    ret = -ENOTTY;
-    break;
-  }
 
   return ret;
 }
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Function: sam_phydump
@@ -3744,12 +3748,12 @@ int sam_gmac_initialize(void)
   priv->dev.d_addmac  = sam_addmac;      /* Add multicast MAC address */
   priv->dev.d_rmmac   = sam_rmmac;       /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = sam_ioctl;       /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)&g_gmac; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll = wd_create();
   if (!priv->txpoll)

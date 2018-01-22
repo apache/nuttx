@@ -1172,7 +1172,7 @@ int misoc_net_initialize(int intf)
 #endif
   priv->misoc_net_dev.d_private = (FAR void *)g_misoc_net; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->misoc_net_txpoll       = wd_create();    /* Create periodic poll timer */
   priv->misoc_net_txtimeout    = wd_create();    /* Create TX timeout timer */

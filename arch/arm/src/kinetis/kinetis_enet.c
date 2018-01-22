@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_enet.c
  *
- *   Copyright (C) 2011-2012, 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -310,7 +310,7 @@ static int  kinetis_addmac(struct net_driver_s *dev,
 static int  kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int  kinetis_ioctl(struct net_driver_s *dev, int cmd,
             unsigned long arg);
 #endif
@@ -1449,48 +1449,52 @@ static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-  int ret;
+#ifdef CONFIG_NETDEV_PHY_IOCTL
   FAR struct kinetis_driver_s *priv =
     (FAR struct kinetis_driver_s *)dev->d_private;
+#endif
+  int ret;
 
   switch (cmd)
-  {
-  case SIOCGMIIPHY: /* Get MII PHY address */
     {
-      struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = priv->phyaddr;
-      ret = OK;
-    }
-    break;
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = priv->phyaddr;
+          ret = OK;
+        }
+        break;
 
-  case SIOCGMIIREG: /* Get register from MII PHY */
-    {
-      struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
-    }
-    break;
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+        }
+        break;
 
-  case SIOCSMIIREG: /* Set register in MII PHY */
-    {
-      struct mii_ioctl_data_s *req =
-        (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
-    }
-    break;
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+        }
+        break;
+#endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
 
-  default:
-    ret = -ENOTTY;
-    break;
-  }
+      default:
+        ret = -ENOTTY;
+        break;
+    }
 
   return ret;
 }
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Function: kinetis_initmii
@@ -2127,12 +2131,12 @@ int kinetis_netinitialize(int intf)
   priv->dev.d_addmac  = kinetis_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = kinetis_rmmac;    /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = kinetis_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll        = wd_create();      /* Create periodic poll timer */
   priv->txtimeout     = wd_create();      /* Create TX timeout timer */
