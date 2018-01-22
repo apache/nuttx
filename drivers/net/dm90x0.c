@@ -1948,7 +1948,7 @@ int dm9x_initialize(void)
 #endif
   g_dm9x[0].dm_dev.d_private = (FAR void *)g_dm9x; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   g_dm9x[0].dm_txpoll       = wd_create();    /* Create periodic poll timer */
   g_dm9x[0].dm_txtimeout    = wd_create();    /* Create TX timeout timer */

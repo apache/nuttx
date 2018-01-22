@@ -2812,7 +2812,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 
   priv->lower = lower;
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll        = wd_create();       /* Create periodic poll timer */
   priv->txtimeout     = wd_create();       /* Create TX timeout timer */

@@ -2537,7 +2537,7 @@ int up_netinitialize(void)
 #endif
   priv->dev.d_private = (FAR void*)&g_emac; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll        = wd_create();        /* Create periodic poll timer */
   priv->txtimeout     = wd_create();        /* Create TX timeout timer */

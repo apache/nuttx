@@ -2392,13 +2392,16 @@ static int lpc54_eth_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
                            unsigned long arg)
 {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
   struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+#endif
   int ret;
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
   switch (cmd)
     {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
      case SIOCGMIIPHY: /* Get MII PHY address */
         {
           struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
@@ -2422,6 +2425,7 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
           ret = OK
         }
         break;
+#endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
 
       default:
         nerr("ERROR: Unrecognized IOCTL command: %d\n", command);

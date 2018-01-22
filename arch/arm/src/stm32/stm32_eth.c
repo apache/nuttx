@@ -721,7 +721,7 @@ static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int  stm32_ioctl(struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
@@ -2847,62 +2847,64 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 #endif
   int ret;
 
   switch (cmd)
-  {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
-  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
-      struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-
-      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
-      if (ret == OK)
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          /* Enable PHY link up/down interrupts */
+          struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
 
-          ret = stm32_phyintenable(priv);
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = stm32_phyintenable(priv);
+            }
         }
-    }
-    break;
+        break;
 #endif
 
-  case SIOCGMIIPHY: /* Get MII PHY address */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = CONFIG_STM32_PHYADDR;
-      ret = OK;
-    }
-    break;
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = CONFIG_STM32_PHYADDR;
+          ret = OK;
+        }
+        break;
 
-  case SIOCGMIIREG: /* Get register from MII PHY */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
-    }
-    break;
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
+        }
+        break;
 
-  case SIOCSMIIREG: /* Set register in MII PHY */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
-    }
-    break;
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
+        }
+        break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
 
-  default:
-    ret = -ENOTTY;
-    break;
-  }
+      default:
+        ret = -ENOTTY;
+        break;
+    }
 
   return ret;
 }
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Function: stm32_phyintenable
@@ -4014,12 +4016,12 @@ int stm32_ethinitialize(int intf)
   priv->dev.d_addmac  = stm32_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = stm32_rmmac;    /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = stm32_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)g_stm32ethmac; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll       = wd_create();   /* Create periodic poll timer */
   priv->txtimeout    = wd_create();   /* Create TX timeout timer */

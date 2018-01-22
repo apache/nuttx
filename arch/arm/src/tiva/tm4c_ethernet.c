@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tm4c_ethernet.c
  *
- *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -733,7 +733,7 @@ static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
 static int  tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int  tiva_ioctl(struct net_driver_s *dev, int cmd,
               unsigned long arg);
 #endif
@@ -2860,59 +2860,61 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
 static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   int ret;
 
   switch (cmd)
-  {
-#ifdef CONFIG_TIVA_PHY_INTERRUPTS
-  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
-      struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-
-      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
-      if (ret == OK)
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          /* Enable PHY link up/down interrupts */
+          struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
 
-          tiva_phy_intenable(true);
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              tiva_phy_intenable(true);
+            }
         }
-    }
-    break;
+        break;
 #endif
 
-  case SIOCGMIIPHY: /* Get MII PHY address */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      req->phy_id = CONFIG_TIVA_PHYADDR;
-      ret = OK;
-    }
-    break;
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = CONFIG_TIVA_PHYADDR;
+          ret = OK;
+        }
+        break;
 
-  case SIOCGMIIREG: /* Get register from MII PHY */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = tiva_phyread(req->phy_id, req->reg_num, &req->val_out);
-    }
-    break;
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          ret = tiva_phyread(req->phy_id, req->reg_num, &req->val_out);
+        }
+        break;
 
-  case SIOCSMIIREG: /* Set register in MII PHY */
-    {
-      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
-      ret = tiva_phywrite(req->phy_id, req->reg_num, req->val_in);
-    }
-    break;
+      case SIOCSMIIREG: /* Set register in MII PHY */
+       {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          ret = tiva_phywrite(req->phy_id, req->reg_num, req->val_in);
+        }
+        break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
 
-  default:
-    ret = -ENOTTY;
-    break;
-  }
+      default:
+        ret = -ENOTTY;
+          break;
+    }
 
   return ret;
 }
-#endif /* CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
  * Function: tiva_phy_intenable
@@ -4040,7 +4042,7 @@ int tiva_ethinitialize(int intf)
   priv->dev.d_addmac  = tiva_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = tiva_rmmac;    /* Remove multicast MAC address */
 #endif
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = tiva_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void *)g_tiva_ethmac; /* Used to recover private state from dev */

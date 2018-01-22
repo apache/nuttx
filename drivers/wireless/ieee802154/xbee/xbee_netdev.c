@@ -1392,7 +1392,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 #endif
   dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->xd_mac        = xbee;               /* Save the MAC interface instance */
   priv->xd_txpoll     = wd_create();       /* Create periodic poll timer */
