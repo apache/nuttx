@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_wrbuffer_dump.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,8 +64,8 @@ void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset)
 {
   syslog(LOG_DEBUG, "%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
-         msg, wrb, WRB_SEQNO(wrb), WRB_SENT(wrb), WRB_NRTX(wrb));
-  iob_dump("I/O Buffer Chain", WRB_IOB(wrb), len, offset);
+         msg, wrb, TCPWB_SEQNO(wrb), TCPWB_SENT(wrb), TCPWB_NRTX(wrb));
+  iob_dump("I/O Buffer Chain", TCPWB_IOB(wrb), len, offset);
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */

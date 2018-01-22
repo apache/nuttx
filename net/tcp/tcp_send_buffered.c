@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send_buffered.c
  *
- *   Copyright (C) 2007-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Jason Jiang  <jasonj@live.cn>
  *
@@ -98,8 +98,8 @@
 #  define BUF_DUMP(msg,buf,len) lib_dumpbuffer(msg,buf,len)
 #else
 #  define BUF_DUMP(msg,buf,len)
-#  undef  WRB_DUMP
-#  define WRB_DUMP(msg,wrb,len,offset)
+#  undef  TCPWB_DUMP
+#  define TCPWB_DUMP(msg,wrb,len,offset)
 #endif
 
 /****************************************************************************
@@ -135,7 +135,7 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
   for (itr = sq_peek(q); itr; itr = sq_next(itr))
     {
       FAR struct tcp_wrbuffer_s *wrb0 = (FAR struct tcp_wrbuffer_s *)itr;
-      if (WRB_SEQNO(wrb0) < WRB_SEQNO(wrb))
+      if (TCPWB_SEQNO(wrb0) < TCPWB_SEQNO(wrb))
         {
           insert = itr;
         }
@@ -417,13 +417,14 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * the write buffer has been ACKed.
            */
 
-          if (ackno > WRB_SEQNO(wrb))
+          if (ackno > TCPWB_SEQNO(wrb))
             {
               /* Get the sequence number at the end of the data */
 
-              lastseq = WRB_SEQNO(wrb) + WRB_PKTLEN(wrb);
+              lastseq = TCPWB_SEQNO(wrb) + TCPWB_PKTLEN(wrb);
               ninfo("ACK: wrb=%p seqno=%u lastseq=%u pktlen=%u ackno=%u\n",
-                    wrb, WRB_SEQNO(wrb), lastseq, WRB_PKTLEN(wrb), ackno);
+                    wrb, TCPWB_SEQNO(wrb), lastseq, TCPWB_PKTLEN(wrb),
+                    ackno);
 
               /* Has the entire buffer been ACKed? */
 
@@ -449,24 +450,24 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                    * buffers in the chain.
                    */
 
-                  trimlen = ackno - WRB_SEQNO(wrb);
-                  if (trimlen > WRB_SENT(wrb))
+                  trimlen = ackno - TCPWB_SEQNO(wrb);
+                  if (trimlen > TCPWB_SENT(wrb))
                     {
                       /* More data has been ACKed then we have sent? */
 
-                      trimlen = WRB_SENT(wrb);
+                      trimlen = TCPWB_SENT(wrb);
                     }
 
                   ninfo("ACK: wrb=%p trim %u bytes\n", wrb, trimlen);
 
-                  WRB_TRIM(wrb, trimlen);
-                  WRB_SEQNO(wrb) = ackno;
-                  WRB_SENT(wrb) -= trimlen;
+                  TCPWB_TRIM(wrb, trimlen);
+                  TCPWB_SEQNO(wrb) = ackno;
+                  TCPWB_SENT(wrb) -= trimlen;
 
                   /* Set the new sequence number for what remains */
 
                   ninfo("ACK: wrb=%p seqno=%u pktlen=%u\n",
-                          wrb, WRB_SEQNO(wrb), WRB_PKTLEN(wrb));
+                          wrb, TCPWB_SEQNO(wrb), TCPWB_PKTLEN(wrb));
                 }
             }
         }
@@ -477,31 +478,31 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
-      if (wrb && WRB_SENT(wrb) > 0 && ackno > WRB_SEQNO(wrb))
+      if (wrb && TCPWB_SENT(wrb) > 0 && ackno > TCPWB_SEQNO(wrb))
         {
           uint32_t nacked;
 
           /* Number of bytes that were ACKed */
 
-          nacked = ackno - WRB_SEQNO(wrb);
-          if (nacked > WRB_SENT(wrb))
+          nacked = ackno - TCPWB_SEQNO(wrb);
+          if (nacked > TCPWB_SENT(wrb))
             {
               /* More data has been ACKed then we have sent? ASSERT? */
 
-              nacked = WRB_SENT(wrb);
+              nacked = TCPWB_SENT(wrb);
             }
 
           ninfo("ACK: wrb=%p seqno=%u nacked=%u sent=%u ackno=%u\n",
-                wrb, WRB_SEQNO(wrb), nacked, WRB_SENT(wrb), ackno);
+                wrb, TCPWB_SEQNO(wrb), nacked, TCPWB_SENT(wrb), ackno);
 
           /* Trim the ACKed bytes from the beginning of the write buffer. */
 
-          WRB_TRIM(wrb, nacked);
-          WRB_SEQNO(wrb) = ackno;
-          WRB_SENT(wrb) -= nacked;
+          TCPWB_TRIM(wrb, nacked);
+          TCPWB_SEQNO(wrb) = ackno;
+          TCPWB_SENT(wrb) -= nacked;
 
           ninfo("ACK: wrb=%p seqno=%u pktlen=%u sent=%u\n",
-                wrb, WRB_SEQNO(wrb), WRB_PKTLEN(wrb), WRB_SENT(wrb));
+                wrb, TCPWB_SEQNO(wrb), TCPWB_PKTLEN(wrb), TCPWB_SENT(wrb));
         }
     }
 
@@ -543,16 +544,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
-      ninfo("REXMIT: wrb=%p sent=%u\n", wrb, wrb ? WRB_SENT(wrb) : 0);
+      ninfo("REXMIT: wrb=%p sent=%u\n", wrb, wrb ? TCPWB_SENT(wrb) : 0);
 
-      if (wrb != NULL && WRB_SENT(wrb) > 0)
+      if (wrb != NULL && TCPWB_SENT(wrb) > 0)
         {
           FAR struct tcp_wrbuffer_s *tmp;
           uint16_t sent;
 
           /* Yes.. Reset the number of bytes sent sent from the write buffer */
 
-          sent = WRB_SENT(wrb);
+          sent = TCPWB_SENT(wrb);
           if (conn->unacked > sent)
             {
               conn->unacked -= sent;
@@ -571,16 +572,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               conn->sent = 0;
             }
 
-          WRB_SENT(wrb) = 0;
+          TCPWB_SENT(wrb) = 0;
           ninfo("REXMIT: wrb=%p sent=%u, conn unacked=%d sent=%d\n",
-                wrb, WRB_SENT(wrb), conn->unacked, conn->sent);
+                wrb, TCPWB_SENT(wrb), conn->unacked, conn->sent);
 
           /* Increment the retransmit count on this write buffer. */
 
-          if (++WRB_NRTX(wrb) >= TCP_MAXRTX)
+          if (++TCPWB_NRTX(wrb) >= TCP_MAXRTX)
             {
               nwarn("WARNING: Expiring wrb=%p nrtx=%u\n",
-                    wrb, WRB_NRTX(wrb));
+                    wrb, TCPWB_NRTX(wrb));
 
               /* The maximum retry count as been exhausted. Remove the write
                * buffer at the head of the queue.
@@ -618,7 +619,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           /* Reset the number of bytes sent sent from the write buffer */
 
-          sent = WRB_SENT(wrb);
+          sent = TCPWB_SENT(wrb);
           if (conn->unacked > sent)
             {
               conn->unacked -= sent;
@@ -637,16 +638,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               conn->sent = 0;
             }
 
-          WRB_SENT(wrb) = 0;
+          TCPWB_SENT(wrb) = 0;
           ninfo("REXMIT: wrb=%p sent=%u, conn unacked=%d sent=%d\n",
-                wrb, WRB_SENT(wrb), conn->unacked, conn->sent);
+                wrb, TCPWB_SENT(wrb), conn->unacked, conn->sent);
 
           /* Free any write buffers that have exceed the retry count */
 
-          if (++WRB_NRTX(wrb) >= TCP_MAXRTX)
+          if (++TCPWB_NRTX(wrb) >= TCP_MAXRTX)
             {
               nwarn("WARNING: Expiring wrb=%p nrtx=%u\n",
-                    wrb, WRB_NRTX(wrb));
+                    wrb, TCPWB_NRTX(wrb));
 
               /* Return the write buffer to the free list */
 
@@ -671,7 +672,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                * is pulled from the write_q again.
                */
 
-              ninfo("REXMIT: Moving wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
+              ninfo("REXMIT: Moving wrb=%p nrtx=%u\n", wrb, TCPWB_NRTX(wrb));
 
               psock_insert_segment(wrb, &conn->write_q);
             }
@@ -726,7 +727,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * window size.
            */
 
-          sndlen = WRB_PKTLEN(wrb) - WRB_SENT(wrb);
+          sndlen = TCPWB_PKTLEN(wrb) - TCPWB_SENT(wrb);
           if (sndlen > conn->mss)
             {
               sndlen = conn->mss;
@@ -738,16 +739,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u\n",
-                wrb, WRB_PKTLEN(wrb), WRB_SENT(wrb), sndlen);
+                wrb, TCPWB_PKTLEN(wrb), TCPWB_SENT(wrb), sndlen);
 
           /* Set the sequence number for this segment.  If we are
            * retransmitting, then the sequence number will already
            * be set for this write buffer.
            */
 
-           if (WRB_SEQNO(wrb) == (unsigned)-1)
+           if (TCPWB_SEQNO(wrb) == (unsigned)-1)
             {
-              WRB_SEQNO(wrb) = conn->isn + conn->sent;
+              TCPWB_SEQNO(wrb) = conn->isn + conn->sent;
             }
 
           /* The TCP stack updates sndseq on receipt of ACK *before*
@@ -757,7 +758,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * before the packet is sent.
            */
 
-          tcp_setsequence(conn->sndseq, WRB_SEQNO(wrb) + WRB_SENT(wrb));
+          tcp_setsequence(conn->sndseq, TCPWB_SEQNO(wrb) + TCPWB_SENT(wrb));
 
 #ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to
@@ -773,7 +774,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * won't actually happen until the polling cycle completes).
            */
 
-          devif_iob_send(dev, WRB_IOB(wrb), sndlen, WRB_SENT(wrb));
+          devif_iob_send(dev, TCPWB_IOB(wrb), sndlen, TCPWB_SENT(wrb));
 
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment
@@ -795,21 +796,21 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           ninfo("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
-                wrb, WRB_NRTX(wrb), conn->unacked, conn->sent);
+                wrb, TCPWB_NRTX(wrb), conn->unacked, conn->sent);
 
           /* Increment the count of bytes sent from this write buffer */
 
-          WRB_SENT(wrb) += sndlen;
+          TCPWB_SENT(wrb) += sndlen;
 
           ninfo("SEND: wrb=%p sent=%u pktlen=%u\n",
-                wrb, WRB_SENT(wrb), WRB_PKTLEN(wrb));
+                wrb, TCPWB_SENT(wrb), TCPWB_PKTLEN(wrb));
 
           /* Remove the write buffer from the write queue if the
            * last of the data has been sent from the buffer.
            */
 
-          DEBUGASSERT(WRB_SENT(wrb) <= WRB_PKTLEN(wrb));
-          if (WRB_SENT(wrb) >= WRB_PKTLEN(wrb))
+          DEBUGASSERT(TCPWB_SENT(wrb) <= TCPWB_PKTLEN(wrb));
+          if (TCPWB_SENT(wrb) >= TCPWB_PKTLEN(wrb))
             {
               FAR struct tcp_wrbuffer_s *tmp;
 
@@ -1060,13 +1061,25 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Initialize the write buffer */
 
-      WRB_SEQNO(wrb) = (unsigned)-1;
-      WRB_NRTX(wrb)  = 0;
-      result = WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
+      TCPWB_SEQNO(wrb) = (unsigned)-1;
+      TCPWB_NRTX(wrb)  = 0;
+
+      /* Copy the user data into the write buffer.  We cannot wait for
+       * buffer space if the socket was opened non-blocking.
+       */
+
+      if (_SS_ISNONBLOCK(psock->s_flags))
+        {
+          result = TCPWB_TRYCOPYIN(wrb, (FAR uint8_t *)buf, len);
+        }
+      else
+        {
+          result = TCPWB_COPYIN(wrb, (FAR uint8_t *)buf, len);
+        }
 
       /* Dump I/O buffer chain */
 
-      WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb), 0);
+      TCPWB_DUMP("I/O buffer chain", wrb, TCPWB_PKTLEN(wrb), 0);
 
       /* psock_send_eventhandler() will send data in FIFO order from the
        * conn->write_q
@@ -1074,7 +1087,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       sq_addlast(&wrb->wb_node, &conn->write_q);
       ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
-            wrb, WRB_PKTLEN(wrb),
+            wrb, TCPWB_PKTLEN(wrb),
             conn->write_q.head, conn->write_q.tail);
 
       /* Notify the device driver of the availability of TX data */
