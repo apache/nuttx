@@ -70,36 +70,16 @@
 #  define NEED_IPDOMAIN_SUPPORT 1
 #endif
 
-/* Timeouts on sendto() do not make sense.  Each polling cycle from the
- * driver is an opportunity to send a packet.  If the driver is not polling,
- * then the network is not up (and there are no polling cycles to drive
- * the timeout).
- *
- * There is a remote possibility that if there is a lot of other network
- * traffic that a UDP sendto could get delayed, but I would not expect this
- * generate a timeout.
- */
-
-#undef CONFIG_NET_SENDTO_TIMEOUT
-
-/* If supported, the sendto timeout function would depend on socket options
- * and a system clock.
- */
-
-#ifndef CONFIG_NET_SOCKOPTS
-#  undef CONFIG_NET_SENDTO_TIMEOUT
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct sendto_s
 {
-#if defined(CONFIG_NET_SENDTO_TIMEOUT) || defined(NEED_IPDOMAIN_SUPPORT)
+#if defined(CONFIG_NET_SOCKOPTS) || defined(NEED_IPDOMAIN_SUPPORT)
   FAR struct socket *st_sock;         /* Points to the parent socket structure */
 #endif
-#ifdef CONFIG_NET_SENDTO_TIMEOUT
+#ifdef CONFIG_NET_SOCKOPTS
   systime_t st_time;                  /* Last send time for determining timeout */
 #endif
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
@@ -130,7 +110,7 @@ struct sendto_s
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_SENDTO_TIMEOUT
+#ifdef CONFIG_NET_SOCKOPTS
 static inline int send_timeout(FAR struct sendto_s *pstate)
 {
   FAR struct socket *psock;
@@ -151,7 +131,7 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
 
   return FALSE;
 }
-#endif /* CONFIG_NET_SENDTO_TIMEOUT */
+#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Name: sendto_ipselect
@@ -254,7 +234,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
            * polling cycle and check again.
            */
 
-#ifdef CONFIG_NET_SENDTO_TIMEOUT
+#ifdef CONFIG_NET_SOCKOPTS
           if (send_timeout(pstate))
             {
               /* Yes.. report the timeout */
@@ -263,7 +243,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
               pstate->st_sndlen = -ETIMEDOUT;
             }
           else
-#endif /* CONFIG_NET_SENDTO_TIMEOUT */
+#endif /* CONFIG_NET_SOCKOPTS */
             {
                /* No timeout.  Just wait for the next polling cycle */
 
@@ -403,7 +383,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_buflen = len;
   state.st_buffer = buf;
 
-#if defined(CONFIG_NET_SENDTO_TIMEOUT) || defined(NEED_IPDOMAIN_SUPPORT)
+#if defined(CONFIG_NET_SOCKOPTS) || defined(NEED_IPDOMAIN_SUPPORT)
   /* Save the reference to the socket structure if it will be needed for
    * asynchronous processing.
    */
@@ -411,7 +391,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_sock = psock;
 #endif
 
-#ifdef CONFIG_NET_SENDTO_TIMEOUT
+#ifdef CONFIG_NET_SOCKOPTS
   /* Set the initial time for calculating timeouts */
 
   state.st_time = clock_systimer();
