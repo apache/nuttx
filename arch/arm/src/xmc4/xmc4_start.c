@@ -396,9 +396,17 @@ void __start(void)
 
   /* Then start NuttX */
 
+#ifdef CONFIG_STACK_COLORATION
+  /* Set the IDLE stack to the coloration value and jump into os_start() */
+
+  go_os_start((FAR void *)&_ebss, CONFIG_IDLETHREAD_STACKSIZE);
+#else
+  /* Call os_start() */
+
   os_start();
 
   /* Shouldn't get here */
 
   for (; ; );
+#endif
 }

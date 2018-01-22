@@ -82,99 +82,8 @@
 
 #define BOARD_XTAL_FREQUENCY        12000000 /* 12MHz XTAL */
 #undef  BOARD_RTC_XTAL_FRQUENCY              /* 32.768KHz RTC XTAL not available on the Relax Lite */
-
-#if defined(BOARD_FCPU_144MHZ)
-/* Default clock initialization
- *
- *   fXTAL = 12Mhz
- *      -> fPLL = (fXTAL / (2 * 1) * 48) = 288MHz
- *         -> fSYS = (fPLL / 1)          = 288MHz
- *            -> fCPU = (fSYS / 2)       = 144MHz
- *               -> fPERIPH = (fCPU / 1) = 144MHz
- *            -> fCCU = (fSYS / 2)       = 144MHz
- *            -> fETH                    = 72MHz   (REVISIT)
- *         -> fUSB                       = 48MHz   (REVISIT)
- *         -> fEBU                       = 72MHz   (REVISIT)
- *
- * fUSBPLL Disabled, only enabled if SCU_CLK_USBCLKCR_USBSEL_USBPLL is selected
- *
- *   fOFI                                = 24MHz
- *      -> fWDT                          = 24MHz   (REVISIT)
- */
-
-/* Select the external crystal as the PLL clock source */
-
-#  define BOARD_PLL_CLOCKSRC_XTAL   1        /* PLL Clock source == external crystal */
-#  undef  BOARD_PLL_CLOCKSRC_OFI             /* PLL Clock source != internal fast oscillator */
-
-/* PLL Configuration:
- *
- * fPLL = (fPLLSRC / (pdiv * k2div) * ndiv
- *
- * fPLL = (12000000 / (2 * 1)) * 48
- *      = 288MHz
- */
-
-#  define BOARD_ENABLE_PLL          1
-#  define BOARD_PLL_PDIV            2
-#  define BOARD_PLL_NDIV            48
-#  define BOARD_PLL_K2DIV           1
-#  define BOARD_PLL_FREQUENCY       288000000
-
-/* System frequency, fSYS, is divided down from PLL output */
-
-#  define BOARD_SYSDIV              1        /* PLL Output divider to get fSYS */
-#  define BOARD_SYS_FREQUENCY       288000000
-
-/* CPU frequency, fCPU, may be divided down from system frequency */
-
-#  define BOARD_CPUDIV_ENABLE       1        /* Enable PLL divide by 2 for fCPU */
-#  define BOARD_CPU_FREQUENCY       144000000
-
-/* CCU frequency may be divided down from system frequency */
-
-#  define BOARD_CCUDIV_ENABLE       1        /* Enable PLL div by 2 */
-#  define BOARD_CCU_FREQUENCY       144000000
-
-/* Watchdog clock settings */
-
-#  define BOARD_WDT_SOURCE          WDT_CLKSRC_FOFI
-#  define BOARD_WDTDIV              1
-#  define BOARD_WDT_FREQUENCY       24000000
-
-/* EBU frequency may be divided down from system frequency */
-
-#  define BOARD_EBUDIV              2        /* fSYS / 2 */
-#  define BOARD_EBU_FREQUENCY       72000000
-
-/* EXT clock settings */
-
-#  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
-#  define BOARD_EXTDIV              289      /* REVISIT */
-#  define BOARD_EXT_FREQUENCY       498270   /* REVISIT */
-
-/* The peripheral clock, fPERIPH, derives from fCPU with no division */
-
-#  define BOARD_PBDIV               1        /* No division */
-#  define BOARD_PERIPH_FREQUENCY    144000000
-
-#elif defined(BOARD_FCPU_120MHZ)
-/* Default clock initialization
- *
- *   fXTAL = 12Mhz
- *      -> fPLL = (fXTAL / (2 * 4) * 80) = 120
- *         -> fSYS = (fPLL / 1)          = 120MHz
- *            -> fCPU = (fSYS / 1)       = 120MHz
- *               -> fPERIPH = (fCPU / 1) = 120MHz
- *            -> fCCU = (fSYS / 1)       = 120MHz
- *            -> fETH                    = 60MHz   (REVISIT)
- *         -> fUSB                       = 48MHz   (REVISIT)
- *         -> fEBU                       = 60MHz   (REVISIT)
- *
- * fUSBPLL Disabled, only enabled if SCU_CLK_USBCLKCR_USBSEL_USBPLL is selected
- *
- *   fOFI                                = 24MHz
- *      -> fWDT                          = 24MHz   (REVISIT)
+/*
+ * TODO: enable the RTC osc, use RTC for time/date
  */
 
 /* Select the external crystal as the PLL clock source */
@@ -184,55 +93,141 @@
 
 /* PLL Configuration:
  *
- * fPLL = (fPLLSRC / (pdiv * k2div) * ndiv
+ *   fXTAL = 12Mhz
+ *   260 MHz <= fVCO <= 520 MHz
  *
- * fPLL = (12000000 / (2 * 4)) * 80
- *      = 120MHz
+ * fVCO = fXTAL * ndiv / pdiv
+ * fPLL = fVCO / k2div
+ * fSYS = fPLL / sysdiv
+ * fETH = fSYS / 2          (fixed div by 2)
+ * fCCU = fSYS / ccudiv     (div by 1 or 2)
+ * fCPU = fSYS / cpudiv     (div by 1 or 2)
+ * fPERIPH = fCPU / pbdiv   (div by 1 or 2)
  */
 
-#  define BOARD_ENABLE_PLL          1
-#  define BOARD_PLL_PDIV            2
-#  define BOARD_PLL_NDIV            80
+#  define BOARD_ENABLE_PLL          1   /* enable the PLL */
+#  define CPU_FREQ                  120 /* MHz */
+
+/* TODO: Automate PLL calculations */
+
+#if CPU_FREQ == 120
+/*
+ *      120 MHz
+ *
+ * fVCO = 12MHz * 40 / 2  = 480MHz
+ * fPLL = 480MHz / 2  = 240MHz
+ * fSYS = fPLL / 2    = 120MHz
+ * fCCU = fSYS / 2    =  60MHz
+ * fCPU = fSYS / 1    = 120MHz
+ * fPB  = fCPU / 2    =  60MHz
+ * fETH = fSYS / 2    =  60MHz
+ */
+
+#  define BOARD_PLL_NDIV            40
+#  define BOARD_PLL_PDIV            1
 #  define BOARD_PLL_K2DIV           4
-#  define BOARD_PLL_FREQUENCY       120000000
+#  define BOARD_PLL_SYSDIV          1
+#  define BOARD_PLL_CPUDIV          1
+#  define BOARD_PLL_PBDIV           2
+#  define BOARD_PLL_CCUDIV          2
+#  define BOARD_PLL_EBUDIV          4
 
-/* System frequency, fSYS, is divided down from PLL output */
+#elif CPU_FREQ == 144
+/*
+ *      144 MHz
+ *
+ * fVCO = 12MHz * 36 / 1  = 432MHz
+ * fPLL = 432MHz / 3  = 144MHz
+ * fSYS = fPLL / 1    = 144MHz
+ * fCCU = fSYS / 2    =  72MHz
+ * fCPU = fSYS / 1    = 144MHz
+ * fPB  = fCPU / 2    =  72MHz
+ * fETH = fSYS / 2    =  72MHz
+ */
 
-#  define BOARD_SYSDIV              1        /* No division */
-#  define BOARD_SYS_FREQUENCY       120000000
+#  define BOARD_PLL_NDIV            36
+#  define BOARD_PLL_PDIV            1
+#  define BOARD_PLL_K2DIV           3
+#  define BOARD_PLL_SYSDIV          1
+#  define BOARD_PLL_CPUDIV          1
+#  define BOARD_PLL_PBDIV           2
+#  define BOARD_PLL_CCUDIV          2
+#  define BOARD_PLL_EBUDIV          2
 
-/* CPU frequency, fCPU, may be divided down from system frequency */
+#else
+#  error "Illegal or Unsupported CPU Frequency"
+#endif
 
-#  define BOARD_CPUDIV_ENABLE       0        /* No divison */
-#  define BOARD_CPU_FREQUENCY       120000000
 
-/* CCU frequency may be divided down from system frequency */
+#  define BOARD_CCUDIV_ENABLE       (BOARD_PLL_CCUDIV - 1)
+#  define BOARD_CPUDIV_ENABLE       (BOARD_PLL_CPUDIV - 1)
 
-#  define BOARD_CCUDIV_ENABLE       0        /* No divison */
-#  define BOARD_CCU_FREQUENCY       120000000
-
-/* Watchdog clock setting */
+#  define BOARD_VCO_FREQUENCY       (BOARD_XTAL_FREQUENCY * BOARD_PLL_NDIV / BOARD_PLL_PDIV)
+#  define BOARD_PLL_FREQUENCY       (BOARD_VCO_FREQUENCY / BOARD_PLL_K2DIV)
+#  define BOARD_SYS_FREQUENCY       (BOARD_PLL_FREQUENCY / BOARD_PLL_SYSDIV)
+#  define BOARD_CCU_FREQUENCY       (BOARD_SYS_FREQUENCY / BOARD_PLL_CCUDIV)
+#  define BOARD_CPU_FREQUENCY       (BOARD_SYS_FREQUENCY / BOARD_PLL_CPUDIV)
+#  define BOARD_PERIPH_FREQUENCY    (BOARD_CPU_FREQUENCY / BOARD_PLL_PBDIV)
+#  define BOARD_ETH_FREQUENCY       (BOARD_SYS_FREQUENCY / 2)
 
 #  define BOARD_WDT_SOURCE          WDT_CLKSRC_FOFI
 #  define BOARD_WDTDIV              1
 #  define BOARD_WDT_FREQUENCY       24000000
 
-/* EBU frequency may be divided down from system frequency */
+#  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
+#  define BOARD_PLL_ECKDIV          480     /* [1,512] */
 
-#  define BOARD_EBUDIV              2       /* fSYS/2 */
-#  define BOARD_EBU_FREQUENCY       60000000
+#  define kHz_1     1000
+#  define MHz_1     (kHz_1 * kHz_1)
+#  define MHz_50    ( 50 * MHz_1)
+#  define MHz_260   (260 * MHz_1)
+#  define MHz_520   (520 * MHz_1)
+
+   /* range check VCO frequency */
+#  if (BOARD_VCO_FREQUENCY < MHz_260)
+#     error "VCO freq must be >= 260 MHz"
+#  endif
+
+#  if (BOARD_VCO_FREQUENCY > MHz_520)
+#     error "VCO freq must be <= 520 MHz"
+#  endif
+
+   /* range check Ethernet MAC frequency */
+#  if (BOARD_ETH_FREQUENCY <= MHz_50)
+#     error "ETH freq must be > 50 MHz"
+#  endif
+
+
+
+/* check ccudiv cpudiv pbdiv against Table 11-5
+ * of XMC4500 User Manual
+ */
+#define CLKDIV_INDEX        (4 * (BOARD_PLL_CCUDIV-1) + \
+                             2 * (BOARD_PLL_CPUDIV-1) + \
+                                 (BOARD_PLL_PBDIV-1) )
+
+#if (CLKDIV_INDEX == 3) || (CLKDIV_INDEX == 4) || (CLKDIV_INDEX > 6)
+#  error "Illegal combination of dividers!  Ref: Table 11-5 of UM"
+#endif
+
 
 /* EXT clock settings */
+#define BOARD_EXTCKL_ENABLE         1   /* 0 disables output */
 
+#if BOARD_EXTCKL_ENABLE
+#  define EXTCLK_PIN_P0_8           8
+#  define EXTCLK_PIN_P1_15          15
+#  define BOARD_EXTCLK_PIN          EXTCLK_PIN_P0_8
 #  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
-#  define BOARD_EXTDIV              289      /* REVISIT */
-#  define BOARD_EXT_FREQUENCY       415225   /* REVISIT */
+#  define BOARD_EXT_FREQUENCY       (250 * kHz_1)   /* Desired output freq */
+#  define BOARD_EXTDIV              (BOARD_PLL_FREQUENCY / BOARD_EXT_FREQUENCY)
 
-/* The peripheral clock, fPERIPH, derives from fCPU with no division */
-
-#  define BOARD_PBDIV               1        /* No division */
-#  define BOARD_PERIPH_FREQUENCY    120000000
+/* range check EXTDIV */
+#  if BOARD_EXTDIV > 512
+#    error "EXTCLK Divisor out of range!"
+#  endif
 #endif
+
 
 /* Standby clock source selection
  *
