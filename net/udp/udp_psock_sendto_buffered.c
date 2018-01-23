@@ -124,8 +124,6 @@ static int sendto_next_transfer(FAR struct socket *psock,
 static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
                                     FAR void *pvconn, FAR void *pvpriv,
                                     uint16_t flags);
-static inline void sendto_txnotify(FAR struct socket *psock,
-                                   FAR struct udp_conn_s *conn);
 
 /****************************************************************************
  * Private Functions
@@ -378,9 +376,13 @@ static int sendto_next_transfer(FAR struct socket *psock,
    */
 
   wrb = (FAR struct udp_wrbuffer_s *)sq_peek(&conn->write_q);
-  DEBUGASSERT(wrb != NULL);
+  if (wrb == NULL)
+    {
+      ninfo("Write buffer queue is empty\n");
+      return -ENOENT;
+    }
 
-  ret = udp_connect(conn, (FAR const struct sockaddr *)wrb->wb_iob->io_data);
+  ret = udp_connect(conn, (FAR const struct sockaddr *)&wrb->wb_dest);
   if (ret < 0)
     {
       nerr("ERROR: udp_connect failed: %d\n", ret);
@@ -443,6 +445,10 @@ static int sendto_next_transfer(FAR struct socket *psock,
   psock->s_sndcb->flags = (UDP_POLL | NETDEV_DOWN);
   psock->s_sndcb->priv  = (FAR void *)psock;
   psock->s_sndcb->event = sendto_eventhandler;
+
+  /* Notify the device driver of the availability of TX data */
+
+  netdev_txnotify_dev(dev);
   return OK;
 }
 
@@ -499,7 +505,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
    * buffers to send.
    */
 
-  if (dev->d_sndlen <= 0 && (flags & UDP_NEWDATA) != 0 &&
+  if (dev->d_sndlen <= 0 && (flags & UDP_NEWDATA) == 0 &&
       (flags & UDP_POLL) != 0 && !sq_empty(&conn->write_q))
     {
       /* Check if the destination IP address is in the ARP  or Neighbor
@@ -574,53 +580,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
   /* Continue waiting */
 
   return flags;
-}
-
-/****************************************************************************
- * Name: sendto_txnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (UDP)
- *
- * Parameters:
- *   psock - Socket state structure
- *   conn  - The UDP connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void sendto_txnotify(FAR struct socket *psock,
-                                   FAR struct udp_conn_s *conn)
-{
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver that send data is available */
-
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver that send data is available */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
 }
 
 /****************************************************************************
@@ -750,7 +709,14 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       UDP_WBDUMP("I/O buffer chain", wrb, wrb->wb_iob->io_pktlen, 0);
 
       /* sendto_eventhandler() will send data in FIFO order from the
-       * conn->write_q
+       * conn->write_q.
+       *
+       * REVISIT:  Why FIFO order?  Because it is easy.  In a real world
+       * environment where there are multiple network devices this might
+       * be inefficient because we could be sending data to different
+       * device out-of-queued-order to optimize performance.  Sending
+       * data to different networks from a single UDP socket is probably
+       * not a very common use case, however.
        */
 
       sq_addlast(&wrb->wb_node, &conn->write_q);
@@ -770,9 +736,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
          goto errout_with_wrb;
        }
 
-      /* Notify the device driver of the availability of TX data */
-
-      sendto_txnotify(psock, conn);
       net_unlock();
     }
 
