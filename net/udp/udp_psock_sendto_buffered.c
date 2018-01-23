@@ -105,9 +105,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline void sendto_netdev_down(FAR struct socket *psock,
-                                      FAR struct udp_conn_s *conn);
-
 #ifdef NEED_IPDOMAIN_SUPPORT
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
@@ -135,47 +132,64 @@ static inline void sendto_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sendto_netdev_down
+ * Name: sendto_writebuffer_release
  *
  * Description:
- *   The network device is down.  Free all write buffers.
- *   REVISIT:  Should only free write buffers associated with the device
- *   that went down.
+ *   Release the write buffer at the head of the write buffer queue.
  *
  * Parameters:
- *   psock    The socket structure
- *   conn     The connection structure associated with the socket
+ *   dev   - The structure of the network driver that caused the event
+ *   psock - Socket state structure
  *
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   The network is locked
+ *
  ****************************************************************************/
 
-static inline void sendto_netdev_down(FAR struct socket *psock,
-                                      FAR struct udp_conn_s *conn)
+static void sendto_writebuffer_release(FAR struct socket *psock,
+                                       FAR struct udp_conn_s *conn)
 {
-  FAR sq_entry_t *entry;
-  FAR sq_entry_t *next;
+  FAR struct udp_wrbuffer_s *wrb;
+  int ret = OK;
 
-  /* Do not allow any further callbacks */
-
-  if (psock->s_sndcb != NULL)
+  do
     {
-      psock->s_sndcb->flags = 0;
-      psock->s_sndcb->event = NULL;
+      /* Check if the write queue became empty */
+
+      if (sq_empty(&conn->write_q))
+        {
+          /* Yes.. stifle any further callbacks until more write data is
+           * enqueued.
+           */
+
+          psock->s_sndcb->flags = 0;
+          psock->s_sndcb->priv  = NULL;
+          psock->s_sndcb->event = NULL;
+          wrb = NULL;
+        }
+      else
+        {
+          /* Remove the write buffer from the head of the write buffer queue
+           * and release it.
+           */
+
+          wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
+          DEBUGASSERT(wrb != NULL);
+
+          udp_wrbuffer_release(wrb);
+
+          /* Set up for the next packet transfer by setting the connection
+           * address to the address of the next packet now at the header of
+           * the write buffer queue.
+           */
+
+         ret = sendto_next_transfer(psock, conn);
+       }
     }
-
-  /* Free all queued write buffers */
-
-  for (entry = sq_peek(&conn->write_q); entry; entry = next)
-    {
-      next = sq_next(entry);
-      udp_wrbuffer_release((FAR struct udp_wrbuffer_s *)entry);
-    }
-
-  /* Reset write buffering variables */
-
-  sq_init(&conn->write_q);
+  while (wrb != NULL && ret < 0);
 }
 
 /****************************************************************************
@@ -254,7 +268,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_ETHERNET
 static inline bool sendto_addrcheck(FAR struct udp_conn_s *conn,
-                                       FAR struct net_driver_s *dev)
+                                    FAR struct net_driver_s *dev)
 {
   /* REVISIT: Could the MAC address not also be in a routing table? */
 
@@ -458,7 +472,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
-  int ret;
 
   ninfo("flags: %04x\n", flags);
 
@@ -468,9 +481,11 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
     {
       ninfo("Device down: %04x\n", flags);
 
-      /* Free write buffers and terminate polling */
+      /* Free the write buffer at the head of the queue and attempt to setup
+       * the next transfer.
+       */
 
-      sendto_netdev_down(psock, conn);
+      sendto_writebuffer_release(psock, conn);
       return flags;
     }
 
@@ -495,7 +510,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
       if (sendto_addrcheck(conn, dev))
         {
           FAR struct udp_wrbuffer_s *wrb;
-          FAR struct udp_wrbuffer_s *tmp;
           size_t sndlen;
 
           /* Peek at the head of the write queue (but don't remove anything
@@ -530,41 +544,11 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
           devif_iob_send(dev, wrb->wb_iob, sndlen, 0);
 
-          /* Remove and free the write buffer from the head of the write
-           * buffer queue.
+          /* Free the write buffer at the head of the queue and attempt to
+           * setup the next transfer.
            */
 
-          do
-            {
-              tmp = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
-              DEBUGASSERT(tmp == wrb);
-
-              udp_wrbuffer_release(tmp);
-
-              /* Check if the write queue became empty */
-
-              if (sq_empty(&conn->write_q))
-                {
-                  /* Yes.. stifle any further callbacks until more write
-                   * data is enqueued.
-                   */
-
-                  psock->s_sndcb->flags = 0;
-                  psock->s_sndcb->priv  = NULL;
-                  psock->s_sndcb->event = NULL;
-                  ret = OK;
-                }
-              else
-                {
-                  /* Set up for the next packet transfer by setting the
-                   * connection address to the address of the next packet
-                   * now at the header of of the write buffer queue.
-                   */
-
-                  ret = sendto_next_transfer(psock, conn);
-                }
-            }
-          while (ret < 0);
+          sendto_writebuffer_release(psock, conn);
 
           /* Only one data can be sent by low level driver at once,
            * tell the caller stop polling the other connections.
@@ -579,28 +563,11 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
   else if (sendto_timeout(psock, conn))
     {
-      FAR struct udp_wrbuffer_s *wrb;
+      /* Free the write buffer at the head of the queue and attempt to setup
+       * the next transfer.
+       */
 
-      do
-        {
-          /* Remove and free the write buffer from the head of the write
-           * buffer queue.  Here we know that the write queue is not empty
-           * because the entry at the head of the queue just timed out!
-           */
-
-          wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
-          DEBUGASSERT(wrb != NULL);
-
-          udp_wrbuffer_release(wrb);
-
-          /* Set up for the next packet transfer by setting the connection
-           * address to the address of the next packet now at the header of the
-           * write buffer queue.
-           */
-
-          ret = sendto_next_transfer(psock, conn);
-        }
-      while (ret < 0);
+      sendto_writebuffer_release(psock, conn);
     }
 #endif /* CONFIG_NET_SOCKOPTS */
 
@@ -799,9 +766,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
      ret = sendto_next_transfer(psock, conn);
      if (ret < 0)
        {
-         /* REVISIT:  An error here is not recoverable */
-
-         goto errout_with_lock;
+         (void)sq_remlast(&conn->write_q);
+         goto errout_with_wrb;
        }
 
       /* Notify the device driver of the availability of TX data */
