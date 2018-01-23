@@ -77,25 +77,25 @@
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
 
-#  define TCPWB_SEQNO(wrb)           ((wrb)->wb_seqno)
-#  define TCPWB_PKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
-#  define TCPWB_SENT(wrb)            ((wrb)->wb_sent)
-#  define TCPWB_NRTX(wrb)            ((wrb)->wb_nrtx)
-#  define TCPWB_IOB(wrb)             ((wrb)->wb_iob)
-#  define TCPWB_COPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
-#  define TCPWB_COPYIN(wrb,src,n) \
+#  define TCP_WBSEQNO(wrb)           ((wrb)->wb_seqno)
+#  define TCP_WBPKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
+#  define TCP_WBSENT(wrb)            ((wrb)->wb_sent)
+#  define TCP_WBNRTX(wrb)            ((wrb)->wb_nrtx)
+#  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
+#  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
+#  define TCP_WBCOPYIN(wrb,src,n) \
      (iob_copyin((wrb)->wb_iob,src,(n),0,false))
-#  define TCPWB_TRYCOPYIN(wrb,src,n) \
+#  define TCP_WBTRYCOPYIN(wrb,src,n) \
      (iob_trycopyin((wrb)->wb_iob,src,(n),0,false))
 
-#  define TCPWB_TRIM(wrb,n) \
+#  define TCP_WBTRIM(wrb,n) \
      do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define TCPWB_DUMP(msg,wrb,len,offset) \
+#  define TCP_WBDUMP(msg,wrb,len,offset) \
      tcp_wrbuffer_dump(msg,wrb,len,offset)
 #  else
-#    define TCPWB_DUMP(msg,wrb,len,offset)
+#    define TCP_WBDUMP(msg,wrb,len,offset)
 #  endif
 #endif
 

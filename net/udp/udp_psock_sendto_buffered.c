@@ -97,8 +97,8 @@
 #  define BUF_DUMP(msg,buf,len) lib_dumpbuffer(msg,buf,len)
 #else
 #  define BUF_DUMP(msg,buf,len)
-#  undef  UDPWB_DUMP
-#  define UDPWB_DUMP(msg,wrb,len,offset)
+#  undef  UDP_WBDUMP
+#  define UDP_WBDUMP(msg,wrb,len,offset)
 #endif
 
 /****************************************************************************
@@ -747,7 +747,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Dump I/O buffer chain */
 
-      UDPWB_DUMP("I/O buffer chain", wrb, wrb->wb_iob->io_pktlen, 0);
+      UDP_WBDUMP("I/O buffer chain", wrb, wrb->wb_iob->io_pktlen, 0);
 
       /* sendto_eventhandler() will send data in FIFO order from the
        * conn->write_q

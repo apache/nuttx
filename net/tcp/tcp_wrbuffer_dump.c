@@ -64,8 +64,8 @@ void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset)
 {
   syslog(LOG_DEBUG, "%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
-         msg, wrb, TCPWB_SEQNO(wrb), TCPWB_SENT(wrb), TCPWB_NRTX(wrb));
-  iob_dump("I/O Buffer Chain", TCPWB_IOB(wrb), len, offset);
+         msg, wrb, TCP_WBSEQNO(wrb), TCP_WBSENT(wrb), TCP_WBNRTX(wrb));
+  iob_dump("I/O Buffer Chain", TCP_WBIOB(wrb), len, offset);
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */
