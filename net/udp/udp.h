@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <queue.h>
 
 #include <nuttx/clock.h>
@@ -137,12 +138,12 @@ struct udp_conn_s
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
 struct udp_wrbuffer_s
 {
-  sq_entry_t wb_node;      /* Supports a singly linked list */
-  union ip_addr_u wb_dest; /* Destination address */
+  sq_entry_t wb_node;              /* Supports a singly linked list */
+  struct sockaddr_storage wb_dest; /* Destination address */
 #ifdef CONFIG_NET_SOCKOPTS
-  systime_t wb_start;      /* Start time for timeout calculation */
+  systime_t wb_start;              /* Start time for timeout calculation */
 #endif
-  struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
+  struct iob_s *wb_iob;            /* Head of the I/O buffer chain */
 };
 #endif
 

@@ -52,7 +52,6 @@ config NET_UDP_WRITE_BUFFERS
 	default n
 	select NET_WRITE_BUFFERS
 	select MM_IOB
-	depends on EXPERIMENTAL
 	---help---
 		Write buffers allows buffering of ongoing UDP/IP packets, providing
 		for higher performance, streamed output.
