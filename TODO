@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 21, 2018)
+NuttX TODO List (Last updated January 23, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/:
   (8)  Kernel/Protected Build
   (3)  C++ Support
   (6)  Binary loaders (binfmt/)
- (17)  Network (net/, drivers/net)
+ (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (0)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
@@ -1075,22 +1075,18 @@ o Network (net/, drivers/net)
   Title:       POLL/SELECT ON TCP/UDP SOCKETS NEEDS READ-AHEAD
   Description: poll()/select() only works for availability of buffered TCP/UDP
                read data (when read-ahead is enabled).  The way writing is
-               handled in the network layer, all sockets must wait when send and
-               cannot be notified when they can send without waiting.
+               handled in the network layer, either (1) If CONFIG_UDP/TCP_WRITE_BUFFERS=y
+               then we never have to wait to send; otherwise, we always have
+               to wait to send.  So it is impossible to notify the caller
+               when it can send without waiting.
+
+               An exception "never having to wait" is the case where we are
+               out of memory for use in write buffering.  In that case, the
+               blocking send()/sendto() would have to wait for the memory
+               to become available.
   Status:      Open, probably will not be fixed.
   Priority:    Medium... this does effect porting of applications that expect
                different behavior from poll()/select()
-
-  Title:       SOCKETS DO NOT ALWAYS SUPPORT O_NONBLOCK
-  Description: sockets do not support all modes for O_NONBLOCK. Sockets
-               support nonblocking operations only (1) for TCP/IP non-
-               blocking read operations when read-ahead buffering is
-               enabled, (2) TCP/IP accept() operations when TCP/IP
-               connection backlog is enabled, (2) UDP/IP read() operations
-               when UDP read-ahead is enabled, and (3) non-blocking
-               operations on Unix domain sockets.
-  Status:      Open
-  Priority:    Low.
 
   Title:       INTERFACES TO LEAVE/JOIN IGMP MULTICAST GROUP
   Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
@@ -1124,8 +1120,8 @@ o Network (net/, drivers/net)
                however.  Others support the address filtering interfaces but
                have never been verifed:
 
-               C5471, LM3S, ez80, DM0x90 NIC, PIC: Do not support address
-                 filtering.
+               C5471, LM3S, ez80, DM0x90 NIC, PIC, LPC54: Do not support
+                 address filtering.
                Kinetis, LPC17xx, LPC43xx:  Untested address filter support
 
   Status:      Open
