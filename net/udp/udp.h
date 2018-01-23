@@ -71,10 +71,10 @@
 /* UDP write buffer dump macros */
 
 #  ifdef CONFIG_DEBUG_FEATURES
-#    define UDPWB_DUMP(msg,wrb,len,offset) \
+#    define UDP_WBDUMP(msg,wrb,len,offset) \
        udp_wrbuffer_dump(msg,wrb,len,offset)
 #  else
-#    define UDPWB_DUMP(msg,wrb,len,offset)
+#    define UDP_WBDUMP(msg,wrb,len,offset)
 #  endif
 #endif
 
