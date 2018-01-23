@@ -11,6 +11,14 @@ config ARCH_HAVE_PHY
 	bool
 	default n
 
+config NET_WRITE_BUFFERS
+	bool
+	default n
+
+config NET_READAHEAD
+	bool
+	default n
+
 config NET
 	bool "Networking support"
 	default n

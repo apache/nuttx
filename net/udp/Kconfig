@@ -44,7 +44,57 @@ config NET_BROADCAST
 config NET_UDP_READAHEAD
 	bool "Enable UDP/IP read-ahead buffering"
 	default y
+	select NET_READAHEAD
 	select MM_IOB
+
+config NET_UDP_WRITE_BUFFERS
+	bool "Enable UDP/IP write buffering"
+	default n
+	select NET_WRITE_BUFFERS
+	select MM_IOB
+	depends on EXPERIMENTAL
+	---help---
+		Write buffers allows buffering of ongoing UDP/IP packets, providing
+		for higher performance, streamed output.
+
+		You might want to disable UDP/IP write buffering on a highly memory
+		memory constrained system where there are no performance issues.
+
+if NET_UDP_WRITE_BUFFERS
+
+config NET_UDP_NWRBCHAINS
+	int "Number of pre-allocated I/O buffer chain heads"
+	default 8
+	---help---
+		These tiny nodes are used as "containers" to support queuing of
+		UDP write buffers.  This setting will limit the number of UDP write
+		operations that can be "in-flight" at any give time.  So a good
+		choice for this value would be the same as the maximum number of
+		UDP connections.
+
+config NET_UDP_WRBUFFER_DEBUG
+	bool "Force write buffer debug"
+	default n
+	depends on DEBUG_FEATURES
+	select IOB_DEBUG
+	---help---
+		This option will force debug output from UDP write buffer logic,
+		even without network debug output.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		write buffer logic and do not want to get overloaded with other
+		network-related debug output.
+
+config NET_UDP_WRBUFFER_DUMP
+	bool "Force write buffer dump"
+	default n
+	depends on DEBUG_NET || NET_UDP_WRBUFFER_DEBUG
+	select IOB_DEBUG
+	---help---
+		Dump the contents of the write buffers.  You do not want to do this
+		unless you really want to analyze the write buffer transfers in
+		detail.
+
+endif # NET_UDP_WRITE_BUFFERS
 
 endif # NET_UDP && !NET_UDP_NO_STACK
 endmenu # UDP Networking

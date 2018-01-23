@@ -1,7 +1,8 @@
 /****************************************************************************
- * net/udp/udp_psock_sendto.c
+ * net/udp/udp_psock_sendto_unbuffered.c
  *
- *   Copyright (C) 2007-2009, 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +95,7 @@ struct sendto_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: send_timeout
+ * Name: sendto_timeout
  *
  * Description:
  *   Check for send timeout.
@@ -111,7 +112,7 @@ struct sendto_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SOCKOPTS
-static inline int send_timeout(FAR struct sendto_s *pstate)
+static inline int sendto_timeout(FAR struct sendto_s *pstate)
 {
   FAR struct socket *psock;
 
@@ -235,7 +236,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
            */
 
 #ifdef CONFIG_NET_SOCKOPTS
-          if (send_timeout(pstate))
+          if (sendto_timeout(pstate))
             {
               /* Yes.. report the timeout */
 

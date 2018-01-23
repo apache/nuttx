@@ -105,7 +105,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   psock->s_domain = domain;
   psock->s_type   = type;
   psock->s_conn   = NULL;
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_UDP_WRITE_BUFFERS)
   psock->s_sndcb  = NULL;
 #endif
 
