@@ -424,6 +424,15 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       goto errout_with_lock;
    }
 
+  /* Make sure that the device is in the UP state */
+
+  if ((dev->d_flags & IFF_UP) == 0)
+    {
+      nwarn("WARNING: device is DOWN\n");
+      ret = -EHOSTUNREACH;
+      goto errout_with_lock;
+    }
+
   /* Set up the callback in the connection */
 
   state.st_cb = udp_callback_alloc(dev, conn);

@@ -384,6 +384,14 @@ static int sendto_next_transfer(FAR struct socket *psock,
      return -ENETUNREACH;
    }
 
+  /* Make sure that the device is in the UP state */
+
+  if ((dev->d_flags & IFF_UP) == 0)
+    {
+      nwarn("WARNING: device is DOWN\n");
+      return -EHOSTUNREACH;
+    }
+
   /* If this is not the same device that we used in the last call to
    * udp_callback_alloc(), then we need to release and reallocate the old
    * callback instance.
