@@ -70,6 +70,7 @@ config NET_MAX_LISTENPORTS
 config NET_TCP_READAHEAD
 	bool "Enable TCP/IP read-ahead buffering"
 	default y
+	select NET_READAHEAD
 	select MM_IOB
 	---help---
 		Read-ahead buffers allows buffering of TCP/IP packets when there is no
@@ -91,6 +92,7 @@ endif # NET_TCP_READAHEAD
 config NET_TCP_WRITE_BUFFERS
 	bool "Enable TCP/IP write buffering"
 	default n
+	select NET_WRITE_BUFFERS
 	select MM_IOB
 	---help---
 		Write buffers allows buffering of ongoing TCP/IP packets, providing
@@ -105,7 +107,7 @@ config NET_TCP_NWRBCHAINS
 	int "Number of pre-allocated I/O buffer chain heads"
 	default 8
 	---help---
-		These tiny nodes are used as "containers" to support queueing of
+		These tiny nodes are used as "containers" to support queuing of
 		TCP write buffers.  This setting will limit the number of TCP write
 		operations that can be "in-flight" at any give time.  So a good
 		choice for this value would be the same as the maximum number of

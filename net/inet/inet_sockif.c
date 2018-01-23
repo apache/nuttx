@@ -1146,7 +1146,7 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 #if defined(CONFIG_NET_6LOWPAN)
   /* Try 6LoWPAN UDP packet sendto() */
 
-  nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, tolen);
+  nsent = psock_6lowpan_udp_sendto(psock, buf, len, flags, to, minlen);
 
 #ifdef NET_UDP_HAVE_STACK
   if (nsent < 0)

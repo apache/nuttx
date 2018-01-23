@@ -172,6 +172,10 @@ void net_setup(void)
   /* Initialize the UDP connection structures */
 
   udp_initialize();
+
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+  udp_wrbuffer_initialize();
+#endif
 #endif
 
 #ifdef CONFIG_NET_IGMP
