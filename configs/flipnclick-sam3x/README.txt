@@ -22,23 +22,11 @@ STATUS
 ======
 
   2018-01-07:  Created the configuration.  At present it does not work; I
-    believe because of tool-related issues.  I do the following:
-
-    a) Open TeraTerm, select COM7 at 1200 baud, type a few ENTERs, and
-       close teraterm.
-
-    b) Execute the following command which claims to have successfully
-       written to FLASH.
-
-       bossac.exe --info --debug --port COM7 --usb-port=0 --erase --write --verify -b nuttx.bin -R
-
-       But the code does not boot.  There is no indication of life.
-
-    c) Repeat a) then
-
-       bossac.exe --info --debug --port COM7 --usb-port=0 --verify -b nuttx.bin
-
-       And it says that the content of the FLASH is not good.
+    believe because of tool-related issues.  See discussion under "Loading
+    Code" below.
+  2018-01-24:  I ordered a JTAG connector and soldered that to the Flip'n'Click
+    and I am now successfully able to load code.  The NSH configuration appears
+    to be fully functional.
 
 Buttons and LEDs
 ================
@@ -99,10 +87,11 @@ Serial Consoles
   serial chip connected to the first of the MCU (RX0 and TX0 on PA8 and PA9,
   respectively).  The output from that port is visible using the Arduino tool.
 
-  Any of UART and USART0-3 may be used as a serial console.  By default,
-  UART0 is used as the serial console in all configurations.  But that is
-  easily changed by modifying the configuration as described under
-  "Configurations" below.
+  [NOTE: My experience so far:  I get serial output on the virtual COM port
+   via the UART, but I receive no serial input for keyboard data entered in
+   the PC serial terminal.  I have not investigated this problem.  It may
+   be something as simple as the Rx pin configuration.  Instead, I just
+   switched to USART0.]
 
   Other convenient U[S]ARTs that may be used as the Serial console include:
 
@@ -125,8 +114,21 @@ Serial Consoles
   transceiver to get the signals to RS232 levels (or connect to the
   USB virtual COM port in the case of UART0).
 
+  Any of UART and USART0-3 may be used as a serial console.  UART0 would
+  be the preferred default console setting. However, due to the communication
+  problems mentioned above, USART0 is used as the default serial console
+  in all configurations.  But that is easily changed by modifying the
+  configuration as described under "Configurations" below.
+
 Loading Code
 ============
+
+  [NOTE: This text was mostly copied from the Arduino Due README.txt.  I
+   believe, however, that there have been significant changes to the
+   tool environment such that Bossac may no longer be usable.  I don't
+   know that for certain and perhaps someone with more knowledge of
+   the tools than I could make this work.  See STATUS below for the
+   current issues that I see.]
 
   Installing the Arduino USB Driver under Windows
   -----------------------------------------------
@@ -302,6 +304,25 @@ Loading Code
        $ bossac.exe --port=COM7 --usb-port=false --boot=1
        Set boot flash true
 
+  STATUS:
+    At present this procedure does not work.  I do the following:
+
+    a) Open TeraTerm, select COM7 at 1200 baud, type a few ENTERs, and
+       close teraterm.
+
+    b) Execute the following command which claims to have successfully
+       written to FLASH.
+
+       bossac.exe --info --debug --port COM7 --usb-port=0 --erase --write --verify -b nuttx.bin -R
+
+       But the code does not boot.  There is no indication of life.
+
+    c) Repeat a) then
+
+       bossac.exe --info --debug --port COM7 --usb-port=0 --verify -b nuttx.bin
+
+       And it says that the content of the FLASH is not good.
+
   Uploading NuttX to the Flip&Click Using JTAG
   --------------------------------------------
 
@@ -465,15 +486,16 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on UART0 which is available both on the USB virtual COM port
-     and on the PWML connector (see the section "Serial Consoles" above).
+     output on USART0 which is available either on the Arduion Shield
+     connector or on mikroBUS A as described above in the section entitled
+     "Serial Consoles".
 
   3. Unless otherwise stated, the configurations are setup for
      Cygwin under Windows:
 
      Build Setup:
        CONFIG_HOST_WINDOWS=y   : Microsoft Windows
-       CONFIG_WINDIWS_CYGWIN=y : Cygwin under Windoes
+       CONFIG_WINDIWS_CYGWIN=y : Cygwin under Windows
 
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
