@@ -321,7 +321,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       ret = I2C_TRANSFER(g_ds3231.i2c, msg, 4);
       if (ret < 0)
         {
-          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
     }
@@ -415,7 +415,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
       return -EAGAIN;
     }
 
-  rtc_dumptime(tp, "Setting time");
+  rtcinfo("Setting time tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
 
   /* Get the broken out time */
 
@@ -430,18 +430,18 @@ int up_rtc_settime(FAR const struct timespec *tp)
  #ifdef CONFIG_LIBC_LOCALTIME
    if (localtime_r(&newtime, &newtm) == NULL)
      {
-       rtcerr("ERROR: localtime_r failed\n")
+       rtcerr("ERROR: localtime_r failed\n");
        return -EINVAL;
      }
 #else
    if (gmtime_r(&newtime, &newtm) == NULL)
      {
-       rtcerr("ERROR: gmtime_r failed\n")
+       rtcerr("ERROR: gmtime_r failed\n");
        return -EINVAL;
      }
 #endif
 
-  rtc_dumptime(&tm, "New time");
+  rtc_dumptime(&newtm, "New time");
 
   /* Construct the message */
   /* Write starting with the seconds regiser */
@@ -536,7 +536,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
       ret = I2C_TRANSFER(g_ds3231.i2c, msg, 3);
       if (ret < 0)
         {
-          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret)
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
     }
