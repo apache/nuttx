@@ -1273,7 +1273,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
   if (priv->dcnt == -1 && priv->msgc != 0 && (status & I2C_SR1_SB) == 0)
     {
-#ifdef CONFIG_STM32_I2C_DMA
+#if defined(CONFIG_STM32_I2C_DMA) || defined(CONFIG_I2C_POLLED)
       return OK;
 #else
       priv->status |= I2C_SR1_TIMEOUT;
@@ -2049,7 +2049,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       /* Clear interrupt flags */
 
-#ifndef CONFIG_STM32_I2C_DMA
+#if !defined(CONFIG_STM32_I2C_DMA) && !defined(CONFIG_I2C_POLLED)
 state_error:
 #endif
       stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
