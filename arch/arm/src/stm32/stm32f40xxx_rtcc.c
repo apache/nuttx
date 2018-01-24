@@ -58,7 +58,7 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_RTC
+#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1659,4 +1659,5 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
 }
 #endif
 
-#endif /* CONFIG_RTC */
+#endif /* CONFIG_RTC && !CONFIG_RTC_EXTERNAL */
+

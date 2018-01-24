@@ -387,7 +387,7 @@ void up_irqinitialize(void)
   up_enable_irq(STM32_IRQ_MEMFAULT);
 #endif
 
-#ifdef CONFIG_RTC
+#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
   /* RTC was initialized earlier but IRQs weren't ready at that time */
 
   stm32_rtc_irqinitialize();
