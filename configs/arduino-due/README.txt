@@ -330,6 +330,12 @@ Serial Consoles
 Loading Code
 ============
 
+  [NOTE: I believe that there have been significant changes to the more
+   recent tool environment such that Bossac may no longer be usable.  I
+   don't know that for certain and perhaps someone with more knowledge of
+   the tools than I could make this work.  See the Flip'n'Clip SAM3X README
+   file for additional information.]
+
   Installing the Arduino USB Driver under Windows:
   ------------------------------------------------
 

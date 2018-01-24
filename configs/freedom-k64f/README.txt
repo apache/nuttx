@@ -618,7 +618,7 @@ GNU Toolchain Options
 =====================
 
   The NuttX make system supports several GNU-based toolchains under Linux,
-  Cygwin under Windows, and Windoes native.  To select a toolchain:
+  Cygwin under Windows, and Windows native.  To select a toolchain:
 
   1. Use 'make menuconfig' and select the toolchain that you are using
      under the System Type menu.
