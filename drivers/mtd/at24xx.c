@@ -86,9 +86,9 @@
 
 /* Get the part configuration based on the size configuration */
 
-#if CONFIG_AT24XX_SIZE == 2       /* AT24C02: 2Kbits = 256; 16 * 16 =  256 */
-#  define AT24XX_NPAGES     16
-#  define AT24XX_PAGESIZE   16
+#if CONFIG_AT24XX_SIZE == 2       /* AT24C02: 2Kbits = 256; 32 * 8 =  256 */
+#  define AT24XX_NPAGES     32
+#  define AT24XX_PAGESIZE   8
 #  define AT24XX_ADDRSIZE   1
 #elif CONFIG_AT24XX_SIZE == 4     /* AT24C04: 4Kbits = 512B; 32 * 16 = 512 */
 #  define AT24XX_NPAGES     32
