@@ -1122,13 +1122,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   uint16_t setbits;
   uint32_t actual;
 
-  /* Limit to max possible (if STM32_SPI_CLK_MAX is defined in board.h) */
-
-  if (frequency > STM32_SPI_CLK_MAX)
-    {
-      frequency = STM32_SPI_CLK_MAX;
-    }
-
   /* Has the frequency changed? */
 
   if (frequency != priv->frequency)
