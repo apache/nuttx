@@ -500,7 +500,7 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
         {
           /* There is no previous link.  This is the new head of the list */
 
-          DEBUGASSERT(desc == g_base_desc[dmach->dc_chan]);
+          DEBUGASSERT(desc == &g_base_desc[dmach->dc_chan]);
         }
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
@@ -627,7 +627,7 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   uint16_t btcnt;
   uint16_t tmp;
 
-  DEBUGASSERT(dmac->dc_dir == DMADIR_UNKOWN || dmac->dc_dir == DMADIR_TX);
+  DEBUGASSERT(dmach->dc_dir == DMADIR_UNKOWN || dmach->dc_dir == DMADIR_TX);
 
   /* Set up the Block Transfer Control Register configuration:
    *
@@ -703,7 +703,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   uint16_t btcnt;
   uint16_t tmp;
 
-  DEBUGASSERT(dmac->dc_dir == DMADIR_UNKOWN || dmac->dc_dir == DMADIR_RX);
+  DEBUGASSERT(dmach->dc_dir == DMADIR_UNKOWN || dmach->dc_dir == DMADIR_RX);
 
   /* Set up the Block Transfer Control Register configuration:
    *
@@ -1218,10 +1218,13 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       /* Enable the channel */
 
       ctrla = DMAC_CHCTRLA_ENABLE;
+
+#ifdef CONFIG_ARCH_FAMILY_SAML21
       if (dmach->dc_flags & DMACH_FLAG_RUNINSTDBY)
         {
           ctrla |= DMAC_CHCTRLA_RUNSTDBY;
         }
+#endif
 
       putreg8(ctrla, SAM_DMAC_CHCTRLA);
 
@@ -1272,19 +1275,18 @@ void sam_dmastop(DMA_HANDLE handle)
 #ifdef CONFIG_DEBUG_DMA_INFO
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
-  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
-  uintptr_t base;
   irqstate_t flags;
 
   /* Sample DMAC registers. */
 
   flags            = enter_critical_section();
+
   regs->ctrl       = getreg16(SAM_DMAC_CTRL);       /* Control Register */
   regs->crcctrl    = getreg16(SAM_DMAC_CRCCTRL);    /* CRC Control Register */
   regs->crcdatain  = getreg32(SAM_DMAC_CRCDATAIN);  /* CRC Data Input Register */
   regs->crcchksum  = getreg32(SAM_DMAC_CRCCHKSUM);  /* CRC Checksum Register */
   regs->crcstatus  = getreg8(SAM_DMAC_CRCSTATUS);   /* CRC Status Register */
-  regs->errctrl    = getreg8(SAM_DMAC_DBGCTRL);     /* Debug Control Register */
+  regs->dbgctrl    = getreg8(SAM_DMAC_DBGCTRL);     /* Debug Control Register */
   regs->qosctrl    = getreg8(SAM_DMAC_QOSCTRL);     /* Quality of Service Control Register */
   regs->swtrigctrl = getreg32(SAM_DMAC_SWTRIGCTRL); /* Software Trigger Control Register */
   regs->prictrl0   = getreg32(SAM_DMAC_PRICTRL0);   /* Priority Control 0 Register */
@@ -1300,6 +1302,8 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->chctrlb    = getreg32(SAM_DMAC_CHCTRLB);    /* Channel Control B Register */
   regs->chintflag  = getreg8(SAM_DMAC_CHINTFLAG);   /* Channel Interrupt Flag Status and Clear Register */
   regs->chstatus   = getreg8(SAM_DMAC_CHSTATUS);    /* Channel Status Register */
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_DEBUG_DMA_INFO */
 
@@ -1325,13 +1329,13 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   dmainfo("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
           regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
   dmainfo("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
-          regs->crcstatus, regs->errctrl, regs->qosctrl, regs->swtrigctrl);
+          regs->crcstatus, regs->dbgctrl, regs->qosctrl, regs->swtrigctrl);
   dmainfo("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
           regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
   dmainfo("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
           regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
   dmainfo("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
-          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag,
+          regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag);
   dmainfo("     CHSTATUS: %02x\n",
           regs->chstatus);
 }

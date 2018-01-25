@@ -50,8 +50,8 @@
 
 #ifdef CONFIG_SAMDL_DMAC
 
-#if defined(CONFIG_ARCH_FAMILY_SAMD20)
-#  error Missing support for the SAMD20 architecture
+#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
+#  include "chip/samd_dmac.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
 #  include "chip/saml_dmac.h"
 #else
