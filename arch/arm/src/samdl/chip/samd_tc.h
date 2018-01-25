@@ -218,6 +218,11 @@
 #  define TC_EVCTRL_EVACT_START      (3 << TC_EVCTRL_EVACT_SHIFT)
 #  define TC_EVCTRL_EVACT_PPW        (5 << TC_EVCTRL_EVACT_SHIFT)
 #  define TC_EVCTRL_EVACT_PWP        (6 << TC_EVCTRL_EVACT_SHIFT)
+#define TC_EVCTRL_TCINV              (1 << 4)
+#define TC_EVCTRL_TCEI               (1 << 5)
+#define TC_EVCTRL_OVFEO              (1 << 8)
+#define TC_EVCTRL_MCEO0              (1 << 12)
+#define TC_EVCTRL_MCEO1              (1 << 13)
 
 /* Interrupt register bits */
 
