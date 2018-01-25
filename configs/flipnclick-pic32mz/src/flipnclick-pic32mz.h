@@ -85,6 +85,47 @@
 #define GPIO_T1      (GPIO_INPUT | GPIO_INTERRUPT | GPIO_PORTD | GPIO_PIN10)
 #define GPIO_T2      (GPIO_INPUT | GPIO_INTERRUPT | GPIO_PORTD | GPIO_PIN11)
 
+/* SPI Chip Selects
+ *
+ * SPI3 is available on pins D10-D13 of the Arduino Shield connectors where
+ * you would expect then.  The SPI connector is configured as follows:
+ *
+ *   Pin J1 Board Signal PIC32MZ
+ *   --- -- ------------ -------
+ *   D10 8  SPI3_SCK     RB14
+ *   D10 7  SPI3_MISO    RB9
+ *   D11 6  SPI3_MOSI    RB10
+ *   D13 5  SPI3_SS      RB9
+ */
+
+#define GPIO_ARD_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTB | GPIO_PIN14)
+
+/* SPI1 and SPI2 are also available on the mikroBUS Click connectors (in
+ * addition to 5V and GND).  The connectivity between connectors A and B and
+ * between C and D differs only in the chip select pin:
+ *
+ *   MikroBUS A:                 MikroBUS B:
+ *   Pin  Board Signal PIC32MZ  Pin  Board Signal PIC32MZ
+ *   ---- ------------ -------  ---- ------------ -------
+ *   CS   SPI2_SS1     RA0      CS   SPI2_SS0     RE4
+ *   SCK  SPI2_SCK     RG6      SCK  SPI2_SCK     RG6
+ *   MISO SPI2_MISO    RC4      MISO SPI2_MISO    RC4
+ *   MOSI SPI2_MOSI    RB5      MOSI SPI2_MOSI    RB5
+ *
+ *   MikroBUS C:                 MikroBUS D:
+ *   Pin  Board Signal PIC32MZ  Pin  Board Signal PIC32MZ
+ *   ---- ------------ -------  ---- ------------ -------
+ *   CS   SPI1_SS0     RD12     CS   SPI1_SS1     RD13
+ *   SCK  SPI1_SCK     RD1      SCK  SPI1_SCK     RD1
+ *   MISO SPI1_MISO    RD2      MISO SPI1_MISO    RD2
+ *   MOSI SPI1_MOSI    RD3      MOSI SPI1_MOSI    RD3
+ */
+
+#define GPIO_MBA_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTA | GPIO_PIN0)
+#define GPIO_MBB_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTE | GPIO_PIN4)
+#define GPIO_MBC_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | GPIO_PIN12)
+#define GPIO_MBD_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | GPIO_PIN13)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
