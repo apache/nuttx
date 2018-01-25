@@ -15,6 +15,7 @@ Contents
   - Buttons and LEDs
   - Serial Consoles
   - SPI
+  - I2C
   - Loading Code
   - Flip&Click SAM3X-specific Configuration Options
   - Configurations
@@ -153,6 +154,33 @@ SPI
      SCK  SPI0_SCK     PA27   SCK  SPI0_SCK     PA27
      MISO SPI0_MISO    PA25   MISO SPI0_MISO    PA25
      MOSI SPI0_MOSI    PA26   MOSI SPI0_MOSI    PA26
+
+I2C
+===
+
+   I2C0 is available on pins D16-D17 of the Arduino Shield connectors where
+   you would expect then.  The SPI connector is configured as follows:
+
+     Pin Label J1 Board Signal SAM3X
+     --- ----- -- ------------ -----
+     D16 SCL1  8  I2C0_SCL     PA17
+     D17 SDA1  7  I2C0_SDA     PA18
+
+   I2C0 and I2C1 are also available on the mikroBUS Click connectors (in
+   addition to 5V and GND).  The connectors A and B share I2C0 with the
+   Arduino shield connector.  Connectors C and D both connect to I2C1:
+
+     MikroBUS A:              MikroBUS B:
+     Pin  Board Signal SAM3X  Pin  Board Signal SAM3X
+     ---- ------------ -----  ---- ------------ -------
+     SCL  I2C0_SCL     PA17   SCL  I2C0_SCL    PA17
+     SDA  I2C0_SDA     PA1    SDA  I2C0_SDA    PA18
+
+     MikroBUS C:              MikroBUS D:
+     Pin  Board Signal SAM3X  Pin  Board Signal SAM3X
+     ---- ------------ -----  ---- ------------ -------
+     SCL  I2C1_SCL     PB13   SCL  I2C1_SCL     PB13
+     SDA  I2C1_SDA     PB12   SDA  I2C1_SDA     PB12
 
 Loading Code
 ============
