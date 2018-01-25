@@ -349,9 +349,10 @@ Loading Code
 
    You should be able to use a 10- to 20-pin adapter to connect a SAM-ICE
    or J-Link debugger to the Flip&Click SAM3X.  I have this Olimex adapter:
-   https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ . But so far I
-   have been unable to get the get the SAM-ICE to communicate with the
-   Flip&Click.
+   https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ .  I have been
+   loading code and debugging with no problems using JTAG.
+
+   You can find photos my setup here: http://www.nuttx.org/doku.php?id=wiki:howtos:flipnclick-sam3x
 
 Flip&Click SAM3X-specific Configuration Options
 ===============================================
