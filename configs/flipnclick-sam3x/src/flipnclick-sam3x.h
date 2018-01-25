@@ -79,6 +79,55 @@
 #define GPIO_LED_D   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
                       GPIO_PORT_PIOC | GPIO_PIN8)
 
+/* SPI chip select pins.
+ *
+ * SPI0 is available on the Arduino compatible SPI connector (but no SPI is
+ * available on pins D10-D13 of the main Arduino Shield connectors where
+ * you might expect then).  The SPI connector is configured as follows:
+ *
+ *   Pin Board Signal SAM3X  Pin Board Signal SAM3X
+ *   --- ------------ -----  --- ------------ -----
+ *    1  SPI0_MISO    PA25    2  VCC-5V       N/A
+ *    3  SPI0_SCK     PA27    4  SPI0_MOSI    PA26
+ *    5  MRST         NRSTB   6  GND          N/A
+ *
+ * SPI0 is also available on each of the mikroBUS Click connectors (in
+ * addition to 5V and GND).  The connectivity differs only in the chip
+ * select pin:
+ *
+ *   MikroBUS A:              MikroBUS B:
+ *   Pin  Board Signal SAM3X  Pin  Board Signal SAM3X
+ *   ---- ------------ -----  ---- ------------ -----
+ *   CS   SPI0_CS0     PA28   CS   PA29         PA29
+ *   SCK  SPI0_SCK     PA27   SCK  SPI0_SCK     PA27
+ *   MISO SPI0_MISO    PA25   MISO SPI0_MISO    PA25
+ *   MOSI SPI0_MOSI    PA26   MOSI SPI0_MOSI    PA26
+ *
+ *   MikroBUS C:              MikroBUS D:
+ *   Pin  Board Signal SAM3X  Pin  Board Signal SAM3X
+ *   ---- ------------ -----  ---- ------------ -----
+ *   CS   SPI0_CS2     PB21   CS   SPI0_CS3     PB23
+ *   SCK  SPI0_SCK     PA27   SCK  SPI0_SCK     PA27
+ *   MISO SPI0_MISO    PA25   MISO SPI0_MISO    PA25
+ *   MOSI SPI0_MOSI    PA26   MOSI SPI0_MOSI    PA26
+ */
+
+#define GPIO_MBA_CS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOA | GPIO_PIN28)
+#define MBA_CSNUM    0
+
+#define GPIO_MBB_CS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOA | GPIO_PIN29)
+#define MBB_CSNUM    1
+
+#define GPIO_MBC_CS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOB | GPIO_PIN21)
+#define MBC_CSNUM    2
+
+#define GPIO_MBD_CS  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOB | GPIO_PIN23)
+#define MBD_CSNUM    3
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
