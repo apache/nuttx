@@ -75,7 +75,7 @@
 #define sam_apbc_enableperiph(s)      modifyreg32(SAM_PM_APBCMASK,0,s)
 
 #define sam_pac2_enableperiph()       sam_apbc_enableperiph(PM_APBCMASK_PAC2)
-#define sam_devsys_enableperiph()     sam_apbc_enableperiph(PM_APBCMASK_EVSYS)
+#define sam_evsys_enableperiph()      sam_apbc_enableperiph(PM_APBCMASK_EVSYS)
 #define sam_sercom_enableperiph(n)    sam_apbc_enableperiph(PM_APBCMASK_SERCOM(n))
 #define sam_sercom0_enableperiph()    sam_apbc_enableperiph(PM_APBCMASK_SERCOM0)
 #define sam_sercom1_enableperiph()    sam_apbc_enableperiph(PM_APBCMASK_SERCOM1)
@@ -135,7 +135,7 @@
 #define sam_apbc_disableperiph(s)     modifyreg32(SAM_PM_APBCMASK,s,0)
 
 #define sam_pac2_disableperiph()      sam_apbc_disableperiph(PM_APBCMASK_PAC2)
-#define sam_devsys_disableperiph()    sam_apbc_disableperiph(PM_APBCMASK_EVSYS)
+#define sam_evsys_disableperiph()     sam_apbc_disableperiph(PM_APBCMASK_EVSYS)
 #define sam_sercom_disableperiph(n)   sam_apbc_disableperiph(PM_APBCMASK_SERCOM(n))
 #define sam_sercom0_disableperiph()   sam_apbc_disableperiph(PM_APBCMASK_SERCOM0)
 #define sam_sercom1_disableperiph()   sam_apbc_disableperiph(PM_APBCMASK_SERCOM1)
@@ -195,7 +195,7 @@
 #define sam_apbc_isenabled(s)         (getreg32(SAM_PM_APBCMASK) & (s)) != 0)
 
 #define sam_pac2_isenabled()          sam_apbc_isenabled(PM_APBCMASK_PAC2)
-#define sam_devsys_isenabled()        sam_apbc_isenabled(PM_APBCMASK_EVSYS)
+#define sam_evsys_isenabled()         sam_apbc_isenabled(PM_APBCMASK_EVSYS)
 #define sam_sercom_isenabled(n)       sam_apbc_isenabled(PM_APBCMASK_SERCOM(n))
 #define sam_sercom0_isenabled()       sam_apbc_isenabled(PM_APBCMASK_SERCOM0)
 #define sam_sercom1_isenabled()       sam_apbc_isenabled(PM_APBCMASK_SERCOM1)

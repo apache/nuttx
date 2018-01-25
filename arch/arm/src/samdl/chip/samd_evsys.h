@@ -68,9 +68,9 @@
 #define SAM_EVSYS_CTRL               (SAM_EVSYS_BASE+SAM_EVSYS_CTRL_OFFSET)
 #define SAM_EVSYS_CHANNEL            (SAM_EVSYS_BASE+SAM_EVSYS_CHANNEL_OFFSET)
 #define SAM_EVSYS_USER               (SAM_EVSYS_BASE+SAM_EVSYS_USER_OFFSET)
-#define SAM_EVSYS_CHSTATUS           (SAM_EVSYS_BASE+SAM_EVSYS_CHSTATUS_OFFSET
-#define SAM_EVSYS_INTENCLR           (SAM_EVSYS_BASE+SAM_EVSYS_INTENCLR_OFFSET
-#define SAM_EVSYS_INTENSET           (SAM_EVSYS_BASE+SAM_EVSYS_INTENSET_OFFSET
+#define SAM_EVSYS_CHSTATUS           (SAM_EVSYS_BASE+SAM_EVSYS_CHSTATUS_OFFSET)
+#define SAM_EVSYS_INTENCLR           (SAM_EVSYS_BASE+SAM_EVSYS_INTENCLR_OFFSET)
+#define SAM_EVSYS_INTENSET           (SAM_EVSYS_BASE+SAM_EVSYS_INTENSET_OFFSET)
 #define SAM_EVSYS_INTFLAG            (SAM_EVSYS_BASE+SAM_EVSYS_INTFLAG_OFFSET)
 
 /* EVSYS register bit definitions ***********************************************************/
@@ -302,12 +302,14 @@
 
 /* Channel status register */
 
-#define EVSYS_CHSTATUS_USRRDY_SHIFT  (0)       /* Bits 0-7: User Ready for Channel n, n=0-7 */
-#define EVSYS_CHSTATUS_USRRDY_MASK   (0xff << EVSYS_CHSTATUS_USRRDY_SHIFT)
-#  define EVSYS_CHSTATUS_USRRDY(n)   (1 << (n))
-#define EVSYS_CHSTATUS_CHBUSY_SHIFT  (8)       /* Bits 8-15: Channel Busy n, n=0-7 */
-#define EVSYS_CHSTATUS_CHBUSY_MASK   (0xff << EVSYS_CHSTATUS_CHBUSY_SHIFT)
-#  define EVSYS_CHSTATUS_CHBUSY(n)   (1 << ((n) + 8))
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define EVSYS_CHSTATUS_USRRDY_SHIFT  (0)       /* Bits 0-7: User Ready for Channel n, n=0-7 */
+#  define EVSYS_CHSTATUS_USRRDY_MASK   (0xff << EVSYS_CHSTATUS_USRRDY_SHIFT)
+#    define EVSYS_CHSTATUS_USRRDY(n)   (1 << (n))
+#  define EVSYS_CHSTATUS_CHBUSY_SHIFT  (8)       /* Bits 8-15: Channel Busy n, n=0-7 */
+#  define EVSYS_CHSTATUS_CHBUSY_MASK   (0xff << EVSYS_CHSTATUS_CHBUSY_SHIFT)
+#    define EVSYS_CHSTATUS_CHBUSY(n)   (1 << ((n) + 8))
+#endif
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 #  define EVSYS_CHSTATUS_USRRDYH_SHIFT  (16)       /* Bits 16-19: User Ready for Channel n, n=8-11 */
@@ -320,12 +322,14 @@
 
 /* Interrupt enable clear, interrupt enable set, and interrupt flag status and clear registers */
 
-#define EVSYS_INT_OVR_SHIFT          (0)       /* Bits 0-7: Overrun channel n interrupt, n=0-7 */
-#define EVSYS_INT_OVR_MASK           (0xff << EVSYS_INT_OVR_SHIFT)
-#  define EVSYS_INT_OVR(n)           (1 << (n))
-#define EVSYS_INT_EVD_SHIFT          (8)       /* Bits 8-15: Event detected channel n interrupt, n=0-7 */
-#define EVSYS_INT_EVD_MASK           (0xff << EVSYS_INT_EVD_SHIFT)
-#  define EVSYS_INT_EVD(n)           (1 << ((n) + 8))
+#ifdef CONFIG_ARCH_FAMILY_SAMD20
+#  define EVSYS_INT_OVR_SHIFT          (0)       /* Bits 0-7: Overrun channel n interrupt, n=0-7 */
+#  define EVSYS_INT_OVR_MASK           (0xff << EVSYS_INT_OVR_SHIFT)
+#    define EVSYS_INT_OVR(n)           (1 << (n))
+#  define EVSYS_INT_EVD_SHIFT          (8)       /* Bits 8-15: Event detected channel n interrupt, n=0-7 */
+#  define EVSYS_INT_EVD_MASK           (0xff << EVSYS_INT_EVD_SHIFT)
+#    define EVSYS_INT_EVD(n)           (1 << ((n) + 8))
+#endif
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 #  define EVSYS_INT_OVR_SHIFT        (16)      /* Bits 16-19: Overrun channel n interrupt, n=8-11 */
