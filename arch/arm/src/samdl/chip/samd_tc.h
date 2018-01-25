@@ -153,10 +153,10 @@
 #define TC_CTRLA_SWRST               (1 << 0)  /* Bit 0:  Software reset */
 #define TC_CTRLA_ENABLE              (1 << 1)  /* Bit 1:  Enable */
 #define TC_CTRLA_MODE_SHIFT          (2)
-#define TC_CTRLA_MODE_MASK           (3 << TC_CTRLA_SHIFT)
-#  define TC_CTRLA_MODE_COUNT16      (0 << TC_CTRLA_SHIFT)
-#  define TC_CTRLA_MODE_COUNT8       (1 << TC_CTRLA_SHIFT)
-#  define TC_CTRLA_MODE_COUNT32      (2 << TC_CTRLA_SHIFT)
+#define TC_CTRLA_MODE_MASK           (3 << TC_CTRLA_MODE_SHIFT)
+#  define TC_CTRLA_MODE_COUNT16      (0 << TC_CTRLA_MODE_SHIFT)
+#  define TC_CTRLA_MODE_COUNT8       (1 << TC_CTRLA_MODE_SHIFT)
+#  define TC_CTRLA_MODE_COUNT32      (2 << TC_CTRLA_MODE_SHIFT)
 #define TC_CTRLA_WAVEGEN_SHIFT       (5)
 #define TC_CTRLA_WAVEGEN_MASK        (3 << TC_CTRLA_WAVEGEN_SHIFT)
 #  define TC_CTRLA_WAVEGEN_NFRQ      (0 << TC_CTRLA_WAVEGEN_SHIFT)
