@@ -42,8 +42,10 @@
 
 #include <nuttx/config.h>
 
-#include "chip.h"
-#include "chip/stm32_bkp.h"
+#ifdef CONFIG_STM32_STM32F10XX
+#  include "chip.h"
+#  include "chip/stm32_bkp.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
