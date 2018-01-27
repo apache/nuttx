@@ -1737,7 +1737,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 #ifdef CONFIG_SAMV7_QSPI
   if (intf == 0)
     {
-      /* If this function is called multiple times, the following operatinos
+      /* If this function is called multiple times, the following operations
        * will be performed multiple times.
        */
 

@@ -165,7 +165,7 @@ config SAMA5_HAVE_VDEC
 	bool
 	default n
 
-# Summary configuratinos
+# Summary configurations
 
 config SAMA5_FLEXCOM
 	bool
