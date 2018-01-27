@@ -64,8 +64,8 @@
  *   LED_PANIC        The system has crashed  2Hz N/C N/C N/C N/C
  *   LED_IDLE         MCU is is sleep mode    ---- Not used -----
  *
- * Thus if LED L is glowing on and all other LEDs are off (except LED D
- * which was left on but is no longer controlled by NuttX and so may be in
+ * Thus if LED L is faintly glowing and all other LEDs are off (except LED
+ * D which was left on but is no longer controlled by NuttX and so may be in
  * any state), NuttX has successfully booted and is, apparently, running
  * normally and taking interrupts.  If any of LEDs A-D are statically set,
  * then NuttX failed to boot and the LED indicates the initialization phase
@@ -99,7 +99,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Processor Definitinos
+ * Processor Definitions
  ****************************************************************************/
 
 /* LED indices */
@@ -123,7 +123,7 @@ static void board_autoled_setone(int ledndx)
   sam_gpiowrite(GPIO_LED_L, ledon[INDEX_LED_L]);
   sam_gpiowrite(GPIO_LED_A, ledon[INDEX_LED_A]);
   sam_gpiowrite(GPIO_LED_B, ledon[INDEX_LED_B]);
-  sam_gpiowrite(GPIO_LED_C, ledon[INDEX_LED_D]);
+  sam_gpiowrite(GPIO_LED_C, ledon[INDEX_LED_C]);
   sam_gpiowrite(GPIO_LED_D, ledon[INDEX_LED_D]);
 }
 
@@ -176,7 +176,7 @@ void board_autoled_on(int led)
         board_autoled_setone(INDEX_LED_B);
         break;
 
-     case 2:
+      case 2:
         board_autoled_setone(INDEX_LED_C);
         break;
 
