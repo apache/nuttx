@@ -99,7 +99,7 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  *     spinlock.
  *   - Another task on CPUm attempts to enter the critical section but has
  *     to wait, spinning to get g_cpu_irqlock with interrupts disabled.
- *   - The task on CPUn causes a new task to become ready-torun and the
+ *   - The task on CPUn causes a new task to become ready-to-run and the
  *     scheduler selects CPUm.  CPUm is requested to pause via a pause
  *     interrupt.
  *   - But the task on CPUm is also attempting to enter the critical
@@ -641,7 +641,7 @@ bool irq_cpu_locked(int cpu)
     {
       /* In this case g_cpu_irqlock should be unlocked.  However, if
        * the lock was established in the interrupt handler AND there are
-       * no bits set in g_cpu_irqset, that probabaly means only that
+       * no bits set in g_cpu_irqset, that probably means only that
        * critical section was established from an interrupt handler.
        * Return false in either case.
        */

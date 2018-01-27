@@ -141,7 +141,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
  *
  *   If the currently active task has preemption disabled and the new TCB
  *   would cause this task to be pre-empted, the new task is added to the
- *   g_pendingtasks list instead.  Thepending tasks will be made
+ *   g_pendingtasks list instead.  The pending tasks will be made
  *   ready-to-run when preemption isunlocked.
  *
  * Inputs:
@@ -405,7 +405,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
           /* No context switch.  Assign the CPU and set the assigned state.
            *
            * REVISIT: I have seen this assertion fire.  Apparently another
-           * CPU may add another, higher prioirity task to the same
+           * CPU may add another, higher priority task to the same
            * g_assignedtasks[] list sometime after sched_cpu_select() was
            * called above, leaving this TCB in the wrong task list if task_state
            * is TSTATE_TASK_ASSIGNED).

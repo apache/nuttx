@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_FLIPNCLICK_SAM3X_SRC_ARDUNO_DUE_H
-#define __CONFIGS_FLIPNCLICK_SAM3X_SRC_ARDUNO_DUE_H
+#ifndef __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H
+#define __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H
 
 /************************************************************************************
  * Included Files
@@ -159,5 +159,5 @@
 int sam_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_FLIPNCLICK_SAM3X_SRC_ARDUNO_DUE_H */
+#endif /* __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H */
 

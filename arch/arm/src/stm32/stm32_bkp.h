@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /* Only the STM32 F1 family has a dedicated address region for BKP memory.  For F2,
- * F3, and F3 parts, the bKP registers lie in the same address region as the RTCC
+ * F3, and F4 parts, the bKP registers lie in the same address region as the RTCC
  * and the definitions in chip/stm32_rtcc.h should be used to access backup
  * registers.  NOTE:  These definitions are not interchangeable!
  */

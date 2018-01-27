@@ -397,7 +397,7 @@ Loading Code
      3  GND            GND
      4  JTAG_TCK       SWDCLK/TCK        SAM3X pin 28, Pulled up on board
      5  GND            GND
-     6  JTAG_TDO       SWO/EXta/TRACECTL SAM3X pin 30, ulled up on board
+     6  JTAG_TDO       SWO/EXta/TRACECTL SAM3X pin 30, Pulled up on board
      7  N/C            Key
      8  JTAG_TDI       NC/EXTb/TDI       SAM3X pin 29, Pulled up on board
      9  GND            GNDDetect

@@ -351,7 +351,8 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
         pid, path, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to
-   * the signal mask, then start the new child task directly from the parent task.
+   * the signal mask, then start the new child task directly from the parent
+   * task.
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
