@@ -748,7 +748,6 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
         {
           per = HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMA);
 
-
           if (out < priv->v_in) out = priv->v_in;
           if (out >= BOOST_VOLT_MAX) out = BOOST_VOLT_MAX;
 
@@ -767,9 +766,24 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
 
       case CONVERTER_MODE_BUCKBOOST:
         {
-          /* do something */
+          /* Buck converter is set to fixed duty cycle (80%).
+           * Now we need set boost converter
+           */
 
-#warning TODO: buck boost mode
+          per = HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMA);
+
+          if (out < priv->v_in) out = priv->v_in;
+          if (out >= BOOST_VOLT_MAX) out = BOOST_VOLT_MAX;
+
+          duty = 1.0 - priv->v_in/out;
+
+#warning TODO: current limit in buck boost mode
+
+          cmp = (uint16_t)(per * duty);
+
+          /* Set T12 duty cycle. T5 is complementary to T12 */
+
+          HRTIM_CMP_SET(hrtim, HRTIM_TIMER_TIMB, HRTIM_CMP1, cmp);
 
           break;
         }
@@ -856,6 +870,12 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
 
           HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_SET_PER);
           HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_RST_CMP1);
+
+          /* Set fixed duty cycle (80%) on buck converter (T4 and T11) */
+
+          HRTIM_CMP_SET(hrtim, HRTIM_TIMER_TIMA, HRTIM_CMP1,
+                        0.8 * ((uint16_t)HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMA)));
+
 
           break;
         }
