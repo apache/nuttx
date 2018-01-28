@@ -180,6 +180,29 @@
 #    error "CONFIG_STM32_HRTIM_CHOPPER must be set"
 #  endif
 #endif
+#if defined(CONFIG_STM32_HRTIM_TIMA_PSHPLL) || defined(CONFIG_STM32_HRTIM_TIMB_PSHPLL) || \
+    defined(CONFIG_STM32_HRTIM_TIMC_PSHPLL) || defined(CONFIG_STM32_HRTIM_TIMD_PSHPLL) || \
+    defined(CONFIG_STM32_HRTIM_TIME_PSHPLL)
+#  ifndef CONFIG_STM32_HRTIM_PUSHPULL
+#    error "CONFIG_STM32_HRTIM_PUSHPULL must be set"
+#  endif
+#endif
+
+#if defined(CONFIG_STM32_HRTIM_TIMA_DT) && defined(CONFIG_STM32_HRTIM_TIMA_PSHPLL)
+#  error "The deadtime cannot be used simultaneously with the push-pull mode"
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIMB_DT) && defined(CONFIG_STM32_HRTIM_TIMB_PSHPLL)
+#  error "The deadtime cannot be used simultaneously with the push-pull mode"
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIMC_DT) && defined(CONFIG_STM32_HRTIM_TIMC_PSHPLL)
+#  error "The deadtime cannot be used simultaneously with the push-pull mode"
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIMD_DT) && defined(CONFIG_STM32_HRTIM_TIMD_PSHPLL)
+#  error "The deadtime cannot be used simultaneously with the push-pull mode"
+#endif
+#if defined(CONFIG_STM32_HRTIM_TIME_DT) && defined(CONFIG_STM32_HRTIM_TIME_PSHPLL)
+#  error "The deadtime cannot be used simultaneously with the push-pull mode"
+#endif
 
 #if defined(CONFIG_STM32_HRTIM_ADC1_TRG1) || defined(CONFIG_STM32_HRTIM_ADC1_TRG2) || \
     defined(CONFIG_STM32_HRTIM_ADC1_TRG3) || defined(CONFIG_STM32_HRTIM_ADC1_TRG4) || \
@@ -305,7 +328,7 @@ struct stm32_hrtim_timout_s
 #ifdef CONFIG_STM32_HRTIM_CHOPPER
 struct stm32_hrtim_chopper_s
 {
-  uint16_t start:4;              /* Chopper start pulsewidth */
+  uint16_t start_pulse:4;        /* Chopper start pulsewidth */
   uint16_t freq:4;               /* Chopper carrier frequency value */
   uint16_t duty:3;               /* Chopper duty cycle */
   uint16_t _res:5;               /* Reserved */
@@ -345,6 +368,8 @@ struct stm32_hrtim_tim_burst_s
 
 struct stm32_hrtim_pwm_s
 {
+  uint8_t pushpull:1;
+  uint8_t res:7;
   struct stm32_hrtim_timout_s ch1; /* Channel 1 Set/Reset configuration*/
   struct stm32_hrtim_timout_s ch2; /* Channel 2 Set/Reset configuration */
 
@@ -786,6 +811,9 @@ static struct stm32_hrtim_slave_priv_s g_tima_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMA_PWM
   .pwm =
   {
+#ifdef CONFIG_STM32_HRTIM_TIMA_PSHPLL
+    .pushpull = 1,
+#endif
 #ifdef CONFIG_STM32_HRTIM_TIMA_PWM_CH1
     .ch1 =
     {
@@ -883,6 +911,9 @@ static struct stm32_hrtim_slave_priv_s g_timb_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMB_PWM
   .pwm =
   {
+#ifdef CONFIG_STM32_HRTIM_TIMB_PSHPLL
+    .pushpull = 1,
+#endif
 #ifdef CONFIG_STM32_HRTIM_TIMB_PWM_CH1
     .ch1 =
     {
@@ -980,6 +1011,9 @@ static struct stm32_hrtim_slave_priv_s g_timc_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMC_PWM
   .pwm =
   {
+#ifdef CONFIG_STM32_HRTIM_TIMC_PSHPLL
+    .pushpull = 1,
+#endif
 #ifdef CONFIG_STM32_HRTIM_TIMC_PWM_CH1
     .ch1 =
     {
@@ -1077,6 +1111,9 @@ static struct stm32_hrtim_slave_priv_s g_timd_priv =
 #ifdef CONFIG_STM32_HRTIM_TIMD_PWM
   .pwm =
   {
+#ifdef CONFIG_STM32_HRTIM_TIMD_PSHPLL
+    .pushpull = 1,
+#endif
 #ifdef CONFIG_STM32_HRTIM_TIMD_PWM_CH1
     .ch1 =
     {
@@ -1174,6 +1211,9 @@ static struct stm32_hrtim_slave_priv_s g_time_priv =
 #ifdef CONFIG_STM32_HRTIM_TIME_PWM
   .pwm =
   {
+#ifdef CONFIG_STM32_HRTIM_TIME_PSHPLL
+    .pushpull = 1,
+#endif
 #ifdef CONFIG_STM32_HRTIM_TIME_PWM_CH1
     .ch1 =
     {
@@ -1518,7 +1558,7 @@ static const struct stm32_hrtim_ops_s g_hrtim1ops =
   .burst_pre_get = hrtim_burst_pre_get,
 #endif
 #ifdef CONFIG_STM32_HRTIM_CHOPPER
-  .chopper_enable = hrtim_chopper_enable
+  .chopper_enable = hrtim_chopper_enable,
 #endif
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
   .deadtime_update = hrtim_deadtime_update,
@@ -2808,6 +2848,15 @@ static int hrtim_tim_outputs_config(FAR struct stm32_hrtim_s *priv, uint8_t time
     }
 #endif
 
+#ifdef CONFIG_STM32_HRTIM_PUSHPULL
+  if (slave->pwm.pushpull == 1)
+    {
+      /* Enable push-pull mode */
+
+      hrtim_tim_modifyreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET, 0, HRTIM_TIMCR_PSHPLL);
+    }
+#endif
+
 errout:
   return ret;
 }
@@ -3640,13 +3689,13 @@ static int hrtim_chopper_enable(FAR struct hrtim_dev_s *dev, uint8_t timer,
     {
       /* Set enable bit */
 
-      hrtim_tim_modifyreg(priv, index, STM32_HRTIM_TIM_OUTR_OFFSET, 0, val);
+      hrtim_tim_modifyreg(priv, timer, STM32_HRTIM_TIM_OUTR_OFFSET, 0, val);
     }
   else
     {
       /* Clear enable bit */
 
-      hrtim_tim_modifyreg(priv, index, STM32_HRTIM_TIM_OUTR_OFFSET, val, 0);
+      hrtim_tim_modifyreg(priv, timer, STM32_HRTIM_TIM_OUTR_OFFSET, val, 0);
     }
 
 errout:
@@ -3698,6 +3747,7 @@ static int hrtim_tim_chopper_cfg(FAR struct stm32_hrtim_s *priv,
 
   hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_CHPR_OFFSET, regval);
 
+errout:
   return OK;
 }
 
@@ -4509,13 +4559,6 @@ static void hrtim_tim_mode_set(FAR struct stm32_hrtim_s *priv, uint8_t timer,
   if (mode & HRTIM_MODE_CONT)
     {
       regval |= HRTIM_CMNCR_CONT;
-    }
-
-  /* Configure push-pull mode. Only Slaves */
-
-  if (mode & HRTIM_MODE_PSHPLL && timer != HRTIM_TIMER_MASTER)
-    {
-      regval |= HRTIM_TIMCR_PSHPLL;
     }
 
   /* Write register */

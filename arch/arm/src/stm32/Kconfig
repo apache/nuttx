@@ -2195,7 +2195,7 @@ config STM32_COMP6
 config STM32_COMP7
 	bool "COMP7"
 	default n
-	depends on STM32_HAVE_COMP6
+	depends on STM32_HAVE_COMP7
 
 config STM32_BKP
 	bool "BKP"
@@ -5864,6 +5864,11 @@ config STM32_HRTIM_DEADTIME
 	depends on STM32_HRTIM_PWM
 	default n
 
+config STM32_HRTIM_PUSHPULL
+	bool "HRTIM push-pull mode"
+	depends on STM32_HRTIM_PWM
+	default n
+
 config STM32_HRTIM_DMA
 	bool "HRTIM DMA"
 	default n
@@ -6041,6 +6046,11 @@ config STM32_HRTIM_TIMA_DT
 	default n
 	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMA_PWM)
 
+config STM32_HRTIM_TIMA_PSHPLL
+	bool "HRTIM TIMA PWM Push-pull mode"
+	default n
+	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMA_PWM)
+
 endmenu # "HRTIM Timer A Configuration"
 
 menu "HRTIM Timer B Configuration"
@@ -6105,6 +6115,11 @@ config STM32_HRTIM_TIMB_DT
 	bool "HRTIM TIMB PWM Dead-time"
 	default n
 	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMB_PWM)
+
+config STM32_HRTIM_TIMB_PSHPLL
+	bool "HRTIM TIMB PWM Push-pull mode"
+	default n
+	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMB_PWM)
 
 endmenu # "HRTIM Timer B Configuration"
 
@@ -6171,6 +6186,11 @@ config STM32_HRTIM_TIMC_DT
 	default n
 	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMC_PWM)
 
+config STM32_HRTIM_TIMC_PSHPLL
+	bool "HRTIM TIMC PWM Push-pull mode"
+	default n
+	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMC_PWM)
+
 endmenu # "HRTIM Timer C Configuration"
 
 menu "HRTIM Timer D Configuration"
@@ -6236,6 +6256,11 @@ config STM32_HRTIM_TIMD_DT
 	default n
 	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMD_PWM)
 
+config STM32_HRTIM_TIMD_PSHPLL
+	bool "HRTIM TIMD PWM Push-pull mode"
+	default n
+	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMD_PWM)
+
 endmenu # "HRTIM Timer D Configuration"
 
 menu "HRTIM Timer E Configuration"
@@ -6300,6 +6325,11 @@ config STM32_HRTIM_TIME_DT
 	bool "HRTIM TIME PWM Dead-time"
 	default n
 	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIME_PWM)
+
+config STM32_HRTIM_TIME_PSHPLL
+	bool "HRTIM TIME PWM Push-pull mode"
+	default n
+	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIME_PWM)
 
 endmenu # "HRTIM Timer E Configuration"
 
