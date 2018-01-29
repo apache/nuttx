@@ -36,7 +36,7 @@
 
 /************************************************************************************
  * The external functions, stm32_spi1/2/3/4/5/6select and stm32_spi1/2/3/4/5/6status
- * must be * provided by board-specific logic.  They are implementations of the select
+ * must be provided by board-specific logic.  They are implementations of the select
  * and status methods of the SPI interface defined by struct spi_ops_s (see
  * include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
  * are provided by common STM32 logic.  To use this common SPI logic on your
@@ -1190,6 +1190,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
+#ifdef CONFIG_STM32F7_SPI_DMA
+  uint16_t cr2bits;
+#endif
 
   spiinfo("mode=%d\n", mode);
 
@@ -1225,9 +1228,39 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
+      /* Disable SPI then change mode */
+
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
       spi_modifycr1(priv, setbits, clrbits);
+
+#ifdef CONFIG_STM32F7_SPI_DMA
+      /* Enabling SPI causes a spurious received character indication
+       * which confuse the DMA controller so we disable DMA during that
+       * enabling; and flush the SPI RX FIFO before re-enabling DMA.
+       */
+
+      cr2bits = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+      spi_modifycr2(priv, 0, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+#endif
+
+      /* Re-enable SPI */
+
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
+      while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_FRLVL_MASK) != 0)
+        {
+          /* Flush SPI read FIFO */
+
+          spi_getreg(priv, STM32_SPI_DR_OFFSET);
+        }
+
+#ifdef CONFIG_STM32F7_SPI_DMA
+
+      /* Re-enable DMA (with SPI disabled) */
+
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr2(priv, cr2bits & (SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN), 0);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#endif
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
