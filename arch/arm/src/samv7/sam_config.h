@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam-config.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,7 +144,11 @@
 #  undef CONFIG_SAMV7_USART2
 #endif
 
-/* Are any USARTs enabled? */
+/* Are any USARTs enabled?
+ *
+ * REVISIT: Setting HAVE_UART_DEVICE only makes sense of the USART is being
+ * used as a UART.
+ */
 
 #if defined(CONFIG_SAMV7_USART0) || defined(CONFIG_SAMV7_USART1) || \
     defined(CONFIG_SAMV7_USART2)

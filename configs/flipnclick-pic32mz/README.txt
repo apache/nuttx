@@ -218,8 +218,8 @@ LEDs and Buttons
     LED_PANIC        The system has crashed  2Hz N/C N/C N/C N/C
     LED_IDLE         MCU is is sleep mode    ---- Not used -----
 
-  Thus if LED L is glowing on and all other LEDs are off (except LED D which
-  was left on but is no longer controlled by NuttX and so may be in any
+  Thus if LED L is glowing faintly and all other LEDs are off (except LED D
+  which was left on but is no longer controlled by NuttX and so may be in any
   state), NuttX has successfully booted and is, apparently, running normally
   and taking interrupts.  If any of LEDs A-D are statically set, then NuttX
   failed to boot and the LED indicates the initialization phase where the

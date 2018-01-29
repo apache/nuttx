@@ -71,8 +71,8 @@ Buttons and LEDs
     LED_PANIC        The system has crashed  2Hz N/C N/C N/C N/C
     LED_IDLE         MCU is is sleep mode    ---- Not used -----
 
-  Thus if LED L is glowing on and all other LEDs are off (except LED D which
-  was left on but is no longer controlled by NuttX and so may be in any
+  Thus if LED L is glowing faintly and all other LEDs are off (except LED D
+  which was left on but is no longer controlled by NuttX and so may be in any
   state), NuttX has successfully booted and is, apparently, running normally
   and taking interrupts.  If any of LEDs A-D are statically set, then NuttX
   failed to boot and the LED indicates the initialization phase where the
@@ -397,7 +397,7 @@ Loading Code
      3  GND            GND
      4  JTAG_TCK       SWDCLK/TCK        SAM3X pin 28, Pulled up on board
      5  GND            GND
-     6  JTAG_TDO       SWO/EXta/TRACECTL SAM3X pin 30, ulled up on board
+     6  JTAG_TDO       SWO/EXta/TRACECTL SAM3X pin 30, Pulled up on board
      7  N/C            Key
      8  JTAG_TDI       NC/EXTb/TDI       SAM3X pin 29, Pulled up on board
      9  GND            GNDDetect

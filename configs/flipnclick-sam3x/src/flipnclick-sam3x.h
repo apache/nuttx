@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_FLIPNCLICK_SAM3X_SRC_ARDUNO_DUE_H
-#define __CONFIGS_FLIPNCLICK_SAM3X_SRC_ARDUNO_DUE_H
+#ifndef __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H
+#define __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H
 
 /************************************************************************************
  * Included Files
@@ -68,15 +68,15 @@
  * A high output value illuminates the LEDs.
  */
 
-#define GPIO_LED_L   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LED_L   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                       GPIO_PORT_PIOB | GPIO_PIN27)
-#define GPIO_LED_A   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LED_A   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                       GPIO_PORT_PIOC | GPIO_PIN6)
-#define GPIO_LED_B   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LED_B   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                       GPIO_PORT_PIOC | GPIO_PIN5)
-#define GPIO_LED_C   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LED_C   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                       GPIO_PORT_PIOC | GPIO_PIN7)
-#define GPIO_LED_D   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
+#define GPIO_LED_D   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                       GPIO_PORT_PIOC | GPIO_PIN8)
 
 /* SPI chip select pins.
@@ -159,5 +159,5 @@
 int sam_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_FLIPNCLICK_SAM3X_SRC_ARDUNO_DUE_H */
+#endif /* __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H */
 

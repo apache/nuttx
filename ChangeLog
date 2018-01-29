@@ -17445,7 +17445,7 @@
 	* The lcdrw example has been removed because it violates the portable OS
 	  interface (2017-10-14).
 	* All configurations that use NXIMAGE or NXHELLO must select
-	  NX_MULTIUSER.  All configuratinos that use examples/nxterm must enable
+	  NX_MULTIUSER.  All configurations that use examples/nxterm must enable
 	  CONFIG_LIB_BOARDCTL (2017-10-14).
 	* configs/stm32f103-minimum: Add support for LM75 in the
 	  stm32f103-minimum board.  From Alan Carvalho de Assis (2017-10-14).

@@ -415,10 +415,6 @@ enum stm32_hrtim_mode_e
   HRTIM_MODE_HALF    = (1 << 1),  /* Half mode */
   HRTIM_MODE_RETRIG  = (1 << 2),  /* Re-triggerable mode */
   HRTIM_MODE_CONT    = (1 << 3),  /* Continuous mode */
-
-  /* Only slave Timers */
-
-  HRTIM_MODE_PSHPLL  = (1 << 7),  /* Push-Pull mode */
 };
 
 /* HRTIM Slave Timer auto-delayed mode
