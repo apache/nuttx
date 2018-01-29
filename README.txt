@@ -76,10 +76,10 @@ ENVIRONMENTS
       is that it is closer to a native Windows environment and uses only a
       minimal of add-on POSIX-land tools.
 
-    - NuttX can also be installed and built on a native Windows system, but
-      with some potential tool-related issues (see the discussion "Native
-      Windows Build" under "Building NuttX" below).  GNUWin32 is used to
-      provide compatible native windows tools.
+  NuttX can also be installed and built on a native Windows system, but with
+  some potential tool-related issues (see the discussion "Native Windows
+  Build" under "Building NuttX" below).  GNUWin32 is used to provide
+  compatible native windows tools.
 
 Installing Cygwin
 -----------------
@@ -635,7 +635,7 @@ Instantiating "Canned" Configurations
       refreshing the configuration as described below.
 
       NOTE:  NuttX uses only compressed defconfig files.  For the NuttX
-      defconfig files, this refrshing step is *NOT* optional; it is also
+      defconfig files, this refreshing step is *NOT* optional; it is also
       necessary to uncompress and regenerate the full making file.  This is
       discussed further below.
 
