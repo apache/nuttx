@@ -106,3 +106,7 @@ endif
 ifeq ($(CONFIG_SAMDL_EIC),y)
 CHIP_CSRCS += sam_eic.c
 endif
+
+ifeq ($(CONFIG_SAMDL_AC),y)
+CHIP_CSRCS += sam_ac.c
+endif
