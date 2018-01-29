@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#define _GNU_SOURCE
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <stdlib.h>

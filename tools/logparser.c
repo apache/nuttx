@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#define _GNU_SOURCE
 #include <stdbool.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -462,6 +463,7 @@ static void parse_file(FILE *stream)
             if (isspace(g_line[0]))
               {
                 char *endptr;
+                char *tmp;
 
                 /* Remove the newline from the end */
 
@@ -469,21 +471,24 @@ static void parse_file(FILE *stream)
                 endptr = &ptr[strlen(ptr) - 1];
                 trim_end(ptr, endptr);
 
-                /* Skip over certain crap lines added by GIT; Skip over
-                 * merge entries.
+                /* Change leading "* " to "- " */
+
+                tmp = ptr;
+                if (ptr[0] == '*' && ptr[1] == ' ')
+                  {
+                    *ptr = '-';
+                    tmp = ptr + 2;
+                  }
+
+                /* Skip over certain crap body lines added by GIT; Skip over
+                 * merge entries altogether.
                  */
 
-                if (strncmp(ptr, "Merged in ", 10) != 0 &&
-                    strncmp(ptr, "Approved-by: ", 13) != 0 &&
+                if (strncmp(tmp, "Merged in ", 10) != 0 &&
+                    strncmp(tmp, "Approved-by: ", 13) != 0 &&
+                    strncmp(tmp, "Signed-off-by: ", 15) != 0 &&
                     !merge)
                   {
-                    /* Change leading "* " to "- " */
-
-                    if (ptr[0] == '*' && ptr[1] == ' ')
-                      {
-                        *ptr = '-';
-                      }
-
                     /* Is this the first paragraph in the body? */
 
                     if (firstline)
@@ -492,7 +497,9 @@ static void parse_file(FILE *stream)
                       }
                     else
                       {
-                        /* Was this paragraph preceded by a blank line? */
+                        /* This paragraph is not the first, was it separated
+                         * from the previous paragraph by a blank line?
+                         */
 
                         if (lastblank)
                           {
