@@ -469,14 +469,22 @@ static void parse_file(FILE *stream)
                 endptr = &ptr[strlen(ptr) - 1];
                 trim_end(ptr, endptr);
 
-                /* Was this paragraph preceded by a blank line? */
+                /* Skip over certain crap lines added by GIT; Skip over
+                 * merge entries.
+                 */
 
-                if (!merge)
+                if (strncmp(ptr, "Merged in ", 10) != 0 &&
+                    strncmp(ptr, "Approved-by: ", 13) != 0 &&
+                    !merge)
                   {
-                    if (lastblank)
+                    /* Change leading "* " to "- " */
+
+                    if (ptr[0] == '*' && ptr[1] == ' ')
                       {
-                        putchar('\n');
+                        *ptr = '-';
                       }
+
+                    /* Is this the first paragraph in the body? */
 
                     if (firstline)
                       {
@@ -484,13 +492,21 @@ static void parse_file(FILE *stream)
                       }
                     else
                       {
+                        /* Was this paragraph preceded by a blank line? */
+
+                        if (lastblank)
+                          {
+                            putchar('\n');
+                          }
+
                         printf("\n\t  %s", ptr);
                       }
+
+                    firstline = false;
+                    lastblank = false;
                   }
 
                 consumed  = true;
-                lastblank = false;
-                firstline = false;
                 break;
               }
 
@@ -505,8 +521,9 @@ static void parse_file(FILE *stream)
 
             free(name);
             name  = NULL;
-            date  = NULL;
             free(date);
+            date  = NULL;
+
             state = STATE_IDLE;
             firstline = true;
             merge = false;
