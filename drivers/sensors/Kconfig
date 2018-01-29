@@ -338,6 +338,34 @@ config ADXL345_REGDEBUG
 
 endif # SENSORS_ADXL345
 
+config SENSORS_MAX44009
+	bool "Maxim MAX44009 ALS sensor"
+	default n
+	select I2C
+	---help---
+		Enables MAX44009 Ambient Light Sensor
+
+if SENSORS_MAX44009
+
+config MAX44009_I2C_FREQUENCY
+	int "MAX44009 I2C frequency"
+	default 400000
+	range 1 400000
+
+config DEBUG_MAX44009
+	bool "Enable debug support for the MAX44009"
+	default n
+	---help---
+		Enables debug support for the MAX44009
+
+config MAX44009_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Number of waiters to poll
+
+endif # SENSORS_MAX44009
+
 config SENSORS_MAX31855
 	bool "Maxim MAX31855 Driver"
 	default n

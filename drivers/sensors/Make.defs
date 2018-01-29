@@ -105,6 +105,10 @@ ifeq ($(CONFIG_SENSORS_LM92),y)
   CSRCS += lm92.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MAX44009),y)
+  CSRCS += max44009.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MB7040),y)
   CSRCS += mb7040.c
 endif
