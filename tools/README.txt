@@ -655,6 +655,11 @@ kconfig.bat
      -   option env="APPSDIR"
      +   default "../apps"
 
+logparser.c
+-----------
+
+  Convert a git log to ChangeLog format.
+
 mkimage.sh
 ----------
 
