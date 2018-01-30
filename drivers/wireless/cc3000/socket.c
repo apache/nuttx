@@ -130,7 +130,7 @@ int cc3000_socket(int domain, int type, int protocol)
 
   if (type < SOCK_STREAM || type >= ARRAY_SIZE(bsd2ti_types))
     {
-      errno = EPROTOTYPE;
+      set_errno(EPROTOTYPE);
       return -1;
     }
 
@@ -145,7 +145,7 @@ int cc3000_socket(int domain, int type, int protocol)
       break;
 
     default:
-      errno = EAFNOSUPPORT;
+      set_errno(EAFNOSUPPORT);
       return -1;
     }
 
@@ -163,7 +163,7 @@ int cc3000_socket(int domain, int type, int protocol)
         break;
 
       default:
-        errno = EPROTONOSUPPORT;
+        set_errno(EPROTONOSUPPORT);
         return -1;
     }
 

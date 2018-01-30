@@ -231,7 +231,7 @@ int usbmonitor_start(void)
                            (FAR char * const *)NULL);
       if (ret < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           uerr("ERROR: Failed to start the USB monitor: %d\n",
                errcode);
           UNUSED(errcode);

@@ -234,7 +234,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
   FAR struct loop_struct_s *dev;
   ssize_t nbytesread;
   off_t offset;
-  int ret;
+  off_t ret;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
@@ -249,10 +249,9 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
 
   offset = start_sector * dev->sectsize + dev->offset;
   ret = file_seek(&dev->devfile, offset, SEEK_SET);
-  if (ret == (off_t)-1)
+  if (ret < 0)
     {
-      ferr("ERROR: Seek failed for offset=%d: %d\n",
-           (int)offset, get_errno());
+      ferr("ERROR: Seek failed for offset=%d: %d\n", (int)offset, (int)ret);
       return -EIO;
     }
 
@@ -290,7 +289,7 @@ static ssize_t loop_write(FAR struct inode *inode,
   FAR struct loop_struct_s *dev;
   ssize_t nbyteswritten;
   off_t offset;
-  int ret;
+  off_t ret;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct loop_struct_s *)inode->i_private;
@@ -299,10 +298,9 @@ static ssize_t loop_write(FAR struct inode *inode,
 
   offset = start_sector * dev->sectsize + dev->offset;
   ret = file_seek(&dev->devfile, offset, SEEK_SET);
-  if (ret == (off_t)-1)
+  if (ret < 0)
     {
-      ferr("ERROR: Seek failed for offset=%d: %d\n",
-           (int)offset, get_errno());
+      ferr("ERROR: Seek failed for offset=%d: %d\n", (int)offset, (int)ret);
     }
 
   /* Then write the requested number of sectors to that position */

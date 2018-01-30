@@ -158,10 +158,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
   if (nrecvd < 0)
     {
-      errcode = get_errno();
-      gerr("ERROR: Receive protocol confirmation failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      gerr("ERROR: Receive protocol confirmation failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
     }
   else if (nrecvd == 0)
     {
@@ -226,10 +224,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
                       sizeof(struct rfb_selected_sectype_s), 0);
   if (nrecvd < 0)
     {
-      errcode = get_errno();
-      gerr("ERROR: Receive SecurityType failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      gerr("ERROR: Receive SecurityType failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
     }
   else if (nrecvd == 0)
     {
@@ -309,10 +305,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
                       sizeof(struct rfb_clientinit_s), 0);
   if (nrecvd < 0)
     {
-      errcode = get_errno();
-      gerr("ERROR: Receive ClientInit failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      gerr("ERROR: Receive ClientInit failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
     }
   else if (nrecvd == 0)
     {
@@ -383,10 +377,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
                       sizeof(struct rfb_setpixelformat_s), 0);
   if (nrecvd < 0)
     {
-      errcode = get_errno();
-      gerr("ERROR: Receive SetPixelFormat failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      gerr("ERROR: Receive SetPixelFormat failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
     }
   else if (nrecvd == 0)
     {
@@ -430,10 +422,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
                       CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
   if (nrecvd < 0)
     {
-      errcode = get_errno();
-      gerr("ERROR: Receive SetEncodings failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+      gerr("ERROR: Receive SetEncodings failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
     }
   else if (nrecvd == 0)
     {

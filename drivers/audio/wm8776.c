@@ -566,7 +566,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
                 CONFIG_WM8776_MSG_PRIO);
   if (ret < 0)
     {
-      auderr("ERROR: mq_send failed: %d\n", errno);
+      auderr("ERROR: mq_send failed: %d\n", get_errno());
     }
 }
 
@@ -913,7 +913,7 @@ static int wm8776_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
                     CONFIG_WM8776_MSG_PRIO);
       if (ret < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
           auderr("ERROR: mq_send failed: %d\n", errcode);

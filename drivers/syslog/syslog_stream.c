@@ -79,7 +79,7 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
                                         (size_t)iob->io_len);
           if (nbytes < 0)
             {
-              ret = -get_errno();
+              ret = (int)nbytes;
             }
           else
             {
@@ -172,18 +172,18 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
                */
 
               ret = syslog_putc(ch);
-              if (ret != EOF)
+              if (ret >= 0)
                 {
                   this->nput++;
                   return;
                 }
 
-              /* The special errno value -EINTR means that syslog_putc() was
+              /* The special return value -EINTR means that syslog_putc() was
                * awakened by a signal.  This is not a real error and must be
                * ignored in this context.
                */
             }
-          while (get_errno() == -EINTR);
+          while (ret == -EINTR);
         }
     }
 }

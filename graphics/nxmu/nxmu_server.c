@@ -45,6 +45,7 @@
 #include <semaphore.h>
 #include <mqueue.h>
 #include <fcntl.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -52,22 +53,6 @@
 #include <nuttx/nx/nx.h>
 
 #include "nxfe.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -190,7 +175,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   if (ret < 0)
     {
       gerr("ERROR: nxbe_configure failed: %d\n", -ret);
-      errno = -ret;
+      set_errno(-ret);
       return ERROR;
     }
 
@@ -199,7 +184,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   if (ret < 0)
     {
       gerr("ERROR: nxbe_colormap failed: %d\n", -ret);
-      errno = -ret;
+      set_errno(-ret);
       return ERROR;
     }
 #endif /* CONFIG_FB_CMAP */
@@ -301,15 +286,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
   /* Initialization *********************************************************/
 
-  /* Sanity checking */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!mqname || !dev)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
+  DEBUGASSERT(mqname != NULL || dev != NULL);
 
   /* Initialize and configure the server */
 

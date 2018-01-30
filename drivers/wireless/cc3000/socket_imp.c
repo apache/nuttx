@@ -512,14 +512,15 @@ int cc3000_gethostbyname_impl(char *hostname, uint16_t usNameLen,
                               unsigned long *out_ip_addr)
 {
   tBsdGethostbynameParams ret;
-  uint8_t *ptr, *args;
-
-  set_errno(EFAIL);
+  uint8_t *ptr;
+  uint8_t *args;
 
   if (usNameLen > CC3000_HOSTNAME_MAX_LENGTH)
     {
-      return get_errno();
+      return -EINVAL;
     }
+
+  ret.retVal = OK;
 
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + SIMPLE_LINK_HCI_CMND_TRANSPORT_HEADER_SIZE);
@@ -539,11 +540,9 @@ int cc3000_gethostbyname_impl(char *hostname, uint16_t usNameLen,
 
   SimpleLinkWaitEvent(HCI_EVNT_BSD_GETHOSTBYNAME, &ret);
 
-  set_errno(ret.retVal);
-
   (*((FAR long *)out_ip_addr)) = ret.outputAddress;
 
-  return ret.retVal;
+  return (int)ret.retVal;
 }
 #endif
 
