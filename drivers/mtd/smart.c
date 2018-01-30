@@ -3220,6 +3220,11 @@ static int smart_relocate_sector(FAR struct smart_struct_s *dev,
 
   ret = MTD_BWRITE(dev->mtd, newsector * dev->mtdblkspersector,
                    dev->mtdblkspersector, (FAR uint8_t *) dev->rwbuffer);
+  if (ret != dev->mtdblkspersector)
+    {
+      ferr("Error writing to new sector %d\n", newsector);
+      goto errout;
+    }
 
 #else   /* CONFIG_MTD_SMART_ENABLE_CRC */
 
@@ -3233,6 +3238,11 @@ static int smart_relocate_sector(FAR struct smart_struct_s *dev,
 
   ret = MTD_BWRITE(dev->mtd, newsector * dev->mtdblkspersector,
                    dev->mtdblkspersector, (FAR uint8_t *) dev->rwbuffer);
+  if (ret != dev->mtdblkspersector)
+    {
+      ferr("Error writing to new sector %d\n", newsector);
+      goto errout;
+    }
 
   /* Commit the sector */
 
@@ -3266,10 +3276,7 @@ static int smart_relocate_sector(FAR struct smart_struct_s *dev,
       ferr("ERROR: Error %d releasing old sector %d\n" -ret, oldsector);
     }
 
-#ifndef CONFIG_MTD_SMART_ENABLE_CRC
 errout:
-#endif
-
   return ret;
 }
 
