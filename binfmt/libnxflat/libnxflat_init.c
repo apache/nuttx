@@ -111,7 +111,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   loadinfo->filfd = open(filename, O_RDONLY);
   if (loadinfo->filfd < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       berr("Failed to open NXFLAT binary %s: %d\n", filename, errval);
       return -errval;
     }

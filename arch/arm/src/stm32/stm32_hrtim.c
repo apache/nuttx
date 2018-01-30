@@ -5313,7 +5313,6 @@ FAR struct hrtim_dev_s* stm32_hrtiminitialize(void)
       if (ret < 0)
         {
           tmrerr("ERROR: Failed to initialize HRTIM1: %d\n", ret);
-          errno = -ret;
           return NULL;
         }
 

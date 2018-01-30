@@ -360,7 +360,7 @@ int work_usrstart(void)
     DEBUGASSERT(g_usrwork.pid > 0);
     if (g_usrwork.pid < 0)
       {
-        int errcode = errno;
+        int errcode = get_errno();
         DEBUGASSERT(errcode > 0);
         return -errcode;
       }

@@ -101,7 +101,7 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
   ret = stat(filename, &buf);
   if (ret < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       berr("Failed to stat file: %d\n", errval);
       return -errval;
     }
@@ -165,7 +165,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   loadinfo->filfd = open(filename, O_RDONLY);
   if (loadinfo->filfd < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       berr("Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }

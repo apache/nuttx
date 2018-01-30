@@ -131,7 +131,7 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
       rpos = lseek(loadinfo->filfd, offset, SEEK_SET);
       if (rpos != offset)
         {
-          int errval = errno;
+          int errval = get_errno();
           berr("Failed to seek to position %d: %d\n", offset, errval);
           return -errval;
         }

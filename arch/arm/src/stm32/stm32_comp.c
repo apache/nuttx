@@ -1069,7 +1069,6 @@ FAR struct comp_dev_s* stm32_compinitialize(int intf)
   if (ret < 0)
     {
       aerr("ERROR: Failed to initialize COMP%d: %d\n", intf, ret);
-      errno = -ret;
       return NULL;
     }
 

@@ -98,7 +98,7 @@ static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo,
   ret = stat(filename, &buf);
   if (ret < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       serr("ERROR: Failed to stat file: %d\n", errval);
       return -errval;
     }
@@ -163,7 +163,7 @@ int modlib_initialize(FAR const char *filename,
   loadinfo->filfd = open(filename, O_RDONLY);
   if (loadinfo->filfd < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       serr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }

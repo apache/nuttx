@@ -209,7 +209,7 @@ int work_lpstart(void)
       DEBUGASSERT(pid > 0);
       if (pid < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           DEBUGASSERT(errcode > 0);
 
           serr("ERROR: kthread_create %d failed: %d\n", wndx, errcode);

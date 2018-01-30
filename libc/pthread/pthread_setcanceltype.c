@@ -85,7 +85,7 @@ int pthread_setcanceltype(int type, FAR int *oldtype)
   ret = task_setcanceltype(type, oldtype);
   if (ret < 0)
     {
-      ret = errno;
+      ret = get_errno();
     }
 
   return ret;

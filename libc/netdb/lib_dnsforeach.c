@@ -104,7 +104,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "rb");
   if (stream == NULL)
     {
-      int errcode = errno;
+      int errcode = get_errno();
       nerr("ERROR: Failed to open %s: %d\n",
         CONFIG_NETDB_RESOLVCONF_PATH, errcode);
       DEBUGASSERT(errcode > 0);

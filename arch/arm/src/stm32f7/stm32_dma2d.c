@@ -2261,7 +2261,6 @@ FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer)
     {
       lcderr("ERROR: Returning -EINVAL, unsupported pixel format: %d\n",
              layer->vinfo.fmt);
-      errno = -EINVAL;
       return NULL;
     }
 

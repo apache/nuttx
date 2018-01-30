@@ -90,7 +90,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "at");
   if (stream == NULL)
     {
-      int errcode = errno;
+      int errcode = get_errno();
       nerr("ERROR: Failed to open %s: %d\n",
            CONFIG_NETDB_RESOLVCONF_PATH, errcode);
       DEBUGASSERT(errcode > 0);

@@ -85,7 +85,7 @@ int pthread_setcancelstate(int state, FAR int *oldstate)
   ret = task_setcancelstate(state, oldstate);
   if (ret < 0)
     {
-      ret = errno;
+      ret = get_errno();
     }
 
   return ret;

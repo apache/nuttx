@@ -1402,7 +1402,6 @@ FAR struct opamp_dev_s* stm32_opampinitialize(int intf)
   if (ret < 0)
     {
       aerr("ERROR: Failed to initialize OPAMP%d: %d\n", intf, ret);
-      errno = -ret;
       return NULL;
     }
 

@@ -89,7 +89,7 @@ int fclose(FAR FILE *stream)
           if ((stream->fs_oflags & O_WROK) != 0)
             {
               ret = lib_fflush(stream, true);
-              errcode = errno;
+              errcode = get_errno();
             }
 
           /* Close the underlying file descriptor and save the return status */
@@ -103,7 +103,7 @@ int fclose(FAR FILE *stream)
           if (ret == OK)
             {
               ret = status;
-              errcode = errno;
+              errcode = get_errno();
             }
         }
 

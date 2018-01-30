@@ -98,7 +98,7 @@ int work_signal(int qid)
       ret = kill(g_usrwork.pid, SIGWORK);
       if (ret < 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           ret = -errcode;
         }
     }

@@ -66,7 +66,7 @@ int wctomb(FAR char *s, wchar_t wc)
 
   if ((size_t) wc >= 0x100)
     {
-      errno = EILSEQ;
+      set_errno(EILSEQ);
       return -1;
     }
 

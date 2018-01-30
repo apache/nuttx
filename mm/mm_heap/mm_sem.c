@@ -200,7 +200,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
               DEBUGASSERT(ret == -EINTR);
 #else
-              int errcode = errno;
+              int errcode = get_errno();
               DEBUGASSERT(errcode == EINTR);
               ret = -errcode;
 #endif

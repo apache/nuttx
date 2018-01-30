@@ -863,7 +863,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
                priv->td_minor);
 
       ret = stat(session->ts_devpath, &statbuf);
-      DEBUGASSERT(ret >= 0 || errno == ENOENT);
+      DEBUGASSERT(ret >= 0 || get_errno() == ENOENT);
     }
   while (ret >= 0 && start != g_telnet_common.tc_minor);
 

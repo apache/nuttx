@@ -144,7 +144,7 @@ int at25_main(int argc, char *argv)
   fd = open(g_at25dev, O_WRONLY);
   if (fd < 0)
     {
-      int errcode = errno;
+      int errcode = get_errno();
       fprintf(stderr, "ERROR: Failed to open %s: %d\n", g_at25dev, errcode);
       return EXIT_FAILURE;
     }
@@ -205,7 +205,7 @@ int at25_main(int argc, char *argv)
       nwritten = write(fd, src, memoutstream.public.nput);
       if (nwritten <= 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           if (errno != EINTR)
             {
               fprintf(stderr, "ERROR: Write failed: %d\n", errcode);
@@ -235,7 +235,7 @@ int at25_main(int argc, char *argv)
   fd = open(g_at25dev, O_RDONLY);
   if (fd < 0)
     {
-      int errcode = errno;
+      int errcode = get_errno();
       fprintf(stderr, "ERROR: Failed to open %s: %d\n", g_at25dev, errcode);
       return EXIT_FAILURE;
     }
@@ -254,7 +254,7 @@ int at25_main(int argc, char *argv)
       nread = read(fd, g_iobuffer, rdsize);
       if (nread <= 0)
         {
-          int errcode = errno;
+          int errcode = get_errno();
           if (errno != EINTR)
             {
               fprintf(stderr, "ERROR: Read failed: %d\n", errcode);

@@ -170,7 +170,7 @@ int net_routesize(FAR const char *path, size_t entrysize)
        * created yet?
        */
 
-      errcode = errno;
+      errcode = get_errno();
       if (errcode == ENOENT)
         {
           /* The routing table file has not been created.  Return size zero. */
