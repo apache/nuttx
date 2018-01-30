@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_sporadic.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,12 +159,11 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
        * switch.
        */
 
-      ret = sched_reprioritize(tcb, sporadic->low_priority);
+      ret = nxsched_reprioritize(tcb, sporadic->low_priority);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          serr("ERROR: sched_reprioritize failed: %d\n", errcode);
-          return -errcode;
+          serr("ERROR: nxsched_reprioritize failed: %d\n", ret);
+          return ret;
         }
     }
 
@@ -239,12 +238,11 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
 
   /* Then reprioritize to the higher priority */
 
-  ret = sched_reprioritize(tcb, sporadic->hi_priority);
+  ret = nxsched_reprioritize(tcb, sporadic->hi_priority);
   if (ret < 0)
     {
-      int errcode = get_errno();
-      serr("ERROR: sched_reprioritize failed: %d\n", errcode);
-      return -errcode;
+      serr("ERROR: nxsched_reprioritize failed: %d\n", ret);
+      return ret;
     }
 
   return OK;

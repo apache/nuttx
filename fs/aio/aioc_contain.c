@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/aio/aioc_contain.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
@@ -139,7 +140,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
   aioc->aioc_pid = getpid();
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  DEBUGVERIFY(sched_getparam (aioc->aioc_pid, &param));
+  DEBUGVERIFY(nxsched_getparam (aioc->aioc_pid, &param));
   aioc->aioc_prio = param.sched_priority;
 #endif
 

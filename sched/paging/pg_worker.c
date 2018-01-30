@@ -2,7 +2,7 @@
  * sched/paging/pg_worker.c
  * Page fill worker thread implementation.
  *
- *   Copyright (C) 2010-2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
 #include <nuttx/page.h>
@@ -185,7 +186,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
         {
           pginfo("New worker priority. %d->%d\n",
                  wtcb->sched_priority, priority);
-          sched_setpriority(wtcb, priority);
+          (void)nxsched_setpriority(wtcb, priority);
         }
 
       /* Save the page fill result (don't permit the value -EBUSY) */
@@ -296,7 +297,7 @@ static inline bool pg_dequeue(void)
 
                   pginfo("New worker priority. %d->%d\n",
                          wtcb->sched_priority, priority);
-                  sched_setpriority(wtcb, priority);
+                  (void)nxsched_setpriority(wtcb, priority);
                 }
 
               /* Return with g_pftcb holding the pointer to
@@ -458,7 +459,7 @@ static inline void pg_alldone(void)
   g_pftcb = NULL;
   pginfo("New worker priority. %d->%d\n",
          wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);
-  sched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
+  (void)nxsched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
 }
 
 /****************************************************************************

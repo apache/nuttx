@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/string/lib_psa_init.c
  *
- *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,7 @@
 #include <assert.h>
 #include <errno.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -82,17 +80,23 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   /* Set the default priority to the same priority as this task */
 
-  ret = sched_getparam(0, &param);
+  ret = _SCHED_GETPARAM(0, &param);
   if (ret < 0)
     {
-      return errno;
+      return _SCHED_ERRNO(ret);
     }
 
   attr->priority            = param.sched_priority;
 
   /* Set the default scheduler policy to the policy of this task */
 
-  attr->policy              = sched_getscheduler(0);
+  ret = _SCHED_GETSCHEDULER(0);
+  if (ret < 0)
+    {
+      return _SCHED_ERRNO(ret);
+    }
+
+  attr->policy              = ret;
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Empty signal mask */

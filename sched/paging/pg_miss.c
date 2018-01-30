@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/paging/pg_miss.c
  *
- *   Copyright (C) 2010, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,7 +162,7 @@ void pg_miss(void)
 
       pginfo("New worker priority. %d->%d\n",
              wtcb->sched_priority, ftcb->sched_priority);
-      sched_setpriority(wtcb, ftcb->sched_priority);
+      (void)nxsched_setpriority(wtcb, ftcb->sched_priority);
     }
 
   /* Signal the page fill worker thread.

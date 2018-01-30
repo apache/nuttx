@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_setaffinity.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/sched.h>
 
 #include "pthread/pthread.h"
 
@@ -88,18 +90,11 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
   DEBUGASSERT(thread > 0 && cpusetsize == sizeof(cpu_set_t) &&
               cpuset != NULL);
 
-  /* Let sched_setaffinity do all of the work */
+  /* Let nxsched_setaffinity do all of the work, adjusting the return value */
 
-  ret = sched_setaffinity((pid_t)thread, cpusetsize, cpuset);
-  if (ret < 0)
-    {
-      /* If sched_setaffinity() fails, return the errno */
-
-      ret = get_errno();
-      DEBUGASSERT(ret > 0);
-    }
-
-  return ret;
+  ret = nxsched_setaffinity((pid_t)thread, cpusetsize, cpuset);
+  return ret < 0 ? -ret : OK;
 }
 
 #endif /* CONFIG_SMP */
+

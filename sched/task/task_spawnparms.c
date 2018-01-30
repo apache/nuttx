@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_spawnparms.c
  *
- *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -194,7 +194,7 @@ void spawn_semtake(FAR sem_t *sem)
  *   attr - The attributes to use
  *
  * Returned Value:
- *   Errors are not reported by this function.  This is because errors
+ *   Errors are not reported by this function.  This is not because errors
  *   cannot occur, but rather that the new task has already been started
  *   so there is no graceful way to handle errors detected in this context
  *   (unless we delete the new task and recover).
@@ -208,6 +208,7 @@ void spawn_semtake(FAR sem_t *sem)
 int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 {
   struct sched_param param;
+  int ret;
 
   DEBUGASSERT(attr);
 
@@ -223,17 +224,14 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
   if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
     {
 #ifdef CONFIG_SCHED_SPORADIC
-      int ret;
-
       /* Get the current sporadic scheduling parameters.  Those will not be
        * modified.
        */
 
-      ret = sched_getparam(pid, &param);
+      ret = nxsched_getparam(pid, &param);
       if (ret < 0)
         {
-          int errcode = get_errno();
-          return -errcode;
+          return ret;
         }
 #endif
 
@@ -250,7 +248,11 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
           sinfo("Setting priority=%d for pid=%d\n",
                 param.sched_priority, pid);
 
-          (void)sched_setparam(pid, &param);
+          ret = nxsched_setparam(pid, &param);
+          if (ret < 0)
+            {
+             return ret;
+            }
         }
     }
 
@@ -261,7 +263,11 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   else if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
     {
-      (void)sched_getparam(0, &param);
+      ret = nxsched_getparam(0, &param);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   /* Are we setting the scheduling policy?  If so, use the priority

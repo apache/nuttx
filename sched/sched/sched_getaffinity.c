@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_getaffinity.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -51,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_getscheduler
+ * Name: sched_getaffinity
  *
  * Description:
  *   sched_getaffinity() writes the affinity mask of the thread whose ID

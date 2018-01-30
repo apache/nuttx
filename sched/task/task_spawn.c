@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_spawn.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 #include <sched.h>
 #include <spawn.h>
 #include <debug.h>
+
+#include <nuttx/sched.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -123,9 +125,10 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
       /* Set the default priority to the same priority as this task */
 
-      ret = sched_getparam(0, &param);
+      ret = nxsched_getparam(0, &param);
       if (ret < 0)
         {
+          ret = -ret;
           goto errout;
         }
 
@@ -378,14 +381,12 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 
   /* Get the priority of this (parent) task */
 
-  ret = sched_getparam(0, &param);
+  ret = nxsched_getparam(0, &param);
   if (ret < 0)
     {
-      int errcode = get_errno();
-
-      serr("ERROR: sched_getparam failed: %d\n", errcode);
+      serr("ERROR: nxsched_getparam failed: %d\n", ret);
       spawn_semgive(&g_spawn_parmsem);
-      return errcode;
+      return -ret;
     }
 
   /* Disable pre-emption so that the proxy does not run until waitpid

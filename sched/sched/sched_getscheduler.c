@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_getscheduler.c
  *
- *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -52,12 +53,73 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsched_getscheduler
+ *
+ * Description:
+ *   sched_getscheduler() returns the scheduling policy currently
+ *   applied to the task identified by pid.  If pid equals zero, the
+ *   policy of the calling task will be retrieved.
+ *
+ *   This functions is identical to the function sched_getscheduler(),
+ *   differing only in its return value:  This function does not modify
+ *   the errno variable.
+ *
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_getscheduler().
+ *
+ * Inputs:
+ *   pid - the task ID of the task to query.  If pid is zero, the
+ *     calling task is queried.
+ *
+ * Return Value:
+ *    On success, sched_getscheduler() returns the policy for the task
+ *    (either SCHED_FIFO or SCHED_RR).  On error,  a negated errno value
+ *    returned:
+ *
+ *      ESRCH  The task whose ID is pid could not be found.
+ *
+ ****************************************************************************/
+
+int nxsched_getscheduler(pid_t pid)
+{
+  FAR struct tcb_s *tcb;
+  int policy;
+
+  /* Verify that the PID corresponds to a real task */
+
+  if (pid == 0)
+    {
+      tcb = this_task();
+    }
+  else
+    {
+      tcb = sched_gettcb(pid);
+    }
+
+  if (tcb == NULL)
+    {
+      return -ESRCH;
+    }
+
+  /* Return the scheduling policy from the TCB.  NOTE that the user-
+   * interpretable values are 1 based; the TCB values are zero-based.
+   */
+
+  policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
+  return policy + 1;
+}
+
+/****************************************************************************
  * Name: sched_getscheduler
  *
  * Description:
  *   sched_getscheduler() returns the scheduling policy currently
  *   applied to the task identified by pid. If pid equals zero, the
  *   policy of the calling task will be retrieved.
+ *
+ *   sched_getscheduler() is a simply wrapper around nxsched_getscheduler()
+ *   that sets the errno value in the event of an error.
  *
  * Inputs:
  *   pid - the task ID of the task to query.  If pid is zero, the
@@ -70,36 +132,16 @@
  *
  *      ESRCH  The task whose ID is pid could not be found.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int sched_getscheduler(pid_t pid)
 {
-  FAR struct tcb_s *tcb;
-  int policy;
-
-  /* Verify that the PID corresponds to a real task */
-
-  if (!pid)
+  int ret = nxsched_getscheduler(pid);
+  if (ret < 0)
     {
-      tcb = this_task();
-    }
-  else
-    {
-      tcb = sched_gettcb(pid);
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  if (!tcb)
-    {
-      set_errno(ESRCH);
-      return ERROR;
-    }
-
-  /* Return the scheduling policy from the TCB.  NOTE that the user-
-   * interpretable values are 1 based; the TCB values are zero-based.
-   */
-
-  policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
-  return policy + 1;
+  return ret;
 }

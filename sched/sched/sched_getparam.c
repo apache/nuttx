@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_getparam.c
  *
- *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,9 @@
 
 #include <sys/types.h>
 #include <sched.h>
+#include <errno.h>
+
+#include <nuttx/sched.h>
 
 #include "clock/clock.h"
 #include "sched/sched.h"
@@ -50,11 +53,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_getparam
+ * Name: nxsched_getparam
  *
  * Description:
- *   This function gets the scheduling priority of the task
- *  specified by pid.
+ *   This function gets the scheduling priority of the task specified by
+ *   pid.  It is identical to the function sched_getparam(), differing only
+ *   in its return value:  This function does not modify the errno variable.
+ *
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_getparam().
  *
  * Inputs:
  *   pid - the task ID of the task.  If pid is zero, the priority
@@ -64,49 +72,48 @@
  *     element of this structure.
  *
  * Return Value:
- *    0 (OK) if successful, otherwise -1 (ERROR).
+ *   0 (OK) if successful, otherwise a negated errno value is returned to
+ *   indicate the nature of the failure..
  *
- *    This function can fail if param is null or if pid does
- *    not correspond to any task.
- *
- * Assumptions:
+ *   This function can fail if param is null (EINVAL) or if pid does
+ *   not correspond to any task (ESRCH).
  *
  ****************************************************************************/
 
-int sched_getparam (pid_t pid, FAR struct sched_param *param)
+int nxsched_getparam (pid_t pid, FAR struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
   int ret = OK;
 
-  if (!param)
+  if (param == NULL)
     {
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Check if the task to restart is the calling task */
 
   rtcb = this_task();
-  if ((pid == 0) || (pid == rtcb->pid))
+  if (pid == 0 || pid == rtcb->pid)
     {
       /* Return the priority if the calling task. */
 
       param->sched_priority = (int)rtcb->sched_priority;
     }
 
-  /* Ths pid is not for the calling task, we will have to look it up */
+  /* This PID is not for the calling task, we will have to look it up */
 
   else
     {
-      /* Get the TCB associated with this pid */
+      /* Get the TCB associated with this PID */
 
       sched_lock();
       tcb = sched_gettcb(pid);
       if (!tcb)
         {
-          /* This pid does not correspond to any known task */
+          /* This PID does not correspond to any known task */
 
-          ret = ERROR;
+          ret = -ESRCH;
         }
       else
         {
@@ -145,6 +152,42 @@ int sched_getparam (pid_t pid, FAR struct sched_param *param)
         }
 
       sched_unlock();
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sched_getparam
+ *
+ * Description:
+ *   This function gets the scheduling priority of the task specified by
+ *   pid.  This function is a simply wrapper around nxsched_getparam() that
+ *   sets the errno value in the event of an error.
+ *
+ * Inputs:
+ *   pid - the task ID of the task.  If pid is zero, the priority
+ *     of the calling task is returned.
+ *   param - A structure whose member sched_priority is the integer
+ *     priority.  The task's priority is copied to the sched_priority
+ *     element of this structure.
+ *
+ * Return Value:
+ *   0 (OK) if successful, otherwise -1 (ERROR) with the errno value set
+ *   to indicate the nature of the problem.
+ *
+ *   This function can fail if param is null (EINVAL) or if pid does
+ *   not correspond to any task (ESRCH).
+ *
+ ****************************************************************************/
+
+int sched_getparam (pid_t pid, FAR struct sched_param *param)
+{
+  int ret = nxsched_getparam(pid, param);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
     }
 
   return ret;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_reprioritize.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
+
 #include "sched/sched.h"
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -52,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_reprioritize
+ * Name:  nxsched_reprioritize
  *
  * Description:
  *   This function sets the priority of a specified task.
@@ -66,26 +68,24 @@
  *   sched_priority - The new task priority
  *
  * Return Value:
- *   On success, sched_setparam() returns 0 (OK). On error, -1
- *   (ERROR) is returned, and errno is set appropriately.
+ *   On success, sched_reporioritize() returns 0 (OK). On error, a negated
+ *   errno value is returned. 
  *
  *   EINVAL The parameter 'param' is invalid or does not make sense for the
  *          current scheduling policy.
  *   EPERM  The calling task does not have appropriate privileges.
  *   ESRCH  The task whose ID is pid could not be found.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
+int nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
 {
-  /* This function is equivalent to sched_setpriority() BUT it also has the
+  /* This function is equivalent to nxsched_setpriority() BUT it also has the
    * side effect of discarding all priority inheritance history.  This is
    * done only on explicit, user-initiated reprioritization.
    */
 
-  int ret = sched_setpriority(tcb, sched_priority);
+  int ret = nxsched_setpriority(tcb, sched_priority);
   if (ret == 0)
     {
       /* Reset the base_priority -- the priority that the thread would return

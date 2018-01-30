@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_getschedparam.c
  *
- *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,16 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <pthread.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <nuttx/sched.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -90,30 +95,34 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
 
   sinfo("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
 
-  if (!policy || !param)
+  if (policy == NULL || param == NULL)
     {
       ret = EINVAL;
     }
   else
     {
-      /* Get the schedparams of the thread. */
+      /* Get the scheduler parameters of the thread. */
 
-      ret = sched_getparam((pid_t)thread, param);
-      if (ret != OK)
+      ret = nxsched_getparam((pid_t)thread, param);
+      if (ret < 0)
         {
-          ret = EINVAL;
+          ret = -ret;
         }
 
-      /* Return the policy. */
+      /* Get the scheduler policy. */
 
-      *policy = sched_getscheduler((pid_t)thread);
-      if (*policy == ERROR)
+      ret = nxsched_getscheduler((pid_t)thread);
+      if (ret < 0)
         {
-          ret = get_errno();
+          ret = -ret;
+        }
+      else
+        {
+          *policy = ret;
+          ret = OK;
         }
     }
 
   sinfo("Returning %d\n", ret);
   return ret;
 }
-

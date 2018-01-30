@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
@@ -477,7 +478,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   /* Set the new affinity which assigns to CPU0 */
 
-  sched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
+  (void)nxsched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
   nxsig_usleep(10 * 1000);
 #endif
 
@@ -486,7 +487,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 #ifdef CONFIG_SMP
   /* Restore the original affinity */
 
-  sched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  (void)nxsched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
   nxsig_usleep(10 * 1000);
 #endif
 

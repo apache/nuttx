@@ -380,15 +380,15 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
 bool sched_mergepending(void);
 void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state);
 void sched_removeblocked(FAR struct tcb_s *btcb);
-int  sched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
+int  nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
 
 /* Priority inheritance support */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
+int  nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
-#  define sched_reprioritize(tcb,sched_priority) \
-     sched_setpriority(tcb,sched_priority)
+#  define nxsched_reprioritize(tcb,sched_priority) \
+     nxsched_setpriority(tcb,sched_priority)
 #endif
 
 /* Support for tickless operation */

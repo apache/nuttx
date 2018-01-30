@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setscheduler.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2015-2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:sched_setscheduler
+ * Name: sched_setscheduler
  *
  * Description:
  *   sched_setscheduler() sets both the scheduling policy and the priority
@@ -88,9 +89,7 @@ int sched_setscheduler(pid_t pid, int policy,
 {
   FAR struct tcb_s *tcb;
   irqstate_t flags;
-#ifdef CONFIG_SCHED_SPORADIC
   int errcode;
-#endif
   int ret;
 
   /* Check for supported scheduling policy */
@@ -278,15 +277,23 @@ int sched_setscheduler(pid_t pid, int policy,
 
   /* Set the new priority */
 
-  ret = sched_reprioritize(tcb, param->sched_priority);
+  ret = nxsched_reprioritize(tcb, param->sched_priority);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_lock;
+    }
+
   sched_unlock();
-  return (ret >= 0) ? OK : ERROR;
+  return OK;
 
 #ifdef CONFIG_SCHED_SPORADIC
 errout_with_irq:
-  set_errno(errcode);
   leave_critical_section(flags);
+#endif
+
+errout_with_lock:
+  set_errno(errcode);
   sched_unlock();
   return ERROR;
-#endif
 }

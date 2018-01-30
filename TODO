@@ -255,11 +255,13 @@ o Task/Scheduler (sched/)
                  message queue used in the OS.  I am keeping this issue
                  open because (1) there are some known remaining calls that
                  that will modify the errno (such as dup(), dup2(),
-                 sched_getparam(), sched_reprioritize(). sched_setaffinity(),
-                 task_activate(), mq_open(), mq_close(), and others) and (2)
-                 there may still be calls that create cancellation points.
-                 Need to check things like open(), close(), read(), write(),
-                 and possibly others.
+                 task_activate(), mq_open(), mq_close(), and others) and
+                 (2) there may still be calls that create cancellation
+                 points.  Need to check things like open(), close(), read(),
+                 write(), and possibly others.
+               2018-01-30:  This change has been completed for the case of
+                 scheduler functions used within the OS:  sched_getparam(),
+                 sched_setparam(), sched_getscheduler(), and sched_setaffinity(),
 
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design

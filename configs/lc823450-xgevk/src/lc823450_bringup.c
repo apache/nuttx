@@ -49,6 +49,8 @@
 #  include <sched.h>
 #endif
 
+#include <nuttx/sched.h>
+
 #ifdef CONFIG_RNDIS
 #  include <nuttx/usb/rndis.h>
 #endif
@@ -132,7 +134,7 @@ int lc823450_bringup(void)
 
   /* NOTE: pid=4 is assumed to be lpwork */
 
-  sched_setaffinity(4, sizeof(cpu_set_t), &cpuset);
+  (void)nxsched_setaffinity(4, sizeof(cpu_set_t), &cpuset);
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

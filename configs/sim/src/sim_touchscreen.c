@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sim/src/sim_touchscreen.c
  *
- *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/board.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/input/touchscreen.h>
@@ -171,10 +172,10 @@ int sim_tsc_setup(int minor)
   /* Set the client task priority */
 
   param.sched_priority = CONFIG_SIM_CLIENTPRIO;
-  ret = sched_setparam(0, &param);
+  ret = nxsched_setparam(0, &param);
   if (ret < 0)
     {
-      gerr("ERROR: sched_setparam failed: %d\n" , ret);
+      gerr("ERROR: nxsched_setparam failed: %d\n" , ret);
       return ret;
     }
 

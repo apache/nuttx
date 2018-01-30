@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_posixspawn.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <spawn.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kthread.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/symtab.h>
@@ -391,14 +392,12 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 
   /* Get the priority of this (parent) task */
 
-  ret = sched_getparam(0, &param);
+  ret = nxsched_getparam(0, &param);
   if (ret < 0)
     {
-      int errcode = get_errno();
-
-      serr("ERROR: sched_getparam failed: %d\n", errcode);
+      serr("ERROR: nxsched_getparam failed: %d\n", ret);
       spawn_semgive(&g_spawn_parmsem);
-      return errcode;
+      return -ret;
     }
 
   /* Disable pre-emption so that the proxy does not run until waitpid

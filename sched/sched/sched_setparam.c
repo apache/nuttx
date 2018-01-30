@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setparam.c
  *
- *   Copyright (C) 2007, 2009, 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013, 2015-2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -55,14 +57,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_setparam
+ * Name:  nxsched_setparam
  *
  * Description:
- *   This function sets the priority of a specified task.
+ *   This function sets the priority of a specified task.  It is identical
+ *   to the function sched_setparam(), differing only in its return value:
+ *   This function does not modify the errno variable.
  *
  *   NOTE: Setting a task's priority to the same value has a similar effect
  *   to sched_yield() -- The task will be moved to  after all other tasks
  *   with the same priority.
+ *
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_setparam().
  *
  * Inputs:
  *   pid - the task ID of the task to reprioritize.  If pid is zero, the
@@ -72,31 +80,27 @@
  *      through SCHED_PRIORITY_MAX.
  *
  * Return Value:
- *   On success, sched_setparam() returns 0 (OK). On error, -1 (ERROR) is
- *   returned, and errno is set appropriately.
+ *   0 (OK) if successful, otherwise a negated errno value is returned to
+ *   indicate the nature of the failure..
  *
- *  EINVAL The parameter 'param' is invalid or does not make sense for the
- *         current scheduling policy.
- *  EPERM  The calling task does not have appropriate privileges.
- *  ESRCH  The task whose ID is pid could not be found.
- *
- * Assumptions:
+ *   EINVAL The parameter 'param' is invalid or does not make sense for the
+ *          current scheduling policy.
+ *   EPERM  The calling task does not have appropriate privileges.
+ *   ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 
-int sched_setparam(pid_t pid, FAR const struct sched_param *param)
+int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
-  int errcode;
   int ret;
 
   /* Verify that the requested priority is in the valid range */
 
-  if (!param)
+  if (param == NULL)
     {
-      errcode = EINVAL;
-      goto errout_with_errcode;
+      return -EINVAL;
     }
 
   /* Prohibit modifications to the head of the ready-to-run task
@@ -122,7 +126,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
         {
           /* No task with this PID was found */
 
-          errcode = ESRCH;
+          ret = -ESRCH;
           goto errout_with_lock;
         }
     }
@@ -140,7 +144,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       if (param->sched_ss_max_repl < 1 ||
           param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)
         {
-          errcode = EINVAL;
+          ret = -EINVAL;
           goto errout_with_lock;
         }
 
@@ -174,7 +178,7 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       if (repl_ticks < budget_ticks)
 #endif
         {
-          errcode = EINVAL;
+          ret = -EINVAL;
           goto errout_with_lock;
         }
 
@@ -209,7 +213,6 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
       leave_critical_section(flags);
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_lock;
         }
     }
@@ -217,16 +220,53 @@ int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 
   /* Then perform the reprioritization */
 
-  ret = sched_reprioritize(tcb, param->sched_priority);
-  sched_unlock();
-  return ret;
+  ret = nxsched_reprioritize(tcb, param->sched_priority);
 
 errout_with_lock:
-  set_errno(errcode);
   sched_unlock();
-  return ERROR;
+  return ret;
+}
 
-errout_with_errcode:
-  set_errno(errcode);
-  return ERROR;
+/****************************************************************************
+ * Name:  sched_setparam
+ *
+ * Description:
+ *   This function sets the priority of a specified task.  This function is
+ *   a simply wrapper around nxsched_setparam() that sets the errno value in
+ *   the event of an error.
+ *
+ *   NOTE: Setting a task's priority to the same value has a similar effect
+ *   to sched_yield() -- The task will be moved to  after all other tasks
+ *   with the same priority.
+ *
+ * Inputs:
+ *   pid - the task ID of the task to reprioritize.  If pid is zero, the
+ *      priority of the calling task is changed.
+ *   param - A structure whose member sched_priority is the integer priority.
+ *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
+ *      through SCHED_PRIORITY_MAX.
+ *
+ * Return Value:
+ *   On success, sched_setparam() returns 0 (OK). On error, -1 (ERROR) is
+ *   returned, and errno is set appropriately.
+ *
+ *  EINVAL The parameter 'param' is invalid or does not make sense for the
+ *         current scheduling policy.
+ *  EPERM  The calling task does not have appropriate privileges.
+ *  ESRCH  The task whose ID is pid could not be found.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int sched_setparam(pid_t pid, FAR const struct sched_param *param)
+{
+  int ret = nxsched_setparam(pid, param);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }

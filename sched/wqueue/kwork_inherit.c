@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/work/work_inherit.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
            * sched_unblock() processing.
            */
 
-          (void)sched_setpriority(wtcb, reqprio);
+          (void)nxsched_setpriority(wtcb, reqprio);
         }
       else
         {
@@ -160,7 +160,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
        * sched_unlock() processing.
        */
 
-      (void)sched_setpriority(wtcb, reqprio);
+      (void)nxsched_setpriority(wtcb, reqprio);
     }
 #endif
 }
@@ -223,7 +223,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 
           /* Reset the worker's priority back to the base priority. */
 
-          sched_reprioritize(wtcb, wtcb->base_priority);
+          (void)nxsched_reprioritize(wtcb, wtcb->base_priority);
         }
 
       /* There are multiple pending priority levels. The worker thread's
@@ -264,7 +264,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
            * base_priority)
            */
 
-          sched_setpriority(wtcb, wpriority);
+          nxsched_setpriority(wtcb, wpriority);
         }
       else
         {
@@ -304,7 +304,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
        * priority.
        */
 
-      sched_reprioritize(wtcb, wtcb->base_priority);
+      (void)nxsched_reprioritize(wtcb, wtcb->base_priority);
 #endif
     }
 }

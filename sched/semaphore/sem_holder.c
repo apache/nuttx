@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_holder.c
  *
- *   Copyright (C) 2009-2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013, 2016-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -387,7 +388,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
            * switch may occur during up_block_task() processing.
            */
 
-          (void)sched_setpriority(htcb, rtcb->sched_priority);
+          (void)nxsched_setpriority(htcb, rtcb->sched_priority);
         }
       else
         {
@@ -425,7 +426,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
        * will occur during up_block_task() processing.
        */
 
-      (void)sched_setpriority(htcb, rtcb->sched_priority);
+      (void)nxsched_setpriority(htcb, rtcb->sched_priority);
     }
 #endif
 
@@ -535,7 +536,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
 
           /* Reset the holder's priority back to the base priority. */
 
-          sched_reprioritize(htcb, htcb->base_priority);
+          (void)nxsched_reprioritize(htcb, htcb->base_priority);
         }
 
       /* There are multiple pending priority levels. The holder thread's
@@ -577,7 +578,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
            * base_priority)
            */
 
-          sched_setpriority(htcb, rpriority);
+          nxsched_setpriority(htcb, rpriority);
         }
       else
         {
@@ -617,7 +618,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
        * priority.
        */
 
-      sched_reprioritize(htcb, htcb->base_priority);
+      (void)nxsched_reprioritize(htcb, htcb->base_priority);
 #endif
     }
 
