@@ -129,7 +129,14 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
                */
 
               status = nxsem_reset((FAR sem_t *)&mutex->sem, 1);
-              ret = (status != OK) ? get_errno() : OK;
+              if (status < 0)
+                {
+                  ret = -status;
+                }
+              else
+                {
+                  ret = OK;
+                }
             }
 
           /* Otherwise the mutex is held by some active thread.  Let's not

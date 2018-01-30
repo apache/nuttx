@@ -192,4 +192,3 @@ int sched_getparam (pid_t pid, FAR struct sched_param *param)
 
   return ret;
 }
-

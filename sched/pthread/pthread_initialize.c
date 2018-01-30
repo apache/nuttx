@@ -164,6 +164,8 @@ int pthread_sem_trytake(sem_t *sem)
 
 int pthread_sem_give(sem_t *sem)
 {
+  int ret;
+
   /* Verify input parameters */
 
 
@@ -172,16 +174,13 @@ int pthread_sem_give(sem_t *sem)
     {
       /* Give the semaphore */
 
-      if (nxsem_post(sem) == OK)
+      ret = nxsem_post(sem);
+      if (ret < 0)
         {
-          return OK;
+          return -ret;
         }
-      else
-        {
-          /* nxsem_post() reported an error */
 
-          return get_errno();
-        }
+      return OK;
     }
   else
     {

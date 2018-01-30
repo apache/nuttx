@@ -73,15 +73,14 @@
  *   use the standard sched_setparam().
  *
  * Inputs:
- *   pid       - The ID of thread whose affinity set will be modified.
- *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
+ *   pid        - The ID of thread whose affinity set will be modified.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
  *   mask       - The location to return the thread's new affinity set.
  *
  * Return Value:
- *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
- *   set appropriately:
+ *   Zero (OK) if successful.  Otherwise, a negated errno value is returned:
  *
- *      ESRCH  The task whose ID is pid could not be found.
+ *     ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 
@@ -182,15 +181,15 @@ errout_with_lock:
  *   the errno value in the event of an error.
  *
  * Inputs:
- *   pid       - The ID of thread whose affinity set will be modified.
- *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
+ *   pid        - The ID of thread whose affinity set will be modified.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
  *   mask       - The location to return the thread's new affinity set.
  *
  * Return Value:
  *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
  *   set appropriately:
  *
- *      ESRCH  The task whose ID is pid could not be found.
+ *     ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 

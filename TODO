@@ -170,6 +170,9 @@ o Task/Scheduler (sched/)
                to make this change:  Just move the pterrno field from
                struct tcb_s to struct task_group_s.   However, I am still not
                sure if this should be done or not.
+               NOTE: glibc behaves this way unless __thread is defined then,
+               in that case, it behaves like NuttX (using TLS to save the
+               thread local errno).
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low
@@ -255,13 +258,14 @@ o Task/Scheduler (sched/)
                  message queue used in the OS.  I am keeping this issue
                  open because (1) there are some known remaining calls that
                  that will modify the errno (such as dup(), dup2(),
-                 task_activate(), mq_open(), mq_close(), and others) and
-                 (2) there may still be calls that create cancellation
-                 points.  Need to check things like open(), close(), read(),
-                 write(), and possibly others.
+                 task_create(), task_activate(), kthread_create(), exec(), mq_open(),
+                 mq_close(), and others) and (2) there may still be calls that
+                 create cancellation points.  Need to check things like open(),
+                 close(), read(), write(), and possibly others.
                2018-01-30:  This change has been completed for the case of
                  scheduler functions used within the OS:  sched_getparam(),
-                 sched_setparam(), sched_getscheduler(), and sched_setaffinity(),
+                 sched_setparam(), sched_getscheduler(), sched_setschedule(),
+                 and sched_setaffinity(),
 
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design

@@ -474,7 +474,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   /* Backup the current affinity */
 
-  sched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  (void)nxsched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
 
   /* Set the new affinity which assigns to CPU0 */
 

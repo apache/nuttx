@@ -191,19 +191,23 @@
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define _SCHED_GETPARAM(t,p)      nxsched_getparam(t,p)
-#  define _SCHED_SETPARAM(t,p)      nxsched_setparam(t,p)
-#  define _SCHED_GETSCHEDULER(t)    nxsched_getscheduler(t)
-#  define _SCHED_SETAFFINITY(t,c,m) nxsched_setaffinity(t,c,m)
-#  define _SCHED_ERRNO(r)           (-(r))
-#  define _SCHED_ERRVAL(r)          (r)
+#  define _SCHED_GETPARAM(t,p)       nxsched_getparam(t,p)
+#  define _SCHED_SETPARAM(t,p)       nxsched_setparam(t,p)
+#  define _SCHED_GETSCHEDULER(t)     nxsched_getscheduler(t)
+#  define _SCHED_SETSCHEDULER(t,s,p) nxsched_setscheduler(t,s,p)
+#  define _SCHED_GETAFFINITY(t,c,m)  nxsched_getaffinity(t,c,m)
+#  define _SCHED_SETAFFINITY(t,c,m)  nxsched_setaffinity(t,c,m)
+#  define _SCHED_ERRNO(r)            (-(r))
+#  define _SCHED_ERRVAL(r)           (r)
 #else
-#  define _SCHED_GETPARAM(t,p)      sched_getparam(t,p)
-#  define _SCHED_SETPARAM(t,p)      sched_setparam(t,p)
-#  define _SCHED_GETSCHEDULER(t)    sched_getscheduler(t)
-#  define _SCHED_SETAFFINITY(t,c,m) sched_setaffinity(t,c,m)
-#  define _SCHED_ERRNO(r)           errno
-#  define _SCHED_ERRVAL(r)          (-errno)
+#  define _SCHED_GETPARAM(t,p)       sched_getparam(t,p)
+#  define _SCHED_SETPARAM(t,p)       sched_setparam(t,p)
+#  define _SCHED_GETSCHEDULER(t)     sched_getscheduler(t)
+#  define _SCHED_SETSCHEDULER(t,s,p) sched_setscheduler(t,s,p)
+#  define _SCHED_GETAFFINITY(t,c,m)  sched_getaffinity(t,c,m)
+#  define _SCHED_SETAFFINITY(t,c,m)  sched_setaffinity(t,c,m)
+#  define _SCHED_ERRNO(r)            errno
+#  define _SCHED_ERRVAL(r)           (-errno)
 #endif
 
 /********************************************************************************
@@ -1007,6 +1011,76 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param);
 int nxsched_getscheduler(pid_t pid);
 
 /****************************************************************************
+ * Name: nxsched_setscheduler
+ *
+ * Description:
+ *   nxsched_setscheduler() sets both the scheduling policy and the priority
+ *   for the task identified by pid. If pid equals zero, the scheduler of
+ *   the calling task will be set.  The parameter 'param' holds the priority
+ *   of the thread under the new policy.
+ *
+ *   nxsched_setscheduler() is identical to the function sched_getparam(),
+ *   differing only in its return value:  This function does not modify the
+ *    errno variable.
+ *
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_getparam().
+ *
+ * Input Parameters:
+ *   pid - the task ID of the task to modify.  If pid is zero, the calling
+ *      task is modified.
+ *   policy - Scheduling policy requested (either SCHED_FIFO or SCHED_RR)
+ *   param - A structure whose member sched_priority is the new priority.
+ *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
+ *      through SCHED_PRIORITY_MAX.
+ *
+ * Returned Value:
+ *   On success, nxsched_setscheduler() returns OK (zero).  On error, a
+ *   negated errno value is returned:
+ *
+ *   EINVAL The scheduling policy is not one of the recognized policies.
+ *   ESRCH  The task whose ID is pid could not be found.
+ *
+ ****************************************************************************/
+
+int nxsched_setscheduler(pid_t pid, int policy,
+                         FAR const struct sched_param *param);
+
+/****************************************************************************
+ * Name: nxsched_getaffinity
+ *
+ * Description:
+ *   nxsched_getaffinity() writes the affinity mask of the thread whose ID
+ *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
+ *   argument specifies the size (in bytes) of mask.  If pid is zero, then
+ *   the mask of the calling thread is returned.
+ *
+ *   nxsched_getaffinity() is identical to the function sched_getaffinity(),
+ *   differing only in its return value:  This function does not modify the
+ *   errno variable.
+ *
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_getparam().
+ *
+ * Input Parameters:
+ *   pid        - The ID of thread whose affinity set will be retrieved.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
+ *   mask       - The location to return the thread's new affinity set.
+ *
+ * Returned Value:
+ *   Zero (OK) if successful.  Otherwise, a negated errno value is returned:
+ *
+ *     ESRCH  The task whose ID is pid could not be found.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
+#endif
+
+/****************************************************************************
  * Name: nxsched_setaffinity
  *
  * Description:
@@ -1027,15 +1101,14 @@ int nxsched_getscheduler(pid_t pid);
  *   use the standard sched_setparam().
  *
  * Inputs:
- *   pid       - The ID of thread whose affinity set will be modified.
- *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
+ *   pid        - The ID of thread whose affinity set will be modified.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
  *   mask       - The location to return the thread's new affinity set.
  *
  * Return Value:
- *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
- *   set appropriately:
+ *   Zero (OK) if successful.  Otherwise, a negated errno value is returned:
  *
- *      ESRCH  The task whose ID is pid could not be found.
+ *     ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 

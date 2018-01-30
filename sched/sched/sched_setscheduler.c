@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -57,15 +58,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_setscheduler
+ * Name: nxsched_setscheduler
  *
  * Description:
- *   sched_setscheduler() sets both the scheduling policy and the priority
+ *   nxsched_setscheduler() sets both the scheduling policy and the priority
  *   for the task identified by pid. If pid equals zero, the scheduler of
  *   the calling task will be set.  The parameter 'param' holds the priority
  *   of the thread under the new policy.
  *
- * Inputs:
+ *   nxsched_setscheduler() is identical to the function sched_getparam(),
+ *   differing only in its return value:  This function does not modify the
+ *    errno variable.
+ *
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_getparam().
+ *
+ * Input Parameters:
  *   pid - the task ID of the task to modify.  If pid is zero, the calling
  *      task is modified.
  *   policy - Scheduling policy requested (either SCHED_FIFO or SCHED_RR)
@@ -73,23 +82,20 @@
  *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
  *      through SCHED_PRIORITY_MAX.
  *
- * Return Value:
- *   On success, sched_setscheduler() returns OK (zero).  On error, ERROR
- *   (-1) is returned, and errno is set appropriately:
+ * Returned Value:
+ *   On success, nxsched_setscheduler() returns OK (zero).  On error, a
+ *   negated errno value is returned:
  *
  *   EINVAL The scheduling policy is not one of the recognized policies.
  *   ESRCH  The task whose ID is pid could not be found.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-int sched_setscheduler(pid_t pid, int policy,
-                       FAR const struct sched_param *param)
+int nxsched_setscheduler(pid_t pid, int policy,
+                         FAR const struct sched_param *param)
 {
   FAR struct tcb_s *tcb;
   irqstate_t flags;
-  int errcode;
   int ret;
 
   /* Check for supported scheduling policy */
@@ -103,8 +109,7 @@ int sched_setscheduler(pid_t pid, int policy,
 #endif
      )
     {
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Check if the task to modify the calling task */
@@ -119,8 +124,7 @@ int sched_setscheduler(pid_t pid, int policy,
   tcb = sched_gettcb(pid);
   if (!tcb)
     {
-      set_errno(ESRCH);
-      return ERROR;
+      return -ESRCH;
     }
 
   /* Prohibit any context switches while we muck with priority and scheduler
@@ -137,6 +141,7 @@ int sched_setscheduler(pid_t pid, int policy,
     {
       default:
         DEBUGPANIC();
+
       case SCHED_FIFO:
         {
 #ifdef CONFIG_SCHED_SPORADIC
@@ -185,7 +190,7 @@ int sched_setscheduler(pid_t pid, int policy,
           if (param->sched_ss_max_repl < 1 ||
               param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)
             {
-              errcode = EINVAL;
+              ret = -EINVAL;
               goto errout_with_irq;
             }
 
@@ -219,7 +224,7 @@ int sched_setscheduler(pid_t pid, int policy,
           if (repl_ticks < budget_ticks)
 #endif
             {
-              errcode = EINVAL;
+              ret = -EINVAL;
               goto errout_with_irq;
             }
 
@@ -259,7 +264,6 @@ int sched_setscheduler(pid_t pid, int policy,
 
           if (ret < 0)
             {
-              errcode = -ret;
               goto errout_with_irq;
             }
         }
@@ -278,22 +282,55 @@ int sched_setscheduler(pid_t pid, int policy,
   /* Set the new priority */
 
   ret = nxsched_reprioritize(tcb, param->sched_priority);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout_with_lock;
-    }
-
   sched_unlock();
-  return OK;
+  return ret;
 
 #ifdef CONFIG_SCHED_SPORADIC
 errout_with_irq:
   leave_critical_section(flags);
-#endif
-
-errout_with_lock:
-  set_errno(errcode);
   sched_unlock();
-  return ERROR;
+  return ret;
+#endif
+}
+
+/****************************************************************************
+ * Name: sched_setscheduler
+ *
+ * Description:
+ *   sched_setscheduler() sets both the scheduling policy and the priority
+ *   for the task identified by pid. If pid equals zero, the scheduler of
+ *   the calling task will be set.  The parameter 'param' holds the priority
+ *   of the thread under the new policy.
+ *
+ *   This function is a simply wrapper around nxsched_getparam() that
+ *   sets the errno value in the event of an error.
+ *
+ * Input Parameters:
+ *   pid - the task ID of the task to modify.  If pid is zero, the calling
+ *      task is modified.
+ *   policy - Scheduling policy requested (either SCHED_FIFO or SCHED_RR)
+ *   param - A structure whose member sched_priority is the new priority.
+ *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
+ *      through SCHED_PRIORITY_MAX.
+ *
+ * Returned Value:
+ *   On success, sched_setscheduler() returns OK (zero).  On error, ERROR
+ *   (-1) is returned, and errno is set appropriately:
+ *
+ *   EINVAL The scheduling policy is not one of the recognized policies.
+ *   ESRCH  The task whose ID is pid could not be found.
+ *
+ ****************************************************************************/
+
+int sched_setscheduler(pid_t pid, int policy,
+                       FAR const struct sched_param *param)
+{
+  int ret = nxsched_setscheduler(pid, policy, param);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }

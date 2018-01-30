@@ -53,37 +53,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_getaffinity
+ * Name: nxsched_getaffinity
  *
  * Description:
- *   sched_getaffinity() writes the affinity mask of the thread whose ID
+ *   nxsched_getaffinity() writes the affinity mask of the thread whose ID
  *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
  *   argument specifies the size (in bytes) of mask.  If pid is zero, then
  *   the mask of the calling thread is returned.
  *
- * Inputs:
- *   pid        - The ID of thread whose affinity set will be retrieved.
- *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
- *   cpuset     - The location to return the thread's new affinity set.
+ *   nxsched_getaffinity() is identical to the function sched_getaffinity(),
+ *   differing only in its return value:  This function does not modify the
+ *   errno variable.
  *
- * Return Value:
- *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
- *   set appropriately:
+ *   This is a non-standard, internal OS function and is not intended for
+ *   use by application logic.  Applications should use the standard
+ *   sched_getparam().
+ *
+ * Input Parameters:
+ *   pid        - The ID of thread whose affinity set will be retrieved.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
+ *   mask       - The location to return the thread's new affinity set.
+ *
+ * Returned Value:
+ *   Zero (OK) if successful.  Otherwise, a negated errno value is returned:
  *
  *      ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 
-int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
+int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 {
   FAR struct tcb_s *tcb;
+  int ret;
 
   DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
 
   /* Verify that the PID corresponds to a real task */
 
   sched_lock();
-  if (!pid)
+  if (pid == 0)
     {
       tcb = this_task();
     }
@@ -94,13 +102,53 @@ int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 
   if (tcb == NULL)
     {
-      set_errno(ESRCH);
-      return ERROR;
+      ret = -ESRCH;
+    }
+  else
+    {
+      /* Return the affinity mask from the TCB. */
+
+      *mask = tcb->affinity;
+      ret = OK;
     }
 
-  /* Return the affinity mask from the TCB. */
-
-  *mask = tcb->affinity;
   sched_unlock();
-  return OK;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sched_getaffinity
+ *
+ * Description:
+ *   sched_getaffinity() writes the affinity mask of the thread whose ID
+ *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
+ *   argument specifies the size (in bytes) of mask.  If pid is zero, then
+ *   the mask of the calling thread is returned.
+ *
+ *   This function is a simply wrapper around nxsched_getaffinity() that
+ *   sets the errno value in the event of an error.
+ *
+ * Input Parameters:
+ *   pid        - The ID of thread whose affinity set will be retrieved.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
+ *   mask       - The location to return the thread's new affinity set.
+ *
+ * Returned Value:
+ *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
+ *   set appropriately:
+ *
+ *      ESRCH  The task whose ID is pid could not be found.
+ *
+ ****************************************************************************/
+
+int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
+{
+  int ret = nxsched_getaffinity(pid, cpusetsize, mask);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }

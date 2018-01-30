@@ -529,7 +529,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       if (ret < 0)
         {
-          ret = get_errno();
+          ret = -ret;
         }
     }
 
