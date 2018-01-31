@@ -128,19 +128,16 @@ static void aio_read_worker(FAR void *arg)
     }
 #endif
 
-  /* Set the result of the read */
+  /* Set the result of the read operation. */
 
+#ifdef CONFIG_DEBUG_FS_ERROR
   if (nread < 0)
     {
-      int errcode = get_errno();
-      ferr("ERROR: pread failed: %d\n", errcode);
-      DEBUGASSERT(errcode > 0);
-      aiocbp->aio_result = -errcode;
+      ferr("ERROR: read failed: %d\n", (int)nread);
     }
-  else
-    {
-      aiocbp->aio_result = nread;
-    }
+#endif
+
+  aiocbp->aio_result = nread;
 
   /* Signal the client */
 
