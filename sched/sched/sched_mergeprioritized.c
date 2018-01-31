@@ -83,6 +83,12 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
   FAR struct tcb_s *tcb2;
   FAR struct tcb_s *tmp;
 
+#ifdef CONFIG_SMP
+  /* Lock the tasklists before accessing */
+
+  irqstate_t lock = sched_tasklist_lock();
+#endif
+
   DEBUGASSERT(list1 != NULL && list2 != NULL);
 
   /* Get a private copy of list1, clearing list1.  We do this early so that
@@ -99,7 +105,7 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
     {
       /* Special case.. list1 is empty.  There is nothing to be done. */
 
-      return;
+      goto ret_with_lock;
     }
 
   /* Now the TCBs are no longer accessible and we can change the state on
@@ -122,7 +128,7 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
       /* Special case.. list2 is empty.  Move list1 to list2. */
 
       dq_move(&clone, list2);
-      return;
+      goto ret_with_lock;
     }
 
   /* Now loop until all entries from list1 have been merged into list2. tcb1
@@ -171,4 +177,13 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
         }
     }
   while (tcb1 != NULL);
+
+ret_with_lock:
+
+#ifdef CONFIG_SMP
+  /* Unlock the tasklists */
+
+  sched_tasklist_unlock(lock);
+#endif
+  return;
 }

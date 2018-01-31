@@ -364,6 +364,10 @@ extern volatile spinlock_t g_cpu_schedlock SP_SECTION;
 extern volatile spinlock_t g_cpu_locksetlock SP_SECTION;
 extern volatile cpu_set_t g_cpu_lockset SP_SECTION;
 
+/* Used to lock tasklist to prevent from concurrent access */
+
+extern volatile spinlock_t g_cpu_tasklistlock SP_SECTION;
+
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
@@ -425,6 +429,10 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #ifdef CONFIG_SMP
 int  sched_cpu_select(cpu_set_t affinity);
 int  sched_cpu_pause(FAR struct tcb_s *tcb);
+
+irqstate_t sched_tasklist_lock(void);
+void sched_tasklist_unlock(irqstate_t lock);
+
 #  define sched_islocked(tcb) spin_islocked(&g_cpu_schedlock)
 #else
 #  define sched_cpu_select(a) (0)

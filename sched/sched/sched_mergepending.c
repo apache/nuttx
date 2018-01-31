@@ -199,6 +199,10 @@ bool sched_mergepending(void)
   int cpu;
   int me;
 
+  /* Lock the tasklist before accessing */
+
+  irqstate_t lock = sched_tasklist_lock();
+
   /* Remove and process every TCB in the g_pendingtasks list.
    *
    * Do nothing if (1) pre-emption is still disabled (by any CPU), or (2) if
@@ -215,7 +219,7 @@ bool sched_mergepending(void)
         {
           /* The pending task list is empty */
 
-          return ret;
+          goto errout_with_lock;
         }
 
       cpu  = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
@@ -259,7 +263,7 @@ bool sched_mergepending(void)
                * pending task list.
                */
 
-              return ret;
+              goto errout_with_lock;
             }
 
           /* Set up for the next time through the loop */
@@ -269,7 +273,7 @@ bool sched_mergepending(void)
             {
               /* The pending task list is empty */
 
-              return ret;
+              goto errout_with_lock;
             }
 
           cpu  = sched_cpu_select(ALL_CPUS /* ptcb->affinity */);
@@ -285,6 +289,11 @@ bool sched_mergepending(void)
                              TSTATE_TASK_READYTORUN);
     }
 
+errout_with_lock:
+
+  /* Unlock the tasklist */
+
+  sched_tasklist_unlock(lock);
   return ret;
 }
 #endif /* CONFIG_SMP */
