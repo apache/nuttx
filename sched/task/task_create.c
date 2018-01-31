@@ -100,7 +100,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
     {
       serr("ERROR: Failed to allocate TCB\n");
       return -ENOMEM;
-      goto errout;
     }
 
 #ifdef HAVE_TASK_GROUP
