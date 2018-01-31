@@ -173,6 +173,10 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
   int cpu;
   int me;
 
+  /* Lock the tasklists before accessing */
+
+  irqstate_t lock = sched_tasklist_lock();
+
   /* Check if the blocked TCB is locked to this CPU */
 
   if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
@@ -339,10 +343,9 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
           else if (g_cpu_nestcount[me] <= 0)
             {
-              /* Release our hold on the IRQ lock. */
-
-              spin_clrbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
+              /* Do nothing here
+               * NOTE: spin_clrbit() will be done in sched_resumescheduler()
+               */
             }
 
           /* Sanity check.  g_cpu_netcount should be greater than zero
@@ -426,6 +429,9 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
         }
     }
 
+  /* Unlock the tasklists */
+
+  sched_tasklist_unlock(lock);
   return doswitch;
 }
 

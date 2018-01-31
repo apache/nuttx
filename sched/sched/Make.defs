@@ -77,6 +77,8 @@ else ifeq ($(CONFIG_SCHED_SPORADIC),y)
 CSRCS += sched_resumescheduler.c
 else ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
 CSRCS += sched_resumescheduler.c
+else ifeq ($(CONFIG_SMP),y)
+CSRCS += sched_resumescheduler.c
 endif
 
 ifeq ($(CONFIG_SCHED_CPULOAD),y)
@@ -94,6 +96,10 @@ endif
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
 CSRCS += sched_note.c
+endif
+
+ifeq ($(CONFIG_SMP),y)
+CSRCS += sched_tasklistlock.c
 endif
 
 # Include sched build support

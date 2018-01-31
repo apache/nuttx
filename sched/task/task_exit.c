@@ -97,6 +97,14 @@ int task_exit(void)
   (void)sched_removereadytorun(dtcb);
   rtcb = this_task();
 
+#ifdef CONFIG_SMP
+  /* Because clearing the global IRQ control in sched_removereadytorun()
+   * was moved to sched_resume_scheduler(). So call the API here.
+   */
+
+  sched_resume_scheduler(rtcb);
+#endif
+
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
    * emption on this TCB and marking the new ready-to-run task as not

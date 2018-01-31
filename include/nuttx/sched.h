@@ -883,7 +883,7 @@ void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
  ********************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION)
+    defined(CONFIG_SCHED_INSTRUMENTATION) || defined(CONFIG_SMP)
 void sched_resume_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_resume_scheduler(tcb)

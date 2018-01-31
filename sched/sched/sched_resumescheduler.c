@@ -45,10 +45,11 @@
 #include <nuttx/clock.h>
 #include <nuttx/sched_note.h>
 
+#include "irq/irq.h"
 #include "sched/sched.h"
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION)
+    defined(CONFIG_SCHED_INSTRUMENTATION) || defined(CONFIG_SMP)
 
 /****************************************************************************
  * Public Functions
@@ -101,7 +102,44 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
   sched_note_resume(tcb);
 #endif
 
+#ifdef CONFIG_SMP
+  /* NOTE: The following logic for adjusting global IRQ controls were
+   * derived from sched_addreadytorun() and sched_removedreadytorun()
+   * Here, we only handles clearing logic to defer unlocking IRQ lock
+   * followed by context switching.
+   */
+
+  int me = this_cpu();
+
+  /* Adjust global IRQ controls.  If irqcount is greater than zero,
+   * then this task/this CPU holds the IRQ lock
+   */
+
+  if (tcb->irqcount > 0)
+    {
+      /* Do notihing here
+       * NOTE: spin_setbit() is done in sched_addreadytorun()
+       * and sched_removereadytorun()
+       */
+    }
+
+  /* No.. This CPU will be relinquishing the lock.  But this works
+   * differently if we are performing a context switch from an
+   * interrupt handler and the interrupt handler has established
+   * a critical section.  We can detect this case when
+   * g_cpu_nestcount[me] > 0.
+   */
+
+  else if (g_cpu_nestcount[me] <= 0)
+    {
+      /* Release our hold on the IRQ lock. */
+
+      spin_clrbit(&g_cpu_irqset, me, &g_cpu_irqsetlock,
+                  &g_cpu_irqlock);
+    }
+#endif /* CONFIG_SMP */
+
 }
 
 #endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || \
-        * CONFIG_SCHED_INSTRUMENTATION */
+        * CONFIG_SCHED_INSTRUMENTATION || CONFIG_SMP */
