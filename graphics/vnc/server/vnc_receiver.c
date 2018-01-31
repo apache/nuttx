@@ -105,7 +105,7 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
       if (nrecvd < 0)
         {
           gerr("ERROR: Receive message failed: %d\n", (int)nrecvd);
-          return (int)recvd;
+          return (int)nrecvd;
         }
     }
 
