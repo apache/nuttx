@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/kthread.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -356,9 +357,9 @@ int sam_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = task_create("OHCI Monitor", CONFIG_SAMA5D4EK_USBHOST_PRIO,
-                    CONFIG_SAMA5D4EK_USBHOST_STACKSIZE,
-                    (main_t)ohci_waiter, (FAR char * const *)NULL);
+  pid = kthread_create("OHCI Monitor", CONFIG_SAMA5D4EK_USBHOST_PRIO,
+                       CONFIG_SAMA5D4EK_USBHOST_STACKSIZE,
+                       (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
       uerr("ERROR: Failed to create ohci_waiter task: %d\n", ret);
@@ -378,9 +379,9 @@ int sam_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = task_create("EHCI Monitor", CONFIG_SAMA5D4EK_USBHOST_PRIO,
-                    CONFIG_SAMA5D4EK_USBHOST_STACKSIZE,
-                    (main_t)ehci_waiter, (FAR char * const *)NULL);
+  pid = kthread_create("EHCI Monitor", CONFIG_SAMA5D4EK_USBHOST_PRIO,
+                       CONFIG_SAMA5D4EK_USBHOST_STACKSIZE,
+                       (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
       uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);

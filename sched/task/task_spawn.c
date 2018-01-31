@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/kthread.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -138,11 +139,11 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
   /* Start the task */
 
-  pid = task_create(name, priority, stacksize, entry, argv);
+  pid = nxtask_create(name, priority, stacksize, entry, argv);
   if (pid < 0)
     {
-      ret = get_errno();
-      serr("ERROR: task_create failed: %d\n", ret);
+      ret = -pid;
+      serr("ERROR: nxtask_create failed: %d\n", ret);
       goto errout;
     }
 
@@ -403,15 +404,14 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
    * task.
    */
 
-  proxy = task_create("task_spawn_proxy", param.sched_priority,
-                      CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                      (main_t)task_spawn_proxy,
-                      (FAR char * const *)NULL);
+  proxy = nxtask_create("task_spawn_proxy", param.sched_priority,
+                        CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
+                        (main_t)task_spawn_proxy,
+                        (FAR char * const *)NULL);
   if (proxy < 0)
     {
-      ret = get_errno();
+      ret = -proxy;
       serr("ERROR: Failed to start task_spawn_proxy: %d\n", ret);
-
       goto errout_with_lock;
     }
 

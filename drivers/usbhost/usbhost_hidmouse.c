@@ -1699,12 +1699,12 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
                                  CONFIG_HIDMOUSE_STACKSIZE,
                                  (main_t)usbhost_mouse_poll,
                                  (FAR char * const *)NULL);
-  if (priv->pollpid == ERROR)
+  if (priv->pollpid < 0)
     {
       /* Failed to started the poll thread... probably due to memory resources */
 
       usbhost_givesem(&g_exclsem);
-      ret = -ENOMEM;
+      ret = priv->pollpid;
       goto errout;
     }
 

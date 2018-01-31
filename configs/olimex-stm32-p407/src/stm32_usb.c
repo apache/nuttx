@@ -47,6 +47,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kthread.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -236,9 +237,9 @@ int stm32_usbhost_setup(void)
 
       uinfo("Start usbhost_waiter\n");
 
-      pid = task_create("usbhost", CONFIG_OLIMEXP407_USBHOST_PRIO,
-                        CONFIG_OLIMEXP407_USBHOST_STACKSIZE,
-                        (main_t)usbhost_waiter, (FAR char * const *)NULL);
+      pid = kthread_create("usbhost", CONFIG_OLIMEXP407_USBHOST_PRIO,
+                           CONFIG_OLIMEXP407_USBHOST_STACKSIZE,
+                           (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
 

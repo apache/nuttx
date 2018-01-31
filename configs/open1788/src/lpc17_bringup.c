@@ -46,6 +46,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kthread.h>
 #include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
@@ -343,9 +344,9 @@ static int nsh_usbhostinitialize(void)
 
       syslog(LOG_INFO, "Start nsh_waiter\n");
 
-      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        CONFIG_USBHOST_STACKSIZE,
-                        (main_t)nsh_waiter, (FAR char * const *)NULL);
+      pid = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
+                           CONFIG_USBHOST_STACKSIZE,
+                           (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
 

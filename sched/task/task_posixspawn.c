@@ -420,9 +420,8 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
                          (FAR char * const *)NULL);
   if (proxy < 0)
     {
-      ret = get_errno();
+      ret = -proxy;
       serr("ERROR: Failed to start posix_spawn_proxy: %d\n", ret);
-
       goto errout_with_lock;
     }
 

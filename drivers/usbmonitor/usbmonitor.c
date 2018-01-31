@@ -231,25 +231,24 @@ int usbmonitor_start(void)
                            (FAR char * const *)NULL);
       if (ret < 0)
         {
-          int errcode = get_errno();
           uerr("ERROR: Failed to start the USB monitor: %d\n",
-               errcode);
-          UNUSED(errcode);
+               ret);
         }
       else
         {
           g_usbmonitor.pid = ret;
           uinfo("Started: %d\n", g_usbmonitor.pid);
+          ret = OK;
         }
 
       sched_unlock();
-      return 0;
+      return ret;
     }
 
   sched_unlock();
   uinfo("%s: %d\n",
         g_usbmonitor.stop ? "Stopping" : "Running", g_usbmonitor.pid);
-  return 0;
+  return OK;
 }
 
 /****************************************************************************

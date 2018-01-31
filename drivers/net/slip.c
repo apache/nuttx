@@ -57,6 +57,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
+#include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -971,15 +972,15 @@ int slip_initialize(int intf, FAR const char *devname)
 
   slip_ifdown(&priv->dev);
 
-  /* Start the SLIP receiver task */
+  /* Start the SLIP receiver kernel thread */
 
   snprintf(buffer, 8, "%d", intf);
   argv[0] = buffer;
   argv[1] = NULL;
 
-  priv->rxpid = task_create("rxslip", CONFIG_NET_SLIP_DEFPRIO,
-                            CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_rxtask,
-                            (FAR char * const *)argv);
+  priv->rxpid = kthread_create("rxslip", CONFIG_NET_SLIP_DEFPRIO,
+                               CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_rxtask,
+                               (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
       nerr("ERROR: Failed to start receiver task\n");
@@ -990,11 +991,11 @@ int slip_initialize(int intf, FAR const char *devname)
 
   slip_semtake(priv);
 
-  /* Start the SLIP transmitter task */
+  /* Start the SLIP transmitter kernel thread */
 
-  priv->txpid = task_create("txslip", CONFIG_NET_SLIP_DEFPRIO,
-                            CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_txtask,
-                            (FAR char * const *)argv);
+  priv->txpid = kthread_create("txslip", CONFIG_NET_SLIP_DEFPRIO,
+                               CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_txtask,
+                               (FAR char * const *)argv);
   if (priv->txpid < 0)
     {
       nerr("ERROR: Failed to start receiver task\n");

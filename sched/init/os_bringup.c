@@ -257,16 +257,16 @@ static inline void os_do_appstart(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  pid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                    CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
-                    (FAR char * const *)NULL);
+  pid = nxtask_create("init", SCHED_PRIORITY_DEFAULT,
+                      CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
+                      (FAR char * const *)NULL);
 #else
-  pid = task_create("init", SCHED_PRIORITY_DEFAULT,
-                    CONFIG_USERMAIN_STACKSIZE,
-                    (main_t)CONFIG_USER_ENTRYPOINT,
-                    (FAR char * const *)NULL);
+  pid = nxtask_create("init", SCHED_PRIORITY_DEFAULT,
+                      CONFIG_USERMAIN_STACKSIZE,
+                      (main_t)CONFIG_USER_ENTRYPOINT,
+                      (FAR char * const *)NULL);
 #endif
-  ASSERT(pid > 0);
+  DEBUGASSERT(pid > 0);
 }
 
 #elif defined(CONFIG_INIT_FILEPATH)
@@ -357,7 +357,7 @@ static inline void os_start_application(void)
   pid = kthread_create("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
                       (main_t)os_start_task, (FAR char * const *)NULL);
-  ASSERT(pid > 0);
+  DEBUGASSERT(pid > 0);
 
 #else
   /* Do the board/application initialization on this thread of execution. */

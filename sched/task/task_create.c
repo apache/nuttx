@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/task/task_create.c
  *
- *   Copyright (C) 2007-2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2014, 2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,9 +79,9 @@
  *                parameters are required, argv may be NULL.
  *
  * Return Value:
- *   Returns the non-zero process ID of the new task or ERROR if memory is
- *   insufficient or the task cannot be created.  The errno will be set to
- *   indicate the nature of the error (always ENOMEM).
+ *   Returns the positive, non-zero process ID of the new task or a negated
+ *   errno value to indicate the nature of any failure.  If memory is
+ *   insufficient or the task cannot be created -ENOMEM will be returned.
  *
  ****************************************************************************/
 
@@ -90,7 +91,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
-  int errcode;
   int ret;
 
   /* Allocate a TCB for the new task. */
@@ -99,7 +99,7 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   if (!tcb)
     {
       serr("ERROR: Failed to allocate TCB\n");
-      errcode = ENOMEM;
+      return -ENOMEM;
       goto errout;
     }
 
@@ -111,7 +111,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   ret = group_allocate(tcb, ttype);
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_tcb;
     }
 #endif
@@ -129,7 +128,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
       ret = group_setuptaskfiles(tcb);
       if (ret < OK)
         {
-          errcode = -ret;
           goto errout_with_tcb;
         }
     }
@@ -140,7 +138,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size, ttype);
   if (ret < OK)
     {
-      errcode = -ret;
       goto errout_with_tcb;
     }
 
@@ -149,7 +146,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   ret = task_schedsetup(tcb, priority, task_start, entry, ttype);
   if (ret < OK)
     {
-      errcode = -ret;
       goto errout_with_tcb;
     }
 
@@ -163,7 +159,6 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   ret = group_initialize(tcb);
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_tcb;
     }
 #endif
@@ -177,7 +172,8 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < OK)
     {
-      errcode = get_errno();
+      ret = -get_errno();
+      DEBUGASSERT(ret < 0);
 
       /* The TCB was added to the active task list by task_schedsetup() */
 
@@ -189,15 +185,59 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 
 errout_with_tcb:
   sched_releasetcb((FAR struct tcb_s *)tcb, ttype);
-
-errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxtask_create
+ *
+ * Description:
+ *   This function creates and activates a new task with a specified
+ *   priority and returns its system-assigned ID.
+ *
+ *   The entry address entry is the address of the "main" function of the
+ *   task.  This function will be called once the C environment has been
+ *   set up.  The specified function will be called with four arguments.
+ *   Should the specified routine return, a call to exit() will
+ *   automatically be made.
+ *
+ *   Note that four (and only four) arguments must be passed for the spawned
+ *   functions.
+ *
+ *   nxtask_create() is identical to the function task_create(), differing
+ *   only in its return value:  This function does not modify the errno
+ *   variable.  This is a non-standard, internal OS function and is not
+ *   intended for use by application logic.  Applications should use
+ *   task_create().
+ *
+ * Input Parameters:
+ *   name       - Name of the new task
+ *   priority   - Priority of the new task
+ *   stack_size - size (in bytes) of the stack needed
+ *   entry      - Entry point of a new task
+ *   arg        - A pointer to an array of input parameters. Up to
+ *                CONFIG_MAX_TASK_ARG parameters may be provided.  If fewer
+ *                than CONFIG_MAX_TASK_ARG parameters are passed, the list
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
+ *
+ * Return Value:
+ *   Returns the positive, non-zero process ID of the new task or a negated
+ *   errno value to indicate the nature of any failure.  If memory is
+ *   insufficient or the task cannot be created -ENOMEM will be returned.
+ *
+ ****************************************************************************/
+
+int nxtask_create(FAR const char *name, int priority,
+                  int stack_size, main_t entry, FAR char * const argv[])
+{
+  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
+                       entry, argv);
+}
 
 /****************************************************************************
  * Name: task_create
@@ -228,8 +268,8 @@ errout:
  *
  * Return Value:
  *   Returns the non-zero process ID of the new task or ERROR if memory is
- *   insufficient or the task cannot be created.  The errno will be set to
- *   indicate the nature of the error (always ENOMEM).
+ *   insufficient or the task cannot be created.  The errno will be set in
+ *   the failure case to indicate the nature of the error.
  *
  ****************************************************************************/
 
@@ -237,8 +277,14 @@ errout:
 int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 {
-  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
-                       entry, argv);
+  int ret = nxtask_create(name, priority, stack_size, entry, argv);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
 #endif
 
@@ -251,10 +297,20 @@ int task_create(FAR const char *name, int priority,
  *   configures the newly started thread to run in kernel model.
  *
  * Input Parameters:
- *   (same as task_create())
+ *   name       - Name of the new task
+ *   priority   - Priority of the new task
+ *   stack_size - size (in bytes) of the stack needed
+ *   entry      - Entry point of a new task
+ *   arg        - A pointer to an array of input parameters. Up to
+ *                CONFIG_MAX_TASK_ARG parameters may be provided.  If fewer
+ *                than CONFIG_MAX_TASK_ARG parameters are passed, the list
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
  *
  * Return Value:
- *   (same as task_create())
+ *   Returns the positive, non-zero process ID of the new task or a negated
+ *   errno value to indicate the nature of any failure.  If memory is
+ *   insufficient or the task cannot be created -ENOMEM will be returned.
  *
  ****************************************************************************/
 

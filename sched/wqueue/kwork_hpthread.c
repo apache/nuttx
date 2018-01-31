@@ -162,11 +162,8 @@ int work_hpstart(void)
   DEBUGASSERT(pid > 0);
   if (pid < 0)
     {
-      int errcode = get_errno();
-      DEBUGASSERT(errcode > 0);
-
-      serr("ERROR: kthread_create failed: %d\n", errcode);
-      return -errcode;
+      serr("ERROR: kthread_create failed: %d\n", (int)pid);
+      return (int)pid;
     }
 
   g_hpwork.worker[0].pid  = pid;

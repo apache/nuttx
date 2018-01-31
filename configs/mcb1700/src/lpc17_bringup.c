@@ -45,6 +45,7 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/kthread.h>
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
@@ -301,9 +302,9 @@ static int nsh_usbhostinitialize(void)
 
       syslog(LOG_ERR, "ERROR: Start nsh_waiter\n");
 
-      pid = task_create("usbhost", CONFIG_MCB1700_USBHOST_PRIO,
-                        CONFIG_MCB1700_USBHOST_STACKSIZE,
-                        (main_t)nsh_waiter, (FAR char * const *)NULL);
+      pid = kthread_create("usbhost", CONFIG_MCB1700_USBHOST_PRIO,
+                           CONFIG_MCB1700_USBHOST_STACKSIZE,
+                           (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
 
