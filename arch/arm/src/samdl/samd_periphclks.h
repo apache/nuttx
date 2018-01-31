@@ -107,7 +107,7 @@
 #define sam_ptc_enableperiph()        sam_apbc_enableperiph(PM_APBCMASK_PTC)
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define sam_i2s_enableperiph()      sam_apbc_enableperiph(PM_APBBMASK_I2S)
+#  define sam_i2s_enableperiph()      sam_apbc_enableperiph(PM_APBCMASK_I2S)
 #endif
 
 #define sam_apba_disableperiph(s)     modifyreg32(SAM_PM_APBAMASK,s,0)
@@ -167,7 +167,7 @@
 #define sam_ptc_disableperiph()       sam_apbc_disableperiph(PM_APBCMASK_PTC)
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define sam_i2s_disableperiph()     sam_apbc_disableperiph(PM_APBBMASK_I2S)
+#  define sam_i2s_disableperiph()     sam_apbc_disableperiph(PM_APBCMASK_I2S)
 #endif
 
 #define sam_apba_isenabled(s)         (getreg32(SAM_PM_APBAMASK) & (s)) != 0)
@@ -227,7 +227,7 @@
 #define sam_ptc_isenabled()           sam_apbc_isenabled(PM_APBCMASK_PTC)
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define sam_i2s_isenabled()         sam_apbc_isenabled(PM_APBBMASK_I2S)
+#  define sam_i2s_isenabled()         sam_apbc_isenabled(PM_APBCMASK_I2S)
 #endif
 
 /****************************************************************************

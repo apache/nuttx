@@ -158,8 +158,8 @@
 #  define GCLK_CLKCTRL_ID_ACANA      (32 << GCLK_CLKCTRL_ID_SHIFT) /* AC_ANA */
 #  define GCLK_CLKCTRL_ID_DAC        (33 << GCLK_CLKCTRL_ID_SHIFT) /* DAC */
 #  define GCLK_CLKCTRL_ID_PTC        (34 << GCLK_CLKCTRL_ID_SHIFT) /* PTC */
-#  define GCLK_CLKCTRL_I2S0_PTC      (35 << GCLK_CLKCTRL_ID_SHIFT) /* I2S0 */
-#  define GCLK_CLKCTRL_I2S1_PTC      (36 << GCLK_CLKCTRL_ID_SHIFT) /* I2S1 */
+#  define GCLK_CLKCTRL_ID_I2S0       (35 << GCLK_CLKCTRL_ID_SHIFT) /* I2S0 */
+#  define GCLK_CLKCTRL_ID_I2S1       (36 << GCLK_CLKCTRL_ID_SHIFT) /* I2S1 */
 #endif
 
 #define GCLK_CLKCTRL_GEN_SHIFT  (8)       /* Bits 8-11: Generic Clock Generator */

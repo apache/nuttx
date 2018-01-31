@@ -228,7 +228,7 @@
 #define PM_APBCMASK_PTC           (1 << 19) /* Bit 19: PTC */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define PM_APBBMASK_I2S         (1 << 20) /* Bit 20: Inter IC Sound */
+#  define PM_APBCMASK_I2S         (1 << 20) /* Bit 20: Inter IC Sound */
 #endif
 
 /* Interrupt enable clear, Interrupt enable set, and Interrupt flag status and clear registers */
