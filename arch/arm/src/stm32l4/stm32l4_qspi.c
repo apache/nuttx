@@ -1447,7 +1447,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
 
       ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
                      (wdentry_t)qspi_dma_timeout, 1, (uint32_t)priv);
-      if (ret != OK)
+      if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
         }

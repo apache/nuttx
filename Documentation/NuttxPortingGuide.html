@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: October 12, 2017</p>
+      <p>Last Updated: January 31, 2018</p>
     </td>
   </tr>
 </table>
@@ -2605,7 +2605,7 @@ pointer to a watchdog structure.
 <p>
 <b>Returned Value:</b>
 <ul>
-<li>OK or ERROR
+<li>Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is return to indicate the nature of any failure.
 </ul>
 
 <p>
@@ -2662,7 +2662,7 @@ wd_start() on a given watchdog ID has any effect.
 <p>
 <b>Returned Value:</b>
 <ul>
-<li>OK or ERROR
+<li>Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is return to indicate the nature of any failure.
 </ul>
 
 <p>

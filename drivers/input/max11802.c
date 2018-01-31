@@ -592,8 +592,8 @@ static void max11802_worker(FAR void *arg)
 
        iinfo("Previous pen up event still in buffer\n");
        max11802_notify(priv);
-       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-                (uint32_t)priv);
+       (void)wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+                      (uint32_t)priv);
        goto ignored;
     }
   else
@@ -632,8 +632,8 @@ static void max11802_worker(FAR void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-               (uint32_t)priv);
+      (void)wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+i                    (uint32_t)priv);
 
       /* Check if data is valid */
 

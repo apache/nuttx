@@ -271,7 +271,8 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
 
   /* Start the watchdog and begin the wait for MQ not full */
 
-  wd_start(rtcb->waitdog, ticks, (wdentry_t)nxmq_sndtimeout, 1, getpid());
+  (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)nxmq_sndtimeout,
+                 1, getpid());
 
   /* And wait for the message queue to be non-empty */
 

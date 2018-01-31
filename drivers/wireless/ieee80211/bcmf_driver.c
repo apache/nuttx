@@ -886,8 +886,8 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /*  Start scan_timeout timer */
 
-  wd_start(priv->scan_timeout, BCMF_SCAN_TIMEOUT_TICK,
-           bcmf_wl_scan_timeout, (wdparm_t)priv);
+  (void)wd_start(priv->scan_timeout, BCMF_SCAN_TIMEOUT_TICK,
+                 bcmf_wl_scan_timeout, (wdparm_t)priv);
 
   return OK;
 

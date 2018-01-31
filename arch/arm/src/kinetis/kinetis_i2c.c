@@ -1183,8 +1183,8 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
       /* Wait for transfer complete */
 
-      wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
-               (uint32_t) priv);
+      (void)wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
+                     (uint32_t)priv);
       kinetis_i2c_wait(priv);
 
       wd_cancel(priv->timeout);

@@ -2791,7 +2791,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
       delay = MSEC2TICK(timeout);
       ret   = wd_start(priv->waitwdog, delay, (wdentry_t)sam_eventtimeout,
                        1, (uint32_t)priv);
-      if (ret != OK)
+      if (ret < 0)
         {
            mcerr("ERROR: wd_start failed: %d\n", ret);
         }

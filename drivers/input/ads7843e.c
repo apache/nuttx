@@ -607,7 +607,8 @@ static void ads7843e_worker(FAR void *arg)
        * later.
        */
 
-       wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1, (uint32_t)priv);
+       (void)wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
+                      (uint32_t)priv);
        goto ignored;
     }
   else

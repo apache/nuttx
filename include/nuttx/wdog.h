@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/wdog.h
  *
- *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,7 +197,8 @@ WDOG_ID wd_create(void);
  *          watchdog structure.
  *
  * Return Value:
- *   Returns OK or ERROR
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
  *
  * Assumptions:
  *   The caller has assured that the watchdog is no longer in use.
@@ -230,7 +232,8 @@ int wd_delete(WDOG_ID wdog);
  *   parm1..4 - parameters to pass to wdentry
  *
  * Return Value:
- *   OK or ERROR
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
  *
  * Assumptions:
  *   The watchdog routine runs in the context of the timer interrupt handler

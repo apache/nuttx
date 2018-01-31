@@ -68,7 +68,8 @@
  *          watchdog structure.
  *
  * Return Value:
- *   Returns OK or ERROR
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
  *
  * Assumptions:
  *   The caller has assured that the watchdog is no longer in use.

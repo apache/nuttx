@@ -765,10 +765,9 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
   priv->result = OK;
 
   /* Set up the transfer timeout */
-  /* wd_start(priv->timeout ...);  */
 
-  wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT, lpc54_i2c_timeout,
-           1, (uint32_t)priv);
+  (void)wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT,
+                 lpc54_i2c_timeout, 1, (uint32_t)priv);
 
   /* Initiate the transfer */
 

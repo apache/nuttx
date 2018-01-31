@@ -274,8 +274,10 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                     {
                       /* Start the watchdog */
 
-                      wd_start(rtcb->waitdog, ticks, (wdentry_t)pthread_condtimedout,
-                               2, (uint32_t)mypid, (uint32_t)SIGCONDTIMEDOUT);
+                      (void)wd_start(rtcb->waitdog, ticks,
+                                     (wdentry_t)pthread_condtimedout,
+                                     2, (uint32_t)mypid,
+                                     (uint32_t)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore interrupts
                        * until we return from the wait.  This is necessary to

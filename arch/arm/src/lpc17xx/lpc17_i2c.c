@@ -215,7 +215,8 @@ static int lpc17_i2c_start(struct lpc17_i2cdev_s *priv)
            priv->base + LPC17_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC17_I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT, lpc17_i2c_timeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->timeout, I2C_TIMEOUT, lpc17_i2c_timeout, 1,
+                 (uint32_t)priv);
   nxsem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);

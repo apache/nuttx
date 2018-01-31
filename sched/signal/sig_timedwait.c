@@ -356,8 +356,8 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
               /* Start the watchdog */
 
-              wd_start(rtcb->waitdog, waitticks, (wdentry_t)nxsig_timeout,
-                       1, wdparm.pvarg);
+              (void)wd_start(rtcb->waitdog, waitticks,
+                             (wdentry_t)nxsig_timeout, 1, wdparm.pvarg);
 
               /* Now wait for either the signal or the watchdog */
 

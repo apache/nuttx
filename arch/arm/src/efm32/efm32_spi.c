@@ -1493,7 +1493,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       ret = wd_start(priv->wdog, (int)ticks, spi_dma_timeout, 1, (uint32_t)priv);
       if (ret < 0)
         {
-          spierr("ERROR: Failed to start timeout\n");
+          spierr("ERROR: Failed to start timeout: %d\n", ret);
         }
 
       /* Then wait for each to complete.  TX should complete first */

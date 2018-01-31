@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/wdog/wd_start.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2016, 2018 Gregory Nutt.  All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,8 +103,6 @@ typedef void (*wdentry4_t)(int argc, wdparm_t arg1, wdparm_t arg2,
  *
  * Return Value:
  *   None
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -211,7 +210,8 @@ static inline void wd_expiration(void)
  *   parm1..4 - parameters to pass to wdentry
  *
  * Return Value:
- *   OK or ERROR
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
  *
  * Assumptions:
  *   The watchdog routine runs in the context of the timer interrupt handler
@@ -229,12 +229,11 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
   irqstate_t flags;
   int i;
 
-  /* Verify the wdog */
+  /* Verify the wdog and setup parameters */
 
-  if (!wdog || argc > CONFIG_MAX_WDOGPARMS || delay < 0)
+  if (wdog == NULL || argc > CONFIG_MAX_WDOGPARMS || delay < 0)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Check if the watchdog has been started. If so, stop it.

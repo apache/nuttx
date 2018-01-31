@@ -597,7 +597,8 @@ static void sam_tsd_bottomhalf(void *arg)
        * this case; we rely on the timer expiry to get us going again.
        */
 
-      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
+      (void)wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
+                     (uint32_t)priv);
       ier = 0;
       goto ignored;
     }
@@ -675,7 +676,8 @@ static void sam_tsd_bottomhalf(void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
+      (void)wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
+                     (uint32_t)priv);
 
       /* Check the thresholds.  Bail if (1) this is not the first
        * measurement and (2) there is no significant difference from

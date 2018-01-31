@@ -303,11 +303,8 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
                              (uint32_t)((uintptr_t)priv));
               if (ret < 0)
                 {
-                  errcode = get_errno();
-                  DEBUGASSERT(errcode > 0);
-
-                  ferr("ERROR: wd_start failed: %d\n", errcode);
-                  return -ret;
+                  ferr("ERROR: wd_start failed: %d\n", ret);
+                  return ret;
                 }
             }
 

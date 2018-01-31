@@ -491,7 +491,8 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    * TWIHS transfer stalls.
    */
 
-  wd_start(priv->timeout, (timeout * size), twi_timeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->timeout, (timeout * size), twi_timeout, 1,
+                 (uint32_t)priv);
 
   /* Wait for either the TWIHS transfer or the timeout to complete */
 

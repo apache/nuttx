@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_settime.c
  *
- *   Copyright (C) 2007-2010, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -390,6 +391,15 @@ int timer_settime(timer_t timerid, int flags,
       timer->pt_last = delay;
       ret = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout,
                      1, (uint32_t)((wdparm_t)timer));
+      if (ret < 0)
+        {
+          set_errno(-ret);
+          ret = ERROR;
+        }
+      else
+        {
+          ret = OK;
+        }
     }
 
   leave_critical_section(intflags);

@@ -1031,7 +1031,8 @@ static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv, uint8_t epno)
 
   /* And start (or re-start) the watchdog timer */
 
-  wd_start(priv->wdog, RESTART_DELAY, pic32mx_rqrestart, 1, (uint32_t)priv);
+  (void)wd_start(priv->wdog, RESTART_DELAY, pic32mx_rqrestart, 1,
+                 (uint32_t)priv);
 }
 
 /****************************************************************************
