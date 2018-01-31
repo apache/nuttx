@@ -267,6 +267,7 @@ static inline void os_do_appstart(void)
                       (FAR char * const *)NULL);
 #endif
   DEBUGASSERT(pid > 0);
+  UNUSED(pid);
 }
 
 #elif defined(CONFIG_INIT_FILEPATH)
