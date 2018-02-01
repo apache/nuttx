@@ -158,18 +158,20 @@
 #  define BOARD_PHYID1          MII_PHYID1_KSZ8041
 #  define BOARD_PHYID2          MII_PHYID2_KSZ8041
 #  define BOARD_PHY_STATUS      MII_KSZ8041_PHYCTRL2
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_PHYCTRL2_MODE_10HDX) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_PHYCTRL2_MODE_100HDX) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_PHYCTRL2_MODE_DUPLEX) != 0)
 #elif defined(CONFIG_ETH0_PHY_KSZ8081)
 #  define BOARD_PHY_NAME        "KSZ8081"
 #  define BOARD_PHYID1          MII_PHYID1_KSZ8081
 #  define BOARD_PHYID2          MII_PHYID2_KSZ8081
-#  define BOARD_PHY_STATUS      MII_KSZ8081_PHYCTRL2
+#  define BOARD_PHY_STATUS      MII_KSZ8081_PHYCTRL1
+#  define BOARD_PHY_10BASET(s)  (((s) & MII_PHYCTRL1_MODE_10HDX) != 0)
+#  define BOARD_PHY_100BASET(s) (((s) & MII_PHYCTRL1_MODE_100HDX) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_PHYCTRL1_MODE_DUPLEX) != 0)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
-
-#define BOARD_PHY_10BASET(s)  (((s) & (1 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
-#define BOARD_PHY_100BASET(s) (((s) & (2 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
-#define BOARD_PHY_ISDUPLEX(s) (((s) & (4 << MII_PHYCTRL2_MODE_SHIFT)) != 0)
 
 /* Estimate the MII_SPEED in order to get an MDC close to 2.5MHz,
    based on the internal module (ENET) clock:

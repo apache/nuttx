@@ -583,6 +583,7 @@
 #  define MII_PHYCTRL2_MODE_BUSY     (0 << MII_PHYCTRL2_MODE_SHIFT) /* Still in autonegotiation */
 #  define MII_PHYCTRL2_MODE_10HDX    (1 << MII_PHYCTRL2_MODE_SHIFT) /* 10Base-T half-duplex */
 #  define MII_PHYCTRL2_MODE_100HDX   (2 << MII_PHYCTRL2_MODE_SHIFT) /* 100Base-T half-duplex */
+#  define MII_PHYCTRL2_MODE_DUPLEX   (4 << MII_PHYCTRL2_MODE_SHIFT) /* Full duplex */
 #  define MII_PHYCTRL2_MODE_10FDX    (5 << MII_PHYCTRL2_MODE_SHIFT) /* 10Base-T full-duplex */
 #  define MII_PHYCTRL2_MODE_100FDX   (6 << MII_PHYCTRL2_MODE_SHIFT) /* 100Base-T full-duplex */
 #define MII_PHYCTRL2_SEQTEST         (1 << 1)  /* Bit 1:  Enable SQE test */
@@ -602,6 +603,7 @@
 #  define MII_PHYCTRL1_MODE_BUSY     (0 << MII_PHYCTRL1_MODE_SHIFT) /* Still in autonegotiation */
 #  define MII_PHYCTRL1_MODE_10HDX    (1 << MII_PHYCTRL1_MODE_SHIFT) /* 10Base-T half-duplex */
 #  define MII_PHYCTRL1_MODE_100HDX   (2 << MII_PHYCTRL1_MODE_SHIFT) /* 100Base-T half-duplex */
+#  define MII_PHYCTRL1_MODE_DUPLEX   (4 << MII_PHYCTRL1_MODE_SHIFT) /* Full duplex */
 #  define MII_PHYCTRL1_MODE_10FDX    (5 << MII_PHYCTRL1_MODE_SHIFT) /* 10Base-T full-duplex */
 #  define MII_PHYCTRL1_MODE_100FDX   (6 << MII_PHYCTRL1_MODE_SHIFT) /* 100Base-T full-duplex */
 
