@@ -359,7 +359,7 @@ static inline void os_start_application(void)
                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
                       (main_t)os_start_task, (FAR char * const *)NULL);
   DEBUGASSERT(pid > 0);
-
+  UNUSED(pid);
 #else
   /* Do the board/application initialization on this thread of execution. */
 

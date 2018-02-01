@@ -115,7 +115,6 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
-  int errcode;
 
 #ifdef CONFIG_NET_SOCKOPTS
   struct timeval tv;

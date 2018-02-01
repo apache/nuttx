@@ -92,7 +92,6 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
 {
   ssize_t nrecvd;
   size_t ntotal;
-  int errcode;
 
   /* Loop until the rest of the message is recieved. */
 
@@ -136,7 +135,6 @@ int vnc_receiver(FAR struct vnc_session_s *session)
   struct timeval tv;
 #endif
   ssize_t nrecvd;
-  int errcode;
   int ret;
 
   DEBUGASSERT(session);
@@ -180,7 +178,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
       else if (nrecvd == 0)
         {
-          gwarn("WARNING: Connection closed\n", errcode);
+          gwarn("WARNING: Connection closed\n");
           return OK;
         }
 
