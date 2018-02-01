@@ -362,7 +362,7 @@ int elf_initialize(void)
 
 void elf_uninitialize(void)
 {
-  unregister_binfmt(&g_elfbinfmt);
+  (void)unregister_binfmt(&g_elfbinfmt);
 }
 
 #endif /* CONFIG_ELF */

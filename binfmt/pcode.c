@@ -583,11 +583,7 @@ void pcode_uninitialize(void)
   ret = unregister_binfmt(&g_pcode_binfmt);
   if (ret < 0)
     {
-      int errval = get_errno();
-      DEBUGASSERT(errval > 0);
-
-      berr("ERROR: unregister_binfmt() failed: %d\n", errval);
-      UNUSED(errval);
+      berr("ERROR: unregister_binfmt() failed: %d\n", ret);
     }
 
 #ifdef CONFIG_BINFMT_PCODE_TEST_FS

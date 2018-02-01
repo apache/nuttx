@@ -195,7 +195,7 @@ int builtin_initialize(void)
 
 void builtin_uninitialize(void)
 {
-  unregister_binfmt(&g_builtin_binfmt);
+  (void)unregister_binfmt(&g_builtin_binfmt);
 }
 
 #endif /* CONFIG_BUILTIN */
