@@ -62,7 +62,7 @@
 /****************************************************************************
  * Name: nxgl_setpixel_*bpp
  *
- * Descripton:
+ * Description:
  *   Draw a single pixel in LCD memory at the given position and with the
  *   given color.  This is equivalent to nxgl_fillrectangle_*bpp() with a 1x1
  *   rectangle but is more efficient.

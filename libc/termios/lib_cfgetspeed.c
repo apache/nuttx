@@ -47,7 +47,7 @@
 /****************************************************************************
  * Name: cfgetspeed
  *
- * Descripton:
+ * Description:
  *   The cfgetspeed() function is a non-POSIX function will extract the baud
  *   from the termios structure to which the termiosp argument points.
  *

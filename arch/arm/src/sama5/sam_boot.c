@@ -84,7 +84,7 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
 /****************************************************************************
  * Name: sam_setupmappings
  *
- * Description
+ * Description:
  *   Map all of the initial memory regions defined in g_section_mapping[]
  *
  ****************************************************************************/
@@ -106,7 +106,7 @@ static inline void sam_setupmappings(void)
 /****************************************************************************
  * Name: sam_remap
  *
- * Description
+ * Description:
  *   Map all of the final memory regions defined in g_operational_mapping[]
  *
  ****************************************************************************/

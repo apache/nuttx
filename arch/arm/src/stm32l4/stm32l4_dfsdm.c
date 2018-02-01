@@ -1070,7 +1070,8 @@ static void dfsdm_rccreset(FAR struct stm32_dev_s *priv, bool reset)
 /****************************************************************************
  * Name: dfsdm_enable
  *
- * Description    : Enables the DFSDM peripheral.
+ * Description:
+ *   Enables the DFSDM peripheral.
  *
  * Input Parameters:
  *   priv - A reference to the DFSDM block status

@@ -1145,7 +1145,8 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
 /****************************************************************************
  * Name: adc_enable
  *
- * Description    : Enables the specified ADC peripheral.
+ * Description:
+ *   Enables the specified ADC peripheral.
  *
  * Input Parameters:
  *   priv - A reference to the ADC block status

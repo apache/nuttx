@@ -73,7 +73,7 @@
 /****************************************************************************
  * Name: nxfe_redrawreq
  *
- * Descripton:
+ * Description:
  *   Request the client that has this window to redraw the rectangular region.
  *
  ****************************************************************************/

@@ -55,7 +55,8 @@
 /****************************************************************************
  * Name: IO_Init()
  *
- * Descriptions: Initialize the target board before running the main()
+ * Description:
+ *   Initialize the target board before running the main()
  *
  ****************************************************************************/
 

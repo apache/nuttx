@@ -222,7 +222,7 @@ void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
 /****************************************************************************
  * Name: nxgl_setpixel_*bpp
  *
- * Descripton:
+ * Description:
  *   Draw a single pixel in graphics memory at the given position and
  *   with the given color.  This is equivalent to nxgl_fillrectangle_*bpp()
  *   with a 1x1 rectangle but is more efficient.
@@ -247,7 +247,7 @@ void nxgl_setpixel_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
 /****************************************************************************
  * Name: nxgl_fillrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Fill a rectangle region in the graphics memory with a fixed color
  *
  ****************************************************************************/
@@ -277,7 +277,7 @@ void nxgl_fillrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
 /****************************************************************************
  * Name: nxgl_getrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Fetch a rectangular region from graphics memory.  The source is
  *   expressed as a rectangle.
  *
@@ -308,7 +308,7 @@ void nxgl_getrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
 /****************************************************************************
  * Name: nxglib_filltrapezoid_*bpp
  *
- * Descripton:
+ * Description:
  *   Fill a trapezoidal region in the graphics memory with a fixed color.
  *   Clip the trapezoid to lie within a bounding box.  This is useful for
  *   drawing complex shapes that can be broken into a set of trapezoids.
@@ -347,7 +347,7 @@ void nxgl_filltrapezoid_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
 /****************************************************************************
  * Name: nxgl_moverectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Move a rectangular region from location to another in the
  *   framebuffer/LCD memory.  The source is expressed as a rectangle; the
  *   destination position is expressed as a point corresponding to the
@@ -380,7 +380,7 @@ void nxgl_moverectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
 /****************************************************************************
  * Name: nxgl_copyrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Copy a rectangular bitmap image into the specific position in the
  *   graphics memory.
  *

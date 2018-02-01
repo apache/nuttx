@@ -1118,7 +1118,7 @@ extern const uint8_t g_fllratio[WM8904_NFLLRATIO];
 /****************************************************************************
  * Name: wm8904_readreg
  *
- * Description
+ * Description:
  *    Read the specified 16-bit register from the WM8904 device.
  *
  ****************************************************************************/

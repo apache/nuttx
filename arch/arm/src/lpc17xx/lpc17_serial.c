@@ -550,7 +550,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 /************************************************************************************
  * Name: lpc17_uartcclkdiv
  *
- * Descrption:
+ * Description:
  *   Select a CCLK divider to produce the UART PCLK.  The stratey is to select the
  *   smallest divisor that results in an solution within range of the 16-bit
  *   DLM and DLL divisor:
@@ -667,7 +667,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
 /************************************************************************************
  * Name: lpc17_uart0config, uart1config, uart2config, and uart3config
  *
- * Descrption:
+ * Description:
  *   Configure the UART.  UART0/1/2/3 peripherals are configured using the following
  *   registers:
  *
@@ -815,7 +815,7 @@ static inline void lpc17_uart3config(void)
 /************************************************************************************
  * Name: lpc17_uartdl
  *
- * Descrption:
+ * Description:
  *   Select a divider to produce the BAUD from the UART PCLK.
  *
  *     BAUD = PCLK / (16 * DL), or

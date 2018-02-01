@@ -420,7 +420,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
 /****************************************************************************
  * Name: lib_dns_query
  *
- * Descriptions:
+ * Description:
  *   Combines the operations of dns_bind(), dns_query(), and dns_free() to
  *   obtain the IP address ('ipaddr') associated with the 'hostname' in one
  *   operation.

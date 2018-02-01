@@ -51,7 +51,7 @@
 /****************************************************************************
  * Name: nxbe_setposition
  *
- * Descripton:
+ * Description:
  *   This function checks for intersections and redraws the display after
  *   a change in the position of a window.
  *

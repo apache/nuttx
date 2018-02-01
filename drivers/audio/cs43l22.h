@@ -374,7 +374,7 @@ extern const uint8_t g_fllratio[CS43L22_NFLLRATIO];
 /****************************************************************************
  * Name: cs43l22_readreg
  *
- * Description
+ * Description:
  *    Read the specified 8-bit register from the CS43L22 device.
  *
  ****************************************************************************/

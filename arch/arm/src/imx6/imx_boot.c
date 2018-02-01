@@ -91,7 +91,7 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
 /****************************************************************************
  * Name: imx_setupmappings
  *
- * Description
+ * Description:
  *   Map all of the initial memory regions defined in g_section_mapping[]
  *
  ****************************************************************************/
@@ -115,7 +115,7 @@ static inline void imx_setupmappings(void)
 /****************************************************************************
  * Name: imx_remap
  *
- * Description
+ * Description:
  *   Map all of the final memory regions defined in g_operational_mapping[]
  *
  ****************************************************************************/

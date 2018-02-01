@@ -518,7 +518,7 @@ static inline void u16550_enablebreaks(FAR struct u16550_s *priv,
 /****************************************************************************
  * Name: u16550_divisor
  *
- * Descrption:
+ * Description:
  *   Select a divider to produce the BAUD from the UART_CLK.
  *
  *     BAUD = UART_CLK / (16 * DL), or

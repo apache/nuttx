@@ -81,7 +81,7 @@ static void nxbe_clipvisible(FAR struct nxbe_clipops_s *cops,
 /****************************************************************************
  * Name: nxbe_visible
  *
- * Descripton:
+ * Description:
  *   Return true if the point, pt, in window wnd is visible.  pt is in
  *   absolute screen coordinates
  *

@@ -190,7 +190,7 @@ void smartfs_wrle32(uint8_t *dest, uint32_t val)
 /****************************************************************************
  * Name: smartfs_mount
  *
- * Desciption: This function is called only when the mountpoint is first
+ * Description: This function is called only when the mountpoint is first
  *   established.  It initializes the mountpoint structure and verifies
  *   that a valid SMART filesystem is provided by the block driver.
  *
@@ -334,7 +334,7 @@ errout:
 /****************************************************************************
  * Name: smartfs_unmount
  *
- * Desciption: This function is called only when the mountpoint is being
+ * Description: This function is called only when the mountpoint is being
  *   unbound.  If we are serving multiple directories, then we have to
  *   remove ourselves from the mount linked list, and potentially free
  *   the shared buffers.

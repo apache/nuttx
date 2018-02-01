@@ -63,7 +63,7 @@
 /****************************************************************************
  * Name: nxgl_fillrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Fill a rectangle region in the LCD memory with a fixed color
  *
  ****************************************************************************/

@@ -157,7 +157,7 @@ void nfs_semgive(struct nfsmount *nmp)
 /****************************************************************************
  * Name: nfs_checkmount
  *
- * Desciption: Check if the mountpoint is still valid.
+ * Description: Check if the mountpoint is still valid.
  *
  *   The caller should hold the mountpoint semaphore
  *
@@ -190,7 +190,7 @@ int nfs_checkmount(struct nfsmount *nmp)
 /****************************************************************************
  * Name: nfs_request
  *
- * Desciption:
+ * Description:
  *   Perform the NFS request. On successful receipt, it verifies the NFS level of the
  *   returned values.
  *
@@ -255,7 +255,7 @@ tryagain:
 /****************************************************************************
  * Name: nfs_lookup
  *
- * Desciption:
+ * Description:
  *   Given a directory file handle, and the path to file in the directory,
  *   return the file handle of the path and attributes of both the file and
  *   the directory containing the file.
@@ -376,7 +376,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
 /****************************************************************************
  * Name: nfs_findnode
  *
- * Desciption:
+ * Description:
  *   Given a path to something that may or may not be in the file system,
  *   return the handle of the directory entry of the requested object.
  *
@@ -483,7 +483,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
 /****************************************************************************
  * Name: nfs_finddir
  *
- * Desciption:
+ * Description:
  *   Given a path to something that may or may not be in the file system,
  *   return the handle of the entry of the directory containing the requested
  *   object.
@@ -574,7 +574,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
 /****************************************************************************
  * Name: nfs_attrupdate
  *
- * Desciption:
+ * Description:
  *   Update file attributes on write or after the file is modified.
  *
  * Returned Value:

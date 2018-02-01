@@ -208,7 +208,7 @@ void nxbe_closewindow(struct nxbe_window_s *wnd);
 /****************************************************************************
  * Name: nxbe_setposition
  *
- * Descripton:
+ * Description:
  *   This function checks for intersections and redraws the display after
  *   a change in the position of a window.
  *
@@ -220,7 +220,7 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
 /****************************************************************************
  * Name: nxbe_setsize
  *
- * Descripton:
+ * Description:
  *   This function checks for intersections and redraws the display after
  *   a change in the size of a window.
  *

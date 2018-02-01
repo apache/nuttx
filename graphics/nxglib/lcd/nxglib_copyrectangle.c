@@ -55,7 +55,7 @@
 /****************************************************************************
  * Name: nxgl_copyrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Copy a rectangular bitmap image into the specific position in the
  *   framebuffer memory.
  *

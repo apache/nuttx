@@ -51,7 +51,7 @@
 /************************************************************************************
  * Name: up_addregion
  *
- * Descripton:
+ * Description:
  *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
  *   that may be used for heap.
  *

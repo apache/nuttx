@@ -104,7 +104,7 @@ static inline void bcm_set_level1entry(uint32_t paddr, uint32_t vaddr,
 /****************************************************************************
  * Name: bcm_setupmappings
  *
- * Description
+ * Description:
  *   Map all of the initial memory regions defined in g_section_mapping[]
  *
  ****************************************************************************/

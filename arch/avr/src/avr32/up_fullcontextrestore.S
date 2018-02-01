@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: up_fullcontextrestore
  *
- * Descripion:
+ * Description:
  *   Restore the full-running contex of a thread.
  *
  *   NOTE: Thus function must handle one very strange case.  That is when

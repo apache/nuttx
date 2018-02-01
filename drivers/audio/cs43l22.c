@@ -209,7 +209,7 @@ static const struct audio_ops_s g_audioops =
 /****************************************************************************
  * Name: cs43l22_readreg
  *
- * Description
+ * Description:
  *    Read the specified 16-bit register from the CS43L22 device.
  *
  ****************************************************************************/
@@ -1206,8 +1206,8 @@ static int cs43l22_start(FAR struct audio_lowerhalf_s *dev)
 /****************************************************************************
  * Name: cs43l22_stop
  *
- * Description: Stop the configured operation (audio streaming, volume
- *              disabled, etc.).
+ * Description:
+ *   Stop the configured operation (audio streaming, volume disabled, etc.).
  *
  ****************************************************************************/
 
@@ -1244,7 +1244,8 @@ static int cs43l22_stop(FAR struct audio_lowerhalf_s *dev)
 /****************************************************************************
  * Name: cs43l22_pause
  *
- * Description: Pauses the playback.
+ * Description:
+ *   Pauses the playback.
  *
  ****************************************************************************/
 
@@ -1273,7 +1274,8 @@ static int cs43l22_pause(FAR struct audio_lowerhalf_s *dev)
 /****************************************************************************
  * Name: cs43l22_resume
  *
- * Description: Resumes the playback.
+ * Description:
+ *   Resumes the playback.
  *
  ****************************************************************************/
 
@@ -1306,7 +1308,8 @@ static int cs43l22_resume(FAR struct audio_lowerhalf_s *dev)
 /****************************************************************************
  * Name: cs43l22_enqueuebuffer
  *
- * Description: Enqueue an Audio Pipeline Buffer for playback/ processing.
+ * Description:
+ *   Enqueue an Audio Pipeline Buffer for playback/ processing.
  *
  ****************************************************************************/
 
@@ -1356,7 +1359,8 @@ static int cs43l22_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************
  * Name: cs43l22_cancelbuffer
  *
- * Description: Called when an enqueued buffer is being cancelled.
+ * Description:
+ *   Called when an enqueued buffer is being cancelled.
  *
  ****************************************************************************/
 
@@ -1370,7 +1374,8 @@ static int cs43l22_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************
  * Name: cs43l22_ioctl
  *
- * Description: Perform a device ioctl
+ * Description:
+ *   Perform a device ioctl
  *
  ****************************************************************************/
 
@@ -1424,7 +1429,8 @@ static int cs43l22_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 /****************************************************************************
  * Name: cs43l22_reserve
  *
- * Description: Reserves a session (the only one we have).
+ * Description:
+ *   Reserves a session (the only one we have).
  *
  ****************************************************************************/
 
@@ -1469,7 +1475,8 @@ static int cs43l22_reserve(FAR struct audio_lowerhalf_s *dev)
 /****************************************************************************
  * Name: cs43l22_release
  *
- * Description: Releases the session (the only one we have).
+ * Description:
+ *   Releases the session (the only one we have).
  *
  ****************************************************************************/
 

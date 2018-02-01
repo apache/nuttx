@@ -3491,7 +3491,7 @@ errout:
 /****************************************************************************
  * Name: sam_ep_reset
  *
- * Description
+ * Description:
  *   Reset and disable one endpoints.
  *
  ****************************************************************************/
@@ -3528,7 +3528,7 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
 /****************************************************************************
  * Name: sam_epset_reset
  *
- * Description
+ * Description:
  *   Reset and disable a set of endpoints.
  *
  ****************************************************************************/

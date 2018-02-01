@@ -225,7 +225,7 @@ static void ads7843e_unlock(FAR struct spi_dev_s *spi)
 /****************************************************************************
  * Name: ads7843e_sendcmd
  *
- * Description.
+ * Description:
  *   The command/data sequences is as follows:
  *
  *            DCLK

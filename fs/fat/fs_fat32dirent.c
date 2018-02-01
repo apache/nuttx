@@ -182,7 +182,7 @@ static uint8_t fat_lfnchecksum(const uint8_t *sfname)
 /****************************************************************************
  * Name: fat_parsesfname
  *
- * Desciption:  Convert a user filename into a properly formatted FAT
+ * Description:  Convert a user filename into a properly formatted FAT
  *   (short 8.3) filename as it would appear in a directory entry.  Here are
  *    the rules for the 8+3 short file name in the directory:
  *
@@ -458,7 +458,7 @@ errout:
 /****************************************************************************
  * Name: fat_parselfname
  *
- * Desciption:  Convert a user filename into a properly formatted FAT
+ * Description:  Convert a user filename into a properly formatted FAT
  *   long filename as it would appear in a directory entry.  Here are
  *   the rules for the long file name in the directory:
  *
@@ -549,7 +549,7 @@ errout:
 /****************************************************************************
  * Name: fat_createalias
  *
- * Desciption:  Given a valid long file name, create a short filename alias.
+ * Description:  Given a valid long file name, create a short filename alias.
  *   Here are the rules for creation of the alias:
  *
  *   1. All uppercase
@@ -761,7 +761,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
 /****************************************************************************
  * Name: fat_findalias
  *
- * Desciption:  Make sure that the short alias for the long file name is
+ * Description:  Make sure that the short alias for the long file name is
  *   unique, ie., that there is no other
  *
  * NOTE: This function does not restore the directory entry that was in the
@@ -800,7 +800,7 @@ static inline int fat_findalias(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_uniquealias
  *
- * Desciption:  Make sure that the short alias for the long file name is
+ * Description:  Make sure that the short alias for the long file name is
  *   unique, modifying the alias as necessary to assure uniqueness.
  *
  * NOTE: This function does not restore the directory entry that was in the
@@ -913,7 +913,7 @@ static inline int fat_uniquealias(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_path2dirname
  *
- * Desciption:  Convert a user filename into a properly formatted FAT
+ * Description:  Convert a user filename into a properly formatted FAT
  *   (short 8.3) filename as it would appear in a directory entry.
  *
  ****************************************************************************/
@@ -951,7 +951,7 @@ static int fat_path2dirname(const char **path, struct fat_dirinfo_s *dirinfo,
 /****************************************************************************
  * Name: fat_findsfnentry
  *
- * Desciption: Find a short file name directory entry.  Returns OK if the
+ * Description: Find a short file name directory entry.  Returns OK if the
  *  directory exists; -ENOENT if it does not.
  *
  ****************************************************************************/
@@ -1038,7 +1038,7 @@ static int fat_findsfnentry(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_cmplfnchunk
  *
- * Desciption:  There are 13 characters per LFN entry, broken up into three
+ * Description:  There are 13 characters per LFN entry, broken up into three
  *   chunks for characts 1-5, 6-11, and 12-13.  This function will perform
  *   the comparison of a single chunk.
  *
@@ -1102,7 +1102,7 @@ static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
 /****************************************************************************
  * Name: fat_cmplfname
  *
- * Desciption: Given an LFN directory entry, compare a substring of the name
+ * Description: Given an LFN directory entry, compare a substring of the name
  *   to a portion in the directory entry.
  *
  ****************************************************************************/
@@ -1146,7 +1146,7 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
 /****************************************************************************
  * Name: fat_findlfnentry
  *
- * Desciption: Find a sequence of long file name directory entries.
+ * Description: Find a sequence of long file name directory entries.
  *
  * NOTE: As a side effect, this function returns with the sector containing
  *   the short file name directory entry in the cache.
@@ -1368,7 +1368,7 @@ next_entry:
 /****************************************************************************
  * Name: fat_allocatesfnentry
  *
- * Desciption: Find a free directory entry for a short file name entry.
+ * Description: Find a free directory entry for a short file name entry.
  *
  ****************************************************************************/
 
@@ -1450,7 +1450,7 @@ static inline int fat_allocatesfnentry(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_allocatelfnentry
  *
- * Desciption: Find a sequence of free directory entries for a several long
+ * Description: Find a sequence of free directory entries for a several long
  *   and one short file name entry.
  *
  * On entry, dirinfo.dir refers to the first interesting entry the directory.
@@ -1592,7 +1592,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_getsfname
  *
- * Desciption:  Get the 8.3 filename from a directory entry.  On entry, the
+ * Description:  Get the 8.3 filename from a directory entry.  On entry, the
  *  short file name entry is already in the cache.
  *
  ****************************************************************************/
@@ -1711,7 +1711,7 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
 /****************************************************************************
  * Name: fat_getlfnchunk
  *
- * Desciption:  There are 13 characters per LFN entry, broken up into three
+ * Description:  There are 13 characters per LFN entry, broken up into three
  *   chunks for characts 1-5, 6-11, and 12-13.  This function will get the
  *   file name characters from one chunk.
  *
@@ -1742,7 +1742,7 @@ static void fat_getlfnchunk(uint8_t *chunk, uint8_t *dest, int nchunk)
 /****************************************************************************
  * Name: fat_getlfname
  *
- * Desciption:  Get the long filename from a sequence of directory entries.
+ * Description:  Get the long filename from a sequence of directory entries.
  *   On entry, the "last" long file name entry is in the cache.  Returns with
  *   the short file name entry in the cache.
  *
@@ -1903,7 +1903,7 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
 /****************************************************************************
  * Name: fat_putsfname
  *
- * Desciption: Write the short directory entry name.
+ * Description: Write the short directory entry name.
  *
  * Assumption:  The directory sector is in the cache.
  *
@@ -1928,7 +1928,7 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 /****************************************************************************
  * Name: fat_initlfname
  *
- * Desciption:  There are 13 characters per LFN entry, broken up into three
+ * Description:  There are 13 characters per LFN entry, broken up into three
  *   chunks for characts 1-5, 6-11, and 12-13.  This function will put the
  *   0xffff characters into one chunk.
  *
@@ -1954,7 +1954,7 @@ static void fat_initlfname(uint8_t *chunk, int nchunk)
 /****************************************************************************
  * Name: fat_putlfnchunk
  *
- * Desciption:  There are 13 characters per LFN entry, broken up into three
+ * Description:  There are 13 characters per LFN entry, broken up into three
  *   chunks for characts 1-5, 6-11, and 12-13.  This function will put the
  *   file name characters into one chunk.
  *
@@ -1986,7 +1986,7 @@ static void fat_putlfnchunk(uint8_t *chunk, const uint8_t *src, int nchunk)
 /****************************************************************************
  * Name: fat_putlfname
  *
- * Desciption:  Write the long filename into a sequence of directory entries.
+ * Description:  Write the long filename into a sequence of directory entries.
  *   On entry, the "last" long file name entry is in the cache.  Returns with
  *   the short file name entry in the cache.
  *
@@ -2192,7 +2192,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_putsfdirentry
  *
- * Desciption: Write a short file name directory entry
+ * Description: Write a short file name directory entry
  *
  * Assumption:  The directory sector is in the cache.  The caller will write
  *   sector information.
@@ -2236,7 +2236,7 @@ static int fat_putsfdirentry(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_finddirentry
  *
- * Desciption: Given a path to something that may or may not be in the file
+ * Description: Given a path to something that may or may not be in the file
  *   system, return the description of the directory entry of the requested
  *   item.
  *
@@ -2407,7 +2407,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 /****************************************************************************
  * Name: fat_allocatedirentry
  *
- * Desciption:
+ * Description:
  *   Find (or allocate) all needed directory entries to contain the file name
  *
  ****************************************************************************/
@@ -2544,7 +2544,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs,
 /****************************************************************************
  * Name: fat_freedirentry
  *
- * Desciption:  Free the directory entry.
+ * Description:  Free the directory entry.
  *
  * NOTE: As a side effect, this function returns with the sector containing
  *   the deleted short file name directory entry in the cache.
@@ -2647,7 +2647,7 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 /****************************************************************************
  * Name: fat_dirname2path
  *
- * Desciption:  Convert a filename in a raw directory entry into a user
+ * Description:  Convert a filename in a raw directory entry into a user
  *    filename.  This is essentially the inverse operation of that performed
  *    by fat_path2dirname.  See that function for more details.
  *
@@ -2690,7 +2690,7 @@ int fat_dirname2path(struct fat_mountpt_s *fs, struct fs_dirent_s *dir)
 /****************************************************************************
  * Name: fat_dirnamewrite
  *
- * Desciption: Write the (possibly long) directory entry name.  This function
+ * Description: Write the (possibly long) directory entry name.  This function
  *   is called only from fat_rename to write the new file name.
  *
  * Assumption:  The directory sector containing the short file name entry
@@ -2731,7 +2731,7 @@ int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 /****************************************************************************
  * Name: fat_dirwrite
  *
- * Desciption: Write a directory entry, possibly with a long file name.
+ * Description: Write a directory entry, possibly with a long file name.
  *   Called from:
  *
  *   fat_mkdir() to write the new FAT directory entry.
@@ -2777,7 +2777,7 @@ int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 /****************************************************************************
  * Name: fat_dircreate
  *
- * Desciption: Create a directory entry for a new file
+ * Description: Create a directory entry for a new file
  *
  ****************************************************************************/
 
@@ -2809,7 +2809,7 @@ int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 /****************************************************************************
  * Name: fat_remove
  *
- * Desciption: Remove a directory or file from the file system.  This
+ * Description: Remove a directory or file from the file system.  This
  *   implements both rmdir() and unlink().
  *
  ****************************************************************************/

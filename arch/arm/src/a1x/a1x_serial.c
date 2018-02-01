@@ -710,7 +710,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 /************************************************************************************
  * Name: a1x_uart0config, uart1config, uart2config, ..., uart7config
  *
- * Descrption:
+ * Description:
  *   Configure the UART
  *
  ************************************************************************************/
@@ -886,7 +886,7 @@ static inline void a1x_uart7config(void)
 /************************************************************************************
  * Name: a1x_uartdl
  *
- * Descrption:
+ * Description:
  *   Select a divider to produce the BAUD from the UART PCLK.
  *
  *     BAUD = PCLK / (16 * DL), or

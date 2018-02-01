@@ -124,7 +124,7 @@ static const struct section_mapping_s section_mapping[] =
 /****************************************************************************
  * Name: a1x_setupmappings
  *
- * Description
+ * Description:
  *   Map all of the initial memory regions defined in section_mapping[]
  *
  ****************************************************************************/

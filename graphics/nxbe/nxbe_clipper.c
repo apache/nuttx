@@ -156,7 +156,7 @@ static inline bool nxbe_poprectangle(struct nxbe_clipstack_s *stack,
 /****************************************************************************
  * Name: nxbe_clipper
  *
- * Descripton:
+ * Description:
  *   Perform flexible clipping operations.  Callbacks are executed for
  *   each oscured and visible portions of the window.
  *
@@ -265,7 +265,7 @@ void nxbe_clipper(FAR struct nxbe_window_s *wnd,
 /****************************************************************************
  * Name: nxbe_clipnull
  *
- * Descripton:
+ * Description:
  *   The do-nothing clipping callback function
  *
  ****************************************************************************/

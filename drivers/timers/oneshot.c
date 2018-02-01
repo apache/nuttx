@@ -179,7 +179,7 @@ static int oneshot_close(FAR struct file *filep)
 /************************************************************************************
  * Name: oneshot_read
  *
- * Description:O
+ * Description:
  *   A dummy read method.  This is provided only to satsify the VFS layer.
  *
  ************************************************************************************/

@@ -370,7 +370,7 @@ errout_with_exclsem:
 /****************************************************************************
  * Name: zc_read
  *
- * Description:O
+ * Description:
  *   A dummy read method.  This is provided only to satsify the VFS layer.
  *
  ****************************************************************************/

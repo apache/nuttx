@@ -847,9 +847,9 @@ static void adc_hw_reset(struct efm32_dev_s *priv, bool reset)
 /****************************************************************************
  * Name: adc_enable
  *
- * Description    : Enables or disables the specified ADC peripheral.
- *                  Also, starts a conversion when the ADC is not
- *                  triggered by timers
+ * Description:
+ *   Enables or disables the specified ADC peripheral.  Also, starts a
+ *   conversion when the ADC is not triggered by timers
  *
  * Input Parameters:
  *

@@ -105,7 +105,7 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
 /****************************************************************************
  * Name: nxgl_moverectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Move a rectangular region from location to another in the
  *   framebuffer memory.  The source is expressed as a rectangle; the
  *   destination position is expressed as a point corresponding to the

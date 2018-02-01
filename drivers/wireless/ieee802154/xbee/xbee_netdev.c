@@ -1165,7 +1165,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
 /****************************************************************************
  * Name: xbeemac_get_mhrlen
  *
- * Description
+ * Description:
  *   Calculate the MAC header length given the frame meta-data.
  *
  * Input Parameters:

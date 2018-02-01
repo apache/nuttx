@@ -1366,7 +1366,8 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
 /****************************************************************************
  * Name: adc_power_down_idle
  *
- * Description    : Enables or disables power down during the idle phase.
+ * Description:
+ *   Enables or disables power down during the idle phase.
  *
  * Input Parameters:
  *
@@ -1407,7 +1408,8 @@ static void adc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
 /****************************************************************************
  * Name: adc_power_down_delay
  *
- * Description    : Enables or disables power down during the delay phase.
+ * Description:
+ *   Enables or disables power down during the delay phase.
  *
  * Input Parameters:
  *
@@ -1448,8 +1450,9 @@ static void adc_power_down_delay(FAR struct stm32_dev_s *priv, bool pdd_high)
 /****************************************************************************
  * Name: adc_dels_after_conversion
  *
- * Description    : Defines the length of the delay which is applied
- *                  after a conversion or a sequence of conversions.
+ * Description:
+ *   Defines the length of the delay which is applied after a conversion or
+ *   a sequence of conversions.
  *
  * Input Parameters:
  *
@@ -1474,7 +1477,8 @@ static void adc_dels_after_conversion(FAR struct stm32_dev_s *priv,
 /****************************************************************************
  * Name: adc_select_ch_bank
  *
- * Description    : Selects the bank of channels to be converted
+ * Description:
+ *   Selects the bank of channels to be converted
  *                  (! Must be modified only when no conversion is on going !)
  *
  * Input Parameters:
@@ -1507,9 +1511,9 @@ static void adc_select_ch_bank(FAR struct stm32_dev_s *priv,
 /****************************************************************************
  * Name: adc_enable
  *
- * Description    : Enables or disables the specified ADC peripheral.
- *                  Also, starts a conversion when the ADC is not
- *                  triggered by timers
+ * Description:
+ *   Enables or disables the specified ADC peripheral.  Also, starts a
+ *   conversion when the ADC is not triggered by timers
  *
  * Input Parameters:
  *

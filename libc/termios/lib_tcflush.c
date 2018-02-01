@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: tcflush
  *
- * Descripton:
+ * Description:
  *   Function for flushing a terminal/serial device
  *
  * Input Parameters:

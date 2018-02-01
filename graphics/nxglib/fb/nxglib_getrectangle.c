@@ -105,7 +105,7 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
 /****************************************************************************
  * Name: nxgl_getrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Fetch a rectangular region from framebuffer memory.  The source is
  *   expressed as a rectangle.
  *

@@ -51,7 +51,7 @@
 /****************************************************************************
  * Name: nxbe_setsize
  *
- * Descripton:
+ * Description:
  *   This function checks for intersections and redraws the display after
  *   a change in the size of a window.
  *

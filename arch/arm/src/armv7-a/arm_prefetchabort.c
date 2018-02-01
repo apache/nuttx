@@ -57,7 +57,7 @@
 /****************************************************************************
  * Name: arm_prefetchabort
  *
- * Description;
+ * Description:
  *   This is the prefetch abort exception handler. The ARM prefetch abort
  *   exception occurs when a memory fault is detected during an an
  *   instruction fetch.

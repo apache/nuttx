@@ -528,7 +528,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
 /****************************************************************************
  * Name:  spi_create_bitbang
  *
- * Descripton:
+ * Description:
  *   Create an instance of the SPI bit-bang driver.
  *
  ****************************************************************************/

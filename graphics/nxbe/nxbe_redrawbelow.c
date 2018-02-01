@@ -51,7 +51,7 @@
 /****************************************************************************
  * Name: nxbe_redrawbelow
  *
- * Descripton:
+ * Description:
  *   Re-draw the visible portions of the rectangular region for all windows
  *   below (and including) the specified window.  This function is called
  *   whenever a window is closed, moved, lowered or re-sized in order to

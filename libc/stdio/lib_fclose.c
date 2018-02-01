@@ -54,7 +54,7 @@
 /****************************************************************************
  * Name: fclose
  *
- * Description
+ * Description:
  *   The fclose() function will flush the stream pointed to by stream
  *   (writing any buffered output data using lib_fflush()) and close the
  *   underlying file descriptor.

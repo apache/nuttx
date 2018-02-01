@@ -61,7 +61,7 @@
 /****************************************************************************
  * Name: nxgl_fillrectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Fill a rectangle region in the framebuffer memory with a fixed color
  *
  ****************************************************************************/

@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: tcsetattr
  *
- * Descripton:
+ * Description:
  *   The tcsetattr() function sets the parameters associated with the
  *   terminal referred to by the open file descriptor 'fd' from the termios
  *   structure referenced by 'termiop' as follows:

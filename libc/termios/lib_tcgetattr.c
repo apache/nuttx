@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: tcgetattr
  *
- * Descripton:
+ * Description:
  *   The tcgetattr() function gets the parameters associated with the
  *   terminal referred to by 'fd' and stores them in the termios structure
  *   referenced by 'termiosp'.

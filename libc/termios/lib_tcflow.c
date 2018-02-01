@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: tcflow
  *
- * Descripton:
+ * Description:
  *   The tcflow() function will suspend or restart transmission or reception
  *   of data on the object referred to by 'fd', depending on the value of
  *   'action'.

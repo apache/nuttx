@@ -55,7 +55,7 @@
 /****************************************************************************
  * Name: tcdrain
  *
- * Descripton:
+ * Description:
  *   Function for draining the output buffer of a terminal/serial device
  *
  * Input Parameters:

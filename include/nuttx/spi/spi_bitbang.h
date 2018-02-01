@@ -129,7 +129,7 @@ extern "C"
 /****************************************************************************
  * Name:  spi_create_bitbang
  *
- * Descripton:
+ * Description:
  *   Create an instance of the SPI bit-bang driver.
  *
  * Input Parameters:

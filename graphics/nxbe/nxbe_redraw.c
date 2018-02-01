@@ -83,7 +83,7 @@ static void nxbe_clipredraw(FAR struct nxbe_clipops_s *cops,
 /****************************************************************************
  * Name: nxbe_redraw
  *
- * Descripton:
+ * Description:
  *   Re-draw the visible portions of the rectangular region for the
  *   specified window
  *

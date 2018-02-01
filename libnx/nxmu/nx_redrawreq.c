@@ -54,7 +54,7 @@
 /****************************************************************************
  * Name: nx_redrawreq
  *
- * Descripton:
+ * Description:
  *   This will cause a NX re-draw callback to the client that owns the
  *   window.  This is not normally called from user code, but may be
  *   used within middle-ware layers when redrawing is needed.

@@ -629,7 +629,8 @@ static void sdadc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
 /****************************************************************************
  * Name: sdadc_power_down_idle
  *
- * Description    : Enables or disables power down during the idle phase.
+ * Description:
+ *   Enables or disables power down during the idle phase.
  *
  * Input Parameters:
  *   priv     - A reference to the SDADC block state
@@ -670,7 +671,8 @@ static void sdadc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
 /****************************************************************************
  * Name: sdadc_enable
  *
- * Description    : Enables or disables the specified SDADC peripheral.
+ * Description:
+ *   Enables or disables the specified SDADC peripheral.
  *                  Does not start conversion unless the SDADC is
  *                  triggered by timer
  *

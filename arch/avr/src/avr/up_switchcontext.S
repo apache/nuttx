@@ -106,7 +106,7 @@ up_switchcontext:
 /****************************************************************************
  * Name: up_fullcontextrestore
  *
- * Descripion:
+ * Description:
  *   Restore the full-running context of a thread.
  *
  * Input Parameters:

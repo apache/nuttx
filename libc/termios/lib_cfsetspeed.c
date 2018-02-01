@@ -44,7 +44,7 @@
 /****************************************************************************
  * Name: cfsetspeed
  *
- * Descripton:
+ * Description:
  *   The cfsetspeed() function is a non-POSIX function that sets the baud
  *   stored in the structure pointed to by termiosp to speed.
  *

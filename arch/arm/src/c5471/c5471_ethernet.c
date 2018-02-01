@@ -439,7 +439,7 @@ static void c5471_macassign(struct c5471_driver_s *priv);
 /****************************************************************************
  * Name: c5471_dumpbuffer
  *
- * Description
+ * Description:
  *   Debug only
  *
  ****************************************************************************/
@@ -461,7 +461,7 @@ static inline void c5471_dumpbuffer(const char *msg, const uint8_t *buffer,
 /****************************************************************************
  * Name: c5471_mdtxbit
  *
- * Description
+ * Description:
  *   A helper routine used when serially communicating with the c547X's
  *   external ethernet transeiver device. GPIO pins are connected to the
  *   transeiver's MDCLK and MDIO pins and are used to accomplish the serial
@@ -528,7 +528,7 @@ static void c5471_mdtxbit (int bit_state)
 /****************************************************************************
  * Name: c5471_mdrxbit
  *
- * Description
+ * Description:
  *    A helper routine used when serially communicating with the c547X's
  *    external ethernet transeiver device. GPIO pins are connected to the
  *    transeiver's MDCLK and MDIO pins and are used to accomplish the serial
@@ -589,7 +589,7 @@ static int c5471_mdrxbit (void)
 /****************************************************************************
  * Name: c5471_mdwrite
  *
- * Description
+ * Description:
  *    A helper routine used when serially communicating with the c547X's
  *    external ethernet transeiver device. GPIO pins are connected to the
  *    transeiver's MDCLK and MDIO pins and are used to accomplish the serial
@@ -651,7 +651,7 @@ static void c5471_mdwrite (int adr, int reg, int data)
 /****************************************************************************
  * Name: c5471_mdread
  *
- * Description
+ * Description:
  *    A helper routine used when serially communicating with the c547X's
  *    external ethernet transeiver device. GPIO pins are connected to the
  *    transeiver's MDCLK and MDIO pins and are used to accomplish the serial
@@ -716,7 +716,7 @@ static int c5471_mdread (int adr, int reg)
 /****************************************************************************
  * Name: c5471_phyinit
  *
- * Description
+ * Description:
  *   The c547X EVM board uses a Lucent LU3X31T-T64 transeiver device to
  *   handle the physical layer (PHY). It's a h/w block that on the one end
  *   offers a Media Independent Interface (MII) which is connected to the
@@ -820,7 +820,7 @@ static int c5471_phyinit (void)
 /****************************************************************************
  * Name: c5471_inctxcpu
  *
- * Description
+ * Description:
  *
  ****************************************************************************/
 
@@ -843,7 +843,7 @@ static inline void c5471_inctxcpu(struct c5471_driver_s *priv)
 /****************************************************************************
  * Name: c5471_incrxcpu
  *
- * Description
+ * Description:
  *
  ****************************************************************************/
 
@@ -2073,7 +2073,7 @@ static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 /****************************************************************************
  * Name: c5471_eimreset
  *
- * Description
+ * Description:
  *   The C547x docs states that a module should generally be reset according
  *   to the following algorithm:
  *
@@ -2121,7 +2121,7 @@ static void c5471_eimreset (struct c5471_driver_s *priv)
 /****************************************************************************
  * Name: c5471_eimconfig
  *
- * Description
+ * Description:
  *    Assumes that all registers are currently in the power-up reset state.
  *    This routine then modifies that state to provide our specific ethernet
  *    configuration.
@@ -2332,7 +2332,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
 /****************************************************************************
  * Name: c5471_reset
  *
- * Description
+ * Description:
  *
  ****************************************************************************/
 
@@ -2352,7 +2352,7 @@ static void c5471_reset(struct c5471_driver_s *priv)
 /****************************************************************************
  * Name: c5471_macassign
  *
- * Description
+ * Description:
  *    Set the mac address of our CPU ether port so that when the SWITCH
  *    receives packets from the PROMISCUOUS ENET0 it will switch them to the
  *    CPU port and cause a packet arrival event on the Switch's CPU TX queue

@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: nxgl_moverectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Fetch a rectangular region from LCD GRAM memory.  The source is
  *   expressed as a rectangle.
  *

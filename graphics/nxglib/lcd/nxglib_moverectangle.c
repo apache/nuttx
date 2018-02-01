@@ -53,7 +53,7 @@
 /****************************************************************************
  * Name: nxgl_moverectangle_*bpp
  *
- * Descripton:
+ * Description:
  *   Move a rectangular region from location to another in the
  *   LCD memory.  The source is expressed as a rectangle; the
  *   destination position is expressed as a point corresponding to the

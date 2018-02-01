@@ -362,7 +362,7 @@ static inline void lpc11_uart0config(void)
 /************************************************************************************
  * Name: lpc11_uartdl
  *
- * Descrption:
+ * Description:
  *   Select a divider to produce the BAUD from the UART PCLK.
  *
  *     BAUD = PCLK / (16 * DL), or
