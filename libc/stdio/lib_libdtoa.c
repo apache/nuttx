@@ -138,6 +138,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
   int  dsgn;            /* Unused sign indicator */
   int  i;
 
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* This function may *NOT* be called within interrupt level logic.  That is
    * because the logic in __dtoa may attempt to allocate memory.  That will
    * lead to cryptic failures down the road within the memory manager.
@@ -146,6 +147,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
    */
 
   DEBUGASSERT(up_interrupt_context() == false);
+#endif
 
   /* Special handling for NaN and Infinity */
 
