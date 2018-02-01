@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name hex2mem
+ * Name: hex2mem
  *
  * Description:
  *   Read the Intel HEX ASCII data provided on the file descriptor 'fd' and

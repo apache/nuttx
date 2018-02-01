@@ -65,7 +65,7 @@ static void idt_outb(uint8_t val, uint16_t addr) noinline_function;
  ****************************************************************************/
 
 /****************************************************************************
- * Name idt_outb
+ * Name: idt_outb
  *
  * Description:
  *   A slightly slower version of outb

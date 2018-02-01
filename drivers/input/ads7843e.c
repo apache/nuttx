@@ -975,7 +975,7 @@ errout:
 }
 
 /****************************************************************************
- * Name:ads7843e_ioctl
+ * Name: ads7843e_ioctl
  ****************************************************************************/
 
 static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

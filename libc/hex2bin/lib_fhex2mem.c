@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name fhex2mem
+ * Name: fhex2mem
  *
  * Description:
  *   Read the Intel HEX ASCII data provided on the standard stream

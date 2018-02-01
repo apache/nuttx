@@ -977,7 +977,7 @@ errout:
 }
 
 /****************************************************************************
- * Name:ft5x06_ioctl
+ * Name: ft5x06_ioctl
  ****************************************************************************/
 
 static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

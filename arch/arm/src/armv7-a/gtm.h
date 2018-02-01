@@ -111,17 +111,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name:
- *
- * Description:
- *
- * Input Parameters:
- *
- * Returned Value:
- *
- ****************************************************************************/
-
 /* Clocking:
  *   CLK - This is the main clock of the Cortex-A9 processor.  All Cortex-A9
  *     processors in the Cortex-A9 MPCore processor and the SCU are clocked

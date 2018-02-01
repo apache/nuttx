@@ -1189,7 +1189,7 @@ errout_without_sem:
 }
 
 /****************************************************************************
- * Name:cc3000_write
+ * Name: cc3000_write
  *
  * Bit of non standard buffer management ahead
  * The buffer is memory allocated in the user space with space for the spi
@@ -1306,7 +1306,7 @@ errout_without_sem:
 }
 
 /****************************************************************************
- * Name:cc3000_ioctl
+ * Name: cc3000_ioctl
  ****************************************************************************/
 
 static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

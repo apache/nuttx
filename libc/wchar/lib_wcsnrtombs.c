@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:
+ * Name: wcsnrtombs
  *
  * Description:
  *   The 'wcsrtombs' function converts a string of wide characters

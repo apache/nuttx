@@ -486,7 +486,7 @@ errout:
 }
 
 /****************************************************************************
- * Name:up_ioctl
+ * Name: up_ioctl
  ****************************************************************************/
 
 static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

@@ -40,7 +40,7 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Name:__error__
+ * Name: __error__
  *
  * Description:
  *   Stub function for ASSERT macro

@@ -393,7 +393,7 @@ void net_setipid(uint16_t id);
 int net_checksd(int fd, int oflags);
 
 /****************************************************************************
- * Name:
+ * Name: net_initlist
  *
  * Description:
  *   Initialize a list of sockets for a new task

@@ -530,7 +530,7 @@ static int local_connect(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Name: pkt_accept
+ * Name: local_accept
  *
  * Description:
  *   The pkt_accept function is used with connection-based socket types
@@ -797,19 +797,6 @@ static int local_close(FAR struct socket *psock)
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:
- *
- * Description:
- *
- * Parameters:
- *
- * Returned Value:
- *
- * Assumptions:
- *
  ****************************************************************************/
 
 #endif /* CONFIG_NET_LOCAL */

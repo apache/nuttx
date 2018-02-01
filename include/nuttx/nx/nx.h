@@ -295,7 +295,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
 int nx_start(void);
 
 /****************************************************************************
- * Name:nx_connectinstance (and nx_connect macro)
+ * Name: nx_connectinstance (and nx_connect macro)
  *
  * Description:
  *   Open a connection from a client to the NX server.  One one client

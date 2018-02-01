@@ -1499,7 +1499,7 @@ errout:
 }
 
 /****************************************************************************
- * Name:mxt_ioctl
+ * Name: mxt_ioctl
  ****************************************************************************/
 
 static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

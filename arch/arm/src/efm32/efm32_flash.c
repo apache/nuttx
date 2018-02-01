@@ -258,7 +258,7 @@ int __ramfunc__ msc_load_verify_address(uint32_t *address)
 }
 
 /****************************************************************************
- * Name:msc_load_data
+ * Name: msc_load_data
  *
  * Description:
  *   Perform data phase of FLASH write cycle.

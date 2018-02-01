@@ -123,15 +123,4 @@ enum spirit_version_e
  * Public Function Prototypes
  ******************************************************************************/
 
-/******************************************************************************
- * Name:
- *
- * Description:
- *
- * Input Parameters:
- *
- * Returned Value:
- *
- ******************************************************************************/
-
 #endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_GENERAL_H */

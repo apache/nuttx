@@ -81,7 +81,7 @@ static struct idt_entry_s idt_entries[256];
  ****************************************************************************/
 
 /****************************************************************************
- * Name idt_outb
+ * Name: idt_outb
  *
  * Description:
  *   A slightly slower version of outb
@@ -94,7 +94,7 @@ static void idt_outb(uint8_t val, uint16_t addr)
 }
 
 /****************************************************************************
- * Name up_remappic
+ * Name: up_remappic
  *
  * Description:
  *   Remap the PIC.  The Programmable Interrupt Controller (PIC) is used to
@@ -142,7 +142,7 @@ static void up_remappic(void)
 }
 
 /****************************************************************************
- * Name up_idtentry
+ * Name: up_idtentry
  *
  * Description:
  *   Initialize one IDT entry.
@@ -168,7 +168,7 @@ static void up_idtentry(unsigned int index, uint32_t base, uint16_t sel,
 }
 
 /****************************************************************************
- * Name up_idtinit
+ * Name: up_idtinit
  *
  * Description:
  *   Initialize the IDT. The Interrupt Descriptor Table (IDT) is a data

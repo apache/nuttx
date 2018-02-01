@@ -314,7 +314,7 @@ static ssize_t bch_read(FAR struct file *filep, FAR char *buffer, size_t len)
 }
 
 /****************************************************************************
- * Name:bch_write
+ * Name: bch_write
  ****************************************************************************/
 
 static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer, size_t len)

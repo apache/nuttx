@@ -1949,7 +1949,7 @@ static void stm32_ltdc_lenable(FAR struct stm32_layer_s *layer)
 }
 
 /****************************************************************************
- * Name stm32_ltdc_lclear
+ * Name: stm32_ltdc_lclear
  *
  * Description:
  *   Clear the whole layer

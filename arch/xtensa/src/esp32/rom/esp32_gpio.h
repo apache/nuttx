@@ -329,7 +329,7 @@ void gpio_matrix_out(uint32_t gpio, uint32_t signal_idx, bool out_inv,
                      bool oen_inv);
 
 /****************************************************************************
- * Name:
+ * Name: gpio_pad_select_gpio
  *
  * Description:
  *   Select pad as a gpio function from IOMUX.

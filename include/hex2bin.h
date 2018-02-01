@@ -146,7 +146,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
             uint32_t endpaddr, enum hex2bin_swap_e swap);
 
 /****************************************************************************
- * Name hex2mem
+ * Name: hex2mem
  *
  * Description:
  *   Read the Intel HEX ASCII data provided on the file descriptor 'fd' and
@@ -173,7 +173,7 @@ int hex2mem(int fd, uint32_t baseaddr, uint32_t endpaddr,
             enum hex2bin_swap_e swap);
 
 /****************************************************************************
- * Name fhex2mem
+ * Name: fhex2mem
  *
  * Description:
  *   Read the Intel HEX ASCII data provided on the standard stream

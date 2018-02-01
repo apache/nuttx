@@ -1034,7 +1034,7 @@ errout:
 }
 
 /****************************************************************************
- * Name:sam_tsd_ioctl
+ * Name: sam_tsd_ioctl
  ****************************************************************************/
 
 static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)

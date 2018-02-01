@@ -1197,7 +1197,7 @@ errout:
 }
 
 /****************************************************************************
- * Name:tc_ioctl
+ * Name: tc_ioctl
  ****************************************************************************/
 
 static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

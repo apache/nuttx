@@ -331,7 +331,7 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name stm32_rgbled_setup
+ * Name: stm32_rgbled_setup
  *
  * Description:
  *   This function is called by board initialization logic to configure the

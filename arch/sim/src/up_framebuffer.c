@@ -308,7 +308,7 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name:
+ * Name: up_setcursor
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR

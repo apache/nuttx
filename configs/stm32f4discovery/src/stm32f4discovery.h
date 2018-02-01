@@ -720,7 +720,7 @@ int stm32_pca9635_initialize(void);
 #endif
 
 /****************************************************************************
- * Name stm32_rgbled_setup
+ * Name: stm32_rgbled_setup
  *
  * Description:
  *   This function is called by board initialization logic to configure the
@@ -761,7 +761,7 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name xen1210_archinitialize
+ * Name: xen1210_archinitialize
  *
  * Description:
  *   This function is called by board initialization logic to configure the
