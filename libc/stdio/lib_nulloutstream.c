@@ -64,7 +64,7 @@ static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
  *   Initializes a NULL streams. The initialized stream will write all data
  *   to the bit-bucket.
  *
- * Input parameters:
+ * Input Parameters:
  *   nulloutstream - User allocated, uninitialized instance of struct
  *                   lib_outstream_s to be initialized.
  *

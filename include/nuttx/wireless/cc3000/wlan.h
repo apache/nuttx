@@ -499,7 +499,7 @@ long wlan_smart_config_set_prefix(char* cNewPrefix);
  * Input Parameters:
  *  key   AES128 key of size 16 bytes
  *
- * Returned Value
+ * Returned Value:
  *   On success 0, error otherwise.
  *
  ****************************************************************************/
@@ -516,7 +516,7 @@ signed long aes_read_key(FAR uint8_t *key);
  * Input Parameters:
  *  key   AES128 key of size 16 bytes
  *
- * Returned Value
+ * Returned Value:
  *   On success 0, error otherwise.
  *
  ****************************************************************************/

@@ -62,7 +62,7 @@
  *
  *  If the stream argument is NULL, fflush() flushes all open output streams.
  *
- * Return:
+ * Returned Value:
  *  OK on success EOF on failure (with errno set appropriately)
  *
  ****************************************************************************/

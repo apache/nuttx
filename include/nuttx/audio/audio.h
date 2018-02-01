@@ -670,7 +670,7 @@ extern "C"
  *   When this function is called, the "lower half" driver should be in the
  *   reset state (as if the shutdown() method had already been called).
  *
- * Input parameters:
+ * Input Parameters:
  *   name - The name of the audio device.  This name will be used to generate
  *     a full path to the driver in the format "/dev/audio/[name]" in the NuttX
  *     filesystem (i.e. the path "/dev/audio" will be prepended to the supplied
@@ -695,7 +695,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev);
  *   Allocated an AP Buffer and prepares it for use.  This allocates a dynamically
  *   allocated buffer that has no special DMA capabilities.
  *
- * Input parameters:
+ * Input Parameters:
  *   bufdesc:   Pointer to a buffer descriptor
  *
  * Returned Value:

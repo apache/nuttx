@@ -927,8 +927,8 @@ static int _close(FAR struct file *filep)
  * Description:
  *   This routine is called when the device is read.
  *
- * Returns TAG id as string to buffer.
- * or -EIO if no TAG found
+ * Returned Value:
+ *   TAG id as string to buffer or -EIO if no TAG found
  *
  ****************************************************************************/
 

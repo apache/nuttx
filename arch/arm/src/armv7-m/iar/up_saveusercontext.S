@@ -72,7 +72,7 @@
  *
  *   int  up_saveusercontext(uint32_t *saveregs);
  *
- * Return:
+ * Returned Value:
  *   0: Normal return
  *   1: Context switch return
  *

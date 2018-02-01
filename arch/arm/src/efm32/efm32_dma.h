@@ -173,7 +173,7 @@ extern "C"
  *   If no DMA channel is available, then efm32_dmachannel() will wait until the
  *   holder of a channel relinquishes the channel by calling efm32_dmafree().
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

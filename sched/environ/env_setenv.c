@@ -71,7 +71,7 @@
  *   value - The new value of the variable
  *   overwrite - Replace any existing value if non-zero.
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success
  *
  * Assumptions:

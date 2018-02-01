@@ -72,7 +72,7 @@
  *   conn - The TCP "connection" to poll for TX data
  *   hsed - The polling interval in halves of a second
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

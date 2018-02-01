@@ -279,7 +279,7 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *   device after the first initializing and should be used by each driver who
  *   shares the spi5 bus.
  *
- * Input Parameter:
+ * Input Parameters:
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure

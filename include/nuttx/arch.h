@@ -247,7 +247,7 @@ void up_initial_state(FAR struct tcb_s *tcb);
  *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   - tcb: The TCB of new task
  *   - stack_size:  The requested stack size.  At least this much
  *     must be allocated.
@@ -289,7 +289,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
  *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   - tcb:  The TCB of new task
  *   - stack:  The new stack to be used.
  *   - stack_size:  The allocated stack size.
@@ -324,7 +324,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *     been removed from the stack.  This will still be the initial value
  *     of the stack pointer when the task is started.
  *
- * Inputs:
+ * Input Parameters:
  *   - tcb:  The TCB of new task
  *   - frame_size:  The size of the stack frame to allocate.
  *
@@ -344,7 +344,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
  *   A task has been stopped. Free all stack related resources retained in
  *   the defunct TCB.
  *
- * Input Parmeters
+ * Input Parameters:
  *   - dtcb:  The TCB containing information about the stack to be released
  *   - ttype:  The thread type.  This may be one of following (defined in
  *     include/nuttx/sched.h):
@@ -382,7 +382,7 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
  *   logic.  Interrupts will always be disabled when this
  *   function is called.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb: Refers to the tcb to be unblocked.  This tcb is
  *     in one of the waiting tasks lists.  It must be moved to
  *     the ready-to-run list and, if it is the highest priority
@@ -404,7 +404,7 @@ void up_unblock_task(FAR struct tcb_s *tcb);
  *   logic.  Interrupts will always be disabled when this
  *   function is called.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb: Refers to a task in the ready-to-run list (normally
  *     the task at the head of the list).  It most be
  *     stopped, its context saved and moved into one of the
@@ -455,7 +455,7 @@ void up_release_pending(void);
  *   logic.  Interrupts will always be disabled when this
  *   function is called.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb: The TCB of the task that has been reprioritized
  *   priority: The new task priority
  *
@@ -601,12 +601,12 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
  *   function is the user-space, signal handler trampoline function.  It is
  *   called from up_signal_dispatch() in user-mode.
  *
- * Inputs:
+ * Input Parameters:
  *   sighand - The address user-space signal handling function
  *   signo, info, and ucontext - Standard arguments to be passed to the
  *     signal handling function.
  *
- * Return:
+ * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
  *   via an architecture specific system call made by up_signal_handler()
  *   (see below).  However, this will look like a normal return by the
@@ -628,12 +628,12 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
  *   must be provided by architecture-specific logic.  It is called from
  *   up_signal_dispatch() in user-mode.
  *
- * Inputs:
+ * Input Parameters:
  *   sighand - The address user-space signal handling function
  *   signo, info, and ucontext - Standard arguments to be passed to the
  *     signal handling function.
  *
- * Return:
+ * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
  *   via an architecture specific system call.
  *
@@ -1741,7 +1741,7 @@ int up_cpu_index(void);
  *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is
  *                  being created for.
  *   - tcb:         The TCB of new CPU IDLE task
@@ -2015,10 +2015,10 @@ void sched_alarm_expiration(FAR const struct timespec *ts);
  * Description:
  *   Collect data that can be used for CPU load measurements.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions/Limitations:
@@ -2054,7 +2054,7 @@ void irq_dispatch(int irq, FAR void *context);
  * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   The estimated amount of stack space used.
  *
  ****************************************************************************/

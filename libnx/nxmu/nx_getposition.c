@@ -61,7 +61,7 @@
  * Input Parameters:
  *   hwnd   - The window handle
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

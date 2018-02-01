@@ -135,7 +135,7 @@ void weak_function sam_spidev_initialize(void)
  *   devid - Identifies the (logical) device
  *   selected - TRUE:Select the device, FALSE:De-select the device
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -178,7 +178,7 @@ void sam_spi0select(uint32_t devid, bool selected)
  * Input Parameters:
  *   devid - Identifies the (logical) device
  *
- * Returned Values:
+ * Returned Value:
  *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/
@@ -225,7 +225,7 @@ uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
  *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno on failure.
  *
  ****************************************************************************/

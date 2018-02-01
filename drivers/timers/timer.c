@@ -431,7 +431,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   When this function is called, the "lower half" driver should be in the
  *   disabled state (as if the stop() method had already been called).
  *
- * Input parameters:
+ * Input Parameters:
  *   dev path - The full path to the driver to be registers in the NuttX
  *     pseudo-filesystem.  The recommended convention is to name all timer
  *     drivers as "/dev/tc0", "/dev/tc1", etc.  where the driver
@@ -508,7 +508,7 @@ errout:
  *   This function can be called to disable and unregister the timer
  *   device driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle - This is the handle that was returned by timer_register()
  *
  * Returned Value:
@@ -552,7 +552,7 @@ void timer_unregister(FAR void *handle)
  *   to handle timer expirations.  This is a strictly OS internal interface
  *   and may NOT be used by appliction code.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle   - This is the handle that was returned by timer_register()
  *   callback - The new timer interrupt callback
  *   arg      - Argument to be provided with the callback

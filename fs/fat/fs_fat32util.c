@@ -813,7 +813,8 @@ off_t fat_cluster2sector(FAR struct fat_mountpt_s *fs,  uint32_t cluster)
  * Description:
  *   Get the next cluster start from the FAT.
  *
- * Return:  <0: error, 0:cluster unassigned, >=0: start sector of cluster
+ * Returned Value:
+ *   <0: error, 0:cluster unassigned, >=0: start sector of cluster
  *
  ****************************************************************************/
 
@@ -1161,7 +1162,7 @@ int fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster)
  *   Add a new cluster to the chain following cluster (if cluster is non-
  *   NULL).  if cluster is zero, then a new chain is created.
  *
- * Return:
+ * Returned Value:
  *   <0:error, 0: no free cluster, >=2: new cluster number
  *
  ****************************************************************************/

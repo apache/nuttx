@@ -386,7 +386,7 @@ static void xbee_attnworker(FAR void *arg)
  *    datalen - The size of the data section of the frame.  This is the value
  *              included as the second and third byte of the frame.
  *
- * Returns:
+ * Returned Value:
  *   true  - Frame type is known and length is logical
  *   false - Frame type is unknown or length is invalid for frame type
  *
@@ -453,7 +453,7 @@ static bool xbee_validate_apiframe(uint8_t frametype, uint16_t datalen)
  *    frame - pointer to the frame data
  *    framelen - size of the overall frame. NOT the data length field
  *
- * Returns:
+ * Returned Value:
  *   true  - Checksum is valid
  *   false - Checksum is invalid
  *

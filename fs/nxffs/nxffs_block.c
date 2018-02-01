@@ -66,7 +66,7 @@
  *   volume - Describes the NXFFS volume
  *   block - The (logical) block number to load and verify.
  *
- * Returned Values:
+ * Returned Value:
  *   OK (zero( is returned on success.  Otherwise, a negated errno value is
  *   returned indicating the nature of the failure:
  *

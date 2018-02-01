@@ -69,7 +69,7 @@
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
- * Return:
+ * Returned Value:
  *      OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
  *          one or more server message was processed.
  *   ERROR: An error occurred and errno has been set appropriately

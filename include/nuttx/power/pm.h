@@ -364,10 +364,10 @@ extern "C"
  *   *before* any other device drivers are initialized (since they may
  *   attempt to register with the power management subsystem).
  *
- * Input parameters:
+ * Input Parameters:
  *   None.
  *
- * Returned value:
+ * Returned Value:
  *    None.
  *
  ****************************************************************************/
@@ -381,11 +381,11 @@ void pm_initialize(void);
  *   This function is called by a device driver in order to register to
  *   receive power management event callbacks.
  *
- * Input parameters:
+ * Input Parameters:
  *   callbacks - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
- * Returned value:
+ * Returned Value:
  *    Zero (OK) on success; otherwise a negater errno value is returned.
  *
  ****************************************************************************/

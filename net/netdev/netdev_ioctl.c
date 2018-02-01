@@ -382,7 +382,7 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -444,7 +444,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -507,7 +507,7 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -548,7 +548,7 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
  * Parameters:
  *   req - The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *  A pointer to the driver structure on success; NULL on failure.
  *
  ****************************************************************************/
@@ -578,7 +578,7 @@ static FAR struct net_driver_s *netdev_ifr_dev(FAR struct ifreq *req)
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -1030,7 +1030,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
  * Parameters:
  *   req - The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *  A pointer to the driver structure on success; NULL on failure.
  *
  ****************************************************************************/
@@ -1063,7 +1063,7 @@ static FAR struct net_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
  *   cmd      The ioctl command
  *   imsf     The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -1122,7 +1122,7 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
  *   cmd    The ioctl command
  *   req    The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -1245,7 +1245,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
  *   cmd      The ioctl command
  *   rtentry  The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   Negated errno returned on failure.
  *
@@ -1359,7 +1359,7 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   A non-negative value is returned on success; a negated errno value is
  *   returned on any failure to indicate the nature of the failure:
  *
@@ -1469,7 +1469,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   A non-negative value is returned on success; a negated errno value is
  *   returned on any failure to indicate the nature of the failure:
  *

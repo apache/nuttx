@@ -88,7 +88,7 @@
  *   caps   - Draw a circular cap on the ends of the line to support better
  *            line joins
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

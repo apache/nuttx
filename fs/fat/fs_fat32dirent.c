@@ -213,7 +213,7 @@ static uint8_t fat_lfnchecksum(const uint8_t *sfname)
  *   code pages".  The logic below does not, at present, support any other
  *   character sets.
  *
- * Returned value:
+ * Returned Value:
  *   OK - The path refers to a valid 8.3 FAT file name and has been properly
  *        converted and stored in dirinfo.
  *   <0 - Otherwise an negated error is returned meaning that the string is
@@ -468,7 +468,7 @@ errout:
  *     2. '.' (dot) can occur more than once in a filename. Extension is
  *        the substring after the last dot.
  *
- * Returned value:
+ * Returned Value:
  *   OK - The path refers to a valid long file name and has been properly
  *        stored in dirinfo.
  *   <0 - Otherwise an negated error is returned meaning that the string is
@@ -562,7 +562,7 @@ errout:
  *
  * This function is called only from fat_putlfname()
  *
- * Returned value:
+ * Returned Value:
  *   OK - The alias was created correctly.
  *   <0 - Otherwise an negated error is returned.
  *
@@ -767,7 +767,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
  * NOTE: This function does not restore the directory entry that was in the
  * sector cache
  *
- * Returned value:
+ * Returned Value:
  *   OK - The alias is unique.
  *   <0 - Otherwise an negated error is returned.
  *
@@ -807,7 +807,7 @@ static inline int fat_findalias(struct fat_mountpt_s *fs,
  * sector cache
  *
  *   information upon return.
- * Returned value:
+ * Returned Value:
  *   OK - The alias is unique.
  *   <0 - Otherwise an negated error is returned.
  *

@@ -952,7 +952,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  *   Initialize the selected SPI port.  This function could get called
  *   multiple times for each STR7 devices that needs an SPI reference.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:

@@ -59,11 +59,11 @@
  *   This function is called by a device driver in order to register to
  *   receive power management event callbacks.
  *
- * Input parameters:
+ * Input Parameters:
  *   callbacks - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
- * Returned value:
+ * Returned Value:
  *    Zero (OK) on success; otherwise a negater errno value is returned.
  *
  ****************************************************************************/

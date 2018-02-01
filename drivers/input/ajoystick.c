@@ -842,7 +842,7 @@ errout_with_dusem:
  *   lower - An instance of the platform-specific analog joystick lower
  *     half driver.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *

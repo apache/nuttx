@@ -144,7 +144,7 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:

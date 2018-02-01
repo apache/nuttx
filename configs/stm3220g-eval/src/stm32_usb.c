@@ -272,11 +272,11 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  *   Setup to receive an interrupt-level callback if an overcurrent condition is
  *   detected.
  *
- * Input Parameter:
+ * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument provided for the interrupt handler
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
  *   to indicate the nature of the failure.
  *

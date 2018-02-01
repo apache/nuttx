@@ -74,7 +74,7 @@
  *   different semantics and prototypes.  sendfile() should not be used
  *   in portable programs.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   infd   - A file (or socket) descriptor opened for reading
  *   outfd  - A descriptor opened for writing.
  *   offset - If 'offset' is not NULL, then it points to a variable

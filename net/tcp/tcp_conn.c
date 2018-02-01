@@ -243,7 +243,7 @@ static FAR struct tcp_conn_s *
  *   portno -- the selected port number in host order. Zero means no port
  *     selected.
  *
- * Return:
+ * Returned Value:
  *   Selected or verified port number in host order on success, a negated
  *   errno on failure:
  *
@@ -445,7 +445,7 @@ static inline FAR struct tcp_conn_s *
  *   This function implements the lower level parts of the standard TCP
  *   bind() operation.
  *
- * Return:
+ * Returned Value:
  *   0 on success or -EADDRINUSE on failure
  *
  * Assumptions:
@@ -510,7 +510,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
  *   This function implements the lower level parts of the standard TCP
  *   bind() operation.
  *
- * Return:
+ * Returned Value:
  *   0 on success or -EADDRINUSE on failure
  *
  * Assumptions:
@@ -1039,7 +1039,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
  *   This function implements the lower level parts of the standard TCP
  *   bind() operation.
  *
- * Return:
+ * Returned Value:
  *   0 on success or -EADDRINUSE on failure
  *
  * Assumptions:

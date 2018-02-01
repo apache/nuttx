@@ -86,7 +86,7 @@
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   addr     Peripheral address location to modify bit in.
  *   bit      Bit position to modify, 0-31.
  *   val      Value to set bit to, 0 or 1.
@@ -115,7 +115,7 @@ inline void bitband_set_peripheral(uint32_t addr, uint32_t bit, uint32_t val)
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   addr     Peripheral address location to read.
  *   bit      Bit position to modify, 0-31.
  *
@@ -145,7 +145,7 @@ inline uint32_t bitband_get_peripheral(uint32_t addr, uint32_t bit)
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   addr     SRAM address location to modify bit in.
  *   bit      Bit position to modify, 0-31.
  *   val      Value to set bit to, 0 or 1.
@@ -174,7 +174,7 @@ inline void bitband_set_sram(uint32_t addr, uint32_t bit, uint32_t val)
  * Note
  *   This function is only atomic on cores which fully support bitbanding.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   addr     Peripheral address location to read.
  *   bit      Bit position to modify, 0-31.
  *

@@ -65,7 +65,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   The current value of the thread specific errno.
  *
  * Assumptions:

@@ -63,7 +63,7 @@
  * Parameters:
  *   name - The name of the variable to delete
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success
  *
  * Assumptions:

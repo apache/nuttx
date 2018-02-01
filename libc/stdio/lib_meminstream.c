@@ -81,7 +81,7 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
  * Description:
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
- * Input parameters:
+ * Input Parameters:
  *   instream    - User allocated, uninitialized instance of struct
  *                 lib_meminstream_s to be initialized.
  *   bufstart    - Address of the beginning of the fixed-size memory buffer

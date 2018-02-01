@@ -65,7 +65,7 @@
  *   req      The ioctl command
  *   ...      A third argument of type unsigned long is expected
  *
- * Return:
+ * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
  *   -1 on failure with errno set properly:
  *

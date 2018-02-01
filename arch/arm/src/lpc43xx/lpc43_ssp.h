@@ -95,7 +95,7 @@ extern "C"
  * Description:
  *   Initialize the selected SSP port (0=SSP0, 1=SSP1)
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - Port number (0=SSP0, 1=SSP1)
  *
  * Returned Value:

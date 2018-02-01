@@ -108,7 +108,7 @@ static int stm32_exti_alarm_isr(int irq, void *context, FAR void *arg)
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *

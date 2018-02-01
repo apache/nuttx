@@ -230,7 +230,7 @@ extern "C"
  *   Seekable versions are defined in lib/stdio/lib_memsistream.c and
  *   lib/stdio/lib_memsostream.c.
  *
- * Input parameters:
+ * Input Parameters:
  *   memstream    - User allocated, uninitialized instance of struct
  *                  lib_meminstream_s to be initialized.
  *   memstream    - User allocated, uninitialized instance of struct
@@ -259,7 +259,7 @@ void lib_memsostream(FAR struct lib_memsostream_s *outstream,
  *   Initializes a stream for use with a FILE instance.
  *   Defined in lib/stdio/lib_stdinstream.c and lib/stdio/lib_stdoutstream.c
  *
- * Input parameters:
+ * Input Parameters:
  *   instream  - User allocated, uninitialized instance of struct
  *               lib_stdinstream_s to be initialized.
  *   outstream - User allocated, uninitialized instance of struct
@@ -291,7 +291,7 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
  *   Seekable versions are defined in lib/stdio/lib_rawsistream.c and
  *   lib/stdio/lib_rawsostream.c
  *
- * Input parameters:
+ * Input Parameters:
  *   instream  - User allocated, uninitialized instance of struct
  *               lib_rawinstream_s to be initialized.
  *   outstream - User allocated, uninitialized instance of struct
@@ -316,7 +316,7 @@ void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
  *   Initializes a stream for use with low-level, architecture-specific output.
  *   Defined in ib/stdio/lib_lowoutstream.c
  *
- * Input parameters:
+ * Input Parameters:
  *   lowoutstream - User allocated, uninitialized instance of struct
  *                  lib_lowoutstream_s to be initialized.
  *
@@ -342,7 +342,7 @@ void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
  *   o The stream created by lib_nulloutstream will write all data to the
  *     bit-bucket. Defined in lib/stdio/lib_nulloutstream.c
  *
- * Input parameters:
+ * Input Parameters:
  *   zeroinstream  - User allocated, uninitialized instance of struct
  *                   lib_instream_s to be initialized.
  *   nullinstream  - User allocated, uninitialized instance of struct
@@ -366,7 +366,7 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
  *   Initializes a stream for use with the configured syslog interface.
  *   Only accessible from with the OS SYSLOG logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_lowoutstream_s to be initialized.
  *
@@ -383,7 +383,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream);
  * Description:
  *   Free resources held by the syslog stream.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_lowoutstream_s to be initialized.
  *
@@ -405,7 +405,7 @@ void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
  *   Initializes a stream for use with the configured emergency syslog
  *   interface.  Only accessible from with the OS SYSLOG logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_lowoutstream_s to be initialized.
  *
@@ -423,7 +423,7 @@ void emergstream(FAR struct lib_outstream_s *stream);
  *  lib_noflush() provides a common, dummy flush method for output streams
  *  that are not flushable.
  *
- * Return:
+ * Returned Value:
  *  Always returns OK
  *
  ****************************************************************************/
@@ -438,7 +438,7 @@ int lib_noflush(FAR struct lib_outstream_s *stream);
  *  streams that are not flushable.
  *  is selected.
  *
- * Return:
+ * Returned Value:
  *  Always returns OK
  *
  ****************************************************************************/

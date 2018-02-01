@@ -84,13 +84,13 @@
  *   exit() and pthread_exit().  In those cases task_exithook() has already
  *   been called with nonblocking == false;
  *
- * Inputs:
+ * Input Parameters:
  *   pid - The task ID of the task to delete.  A pid of zero
  *         signifies the calling task.
  *   nonblocking - True: The task is an unhealthy, partially torn down
  *         state and is not permitted to block.
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; or ERROR on failure
  *
  *   This function can fail if the provided pid does not correspond to a

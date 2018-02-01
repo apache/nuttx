@@ -54,10 +54,10 @@
  *   Return the number of bits set in the 'set'.  This could be improved by
  *   using CPU-specific bit counting instructions.
  *
- * Inputs:
+ * Input Parameters:
  *   set - The set of CPUs to be counted.
  *
- * Return Value:
+ * Returned Value:
  *   The number of CPUs in 'set'
  *
  ****************************************************************************/

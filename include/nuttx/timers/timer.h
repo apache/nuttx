@@ -225,7 +225,7 @@ extern "C"
  *   Rather it is called indirectly through the architecture-specific
  *   initialization.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev path - The full path to the driver to be registers in the NuttX
  *     pseudo-filesystem.  The recommended convention is to name all timer
  *     drivers as "/dev/timer0", "/dev/timer1", etc.  where the driver
@@ -250,7 +250,7 @@ FAR void *timer_register(FAR const char *path,
  *   This function can be called to disable and unregister the timer
  *   device driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle - This is the handle that was returned by timer_register()
  *
  * Returned Value:
@@ -272,7 +272,7 @@ void timer_unregister(FAR void *handle);
  *   to handle timer expirations.  This is a strictly OS internal interface
  *   and may NOT be used by appliction code.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle   - This is the handle that was returned by timer_register()
  *   callback - The new timer interrupt callback
  *   arg      - Argument provided when the callback is called.

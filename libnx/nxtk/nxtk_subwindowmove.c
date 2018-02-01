@@ -89,7 +89,7 @@
  *   srcoffset  - The offset to move the region
  *   bounds     - The subwindow bounds in absolute screen coordinates.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

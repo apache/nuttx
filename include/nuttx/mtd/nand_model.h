@@ -127,7 +127,7 @@ EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
  *   chipid    Identifier returned by the Nand(id1|(id2<<8)|(id3<<16)|(id4<<24)).
  *   model     nand_model_s instance to update with the model parameters.
  *
- * Returned Values:
+ * Returned Value:
  *   OK is returned on success; -ENODEV is returned on failure.
  *
  ****************************************************************************/
@@ -151,7 +151,7 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
  *   page    Stores the first accessed page number inside the first block.
  *   offset  Stores the byte offset inside the first accessed page.
  *
- * Returned Values:
+ * Returned Value:
  *   OK on success; -EPIPE on failure.
  *
  ****************************************************************************/
@@ -170,7 +170,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *  Spare placement scheme
  *
  ****************************************************************************/
@@ -186,7 +186,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Device ID
  *
  ****************************************************************************/
@@ -202,7 +202,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Number of blocks in the device
  *
  ****************************************************************************/
@@ -220,7 +220,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Size of the device in bytes
  *
  ****************************************************************************/
@@ -237,7 +237,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *  size of the device in MB.
  *
  ****************************************************************************/
@@ -253,7 +253,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *    Block size in pages
  *
  ****************************************************************************/
@@ -270,7 +270,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Number of pages in the device
  *
  ****************************************************************************/
@@ -288,7 +288,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *  model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *  Block size in bytes
  *
  ****************************************************************************/
@@ -304,7 +304,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Size of data area in bytes
  *
  ****************************************************************************/
@@ -320,7 +320,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *  size of spare area in bytes
  *
  ****************************************************************************/
@@ -336,7 +336,7 @@ unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model);
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *  data width
  *
  ****************************************************************************/
@@ -354,7 +354,7 @@ unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model);
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Returns true if the given NAND FLASH model uses the "small blocks/pages"
  *   command set; otherwise returns false.
  *
@@ -372,7 +372,7 @@ unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model);
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Returns true if the device supports the copy-back operation. Otherwise
  *   returns false.
  *

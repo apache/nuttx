@@ -68,12 +68,12 @@
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).
  *
- * Inputs:
+ * Input Parameters:
  *   pathname - The full path to the FIFO instance to attach to or to create
  *     (if not already created).
  *   mode - Ignored for now
  *
- * Return:
+ * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
  *   appropriately.
  *

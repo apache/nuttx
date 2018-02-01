@@ -375,7 +375,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   len      Length of data to send
  *   flags    Send flags (ignored for now)
  *
- * Return:
+ * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
  *   -1 is returned, and errno is set appropriately (see send() for the
  *   list of errno numbers).
@@ -429,7 +429,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
  *   buf      Data to send
  *   len      Length of data to send
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
  *   failure.
  *
@@ -482,7 +482,7 @@ ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
  *   len   - Length of data to receive [in]
  *           Length of data actually received [out]
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
  *   failure.  If -ECONNRESET is received, then the sending side has closed
  *   the FIFO. In this case, the returned data may still be valid (if the
@@ -504,7 +504,7 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len);
  *   addrlen - The size of the memory allocat by the caller to receive the
  *             address.
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -521,7 +521,7 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
  * Parameters:
  *   filep - File structure of write-only FIFO.
  *
- * Return:
+ * Returned Value:
  *   The non-zero size of the following packet is returned on success; a
  *   negated errno value is returned on any failure.
  *

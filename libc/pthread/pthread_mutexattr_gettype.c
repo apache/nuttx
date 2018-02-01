@@ -55,7 +55,7 @@
  *   attr - The mutex attributes to query
  *   type - Location to return the mutex type
  *
- * Return Value:
+ * Returned Value:
  *   0, if the mutex type was successfully return in 'type', or
  *   EINVAL, if any NULL pointers provided.
  *

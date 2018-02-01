@@ -62,12 +62,12 @@
  *   is written into 'interval.  The identified process should be running
  *   under the SCHED_RRscheduling policy.'
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task.  If pid is zero, the priority of the
  *         calling task is returned.
  *   interval - a structure used to return the time slice
  *
- * Return Value:
+ * Returned Value:
  *   On success, sched_rr_get_interval() returns OK (0).  On error,
  *   ERROR (-1) is returned, and errno is set to:
  *

@@ -122,7 +122,7 @@ static int stm32_exti_pvd_isr(int irq, void *context, void *arg)
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *

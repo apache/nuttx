@@ -133,7 +133,7 @@ static const struct timer_ops_s g_timer_ops =
  *   priv - A pointer to a private timer driver lower half instance
  *   usecs - The number of usecs to convert
  *
- * Returned Values:
+ * Returned Value:
  *   The time converted to clock ticks.
  *
  ****************************************************************************/
@@ -161,7 +161,7 @@ static uint32_t tiva_usec2ticks(struct tiva_lowerhalf_s *priv, uint32_t usecs)
  *   priv - A pointer to a private timer driver lower half instance
  *   usecs - The number of ticks to convert
  *
- * Returned Values:
+ * Returned Value:
  *   The time converted to microseconds.
  *
  ****************************************************************************/
@@ -189,7 +189,7 @@ static uint32_t tiva_ticks2usec(struct tiva_lowerhalf_s *priv, uint32_t ticks)
  *   priv - A pointer to a private timer driver lower half instance
  *   timeout - The new timeout value in microseconds.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -224,7 +224,7 @@ static void tiva_timeout(struct tiva_lowerhalf_s *priv, uint32_t timeout)
  * Input Parameters:
  *   Usual 32-bit timer interrupt handler arguments.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -287,7 +287,7 @@ static void tiva_timer_handler(TIMER_HANDLE handle, void *arg, uint32_t status)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -324,7 +324,7 @@ static int tiva_start(struct timer_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -362,7 +362,7 @@ static int tiva_stop(struct timer_lowerhalf_s *lower)
  *            driver state structure.
  *   status - The location to return the status information.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -415,7 +415,7 @@ static int tiva_getstatus(struct timer_lowerhalf_s *lower,
  *             driver state structure.
  *   timeout - The new timeout value in microseconds.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -456,7 +456,7 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
  *              function pointer is NULL, then the reset-on-expiration
  *              behavior is restored,
  *
- * Returned Values:
+ * Returned Value:
  *   The previous timer expiration function pointer or NULL is there was
  *   no previous function pointer.
  *
@@ -496,7 +496,7 @@ static void tiva_setcallback(struct timer_lowerhalf_s *lower,
  *           interpretation of this argument depends on the particular
  *           command.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -535,7 +535,7 @@ static int tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
  *     form /dev/timer0
  *   config - 32-bit timer configuration values.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *

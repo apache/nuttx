@@ -102,7 +102,7 @@ uint32_t get_cpu_ver(void)
 /****************************************************************************
  * Name: mod_stby_regs
  *
- * Input parameters:
+ * Input Parameters:
  *   enabits : specify regions to be enabled
  *   disbits : specify regions to be disabled
  *

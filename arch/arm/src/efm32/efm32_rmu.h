@@ -90,7 +90,7 @@ const char* efm32_reset_cause_list_str(uint32_t reg, unsigned int *idx);
  * Description:
  *    Return next reset cause string, NULL if no more reset cause.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   reg: reset cause register to decode (like g_efm32_rstcause)
  *   idx: Use to keep in maind reset cause decoding position.
  *        set *idx to zero before first call.

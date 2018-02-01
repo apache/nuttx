@@ -331,7 +331,7 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
  * Parameters:
  *   dev - The device driver structure to assign the address to
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
  *   any failure.
  *

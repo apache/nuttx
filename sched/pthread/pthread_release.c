@@ -61,7 +61,7 @@
  *   group = The task group containing the pthread resources to be
  *           released.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

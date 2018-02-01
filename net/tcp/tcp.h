@@ -480,7 +480,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
  *   This function implements the lower level parts of the standard TCP
  *   bind() operation.
  *
- * Return:
+ * Returned Value:
  *   0 on success or -EADDRINUSE on failure
  *
  * Assumptions:
@@ -727,7 +727,7 @@ void tcp_nextsequence(void);
  *   dev - The device driver structure to use in the send operation
  *   conn - The TCP "connection" to poll for TX data
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -748,7 +748,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
  *   conn - The TCP "connection" to poll for TX data
  *   hsec - The polling interval in halves of a second
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -859,7 +859,7 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
  *   flags  - flags to apply to the TCP header
  *   len    - length of the message
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -904,7 +904,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
  * Parameters:
  *   dev    - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -925,7 +925,7 @@ void tcp_reset(FAR struct net_driver_s *dev);
  *   conn - The TCP connection structure holding connection information
  *   ack  - The ACK response to send
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -949,7 +949,7 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   conn   - The TCP connection structure holding connection information
  *   result - App result event sent
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -971,7 +971,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   conn   - The TCP connection structure holding connection information
  *   result - App result event sent
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -991,7 +991,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  * Parameters:
  *   dev - The device driver structure containing the received TCP packet.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -1012,7 +1012,7 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev);
  * Parameters:
  *   dev - The device driver structure containing the received TCP packet.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -1053,7 +1053,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *     buffers
  *   buflen - The number of bytes to copy to the read-ahead buffer.
  *
- * Returned value:
+ * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
  *   zero or equal to buflen; partial packets are not buffered.
  *
@@ -1320,7 +1320,7 @@ void tcp_wrbuffer_initialize(void);
  *   the free list.  This function is called from TCP logic when a buffer
  *   of TCP data is about to sent
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Assumptions:

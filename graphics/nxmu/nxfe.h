@@ -106,7 +106,7 @@ extern "C"
  *   msg    - A pointer to the message to send
  *   msglen - The length of the message in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -125,7 +125,7 @@ int nxmu_sendclient(FAR struct nxfe_conn_s *conn,
  *   msg    - A pointer to the message to send
  *   msglen - The length of the message in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -143,7 +143,7 @@ int nxmu_sendclientwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
  *   be  - The back-end status structure
  *   wnd  - The pre-allocated window structure to be initialized [IN/OUT]
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -164,7 +164,7 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be,
  *   cb   - Callbacks used to process window events
  *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -184,7 +184,7 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
  * Input Parameters:
  *   fe - The front-end state structure
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

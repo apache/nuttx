@@ -55,7 +55,7 @@
  *   set - Signal set to add signal to
  *   signo - Signal to add
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK), or -1 (ERROR) if the signal number is invalid.
  *
  * Assumptions:

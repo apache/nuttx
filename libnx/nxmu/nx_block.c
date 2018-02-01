@@ -74,7 +74,7 @@
  *   arg - An argument that will accompany the block messages (This is arg2
  *         in the blocked callback).
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

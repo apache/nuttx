@@ -70,10 +70,10 @@ struct pm_global_s g_pmglobals;
  *   other device drivers are initialize (since they may attempt to register
  *   with the power management subsystem).
  *
- * Input parameters:
+ * Input Parameters:
  *   None.
  *
- * Returned value:
+ * Returned Value:
  *    None.
  *
  ****************************************************************************/

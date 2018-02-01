@@ -85,7 +85,7 @@ struct telnet_session_s
  * Parameters:
  *   None
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/

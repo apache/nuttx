@@ -94,7 +94,7 @@ struct spi_dev_s;  /* Forward reference */
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - SPI "port" number (i.e., SERCOM number)
  *
  * Returned Value:
@@ -161,7 +161,7 @@ struct spi_dev_s *sam_spibus_initialize(int port);
  *   devid - Identifies the (logical) device
  *   selected - TRUE:Select the device, FALSE:De-select the device
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -206,7 +206,7 @@ void sam_spi5select(FAR struct spi_dev_s *dev, uint32_t devid,
  *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *
- * Returned Values:
+ * Returned Value:
  *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/
@@ -254,7 +254,7 @@ uint8_t sam_spi5status(FAR struct spi_dev_s *dev, uint32_t devid);
  *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno on failure.
  *
  ****************************************************************************/

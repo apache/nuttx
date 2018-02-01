@@ -1783,7 +1783,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev);
  *   minor - The device minor number.  The IEEE802.15.4 MAC character device
  *     will be registered as /dev/ieeeN where N is the minor number
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *
@@ -1801,7 +1801,7 @@ int mac802154dev_register(MACHANDLE mac, int minor);
  * Input Parameters:
  *   mac - Pointer to the mac layer struct to be registered.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *
@@ -1819,10 +1819,10 @@ int mac802154netdev_register(MACHANDLE mac);
  *   be called early in the initialization sequence before any radios
  *   begin operation.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -1845,10 +1845,10 @@ void ieee802154_primitivepool_initialize(void);
  *   list.  If that the list is empty, then the primitive structure will be
  *   allocated from the dynamic memory pool.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   A reference to the allocated primitive structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
@@ -1865,10 +1865,10 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void);
  *   the free pool if it was a pre-allocated primitive structure. If the primitive
  *   was allocated dynamically it will be deallocated.
  *
- * Inputs:
+ * Input Parameters:
  *   prim - primitive structure to free
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

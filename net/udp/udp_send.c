@@ -89,7 +89,7 @@
  *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" structure holding port information
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

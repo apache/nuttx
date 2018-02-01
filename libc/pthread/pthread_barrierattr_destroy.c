@@ -59,7 +59,7 @@
  * Parameters:
  *   attr - barrier attributes to be destroyed.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or EINVAL if attr is invalid.
  *
  * Assumptions:

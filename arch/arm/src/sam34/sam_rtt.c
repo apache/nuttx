@@ -270,7 +270,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  * Input Parameters:
  *   Usual interrupt handler arguments.
  *
- * Returned Values:
+ * Returned Value:
  *   Always returns OK.
  *
  ****************************************************************************/
@@ -354,7 +354,7 @@ static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -417,7 +417,7 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -456,7 +456,7 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
  *            driver state structure.
  *   status - The location to return the status information.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -507,7 +507,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
  *             driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -559,7 +559,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
  *              behavior is restored,
  *   arg      - Argument that will be provided in the callback
  *
- * Returned Values:
+ * Returned Value:
  *   The previous timer expiration function pointer or NULL is there was
  *   no previous function pointer.
  *
@@ -599,7 +599,7 @@ static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
  *           interpretation of this argument depends on the particular
  *           command.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -632,7 +632,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *   devpath - The full path to the timer.  This should be of the form
  *     /dev/rtt0
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

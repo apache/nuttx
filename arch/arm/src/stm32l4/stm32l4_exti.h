@@ -101,7 +101,7 @@ int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *
@@ -124,7 +124,7 @@ int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *
@@ -148,7 +148,7 @@ int stm32l4_exti_wakeup(bool risingedge, bool fallingedge, bool event,
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *

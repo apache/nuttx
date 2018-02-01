@@ -57,10 +57,10 @@
  * Description:
  *   This function removes a TCB from the ready to run list.
  *
- * Inputs:
+ * Input Parameters:
  *   rtcb - Points to the TCB that is ready-to-run
  *
- * Return Value:
+ * Returned Value:
  *   true if the currently active task (the head of the ready-to-run list)
  *     has changed.
  *
@@ -116,10 +116,10 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
  * Description:
  *   This function removes a TCB from the ready to run list.
  *
- * Inputs:
+ * Input Parameters:
  *   rtcb - Points to the TCB that is ready-to-run
  *
- * Return Value:
+ * Returned Value:
  *   true if the currently active task (the head of the ready-to-run list)
  *     has changed.
  *

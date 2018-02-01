@@ -61,7 +61,7 @@
  *   wnd  - The window to be closed (and deallocated using the user-space
  *          allocator)
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

@@ -57,10 +57,10 @@
  *   closed so that no thread will attempt access it while it is being
  *   deleted.
  *
- * Inputs:
+ * Input Parameters:
  *   msgq - Named essage queue to be freed
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

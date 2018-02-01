@@ -63,11 +63,11 @@
  *   to sched_yield() -- The task will be moved to  after all other tasks
  *   with the same priority.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - the TCB of task to reprioritize.
  *   sched_priority - The new task priority
  *
- * Return Value:
+ * Returned Value:
  *   On success, sched_reporioritize() returns 0 (OK). On error, a negated
  *   errno value is returned. 
  *

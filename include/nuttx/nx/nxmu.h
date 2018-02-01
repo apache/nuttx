@@ -495,7 +495,7 @@ extern "C"
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately.  In the
  *   case of ERROR, NX will have deallocated the pre-allocated window.
  *
@@ -515,7 +515,7 @@ int nxfe_constructwindow(NXHANDLE handle,
  * Input Parameters:
  *   sem - the semaphore to be taken.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -533,7 +533,7 @@ void nxmu_semtake(sem_t *sem);
  *   msg    - A pointer to the message to send
  *   msglen - The length of the message in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -553,7 +553,7 @@ int nxmu_sendserver(FAR struct nxfe_conn_s *conn,
  *   msg    - A pointer to the message to send
  *   msglen - The length of the message in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

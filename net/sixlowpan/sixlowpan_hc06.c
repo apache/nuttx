@@ -1078,7 +1078,7 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
  *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *
- * Input Parmeters:
+ * Input Parameters:
  *   radio    - Reference to a radio network driver state instance.
  *   metadata - Obfuscated MAC metadata including node addressing
  *              information.

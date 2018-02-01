@@ -74,7 +74,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size);
  *   alloc - Allocation base address of the stack
  *   size - The size of the stack in bytes
  *
- * Returned value:
+ * Returned Value:
  *   The estimated amount of stack space used.
  *
  ****************************************************************************/
@@ -154,7 +154,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
  * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   The estimated amount of stack space used.
  *
  ****************************************************************************/

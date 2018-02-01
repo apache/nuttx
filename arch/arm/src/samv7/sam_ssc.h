@@ -82,7 +82,7 @@ extern "C"
  * Description:
  *   Initialize the selected I2S port.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple I2S interfaces)
  *
  * Returned Value:

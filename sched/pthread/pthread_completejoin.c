@@ -115,7 +115,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
  * Parameters:
  *   pid
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

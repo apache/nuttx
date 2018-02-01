@@ -101,13 +101,14 @@ static bool      g_binitialized = false;
  *      errors are returned ('?' or ':') until getopt() finally returns -1.
  *     (You can also set optind to -1 to force a reset).
  *
- * Return: If an option was successfully found, then getopt() returns the
- *   option character. If all command-line options have been parsed, then
- *   getopt() returns -1.  If getopt() encounters an option character that
- *   was not in optstring, then '?' is returned. If getopt() encounters an
- *   option with a missing argument, then the return value depends on the
- *   first character in optstring: if it is ':', then ':' is returned;
- *   otherwise '?' is returned.
+ * Return Value:
+ *   If an option was successfully found, then getopt() returns the option
+ *   haracter. If all command-line options have been parsed, then getopt()
+ *   returns -1.  If getopt() encounters an option character that was not
+ *   in optstring, then '?' is returned. If getopt() encounters an option
+ *   with a missing argument, then the return value depends on the first
+ *   character in optstring: if it is ':', then ':' is returned; otherwise
+ *   '?' is returned.
  *
  ****************************************************************************/
 

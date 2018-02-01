@@ -487,10 +487,10 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
  *   REVISIT: Since this is a common signal, we will need to come up with some way
  *   to inform both EHCI and OHCI drivers when this error occurs.
  *
- * Input Parameter:
+ * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *
- * Returned value:
+ * Returned Value:
  *   Old overcurrent interrupt handler
  *
  ************************************************************************************/

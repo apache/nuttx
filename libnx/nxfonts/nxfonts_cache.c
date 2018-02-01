@@ -639,7 +639,7 @@ nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
  *   bpp       - Bits per pixel
  *   maxglyphs - Maximum number of glyphs permitted in the cache
  *
- * Returned value:
+ * Returned Value:
  *   On success a non-NULL handle is returned that then may sequently be
  *   used with nxf_getglyph() to extract fonts from the font cache.  NULL
  *   returned on any failure with the errno value set to indicate the nature
@@ -798,7 +798,7 @@ errout_with_lock:
  * Input Parameters:
  *   fhandle - A font cache handle previously returned by nxf_cache_connect();
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -876,7 +876,7 @@ void nxf_cache_disconnect(FCACHE fhandle)
  * Input Parameters:
  *   fhandle - A font cache handle previously returned by nxf_cache_connect();
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) is returned if the metrics were
  *
  * Returned Value:

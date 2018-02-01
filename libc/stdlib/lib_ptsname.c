@@ -54,7 +54,7 @@
  *   The ptsname() function returns the name of the slave pseudoterminal
  *   device corresponding to the master referred to by fd.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, ptsname() returns a pointer to a string in static storage
  *   which will be overwritten by subsequent calls.  This pointer must not
  *   be freed.  On failure, NULL is returned.

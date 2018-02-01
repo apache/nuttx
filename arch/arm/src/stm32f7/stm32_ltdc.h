@@ -125,7 +125,7 @@ struct ltdc_layer_s
    *   layer  - Reference to the layer control structure
    *   vinfo  - Reference to the video info structure
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -143,7 +143,7 @@ struct ltdc_layer_s
    *   planeno - Number of the plane
    *   pinfo   - Reference to the plane info structure
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -163,7 +163,7 @@ struct ltdc_layer_s
    *           e.g. get the current active or inactive layer.
    *           See LTDC_LAYER_* for possible values
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -184,7 +184,7 @@ struct ltdc_layer_s
    *   enable - Enable or disable clut support (if false cmap is ignored and can
    *            be NULL)
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -202,7 +202,7 @@ struct ltdc_layer_s
    *   cmap  - Reference to valid color lookup table accept up the 256 color
    *           entries
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -221,7 +221,7 @@ struct ltdc_layer_s
    *   layer - Reference to the layer structure
    *   argb  - ARGB8888 color value
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -237,7 +237,7 @@ struct ltdc_layer_s
    *   layer - Reference to the layer structure
    *   argb  - Reference to store the ARGB8888 color value
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -255,7 +255,7 @@ struct ltdc_layer_s
    *   layer  - Reference to the layer structure
    *   rgb    - RGB888 color key
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -271,7 +271,7 @@ struct ltdc_layer_s
    *   layer  - Reference to the layer structure
    *   rgb    - Reference to store the RGB888 color key
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -293,7 +293,7 @@ struct ltdc_layer_s
    *   layer - Reference to the layer structure
    *   alpha - Alpha value
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -309,7 +309,7 @@ struct ltdc_layer_s
    *   layer - Reference to the layer structure
    *   alpha - Reference to store the alpha value
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -327,7 +327,7 @@ struct ltdc_layer_s
    *   layer - Reference to the layer structure
    *   mode  - Blend mode (see LTDC_BLEND_*)
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    *
@@ -365,7 +365,7 @@ struct ltdc_layer_s
    *   layer - Reference to the layer structure
    *   mode  - Reference to store the blend mode
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -392,7 +392,7 @@ struct ltdc_layer_s
    *   srcxpos - x position of the visible pixel of the whole layer
    *   srcypos - y position of the visible pixel of the whole layer
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    *
@@ -418,7 +418,7 @@ struct ltdc_layer_s
    *   srcxpos - Reference to store the referenced x position of the whole layer
    *   srcypos - Reference to store the reterenced y position of the whole layer
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -437,7 +437,7 @@ struct ltdc_layer_s
    *   layer   - Reference to the layer structure
    *   mode    - operation mode (see LTDC_UPDATE_*)
    *
-   * Return:
+   * Returned Value:
    *    OK        - On success
    *   -EINVAL    - If one of the parameter invalid
    *   -ECANCELED - Operation cancelled, something goes wrong
@@ -481,7 +481,7 @@ struct ltdc_layer_s
    *   src      - Reference to the source layer
    *   srcarea  - Reference to the selected area of the source layer
    *
-   * Return:
+   * Returned Value:
    *    OK      - On success
    *   -EINVAL  - If one of the parameter invalid or if the size of the selected
    *              source area outside the visible area of the destination layer.
@@ -510,7 +510,7 @@ struct ltdc_layer_s
    *   back     - Reference to the background layer
    *   backarea - Reference to the selected area of the background layer
    *
-   * Return:
+   * Returned Value:
    *    OK      - On success
    *   -EINVAL  - If one of the parameter invalid or if the size of the selected
    *              source area outside the visible area of the destination layer.
@@ -535,7 +535,7 @@ struct ltdc_layer_s
    *   color    - Color to fill the selected area. Color must be formatted
    *              according to the layer pixel format.
    *
-   * Return:
+   * Returned Value:
    *    OK      - On success
    *   -EINVAL  - If one of the parameter invalid or if the size of the selected
    *              area outside the visible area of the layer.
@@ -609,7 +609,7 @@ struct stm32_ltdc_s
  * Description:
  *   Initialize the ltdc controller
  *
- * Return:
+ * Returned Value:
  *   OK
  *
  ************************************************************************************/
@@ -627,7 +627,7 @@ void stm32_ltdcuninitialize(void);
  * Parameter:
  *   lid - Layer identifier
  *
- * Return:
+ * Returned Value:
  *   Reference to the layer control structure on success or Null if parameter
  *   invalid.
  *

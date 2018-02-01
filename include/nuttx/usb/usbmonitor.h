@@ -72,7 +72,7 @@ extern "C"
  * Input Parameters:
  *   None
  *
- * Returned values:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *

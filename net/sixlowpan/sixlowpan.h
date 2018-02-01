@@ -86,7 +86,7 @@ void sixlowpan_initialize(void);
  *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
- * Input Parmeters
+ * Input Parameters:
  *   psock - An instance of the internal socket structure.
  *   buf   - Data to send
  *   len   - Length of data to send
@@ -126,7 +126,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   driver. Under those conditions, this function will be called to create
  *   the IEEE80215.4 frames.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev    - The network device containing the packet to be sent.
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
@@ -159,7 +159,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
  *
  *   Both cases are handled here.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev    - The network device containing the packet to be sent.
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
@@ -189,7 +189,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
  *   psock_6lowpan_udp_send() call may be used with connectionlesss UDP
  *   sockets.
  *
- * Input Parmeters
+ * Input Parameters:
  *   psock - An instance of the internal socket structure.
  *   buf   - Data to send
  *   len   - Length of data to send
@@ -219,7 +219,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
  *   may be returned when they are not NULL and 0), and the error ENOTCONN is
  *   returned when the socket was not actually connected.
  *
- * Input Parmeters
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
@@ -251,7 +251,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
  *   Handles forwarding a UDP packet via 6LoWPAN.  This is currently only
  *   used by the IPv6 forwarding logic.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev    - An instance of nework device state structure
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets

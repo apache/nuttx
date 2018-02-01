@@ -55,10 +55,10 @@
  *   This function removes a TCB from one of the blocked state task
  *   lists as inferred from the task_state inside the TCB.
  *
- * Inputs:
+ * Input Parameters:
  *   btcb - Points to the TCB that is blocked
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

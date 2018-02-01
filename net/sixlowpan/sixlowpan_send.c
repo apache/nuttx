@@ -141,7 +141,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  *   This function is called from the interrupt level to perform the actual
  *   send operation when polled by the lower, device interfacing layer.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev   - The structure of the network driver that caused the interrupt
  *   conn  - The connection structure associated with the socket
  *   flags - Set of events describing why the callback was invoked

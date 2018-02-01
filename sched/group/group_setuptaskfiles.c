@@ -79,7 +79,7 @@
  * Input Parameters:
  *   tcb - tcb of the new task.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -137,7 +137,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
  * Input Parameters:
  *   tcb - tcb of the new task.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -198,7 +198,7 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
  * Parameters:
  *   tcb - tcb of the new task.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
  *   failure.
  *

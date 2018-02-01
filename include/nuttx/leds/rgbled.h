@@ -71,7 +71,7 @@ extern "C"
  *   be used by application code.
  *
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/rgdbled0", "/dev/rgbled1", etc.  where the driver path

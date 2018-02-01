@@ -64,7 +64,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -91,7 +91,7 @@ void pthread_initialize(void)
  *  intr - false: ignore EINTR errors when locking; true tread EINTR as
  *         other errors by returning the errno value
  *
- * Return Value:
+ * Returned Value:
  *   0 on success or an errno value on failure.
  *
  ****************************************************************************/

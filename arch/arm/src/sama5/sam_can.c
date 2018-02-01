@@ -579,7 +579,7 @@ static void can_semtake(FAR struct sam_can_s *priv)
  * Description:
  *   Allocate one mailbox
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN peripheral
  *
  * Returned Value:
@@ -626,7 +626,7 @@ static int can_mballoc(FAR struct sam_can_s *priv)
  * Description:
  *   Free one mailbox
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN peripheral
  *   mbndx - Index of the mailbox to be freed
  *
@@ -670,7 +670,7 @@ static void can_mbfree(FAR struct sam_can_s *priv, int mbndx)
  * Description:
  *   Configure and enable mailbox(es) for reception
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN peripheral
  *
  * Returned Value:
@@ -1592,7 +1592,7 @@ static void can_interrupt(int irq, void *context, FAR void *arg)
  *     Tphs1    = Tq * (PHASE1 + 1)
  *     Tphs2    = Tq * (PHASE2 + 1)
  *
- * Input Parameter:
+ * Input Parameters:
  *   config - A reference to the CAN constant configuration
  *
  * Returned Value:
@@ -1706,7 +1706,7 @@ static int can_bittiming(struct sam_can_s *priv)
  * Description:
  *   Use the SAMA5 auto-baud feature to correct the initial timing
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *
  * Returned Value:
@@ -1776,7 +1776,7 @@ static int can_autobaud(struct sam_can_s *priv)
  * Description:
  *   CAN cell initialization
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN peripheral
  *
  * Returned Value:
@@ -1889,7 +1889,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
  * Description:
  *   Initialize the selected CAN port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple CAN interfaces)
  *
  * Returned Value:

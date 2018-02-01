@@ -92,7 +92,7 @@
  *   set  - Location of the new signal mask
  *   oset - Location to store the old signal mask
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -197,7 +197,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
  *   set  - Location of the new signal mask
  *   oset - Location to store the old signal mask
  *
- * Return Value:
+ * Returned Value:
  *   This function will return 0 (OK) on success or -1 (ERROR) if how is
  *   invalid.  In the latter case, the errno variable will be set to EINVAL.
  *

@@ -104,12 +104,12 @@ static b16_t nxgl_interpolate(b16_t x, b16_t dy, b16_t dxdy)
  *      this case, 3 trapezoids will be returned, but traps[1] will be
  *      degenerate.
  *
- * Input parameters:
+ * Input Parameters:
  *   vector - A pointer to the vector described the line to be drawn.
  *   traps  - A pointer to a array of trapezoids (size 3).
  *   rect   - A pointer to a rectangle.
  *
- * Returned value:
+ * Returned Value:
  *   0: Line successfully broken up into three trapezoids.  Values in
  *      traps[0], traps[1], and traps[2] are valid.
  *   1: Line successfully represented by one trapezoid. Value in traps[1]

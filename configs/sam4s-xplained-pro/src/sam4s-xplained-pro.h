@@ -221,7 +221,7 @@ bool sam_writeprotected(int slotno);
  * Description:
  *   Perform architecture-specific initialization of the Watchdog hardware.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

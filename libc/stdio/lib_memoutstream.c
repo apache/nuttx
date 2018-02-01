@@ -78,7 +78,7 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  * Description:
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
- * Input parameters:
+ * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
  *                  lib_memoutstream_s to be initialized.
  *   bufstart     - Address of the beginning of the fixed-size memory buffer

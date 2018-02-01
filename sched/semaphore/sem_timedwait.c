@@ -86,7 +86,7 @@
  *   sem     - Semaphore object
  *   abstime - The absolute time to wait until a timeout is declared.
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -235,7 +235,7 @@ errout_with_irqdisabled:
  *   sem     - Semaphore object
  *   abstime - The absolute time to wait until a timeout is declared.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success.  On failure, -1 (ERROR) is returned
  *   and the errno is set appropriately:
  *

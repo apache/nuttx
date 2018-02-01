@@ -109,7 +109,7 @@ EXTERN const struct nand_scheme_s g_nand_sparescheme4096;
  *   spare   Spare area buffer.
  *   marker  Pointer to the variable to store the bad block marker.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -130,7 +130,7 @@ void nandscheme_readbadblockmarker(FAR const struct nand_scheme_s *scheme,
  *   spare   Spare area buffer.
  *   marker  Bad block marker to write.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -150,7 +150,7 @@ void nandscheme_writebadblockmarker(FAR const struct nand_scheme_s *scheme,
  * Input Parameters:
  *   scheme  Pointer to a nand_scheme_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Offset in the spare area to the first ECC byte
  *
  ****************************************************************************/
@@ -166,7 +166,7 @@ void nandscheme_writebadblockmarker(FAR const struct nand_scheme_s *scheme,
  * Input Parameters:
  *   scheme  Pointer to a nand_scheme_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Size of the ECC information in the spare area.
  *
  ****************************************************************************/
@@ -184,7 +184,7 @@ void nandscheme_writebadblockmarker(FAR const struct nand_scheme_s *scheme,
  *   spare   Spare area buffer.
  *   ecc     ECC buffer.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -203,7 +203,7 @@ void nandscheme_readecc(FAR const struct nand_scheme_s *scheme,
  *   spare   Spare area buffer.
  *   ecc     ECC buffer.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -223,7 +223,7 @@ void nandscheme_writeecc(FAR const struct nand_scheme_s *scheme,
  * Input Parameters:
  *   scheme  Pointer to a nand_scheme_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Offset in the spare area to the first extra byte
  *
  ****************************************************************************/
@@ -239,7 +239,7 @@ void nandscheme_writeecc(FAR const struct nand_scheme_s *scheme,
  * Input Parameters:
  *   scheme  Pointer to a nand_scheme_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *   Size of the extra information in the spare area.
  *
  ****************************************************************************/
@@ -260,7 +260,7 @@ void nandscheme_writeecc(FAR const struct nand_scheme_s *scheme,
  *   size    Number of extra bytes to read.
  *   offset  Index where to read the first extra byte.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -283,7 +283,7 @@ void nandscheme_readextra(FAR const struct nand_scheme_s *scheme,
  *   size    Number of extra bytes to write.
  *   offset  Index where to write the first extra byte.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -305,7 +305,7 @@ void nandscheme_writeextra(FAR const struct nand_scheme_s *scheme,
  *   size    Number of extra bytes to write.
  *   offset  Index where to write the first extra byte.
  *
- * Returned Values:
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/

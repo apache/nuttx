@@ -67,7 +67,7 @@
  * Description:
  *   Initialize and register the MFRC522 RFID driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
  *
  * Returned Value:

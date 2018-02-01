@@ -183,7 +183,8 @@ static const struct file_operations g_vgaops =
  * you'll need to switch planes to access the whole screen but
  * that allows you using any resolution, up to 400x600
  *
- * Returns 0=ok, -n=fail
+ * Returned Value:
+ *   0=ok, -n=fail
  */
 
 static int init_graph_vga(int width, int height,int chain4)

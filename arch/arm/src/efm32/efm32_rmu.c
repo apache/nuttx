@@ -184,7 +184,7 @@ uint32_t g_efm32_rstcause;
  * Description:
  *    Return next reset cause string, NULL if no more reset cause.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   reg: reset cause register to decode (like g_efm32_rstcause)
  *   idx: Use to keep in maind reset cause decoding position.
  *        set *idx to zero before first call.

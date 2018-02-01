@@ -55,7 +55,7 @@
  *   attr   - The mutex attributes to query
  *   robust - Location to return the robustness indication
  *
- * Return Value:
+ * Returned Value:
  *   0, if the robustness was successfully return in 'robust', or
  *   EINVAL, if any NULL pointers provided.
  *

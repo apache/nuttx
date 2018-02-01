@@ -403,7 +403,7 @@ static inline void writedata(FAR struct lib_sostream_s *outstream,
  *   swap      - Controls byte ordering.  See enum hex2bin_swap_e for
  *               description of the values.
  *
- * Returned Value
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   failure.
  *

@@ -1609,7 +1609,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
  *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
  *   in the range 12 to 64.
  *
- * Input Parameter:
+ * Input Parameters:
  *   dlc    - the DLC value to convert to a byte count
  *
  * Returned Value:
@@ -1665,7 +1665,7 @@ static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
  *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
  *   in the range 12 to 64.
  *
- * Input Parameter:
+ * Input Parameters:
  *   nbytes - the byte count to convert to a DLC value
  *
  * Returned Value:
@@ -3649,7 +3649,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
  * Description:
  *   MCAN hardware initialization
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this MCAN peripheral
  *
  * Returned Value:
@@ -3924,7 +3924,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
  * Description:
  *   Initialize the selected MCAN port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - Port number (for hardware that has multiple MCAN interfaces),
  *          0=MCAN0, 1=MCAN1
  *

@@ -74,7 +74,7 @@
  * Parameters:
  *   sem - Semaphore descriptor
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -211,7 +211,7 @@ int nxsem_post(FAR sem_t *sem)
  * Parameters:
  *   sem - Semaphore descriptor
  *
- * Return Value:
+ * Returned Value:
  *   This function is a standard, POSIX application interface.  It will
  *   return zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
  *   the errno value is set appropriately.

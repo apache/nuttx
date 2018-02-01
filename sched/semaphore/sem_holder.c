@@ -717,7 +717,7 @@ static int nxsem_restoreholderprioB(FAR struct semholder_s *pholder,
  *     - If it is >0 then there should be no threads waiting for counts and
  *       stcb should be null.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -778,7 +778,7 @@ static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
  *     - If it is >0 then there should be no threads waiting for counts and
  *       stcb should be null.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -848,7 +848,7 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -882,7 +882,7 @@ void nxsem_initholders(void)
  * Parameters:
  *   sem - A reference to the semaphore being destroyed
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -933,7 +933,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
  *   htcb - TCB of the thread that just obtained the semaphore
  *   sem  - A reference to the incremented semaphore
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
@@ -976,7 +976,7 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
  * Parameters:
  *   sem - A reference to the incremented semaphore
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
@@ -998,7 +998,7 @@ void nxsem_addholder(FAR sem_t *sem)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
@@ -1027,7 +1027,7 @@ void nxsem_boostpriority(FAR sem_t *sem)
  * Parameters:
  *   sem - A reference to the semaphore being posted
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -1077,7 +1077,7 @@ void nxsem_releaseholder(FAR sem_t *sem)
  *     - If it is >0 then there should be no threads waiting for counts and
  *       stcb should be null.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -1122,7 +1122,7 @@ void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
  * Parameters:
  *   sem - A reference to the semaphore no longer being waited for
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -1151,7 +1151,7 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
  * Parameters:
  *   sem - A reference to the semaphore
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -1177,7 +1177,7 @@ void sem_enumholders(FAR sem_t *sem)
  * Parameters:
  *   sem - A reference to the semaphore
  *
- * Return Value:
+ * Returned Value:
  *   The number of available holder containers
  *
  * Assumptions:

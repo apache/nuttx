@@ -690,7 +690,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer, size_t len)
     }
   while (ret == 0);
 
-  /* Return:
+  /* Returned Value:
    *
    * ret > 0:  The number of characters copied into the user buffer by
    *           telnet_receive().
@@ -783,7 +783,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer, size
  *   session - On input, contains the socket descriptor that represents the
  *   new telnet connection.  On output, it holds the path to the new Telnet driver.
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -978,7 +978,7 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Parameters:
  *   None
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/

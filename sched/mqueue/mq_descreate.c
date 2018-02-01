@@ -67,10 +67,10 @@
  * Description:
  *   Allocate a message queue descriptor.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   Reference to the allocated mq descriptor.
  *
  ****************************************************************************/
@@ -109,12 +109,12 @@ static mqd_t nxmq_alloc_des(void)
  * Description:
  *   Create a message queue descriptor for the specified TCB
  *
- * Inputs:
+ * Input Parameters:
  *   mtcb   - task that needs the descriptor.
  *   msgq   - Named message queue containing the message
  *   oflags - access rights for the descriptor
  *
- * Return Value:
+ * Returned Value:
  *   On success, the message queue descriptor is returned.  NULL is returned
  *   on a failure to allocate.
  *

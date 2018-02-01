@@ -65,7 +65,7 @@
  *   group Identifies the task group containing the environment structure
  *     to be released.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

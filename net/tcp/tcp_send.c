@@ -86,7 +86,7 @@
  * Parameters:
  *   dev - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   The length of the IP header (IPv4_HDRLEN or IPv6_HDRLEN)
  *
  ****************************************************************************/
@@ -122,7 +122,7 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
  * Parameters:
  *   dev - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -190,7 +190,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
  * Parameters:
  *   dev - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -253,7 +253,7 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
  * Parameters:
  *   dev - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -301,7 +301,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev,
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP connection structure holding connection information
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -403,7 +403,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
  *   len    - length of the message (includes the length of the IP and TCP
  *            headers)
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -431,7 +431,7 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  * Parameters:
  *   dev    - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -548,7 +548,7 @@ void tcp_reset(FAR struct net_driver_s *dev)
  *   conn - The TCP connection structure holding connection information
  *   ack  - The ACK response to send
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

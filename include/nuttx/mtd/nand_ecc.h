@@ -86,14 +86,14 @@ extern "C"
  *   the spare area. If a buffer pointer is NULL, then the corresponding area
  *   is not saved.
  *
- * Input parameters:
+ * Input Parameters:
  *   nand  - Upper-half, NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *   spare - Buffer where the spare area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -111,14 +111,14 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
  *   If no spare buffer is provided, the spare area is still written with the
  *   ECC information calculated on the data buffer.
  *
- * Input parameters:
+ * Input Parameters:
  *   nand  - Upper-half, NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *   spare - Buffer containing the spare data to be written.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/

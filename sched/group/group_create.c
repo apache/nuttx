@@ -92,7 +92,7 @@ FAR struct task_group_s *g_grouphead;
  * Parameters:
  *   tcb - The tcb in need of the task group.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -165,7 +165,7 @@ static void group_assigngid(FAR struct task_group_s *group)
  *   tcb   - The tcb in need of the task group.
  *   ttype - Type of the thread that is the parent of the group
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:
@@ -274,7 +274,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
  * Parameters:
  *   tcb - The tcb in need of the task group.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:

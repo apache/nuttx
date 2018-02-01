@@ -122,7 +122,7 @@ static off_t memsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
  * Description:
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
- * Input parameters:
+ * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
  *                  lib_memsostream_s to be initialized.
  *   bufstart     - Address of the beginning of the fixed-size memory buffer

@@ -42,10 +42,6 @@
 #ifdef CONFIG_NET
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -60,7 +56,7 @@
  *   The shutdown() function disables subsequent send and/or receive
  *   operations on a socket, depending on the value of the how argument.
  *
- * Input Paramteers:
+ * Input Parameters:
  *   sockfd - Specifies the file descriptor of the socket.
  *   how    - Specifies the type of shutdown. The values are as follows:
  *

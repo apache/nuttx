@@ -128,7 +128,7 @@ enum spirit_version_e
  *
  * Description:
  *
- * Input parameters:
+ * Input Parameters:
  *
  * Returned Value:
  *

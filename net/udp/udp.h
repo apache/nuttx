@@ -301,7 +301,7 @@ void udp_ipv6_select(FAR struct net_driver_s *dev);
  *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" to poll for TX data
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -321,7 +321,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" structure holding port information
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -354,7 +354,7 @@ void udp_wrbuffer_initialize(void);
  *   the free list.  This function is called from UDP logic when a buffer
  *   of UDP data is about to sent
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Assumptions:
@@ -426,7 +426,7 @@ void udp_wrbuffer_dump(FAR const char *msg, FAR struct udp_wrbuffer_s *wrb,
  * Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
- * Return:
+ * Returned Value:
  *   OK  The packet has been processed  and can be deleted
  *   ERROR Hold the packet and try again later. There is a listening socket
  *         but no receive in place to catch the packet yet.
@@ -449,7 +449,7 @@ int udp_ipv4_input(FAR struct net_driver_s *dev);
  * Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
- * Return:
+ * Returned Value:
  *   OK  The packet has been processed  and can be deleted
  *   ERROR Hold the packet and try again later. There is a listening socket
  *         but no receive in place to catch the packet yet.

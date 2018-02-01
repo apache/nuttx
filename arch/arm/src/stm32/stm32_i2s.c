@@ -2160,7 +2160,7 @@ errout_with_exclsem:
  *   Setup the MCK divider based on the currently selected data width and
  *   the sample rate
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - I2C device structure (only the sample rate and data length is
  *          needed at this point).
  *
@@ -2562,7 +2562,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  * Description:
  *   Initialize the selected i2S port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple I2S interfaces)
  *
  * Returned Value:

@@ -73,7 +73,7 @@ static char g_retchar[2];
  * Parameter:
  *   path The null-terminated string referring to the path to be decomposed
  *
- * Return:
+ * Returned Value:
  *   On success the filename component of the path is returned.
  *
  ****************************************************************************/

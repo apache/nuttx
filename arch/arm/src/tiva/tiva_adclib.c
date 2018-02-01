@@ -624,7 +624,7 @@ void tiva_adc_sample_rate(uint8_t rate)
  *   to the FIFO. This is only required when the trigger source is set to the
  *   processor.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - which ADC peripherals' sample sequencers to trigger
  *   sse_mask - sample sequencer bitmask, each sse is 1 shifted by the sse
  *              number. e.g.
@@ -650,7 +650,7 @@ void tiva_adc_proc_trig(uint8_t adc, uint8_t sse_mask)
  * Description:
  *   Returns raw interrupt status for the input ADC
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - which ADC peripherals' interrupt status to retrieve
  *
  ****************************************************************************/
@@ -670,12 +670,12 @@ uint32_t tiva_adc_int_status(uint8_t adc)
  *   Sets the operation state of an ADC's sample sequencer (SSE). SSEs must
  *   be configured before being enabled.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   state - sample sequencer enable/disable state
  *
- * Return value:
+ * Returned Value:
  *   Actual state of the ACTSS register.
  *
  ****************************************************************************/
@@ -711,7 +711,7 @@ uint8_t tiva_adc_sse_enable(uint8_t adc, uint8_t sse, bool state)
  *      - Always
  *      - !!UNSUPPORTED: Comparators
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   trigger - interrupt trigger
@@ -736,7 +736,7 @@ void tiva_adc_sse_trigger(uint8_t adc, uint8_t sse, uint32_t trigger)
  *   Additional triggering configuration for PWM. Sets which PWM and which
  *   generator.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   cfg - which PWM modulator and generator to use, use TIVA_ADC_PWM_TRIG
@@ -762,7 +762,7 @@ void tiva_adc_sse_pwm_trig(uint8_t adc, uint8_t sse, uint32_t cfg)
  *   Sets the interrupt state of an ADC's sample sequencer (SSE). SSEs must
  *   be enabled before setting interrupt state.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   state - sample sequencer enable/disable interrupt state
@@ -799,7 +799,7 @@ void tiva_adc_sse_int_enable(uint8_t adc, uint8_t sse, bool state)
  * Description:
  *   Returns interrupt status for the specificed SSE
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - which ADC peripherals' interrupt status to retrieve
  *   sse - which SSE interrupt status to retrieve
  *
@@ -818,7 +818,7 @@ bool tiva_adc_sse_int_status(uint8_t adc, uint8_t sse)
  * Description:
  *   Clears the interrupt bit for the SSE.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   state - sample sequencer
@@ -839,11 +839,11 @@ void tiva_adc_sse_clear_int(uint8_t adc, uint8_t sse)
  *   The input data buffer MUST be as large or larger than the sample sequencer.
  *   otherwise
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *
- * Return value:
+ * Returned Value:
  *   number of steps read from FIFO.
  *
  ****************************************************************************/
@@ -880,7 +880,7 @@ uint8_t tiva_adc_sse_data(uint8_t adc, uint8_t sse, int32_t *buf)
  *   priority value ranges from 0 to 3, 0 being the highest priority, 3 being
  *   the lowest. There can be no duplicate values.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   priority - conversion priority
@@ -906,7 +906,7 @@ void tiva_adc_sse_priority(uint8_t adc, uint8_t sse, uint8_t priority)
  *
  *   *SSEMUX only supported on TM4C129 devices
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   chn - sample sequencer step
@@ -940,7 +940,7 @@ void tiva_adc_sse_register_chn(uint8_t adc, uint8_t sse, uint8_t chn,
  * Description:
  *   Sets the differential capability for a SSE. !! UNSUPPORTED
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   chn - sample sequencer channel
@@ -970,7 +970,7 @@ void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t d
  *  This is not available on all devices, however on devices that do not
  *  support this feature these reserved bits are ignored on write access.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   chn - sample sequencer channel
@@ -1007,7 +1007,7 @@ void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse,
  *
  *  *Comparator/Differential functionality is unsupported and ignored.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *   chn - sample sequencer channel
@@ -1029,7 +1029,7 @@ void tiva_adc_sse_step_cfg(uint8_t adc, uint8_t sse, uint8_t chn, uint8_t cfg)
  *   Dump all configured registers for the given ADC and SSE. This should
  *   only be used to verify that configuration routines were accurate.
  *
- * Input parameters:
+ * Input Parameters:
  *   adc - peripheral state
  *   sse - sample sequencer
  *

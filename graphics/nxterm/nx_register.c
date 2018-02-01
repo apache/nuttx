@@ -90,7 +90,7 @@ static const struct nxterm_operations_s g_nxops =
  *   rect  - The location to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -114,7 +114,7 @@ static int nxterm_fill(FAR struct nxterm_state_s *priv,
  *   offset - The offset to move the region.  The  rectangular region will be
  *            moved so that the origin is translated by this amount.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -146,7 +146,7 @@ static int nxterm_move(FAR struct nxterm_state_s *priv,
  *            may lie outside of the display.
  *   stride - The width of the full source image in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -177,7 +177,7 @@ static int nxterm_bitmap(FAR struct nxterm_state_s *priv,
  *   wndo - Describes the window and font to be used
  *   minor - The device minor number
  *
- * Return:
+ * Returned Value:
  *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/

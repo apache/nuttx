@@ -76,7 +76,7 @@ struct spi_dev_s;
  * Description:
  *   Initialize the selected SPI bus
  *
- * Input Parameter:
+ * Input Parameters:
  *   bus number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:

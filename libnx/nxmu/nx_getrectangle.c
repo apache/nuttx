@@ -68,7 +68,7 @@
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

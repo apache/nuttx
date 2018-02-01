@@ -55,7 +55,7 @@
  *   attr - The mutex attributes in which to set the mutex type.
  *   type - The mutex type value to set.
  *
- * Return Value:
+ * Returned Value:
  *   0, if the mutex type was successfully set in 'attr', or
  *   EINVAL, if 'attr' is NULL or 'type' unrecognized.
  *

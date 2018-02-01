@@ -63,7 +63,7 @@
  *   cb   - Callbacks used to process window events
  *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

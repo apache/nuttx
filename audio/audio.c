@@ -680,7 +680,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *      to enqueue additional buffers and "wake them up" for further
  *      processing.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle - This is the handle that was provided to the lower-half
  *     start() method.
  *   apb - A pointer to the previsously enqueued ap_buffer_s
@@ -767,7 +767,7 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
  *   Provides a callback interface for lower-half drivers to call to the
  *   upper-half for buffer dequeueing, error reporting, etc.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - Private context data owned by the upper-half
  *   reason - The reason code for the callback
  *   apb - A pointer to the previsously enqueued ap_buffer_s
@@ -854,7 +854,7 @@ static void audio_callback(FAR void *handle, uint16_t reason,
  *   When this function is called, the "lower half" driver should be in the
  *   reset state (as if the shutdown() method had already been called).
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name Audio drivers
  *     based on the function they provide, such as "/dev/pcm0", "/dev/mp31",

@@ -118,7 +118,7 @@ extern "C"
  * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   One success, a reference to the initialized MTD device instance is
  *   returned;  NULL is returned on any failure.
  *

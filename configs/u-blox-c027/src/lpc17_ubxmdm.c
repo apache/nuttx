@@ -281,7 +281,7 @@ static int lpc17_ioctl(FAR struct ubxmdm_lower* lower,
  * Input Parameters:
  *   usb_used - enables the USB sense pin if 'true'
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

@@ -784,7 +784,7 @@ static int rtc_unlink(FAR struct inode *inode)
  *   provided to this function.  The resulting RTC driver will be registered
  *   at /dev/rtcN where N is the minor number provided to this function.
  *
- * Input parameters:
+ * Input Parameters:
  *   minor - The minor number of the RTC device.  The N in /dev/rtcN
  *   lower - The lower half driver instance.
  *

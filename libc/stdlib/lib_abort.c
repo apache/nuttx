@@ -87,7 +87,7 @@
  *   It does this by restoring the default disposition for SIGABRT and
  *   then raising the signal for a second time.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

@@ -62,7 +62,7 @@
  * Parameters:
  *   ts - Location to return the time
  *
- * Return Value:
+ * Returned Value:
  *   Current version always returns OK
  *
  * Assumptions:

@@ -73,7 +73,7 @@
  *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
  *   cpuset     - Provides the new affinity set for the thread.
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, an errno value is returned indicating the
  *   nature of the failure.
  *

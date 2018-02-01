@@ -110,10 +110,10 @@ volatile uint32_t g_cpuload_total;
  * Description:
  *   Collect data that can be used for CPU load measurements.
  *
- * Inputs:
+ * Input Parameters:
  *   cpu - The CPU that we are performing the load operations on.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions/Limitations:
@@ -156,10 +156,10 @@ static inline void sched_cpu_process_cpuload(int cpu)
  * Description:
  *   Collect data that can be used for CPU load measurements.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions/Limitations:
@@ -228,7 +228,7 @@ void weak_function sched_process_cpuload(void)
  *   pid - The task ID of the thread of interest.  pid == 0 is the IDLE thread.
  *   cpuload - The location to return the CPU load
  *
- * Return Value:
+ * Returned Value:
  *   OK (0) on success; a negated errno value on failure.  The only reason
  *   that this function can fail is if 'pid' no longer refers to a valid
  *   thread.

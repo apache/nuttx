@@ -84,7 +84,7 @@
  *   hfwnd - The window handle returned by nxtk_openwindow
  *   size  - The new size of the client sub-window.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

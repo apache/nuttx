@@ -573,7 +573,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  * Description:
  *   Get the maximum frame length supported by radio network drvier.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *
  * Returned Value:
@@ -607,7 +607,7 @@ int sixlowpan_radio_framelen(FAR struct radio_driver_s *radio)
  * Description:
  *   Get the source PAN ID from the IEEE802.15.4 MAC layer.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *   panid - The location in which to return the PAN ID.  0xfff may be
  *           returned if the device is not associated.
@@ -647,7 +647,7 @@ int sixlowpan_src_panid(FAR struct radio_driver_s *radio,
  *   Extract the source MAC address from the radio-specific RX metadata, and
  *   return the source address in a radio-agnostic form.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio    - Reference to a radio network driver state instance.
  *   metadata - Opaque reference to the radio-specific RX metadata.
  *   srcaddr  - The location in which to return the source MAC address.
@@ -714,7 +714,7 @@ int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
  *   Extract the destination MAC address from the radio-specific RX metadata,
  *   and return the destination address in a radio-agnostic form.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio    - Reference to a radio network driver state instance.
  *   metadata - Opaque reference to the radio-specific RX metadata.
  *   destaddr - The location in which to return the destination MAC address.

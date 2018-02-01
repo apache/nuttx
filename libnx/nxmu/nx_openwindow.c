@@ -63,7 +63,7 @@
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
- * Return:
+ * Returned Value:
  *   Success: A non-NULL handle used with subsequent NX accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *

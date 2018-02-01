@@ -2638,7 +2638,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
  *   Return true if UART activated RX flow control to block more incoming
  *   data
  *
- * Input parameters:
+ * Input Parameters:
  *   dev       - UART device instance
  *   nbuffered - the number of characters currently buffered
  *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
@@ -2869,7 +2869,7 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
  *   Register USB serial port (and USB serial console if so configured) and
  *   return the class object.
  *
- * Input Parameter:
+ * Input Parameters:
  *   minor - Device minor number.  E.g., minor 0 would correspond to
  *     /dev/ttyACM0.
  *   classdev - The location to return the CDC serial class' device
@@ -3004,7 +3004,7 @@ errout_with_class:
  * Description:
  *   Register USB serial port (and USB serial console if so configured).
  *
- * Input Parameter:
+ * Input Parameters:
  *   minor - Device minor number.  E.g., minor 0 would correspond to
  *     /dev/ttyACM0.
  *   handle - An optional opaque reference to the CDC/ACM class object that

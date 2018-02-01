@@ -55,7 +55,7 @@
  *   set - Signal set to delete the signal from
  *   signo - Signal to delete
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK), or -1 (ERROR) if the signal number is invalid.
  *
  * Assumptions:

@@ -56,7 +56,7 @@
  *   ticks - The number of system time ticks to convert.
  *   reltime - Return the converted system time here.
  *
- * Return Value:
+ * Returned Value:
  *   Always returns OK
  *
  * Assumptions:

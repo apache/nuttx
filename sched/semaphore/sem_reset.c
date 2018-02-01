@@ -64,7 +64,7 @@
  *   sem   - Semaphore descriptor to be reset
  *   count - The requested semaphore count
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface, not available to applications, and
  *   hence follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.

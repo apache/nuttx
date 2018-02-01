@@ -131,7 +131,7 @@ extern unsigned long socket_active_status;
  *   from           from information (in case of data received)
  *   fromlen        from information length (in case of data received)
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -147,7 +147,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen);
  * Input Parameters:
  *   event_hdr   event header
  *
- * Returned Values:
+ * Returned Value:
  *   1 if event supported and handled; 0 if event is not supported
  *
  ****************************************************************************/
@@ -164,7 +164,7 @@ long hci_unsol_event_handler(char *event_hdr);
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   ESUCCESS if successful, EFAIL if an error occurred
  *
  ****************************************************************************/

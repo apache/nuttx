@@ -57,10 +57,10 @@
  *   execution.  sched_unlock() will have to called that many times from
  *   this thread in order to re-enable pre-emption.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   lockcount
  *
  ****************************************************************************/

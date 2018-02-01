@@ -213,7 +213,7 @@ errout:
  *   caller may call kmm_free upon return of this function if necessary to
  *   free the entry container.
  *
- * Input parameters:
+ * Input Parameters:
  *   entry  - The entry to be freed.
  *
  * Returned Value:

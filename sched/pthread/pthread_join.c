@@ -70,7 +70,7 @@
  *   thread
  *   pexit_value
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, one of the following error codes:
  *
  *   EINVAL  The value specified by thread does not refer to joinable

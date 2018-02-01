@@ -87,7 +87,7 @@
  *            sub-window to move
  *   offset - The offset to move the region
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

@@ -77,7 +77,7 @@
  * Description:
  *   Dump all timer registers.
  *
- * Input parameters:
+ * Input Parameters:
  *   base - A base address of timer
  *
  * Returned Value:
@@ -132,7 +132,7 @@ void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
  * Description:
  *   reset timer into reset state
  *
- * Input parameters:
+ * Input Parameters:
  *   base - A base address of timer
  *
  * Returned Value:
@@ -192,7 +192,7 @@ void efm32_timer_reset(uintptr_t base)
  * Description:
  *   set prescaler and top timer with best value to have "freq"
  *
- * Input parameters:
+ * Input Parameters:
  *   base       - A base address of timer
  *   clk_freq   - Clock soure of timer.
  *   freq       - Wanted freqency.

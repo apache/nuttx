@@ -67,7 +67,7 @@
  *   mqdes - Message queue descriptor.
  *   group - Group that has the open descriptor.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) if the message queue is closed successfully.  Otherwise, a
  *   negated errno value is returned.
  *
@@ -125,7 +125,7 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
  * Parameters:
  *   mqdes - Message queue descriptor.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if the message queue is closed successfully,
  *   otherwise, -1 (ERROR).
  *
@@ -176,7 +176,7 @@ int mq_close(mqd_t mqdes)
  * Parameters:
  *   inode - The message queue inode
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

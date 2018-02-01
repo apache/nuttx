@@ -119,7 +119,7 @@ void stm32_pwr_enablebkp(bool writable);
  * Input Parameters:
  *   regon - state to set it to
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ************************************************************************************/

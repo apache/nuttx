@@ -129,7 +129,7 @@ struct pollfd;    /* Forward reference */
  *   dev - The device driver structure containing the received ICMP
  *         packet
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -235,7 +235,7 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev, uint8_t id);
  * Parameters:
  *   dev - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

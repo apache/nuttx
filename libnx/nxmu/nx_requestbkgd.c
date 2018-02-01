@@ -84,7 +84,7 @@
  *   cb     - Callbacks to use for processing background window events
  *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
  *
- * Return:
+ * Returned Value:
  *   OK: Success; ERROR of failure with errno set appropriately.
  *
  ****************************************************************************/

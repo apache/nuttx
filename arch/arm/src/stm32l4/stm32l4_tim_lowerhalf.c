@@ -231,7 +231,7 @@ static struct stm32l4_lowerhalf_s g_tim17_lowerhalf =
  *
  * Input Parameters:
  *
- * Returned Values:
+ * Returned Value:
  *
  ****************************************************************************/
 
@@ -267,7 +267,7 @@ static int stm32l4_timer_handler(int irq, void *context, void *arg)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -305,7 +305,7 @@ static int stm32l4_start(FAR struct timer_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -339,7 +339,7 @@ static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower)
  *             driver state structure.
  *   timeout - The new timeout value in microseconds.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -385,7 +385,7 @@ static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower,
  *              behavior is restored,
  *   arg      - Argument that will be provided in the callback
  *
- * Returned Values:
+ * Returned Value:
  *   The previous timer expiration function pointer or NULL is there was
  *   no previous function pointer.
  *
@@ -432,7 +432,7 @@ static void stm32l4_setcallback(FAR struct timer_lowerhalf_s *lower,
  *     form /dev/timer0
  *   timer - the timer's number.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *

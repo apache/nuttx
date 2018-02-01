@@ -65,7 +65,7 @@
  *   mq_stat - New attributes
  *   oldstate - Old attributes
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if attributes are set successfully, otherwise
  *   -1 (ERROR).
  *

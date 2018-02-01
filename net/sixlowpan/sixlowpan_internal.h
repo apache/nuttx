@@ -319,7 +319,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
  *   determine what the size of the IEEE802.15.4 header will be.  No frame
  *   buffer is required to make this determination.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *   meta  - obfuscated meta data that describes the MAC header
  *
@@ -341,7 +341,7 @@ int sixlowpan_frame_hdrlen(FAR struct radio_driver_s *radio,
  *   new incoming frame and the network responds with an outgoing packet.  It
  *   submits any new outgoing frame to the MAC.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *   meta  - Obfuscated metadata that describes the MAC header
  *   frame - The IOB containing the frame to be submitted.
@@ -471,7 +471,7 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
  *   decompression, g_frame_hdrlen and g_uncompressed_hdrlen are set to the
  *   appropriate values
  *
- * Input Parmeters:
+ * Input Parameters:
  *   radio    - Reference to a radio network driver state instance.
  *   metadata - Obfuscated MAC metadata including node addressing
  *              information.
@@ -506,7 +506,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
  *   6lowpan packet in the packetbuf buffer from a full IPv6 packet in the
  *   uip_buf buffer.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   radio   - Reference to a radio network driver state instance.
  *   ipv6    - The IPv6 header to be compressed
  *   destmac - L2 destination address, needed to compress the IP
@@ -629,7 +629,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  * Description:
  *   Get the maximum frame length supported by radio network drvier.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *
  * Returned Value:
@@ -646,7 +646,7 @@ int sixlowpan_radio_framelen(FAR struct radio_driver_s *radio);
  * Description:
  *   Get the source PAN ID from the IEEE802.15.4 radio.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *   panid - The location in which to return the PAN ID.  0xfff may be
  *           returned if the device is not associated.
@@ -668,7 +668,7 @@ int sixlowpan_src_panid(FAR struct radio_driver_s *radio,
  *   Extract the source MAC address from the radio-specific RX metadata, and
  *   return the source address in a radio-agnostic form.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio    - Reference to a radio network driver state instance.
  *   metadata - Opaque reference to the radio-specific RX metadata.
  *   srcaddr  - The location in which to return the source MAC address.
@@ -689,7 +689,7 @@ int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
  *   Extract the destination MAC address from the radio-specific RX metadata,
  *   and return the destination address in a radio-agnostic form.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio    - Reference to a radio network driver state instance.
  *   metadata - Opaque reference to the radio-specific RX metadata.
  *   destaddr - The location in which to return the destination MAC address.
@@ -713,10 +713,10 @@ int sixlowpan_extract_destaddr(FAR struct radio_driver_s *radio,
  *
  *   Called only once during network initialization.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -734,11 +734,11 @@ void sixlowpan_reass_initialize(void);
  *   list.  If that the list is empty, then the reassembly buffer structure
  *   will be allocated from the dynamic memory pool.
  *
- * Inputs:
+ * Input Parameters:
  *   reasstag - The reassembly tag for subsequent lookup.
  *   fragsrc  - The source address of the fragment.
  *
- * Return Value:
+ * Returned Value:
  *   A reference to the allocated reass structure.  All fields used by the
  *   reasembly logic have been zeroed.  On a failure to allocate, NULL is
  *   returned.
@@ -759,11 +759,11 @@ FAR struct sixlowpan_reassbuf_s *
  *   Find a previously allocated, active reassembly buffer with the specified
  *   reassembly tag.
  *
- * Inputs:
+ * Input Parameters:
  *   reasstag - The reassembly tag to match.
  *   fragsrc  - The source address of the fragment.
  *
- * Return Value:
+ * Returned Value:
  *   A reference to the matching reass structure.
  *
  * Assumptions:
@@ -784,10 +784,10 @@ FAR struct sixlowpan_reassbuf_s *
  *   structure. If the reass structure was allocated dynamically it will
  *   be deallocated.
  *
- * Inputs:
+ * Input Parameters:
  *   reass - reass structure to free
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

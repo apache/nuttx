@@ -69,7 +69,7 @@
  * Name: stm32_usb_set_pwr_callback()
  *
  * Description:
- * Inputs:
+ * Input Parameters:
  *   pwr_changed_handler: An interrupt handler that will be called on VBUS power
  *   state changes.
  *

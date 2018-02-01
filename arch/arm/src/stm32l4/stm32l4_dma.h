@@ -145,7 +145,7 @@ extern "C"
  *   Hmm.. I suppose this interface could be extended to make a non-blocking
  *   version.  Feel free to do that if that is what you need.
  *
- * Input parameter:
+ * Input Parameters:
  *   chan - Identifies the stream/channel resource
  *     This is a bit encoded value as provided by the DMACHAN_* definitions
  *     in chip/stm32l4x6xx_dma.h
@@ -249,7 +249,7 @@ size_t stm32l4_dmaresidual(DMA_HANDLE handle);
  *   only applies to memory addresses, it will return false for any peripheral
  *   address.
  *
- * Returned value:
+ * Returned Value:
  *   True, if transfer is possible.
  *
  ****************************************************************************/

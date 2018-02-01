@@ -146,7 +146,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
  *     asynchronous notification.  evp may be NULL (see above).
  *   timerid - The pre-thread timer created by the call to timer_create().
  *
- * Return Value:
+ * Returned Value:
  *   If the call succeeds, timer_create() will return 0 (OK) and update the
  *   location referenced by timerid to a timer_t, which can be passed to the
  *   other per-thread timer calls.  If an error occurs, the function will

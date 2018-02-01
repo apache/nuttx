@@ -161,7 +161,7 @@ struct spi_dev_s;  /* Forward reference */
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

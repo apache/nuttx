@@ -70,7 +70,7 @@
  *   errcode - EINTR if the semaphore wait was awakened by a signal;
  *             ETIMEDOUT if awakened by a timeout
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

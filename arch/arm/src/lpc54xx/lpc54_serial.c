@@ -1421,7 +1421,7 @@ void lpc54_earlyserialinit(void)
  * Input Parameters:
  *   None
  *
- * Returns Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

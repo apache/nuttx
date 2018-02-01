@@ -98,7 +98,7 @@ extern "C"
  *   1 - SSP0
  *   2 - SSP1
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

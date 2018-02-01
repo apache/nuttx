@@ -144,7 +144,7 @@ static void inode_insert(FAR struct inode *node,
  *   Reserve an (initialized) inode the pseudo file system.  The initial
  *   reference count on the new inode is zero.
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The path to the inode to create
  *   inode - The location to return the inode pointer
  *

@@ -93,7 +93,7 @@
  *
  *   These functions are provided by the common ARMv7-A logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

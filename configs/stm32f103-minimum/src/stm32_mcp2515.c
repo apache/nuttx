@@ -173,7 +173,7 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
  * Description:
  *   Initialize and register the MCP2515 RFID driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
  *
  * Returned Value:

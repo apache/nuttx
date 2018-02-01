@@ -342,7 +342,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, FAR void *arg)
  * Parameters:
  *  cfg - configuration
  *
- * Returns:
+ * Returned Value:
  *  0 on success, a negated errno value on failure
  *
  ****************************************************************************/

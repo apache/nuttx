@@ -63,10 +63,10 @@
  * Description:
  *   Find the shared memory region with matching key
  *
- * Input parameters:
+ * Input Parameters:
  *   key - The value that uniquely identifies a shared memory region.
  *
- * Returned value:
+ * Returned Value:
  *   On success, an index in the range of 0 to CONFIG_ARCH_SHM_MAXREGIONS-1
  *   is returned to identify the matching region; -ENOENT is returned on
  *   failure.
@@ -94,10 +94,10 @@ static int shm_find(key_t key)
  * Description:
  *   Allocate an unused shared memory region.  That is one with a key of -1
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   On success, an index in the range of 0 to CONFIG_ARCH_SHM_MAXREGIONS-1
  *   is returned to identify the matching region; -ENOSPC is returned on
  *   failure.
@@ -154,12 +154,12 @@ static int shm_reserve(key_t key, int shmflg)
  *   Extend the size of a memory regions by allocating physical pages as
  *   necessary
  *
- * Input parameters:
+ * Input Parameters:
  *   shmid - The index of the region of interest in the shared memory region
  *     table.
  *   size - The new size of the region.
  *
- * Returned value:
+ * Returned Value:
  *   Zero is returned on success; -ENOMEM is returned on failure.
  *   (Should a different error be returned if the region is just too big?)
  *
@@ -224,7 +224,7 @@ static int shm_extend(int shmid, size_t size)
  * Description:
  *   Create the shared memory region.
  *
- * Input parameters:
+ * Input Parameters:
  *   key     - The key that is used to access the unique shared memory
  *             identifier.
  *   size    - The shared memory region that is created will be at least
@@ -232,7 +232,7 @@ static int shm_extend(int shmid, size_t size)
  *   shmflgs - See IPC_* definitions in sys/ipc.h.  Only the values
  *             IPC_PRIVATE or IPC_CREAT are supported.
  *
- * Returned value:
+ * Returned Value:
  *   Zero is returned on success;  A negated errno value is returned on
  *   failure.
  *

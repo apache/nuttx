@@ -70,7 +70,7 @@
  * Parameters:
  *   group - The group to be removed.
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:
@@ -129,7 +129,7 @@ static void group_remove(FAR struct task_group_s *group)
  * Parameters:
  *   group - The group to be removed.
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:
@@ -289,7 +289,7 @@ static inline void group_release(FAR struct task_group_s *group)
  *   group - The group from which to remove the member.
  *   pid - The member to be removed.
  *
- * Return Value:
+ * Returned Value:
  *   On success, returns the number of members remaining in the group (>=0).
  *   Can fail only if the member is not found in the group.  On failure,
  *   returns -ENOENT
@@ -346,7 +346,7 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
  * Parameters:
  *   tcb - The TCB of the task that is exiting.
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

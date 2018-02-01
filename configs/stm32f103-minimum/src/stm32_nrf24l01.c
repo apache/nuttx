@@ -105,7 +105,7 @@ static void stm32tiny_wl_chip_enable(bool enable)
  * Description:
  *   Initialize the NRF24L01 wireless module
  *
- * Input Parmeters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

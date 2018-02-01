@@ -176,7 +176,7 @@ extern "C"
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
  *   watchdogs are available.
  *
@@ -196,7 +196,7 @@ WDOG_ID wd_create(void);
  *   wdog - The watchdog ID to delete.  This is actually a pointer to a
  *          watchdog structure.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to
  *   indicate the nature of any failure.
  *
@@ -231,7 +231,7 @@ int wd_delete(WDOG_ID wdog);
  *   wdentry  - function to call on timeout
  *   parm1..4 - parameters to pass to wdentry
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to
  *   indicate the nature of any failure.
  *
@@ -253,7 +253,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...);
  * Parameters:
  *   wdog - ID of the watchdog to cancel.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success;  A negated errno value is returned to
  *   indicate the nature of any failure.
  *
@@ -271,7 +271,7 @@ int wd_cancel(WDOG_ID wdog);
  * Parameters:
  *   wdog - watchdog ID
  *
- * Return Value:
+ * Returned Value:
  *   The time in system ticks remaining until the watchdog time expires.
  *   Zero means either that wdog is not valid or that the wdog has already
  *   expired.

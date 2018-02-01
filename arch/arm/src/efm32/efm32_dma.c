@@ -319,7 +319,7 @@ void weak_function up_dmainitialize(void)
  *   until the holder of a channel relinquishes the channel by calling
  *   efm32_dmafree().
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

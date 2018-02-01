@@ -100,7 +100,7 @@ static int l3gd20_attach(FAR struct l3gd20_config_s *cfg, xcpt_t irq)
  * Description:
  *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
  *
  * Returned Value:

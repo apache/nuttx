@@ -148,7 +148,7 @@ int nr5_timer_deinit(FAR struct nr5_timer_dev_s *dev);
  *   devpath - The full path to the timer device. This should be of the form /dev/timer0
  *   timer - the timer number.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *

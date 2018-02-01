@@ -70,7 +70,7 @@ static const uint8_t g_lookup[12] = {2, 5, 7, 10, 12, 15, 17, 20, 23, 25, 28, 30
  *   month - 0 through 11
  *   day   - 1 through 31
  *
- * Return Value:
+ * Returned Value:
  *   The day of the week as days since Sunday: 0 = Sunday, 1 = Monday, etc.
  *
  * Assumptions:

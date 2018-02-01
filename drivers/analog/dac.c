@@ -465,7 +465,7 @@ static int dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Description:
  *   Called from the DAC interrupt handler at the completion of a send operation.
  *
- * Return:
+ * Returned Value:
  *   OK on success; a negated errno on failure.
  *
  ************************************************************************************/

@@ -68,10 +68,10 @@
  *   This function merges the prioritized g_pendingtasks list into the
  *   prioritized ready-to-run task list.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   true if the head of the ready-to-run task list has changed indicating
  *     a context switch is needed.
  *
@@ -173,10 +173,10 @@ bool sched_mergepending(void)
  *   This function merges the prioritized g_pendingtasks list into the
  *   prioritized ready-to-run task list.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   true if the head of the ready-to-run task list has changed indicating
  *     a context switch is needed.
  *

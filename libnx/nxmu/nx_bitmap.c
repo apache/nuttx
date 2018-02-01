@@ -69,7 +69,7 @@
  *            may lie outside of the display.
  *   stride - The width of the full source image in pixels.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

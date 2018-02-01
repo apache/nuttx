@@ -60,10 +60,10 @@
  *   instead.  The pending tasks will be made ready-to-run when preemption is
  *   unlocked.
  *
- * Inputs:
+ * Input Parameters:
  *   btcb - Points to the blocked TCB that is ready-to-run
  *
- * Return Value:
+ * Returned Value:
  *   true if the currently active task (the head of the ready-to-run list)
  *   has changed.
  *
@@ -144,10 +144,10 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
  *   g_pendingtasks list instead.  The pending tasks will be made
  *   ready-to-run when preemption isunlocked.
  *
- * Inputs:
+ * Input Parameters:
  *   btcb - Points to the blocked TCB that is ready-to-run
  *
- * Return Value:
+ * Returned Value:
  *   true if the currently active task (the head of the ready-to-run list)
  *   has changed.
  *

@@ -70,7 +70,7 @@
  *   from the queue, or (2) work_cancel() has been called to cancel the work
  *   and remove it from the work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID (index)
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will invoked
@@ -141,7 +141,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
  *   previous work as been performed and removed from the queue, then any
  *   pending work will be canceled and lost.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID (index)
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will invoked

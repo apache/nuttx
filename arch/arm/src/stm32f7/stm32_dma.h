@@ -135,7 +135,7 @@ extern "C"
  *   Hmm.. I suppose this interface could be extended to make a non-blocking
  *   version.  Feel free to do that if that is what you need.
  *
- * Input parameter:
+ * Input Parameters:
  *   chan - Identifies the stream/channel resource
  *     For the STM32 F7, this is a bit encoded value as provided by the
  *     the DMAMAP_* definitions  in chip/stm32f7xxxxxxx_dma.h
@@ -248,7 +248,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *           ccr.
  *   ccr   - DMA stream configuration register
  *
- * Returned value:
+ * Returned Value:
  *   True, if transfer is possible.
  *
  ****************************************************************************/

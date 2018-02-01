@@ -106,7 +106,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
  *                message to be sent.
  *   destipaddr - The IP address of the recipient of the message
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

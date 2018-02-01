@@ -72,7 +72,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   The current value of the system timer counter
  *
  * Assumptions:

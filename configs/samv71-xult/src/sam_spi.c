@@ -151,7 +151,7 @@ void sam_spidev_initialize(void)
  *   devid - Identifies the (logical) device
  *   selected - TRUE:Select the device, FALSE:De-select the device
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -197,7 +197,7 @@ void sam_spi1select(uint32_t devid, bool selected)
  * Input Parameters:
  *   devid - Identifies the (logical) device
  *
- * Returned Values:
+ * Returned Value:
  *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/

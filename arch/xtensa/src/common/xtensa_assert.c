@@ -180,7 +180,7 @@ void up_assert(const uint8_t *filename, int lineno)
  *   - Co-processor exception
  *   - High priority level2-6 Exception.
  *
- * Input parameters:
+ * Input Parameters:
  *   xcptcode - Identifies the unhandled exception (see include/esp32/irq.h)
  *   regs - The register save are at the time of the interrupt.
  *
@@ -280,7 +280,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  *     cause varies 32..39.
  *   40..63 Reserved
  *
- * Input parameters:
+ * Input Parameters:
  *   exccause - Identifies the EXCCAUSE of the user exception
  *   regs - The register save are at the time of the interrupt.
  *

@@ -69,7 +69,7 @@
  *   len   - Length of data to receive [in]
  *           Length of data actually received [out]
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
  *   failure.  If -ECONNRESET is received, then the sending side has closed
  *   the FIFO. In this case, the returned data may still be valid (if the
@@ -133,7 +133,7 @@ errout:
  * Parameters:
  *   filep - File structure of write-only FIFO.
  *
- * Return:
+ * Returned Value:
  *   The non-zero size of the following packet is returned on success; a
  *   negated errno value is returned on any failure.
  *
@@ -201,7 +201,7 @@ int local_sync(FAR struct file *filep)
  *   addrlen - The size of the memory allocated by the caller to receive the
  *             address.
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/

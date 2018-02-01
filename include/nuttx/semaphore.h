@@ -159,7 +159,7 @@ extern "C"
  *   pshared - Process sharing (not used)
  *   value - Semaphore initialization value
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -185,7 +185,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
  * Parameters:
  *   sem - Semaphore to be destroyed.
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -211,7 +211,7 @@ int nxsem_destroy (FAR sem_t *sem);
  * Parameters:
  *   sem - Semaphore descriptor.
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -235,7 +235,7 @@ int nxsem_wait(FAR sem_t *sem);
  * Parameters:
  *   sem - the semaphore descriptor
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -276,7 +276,7 @@ int nxsem_trywait(FAR sem_t *sem);
  *   sem     - Semaphore object
  *   abstime - The absolute time to wait until a timeout is declared.
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -313,7 +313,7 @@ int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime);
  *             posted.  If ticks is zero, then this function is equivalent
  *             to sem_trywait().
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface, not available to applications, and
  *   hence follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -342,7 +342,7 @@ int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
  * Parameters:
  *   sem - Semaphore descriptor
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -373,7 +373,7 @@ int nxsem_post(FAR sem_t *sem);
  *   sem - Semaphore descriptor
  *   sval - Buffer by which the value is returned
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -395,7 +395,7 @@ int nxsem_getvalue(FAR sem_t *sem, FAR int *sval);
  *   sem   - Semaphore descriptor to be reset
  *   count - The requested semaphore count
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface, not available to applications, and
  *   hence follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -416,7 +416,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
  *    protocol - The user provided location in which to store the protocol
  *               value.
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -437,7 +437,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
  *    protocol - The user provided location in which to store the protocol
  *               value.
  *
- * Return Value:
+ * Returned Value:
  *   This function is exposed as a non-standard application interface.  It
  *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
  *   the errno value is set appropriately.
@@ -476,7 +476,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  *               modified
  *    protocol - The new protocol to use
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -515,7 +515,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol);
  *               modified
  *    protocol - The new protocol to use
  *
- * Return Value:
+ * Returned Value:
  *   This function is exposed as a non-standard application interface.  It
  *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
  *   the errno value is set appropriately.

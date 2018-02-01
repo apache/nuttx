@@ -170,7 +170,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
  *   Return true if the current set of events should trigger a callback to
  *   occur.
  *
- * Input paramters:
+ * Input Parameters:
  *   events   - The set of events that has occurred.
  *   triggers - The set of events that will trigger a callback.
  *
@@ -402,7 +402,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  * Description:
  *   Execute a list of callbacks using the packet event chain.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
@@ -411,7 +411,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *   flags - The bit set of events to be notified.
  *   list - The list to traverse in performing the notifications
  *
- * Returned value:
+ * Returned Value:
  *   The updated flags as modified by the callback functions.
  *
  * Assumptions:
@@ -465,7 +465,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
  * Description:
  *   Execute a list of callbacks using the device event chain.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
@@ -473,7 +473,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
  *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *
- * Returned value:
+ * Returned Value:
  *   The updated flags as modified by the callback functions.
  *
  * Assumptions:

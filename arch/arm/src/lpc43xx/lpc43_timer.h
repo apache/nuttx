@@ -80,7 +80,7 @@ extern "C"
  *   devpath - The full path to the timer.  This should be of the form
  *     /dev/timer0
  *   irq - irq associated with the timer
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

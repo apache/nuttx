@@ -55,11 +55,11 @@
  *   This function adds a TCB to one of the blocked state task lists as
  *   inferred from task_state.
  *
- * Inputs:
+ * Input Parameters:
  *   btcb - Points to the TCB that is blocked
  *   task_state - identifies the state of the blocked task
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

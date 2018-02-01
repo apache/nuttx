@@ -61,12 +61,12 @@
  *   If the  thread_setschedprio() function fails, the scheduling priority
  *   of the target thread will not be changed.
  *
- * Inputs:
+ * Input Parameters:
  *   thread - the thread ID of the task to reprioritize.
  *   prio - The new thread priority.  The range of valid priority numbers is
  *     from SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
  *
- * Return Value:
+ * Returned Value:
  *    OK if successful, otherwise an error number.  This function can
  *    fail for the following reasons:
  *

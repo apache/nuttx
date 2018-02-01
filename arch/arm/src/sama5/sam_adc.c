@@ -591,7 +591,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
  *       thread sets ready when it has completed processing the last sample
  *       data.
  *
- * Input Parameters
+ * Input Parameters:
  *   arg - The ADC private data structure cast to (void *)
  *
  * Returned Value:
@@ -838,7 +838,7 @@ static int sam_adc_dmasetup(FAR struct sam_adc_s *priv, FAR uint8_t *buffer,
  *   sam_adc_endconversion will re-enable EOC interrupts when it completes
  *   processing all pending EOC events.
  *
- * Input Parameters
+ * Input Parameters:
  *   arg - The ADC private data structure cast to (void *)
  *
  * Returned Value:

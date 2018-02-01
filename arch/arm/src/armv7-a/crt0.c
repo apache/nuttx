@@ -67,13 +67,13 @@ int main(int argc, char *argv[]);
  *     R4-R10 - static registers must be preserved
  *     R12-R14 - LR and SP must be preserved
  *
- * Inputs:
+ * Input Parameters:
  *   R0 = sighand
  *     The address user-space signal handling function
  *   R1-R3 = signo, info, and ucontext
  *     Standard arguments to be passed to the signal handling function.
  *
- * Return:
+ * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
  *   via the SYS_signal_handler_return (see svcall.h)
  *

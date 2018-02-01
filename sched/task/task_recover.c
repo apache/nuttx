@@ -63,10 +63,10 @@
  *   via pthread_cancel.  I checks checks for semaphores, message queue, and
  *   watchdog timer resources stranded in bad conditions.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The TCB of the terminated task or thread
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

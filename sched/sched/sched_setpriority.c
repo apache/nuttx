@@ -59,10 +59,10 @@
  * Description:
  *   Get the next highest priority ready-to-run task.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - the TCB of task to reprioritize.
  *
- * Return Value:
+ * Returned Value:
  *   TCB of the next highest priority ready-to-run task.
  *
  ****************************************************************************/
@@ -124,11 +124,11 @@ static FAR struct tcb_s *sched_nexttcb(FAR struct tcb_s *tcb)
  *   to sched_yield() -- The task will be moved to after all other tasks
  *   with the same priority.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - the TCB of task to reprioritize.
  *   sched_priority - The new task priority
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -178,11 +178,11 @@ static inline void sched_running_setpriority(FAR struct tcb_s *tcb,
  *   the position of the task in the ready-to-run list and if the priority
  *   is increased, may cause the task to become running.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - the TCB of task to reprioritize.
  *   sched_priority - The new task priority
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -267,11 +267,11 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
  *   Change the priority of a blocked tasks.  The only issue here is that
  *   the task may like in a prioritized or an non-prioritized queue.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - the TCB of task to reprioritize.
  *   sched_priority - The new task priority
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -324,11 +324,11 @@ static inline void sched_blocked_setpriority(FAR struct tcb_s *tcb,
  *   to sched_yield() -- The task will be moved to after all other tasks
  *   with the same priority.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - the TCB of task to reprioritize.
  *   sched_priority - The new task priority
  *
- * Return Value:
+ * Returned Value:
  *   On success, nxsched_setpriority() returns 0 (OK). On error, a negated
  *   errno value is returned.
  *

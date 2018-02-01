@@ -83,7 +83,7 @@ uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS]
  *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is
  *                  being created for.
  *   - tcb:         The TCB of new CPU IDLE task

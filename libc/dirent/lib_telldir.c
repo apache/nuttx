@@ -61,11 +61,11 @@
  *   The telldir() function returns the current location
  *   associated with the directory stream dirp.
  *
- * Inputs:
+ * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous
  *     call to opendir();
  *
- * Return:
+ * Returned Value:
  *   On success, the telldir() function returns the current
  *   location in the directory stream.  On error, -1 is
  *   returned, and errno is set appropriately.

@@ -90,7 +90,7 @@ static struct wdog_s g_wdpool[CONFIG_PREALLOC_WDOGS];
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

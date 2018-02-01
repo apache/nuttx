@@ -79,7 +79,7 @@
  *        created to determine the maximum number of
  *        messages that may be placed in the message queue.
  *
- * Return Value:
+ * Returned Value:
  *   A message queue descriptor or (mqd_t)-1 (ERROR)
  *
  * Assumptions:

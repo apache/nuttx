@@ -69,10 +69,10 @@
  *   and task_restart().  In the last two cases, the task will be terminated
  *   as though exit() were called.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; or ERROR on failure
  *
  * Assumeptions:

@@ -71,7 +71,7 @@
  *   symbolic links. The 'size' argument is the size in bytes of the
  *   character array pointed to by the 'buf' argument.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   buf - a pointer to the location in which the current working directory
  *     pathaname is returned.
  *   size - The size in bytes avaiable at 'buf'

@@ -60,7 +60,7 @@
  * Parameters:
  *   key = the key to delete
  *
- * Return Value:
+ * Returned Value:
  *   Always returns ENOSYS.
  *
  * Assumptions:

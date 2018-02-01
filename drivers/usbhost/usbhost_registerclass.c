@@ -86,7 +86,7 @@
  *   usbclass - An write-able instance of struct usbhost_registry_s that
  *     will be maintained in a registry.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, this function will return zero (OK).  Otherwise, a negated
  *   errno value is returned.
  *

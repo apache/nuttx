@@ -634,7 +634,7 @@ static inline unsigned int arm_gic_nlines(void)
  *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
  *   only to the current CPU.
  *
- * Input Paramters
+ * Input Parameters:
  *   sgi    - The SGI interrupt ID (0-15)
  *   cpuset - The set of CPUs to receive the SGI
  *
@@ -714,7 +714,7 @@ void arm_gic_initialize(void);
  *   Since this API is not supported on all architectures, it should be
  *   avoided in common implementations where possible.
  *
- * Input Paramters:
+ * Input Parameters:
  *   irq - The interrupt request to modify.
  *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
  *
@@ -735,7 +735,7 @@ int arm_gic_irq_trigger(int irq, bool edge);
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- *  Input parameters:
+ *  Input Parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/

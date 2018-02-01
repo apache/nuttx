@@ -82,7 +82,7 @@
  *   tcb        - Address of the new task's TCB
  *   name       - Name of the new task
  *
- * Return Value:
+ * Returned Value:
  *  None
  *
  ****************************************************************************/
@@ -110,7 +110,7 @@ static inline void vfork_namesetup(FAR struct tcb_s *parent,
  *   parent - Address of the parent task's TCB
  *   child  - Address of the child task's TCB
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/
@@ -177,7 +177,7 @@ static inline int vfork_stackargsetup(FAR struct tcb_s *parent,
  *   parent - Address of the parent task's TCB
  *   child  - Address of the child task's TCB
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/

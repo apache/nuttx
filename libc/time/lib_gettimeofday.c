@@ -64,7 +64,7 @@
  *   tv - The location to return the current time
  *   tz - Ignored
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) on success;  -1 is returned on failure with the errno variable
  *   set appropriately.
  *

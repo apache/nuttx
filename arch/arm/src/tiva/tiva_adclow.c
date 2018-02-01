@@ -655,7 +655,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
  *   are disabled when this function runs. tiva_adc_read will
  *   re-enable interrupts when it completes processing all pending events.
  *
- * Input Parameters
+ * Input Parameters:
  *   arg - The ADC SSE data structure cast to (void *)
  *
  * Returned Value:

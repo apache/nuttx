@@ -54,10 +54,10 @@
  *   This function returns the value of the lowest possible
  *   task priority for a specified scheduling policy.
  *
- * Inputs:
+ * Input Parameters:
  *   policy - Scheduling policy requested.
  *
- * Return Value:
+ * Returned Value:
  *   The minimum priority value or -1 (ERROR)
  *   (errno is not set)
  *

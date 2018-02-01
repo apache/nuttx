@@ -199,7 +199,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  *   Initializes a stream for use with the configured syslog interface.
  *   Only accessible from with the OS SYSLOG logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_lowoutstream_s to be initialized.
  *
@@ -245,7 +245,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
  * Description:
  *   Free resources held by the syslog stream.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_lowoutstream_s to be initialized.
  *

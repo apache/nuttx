@@ -1665,7 +1665,7 @@ static void lpc54_spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   ...
  *   9 - SSP9
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - SPI peripheral number.  0..9
  *
  * Returned Value:

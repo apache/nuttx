@@ -526,7 +526,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  * Description:
  *   Initialize the selected SPI port.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

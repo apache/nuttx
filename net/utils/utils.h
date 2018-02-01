@@ -161,7 +161,7 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
  * Parameters:
  *   mask   Points to an IPv6 netmask in the form of uint16_t[8]
  *
- * Return:
+ * Returned Value:
  *   The prefix length, range 0-128 on success;  This function will not
  *   fail.
  *

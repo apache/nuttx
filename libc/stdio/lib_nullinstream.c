@@ -62,7 +62,7 @@ static int nullinstream_getc(FAR struct lib_instream_s *this)
  *   Initializes a NULL stream. The initialized stream will  will return only
  *   EOF.
  *
- * Input parameters:
+ * Input Parameters:
  *   nullinstream  - User allocated, uninitialized instance of struct
  *                   lib_instream_s to be initialized.
  *

@@ -502,7 +502,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
  * Description:
  *   Initialize the selected adc port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple adc interfaces)
  *
  * Returned Value:

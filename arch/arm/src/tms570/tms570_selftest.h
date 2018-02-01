@@ -90,7 +90,7 @@ void tms570_memtest_selftest(void);
  * Description:
  *   Start the memory test on the selected set of RAMs.
  *
- * Input Paramters:
+ * Input Parameters:
  *   rinfol - The OR of each RAM grouping bit.  See the PBIST_RINFOL*
  *     definitions in chip/tms570_pbist.h
  *

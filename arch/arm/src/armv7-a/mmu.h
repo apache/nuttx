@@ -897,7 +897,7 @@ struct section_mapping_s
  * Description:
  *   Disable the MMU
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
  ************************************************************************************/
@@ -919,7 +919,7 @@ struct section_mapping_s
  *   instruction that performs the operation. Software does not have to write a
  *   value to the register before issuing the MCR instruction.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
  ************************************************************************************/
@@ -934,7 +934,7 @@ struct section_mapping_s
  * Description:
  *   Invalidate unified TLB entry by MVA all ASID Inner Shareable
  *
- * Inputs:
+ * Input Parameters:
  *   vaddr - The virtual address to be invalidated
  *
  ************************************************************************************/
@@ -952,7 +952,7 @@ struct section_mapping_s
  * Description:
  *   Write the Domain Access Control Register (DACR)
  *
- * Inputs:
+ * Input Parameters:
  *   dacr - The new value of the DACR
  *
  ************************************************************************************/
@@ -979,7 +979,7 @@ struct section_mapping_s
  *   Table Base Register 0 (TTBR0).  Then it clears the TTB control
  *   register (TTBCR), indicating that we are using TTBR0.
  *
- * Inputs:
+ * Input Parameters:
  *   ttb - The new value of the TTBR0 register
  *
  ************************************************************************************/
@@ -1012,7 +1012,7 @@ struct section_mapping_s
  *      ldr	r3, =MMUFLAGS			<-- L2 MMU flags
  *	pg_l2map r0, r1, r2, r3, r4
  *
- * Inputs:
+ * Input Parameters:
  *   l2 - Physical or virtual start address in the L2 page table, depending
  *        upon the context. (modified)
  *   ppage - The physical address of the start of the region to span. Must
@@ -1083,7 +1083,7 @@ struct section_mapping_s
  *	ldr	r4, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
  *	pg_l1span r0, r1, r2, r3, r4, r4
  *
- * Inputs (unmodified unless noted):
+ * Input Parameters (unmodified unless noted):
  *   l1 - Physical or virtual address in the L1 table to begin writing (modified)
  *   l2 - Physical start address in the L2 page table (modified)
  *   npages - Number of pages to required to span that memory region (modified)
@@ -1097,7 +1097,7 @@ struct section_mapping_s
  *   ppage - After the first page, this will be the full number of pages.
  *   tmp - scratch
  *
- * Return:
+ * Returned Value:
  *   Nothing of interest.
  *
  * Assumptions:
@@ -1159,7 +1159,7 @@ struct section_mapping_s
  * Description:
  *   Disable the MMU
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
  ************************************************************************************/
@@ -1188,7 +1188,7 @@ static inline void cp15_disable_mmu(void)
  *   instruction that performs the operation. Software does not have to write a
  *   value to the register before issuing the MCR instruction.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
  ************************************************************************************/
@@ -1210,7 +1210,7 @@ static inline void cp15_invalidate_tlbs(void)
  * Description:
  *   Invalidate unified TLB entry by MVA all ASID Inner Shareable
  *
- * Inputs:
+ * Input Parameters:
  *   vaddr - The virtual address to be invalidated
  *
  ************************************************************************************/
@@ -1235,7 +1235,7 @@ static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
  * Description:
  *   Write the Domain Access Control Register (DACR)
  *
- * Inputs:
+ * Input Parameters:
  *   dacr - The new value of the DACR
  *
  ************************************************************************************/
@@ -1269,7 +1269,7 @@ static inline void cp15_wrdacr(unsigned int dacr)
  *   Table Base Register 0 (TTBR0).  Then it clears the TTB control
  *   register (TTBCR), indicating that we are using TTBR0.
  *
- * Inputs:
+ * Input Parameters:
  *   ttb - The new value of the TTBR0 register
  *
  ************************************************************************************/

@@ -64,7 +64,7 @@
  *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
- * Input parameters:
+ * Input Parameters:
  *   addr    - The address to check
  *   addrlen - The length of the address in bytes
  *
@@ -93,7 +93,7 @@ static bool sixlowpan_anyaddrnull(FAR const uint8_t *addr, uint8_t addrlen)
  *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
- * Input parameters:
+ * Input Parameters:
  *   eaddr - The short address to check
  *
  * Returned Value:
@@ -113,7 +113,7 @@ static inline bool sixlowpan_saddrnull(FAR const uint8_t *saddr)
  *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
- * Input parameters:
+ * Input Parameters:
  *   eaddr - The extended address to check
  *
  * Returned Value:
@@ -247,7 +247,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
  *   determine what the size of the IEEE802.15.4 header will be.  No frame
  *   buffer is required to make this determination.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - A reference IEEE802.15.4 MAC network device structure.
  *   meta - Meta data that describes the MAC header
  *
@@ -272,7 +272,7 @@ int sixlowpan_frame_hdrlen(FAR struct radio_driver_s *radio,
  *   new incoming frame and the network responds with an outgoing packet.  It
  *   submits any new outgoing frame to the MAC.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - A reference to a radio network device instance.
  *   meta  - Meta data that describes the MAC header
  *   frame - The IOB containing the frame to be submitted.

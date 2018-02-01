@@ -71,7 +71,7 @@
  *   set - Location of the new signal mask
  *   oset - Location to store the old signal mask
  *
- * Return Value:
+ * Returned Value:
  *   On success, this function will return 0 (OK).  It will return EINVAL if
  *   how is invalid.
  *

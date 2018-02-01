@@ -76,7 +76,7 @@
  *   chipid    Identifier returned by the Nand(id1|(id2<<8)|(id3<<16)|(id4<<24)).
  *   model     nand_model_s instance to update with the model parameters.
  *
- * Returned Values:
+ * Returned Value:
  *   OK is returned on success; -ENODEV is returned on failure.
  *
  ****************************************************************************/
@@ -186,7 +186,7 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
  *   page    Stores the first accessed page number inside the first block.
  *   offset  Stores the byte offset inside the first accessed page.
  *
- * Returned Values:
+ * Returned Value:
  *   OK on success; -EPIPE on failure.
  *
  ****************************************************************************/
@@ -252,7 +252,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  * Input Parameters:
  *   model  Pointer to a nand_model_s instance.
  *
- * Returned Values:
+ * Returned Value:
  *  size of spare area in bytes
  *
  ****************************************************************************/

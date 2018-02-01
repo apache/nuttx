@@ -60,7 +60,7 @@
  *   handler - The function to be called
  *   arg - An additional argument to provide to the handler
  *
- * Return Value:
+ * Returned Value:
  *   Success (OK) is always returned unless the handler returns a non-zero
  *   value (a negated errno on errors).  In that case, the traversal
  *   terminates and that non-zero value is returned.

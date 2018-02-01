@@ -68,7 +68,7 @@
  *   pshared - Process sharing (not used)
  *   value - Semaphore initialization value
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -124,7 +124,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
  *   pshared - Process sharing (not used)
  *   value - Semaphore initialization value
  *
- * Return Value:
+ * Returned Value:
  *   This returns zero (OK) if successful.  Otherwise, -1 (ERROR) is
  *   returned and the errno value is set appropriately.
  *

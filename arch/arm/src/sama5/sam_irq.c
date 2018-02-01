@@ -261,7 +261,7 @@ static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
  * Description:
  *   Return true if the peripheral secure.
  *
- * Input Parameter:
+ * Input Parameters:
  *   PID = IRQ number
  *
  ****************************************************************************/
@@ -576,7 +576,7 @@ void up_irqinitialize(void)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- *  Input parameters:
+ *  Input Parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/

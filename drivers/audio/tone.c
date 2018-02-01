@@ -922,7 +922,7 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
  *   be used by application code.
  *
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name of PWM driver
  *     as "/dev/tone0".

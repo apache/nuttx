@@ -89,7 +89,7 @@ static long compare_timespec(FAR const struct timespec *a,
  *   reltime - Convert this absolue time to system clock ticks.
  *   ticks - Return the converted number of ticks here.
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; A non-zero error number on failure;
  *
  * Assumptions:

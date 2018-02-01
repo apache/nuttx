@@ -79,7 +79,7 @@ extern "C"
  *   devpath - The full path to the watchdog.  This should be of the form
  *     /dev/watchdog0
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

@@ -334,7 +334,7 @@ int wireless_archinitialize(size_t max_rx_size)
  *   Warning: This function must be called before ANY other wlan driver
  *   function
  *
- * Input Parmeters:
+ * Input Parameters:
  *   sWlanCB   Asynchronous events callback.
  *             0 no event call back.
  *             - Call back parameters:

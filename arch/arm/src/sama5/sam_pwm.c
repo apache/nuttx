@@ -754,7 +754,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
  * Description:
  *   Dump all timer registers.
  *
- * Input parameters:
+ * Input Parameters:
  *   chan - A reference to the PWM channel instance
  *
  * Returned Value:
@@ -827,7 +827,7 @@ static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
  * Description:
  *   Handle timer interrupts.
  *
- * Input parameters:
+ * Input Parameters:
  *   Standard interrupt handler inputs
  *
  * Returned Value:
@@ -854,7 +854,7 @@ static int pwm_interrupt(int irq, void *context, FAR void *arg)
  *   use.  It will not, however, output pulses until the start method is
  *   called.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -897,7 +897,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *   stop pulsed output, free any resources, disable the timer hardware, and
  *   put the system into the lowest possible power usage state
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -927,7 +927,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   (Re-)initialize the timer resources and start the pulsed output
  *
- * Input parameters:
+ * Input Parameters:
  *   dev  - A reference to the lower half PWM driver state structure
  *   info - A reference to the characteristics of the pulsed output
  *
@@ -1049,7 +1049,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  * Description:
  *   Stop the pulsed output and reset the timer resources
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -1086,7 +1086,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *   cmd - The ioctl command
  *   arg - The argument accompanying the ioctl command
@@ -1145,7 +1145,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
  *     regbits   = PWM_CLK_PREB_DIV(prelog2);
  *     prescaler = (1 << prelog2)
  *
- * Input parameters:
+ * Input Parameters:
  *     mck  - The main clock frequency
  *     fclk - The desired clock A or B frequency
  *
@@ -1193,7 +1193,7 @@ static unsigned int pwm_clk_prescaler_log2(uint32_t mck, uint32_t fclk)
  *
  *   div = MCK / prescaler / frequency
  *
- * Input parameters:
+ * Input Parameters:
  *     mck     - The main clock frequency
  *     fclk    - The desired clock A or B frequency
  *     prelog2 - The log2(prescaler) value previously selected by
@@ -1231,7 +1231,7 @@ static unsigned int pwm_clk_divider(uint32_t mck, uint32_t fclk,
  *
  *   frequency = MCK / prescaler / div
  *
- * Input parameters:
+ * Input Parameters:
  *     mck     - The main clock frequency
  *     prelog2 - The log2(prescaler) value previously selected by
  *               pwm_prescale_log2().
@@ -1255,7 +1255,7 @@ static uint32_t pwm_clk_frequency(uint32_t mck, unsigned int prelog2,
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
- * Input parameters:
+ * Input Parameters:
  *   chan - A reference to the PWM channel instance
  *
  * Returned Value:

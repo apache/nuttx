@@ -901,7 +901,7 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
  *   NOTE:  This is a user function that is implemented as part of the
  *   NuttX C library and is intended to be called by appliation logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   mountpt  - Mountpoint path
  *   userops  - The caller operations that implement the file system
  *              interface.

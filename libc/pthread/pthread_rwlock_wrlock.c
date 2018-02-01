@@ -73,7 +73,7 @@ static void wrlock_cleanup(FAR void *arg)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

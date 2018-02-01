@@ -177,7 +177,7 @@ static inline void tiva_qe_putreg(struct tiva_qe_s *qe, unsigned int offset,
  *   use.  It will not, however, output pulses until the start method is
  *   called.
  *
- * Input parameters:
+ * Input Parameters:
  *   lower - A reference to the lower half QEI driver state structure
  *
  * Returned Value:
@@ -260,7 +260,7 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
  *   stop data collection, free any resources, disable the timer hardware, and
  *   put the system into the lowest possible power usage state
  *
- * Input parameters:
+ * Input Parameters:
  *   lower - A reference to the lower half QEI driver state structure
  *
  * Returned Value:
@@ -287,7 +287,7 @@ static int tiva_qe_shutdown(FAR struct qe_lowerhalf_s *lower)
  * Description:
  *   Reset the position measurement to zero.
  *
- * Input parameters:
+ * Input Parameters:
  *   lower - A reference to the lower half QEI driver state structure
  *
  * Returned Value:
@@ -312,7 +312,7 @@ static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower)
  * Description:
  *   Return the position mesaured by QEI.
  *
- * Input parameters:
+ * Input Parameters:
  *   lower - A reference to the lower half QEI driver state structure
  *   pos - pointer to the position returned
  *
@@ -338,7 +338,7 @@ static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
- * Input parameters:
+ * Input Parameters:
  *   lower - A reference to the lower half QEI driver state structure
  *   cmd - The ioctl command
  *   arg - The argument accompanying the ioctl command
@@ -383,7 +383,7 @@ static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  * Description:
  *   Return the direction mesaured by QEI.
  *
- * Input parameters:
+ * Input Parameters:
  *   qe - A reference to the TIVA QEI structure
  *   dir - pointer to the direction returned
  *
@@ -414,7 +414,7 @@ static int tiva_qe_direction(FAR struct tiva_qe_s *qe, unsigned long *dir)
  * Description:
  *   Return the velocity (A/B pulses per second) mesaured by QEI.
  *
- * Input parameters:
+ * Input Parameters:
  *   qe - A reference to the TIVA QEI structure
  *
  * Returned Value:
@@ -437,7 +437,7 @@ static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
  * Description:
  *   Set reset mode as MAXPOS and also set maxpos value
  *
- * Input parameters:
+ * Input Parameters:
  *   qe - A reference to the TIVA QEI structure
  *   ppr - pulses per round of encoder
  *

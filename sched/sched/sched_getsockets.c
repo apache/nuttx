@@ -57,7 +57,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   A pointer to the errno.
  *
  * Assumptions:

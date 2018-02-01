@@ -106,7 +106,7 @@ static inline void timer_free(struct posix_timer_s *timer)
  *   timer - The per-thread timer, previously created by the call to
  *     timer_create(), to be deleted.
  *
- * Return Value:
+ * Returned Value:
  *   If the call succeeds, timer_release() will return 0 (OK) or 1 (meaning
  *   that the timer is still valid).  Otherwise, the function will return a
  *   negated errno value:

@@ -66,7 +66,7 @@
  *            queue is created to determine the maximum number of
  *            messages that may be placed in the message queue.
  *
- * Return Value:
+ * Returned Value:
  *   The allocated and initialized message queue structure or NULL in the
  *   event of a failure.
  *

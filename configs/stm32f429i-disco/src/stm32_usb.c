@@ -282,7 +282,7 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument provided for the interrupt handler
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
  *   to indicate the nature of the failure.
  *

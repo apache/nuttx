@@ -74,7 +74,7 @@ struct dma2d_layer_s
    *   layer  - Reference to the layer control structure
    *   vinfo  - Reference to the video info structure
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -92,7 +92,7 @@ struct dma2d_layer_s
    *   planeno - Number of the plane
    *   pinfo   - Reference to the plane info structure
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -109,7 +109,7 @@ struct dma2d_layer_s
    *   layer - Reference to the layer structure
    *   lid   - Reference to store the layer id
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -127,7 +127,7 @@ struct dma2d_layer_s
    *   layer  - Reference to the layer structure
    *   cmap   - color lookup table with up the 256 entries
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -145,7 +145,7 @@ struct dma2d_layer_s
    *   cmap  - Reference to valid color lookup table accept up the 256 color
    *           entries
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
@@ -167,7 +167,7 @@ struct dma2d_layer_s
    *   layer - Reference to the layer structure
    *   alpha - Alpha value
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -183,7 +183,7 @@ struct dma2d_layer_s
    *   layer - Reference to the layer structure
    *   alpha - Reference to store the alpha value
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -201,7 +201,7 @@ struct dma2d_layer_s
    *   layer - Reference to the layer structure
    *   mode  - Blend mode (see DMA2D_BLEND_*)
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    *
@@ -230,7 +230,7 @@ struct dma2d_layer_s
    *   layer - Reference to the layer structure
    *   mode  - Reference to store the blend mode
    *
-   * Return:
+   * Returned Value:
    *   On success - OK
    *   On error - -EINVAL
    */
@@ -250,7 +250,7 @@ struct dma2d_layer_s
    *   src      - Reference to the source layer
    *   srcarea  - Reference to the selected area of the source layer
    *
-   * Return:
+   * Returned Value:
    *    OK        - On success
    *   -EINVAL    - If one of the parameter invalid or if the size of the
    *                selected source area outside the visible area of the
@@ -281,7 +281,7 @@ struct dma2d_layer_s
    *   back     - Reference to the background layer
    *   backarea - Reference to the selected area of the background layer
    *
-   * Return:
+   * Returned Value:
    *    OK        - On success
    *   -EINVAL    - If one of the parameter invalid or if the size of the
    *                selected source area outside the visible area of the
@@ -308,7 +308,7 @@ struct dma2d_layer_s
    *   color    - Color to fill the selected area. Color must be formatted
    *              according to the layer pixel format.
    *
-   * Return:
+   * Returned Value:
    *    OK        - On success
    *   -EINVAL    - If one of the parameter invalid or if the size of the
    *                selected area outside the visible area of the layer.
@@ -340,7 +340,7 @@ struct stm32_ltdc_s; /* Forward declaration */
  * Parameter:
  *   layer  - a valid reference to the low level ltdc layer structure
  *
- * Return:
+ * Returned Value:
  *   On success - A valid dma2d layer reference
  *   On error   - NULL and errno is set to
  *                -EINVAL if one of the parameter is invalid
@@ -358,7 +358,7 @@ FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
  * Parameter:
  *   lid - Layer identifier
  *
- * Return:
+ * Returned Value:
  *   Reference to the dma2d layer control structure on success or Null if no
  *   related exist.
  *
@@ -377,7 +377,7 @@ FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid);
  *   height - Layer height
  *   fmt    - Pixel format of the layer
  *
- * Return:
+ * Returned Value:
  *   On success - A valid dma2d layer reference
  *   On error   - NULL and errno is set to
  *                -EINVAL if one of the parameter is invalid
@@ -399,7 +399,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
  * Parameter:
  *   layer  - Reference to the layer to remove
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -413,7 +413,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer);
  * Description:
  *   Initialize the dma2d controller
  *
- * Return:
+ * Returned Value:
  *   OK - On success
  *   An error if initializing failed.
  *

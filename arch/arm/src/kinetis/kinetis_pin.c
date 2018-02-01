@@ -214,7 +214,7 @@ int kinetis_pinconfig(uint32_t cfgset)
  *   Configure the digital filter associated with a port. The digital filter
  *   capabilities of the PORT module are available in all digital pin muxing modes.
  *
- * Input parmeters:
+ * Input Parameters:
  *   port  - Port number.  See KINETIS_PORTn definitions in kinetis_port.h
  *   lpo   - true: Digital Filters are clocked by the bus clock
  *           false: Digital Filters are clocked by the 1 kHz LPO clock

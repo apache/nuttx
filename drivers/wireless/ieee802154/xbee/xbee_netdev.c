@@ -665,7 +665,7 @@ static void xbeenet_txpoll_expiry(int argc, wdparm_t arg, ...)
  * Description:
  *   Get the extended address of the PAN coordinator.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *   eaddr - The location in which to return the extended address.
  *
@@ -702,7 +702,7 @@ static int xbeenet_coord_eaddr(FAR struct radio_driver_s *radio,
  * Description:
  *   Get the short address of the PAN coordinator.
  *
- * Input parameters:
+ * Input Parameters:
  *   radio - Reference to a radio network driver state instance.
  *   saddr - The location in which to return the short address.
  *
@@ -1168,7 +1168,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Description
  *   Calculate the MAC header length given the frame meta-data.
  *
- * Input parameters:
+ * Input Parameters:
  *   netdev    - The network device that will mediate the MAC interface
  *   meta      - Obfuscated metadata structure needed to create the radio
  *               MAC header
@@ -1200,7 +1200,7 @@ static int xbeenet_get_mhrlen(FAR struct radio_driver_s *netdev,
  * Description:
  *   Requests the transfer of a list of frames to the XBee MAC.
  *
- * Input parameters:
+ * Input Parameters:
  *   netdev    - The networkd device that will mediate the MAC interface
  *   meta      - Obfuscated metadata structure needed to create the radio
  *               MAC header
@@ -1272,7 +1272,7 @@ static int xbeenet_req_data(FAR struct radio_driver_s *netdev,
  *   run time.  This information is provided to the 6LoWPAN network via the
  *   following structure.
  *
- * Input parameters:
+ * Input Parameters:
  *   netdev     - The network device to be queried
  *   properties - Location where radio properities will be returned.
  *
@@ -1349,7 +1349,7 @@ static int xbeenet_properties(FAR struct radio_driver_s *netdev,
  * Input Parameters:
  *   mac - Pointer to the mac layer struct to be registered.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *

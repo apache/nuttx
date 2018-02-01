@@ -136,7 +136,7 @@ static int apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
  * Description:
  *   Initialize and register the APDS9960 gesture sensor.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/gest0"
  *
  * Returned Value:

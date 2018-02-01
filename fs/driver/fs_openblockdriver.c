@@ -56,13 +56,13 @@
  * Description:
  *   Return the inode of the block driver specified by 'pathname'
  *
- * Inputs:
+ * Input Parameters:
  *   pathname - the full path to the block driver to be opened
  *   mountflags - if MS_RDONLY is not set, then driver must support write
  *     operations (see include/sys/mount.h)
  *   ppinode - address of the location to return the inode reference
  *
- * Return:
+ * Returned Value:
  *   Returns zero on success or a negated errno on failure:
  *
  *   EINVAL  - pathname or pinode is NULL

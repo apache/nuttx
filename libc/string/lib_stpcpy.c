@@ -52,7 +52,7 @@
  *   Copies the string pointed to by 'src' (including the terminating NUL
  *   character) into the array pointed to by 'dest'.
  *
- * Returned value:
+ * Returned Value:
  *   The stpcpy() function returns a pointer to the terminating NUL
  *   character copied into the 'dest' buffer
  *

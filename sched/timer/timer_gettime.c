@@ -68,7 +68,7 @@
  *   timerid - The pre-thread timer, previously created by the call to
  *   timer_create(), whose remaining time count will be returned..
  *
- * Return Value:
+ * Returned Value:
  *   If the timer_gettime() succeeds, a value of 0 (OK) will be returned.
  *   If an error occurs, the value -1 (ERROR) will be returned, and errno
  *   set to indicate the error.

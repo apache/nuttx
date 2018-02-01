@@ -85,7 +85,7 @@
  *   arg    - User provided value that will be returned with toolbar
  *            callbacks.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

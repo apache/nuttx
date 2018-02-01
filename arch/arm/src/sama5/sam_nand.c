@@ -353,10 +353,10 @@ void nand_unlock(void)
  *   Waiting for the completion of a page program, erase and random read
  *   completion.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv  Pointer to a sam_nandcs_s instance.
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -376,13 +376,13 @@ static void nand_wait_ready(struct sam_nandcs_s *priv)
  * Description:
  *   Use the HOST NAND FLASH controller to send a command to the NFC.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - Lower-half, private NAND FLASH device state
  *   cmd    - command to send
  *   acycle - address cycle when command access id decoded
  *   cycle0 - address at first cycle
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -414,10 +414,10 @@ static void nand_nfc_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
  * Description:
  *   Check if a program or erase operation completed successfully
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - Lower-half, private NAND FLASH device state
  *
- * Returned value.
+ * Returned Value:
  *   OK on success, a negated errnor value on failure
  *
  ****************************************************************************/
@@ -451,7 +451,7 @@ static int nand_operation_complete(struct sam_nandcs_s *priv)
  *   address cycles. The resulting values are stored in the provided
  *   variables if they are not null.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv       - Lower-half, private NAND FLASH device state
  *   coladdr    - Column address to translate.
  *   rowaddr    - Row address to translate.
@@ -459,7 +459,7 @@ static int nand_operation_complete(struct sam_nandcs_s *priv)
  *   acycle1234 - Four address cycles.
  *   rowonly    - True:Only ROW address is used.
  *
- * Returned value.
+ * Returned Value:
  *   Number of address cycles converted.
  *
  ****************************************************************************/
@@ -565,10 +565,10 @@ static int nand_translate_address(struct sam_nandcs_s *priv,
  * Description:
  *   Map the number of address cycles the bit setting for the NFC command
  *
- * Input parameters:
+ * Input Parameters:
  *   ncycles    - Number of address cycles
  *
- * Returned value.
+ * Returned Value:
  *   NFC command value
  *
  ****************************************************************************/
@@ -602,7 +602,7 @@ static uint32_t nand_get_acycle(int ncycles)
  * Description:
  *   Sends NAND CLE/ALE command.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv    - Pointer to a sam_nandcs_s instance.
  *   mode    - SMC ALE CLE mode parameter.
  *   cmd1    - First command to be sent.
@@ -610,7 +610,7 @@ static uint32_t nand_get_acycle(int ncycles)
  *   coladdr - Column address.
  *   rowaddr - Row address.
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -670,10 +670,10 @@ static void nand_nfc_cleale(struct sam_nandcs_s *priv, uint8_t mode,
  * Description:
  *   Wait for NFC command done
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -716,10 +716,10 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
  * Description:
  *   Setup to wait for CMDDONE event
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -758,10 +758,10 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
  * Description:
  *   Wait for a transfer to complete
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -804,10 +804,10 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
  * Description:
  *   Setup to wait for XFDONE event
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -846,10 +846,10 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
  * Description:
  *   Wait for read/busy edge detection
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -892,10 +892,10 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
  * Description:
  *   Setup to wait for RBEDGE0 event
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -934,10 +934,10 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
  * Description:
  *   Wait for NFC not busy
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - CS state structure instance
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -965,10 +965,10 @@ static void nand_wait_nfcbusy(struct sam_nandcs_s *priv)
  *   This latching capability function is needed to prevent loss of pending
  *   status when sampling the HSMC_SR register.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
- * Returned value.
+ * Returned Value:
  *   Current HSMC_SR register value;
  *
  ****************************************************************************/
@@ -1041,10 +1041,10 @@ static uint32_t nand_nfc_poll(void)
  * Description:
  *   HSMC interrupt handler
  *
- * Input parameters:
+ * Input Parameters:
  *   Standard interrupt arguments
  *
- * Returned value.
+ * Returned Value:
  *   Always returns OK
  *
  ****************************************************************************/
@@ -1203,10 +1203,10 @@ static void nand_dma_sampledone(struct sam_nandcs_s *priv, int result)
  * Description:
  *   Wait for the completion of a DMA transfer
  *
- * Input parameters:
+ * Input Parameters:
  *   Wait for read/busy edge detection
  *
- * Returned value.
+ * Returned Value:
  *   The result of the DMA.  OK on success; a negated ernno value on failure.
  *
  ****************************************************************************/
@@ -1266,7 +1266,7 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *   nbytes   - The number of bytes to transfer
  *   dmaflags - Describes the DMA configuration
  *
- * Returned Value
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -1355,7 +1355,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
  *   nbytes   - The number of bytes to transfer
  *   dmaflags - Describes the DMA configuration
  *
- * Returned Value
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -1440,7 +1440,7 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
  *   offset   - If reading from NFC SRAM, this is the offset into
  *              the SRAM.
  *
- * Returned Value
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -1506,7 +1506,7 @@ static int nand_nfcsram_read(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   nfcsram  - True: Use NFC Host SRAM
  *   buffer   - Buffer that provides the data for the write
  *
- * Returned Value
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -1590,13 +1590,13 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
  * Description:
  *   Reads the data area of a page of a NAND FLASH into the provided buffer.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -1743,7 +1743,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
  *   buffer   - Buffer that provides the data for the write
  *   offset   - Data offset in bytes
  *
- * Returned Value
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -1806,7 +1806,7 @@ static int nand_nfcsram_write(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   buffer   - Buffer that provides the data for the write
  *   offset   - Data offset in bytes
  *
- * Returned Value
+ * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -1891,14 +1891,14 @@ static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   provided buffers.  The raw NAND contents are returned with no ECC
  *   corrections.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *   spare - Buffer where the spare area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2007,13 +2007,13 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
  *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
  *   provided buffers.  PMECC is used
  *
- * Input parameters:
+ * Input Parameters:
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2127,14 +2127,14 @@ errout:
  *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
  *   No ECC calculations are performed.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *   spare - Buffer conatining the spare data to be written.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2281,13 +2281,13 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
  *   performed.  The redundancy is appended to the page and written in the
  *   spare area.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2495,11 +2495,11 @@ errout:
  * Description:
  *   Erases the specified block of the device.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw    - Lower-half, raw NAND FLASH interface
  *   block  - Number of the physical block to erase.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2575,14 +2575,14 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
  *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
  *   provided buffers.  This is a raw read of the flash contents.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *   spare - Buffer where the spare area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2612,14 +2612,14 @@ static int nand_rawread(struct nand_raw_s *raw, off_t block,
  *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
  *   This is a raw write of the flash contents.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *   spare - Buffer containing the spare data to be written.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2651,14 +2651,14 @@ static int nand_rawwrite(struct nand_raw_s *raw, off_t block,
  *   provided buffers.  Hardware ECC checking will be performed if so
  *   configured.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *   spare - Buffer where the spare area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2713,14 +2713,14 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
  *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
  *   Hardware ECC checking will be performed if so configured.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *   spare - Buffer conatining the spare data to be written.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -2775,10 +2775,10 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
  * Description:
  *   Resets a NAND FLASH device
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - Lower-half, private NAND FLASH device state
  *
- * Returned value.
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -2803,11 +2803,11 @@ static void nand_reset(struct sam_nandcs_s *priv)
  *   performed here.  Those necessary NAND features are provided by common,
  *   higher level NAND MTD layers found in drivers/mtd.
  *
- * Input parameters:
+ * Input Parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
  *
- * Returned value.
+ * Returned Value:
  *   On success a non-NULL pointer to an MTD device structure is returned;
  *   NULL is returned on a failure.
  *

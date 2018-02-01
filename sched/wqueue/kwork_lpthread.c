@@ -84,7 +84,7 @@ struct lp_wqueue_s g_lpwork;
  *   bring up.  This entry point is referenced by OS internally and should
  *   not be accessed by application logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   argc, argv (not used)
  *
  * Returned Value:
@@ -168,7 +168,7 @@ static int work_lpthread(int argc, char *argv[])
  * Description:
  *   Start the low-priority, kernel-mode worker thread(s)
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

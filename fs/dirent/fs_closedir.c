@@ -64,10 +64,10 @@
  *    'dirp'.  The directory stream descriptor 'dirp' is not available after
  *    this call.
  *
- * Inputs:
+ * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous call to opendir();
  *
- * Return:
+ * Returned Value:
  *   The closedir() function returns 0 on success.  On error, -1 is
  *   returned, and errno is set appropriately.
  *

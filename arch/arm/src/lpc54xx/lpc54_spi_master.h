@@ -98,7 +98,7 @@ extern "C"
  *   ...
  *   9 - SPI9
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - SPI peripheral number, 0.. 9.
  *
  * Returned Value:

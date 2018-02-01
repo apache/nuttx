@@ -163,7 +163,7 @@ void stm32_usbinitialize(void);
  * Description:
  *   Called to setup set a call back for USB power state changes.
  *
- * Inputs:
+ * Input Parameters:
  *   pwr_changed_handler: An interrupt handler that will be called on VBUS power
  *   state changes.
  *

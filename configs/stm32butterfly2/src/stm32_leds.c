@@ -130,7 +130,7 @@ void stm32_led_initialize(void)
  * Description:
  *   Drives board leds when specific RTOS state led occurs.
  *
- * Input parameters:
+ * Input Parameters:
  *   led - This is actually an RTOS state not led number of anything like that
  ****************************************************************************/
 
@@ -173,7 +173,7 @@ void board_autoled_on(int led)
  * Description:
  *   Drives board leds when specific RTOS state led ends
  *
- * Input parameters:
+ * Input Parameters:
  *   led - This is actually an RTOS state not led number of anything like that
  ****************************************************************************/
 
@@ -225,7 +225,7 @@ void board_userled_initialize(void)
  * Description:
  *   Sets led to ledon state.
  *
- * Input parameters:
+ * Input Parameters:
  *   led - Led to be set, indexed from 0
  *   ledon - new state for the led.
  ****************************************************************************/
@@ -251,7 +251,7 @@ void board_userled(int led, bool ledon)
  * Description:
  *   Sets whole ledset to given state.
  *
- * Input parameters:
+ * Input Parameters:
  *   ledset - Led bits to be set on or off
  ****************************************************************************/
 

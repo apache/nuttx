@@ -129,7 +129,7 @@ void stm32l4_gpioinit(void)
  *   function, it must be unconfigured with stm32l4_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
- * Returns:
+ * Returned Value:
  *   OK on success
  *   A negated errono valu on invalid port, or when pin is locked as ALT
  *   function.
@@ -351,7 +351,7 @@ int stm32l4_configgpio(uint32_t cfgset)
  *   operate in PWM mode could produce excessive on-board currents and trigger
  *   over-current/alarm function.
  *
- * Returns:
+ * Returned Value:
  *  OK on success
  *  A negated errno value on invalid port
  *

@@ -72,7 +72,7 @@
  *   conn   - The TCP connection structure holding connection information
  *   result - App result event sent
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -197,7 +197,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *   conn   - The TCP connection structure holding connection information
  *   result - App result event sent
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

@@ -62,7 +62,7 @@
  *   msg    - A pointer to the message to send
  *   msglen - The length of the message in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

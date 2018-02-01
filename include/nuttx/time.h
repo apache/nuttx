@@ -111,7 +111,7 @@ int clock_daysbeforemonth(int month, bool leapyear);
  *   month - The month of the year 1 - 12
  *   year  - the year including the 1900
  *
- * Returned value:
+ * Returned Value:
  *   Zero based day of the week 0-6, 0 = Sunday, 1 = Monday... 6 = Saturday
  *
  ****************************************************************************/

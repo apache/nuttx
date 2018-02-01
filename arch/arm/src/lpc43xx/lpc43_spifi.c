@@ -1132,7 +1132,7 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
  * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   One success, a reference to the initialized MTD device instance is
  *   returned;  NULL is returned on any failure.
  *
@@ -1220,7 +1220,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
  * Input Parameters:
  *   high
  *
- * Returned value:
+ * Returned Value:
  *   None.
  *
  ****************************************************************************/

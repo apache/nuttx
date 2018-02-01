@@ -1495,7 +1495,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   required.  Theregore, all GPIO chip management is deferred to board-
  *   specific logic.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple SSI interfaces)
  *
  * Returned Value:

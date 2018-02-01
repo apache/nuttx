@@ -125,7 +125,7 @@ extern "C"
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NXTK callbacks.
  *
- * Return:
+ * Returned Value:
  *   Success: A non-NULL handle used with subsequent NXTK window accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *
@@ -143,7 +143,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -176,7 +176,7 @@ int nxtk_closewindow(NXTKWINDOW hfwnd);
  *   arg - An argument that will accompany the block messages (This is arg2
  *         in the blocked callback).
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -194,7 +194,7 @@ int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -213,7 +213,7 @@ int nxtk_getposition(NXTKWINDOW hfwnd);
  *   hfwnd - The window handle returned by nxtk_openwindow
  *   pos   - The new position of the client sub-window
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -232,7 +232,7 @@ int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos);
  *   hfwnd - The window handle returned by nxtk_openwindow
  *   size  - The new size of the client sub-window.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -246,11 +246,11 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size);
  *   Bring the window containing the specified client sub-window to the top
  *   of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hfwnd - the window to be raised.  This must have been previously created
  *           by nxtk_openwindow().
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -264,11 +264,11 @@ int nxtk_raise(NXTKWINDOW hfwnd);
  *   Lower the window containing the specified client sub-window to the
  *   bottom of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hfwnd - the window to be lowered.  This must have been previously created
  *           by nxtk_openwindow().
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -286,7 +286,7 @@ int nxtk_lower(NXTKWINDOW hfwnd);
  *   rect  - The location within the client window to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -310,7 +310,7 @@ int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -330,7 +330,7 @@ int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -355,7 +355,7 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
  *   caps   - Draw a circular cap the ends of the line to support better
  *            line joins
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -377,7 +377,7 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
  *   width  - The width of the line
  *   color  - The color to use to fill the line
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -399,7 +399,7 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
  *   radius - The radius of the circle in pixels.
  *   color  - The color to use to fill the circle
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -423,7 +423,7 @@ int nxtk_fillcirclewindow(NXWINDOW hfwnd,
  *   offset - The offset to move the region.  The  rectangular region will be
  *            moved so that the origin is translated by this amount.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -449,7 +449,7 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *            origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -471,7 +471,7 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
  *   cb     - Callbacks used to process toolbar events
  *   arg    - User provided value that will be returned with toolbar callbacks.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -488,7 +488,7 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -511,7 +511,7 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd);
  *   hfwnd  - The handle returned by nxtk_openwindow
  *   bounds - User provided location in which to return the bounding box.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -529,7 +529,7 @@ int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds);
  *   rect  - The location within the toolbar window to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -553,7 +553,7 @@ int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -573,7 +573,7 @@ int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -599,7 +599,7 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd,
  *   caps   - Draw a circular cap on the ends of the line to support better
  *            line joins
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -621,7 +621,7 @@ int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
  *   width  - The width of the line
  *   color  - The color to use to fill the line
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -643,7 +643,7 @@ int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
  *   radius - The radius of the circle in pixels.
  *   color  - The color to use to fill the circle
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -668,7 +668,7 @@ int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
  *   offset - The offset to move the region.  The  rectangular region will be
  *            moved so that the origin is translated by this amount.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -693,7 +693,7 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *            origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

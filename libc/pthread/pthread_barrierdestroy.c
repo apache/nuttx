@@ -63,7 +63,7 @@
  * Parameters:
  *   barrier - barrier to be destroyed.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or on of the following error numbers:
  *
  *   EBUSY  The implementation has detected an attempt to destroy a barrier

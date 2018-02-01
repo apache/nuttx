@@ -58,7 +58,7 @@
  * Parameters:
  *   timep - The current time represented as seconds since the epoch.
  *
- * Return Value:
+ * Returned Value:
  *   One success a pointer to the string is returned; on failure, NULL is
  *   returned.
  *

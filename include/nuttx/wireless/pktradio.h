@@ -181,10 +181,10 @@ struct pktradio_metadata_s
  *   called.  Therefore, it may be called during packet radio driver
  *   initialization, even if there are multiple packet radio drivers.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -202,10 +202,10 @@ void pktradio_metadata_initialize(void);
  *   list.  If that the list is empty, then the meta-data structure will be
  *   allocated from the dynamic memory pool.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   A reference to the allocated metadata structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
@@ -223,10 +223,10 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void);
  *   structure. If the metadata structure was allocated dynamically it will
  *   be deallocated.
  *
- * Inputs:
+ * Input Parameters:
  *   metadata - metadata structure to free
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

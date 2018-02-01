@@ -67,7 +67,7 @@
  *   wdog - The watchdog ID to delete.  This is actually a pointer to a
  *          watchdog structure.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to
  *   indicate the nature of any failure.
  *

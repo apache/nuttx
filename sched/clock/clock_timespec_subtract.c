@@ -55,11 +55,11 @@
  *   Subtract timespec ts2 from to1 and return the result in ts3.
  *   Zero is returned if the time difference is negative.
  *
- * Inputs:
+ * Input Parameters:
  *   ts1 and ts2: The two timespecs to be subtracted (ts1 - ts2)
  *   t23: The location to return the result (may be ts1 or ts2)
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

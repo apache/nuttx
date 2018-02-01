@@ -63,7 +63,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
  *   watchdogs are available.
  *

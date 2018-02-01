@@ -1059,7 +1059,7 @@ static void spi_qflush(struct spi_sctrlr_s *sctrlr)
  * Description:
  *   Initialize the selected SPI port in slave mode.
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - Chip select number identifying the "logical" SPI port.  Includes
  *          encoded port and chip select information.
  *

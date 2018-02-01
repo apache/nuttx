@@ -214,7 +214,7 @@ mount_findfs(FAR const struct fsmap_t *fstab, FAR const char *filesystemtype)
  *   mount() attaches the filesystem specified by the 'source' block device
  *   name into the root file system at the path specified by 'target.'
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; -1 is returned on an error and errno is
  *   set appropriately:
  *

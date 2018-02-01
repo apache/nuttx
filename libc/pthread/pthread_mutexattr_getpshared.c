@@ -57,7 +57,7 @@
  *    attr
  *    pshared
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:

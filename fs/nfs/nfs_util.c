@@ -194,7 +194,7 @@ int nfs_checkmount(struct nfsmount *nmp)
  *   Perform the NFS request. On successful receipt, it verifies the NFS level of the
  *   returned values.
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success; a positive errno value on failure.
  *
  ****************************************************************************/
@@ -380,7 +380,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
  *   Given a path to something that may or may not be in the file system,
  *   return the handle of the directory entry of the requested object.
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success; a positive errno value on failure.
  *
  ****************************************************************************/
@@ -488,7 +488,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
  *   return the handle of the entry of the directory containing the requested
  *   object.
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success; a positive errno value on failure.
  *
  ****************************************************************************/
@@ -577,7 +577,7 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
  * Desciption:
  *   Update file attributes on write or after the file is modified.
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  ****************************************************************************/

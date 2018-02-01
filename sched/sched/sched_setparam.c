@@ -72,14 +72,14 @@
  *   use by application logic.  Applications should use the standard
  *   sched_setparam().
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task to reprioritize.  If pid is zero, the
  *      priority of the calling task is changed.
  *   param - A structure whose member sched_priority is the integer priority.
  *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
  *      through SCHED_PRIORITY_MAX.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if successful, otherwise a negated errno value is returned to
  *   indicate the nature of the failure..
  *
@@ -239,14 +239,14 @@ errout_with_lock:
  *   to sched_yield() -- The task will be moved to  after all other tasks
  *   with the same priority.
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task to reprioritize.  If pid is zero, the
  *      priority of the calling task is changed.
  *   param - A structure whose member sched_priority is the integer priority.
  *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
  *      through SCHED_PRIORITY_MAX.
  *
- * Return Value:
+ * Returned Value:
  *   On success, sched_setparam() returns 0 (OK). On error, -1 (ERROR) is
  *   returned, and errno is set appropriately.
  *

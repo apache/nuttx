@@ -67,12 +67,12 @@
  *   user-space, signal handler trampoline function.  It is called from
  *   up_signal_dispatch() in user-mode.
  *
- * Inputs:
+ * Input Parameters:
  *   sighand - The address user-space signal handling function
  *   signo, info, and ucontext - Standard arguments to be passed to the
  *     signal handling function.
  *
- * Return:
+ * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
  *   via an architecture specific system call made by up_signal_handler().
  *   However, this will look like a normal return by the caller of

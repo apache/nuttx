@@ -69,7 +69,7 @@
  *     pthread_barrier_wait() before any of them successfully return from
  *     the call.  The value specified by count must be greater than zero.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or on of the following error numbers:
  *
  *   EAGAIN The system lacks the necessary resources to initialize another

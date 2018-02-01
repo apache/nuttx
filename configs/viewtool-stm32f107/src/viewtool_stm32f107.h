@@ -407,7 +407,7 @@ int stm32_can_setup(void);
  * Description:
  *   Initialize and register the MPL115A Pressure Sensor driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/press0"
  *
  * Returned Value:

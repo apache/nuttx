@@ -79,7 +79,7 @@
  * Input Parameters:
  *   fe - The front-end state structure
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

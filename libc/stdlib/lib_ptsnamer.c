@@ -59,7 +59,7 @@
  *   terminated string in the buffer pointed to by buf.  The buflen
  *   argument specifies the number of bytes available in buf.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, ptsname_r() returns 0.  On failure, a nonzero value is
  *   returned and errno is set to indicate the error.
  *

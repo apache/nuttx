@@ -239,7 +239,7 @@ static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
  *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
  *   in the range 12 to 64.
  *
- * Input Parameter:
+ * Input Parameters:
  *   dlc    - the DLC value to convert to a byte count
  *
  * Returned Value:
@@ -288,7 +288,7 @@ static uint8_t can_dlc2bytes(uint8_t dlc)
  *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
  *   in the range 12 to 64.
  *
- * Input Parameter:
+ * Input Parameters:
  *   nbytes - the byte count to convert to a DLC value
  *
  * Returned Value:

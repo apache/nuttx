@@ -103,7 +103,7 @@
  * Input Parameters:
  *   None
  *
- * Returned Value
+ * Returned Value:
  *   true is returned if a cancellation is pending but cannot be performed
  *   now due to the nesting level.
  *
@@ -194,7 +194,7 @@ bool enter_cancellation_point(void)
  * Input Parameters:
  *   None
  *
- * Returned Value
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -274,7 +274,7 @@ void leave_cancellation_point(void)
  * Input Parameters:
  *   None
  *
- * Returned Value
+ * Returned Value:
  *   true is returned if a cancellation is pending but cannot be performed
  *   now due to the nesting level.
  *

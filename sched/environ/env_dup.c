@@ -67,7 +67,7 @@
  *   group The child task group to receive the newly allocated copy of the
  *        parent task groups environment structure.
  *
- * Return Value:
+ * Returned Value:
  *   zero on success
  *
  * Assumptions:

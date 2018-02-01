@@ -76,7 +76,7 @@ extern "C"
  *
  *   At a minimum, this function should call watchdog_register().
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

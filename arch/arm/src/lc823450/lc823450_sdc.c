@@ -355,7 +355,9 @@ int lc823450_sdc_setclock(uint32_t ch, uint32_t limitclk, uint32_t sysclk)
 /****************************************************************************
  * Name: lc823450_sdc_refmediatype
  *
- * Return Values: 0(sd), 1(emmc)
+ * Returned Value:
+ *   0(sd), 1(emmc)
+ *
  ****************************************************************************/
 
 int lc823450_sdc_refmediatype(uint32_t ch)

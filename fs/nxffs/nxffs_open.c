@@ -855,7 +855,7 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
  *      file was open for writing, and finally,
  *   3. Write the new file inode.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   wrfile - Describes the state of the open file
  *
@@ -1200,7 +1200,7 @@ errout:
  * Note that in either case, the inode name has already been written to
  * FLASH.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   entry  - Describes the inode header to write
  *
@@ -1283,7 +1283,7 @@ errout:
  *   The packing logic has moved an inode.  Check if any open files are using
  *   this inode and, if so, move the data in the open file structure as well.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   entry  - Describes the new inode entry
  *

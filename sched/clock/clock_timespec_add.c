@@ -54,11 +54,11 @@
  * Description:
  *   Add timespec ts1 to to2 and return the result in ts3
  *
- * Inputs:
+ * Input Parameters:
  *   ts1 and ts2: The two timespecs to be added
  *   t23: The location to return the result (may be ts1 or ts2)
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

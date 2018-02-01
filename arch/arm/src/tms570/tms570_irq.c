@@ -198,7 +198,7 @@ void up_irqinitialize(void)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- * Input parameters:
+ * Input Parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/
@@ -240,7 +240,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- *  Input parameters:
+ *  Input Parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/

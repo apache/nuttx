@@ -74,7 +74,7 @@
  *   r24-r25: savregs
  *   r22-r23: restoreregs
  *
- * Return:
+ * Returned Value:
  *   up_switchcontext forces a context switch to the task "canned" in restoreregs.
  *   It does not 'return' in the normal sense, rather, it will context switch back
  *   to the function point.  When it does 'return,' it is because the blocked

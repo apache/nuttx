@@ -65,7 +65,7 @@
  *   wtcb - A pointer to the TCB of the task that is waiting on a message
  *          queue, but has received a signal instead.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

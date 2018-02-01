@@ -84,7 +84,7 @@
  * Parameters:
  *   dev - Reference to an Ethernet device driver structure
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

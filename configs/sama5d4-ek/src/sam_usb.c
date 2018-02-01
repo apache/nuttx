@@ -483,7 +483,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
  * Input Parameters:
  *   handler - New over-current interrupt handler
  *
- * Returned value:
+ * Returned Value:
  *   Old over-current interrupt handler
  *
  ************************************************************************************/

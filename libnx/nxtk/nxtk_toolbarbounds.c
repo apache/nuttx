@@ -87,7 +87,7 @@
  *   hfwnd  - The handle returned by nxtk_openwindow
  *   bounds - User provided location in which to return the bounding box.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

@@ -374,7 +374,7 @@ void arp_notify(in_addr_t ipaddr);
  * Description:
  *   Find the ARP entry corresponding to this IP address.
  *
- * Input parameters:
+ * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions
@@ -391,7 +391,7 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr);
  * Description:
  *   Remove an IP association from the ARP table
  *
- * Input parameters:
+ * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions
@@ -416,7 +416,7 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr);
  *   Add the IP/HW address mapping to the ARP table -OR- change the IP
  *   address of an existing association.
  *
- * Input parameters:
+ * Input Parameters:
  *   ipaddr  - The IP address as an inaddr_t
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
  *
@@ -438,7 +438,7 @@ int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr);
  *   Add the IP/HW address mapping to the ARP table -OR- change the IP
  *   address of an existing association.
  *
- * Input parameters:
+ * Input Parameters:
  *   pipaddr - Refers to an IP address uint16_t[2] in network order
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
  *

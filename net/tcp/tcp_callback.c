@@ -218,7 +218,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *     buffers
  *   buflen - The number of bytes to copy to the read-ahead buffer.
  *
- * Returned value:
+ * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
  *   zero or equal to buflen; partial packets are not buffered.
  *

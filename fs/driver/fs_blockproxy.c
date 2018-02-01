@@ -77,7 +77,7 @@ static sem_t g_devno_sem = SEM_INITIALIZER(1);
  *   psuedo-file system.  We cannot use mktemp for this because it will
  *   attempt to open() the file.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -146,7 +146,7 @@ static FAR char *unique_chardev(void)
  *   Create a temporary char driver using drivers/bch to mediate character
  *   oriented accessed to the block driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   blkdev - The path to the block driver
  *   oflags - Character driver open flags
  *

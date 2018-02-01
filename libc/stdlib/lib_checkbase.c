@@ -59,7 +59,7 @@
  * Assumptions:
  *   *ptr points to the first, non-whitespace character in the string.
  *
- * Returns:
+ * Returned Value:
  *   - if base is valid, the actual base to use, and pptr is updated to point
  *     at the first digit.
  *   - if base is invalid (<2 or >36), return -1.

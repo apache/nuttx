@@ -456,7 +456,7 @@ static void tim_modifyreg(FAR struct stm32_dev_s *priv, int offset,
  * Description:
  *   Dump all timer registers.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - A reference to the SDADC block state
  *
  * Returned Value:

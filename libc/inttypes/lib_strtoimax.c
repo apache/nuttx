@@ -64,7 +64,7 @@
  *   nptr to a intmax_t integer value according to the given base, which
  *   must be between 2 and 36 inclusive, or be the special value 0.
  *
- * Returns:
+ * Returned Value:
  *   - The converted value, if the base and number are valid
  *   - 0 if an error occurs, and set errno to:
  *     * EINVAL if base < 2 or base > 36

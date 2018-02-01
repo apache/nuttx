@@ -86,7 +86,7 @@
  * Parameters:
  *   barrier - the barrier to wait on
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or EINVAL if the barrier is not valid.
  *
  * Assumptions:

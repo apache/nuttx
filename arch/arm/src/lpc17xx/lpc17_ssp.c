@@ -765,7 +765,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  * Description:
  *   Initialize the SSP0
  *
- * Input Parameter:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -819,7 +819,7 @@ static inline FAR struct lpc17_sspdev_s *lpc17_ssp0initialize(void)
  * Description:
  *   Initialize the SSP1
  *
- * Input Parameter:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -873,7 +873,7 @@ static inline FAR struct lpc17_sspdev_s *lpc17_ssp1initialize(void)
  * Description:
  *   Initialize the SSP2
  *
- * Input Parameter:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -930,7 +930,7 @@ static inline FAR struct lpc17_sspdev_s *lpc17_ssp2initialize(void)
  * Description:
  *   Initialize the selected SSP port.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:

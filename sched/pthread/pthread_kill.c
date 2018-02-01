@@ -70,7 +70,7 @@
  *   signo - The signal number to send.  If 'signo' is zero, no signal is
  *    sent, but all error checking is performed.
  *
- * Return Value:
+ * Returned Value:
  *    On success the signal was send and zero is returned. On error one
  *    of the following error numbers is returned.
  *

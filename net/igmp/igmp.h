@@ -247,7 +247,7 @@ void igmp_poll(FAR struct net_driver_s *dev);
  *                message to be sent.
  *   destipaddr - The IP address of the recipient of the message
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

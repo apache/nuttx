@@ -56,7 +56,7 @@
  * Description:
  *   Get EEPROM data memory size
  *
- * Returns:
+ * Returned Value:
  *  Length of EEPROM memory region
  *
  ************************************************************************************/
@@ -69,7 +69,7 @@ size_t stm32_eeprom_size(void);
  * Description:
  *   Get EEPROM data memory address
  *
- * Returns:
+ * Returned Value:
  *  Address of EEPROM memory region
  *
  ************************************************************************************/
@@ -82,7 +82,7 @@ size_t stm32_eeprom_getaddress(void);
  * Description:
  *    Write buffer to EEPROM data memory address
  *
- * Returns:
+ * Returned Value:
  *  Number of written bytes or error code.
  *
  ************************************************************************************/
@@ -95,7 +95,7 @@ ssize_t stm32_eeprom_write(size_t addr, const void *buf, size_t buflen);
  * Description:
  *    Erase memory on EEPROM data memory address
  *
- * Returns:
+ * Returned Value:
  *  Number of erased bytes or error code.
  *
  ************************************************************************************/

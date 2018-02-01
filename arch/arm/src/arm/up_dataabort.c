@@ -59,7 +59,7 @@
 /****************************************************************************
  * Name: up_dataabort
  *
- * Input parameters:
+ * Input Parameters:
  *   regs - The standard, ARM register save array.
  *
  * If CONFIG_PAGING is selected in the NuttX configuration file, then these

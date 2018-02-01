@@ -59,7 +59,7 @@
  *   alignment - Log2 byte alignment
  *   size - Size (in bytes) of the new memory region to be allocated.
  *
- * Return Value:
+ * Returned Value:
  *   The address of the re-allocated memory (NULL on failure to allocate)
  *
  ****************************************************************************/

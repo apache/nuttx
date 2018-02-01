@@ -187,7 +187,7 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
  *   but this is a point where support for other conversions may be
  *   provided.
  *
- * Returned value:
+ * Returned Value:
  *   PACKET_FORWARDED     - Packet was forwarded
  *   PACKET_NOT_FORWARDED - Packet was not forwarded
  *   < 0                  - And error occurred (and packet not fowarded).

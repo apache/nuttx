@@ -1073,7 +1073,7 @@ void xmc4_earlyserialinit(void)
  * Input Parameters:
  *   None
  *
- * Returns Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

@@ -74,7 +74,7 @@
  *   group - The task group to add the new member
  *   pid - The new member
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:
@@ -152,7 +152,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
  * Parameters:
  *   tcb - The TCB of the new "child" task that need to join the group.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:
@@ -189,7 +189,7 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
  * Parameters:
  *   tcb - The TCB of the new "child" task that need to join the group.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:

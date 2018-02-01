@@ -64,7 +64,7 @@
  * Parameters:
  *   errcode - The thread specific errno will be set to this error code value.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

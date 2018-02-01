@@ -106,7 +106,7 @@ pthread_mutex_t g_usrmutex;
  *   part of the internal implementation of each work queue; it should not
  *   be called from application level logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   wqueue - Describes the work queue to be processed
  *
  * Returned Value:
@@ -285,7 +285,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
  *   miscellaneous operations.  The user work thread must be started by
  *   application start-up logic by calling work_usrstart().
  *
- * Input parameters:
+ * Input Parameters:
  *   argc, argv (not used)
  *
  * Returned Value:
@@ -327,7 +327,7 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
  * Description:
  *   Start the user mode work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

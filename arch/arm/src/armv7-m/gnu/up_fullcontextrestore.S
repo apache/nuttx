@@ -71,7 +71,7 @@
  *
  *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ************************************************************************************/

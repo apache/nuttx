@@ -76,7 +76,7 @@ extern "C"
  * Description:
  *   Initialize the selected SSP port.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

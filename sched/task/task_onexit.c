@@ -84,7 +84,7 @@
  *   arg -  An argument that will be provided to the on_exit() function when
  *          the task exits.
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success. Non-zero on failure.
  *
  ****************************************************************************/

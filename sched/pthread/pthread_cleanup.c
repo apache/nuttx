@@ -64,7 +64,7 @@
  * Input Parameters:
  *   tcb - The TCB of the pthread that is exiting or being canceled.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

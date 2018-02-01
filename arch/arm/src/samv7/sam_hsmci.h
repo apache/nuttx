@@ -85,7 +85,7 @@ extern "C"
  * Input Parameters:
  *   slotno - Not used.
  *
- * Returned Values:
+ * Returned Value:
  *   A reference to an SDIO interface structure.  NULL is returned on failures.
  *
  ****************************************************************************/
@@ -116,7 +116,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *   bootloader that brought us into SDRAM and it is that bootloader that
  *   has configured the clocking.
  *
- * Input parameters:
+ * Input Parameters:
  *   target - The target SD frequency
  *
  * Returned Value:
@@ -141,7 +141,7 @@ uint32_t sam_hsmci_clkdiv(uint32_t target);
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -159,7 +159,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  *   dev       - An instance of the SDIO driver device state structure.
  *   wrprotect - true is a card is writeprotected.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

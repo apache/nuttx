@@ -115,7 +115,7 @@ void up_idle(void)
  *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is
  *                  being created for.
  *   - tcb:         The TCB of new CPU IDLE task

@@ -513,7 +513,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success, this function will return a non-NULL instance of struct
  *   usbhost_class_s.  NULL is returned on failure; this function will
  *   will fail only if there are insufficient resources to create another
@@ -540,7 +540,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
  * Input Parameters:
  *   usbclass - A reference to the class instance to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -614,7 +614,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
  * Input Parameters:
  *   arg - A reference to the class instance to be destroyed.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -676,7 +676,7 @@ static void usbhost_destroy(FAR void *arg)
  * Description:
  *   Wake any threads waiting for mouse data
  *
- * Input Paramters:
+ * Input Parameters:
  *   priv - A reference to the mouse state structure.
  *
  * Returned Value:
@@ -1038,7 +1038,7 @@ static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
  * Input Parameters:
  *   arg - A reference to the class instance to be destroyed.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -1448,7 +1448,7 @@ errout:
  *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -1648,7 +1648,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
  * Input Parameters:
  *   priv - A reference to the class instance.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -1739,7 +1739,7 @@ errout:
  * Input Parameters:
  *   val - A pointer to the first byte of the little endian value.
  *
- * Returned Values:
+ * Returned Value:
  *   A uint16_t representing the whole 16-bit integer value
  *
  ****************************************************************************/
@@ -1759,7 +1759,7 @@ static inline uint16_t usbhost_getle16(const uint8_t *val)
  *   dest - A pointer to the first byte to save the little endian value.
  *   val - The 16-bit value to be saved.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -1780,7 +1780,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  *   dest - A pointer to the first byte to save the big endian value.
  *   val - The 32-bit value to be saved.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -1802,7 +1802,7 @@ static inline uint32_t usbhost_getle32(const uint8_t *val)
  *   dest - A pointer to the first byte to save the little endian value.
  *   val - The 32-bit value to be saved.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -1826,7 +1826,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
  * Input Parameters:
  *   priv - A reference to the class instance.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned.  On failure, an negated errno value
  *   is returned to indicate the nature of the failure.
  *
@@ -1852,7 +1852,7 @@ static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
  * Input Parameters:
  *   priv - A reference to the class instance.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned.  On failure, an negated errno value
  *   is returned to indicate the nature of the failure.
  *
@@ -1896,7 +1896,7 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
  *   id - In the case where the device supports multiple base classes,
  *     subclasses, or protocols, this specifies which to configure for.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, this function will return a non-NULL instance of struct
  *   usbhost_class_s that can be used by the USB host driver to communicate
  *   with the USB host class.  NULL is returned on failure; this function
@@ -1982,7 +1982,7 @@ static FAR struct usbhost_class_s *
  *     descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -2050,7 +2050,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
  *   usbclass - The USB host class entry previously obtained from a call to
  *     create().
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
  *   is returned indicating the nature of the failure
  *
@@ -2553,7 +2553,7 @@ errout:
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *

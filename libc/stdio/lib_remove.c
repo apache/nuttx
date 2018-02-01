@@ -53,7 +53,7 @@
  *   The remove() function causes the object denoted by path to be removed.
  *   The function is equivalent to unlink() or rmdir().
  *
- * Input Parmeters:
+ * Input Parameters:
  *   path - A pointer to a file or directory to be removed.
  *
  * Returned Value:

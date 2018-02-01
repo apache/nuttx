@@ -65,7 +65,7 @@
  * Parameters:
  *   name=value string describing the environment setting to add/modify
  *
- * Return Value:
+ * Returned Value:
  *   Zero on sucess
  *
  * Assumptions:

@@ -273,7 +273,7 @@ EXTERN const uint32_t g_gpiobase[STM32L4_NPORTS];
  *   function, it must be unconfigured with stm32l4_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
- * Returns:
+ * Returned Value:
  *   OK on success
  *   ERROR on invalid port, or when pin is locked as ALT function.
  *
@@ -294,7 +294,7 @@ int stm32l4_configgpio(uint32_t cfgset);
  *   operate in PWM mode could produce excessive on-board currents and trigger
  *   over-current/alarm function.
  *
- * Returns:
+ * Returned Value:
  *  OK on success
  *  ERROR on invalid port
  *

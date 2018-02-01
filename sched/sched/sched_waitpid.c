@@ -147,7 +147,7 @@
  *   stat_loc - The location to return the exit status
  *   options - ignored
  *
- * Return Value:
+ * Returned Value:
  *   If waitpid() returns because the status of a child process is available,
  *   it will return a value equal to the process ID of the child process for
  *   which status is reported.

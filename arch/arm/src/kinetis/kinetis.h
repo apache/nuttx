@@ -418,7 +418,7 @@ void kinetis_lowsetup(void);
  * Input Parameters:
  *   first: - First TTY number to assign
  *
- * Returns Value:
+ * Returned Value:
  *   The next TTY number available for assignment
  *
  ****************************************************************************/
@@ -437,7 +437,7 @@ unsigned int kinetis_uart_serialinit(unsigned int first);
  * Input Parameters:
  *   first: - First TTY number to assign
  *
- * Returns Value:
+ * Returned Value:
  *   The next TTY number available for assignment
  *
  ****************************************************************************/
@@ -587,7 +587,7 @@ void kinetis_pinirqinitialize(void);
  *   pinisr -  Pin interrupt service routine
  *   arg    -  An argument that will be provided to the interrupt service routine.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on any
  *   failure to indicate the nature of the failure.
  *
@@ -678,10 +678,10 @@ void kinetis_clrpend(int irq);
  * Description:
  *   Initialize SDIO for operation.
  *
- * Input parameters:
+ * Input Parameters:
  *   slotno - Not used.
  *
- * Returned Values:
+ * Returned Value:
  *   A reference to an SDIO interface structure.  NULL is returned on failures.
  *
  ****************************************************************************/
@@ -705,7 +705,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno);
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -725,7 +725,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  *   dev       - An instance of the SDIO driver device state structure.
  *   wrprotect - true is a card is writeprotected.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

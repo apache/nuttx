@@ -597,7 +597,7 @@ errout_with_reass:
  * Description:
  *   Inject the packet in d_buf into the network for normal packet processing.
  *
- * Input Parmeters
+ * Input Parameters:
  *   radio - The IEEE802.15.4 MAC network driver interface.
  *
  * Returned Value:

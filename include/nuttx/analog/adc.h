@@ -227,7 +227,7 @@ extern "C"
  *   driver with the "upper half" ADC device and registers that device so that can
  *   be used by application code.
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/adc", "/dev/adc1", etc.  where the driver path differs only

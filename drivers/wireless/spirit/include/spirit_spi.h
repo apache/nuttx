@@ -86,7 +86,7 @@ struct spi_dev_s; /* Forward reference */
  * Description:
  *   Read single or multiple SPIRIT1 register
  *
- * Input parameters:
+ * Input Parameters:
  *   regaddr: Base register's address to be read
  *   buffer:  Pointer to the buffer of registers' values to be read
  *   buflen:  Number of register values to be read
@@ -106,7 +106,7 @@ int spirit_reg_read(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  * Description:
  *   Read single or multiple SPIRIT1 register.
  *
- * Input parameters:
+ * Input Parameters:
  *   spirit  - Reference to an instance of the driver state stucture.
  *   regaddr - Base register's address to write
  *   buffer  - Pointer to the buffer of register values to write
@@ -129,7 +129,7 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   atomic only in the sense that other accesses to the SPI bus are
  *   prohibited throughout the operation.
  *
- * Input parameters:
+ * Input Parameters:
  *   spirit  - Reference to an instance of the driver state stucture.
  *   regaddr - Base register's address to write
  *   clrbits - Bits to clear in the register
@@ -150,7 +150,7 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  * Description:
  *   Send a command
  *
- * Input parameters:
+ * Input Parameters:
  *   spirit - Reference to an instance of the driver state stucture.
  *   cmd    - Command code to be sent
  *
@@ -168,7 +168,7 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd);
  * Description:
  *   Read data from RX FIFO
  *
- * Input parameters:
+ * Input Parameters:
  *   spirit - Reference to an instance of the driver state stucture.
  *   buffer - Pointer to the buffer of data values to write
  *   buflen - Number of bytes to be written
@@ -188,7 +188,7 @@ int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
  * Description:
  *   Write data into TX FIFO.
  *
- * Input parameters:
+ * Input Parameters:
  *   spirit  - Reference to an instance of the driver state stucture.
  *   buffer  - Pointer to the buffer of data values to write
  *   buflen  - Number of data values to be written.

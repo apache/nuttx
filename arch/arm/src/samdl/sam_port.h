@@ -343,7 +343,7 @@ extern "C"
  * Description:
  *   Configure a PORT pin based on bit-encoded description of the pin.
  *
- * Returns:
+ * Returned Value:
  *   OK (always)
  *
  ****************************************************************************/

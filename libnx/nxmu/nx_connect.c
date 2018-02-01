@@ -93,7 +93,7 @@ static uint32_t g_nxcid    = 1;
  * Input Parameters:
  *   svrmqname - The name for the server incoming message queue
  *
- * Return:
+ * Returned Value:
  *   Success: A non-NULL handle used with subsequent NX accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *

@@ -1714,7 +1714,7 @@ static int qspi_hw_initialize(struct sam_qspidev_s *priv)
  * Description:
  *   Initialize the selected QSPI port in master mode
  *
- * Input Parameter:
+ * Input Parameters:
  *   intf - Interface number(must be zero)
  *
  * Returned Value:

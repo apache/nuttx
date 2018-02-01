@@ -61,7 +61,7 @@
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with the errno set appropriately.
  *   NOTE that handle will no long be valid upon return.
  *

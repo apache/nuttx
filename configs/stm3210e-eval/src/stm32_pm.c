@@ -78,10 +78,10 @@
  *   *before* any other device drivers are initialized (since they may
  *   attempt to register with the power management subsystem).
  *
- * Input parameters:
+ * Input Parameters:
  *   None.
  *
- * Returned value:
+ * Returned Value:
  *    None.
  *
  ****************************************************************************/

@@ -86,7 +86,7 @@ extern "C"
  * Description:
  *   Initialize the selected QSPI port in master mode
  *
- * Input Parameter:
+ * Input Parameters:
  *   intf - Interface number(must be zero)
  *
  * Returned Value:
@@ -103,7 +103,7 @@ FAR struct qspi_dev_s *stm32l4_qspi_initialize(int intf);
  * Description:
  *   Put the QSPI device into memory mapped mode
  *
- * Input Parameter:
+ * Input Parameters:
  *   dev - QSPI device
  *   meminfo - parameters like for a memory transfer used for reading
  *   lpto - number of cycles to wait to automatically de-assert CS
@@ -123,7 +123,7 @@ void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s* dev,
  * Description:
  *   Take the QSPI device out of memory mapped mode
  *
- * Input Parameter:
+ * Input Parameters:
  *   dev - QSPI device
  *
  * Returned Value:

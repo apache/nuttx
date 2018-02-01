@@ -372,7 +372,7 @@ void arm_gic_initialize(void)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- *  Input parameters:
+ *  Input Parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/
@@ -532,7 +532,7 @@ int up_prioritize_irq(int irq, int priority)
  *   Since this API is not supported on all architectures, it should be
  *   avoided in common implementations where possible.
  *
- * Input Paramters:
+ * Input Parameters:
  *   irq - The interrupt request to modify.
  *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
  *

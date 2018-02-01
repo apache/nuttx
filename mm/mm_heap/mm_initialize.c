@@ -60,7 +60,7 @@
  *   heapstart - Start of the heap region
  *   heapsize  - Size of the heap region
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -145,7 +145,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
  *   heapstart - Start of the initial heap region
  *   heapsize  - Size of the initial heap region
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

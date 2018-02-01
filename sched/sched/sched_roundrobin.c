@@ -73,12 +73,12 @@
  * Description:
  *   Check if the currently executing task has exceeded its time slice.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The TCB of the currently executing task
  *   ticks - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
- * Return Value:
+ * Returned Value:
  *   The number if ticks remaining until the next time slice expires.
  *   Zero is returned if there is no time slicing (i.e., the task at the
  *   head of the ready-to-run list does not support round robin

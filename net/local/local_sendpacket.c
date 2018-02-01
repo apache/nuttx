@@ -83,7 +83,7 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
  *   buf      Data to send
  *   len      Length of data to send
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
  *   failure.
  *
@@ -133,7 +133,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  *   buf      Data to send
  *   len      Length of data to send
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
  *   failure.
  *

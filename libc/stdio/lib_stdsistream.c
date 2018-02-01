@@ -90,7 +90,7 @@ static off_t stdsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
  * Description:
  *   Initializes a stream for use with a FILE instance.
  *
- * Input parameters:
+ * Input Parameters:
  *   instream - User allocated, uninitialized instance of struct
  *              lib_stdsistream_s to be initialized.
  *   stream   - User provided stream instance (must have been opened for

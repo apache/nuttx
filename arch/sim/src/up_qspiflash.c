@@ -577,7 +577,7 @@ static int qspiflash_command(FAR struct qspi_dev_s *dev, FAR struct qspi_cmdinfo
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

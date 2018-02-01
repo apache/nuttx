@@ -555,7 +555,7 @@ static void aes_decr(FAR uint8_t *state, FAR const uint8_t *expanded_key)
  *  key   AES128 key of size 16 bytes
  *  state 16 bytes of plain text and cipher text
  *
- * Returned Value
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -580,7 +580,7 @@ void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key)
  *  key   AES128 key of size 16 bytes
  *  state 16 bytes of plain text and cipher text
  *
- * Returned Value
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

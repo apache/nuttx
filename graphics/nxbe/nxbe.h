@@ -198,7 +198,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be);
  * Input Parameters:
  *   wnd  - The window to be closed (and deallocated)
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -261,7 +261,7 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd);
  *   pos  - The pixel location to be set
  *   col  - The color to use in the set
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -281,7 +281,7 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
  *   rect - The location to be filled
  *   col  - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -302,7 +302,7 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
  *   rect - The location to be filled
  *   col  - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -328,7 +328,7 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -349,7 +349,7 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
  *   rect   - Describes the rectangular region to move
  *   offset - The offset to move the region
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -375,7 +375,7 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
  *            may lie outside of the display.
  *   stride - The width of the full source image in pixels.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

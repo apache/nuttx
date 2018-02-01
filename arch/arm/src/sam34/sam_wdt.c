@@ -251,7 +251,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  * Input Parameters:
  *   Usual interrupt handler arguments.
  *
- * Returned Values:
+ * Returned Value:
  *   Always returns OK.
  *
  ****************************************************************************/
@@ -294,7 +294,7 @@ static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -338,7 +338,7 @@ static int sam34_start(FAR struct watchdog_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -369,7 +369,7 @@ static int sam34_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -393,7 +393,7 @@ static int sam34_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *            driver state structure.
  *   status - The location to return the watchdog status information.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -449,7 +449,7 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *             driver state structure.
  *   timeout - The new timeout value in millisecnds.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -516,7 +516,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
  *
- * Returned Values:
+ * Returned Value:
  *   The previous watchdog expiration function pointer or NULL is there was
  *   no previous function pointer, i.e., if the previous behavior was
  *   reset-on-expiration (NULL is also returned if an error occurs).
@@ -589,7 +589,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
  *           interpretation of this argument depends on the particular
  *           command.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -649,7 +649,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *   devpath - The full path to the watchdog.  This should be of the form
  *     /dev/watchdog0
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

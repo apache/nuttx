@@ -57,7 +57,7 @@
  * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   Does not return.
  *
  ****************************************************************************/

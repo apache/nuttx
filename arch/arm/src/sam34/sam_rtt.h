@@ -80,7 +80,7 @@ extern "C"
  *   devpath - The full path to the timer.  This should be of the form
  *     /dev/rtt0
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

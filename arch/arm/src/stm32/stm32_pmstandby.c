@@ -71,7 +71,7 @@
  * Input Parameters:
  *   None
  *
- * Returned Value.
+ * Returned Value:
  *   On success, this function will not return (STANDBY mode can only be
  *   terminated with a reset event).  Otherwise, STANDBY mode did not occur
  *   and a negated errno value is returned to indicate the cause of the

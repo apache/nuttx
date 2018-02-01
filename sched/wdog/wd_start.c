@@ -101,7 +101,7 @@ typedef void (*wdentry4_t)(int argc, wdparm_t arg1, wdparm_t arg2,
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -209,7 +209,7 @@ static inline void wd_expiration(void)
  *   wdentry  - function to call on timeout
  *   parm1..4 - parameters to pass to wdentry
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to
  *   indicate the nature of any failure.
  *
@@ -406,7 +406,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
  *     this function is called on each timer interrupt and a value of one
  *     is implicit.
  *
- * Return Value:
+ * Returned Value:
  *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
  *   next delay is provided (zero if no delay).  Otherwise, this function
  *   has no returned value.

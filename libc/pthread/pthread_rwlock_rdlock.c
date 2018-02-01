@@ -93,7 +93,7 @@ static int tryrdlock(FAR pthread_rwlock_t *rw_lock)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

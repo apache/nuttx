@@ -391,7 +391,7 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:

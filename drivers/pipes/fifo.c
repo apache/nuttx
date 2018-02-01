@@ -97,13 +97,13 @@ static const struct file_operations fifo_fops =
  *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
  *   to control the size of those buffers is critical for system tuning.
  *
- * Inputs:
+ * Input Parameters:
  *   pathname - The full path to the FIFO instance to attach to or to create
  *     (if not already created).
  *   mode - Ignored for now
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
- * Return:
+ * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
  *   appropriately.
  *

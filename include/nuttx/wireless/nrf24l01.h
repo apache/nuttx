@@ -196,7 +196,7 @@ struct nrf24l01_config_s
 /************************************************************************************
  * Register the nRF24L01+ device.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   spi - SPI Device structure
  *   cfg Board specific configuration info
  *
@@ -214,7 +214,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 /************************************************************************************
  * Initialize the nRF24L01+ chip to a default initial state.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to a registered nRF24L01 device structure
  *
  ************************************************************************************/
@@ -224,7 +224,7 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev);
 /************************************************************************************
  * Set the default TX address.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   addr TX address  (LSByte first)
  *
@@ -238,7 +238,7 @@ int nrf24l01_settxaddr(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *addr);
 /************************************************************************************
  * Get the default TX address.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   addr TX address  (LSByte first)
  *
@@ -252,7 +252,7 @@ int nrf24l01_gettxaddr(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *addr);
 /************************************************************************************
  * Configure auto-retransmit
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   retrdelay  Auto-retransmit delay
  *   retrcount  Auto-retransmit count  (0 - 15)
@@ -268,7 +268,7 @@ int nrf24l01_setretransmit(FAR struct nrf24l01_dev_s *dev,
 /************************************************************************************
  * Configure a RX pipe.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   pipeno Pipe number to configure
  *   pipecfg Pointer to configuration data
@@ -284,7 +284,7 @@ int nrf24l01_setpipeconfig(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno,
 /************************************************************************************
  * Get pipe configuration.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   pipeno Pipe number to configure
  *   pipecfg Pointer to configuration data used to store the config
@@ -300,7 +300,7 @@ int nrf24l01_getpipeconfig(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno,
 /************************************************************************************
  * Enable a RX pipe.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   pipeno Pipe number
  *   enable true to enable the pipe, false to disable it
@@ -316,7 +316,7 @@ int nrf24l01_enablepipe(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno,
 /************************************************************************************
  * Configure RF.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   datarate Datarate
  *   outpower Output power
@@ -334,7 +334,7 @@ int nrf24l01_setuprf(FAR struct nrf24l01_dev_s *dev, nrf24l01_datarate_t datarat
  *
  * Note that hardware supports only -18, -12, -6 and 0 dBm values.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   outpower Output power (in dBm).
  *
@@ -350,7 +350,7 @@ int nrf24l01_settxpower(FAR struct nrf24l01_dev_s *dev, int outpower);
  *
  * Note that hardware supports only -18, -12, -6 and 0 dBm values.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *
  * Returned Value:
@@ -363,7 +363,7 @@ int nrf24l01_gettxpower(FAR struct nrf24l01_dev_s *dev);
 /************************************************************************************
  * Set transmission data rate
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *
  * Returned Value:
@@ -377,7 +377,7 @@ int nrf24l01_setdatarate(FAR struct nrf24l01_dev_s *dev,
 /************************************************************************************
  * Set radio frequency.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   freq New frequency value  (in Mhz: 2400 to 2525)
  *
@@ -391,7 +391,7 @@ int nrf24l01_setradiofreq(FAR struct nrf24l01_dev_s *dev, uint32_t freq);
 /************************************************************************************
  * Get current radio frequency.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *
  * Returned Value:
@@ -404,7 +404,7 @@ uint32_t nrf24l01_getradiofreq(FAR struct nrf24l01_dev_s *dev);
 /************************************************************************************
  * Configure address length.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   width Address width to use (3-5)
  *
@@ -418,7 +418,7 @@ int nrf24l01_setaddrwidth(FAR struct nrf24l01_dev_s *dev, uint32_t width);
 /************************************************************************************
  * Change the current lifecycle state of the nRF24L01+ chip.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   state New state to put the nRF24L01 module into
  *
@@ -429,7 +429,7 @@ int nrf24l01_changestate(FAR struct nrf24l01_dev_s *dev, nrf24l01_state_t state)
 /************************************************************************************
  * Send data to the default address.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   data Pointer on the data buffer
  *   datalen Length of the buffer (in bytes)
@@ -444,7 +444,7 @@ int nrf24l01_send(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 /************************************************************************************
  * Send data to the specified address.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *   data Pointer on the data buffer
  *   datalen Length of the buffer (in bytes)
@@ -461,7 +461,7 @@ int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
  * Get the retransmits count of the last transmission.
  * This value is meaningful only if auto-acknowledge is enabled.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
  *
  * Returned Value:

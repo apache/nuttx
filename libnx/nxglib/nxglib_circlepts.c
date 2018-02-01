@@ -89,13 +89,13 @@
  *   circumference of the circle.  These points may then be used by
  *   nx_drawcircle() or related APIs to draw a circle outline.
  *
- * Input parameters:
+ * Input Parameters:
  *   center - A pointer to the point that is the center of the circle
  *   radius - The radius of the circle in pixels.
  *   circle - A pointer the first entry in an array of 16 points where the
  *            circle points will be returned.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

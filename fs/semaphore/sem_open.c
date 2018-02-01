@@ -93,7 +93,7 @@
  *        initial values of the semaphore must be less than or equal to
  *        SEM_VALUE_MAX.
  *
- * Return Value:
+ * Returned Value:
  *   A pointer to sem_t or SEM_FAILED if unsuccessful.
  *
  * Assumptions:

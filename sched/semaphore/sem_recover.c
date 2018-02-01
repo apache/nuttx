@@ -64,10 +64,10 @@
  *   only the task, there is not mechanism to traverse all of the semaphores
  *   with counts held by the task.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The TCB of the terminated task or thread
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

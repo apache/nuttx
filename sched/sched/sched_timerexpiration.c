@@ -162,12 +162,12 @@ static struct timespec g_stop_time;
  *   Check for operations specific to scheduling policy of the currently
  *   active task on a single CPU.
  *
- * Inputs:
+ * Input Parameters:
  *   cpu - The CPU that we are performing the scheduler operations on.
  *   ticks - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
- * Return Value:
+ * Returned Value:
  *   The number if ticks remaining until the next time slice expires.
  *   Zero is returned if there is no time slicing (i.e., the task at the
  *   head of the ready-to-run list does not support round robin
@@ -264,11 +264,11 @@ static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
  *   Check for operations specific to scheduling policy of the currently
  *   active task on a single CPU.
  *
- * Inputs:
+ * Input Parameters:
  *   ticks - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
- * Return Value:
+ * Returned Value:
  *   The number if ticks remaining until the next time slice expires.
  *   Zero is returned if there is no time slicing (i.e., the task at the
  *   head of the ready-to-run list does not support round robin

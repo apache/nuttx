@@ -59,10 +59,10 @@
  *   messages if it was a pre-allocated message. If the message was
  *   allocated dynamically it will be deallocated.
  *
- * Inputs:
+ * Input Parameters:
  *   mqmsg - message to free
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

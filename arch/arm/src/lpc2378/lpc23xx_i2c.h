@@ -163,7 +163,7 @@
  *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple I2C interfaces)
  *
  * Returned Value:
@@ -179,7 +179,7 @@ FAR struct i2c_master_s *lpc2378_i2cbus_initialize(int port);
  * Description:
  *   De-initialize the selected I2C port, and power down the device.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Device structure as returned by the lpc2378_i2cbus_initialize()
  *
  * Returned Value:

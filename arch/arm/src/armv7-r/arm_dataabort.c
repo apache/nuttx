@@ -54,7 +54,7 @@
 /****************************************************************************
  * Name: arm_dataabort
  *
- * Input parameters:
+ * Input Parameters:
  *   regs - The standard, ARM register save array.
  *   dfar - Fault address register.
  *   dfsr - Fault status register.

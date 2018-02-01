@@ -58,7 +58,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
@@ -79,7 +79,7 @@ int umm_trysemaphore(void)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; a negated errno on failure
  *
  ****************************************************************************/

@@ -63,7 +63,7 @@
  * Parameters:
  *   name - The name of the variable to find.
  *
- * Return Value:
+ * Returned Value:
  *   The value of the valiable (read-only) or NULL on failure
  *
  * Assumptions:

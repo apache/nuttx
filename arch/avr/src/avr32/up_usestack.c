@@ -78,7 +78,7 @@
  *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   - tcb: The TCB of new task
  *   - stack_size:  The allocated stack size.
  *

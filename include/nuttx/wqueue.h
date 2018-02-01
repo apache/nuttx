@@ -318,7 +318,7 @@ extern "C"
  * Description:
  *   Start the user mode work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -345,7 +345,7 @@ int work_usrstart(void);
  *   previous work as been performed and removed from the queue, then any
  *   pending work will be canceled and lost.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will invoked
@@ -371,7 +371,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  *   After work has been cancelled, it may be re-queue by calling work_queue()
  *   again.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID
  *   work   - The previously queue work structure to cancel
  *
@@ -393,7 +393,7 @@ int work_cancel(int qid, FAR struct work_s *work);
  *   is used internally by the work logic but could also be used by the
  *   user to force an immediate re-assessment of pending work.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID
  *
  * Returned Value:
@@ -409,7 +409,7 @@ int work_signal(int qid);
  * Description:
  *   Check if the work structure is available.
  *
- * Input parameters:
+ * Input Parameters:
  *   work - The work queue structure to check.
  *   None
  *
@@ -431,7 +431,7 @@ int work_signal(int qid);
  * Parameters:
  *   reqprio - Requested minimum worker thread priority
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -453,7 +453,7 @@ void lpwork_boostpriority(uint8_t reqprio);
  *   reqprio - Previously requested minimum worker thread priority to be
  *     "unboosted"
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

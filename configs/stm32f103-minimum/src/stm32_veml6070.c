@@ -67,7 +67,7 @@
  * Description:
  *   Initialize and register the VEML6070 UV-A Light sensor.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/uvlight0"
  *
  * Returned Value:

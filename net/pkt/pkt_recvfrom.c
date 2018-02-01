@@ -159,7 +159,7 @@ static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
  *
  * Parameters:
  *
- * Returned Values:
+ * Returned Value:
  *
  * Assumptions:
  *
@@ -177,7 +177,7 @@ static inline void pkt_recvfrom_sender(FAR struct net_driver_s *dev,
  *
  * Parameters:
  *
- * Returned Values:
+ * Returned Value:
  *
  * Assumptions:
  *

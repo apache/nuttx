@@ -76,7 +76,7 @@ struct nxbe_fill_s
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

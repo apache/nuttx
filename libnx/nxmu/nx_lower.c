@@ -56,10 +56,10 @@
  * Description:
  *   Lower the specified window to the bottom of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hwnd - the window to be lowered
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

@@ -65,7 +65,7 @@
  * Input Parameters:
  *   bytes - The byte to use.
  *
- * Returned Values:
+ * Returned Value:
  *   Returns the number of bits set to '1' in the given byte.
  *
  ****************************************************************************/
@@ -95,7 +95,7 @@ static unsigned int hamming_bitsinbyte(uint8_t byte)
  * Input Parameters:
  *   code - Hamming code
  *
- * Returned Values:
+ * Returned Value:
  *   Returns the number of bits set to '1' in the given hamming code.
  *
  ****************************************************************************/
@@ -117,7 +117,7 @@ static uint8_t hamming_bitsincode256(FAR uint8_t *code)
  *   data - Data buffer to calculate code
  *   code - Pointer to a buffer where the code should be stored
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -272,7 +272,7 @@ static void hamming_compute256(FAR const uint8_t *data, FAR uint8_t *code)
  *   data     - Data buffer to check
  *   original - Hamming code to use for verifying the data
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success, otherwise returns a HAMMING_ERROR_ code.
  *
  ****************************************************************************/
@@ -372,7 +372,7 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
  *   size - Data size in bytes
  *   code - Codes buffer
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -408,7 +408,7 @@ void hamming_compute256x(FAR const uint8_t *data, size_t size, uint8_t *code)
  *   size - Size of the data in bytes
  *   code - Original codes
  *
- * Returned Values:
+ * Returned Value:
  *   Return 0 if the data is correct, HAMMING_ERROR_SINGLEBIT if one or more
  *   block(s) have had a single bit corrected, or either HAMMING_ERROR_ECC
  *   or HAMMING_ERROR_MULTIPLEBITS.

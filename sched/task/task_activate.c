@@ -60,7 +60,7 @@
  * Input Parameters:
  *   tcb - The TCB for the task for the task (same as the task_init argument).
  *
- * Return Value:
+ * Returned Value:
  *   Always returns OK
  *
  ****************************************************************************/

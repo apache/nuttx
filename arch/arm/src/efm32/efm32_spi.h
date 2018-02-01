@@ -59,7 +59,7 @@ struct spi_dev_s;  /* Forward reference */
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - SPI port number to initialize.  One of {0,1,2}
  *
  * Returned Value:

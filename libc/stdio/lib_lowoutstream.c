@@ -76,7 +76,7 @@ static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  * Description:
  *   Initializes a stream for use with low-level, architecture-specific I/O.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_lowoutstream_s to be initialized.
  *

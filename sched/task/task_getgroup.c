@@ -60,7 +60,7 @@
  * Parameters:
  *   pid - The task ID to use in the lookup.
  *
- * Return Value:
+ * Returned Value:
  *   On success, a pointer to the group task structure is returned.  This
  *   function can fail only if there is no group that corresponds to the
  *   groupd ID.

@@ -80,7 +80,7 @@ struct group_signal_s
  *   pid - The ID of the group member that may be signalled.
  *   arg - A pointer to a struct group_signal_s instance.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -195,7 +195,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
  * Parameters:
  *   group - The task group that needs to be signalled.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:

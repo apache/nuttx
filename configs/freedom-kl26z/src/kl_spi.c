@@ -124,7 +124,7 @@ void weak_function kl_spidev_initialize(void)
  *   devid - Identifies the (logical) device
  *   selected - TRUE:Select the device, FALSE:De-select the device
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -156,7 +156,7 @@ void kl_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
  * Input Parameters:
  *   devid - Identifies the (logical) device
  *
- * Returned Values:
+ * Returned Value:
  *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/
@@ -187,7 +187,7 @@ uint8_t kl_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
  *   devid - Identifies the (logical) device
  *   cmd - Determines where command or data should be selected.
  *
- * Returned Values:
+ * Returned Value:
  *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/

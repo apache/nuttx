@@ -125,13 +125,13 @@ void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd);
  *   then move the rectangle to that it is relative to the containing
  *   window.
  *
- * Input parameters:
+ * Input Parameters:
  *   fwnd   - The framed window to be used
  *   dest   - The locaton to put the result
  *   src    - The src rectangle in relative sub-window coordinates
  *   bounds - The subwindow bounds in absolute screen coordinates.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -152,13 +152,13 @@ void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
  *   relative to the sub-window (i.e., (0,0) is the top left corner of the
  *   sub-window).
  *
- * Input parameters:
+ * Input Parameters:
  *   fwnd   - The framed window to be used
  *   dest   - The location to put the result
  *   src    - The src rectangle in relative container-window coordinates
  *   bounds - The subwindow bounds in absolute screen coordinates.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -185,7 +185,7 @@ void nxtk_containerclip(FAR struct nxtk_framedwindow_s *fwnd,
  *   srcoffset  - The offset to move the region
  *   bounds     - The subwindow bounds in absolute screen coordinates.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -203,13 +203,13 @@ void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
  * Description:
  *   Redraw the window frame.
  *
- * Input parameters:
+ * Input Parameters:
  *   fwnd   - the framed window whose frame needs to be re-drawn.  This must
  *            have been previously created by nxtk_openwindow().
  *   bounds - Only draw the ports of the frame within this bounding box.
  *            (window relative coordinates).
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

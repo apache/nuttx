@@ -505,7 +505,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  * Description:
  *   Initialize the SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port Port number (must be zero)
  *
  * Returned Value:
@@ -564,7 +564,7 @@ static FAR struct spi_dev_s *lpc43_spiport_initialize(int port)
  *   1 - SSP0
  *   2 - SSP1
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

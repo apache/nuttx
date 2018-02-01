@@ -664,7 +664,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  * Description:
  *   Initialize the SSP0
  *
- * Input Parameter:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -717,7 +717,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
  * Description:
  *   Initialize the SSP1
  *
- * Input Parameter:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -777,7 +777,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
  * Description:
  *   Initialize the selected SSP port (0=SSP0, 1=SSP1)
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - Port number (0=SSP0, 1=SSP1)
  *
  * Returned Value:

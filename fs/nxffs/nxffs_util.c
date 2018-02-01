@@ -143,7 +143,7 @@ void nxffs_wrle32(uint8_t *dest, uint32_t val)
  *   buffer - Address of the start of the memory to check.
  *   buflen - The number of bytes to check.
  *
- * Returned Values:
+ * Returned Value:
  *   The number of erased bytes found at the beginning of the memory region.
  *
  ****************************************************************************/

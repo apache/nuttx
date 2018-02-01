@@ -217,7 +217,7 @@ extern "C"
  *   NOTE:  This function would not be called by application code.  Rather it is
  *   called indirectly through the architecture-specific interfaces.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev path - The full path to the driver to be registers in the NuttX
  *     pseudo-filesystem.  The recommended convention is to name all watchdog
  *     drivers as "/dev/watchdog0", "/dev/watchdog1", etc.  where the driver
@@ -242,7 +242,7 @@ FAR void *watchdog_register(FAR const char *path,
  *   This function can be called to disable and unregister the watchdog
  *   device driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle - This is the handle that was returned by watchdog_register()
  *
  * Returned Value:

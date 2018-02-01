@@ -402,7 +402,7 @@ int stm32_pwm_setup(void);
  * Description:
  *   Initialize the NRF24L01 wireless module
  *
- * Input Parmeters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

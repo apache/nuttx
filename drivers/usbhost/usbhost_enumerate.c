@@ -280,7 +280,7 @@ static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
  *      and bound to the hub port, the allocated class instance is returned
  *      into this caller-provided memory location.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *

@@ -1636,7 +1636,7 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
  *   Called from the worker thread in the USBMSC_STATE_IDLE state.  Checks
  *   for the receipt of a bulk CBW.
  *
- * Returned value:
+ * Returned Value:
  *   If no new, valid CBW is available, this function returns a negated errno.
  *   Otherwise, when a new CBW is successfully parsed, this function sets
  *   priv->thstate to USBMSC_STATE_CMDPARSE and returns OK.
@@ -1781,7 +1781,7 @@ static int usbmsc_idlestate(FAR struct usbmsc_dev_s *priv)
  *   This state is entered when usbmsc_idlestate obtains a valid CBW
  *   containing SCSI commands.  This function processes those SCSI commands.
  *
- * Returned value:
+ * Returned Value:
  *   If no write request is available or certain other errors occur, this
  *   function returns a negated errno and stays in the USBMSC_STATE_CMDPARSE
  *   state.  Otherwise, when the new CBW is successfully process, this
@@ -2097,7 +2097,7 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
  *   of the USBMSC_STATE_CMDPARSE state that handles extended SCSI read
  *   command handling.
  *
- * Returned value:
+ * Returned Value:
  *   If no USBDEV write request is available or certain other errors occur, this
  *   function returns a negated errno and stays in the USBMSC_STATE_CMDREAD
  *   state.  Otherwise, when the new SCSI read command is fully processed,
@@ -2244,7 +2244,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
  *   of the USBMSC_STATE_CMDPARSE state that handles extended SCSI write
  *   command handling.
  *
- * Returned value:
+ * Returned Value:
  *   If no USBDEV write request is available or certain other errors occur, this
  *   function returns a negated errno and stays in the USBMSC_STATE_CMDWRITE
  *   state.  Otherwise, when the new SCSI write command is fully processed,
@@ -2384,7 +2384,7 @@ errout:
  *   The USBMSC_STATE_CMDFINISH state is entered when processing of a
  *   command has finished but before status has been returned.
  *
- * Returned value:
+ * Returned Value:
  *   If no USBDEV write request is available or certain other errors occur, this
  *   function returns a negated errno and stays in the USBMSC_STATE_CMDFINISH
  *   state.  Otherwise, when the command is fully processed, this function
@@ -2527,7 +2527,7 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
  *   That state is after a CBW has been fully processed.  This function sends
  *   the concluding CSW.
  *
- * Returned value:
+ * Returned Value:
  *   If no write request is available or certain other errors occur, this
  *   function returns a negated errno and stays in the USBMSC_STATE_CMDSTATUS
  *   state.  Otherwise, when the SCSI statis is successfully returned, this

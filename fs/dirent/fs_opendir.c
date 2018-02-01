@@ -61,12 +61,12 @@
  * Description:
  *   Handle the case where the inode to be opened is within a mountpoint.
  *
- * Inputs:
+ * Input Parameters:
  *   inode -- the inode of the mountpoint to open
  *   relpath -- the relative path within the mountpoint to open
  *   dir -- the dirent structure to be initialized
  *
- * Return:
+ * Returned Value:
  *   On success, OK is returned; Otherwise, a positive errno is returned.
  *
  ****************************************************************************/
@@ -127,11 +127,11 @@ static inline int open_mountpoint(FAR struct inode *inode,
  *   Handle the case where the inode to be opened is within the top-level
  *   pseudo-file system.
  *
- * Inputs:
+ * Input Parameters:
  *   inode -- the inode of the mountpoint to open
  *   dir -- the dirent structure to be initialized
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -164,10 +164,10 @@ static void open_pseudodir(FAR struct inode *inode, FAR struct fs_dirent_s *dir)
  *   and, therefore, it must be a directory node.  But is has no children
  *   to be enumerated either.
  *
- * Inputs:
+ * Input Parameters:
  *   dir -- the dirent structure to be initialized
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -204,10 +204,10 @@ static inline void open_emptydir(FAR struct fs_dirent_s *dir)
  *   directory name, and returns a pointer to the directory stream. The
  *   stream is positioned at the first entry in the directory.
  *
- * Inputs:
+ * Input Parameters:
  *   path -- the directory to open
  *
- * Return:
+ * Returned Value:
  *   The opendir() function returns a pointer to the directory stream.  On
  *   error, NULL is returned, and errno is set appropriately.
  *

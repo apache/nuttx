@@ -58,7 +58,7 @@
  * Parameters:
  *   tp - Pointer to the time to be converted.
  *
- * Return Value:
+ * Returned Value:
  *   One success a pointer to the string is returned; on failure, NULL is
  *   returned.
  *

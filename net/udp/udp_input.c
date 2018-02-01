@@ -71,7 +71,7 @@
  *   udp   - A pointer to the UDP header in the packet
  *   iplen - Length of the IP and UDP headers
  *
- * Return:
+ * Returned Value:
  *   OK    - The packet has been processed  and can be deleted
  *   ERROR - Hold the packet and try again later.  There is a listening
  *           socket but no receive in place to catch the packet yet.  The
@@ -241,7 +241,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
  * Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
- * Return:
+ * Returned Value:
  *   OK  The packet has been processed  and can be deleted
  *   ERROR Hold the packet and try again later. There is a listening socket
  *         but no receive in place to catch the packet yet.
@@ -273,7 +273,7 @@ int udp_ipv4_input(FAR struct net_driver_s *dev)
  * Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
- * Return:
+ * Returned Value:
  *   OK  The packet has been processed  and can be deleted
  *   ERROR Hold the packet and try again later. There is a listening socket
  *         but no receive in place to catch the packet yet.

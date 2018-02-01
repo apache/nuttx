@@ -80,7 +80,7 @@
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately.  (See
  *   task_schedsetup() for possible failure conditions).  On failure, the
  *   caller is responsible for freeing the stack memory and for calling

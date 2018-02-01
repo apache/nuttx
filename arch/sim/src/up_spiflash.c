@@ -897,7 +897,7 @@ static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

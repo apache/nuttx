@@ -82,7 +82,7 @@
  * Input Parameters:
  *   func - A pointer to the function to be called when the task exits.
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success. Non-zero on failure.
  *
  ****************************************************************************/

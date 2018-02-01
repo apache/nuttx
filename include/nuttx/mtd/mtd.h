@@ -243,7 +243,7 @@ extern "C"
  *   partitions, that mutual exclusion would be provided by the file system
  *   above the FLASH driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   mtd        - The MTD device to be partitioned
  *   firstblock - The offset in bytes to the first block
  *   nblocks    - The number of blocks in the partition

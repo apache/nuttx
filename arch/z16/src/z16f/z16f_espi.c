@@ -788,7 +788,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - Identifies the "logical" SPI port.  Must be zero in this case.
  *
  * Returned Value:

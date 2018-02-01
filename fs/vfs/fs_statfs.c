@@ -70,7 +70,8 @@ static int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
 /****************************************************************************
  * Name: statfs
  *
- * Return: Zero on success; -1 on failure with errno set:
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set:
  *
  *   EACCES  Search permission is denied for one of the directories in the
  *           path prefix of path.

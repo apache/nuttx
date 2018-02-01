@@ -114,7 +114,7 @@ static int stm32_exti_pvd_isr(int irq, void *context, FAR void *arg)
  *  - func:   when non-NULL, generate interrupt
  *  - arg:    Argument passed to the interrupt callback
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *

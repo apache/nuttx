@@ -61,7 +61,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   Returns true if the mutex is locked
  *
  ****************************************************************************/
@@ -105,7 +105,7 @@ static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

@@ -823,12 +823,12 @@ FAR struct socketlist *sched_getsockets(void);
  *   The start hook is useful, for example, for setting up automatic
  *   configuration of C++ constructors.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The new, unstarted task task that needs the start hook
  *   starthook - The pointer to the start hook function
  *   arg - The argument to pass to the start hook function.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ********************************************************************************/
@@ -923,14 +923,14 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb);
  *   use by application logic.  Applications should use the standard
  *   sched_getparam().
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task.  If pid is zero, the priority
  *     of the calling task is returned.
  *   param - A structure whose member sched_priority is the integer
  *     priority.  The task's priority is copied to the sched_priority
  *     element of this structure.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if successful, otherwise a negated errno value is returned to
  *   indicate the nature of the failure..
  *
@@ -958,14 +958,14 @@ int nxsched_getparam (pid_t pid, FAR struct sched_param *param);
  *   use by application logic.  Applications should use the standard
  *   sched_setparam().
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task to reprioritize.  If pid is zero, the
  *      priority of the calling task is changed.
  *   param - A structure whose member sched_priority is the integer priority.
  *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
  *      through SCHED_PRIORITY_MAX.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if successful, otherwise a negated errno value is returned to
  *   indicate the nature of the failure..
  *
@@ -995,11 +995,11 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param);
  *   use by application logic.  Applications should use the standard
  *   sched_getscheduler().
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task to query.  If pid is zero, the
  *     calling task is queried.
  *
- * Return Value:
+ * Returned Value:
  *    On success, sched_getscheduler() returns the policy for the task
  *    (either SCHED_FIFO or SCHED_RR).  On error,  a negated errno value
  *    returned:
@@ -1100,12 +1100,12 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
  *   is not intended for use by application logic.  Applications should
  *   use the standard sched_setparam().
  *
- * Inputs:
+ * Input Parameters:
  *   pid        - The ID of thread whose affinity set will be modified.
  *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
  *   mask       - The location to return the thread's new affinity set.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) if successful.  Otherwise, a negated errno value is returned:
  *
  *     ESRCH  The task whose ID is pid could not be found.

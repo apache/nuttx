@@ -63,7 +63,7 @@
  *   tv - The net to time to be set
  *   tz - Ignored
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) on success;  -1 is returned on failure with the errno variable
  *   set appropriately.
  *

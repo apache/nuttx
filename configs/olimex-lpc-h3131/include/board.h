@@ -174,11 +174,11 @@ extern "C"
  *   Setup to receive an interrupt-level callback if an overcurrent condition is
  *   detected.
  *
- * Input parameter:
+ * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument that will accompany the interrupt
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on failure.
  *
  ************************************************************************************/

@@ -66,7 +66,7 @@
  * Parameters:
  *   tcb - tcb of the idle task.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

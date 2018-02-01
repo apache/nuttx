@@ -107,7 +107,7 @@ nxgl_mxpixel_t g_bordercolor3[CONFIG_NX_NPLANES] =
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NXTK callbacks.
  *
- * Return:
+ * Returned Value:
  *   Success: A non-NULL handle used with subsequent NXTK window accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *

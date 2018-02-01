@@ -80,7 +80,7 @@
  *               modified
  *    protocol - The new protocol to use
  *
- * Return Value:
+ * Returned Value:
  *   This function is exposed as a non-standard application interface.  It
  *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
  *   the errno value is set appropriately.
@@ -138,7 +138,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol)
  *               modified
  *    protocol - The new protocol to use
  *
- * Return Value:
+ * Returned Value:
  *   This function is exposed as a non-standard application interface.  It
  *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
  *   the errno value is set appropriately.

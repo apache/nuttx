@@ -74,7 +74,7 @@ FAR struct binary_s *g_unloadhead;
  *
  *   This function will add one structure to the linked list
  *
- * Input Parameter:
+ * Input Parameters:
  *   pid - The task ID of the child task
  *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads
@@ -117,7 +117,7 @@ static void unload_list_add(pid_t pid, FAR struct binary_s *bin)
  *
  *   This function will remove one structure to the linked list
  *
- * Input Parameter:
+ * Input Parameters:
  *   pid - The task ID of the child task
  *
  * Returned Value:
@@ -184,7 +184,7 @@ static FAR struct binary_s *unload_list_remove(pid_t pid)
  *   bin was allocated with kmm_malloc() or friends and will also automatically
  *   free the structure with kmm_free() when the task exists.
  *
- * Input Parameter:
+ * Input Parameters:
  *   pid - The ID of the task that just exited
  *   arg - A reference to the load structure cast to FAR void *
  *
@@ -243,7 +243,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
  *   or friends.  It will also automatically free the structure with kmm_free()
  *   after unloading the module.
  *
- * Input Parameter:
+ * Input Parameters:
  *   pid - The task ID of the child task
  *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads

@@ -306,7 +306,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
  *   closed so that no thread will attempt access it while it is being
  *   deleted.
  *
- * Inputs:
+ * Input Parameters:
  *   msgq - Named essage queue to be freed
  *
  * Returned Value:

@@ -65,7 +65,7 @@
  * Parameters:
  *   reqprio - Requested minimum worker thread priority
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -178,7 +178,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
  *   reqprio - Previously requested minimum worker thread priority to be
  *     "unboosted"
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -324,7 +324,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
  * Parameters:
  *   reqprio - Requested minimum worker thread priority
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -370,7 +370,7 @@ void lpwork_boostpriority(uint8_t reqprio)
  *   reqprio - Previously requested minimum worker thread priority to be
  *     "unboosted"
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

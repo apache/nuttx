@@ -81,7 +81,7 @@ static struct g_gpiohandler_s g_gpiohandler[NR_GPIO_IRQS];
 /****************************************************************************
  * Name: gpio_baseaddress
  *
- * Input:
+ * Input Parameters:
  *   irq - A IRQ number in the range of 0 to NR_GPIO_IRQS.
  *
  * Description:
@@ -114,7 +114,7 @@ static inline uint32_t gpio_baseaddress(unsigned int irq)
 /****************************************************************************
  * Name: gpio_pin
  *
- * Input:
+ * Input Parameters:
  *   irq - A IRQ number in the range of 0 to NR_GPIO_IRQS.
  *
  * Description:

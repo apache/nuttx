@@ -59,7 +59,7 @@
  *   handle  - The connection handle
  *   color - The color to use in the background
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

@@ -59,7 +59,7 @@
  *   pid - The ID of the group member that may be signalled.
  *   arg - The PID of the thread to be retained.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -95,7 +95,7 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
  * Parameters:
  *   tcb - TCB of the task to be retained.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

@@ -56,11 +56,11 @@
  * Description:
  *  This function adds a TCB to a prioritized TCB list.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - Points to the TCB to add to the prioritized list
  *   list - Points to the prioritized list to add tcb to
  *
- * Return Value:
+ * Returned Value:
  *   true if the head of the list has changed.
  *
  * Assumptions:

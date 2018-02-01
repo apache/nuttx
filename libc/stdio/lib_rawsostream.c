@@ -98,7 +98,7 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  * Description:
  *   Initializes a stream for use with a file descriptor.
  *
- * Input parameters:
+ * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
  *               lib_rawoutstream_s to be initialized.
  *   fd        - User provided file/socket descriptor (must have been opened

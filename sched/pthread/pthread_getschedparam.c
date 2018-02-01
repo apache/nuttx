@@ -80,7 +80,7 @@
  *   policy - The location to store the thread's scheduling policy.
  *   param  - The location to store the thread's priority.
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, the error code ESRCH if the value specified
  *   by thread does not refer to an existing thread.
  *

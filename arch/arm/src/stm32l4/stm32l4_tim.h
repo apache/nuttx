@@ -204,7 +204,7 @@ int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s *dev);
  *   devpath - The full path to the timer device. This should be of the form /dev/timer0
  *   timer - the timer number.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *

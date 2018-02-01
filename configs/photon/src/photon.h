@@ -120,7 +120,7 @@ void weak_function stm32_spidev_initialize(void);
  * Description:
  *   Perform architecture-specific initialization of the Watchdog hardware.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -138,7 +138,7 @@ int photon_watchdog_initialize(void);
  * Description:
  *   Initialize wlan hardware and driver for Photon board.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

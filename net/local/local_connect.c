@@ -117,7 +117,7 @@ static inline void _local_semtake(sem_t *sem)
  *   Find a local connection structure that is the appropriate "server"
  *   connection to be used with the provided "client" connection.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) returned on success; A negated errno value is returned on a
  *   failure.  Possible failures include:
  *
@@ -250,7 +250,7 @@ errout_with_fifos:
  *   Find a local connection structure that is the appropriate "server"
  *   connection to be used with the provided "client" connection.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) returned on success; A negated errno value is returned on a
  *   failure.  Possible failures include:
  *

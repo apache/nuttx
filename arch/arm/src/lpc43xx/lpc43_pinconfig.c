@@ -68,7 +68,7 @@
  * Description:
  *   Configure a pin based on bit-encoded description of the pin.
  *
- * Input Value:
+ * Input Parameters:
  *   20-bit encoded value describing the pin.
  *
  * Returned Value:

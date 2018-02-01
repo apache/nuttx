@@ -97,7 +97,7 @@
  *   bootloader that brought us into SDRAM and it is that bootloader that
  *   has configured the clocking.
  *
- * Input parameters:
+ * Input Parameters:
  *   target - The target SD frequency
  *
  * Returned Value:

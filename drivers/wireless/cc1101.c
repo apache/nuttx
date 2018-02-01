@@ -326,7 +326,7 @@ void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 
 /* CC1101 Access with Range Check
  *
- * Input Paramters:
+ * Input Parameters:
  *   dev CC1101 Private Structure
  *   addr CC1101 Address
  *   buf Pointer to buffer, either for read or write access

@@ -62,7 +62,7 @@
  * Parameters:
  *   set - The location to return the pending signal set.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) or -1 (ERROR)
  *
  * Assumptions:

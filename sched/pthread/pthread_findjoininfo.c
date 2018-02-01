@@ -58,7 +58,7 @@
  *   group - The that the pid is (or was) a member of of
  *   pid - The ID of the pthread
  *
- * Return Value:
+ * Returned Value:
  *   None or pointer to the found entry.
  *
  * Assumptions:

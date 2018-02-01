@@ -64,14 +64,14 @@
  *   use by application logic.  Applications should use the standard
  *   sched_getparam().
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task.  If pid is zero, the priority
  *     of the calling task is returned.
  *   param - A structure whose member sched_priority is the integer
  *     priority.  The task's priority is copied to the sched_priority
  *     element of this structure.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if successful, otherwise a negated errno value is returned to
  *   indicate the nature of the failure..
  *
@@ -165,14 +165,14 @@ int nxsched_getparam (pid_t pid, FAR struct sched_param *param)
  *   pid.  This function is a simply wrapper around nxsched_getparam() that
  *   sets the errno value in the event of an error.
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task.  If pid is zero, the priority
  *     of the calling task is returned.
  *   param - A structure whose member sched_priority is the integer
  *     priority.  The task's priority is copied to the sched_priority
  *     element of this structure.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if successful, otherwise -1 (ERROR) with the errno value set
  *   to indicate the nature of the problem.
  *

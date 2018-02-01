@@ -82,10 +82,10 @@ static struct ieee802154_container_s
  *   be called early in the initialization sequence before any socket
  *   activity.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -127,10 +127,10 @@ void ieee802154_container_initialize(void)
  *   list.  If that the list is empty, then the meta-data structure will be
  *   allocated from the dynamic memory pool.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   A reference to the allocated container structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
@@ -185,10 +185,10 @@ FAR struct ieee802154_container_s *ieee802154_container_allocate(void)
  *   structure. If the container structure was allocated dynamically it will
  *   be deallocated.
  *
- * Inputs:
+ * Input Parameters:
  *   container - container structure to free
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

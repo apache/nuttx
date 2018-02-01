@@ -63,7 +63,7 @@
  *   argc - The number of arguments (should be 1)
  *   pid  - The task ID of the task to wakeup
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

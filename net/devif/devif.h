@@ -309,7 +309,7 @@ EXTERN systime_t g_polltime;
  * Parameters:
  *   None
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -400,7 +400,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  * Description:
  *   Execute a list of callbacks.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
@@ -409,7 +409,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *   flags - The bit set of events to be notified.
  *   list - The list to traverse in performing the notifications
  *
- * Returned value:
+ * Returned Value:
  *   The updated flags as modified by the callback functions.
  *
  * Assumptions:
@@ -426,7 +426,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  * Description:
  *   Execute a list of callbacks using the device event chain.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
@@ -434,7 +434,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *
- * Returned value:
+ * Returned Value:
  *   The updated flags as modified by the callback functions.
  *
  * Assumptions:

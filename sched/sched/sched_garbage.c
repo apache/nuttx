@@ -53,7 +53,7 @@
  * Description:
  *   Clean-up deferred de-allocations of user memory
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -110,7 +110,7 @@ static inline void sched_kucleanup(void)
  * Description:
  *   Return TRUE if there is user heap garbage to be collected.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -133,7 +133,7 @@ static inline bool sched_have_kugarbage(void)
  * Description:
  *   Clean-up deferred de-allocations of kernel memory
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -184,7 +184,7 @@ static inline void sched_kcleanup(void)
  * Description:
  *   Return TRUE if there is kernal heap garbage to be collected.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -220,7 +220,7 @@ static inline bool sched_have_kgarbage(void)
  *   collection to be called from the IDLE thread because it runs at a very
  *   low priority and could cause false memory out conditions.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -254,7 +254,7 @@ void sched_garbage_collection(void)
  *   state.  The looping nature of the IDLE loops should catch any missed
  *   garbage from the test on the next time arround.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

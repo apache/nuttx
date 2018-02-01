@@ -111,7 +111,7 @@ static sq_queue_t g_desalloc;
  * Description:
  *   Allocate a block of messages and place them on the free list.
  *
- * Inputs Parameters:
+ * Input Parameters:
  *  queue
  *
  ****************************************************************************/
@@ -156,10 +156,10 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
  *   be called early in the initialization sequence before any of the
  *   other message interfaces execute.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -198,10 +198,10 @@ void nxmq_initialize(void)
  *   Allocate a block of message descriptors and place them on the free
  *   list.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

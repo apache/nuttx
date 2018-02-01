@@ -233,12 +233,12 @@ static int bat_gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   Register a lower half battery driver with the common, upper-half
  *   battery driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The location in the pseudo-filesystem to create the driver.
  *     Recommended standard is "/dev/bat0", "/dev/bat1", etc.
  *   dev - An instance of the battery state structure .
  *
- * Returned value:
+ * Returned Value:
  *    Zero on success or a negated errno value on failure.
  *
  ****************************************************************************/

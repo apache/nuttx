@@ -128,11 +128,11 @@
  * Description:
  *   Erases the specified block of the device.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw    - Lower-half, raw NAND FLASH interface
  *   block  - Number of the physical block to erase.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -146,14 +146,14 @@
  *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
  *   provided buffers.  This is a raw read of the flash contents.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *   spare - Buffer where the spare area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -167,14 +167,14 @@
  *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
  *   This is a raw write of the flash contents.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *   spare - Buffer containing the spare data to be written.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -189,14 +189,14 @@
  *   provided buffers.  Hardware ECC checking will be performed if so
  *   configured.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
  *   spare - Buffer where the spare area will be stored.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
@@ -214,14 +214,14 @@
  *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
  *   Hardware ECC checking will be performed if so configured.
  *
- * Input parameters:
+ * Input Parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
  *   spare - Buffer containing the spare data to be written.
  *
- * Returned value.
+ * Returned Value:
  *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/

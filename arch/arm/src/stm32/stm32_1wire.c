@@ -500,7 +500,7 @@ static void stm32_1wire_set_baud(struct stm32_1wire_priv_s *priv)
  * Description:
  *   Enable or disable APB clock for the USART peripheral
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - A reference to the 1-Wire driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
@@ -1149,7 +1149,7 @@ static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
  *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple 1-Wire interfaces)
  *
  * Returned Value:
@@ -1245,7 +1245,7 @@ FAR struct onewire_dev_s *stm32_1wireinitialize(int port)
  * Description:
  *   De-initialize the selected 1-Wire port, and power down the device.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Device structure as returned by the stm32_1wireinitialize()
  *
  * Returned Value:

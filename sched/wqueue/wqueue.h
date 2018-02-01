@@ -134,7 +134,7 @@ extern struct lp_wqueue_s g_lpwork;
  * Description:
  *   Start the high-priority, kernel-mode work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -153,7 +153,7 @@ int work_hpstart(void);
  * Description:
  *   Start the low-priority, kernel-mode worker thread(s)
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -175,7 +175,7 @@ int work_lpstart(void);
  *   part of the internal implementation of each work queue; it should not
  *   be called from application level logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   wqueue - Describes the work queue to be processed
  *   period - The polling period in clock ticks
  *   wndx   - The worker thread index

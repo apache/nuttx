@@ -57,7 +57,7 @@
  *   mqdes - Message queue descriptor
  *   mq_stat - Buffer in which to return attributes
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) if attributes provided, -1 (ERROR) otherwise.
  *
  * Assumptions:

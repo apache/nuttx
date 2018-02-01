@@ -96,7 +96,7 @@ struct ieee802154_sendto_s
  *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
- * Input parameters:
+ * Input Parameters:
  *   addr    - The address to check
  *   addrlen - The length of the address in bytes
  *
@@ -125,7 +125,7 @@ static bool ieee802154_anyaddrnull(FAR const uint8_t *addr, uint8_t addrlen)
  *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
- * Input parameters:
+ * Input Parameters:
  *   eaddr - The short address to check
  *
  * Returned Value:
@@ -145,7 +145,7 @@ static inline bool ieee802154_saddrnull(FAR const uint8_t *saddr)
  *   If the destination address is all zero in the MAC header buf, then it is
  *   broadcast on the 802.15.4 network.
  *
- * Input parameters:
+ * Input Parameters:
  *   eaddr - The extended address to check
  *
  * Returned Value:

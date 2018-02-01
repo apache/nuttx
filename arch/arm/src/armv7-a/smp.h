@@ -93,7 +93,7 @@ extern uint32_t g_cpu3_idlestack[SMP_STACK_WORDS];
  *
  *   These functions are provided by the common ARMv7-A logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -129,7 +129,7 @@ void __cpu3_start(void);
  *   This function must be provided by the each ARMv7-A MCU and implement
  *   MCU-specific initialization logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   cpu - The CPU index.  This is the same value that would be obtained by
  *      calling up_cpu_index();
  *

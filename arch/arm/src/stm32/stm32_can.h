@@ -125,7 +125,7 @@ extern "C"
  * Description:
  *   Initialize the selected CAN port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple CAN interfaces)
  *
  * Returned Value:

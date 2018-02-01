@@ -229,7 +229,7 @@ extern "C"
  *     nxtool_register() returns.
  *   minor - The device minor number
  *
- * Return:
+ * Returned Value:
  *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/
@@ -252,7 +252,7 @@ NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo,
  *     nxtool_register() returns.
  *   minor - The device minor number
  *
- * Return:
+ * Returned Value:
  *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/
@@ -277,7 +277,7 @@ NXTERM nxtk_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
  *     nxtool_register() returns.
  *   minor - The device minor number
  *
- * Return:
+ * Returned Value:
  *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/

@@ -68,13 +68,13 @@
  *   Given a description of a a circle, return 8 trapezoids that can be
  *   used to fill the circle by nx_fillcircle() and other interfaces.
  *
- * Input parameters:
+ * Input Parameters:
  *   center - A pointer to the point that is the center of the circle
  *   radius - The radius of the circle in pixels.
  *   circle - A pointer the first entry in an array of 8 trapezoids where
  *            the circle description will be returned.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

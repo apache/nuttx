@@ -62,7 +62,7 @@ static int zeroinstream_getc(FAR struct lib_instream_s *this)
  *   Initializes a NULL stream.  The initialized stream will return an
  *   infinitely long stream of zeroes.
  *
- * Input parameters:
+ * Input Parameters:
  *   zeroinstream  - User allocated, uninitialized instance of struct
  *                   lib_instream_s to be initialized.
  *

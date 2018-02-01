@@ -271,7 +271,7 @@ int exec_module(FAR const struct binary_s *bin);
  *   or friends.  It will also automatically free the structure with
  *   kmm_free() after unloading the module.
  *
- * Input Parameter:
+ * Input Parameters:
  *   pid - The task ID of the child task
  *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads

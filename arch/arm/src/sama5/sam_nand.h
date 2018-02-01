@@ -397,11 +397,11 @@ EXTERN struct sam_nand_s g_nand;
  *   performed here.  Those necessary NAND features are provided by common,
  *   higher level NAND MTD layers found in drivers/mtd.
  *
- * Input parameters:
+ * Input Parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
  *
- * Returned value.
+ * Returned Value:
  *   On success a non-NULL pointer to an MTD device structure is returned;
  *   NULL is returned on a failure.
  *
@@ -428,7 +428,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs);
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
  *
- * Returned Values:
+ * Returned Value:
  *   OK if the HSMC was successfully configured for this CS.  A negated
  *   errno value is returned on a failure.  This would fail with -ENODEV,
  *   for example, if the board does not support NAND FLASH on the requested
@@ -449,7 +449,7 @@ int board_nandflash_config(int cs);
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
  *
- * Returned Values:
+ * Returned Value:
  *   True:  NAND is busy, False: NAND is ready
  *
  ****************************************************************************/
@@ -470,7 +470,7 @@ bool board_nand_busy(int cs);
  *        are connected on-board).
  *   enable - True: enable Chip Select, False: Disable Chip select
  *
- * Returned Values:
+ * Returned Value:
  *   OK if the HSMC was successfully configured for this CS.  A negated
  *   errno value is returned on a failure.  This would fail with -ENODEV,
  *   for example, if the board does not support NAND FLASH on the requested

@@ -117,7 +117,7 @@ void builtin_uninitialize(void);
  * Description:
  *   Checks for availabiliy of application registerred during compile time.
  *
- * Input Parameter:
+ * Input Parameters:
  *   filename - Name of the linked-in binary to be started.
  *
  * Returned Value:
@@ -136,7 +136,7 @@ int builtin_isavail(FAR const char *appname);
  *   Returns pointer to a name of built-in application pointed by the
  *   index.
  *
- * Input Parameter:
+ * Input Parameters:
  *   index, from 0 and on ...
  *
  * Returned Value:
@@ -158,7 +158,7 @@ FAR const char *builtin_getname(int index);
  *   If support for builtin functions is enabled in the NuttX configuration,
  *   then this function must be provided by the application code.
  *
- * Input Parameter:
+ * Input Parameters:
  *   index, from 0 and on...
  *
  * Returned Value:

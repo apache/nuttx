@@ -58,10 +58,10 @@
  *   via pthread_cancel. I checks if the task was waiting for a message
  *   queue event and adjusts counts appropriately.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The TCB of the terminated task or thread
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

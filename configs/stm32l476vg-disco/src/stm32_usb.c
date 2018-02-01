@@ -301,10 +301,10 @@ void stm32l4_usbhost_vbusdrive(int iface, bool enable)
  *   Setup to receive an interrupt-level callback if an over current condition is
  *   detected.
  *
- * Input Parameter:
+ * Input Parameters:
  *   handler - New over current interrupt handler
  *
- * Returned value:
+ * Returned Value:
  *   Old over current interrupt handler
  *
  ************************************************************************************/

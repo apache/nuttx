@@ -64,7 +64,7 @@
  *   classid - ID info for the class under consideration.
  *   devid - ID info reported by the device.
  *
- * Returned Values:
+ * Returned Value:
  *   TRUE - the class will support this device.
  *
  ****************************************************************************/
@@ -127,7 +127,7 @@ static bool usbhost_idmatch(const struct usbhost_id_s *classid,
  * Input Parameters:
  *   id - Identifies the USB device class that has connect to the USB host.
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return a non-NULL instance of struct
  *   usbhost_registry_s.  NULL will be returned on failure.  This function
  *   can only fail if (1) id is NULL, or (2) no USB host class is registered

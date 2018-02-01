@@ -67,7 +67,7 @@
  *     PTHREAD_ONCE_INIT is defined in pthread.h
  *   init_routine - The initialization routine that will be called once.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or EINVAL if either once_control or init_routine are
  *   invalid
  *

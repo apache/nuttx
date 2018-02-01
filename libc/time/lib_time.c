@@ -63,7 +63,7 @@
  *   parameter is not used, but a time_t object is still returned by the
  *   function.
  *
- * Return Value:
+ * Returned Value:
  *   The current calendar time as a time_t object.  If the argument is not
  *   a null pointer, the return value is the same as the one stored in the
  *   location pointed by the argument.

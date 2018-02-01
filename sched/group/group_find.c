@@ -68,7 +68,7 @@
  * Parameters:
  *   gid - The group ID to find.
  *
- * Return Value:
+ * Returned Value:
  *   On success, a pointer to the group task structure is returned.  This
  *   function can fail only if there is no group that corresponds to the
  *   group ID.
@@ -114,7 +114,7 @@ FAR struct task_group_s *group_findbygid(gid_t gid)
  * Parameters:
  *   pid - The task ID of the main task thread.
  *
- * Return Value:
+ * Returned Value:
  *   On success, a pointer to the group task structure is returned.  This
  *   function can fail only if there is no group that corresponds to the
  *   task ID.

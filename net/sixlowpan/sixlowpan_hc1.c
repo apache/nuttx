@@ -108,7 +108,7 @@
  *   | src p.| dst p.| UDP checksum                  | L4 data...
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
- * Input Parmeters:
+ * Input Parameters:
  *   radio   - A reference to a radio network device instance
  *   ipv6    - The IPv6 header followd by TCP, UDP, or ICMPv6 header to be
  *             compressed

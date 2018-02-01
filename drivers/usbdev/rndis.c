@@ -775,7 +775,7 @@ static void rndis_giverxreq(FAR struct rndis_dev_s *priv)
  *   priv: pointer to RNDIS device driver structure
  *   req: the request whose buffer we should fill
  *
- * Returned value:
+ * Returned Value:
  *   The total length of the request data
  *
  * Assumptions:

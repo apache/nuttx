@@ -361,7 +361,7 @@ static FAR char *g_idleargv[1][2];
  * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   Does not return.
  *
  ****************************************************************************/

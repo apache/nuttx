@@ -104,7 +104,7 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
  * Description:
  *   Initializes a stream for use with a file descriptor.
  *
- * Input parameters:
+ * Input Parameters:
  *   instream - User allocated, uninitialized instance of struct
  *              lib_rawsistream_s to be initialized.
  *   fd       - User provided file/socket descriptor (must have been opened

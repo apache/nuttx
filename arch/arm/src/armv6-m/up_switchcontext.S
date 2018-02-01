@@ -71,7 +71,7 @@
  *
  *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ************************************************************************************/

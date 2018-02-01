@@ -75,7 +75,7 @@ static char *g_saveptr = NULL;
  *    end of the string are ignored.  The tokens returned by
  *    strtok() are always non-empty strings.
  *
- * Return
+ * Returned Value:
  *    strtok() returns a pointer to the next token, or NULL
  *    if there are no more tokens.
  *

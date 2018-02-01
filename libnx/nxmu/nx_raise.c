@@ -56,10 +56,10 @@
  * Description:
  *   Bring the specified window to the top of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hwnd - the window to be raised
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

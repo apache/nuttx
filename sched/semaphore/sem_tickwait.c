@@ -76,7 +76,7 @@
  *             posted.  If ticks is zero, then this function is equivalent
  *             to nxsem_trywait().
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface, not available to applications, and
  *   hence follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.

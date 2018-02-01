@@ -357,14 +357,14 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
  *   occurred for any of  the  file  descriptors,  then  poll() blocks until
  *   one of the events occurs.
  *
- * Inputs:
+ * Input Parameters:
  *   fds  - List of structures describing file descriptors to be monitored
  *   nfds - The number of entries in the list
  *   timeout - Specifies an upper limit on the time for which poll() will
  *     block in milliseconds.  A negative value of timeout means an infinite
  *     timeout.
  *
- * Return:
+ * Returned Value:
  *   On success, the number of structures that have non-zero revents fields.
  *   A value of 0 indicates that the call timed out and no file descriptors
  *   were ready.  On error, -1 is returned, and errno is set appropriately:

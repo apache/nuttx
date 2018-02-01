@@ -439,7 +439,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   When this function is called, the "lower half" driver should be in the
  *   disabled state (as if the stop() method had already been called).
  *
- * Input parameters:
+ * Input Parameters:
  *   dev path - The full path to the driver to be registers in the NuttX
  *     pseudo-filesystem.  The recommended convention is to name all watchdog
  *     drivers as "/dev/watchdog0", "/dev/watchdog1", etc.  where the driver
@@ -518,7 +518,7 @@ errout:
  *   This function can be called to disable and unregister the watchdog
  *   device driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   handle - This is the handle that was returned by watchdog_register()
  *
  * Returned Value:

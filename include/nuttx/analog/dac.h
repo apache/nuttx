@@ -190,7 +190,7 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev);
  * Input Parameters:
  *    dev - An instance of the device-specific DAC interface
  *
- * Return:
+ * Returned Value:
  *   OK on success; a negated errno on failure.
  *
  ************************************************************************************/

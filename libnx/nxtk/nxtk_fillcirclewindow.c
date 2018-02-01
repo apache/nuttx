@@ -84,7 +84,7 @@
  *   radius - The radius of the circle in pixels.
  *   color  - The color to use to fill the circle.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

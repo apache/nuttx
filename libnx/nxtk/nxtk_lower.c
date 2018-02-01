@@ -79,11 +79,11 @@
  *   Lower the window containing the specified client sub-window to the
  *   bottom of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hfwnd - the window to be lowered.  This must have been previously
  *           created by nxtk_openwindow().
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

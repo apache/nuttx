@@ -275,7 +275,7 @@ void clock_initialize(void)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -314,7 +314,7 @@ void clock_synchronize(void)
  * Parameters:
  *   rtc_diff:  amount of time system-time is adjusted forward with RTC
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

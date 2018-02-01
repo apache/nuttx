@@ -58,7 +58,7 @@
  * Parameters:
  *   attr - barrier attributes to be initialized.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or EINVAL if attr is invalid.
  *
  * Assumptions:

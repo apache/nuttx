@@ -67,7 +67,7 @@
  * Description:
  *   Initialize and register the MPL115A Pressure Sensor driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/light0"
  *
  * Returned Value:

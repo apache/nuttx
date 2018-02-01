@@ -117,7 +117,7 @@ extern "C"
  *   When this function is called, the MTD device pass in should already
  *   be initialized appropriately to access the physical device or partition.
  *
- * Input parameters:
+ * Input Parameters:
  *   mtd - Pointer to the MTD device to bind with the /dev/config device
  *
  * Returned Value:

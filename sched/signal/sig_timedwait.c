@@ -226,7 +226,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
  *   info    - The returned value (may be NULL).
  *   timeout - The amount of time to wait (may be NULL)
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -483,7 +483,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
  *   info    - The returned value (may be NULL).
  *   timeout - The amount of time to wait (may be NULL)
  *
- * Return Value:
+ * Returned Value:
  *   Signal number that cause the wait to be terminated, otherwise -1 (ERROR)
  *   is returned with errno set to either:
  *

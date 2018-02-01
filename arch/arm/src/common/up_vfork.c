@@ -101,7 +101,7 @@
  * Input Parameters:
  *   context - Caller context information saved by vfork()
  *
- * Return:
+ * Returned Value:
  *   Upon successful completion, vfork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,

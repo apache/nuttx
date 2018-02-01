@@ -152,7 +152,7 @@ void stm32_pwr_enablebkp(bool writable);
  *   wupin - Selects the WKUP pin to enable/disable
  *   wupon - state to set it to
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on any
  *   failure.  The only cause of failure is if the selected MCU does not support
  *   the requested wakeup pin.
@@ -195,7 +195,7 @@ bool stm32_pwr_getwuf(void);
  * Input Parameters:
  *   regon - state to set it to
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ************************************************************************************/
@@ -215,7 +215,7 @@ void stm32_pwr_enablebreg(bool regon);
  * Input Parameters:
  *   vos - Properly aligned voltage scaling select bits for the PWR_CR register.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -237,7 +237,7 @@ void stm32_pwr_setvos(uint16_t vos);
  * Input Parameters:
  *   pls - PVD level
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Assumptions:

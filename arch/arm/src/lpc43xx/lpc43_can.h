@@ -64,7 +64,7 @@ extern "C"
  * Description:
  *   Initialize the selected can port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple can interfaces)
  *
  * Returned Value:

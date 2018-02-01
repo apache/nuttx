@@ -177,12 +177,12 @@ static int pipe_close(FAR struct file *filep)
  *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
  *   to control the size of those buffers is critical for system tuning.
  *
- * Inputs:
+ * Input Parameters:
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
- * Return:
+ * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
  *   appropriately.
  *

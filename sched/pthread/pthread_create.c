@@ -103,7 +103,7 @@ static const char g_pthreadname[] = "<pthread>";
  *   tcb        - Address of the new task's TCB
  *   arg        - The argument to provide to the pthread on startup.
  *
- * Return Value:
+ * Returned Value:
  *  None
  *
  ****************************************************************************/
@@ -133,7 +133,7 @@ static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb, pthread_addr_
  * Parameters:
  *   pjoin
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -232,7 +232,7 @@ static void pthread_start(void)
  *    start_routine
  *    arg
  *
- * Returned value:
+ * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno
  *   variable is not set.
  *

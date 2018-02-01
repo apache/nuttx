@@ -61,7 +61,7 @@
  *   execute.  Move the TCB to the ready-to-run list, restore its context,
  *   and start execution.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb: Refers to the tcb to be unblocked.  This tcb is in one of the
  *     waiting tasks lists.  It must be moved to the ready-to-run list and,
  *     if it is the highest priority ready to run task, executed.

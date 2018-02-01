@@ -97,7 +97,7 @@ static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
  *   Initializes a stream for use with the configured emergency syslog
  *   interface.  Only accessible from with the OS SYSLOG logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
  *            lib_outstream_s to be initialized.
  *

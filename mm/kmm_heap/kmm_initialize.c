@@ -66,7 +66,7 @@ struct mm_heap_s g_kmmheap;
  *   heap_start - Address of the beginning of the (initial) memory region
  *   heap_size  - The size (in bytes) if the (initial) memory region.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

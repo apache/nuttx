@@ -293,7 +293,7 @@ const char *inode_nextname(FAR const char *name);
  *
  *   NOTE: Caller must hold the inode semaphore
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The path to the inode to create
  *   inode - The location to return the inode pointer
  *

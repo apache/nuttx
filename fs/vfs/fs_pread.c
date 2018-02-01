@@ -129,7 +129,7 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
  *   nbytes   The maximum size of the user-provided buffer
  *   offset   The file offset
  *
- * Return:
+ * Returned Value:
  *   The positive non-zero number of bytes read on success, 0 on if an
  *   end-of-file condition, or -1 on failure with errno set appropriately.
  *   See read() return values

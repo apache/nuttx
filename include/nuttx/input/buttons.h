@@ -191,7 +191,7 @@ extern "C"
  *     minor device number.
  *   lower - An instance of the platform-specific button lower half driver.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *

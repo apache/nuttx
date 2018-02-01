@@ -107,7 +107,7 @@ static int stm32l4_exti_wakeup_isr(int irq, void *context, FAR void *arg)
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *

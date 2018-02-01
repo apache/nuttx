@@ -60,7 +60,7 @@
  *   group The task group with the environment containing the name=value pair
  *   pvar A pointer to the name=value pair in the restroom
  *
- * Return Value:
+ * Returned Value:
  *   Zero on success
  *
  * Assumptions:

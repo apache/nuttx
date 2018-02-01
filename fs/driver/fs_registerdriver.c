@@ -56,7 +56,7 @@
  * Description:
  *   Register a character driver inode the pseudo file system.
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
  *   mode - inmode priviledges (not used)

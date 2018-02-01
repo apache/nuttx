@@ -162,7 +162,7 @@ struct spi_dev_s; /* Forward reference */
  *   Initialize the selected SPI port.  This function could get called
  *   multiple times for each STR7 devices that needs an SPI reference.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:

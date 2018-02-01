@@ -64,7 +64,7 @@
  * Parameters:
  *   conn   - The socket connection structure.
  *
- * Return:
+ * Returned Value:
  *   The number of frames in the queue.
  *
  ****************************************************************************/
@@ -96,7 +96,7 @@ static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
  *   framel - A single frame to add to the RX queue.
  *   meta   - Meta data characterizing the received frane.
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
  *   any failure.
  *
@@ -227,7 +227,7 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
  *               If there are multilple frames in the list, this metadata
  *               must apply to all of the frames in the list.
  *
- * Return:
+ * Returned Value:
  *   OK    The IEEE 802.15.4 has been processed  and can be deleted
  *   ERROR Hold the IEEE 802.15.4 and try again later. There is a listening
  *         socket but no recv in place to catch the IEEE 802.15.4 yet.

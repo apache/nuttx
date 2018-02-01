@@ -108,7 +108,7 @@ extern "C"
  *   size - Data size in bytes
  *   code - Codes buffer
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -127,7 +127,7 @@ void hamming_compute256x(FAR const uint8_t *data, size_t size, uint8_t *code);
  *   size - Size of the data in bytes
  *   code - Original codes
  *
- * Returned Values:
+ * Returned Value:
  *   Return 0 if the data is correct, HAMMING_ERROR_SINGLEBIT if one or more
  *   block(s) have had a single bit corrected, or either HAMMING_ERROR_ECC
  *   or HAMMING_ERROR_MULTIPLEBITS.

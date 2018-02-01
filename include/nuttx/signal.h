@@ -127,7 +127,7 @@ struct timespec;  /* Forward reference */
  *   set  - Location of the new signal mask
  *   oset - Location to store the old signal mask
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -160,7 +160,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
  *   signo - Signal number
  *   value - Value to pass to task with signal
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -232,7 +232,7 @@ int nxsig_kill(pid_t pid, int signo);
  *   set - The pending signal set
  *   info - The returned value
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.
@@ -270,7 +270,7 @@ int nxsig_kill(pid_t pid, int signo);
  *   info    - The returned value (may be NULL).
  *   timeout - The amount of time to wait (may be NULL)
  *
- * Return Value:
+ * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
  *   returned on success.  A negated errno value is returned on failure.

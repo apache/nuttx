@@ -82,7 +82,7 @@ gid_t g_gid_current;
  *         be the TCB at the head of the ready-to-run list, but that is not
  *         enough.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.
  *

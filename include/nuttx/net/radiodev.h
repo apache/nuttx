@@ -189,7 +189,7 @@ struct radio_driver_s
    * Description:
    *   Calculate the MAC header length given the frame meta-data.
    *
-   * Input parameters:
+   * Input Parameters:
    *   netdev    - The networkd device that will mediate the MAC interface
    *   meta      - Obfuscated metadata structure needed to recreate the
    *               radio MAC header
@@ -209,7 +209,7 @@ struct radio_driver_s
    * Description:
    *   Requests the transfer of a list of frames to the MAC.
    *
-   * Input parameters:
+   * Input Parameters:
    *   netdev    - The network device that will mediate the MAC interface
    *   meta      - Obfuscated metadata structure needed to create the radio
    *               MAC header
@@ -233,7 +233,7 @@ struct radio_driver_s
    *   run time.  This information is provided to the 6LoWPAN network via the
    *   following structure.
    *
-   * Input parameters:
+   * Input Parameters:
    *   netdev     - The network device to be queried
    *   properties - Location where radio properities will be returned.
    *

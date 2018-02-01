@@ -567,7 +567,7 @@ static int nunchuck_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *     minor device number.
  *   i2c - An instance of the platform-specific I2C connected to Nunchuck.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *

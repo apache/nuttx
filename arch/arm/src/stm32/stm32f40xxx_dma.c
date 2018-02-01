@@ -524,7 +524,7 @@ void weak_function up_dmainitialize(void)
  *   Hmm.. I suppose this interface could be extended to make a non-blocking
  *   version.  Feel free to do that if that is what you need.
  *
- * Input parameter:
+ * Input Parameters:
  *   dmamap - Identifies the stream/channel resource. For the STM32 F4, this
  *     is a bit-encoded  value as provided by the DMAMAP_* definitions
  *     in chip/stm32f40xxx_dma.h
@@ -863,7 +863,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *   of the processor. Note that this only applies to memory addresses, it
  *   will return false for any peripheral address.
  *
- * Returned value:
+ * Returned Value:
  *   True, if transfer is possible.
  *
  ****************************************************************************/

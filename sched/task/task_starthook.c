@@ -58,12 +58,12 @@
  *   The start hook is useful, for example, for setting up automatic
  *   configuration of C++ constructors.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The new, unstarted task task that needs the start hook
  *   starthook - The pointer to the start hook function
  *   arg - The argument to pass to the start hook function.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

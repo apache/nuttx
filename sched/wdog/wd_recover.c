@@ -58,10 +58,10 @@
  *   task_delete() or via pthread_cancel(). It checks if the deleted task
  *   is waiting for a timed event and if so cancels the timeout
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - The TCB of the terminated task or thread
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

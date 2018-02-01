@@ -62,7 +62,7 @@
  *   After work has been cancelled, it may be re-queue by calling work_queue()
  *   again.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID
  *   work   - The previously queue work structure to cancel
  *
@@ -124,7 +124,7 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue, FAR struct work_s *work
  *   user mode work queue.  After work has been cancelled, it may be re-queue
  *   by calling work_queue() again.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID (must be USRWORK)
  *   work   - The previously queue work structure to cancel
  *

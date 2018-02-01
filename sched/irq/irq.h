@@ -180,10 +180,10 @@ int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg);
  *   the IRQ lock is also set UNLESS the CPU starting the task is the
  *   holder of the IRQ lock.
  *
- * Inputs:
+ * Input Parameters:
  *   rtcb - Points to the blocked TCB that is ready-to-run
  *
- * Return Value:
+ * Returned Value:
  *   true  - IRQs are locked by a different CPU.
  *   false - IRQs are unlocked OR if they are locked BUT this CPU
  *           is the holder of the lock.

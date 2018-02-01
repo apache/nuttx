@@ -57,7 +57,7 @@
  *   unlockpt() must be called before opening the slave side of a
  *   pseudoterminal.
  *
- * Returned Values:
+ * Returned Value:
  *   When successful, unlockpt() returns 0. Otherwise, it returns -1 and
  *   sets errno appropriately.
  *

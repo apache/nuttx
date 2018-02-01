@@ -164,7 +164,7 @@ static off_t nxffs_packtell(FAR struct nxffs_volume_s *volume,
  * Input Parameters:
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -191,7 +191,7 @@ static inline bool nxffs_packvalid(FAR struct nxffs_pack_s *pack)
  *   volume - The volume to be packed.
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   The offset to the data area on the first valid block.  Zero is return
  *   if there are no valid blocks or if there are no valid inode headers
  *   after the first valid block.
@@ -261,7 +261,7 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
  *     --  then no packing can be performed. In this case, then the free
  *     flash offset is returned through this location.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.  If -ENOSPC is returned then the
  *   free FLASH offset is also returned.
@@ -398,7 +398,7 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
  *   offset - FLASH offset to the data block header (will be zero for zero-
  *     files.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *
@@ -441,7 +441,7 @@ static int nxffs_srcsetup(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *
@@ -618,7 +618,7 @@ errout:
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure (not used).
  *
@@ -727,7 +727,7 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *
@@ -782,7 +782,7 @@ static void nxffs_wrdathdr(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   None.
  *
  ****************************************************************************/
@@ -830,7 +830,7 @@ static void nxffs_packtransfer(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *
@@ -872,7 +872,7 @@ static int nxffs_endsrcblock(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *
@@ -1057,7 +1057,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   If there is an active writer of the volume, its open file instance is
  *   returned.  NULL is returned otherwise.
  *
@@ -1125,7 +1125,7 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *
@@ -1257,7 +1257,7 @@ static inline int nxffs_packwriter(FAR struct nxffs_volume_s *volume,
  * Input Parameters:
  *   volume - The volume to be packed.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *

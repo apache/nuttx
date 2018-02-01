@@ -2786,7 +2786,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
  *   Setup the MCK/2 divider based on the currently selected data width and
  *   the sample rate
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - I2C device structure (only the sample rate and data length is
  *          needed at this point).
  *
@@ -2843,7 +2843,7 @@ static uint32_t ssc_mck2divider(struct sam_ssc_s *priv)
  * Description:
  *   Enable and configure clocking to the SSC
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - Partially initialized I2C device structure (only the PID is
  *          needed at this point).
  *
@@ -3394,7 +3394,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
  * Description:
  *   Initialize the selected SSC port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - I2S "port" number (identifying the "logical" SSC port)
  *
  * Returned Value:

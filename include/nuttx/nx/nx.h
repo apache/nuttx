@@ -260,7 +260,7 @@ extern "C"
  *   mqname - The name for the server incoming message queue
  *   dev     - Vtable "object" of the framebuffer "driver" to use
  *
- * Return:
+ * Returned Value:
  *   This function usually does not return.  If it does return, it will
  *   return ERROR and errno will be set appropriately.
  *
@@ -315,7 +315,7 @@ int nx_start(void);
  * Input Parameters:
  *   svrmqname - The name for the server incoming message queue
  *
- * Return:
+ * Returned Value:
  *   Success: A non-NULL handle used with subsequent NX accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *
@@ -334,7 +334,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname);
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -358,7 +358,7 @@ void nx_disconnect(NXHANDLE handle);
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
- * Return:
+ * Returned Value:
  *     OK: No errors occurred.  If CONFIG_NX_BLOCKING is defined, then
  *         one or more server messages were processed.
  *  ERROR: An error occurred and errno has been set appropriately.  Of
@@ -385,7 +385,7 @@ int nx_eventhandler(NXHANDLE handle);
  * Input Parameters:
  *   handle - the handle returned by nx_connect
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -407,7 +407,7 @@ int nx_eventnotify(NXHANDLE handle, int signo);
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
- * Return:
+ * Returned Value:
  *   Success: A non-NULL handle used with subsequent NX accesses
  *   Failure:  NULL is returned and errno is set appropriately
  *
@@ -425,7 +425,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
  * Input Parameters:
  *   wnd - The window to be destroyed
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -456,7 +456,7 @@ int nx_closewindow(NXWINDOW hwnd);
  *   arg - An argument that will accompany the block messages (This is arg2
  *         in the blocked callback).
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -497,7 +497,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  *   cb     - Callbacks to use for processing background window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -515,7 +515,7 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
  * Input Parameters:
  *   hwnd - The handle returned (indirectly) by nx_requestbkgd
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -533,7 +533,7 @@ int nx_releasebkgd(NXWINDOW hwnd);
  * Input Parameters:
  *   hwnd   - The window handle
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -550,7 +550,7 @@ int nx_getposition(NXWINDOW hwnd);
  *   hwnd  - The window handle
  *   pos   - The new position of the window
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -567,7 +567,7 @@ int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos);
  *   hwnd   - The window handle
  *   size   - The new size of the window.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -580,10 +580,10 @@ int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size);
  * Description:
  *   Bring the specified window to the top of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hwnd - the window to be raised
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -596,10 +596,10 @@ int nx_raise(NXWINDOW hwnd);
  * Description:
  *   Lower the specified window to the bottom of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hwnd - the window to be lowered
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -618,7 +618,7 @@ int nx_lower(NXWINDOW hwnd);
  *   pos  - The pixel location to be set
  *   col  - The color to use in the set
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -637,7 +637,7 @@ int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
  *   rect  - The location to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -666,7 +666,7 @@ int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *   rect  - The location to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -687,7 +687,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *   trap  - The trapezoidal region to be filled
  *   color - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -712,7 +712,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
  *   caps   - Draw a circular on the both ends of the line to support better
  *            line joins
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -734,7 +734,7 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
  *   width  - The width of the line
  *   color  - The color to use to fill the line
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -755,7 +755,7 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
  *   radius - The radius of the circle in pixels.
  *   color  - The color to use to fill the circle
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -774,7 +774,7 @@ int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
  *   handle  - The connection handle
  *   color - The color to use in the background
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -793,7 +793,7 @@ int nx_setbgcolor(NXHANDLE handle, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
  *   offset - The offset to move the region.  The  rectangular region will be
  *            moved so that the origin is translated by this amount.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -819,7 +819,7 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *            may lie outside of the display.
  *   stride - The width of the full source image in bytes.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
@@ -936,7 +936,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately.  In the
  *   case of ERROR, NX will have deallocated the pre-allocated window.
  *

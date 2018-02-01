@@ -197,7 +197,7 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
  *   rect   - Describes the rectangular region to move
  *   offset - The offset to move the region
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

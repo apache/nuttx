@@ -1095,7 +1095,7 @@ static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value
  * Description:
  *   Dump all timer registers.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - A reference to the PWM block status
  *
  * Returned Value:
@@ -1182,7 +1182,7 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
  * Description:
  *   (Re-)initialize the timer resources and start the pulsed output
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - A reference to the lower half PWM driver state structure
  *   info - A reference to the characteristics of the pulsed output
  *
@@ -1815,7 +1815,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
  * Description:
  *   Try to change only channel duty.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv    - A reference to the lower half PWM driver state structure
  *   channel - Channel to by updated
  *   duty    - New duty.
@@ -1897,7 +1897,7 @@ static  int pwm_update_duty(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
  * Description:
  *   Handle timer interrupts.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -1980,7 +1980,7 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
  * Description:
  *   Handle timer 1 and 8 interrupts.
  *
- * Input parameters:
+ * Input Parameters:
  *   Standard NuttX interrupt inputs
  *
  * Returned Value:
@@ -2008,7 +2008,7 @@ static int pwm_tim8interrupt(int irq, void *context, FAR void *arg)
  * Description:
  *   Pick an optimal pulse count to program the RCR.
  *
- * Input parameters:
+ * Input Parameters:
  *   count - The total count remaining
  *
  * Returned Value:
@@ -2055,7 +2055,7 @@ static uint8_t pwm_pulsecount(uint32_t count)
  * Description:
  *   Enable or disable APB clock for the timer peripheral
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
@@ -2188,7 +2188,7 @@ static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
  *   should configure and initialize the device so that it is ready for use.
  *   It should not, however, output pulses until the start method is called.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -2241,7 +2241,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *   stop pulsed output, free any resources, disable the timer hardware, and
  *   put the system into the lowest possible power usage state
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -2303,7 +2303,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   (Re-)initialize the timer resources and start the pulsed output
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *   info - A reference to the characteristics of the pulsed output
  *
@@ -2390,7 +2390,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  * Description:
  *   Stop the pulsed output and reset the timer resources
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -2549,7 +2549,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *   cmd - The ioctl command
  *   arg - The argument accompanying the ioctl command

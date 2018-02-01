@@ -63,7 +63,7 @@
  *   Handles forwarding a ICMPv6 packet via 6LoWPAN.  This is currently only
  *   used by the IPv6 forwarding logic.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev    - An instance of nework device state structure
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets

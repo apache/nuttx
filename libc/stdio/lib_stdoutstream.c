@@ -102,7 +102,7 @@ static int stdoutstream_flush(FAR struct lib_outstream_s *this)
  * Description:
  *   Initializes a stream for use with a FILE instance.
  *
- * Input parameters:
+ * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
  *               lib_stdoutstream_s to be initialized.
  *   stream    - User provided stream instance (must have been opened for

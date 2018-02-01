@@ -55,10 +55,10 @@
  * Description:
  *   Call the close method and release the inode
  *
- * Inputs:
+ * Input Parameters:
  *   inode - reference to the inode of a block driver opened by open_blockdriver
  *
- * Return:
+ * Returned Value:
  *   Returns zero on success or a negated errno on failure:
  *
  *   EINVAL  - inode is NULL

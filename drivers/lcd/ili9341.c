@@ -532,7 +532,7 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
  * Parameters:
  *   dev   - Reference to private driver structure
  *
- * Return Value:
+ * Returned Value:
  *
  *   Horicontal resolution
  *
@@ -560,7 +560,7 @@ static inline uint16_t ili9341_getxres(FAR struct ili9341_dev_s *dev)
  * Parameter:
  *   dev   - Reference to private driver structure
  *
- * Return Value:
+ * Returned Value:
  *
  *   Vertical resolution
  *

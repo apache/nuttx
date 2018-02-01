@@ -107,7 +107,7 @@ extern FAR struct tcb_s *g_pftcb;
  *   This is the entry point of the worker thread that performs the actual
  *   page file.
  *
- * Input parameters:
+ * Input Parameters:
  *   argc, argv (not used)
  *
  * Returned Value:

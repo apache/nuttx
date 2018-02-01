@@ -1340,7 +1340,7 @@ static int efm32_ctrlchan_alloc(FAR struct efm32_usbhost_s *priv,
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -1402,7 +1402,7 @@ static int efm32_ctrlep_alloc(FAR struct efm32_usbhost_s *priv,
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -3791,7 +3791,7 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
  *   hport - The location to return the hub port descriptor that detected the
  *      connection related event.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success when a device in connected or
  *   disconnected. This function will not return until either (1) a device is
  *   connected or disconnect to/from any hub port or until (2) some failure
@@ -3882,7 +3882,7 @@ static int efm32_wait(FAR struct usbhost_connection_s *conn,
  *   hport - The descriptor of the hub port that has the newly connected
  *      device.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4010,7 +4010,7 @@ static int efm32_enumerate(FAR struct usbhost_connection_s *conn,
  *   maxpacketsize - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4069,7 +4069,7 @@ static int efm32_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4126,7 +4126,7 @@ static int efm32_epalloc(FAR struct usbhost_driver_s *drvr,
  *      the class create() method.
  *   ep - The endpoint to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4194,7 +4194,7 @@ static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   maxlen - The address of a memory location provided by the caller in which to
  *     return the maximum size of the allocated buffer memory.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4240,7 +4240,7 @@ static int efm32_alloc(FAR struct usbhost_driver_s *drvr,
  *      the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4276,7 +4276,7 @@ static int efm32_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *     return the allocated buffer memory address.
  *   buflen - The size of the buffer required.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4320,7 +4320,7 @@ static int efm32_ioalloc(FAR struct usbhost_driver_s *drvr,
  *      the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4363,7 +4363,7 @@ static int efm32_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
  *   memory.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4566,7 +4566,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, a non-negative value is returned that indicates the number
  *   of bytes successfully transferred.  On a failure, a negated errno value is
  *   returned that indicates the nature of the failure:
@@ -4638,7 +4638,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep
  *   arg - The arbitrary parameter that will be passed to the callback function
  *     when the transfer completes.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -4694,7 +4694,7 @@ static int efm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
  *      asynchronous transfer should be transferred.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure.
  *
@@ -4783,7 +4783,7 @@ static int efm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *      related event
  *   connected - True: device connected; false: device disconnected
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure.
  *
@@ -4834,7 +4834,7 @@ static int efm32_connect(FAR struct usbhost_driver_s *drvr,
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Assumptions:

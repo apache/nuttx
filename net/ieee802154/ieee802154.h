@@ -268,7 +268,7 @@ FAR struct ieee802154_conn_s *
  *               If there are multilple frames in the list, this metadata
  *               must apply to all of the frames in the list.
  *
- * Return:
+ * Returned Value:
  *   OK    The IEEE 802.15.4 has been processed  and can be deleted
  *   ERROR Hold the IEEE 802.15.4 and try again later. There is a listening
  *         socket but no recv in place to catch the IEEE 802.15.4 yet.
@@ -364,7 +364,7 @@ FAR struct radio_driver_s *
  *   dev - The device driver structure to use in the send operation
  *   conn - The IEEE 802.15.4 "connection" to poll for TX data
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -413,10 +413,10 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
  *   be called early in the initialization sequence before any socket
  *   activity.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -437,10 +437,10 @@ void ieee802154_container_initialize(void);
  *   list.  If that the list is empty, then the meta-data structure will be
  *   allocated from the dynamic memory pool.
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   A reference to the allocated container structure.  All user fields in this
  *   structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
@@ -461,10 +461,10 @@ FAR struct ieee802154_container_s *ieee802154_container_allocate(void);
  *   structure. If the container structure was allocated dynamically it will
  *   be deallocated.
  *
- * Inputs:
+ * Input Parameters:
  *   container - container structure to free
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

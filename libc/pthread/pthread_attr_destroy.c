@@ -57,7 +57,7 @@
  * Parameters:
  *   attr
  *
- * Return Value:
+ * Returned Value:
  *   0 meaning success
  *
  * Assumptions:

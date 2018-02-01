@@ -1231,7 +1231,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
  *   In all cases, the success reponse is a zero-length packet; the failure
  *   response is an EP0 stall.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv  - Private state structure for this USB storage instance
  *   stall - true is the action failed and a stall is required
  *

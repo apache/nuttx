@@ -486,7 +486,7 @@ static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
  *   loading or dma transfer was completed.
  *   Note! The caller must use this function within a critical section.
  *
- * Return:
+ * Returned Value:
  *   On success OK otherwise ERROR
  *
  ****************************************************************************/
@@ -532,7 +532,7 @@ static int stm32_dma2d_waitforirq(void)
  * Parameter:
  *   pfcreg - PFC control Register
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -620,7 +620,7 @@ static int stm32_dma2d_start(void)
  * Parameter:
  *   layer - Reference to the common layer state structure
  *
- * Return:
+ * Returned Value:
  *   memory address
  *
  ****************************************************************************/
@@ -646,7 +646,7 @@ static uint32_t stm32_dma2d_memaddress(FAR const struct stm32_dma2d_s *layer,
  * Parameter:
  *   layer - Reference to the common layer state structure
  *
- * Return:
+ * Returned Value:
  *   line offset
  *
  ****************************************************************************/
@@ -670,7 +670,7 @@ static fb_coord_t stm32_dma2d_lineoffset(FAR const struct stm32_dma2d_s *layer,
  *   layer - Reference to the common layer state structure
  *   fmt   - Reference to the location to store the pixel format
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -729,7 +729,7 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
  *   layer - Reference to the common layer state structure
  *   bpp   - Reference to the location to store the pixel format
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -770,7 +770,7 @@ static int stm32_dma2d_bpp(uint8_t fmt, uint8_t *bpp)
  * Description:
  *   Get a free layer id
  *
- * Return:
+ * Returned Value:
  *   The number of the free layer
  *   -1 if no free layer is available
  *
@@ -797,7 +797,7 @@ static int stm32_dma2d_lfreelid(void)
  * Description:
  *   Allocate a new layer structure
  *
- * Return:
+ * Returned Value:
  *   A new allocated layer structure or NULL on error.
  *
  ****************************************************************************/
@@ -886,7 +886,7 @@ static void stm32_dma2d_llayerscleanup(void)
  * Description:
  *   Helper to validate if the layer is valid
  *
- * Return:
+ * Returned Value:
  *   true if validates otherwise false
  *
  ****************************************************************************/
@@ -908,7 +908,7 @@ static inline bool stm32_dma2d_lvalidate(FAR const struct stm32_dma2d_s *layer)
  *   ypos    - The y position inside the whole layer
  *   area    - the area inside the whole layer
  *
- * Return:
+ * Returned Value:
  *   true if area is inside the whole layer otherwise false
  *
  ****************************************************************************/
@@ -1162,7 +1162,7 @@ static void stm32_dma2d_lpfc(FAR const struct stm32_dma2d_s *layer,
  *   layer  - Reference to the layer control structure
  *   vinfo  - Reference to the video info structure
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -1199,7 +1199,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
  *   planeno - Number of the plane
  *   pinfo   - Reference to the plane info structure
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -1235,7 +1235,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
  *   layer - Reference to the layer structure
  *   lid   - Reference to store the layer id
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -1271,7 +1271,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
  *   layer  - Reference to the layer structure
  *   cmap   - color lookup table with up the 256 entries
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -1390,7 +1390,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
  *   cmap  - Reference to valid color lookup table accept up the 256 color
  *           entries
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -1482,7 +1482,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
  *   layer - Reference to the layer structure
  *   alpha - Alpha value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -1517,7 +1517,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
  *   layer - Reference to the layer structure
  *   alpha - Reference to store the alpha value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -1554,7 +1554,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
  *   layer - Reference to the layer structure
  *   mode  - Blend mode (see DMA2D_BLEND_*)
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -1603,7 +1603,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
  *   layer - Reference to the layer structure
  *   mode  - Reference to store the blend mode
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -1643,7 +1643,7 @@ static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
  *   src      - Valid reference to the source layer
  *   srcarea  - Valid reference to the selected area of the source layer
  *
- * Return:
+ * Returned Value:
  *    OK        - On success
  *   -EINVAL    - If one of the parameter invalid or if the size of the selected
  *                source area outside the visible area of the destination layer.
@@ -1752,7 +1752,7 @@ static int stm32_dma2dblit(FAR struct dma2d_layer_s *dest,
  *   back     - Reference to the background layer
  *   backarea - Reference to the selected area of the background layer
  *
- * Return:
+ * Returned Value:
  *    OK        - On success
  *   -EINVAL    - If one of the parameter invalid or if the size of the selected
  *                source area outside the visible area of the destination layer.
@@ -1859,7 +1859,7 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
  *   color    - Color to fill the selected area. Color must be formatted
  *              according to the layer pixel format.
  *
- * Return:
+ * Returned Value:
  *    OK        - On success
  *   -EINVAL    - If one of the parameter invalid or if the size of the selected
  *                area outside the visible area of the layer.
@@ -1935,7 +1935,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
  * Parameter:
  *   lid - Layer identifier
  *
- * Return:
+ * Returned Value:
  *   Reference to the dma2d layer control structure on success or Null if no
  *   related exist.
  *
@@ -1968,7 +1968,7 @@ FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid)
  *   height - Layer height
  *   fmt    - Pixel format of the layer
  *
- * Return:
+ * Returned Value:
  *   On success - A valid dma2d layer reference
  *   On error   - NULL
  *
@@ -2090,7 +2090,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
  * Parameter:
  *   layer  - Reference to the layer to remove
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2132,7 +2132,7 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer)
  * Description:
  *   Initialize the dma2d controller
  *
- * Return:
+ * Returned Value:
  *   OK - On success
  *   An error if initializing failed.
  *
@@ -2248,7 +2248,7 @@ void up_dma2duninitialize(void)
  *   layer  - a valid reference to the low level ltdc layer structure
  *   clut   - a pointer to a valid memory region to hold 256 clut colors
  *
- * Return:
+ * Returned Value:
  *   On success - A valid dma2d layer reference
  *   On error   - NULL
  *

@@ -69,13 +69,13 @@ extern "C"
  * Description:
  *   Return the inode of the block driver specified by 'pathname'
  *
- * Inputs:
+ * Input Parameters:
  *   pathname - the full path to the block driver to be located
  *   mountflags - if MS_RDONLY is not set, then driver must support write
  *     operations (see include/sys/mount.h)
  *   ppinode - address of the location to return the inode reference
  *
- * Return:
+ * Returned Value:
  *   Returns zero on success or a negated errno on failure:
  *
  *   EINVAL  - pathname or pinode is NULL
@@ -98,7 +98,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
  *   Create a temporary char driver using drivers/bch to mediate character
  *   oriented accessed to the block driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   blkdev - The path to the block driver
  *   oflags - Character driver open flags
  *

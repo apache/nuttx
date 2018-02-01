@@ -2369,7 +2369,7 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
  * Description:
  *   MCP2515 hardware initialization
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this MCP2515 peripheral
  *
  * Returned Value:
@@ -2483,7 +2483,7 @@ static int mcp2515_hw_initialize(struct mcp2515_can_s *priv)
  * Description:
  *   Initialize the selected MCP2515 CAN Bus Controller over SPI
  *
- * Input Parameter:
+ * Input Parameters:
  *   config - The configuration structure passed by the board.
  *
  * Returned Value:
@@ -2554,7 +2554,7 @@ FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *confi
  * Description:
  *   Initialize the selected MCP2515 CAN Bus Controller over SPI
  *
- * Input Parameter:
+ * Input Parameters:
  *   config - The configuration structure passed by the board.
  *
  * Returned Value:

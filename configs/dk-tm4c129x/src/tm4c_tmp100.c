@@ -68,7 +68,7 @@
  * Description:
  *   Initialize and register the LM-75 Temperature Sensor driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
  *
  * Returned Value:

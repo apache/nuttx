@@ -80,7 +80,7 @@ extern "C"
  * Parameters:
  *   inode - The message queue inode
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

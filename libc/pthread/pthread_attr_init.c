@@ -76,7 +76,7 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  * Parameters:
  *   attr
  *
- * Return Value:
+ * Returned Value:
  *   0 on success, otherwise an error number
  *
  * Assumptions:

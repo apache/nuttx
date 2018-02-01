@@ -70,7 +70,7 @@
  * Parameters:
  *   name - Semaphore name
  *
- * Return Value:
+ * Returned Value:
  *  0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:

@@ -58,7 +58,7 @@
  * Description:
  *   Register a block driver inode the pseudo file system.
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
  *   mode - inmode priviledges (not used)

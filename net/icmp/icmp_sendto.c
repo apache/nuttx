@@ -150,7 +150,7 @@ static inline int sendto_timeout(FAR struct icmp_sendto_s *pstate)
  *   dev    - The device driver structure to use in the send operation
  *   pstate - Reference to an instance of the ICMP sendto state structure
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

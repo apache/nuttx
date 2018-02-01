@@ -60,7 +60,7 @@
  * Description:
  *   Deallocate a message queue descriptor but returning it to the free list
  *
- * Inputs:
+ * Input Parameters:
  *   mqdes - message queue descriptor to free
  *
  ****************************************************************************/
@@ -82,7 +82,7 @@
  *   mqdes - Message queue descriptor.
  *   group - Group that has the open descriptor.
  *
- * Return Value:
+ * Returned Value:
  *   None.
  *
  * Assumptions:

@@ -197,7 +197,7 @@ static int usbmonitor_daemon(int argc, char **argv)
  * Input Parameters:
  *   None
  *
- * Returned values:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
@@ -259,7 +259,7 @@ int usbmonitor_start(void)
  * Input Parameters:
  *   None
  *
- * Returned values:
+ * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *

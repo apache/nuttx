@@ -1152,7 +1152,7 @@ static void can_setuprxobj(struct up_dev_s *priv)
  * Where:
  *   Tcan is the period of the APB clock (PCLK = CCLK / CONFIG_CAN1_DIVISOR).
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A reference to the CAN block status
  *
  * Returned Value:
@@ -1210,7 +1210,7 @@ static int can_bittiming(struct up_dev_s *priv)
  * Description:
  *   Initialize the selected can port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple can interfaces)
  *
  * Returned Value:

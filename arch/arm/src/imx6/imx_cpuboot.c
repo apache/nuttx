@@ -249,7 +249,7 @@ void imx_cpu_enable(void)
  *   This function must be provided by the each ARMv7-A MCU and implement
  *   MCU-specific initialization logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   cpu - The CPU index.  This is the same value that would be obtained by
  *      calling up_cpu_index();
  *

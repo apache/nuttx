@@ -270,7 +270,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
  *   mqname - The name for the server incoming message queue
  *   dev    - Vtable "object" of the framebuffer/LCD "driver" to use
  *
- * Return:
+ * Returned Value:
  *   This function usually does not return.  If it does return, it will
  *   return ERROR and errno will be set appropriately.
  *

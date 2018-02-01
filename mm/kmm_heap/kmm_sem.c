@@ -56,7 +56,7 @@
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
@@ -75,7 +75,7 @@ int kmm_trysemaphore(void)
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; a negated errno on failure
  *
  ****************************************************************************/

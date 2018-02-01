@@ -91,7 +91,7 @@ volatile sq_queue_t g_alloctimers;
  * Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -132,7 +132,7 @@ void weak_function timer_initialize(void)
  * Parameters:
  *   pid - the task ID of the thread that exited
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

@@ -432,7 +432,7 @@ errout:
  *   The ADC hardware can filter the touchscreen samples by averaging.  The
  *   function selects (or de-selects) that filtering.
  *
- * Input Parameters
+ * Input Parameters:
  *   priv - The touchscreen private data structure
  *   tsav - The new (shifted) value of the TSAV field of the ADC TSMR regsiter.
  *
@@ -494,7 +494,7 @@ static void sam_tsd_setaverage(struct sam_tsd_s *priv, uint32_t tsav)
  *   will re-enable TSD interrupts when it completes processing all pending
  *   TSD events.
  *
- * Input Parameters
+ * Input Parameters:
  *   arg - The touchscreen private data structure cast to (void *)
  *
  * Returned Value:
@@ -1707,7 +1707,7 @@ errout_with_priv:
  * Description:
  *   Handles ADC interrupts associated with touchscreen channels
  *
- * Input parmeters:
+ * Input Parameters:
  *   pending - Current set of pending interrupts being handled
  *
  * Returned Value:

@@ -79,7 +79,7 @@
  *   is used internally by the work logic but could also be used by the
  *   user to force an immediate re-assessment of pending work.
  *
- * Input parameters:
+ * Input Parameters:
  *   qid    - The work queue ID
  *
  * Returned Value:

@@ -60,7 +60,7 @@
  *  lib_noflush() provides a common, dummy flush method for output streams
  *  that are not flushable.
  *
- * Return:
+ * Returned Value:
  *  Always returns OK
  *
  ****************************************************************************/

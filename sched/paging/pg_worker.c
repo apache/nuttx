@@ -141,7 +141,7 @@ static systime_t g_starttime;
  *   task that is waiting for a fill.
  * - Signal the page fill worker thread.
  *
- * Input parameters:
+ * Input Parameters:
  *   tcb    - The TCB of the task that just received the fill.
  *   result - The result of the page fill operation.
  *
@@ -223,7 +223,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
  *   The result (NULL or a TCB pointer) will be returned in the global
  *   variable, g_pftcb.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -334,7 +334,7 @@ static inline bool pg_dequeue(void)
  *   prioritized list, or (2) when a page fill completes and there are more
  *   pages to be filled in g_waitingforfill list.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -441,7 +441,7 @@ static inline bool pg_startfill(void)
  *   - Set g_pftcb to NULL.
  *   - Restore the default priority of the page fill worker thread.
  *
- * Input parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:
@@ -475,7 +475,7 @@ static inline void pg_alldone(void)
  *   This function is just a dumb wrapper around up_unblocktask().  This
  *   function simply makes the task that just received the fill ready-to-run.
  *
- * Input parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:
@@ -515,7 +515,7 @@ static inline void pg_fillcomplete(void)
  *     after completing a page fill.
  *   - A configurable timeout with no activity.
  *
- * Input parameters:
+ * Input Parameters:
  *   argc, argv (not used)
  *
  * Returned Value:

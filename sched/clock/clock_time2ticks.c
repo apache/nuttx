@@ -60,7 +60,7 @@
  *   reltime - Convert this relative time to system clock ticks.
  *   ticks - Return the converted number of ticks here.
  *
- * Return Value:
+ * Returned Value:
  *   Always returns OK
  *
  * Assumptions:

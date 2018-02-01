@@ -58,14 +58,14 @@
  *  into the prioritized task list, 'list2'.  On return 'list2' will contain
  *  the prioritized content of both lists; 'list1' will be empty.
  *
- * Inputs:
+ * Input Parameters:
  *   list1 - Points to the prioritized list to merge into list 1.  This list
  *           will be empty upon return.
  *   list2 - That list that will contained the prioritized content of
  *           both lists upon return.
  *   task_state - The task state/list index associated with list2.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

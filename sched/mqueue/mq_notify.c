@@ -78,7 +78,7 @@
  *      sigev_signo - The signo to use for the notification
  *      sigev_value - Value associated with the signal
  *
- * Return Value:
+ * Returned Value:
  *   On success mq_notify() returns 0; on error, -1 is returned, with
  *   errno set to indicate the error.
  *

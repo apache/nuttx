@@ -57,7 +57,7 @@
  *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple 1-Wire interfaces)
  *
  * Returned Value:
@@ -73,7 +73,7 @@ FAR struct onewire_dev_s *stm32_1wireinitialize(int port);
  * Description:
  *   De-initialize the selected 1-Wire port, and power down the device.
  *
- * Input Parameter:
+ * Input Parameters:
  *   Device structure as returned by the stm32_1wireinitialize()
  *
  * Returned Value:

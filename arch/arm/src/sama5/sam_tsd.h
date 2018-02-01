@@ -119,7 +119,7 @@ int sam_tsd_register(FAR struct sam_adc_s *adc, int minor);
  * Description:
  *   Handles ADC interrupts associated with touchscreen channels
  *
- * Input parmeters:
+ * Input Parameters:
  *   pending - Current set of pending interrupts being handled
  *
  * Returned Value:

@@ -1627,7 +1627,7 @@ static int stm32l4can_txinterrupt(int irq, FAR void *context, FAR void *arg)
  * Where:
  *   Tpclk1 is the period of the APB1 clock (PCLK1).
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A reference to the CAN block status
  *
  * Returned Value:
@@ -1726,7 +1726,7 @@ static int stm32l4can_bittiming(FAR struct stm32l4_can_s *priv)
  *   peripheral, no registers are changed. The initialization mode is
  *   required to change the baud rate.
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *
  * Returned Value:
@@ -1777,7 +1777,7 @@ static int stm32l4can_enterinitmode(FAR struct stm32l4_can_s *priv)
  * Description:
  *   Put the CAN cell out of the Initialization mode (to Normal mode)
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *
  * Returned Value:
@@ -1827,7 +1827,7 @@ static int stm32l4can_exitinitmode(FAR struct stm32l4_can_s *priv)
  * Description:
  *   CAN cell initialization
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *
  * Returned Value:
@@ -1905,7 +1905,7 @@ static int stm32l4can_cellinit(FAR struct stm32l4_can_s *priv)
  *   are set to zero thus supressing all filtering because anything masked
  *   with zero matches zero.
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *
  * Returned Value:
@@ -1981,7 +1981,7 @@ static int stm32l4can_filterinit(FAR struct stm32l4_can_s *priv)
  * Description:
  *   Add a filter for extended CAN IDs
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *   arg  - A pointer to a structure describing the filter
  *
@@ -2006,7 +2006,7 @@ static int stm32l4can_addextfilter(FAR struct stm32l4_can_s *priv,
  * Description:
  *   Remove a filter for extended CAN IDs
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *   arg  - The filter index previously returned by the
  *            CANIOC_ADD_EXTFILTER command
@@ -2031,7 +2031,7 @@ static int stm32l4can_delextfilter(FAR struct stm32l4_can_s *priv, int arg)
  * Description:
  *   Add a filter for standard CAN IDs
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *   arg  - A pointer to a structure describing the filter
  *
@@ -2054,7 +2054,7 @@ static int stm32l4can_addstdfilter(FAR struct stm32l4_can_s *priv,
  * Description:
  *   Remove a filter for standard CAN IDs
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - A pointer to the private data structure for this CAN block
  *   arg  - The filter index previously returned by the
  *            CANIOC_ADD_STDFILTER command
@@ -2081,7 +2081,7 @@ static int stm32l4can_delstdfilter(FAR struct stm32l4_can_s *priv, int arg)
  * Description:
  *   Initialize the selected CAN port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has mutiple CAN interfaces)
  *
  * Returned Value:

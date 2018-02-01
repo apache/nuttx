@@ -178,7 +178,7 @@ static uint16_t sixlowpan_tcp_chksum(FAR const struct ipv6tcp_hdr_s *ipv6tcp,
  * Description:
  *   sixlowpan_tcp_header() will construct the IPv6 and TCP headers
  *
- * Input Parmeters
+ * Input Parameters:
  *   conn    - An instance of the TCP connection structure.
  *   dev     - The network device that will route the packet
  *   buf     - Data to send
@@ -328,7 +328,7 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  *   This function is called from the interrupt level to perform the actual
  *   TCP send operation when polled by the lower, device interfacing layer.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev    - The structure of the network driver that caused the interrupt
  *   pvconn - The connection structure associated with the socket
  *   pvpriv - The interrupt handler's private data argument
@@ -745,7 +745,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
  *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
- * Input Parmeters
+ * Input Parameters:
  *   psock - An instance of the internal socket structure.
  *   buf   - Data to send
  *   bulen - Length of data to send
@@ -898,7 +898,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
  *   driver. Under those conditions, this function will be called to create
  *   the IEEE80215.4 frames.
  *
- * Input Parmeters
+ * Input Parameters:
  *   dev    - The network device containing the packet to be sent.
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets

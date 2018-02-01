@@ -1570,7 +1570,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
  *   Initialize the selected SPI port in its default state (Master, 8-bit,
  *   mode 0, etc.)
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - private SPI device structure
  *
  * Returned Value:
@@ -1695,7 +1695,7 @@ errout:
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - SPI port number to initialize.  One of {0,1,2}
  *
  * Returned Value:

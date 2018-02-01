@@ -91,7 +91,7 @@ struct ieee802154_recvfrom_s
  * Parameters:
  *   conn   - The socket connection structure.
  *
- * Return:
+ * Returned Value:
  *   The number of frames in the queue.
  *
  ****************************************************************************/
@@ -121,7 +121,7 @@ static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
  *
  * Parameters:
  *
- * Returned Values:
+ * Returned Value:
  *
  * Assumptions:
  *   The network is lockec
@@ -209,7 +209,7 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
  *
  * Parameters:
  *
- * Returned Values:
+ * Returned Value:
  *
  * Assumptions:
  *   The network is locked.

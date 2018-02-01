@@ -158,7 +158,7 @@ struct pollfd;       /* Forward reference */
  *   dev - The device driver structure containing the received ICMPv6
  *         packet
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -214,7 +214,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr);
  * Parameters:
  *   dev - The device driver structure to use in the send operation
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -236,7 +236,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev);
  *   dev - Reference to an Ethernet device driver structure
  *   ipaddr - IP address of Neighbor to be solicited
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -261,7 +261,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
  * Parameters:
  *   dev - Reference to an Ethernet device driver structure
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -280,7 +280,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev);
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *
- * Return:
+ * Returned Value:
  *   None.
  *
  * Assumptions:
@@ -301,7 +301,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -406,7 +406,7 @@ void icmpv6_notify(net_ipv6addr_t ipaddr);
  * Parameters:
  *   dev - The device driver structure to assign the address to
  *
- * Return:
+ * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
  *   any failure.
  *

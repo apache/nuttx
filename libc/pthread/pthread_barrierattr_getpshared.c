@@ -58,7 +58,7 @@
  *   attr - barrier attributes to be queried.
  *   pshared - the location to stored the current value of the pshared attribute.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or EINVAL if either attr or pshared is invalid.
  *
  * Assumptions:

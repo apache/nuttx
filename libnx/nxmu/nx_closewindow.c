@@ -60,7 +60,7 @@
  * Input Parameters:
  *   wnd - The window to be destroyed
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

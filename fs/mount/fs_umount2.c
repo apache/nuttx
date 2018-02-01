@@ -59,7 +59,7 @@
  *   umount() detaches the filesystem mounted at the path specified by
  *  'target.'
  *
- * Return:
+ * Returned Value:
  *   Zero is returned on success; -1 is returned on an error and errno is
  *   set appropriately:
  *

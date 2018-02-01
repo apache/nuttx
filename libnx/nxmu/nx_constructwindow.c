@@ -75,7 +75,7 @@
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately.  In the
  *   case of ERROR, NX will have deallocated the pre-allocated window.
  *

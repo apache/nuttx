@@ -62,7 +62,7 @@
  *   be stopped.  Save its context and move it to the inactive list specified
  *   by task_state.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb: Refers to a task in the ready-to-run list (normally the task at the
  *     head of the list).  It most be stopped, its context saved and moved
  *     into one of the waiting task lists.  It it was the task at the head

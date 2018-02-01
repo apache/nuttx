@@ -91,7 +91,7 @@
  *   id - In the case where the device supports multiple base classes, subclasses, or
  *     protocols, this specifies which to configure for.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, this function will return a non-NULL instance of struct
  *   usbhost_class_s that can be used by the USB host driver to communicate with the
  *   USB host class.  NULL is returned on failure; this function will fail only if
@@ -121,7 +121,7 @@
  *   configdesc - A pointer to a uint8_t buffer container the configuration descriptor.
  *   desclen - The length in bytes of the configuration descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -152,7 +152,7 @@
  * Input Parameters:
  *   devclass - The USB host class entry previously obtained from a call to create().
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -175,7 +175,7 @@
  *   hport - The location to return the hub port descriptor that detected the
  *      connection related event.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero (OK) is returned on success when a device in connected or
  *   disconnected. This function will not return until either (1) a device is
  *   connected or disconnect to/from any hub port or until (2) some failure
@@ -209,7 +209,7 @@
  *   hport - The descriptor of the hub port that has the newly connected
  *      device.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -238,7 +238,7 @@
  *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -262,7 +262,7 @@
  *   devinfo - A pointer to memory provided by the caller in which to return the
  *      device information.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -286,7 +286,7 @@
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -308,7 +308,7 @@
  *      the class create() method.
  *   ep - The endpoint to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -341,7 +341,7 @@
  *   maxlen - The address of a memory location provided by the caller in which to
  *     return the maximum size of the allocated buffer memory.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -366,7 +366,7 @@
  *      the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -395,7 +395,7 @@
  *     return the allocated buffer memory address.
  *   buflen - The size of the buffer required.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -420,7 +420,7 @@
  *      the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -456,7 +456,7 @@
  *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
  *   memory.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
@@ -489,7 +489,7 @@
  *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, a non-negative value is returned that indicates the number
  *   of bytes successfully transferred.  On a failure, a negated errno value is
  *   returned that indicates the nature of the failure:
@@ -534,7 +534,7 @@
  *   arg - The arbitrary parameter that will be passed to the callback function
  *     when the transfer completes.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure.
  *
@@ -561,7 +561,7 @@
  *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
  *      asynchronous transfer should be transferred.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure.
  *
@@ -584,7 +584,7 @@
  *      related event
  *   connected - True: device connected; false: device disconnected
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure.
  *
@@ -611,7 +611,7 @@
  *   hport - The port from which the device is being disconnected.  Might be a port
  *      on a hub.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -949,7 +949,7 @@ extern "C"
  *   devclass - An write-able instance of struct usbhost_registry_s that will be
  *     maintained in a registry.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, this function will return zero (OK).  Otherwise, a negated errno
  *   value is returned.
  *
@@ -969,7 +969,7 @@ int usbhost_registerclass(struct usbhost_registry_s *devclass);
  * Input Parameters:
  *   id - Identifies the USB device class that has connect to the USB host.
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return a non-NULL instance of struct
  *   usbhost_registry_s.  NULL will be returned on failure.  This function can only
  *   fail if (1) id is NULL, or (2) no USB host class is registered that matches the
@@ -991,7 +991,7 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *
@@ -1012,7 +1012,7 @@ int usbhost_hub_initialize(void);
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *
@@ -1054,7 +1054,7 @@ int usbhost_cdcacm_initialize(void);
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *
@@ -1075,7 +1075,7 @@ int usbhost_kbdinit(void);
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *
@@ -1096,7 +1096,7 @@ int usbhost_mouse_init(void);
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *
@@ -1116,7 +1116,7 @@ int usbhost_xboxcontroller_init(void);
  * Input Parameters:
  *   None
  *
- * Returned Values:
+ * Returned Value:
  *   On success this function will return zero (OK);  A negated errno value
  *   will be returned on failure.
  *
@@ -1147,7 +1147,7 @@ int usbhost_wlaninit(void);
  *      and bound to the hub, the allocated class instance is returned into
  *      this caller-provided memory location.
  *
- * Returned Values:
+ * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *

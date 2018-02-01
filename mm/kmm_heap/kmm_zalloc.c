@@ -56,7 +56,7 @@
  * Parameters:
  *   size - Size (in bytes) of the memory region to be allocated.
  *
- * Return Value:
+ * Returned Value:
  *   The address of the allocated memory (NULL on failure to allocate)
  *
  ****************************************************************************/

@@ -126,7 +126,7 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
  *   buf      Data to write
  *   nbytes   Length of data to write
  *
- * Return:
+ * Returned Value:
  *   The positive non-zero number of bytes read on success, 0 on if an
  *   end-of-file condition, or -1 on failure with errno set appropriately.
  *   See write() return values

@@ -97,7 +97,7 @@ extern "C"
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
  *
- * Return Value:
+ * Returned Value:
  *   Returns the positive, non-zero process ID of the new task or a negated
  *   errno value to indicate the nature of any failure.  If memory is
  *   insufficient or the task cannot be created -ENOMEM will be returned.
@@ -126,7 +126,7 @@ int nxtask_create(FAR const char *name, int priority,
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
  *
- * Return Value:
+ * Returned Value:
  *   Returns the positive, non-zero process ID of the new task or a negated
  *   errno value to indicate the nature of any failure.  If memory is
  *   insufficient or the task cannot be created -ENOMEM will be returned.

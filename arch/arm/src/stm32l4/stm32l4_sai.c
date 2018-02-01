@@ -479,7 +479,7 @@ static void sai_exclsem_take(struct stm32l4_sai_s *priv)
  *   Setup the master clock divider based on the currently selected data width
  *   and the sample rate
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv - SAI device structure (only the sample rate and frequency are
  *          needed at this point).
  *
@@ -1288,7 +1288,7 @@ static void sai_buf_initialize(struct stm32l4_sai_s *priv)
  * Description:
  *   Initialize the selected SAI port in its default state
  *
- * Input Parameter:
+ * Input Parameters:
  *   priv   - private SAI device structure
  *
  * Returned Value:
@@ -1353,7 +1353,7 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
  * Description:
  *   Initialize the selected SAI block
  *
- * Input Parameter:
+ * Input Parameters:
  *   intf - I2S interface number (identifying the "logical" SAI interface)
  *
  * Returned Value:

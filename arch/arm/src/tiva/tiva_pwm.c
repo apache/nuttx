@@ -421,7 +421,7 @@ static inline void tiva_pwm_putreg(struct tiva_pwm_chan_s *chan,
  *   use.  It will not, however, output pulses until the start method is
  *   called.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -457,7 +457,7 @@ static int tiva_pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *   stop pulsed output, free any resources, disable the timer hardware, and
  *   put the system into the lowest possible power usage state
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -487,7 +487,7 @@ static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   (Re-)initialize the timer resources and start the pulsed output
  *
- * Input parameters:
+ * Input Parameters:
  *   dev  - A reference to the lower half PWM driver state structure
  *   info - A reference to the characteristics of the pulsed output
  *   handle - This is the handle that was provided to the lower-half
@@ -569,7 +569,7 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
  * Description:
  *   Configure PWM registers and start the PWM timer
  *
- * Input parameters:
+ * Input Parameters:
  *   dev  - A reference to the lower half PWM driver state structure
  *   info - A reference to the characteristics of the pulsed output
  *
@@ -659,7 +659,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
  * Description:
  *   Stop the pulsed output and reset the timer resources
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
@@ -692,7 +692,7 @@ static int tiva_pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower half PWM driver state structure
  *   cmd - The ioctl command
  *   arg - The argument accompanying the ioctl command

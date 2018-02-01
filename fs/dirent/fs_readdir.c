@@ -153,10 +153,10 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
  *   to by dir.  It returns NULL on reaching the end-of-file or if an error
  *   occurred.
  *
- * Inputs:
+ * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous call to opendir();
  *
- * Return:
+ * Returned Value:
  *   The readdir() function returns a pointer to a dirent structure, or NULL
  *   if an error occurs or end-of-file is reached.  On error, errno is set
  *   appropriately.

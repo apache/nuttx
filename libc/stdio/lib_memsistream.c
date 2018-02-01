@@ -125,7 +125,7 @@ static off_t memsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
  * Description:
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
- * Input parameters:
+ * Input Parameters:
  *   instream    - User allocated, uninitialized instance of struct
  *                 lib_memsistream_s to be initialized.
  *   bufstart    - Address of the beginning of the fixed-size memory buffer

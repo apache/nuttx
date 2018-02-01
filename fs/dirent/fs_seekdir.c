@@ -188,12 +188,12 @@ static inline void seekmountptdir(struct fs_dirent_s *idir, off_t offset)
  *   which the next readdir() call will start.  seekdir() should be used with
  *   an offset returned by telldir().
  *
- * Inputs:
+ * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous
  *     call to opendir();
  *   offset -- offset to seek to
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

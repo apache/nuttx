@@ -68,11 +68,11 @@
  *   use by application logic.  Applications should use the standard
  *   sched_getscheduler().
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task to query.  If pid is zero, the
  *     calling task is queried.
  *
- * Return Value:
+ * Returned Value:
  *    On success, sched_getscheduler() returns the policy for the task
  *    (either SCHED_FIFO or SCHED_RR).  On error,  a negated errno value
  *    returned:
@@ -121,11 +121,11 @@ int nxsched_getscheduler(pid_t pid)
  *   sched_getscheduler() is a simply wrapper around nxsched_getscheduler()
  *   that sets the errno value in the event of an error.
  *
- * Inputs:
+ * Input Parameters:
  *   pid - the task ID of the task to query.  If pid is zero, the
  *     calling task is queried.
  *
- * Return Value:
+ * Returned Value:
  *    On success, sched_getscheduler() returns the policy for the task
  *    (either SCHED_FIFO or SCHED_RR).  On error,  ERROR (-1) is
  *    returned, and errno is set appropriately:

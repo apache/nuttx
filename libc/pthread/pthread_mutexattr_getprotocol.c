@@ -58,7 +58,7 @@
  *    protocol - The user provided location in which to store the protocol
  *               value.
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, an error code.
  *
  ****************************************************************************/

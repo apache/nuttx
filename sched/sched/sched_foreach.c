@@ -59,7 +59,7 @@
  *   handler - The function to be called with the TCB of
  *     each task
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

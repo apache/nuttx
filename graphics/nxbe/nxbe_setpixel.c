@@ -99,7 +99,7 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
  *   rect - The location to be filled
  *   col  - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

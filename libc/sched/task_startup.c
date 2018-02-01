@@ -57,11 +57,11 @@
  *   This function is the user-space, task startup function.  It is called
  *   from up_task_start() in user-mode.
  *
- * Inputs:
+ * Input Parameters:
  *   entrypt - The user-space address of the task entry point
  *   argc and argv - Standard arguments for the task entry point
  *
- * Return:
+ * Returned Value:
  *   None.  This function does not return.
  *
  ****************************************************************************/

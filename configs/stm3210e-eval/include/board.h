@@ -261,7 +261,7 @@ void stm3210e_lcdclear(uint16_t color);
  * Description:
  *   Initialize and register the LM-75 Temperature Sensor driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
  *
  * Returned Value:
@@ -279,7 +279,7 @@ int stm32_lm75initialize(FAR const char *devpath);
  * Description:
  *   Attach the LM-75 interrupt handler
  *
- * Input parameters:
+ * Input Parameters:
  *   irqhandler - the LM-75 interrupt handler
  *   arg        - The argument that will accompany the interrupt
  *

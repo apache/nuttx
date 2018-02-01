@@ -672,7 +672,7 @@ int tiva_gpioirqinitialize(void)
  *   disabled to stop further interrupts. Otherwise, the new isr is linked
  *   and the pin's interrupt mask is set.
  *
- * Returns:
+ * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   return to indicate the nature of the failure.
  *

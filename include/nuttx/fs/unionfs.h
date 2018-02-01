@@ -83,7 +83,7 @@ extern "C"
  *             file system appear a some path below the unionfs mountpoint,
  *   mountpt - The full path to the mountpoint for the union file system
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) is returned if the union file system was correctly created and
  *   mounted.  On any failure, a negated error value will be returned to
  *   indicate the nature of the failure.

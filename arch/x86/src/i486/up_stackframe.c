@@ -99,7 +99,7 @@
  *     been removed from the stack.  This will still be the initial value
  *     of the stack pointer when the task is started.
  *
- * Inputs:
+ * Input Parameters:
  *   - tcb:  The TCB of new task
  *   - frame_size:  The size of the stack frame to allocate.
  *

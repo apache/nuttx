@@ -58,7 +58,7 @@
  * Description:
  *   Lock the user-mode work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -98,7 +98,7 @@ int work_lock(void)
  * Description:
  *   Unlock the user-mode work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

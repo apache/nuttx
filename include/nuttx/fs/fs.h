@@ -496,7 +496,7 @@ void fs_initialize(void);
  * Description:
  *   Register a character driver inode the pseudo file system.
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
  *   mode - inmode privileges (not used)
@@ -523,7 +523,7 @@ int register_driver(FAR const char *path,
  * Description:
  *   Register a block driver inode the pseudo file system.
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
  *   mode - inmode privileges (not used)
@@ -1051,7 +1051,7 @@ int file_truncate(FAR struct file *filep, off_t length);
  *   req      The ioctl command
  *   arg      The argument of the ioctl cmd
  *
- * Return:
+ * Returned Value:
  *   Returns a non-negative number on success;  A negated errno value is
  *   returned on any failure (see comments ioctl() for a list of appropriate
  *   errno values).

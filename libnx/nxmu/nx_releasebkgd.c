@@ -60,7 +60,7 @@
  * Input Parameters:
  *   hwnd - The handle returned (indirectly) by nx_requestbkgd
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

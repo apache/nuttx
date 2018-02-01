@@ -87,7 +87,7 @@
  *   attr - barrier attributes to be modified.
  *   pshared - the new value of the pshared attribute.
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) on success or EINVAL if either attr is invalid or pshared is not one
  *   of PTHREAD_PROCESS_SHARED or PTHREAD_PROCESS_PRIVATE.
  *

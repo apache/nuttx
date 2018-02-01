@@ -54,7 +54,7 @@
  *   set - Signal set to test
  *   signo - Signal to test for
  *
- * Return Value:
+ * Returned Value:
  *   1 (true), if the specified signal is a member of the set,
  *   0 (OK or FALSE), if it is not, or
  *  -1 (ERROR) if the signal number is invalid.

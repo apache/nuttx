@@ -94,7 +94,7 @@ static const uint16_t g_icmpv_mcastaddr[6] =
  *   dev - Reference to an Ethernet device driver structure
  *   ipaddr - IP address of Neighbor to be solicited
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

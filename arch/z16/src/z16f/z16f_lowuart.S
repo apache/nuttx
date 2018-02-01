@@ -191,7 +191,7 @@ _up_lowputc:
  * Parameters:
  *   r1 = character
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Modifies r0
@@ -230,7 +230,7 @@ _z16f_xmitc1:
  * Parmeters:
  *   None
  *
- * Return
+ * Returned Value:
  *   R0 = Character read
  *
  *************************************************************************/

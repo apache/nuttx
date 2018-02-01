@@ -312,7 +312,7 @@ static inline void stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -360,7 +360,7 @@ static int stm32l4_start(FAR struct watchdog_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -385,7 +385,7 @@ static int stm32l4_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   lower - A pointer the publicly visible representation of the "lower-half"
  *           driver state structure.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -418,7 +418,7 @@ static int stm32l4_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *            driver state structure.
  *   status - The location to return the watchdog status information.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -477,7 +477,7 @@ static int stm32l4_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *             driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
@@ -602,7 +602,7 @@ static int stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *     /dev/watchdog0
  *   lsifreq - The calibrated LSI clock frequency
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

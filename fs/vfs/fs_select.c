@@ -84,7 +84,7 @@
  *   is more wasteful of resources and poll() is the recommended API to be
  *   used.
  *
- * Input parameters:
+ * Input Parameters:
  *   nfds - the maximum fd number (+1) of any descriptor in any of the
  *     three sets.
  *   readfds - the set of descriptions to monitor for read-ready events
@@ -93,7 +93,7 @@
  *   timeout - Return at this time if none of these events of interest
  *     occur.
  *
- *  Return:
+ *  Returned Value:
  *   0: Timer expired
  *  >0: The number of bits set in the three sets of descriptors
  *  -1: An error occurred (errno will be set appropriately)

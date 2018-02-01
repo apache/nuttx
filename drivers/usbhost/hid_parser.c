@@ -398,7 +398,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
  *   report. If the given item does not exist in the report, the function
  *   does not modify the report item's data.
  *
- * Input Parameters
+ * Input Parameters:
  *   report  Buffer containing an IN or FEATURE report from an attached
  *               device.
  *   item        Pointer to the report item of interest in a struct hid_rptinfo_s
@@ -500,7 +500,7 @@ void hid_putitem(FAR uint8_t *report, struct hid_rptitem_s *item)
  * Description:
  *   Retrieves the size of a given HID report in bytes from it's Report ID.
  *
- * InputParameters:
+ * Input Parameters:
  *  rptinfo Pointer to a struct hid_rptinfo_s instance containing the parser output.
  *  id      Report ID of the report whose size is to be retrieved.
  *  rpttype Type of the report whose size is to be determined, a valued from the

@@ -412,7 +412,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
  * Description:
  *   Start the VNC server.
  *
- * Input parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *
@@ -470,7 +470,7 @@ static int vnc_start_server(int display)
  * Description:
  *   Wait for the server to be started.
  *
- * Input parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *
@@ -525,7 +525,7 @@ static inline int vnc_wait_start(int display)
  *   Wait for the server to be connected to the VNC client.  We can do
  *   nothing until that connection is established.
  *
- * Input parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *
@@ -612,7 +612,7 @@ static inline int vnc_wait_connect(int display)
  * Description:
  *   Initialize the framebuffer video hardware associated with the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *
@@ -746,7 +746,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
  *   Return a a reference to the framebuffer object for the specified video
  *   plane of the specified plane.  Many OSDs support multiple planes of video.
  *
- * Input parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *   vplane - Identifies the plane being queried.

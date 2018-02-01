@@ -201,7 +201,7 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:

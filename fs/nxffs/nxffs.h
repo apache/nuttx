@@ -386,7 +386,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume);
  * Input Parameters:
  *   val - A pointer to the first byte of the little endian value.
  *
- * Returned Values:
+ * Returned Value:
  *   A uint16_t representing the whole 16-bit integer value
  *
  * Defined in nxffs_util.c
@@ -405,7 +405,7 @@ uint16_t nxffs_rdle16(FAR const uint8_t *val);
  *   dest - A pointer to the first byte to save the little endian value.
  *   val - The 16-bit value to be saved.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Defined in nxffs_util.c
@@ -423,7 +423,7 @@ void nxffs_wrle16(uint8_t *dest, uint16_t val);
  * Input Parameters:
  *   val - A pointer to the first byte of the little endian value.
  *
- * Returned Values:
+ * Returned Value:
  *   A uint32_t representing the whole 32-bit integer value
  *
  * Defined in nxffs_util.c
@@ -461,7 +461,7 @@ void nxffs_wrle32(uint8_t *dest, uint32_t val);
  *   buffer - Address of the start of the memory to check.
  *   buflen - The number of bytes to check.
  *
- * Returned Values:
+ * Returned Value:
  *   The number of erased bytes found at the beginning of the memory region.
  *
  * Defined in nxffs_util.c
@@ -581,7 +581,7 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve);
  *   caller may call kmm_free upon return of this function if necessary to
  *   free the entry container.
  *
- * Input parameters:
+ * Input Parameters:
  *   entry  - The entry to be freed.
  *
  * Returned Value:
@@ -679,7 +679,7 @@ off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
  *   volume - Describes the NXFFS volume
  *   block - The (logical) block number to load and verify.
  *
- * Returned Values:
+ * Returned Value:
  *   OK (zero( is returned on success.  Otherwise, a negated errno value is
  *   returned indicating the nature of the failure:
  *
@@ -836,7 +836,7 @@ FAR struct nxffs_wrfile_s *nxffs_findwriter(FAR struct nxffs_volume_s *volume);
  * Note that in either case, the inode name has already been written to
  * FLASH.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   entry  - Describes the inode header to write
  *
@@ -858,7 +858,7 @@ int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
  *   The packing logic has moved an inode.  Check if any open files are using
  *   this inode and, if so, move the data in the open file structure as well.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   entry  - Describes the new inode entry
  *
@@ -877,7 +877,7 @@ int nxffs_updateinode(FAR struct nxffs_volume_s *volume,
  * Description:
  *   Zero-extend a file.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   entry  - Describes the new inode entry
  *   length - The new, extended length of the file
@@ -1074,7 +1074,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name);
  * Input Parameters:
  *   volume - The volume to be packed.
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; Otherwise, a negated errno value is returned to
  *   indicate the nature of the failure.
  *

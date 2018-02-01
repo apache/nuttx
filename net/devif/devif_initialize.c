@@ -85,7 +85,7 @@ uint8_t g_reassembly_timer;
  * Parameters:
  *   None
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

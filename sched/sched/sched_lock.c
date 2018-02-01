@@ -132,10 +132,10 @@ volatile cpu_set_t g_cpu_lockset SP_SECTION;
  *   either calls  sched_unlock() (the appropriate number of times) or
  *   until it blocks itself.
  *
- * Inputs
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; ERROR on failure
  *
  ****************************************************************************/

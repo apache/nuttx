@@ -2560,7 +2560,7 @@ static int hrtim_gpios_config(FAR struct stm32_hrtim_s *priv)
  * Description:
  *  Configure HRTIM Captures
  *
- * Input parameters:
+ * Input Parameters:
  *   priv    - A reference to the HRTIM block
  *   timer   - HRTIM Timer index
  *   capture - capture trigers configuration
@@ -2618,7 +2618,7 @@ errout:
  * Description:
  *  Configure HRTIM Captures
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - A reference to the HRTIM block
  *
  * Returned Value:
@@ -2669,7 +2669,7 @@ static int hrtim_capture_config(FAR struct stm32_hrtim_s *priv)
  * Description:
  *  Get HRTIM Timer Capture register
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - A reference to the HRTIM block
  *   timer  - HRTIM Timer index
  *   index  - Capture register index
@@ -4516,7 +4516,7 @@ void hrtim_irq_ack(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
  * Description:
  *  Set HRTIM Timer mode
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - A reference to the HRTIM block
  *   timer  - HRTIM Timer index
  *   mode   - Timer mode configuration
@@ -4685,7 +4685,7 @@ errout:
  * Description:
  *  Try update HRTIM Timer compare register.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev    - HRTIM device structure
  *   timer  - HRTIM Timer index
  *   index  - Compare register timer
@@ -4759,7 +4759,7 @@ errout:
  * Description:
  *  Try update HRTIM Timer period register.
  *
- * Input parameters:
+ * Input Parameters:
  *   dev    - HRTIM device structure
  *   timer  - HRTIM Timer index
  *   per    - New period register value
@@ -4784,7 +4784,7 @@ static int hrtim_per_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
  * Description:
  *  Get HRTIM Timer period value
  *
- * Input parameters:
+ * Input Parameters:
  *   dev    - HRTIM device structure
  *   timer  - HRTIM Timer index
  *
@@ -4806,7 +4806,7 @@ static uint16_t hrtim_per_get(FAR struct hrtim_dev_s *dev, uint8_t timer)
  * Description:
  *  Get HRTIM Timer compare register
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - A reference to the HRTIM block
  *   timer  - HRTIM Timer index
  *   index  - Compare register timer
@@ -4868,7 +4868,7 @@ errout:
  * Description:
  *  Get HRTIM Timer clock value
  *
- * Input parameters:
+ * Input Parameters:
  *   dev    - HRTIM device structure
  *   timer  - HRTIM Timer index
  *
@@ -4904,7 +4904,7 @@ errout:
  * Description:
  *  Set HRTIM Timer Reset events
  *
- * Input parameters:
+ * Input Parameters:
  *   priv   - A reference to the HRTIM block
  *   timer  - HRTIM Timer index
  *   reset  - Reset configuration

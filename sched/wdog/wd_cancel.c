@@ -64,7 +64,7 @@
  * Parameters:
  *   wdog - ID of the watchdog to cancel.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) is returned on success;  A negated errno value is returned to
  *   indicate the nature of any failure.
  *

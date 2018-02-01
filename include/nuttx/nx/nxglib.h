@@ -679,12 +679,12 @@ bool nxgl_colorcmp(const nxgl_mxpixel_t color1[CONFIG_NX_NPLANES],
  *      this case, 3 trapezoids will be returned, but traps[1] will be
  *      degenerate.
  *
- * Input parameters:
+ * Input Parameters:
  *   vector - A pointer to the vector described the line to be drawn.
  *   traps  - A pointer to a array of trapezoids (size 3).
  *   rect   - A pointer to a rectangle.
  *
- * Returned value:
+ * Returned Value:
  *   0: Line successfully broken up into three trapezoids.  Values in
  *      traps[0], traps[1], and traps[2] are valid.
  *   1: Line successfully represented by one trapezoid. Value in traps[1]
@@ -708,13 +708,13 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
  *   circumference of the circle.  These points may then be used by
  *   nx_drawcircle() or related APIs to draw a circle outline.
  *
- * Input parameters:
+ * Input Parameters:
  *   center - A pointer to the point that is the center of the circle
  *   radius - The radius of the circle in pixels.
  *   circle - A pointer the first entry in an array of 16 points where the
  *            circle points will be returned.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
@@ -730,13 +730,13 @@ void nxgl_circlepts(FAR const struct nxgl_point_s *center,
  *   Given a description of a a circle, return 8 trapezoids that can be
  *   used to fill the circle by nx_fillcircle() and other interfaces.
  *
- * Input parameters:
+ * Input Parameters:
  *   center - A pointer to the point that is the center of the circle
  *   radius - The radius of the circle in pixels.
  *   circle - A pointer the first entry in an array of 8 trapezoids where
  *            the circle description will be returned.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

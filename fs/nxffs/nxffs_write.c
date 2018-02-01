@@ -633,7 +633,7 @@ errout:
  * Description:
  *   Zero-extend a file.
  *
- * Input parameters
+ * Input Parameters:
  *   volume - Describes the NXFFS volume
  *   entry  - Describes the new inode entry
  *   length - The new, extended length of the file

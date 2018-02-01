@@ -428,14 +428,14 @@ static int rd_unlink(FAR struct inode *inode)
  * Description:
  *   Non-standard function to register a ramdisk or a romdisk
  *
- * Input Parmeters:
+ * Input Parameters:
  *   minor:         Selects suffix of device named /dev/ramN, N={1,2,3...}
  *   nsectors:      Number of sectors on device
  *   sectize:       The size of one sector
  *   rdflags:       See RDFLAG_* definitions
  *   buffer:        RAM disk backup memory
  *
- * Returned Valued:
+ * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/

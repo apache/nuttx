@@ -139,7 +139,7 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  *   act - Location of new handler
  *   oact - Location to store only handler
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK), or -1 (ERROR) if the signal number is invalid.
  *   (errno is not set)
  *

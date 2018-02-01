@@ -336,7 +336,7 @@ errout:
  *
  *    Locates the first config entry, even if it is empty.
  *
- * Returns:
+ * Returned Value:
  *     offset to the start of the entry.
  *
  ****************************************************************************/
@@ -435,7 +435,7 @@ static int  mtdconfig_findfirstentry(FAR struct mtdconfig_struct_s *dev,
  *
  *    Locates the next config entry starting at offset, even if it is empty.
  *
- * Returns:
+ * Returned Value:
  *     offset to the start of the next entry.
  *
  ****************************************************************************/
@@ -562,7 +562,7 @@ read_next:
  *    method of consolidation is used when only a single erase
  *    block is available in the partition.
  *
- * Returns:
+ * Returned Value:
  *     offset to the next available entry (after consolidation)..
  *
  ****************************************************************************/
@@ -719,7 +719,7 @@ errout:
  *    erased block.  It erases all blocks to the end of the
  *    partition as it goes.
  *
- * Returns:
+ * Returned Value:
  *     offset to the next available entry (after consolidation)..
  *
  ****************************************************************************/

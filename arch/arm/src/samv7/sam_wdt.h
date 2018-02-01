@@ -76,7 +76,7 @@ extern "C"
  *
  *   At a minimum, this function should call watchdog_register().
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -96,7 +96,7 @@ int sam_wdt_initialize(void);
  *
  *   At a minimum, this function should call watchdog_register().
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

@@ -65,7 +65,7 @@
  *  stream - the stream to flush
  *  bforce - flush must be complete.
  *
- * Return:
+ * Returned Value:
  *  A negated errno value on failure, otherwise the number of bytes remaining
  *  in the buffer.
  *

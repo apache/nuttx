@@ -82,7 +82,7 @@ struct hp_wqueue_s g_hpwork;
  *   bring up.  This entry point is referenced by OS internally and should
  *   not be accessed by application logic.
  *
- * Input parameters:
+ * Input Parameters:
  *   argc, argv (not used)
  *
  * Returned Value:
@@ -132,7 +132,7 @@ static int work_hpthread(int argc, char *argv[])
  * Description:
  *   Start the high-priority, kernel-mode work queue.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

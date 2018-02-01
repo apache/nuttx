@@ -75,7 +75,7 @@
  * Parameters:
  *   set - signal mask to use while suspended.
  *
- * Return Value:
+ * Returned Value:
  *   -1 (ERROR) always
  *
  * Assumptions:

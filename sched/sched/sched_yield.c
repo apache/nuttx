@@ -54,10 +54,10 @@
  *   This function forces the calling task to give up the CPU (only to other
  *   tasks at the same priority).
  *
- * Inputs:
+ * Input Parameters:
  *   None
  *
- * Return Value:
+ * Returned Value:
  *   0 (OK) or -1 (ERROR) (errno is not set)
  *
  * Assumptions:

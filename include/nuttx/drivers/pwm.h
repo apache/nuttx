@@ -260,7 +260,7 @@ extern "C"
  *   When this function is called, the "lower half" driver should be in the
  *   reset state (as if the shutdown() method had already been called).
  *
- * Input parameters:
+ * Input Parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/pwm0", "/dev/pwm1", etc.  where the driver path differs only
@@ -301,7 +301,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
  *      interface using the handle that was previously passed to the
  *      start() method
  *
- * Input parameters:
+ * Input Parameters:
  *   handle - This is the handle that was provided to the lower-half
  *     start() method.
  *

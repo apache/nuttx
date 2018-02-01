@@ -82,11 +82,11 @@
  *   This function is the user-space, pthread startup function.  It is called
  *   from up_pthread_start() in user-mode.
  *
- * Inputs:
+ * Input Parameters:
  *   entrypt - The user-space address of the pthread entry point
  *   arg     - Standard argument for the pthread entry point
  *
- * Return:
+ * Returned Value:
  *   None.  This function does not return.
  *
  ****************************************************************************/

@@ -160,7 +160,7 @@ extern "C"
  *   tv - The location to return the current time
  *   tz - Ignored
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) on success;  -1 is returned on failure with the errno variable
  *   set appropriately.
  *
@@ -183,7 +183,7 @@ int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz);
  *   tv - The net to time to be set
  *   tz - Ignored
  *
- * Returned value:
+ * Returned Value:
  *   Zero (OK) on success;  -1 is returned on failure with the errno variable
  *   set appropriately.
  *

@@ -76,7 +76,7 @@
  *   timerid - The pre-thread timer, previously created by the call to
  *   timer_create(), whose overrun count will be returned..
  *
- * Return Value:
+ * Returned Value:
  *   If the timer_getoverrun() function succeeds, it will return the timer
  *   expiration overrun count as explained above. timer_getoverrun() will
  *   fail if:

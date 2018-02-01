@@ -66,7 +66,7 @@
  * Parameters:
  *   mq_name - Name of the message queue
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  * Assumptions:

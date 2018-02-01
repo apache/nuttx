@@ -91,7 +91,7 @@
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
  *
- * Returned Values:
+ * Returned Value:
  *   OK if the HSMC was successfully configured for this CS.  A negated
  *   errno value is returned on a failure.  This would fail with -ENODEV,
  *   for example, if the board does not support NAND FLASH on the requested

@@ -82,10 +82,10 @@ static const char g_noname[] = "<noname>";
  * Description:
  *   This function assigns the next unique task ID to a task.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb - TCB of task
  *
- * Return:
+ * Returned Value:
  *   OK on success; ERROR on failure (errno is not set)
  *
  ****************************************************************************/
@@ -344,7 +344,7 @@ static inline void task_dupdspace(FAR struct tcb_s *tcb)
  *   entry      - Thread user entry point
  *   ttype      - Type of the new thread: task, pthread, or kernel thread
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; ERROR on failure.
  *
  *   This function can only failure is it is unable to assign a new, unique
@@ -449,7 +449,7 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
  *   tcb  - Address of the new task's TCB
  *   name - Name of the new task
  *
- * Return Value:
+ * Returned Value:
  *  None
  *
  ****************************************************************************/
@@ -491,7 +491,7 @@ static void task_namesetup(FAR struct task_tcb_s *tcb, FAR const char *name)
  *          terminated with a NULL argv[] value. If no parameters are
  *          required, argv may be NULL.
  *
- * Return Value:
+ * Returned Value:
  *  Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/
@@ -631,7 +631,7 @@ static inline int task_stackargsetup(FAR struct task_tcb_s *tcb,
  *   main       - Application start point of the new task
  *   ttype      - Type of the new thread: task or kernel thread
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; ERROR on failure.
  *
  *   This function can only failure is it is unable to assign a new, unique
@@ -664,7 +664,7 @@ int task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
  *   entry    - Entry point of the new pthread
  *   ttype    - Type of the new thread: task, pthread, or kernel thread
  *
- * Return Value:
+ * Returned Value:
  *   OK on success; ERROR on failure.
  *
  *   This function can only failure is it is unable to assign a new, unique
@@ -709,7 +709,7 @@ int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
  *          terminated with a NULL argv[] value.  If no parameters are
  *          required, argv may be NULL.
  *
- * Return Value:
+ * Returned Value:
  *  OK
  *
  ****************************************************************************/

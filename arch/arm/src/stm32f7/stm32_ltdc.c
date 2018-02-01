@@ -1168,7 +1168,7 @@ static int stm32_ltdcirq(int irq, void *context, FAR void *arg)
  *   that a register reload was been completed.
  *   Note! The caller must use this function within a critical section.
  *
- * Return:
+ * Returned Value:
  *   OK - On success otherwise ERROR
  *
  ****************************************************************************/
@@ -1467,7 +1467,7 @@ static inline uint8_t stm32_ltdc_lgetopac(FAR struct stm32_layer_s *layer)
  * Parameter:
  *   layer - Reference to the layer control structure
  *
- * Return:
+ * Returned Value:
  *   true  - layer valid
  *   false - layer invalid
  *
@@ -1497,7 +1497,7 @@ static inline bool stm32_ltdc_lvalidate(FAR const struct stm32_layer_s *layer)
  *   srcxpos - Top left x position from where data visible in the active area
  *   srcypos - Top left y position from where data visible in the active area
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -1968,7 +1968,7 @@ static void stm32_ltdc_lenable(FAR struct stm32_layer_s *layer)
  *   layer - Reference to the layer control structure
  *   color - The color to clear
  *
- * Return:
+ * Returned Value:
  *   OK      - On success
  *   -EINVAL - If one of the parameter invalid
  *
@@ -2182,7 +2182,7 @@ static void stm32_ltdc_linit(int lid)
  *   vtable - The framebuffer driver object
  *   vinfo  - the videoinfo object
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2217,7 +2217,7 @@ static int stm32_getvideoinfo(struct fb_vtable_s *vtable,
  *   vtable - The framebuffer driver object
  *   pinfo  - the planeinfo object
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2252,7 +2252,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
  *   vtable - The framebuffer driver object
  *   cmap   - the color table
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2279,7 +2279,7 @@ static int stm32_getcmap(struct fb_vtable_s *vtable,
  *   vtable - The framebuffer driver object
  *   cmap   - the color table
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2306,7 +2306,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
  *   layer  - Reference to the layer control structure
  *   vinfo  - Reference to the video info structure
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2340,7 +2340,7 @@ static int stm32_lgetvideoinfo(struct ltdc_layer_s *layer,
  *   planeno - Number of the plane
  *   pinfo   - Reference to the plane info structure
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2374,7 +2374,7 @@ static int stm32_lgetplaneinfo(struct ltdc_layer_s *layer, int planeno,
  *   layer  - Reference to the layer structure
  *   cmap   - color lookup table with up the 256 entries
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2434,7 +2434,7 @@ static int stm32_setclut(struct ltdc_layer_s *layer,
  *   cmap  - Reference to valid color lookup table accept up the 256 color
  *           entries
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2533,7 +2533,7 @@ static int stm32_getclut(struct ltdc_layer_s *layer,
  *           e.g. get the current active or inactive layer.
  *           See LTDC_LAYER_* for possible values
  *
- * Return:
+ * Returned Value:
  *   OK - On success
  *   Null if invalid flag
  *
@@ -2610,7 +2610,7 @@ static int stm32_getlid(FAR struct ltdc_layer_s *layer, int *lid,
  *   layer - Reference to the layer structure
  *   argb  - ARGB8888 color value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -2646,7 +2646,7 @@ static int stm32_setcolor(FAR struct ltdc_layer_s *layer, uint32_t argb)
  *   layer - Reference to the layer structure
  *   argb  - Reference to store the ARGB8888 color value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2683,7 +2683,7 @@ static int stm32_getcolor(FAR struct ltdc_layer_s *layer, uint32_t *argb)
  *   layer  - Reference to the layer structure
  *   rgb   - RGB888 color value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2719,7 +2719,7 @@ static int stm32_setcolorkey(FAR struct ltdc_layer_s *layer, uint32_t rgb)
  *   layer  - Reference to the layer structure
  *   rgb    - Reference to store the RGB888 color key
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error   - -EINVAL
  *
@@ -2760,7 +2760,7 @@ static int stm32_getcolorkey(FAR struct ltdc_layer_s *layer, uint32_t *rgb)
  *   layer - Reference to the layer structure
  *   alpha - Alpha value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -2796,7 +2796,7 @@ static int stm32_setalpha(FAR struct ltdc_layer_s *layer, uint8_t alpha)
  *   layer - Reference to the layer structure
  *   alpha - Reference to store the alpha value
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -2833,7 +2833,7 @@ static int stm32_getalpha(FAR struct ltdc_layer_s *layer, uint8_t *alpha)
  *   layer - Reference to the layer structure
  *   mode  - Blend mode (see LTDC_BLEND_*)
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -2965,7 +2965,7 @@ static int stm32_setblendmode(FAR struct ltdc_layer_s *layer, uint32_t mode)
  *   layer - Reference to the layer structure
  *   mode  - Reference to store the blend mode
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  ****************************************************************************/
@@ -3004,7 +3004,7 @@ static int stm32_getblendmode(FAR struct ltdc_layer_s *layer, uint32_t *mode)
  *   srcxpos - x position of the visible pixel of the whole layer
  *   srcypos - y position of the visible pixel of the whole layer
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -3066,7 +3066,7 @@ static int stm32_setarea(FAR struct ltdc_layer_s *layer,
  *   srcxpos - Reference to store the referenced x position of the whole layer
  *   srcypos - Reference to store the reterenced y position of the whole layer
  *
- * Return:
+ * Returned Value:
  *   On success - OK
  *   On error - -EINVAL
  *
@@ -3106,7 +3106,7 @@ static int stm32_getarea(FAR struct ltdc_layer_s *layer,
  *   layer   - Reference to the layer structure
  *   mode    - operation mode
  *
- * Return:
+ * Returned Value:
  *    OK        - On success
  *   -EINVAL    - If one of the parameter invalid
  *   -ECANCELED - Operation cancelled, something goes wrong
@@ -3269,7 +3269,7 @@ static int stm32_update(FAR struct ltdc_layer_s *layer, uint32_t mode)
  *   src      - Reference to the source layer
  *   srcarea  - Reference to the selected area of the source layer
  *
- * Return:
+ * Returned Value:
  *    OK      - On success
  *   -EINVAL  - If one of the parameter invalid or if the size of the selected
  *              source area outside the visible area of the destination layer.
@@ -3320,7 +3320,7 @@ static int stm32_blit(FAR struct ltdc_layer_s *dest,
  *   back     - Reference to the background layer
  *   backarea - Reference to the selected area of the background layer
  *
- * Return:
+ * Returned Value:
  *    OK      - On success
  *   -EINVAL  - If one of the parameter invalid or if the size of the selected
  *              source area outside the visible area of the destination layer.
@@ -3370,7 +3370,7 @@ static int stm32_blend(FAR struct ltdc_layer_s *dest,
  *   color    - Color to fill the selected area. Color must be formatted
  *              according to the layer pixel format.
  *
- * Return:
+ * Returned Value:
  *    OK      - On success
  *   -EINVAL  - If one of the parameter invalid or if the size of the selected
  *              area outside the visible area of the layer.
@@ -3412,7 +3412,7 @@ static int stm32_fillarea(FAR struct ltdc_layer_s *layer,
  * Parameter:
  *   lid - Layer identifier
  *
- * Return:
+ * Returned Value:
  *   Reference to the layer control structure on success or Null if lid
  *   is invalid.
  *
@@ -3452,7 +3452,7 @@ void stm32_ltdcreset(void)
  * Description:
  *   Initialize the ltdc controller
  *
- * Return:
+ * Returned Value:
  *   OK
  *
  ****************************************************************************/
@@ -3541,10 +3541,10 @@ int stm32_ltdcinitialize(void)
  *   Return a a reference to the framebuffer object for the specified video
  *   plane.
  *
- * Input parameters:
+ * Input Parameters:
  *   None
  *
- * Returned value:
+ * Returned Value:
  *   Reference to the framebuffer object (NULL on failure)
  *
  ****************************************************************************/

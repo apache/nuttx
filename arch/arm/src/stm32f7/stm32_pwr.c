@@ -200,7 +200,7 @@ void stm32_pwr_enablebkp(bool writable)
  * Input Parameters:
  *   regon - state to set it to
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  ************************************************************************************/
@@ -229,7 +229,7 @@ void stm32_pwr_enablebreg(bool regon)
  * Input Parameters:
  *   vos - Properly aligned voltage scaling select bits for the PWR_CR register.
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -264,7 +264,7 @@ void stm32_pwr_setvos(uint16_t vos)
  * Input Parameters:
  *   pls - PVD level
  *
- * Returned Values:
+ * Returned Value:
  *   None
  *
  * Assumptions:

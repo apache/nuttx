@@ -88,7 +88,7 @@ extern "C"
  * Description:
  *   Initialize the selected MCAN port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - Port number (for hardware that has multiple CAN interfaces),
  *          0=MCAN0, 1=NCAN1
  *

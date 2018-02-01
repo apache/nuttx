@@ -130,7 +130,7 @@
  *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
  *   tim     - The timer number to used.  'tim' must be an element of {1,2,3,4,5,8}
  *
- * Returned Values:
+ * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.
  *
  ************************************************************************************/

@@ -361,7 +361,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *   the initialized state of the spi device after the first initializing
  *   and should be used by each driver who shares the spi5 bus.
  *
- * Input Parameter:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -379,7 +379,7 @@ FAR struct spi_dev_s *stm32_spi5initialize(void);
  * Description:
  *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
  *
  * Returned Value:

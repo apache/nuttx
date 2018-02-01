@@ -90,7 +90,7 @@ static inline void _trimdir(char *path)
  *   is, the starting point for path searches for pathnames not beginning
  *   with '/'.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   path - A pointer to a directory to use as the new current working
  *     directory
  *

@@ -55,10 +55,10 @@
  *   This function closes all of the message queues opened by members of
  *   the task group.
  *
- * Inputs:
+ * Input Parameters:
  *   group - The task group that is terminating.
  *
- * Return Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

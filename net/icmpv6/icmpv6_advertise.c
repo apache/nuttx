@@ -85,7 +85,7 @@
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

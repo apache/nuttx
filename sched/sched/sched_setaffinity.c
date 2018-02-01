@@ -72,12 +72,12 @@
  *   is not intended for use by application logic.  Applications should
  *   use the standard sched_setparam().
  *
- * Inputs:
+ * Input Parameters:
  *   pid        - The ID of thread whose affinity set will be modified.
  *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
  *   mask       - The location to return the thread's new affinity set.
  *
- * Return Value:
+ * Returned Value:
  *   Zero (OK) if successful.  Otherwise, a negated errno value is returned:
  *
  *     ESRCH  The task whose ID is pid could not be found.
@@ -180,12 +180,12 @@ errout_with_lock:
  *   This function is a simply wrapper around nxsched_setaffinity() that sets
  *   the errno value in the event of an error.
  *
- * Inputs:
+ * Input Parameters:
  *   pid        - The ID of thread whose affinity set will be modified.
  *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
  *   mask       - The location to return the thread's new affinity set.
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
  *   set appropriately:
  *

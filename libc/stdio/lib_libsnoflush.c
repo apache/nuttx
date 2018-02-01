@@ -59,7 +59,7 @@
  *  lib_snoflush() provides a common, dummy flush method for seekable output
  *  streams that are not flushable.
  *
- * Return:
+ * Returned Value:
  *  Always returns OK
  *
  ****************************************************************************/

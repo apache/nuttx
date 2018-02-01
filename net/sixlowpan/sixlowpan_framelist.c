@@ -199,7 +199,7 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *   meta    - Location to return the final metadata.
  *
- * Returned value
+ * Returned Value:
  *   OK is returned on success; Othewise a negated errno value is returned.
  *
  ****************************************************************************/
@@ -298,7 +298,7 @@ static int sixlowpan_ieee802154_metadata(FAR struct radio_driver_s *radio,
  *   destmac - The radio-specific MAC address of the destination
  *   meta    - Location to return the final metadata.
  *
- * Returned value
+ * Returned Value:
  *   OK is returned on success; Othewise a negated errno value is returned.
  *
  ****************************************************************************/

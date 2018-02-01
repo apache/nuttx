@@ -1322,7 +1322,7 @@ static void spi_pad_configure(struct sam_spidev_s *priv)
  * Description:
  *   Initialize the selected SPI port
  *
- * Input Parameter:
+ * Input Parameters:
  *   port - SPI "port" number (i.e., SERCOM number)
  *
  * Returned Value:

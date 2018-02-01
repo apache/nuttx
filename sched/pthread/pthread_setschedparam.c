@@ -82,7 +82,7 @@
  *            SCHED_RR. SCHED_OTHER and SCHED_SPORADIC are not supported.
  *   param  - Provides the new priority of the thread.
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, an error code identifying the cause of the
  *   failure:
  *

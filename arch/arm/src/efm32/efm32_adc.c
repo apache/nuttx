@@ -705,7 +705,7 @@ endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
  * Description:
  *   Dump all timer registers.
  *
- * Input parameters:
+ * Input Parameters:
  *   priv - A reference to the ADC block status
  *
  * Returned Value:

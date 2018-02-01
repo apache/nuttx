@@ -89,7 +89,7 @@
  *     buffers
  *   buflen - The number of bytes to copy to the read-ahead buffer.
  *
- * Returned value:
+ * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
  *   zero or equal to buflen; partial packets are not buffered.
  *
@@ -214,7 +214,7 @@ drop:
  *   dev - The device driver structure containing the received ICMP
  *         packet
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

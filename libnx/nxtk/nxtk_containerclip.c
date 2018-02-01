@@ -83,13 +83,13 @@
  *   relative to the sub-window (i.e., (0,0) is the top left corner of the
  *   sub-window).
  *
- * Input parameters:
+ * Input Parameters:
  *   fwnd   - The framed window to be used
  *   dest   - The locaton to put the result
  *   src    - The src rectangle in relative container-window coordinates
  *   bounds - The subwindow bounds in absolute screen coordinates.
  *
- * Returned value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

@@ -58,7 +58,7 @@
  *    attr     - A pointer to the mutex attributes to be modified
  *    protocol - The new protocol to use
  *
- * Return Value:
+ * Returned Value:
  *   0 if successful.  Otherwise, an error code.
  *
  ****************************************************************************/

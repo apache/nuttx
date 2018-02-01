@@ -270,7 +270,7 @@ static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  * Description:
  *   Initialize the selected DAC port
  *
- * Input Parameter:
+ * Input Parameters:
  *   Port number (for hardware that has multiple DAC interfaces)
  *
  * Returned Value:

@@ -203,7 +203,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
  * Input Parameters:
  *   None
  *
- * Return:
+ * Returned Value:
  *   Next available port number
  *
  ****************************************************************************/

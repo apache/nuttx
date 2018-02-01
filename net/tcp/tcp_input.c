@@ -76,7 +76,7 @@
  *   domain - IP domain (PF_INET or PF_INET6)
  *   iplen - Lngth of the IP header (IPv4_HDRLEN or IPv6_HDRLEN).
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -947,7 +947,7 @@ drop:
  * Parameters:
  *   dev - The device driver structure containing the received TCP packet.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:
@@ -977,7 +977,7 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
  * Parameters:
  *   dev - The device driver structure containing the received TCP packet.
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Assumptions:

@@ -123,7 +123,7 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
  *   rect - The location to be filled (in relative window coordinates)
  *   col  - The color to use in the fill
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

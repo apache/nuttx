@@ -68,7 +68,7 @@
  * Description:
  *   Initialize and register the APA102 LED Strip driver.
  *
- * Input parameters:
+ * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/leddrv0"
  *
  * Returned Value:

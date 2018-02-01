@@ -62,7 +62,7 @@
  *   directory stream pointed to by dir.  It returns NULL on
  *   reaching the end-of-file or if an error occurred.
  *
- * Inputs:
+ * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous
  *     call to opendir();
  *   entry -- The  storage  pointed to by entry must be large
@@ -73,7 +73,7 @@
  *     argument entry. Upon reaching the end of the directory
  *     stream, this pointer shall have the value NULL.
  *
- * Return:
+ * Returned Value:
  *   If successful, the readdir_r() function return s zero;
  *   otherwise, an error number is returned to indicate the
  *   error.

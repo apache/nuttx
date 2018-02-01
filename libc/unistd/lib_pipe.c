@@ -57,11 +57,11 @@
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
  *   fd[1] is for writing.
  *
- * Inputs:
+ * Input Parameters:
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
  *
- * Return:
+ * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
  *   appropriately.
  *

@@ -79,11 +79,11 @@
  *   Bring the window containing the specified client sub-window to the top
  *   of the display.
  *
- * Input parameters:
+ * Input Parameters:
  *   hfwnd - the window to be raised.  This must have been previously
  *           created by nxtk_openwindow().
  *
- * Returned value:
+ * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/

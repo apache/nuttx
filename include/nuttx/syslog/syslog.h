@@ -149,7 +149,7 @@ extern "C"
  *   Configure the SYSLOGging function to use the provided channel to
  *   generate SYSLOG output.
  *
- * Input buffer:
+ * Input Parameters:
  *   channel - Provides the interface to the channel to be used.
  *
  * Returned Value:

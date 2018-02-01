@@ -2709,7 +2709,7 @@ static void lpc54_callback(struct lpc54_dev_s *priv)
  * Input Parameters:
  *   slotno - Not used.
  *
- * Returned Values:
+ * Returned Value:
  *   A reference to an SD card interface structure.  NULL is returned on failures.
  *
  ****************************************************************************/

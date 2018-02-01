@@ -76,7 +76,7 @@
  *   be  - The back-end status structure
  *   wnd  - The pre-allocated window structure to be initialized [IN/OUT]
  *
- * Return:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/
