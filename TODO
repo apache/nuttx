@@ -173,9 +173,11 @@ o Task/Scheduler (sched/)
                NOTE: glibc behaves this way unless __thread is defined then,
                in that case, it behaves like NuttX (using TLS to save the
                thread local errno).
-  Status:      Closed.  The existing solution is better (although its
-               incompatibilities could show up in porting some code).
-  Priority:    Low
+  Status:      Closed.  The existing solution is better and compatible with
+               thread-aware GLIBC (although its incompatibilities could show
+               up in porting some code).  I will retain this issue for
+               referencei only.
+  Priority:    N/A
 
   Title:       SCALABILITY
   Description: Task control information is retained in simple lists.  This

@@ -318,7 +318,7 @@ static int bmp180_checkid(FAR struct bmp180_dev_s *priv)
   devid = bmp180_getreg8(priv, BMP180_DEVID);
   sninfo("devid: 0x%02x\n", devid);
 
-  if (devid != (uint16_t) DEVID)
+  if (devid != (uint16_t)DEVID)
     {
       /* ID is not Correct */
 

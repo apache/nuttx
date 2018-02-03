@@ -181,7 +181,23 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
 #endif
   leave_critical_section(flags);
 
-  /* Don't bother if count == 0 */
+  /* Don't bother if count == 0.
+   *
+   * REVISIT:  There is a logic problem with skipping if the count is zero.
+   * Normally this is a good thing because it makes the output concise.
+   * However, it can be a problem under certain conditions:
+   *
+   * It may take multiple passes through the IRQ table to enumerate the
+   * interrupts if the number of interrupts reported is large or if the size
+   * of the user buffer is small.  If a count is zero it will be skipped on
+   * the first time through but if it becomes non-zero on the second time
+   * through, the output will be corrupted.  Similarly if the count is non-
+   * zero the first time through and zero the second.
+   *
+   * A proper fix would require keep better track of where we left off
+   * between passes.  Current that position is remembered only by the
+   * byte offset into the pseudo-file, f_pos.
+   */
 
   if (copy.count == 0)
     {
@@ -210,7 +226,7 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
     }
   else
     {
-      uint64_t intcount = (uint64_t)intpart * elapsed / TICK_PER_SEC;
+      uint64_t intcount = ((uint64_t)intpart * elapsed) / TICK_PER_SEC;
       fracpart = (unsigned int)
         (((copy.count - intcount) * TICK_PER_SEC * 1000) / elapsed);
     }
@@ -225,7 +241,6 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
     {
       count = (unsigned long)copy.count;
     }
-
 #else
 #  error Missing logic
 #endif
@@ -270,10 +285,8 @@ static int irq_open(FAR struct file *filep, FAR const char *relpath,
 
   finfo("Open '%s'\n", relpath);
 
-  /* PROCFS is read-only.  Any attempt to open with any kind of write
-   * access is not permitted.
-   *
-   * REVISIT:  Write-able proc files could be quite useful.
+  /* This PROCFS file is read-only.  Any attempt to open with write access
+   * is not permitted.
    */
 
   if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)

@@ -140,8 +140,8 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
    *
    * In order to do this we would need to know the highest priority from
    * among all tasks waiting for the all semaphores held by the sporadic
-   * task.  Perhaps that information could be retained by the priority
-   * inheritance logic for use here?
+   * task.  That information could be retained by the priority inheritance
+   * logic of sem_holder.c for use here.
    */
 
   if (tcb->sched_priority > tcb->base_priority)
