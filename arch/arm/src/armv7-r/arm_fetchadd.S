@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/gnu/up_fetchadd.S
+ * arch/arm/src/armv7-r/up_fetchadd.S
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,9 +39,7 @@
 
 #include <nuttx/config.h>
 
-	.syntax		unified
-	.thumb
-	.file	"up_fetchadd.S"
+	.file	"arm_fetchadd.S"
 
 /****************************************************************************
  * Public Functions
