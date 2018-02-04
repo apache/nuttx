@@ -72,6 +72,7 @@
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
+ * NOTE: this_task() for SMP is implemented in sched_thistask.c
  */
 
 #ifdef CONFIG_SMP
@@ -80,8 +81,8 @@
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)g_readytorun.head)
 #  define this_cpu()             (0)
+#  define this_task()            (current_task(this_cpu()))
 #endif
-#define this_task()              (current_task(this_cpu()))
 
 /* List attribute flags */
 
@@ -427,6 +428,8 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
+FAR struct tcb_s *this_task(void);
+
 int  sched_cpu_select(cpu_set_t affinity);
 int  sched_cpu_pause(FAR struct tcb_s *tcb);
 
