@@ -45,6 +45,9 @@
 
 #include "sched/sched.h"
 
+#if defined(CONFIG_SMP) && defined (CONFIG_SPINLOCK_IRQ) && \
+    defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -138,3 +141,5 @@ void spin_unlock_irqrestore(irqstate_t flags)
 
   up_irq_restore(flags);
 }
+
+#endif /* CONFIG_SMP && CONFIG_SPINLOCK_IRQ && CONFIG_ARCH_GLOBAL_IRQDISABLE */

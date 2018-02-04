@@ -247,7 +247,8 @@ void leave_critical_section(irqstate_t flags);
  *
  ****************************************************************************/
 
-#if defined (CONFIG_SMP) && defined (CONFIG_SPINLOCK_IRQ)
+#if defined(CONFIG_SMP) && defined(CONFIG_SPINLOCK_IRQ) && \
+    defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 irqstate_t spin_lock_irqsave(void);
 #else
 #  define spin_lock_irqsave(f) enter_critical_section(f)
@@ -275,7 +276,8 @@ irqstate_t spin_lock_irqsave(void);
  *
  ****************************************************************************/
 
-#if defined (CONFIG_SMP) && defined (CONFIG_SPINLOCK_IRQ)
+#if defined(CONFIG_SMP) && defined(CONFIG_SPINLOCK_IRQ) && \
+    defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 void spin_unlock_irqrestore(irqstate_t flags);
 #else
 #  define spin_unlock_irqrestore(f) leave_critical_section(f)
