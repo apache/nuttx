@@ -252,6 +252,7 @@ config SPINLOCK
 config SPINLOCK_IRQ
 	bool "Support Spinlocks with IRQ control"
 	default n
+	depends on ARCH_GLOBAL_IRQDISABLE
 	---help---
 		Enables suppport for spinlocks with IRQ control. This feature can be
 		used to protect data in SMP mode.
