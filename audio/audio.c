@@ -233,9 +233,9 @@ static int audio_close(FAR struct file *filep)
 
       lower->ops->shutdown(lower);
     }
+
   ret = OK;
 
-//errout_with_sem:
   nxsem_post(&upper->exclsem);
 
 errout:

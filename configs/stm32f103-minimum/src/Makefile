@@ -69,6 +69,10 @@ ifeq ($(CONFIG_LEDS_APA102),y)
   CSRCS += stm32_apa102.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += stm32_bmp180.c
+endif
+
 ifeq ($(CONFIG_LM75_I2C),y)
   CSRCS += stm32_lm75.c
 endif
