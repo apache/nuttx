@@ -16,6 +16,7 @@ config ARCH_CHIP_A1X
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_SDRAM
 	select BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
@@ -51,6 +52,7 @@ config ARCH_CHIP_EFM32
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_SPI_BITORDER
 	select ARMV7M_CMNVECTOR
+	select ARCH_HAVE_FETCHADD
 	---help---
 		Energy Micro EFM32 microcontrollers (ARM Cortex-M).
 
@@ -69,6 +71,7 @@ config ARCH_CHIP_IMX6
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_SDRAM
 	select BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
@@ -82,6 +85,7 @@ config ARCH_CHIP_KINETIS
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_I2CRESET
@@ -114,15 +118,6 @@ config ARCH_CHIP_LM
 	---help---
 		TI/Luminary Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
 
-config ARCH_CHIP_TIVA
-	bool "TI Tiva"
-	select ARCH_HAVE_CMNVECTOR
-	select ARCH_HAVE_MPU
-	select ARM_HAVE_MPU_UNIFIED
-	select ARCH_HAVE_FPU
-	---help---
-		TI Tiva TM4C architectures (ARM Cortex-M4)
-
 config ARCH_CHIP_LPC11XX
 	bool "NXP LPC11xx"
 	select ARCH_CORTEXM0
@@ -136,6 +131,7 @@ config ARCH_CHIP_LPC17XX
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FETCHADD
 	---help---
 		NXP LPC17xx architectures (ARM Cortex-M3)
 
@@ -168,6 +164,7 @@ config ARCH_CHIP_LPC43XX
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
@@ -179,6 +176,7 @@ config ARCH_CHIP_LPC54XX
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
 	---help---
 		NPX LPC54XX architectures (ARM Cortex-M4).
 
@@ -203,6 +201,7 @@ config ARCH_CHIP_SAMA5
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_ADDRENV
@@ -229,6 +228,7 @@ config ARCH_CHIP_SAM34
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
@@ -239,6 +239,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_I2CRESET
@@ -253,6 +254,7 @@ config ARCH_CHIP_STM32
 	bool "STMicro STM32 F1/F2/F3/F4"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_PROGMEM
@@ -276,6 +278,7 @@ config ARCH_CHIP_STM32F7
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_SPI_BITORDER
@@ -312,17 +315,29 @@ config ARCH_CHIP_TMS570
 	bool "TI TMS570"
 	select ENDIAN_BIG
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
 	select ARMV7R_MEMINIT
 	select ARMV7R_HAVE_DECODEFIQ
 	---help---
 		TI TMS570 family
 
+config ARCH_CHIP_TIVA
+	bool "TI Tiva"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
+	---help---
+		TI Tiva TM4C architectures (ARM Cortex-M4)
+
 config ARCH_CHIP_XMC4
 	bool "Infineon XMC4xxx"
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_MPU_UNIFIED

@@ -202,6 +202,10 @@ config ARCH_HAVE_RESET
 	bool
 	default n
 
+config ARCH_HAVE_FETCHADD
+	bool
+	default n
+
 config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n

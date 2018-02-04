@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/gnu/up_testset.S
+ * arch/arm/src/armv7-m/iar/up_testset.S
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@
  * Description:
  *   Perform an atomic test and set operation on the provided spinlock.
  *
- *   This function must be provided via the architecture-specific logoic.
+ *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
  *   lock - The address of spinlock object.

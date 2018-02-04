@@ -39,7 +39,7 @@ CMN_UASRCS =
 CMN_UCSRCS =
 
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
-CMN_ASRCS += up_testset.S vfork.S
+CMN_ASRCS += up_testset.S up_fetchadd.S vfork.S
 
 CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
 CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c up_hardfault.c

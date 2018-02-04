@@ -1687,6 +1687,54 @@ int up_timer_start(FAR const struct timespec *ts);
 /* See prototype in include/nuttx/spinlock.h */
 
 /****************************************************************************
+ * Name: up_fetchadd8, up_fetchadd16, and up_fetchadd32
+ *
+ * Description:
+ *   Perform an atomic fetch add operation on the provided 8-, 16-, or 32-
+ *   bit value.
+ *
+ *   This function must be provided via the architecture-specific logic.
+ *
+ * Input Parameters:
+ *   addr  - The address of value to be incremented.
+ *   value - The addend
+ *
+ * Returned Value:
+ *   The incremented value (volatile!)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_FETCHADD
+int32_t up_fetchadd32(FAR int32_t *addr, int32_t value);
+int16_t up_fetchadd16(FAR int16_t *addr, int16_t value);
+int8_t up_fetchadd8(FAR int8_t *addr, int8_t value);
+#endif
+
+/****************************************************************************
+ * Name: up_fetchsub8
+ *
+ * Description:
+ *   Perform an atomic fetch subtract operation on the provided 8-, 16-, or
+ *   32-bit value.
+ *
+ *   This function must be provided via the architecture-specific logic.
+ *
+ * Input Parameters:
+ *   addr  - The address of value to be decremented.
+ *   value - The subtrahend
+ *
+ * Returned Value:
+ *   The decremented value (volatile!)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_FETCHADD
+int32_t up_fetchsub32(FAR int32_t *addr, int32_t value);
+int16_t up_fetchsub16(FAR int16_t *addr, int16_t value);
+int8_t up_fetchsub8(FAR int8_t *addr, int8_t value);
+#endif
+
+/****************************************************************************
  * Name: up_cpu_index
  *
  * Description:
