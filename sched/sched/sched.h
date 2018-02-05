@@ -374,7 +374,7 @@ extern volatile cpu_set_t g_cpu_lockset SP_SECTION;
 
 extern volatile spinlock_t g_cpu_tasklistlock SP_SECTION;
 
-#ifdef CONFIG_ARCH_HAVE_FETCHADD
+#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 /* This is part of the sched_lock() logic to handle atomic operations when
  * locking the scheduler.
  */
@@ -451,7 +451,7 @@ int  sched_cpu_pause(FAR struct tcb_s *tcb);
 irqstate_t sched_tasklist_lock(void);
 void sched_tasklist_unlock(irqstate_t lock);
 
-#ifdef CONFIG_ARCH_HAVE_FETCHADD
+#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 #  define sched_islocked_global() \
      (spin_islocked(&g_cpu_schedlock) || g_global_lockcount > 0)
 #else
