@@ -1705,9 +1705,9 @@ int up_timer_start(FAR const struct timespec *ts);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_FETCHADD
-int32_t up_fetchadd32(FAR int32_t *addr, int32_t value);
-int16_t up_fetchadd16(FAR int16_t *addr, int16_t value);
-int8_t up_fetchadd8(FAR int8_t *addr, int8_t value);
+int32_t up_fetchadd32(FAR volatile int32_t *addr, int32_t value);
+int16_t up_fetchadd16(FAR volatile int16_t *addr, int16_t value);
+int8_t up_fetchadd8(FAR volatile int8_t *addr, int8_t value);
 #endif
 
 /****************************************************************************
@@ -1729,9 +1729,9 @@ int8_t up_fetchadd8(FAR int8_t *addr, int8_t value);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_FETCHADD
-int32_t up_fetchsub32(FAR int32_t *addr, int32_t value);
-int16_t up_fetchsub16(FAR int16_t *addr, int16_t value);
-int8_t up_fetchsub8(FAR int8_t *addr, int8_t value);
+int32_t up_fetchsub32(FAR volatile int32_t *addr, int32_t value);
+int16_t up_fetchsub16(FAR volatile int16_t *addr, int16_t value);
+int8_t up_fetchsub8(FAR volatile int8_t *addr, int8_t value);
 #endif
 
 /****************************************************************************

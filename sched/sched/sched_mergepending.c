@@ -210,7 +210,7 @@ bool sched_mergepending(void)
    */
 
   me = this_cpu();
-  if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(me))
+  if (!sched_islocked_global() && !irq_cpu_locked(me))
     {
       /* Find the CPU that is executing the lowest priority task */
 
@@ -248,7 +248,7 @@ bool sched_mergepending(void)
            * Check if that happened.
            */
 
-          if (spin_islocked(&g_cpu_schedlock) || irq_cpu_locked(me))
+          if (sched_islocked_global() || irq_cpu_locked(me))
             {
               /* Yes.. then we may have incorrectly placed some TCBs in the
                * g_readytorun list (unlikely, but possible).  We will have to

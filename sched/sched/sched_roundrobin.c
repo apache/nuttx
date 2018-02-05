@@ -121,7 +121,7 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
   /* Did decrementing the timeslice counter cause the timeslice to expire? */
 
   ret = tcb->timeslice;
-  if (tcb->timeslice <= 0 && !sched_islocked(tcb))
+  if (tcb->timeslice <= 0 && !sched_islocked_tcb(tcb))
     {
       /* We will also suppress context switches if we were called via one
        * of the unusual cases handled by sched_timer_reasses().  In that

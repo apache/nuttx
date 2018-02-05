@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq/irq_csection.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -506,7 +506,7 @@ void leave_critical_section(irqstate_t flags)
                */
 
               cpu = this_cpu();
-              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
+              DEBUGASSERT(sched_islocked_global() &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
               /* Check if releasing the lock held by this CPU will unlock the
@@ -521,8 +521,7 @@ void leave_critical_section(irqstate_t flags)
                    * because we were within a critical section then.
                    */
 
-                  if (g_pendingtasks.head != NULL &&
-                      !spin_islocked(&g_cpu_schedlock))
+                  if (g_pendingtasks.head != NULL && !sched_islocked_global())
                     {
                       /* Release any ready-to-run tasks that have collected
                        * in g_pendingtasks.  NOTE: This operation has a very
@@ -615,6 +614,15 @@ bool irq_cpu_locked(int cpu)
 
       return false;
     }
+
+#ifdef CONFIG_ARCH_HAVE_FETCHADD
+  /* If the global lockcount has been incremented then simply return true */
+
+  if (g_global_lockcount > 0)
+    {
+      return true;
+    }
+#endif
 
   /* Test if g_cpu_irqlock is locked.  We don't really need to use check
    * g_cpu_irqlock to do this, we can use the g_cpu_set.

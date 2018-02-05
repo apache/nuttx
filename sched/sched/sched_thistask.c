@@ -39,12 +39,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <arch/irq.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "sched/sched.h"
 
@@ -70,7 +70,7 @@
 FAR struct tcb_s *this_task(void)
 {
   FAR struct tcb_s *tcb;
-#ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
+#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   irqstate_t flags;
 
   /* If the CPU supports suppression of interprocessor interrupts, then simple
@@ -79,6 +79,12 @@ FAR struct tcb_s *this_task(void)
    */
 
   flags = up_irq_save();
+#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+  /* Global locking is supported and, hence, sched_lock() will provide the
+   * necessary protection.
+   */
+
+  sched_lock();
 #else
   /* REVISIT:  Otherwise, there is no protection available.  sched_lock() and
    * enter_critical section are not viable options here (because both depend
@@ -93,8 +99,10 @@ FAR struct tcb_s *this_task(void)
 
   /* Enable local interrupts */
 
-#ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
+#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   up_irq_restore(flags);
+#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+  sched_unlock();
 #endif
   return tcb;
 }

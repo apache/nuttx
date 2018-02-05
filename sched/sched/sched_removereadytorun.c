@@ -208,7 +208,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
        * REVISIT: What if it is not the IDLE thread?
        */
 
-      if (!spin_islocked(&g_cpu_schedlock) && !irq_cpu_locked(me))
+      if (!sched_islocked_global() && !irq_cpu_locked(me))
         {
           /* Search for the highest priority task that can run on this
            * CPU.
