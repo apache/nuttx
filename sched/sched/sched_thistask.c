@@ -72,7 +72,7 @@ FAR struct tcb_s *this_task(void)
   irqstate_t flags;
   FAR struct tcb_s *tcb;
 
-#ifdef CONDIF_ARCH_GLOBAL_IRQDISABLE
+#ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
   /* Disable local interrupts to avoid CPU switching */
 
   flags = up_irq_save();
@@ -88,7 +88,7 @@ FAR struct tcb_s *this_task(void)
 
   /* Enable local interrupts */
 
-#ifdef CONDIF_ARCH_GLOBAL_IRQDISABLE
+#ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
   up_irq_restore(flags);
 #else
   leave_critical_section(flags);
