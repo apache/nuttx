@@ -72,12 +72,19 @@
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
- * NOTE: this_task() for SMP is implemented in sched_thistask.c
+ * NOTE: this_task() for SMP is implemented in sched_thistask.c if the CPU
+ * supports disabling of inter-processor interrupts.
+ *
+ * REVISIT: A mechanism to provide an atomic this_task() is still required
+ * for the case where where inter-processor interrupts cannot be disabled!
  */
 
 #ifdef CONFIG_SMP
 #  define current_task(cpu)      ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
 #  define this_cpu()             up_cpu_index()
+#  ifndef CONFIG_ARCH_GLOBAL_IRQDISABLE
+#    define this_task()          (current_task(this_cpu()))
+#  endif
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)g_readytorun.head)
 #  define this_cpu()             (0)
@@ -428,7 +435,9 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
 FAR struct tcb_s *this_task(void);
+#endif
 
 int  sched_cpu_select(cpu_set_t affinity);
 int  sched_cpu_pause(FAR struct tcb_s *tcb);

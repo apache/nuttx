@@ -100,7 +100,9 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_tasklistlock.c
+ifeq ($(CONFIG_ARCH_GLOBAL_IRQDISABLE),y)
 CSRCS += sched_thistask.c
+endif
 endif
 
 # Include sched build support

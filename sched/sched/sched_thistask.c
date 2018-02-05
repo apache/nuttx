@@ -69,17 +69,22 @@
 
 FAR struct tcb_s *this_task(void)
 {
-  irqstate_t flags;
   FAR struct tcb_s *tcb;
-
 #ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
-  /* Disable local interrupts to avoid CPU switching */
+  irqstate_t flags;
+
+  /* If the CPU supports suppression of interprocessor interrupts, then simple
+   * disabling interrupts will provide sufficient protection for the following
+   * operations.
+   */
 
   flags = up_irq_save();
 #else
-  /* Enter a critical section */
-
-  //flags = enter_critical_section();
+  /* REVISIT:  Otherwise, there is no protection available.  sched_lock() and
+   * enter_critical section are not viable options here (because both depend
+   * on this_task()).
+   */
+#  warning "Missing critical section"
 #endif
 
   /* Obtain the TCB which is currently running on this CPU */
@@ -90,8 +95,6 @@ FAR struct tcb_s *this_task(void)
 
 #ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
   up_irq_restore(flags);
-#else
-  //leave_critical_section(flags);
 #endif
   return tcb;
 }
