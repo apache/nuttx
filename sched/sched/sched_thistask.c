@@ -79,7 +79,7 @@ FAR struct tcb_s *this_task(void)
 #else
   /* Enter a critical section */
 
-  flags = enter_critical_section();
+  //flags = enter_critical_section();
 #endif
 
   /* Obtain the TCB which is currently running on this CPU */
@@ -91,7 +91,7 @@ FAR struct tcb_s *this_task(void)
 #ifdef CONFIG_ARCH_GLOBAL_IRQDISABLE
   up_irq_restore(flags);
 #else
-  leave_critical_section(flags);
+  //leave_critical_section(flags);
 #endif
   return tcb;
 }
