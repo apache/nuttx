@@ -103,6 +103,8 @@ int stm32_bringup(void)
 {
 #if defined(CONFIG_STM32_SPI4)
   FAR struct spi_dev_s *spi;
+#endif
+#if defined(CONFIG_MTD)
   FAR struct mtd_dev_s *mtd;
   FAR struct mtd_geometry_s geo;
 #endif
