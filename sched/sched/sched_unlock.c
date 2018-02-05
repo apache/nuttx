@@ -101,7 +101,7 @@ int sched_unlock(void)
       if (rtcb->lockcount <= 0)
         {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          /* Note that we no longer have pre-emption */
+          /* Note that we no longer have pre-emption disabled. */
 
           sched_note_premption(rtcb, false);
 #endif

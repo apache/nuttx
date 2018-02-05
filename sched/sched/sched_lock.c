@@ -151,7 +151,7 @@ int sched_lock(void)
 
   if (rtcb && !up_interrupt_context())
     {
-      /* Catch attempts to increment the lockcount beyound the range of the
+      /* Catch attempts to increment the lockcount beyond the range of the
        * integer type.
        */
 

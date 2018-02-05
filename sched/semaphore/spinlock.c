@@ -468,7 +468,7 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
   irqstate_t flags;
 
   /* Disable local interrupts to prevent being re-entered from an interrupt
-   * on the same CPU.  This does not effect the behavior on other CPUs.
+   * on the same CPU.  This may not effect interrupt behavior on other CPUs.
    */
 
   flags = up_irq_save();
@@ -527,7 +527,7 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
   irqstate_t flags;
 
   /* Disable local interrupts to prevent being re-entered from an interrupt
-   * on the same CPU.  This does not effect the behavior on other CPUs.
+   * on the same CPU.  This may not effect interrupt behavior on other CPUs.
    */
 
   flags = up_irq_save();
