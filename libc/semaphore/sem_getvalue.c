@@ -77,7 +77,7 @@
 
 int nxsem_getvalue(FAR sem_t *sem, FAR int *sval)
 {
-  if (sem && sval)
+  if (sem != NULL && sval != NULL)
     {
       *sval = sem->semcount;
       return OK;

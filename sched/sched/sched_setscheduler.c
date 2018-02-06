@@ -141,6 +141,7 @@ int nxsched_setscheduler(pid_t pid, int policy,
     {
       default:
         DEBUGPANIC();
+        break;
 
       case SCHED_FIFO:
         {

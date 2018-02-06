@@ -309,12 +309,17 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
 
           /* Check if we allocated the primitive structure */
 
-          if (prim != NULL)
+          if (prim == NULL)
             {
-              /* Yes... remember that this primitive structure was dynamically allocated */
+              /* No..  memory not available */
 
-              pool = POOL_PRIMITIVE_DYNAMIC;
+              wlerr("ERROR: Failed to allocate primitive.\n");
+              return NULL;
             }
+
+          /* Remember that this primitive structure was dynamically allocated */
+
+          pool = POOL_PRIMITIVE_DYNAMIC;
         }
     }
 

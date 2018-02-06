@@ -153,10 +153,10 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
           mutex->nlocks = 0;
 #endif
+          ret = OK;
         }
 
       sched_unlock();
-      ret = OK;
     }
 
   sinfo("Returning %d\n", ret);

@@ -108,18 +108,20 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
         {
           ret = -ret;
         }
-
-      /* Get the scheduler policy. */
-
-      ret = nxsched_getscheduler((pid_t)thread);
-      if (ret < 0)
-        {
-          ret = -ret;
-        }
       else
         {
-          *policy = ret;
-          ret = OK;
+          /* Get the scheduler policy. */
+
+          ret = nxsched_getscheduler((pid_t)thread);
+          if (ret < 0)
+            {
+              ret = -ret;
+            }
+          else
+            {
+              *policy = ret;
+              ret = OK;
+            }
         }
     }
 

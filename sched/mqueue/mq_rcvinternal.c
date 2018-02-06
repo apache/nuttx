@@ -302,7 +302,7 @@ ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
        * time the task is unblocked
        */
 
-      DEBUGASSERT(btcb);
+      DEBUGASSERT(btcb != NULL);
 
       btcb->msgwaitq = NULL;
       msgq->nwaitnotfull--;

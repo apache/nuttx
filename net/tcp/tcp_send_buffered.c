@@ -1174,7 +1174,7 @@ int psock_tcp_cansend(FAR struct socket *psock)
       return -ENOTCONN;
     }
 
-  if (tcp_wrbuffer_test())
+  if (tcp_wrbuffer_test() < 0)
     {
       return -EWOULDBLOCK;
     }
