@@ -121,6 +121,34 @@ Status
 2016-12-07:  Just a note to remind myself.  The PL310 L2 cache has *not*
   yet been enabled.
 
+2018-02-06:  Revisited SMP to see how has been broken due to bit rot.
+  Several fixes were needed mostly due to:  (1) The new version of
+  this_task() that calls sched_lock() and sched_unlock(), and (2) to
+  deferred setting g_cpu_irqlock().  That latter setting is now deferred
+  until sched_resume_scheduler() runs.  This means several changes similar
+  to the following were necessary in order to get things working from:
+
+    struct tcb_s *rtcb = this_task();
+
+  To:
+
+    struct tcb_s *rtcb;
+  #ifdef CONFIG_SMP
+    int cpu;
+
+    /* Get the TCB of the currently executing task on this CPU (avoid using
+     * this_task() because the TCBs may be in an inappropriate state right
+     * now).
+     */
+
+    cpu  = this_cpu();
+    rtcb = current_task(cpu);
+  #else
+    rtcb = this_task();
+  #endif
+
+  At present, the NSH prompt does come up but there there still hangs that
+  must be addressed.
 Platform Features
 =================
 
