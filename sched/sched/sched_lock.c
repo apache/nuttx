@@ -188,9 +188,21 @@ int sched_lock(void)
   cpu  = this_cpu();
   rtcb = current_task(cpu);
 
-  /* rtcb may be NULL only during early boot-up phases. */
+  /* Check for some special cases:  (1) rtcb may be NULL only during early
+   * boot-up phases, and (2) sched_lock() should have no effect if called
+   * from the interrupt level.
+   */
 
-  if (rtcb != NULL)
+  if (rtcb == NULL || up_interrupt_context())
+    {
+#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+      up_irq_restore(flags);
+#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+      DEBUGASSERT(g_global_lockcount > 0);
+      (void)up_fetchsub16(&g_global_lockcount, 1);
+#endif
+    }
+  else
     {
       /* Catch attempts to increment the lockcount beyond the range of the
        * integer type.
@@ -231,6 +243,13 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
+#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+      up_irq_restore(flags);
+#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+      DEBUGASSERT(g_global_lockcount > 0);
+      (void)up_fetchsub16(&g_global_lockcount, 1);
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
       /* Check if we just acquired the lock */
 
@@ -251,13 +270,6 @@ int sched_lock(void)
                              (FAR dq_queue_t *)&g_pendingtasks,
                              TSTATE_TASK_PENDING);
     }
-
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-  up_irq_restore(flags);
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
-  DEBUGASSERT(g_global_lockcount > 0);
-  (void)up_fetchsub16(&g_global_lockcount, 1);
-#endif
 
   return OK;
 }

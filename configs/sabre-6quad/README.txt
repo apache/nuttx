@@ -121,34 +121,27 @@ Status
 2016-12-07:  Just a note to remind myself.  The PL310 L2 cache has *not*
   yet been enabled.
 
-2018-02-06:  Revisited SMP to see how has been broken due to bit rot.
+2018-02-06:  Revisited SMP to see how much has been broken due to bit rot.
   Several fixes were needed mostly due to:  (1) The new version of
   this_task() that calls sched_lock() and sched_unlock(), and (2) to
   deferred setting g_cpu_irqlock().  That latter setting is now deferred
-  until sched_resume_scheduler() runs.  This means several changes similar
-  to the following were necessary in order to get things working from:
+  until sched_resume_scheduler() runs.  These commits were made:
 
-    struct tcb_s *rtcb = this_task();
+    commit de34b4523fc33c6f2f20619349af8fa081a3bfcd
+      sched/ and arch/arm/src/armv7-a:  Replace a few more occurrences
+      of this_task() with current_task(cpu) in an effort to get the i.MX6
+      working in SMP mode again.  It does not yet work, sadly.
 
-  To:
+    commit 8aa15385060bf705bbca2c22a5682128740e55a8
+      arch/arm/src/armv7-a:  Found some additional places were the new
+      this_task() function cannot be called in the i.MX6 SMP configuration.
 
-    struct tcb_s *rtcb;
-  #ifdef CONFIG_SMP
-    int cpu;
+     commit 0ba78530164814360eb09ed9805137b934c6f03b
+      sched/irq: Fix a infinite recursion problem that a recent change
+      introduced into the i.MX6 SMP implementation.
 
-    /* Get the TCB of the currently executing task on this CPU (avoid using
-     * this_task() because the TCBs may be in an inappropriate state right
-     * now).
-     */
-
-    cpu  = this_cpu();
-    rtcb = current_task(cpu);
-  #else
-    rtcb = this_task();
-  #endif
-
-  At present, the NSH prompt does come up but there there still hangs that
-  must be addressed.
+  With these changes, basic SMP functionality is restored.  Insufficient
+  stress testing has been done to prove that the solution is stable, however.
 
 Platform Features
 =================
