@@ -506,7 +506,7 @@ void leave_critical_section(irqstate_t flags)
                */
 
               cpu = this_cpu();
-              DEBUGASSERT(sched_islocked_global() &&
+              DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
               /* Check if releasing the lock held by this CPU will unlock the
