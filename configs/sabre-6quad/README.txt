@@ -115,11 +115,11 @@ Status
 2016-11-28:  SMP is unusable until the SCU cache coherency logic is fixed.
   I do not know how to do that now.
 
-2016-12-01:  I committed a completely untest SPI driver.  This was taken
+2016-12-01:  I committed a completely untested SPI driver.  This was taken
   directly from the i.MX1 and is most certainly not ready for use yet.
 
 2016-12-07:  Just a note to remind myself.  The PL310 L2 cache has *not*
-  yet been enbled.
+  yet been enabled.
 
 Platform Features
 =================
@@ -329,7 +329,7 @@ could do would be put the nuttx.bin file on that partition, then boot like:
      MX6Q SABRESD U-Boot > fatload mmc 2:4 0x10800000 nuttx.bin
 
 SD Card Image Copy (Successful Attempt #5)
--------------------------------------
+------------------------------------------
 
 You can use the 'dd' command to copy the first couple of megabytes from the
 8GB SD card and copy that to another SD card.  You then have to use 'fdisk'
@@ -386,7 +386,7 @@ Debugging the NuttX image on the SD card
    the terminal window.  Stop the U-Boot countdown to get to the U-Boot
    prompt.
 
-2. Start the Segger GDB server:
+3. Start the Segger GDB server:
 
      Target:           MCIMX6Q6
      Target Interface: JTAG
@@ -396,7 +396,7 @@ Debugging the NuttX image on the SD card
 
      Waiting for GDB Connection
 
-3. In another Xterm terminal window, start arm-none-eabi-gdb and connect to
+4. In another Xterm terminal window, start arm-none-eabi-gdb and connect to
    the GDB server.
 
    From the Xterm Window:
@@ -409,7 +409,7 @@ Debugging the NuttX image on the SD card
      gdb> target connect localhost:2331
      gdb> mon halt
 
-4. Start U-boot under GDB control:
+5. Start U-boot under GDB control:
 
    From GDB:
      gdb> mon reset
@@ -417,12 +417,12 @@ Debugging the NuttX image on the SD card
 
    Again stop the U-Boot countdown to get to the U-Boot prompt.
 
-5. Load NuttX from the SD card into RAM
+6. Load NuttX from the SD card into RAM
 
    From U-Boot:
      MX6Q SABRESD U-Boot > fatload mmc 2:1 0x10800000 nuttx.bin
 
-6. Load symbols and set a breakpoint
+7. Load symbols and set a breakpoint
 
    From GDB:
      gdb> mon halt
@@ -434,12 +434,12 @@ Debugging the NuttX image on the SD card
    of course, use a different symbol if you want to start debugging later
    in the boot sequence.
 
-7. Start NuttX
+8. Start NuttX
 
    From U-Boot:
      MX6Q SABRESD U-Boot > go 0x10800040
 
-8. You should hit the breakpoint that you set above and be off and
+9. You should hit the breakpoint that you set above and be off and
    debugging.
 
 Debugging a Different NuttX Image
@@ -449,10 +449,20 @@ Q: What if I want do run a different version of nuttx than the nuttx.bin
    file on the SD card.  I just want to build and debug without futzing with
    the SD card.  Can I do that?
 
-A: Yes with the following modifications to the prodecure above.
+A: Yes with the following modifications to the procedure above.
 
-   - Skip step 5, don't bother to load NuttX into RAM
-   - In step 6, load NuttX into RAM like this:
+   - Follow steps 1-5, i.e.,
+
+       1. Connect the J-Link to the 20-pin JTAG connector.
+       2. Connect the "USB TO UART" USB VCOM port to the host PC and start a
+          terminal emulation program.
+       3. Start the Segger GDB server.
+       4. Start arm-none-eabi-gdb and connect to the GDB server.
+       5. Start U-boot under GDB control, stopping the countdown to get
+          the U-boot prompt.
+
+   - Skip step 6, don't bother to load NuttX into RAM
+   - In step 7, load NuttX into RAM like this:
 
        gdb> mon halt
        gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
@@ -469,13 +479,16 @@ A: Yes with the following modifications to the prodecure above.
        gdb> mon halt
        gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
        gdb> file nuttx
-       gdb> mon set pc 0x10800040
+       gdb> mon reg pc 0x10800040
        gdb> s
 
      The final single will then step into the freshly loaded program.
-     You can then forget about steps 7 and 8.
+     You can then forget about steps 8 and 9.
 
      This is, in fact, my preferred way to debug.
+
+     NOTE:  Setting the PC to 0x10800040 is a superstituous step.  The PC
+     will be set 0x10800040 by the 'load nuttx' command.
 
    You can restart the debug session at any time at the gdb> prompt by:
 
@@ -665,7 +678,7 @@ Configuration sub-directories
 
     NOTES:
 
-    1. See the notest for the nsh configuration.  Since this configuration
+    1. See the notes for the nsh configuration.  Since this configuration
        is essentially the same all of those comments apply.
 
     2. SMP is not fully functional.  See the STATUS and SMP sections above

@@ -123,7 +123,7 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
 static inline bool irq_waitlock(int cpu)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tcb_s *tcb = current_task(cpu);
 
   /* Notify that we are waiting for a spinlock */
 
@@ -309,10 +309,15 @@ try_again:
       else
         {
           /* Normal tasking environment. */
-          /* Do we already have interrupts disabled? */
+          /* Get the TCB of the currently executing task on this CPU (avoid
+           * using this_task() which can recurse.
+           */
 
-          rtcb = this_task();
+          cpu  = this_cpu();
+          rtcb = current_task(cpu);
           DEBUGASSERT(rtcb != NULL);
+
+          /* Do we already have interrupts disabled? */
 
           if (rtcb->irqcount > 0)
             {
@@ -463,7 +468,7 @@ void leave_critical_section(irqstate_t flags)
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
                           g_cpu_nestcount[cpu] == 1);
 
-              FAR struct tcb_s *rtcb = this_task();
+              FAR struct tcb_s *rtcb = current_task(cpu);
               DEBUGASSERT(rtcb != NULL);
 
               if (rtcb->irqcount <= 0)
@@ -477,7 +482,14 @@ void leave_critical_section(irqstate_t flags)
         }
       else
         {
-          FAR struct tcb_s *rtcb = this_task();
+          FAR struct tcb_s *rtcb;
+
+          /* Get the TCB of the currently executing task on this CPU (avoid
+           * using this_task() which can recurse.
+           */
+
+          cpu  = this_cpu();
+          rtcb = current_task(cpu);
           DEBUGASSERT(rtcb != NULL && rtcb->irqcount > 0);
 
           /* Normal tasking context.  We need to coordinate with other
@@ -505,7 +517,6 @@ void leave_critical_section(irqstate_t flags)
                * released, then unlock the spinlock.
                */
 
-              cpu = this_cpu();
               DEBUGASSERT(spin_islocked(&g_cpu_irqlock) &&
                           (g_cpu_irqset & (1 << cpu)) != 0);
 
