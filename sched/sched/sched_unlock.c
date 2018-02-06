@@ -168,7 +168,7 @@ int sched_unlock(void)
                * maximum.
                */
 
-              if (rtcb != this_task())
+              if (rtcb != current_task(cpu))
                 {
                   rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
@@ -206,7 +206,7 @@ int sched_unlock(void)
                * change the currently active task.
                */
 
-              if (rtcb == this_task())
+              if (rtcb == current_task(cpu))
                 {
                   sched_timer_reassess();
                 }

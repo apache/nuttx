@@ -149,6 +149,7 @@ Status
 
   At present, the NSH prompt does come up but there there still hangs that
   must be addressed.
+
 Platform Features
 =================
 
