@@ -127,7 +127,12 @@ Status
   deferred setting g_cpu_irqlock().  That latter setting is now deferred
   until sched_resume_scheduler() runs.  These commits were made:
 
-     commit 0ba78530164814360eb09ed9805137b934c6f03b
+    commit 50ab5d638a37b539775d1e60085f182bf26be57f
+      sched/task:  It is not appropriate for logic in task_exit() to call
+      the new version of this_task().  sched/irq:  Remove redundant fetch
+      of CPU index; configs/sabre-6quad: update README.
+
+    commit 0ba78530164814360eb09ed9805137b934c6f03b
       sched/irq: Fix a infinite recursion problem that a recent change
       introduced into the i.MX6 SMP implementation.
 
@@ -147,8 +152,11 @@ Status
       minimum amount of time.
 
   With these changes, basic SMP functionality is restored and there are no
-  known issues.  Insufficient stress testing has been done to prove that the
-  solution is stable, however.
+  known issues (Configuration smp with 4 CPUs and data cache disabled).  It
+  is likely, however, that additional changes similar to the above will be
+  required in other areas of the OS, but none such are known as of this
+  writing.  Insufficient stress testing has been done to prove that the
+  solution is stable.
 
 Platform Features
 =================
@@ -562,7 +570,7 @@ Open Issues:
    This will cause the interrupt handlers on other CPUs to spin until
    leave_critical_section() is called.  More verification is needed.
 
-2. Cache Concurency.  Cache coherency in SMP configurations is managed by the
+2. Cache Concurrency.  Cache coherency in SMP configurations is managed by the
    MPCore snoop control unit (SCU).  But I don't think I have the set up
    correctly yet.
 
@@ -612,6 +620,15 @@ index eedf179..1db2092 100644
  }
 
  #endif
+
+3. Recent redesigns to SMP of another ARMv7-M platform have made changes to the OS
+   SMP support.  There are no known problem but the changes have not been verified
+   fully (see STATUS above for 2019-02-06).
+
+4. I have a sense that there may be some performance issues that need to be worked
+   out.  I have made no measurements so perhaps that is an unfounded concern but
+   you should be aware even of my unfounded concerns if you want to work with i.MX6
+   SMP.
 
 Configurations
 ==============
