@@ -342,7 +342,6 @@ try_again:
                * the spinlock.
                */
 
-              cpu = this_cpu();
               DEBUGASSERT((g_cpu_irqset & (1 << cpu)) == 0);
 
               if (!irq_waitlock(cpu))

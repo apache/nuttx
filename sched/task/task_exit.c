@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/task/task_exit.c
  *
- *   Copyright (C) 2008-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2014, 2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,9 +83,24 @@
 
 int task_exit(void)
 {
-  FAR struct tcb_s *dtcb = this_task();
+  FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
   int ret;
+#ifdef CONFIG_SMP
+  int cpu;
+
+  /* Get the current CPU.  By assumption, we are within a critical section
+   * and, hence, the CPU index will remain stable.
+   *
+   * Avoid using this_task() because it may assume a state that is not
+   * appropriate for an exiting task.
+   */
+
+  cpu  = this_cpu();
+  dtcb = current_task(cpu);
+#else
+  dtcb = this_task();
+#endif
 
   /* Remove the TCB of the current task from the ready-to-run list.  A context
    * switch will definitely be necessary -- that must be done by the
@@ -95,7 +111,14 @@ int task_exit(void)
    */
 
   (void)sched_removereadytorun(dtcb);
+
+  /* Get the new task at the head of the ready to run list */
+
+#ifdef CONFIG_SMP
+  rtcb = current_task(cpu);
+#else
   rtcb = this_task();
+#endif
 
 #ifdef CONFIG_SMP
   /* Because clearing the global IRQ control in sched_removereadytorun()

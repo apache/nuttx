@@ -127,21 +127,28 @@ Status
   deferred setting g_cpu_irqlock().  That latter setting is now deferred
   until sched_resume_scheduler() runs.  These commits were made:
 
-    commit de34b4523fc33c6f2f20619349af8fa081a3bfcd
-      sched/ and arch/arm/src/armv7-a:  Replace a few more occurrences
-      of this_task() with current_task(cpu) in an effort to get the i.MX6
-      working in SMP mode again.  It does not yet work, sadly.
+     commit 0ba78530164814360eb09ed9805137b934c6f03b
+      sched/irq: Fix a infinite recursion problem that a recent change
+      introduced into the i.MX6 SMP implementation.
 
     commit 8aa15385060bf705bbca2c22a5682128740e55a8
       arch/arm/src/armv7-a:  Found some additional places were the new
       this_task() function cannot be called in the i.MX6 SMP configuration.
 
-     commit 0ba78530164814360eb09ed9805137b934c6f03b
-      sched/irq: Fix a infinite recursion problem that a recent change
-      introduced into the i.MX6 SMP implementation.
+    commit de34b4523fc33c6f2f20619349af8fa081a3bfcd
+      sched/ and arch/arm/src/armv7-a:  Replace a few more occurrences
+      of this_task() with current_task(cpu) in an effort to get the i.MX6
+      working in SMP mode again.  It does not yet work, sadly.
 
-  With these changes, basic SMP functionality is restored.  Insufficient
-  stress testing has been done to prove that the solution is stable, however.
+    commit cce21bef3292a40dcd97b6176ea016e2b559de8b
+      sched/sched: sched_lock() and sched_unlock().. back out some changes
+      I made recently.  The seemed correct but apparently not.  Also
+      reorder to logic so that g_global_lockcount is incremented for the very
+      minimum amount of time.
+
+  With these changes, basic SMP functionality is restored and there are no
+  known issues.  Insufficient stress testing has been done to prove that the
+  solution is stable, however.
 
 Platform Features
 =================
