@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_serial.c
  *
- *   Copyright (C) 2010-2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -920,9 +920,12 @@ static int up_setup(struct uart_dev_s *dev)
       lcr |= (UART_LCR_PE | UART_LCR_PS_EVEN);
     }
 
-  /* Disable FDR (fractional divider, not used by baudrate settings -> has to be disabled) */
+  /* Disable FDR (fractional divider, not used by baudrate settings -> has
+   * to be disabled)
+   */
 
-  up_serialout(priv, LPC17_UART_FDR_OFFSET, (1<<UART_FDR_MULVAL_SHIFT) + (0<<UART_FDR_DIVADDVAL_SHIFT));
+  up_serialout(priv, LPC17_UART_FDR_OFFSET,
+              (1 << UART_FDR_MULVAL_SHIFT) + (0 << UART_FDR_DIVADDVAL_SHIFT));
 
   /* Enter DLAB=1 */
 
