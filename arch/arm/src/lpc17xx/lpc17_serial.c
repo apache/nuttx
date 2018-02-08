@@ -920,6 +920,10 @@ static int up_setup(struct uart_dev_s *dev)
       lcr |= (UART_LCR_PE | UART_LCR_PS_EVEN);
     }
 
+  /* Disable FDR (fractional divider, not used by baudrate settings -> has to be disabled) */
+
+  up_serialout(priv, LPC17_UART_FDR_OFFSET, (1<<UART_FDR_MULVAL_SHIFT) + (0<<UART_FDR_DIVADDVAL_SHIFT));
+
   /* Enter DLAB=1 */
 
   up_serialout(priv, LPC17_UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
