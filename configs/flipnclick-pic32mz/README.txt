@@ -11,6 +11,7 @@ Contents
 
   Port Status
   On Board Debug Support
+  Using the mikroProg
   Creating Compatible NuttX HEX files
   Tool Issues
   Serial Console
@@ -26,8 +27,12 @@ Port Status
   2018-01-08:  Created the basic board configuration for the Mikroe
     Flip&Click PIC32MZ board.  No testing has yet been performed.  At this
     point, I have not even figured out how I am going to load and debug
-    new firmware.  I need understand how the memory map is set up when used
-    with the mikroBootloader.
+    new firmware.
+  2018-02-08:  I received a mikroProg PIC32 debugger (Thanks go to John Legg
+    of the Debug Shop!).  At this point I have loaded code and can see the
+    NSH prompt coming from the Flip&Click connect via an RS-232 Click board
+    in mikroBUS slot A.  But there is no response to serial input to the
+    board.  Sounds like a pin configuration issue.
 
 On Board Debug Support
 ======================
@@ -64,6 +69,47 @@ On Board Debug Support
      would, most likely, clobber the USB HID bootloader (and possibly the
      Arduino support as well).
 
+Using the mikroProg
+===================
+
+   Hardware setup
+   --------------
+   You will need to add a five pin header to the mikroProg connector between
+   the A and D mikroBUS sockets.
+
+   Connect the mikroProg to the outer 5 pins of the mikroProg's 10-pin
+   connector to the 5-pin header, respecting the pin 1 position:  The
+   colored wire on the ribbon cable should be on the same side as the tiny
+   arrow on the board indicating pin 1.
+
+   Connect the mikroProg to your computer with the provided USB cable; also power the Flip'n'Clip board with another USB cable connected to the computer.  Either USB
+   port will provide power.
+
+   Installing the Software
+   -----------------------
+   From the mikroProg website https://www.mikroe.com/mikroprog-pic-dspic-pic32
+   Download:
+
+     Drivers for mikroProg Suite
+     https://download.mikroe.com/setups/drivers/mikroprog/pic-dspic-pic32/mikroprog-pic-dspic-pic32-drivers.zip
+
+     mikroProg Suite for PIC, dsPIC, PIC32 v260
+
+     https://download.mikroe.com/setups/programming-software/mikroprog/pic-dspic-pic32/mikroprog-suite-pic-dspic-pic32-programming-software-setup-v260.zip
+
+  Install the mikroProg Suite.  From things I have read, I gather that you
+  must be Administrator when installing the tool  The instructions say that
+  it will automatically install the drivers.  It did not for me.
+
+  To install the drivers... You will find several directories under mikroprog-pic-dspic-pic32-drivers/.  Select the correct directory and run
+  the .EXE file you find there.
+
+  When I started the mikroProg suite, it could not find the USB driver.
+  After a few frustrating hours of struggling with the drivers, I found
+  that if I start the mikroProg suite as a normal user, it does not find
+  the driver.  But if I instead start the mikroProg suite as Administrator...
+  There it is!  A little awkward but works just fine.
+
 Creating Compatible NuttX HEX files
 ===================================
 
@@ -92,7 +138,8 @@ Creating Compatible NuttX HEX files
       cd tools/pic32mx
       make
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable
+    file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -102,7 +149,7 @@ Creating Compatible NuttX HEX files
       export PATH=???  # Add the NuttX tools/pic32mx directory to your
                        # PATH variable
       make             # Build nuttx and nuttx.hex
-      mkpichex $PWD    #  Convert addresses in nuttx.hex.  $PWD is the path
+      mkpichex $PWD    # Convert addresses in nuttx.hex.  $PWD is the path
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
 
