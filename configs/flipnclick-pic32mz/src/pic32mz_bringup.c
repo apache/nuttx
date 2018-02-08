@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mount.h>
+#include <syslog.h>
 
 #include "flipnclick-pic32mz.h"
 
@@ -58,6 +60,17 @@
 int pic32mz_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,"ERROR: Failed to mount procfs at /proc: %d\n",
+            ret);
+    }
+#endif
 
   UNUSED(ret);
   return OK;
