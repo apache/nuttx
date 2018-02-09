@@ -72,6 +72,9 @@ On Board Debug Support
 Using the mikroProg
 ===================
 
+   WARNING: This will most certainly overwrite the bootloader that was factory
+   installed in FLASH!
+
    Hardware setup
    --------------
    You will need to add a five pin header to the mikroProg connector between
@@ -193,6 +196,14 @@ Serial Console
   The outputs from these pins is 3.3V.  You will need to connect RS232
   transceiver to get the signals to RS232 levels (or connect to the
   USB virtual COM port in the case of UART0).
+
+  STATUS: I have been unable to get the RS-232 Click to work in the mikroBUS
+  A slot.  The PIC32MZ does not receive serial input.  It appears that there
+  is an error in the some documentation:  Either RG9 is not connect to
+  UART4_RX or the PPS bit definitions are documented incorrectly for UART4.
+
+  Switching to UART3 eliminates the problem and the serial console is fully
+  functional.
 
 SPI
 ===
@@ -339,9 +350,9 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. Serial Console.  UART 4 is configured as the Serial Console.  This
+    1. Serial Console.  UART3 is configured as the Serial Console.  This
        assumes that you will be using a Mikroe RS-232 Click card in the
-       mikroBUS A slot.  Other serial consoles may be selected by re-
+       mikroBUS B slot.  Other serial consoles may be selected by re-
        configuring (see the section "Serial Consoles" above).
 
     2. Toolchain
