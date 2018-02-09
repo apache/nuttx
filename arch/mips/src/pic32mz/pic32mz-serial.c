@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz-serial.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,10 +96,10 @@
 #    define CONSOLE_DEV         g_uart4port /* UART4 is console */
 #    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart5port /* UART4 is console */
-#    define TTYS0_DEV           g_uart5port /* UART4 is ttyS0 */
-#    define UART4_ASSIGNED      1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart5port /* UART5 is console */
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
 #elif defined(CONFIG_UART6_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart6port /* UART6 is console */
 #    define TTYS5_DEV           g_uart6port /* UART6 is ttyS0 */
@@ -118,9 +118,9 @@
 #  elif defined(CONFIG_PIC32MZ_UART4)
 #    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_PIC32MZ_UART4)
-#    define TTYS0_DEV           g_uart5port /* UART4 is ttyS0 */
-#    define UART4_ASSIGNED      1
+#  elif defined(CONFIG_PIC32MZ_UART5)
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
 #  elif defined(CONFIG_PIC32MZ_UART6)
 #    define TTYS0_DEV           g_uart6port /* UART6 is ttyS0 */
 #    define UART6_ASSIGNED      1

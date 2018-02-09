@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz-gpio.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -332,10 +332,10 @@ void pic32mz_dumpgpio(uint32_t pinset, const char *msg)
                getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET),
                getreg32(base + PIC32MZ_IOPORT_LAT_OFFSET),
                getreg32(base + PIC32MZ_IOPORT_ODC_OFFSET));
-      gpioinfo("  CNCON: %08x   CNEN: %08x  CNPUE: %08x\n",
-               getreg32(PIC32MZ_IOPORT_CNCON),
-               getreg32(PIC32MZ_IOPORT_CNEN),
-               getreg32(PIC32MZ_IOPORT_CNPUE));
+      gpioinfo("  CNCON: %08x   CNEN: %08x   CNPU: %08x\n",
+               getreg32(base + PIC32MZ_IOPORT_CNCON_OFFSET),
+               getreg32(base + PIC32MZ_IOPORT_CNEN_OFFSET),
+               getreg32(base + PIC32MZ_IOPORT_CNPU_OFFSET));
       sched_unlock();
     }
 }
