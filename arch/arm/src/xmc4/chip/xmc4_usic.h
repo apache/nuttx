@@ -465,7 +465,12 @@
 #  define USIC_BRG_PDIV(n)          ((uint32_t)(n) << USIC_BRG_PDIV_SHIFT)
 #define USIC_BRG_SCLKOSEL           (1 << 28) /* Bit 28:  Shift Clock Output Select */
 #define USIC_BRG_MCLKCFG            (1 << 29) /* Bit 29:  Master Clock Configuration */
-#define USIC_BRG_SCLKCFG            (1 << 30) /* Bit 30:  Shift Clock Output Configuration */
+#define USIC_BRG_SCLKCFG_SHIFT      30        /* Bits 30-31: Shift Clock Output Configuration */
+#define USIC_BRG_SCLKCFG_MASK       (3 << USIC_BRG_SCLKCFG_SHIFT)
+#  define USIC_BRG_SCLKCFG_NOINVNODLY (0 << USIC_BRG_SCLKCFG_SHIFT) /* No inverted signal and no delay */
+#  define USIC_BRG_SCLKCFG_INVNODLY   (1 << USIC_BRG_SCLKCFG_SHIFT) /* Inverted signal and no delay */
+#  define USIC_BRG_SCLKCFG_NOINVDLY   (2 << USIC_BRG_SCLKCFG_SHIFT) /* No inverted signal and 1/2 delay */
+#  define USIC_BRG_SCLKCFG_INVDLY     (3 << USIC_BRG_SCLKCFG_SHIFT) /* Inverted signal and 1/2 delay */
 
 /* Interrupt Node Pointer Register */
 
