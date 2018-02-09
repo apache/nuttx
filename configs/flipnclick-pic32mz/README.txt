@@ -72,8 +72,15 @@ On Board Debug Support
 Using the mikroProg
 ===================
 
-   WARNING: This will most certainly overwrite the bootloader that was factory
-   installed in FLASH!
+   WARNINGS:
+   1. Following there steps will most certainly overwrite the bootloader
+      that was factory installed in FLASH!
+   2. Due to the position and orientation of the mikroProg connector you
+      may lose functionality:  If you attach mikroProg to the red side of
+      the board, you will not be able to use the Arduino Shield Connector
+      while the mikroProg connected.  If you attach mikroProg to the white
+      side of the board, you will similarly lose access to mikroBUS
+      connectors A and D.
 
    Hardware setup
    --------------
@@ -85,8 +92,9 @@ Using the mikroProg
    colored wire on the ribbon cable should be on the same side as the tiny
    arrow on the board indicating pin 1.
 
-   Connect the mikroProg to your computer with the provided USB cable; also power the Flip'n'Clip board with another USB cable connected to the computer.  Either USB
-   port will provide power.
+   Connect the mikroProg to your computer with the provided USB cable; also
+   power the Flip'n'Clip board with another USB cable connected to the
+   computer.  Either USB port will provide power.
 
    Installing the Software
    -----------------------
@@ -97,14 +105,14 @@ Using the mikroProg
      https://download.mikroe.com/setups/drivers/mikroprog/pic-dspic-pic32/mikroprog-pic-dspic-pic32-drivers.zip
 
      mikroProg Suite for PIC, dsPIC, PIC32 v260
-
      https://download.mikroe.com/setups/programming-software/mikroprog/pic-dspic-pic32/mikroprog-suite-pic-dspic-pic32-programming-software-setup-v260.zip
 
   Install the mikroProg Suite.  From things I have read, I gather that you
   must be Administrator when installing the tool  The instructions say that
   it will automatically install the drivers.  It did not for me.
 
-  To install the drivers... You will find several directories under mikroprog-pic-dspic-pic32-drivers/.  Select the correct directory and run
+  To install the drivers... You will find several directories under
+  mikroprog-pic-dspic-pic32-drivers/.  Select the correct directory and run
   the .EXE file you find there.
 
   When I started the mikroProg suite, it could not find the USB driver.
@@ -194,16 +202,16 @@ Serial Console
   will leave that as an exercise for the interested reader.
 
   The outputs from these pins is 3.3V.  You will need to connect RS232
-  transceiver to get the signals to RS232 levels (or connect to the
-  USB virtual COM port in the case of UART0).
+  transceiver to get the signals to RS-232 levels.  The simplest options are
+  an expensive Arduino RS-232 shield or a Mikroe RS-232 Click board.
 
   STATUS: I have been unable to get the RS-232 Click to work in the mikroBUS
-  A slot.  The PIC32MZ does not receive serial input.  It appears that there
-  is an error in the some documentation:  Either RG9 is not connect to
+  A slot.  The PIC32MZ did not receive serial input.  It appears that there
+  is an error in the some documentation:  Either RG9 is not connected to
   UART4_RX or the PPS bit definitions are documented incorrectly for UART4.
 
   Switching to UART3 eliminates the problem and the serial console is fully
-  functional.
+  functional.  I have not tried the other options of UART1, 2, or 5.
 
 SPI
 ===
