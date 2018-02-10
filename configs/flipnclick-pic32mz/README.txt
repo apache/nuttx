@@ -30,10 +30,17 @@ Port Status
     point, I have not even figured out how I am going to load and debug
     new firmware.
   2018-02-08:  I received a mikroProg PIC32 debugger (Thanks go to John Legg
-    of the Debug Shop!).  At this point I have loaded code and can see the
-    NSH prompt coming from the Flip&Click connect via an RS-232 Click board
-    in mikroBUS slot A.  But there is no response to serial input to the
-    board.  Sounds like a pin configuration issue.
+    of the Debug Shop!).
+  2018-02-09:  The NSH configuration is now functional, but only with the
+    RS-232 Click in mikroBUS slot B.  There is, apparently, some mis-
+    information  about how UART4 RX is connected in mikroBUS slot A; I
+    cannot receive serial there.  But life is good in slot B.
+  2018-02-10:  Added the nxlines configuration to test the custom HiletGo
+    OLED on a Click proto board.  Debug output indicates that the example is
+    running error free yet nothing appears on the OLED in mikroBUS slot A.
+    It looks like all of the signals are present at the mikroBUS A slot and
+    the proto click ohms out okay so this must be a software driver issue.
+    Write only LCDs are tough to debug!
 
 On Board Debug Support
 ======================
@@ -420,5 +427,6 @@ Where <subdir> is one of the following:
 
     2018-02-10:  The debug output indicates that the nxlines example is
       running with no errors, however, nothing appears on the OLED display.
-      This suggests either a problem with the pin configuration or else I
-      have bungled the wiring of the custom card.
+      It looks like all of the signals are present at the mikroBUS A slot and
+      the proto click ohms out okay so this must be a software driver issue.
+      Write only LCDs are tough to debug!

@@ -111,8 +111,8 @@ void  pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selecte
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
   if (devid == SPIDEV_DISPLAY(0))
     {
       pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
@@ -128,26 +128,26 @@ uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
   if (devid == SPIDEV_DISPLAY(0))
     {
-      pic32mz_gpiowrite(GPIO_HILETGO_CS, !cmd);
+      pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
     }
 #endif
 
   return 0;
 }
 #endif
-#endif
+#endif /* CONFIG_PIC32MZ_SPI1 */
 
 #ifdef CONFIG_PIC32MZ_SPI2
 void  pic32mz_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
   if (devid == SPIDEV_DISPLAY(0))
     {
       pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
@@ -163,17 +163,17 @@ uint8_t pic32mz_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
   if (devid == SPIDEV_DISPLAY(0))
     {
-      pic32mz_gpiowrite(GPIO_HILETGO_CS, !cmd);
+      pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
     }
 #endif
   return 0;
 }
 #endif
-#endif
+#endif /* CONFIG_PIC32MZ_SPI2 */
 
 #ifdef CONFIG_PIC32MZ_SPI3
 void  pic32mz_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
@@ -192,7 +192,7 @@ int pic32mz_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
   return 0;
 }
 #endif
-#endif
+#endif /* CONFIG_PIC32MZ_SPI3 */
 
 #ifdef CONFIG_PIC32MZ_SPI4
 void  pic32mz_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
@@ -211,7 +211,7 @@ int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
   return 0;
 }
 #endif
-#endif
+#endif /* CONFIG_PIC32MZ_SPI4 */
 
 #ifdef CONFIG_PIC32MZ_SPI5
 void  pic32mz_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
@@ -232,7 +232,7 @@ int pic32mz_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
   return 0;
 }
 #endif
-#endif
+#endif /* CONFIG_PIC32MZ_SPI5 */
 
 #ifdef CONFIG_PIC32MZ_SPI6
 void  pic32mz_spi6select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
@@ -254,7 +254,7 @@ int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
   return 0;
 }
 #endif
-#endif
+#endif /* CONFIG_PIC32MZ_SPI6 */
 
 /****************************************************************************
  * Name: pic32mz_spi1/2/...register
@@ -284,7 +284,7 @@ int pic32mz_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_PIC32MZ_SPI1 */
 
 #ifdef CONFIG_PIC32MZ_SPI2
 int pic32mz_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
@@ -293,7 +293,7 @@ int pic32mz_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_PIC32MZ_SPI2 */
 
 #ifdef CONFIG_PIC32MZ_SPI3
 int pic32mz_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
@@ -302,7 +302,7 @@ int pic32mz_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_PIC32MZ_SPI3 */
 
 #ifdef CONFIG_PIC32MZ_SPI4
 int pic32mz_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
@@ -311,7 +311,7 @@ int pic32mz_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_PIC32MZ_SPI4 */
 
 #ifdef CONFIG_PIC32MZ_SPI5
 int pic32mz_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
@@ -320,7 +320,7 @@ int pic32mz_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_PIC32MZ_SPI5 */
 
 #ifdef CONFIG_PIC32MZ_SPI6
 int pic32mz_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
@@ -329,7 +329,7 @@ int pic32mz_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif
+#endif /* CONFIG_PIC32MZ_SPI6 */
 #endif /* CONFIG_SPI_CALLBACK */
 
 #endif /* CONFIG_PIC32MZ_SPI */
