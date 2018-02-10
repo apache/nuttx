@@ -48,6 +48,18 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
+#define HAVE_HILETGO 1
+
+/* The HiletGo LCD must be selected, installed on the Flip&Click, and must
+ * be configured to use the SPI interface.
+ */
+
+#if !defined(CONFIG_LCD_HILETGO) || \
+    !defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO) || \
+    !defined(CONFIG_LCD_SSD1306_SPI)
+#  undef HAVE_HILETGO
+#endif
+
 /* LEDs *********************************************************************/
 /* There are four LEDs on the top, red side of the board.  Only one can be
  * controlled by software:
@@ -126,6 +138,78 @@
 #define GPIO_MBC_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | GPIO_PIN12)
 #define GPIO_MBD_CS  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | GPIO_PIN13)
 
+/* HiletGo OLED
+ *
+ * The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
+ * is the default and is what is used here).  I have mounted the OLED on a
+ * proto click board.  The OLED is connected as follows:
+ *
+ * OLED  ALIAS       DESCRIPTION   PROTO CLICK
+ * ----- ----------- ------------- -----------------
+ *  GND              Ground        GND
+ *  VCC              Power Supply  5V  (3-5V)
+ *  D0   SCL,CLK,SCK Clock         SCK
+ *  D1   SDA,MOSI    Data          MOSI,SDI
+ *  RES  RST,RESET   Reset         RST (GPIO OUTPUT)
+ *  DC   AO          Data/Command  INT (GPIO OUTPUT)
+ *  CS               Chip Select   CS  (GPIO OUTPUT)
+ *
+ * NOTE that this is a write-only display (MOSI only)!
+ *
+ *   MikroBUS A:                 MikroBUS B:
+ *   Pin  Board Signal PIC32MZ  Pin  Board Signal PIC32MZ
+ *   ---- ------------ -------  ---- ------------ -------
+ *   RST  RST4         RE2      RST  RST3         RG13
+ *   DC   INT4         RD9      DC   INT3         RG1
+ *
+ *   MikroBUS C:                 MikroBUS D:
+ *   Pin  Board Signal PIC32MZ  Pin  Board Signal PIC32MZ
+ *   ---- ------------ -------  ---- ------------ -------
+ *   RST  RST1         RG14     RST  RST2         RG12
+ *   DC   INT1         RD5      DC   INT2         RD4
+ */
+
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA)
+#  ifndef CONFIG_PIC32MZ_SPI2
+#    error "The OLED driver requires CONFIG_PIC32MZ_SPI2 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  2
+#  define GPIO_HILETGO_CS  GPIO_MBA_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTE | GPIO_PIN2)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTD | GPIO_PIN9)
+
+#elif defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+#  ifndef CONFIG_PIC32MZ_SPI2
+#    error "The OLED driver requires CONFIG_PIC32MZ_SPI2 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  2
+#  define GPIO_HILETGO_CS  GPIO_MBB_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTG | GPIO_PIN13)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTG | GPIO_PIN1)
+
+#elif defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC)
+#  ifndef CONFIG_PIC32MZ_SPI1
+#    error "The OLED driver requires CONFIG_PIC32MZ_SPI1 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  1
+#  define GPIO_HILETGO_CS  GPIO_MBC_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTG | GPIO_PIN14)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTD | GPIO_PIN5)
+
+#elif defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+#  ifndef CONFIG_PIC32MZ_SPI1
+#    error "The OLED driver requires CONFIG_PIC32MZ_SPI1 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  1
+#  define GPIO_HILETGO_CS  GPIO_MBD_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTG | GPIO_PIN12)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTD | GPIO_PIN4)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -181,6 +265,21 @@ void pic32mz_led_initialize(void);
  ****************************************************************************/
 
 int pic32mz_bringup(void);
+
+/****************************************************************************
+ * Name: pic32mz_graphics_setup
+ *
+ * Description:
+ *   Called by either NX initialization logic (via board_graphics_setup) or
+ *   directly from the board bring-up logic in order to configure the
+ *   HiletGo OLED.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_HILETGO
+struct lcd_dev_s;  /* Forward reference3 */
+FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

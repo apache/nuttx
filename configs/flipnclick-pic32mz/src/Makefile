@@ -50,4 +50,8 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += pic32mz_buttons.c
 endif
 
+ifeq ($(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO),y)
+CSRCS += pic32mz_hiletgo.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

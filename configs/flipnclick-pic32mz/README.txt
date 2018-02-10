@@ -17,6 +17,7 @@ Contents
   Serial Console
   SPI
   LEDs
+  HiletGo OLED
   Configurations
 
 Port Status
@@ -309,6 +310,30 @@ LEDs and Buttons
   The switches have external pull-up resistors. The switches are pulled high
   (+3.3V) and grounded when pressed.
 
+HiletGo OLED
+============
+
+  Hardware
+  --------
+  The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
+  is the default and is what is used here).  I have mounted the OLED on a
+  proto click board.  The OLED is connected as follows:
+
+  OLED  ALIAS       DESCRIPTION   PROTO CLICK
+  ----- ----------- ------------- -----------------
+   GND              Ground        GND
+   VCC              Power Supply  5V  (3-5V)
+   D0   SCL,CLK,SCK Clock         SCK
+   D1   SDA,MOSI    Data          MOSI,SDI
+   RES  RST,RESET   Reset         RST (GPIO OUTPUT)
+   DC   AO          Data/Command  INT (GPIO OUTPUT)
+   CS               Chip Select   CS  (GPIO OUTPUT)
+
+   NOTE that this is a write-only display (MOSI only)!
+
+   Configuration
+   -------------
+
 Configurations
 ==============
 
@@ -374,3 +399,26 @@ Where <subdir> is one of the following:
        CONFIG_PIC32MZ_DEBUGGER_ENABLE=n  : Debugger is disabled
        CONFIG_PIC32MZ_TRACE_ENABLE=n     : Trace is disabled
        CONFIG_PIC32MZ_JTAG_ENABLE=n      : JTAG is disabled
+
+  nxlines
+
+    This is an NSH configuration that supports the NX graphics example at
+    apps/examples/nxlines as a built-in application.
+
+    NOTES:
+
+    1. This configuration derives from the nsh configuration.  All of the
+       notes there apply here as well.
+
+    2. The default configuration assumes there is the custom HiletGo OLED
+       in the mikroBUS A slot (and a Mikroe RS-232 Click card in the
+       mikroBUS B slot).  That is easily changed by reconfiguring, however.
+       See the section entitled "HiletGo OLED" for information about this
+       custom click card.
+
+    STATUS:
+
+    2018-02-10:  The debug output indicates that the nxlines example is
+      running with no errors, however, nothing appears on the OLED display.
+      This suggests either a problem with the pin configuration or else I
+      have bungled the wiring of the custom card.

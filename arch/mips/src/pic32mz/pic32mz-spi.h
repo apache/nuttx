@@ -170,6 +170,58 @@ int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
+/****************************************************************************
+ * Name: pic32mz_spi1/2/...register
+ *
+ * Description:
+ *   If the board supports a card detect callback to inform the SPI-based
+ *   MMC/SD driver when an SD card is inserted or removed, then
+ *   CONFIG_SPI_CALLBACK should be defined and the following function(s)
+ *   must be implemented.  These functions implements the registercallback
+ *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *   callback - The function to call on the media change
+ *   arg -      A caller provided value to return with the callback
+ *
+ * Returned Value:
+ *   0 on success; negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CALLBACK
+#ifdef CONFIG_PIC32MZ_SPI1
+int pic32mz_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg);
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI2
+int pic32mz_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg);
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI3
+int pic32mz_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg);
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI4
+int pic32mz_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg);
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI5
+int pic32mz_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg);
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI6
+int pic32mz_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg);
+#endif
+#endif /* CONFIG_SPI_CALLBACK */
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

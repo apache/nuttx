@@ -4,4 +4,31 @@
 #
 
 if ARCH_BOARD_FLIPNCLICK_PIC32MZ
-endif
+
+
+config FLIPNCLICK_PIC32MZ_HILETGO
+	bool "HiletGo Click Present"
+	default n
+	depends on LCD_HILETGO
+	select NXSTART_EXTERNINIT if NX
+
+choice
+	prompt "HiletGo mikroBUS"
+	default FLIPNCLICK_PIC32MZ_HILETGO_MBA
+	depends on FLIPNCLICK_PIC32MZ_HILETGO
+
+config FLIPNCLICK_PIC32MZ_HILETGO_MBA
+	bool "mikroBUS A"
+
+config FLIPNCLICK_PIC32MZ_HILETGO_MBB
+	bool "mikroBUS B"
+
+config FLIPNCLICK_PIC32MZ_HILETGO_MBC
+	bool "mikroBUS C"
+
+config FLIPNCLICK_PIC32MZ_HILETGO_MBD
+	bool "mikroBUS D"
+
+endchoice # HiletGo mikroBUS
+
+endif # ARCH_BOARD_FLIPNCLICK_PIC32MZ

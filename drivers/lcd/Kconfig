@@ -395,7 +395,6 @@ config LCD_UG2864HSWEG01
 config LCD_UG2832HSWEG04
 	bool "UG-2832HSWEG04 OLED Display Module (SSD1306)"
 	default n
-	depends on !LCD_UG2864HSWEG01
 	select LCD_SSD1306
 	---help---
 		OLED Display Module, UG-UG2832HSWEG04, Univision Technology Inc
@@ -412,7 +411,6 @@ config LCD_UG2832HSWEG04
 config LCD_DD12864WO4A
 	bool "DD-12864WO-4A OLED Display Module"
 	default n
-	depends on !LCD_UG2864HSWEG01 && !LCD_UG2832HSWEG04
 	select LCD_SSD1306
 	select SPI_CMDDATA
 	---help---
@@ -426,6 +424,18 @@ config LCD_DD12864WO4A
 
 		Required SPI driver settings:
 		SPI_CMDDATA - Include support for cmd/data selection.
+
+config LCD_HILETGO
+	bool "HiletGO 128x64 OLED"
+	default n
+	select LCD_SSD1306
+	select SPI_CMDDATA
+	---help---
+		HiletGo 129x64 OLED Display Module, featuring an SSD1306.
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+		LCD_MAXPOWER should be 1:  0=off, 1=on
 
 config LCD_SSD1306
 	bool

@@ -43,9 +43,12 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/spi/spi.h>
+
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "pic32mz-gpio.h"
 
 #include "flipnclick-pic32mz.h"
 
@@ -67,7 +70,10 @@ void weak_function pic32mz_spidev_initialize(void)
 {
   /* Configure the SPI chip select GPIOs */
 
-#warning "Missing logic"
+#ifdef CONFIG_LCD_HILETGO
+  (void)pic32mz_configgpio(GPIO_HILETGO_CS);
+  (void)pic32mz_configgpio(GPIO_HILETGO_DC);
+#endif
 }
 
 /************************************************************************************
@@ -104,19 +110,32 @@ struct spi_dev_s;
 void  pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-#warning "Missing logic"
+
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
+    }
+#endif
 }
 
 uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
   return 0;
 }
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      pic32mz_gpiowrite(GPIO_HILETGO_CS, !cmd);
+    }
+#endif
+
   return 0;
 }
 #endif
@@ -126,19 +145,31 @@ int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 void  pic32mz_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-#warning "Missing logic"
+
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
+    }
+#endif
 }
 
 uint8_t pic32mz_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
   return 0;
 }
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      pic32mz_gpiowrite(GPIO_HILETGO_CS, !cmd);
+    }
+#endif
   return 0;
 }
 #endif
@@ -148,19 +179,16 @@ int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 void  pic32mz_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-#warning "Missing logic"
 }
 
 uint8_t pic32mz_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
   return 0;
 }
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
   return 0;
 }
 #endif
@@ -170,19 +198,16 @@ int pic32mz_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 void  pic32mz_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-#warning "Missing logic"
 }
 
 uint8_t pic32mz_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
-#warning "Missing logic"
   return 0;
 }
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#warning "Missing logic"
   return 0;
 }
 #endif
@@ -192,7 +217,6 @@ int pic32mz_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 void  pic32mz_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-#warning "Missing logic"
 }
 
 uint8_t pic32mz_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -231,5 +255,81 @@ int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 }
 #endif
 #endif
+
+/****************************************************************************
+ * Name: pic32mz_spi1/2/...register
+ *
+ * Description:
+ *   If the board supports a card detect callback to inform the SPI-based
+ *   MMC/SD driver when an SD card is inserted or removed, then
+ *   CONFIG_SPI_CALLBACK should be defined and the following function(s)
+ *   must be implemented.  These functions implements the registercallback
+ *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *   callback - The function to call on the media change
+ *   arg -      A caller provided value to return with the callback
+ *
+ * Returned Value:
+ *   0 on success; negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CALLBACK
+#ifdef CONFIG_PIC32MZ_SPI1
+int pic32mz_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI2
+int pic32mz_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI3
+int pic32mz_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI4
+int pic32mz_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI5
+int pic32mz_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI6
+int pic32mz_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                         FAR void *arg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
+#endif /* CONFIG_SPI_CALLBACK */
 
 #endif /* CONFIG_PIC32MZ_SPI */

@@ -72,6 +72,15 @@ int pic32mz_bringup(void)
     }
 #endif
 
+#if defined(HAVE_HILETGO) && !defined(CONFIG_NXSTART_EXTERNINIT)
+  /* Configure the HiletGo OLED */
+
+  if (pic32mz_graphics_setup(0) == NULL)
+    {
+      syslog(LOG_ERR,"ERROR: Failed to configure the HiletGo OLEDn");
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

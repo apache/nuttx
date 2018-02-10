@@ -65,7 +65,8 @@
 #endif
 
 #if !defined(CONFIG_LCD_SH1106_OLED_132) && !defined(CONFIG_LCD_UG2864HSWEG01) && \
-    !defined(CONFIG_LCD_UG2832HSWEG04) && !defined(CONFIG_LCD_DD12864WO4A)
+    !defined(CONFIG_LCD_UG2832HSWEG04) && !defined(CONFIG_LCD_DD12864WO4A) && \
+    !defined(CONFIG_LCD_HILETGO)
 #  error "Unknown and unsupported SSD1306 LCD"
 #endif
 
@@ -166,6 +167,13 @@
 #  undef IS_SSD1309
 #elif defined(CONFIG_LCD_SH1106_OLED_132)
 #  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 columns used, supporting 132 is a bit difficult */
+#  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
+#  define SSD1306_DEV_XOFFSET     0    /* Offset to logical column 0 */
+#  define SSD1306_DEV_PAGES       8    /* 8 pages */
+#  define SSD1306_DEV_CMNPAD      0x12 /* COM configuration */
+#  undef IS_SSD1309
+#elif defined(CONFIG_LCD_HILETGO)
+#  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 of 132 columns supported */
 #  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
 #  define SSD1306_DEV_XOFFSET     0    /* Offset to logical column 0 */
 #  define SSD1306_DEV_PAGES       8    /* 8 pages */
