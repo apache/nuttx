@@ -228,12 +228,36 @@ int sam_eic_config(uint8_t eirq, port_pinset_t pinset)
   else if (eirq < 16)
     {
       reg = SAM_EIC_CONFIG1;
-      val = EIC_CONFIG1_FILTEN(eirq) | EIC_CONFIG1_SENSE_FALL(eirq);
+
+      val = EIC_CONFIG1_SENSE_BOTH(eirq);
+      if (pinset & PORT_INT_RISING)
+        {
+          val = EIC_CONFIG1_SENSE_RISE(eirq);
+        }
+
+      if (pinset & PORT_INT_FALLING)
+        {
+          val = EIC_CONFIG1_SENSE_FALL(eirq);
+        }
+
+      val |= EIC_CONFIG1_FILTEN(eirq);
     }
   else
     {
       reg = SAM_EIC_CONFIG2;
-      val = EIC_CONFIG2_FILTEN(eirq) | EIC_CONFIG2_SENSE_FALL(eirq);
+
+      val = EIC_CONFIG2_SENSE_BOTH(eirq);
+      if (pinset & PORT_INT_RISING)
+        {
+          val = EIC_CONFIG2_SENSE_RISE(eirq);
+        }
+
+      if (pinset & PORT_INT_FALLING)
+        {
+          val = EIC_CONFIG2_SENSE_FALL(eirq);
+        }
+
+      val |= EIC_CONFIG2_FILTEN(eirq);
     }
 
   /* Write the new config to the CONFIGn register */
