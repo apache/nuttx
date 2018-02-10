@@ -453,11 +453,10 @@ static inline void sam_osc32k_config(void)
 
   regval  = getreg32(SYSCTRL_FUSES_OSC32KCAL_ADDR);
   calib   = (regval & SYSCTRL_FUSES_OSC32KCAL_MASK) >> SYSCTRL_FUSES_OSC32KCAL_SHIFT;
-  regval  = calib << SYSCTRL_OSC32K_CALIB_SHIFT;
 
   /* Configure OSC32K */
 
-  regval |= BOARD_OSC32K_STARTUPTIME;
+  regval = BOARD_OSC32K_STARTUPTIME;
 
 #ifdef BOARD_OSC32K_EN1KHZ
   regval |= SYSCTRL_OSC32K_EN1K;
@@ -481,6 +480,19 @@ static inline void sam_osc32k_config(void)
 
   regval |= SYSCTRL_OSC32K_ENABLE;
   putreg32(regval, SAM_SYSCTRL_OSC32K);
+
+  /* From the datasheet on page 157:
+   * "When writing to the Calibration bits, the user must wait for the
+   * PCLKSR.OSC32KRDY bit to go high before the value is committed
+   * to the oscillator."
+   */
+
+  while ((getreg32(SAM_SYSCTRL_PCLKSR) & SYSCTRL_INT_OSC32KRDY) == 0);
+
+  regval = getreg32(SAM_SYSCTRL_OSC32K);
+  regval |= calib << SYSCTRL_OSC32K_CALIB_SHIFT;
+  putreg32(regval, SAM_SYSCTRL_OSC32K);
+
 }
 #else
 #  define sam_osc32k_config()
@@ -555,6 +567,91 @@ static inline void sam_osc8m_config(void)
 
   putreg32(regval, SAM_SYSCTRL_OSC8M);
 }
+
+#ifdef BOARD_DPLL_ENABLE
+static inline void sam_dpll_config(void)
+{
+  uint8_t ctrla;
+  uint32_t ctrlb;
+  uint32_t ratio;
+
+  ctrla = SYSCTRL_DPLLCTRLA_ENABLE;    /* Enable the FDPLL */
+  ctrlb = 0;
+  ratio = 0;
+
+#ifdef BOARD_DPLL_RUNINSTANDBY
+  ctrla |= SYSCTRL_DPLLCTRLA_RUNSTDBY; /* Run in standby */
+#endif
+
+#ifdef BOARD_DPLL_ONDEMAND
+  ctrla |= SYSCTRL_DPLLCTRLA_ONDEMAND; /* On demand mode */
+#endif
+
+#ifdef BOARD_DPLL_DIV
+  ctrlb |= SYSCTRL_DPLLCTRLB_DIV(BOARD_DPLL_DIV);
+#endif
+
+#ifdef BOARD_DPLL_LBYPASS
+  ctrlb |= SYSCTRL_DPLLCTRLB_LBYPASS;
+#endif
+
+#ifdef BOARD_DPLL_LTIME
+  ctrlb |= BOARD_DPLL_LTIME;
+#endif
+
+#ifdef BOARD_DPLL_REFCLK
+  ctrlb |= BOARD_DPLL_REFCLK;
+  ratio = SYSCTRL_DPLLRATIO_LDR(BOARD_DPLL_LDR);
+#ifdef BOARD_DPLL_LDRFRAC
+  ratio |= SYSCTRL_DPLLRATIO_LDRFRAC(BOARD_DPLL_LDRFRAC);
+#endif
+
+  /* If a GCLK reference was requested, we must initialize the GCLK first */
+
+  if (BOARD_DPLL_REFCLK == SYSCTRL_DPLLCTRLB_REFCLK_GCLKDPLL)
+    {
+      putreg16(GCLK_CLKCTRL_ID_DPLL | GCLK_CLKCTRL_GEN(2) | GCLK_CLKCTRL_CLKEN, SAM_GCLK_CLKCTRL);
+    }
+
+  putreg32(ratio, SAM_SYSCTRL_DPLLRATIO);
+#else
+
+  /* If no reference clock was specified, default to using
+   * the external 32KHz crystal and output of 96MHz
+   */
+
+  ctrlb |= SYSCTRL_DPLLCTRLB_REFCLK_XOSC32;
+  ratio = SYSCTRL_DPLLRATIO_LDR(3000);
+  putreg32(ratio, SAM_SYSCTRL_DPLLRATIO);
+#endif
+
+#ifdef BOARD_DPLL_WUF
+  ctrlb |= BOARD_DPLL_WUF;
+#endif
+
+#ifdef BOARD_DPLL_LPEN
+  ctrlb |= BOARD_DPLL_LPEN;
+#endif
+
+#ifdef BOARD_DPLL_FILTER
+  ctrlb |= BOARD_DPLL_FILTER;
+#endif
+
+  /* Write Control B register */
+
+  putreg32(ctrlb, SAM_SYSCTRL_DPLLCTRLB);
+
+  /* Write Control A register */
+
+  putreg8(ctrla, SAM_SYSCTRL_DPLLCTRLA);
+
+  /* Wait for the DPLL to synchronize */
+
+  while ((getreg8(SAM_SYSCTRL_DPLLSTATUS) & SYSCTRL_DPLLSTATUS_CLKRDY) == 0);
+}
+#else
+#  define sam_dpll_config()
+#endif
 
 /****************************************************************************
  * Name: sam_dfll_config
@@ -866,10 +963,12 @@ void sam_clockconfig(void)
 
   /* Configure XOSC */
 
+  putreg16(0, SAM_SYSCTRL_XOSC);
   sam_xosc_config();
 
   /* Configure XOSC32K */
 
+  putreg16(0, SAM_SYSCTRL_XOSC32K);
   sam_xosc32k_config();
 
   /* Configure OSCK32K */
@@ -883,6 +982,10 @@ void sam_clockconfig(void)
   /* Configure OSC8M */
 
   sam_osc8m_config();
+
+  /* Configure DPLL */
+
+  sam_dpll_config();
 
   /* Configure GCLK(s) */
 
