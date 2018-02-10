@@ -1,6 +1,5 @@
 /**************************************************************************************
  * drivers/lcd/pcd8544.h
- *
  * Definitions for the PCD8544 LCD Display
  *
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.

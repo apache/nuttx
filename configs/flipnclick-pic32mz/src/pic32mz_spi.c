@@ -115,6 +115,10 @@ void  pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selecte
     defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
   if (devid == SPIDEV_DISPLAY(0))
     {
+      /* Low:  the display is selected
+       * High: the display is deselected
+       */
+
       pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
     }
 #endif
@@ -132,6 +136,10 @@ int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
     defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
   if (devid == SPIDEV_DISPLAY(0))
     {
+      /* High: the inputs are treated as display data.
+       * Low:  the inputs are transferred to the command registers.
+       */
+
       pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
     }
 #endif
@@ -150,6 +158,10 @@ void  pic32mz_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selecte
     defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
   if (devid == SPIDEV_DISPLAY(0))
     {
+      /* Low:  the display is selected
+       * High: the display is deselected
+       */
+
       pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
     }
 #endif
@@ -167,6 +179,10 @@ int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
     defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
   if (devid == SPIDEV_DISPLAY(0))
     {
+      /* High: the inputs are treated as display data.
+       * Low:  the inputs are transferred to the command registers.
+       */
+
       pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
     }
 #endif
