@@ -82,8 +82,10 @@ Using the mikroProg
 ===================
 
    WARNINGS:
+
    1. Following there steps will most certainly overwrite the bootloader
       that was factory installed in FLASH!
+
    2. Due to the position and orientation of the mikroProg connector you
       may lose functionality:  If you attach mikroProg to the red side of
       the board, you will not be able to use the Arduino Shield Connector
@@ -91,8 +93,13 @@ Using the mikroProg
       side of the board, you will similarly lose access to mikroBUS
       connectors A and D.
 
+      Hindsight is 20/20 and in retrospect I would look for a right handler
+      header to priven the mikroProg connector from interfering with the
+      Arduino connection.
+
    Hardware setup
    --------------
+
    You will need to add a five pin header to the mikroProg connector between
    the A and D mikroBUS sockets.
 
@@ -107,6 +114,7 @@ Using the mikroProg
 
    Installing the Software
    -----------------------
+
    From the mikroProg website https://www.mikroe.com/mikroprog-pic-dspic-pic32
    Download:
 

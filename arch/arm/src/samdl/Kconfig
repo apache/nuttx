@@ -488,20 +488,6 @@ config SAMDL_DMAC
 	select ARCH_DMA
 	depends on SAMDL_HAVE_DMAC && EXPERIMENTAL
 
-if SAMDL_DMAC && EXPERIMENTAL
-
-menu "DMA options"
-
-config SAMDL_SPI_DMA
-	bool "SPI DMA"
-	default n
-	depends on (SAMDL_HAVE_SPI)
-	---help---
-		Use DMA for SPI SERCOM peripherals.
-endmenu
-
-endif
-
 config SAMDL_EVSYS
 	bool "Event System"
 	default n
@@ -734,7 +720,15 @@ config SAMDL_HAVE_SPI
 	bool
 	select SPI
 
-if SAMDL_HAVE_SPI
+menu "SPI options"
+	depends on SAMDL_HAVE_SPI
+
+config SAMDL_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on SAMDL_DMAC && EXPERIMENTAL
+	---help---
+		Use DMA for SPI SERCOM peripherals.
 
 config SAMDL_SPI_REGDEBUG
 	bool "SPI register-Level Debug"
@@ -743,13 +737,14 @@ config SAMDL_SPI_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG_SPI.
 
-endif # SAMDL_HAVE_SPI
+endmenu # SPI options
 
 config SAMDL_HAVE_I2C
 	bool
 	select I2C
 
-if SAMDL_HAVE_I2C
+menu "I2C options"
+	depends on SAMDL_HAVE_I2C
 
 config SAMDL_I2C_REGDEBUG
 	bool "I2C register-Level Debug"
@@ -758,9 +753,10 @@ config SAMDL_I2C_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG_I2C.
 
-endif # SAMDL_HAVE_I2C
+endmenu # I2C options
 
-if SAMDL_HAVE_USB
+menu "USB options"
+	depends on SAMDL_HAVE_USB
 
 config SAMDL_USB_ENABLE_PPEP
 	bool "Enable Ping-Pong Endpoints"
@@ -780,5 +776,5 @@ config SAMDL_USB_REGDEBUG
 		Enable very low-level register access debug.  Depends on
 		CONFIG_DEBUG_USB_INFO.
 
-endif # SAMDL_HAVE_USB
+endmenu # USB options
 

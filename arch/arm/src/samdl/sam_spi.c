@@ -70,7 +70,7 @@
 #include "sam_spi.h"
 
 #ifdef CONFIG_SAMDL_SPI_DMA
-#include "sam_dmac.h"
+#  include "sam_dmac.h"
 #endif
 
 #include <arch/board/board.h>
@@ -181,7 +181,7 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 /* Interrupt handling */
 
 #if 0 /* Not used */
-static int  spi_interrupt(int irq, void *context, FAR void *arg);
+static int      spi_interrupt(int irq, void *context, FAR void *arg);
 #endif
 
 /* SPI methods */
@@ -240,24 +240,24 @@ static const struct spi_ops_s g_spi0ops =
 
 static struct sam_spidev_s g_spi0dev =
 {
-  .ops       = &g_spi0ops,
-  .sercom    = 0,
+  .ops         = &g_spi0ops,
+  .sercom      = 0,
 #if 0 /* Not used */
-  .irq       = SAM_IRQ_SERCOM0,
+  .irq         = SAM_IRQ_SERCOM0,
 #endif
-  .gclkgen   = BOARD_SERCOM0_GCLKGEN,
-  .slowgen   = BOARD_SERCOM0_SLOW_GCLKGEN,
-  .pad0      = BOARD_SERCOM0_PINMAP_PAD0,
-  .pad1      = BOARD_SERCOM0_PINMAP_PAD1,
-  .pad2      = BOARD_SERCOM0_PINMAP_PAD2,
-  .pad3      = BOARD_SERCOM0_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM0_MUXCONFIG,
-  .srcfreq   = BOARD_SERCOM0_FREQUENCY,
-  .base      = SAM_SERCOM0_BASE,
-  .spilock   = SEM_INITIALIZER(1),
+  .gclkgen     = BOARD_SERCOM0_GCLKGEN,
+  .slowgen     = BOARD_SERCOM0_SLOW_GCLKGEN,
+  .pad0        = BOARD_SERCOM0_PINMAP_PAD0,
+  .pad1        = BOARD_SERCOM0_PINMAP_PAD1,
+  .pad2        = BOARD_SERCOM0_PINMAP_PAD2,
+  .pad3        = BOARD_SERCOM0_PINMAP_PAD3,
+  .muxconfig   = BOARD_SERCOM0_MUXCONFIG,
+  .srcfreq     = BOARD_SERCOM0_FREQUENCY,
+  .base        = SAM_SERCOM0_BASE,
+  .spilock     = SEM_INITIALIZER(1),
 #ifdef CONFIG_SAMDL_SPI_DMA
-  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM0_TX,
-  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM0_RX,
+  .dma_tx_trig = DMAC_TRIGSRC_SERCOM0_TX,
+  .dma_rx_trig = DMAC_TRIGSRC_SERCOM0_RX,
 #endif
 };
 #endif
@@ -290,24 +290,24 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct sam_spidev_s g_spi1dev =
 {
-  .ops       = &g_spi1ops,
-  .sercom    = 1,
+  .ops         = &g_spi1ops,
+  .sercom      = 1,
 #if 0 /* Not used */
-  .irq       = SAM_IRQ_SERCOM1,
+  .irq         = SAM_IRQ_SERCOM1,
 #endif
-  .gclkgen   = BOARD_SERCOM1_GCLKGEN,
-  .slowgen   = BOARD_SERCOM1_SLOW_GCLKGEN,
-  .pad0      = BOARD_SERCOM1_PINMAP_PAD0,
-  .pad1      = BOARD_SERCOM1_PINMAP_PAD1,
-  .pad2      = BOARD_SERCOM1_PINMAP_PAD2,
-  .pad3      = BOARD_SERCOM1_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM1_MUXCONFIG,
-  .srcfreq   = BOARD_SERCOM1_FREQUENCY,
-  .base      = SAM_SERCOM1_BASE,
-  .spilock   = SEM_INITIALIZER(1),
+  .gclkgen     = BOARD_SERCOM1_GCLKGEN,
+  .slowgen     = BOARD_SERCOM1_SLOW_GCLKGEN,
+  .pad0        = BOARD_SERCOM1_PINMAP_PAD0,
+  .pad1        = BOARD_SERCOM1_PINMAP_PAD1,
+  .pad2        = BOARD_SERCOM1_PINMAP_PAD2,
+  .pad3        = BOARD_SERCOM1_PINMAP_PAD3,
+  .muxconfig   = BOARD_SERCOM1_MUXCONFIG,
+  .srcfreq     = BOARD_SERCOM1_FREQUENCY,
+  .base        = SAM_SERCOM1_BASE,
+  .spilock     = SEM_INITIALIZER(1),
 #ifdef CONFIG_SAMDL_SPI_DMA
-  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM1_TX,
-  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM1_RX,
+  .dma_tx_trig = DMAC_TRIGSRC_SERCOM1_TX,
+  .dma_rx_trig = DMAC_TRIGSRC_SERCOM1_RX,
 #endif
 };
 #endif
@@ -340,24 +340,24 @@ static const struct spi_ops_s g_spi2ops =
 
 static struct sam_spidev_s g_spi2dev =
 {
-  .ops       = &g_spi2ops,
-  .sercom    = 2,
+  .ops         = &g_spi2ops,
+  .sercom      = 2,
 #if 0 /* Not used */
-  .irq       = SAM_IRQ_SERCOM2,
+  .irq         = SAM_IRQ_SERCOM2,
 #endif
-  .gclkgen   = BOARD_SERCOM2_GCLKGEN,
-  .slowgen   = BOARD_SERCOM2_SLOW_GCLKGEN,
-  .pad0      = BOARD_SERCOM2_PINMAP_PAD0,
-  .pad1      = BOARD_SERCOM2_PINMAP_PAD1,
-  .pad2      = BOARD_SERCOM2_PINMAP_PAD2,
-  .pad3      = BOARD_SERCOM2_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM2_MUXCONFIG,
-  .srcfreq   = BOARD_SERCOM2_FREQUENCY,
-  .base      = SAM_SERCOM2_BASE,
-  .spilock   = SEM_INITIALIZER(1),
+  .gclkgen     = BOARD_SERCOM2_GCLKGEN,
+  .slowgen     = BOARD_SERCOM2_SLOW_GCLKGEN,
+  .pad0        = BOARD_SERCOM2_PINMAP_PAD0,
+  .pad1        = BOARD_SERCOM2_PINMAP_PAD1,
+  .pad2        = BOARD_SERCOM2_PINMAP_PAD2,
+  .pad3        = BOARD_SERCOM2_PINMAP_PAD3,
+  .muxconfig   = BOARD_SERCOM2_MUXCONFIG,
+  .srcfreq     = BOARD_SERCOM2_FREQUENCY,
+  .base        = SAM_SERCOM2_BASE,
+  .spilock     = SEM_INITIALIZER(1),
 #ifdef CONFIG_SAMDL_SPI_DMA
-  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM2_TX,
-  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM2_RX,
+  .dma_tx_trig = DMAC_TRIGSRC_SERCOM2_TX,
+  .dma_rx_trig = DMAC_TRIGSRC_SERCOM2_RX,
 #endif
 };
 #endif
@@ -390,24 +390,24 @@ static const struct spi_ops_s g_spi3ops =
 
 static struct sam_spidev_s g_spi3dev =
 {
-  .ops       = &g_spi3ops,
-  .sercom    = 3,
+  .ops         = &g_spi3ops,
+  .sercom      = 3,
 #if 0 /* Not used */
-  .irq       = SAM_IRQ_SERCOM3,
+  .irq         = SAM_IRQ_SERCOM3,
 #endif
-  .gclkgen   = BOARD_SERCOM3_GCLKGEN,
-  .slowgen   = BOARD_SERCOM3_SLOW_GCLKGEN,
-  .pad0      = BOARD_SERCOM3_PINMAP_PAD0,
-  .pad1      = BOARD_SERCOM3_PINMAP_PAD1,
-  .pad2      = BOARD_SERCOM3_PINMAP_PAD2,
-  .pad3      = BOARD_SERCOM3_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM3_MUXCONFIG,
-  .srcfreq   = BOARD_SERCOM3_FREQUENCY,
-  .base      = SAM_SERCOM3_BASE,
-  .spilock   = SEM_INITIALIZER(1),
+  .gclkgen     = BOARD_SERCOM3_GCLKGEN,
+  .slowgen     = BOARD_SERCOM3_SLOW_GCLKGEN,
+  .pad0        = BOARD_SERCOM3_PINMAP_PAD0,
+  .pad1        = BOARD_SERCOM3_PINMAP_PAD1,
+  .pad2        = BOARD_SERCOM3_PINMAP_PAD2,
+  .pad3        = BOARD_SERCOM3_PINMAP_PAD3,
+  .muxconfig   = BOARD_SERCOM3_MUXCONFIG,
+  .srcfreq     = BOARD_SERCOM3_FREQUENCY,
+  .base        = SAM_SERCOM3_BASE,
+  .spilock     = SEM_INITIALIZER(1),
 #ifdef CONFIG_SAMDL_SPI_DMA
-  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM3_TX,
-  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM3_RX,
+  .dma_tx_trig = DMAC_TRIGSRC_SERCOM3_TX,
+  .dma_rx_trig = DMAC_TRIGSRC_SERCOM3_RX,
 #endif
 };
 #endif
@@ -440,24 +440,24 @@ static const struct spi_ops_s g_spi4ops =
 
 static struct sam_spidev_s g_spi4dev =
 {
-  .ops       = &g_spi4ops,
-  .sercom    = 4,
+  .ops         = &g_spi4ops,
+  .sercom      = 4,
 #if 0 /* Not used */
-  .irq       = SAM_IRQ_SERCOM4,
+  .irq         = SAM_IRQ_SERCOM4,
 #endif
-  .gclkgen   = BOARD_SERCOM4_GCLKGEN,
-  .slowgen   = BOARD_SERCOM4_SLOW_GCLKGEN,
-  .pad0      = BOARD_SERCOM4_PINMAP_PAD0,
-  .pad1      = BOARD_SERCOM4_PINMAP_PAD1,
-  .pad2      = BOARD_SERCOM4_PINMAP_PAD2,
-  .pad3      = BOARD_SERCOM4_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM4_MUXCONFIG,
-  .srcfreq   = BOARD_SERCOM4_FREQUENCY,
-  .base      = SAM_SERCOM4_BASE,
-  .spilock   = SEM_INITIALIZER(1),
+  .gclkgen     = BOARD_SERCOM4_GCLKGEN,
+  .slowgen     = BOARD_SERCOM4_SLOW_GCLKGEN,
+  .pad0        = BOARD_SERCOM4_PINMAP_PAD0,
+  .pad1        = BOARD_SERCOM4_PINMAP_PAD1,
+  .pad2        = BOARD_SERCOM4_PINMAP_PAD2,
+  .pad3        = BOARD_SERCOM4_PINMAP_PAD3,
+  .muxconfig   = BOARD_SERCOM4_MUXCONFIG,
+  .srcfreq     = BOARD_SERCOM4_FREQUENCY,
+  .base        = SAM_SERCOM4_BASE,
+  .spilock     = SEM_INITIALIZER(1),
 #ifdef CONFIG_SAMDL_SPI_DMA
-  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM4_TX,
-  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM4_RX,
+  .dma_tx_trig = DMAC_TRIGSRC_SERCOM4_TX,
+  .dma_rx_trig = DMAC_TRIGSRC_SERCOM4_RX,
 #endif
 };
 #endif
@@ -490,24 +490,24 @@ static const struct spi_ops_s g_spi5ops =
 
 static struct sam_spidev_s g_spi5dev =
 {
-  .ops       = &g_spi5ops,
-  .sercom    = 5,
+  .ops         = &g_spi5ops,
+  .sercom      = 5,
 #if 0 /* Not used */
-  .irq       = SAM_IRQ_SERCOM5,
+  .irq         = SAM_IRQ_SERCOM5,
 #endif
-  .gclkgen   = BOARD_SERCOM5_GCLKGEN,
-  .slowgen   = BOARD_SERCOM5_SLOW_GCLKGEN,
-  .pad0      = BOARD_SERCOM5_PINMAP_PAD0,
-  .pad1      = BOARD_SERCOM5_PINMAP_PAD1,
-  .pad2      = BOARD_SERCOM5_PINMAP_PAD2,
-  .pad3      = BOARD_SERCOM5_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM5_MUXCONFIG,
-  .srcfreq   = BOARD_SERCOM5_FREQUENCY,
-  .base      = SAM_SERCOM5_BASE,
-  .spilock   = SEM_INITIALIZER(1),
+  .gclkgen     = BOARD_SERCOM5_GCLKGEN,
+  .slowgen     = BOARD_SERCOM5_SLOW_GCLKGEN,
+  .pad0        = BOARD_SERCOM5_PINMAP_PAD0,
+  .pad1        = BOARD_SERCOM5_PINMAP_PAD1,
+  .pad2        = BOARD_SERCOM5_PINMAP_PAD2,
+  .pad3        = BOARD_SERCOM5_PINMAP_PAD3,
+  .muxconfig   = BOARD_SERCOM5_MUXCONFIG,
+  .srcfreq     = BOARD_SERCOM5_FREQUENCY,
+  .base        = SAM_SERCOM5_BASE,
+  .spilock     = SEM_INITIALIZER(1),
 #ifdef CONFIG_SAMDL_SPI_DMA
-  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM5_TX,
-  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM5_RX,
+  .dma_tx_trig = DMAC_TRIGSRC_SERCOM5_TX,
+  .dma_rx_trig = DMAC_TRIGSRC_SERCOM5_RX,
 #endif
 };
 #endif
@@ -1103,26 +1103,41 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)rxbyte;
 }
 
+/****************************************************************************
+ * Name: spi_dma_callback
+ *
+ * Description:
+ *   DMA completion callback
+ *
+ * Input Parameters:
+ *   dma    - Allocate DMA handle
+ *   arg    - User argument provided with callback
+ *   result - The result of the DMA operation
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_SAMDL_SPI_DMA
 static void spi_dma_callback(DMA_HANDLE dma, void *arg, int result)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)arg;
 
-  if(dma == priv->dma_rx)
+  if (dma == priv->dma_rx)
     {
-
       /* Notify the blocked spi_exchange() call that the transaction
        * has completed by posting to the semaphore
        */
 
       nxsem_post(&priv->dmasem);
     }
-  else if(dma == priv->dma_tx)
+  else if (dma == priv->dma_tx)
     {
-      if(result != OK)
-      {
-        spierr("DMA transmission failed\n");
-      }
+      if (result != OK)
+        {
+          spierr("ERROR: DMA transmission failed: %d\n", result);
+        }
     }
 }
 #endif
@@ -1156,11 +1171,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
 
-  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
-
 #ifdef CONFIG_SAMDL_SPI_DMA
-  int ret;
   uint32_t regval;
+  int ret;
+
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Disable SPI while we configure new DMA descriptors */
 
@@ -1171,8 +1186,10 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   /* Setup RX and TX DMA channels */
 
-  sam_dmatxsetup(priv->dma_tx, priv->base + SAM_SPI_DATA_OFFSET, txbuffer, nwords);
-  sam_dmarxsetup(priv->dma_rx, priv->base + SAM_SPI_DATA_OFFSET, rxbuffer, nwords);
+  sam_dmatxsetup(priv->dma_tx, priv->base + SAM_SPI_DATA_OFFSET,
+                 (uint32_t)txbuffer, nwords);
+  sam_dmarxsetup(priv->dma_rx, priv->base + SAM_SPI_DATA_OFFSET,
+                 (uint32_t)rxbuffer, nwords);
 
   /* Start RX and TX DMA channels */
 
@@ -1199,6 +1216,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint16_t *prx16;
   uint8_t *prx8;
   uint16_t data;
+
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up data receive and transmit pointers */
 
@@ -1416,10 +1435,17 @@ static void spi_pad_configure(struct sam_spidev_s *priv)
     }
 }
 
+/****************************************************************************
+ * Name: spi_dma_setup
+ *
+ * Description:
+ *   Configure the SPI DMA operation.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_SAMDL_SPI_DMA
 static void spi_dma_setup(struct sam_spidev_s *priv)
 {
-
   /* Allocate a pair of DMA channels */
 
   priv->dma_rx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
@@ -1430,12 +1456,11 @@ static void spi_dma_setup(struct sam_spidev_s *priv)
                                 DMACH_FLAG_MEM_INCREMENT |
                                 DMACH_FLAG_PERIPH_TXTRIG(priv->dma_tx_trig));
 
-  /* Initialize the samaphore used to notify when DMA is complete */
+  /* Initialize the semaphore used to notify when DMA is complete */
 
   nxsem_init(&priv->dmasem, 0, 0);
   nxsem_setprotocol(&priv->dmasem, SEM_PRIO_NONE);
 }
-
 #endif
 
 /****************************************************************************

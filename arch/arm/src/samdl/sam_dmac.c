@@ -145,8 +145,7 @@ static sem_t g_dsem;
 
 static struct sam_dmach_s g_dmach[SAMDL_NDMACHAN];
 
-/*
- * NOTE: Using the same address as the base descriptors for writeback descriptors
+/* NOTE: Using the same address as the base descriptors for writeback descriptors
  * causes TERR and FERR interrupts to be raised immediately after starting DMA.
  * This was tested on SAMD21G18A, and it would appear that the writeback
  * buffer must be located at a different memory address.
@@ -295,7 +294,6 @@ static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
   unsigned int chndx;
   uint16_t intpend;
 
-
   /* Process all pending channel interrupts */
 
   while ((intpend = getreg16(SAM_DMAC_INTPEND)) != 0)
@@ -404,7 +402,6 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
       /* Yes, return a pointer to the base descriptor */
 
       desc->srcaddr = (uint32_t)-1; /* Any non-zero value */
-
       return desc;
     }
 #if CONFIG_SAMDL_DMAC_NDESC > 0
@@ -418,7 +415,6 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
        */
 
       sam_takedsem();
-
 
       /* Examine each list entry to find an available one -- i.e., one
        * with srcaddr == 0.  That srcaddr field is set to zero by the DMA
@@ -574,11 +570,9 @@ static void sam_free_desc(struct sam_dmach_s *dmach)
 
       next = (struct dma_desc_s *)desc->descaddr;
       memset(desc, 0, sizeof(struct dma_desc_s));
-
       sam_givedsem();
     }
 #endif
-
 }
 
 /****************************************************************************
@@ -814,7 +808,6 @@ void weak_function up_dmainitialize(void)
   /* Initialize global semaphores */
 
   nxsem_init(&g_chsem, 0, 1);
-
 #if CONFIG_SAMDL_DMAC_NDESC > 0
   nxsem_init(&g_dsem, 0, CONFIG_SAMDL_DMAC_NDESC);
 #endif

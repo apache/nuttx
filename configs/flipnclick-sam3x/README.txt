@@ -33,7 +33,7 @@ STATUS
   2018-02-11:  Added the nxlines configuration to test the custom HiletGo
     OLED on a Click proto board.  This is the same logic from the Flip&Click
     PIC32MZ and the result is the same:  No complaints from the software, but
-    nothing appears on the OLED. There is, most likely, an error in my custom
+    nothing appears on the OLED.  There is, most likely, an error in my custom
     HiletGo Click.  Damn!
 
 Buttons and LEDs
@@ -633,4 +633,4 @@ Configuration sub-directories
 
   STATUS:
     2018-02-11:  No complaints from the software, but nothing appears on the
-      OLED. There is, most likely, an error in my custom  HiletGo Click.  Damn!
+      OLED.  There is, most likely, an error in my custom HiletGo Click.  Damn!
