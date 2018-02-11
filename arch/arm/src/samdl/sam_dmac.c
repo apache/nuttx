@@ -145,15 +145,19 @@ static sem_t g_dsem;
 
 static struct sam_dmach_s g_dmach[SAMDL_NDMACHAN];
 
-/* DMA descriptor tables positioned in LPRAM.  In this use case, it is
- * acceptable for the writeback descriptors to overlap the base
- * descriptors since the base descriptors are always initialized prior
- * to starting each DMA transaction.
+/*
+ * NOTE: Using the same address as the base descriptors for writeback descriptors
+ * causes TERR and FERR interrupts to be raised immediately after starting DMA.
+ * This was tested on SAMD21G18A, and it would appear that the writeback
+ * buffer must be located at a different memory address.
+ *
+ * - Matt Thompson
  */
 
 static struct dma_desc_s g_base_desc[SAMDL_NDMACHAN]
   __attribute__ ((section(".lpram"), aligned(16)));
-#define g_writeback_desc g_base_desc
+static struct dma_desc_s g_writeback_desc[SAMDL_NDMACHAN]
+  __attribute__ ((section(".lpram"), aligned(16)));
 
 #if CONFIG_SAMDL_DMAC_NDESC > 0
 /* Additional DMA descriptors for (optional) multi-block transfer support.
@@ -291,9 +295,10 @@ static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
   unsigned int chndx;
   uint16_t intpend;
 
+
   /* Process all pending channel interrupts */
 
-  while (((intpend = getreg16(SAM_DMAC_INTPEND)) & DMAC_INTPEND_PEND) != 0)
+  while ((intpend = getreg16(SAM_DMAC_INTPEND)) != 0)
     {
       /* Get the channel that generated the interrupt */
 
@@ -322,10 +327,17 @@ static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
           sam_dmaterminate(dmach, OK);
         }
 
+      else if ((intpend & DMAC_INTPEND_TERR) != 0)
+        {
+          dmaerr("Invalid descriptor. Channel %d\n", chndx);
+          sam_dmaterminate(dmach, -EIO);
+        }
+
       /* Check for channel suspend interrupt */
 
       else if ((intpend & DMAC_INTPEND_SUSP) != 0)
         {
+          dmaerr("Channel suspended. Channel %d\n", chndx);
           /* REVISIT: Do we want to do anything here? */
         }
     }
@@ -392,6 +404,7 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
       /* Yes, return a pointer to the base descriptor */
 
       desc->srcaddr = (uint32_t)-1; /* Any non-zero value */
+
       return desc;
     }
 #if CONFIG_SAMDL_DMAC_NDESC > 0
@@ -405,6 +418,7 @@ static struct dma_desc_s *sam_alloc_desc(struct sam_dmach_s *dmach)
        */
 
       sam_takedsem();
+
 
       /* Examine each list entry to find an available one -- i.e., one
        * with srcaddr == 0.  That srcaddr field is set to zero by the DMA
@@ -472,7 +486,7 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
   /* Allocate a DMA descriptor */
 
   desc = sam_alloc_desc(dmach);
-  if (desc == NULL)
+  if (desc != NULL)
     {
       /* We have it.  Initialize the new descriptor list entry */
 
@@ -508,6 +522,10 @@ static struct dma_desc_s *sam_append_desc(struct sam_dmach_s *dmach,
 
       dmach->dc_tail = desc;
 #endif
+    }
+  else
+    {
+      dmaerr("Failed to allocate descriptor\n");
     }
 
   return desc;
@@ -556,9 +574,11 @@ static void sam_free_desc(struct sam_dmach_s *dmach)
 
       next = (struct dma_desc_s *)desc->descaddr;
       memset(desc, 0, sizeof(struct dma_desc_s));
+
       sam_givedsem();
     }
 #endif
+
 }
 
 /****************************************************************************
@@ -604,7 +624,7 @@ static uint16_t sam_bytes2beats(struct sam_dmach_s *dmach, size_t nbytes)
 
   /* The number of beats is then the ceiling of the division */
 
-  mask     = (1 < beatsize) - 1;
+  mask     = (1 << beatsize) - 1;
   nbeats   = (nbytes + mask) >> beatsize;
   DEBUGASSERT(nbeats <= UINT16_MAX);
   return (uint16_t)nbeats;
@@ -653,14 +673,25 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
 
+  /* See Addressing on page 264 of the datasheet.
+   * When increment is used, we have to adjust the address in the descriptor
+   * based on the beat count remaining in the block
+   */
+
+  /* Set up the Block Transfer Count Register configuration */
+
+  btcnt   = sam_bytes2beats(dmach, nbytes);
+
   if ((dmach->dc_flags & DMACH_FLAG_MEM_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_SRCINC;
+      maddr += nbytes;
     }
 
   if ((dmach->dc_flags & DMACH_FLAG_PERIPH_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_DSTINC;
+      paddr += nbytes;
     }
 
   if ((dmach->dc_flags & DMACH_FLAG_STEPSEL) == DMACH_FLAG_STEPSEL_PERIPH)
@@ -670,10 +701,6 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
   tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> LPSRAM_BTCTRL_STEPSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_STEPSIZE_SHIFT;
-
-  /* Set up the Block Transfer Count Register configuration */
-
-  btcnt   = sam_bytes2beats(dmach, nbytes);
 
   /* Add the new descriptor list entry */
 
@@ -729,14 +756,20 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
   tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
 
+  /* Set up the Block Transfer Count Register configuration */
+
+  btcnt   = sam_bytes2beats(dmach, nbytes);
+
   if ((dmach->dc_flags & DMACH_FLAG_PERIPH_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_SRCINC;
+      paddr += nbytes;
     }
 
   if ((dmach->dc_flags & DMACH_FLAG_MEM_INCREMENT) != 0)
     {
       btctrl |= LPSRAM_BTCTRL_DSTINC;
+      maddr += nbytes;
     }
 
   if ((dmach->dc_flags & DMACH_FLAG_STEPSEL) == DMACH_FLAG_STEPSEL_MEM)
@@ -746,10 +779,6 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
   tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> LPSRAM_BTCTRL_STEPSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_STEPSIZE_SHIFT;
-
-  /* Set up the Block Transfer Count Register configuration */
-
-  btcnt   = sam_bytes2beats(dmach, nbytes);
 
   /* Add the new descriptor list entry */
 
@@ -785,6 +814,7 @@ void weak_function up_dmainitialize(void)
   /* Initialize global semaphores */
 
   nxsem_init(&g_chsem, 0, 1);
+
 #if CONFIG_SAMDL_DMAC_NDESC > 0
   nxsem_init(&g_dsem, 0, CONFIG_SAMDL_DMAC_NDESC);
 #endif
@@ -1183,7 +1213,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
         }
 
       chctrlb |= tmp << DMAC_CHCTRLB_TRIGSRC_SHIFT;
-      putreg8(chctrlb, SAM_DMAC_CHCTRLB);
+      putreg32(chctrlb, SAM_DMAC_CHCTRLB);
 
       /* Setup the Quality of Service Control Register
        *
@@ -1330,7 +1360,7 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
           regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
   dmainfo("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
           regs->crcstatus, regs->dbgctrl, regs->qosctrl, regs->swtrigctrl);
-  dmainfo("     PRICTRL0: %08x  INTPEND: %04x     INSTSTATUS: %08x     BUSYCH: %08x\n",
+  dmainfo("     PRICTRL0: %08x  INTPEND: %04x      INTSTATUS: %08x     BUSYCH: %08x\n",
           regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
   dmainfo("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
           regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);

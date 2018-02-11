@@ -69,6 +69,10 @@
 #include "sam_sercom.h"
 #include "sam_spi.h"
 
+#ifdef CONFIG_SAMDL_SPI_DMA
+#include "sam_dmac.h"
+#endif
+
 #include <arch/board/board.h>
 
 #ifdef SAMDL_HAVE_SPI
@@ -118,6 +122,16 @@ struct sam_spidev_s
   uint8_t mode;                /* Mode 0,1,2,3 */
   uint8_t nbits;               /* Width of word in bits (8 to 16) */
 
+#ifdef CONFIG_SAMDL_SPI_DMA
+  /* DMA */
+
+  uint8_t dma_tx_trig;         /* DMA TX trigger source to use */
+  uint8_t dma_rx_trig;         /* DMA RX trigger source to use */
+  DMA_HANDLE dma_tx;           /* DMA TX channel handle */
+  DMA_HANDLE dma_rx;           /* DMA RX channel handle */
+  sem_t dmasem;                /* Transfer wait semaphore */
+#endif
+
   /* Debug stuff */
 
 #ifdef CONFIG_SAMDL_SPI_REGDEBUG
@@ -153,6 +167,10 @@ static uint32_t spi_getreg32(struct sam_spidev_s *priv,
                   unsigned int offset);
 static void     spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
                   unsigned int offset);
+
+#ifdef CONFIG_SAMDL_SPI_DMA
+static void spi_dma_setup(struct sam_spidev_s *priv);
+#endif
 
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
@@ -237,6 +255,10 @@ static struct sam_spidev_s g_spi0dev =
   .srcfreq   = BOARD_SERCOM0_FREQUENCY,
   .base      = SAM_SERCOM0_BASE,
   .spilock   = SEM_INITIALIZER(1),
+#ifdef CONFIG_SAMDL_SPI_DMA
+  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM0_TX,
+  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM0_RX,
+#endif
 };
 #endif
 
@@ -283,6 +305,10 @@ static struct sam_spidev_s g_spi1dev =
   .srcfreq   = BOARD_SERCOM1_FREQUENCY,
   .base      = SAM_SERCOM1_BASE,
   .spilock   = SEM_INITIALIZER(1),
+#ifdef CONFIG_SAMDL_SPI_DMA
+  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM1_TX,
+  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM1_RX,
+#endif
 };
 #endif
 
@@ -329,6 +355,10 @@ static struct sam_spidev_s g_spi2dev =
   .srcfreq   = BOARD_SERCOM2_FREQUENCY,
   .base      = SAM_SERCOM2_BASE,
   .spilock   = SEM_INITIALIZER(1),
+#ifdef CONFIG_SAMDL_SPI_DMA
+  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM2_TX,
+  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM2_RX,
+#endif
 };
 #endif
 
@@ -375,6 +405,10 @@ static struct sam_spidev_s g_spi3dev =
   .srcfreq   = BOARD_SERCOM3_FREQUENCY,
   .base      = SAM_SERCOM3_BASE,
   .spilock   = SEM_INITIALIZER(1),
+#ifdef CONFIG_SAMDL_SPI_DMA
+  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM3_TX,
+  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM3_RX,
+#endif
 };
 #endif
 
@@ -421,6 +455,10 @@ static struct sam_spidev_s g_spi4dev =
   .srcfreq   = BOARD_SERCOM4_FREQUENCY,
   .base      = SAM_SERCOM4_BASE,
   .spilock   = SEM_INITIALIZER(1),
+#ifdef CONFIG_SAMDL_SPI_DMA
+  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM4_TX,
+  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM4_RX,
+#endif
 };
 #endif
 
@@ -467,6 +505,10 @@ static struct sam_spidev_s g_spi5dev =
   .srcfreq   = BOARD_SERCOM5_FREQUENCY,
   .base      = SAM_SERCOM5_BASE,
   .spilock   = SEM_INITIALIZER(1),
+#ifdef CONFIG_SAMDL_SPI_DMA
+  .dma_tx_trig  = DMAC_TRIGSRC_SERCOM5_TX,
+  .dma_rx_trig  = DMAC_TRIGSRC_SERCOM5_RX,
+#endif
 };
 #endif
 
@@ -1061,6 +1103,30 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)rxbyte;
 }
 
+#ifdef CONFIG_SAMDL_SPI_DMA
+static void spi_dma_callback(DMA_HANDLE dma, void *arg, int result)
+{
+  struct sam_spidev_s *priv = (struct sam_spidev_s *)arg;
+
+  if(dma == priv->dma_rx)
+    {
+
+      /* Notify the blocked spi_exchange() call that the transaction
+       * has completed by posting to the semaphore
+       */
+
+      nxsem_post(&priv->dmasem);
+    }
+  else if(dma == priv->dma_tx)
+    {
+      if(result != OK)
+      {
+        spierr("DMA transmission failed\n");
+      }
+    }
+}
+#endif
+
 /****************************************************************************
  * Name: spi_exchange
  *
@@ -1089,13 +1155,50 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
               void *rxbuffer, size_t nwords)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
+
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+#ifdef CONFIG_SAMDL_SPI_DMA
+  int ret;
+  uint32_t regval;
+
+  /* Disable SPI while we configure new DMA descriptors */
+
+  regval  = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+  regval &= ~SPI_CTRLA_ENABLE;
+  spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
+  spi_wait_synchronization(priv);
+
+  /* Setup RX and TX DMA channels */
+
+  sam_dmatxsetup(priv->dma_tx, priv->base + SAM_SPI_DATA_OFFSET, txbuffer, nwords);
+  sam_dmarxsetup(priv->dma_rx, priv->base + SAM_SPI_DATA_OFFSET, rxbuffer, nwords);
+
+  /* Start RX and TX DMA channels */
+
+  sam_dmastart(priv->dma_tx, spi_dma_callback, (void *)priv);
+  sam_dmastart(priv->dma_rx, spi_dma_callback, (void *)priv);
+
+  /* Enable SPI to trigger the TX DMA channel */
+
+  regval  = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+  regval |= SPI_CTRLA_ENABLE;
+  spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
+  spi_wait_synchronization(priv);
+
+  do
+    {
+      /* Wait for the DMA callback to notify us that the transfer is complete */
+
+      ret = nxsem_wait(&priv->dmasem);
+    }
+  while (ret < 0 && ret == -EINTR);
+#else
   const uint16_t *ptx16;
   const uint8_t *ptx8;
   uint16_t *prx16;
   uint8_t *prx8;
   uint16_t data;
-
-  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up data receive and transmit pointers */
 
@@ -1203,6 +1306,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           *prx16++ = (uint16_t)data;
         }
     }
+#endif
 }
 
 /****************************************************************************
@@ -1312,6 +1416,28 @@ static void spi_pad_configure(struct sam_spidev_s *priv)
     }
 }
 
+#ifdef CONFIG_SAMDL_SPI_DMA
+static void spi_dma_setup(struct sam_spidev_s *priv)
+{
+
+  /* Allocate a pair of DMA channels */
+
+  priv->dma_rx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
+                                DMACH_FLAG_MEM_INCREMENT |
+                                DMACH_FLAG_PERIPH_RXTRIG(priv->dma_rx_trig));
+
+  priv->dma_tx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
+                                DMACH_FLAG_MEM_INCREMENT |
+                                DMACH_FLAG_PERIPH_TXTRIG(priv->dma_tx_trig));
+
+  /* Initialize the samaphore used to notify when DMA is complete */
+
+  nxsem_init(&priv->dmasem, 0, 0);
+  nxsem_setprotocol(&priv->dmasem, SEM_PRIO_NONE);
+}
+
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1397,6 +1523,10 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spierr("ERROR: Unsupported port: %d\n", port);
       return NULL;
     }
+
+#ifdef CONFIG_SAMDL_SPI_DMA
+  spi_dma_setup(priv);
+#endif
 
   /* Enable clocking to the SERCOM module in PM */
 

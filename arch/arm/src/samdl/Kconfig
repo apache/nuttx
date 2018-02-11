@@ -488,6 +488,20 @@ config SAMDL_DMAC
 	select ARCH_DMA
 	depends on SAMDL_HAVE_DMAC && EXPERIMENTAL
 
+if SAMDL_DMAC && EXPERIMENTAL
+
+menu "DMA options"
+
+config SAMDL_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on (SAMDL_HAVE_SPI)
+	---help---
+		Use DMA for SPI SERCOM peripherals.
+endmenu
+
+endif
+
 config SAMDL_EVSYS
 	bool "Event System"
 	default n
@@ -767,3 +781,4 @@ config SAMDL_USB_REGDEBUG
 		CONFIG_DEBUG_USB_INFO.
 
 endif # SAMDL_HAVE_USB
+
