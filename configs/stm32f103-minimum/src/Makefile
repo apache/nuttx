@@ -123,6 +123,10 @@ ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
   CSRCS += stm32_nunchuck.c
 endif
 
+ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
+CSRCS += stm32_ssd1306.c
+endif
+
 ifeq ($(CONFIG_LCD_ST7567),y)
   CSRCS += stm32_lcd.c
 endif
