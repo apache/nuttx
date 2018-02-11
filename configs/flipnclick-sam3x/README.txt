@@ -16,6 +16,7 @@ Contents
   - Serial Consoles
   - SPI
   - I2C
+  - HiletGo OLED
   - Loading Code
   - Flip&Click SAM3X-specific Configuration Options
   - Configurations
@@ -29,6 +30,11 @@ STATUS
   2018-01-24:  I ordered a JTAG connector and soldered that to the Flip'n'Click
     and I am now successfully able to load code.  The NSH configuration appears
     to be fully functional.
+  2018-02-11:  Added the nxlines configuration to test the custom HiletGo
+    OLED on a Click proto board.  This is the same logic from the Flip&Click
+    PIC32MZ and the result is the same:  No complaints from the software, but
+    nothing appears on the OLED. There is, most likely, an error in my custom
+    HiletGo Click.  Damn!
 
 Buttons and LEDs
 ================
@@ -181,6 +187,27 @@ I2C
      ---- ------------ -----  ---- ------------ -------
      SCL  I2C1_SCL     PB13   SCL  I2C1_SCL     PB13
      SDA  I2C1_SDA     PB12   SDA  I2C1_SDA     PB12
+
+HiletGo OLED
+============
+
+  Hardware
+  --------
+  The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
+  is the default and is what is used here).  I have mounted the OLED on a
+  proto click board.  The OLED is connected as follows:
+
+  OLED  ALIAS       DESCRIPTION   PROTO CLICK
+  ----- ----------- ------------- -----------------
+   GND              Ground        GND
+   VCC              Power Supply  5V  (3-5V)
+   D0   SCL,CLK,SCK Clock         SCK
+   D1   SDA,MOSI    Data          MOSI,SDI
+   RES  RST,RESET   Reset         RST (GPIO OUTPUT)
+   DC   AO          Data/Command  INT (GPIO OUTPUT)
+   CS               Chip Select   CS  (GPIO OUTPUT)
+
+   NOTE that this is a write-only display (MOSI only)!
 
 Loading Code
 ============
@@ -514,7 +541,7 @@ Flip&Click SAM3X-specific Configuration Options
     CONFIG_SAM34_GPIOF_IRQ
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
   Each Flip&Click SAM3X configuration is maintained in a sub-directory and
   can be selected as follow:
@@ -587,3 +614,23 @@ Configuration sub-directories
 
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
+
+  nxlines
+
+    This is an NSH configuration that supports the NX graphics example at
+    apps/examples/nxlines as a built-in application.
+
+    NOTES:
+
+    1. This configuration derives from the nsh configuration.  All of the
+       notes there apply here as well.
+
+    2. The default configuration assumes there is the custom HiletGo OLED
+       in the mikroBUS B slot (and a Mikroe RS-232 Click card in the
+       mikroBUS A slot).  That is easily changed by reconfiguring, however.
+       See the section entitled "HiletGo OLED" for information about this
+       custom click card.
+
+  STATUS:
+    2018-02-11:  No complaints from the software, but nothing appears on the
+      OLED. There is, most likely, an error in my custom  HiletGo Click.  Damn!

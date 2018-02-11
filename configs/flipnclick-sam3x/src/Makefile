@@ -48,4 +48,12 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c
 endif
 
+ifeq ($(CONFIG_SAM34_SPI0),y)
+CSRCS += sam_spi0.c
+endif
+
+ifeq ($(CONFIG_FLIPNCLICK_SAM3X_HILETGO),y)
+CSRCS += sam_hiletgo.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

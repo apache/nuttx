@@ -53,6 +53,25 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ************************************************************/
+
+#define HAVE_HILETGO 1
+
+/* The HiletGo LCD must be selected, installed on the Flip&Click, and must
+ * be configured to use the SPI interface.
+ */
+
+#if !defined(CONFIG_LCD_HILETGO) || \
+    !defined(CONFIG_FLIPNCLICK_SAM3X_HILETGO) || \
+    !defined(CONFIG_LCD_SSD1306_SPI)
+#  undef HAVE_HILETGO
+#  undef CONFIG_FLIPNCLICK_SAM3X_HILETGO
+#  undef CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBA
+#  undef CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBB
+#  undef CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBC
+#  undef CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBD
+#endif
+
 /* There are four LEDs on the top, blue side of the board.  Only one can be
  * controlled by software:
  *
@@ -128,6 +147,90 @@
                       GPIO_PORT_PIOB | GPIO_PIN23)
 #define MBD_CSNUM    3
 
+/* HiletGo OLED
+ *
+ * The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
+ * is the default and is what is used here).  I have mounted the OLED on a
+ * proto click board.  The OLED is connected as follows:
+ *
+ * OLED  ALIAS       DESCRIPTION   PROTO CLICK
+ * ----- ----------- ------------- -----------------
+ *  GND              Ground        GND
+ *  VCC              Power Supply  5V  (3-5V)
+ *  D0   SCL,CLK,SCK Clock         SCK
+ *  D1   SDA,MOSI    Data          MOSI,SDI
+ *  RES  RST,RESET   Reset         RST (GPIO OUTPUT)
+ *  DC   AO          Data/Command  INT (GPIO OUTPUT)
+ *  CS               Chip Select   CS  (GPIO OUTPUT)
+ *
+ * NOTE that this is a write-only display (MOSI only)!
+ *
+ *   MikroBUS A:              MikroBUS B:
+ *   Pin  Board Signal SAM3X  Pin  Board Signal SAM3X
+ *   ---- ------------ -----  ---- ------------ -------
+ *   RST  RSTA         PC1    RST  RSTB         PC2
+ *   DC   INTA         PD1    DC   INTB         PD2
+ *
+ *   MikroBUS C:              MikroBUS D:
+ *   Pin  Board Signal SAM3X  Pin  Board Signal SAM3X
+ *   ---- ------------ -----  ---- ------------ -------
+ *   RST  RSTC         PC3    RST  RSTD         PC4
+ *   DC   INTC         PD3    DC   INTD         PD6
+ */
+
+#if defined(CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBA)
+#  ifndef CONFIG_SAM34_SPI0
+#    error "The OLED driver requires CONFIG_SAM34_SPI0 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  0
+#  define HILETGO_CSNUM    MBA_CSNUM
+#  define GPIO_HILETGO_CS  GPIO_MBA_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOC | GPIO_PIN1)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN1)
+
+#elif defined(CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBB)
+#  ifndef CONFIG_SAM34_SPI0
+#    error "The OLED driver requires CONFIG_SAM34_SPI0 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  0
+#  define HILETGO_CSNUM    MBB_CSNUM
+#  define GPIO_HILETGO_CS  GPIO_MBB_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOC | GPIO_PIN2)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN2)
+
+#elif defined(CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBC)
+#  ifndef CONFIG_SAM34_SPI0
+#    error "The OLED driver requires CONFIG_SAM34_SPI0 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  0
+#  define HILETGO_CSNUM    MBC_CSNUM
+#  define GPIO_HILETGO_CS  GPIO_MBC_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOC | GPIO_PIN3)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN3)
+
+#elif defined(CONFIG_FLIPNCLICK_SAM3X_HILETGO_MBD)
+#  ifndef CONFIG_SAM34_SPI0
+#    error "The OLED driver requires CONFIG_SAM34_SPI0 in the configuration"
+#  endif
+
+#  define HILETGO_SPI_BUS  0
+#  define HILETGO_CSNUM    MBD_CSNUM
+#  define GPIO_HILETGO_CS  GPIO_MBD_CS
+#  define GPIO_HILETGO_RST (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOC | GPIO_PIN4)
+#  define GPIO_HILETGO_DC  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORT_PIOD | GPIO_PIN6)
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -157,6 +260,21 @@
  ****************************************************************************/
 
 int sam_bringup(void);
+
+/****************************************************************************
+ * Name: sam_graphics_setup
+ *
+ * Description:
+ *   Called by either NX initialization logic (via board_graphics_setup) or
+ *   directly from the board bring-up logic in order to configure the
+ *   HiletGo OLED.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_HILETGO
+struct lcd_dev_s;  /* Forward reference */
+FAR struct lcd_dev_s *sam_graphics_setup(unsigned int devno);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_FLIPNCLICK_SAM3X_SRC_FLIPNCLICK_SAM3X_H */

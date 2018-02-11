@@ -290,7 +290,7 @@
  * Chip select pin definitions are provided in
  * configs/flipnclick-sam3x/src/flipnclick-3x.h.
  *
- * There are no alternative pin selections for SPI0_MSIO and SPIO_MOSI.
+ * There are no alternative pin selections for SPI0_MISO and SPIO_MOSI.
  */
 
 #define GPIO_SPI0_SPCK   GPIO_SPI0_SPCK_1

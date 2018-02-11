@@ -58,6 +58,11 @@
     !defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO) || \
     !defined(CONFIG_LCD_SSD1306_SPI)
 #  undef HAVE_HILETGO
+#  undef CONFIG_FLIPNCLICK_PIC32MZ_HILETGO
+#  undef CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA
+#  undef CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB
+#  undef CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC
+#  undef CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD
 #endif
 
 /* LEDs *********************************************************************/
@@ -277,7 +282,7 @@ int pic32mz_bringup(void);
  ****************************************************************************/
 
 #ifdef HAVE_HILETGO
-struct lcd_dev_s;  /* Forward reference3 */
+struct lcd_dev_s;  /* Forward reference */
 FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno);
 #endif
 

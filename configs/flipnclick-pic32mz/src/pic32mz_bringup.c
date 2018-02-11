@@ -77,7 +77,7 @@ int pic32mz_bringup(void)
 
   if (pic32mz_graphics_setup(0) == NULL)
     {
-      syslog(LOG_ERR,"ERROR: Failed to configure the HiletGo OLEDn");
+      syslog(LOG_ERR,"ERROR: Failed to configure the HiletGo OLED\n");
     }
 #endif
 

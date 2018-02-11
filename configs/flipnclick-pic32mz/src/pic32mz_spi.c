@@ -68,9 +68,9 @@
 
 void weak_function pic32mz_spidev_initialize(void)
 {
-  /* Configure the SPI chip select GPIOs */
+#ifdef HAVE_HILETGO
+  /* Configure the HiletGo chip select and command/data GPIOs */
 
-#ifdef CONFIG_LCD_HILETGO
   (void)pic32mz_configgpio(GPIO_HILETGO_CS);
   (void)pic32mz_configgpio(GPIO_HILETGO_DC);
 #endif
@@ -186,6 +186,7 @@ int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
       pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
     }
 #endif
+
   return 0;
 }
 #endif

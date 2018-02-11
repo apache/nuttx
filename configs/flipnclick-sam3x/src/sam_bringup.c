@@ -84,6 +84,15 @@ int sam_bringup(void)
     }
 #endif
 
+#if defined(HAVE_HILETGO) && !defined(CONFIG_NXSTART_EXTERNINIT)
+  /* Configure the HiletGo OLED */
+
+  if (sam_graphics_setup(0) == NULL)
+    {
+      syslog(LOG_ERR,"ERROR: Failed to configure the HiletGo OLED\n");
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
