@@ -413,7 +413,7 @@ int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev, FAR 
   DEBUGASSERT(dev->ops->fault_clean != NULL);
   DEBUGASSERT(dev->ops->ioctl != NULL);
 
-  /* Initialize the HRTIM device structure */
+  /* Initialize the powerled device structure */
 
   dev->ocount = 0;
 

@@ -506,7 +506,7 @@ int smps_register(FAR const char *path, FAR struct smps_dev_s *dev, FAR void *lo
   DEBUGASSERT(dev->ops->fault_clean != NULL);
   DEBUGASSERT(dev->ops->ioctl != NULL);
 
-  /* Initialize the HRTIM device structure */
+  /* Initialize the SMPS device structure */
 
   dev->ocount = 0;
 
