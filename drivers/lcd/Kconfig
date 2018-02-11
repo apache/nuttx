@@ -492,9 +492,10 @@ if LCD_SSD1306_I2C
 
 config SSD1306_I2CADDR
 	int "SSD1306 I2C Address"
-	default 120
+	default 60
 	---help---
-		I2C Address of SSD1306
+		7-bit I2C Address of SSD1306.  Typical addresses are 0x3C (60) or
+		0x7A (61).
 
 config SSD1306_I2CFREQ
 	int "SSD1306 I2C Frequency"
