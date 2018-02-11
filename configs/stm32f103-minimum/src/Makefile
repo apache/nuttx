@@ -65,6 +65,10 @@ ifeq ($(CONFIG_PWM),y)
   CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
+  CSRCS += stm32_zerocross.c
+endif
+
 ifeq ($(CONFIG_LEDS_APA102),y)
   CSRCS += stm32_apa102.c
 endif

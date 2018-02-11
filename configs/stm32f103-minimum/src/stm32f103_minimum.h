@@ -110,6 +110,10 @@
 #define MAX_IRQBUTTON     BUTTON_USER2
 #define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
 
+/* ZERO CROSS pin definiton */
+
+#define GPIO_ZEROCROSS    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
 /* Pins config to use with HC-SR04 sensor */
 
 #define GPIO_HCSR04_INT   (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
@@ -226,6 +230,18 @@ int stm32_bringup(void);
 
 #ifdef CONFIG_DEV_GPIO
 int stm32_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_zerocross_initialize
+ *
+ * Description:
+ *   Initialize and register the zero cross driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_ZEROCROSS
+int stm32_zerocross_initialize(void);
 #endif
 
 /************************************************************************************
