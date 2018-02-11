@@ -275,6 +275,7 @@
 
 #define SPI_STAT_SPIRBF            (1 << 0)  /* Bit 0: SPI receive buffer full status */
 #define SPI_STAT_SPITBF            (1 << 1)  /* Bit 1: SPI transmit buffer full status */
+                                             /* Bit 2: Reserved */
 #define SPI_STAT_SPITBE            (1 << 3)  /* Bit 3: SPI transmit buffer empty status */
                                              /* Bit 4: Reserved */
 #define SPI_STAT_SPIRBE            (1 << 5)  /* Bit 5: RX FIFO Empty */

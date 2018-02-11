@@ -310,8 +310,8 @@
  *   Pin J1 Board Signal PIC32MZ
  *   --- -- ------------ -------
  *   D10 8  SPI3_SCK     RB14
- *   D10 7  SPI3_MISO    RB9
- *   D11 6  SPI3_MOSI    RB10
+ *   D11 7  SPI3_MISO    RB9
+ *   D12 6  SPI3_MOSI    RB10
  *   D13 5  SPI3_SS      RB9
  *
  * SPI1 and SPI2 are also available on the mikroBUS Click connectors (in

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samdl/samd_clockconfig.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -492,7 +492,6 @@ static inline void sam_osc32k_config(void)
   regval = getreg32(SAM_SYSCTRL_OSC32K);
   regval |= calib << SYSCTRL_OSC32K_CALIB_SHIFT;
   putreg32(regval, SAM_SYSCTRL_OSC32K);
-
 }
 #else
 #  define sam_osc32k_config()
