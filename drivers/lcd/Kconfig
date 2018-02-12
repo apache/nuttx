@@ -494,8 +494,9 @@ config SSD1306_I2CADDR
 	int "SSD1306 I2C Address"
 	default 60
 	---help---
-		7-bit I2C Address of SSD1306.  Typical addresses are 0x3C (60) or
-		0x7A (61).
+		7-bit I2C Address of SSD1306.  Typical addresses are 0x3c (60) or
+		0x3d (61).  NOTE that these correspond to the 8-bit addresses
+		0x78 or 0x7a that you may see in documentation.
 
 config SSD1306_I2CFREQ
 	int "SSD1306 I2C Frequency"

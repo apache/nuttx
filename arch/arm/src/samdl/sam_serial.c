@@ -524,7 +524,7 @@ static void sam_disableallints(struct sam_dev_s *priv)
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite uart_dev_s structure in order to call these functions.
+ *   appropriate uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 
@@ -1010,4 +1010,3 @@ int up_putc(int ch)
 
 #endif /* USE_SERIALDRIVER */
 #endif /* SAMDL_HAVE_USART */
-

@@ -74,6 +74,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* BOARD_GCLK_ENABLE looks optional, but it is not */
 
 #ifndef BOARD_GCLK_ENABLE
@@ -140,6 +141,7 @@ static inline void sam_periph_clocks(void);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This structure describes the configuration of every enabled GCLK */
 
 #ifdef BOARD_GCLK_ENABLE

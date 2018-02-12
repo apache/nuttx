@@ -317,7 +317,6 @@ struct sam_rqhead_s
   struct sam_req_s    *tail;         /* Requests are removed from the tail of the list */
 };
 
-
 /* This is the internal representation of an endpoint */
 
 struct sam_ep_s

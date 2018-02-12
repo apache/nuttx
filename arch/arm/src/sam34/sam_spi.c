@@ -79,6 +79,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 /* When SPI DMA is enabled, small DMA transfers will still be performed by
  * polling logic.  But we need a threshold value to determine what is small.
@@ -193,7 +194,7 @@ struct sam_spics_s
 
 typedef void (*select_t)(uint32_t devid, bool selected);
 
-/* Chip select register offsetrs */
+/* Chip select register offsets */
 
 /* The overall state of one SPI controller */
 
@@ -1002,7 +1003,8 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       return spics->actual;
     }
 
-  /* Configure SPI to a frequency as close as possible to the requested frequency.
+  /* Configure SPI to a frequency as close as possible to the requested
+   * frequency.
    *
    *   SPCK frequency = SPI_CLK / SCBR, or SCBR = SPI_CLK / frequency
    */
@@ -1110,7 +1112,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
        *  3    1    0
        */
 
-      offset = (unsigned int)g_csroffset[spics->cs];
+      offset  = (unsigned int)g_csroffset[spics->cs];
       regval  = spi_getreg(spi, offset);
       regval &= ~(SPI_CSR_CPOL | SPI_CSR_NCPHA);
 
@@ -1184,7 +1186,9 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster.
+       */
 
       spics->nbits = nbits;
     }
@@ -1233,7 +1237,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  *   that performs DMA SPI transfers, but only when a larger block of
  *   data is being transferred.  And (2) another version that does polled
  *   SPI transfers.  When CONFIG_SAM34_SPI_DMA=n the latter is the only
- *   version avaialable; when CONFIG_SAM34_SPI_DMA=y, this version is only
+ *   version available; when CONFIG_SAM34_SPI_DMA=y, this version is only
  *   used for short SPI transfers and gets renamed as spi_exchange_nodma).
  *
  * Input Parameters:
@@ -1268,7 +1272,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint8_t *rxptr8;
   uint8_t *txptr8;
 
-  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
+          txbuffer, rxbuffer, nwords);
 
   /* Set up PCS bits */
 
@@ -1414,7 +1419,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       return;
     }
 
-  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
+          txbuffer, rxbuffer, nwords);
 
   spics = (struct sam_spics_s *)dev;
   spi = spi_device(spics);
