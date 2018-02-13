@@ -149,4 +149,10 @@
 #define SNIOC_INIT              _SNIOC(0x003b)
 #define SNIOC_THRESHOLD         _SNIOC(0x003c)
 
+/* IOCTL commands unique to LIS3DH */
+
+#define SNIOC_SET_POWER_MODE    _SNIOC(0x003d) /* Arg: LIS3DH_POWER_xxx */
+#define SNIOC_SET_DATA_RATE     _SNIOC(0x003e) /* Arg: LIS3DH_ODR_xxx */
+#define SNIOC_SET_DATA_FORMAT   _SNIOC(0x003f) /* Arg: LIS3DH_FORMAT_xxx */
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

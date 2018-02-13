@@ -146,6 +146,10 @@ ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += lis3dsh.c
 endif
 
+ifeq ($(CONFIG_LIS3DH),y)
+  CSRCS += lis3dh.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += max31855.c
 endif

@@ -160,6 +160,13 @@ config LIS3DSH
 	---help---
 		Enable driver support for the STMicro LIS3DSH 3-Axis accelerometer.
 
+config LIS3DH
+	bool "STMicro LIS3DH 3-Axis accelerometer support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the STMicro LIS3DH 3-Axis accelerometer.
+
 config LIS331DL
 	bool "STMicro LIS331DL device support"
 	default n
