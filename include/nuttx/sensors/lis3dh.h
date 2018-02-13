@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/lis3dh.h 
+ * include/nuttx/sensors/lis3dh.h
  *
  *   Copyright (C) 2018 Extent3D. All rights reserved.
  *   Author: Matt Thompson <matt@extent3d.com>
@@ -292,7 +292,7 @@ extern "C"
  ****************************************************************************/
 
 int lis3dh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
-  FAR struct lis3dh_config_s *);  
+                    FAR struct lis3dh_config_s *);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -67,7 +67,7 @@
 
 struct lis3dh_dev_s
 {
-  FAR struct lis3dh_config_s *config;   /* Driver configuration */ 
+  FAR struct lis3dh_config_s *config;   /* Driver configuration */
   FAR struct spi_dev_s *spi;            /* Pointer to the SPI instance */
   struct work_s work;                   /* Work Queue */
   uint8_t power_mode;                   /* The power mode used to determine mg/digit */
@@ -75,7 +75,7 @@ struct lis3dh_dev_s
   sem_t readsem;                        /* Read notification semaphore */
   uint8_t fifobuf[LIS3DH_FIFOBUF_SIZE]; /* Raw FIFO buffer */
   struct lis3dh_sensor_data_s queue[LIS3DH_QUEUE_MAX];
-  sem_t queuesem;                       /* Queue exclusive lock */ 
+  sem_t queuesem;                       /* Queue exclusive lock */
   uint8_t queue_rpos;                   /* Queue read position */
   uint8_t queue_wpos;                   /* Queue write position */
   uint8_t queue_count;                  /* Number of elements in the queue */
@@ -93,10 +93,10 @@ struct lis3dh_sample_s
  ****************************************************************************/
 
 static void lis3dh_read_register(FAR struct lis3dh_dev_s *dev,
-                                  uint8_t const reg_addr, uint8_t *reg_data);
+                                 uint8_t const reg_addr, uint8_t *reg_data);
 static void lis3dh_write_register(FAR struct lis3dh_dev_s *dev,
-                                   uint8_t const reg_addr,
-                                   uint8_t const reg_data);
+                                  uint8_t const reg_addr,
+                                  uint8_t const reg_data);
 static void lis3dh_reset(FAR struct lis3dh_dev_s *dev);
 static int lis3dh_ident(FAR struct lis3dh_dev_s *dev);
 static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev);
@@ -108,9 +108,9 @@ static int lis3dh_fifo_enable(FAR struct lis3dh_dev_s *dev);
 static int lis3dh_open(FAR struct file *filep);
 static int lis3dh_close(FAR struct file *filep);
 static ssize_t lis3dh_read(FAR struct file *, FAR char *buffer,
-                            size_t buflen);
+                           size_t buflen);
 static ssize_t lis3dh_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
+                            size_t buflen);
 static int lis3dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -132,10 +132,6 @@ static const struct file_operations g_lis3dh_fops =
   , NULL
 #endif
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -188,15 +184,15 @@ static void lis3dh_read_register(FAR struct lis3dh_dev_s *dev,
  *   Write a single register to the LIS3DH sensor.
  *
  * Input Parameters:
- *   dev - Pointer to device driver instance
+ *   dev      - Pointer to device driver instance
  *   reg_addr - LIS3DH register address
  *   reg_data - Value to write into the specified register address
  *
  ****************************************************************************/
 
 static void lis3dh_write_register(FAR struct lis3dh_dev_s *dev,
-                                   uint8_t const reg_addr,
-                                   uint8_t const reg_data)
+                                  uint8_t const reg_addr,
+                                  uint8_t const reg_data)
 {
   uint8_t buffer[2];
 
@@ -249,7 +245,7 @@ static void lis3dh_reset(FAR struct lis3dh_dev_s *dev)
  *
  * Returned Value:
  *   OK if the device responded with the correct ID
- *   -ENODEV if the device did not respond with the correct ID    
+ *   -ENODEV if the device did not respond with the correct ID
  *
  ****************************************************************************/
 
@@ -258,22 +254,22 @@ static int lis3dh_ident(FAR struct lis3dh_dev_s *dev)
   uint8_t reg;
   lis3dh_read_register(dev, LIS3DH_WHO_AM_I, &reg);
 
-  if(reg == LIS3DH_DEVICE_ID)
+  if (reg == LIS3DH_DEVICE_ID)
     {
       return OK;
     }
+
   return -ENODEV;
 }
-
 
 /****************************************************************************
  * Name: lis3dh_queue_lock
  *
  * Description:
- *   Locks exclusive access to the ring buffer queue  
+ *   Locks exclusive access to the ring buffer queue
  *
  * Input Parameters:
- *   dev - Pointer to device driver instance  
+ *   dev - Pointer to device driver instance
  *
  ****************************************************************************/
 
@@ -293,10 +289,10 @@ static void lis3dh_queue_lock(FAR struct lis3dh_dev_s *dev)
  * Name: lis3dh_queue_unlock
  *
  * Description:
- *   Unlocks exclusive acccess to the ring buffer queue  
+ *   Unlocks exclusive acccess to the ring buffer queue
  *
  * Input Parameters:
- *   dev - Pointer to device driver instance  
+ *   dev - Pointer to device driver instance
  *
  ****************************************************************************/
 
@@ -309,10 +305,10 @@ static void lis3dh_queue_unlock(FAR struct lis3dh_dev_s *dev)
  * Name: lis3dh_queue_push
  *
  * Description:
- *   Push a sensor measurement into the queue  
+ *   Push a sensor measurement into the queue
  *
  * Input Parameters:
- *   dev - Pointer to device driver instance  
+ *   dev - Pointer to device driver instance
  *
  ****************************************************************************/
 
@@ -320,7 +316,7 @@ static int lis3dh_queue_push(FAR struct lis3dh_dev_s *dev,
                              struct lis3dh_sensor_data_s *data)
 {
   lis3dh_queue_lock(dev);
-  if(dev->queue_count >= LIS3DH_QUEUE_MAX)
+  if (dev->queue_count >= LIS3DH_QUEUE_MAX)
     {
       lis3dh_queue_unlock(dev);
       return -ENOMEM;
@@ -339,13 +335,13 @@ static int lis3dh_queue_push(FAR struct lis3dh_dev_s *dev,
  * Name: lis3dh_queue_pop
  *
  * Description:
- *   Pops a sensor measurement from the queue  
+ *   Pops a sensor measurement from the queue
  *
  * Input Parameters:
- *   dev - Pointer to device driver instance  
+ *   dev - Pointer to device driver instance
  *
  * Returned Value:
- *   OK if a measurement was successfully dequeued 
+ *   OK if a measurement was successfully dequeued
  *   -EAGAIN if the queue is empty
  *
  ****************************************************************************/
@@ -354,7 +350,7 @@ static int lis3dh_queue_pop(FAR struct lis3dh_dev_s *dev,
                             struct lis3dh_sensor_data_s *data)
 {
   lis3dh_queue_lock(dev);
-  if(dev->queue_count == 0)
+  if (dev->queue_count == 0)
     {
       lis3dh_queue_unlock(dev);
       return -EAGAIN;
@@ -406,7 +402,7 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
 
   count = fifosrc & 0x1f;
 
-  if(fifosrc & LIS3DH_FIFO_SRC_REG_OVRN_FIFO)
+  if (fifosrc & LIS3DH_FIFO_SRC_REG_OVRN_FIFO)
     {
       snerr("FIFO overrun\n");
     }
@@ -422,7 +418,7 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
 
   SPI_LOCK(dev->spi, false);
 
-  for(i=0;i<count;i++)
+  for (i = 0; i < count; i++)
     {
       struct lis3dh_sensor_data_s data;
       uint16_t x_raw;
@@ -446,7 +442,7 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
        * shift it to the right depending on the selected power mode
        */
 
-      switch(dev->power_mode)
+      switch (dev->power_mode)
         {
           case LIS3DH_POWER_LOW:     /* 8 bit measurements */
             x_acc = (int16_t)x_raw >> 8;
@@ -456,8 +452,8 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
             data.x_acc = (float)x_acc * 0.016;
             data.y_acc = (float)y_acc * 0.016;
             data.z_acc = (float)z_acc * 0.016;
-
             break;
+
           case LIS3DH_POWER_NORMAL:  /* 10 bit measurements */
             x_acc = (int16_t)x_raw >> 6;
             y_acc = (int16_t)y_raw >> 6;
@@ -466,8 +462,8 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
             data.x_acc = (float)x_acc * 0.004;
             data.y_acc = (float)y_acc * 0.004;
             data.z_acc = (float)z_acc * 0.004;
-
             break;
+
           case LIS3DH_POWER_HIGH:    /* 12 bit measurements */
             x_acc = (int16_t)x_raw >> 4;
             y_acc = (int16_t)y_raw >> 4;
@@ -476,13 +472,13 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
             data.x_acc = (float)x_acc * 0.001;
             data.y_acc = (float)y_acc * 0.001;
             data.z_acc = (float)z_acc * 0.001;
-
             break;
+
           default:
             snerr("Unknown power mode\n");
             return -EINVAL;
         }
-      
+
       if (lis3dh_queue_push(dev, &data) == OK)
         {
           nxsem_post(&dev->readsem);
@@ -496,7 +492,7 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
  * Name: lis3dh_interrupt_handler
  *
  * Description:
- *   Interrupt service routine, queues work on high priority work queue.  
+ *   Interrupt service routine, queues work on high priority work queue.
  *
  * Input Parameters:
  *   irq - Interrupt request number
@@ -558,7 +554,7 @@ static void lis3dh_worker(FAR void *arg)
  * Name: lis3dh_set_power_mode
  *
  * Description:
- *   Sets the power mode of the sensor.  
+ *   Sets the power mode of the sensor.
  *
  * Input Parameters:
  *   dev - Pointer to device driver instance
@@ -576,38 +572,41 @@ static int lis3dh_set_power_mode(FAR struct lis3dh_dev_s *dev,
   uint8_t ctrl1;
   uint8_t ctrl4;
 
-  switch(power_mode)
+  switch (power_mode)
     {
       case LIS3DH_POWER_LOW:
         lis3dh_read_register(dev, LIS3DH_CTRL_REG1, &ctrl1);
         lis3dh_read_register(dev, LIS3DH_CTRL_REG4, &ctrl4);
 
-        ctrl1 |= LIS3DH_CTRL_REG1_LPEN; 
+        ctrl1 |= LIS3DH_CTRL_REG1_LPEN;
         ctrl4 &= ~LIS3DH_CTRL_REG4_HR;
 
         lis3dh_write_register(dev, LIS3DH_CTRL_REG1, ctrl1);
         lis3dh_write_register(dev, LIS3DH_CTRL_REG4, ctrl4);
         break;
+
       case LIS3DH_POWER_NORMAL:
         lis3dh_read_register(dev, LIS3DH_CTRL_REG1, &ctrl1);
         lis3dh_read_register(dev, LIS3DH_CTRL_REG4, &ctrl4);
 
-        ctrl1 &= ~LIS3DH_CTRL_REG1_LPEN; 
+        ctrl1 &= ~LIS3DH_CTRL_REG1_LPEN;
         ctrl4 &= ~LIS3DH_CTRL_REG4_HR;
 
         lis3dh_write_register(dev, LIS3DH_CTRL_REG1, ctrl1);
         lis3dh_write_register(dev, LIS3DH_CTRL_REG4, ctrl4);
         break;
+
       case LIS3DH_POWER_HIGH:
         lis3dh_read_register(dev, LIS3DH_CTRL_REG1, &ctrl1);
         lis3dh_read_register(dev, LIS3DH_CTRL_REG4, &ctrl4);
 
-        ctrl1 &= ~LIS3DH_CTRL_REG1_LPEN; 
+        ctrl1 &= ~LIS3DH_CTRL_REG1_LPEN;
         ctrl4 |= LIS3DH_CTRL_REG4_HR;
 
         lis3dh_write_register(dev, LIS3DH_CTRL_REG1, ctrl1);
         lis3dh_write_register(dev, LIS3DH_CTRL_REG4, ctrl4);
         break;
+
       default:
         return -EINVAL;
         break;
@@ -616,14 +615,14 @@ static int lis3dh_set_power_mode(FAR struct lis3dh_dev_s *dev,
   dev->power_mode = power_mode;
   sninfo("Power mode set to %d\n", power_mode);
 
-  return OK; 
+  return OK;
 }
 
 /****************************************************************************
  * Name: lis3dh_set_odr
  *
  * Description:
- *   Sets the output data rate of the sensor.  
+ *   Sets the output data rate of the sensor.
  *
  * Input Parameters:
  *   dev - Pointer to device driver instance
@@ -674,10 +673,10 @@ static int lis3dh_set_odr(FAR struct lis3dh_dev_s *dev, uint8_t odr)
 static int lis3dh_irq_enable(FAR struct lis3dh_dev_s *dev, bool enable)
 {
   uint8_t reg;
-  
+
   reg = 0;
 
-  if(enable == true)
+  if (enable == true)
     {
       reg = LIS3DH_CTRL_REG3_I1_WTM;
     }
@@ -705,8 +704,8 @@ static int lis3dh_fifo_enable(FAR struct lis3dh_dev_s *dev)
 {
   uint8_t reg;
   lis3dh_write_register(dev, LIS3DH_FIFO_CTRL_REG,
-    LIS3DH_FIFO_CTRL_REG_MODE_STREAM | 28);
- 
+                        LIS3DH_FIFO_CTRL_REG_MODE_STREAM | 28);
+
   lis3dh_read_register(dev, LIS3DH_CTRL_REG5, &reg);
   reg |= LIS3DH_CTRL_REG5_FIFO_EN;
   lis3dh_write_register(dev, LIS3DH_CTRL_REG5, reg);
@@ -750,7 +749,7 @@ static int lis3dh_enable(FAR struct lis3dh_dev_s *priv)
   lis3dh_read_register(priv, LIS3DH_CTRL_REG1, &reg);
   reg |= LIS3DH_CTRL_REG1_ZEN | LIS3DH_CTRL_REG1_YEN | LIS3DH_CTRL_REG1_XEN;
   lis3dh_write_register(priv, LIS3DH_CTRL_REG1, reg);
-  
+
   return OK;
 }
 
@@ -765,7 +764,7 @@ static int lis3dh_enable(FAR struct lis3dh_dev_s *priv)
  *
  * Returned Value:
  *   -ENODEV - Device was not identified on the SPI bus.
- *   OK - Sensor device was opened successfully.
+ *   OK      - Sensor device was opened successfully.
  *
  ****************************************************************************/
 
@@ -779,7 +778,7 @@ static int lis3dh_open(FAR struct file *filep)
   /* Perform a reset */
 
   lis3dh_reset(priv);
-  if(lis3dh_ident(priv) < 0)
+  if (lis3dh_ident(priv) < 0)
     {
       snerr("ERROR: Failed to identify LIS3DH on SPI bus\n");
       return -ENODEV;
@@ -795,7 +794,7 @@ static int lis3dh_open(FAR struct file *filep)
 
   /* Enable measurements on the sensor */
 
-  if(lis3dh_enable(priv) < 0)
+  if (lis3dh_enable(priv) < 0)
     {
       snerr("ERROR: Failed to enable LIS3DH\n");
       return -ENODEV;
@@ -891,6 +890,7 @@ static ssize_t lis3dh_read(FAR struct file *filep, FAR char *buffer,
 
       data++;
     }
+
   return count * sizeof(struct lis3dh_sensor_data_s);
 }
 
@@ -901,7 +901,7 @@ static ssize_t lis3dh_read(FAR struct file *filep, FAR char *buffer,
  *   Character device write call. Not supported.
  *
  * Input Parameters:
- *   filep - Pointer to struct file
+ *   filep  - Pointer to struct file
  *   buffer - Pointer to user buffer
  *   buflen - Size of user buffer in bytes
  *
@@ -920,16 +920,16 @@ static ssize_t lis3dh_write(FAR struct file *filep, FAR const char *buffer,
  * Name: lis3dh_ioctl
  *
  * Description:
- *   Character device ioctl call. Sets device parameters. 
+ *   Character device ioctl call. Sets device parameters.
  *
  * Input Parameters:
  *   filep - Pointer to struct file
- *   cmd - SNIOC_*
- *   arg - ioctl specific argument
+ *   cmd   - SNIOC_*
+ *   arg   - ioctl specific argument
  *
  * Returned Value:
  *   OK - The command was executed successfully.
- *   -ENOTTY - The request command is not applicible to the driver.
+ *   -ENOTTY - The request command is not applicable to the driver.
  *
  ****************************************************************************/
 
