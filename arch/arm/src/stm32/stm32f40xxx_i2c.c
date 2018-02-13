@@ -1315,7 +1315,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       * return the error to the waiting task.
       */
 
-      if (((priv->msgv[0].flags & I2C_M_NORESTART) != 0 && (status & I2C_SR1_BTF) == 0) ||
+      if (((priv->msgv[0].flags & I2C_M_NORESTART) != 0 && (status & I2C_SR1_TXE) == 0) ||
           ((priv->msgv[0].flags & I2C_M_NORESTART) == 0 && (status & I2C_SR1_SB) == 0))
         {
 #if defined(CONFIG_STM32_I2C_DMA) || defined(CONFIG_I2C_POLLED)
