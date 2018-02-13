@@ -680,7 +680,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
+ *   a negated errno value is returned.
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation
@@ -726,7 +726,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 {
   FAR struct tcp_conn_s *conn;
   struct send_s state;
-  int errcode;
   int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -734,7 +733,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
-      errcode = EBADF;
+      ret = -EBADF;
       goto errout;
     }
 
@@ -743,7 +742,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
       nerr("ERROR: Not connected\n");
-      errcode = ENOTCONN;
+      ret = -ENOTCONN;
       goto errout;
     }
 
@@ -781,7 +780,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
-      errcode = ENETUNREACH;
+      ret = -ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -869,7 +868,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (state.snd_sent < 0)
     {
-      errcode = state.snd_sent;
+      ret = state.snd_sent;
       goto errout;
     }
 
@@ -879,17 +878,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout;
     }
 
   /* Return the number of bytes actually sent */
 
-  return state.snd_sent;
+  ret = state.snd_sent;
 
 errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************

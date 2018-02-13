@@ -944,8 +944,6 @@ static inline void send_txnotify(FAR struct socket *psock,
  *     In this case the process will also receive a SIGPIPE unless
  *     MSG_NOSIGNAL is set.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
@@ -954,20 +952,19 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_wrbuffer_s *wrb;
   ssize_t    result = 0;
-  int        errcode;
   int        ret = OK;
 
   if (psock == NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
-      errcode = EBADF;
+      ret = -EBADF;
       goto errout;
     }
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
       nerr("ERROR: Not connected\n");
-      errcode = ENOTCONN;
+      ret = -ENOTCONN;
       goto errout;
     }
 
@@ -1004,7 +1001,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
-      errcode = ENETUNREACH;
+      ret = -ENETUNREACH;
       goto errout;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
@@ -1030,7 +1027,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate write buffer\n");
-          errcode = ENOMEM;
+          ret = -ENOMEM;
           goto errout_with_lock;
         }
 
@@ -1048,7 +1045,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate callback\n");
-          errcode = ENOMEM;
+          ret = -ENOMEM;
           goto errout_with_wrb;
         }
 
@@ -1100,13 +1097,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  /* Check for errors.  Errors are signalled by negative errno values
+  /* Check for errors.  Errors are signaled by negative errno values
    * for the send length
    */
 
   if (result < 0)
     {
-      errcode = result;
+      ret = result;
       goto errout;
     }
 
@@ -1117,7 +1114,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout;
     }
 
@@ -1132,8 +1128,7 @@ errout_with_lock:
   net_unlock();
 
 errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
