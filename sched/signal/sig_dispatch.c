@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_dispatch.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -201,11 +202,11 @@ static FAR sigpendq_t *
 
   DEBUGASSERT(group != NULL);
 
-  /* Pending sigals can be added from interrupt level. */
+  /* Pending signals can be added from interrupt level. */
 
   flags = enter_critical_section();
 
-  /* Seach the list for a sigpendion on this signal */
+  /* Search the list for a action pending on this signal */
 
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend && sigpend->info.si_signo != signo);

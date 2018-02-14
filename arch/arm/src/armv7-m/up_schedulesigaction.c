@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_schedulesigaction.c
  *
- *   Copyright (C) 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
       if (tcb == this_task())
         {
           /* CASE 1:  We are not in an interrupt handler and a task is
-           * signalling itself for some reason.
+           * signaling itself for some reason.
            */
 
           if (!CURRENT_REGS)
@@ -176,9 +176,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
             }
         }
 
-      /* Otherwise, we are (1) signalling a task is not running from an
+      /* Otherwise, we are (1) signaling a task is not running from an
        * interrupt handler or (2) we are not in an interrupt handler and the
-       * running task is signalling* some non-running task.
+       * running task is signaling* some non-running task.
        */
 
       else
@@ -250,7 +250,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           cpu = tcb->cpu;
 
           /* CASE 1:  We are not in an interrupt handler and a task is
-           * signalling itself for some reason.
+           * signaling itself for some reason.
            */
 
           if (cpu == me && !CURRENT_REGS)
@@ -270,7 +270,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              /* If we signalling a task running on the other CPU, we have
+              /* If we signaling a task running on the other CPU, we have
                * to PAUSE the other CPU.
                */
 
@@ -282,7 +282,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
                   /* Wait while the pause request is pending */
 
-                  while (up_cpu_pausereq(cpu));
+                  while (up_cpu_pausereq(cpu))
+                    {
+                    }
 
                   /* Now tcb on the other CPU can be accessed safely */
 
@@ -392,7 +394,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       /* Otherwise, we are (1) signaling a task is not running from an
        * interrupt handler or (2) we are not in an interrupt handler and the
-       * running task is signalling some other non-running task.
+       * running task is signaling some other non-running task.
        */
 
       else
