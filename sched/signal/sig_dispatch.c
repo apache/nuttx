@@ -413,7 +413,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
  * Description:
  *   This is the front-end for nxsig_tcbdispatch that should be typically
  *   be used to dispatch a signal.  If HAVE_GROUP_MEMBERS is defined,
- *   then function will follow the group signal delivery algorthrims:
+ *   then function will follow the group signal delivery algorithms:
  *
  *   This front-end does the following things before calling
  *   nxsig_tcbdispatch.
