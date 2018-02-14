@@ -644,7 +644,7 @@ static int lis3dh_set_odr(FAR struct lis3dh_dev_s *dev, uint8_t odr)
     }
 
   lis3dh_read_register(dev, LIS3DH_CTRL_REG1, &ctrl1);
-  ctrl1 |= odr & LIS3DH_CTRL_REG1_ODR_MASK;
+  ctrl1 |= LIS3DH_CTRL_REG1_ODR(odr) & LIS3DH_CTRL_REG1_ODR_MASK;
   lis3dh_write_register(dev, LIS3DH_CTRL_REG1, ctrl1);
 
   /* Cache the current ODR in the device structure */
