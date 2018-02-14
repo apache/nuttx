@@ -345,9 +345,6 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   else
     {
-#ifdef CONFIG_SMP
-      int cpu;
-#endif
       /* Queue any sigaction's requested by this task. */
 
       ret = nxsig_queue_action(stcb, info);
@@ -356,31 +353,12 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       flags = enter_critical_section();
 
-#ifdef CONFIG_SMP
-      /* If the thread is running on another CPU, then pause that CPU.  We can
-       * then setup the for signal delivery on the running thread.  When the
-       * CPU is resumed, the signal handler will then execute.
-       */
-
-      cpu = sched_cpu_pause(stcb);
-#endif /* CONFIG_SMP */
-
       /* Then schedule execution of the signal handling action on the
-       * recipient's thread.
+       * recipient's thread. SMP related handling will be done in
+       * up_schedule_sigaction()
        */
 
       up_schedule_sigaction(stcb, nxsig_deliver);
-
-#ifdef CONFIG_SMP
-      /* Resume the paused CPU (if any) */
-
-      if (cpu >= 0)
-        {
-          /* I am not yet sure how to handle a failure here. */
-
-          DEBUGVERIFY(up_cpu_resume(cpu));
-        }
-#endif /* CONFIG_SMP */
 
       /* Check if the task is waiting for an unmasked signal.  If so, then
        * unblock it. This must be performed in a critical section because
