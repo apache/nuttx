@@ -115,6 +115,10 @@ ifeq ($(CONFIG_SENSORS_HCSR04),y)
   CSRCS += stm32_hcsr04.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+  CSRCS += stm32_max6675.c
+endif
+
 ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219.c
 endif

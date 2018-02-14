@@ -86,6 +86,10 @@ void stm32_spidev_initialize(void)
   (void)stm32_configgpio(GPIO_CS_MFRC522);    /* MFRC522 chip select */
 #endif
 
+#if defined(CONFIG_SENSORS_MAX6675)
+  (void)stm32_configgpio(GPIO_MAX6675_CS);    /* MAX6675 chip select */
+#endif
+
 #ifdef CONFIG_LCD_MAX7219
   (void)stm32_configgpio(STM32_LCD_CS);       /* MAX7219 chip select */
 #endif
@@ -147,6 +151,13 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
   if (devid == SPIDEV_CONTACTLESS(0))
     {
       stm32_gpiowrite(GPIO_CS_MFRC522, !selected);
+    }
+#endif
+
+#if defined(CONFIG_SENSORS_MAX6675)
+  if (devid == SPIDEV_TEMPERATURE(0))
+    {
+      stm32_gpiowrite(GPIO_MAX6675_CS, !selected);
     }
 #endif
 

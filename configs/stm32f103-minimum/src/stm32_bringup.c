@@ -279,6 +279,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = stm32_max6675initialize("/dev/temp0");
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
   /* Configure and initialize the MCP2515 CAN device */
 

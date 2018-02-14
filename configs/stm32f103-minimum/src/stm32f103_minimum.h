@@ -135,6 +135,9 @@
 #define STM32_LCD_CS      (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
+#define GPIO_MAX6675_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
 #define GPIO_MCP2515_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
@@ -335,6 +338,18 @@ int stm32_hcsr04_initialize(FAR const char *devname);
 
 #ifdef CONFIG_LM75_I2C
 int stm32_lm75initialize(FAR const char *devpath);
+#endif
+
+/************************************************************************************
+ * Name: stm32_max6675initialize
+ *
+ * Description:
+ *   Called to initialize MAX6675 temperature sensor
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SENSORS_MAX6675
+int stm32_max6675initialize(FAR const char *devpath);
 #endif
 
 /************************************************************************************
