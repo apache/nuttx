@@ -1569,8 +1569,8 @@ The specific environmental definitions are unique for each board but should incl
       Header files are made accessible to internal OS logic and to applications through symbolic links and through <i>include paths</i> that are provided to the C/C++ compiler.
       Through these include paths, the NuttX build system also enforces modularity in the design.
       For example, one important design principle is architectural <i>layering</i>.
-      In this case I am referring to the OS as layered in to application interface, common internal OS logic, and lower level platform-specific layers.
-      The platform-specific layers all reside in the either <code>arch/</code> sub-directorories on the <code>config/</code> subdirectories:  The former sub-directories are reserved for microcontroller-specific logic and the latter for board-specific logic.
+      In this case I am referring to the OS as layered into application interface, common internal OS logic, and lower level platform-specific layers.
+      The platform-specific layers all reside in the either <code>arch/</code> sub-directories on the <code>config/</code> subdirectories:  The former sub-directories are reserved for microcontroller-specific logic and the latter for board-specific logic.
     </p>
     <p>
       In the strict, layered NuttX architecture, the upper level OS services are always available to platform-specific logic.  However, the opposite is <i>not</i> true:  Common OS logic must never have any dependency on the lower level platform-specific code.  The OS logic must be totally agnostic about its hardware environment.  Similarly, microcontroller-specific logic was be completely ignorant of board-specific logic.
@@ -1583,8 +1583,10 @@ The specific environmental definitions are unique for each board but should incl
       Similarly, the board-specific include directory will be linked at <code>include/arch/board</code> and, hence, can be included like <code>#include &lt;arch/board/board.h</code>.
     </p>
     <p>
-      Keeping in the spirit of the layered architecture, this publicly visible header files must <i>not</i> export platform-specific definitions; Only standardized definitions should be visible such as those provided in <code>include/nuttx/arch.h</code> or <code>include/nuttx/board.h</code>.
-      And, similarly, these publicly visible header file must <i>not</i> include files that reside in the inaccessible platform-specific source directories.
+      Keeping in the spirit of the layered architecture, these publicly visible header files must <i>not</i> export platform-specific definitions; Only platform-specific realizations of standardized declarations should be visible.
+      Those <i>standardized declarations</i> should appear in common header files such as those provided by <code>include/nuttx/arch.h</code> and <code>include/nuttx/board.h</code>.
+      Similarly, these publicly visible header file must <i>not</i> include files that reside in the inaccessible platform-specific source directories.
+      For example, the board-specific <code>configs/&lt;board&gt;/include/board.h</code> header file must never include microcontroller-specific header files that reside in <code>arch/&lt;arch&gt;/src/</code>.
       That practice will cause inclusion failures when the publicly visible file is included in common logic outside of the platform-specific source directories.
     </p>
   </li>
