@@ -50,8 +50,6 @@
 #include "stm32_i2c.h"
 #include "stm32f103_minimum.h"
 
-#ifdef CONFIG_NX_LCDDRIVER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -130,6 +128,3 @@ void board_lcd_uninitialize(void)
 {
   /* TO-FIX */
 }
-
-#endif /* CONFIG_NX_LCDDRIVER */
-
