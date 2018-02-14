@@ -37,10 +37,16 @@
 
 ifeq ($(CONFIG_EEPROM),y)
 
-# Include the Microchip/Atmel xx25xx driver
+# Include the Microchip/Atmel/ST xx25xx driver for SPI
 
 ifeq ($(CONFIG_SPI_EE_25XX),y)
 CSRCS += spi_xx25xx.c
+endif
+
+# Include the Microchip/Atmel/ST xx24xx driver for I2C
+
+ifeq ($(CONFIG_I2C_EE_24XX),y)
+CSRCS += i2c_xx24xx.c
 endif
 
 # Include build support
