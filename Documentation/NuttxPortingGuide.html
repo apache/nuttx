@@ -1566,7 +1566,7 @@ The specific environmental definitions are unique for each board but should incl
   <li>
     <p>
       <b>Scope of Inclusions</b>.
-      Header files are made accessible to internal OS logic and to applications through <i>include paths</i> that are provided to the C/C++ compiler.
+      Header files are made accessible to internal OS logic and to applications through symbolic links and through <i>include paths</i> that are provided to the C/C++ compiler.
       Through these include paths, the NuttX build system also enforces modularity in the design.
       For example, one important design principle is architectural <i>layering</i>.
       In this case I am referring to the OS as layered in to application interface, common internal OS logic, and lower level platform-specific layers.
@@ -1585,7 +1585,7 @@ The specific environmental definitions are unique for each board but should incl
     <p>
       Keeping in the spirit of the layered architecture, this publicly visible header files must <i>not</i> export platform-specific definitions; Only standardized definitions should be visible such as those provided in <code>include/nuttx/arch.h</code> or <code>include/nuttx/board.h</code>.
       And, similarly, these publicly visible header file must <i>not</i> include files that reside in the inaccessible platform-specific source directories.
-      That practice will cause inclusion failures when the publicly visiable file is included in common logic outside of the platform-specific source directories.
+      That practice will cause inclusion failures when the publicly visible file is included in common logic outside of the platform-specific source directories.
     </p>
   </li>
 </ul>
