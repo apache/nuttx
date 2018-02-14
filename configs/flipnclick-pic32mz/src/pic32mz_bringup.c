@@ -72,12 +72,12 @@ int pic32mz_bringup(void)
     }
 #endif
 
-#if defined(HAVE_HILETGO) && !defined(CONFIG_NXSTART_EXTERNINIT)
-  /* Configure the HiletGo OLED */
+#if defined(HAVE_SSD1306) && !defined(CONFIG_NXSTART_EXTERNINIT)
+  /* Configure the SSD1306 OLED */
 
   if (pic32mz_graphics_setup(0) == NULL)
     {
-      syslog(LOG_ERR,"ERROR: Failed to configure the HiletGo OLED\n");
+      syslog(LOG_ERR,"ERROR: Failed to configure the SSD1306 OLED\n");
     }
 #endif
 

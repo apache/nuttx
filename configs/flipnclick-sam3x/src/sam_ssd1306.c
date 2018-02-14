@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-sam3x/src/sam_hiletgo.c
+ * config/flipnclick-sam3x/src/sam_ssd1306.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* HiletGo OLED
+/* SSD1306 OLED
  *
  * The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
  * is the default and is what is used here).  I have mounted the OLED on a
@@ -72,7 +72,7 @@
 
 #include "flipnclick-sam3x.h"
 
-#ifdef HAVE_HILETGO
+#ifdef HAVE_SSD1306
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,7 +93,7 @@
  * Description:
  *   Called by either NX initialization logic (via board_graphics_setup) or
  *   directly from the board bring-up logic in order to configure the
- *   HiletGo OLED.
+ *   SSD1306 OLED.
  *
  ****************************************************************************/
 
@@ -106,16 +106,16 @@ FAR struct lcd_dev_s *sam_graphics_setup(unsigned int devno)
    * putting the OLED into reset state.
    */
 
-  sam_configgpio(GPIO_HILETGO_RST);
+  sam_configgpio(GPIO_SSD1306_RST);
 
   /* Wait a bit then release the OLED from the reset state */
 
   up_mdelay(20);
-  sam_gpiowrite(GPIO_HILETGO_RST, true);
+  sam_gpiowrite(GPIO_SSD1306_RST, true);
 
   /* Get the SPI1 port interface */
 
-  spi = sam_spibus_initialize(GPIO_HILETGO_CS);
+  spi = sam_spibus_initialize(GPIO_SSD1306_CS);
   if (!spi)
     {
       lcderr("ERROR: Failed to initialize SPI port 1\n");
@@ -169,4 +169,4 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 }
 #endif
 
-#endif /* HAVE_HILETGO */
+#endif /* HAVE_SSD1306 */

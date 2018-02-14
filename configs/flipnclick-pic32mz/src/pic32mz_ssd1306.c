@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-pic32mz/src/pic32mz_hiletgo.c
+ * config/flipnclick-pic32mz/src/pic32mz_ssd1306.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* HiletGo OLED
+/* SSD1306 OLED
  *
  * The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
  * is the default and is what is used here).  I have mounted the OLED on a
@@ -72,7 +72,7 @@
 
 #include "flipnclick-pic32mz.h"
 
-#ifdef HAVE_HILETGO
+#ifdef HAVE_SSD1306
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,7 +93,7 @@
  * Description:
  *   Called by either NX initialization logic (via board_graphics_setup) or
  *   directly from the board bring-up logic in order to configure the
- *   HiletGo OLED.
+ *   SSD1306 OLED.
  *
  ****************************************************************************/
 
@@ -106,16 +106,16 @@ FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno)
    * putting the OLED into reset state.
    */
 
-  (void)pic32mz_configgpio(GPIO_HILETGO_RST);
+  (void)pic32mz_configgpio(GPIO_SSD1306_RST);
 
   /* Wait a bit then release the OLED from the reset state */
 
   up_mdelay(20);
-  pic32mz_gpiowrite(GPIO_HILETGO_RST, true);
+  pic32mz_gpiowrite(GPIO_SSD1306_RST, true);
 
   /* Get the SPI1 port interface */
 
-  spi = pic32mz_spibus_initialize(HILETGO_SPI_BUS);
+  spi = pic32mz_spibus_initialize(SSD1306_SPI_BUS);
   if (!spi)
     {
       lcderr("ERROR: Failed to initialize SPI port 1\n");
@@ -169,4 +169,4 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 }
 #endif
 
-#endif /* HAVE_HILETGO */
+#endif /* HAVE_SSD1306 */

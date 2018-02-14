@@ -16,7 +16,7 @@ Contents
   - Serial Consoles
   - SPI
   - I2C
-  - HiletGo OLED
+  - SSD1306 OLED
   - Loading Code
   - Flip&Click SAM3X-specific Configuration Options
   - Configurations
@@ -188,7 +188,7 @@ I2C
      SCL  I2C1_SCL     PB13   SCL  I2C1_SCL     PB13
      SDA  I2C1_SDA     PB12   SDA  I2C1_SDA     PB12
 
-HiletGo OLED
+SSD1306 OLED
 ============
 
   Hardware

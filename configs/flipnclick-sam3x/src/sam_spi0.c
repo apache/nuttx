@@ -70,11 +70,11 @@
 
 void weak_function sam_spidev_initialize(void)
 {
-#ifdef HAVE_HILETGO
-  /* Configure the HiletGo chip select and command/data GPIOs */
+#ifdef HAVE_SSD1306
+  /* Configure the SSD1306 chip select and command/data GPIOs */
 
-  sam_configgpio(GPIO_HILETGO_CS);
-  sam_configgpio(GPIO_HILETGO_DC);
+  sam_configgpio(GPIO_SSD1306_CS);
+  sam_configgpio(GPIO_SSD1306_DC);
 #endif
 }
 
@@ -141,14 +141,14 @@ void sam_spi0select(uint32_t devid, bool selected)
   spiinfo("devid: %08x CS: %s\n",
           (unsigned int)devid, selected ? "assert" : "de-assert");
 
-#ifdef HAVE_HILETGO
+#ifdef HAVE_SSD1306
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* Low:  the display is selected
        * High: the display is deselected
        */
 
-      sam_gpiowrite(GPIO_HILETGO_CS, !selected);
+      sam_gpiowrite(GPIO_SSD1306_CS, !selected);
     }
 #endif
 }
@@ -201,14 +201,14 @@ int sam_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   spiinfo("devid: %08x %s\n", (unsigned int)devid, cmd ? "cmd" : "data");
 
-#ifdef HAVE_HILETGO
+#ifdef HAVE_SSD1306
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* High: the inputs are treated as display data.
        * Low:  the inputs are transferred to the command registers.
        */
 
-      sam_gpiowrite(GPIO_HILETGO_DC, !cmd);
+      sam_gpiowrite(GPIO_SSD1306_DC, !cmd);
     }
 #endif
 

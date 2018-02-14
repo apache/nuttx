@@ -17,7 +17,7 @@ Contents
   Serial Console
   SPI
   LEDs
-  HiletGo OLED
+  SSD1306 OLED
   Configurations
 
 Port Status
@@ -326,7 +326,7 @@ LEDs and Buttons
   The switches have external pull-up resistors. The switches are pulled high
   (+3.3V) and grounded when pressed.
 
-HiletGo OLED
+SSD1306 OLED
 ============
 
   Hardware

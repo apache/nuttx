@@ -52,8 +52,8 @@ ifeq ($(CONFIG_SAM34_SPI0),y)
 CSRCS += sam_spi0.c
 endif
 
-ifeq ($(CONFIG_FLIPNCLICK_SAM3X_HILETGO),y)
-CSRCS += sam_hiletgo.c
+ifeq ($(CONFIG_FLIPNCLICK_SAM3X_SSD1306),y)
+CSRCS += sam_ssd1306.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

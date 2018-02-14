@@ -68,11 +68,11 @@
 
 void weak_function pic32mz_spidev_initialize(void)
 {
-#ifdef HAVE_HILETGO
-  /* Configure the HiletGo chip select and command/data GPIOs */
+#ifdef HAVE_SSD1306
+  /* Configure the SSD1306 chip select and command/data GPIOs */
 
-  (void)pic32mz_configgpio(GPIO_HILETGO_CS);
-  (void)pic32mz_configgpio(GPIO_HILETGO_DC);
+  (void)pic32mz_configgpio(GPIO_SSD1306_CS);
+  (void)pic32mz_configgpio(GPIO_SSD1306_DC);
 #endif
 }
 
@@ -111,15 +111,15 @@ void  pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selecte
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBC) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBD)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* Low:  the display is selected
        * High: the display is deselected
        */
 
-      pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
+      pic32mz_gpiowrite(GPIO_SSD1306_CS, !selected);
     }
 #endif
 }
@@ -132,15 +132,15 @@ uint8_t pic32mz_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBC) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBD)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBC) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBD)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* High: the inputs are treated as display data.
        * Low:  the inputs are transferred to the command registers.
        */
 
-      pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
+      pic32mz_gpiowrite(GPIO_SSD1306_DC, !cmd);
     }
 #endif
 
@@ -154,15 +154,15 @@ void  pic32mz_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selecte
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBA) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBB)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* Low:  the display is selected
        * High: the display is deselected
        */
 
-      pic32mz_gpiowrite(GPIO_HILETGO_CS, !selected);
+      pic32mz_gpiowrite(GPIO_SSD1306_CS, !selected);
     }
 #endif
 }
@@ -175,15 +175,15 @@ uint8_t pic32mz_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mz_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBA) || \
-    defined(CONFIG_FLIPNCLICK_PIC32MZ_HILETGO_MBB)
+#if defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBA) || \
+    defined(CONFIG_FLIPNCLICK_PIC32MZ_SSD1306_MBB)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* High: the inputs are treated as display data.
        * Low:  the inputs are transferred to the command registers.
        */
 
-      pic32mz_gpiowrite(GPIO_HILETGO_DC, !cmd);
+      pic32mz_gpiowrite(GPIO_SSD1306_DC, !cmd);
     }
 #endif
 

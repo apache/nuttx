@@ -5,29 +5,29 @@
 
 if ARCH_BOARD_FLIPNCLICK_SAM3X
 
-config FLIPNCLICK_SAM3X_HILETGO
-	bool "HiletGo Click Present"
+config FLIPNCLICK_SAM3X_SSD1306
+	bool "SSD1306 Click Present"
 	default n
-	depends on LCD_HILETGO
+	depends on LCD_SSD1306
 	select NXSTART_EXTERNINIT if NX
 
 choice
-	prompt "HiletGo mikroBUS"
-	default FLIPNCLICK_SAM3X_HILETGO_MBA
-	depends on FLIPNCLICK_SAM3X_HILETGO
+	prompt "SSD1306 mikroBUS"
+	default FLIPNCLICK_SAM3X_SSD1306_MBA
+	depends on FLIPNCLICK_SAM3X_SSD1306
 
-config FLIPNCLICK_SAM3X_HILETGO_MBA
+config FLIPNCLICK_SAM3X_SSD1306_MBA
 	bool "mikroBUS A"
 
-config FLIPNCLICK_SAM3X_HILETGO_MBB
+config FLIPNCLICK_SAM3X_SSD1306_MBB
 	bool "mikroBUS B"
 
-config FLIPNCLICK_SAM3X_HILETGO_MBC
+config FLIPNCLICK_SAM3X_SSD1306_MBC
 	bool "mikroBUS C"
 
-config FLIPNCLICK_SAM3X_HILETGO_MBD
+config FLIPNCLICK_SAM3X_SSD1306_MBD
 	bool "mikroBUS D"
 
-endchoice # HiletGo mikroBUS
+endchoice # SSD1306 mikroBUS
 
 endif
