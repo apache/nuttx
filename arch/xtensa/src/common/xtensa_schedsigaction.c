@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/common/arm_schedulesigaction.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,7 +114,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
       if (tcb == this_task())
         {
           /* CASE 1:  We are not in an interrupt handler and a task is
-           * signalling itself for some reason.
+           * signaling itself for some reason.
            */
 
           if (!CURRENT_REGS)
@@ -131,7 +131,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            *
            * Hmmm... there looks like a latent bug here: The following logic
            * would fail in the strange case where we are in an interrupt
-           * handler, the thread is signalling itself, but a context switch
+           * handler, the thread is signaling itself, but a context switch
            * to another task has occurred so that CURRENT_REGS does not
            * refer to the thread of this_task()!
            */
@@ -169,7 +169,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       /* Otherwise, we are (1) signaling a task is not running from an
        * interrupt handler or (2) we are not in an interrupt handler and the
-       * running task is signalling some non-running task.
+       * running task is signaling some non-running task.
        */
 
       else
@@ -230,7 +230,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           cpu = tcb->cpu;
 
           /* CASE 1:  We are not in an interrupt handler and a task is
-           * signalling itself for some reason.
+           * signaling itself for some reason.
            */
 
           if (cpu == me && !CURRENT_REGS)
@@ -246,61 +246,38 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * CPU.  In the former case, we will have to PAUSE the other CPU
            * first.  But in either case, we will have to modify the return
            * state as well as the state in the TCB.
-           *
-           * Hmmm... there looks like a latent bug here: The following logic
-           * would fail in the strange case where we are in an interrupt
-           * handler, the thread is signalling itself, but a context switch
-           * to another task has occurred so that CURRENT_REGS does not
-           * refer to the thread of this_task()!
            */
 
           else
             {
-              /* If we signalling a task running on the other CPU, we have
+              /* If we signaling a task running on the other CPU, we have
                * to PAUSE the other CPU.
                */
 
               if (cpu != me)
                 {
+                  /* Pause the CPU */
+
                   up_cpu_pause(cpu);
-                }
 
-              /* Save the return pc and ps.  These will be restored by the
-               * signal trampoline after the signals have been delivered.
-               *
-               * NOTE: that hi-priority interrupts are not disabled.
-               */
+                  /* Wait while the pause request is pending */
 
-              tcb->xcp.sigdeliver = sigdeliver;
-              tcb->xcp.saved_pc   = CURRENT_REGS[REG_PC];
-              tcb->xcp.saved_ps   = CURRENT_REGS[REG_PS];
+                  while (up_cpu_pausereq(cpu))
+                    {
+                    }
 
-              /* Increment the IRQ lock count so that when the task is restarted,
-               * it will hold the IRQ spinlock.
-               */
+                  /* Now tcb on the other CPU can be accessed safely */
 
-              DEBUGASSERT(tcb->irqcount < INT16_MAX);
-              tcb->irqcount++;
+                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be restored
+                   * by the signal trampoline after the signal has been delivered.
+                   *
+                   * NOTE: that hi-priority interrupts are not disabled.
+                   */
 
-              /* Handle a possible race condition where the TCB was suspended
-               * just before we paused the other CPU.  The critical section
-               * established above will prevent new threads from running on
-               * that CPU, but it will not guarantee that the running thread
-               * did not suspend itself (allowing any threads "assigned" to
-               * the CPU to run).
-               */
+                  tcb->xcp.sigdeliver  = sigdeliver;
+                  tcb->xcp.saved_pc    = tcb->xcp.regs[REG_PC];
+                  tcb->xcp.saved_ps    = tcb->xcp.regs[REG_PS];
 
-              if (tcb->task_state != TSTATE_TASK_RUNNING)
-                {
-                  tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
-#ifdef __XTENSA_CALL0_ABI__
-                  tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
-#else
-                  tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
-#endif
-                }
-              else
-                {
                   /* Then set up to vector to the trampoline with interrupts
                    * disabled
                    */
@@ -311,22 +288,54 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #else
                   CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
-                  /* In an SMP configuration, the interrupt disable logic also
-                   * involves spinlocks that are configured per the TCB irqcount
-                   * field.  This is logically equivalent to enter_critical_section().
-                   * The matching call to leave_critical_section() will be
-                   * performed in up_sigdeliver().
+                }
+              else
+                {
+                  /* tcb is running on the same CPU */
+
+                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be restored
+                   * by the signal trampoline after the signal has been delivered.
+                   *
+                   * NOTE: that hi-priority interrupts are not disabled.
                    */
 
-                  spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                              &g_cpu_irqlock);
+                  tcb->xcp.sigdeliver  = sigdeliver;
+                  tcb->xcp.saved_pc    = CURRENT_REGS[REG_PC];
+                  tcb->xcp.saved_ps    = CURRENT_REGS[REG_PS];
 
+                  /* Then set up to vector to the trampoline with interrupts
+                   * disabled
+                   */
+
+                  CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+#ifdef __XTENSA_CALL0_ABI__
+                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+#else
+                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+#endif
                   /* And make sure that the saved context in the TCB is the same
                    * as the interrupt return context.
                    */
 
                   xtensa_savestate(tcb->xcp.regs);
                 }
+
+              /* Increment the IRQ lock count so that when the task is restarted,
+               * it will hold the IRQ spinlock.
+               */
+
+              DEBUGASSERT(tcb->irqcount < INT16_MAX);
+              tcb->irqcount++;
+
+              /* In an SMP configuration, the interrupt disable logic also
+               * involves spinlocks that are configured per the TCB irqcount
+               * field.  This is logically equivalent to enter_critical_section().
+               * The matching call to leave_critical_section() will be
+               * performed in up_sigdeliver().
+               */
+
+              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
+                          &g_cpu_irqlock);
 
               /* RESUME the other CPU if it was PAUSED */
 
@@ -339,7 +348,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       /* Otherwise, we are (1) signaling a task is not running from an
        * interrupt handler or (2) we are not in an interrupt handler and the
-       * running task is signalling some other non-running task.
+       * running task is signaling some other non-running task.
        */
 
       else
