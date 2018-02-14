@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f103-minimum/src/stm32_pwm.c
  *
- *   Copyright (C) 2013, 2015, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 

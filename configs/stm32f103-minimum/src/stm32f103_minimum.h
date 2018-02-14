@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f103-minimum/src/stm32f103_minimum.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,12 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+#include <arch/chip/chip.h>
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
 #define HAVE_AT24 1
 
 /* AT24 Serial EEPROM */
@@ -76,10 +82,6 @@
     !defined(CONFIG_STM32F103MINIMUM_AT24_NXFFS)
 #  undef HAVE_AT24
 #endif
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
 
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
  * modules (others may support more -- in such case, the following must be

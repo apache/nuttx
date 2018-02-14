@@ -46,6 +46,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "stm32_gpio.h"
 #include "stm32f103_minimum.h"
 
 #if defined(CONFIG_ARCH_BUTTONS)
