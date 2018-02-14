@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: January 31, 2018</p>
+      <p>Last Updated: February 14, 2018</p>
     </td>
   </tr>
 </table>
@@ -1562,6 +1562,31 @@ The specific environmental definitions are unique for each board but should incl
       Any interface which is unique to a board should be prefixed with the board name, for example <code>stm32f4discovery_</code>.
       Sometimes the board name is too long so <code>stm32_</code> would be okay too.
       These should be prototyped in <code>configs/&lt;board&gt;/src/&lt;board&gt;.h</code> and should not be used outside of that directory since board-specific definitions have no meaning outside of the board directory.
+  </li>
+  <li>
+    <p>
+      <b>Scope of Inclusions</b>.
+      Header files are made accessible to internal OS logic and to applications through <i>include paths</i> that are provided to the C/C++ compiler.
+      Through these include paths, the NuttX build system also enforces modularity in the design.
+      For example, one important design principle is architectural <i>layering</i>.
+      In this case I am referring to the OS as layered in to application interface, common internal OS logic, and lower level platform-specific layers.
+      The platform-specific layers all reside in the either <code>arch/</code> sub-directorories on the <code>config/</code> subdirectories:  The former sub-directories are reserved for microcontroller-specific logic and the latter for board-specific logic.
+    </p>
+    <p>
+      In the strict, layered NuttX architecture, the upper level OS services are always available to platform-specific logic.  However, the opposite is <i>not</i> true:  Common OS logic must never have any dependency on the lower level platform-specific code.  The OS logic must be totally agnostic about its hardware environment.  Similarly, microcontroller-specific logic was be completely ignorant of board-specific logic.
+    </p>
+    <p>
+      This strict layering is enforced in the NuttX build system by controlling the compiler include paths:  Higher level code can never include header files from either; of the platform-specific source directories;  microcontroller-specific code can never include header files from the board-specific source directories.  The board-specific directories are, then, at the bottom of the layered hierarchy.
+    </p>
+    <p>
+      An exception to these inclusion restrictions is the platform-specific <i>include/</i>.  These are made available to higher level OS logic.  The microcontroller-specific include directory will be linked at <code>include/arch/chip</code> and, hence, can be included like <code>#include &lt;arch/chip/chip.h</code>.
+      Similarly, the board-specific include directory will be linked at <code>include/arch/board</code> and, hence, can be included like <code>#include &lt;arch/board/board.h</code>.
+    </p>
+    <p>
+      Keeping in the spirit of the layered architecture, this publicly visible header files must <i>not</i> export platform-specific definitions; Only standardized definitions should be visible such as those provided in <code>include/nuttx/arch.h</code> or <code>include/nuttx/board.h</code>.
+      And, similarly, these publicly visible header file must <i>not</i> include files that reside in the inaccessible platform-specific source directories.
+      That practice will cause inclusion failures when the publicly visiable file is included in common logic outside of the platform-specific source directories.
+    </p>
   </li>
 </ul>
 
@@ -3852,7 +3877,7 @@ void sched_timer_expiration(void);
   <p>
     <b>NOTE:</b> The other interfaces described in this document are internal OS interface.
     <code>boardctl()</code> is an application interface to the OS.
-    There is not point, in fact, of using <code>boardctl()</code> within the OS;
+    There is no point, in fact, of using <code>boardctl()</code> within the OS;
     the board interfaces prototyped in <code>include/nuttx/board.h</code> may be called directly from within the OS.
   </p>
   <p>
