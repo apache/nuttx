@@ -51,7 +51,6 @@
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/video/fb.h>
-#include <arch/board/board.h>
 
 #ifdef CONFIG_LCD_FRAMEBUFFER
 

@@ -1586,7 +1586,7 @@ The specific environmental definitions are unique for each board but should incl
       Keeping in the spirit of the layered architecture, these publicly visible header files must <i>not</i> export platform-specific definitions; Only platform-specific realizations of standardized declarations should be visible.
       Those <i>standardized declarations</i> should appear in common header files such as those provided by <code>include/nuttx/arch.h</code> and <code>include/nuttx/board.h</code>.
       Similarly, these publicly visible header file must <i>not</i> include files that reside in the inaccessible platform-specific source directories.
-      For example, the board-specific <code>configs/&lt;board&gt;/include/board.h</code> header file must never include microcontroller-specific header files that reside in <code>arch/&lt;arch&gt;/src/</code>.
+      For example, the board-specific <code>configs/&lt;board&gt;/include/board.h</code> header file must never include microcontroller-specific header files that reside in <code>arch/&lt;arch&gt;/src/&lt;mcu&gt;</code>.
       That practice will cause inclusion failures when the publicly visible file is included in common logic outside of the platform-specific source directories.
     </p>
   </li>
