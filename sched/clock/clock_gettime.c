@@ -110,12 +110,12 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
            * CLOCK_MONOTONIC be introduced additional increases to systime.
            */
 
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave();
 
           tp->tv_sec  += (uint32_t)g_monotonic_basetime.tv_sec;
           tp->tv_nsec += (uint32_t)g_monotonic_basetime.tv_nsec;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
 
           /* Handle carry to seconds. */
 
@@ -163,12 +163,12 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
            * was last set, this gives us the current time.
            */
 
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave();
 
           ts.tv_sec  += (uint32_t)g_basetime.tv_sec;
           ts.tv_nsec += (uint32_t)g_basetime.tv_nsec;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
 
           /* Handle carry to seconds. */
 

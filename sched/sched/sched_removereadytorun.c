@@ -238,8 +238,6 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
           tmptcb = (FAR struct tcb_s *)
             dq_remfirst((FAR dq_queue_t *)&g_readytorun);
 
-          DEBUGASSERT(tmptcb == rtrtcb);
-
           dq_addfirst((FAR dq_entry_t *)tmptcb, tasklist);
 
           tmptcb->cpu = cpu;
