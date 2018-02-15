@@ -283,7 +283,7 @@ struct ssd1306_dev_s
 #ifdef CONFIG_LCD_SSD1306_SPI
   FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
 #else
-  FAR struct i2c_master_s  *i2c;      /* Cached SPI device reference */
+  FAR struct i2c_master_s  *i2c;   /* Cached I2C device reference */
   uint8_t                addr;     /* 7-bit I2C address */
 #endif
   uint8_t                contrast; /* Current contrast setting */

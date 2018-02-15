@@ -1,5 +1,5 @@
 /**************************************************************************************
- * drivers/lcd/ssd1306.c
+ * drivers/lcd/ssd1306_base.c
  * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
  * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
  * in SPI mode.
