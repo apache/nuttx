@@ -244,8 +244,10 @@ extern "C"
  *
  **************************************************************************************/
 
-struct lcd_dev_s; /* See include/nuttx/lcd/lcd.h */
-struct spi_dev_s; /* See include/nuttx/spi/spi.h */
+struct lcd_dev_s;    /* See include/nuttx/lcd/lcd.h */
+struct spi_dev_s;    /* See include/nuttx/spi/spi.h */
+struct i2c_master_s; /* See include/nuttx/i2c/i2c_master.h */
+
 #ifdef CONFIG_LCD_SSD1306_SPI
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev,
                                          FAR const struct ssd1306_priv_s *board_priv,
