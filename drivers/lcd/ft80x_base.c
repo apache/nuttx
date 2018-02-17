@@ -90,6 +90,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static void ft80x_destroy(FAR struct ft80x_dev_s *priv);
+#endif
+
 /* Character driver methods */
 
 static int  ft80x_open(FAR struct file *filep);
@@ -103,6 +107,9 @@ static int  ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int  ft80x_poll(FAR struct file *filep, FAR struct pollfd *fds,
               bool setup);
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int ft80x_unlink(FAR struct inode *inode);
 #endif
 
 /* Initialization */
@@ -125,13 +132,42 @@ static const struct file_operations g_ft80x_fops =
   , ft80x_poll   /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
+  , ft80x_unlink /* unlink */
 #endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ft80x_destroy
+ *
+ * Description:
+ *   The driver has been unlinked... clean up as best we can.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static void ft80x_destroy(FAR struct ft80x_dev_s *priv)
+{
+  /* If the lower half driver provided a destroy method, then call that
+   * method now in order order to clean up resources used by the lower-half
+   * driver.
+   */
+
+  DEBUGASSERT(priv != NULL && priv->lower != NULL);
+  if (priv->lower->destroy != NULL)
+    {
+      priv->lower->destroy(priv->lower);
+    }
+
+  /* Then free our container */
+
+  sem_destroy(&priv->exclsem);
+  kmm_free(priv);
+}
+#endif
 
 /****************************************************************************
  * Name: ft80x_open
@@ -143,6 +179,7 @@ static const struct file_operations g_ft80x_fops =
 
 static int ft80x_open(FAR struct file *filep)
 {
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   FAR struct inode *inode;
   FAR struct ft80x_dev_s *priv;
   uint8_t tmp;
@@ -184,6 +221,9 @@ errout_with_sem:
 
 errout:
   return ret;
+#else
+  return OK;
+#endif
 }
 
 /****************************************************************************
@@ -196,6 +236,7 @@ errout:
 
 static int ft80x_close(FAR struct file *filep)
 {
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   FAR struct inode *inode;
   FAR struct ft80x_dev_s *priv;
   int ret;
@@ -215,10 +256,25 @@ static int ft80x_close(FAR struct file *filep)
       goto errout;
     }
 
-  /* Decrement the references to the driver. */
+  /* Will the count decrement to zero? */
 
-  if (priv->crefs > 1)
+  if (priv->crefs <= 1)
     {
+      /* Yes.. if the driver has been unlinked, then we need to destroy the
+       * driver instance.
+       */
+
+      priv->crefs = 0;
+      if (priv->unlinked)
+        {
+          ft80x_destroy(priv);
+          return OK;
+        }
+    }
+  else
+    {
+      /* NO.. decrement the number of references to the driver. */
+
       priv->crefs--;
     }
 
@@ -227,6 +283,9 @@ static int ft80x_close(FAR struct file *filep)
 
 errout:
   return ret;
+#else
+  return OK;
+#endif
 }
 
 /****************************************************************************
@@ -275,6 +334,10 @@ static ssize_t ft80x_write(FAR struct file *filep, FAR const char *buffer,
     {
       return ret;
     }
+
+  /* Note that there is no check if the driver was opened read-only.  That
+   * would be a silly thing to do.
+   */
 
   /* The write method is functionally equivalent to the FT80XIOC_PUTDISPLAYLIST
    * IOCTL command:  It simply copies the display list in the user buffer to
@@ -421,6 +484,39 @@ static int ft80x_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
 #warning Missing logic
   return -ENOSYS;
+}
+#endif
+
+/****************************************************************************
+ * Name: ft80x_unlink
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int ft80x_unlink(FAR struct inode *inode)
+{
+  FAR struct ft80x_dev_s *priv;
+
+  /* Get the reference to our internal state structure from the inode
+   * structure.
+   */
+
+  DEBUGASSERT(inode && inode->i_private);
+  priv = inode->i_private;
+
+  /* Indicate that the driver has been unlinked */
+
+  priv->unlinked = true;
+
+  /* If there are no further open references to the driver, then commit
+   * Hara-Kiri now.
+   */
+
+  if (priv->crefs == 0)
+    {
+      ft80x_destroy(priv);
+    }
+
+  return OK;
 }
 #endif
 

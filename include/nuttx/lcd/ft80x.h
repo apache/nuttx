@@ -470,13 +470,17 @@ struct ft80x_config_s
    *   enable  - Enable or disable the GPIO interrupt
    *   clear   - Acknowledge/clear any pending GPIO interrupt
    *   pwrdown - Power down the FT80X
+   *   destroy - The driver has been unlinked. Cleanup as necessary.
    */
 
-  int  (*attach)(FAR const struct ft80x_config_s *state, xcpt_t isr,
-                 FAR void *arg);
-  void (*enable)(FAR const struct ft80x_config_s *state, bool enable);
-  void (*clear)(FAR const struct ft80x_config_s *state);
-  bool (*pwrdown)(FAR const struct ft80x_config_s *state, bool pwrdown);
+  CODE int  (*attach)(FAR const struct ft80x_config_s *state, xcpt_t isr,
+                      FAR void *arg);
+  CODE void (*enable)(FAR const struct ft80x_config_s *state, bool enable);
+  CODE void (*clear)(FAR const struct ft80x_config_s *state);
+  CODE bool (*pwrdown)(FAR const struct ft80x_config_s *state, bool pwrdown);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  CODE void (*destroy)(FAR const struct ft80x_config_s *state);
+#endif
 };
 
 /* This structure describes one generic display list command */

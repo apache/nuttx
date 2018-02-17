@@ -361,7 +361,10 @@ struct ft80x_dev_s
   FAR const struct ft80x_config_s *lower; /* Cached lower half instance */
   uint32_t frequency;                     /* Effective frequency */
   sem_t exclsem;                          /* Mutual exclusion semaphore */
-  uint8_t crefs;                          /* Open count */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  uint8_t crefs;                          /* Number of open references */
+  bool unlinked;                          /* True if the driver has been unlinked */
+#endif
 };
 
 /****************************************************************************
