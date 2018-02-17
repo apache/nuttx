@@ -85,9 +85,9 @@
  *                 struct ft80x_displaylist_s below.
  *   Returns:      None
  *
- * These two IOCTL command simply copies the display list as provided into
- * the FT80x display list memory.  Display lists should generally be formed
- * as follows:
+ * These two IOCTL command simply copy the display list as provided into the
+ * FT80x display list memory.  Display lists should generally be formed as
+ * follows:
  *
  *   struct ft80x_cmd_dlstart_s dlstart;  # Mark the start of the display list
  *                                        # Various display commands follow...
@@ -95,13 +95,17 @@
  *   struct ft80x_cmd_swap_s swap;        # Swap to the new display list
  *
  * NOTE: The functionality of FT80X_IOC_CREATEDL is the equivalent to that of
- * the driver write() method.  Either the write method or the FT80X_IOC_CREATEDL
- * IOCTL command can be used to write the display list.
+ * the driver write() method.  Either the write() method or the FT80X_IOC_CREATEDL
+ * IOCTL command can be used to create the display list.
  *
  * The difference between appending and create a display list using write()
  * is that it is necessary to lseek() to the beginning of the display list
  * to create a new display list.  Subsequent writes will behave then append
  * to the end of the display list.
+ *
+ * Need to know the current display list offset?  You can set that using lseek()
+ * too.  Just seek to the current position; the returned value will be the current
+ * display list offset.
  *
  * Output values from display commands are not automatically written back in
  * either case but must be subsequently obtained using FT80X_IOC_GETRESULT32.

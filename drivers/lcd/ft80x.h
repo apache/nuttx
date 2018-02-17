@@ -48,6 +48,9 @@
  * Included Files
  *******************************************************************************************/
 
+#include <nuttx/config.h>
+#include <nuttx/wqueue.h>
+
 /*******************************************************************************************
  * Pre-processor Definitions
  *******************************************************************************************/
@@ -244,6 +247,25 @@
                                                   * frame is scanned out (recommended).
                                                   */
 
+/* Interrupts ******************************************************************************/
+
+/* The interrupt output pin is enabled by REG_INT_EN. When REG_INT_EN is 0, INT_N is
+ * tri-state (pulled to high by external pull-up resistor). When REG_INT_EN is 1, INT_N is
+ * driven low when any of the interrupt flags in REG_INT_FLAGS are high, after masking with
+ * REG_INT_MASK. Writing a ‘1’ in any bit of REG_INT_MASK will enable the correspond
+ * interrupt. Each bit in REG_INT_FLAGS is set by a corresponding interrupt source.
+ * REG_INT_FLAGS is readable by the host at any time, and clears when read.
+ */
+
+#define FT80X_INT_SWAP                 (1 << 0)  /* Bit 0: Display swap occurred */
+#define FT80X_INT_TOUCH                (1 << 1)  /* Bit 1: Touch-screen touch detected */
+#define FT80X_INT_TAG                  (1 << 2)  /* Bit 2: Touch-screen tag value change */
+#define FT80X_INT_SOUND                (1 << 3)  /* Bit 3: Sound effect ended */
+#define FT80X_INT_PLAYBACK             (1 << 4)  /* Bit 4: Audio playback ended */
+#define FT80X_INT_CMDEMPTY             (1 << 5)  /* Bit 5: Command FIFO empty */
+#define FT80X_INT_CMDFLAG              (1 << 6)  /* Bit 6: Command FIFO flag */
+#define FT80X_INT_CONVCOMPLETE         (1 << 7)  /* Bit 7: Touch-screen conversions completed */
+
 /*******************************************************************************************
  * Public Types
  *******************************************************************************************/
@@ -359,6 +381,7 @@ struct ft80x_dev_s
   FAR struct i2c_master_s *i2c;           /* Cached SPI device reference */
 #endif
   FAR const struct ft80x_config_s *lower; /* Cached lower half instance */
+  struct work_s intwork;                  /* Support back end interrupt processing */
   uint32_t frequency;                     /* Effective frequency */
   sem_t exclsem;                          /* Mutual exclusion semaphore */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS

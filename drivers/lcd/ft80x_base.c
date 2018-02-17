@@ -60,6 +60,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi.h>
@@ -90,6 +91,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static void ft80x_interrupt_work(FAR void *arg);
+static int  ft80x_interrupt(int irq, FAR void *context, FAR void *arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void ft80x_destroy(FAR struct ft80x_dev_s *priv);
 #endif
@@ -105,7 +108,7 @@ static ssize_t ft80x_write(FAR struct file *filep, FAR const char *buffer,
               size_t buflen);
 static int  ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int ft80x_unlink(FAR struct inode *inode);
+static int  ft80x_unlink(FAR struct inode *inode);
 #endif
 
 /* Initialization */
@@ -135,6 +138,123 @@ static const struct file_operations g_ft80x_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ft80x_interrupt_work
+ *
+ * Description:
+ *   Back end handling for FT80x interrupts
+ *
+ ****************************************************************************/
+
+static void ft80x_interrupt_work(FAR void *arg)
+{
+  FAR struct ft80x_dev_s *priv = (FAR struct ft80x_dev_s *)arg;
+  uint32_t intflags;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Get the set of pending interrupts.  Note that simply reading this
+   * register is sufficient to clear all pending interrupts.
+   */
+
+  intflags = ft80x_read_word(priv, FT80X_REG_INT_FLAGS);
+
+  /* And process each pending interrupt.
+   *
+   * REVISIT:  No interrupt sources are ever enabled in the current
+   * implementation.
+   */
+
+   if ((intflags & FT80X_INT_SWAP) != 0)
+     {
+       /* Display swap occurred */
+
+       lcdinfo("Display swap occurred\n");
+     }
+
+   if ((intflags & FT80X_INT_TOUCH) != 0)
+     {
+       /* Touch-screen touch detected */
+
+       lcdinfo("Touch-screen touch detected\n");
+     }
+
+   if ((intflags & FT80X_INT_TAG) != 0)
+     {
+       /* Touch-screen tag value change */
+
+       lcdinfo("Touch-screen tag value change\n");
+     }
+
+   if ((intflags & FT80X_INT_SOUND) != 0)
+     {
+       /*  Sound effect ended */
+
+       lcdinfo(" Sound effect ended\n");
+     }
+
+   if ((intflags & FT80X_INT_PLAYBACK) != 0)
+     {
+       /* Audio playback ended */
+
+       lcdinfo("Audio playback ended\n");
+     }
+
+   if ((intflags & FT80X_INT_CMDEMPTY) != 0)
+     {
+       /* Command FIFO empty */
+
+       lcdinfo("Command FIFO empty\n");
+     }
+
+   if ((intflags & FT80X_INT_CMDFLAG) != 0)
+     {
+       /* Command FIFO flag */
+
+       lcdinfo("Command FIFO flag\n");
+     }
+
+   if ((intflags & FT80X_INT_CONVCOMPLETE) != 0)
+     {
+       /* Touch-screen conversions completed */
+
+       lcdinfo(" Touch-screen conversions completed\n");
+     }
+
+  /* Re-enable interrupts */
+
+  DEBUGASSERT(priv->lower != NULL && priv->lower->enable != NULL);
+  priv->lower->enable(priv->lower, true);
+}
+
+/****************************************************************************
+ * Name: ft80x_interrupt
+ *
+ * Description:
+ *   FT80x interrupt handler
+ *
+ ****************************************************************************/
+
+static int ft80x_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct ft80x_dev_s *priv = (FAR struct ft80x_dev_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Schedule to perform the interrupt work on the high priority work queue. */
+
+  work_queue(HPWORK, &priv->intwork, ft80x_interrupt_work, priv, 0);
+
+  /* Disable further interrupts for the GPIO interrupt source.
+   * REVISIT:  This assumes that interrupts will pend until re-enabled.
+   * In certain implementations, this can cause a loss of interrupts.
+   */
+
+  DEBUGASSERT(priv->lower != NULL && priv->lower->enable != NULL);
+  priv->lower->enable(priv->lower, false);
+  return OK;
+}
 
 /****************************************************************************
  * Name: ft80x_destroy
@@ -419,20 +539,30 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR struct ft80x_displaylist_s *)((uintptr_t)arg);
 
           if (dl == NULL || ((uintptr_t)&dl->cmd & 3) != 0 ||
-              dl->dlsize == 0 || (dl->dlsize & 3) != 0 ||
+              (dl->dlsize & 3) != 0 ||
               dl->dlsize + filep->f_pos > FT80X_RAM_DL_SIZE)
             {
               ret = -EINVAL;
             }
           else
             {
-              /* This IOCTL command simply copies the display list
-               * provided into the FT80x display list memory.
+              /* Check if there is a display list.  It might be useful for
+               * the application to issue FT80X_IOC_CREATEDL with no data in
+               * order to initialize the display list, then form all of the
+               * list entries with FT80X_IOC_APPENDDL.
                */
 
-              ft80x_write_memory(priv, FT80X_RAM_DL + filep->f_pos,
-                                 &dl->cmd, dl->dlsize);
-              filep->f_pos += dl->dlsize;
+              if (dl->dlsize > 0)
+                {
+                  /* This IOCTL command simply copies the display list
+                   * provided into the FT80x display list memory.
+                   */
+
+                  ft80x_write_memory(priv, FT80X_RAM_DL + filep->f_pos,
+                                     &dl->cmd, dl->dlsize);
+                  filep->f_pos += dl->dlsize;
+                }
+
               ret = OK;
             }
         }
@@ -824,15 +954,37 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
       goto errout_with_sem;
     }
 
-  /* Register the FT80x character driver */
+  /* Attach our interrupt handler */
 
-  ret = register_driver(DEVNAME, &g_ft80x_fops, 0666, priv);
+  DEBUGASSERT(lower->attach != NULL && lower->enable != NULL);
+  ret = lower->attach(lower, ft80x_interrupt, priv);
   if (ret < 0)
     {
       goto errout_with_sem;
     }
 
+  /* Disable all interrupt sources, but enable interrupts both in the lower
+   * half driver and in the FT80x.
+   */
+
+  ft80x_write_word(priv, FT80X_REG_INT_MASK, 0);
+  ft80x_write_word(priv, FT80X_REG_INT_EN, 1);
+  lower->enable(lower, true);
+
+  /* Register the FT80x character driver */
+
+  ret = register_driver(DEVNAME, &g_ft80x_fops, 0666, priv);
+  if (ret < 0)
+    {
+      goto errout_with_interrupts;
+    }
+
   return OK;
+
+errout_with_interrupts:
+  lower->enable(lower, false);
+  ft80x_write_word(priv, FT80X_REG_INT_EN, 0);
+  lower->attach(lower, NULL, NULL);
 
 errout_with_sem:
   sem_destroy(&priv->exclsem);
