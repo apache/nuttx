@@ -97,7 +97,9 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
         {
           case SEEK_CUR:
             offset += filep->f_pos;
+
             /* FALLTHROUGH */
+
           case SEEK_SET:
             if (offset >= 0)
               {

@@ -104,10 +104,6 @@ static ssize_t ft80x_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t ft80x_write(FAR struct file *filep, FAR const char *buffer,
               size_t buflen);
 static int  ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
-static int  ft80x_poll(FAR struct file *filep, FAR struct pollfd *fds,
-              bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int ft80x_unlink(FAR struct inode *inode);
 #endif
@@ -129,7 +125,7 @@ static const struct file_operations g_ft80x_fops =
   NULL,          /* seek */
   ft80x_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , ft80x_poll   /* poll */
+  , NULL         /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , ft80x_unlink /* unlink */
@@ -322,7 +318,7 @@ static ssize_t ft80x_write(FAR struct file *filep, FAR const char *buffer,
   priv  = inode->i_private;
 
   if (buffer == NULL || ((uintptr_t)buffer & 3) != 0 ||
-      len == 0 || (len & 3) != 0 || len > FT80X_RAM_DL_SIZE)
+      len == 0 || (len & 3) != 0 || (len + filep->f_pos) > FT80X_RAM_DL_SIZE)
     {
        return -EINVAL;
     }
@@ -339,12 +335,13 @@ static ssize_t ft80x_write(FAR struct file *filep, FAR const char *buffer,
    * would be a silly thing to do.
    */
 
-  /* The write method is functionally equivalent to the FT80XIOC_PUTDISPLAYLIST
+  /* The write method is functionally equivalent to the FT80X_IOC_CREATEDL
    * IOCTL command:  It simply copies the display list in the user buffer to
    * the FT80x display list memory.
    */
 
-  ft80x_write_memory(priv, FT80X_RAM_DL, buffer, len);
+  ft80x_write_memory(priv, FT80X_RAM_DL + filep->f_pos, buffer, len);
+  filep->f_pos += len;
 
   nxsem_post(&priv->exclsem);
   return len;
@@ -383,21 +380,47 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* FT80XIOC_PUTDISPLAYLIST:
+      /* FT80X_IOC_CREATEDL:
        *   Description:  Write a display list to the FT80x display list memory
+       *   Description:  Write a display list to the FT80x display list memory
+       *                 starting at offset zero.  This may or may not be the
+       *                 entire display list.  Display lists may be created
+       *                 incrementally, starting with FT80X_IOC_CREATEDL and
+       *                 finishing the display list using FT80XIO_APPENDDL
        *   Argument:     A reference to a display list structure instance.
        *                 See struct ft80x_displaylist_s.
        *   Returns:      None
        */
 
-      case FT80XIOC_PUTDISPLAYLIST:
+      case FT80X_IOC_CREATEDL:
+
+        /* Set the file position to zero and fall through to "append" the new
+         * display list data at offset 0.
+         */
+
+        filep->f_pos = 0;
+
+        /* FALLTHROUGH */
+
+     /* FT80X_IOC_APPENDDL:
+      *   Description:  Write additional display list entries to the FT80x
+      *                 display list memory at the current display list offset.
+      *                 This IOCTL command permits display lists to be completed
+      *                 incrementally, starting with FT80X_IOC_CREATEDL and
+      *                 finishing the display list using FT80XIO_APPENDDL.
+      *   Argument:     A reference to a display list structure instance.  See
+      *                 struct ft80x_displaylist_s.
+      *   Returns:      None
+      */
+
+     case FT80X_IOC_APPENDDL:
         {
           FAR struct ft80x_displaylist_s *dl =
             (FAR struct ft80x_displaylist_s *)((uintptr_t)arg);
 
           if (dl == NULL || ((uintptr_t)&dl->cmd & 3) != 0 ||
               dl->dlsize == 0 || (dl->dlsize & 3) != 0 ||
-              dl->dlsize > FT80X_RAM_DL_SIZE)
+              dl->dlsize + filep->f_pos > FT80X_RAM_DL_SIZE)
             {
               ret = -EINVAL;
             }
@@ -407,19 +430,21 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                * provided into the FT80x display list memory.
                */
 
-              ft80x_write_memory(priv, FT80X_RAM_DL, &dl->cmd, dl->dlsize);
+              ft80x_write_memory(priv, FT80X_RAM_DL + filep->f_pos,
+                                 &dl->cmd, dl->dlsize);
+              filep->f_pos += dl->dlsize;
               ret = OK;
             }
         }
         break;
 
-      /* FT80XIOC_GETRESULT32:
+      /* FT80X_IOC_GETRESULT32:
        *   Description:  Read a 32-bit value from the display list.
        *   Argument:     A reference to an instance of struct ft80x_result32_s.
        *   Returns:      The 32-bit value read from the display list.
        */
 
-      case FT80XIOC_GETRESULT32:
+      case FT80X_IOC_GETRESULT32:
         {
           FAR struct ft80x_result32_s *result =
             (FAR struct ft80x_result32_s *)((uintptr_t)arg);
@@ -438,7 +463,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* FT80XIOC_GETTRACKER:
+      /* FT80X_IOC_GETTRACKER:
        *   Description:  After CMD_TRACK has been issued, the coprocessor
        *                 will update the TRACKER register with new position
        *                 data.
@@ -446,7 +471,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        *   Returns:      The new content of the tracker register.
        */
 
-      case FT80XIOC_GETTRACKER:
+      case FT80X_IOC_GETTRACKER:
         {
           FAR uint32_t *tracker = (FAR uint32_t *)((uintptr_t)arg);
 
@@ -473,19 +498,6 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   nxsem_post(&priv->exclsem);
   return ret;
 }
-
-/****************************************************************************
- * Name: ft80x_poll
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_POLL
-static int ft80x_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
-{
-#warning Missing logic
-  return -ENOSYS;
-}
-#endif
 
 /****************************************************************************
  * Name: ft80x_unlink

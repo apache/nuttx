@@ -65,43 +65,63 @@
 
 /* FT80x IOCTL commands:
  *
- * FT80XIOC_PUTDISPLAYLIST:
+ * FT80X_IOC_CREATEDL:
  *   Description:  Write a display list to the FT80x display list memory
+ *                 starting at offset zero.  This may or may not be the
+ *                 entire display list.  Display lists may be created
+ *                 incrementally, starting with FT80X_IOC_CREATEDL and
+ *                 finishing the display list using FT80XIO_APPENDDL
  *   Argument:     A reference to a display list structure instance.  See
  *                 struct ft80x_displaylist_s below.
  *   Returns:      None
  *
- * This IOCTL command simply copies the display list as provided into the
- * FT80x display list memory.  Display lists should generally be formed as
- * follows:
+ * FT80X_IOC_APPENDDL:
+ *   Description:  Write additional display list entries to the FT80x
+ *                 display list memory at the current display list offset.
+ *                 This IOCTL command permits display lists to be completed
+ *                 incrementally, starting with FT80X_IOC_CREATEDL and
+ *                 finishing display list using FT80XIO_APPENDDL.
+ *   Argument:     A reference to a display list structure instance.  See
+ *                 struct ft80x_displaylist_s below.
+ *   Returns:      None
+ *
+ * These two IOCTL command simply copies the display list as provided into
+ * the FT80x display list memory.  Display lists should generally be formed
+ * as follows:
  *
  *   struct ft80x_cmd_dlstart_s dlstart;  # Mark the start of the display list
- *                                        # Various display commands fillow...
+ *                                        # Various display commands follow...
  *   FT80X_DISPLAY();                     # Finish the last display
  *   struct ft80x_cmd_swap_s swap;        # Swap to the new display list
  *
- * NOTE: This is the same functionality as the driver write() method.  Either
- * the write method or the FT80XIOC_PUTDISPLAYLIST IOCTL command can be used to
- * write the display list.
+ * NOTE: The functionality of FT80X_IOC_CREATEDL is the equivalent to that of
+ * the driver write() method.  Either the write method or the FT80X_IOC_CREATEDL
+ * IOCTL command can be used to write the display list.
+ *
+ * The difference between appending and create a display list using write()
+ * is that it is necessary to lseek() to the beginning of the display list
+ * to create a new display list.  Subsequent writes will behave then append
+ * to the end of the display list.
  *
  * Output values from display commands are not automatically written back in
- * either case but must be subsequently obtained using FT80XIOC_GETRESULT32.
+ * either case but must be subsequently obtained using FT80X_IOC_GETRESULT32.
  *
- * FT80XIOC_GETRESULT32:
+ * FT80X_IOC_GETRESULT32:
  *   Description:  Read a 32-bit value from the display list.
  *   Argument:     A reference to an instance of struct ft80x_result32_s below.
  *   Returns:      The 32-bit value read from the display list.
  *
- * FT80XIOC_GETTRACKER:
+ * FT80X_IOC_GETTRACKER:
  *   Description:  After CMD_TRACK has been issued, the coprocessor will update
  *                 the TRACKER register with new position data.
  *   Argument:     A pointer to a writable uint32_t memory location.
  *   Returns:      The new content of the tracker register.
  */
 
-#define FT80XIOC_PUTDISPLAYLIST    _LCDIOC(FT80X_NIOCTL_BASE + 0)
-#define FT80XIOC_GETRESULT32       _LCDIOC(FT80X_NIOCTL_BASE + 1)
-#define FT80XIOC_GETTRACKER        _LCDIOC(FT80X_NIOCTL_BASE + 2)
+#define FT80X_IOC_CREATEDL          _LCDIOC(FT80X_NIOCTL_BASE + 0)
+#define FT80X_IOC_APPENDDL          _LCDIOC(FT80X_NIOCTL_BASE + 1)
+#define FT80X_IOC_GETRESULT32       _LCDIOC(FT80X_NIOCTL_BASE + 2)
+#define FT80X_IOC_GETTRACKER        _LCDIOC(FT80X_NIOCTL_BASE + 3)
 
 /* Host commands.  3 word commands.  The first word begins with 0b01, the next two are zero */
 
@@ -993,8 +1013,8 @@ struct ft80x_cmd_translate_s
   int32_t ty;       /* 8:  Y translate factor (b16) (input) */
 };
 
-/* This container structure is used by FT80XIOC_PUTDISPLAY and defines the
- * list of display commands to be written into display list memory.
+/* This container structure is used by FT80X_IOC_CREATEDL and FT80X_IOC_APPENDDL.  It
+ * and defines the list of display commands to be written into display list memory.
  */
 
 struct ft80x_displaylist_s
@@ -1003,7 +1023,7 @@ struct ft80x_displaylist_s
   struct ft80x_dlcmd_s cmd; /* First command in the display list (input)  */
 };
 
-/* This structure is used with the FT80XIOC_GETRESULT32 IOCTL command to
+/* This structure is used with the FT80X_IOC_GETRESULT32 IOCTL command to
  * retrieve the result of the display list operation from display list memory.
  */
 
