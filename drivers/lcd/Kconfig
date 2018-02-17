@@ -1173,6 +1173,61 @@ config LCD_RA8875_EXTENDED
 		driver anyway.
 
 endif # LCD_RA8875
+
+config LCD_FT80X
+	bool "FTDI FT80x GUI Controller"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Integrated LCD, Audio, Touchscreen controller driver for the FTDI
+		FT80x "EVE" series.
+
+if LCD_FT80X
+
+choice
+	prompt "FTDI FT80x part"
+	default LCD_FT800
+
+config LCD_FT800
+	bool "FT800"
+
+config LCD_FT801
+	bool "FT801"
+
+endchoice # FTDI FT80x part
+
+choice
+	prompt "FTDI FT80x Interface"
+	default LCD_FT80X_SPI
+
+config LCD_FT80X_SPI
+	bool "SPI"
+	select SPI
+
+config LCD_FT80X_I2C
+	bool "I2C"
+	select I2C
+
+endchoice # FTDI FT80x Interface
+
+config LCD_FT801_MULTITOUCH
+	bool "FT801 Multi-touch"
+	default n
+	depends on LCD_FT801
+
+choice
+	prompt "Display size"
+	default LCD_FT80X_WQVGA
+
+config LCD_FT80X_WQVGA
+	bool "WQVGA 480x272"
+
+config LCD_FT80X_QVGA
+	bool "QVGA 320x240"
+
+endchoice # Display size
+endif # LCD_FT80X
+
 endmenu # LCD Driver selection
 endif # LCD
 

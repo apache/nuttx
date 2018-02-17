@@ -266,9 +266,8 @@ static int pwm_close(FAR struct file *filep)
 
       lower->ops->shutdown(lower);
     }
-  ret = OK;
 
-//errout_with_sem:
+  ret = OK;
   nxsem_post(&upper->exclsem);
 
 errout:

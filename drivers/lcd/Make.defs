@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/lcd/Make.defs
 #
-#   Copyright (C) 2010-2012, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2012, 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,15 @@ ifeq ($(CONFIG_LCD_FRAMEBUFFER),y)
 endif
 
 # Include support for Graphics LCD drivers
+
+ifeq ($(CONFIG_LCD_FT80X),y)
+  CSRCS += ft80x_base.c
+ifeq ($(CONFIG_LCD_FT80X_SPI),y)
+  CSRCS += ft80x_spi.c
+else ifeq ($(CONFIG_LCD_FT80X_I2C),y)
+  CSRCS += ft80x_i2c.c
+endif
+endif
 
 ifeq ($(CONFIG_LCD_P14201),y)
   CSRCS += p14201.c

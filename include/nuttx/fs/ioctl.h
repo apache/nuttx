@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/fs/ioctl.h
  *
- *   Copyright (C) 2008, 2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2014, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,29 +68,30 @@
 #define _BATIOCBASE     (0x0e00) /* Battery driver ioctl commands */
 #define _QEIOCBASE      (0x0f00) /* Quadrature encoder ioctl commands */
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
-#define _SLCDIOCBASE    (0x1100) /* Segment LCD ioctl commands */
-#define _WLIOCBASE      (0x1200) /* Wireless modules ioctl network commands */
-#define _WLCIOCBASE     (0x1300) /* Wireless modules ioctl character driver commands */
-#define _CFGDIOCBASE    (0x1400) /* Config Data device (app config) ioctl commands */
-#define _TCIOCBASE      (0x1500) /* Timer ioctl commands */
-#define _JOYBASE        (0x1600) /* Joystick ioctl commands */
-#define _PIPEBASE       (0x1700) /* FIFO/pipe ioctl commands */
-#define _RTCBASE        (0x1800) /* RTC ioctl commands */
-#define _RELAYBASE      (0x1900) /* Relay devices ioctl commands */
-#define _CANBASE        (0x1a00) /* CAN ioctl commands */
-#define _BTNBASE        (0x1b00) /* Button ioctl commands */
-#define _ULEDBASE       (0x1c00) /* User LED ioctl commands */
-#define _ZCBASE         (0x1d00) /* Zero Cross ioctl commands */
-#define _LOOPBASE       (0x1e00) /* Loop device commands */
-#define _MODEMBASE      (0x1f00) /* Modem ioctl commands */
-#define _I2CBASE        (0x2000) /* I2C driver commands */
-#define _SPIBASE        (0x2100) /* SPI driver commands */
-#define _GPIOBASE       (0x2200) /* GPIO driver commands */
-#define _CLIOCBASE      (0x2300) /* Contactless modules ioctl commands */
-#define _USBCBASE       (0x2400) /* USB-C controller ioctl commands */
-#define _MAC802154BASE  (0x2500) /* 802.15.4 MAC ioctl commands */
-#define _PWRBASE        (0x2600) /* Power-related ioctl commands */
-#define _FBIOCBASE      (0x2700) /* Frame buffer character driver ioctl commands */
+#define _LCDIOCBASE     (0x1100) /* LCD character driver ioctl commands */
+#define _SLCDIOCBASE    (0x1200) /* Segment LCD ioctl commands */
+#define _WLIOCBASE      (0x1300) /* Wireless modules ioctl network commands */
+#define _WLCIOCBASE     (0x1400) /* Wireless modules ioctl character driver commands */
+#define _CFGDIOCBASE    (0x1500) /* Config Data device (app config) ioctl commands */
+#define _TCIOCBASE      (0x1600) /* Timer ioctl commands */
+#define _JOYBASE        (0x1700) /* Joystick ioctl commands */
+#define _PIPEBASE       (0x1800) /* FIFO/pipe ioctl commands */
+#define _RTCBASE        (0x1900) /* RTC ioctl commands */
+#define _RELAYBASE      (0x1a00) /* Relay devices ioctl commands */
+#define _CANBASE        (0x1b00) /* CAN ioctl commands */
+#define _BTNBASE        (0x1c00) /* Button ioctl commands */
+#define _ULEDBASE       (0x1d00) /* User LED ioctl commands */
+#define _ZCBASE         (0x1e00) /* Zero Cross ioctl commands */
+#define _LOOPBASE       (0x1f00) /* Loop device commands */
+#define _MODEMBASE      (0x2000) /* Modem ioctl commands */
+#define _I2CBASE        (0x2100) /* I2C driver commands */
+#define _SPIBASE        (0x2200) /* SPI driver commands */
+#define _GPIOBASE       (0x2300) /* GPIO driver commands */
+#define _CLIOCBASE      (0x2400) /* Contactless modules ioctl commands */
+#define _USBCBASE       (0x2500) /* USB-C controller ioctl commands */
+#define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
+#define _PWRBASE        (0x2700) /* Power-related ioctl commands */
+#define _FBIOCBASE      (0x2800) /* Frame buffer character driver ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -306,6 +308,12 @@
 
 #define _AUDIOIOCVALID(c) (_IOC_TYPE(c)==_AUDIOIOCBASE)
 #define _AUDIOIOC(nr)     _IOC(_AUDIOIOCBASE,nr)
+
+/* LCD character driver ioctl definitions ***********************************/
+/* (see nuttx/include/lcd/slcd_codec.h */
+
+#define _LCDIOCVALID(c)   (_IOC_TYPE(c)==_LCDIOCBASE)
+#define _LCDIOC(nr)       _IOC(_LCDIOCBASE,nr)
 
 /* Segment LCD driver ioctl definitions *************************************/
 /* (see nuttx/include/lcd/slcd_codec.h */
