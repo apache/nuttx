@@ -604,6 +604,18 @@
 #define FT80X_BEGIN(prim) \
   ((31 << 24) | (((prim) & 15) << 0))
 
+/* Graphics primitive operations: */
+
+#define FT80X_PRIM_BITMAPS         1  /* Bitmap drawing primitive */
+#define FT80X_PRIM_POINTS          2  /* Point drawing primitive */
+#define FT80X_PRIM_LINES           3  /* Line drawing primitive */
+#define FT80X_PRIM_LINE_STRIP      4  /* Line strip drawing primitive */
+#define FT80X_PRIM_EDGE_STRIP_R    5  /* Edge strip right side drawing primitive */
+#define FT80X_PRIM_EDGE_STRIP_L    6  /* Edge strip left side drawing primitive */
+#define FT80X_PRIM_EDGE_STRIP_A    7  /* Edge strip above drawing primitive */
+#define FT80X_PRIM_EDGE_STRIP_B    8  /* Edge strip below side drawing primitive */
+#define FT80X_PRIM_RECTS           9  /* Rectangle drawing primitive */
+
 /* END (0x21) -Finish drawing a graphics primitive */
 
 #define FT80X_END() \
@@ -859,11 +871,9 @@ struct ft80x_cmd_button_s
   int16_t h;        /* 10: Height of the button (input) */
   int16_t font;     /* 12: bitmap handle to specify the font used in button label (input) */
   uint16_t options; /* 14: Button effects options (input) */
-  char s[1];        /* 16: Start of button label string (input)
+                    /* 16: Start of button label string (input)
                      *     NUL terminated and padded to 32-bit alignment */
 };
-
-#define SIZEOF_FT80X_CMD_BUTTON_S(n) (sizeof(struct ft80x_cmd_button_s) + (n) - 1)
 
 /* FT80X_CMD_CALIBRATE:  Execute touchscreen calibration routine */
 
@@ -995,11 +1005,9 @@ struct ft80x_cmd_inflate_s
 {
   uint32_t cmd;     /* 0:  FT80X_CMD_INFLATE */
   uint32_t ptr;     /* 4:  Destination address (input) */
-  uint8_t data[1];  /* 8:  Start of compressed data (input)
+                    /* 8:  Start of compressed data (input)
                      *     Padded to 32-bit alignment  */
 };
-
-#define SIZEOF_FT80X_CMD_INFLATE_S(n) (sizeof(struct ft80x_cmd_inflate_s) + (n) - 1)
 
 /* FT80X_CMD_INTERRUPT:  Trigger interrupt INT_CMDFLAG */
 
@@ -1020,11 +1028,9 @@ struct ft80x_cmd_keys_s
   int16_t h;        /* 10: Height of the keys (input) */
   int16_t font;     /* 12: Bitmap handle to specify the font used in key label (input) */
   uint16_t options; /* 14: 3D and other display options (input) */
-  char s[1];        /* 16: Key labels, one character per key (input)
+                    /* 16: Key labels, one character per key (input)
                      *     Padded to 32-bit alignment */
 };
-
-#define SIZEOF_FT80X_CMD_KEYS_S(n) (sizeof(struct ft80x_cmd_keys_s) + (n) - 1)
 
 /* FT80X_CMD_LOADIDENTITY:  Set the current matrix to identity */
 
@@ -1086,11 +1092,9 @@ struct ft80x_cmd_memwrite_s
   uint32_t cmd;     /* FT80X_CMD_MEMWRITE */
   uint32_t ptr;     /* 4:  Memory address to be written (input) */
   uint32_t num;     /* 8:  Number of bytes to be written (input) */
-  uint8_t data[1];  /* 12: Start of data to be written (input)
+                    /* 12: Start of data to be written (input)
                      *     Padded to 32-bit alignment. */
 };
-
-#define SIZEOF_FT80X_CMD_MEMWRITE_S(n) (sizeof(struct ft80x_cmd_memwrite_s) + (n) - 1)
 
 /* FT80X_CMD_MEMZERO:  Write zero to a block of memory */
 
@@ -1260,11 +1264,9 @@ struct ft80x_cmd_text_s
   int16_t y;        /* 6:  Y-coordinate of text base, in pixels (input) */
   int16_t font;     /* 8:  Font to use for text (input) */
   uint16_t options; /* 10: Justification options (input) */
-  char s[1];        /* 12: Start of text string (input)
+                    /* 12: Start of text string (input)
                      *     Must be NUL terminated and padded to 32-bit alignment */
 };
-
-#define SIZEOF_FT80X_CMD_TEXT_S(n) (sizeof(struct ft80x_cmd_text_s) + (n) - 1)
 
 /* FT80X_CMD_TOGGLE:  Draw a toggle switch */
 
@@ -1277,11 +1279,9 @@ struct ft80x_cmd_toggle_s
   int16_t font;     /* 10: font to use for text (input) */
   uint16_t options; /* 12: 3D options (input) */
   uint16_t state;   /* 14: state of the toggle: 0 is off, 65535 is on (input) */
-  char s[1]         /* 16: String label for toggle (0xff separated) (input)
+                    /* 16: String label for toggle (0xff separated) (input)
                      *     Padded to 32-bit boundary */
 };
-
-#define SIZEOF_FT80X_CMD_TOGGLE_S(n) (sizeof(struct ft80x_cmd_toggle_s) + (n) - 1)
 
 /* FT80X_CMD_TRACK - Enable co-processor to track touch on graphics object */
 
