@@ -632,16 +632,16 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* FT80X_IOC_GETRESULT32:
+      /* FT80X_IOC_GETDL32:
        *   Description:  Read a 32-bit value from the display list.
-       *   Argument:     A reference to an instance of struct ft80x_result32_s.
+       *   Argument:     A reference to an instance of struct ft80x_dlmem_s.
        *   Returns:      The 32-bit value read from the display list.
        */
 
-      case FT80X_IOC_GETRESULT32:
+      case FT80X_IOC_GETDL32:
         {
-          FAR struct ft80x_result32_s *result =
-            (FAR struct ft80x_result32_s *)((uintptr_t)arg);
+          FAR struct ft80x_dlmem_s *result =
+            (FAR struct ft80x_dlmem_s *)((uintptr_t)arg);
 
           if (result == NULL || ((uintptr_t)&result->offset & 3) != 0 ||
               result->offset >= FT80X_RAM_DL_SIZE)
@@ -657,25 +657,139 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* FT80X_IOC_GETTRACKER:
-       *   Description:  After CMD_TRACK has been issued, the coprocessor
-       *                 will update the TRACKER register with new position
-       *                 data.
-       *   Argument:     A pointer to a writable uint32_t memory location.
-       *   Returns:      The new content of the tracker register.
+      /* FT80X_IOC_GETREG8:
+       *   Description:  Read an 8-bit register value from the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Returns:      The 8-bit value read from the display list.
        */
 
-      case FT80X_IOC_GETTRACKER:
+      case FT80X_IOC_GETREG8:
         {
-          FAR uint32_t *tracker = (FAR uint32_t *)((uintptr_t)arg);
+          FAR struct ft80x_register_s *reg =
+            (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (tracker == NULL)
+          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
           else
             {
-              *tracker = ft80x_read_word(priv, FT80X_REG_TRACKER);
+              reg->value.u8 = ft80x_read_byte(priv, reg->addr);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_GETREG16:
+       *   Description:  Read a 16-bit register value from the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Returns:      The 16-bit value read from the display list.
+       */
+
+      case FT80X_IOC_GETREG16:
+        {
+          FAR struct ft80x_register_s *reg =
+            (FAR struct ft80x_register_s *)((uintptr_t)arg);
+
+          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              reg->value.u16 = ft80x_read_hword(priv, reg->addr);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_GETREG32:
+       *   Description:  Read a 32-bit register value from the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Returns:      The 32-bit value read from the display list.
+       */
+
+      case FT80X_IOC_GETREG32:
+        {
+          FAR struct ft80x_register_s *reg =
+            (FAR struct ft80x_register_s *)((uintptr_t)arg);
+
+          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              reg->value.u32 = ft80x_read_word(priv, reg->addr);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_PUTREG8:
+       *   Description:  Write an 8-bit register value to the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Returns:      None.
+       */
+
+      case FT80X_IOC_PUTREG8:
+        {
+          FAR struct ft80x_register_s *reg =
+            (FAR struct ft80x_register_s *)((uintptr_t)arg);
+
+          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_write_byte(priv, reg->addr, reg->value.u8);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_PUTREG16:
+       *   Description:  Write a 16-bit  register value to the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Returns:      None.
+       */
+
+      case FT80X_IOC_PUTREG16:
+        {
+          FAR struct ft80x_register_s *reg =
+            (FAR struct ft80x_register_s *)((uintptr_t)arg);
+
+          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_write_hword(priv, reg->addr, reg->value.u16);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_PUTREG32:
+       *   Description:  Write a 32-bit  register value to the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Returns:      None.
+       */
+
+      case FT80X_IOC_PUTREG32:
+        {
+          FAR struct ft80x_register_s *reg =
+            (FAR struct ft80x_register_s *)((uintptr_t)arg);
+
+          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_write_word(priv, reg->addr, reg->value.u32);
               ret = OK;
             }
         }

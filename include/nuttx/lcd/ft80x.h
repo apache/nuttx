@@ -124,18 +124,42 @@
  * display list offset.
  *
  * Output values from display commands are not automatically written back in
- * either case but must be subsequently obtained using FT80X_IOC_GETRESULT32.
+ * either case but must be subsequently obtained using FT80X_IOC_GETDL32.
  *
- * FT80X_IOC_GETRESULT32:
+ * FT80X_IOC_GETDL32:
  *   Description:  Read a 32-bit value from the display list.
- *   Argument:     A reference to an instance of struct ft80x_result32_s below.
+ *   Argument:     A reference to an instance of struct ft80x_dlmem_s below.
  *   Returns:      The 32-bit value read from the display list.
  *
- * FT80X_IOC_GETTRACKER:
- *   Description:  After CMD_TRACK has been issued, the co-processor will update
- *                 the TRACKER register with new position data.
- *   Argument:     A pointer to a writable uint32_t memory location.
- *   Returns:      The new content of the tracker register.
+ * FT80X_IOC_GETREG8:
+ *   Description:  Read an 8-bit register value from the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      The 8-bit value read from the display list.
+ *
+ * FT80X_IOC_GETREG16:
+ *   Description:  Read a 16-bit register value from the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      The 16-bit value read from the display list.
+ *
+ * FT80X_IOC_GETREG32:
+ *   Description:  Read a 32-bit register value from the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      The 32-bit value read from the display list.
+ *
+ * FT80X_IOC_PUTREG8:
+ *   Description:  Write an 8-bit register value to the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      None.
+ *
+ * FT80X_IOC_PUTREG16:
+ *   Description:  Write a 16-bit  register value to the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      None.
+ *
+ * FT80X_IOC_PUTREG32:
+ *   Description:  Write a 32-bit  register value to the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      None.
  *
  * FT80X_IOC_EVENTNOTIFY:
  *   Description:  Setup to receive a signal when there is a change in any
@@ -151,9 +175,14 @@
 
 #define FT80X_IOC_CREATEDL          _LCDIOC(FT80X_NIOCTL_BASE + 0)
 #define FT80X_IOC_APPENDDL          _LCDIOC(FT80X_NIOCTL_BASE + 1)
-#define FT80X_IOC_GETRESULT32       _LCDIOC(FT80X_NIOCTL_BASE + 2)
-#define FT80X_IOC_GETTRACKER        _LCDIOC(FT80X_NIOCTL_BASE + 3)
-#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 4)
+#define FT80X_IOC_GETDL32           _LCDIOC(FT80X_NIOCTL_BASE + 2)
+#define FT80X_IOC_GETREG8           _LCDIOC(FT80X_NIOCTL_BASE + 3)
+#define FT80X_IOC_GETREG16          _LCDIOC(FT80X_NIOCTL_BASE + 4)
+#define FT80X_IOC_GETREG32          _LCDIOC(FT80X_NIOCTL_BASE + 5)
+#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 6)
+#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 7)
+#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 8)
+#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 9)
 
 /* FT80x Display List Commands **********************************************/
 /* Host commands.  3 word commands.  The first word begins with 0b01, the next two are zero */
@@ -1055,17 +1084,17 @@ struct ft80x_cmd_translate_s
 
 struct ft80x_displaylist_s
 {
-  uint32_t dlsize;          /* Size of the display list in bytes (input) */
-  struct ft80x_dlcmd_s cmd; /* First command in the display list (input)  */
+  uint32_t dlsize;          /* Size of the display list in bytes */
+  struct ft80x_dlcmd_s cmd; /* First command in the display list  */
 };
 
-/* This structure is used with the FT80X_IOC_GETRESULT32 IOCTL command to
+/* This structure is used with the FT80X_IOC_GETDL32 IOCTL command to
  * retrieve the result of the display list operation from display list memory.
  */
 
-struct ft80x_result32_s
+struct ft80x_dlmem_s
 {
-  uint32_t offset;         /* 32-bit aligned offset into the display list (input)  */
+  uint32_t offset;         /* 32-bit aligned offset into the display list */
   uint32_t value;          /* 32-bit value read from display list + offset */
 };
 
@@ -1091,6 +1120,27 @@ struct ft80x_notify_s
   pid_t pid;                 /* Send the notification to this task */
   enum ft80x_notify_e event; /* Notify on this event */
   bool enable;               /* True: enable notification; false: disable */
+};
+
+/* This structure is used with the FT80X_IOC_GETREGnn and FT80X_IOC_PUTREGnn
+ * IOCTL commands to describe the requested register access.
+ *
+ * NOTES:
+ *   - For FT80X_IOC_GETREGnn, the value is an output; for FT80X_IOC_PUTREGnn,
+ *     the value is an input.
+ *   - The union field used to access the register value depends on the width
+ *     of the requested access.
+ */
+
+struct ft80x_register_s
+{
+  uint32_t addr;             /* 32-bit aligned register address */
+  union
+  {
+    uint8_t u8;              /* 8-bit register value */
+    uint16_t u16;            /* 16-bit register value */
+    uint32_t u32;            /* 32-bit register value */
+  } value;
 };
 
 /****************************************************************************
