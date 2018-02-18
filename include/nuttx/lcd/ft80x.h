@@ -53,6 +53,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/lcd/lcd_ioctl.h>
@@ -62,13 +63,23 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration */
+/* Configuration ************************************************************/
 
 #ifdef CONFIG_DISABLE_SIGNALS
 #  error Signal support is required by this driver
 #endif
 
-/* FT80x IOCTL commands:
+#if defined(CONFIG_LCD_FT80X_WQVGA)
+#  define FT80X_DISPLAY_WIDTH   480
+#  define FT80X_DISPLAY_HEIGHT  272
+#elif defined(CONFIG_LCD_FT80X_QVGA)
+#  define FT80X_DISPLAY_WIDTH   320
+#  define FT80X_DISPLAY_HEIGHT  240
+#else
+#  error Unknown display size
+#endif
+
+/* FT80x IOCTL commands *****************************************************
  *
  * FT80X_IOC_CREATEDL:
  *   Description:  Write a display list to the FT80x display list memory
@@ -144,6 +155,7 @@
 #define FT80X_IOC_GETTRACKER        _LCDIOC(FT80X_NIOCTL_BASE + 3)
 #define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 4)
 
+/* FT80x Display List Commands **********************************************/
 /* Host commands.  3 word commands.  The first word begins with 0b01, the next two are zero */
 
 #define FT80X_CMD_ACTIVE           0x00        /* Switch from Standby/Sleep modes to active mode */
@@ -466,6 +478,7 @@
  * Public Types
  ****************************************************************************/
 
+/* FT80x Lower Half Interface Definitions ***********************************/
 /* Pins relevant to software control.  The FT80X is a 48-pin part.  Most of
  * the pins are associated with the TFT panel and other board-related
  * support.  A few a relevant to software control of the part.  Those are
@@ -524,6 +537,7 @@ struct ft80x_config_s
 #endif
 };
 
+/* FT80x Display List Command Structures ************************************/
 /* This structure describes one generic display list command */
 
 struct ft80x_dlcmd_s
@@ -1034,6 +1048,7 @@ struct ft80x_cmd_translate_s
   int32_t ty;       /* 8:  Y translate factor (b16) (input) */
 };
 
+/* FT80x IOCTL Argument Structures ******************************************/
 /* This container structure is used by FT80X_IOC_CREATEDL and FT80X_IOC_APPENDDL.  It
  * and defines the list of display commands to be written into display list memory.
  */

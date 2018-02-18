@@ -78,12 +78,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define CHIPID     0x7c
+#define ROMID_MASK 0x0000ffff
 #if defined(CONFIG_LCD_FT800)
-#  define DEVNAME "/dev/ft800"
-#  define ROMID   0x01000800
+#  define DEVNAME  "/dev/ft800"
+#  define ROMID    0x00000800
 #elif defined(CONFIG_LCD_FT801)
-#  define DEVNAME "/dev/ft801"
-#  define ROMID   0x01000801
+#  define DEVNAME  "/dev/ft801"
+#  define ROMID    0x00000801
 #else
 #  error No FT80x device configured
 #endif
@@ -800,6 +802,7 @@ static int ft80x_unlink(FAR struct inode *inode)
 
 static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
 {
+  uint32_t timeout;
   uint8_t regval32;
   uint8_t regval8;
 
@@ -874,23 +877,39 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
 
   /* 2. Send Host command CLKEXT to FT800
    * 3. Send Host command ACTIVE to enable clock to FT800.
+   *
+   * PLL output should default to 48MHz.
    */
 
   ft80x_host_command(priv, FT80X_CMD_CLKEXT);
   ft80x_host_command(priv, FT80X_CMD_ACTIVE);
 
-  /* Verify the chip ID */
+  /* Verify the chip ID.  Read repeatedly until FT80x is ready. */
 
-  regval32 = ft80x_read_word(priv, FT80X_REG_ID);
-  if ((regval32 & ID_MASK) != 0x7c)
+  timeout = 0;
+  for (; ; )
     {
-      lcderr("ERROR: Bad chip ID: %02x\n",
-             (unsigned int)(regval32 & ID_MASK));
-      return -ENODEV;
+      /* Read the Chip ID */
+
+      regval8 = ft80x_read_byte(priv, FT80X_REG_ID);
+      if (regval8 == CHIPID)
+        {
+          /* Chip ID verify so FT80x is ready */
+
+          break;
+        }
+
+      /* Initial Chip ID read may fail because the chip is not yet ready. */
+
+      if (++timeout > 100000)
+        {
+          lcderr("ERROR: Bad chip ID: %02x\n", regval8);
+          return -ENODEV;
+        }
     }
 
   regval32 = ft80x_read_word(priv, FT80X_ROM_CHIPID);
-  if (regval32 != ROMID)
+  if ((regval32 & ROMID_MASK) != ROMID)
     {
       lcderr("ERROR: Bad ROM chip ID: %08lx\n", (unsigned long)regval32);
       return -ENODEV;
@@ -907,8 +926,8 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    * b. Set the following registers with values for the chosen display.
    *    Typical WQVGA and QVGA values are shown:
    *
-   *    Register            Description                      WQVGA    QVGA 320 x 240
-   *                                                     480x272  320x240
+   *    Register            Description                    WQVGA     QVGA
+   *                                                      480x272  320x240
    *    FT80X_REG_PCLK_POL  Pixel Clock Polarity             1        0
    *    FT80X_REG_HSIZE     Image width in pixels            480      320
    *    FT80X_REG_HCYCLE    Total number of clocks per line  548      408
@@ -958,7 +977,7 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
   ft80x_write_hword(priv, FT80X_REG_VOFFSET, 13);
   ft80x_write_hword(priv, FT80X_REG_VSYNC0, 0);
   ft80x_write_hword(priv, FT80X_REG_VSYNC1, 2);
-  ft80x_write_byte(priv, FT80X_REG_SWIZZLE, 0);  /* REVISIT */
+  ft80x_write_byte(priv, FT80X_REG_SWIZZLE, 2);
   ft80x_write_byte(priv, FT80X_REG_PCLK_POL, 0);
   ft80x_write_byte(priv, FT80X_REG_CSPREAD, 1);
   ft80x_write_hword(priv, FT80X_REG_HSIZE, 320);
@@ -998,19 +1017,42 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
 
   /* 8. Write FT80X_REG_PCLK, video output begins with the first display list */
 
+#if defined(CONFIG_LCD_FT80X_WQVGA)
   ft80x_write_byte(priv, FT80X_REG_PCLK, 5);
+#elif defined(CONFIG_LCD_FT80X_QVGA)
+  ft80x_write_byte(priv, FT80X_REG_PCLK, 8);
+#else
+#  error Unknown display size
+#endif
 
   /* 9. Use MCU SPI clock not more than 30MHz */
 
   DEBUGASSERT(priv->lower->op_frequency <= 30000000);
   priv->frequency = priv->lower->op_frequency;
 
+  /* Configure touch threshold.
+   * REVISIT:  For FT800 set REG_TOUCH_RZTHRESH to 1200.
+   */
+
+#if defined(CONFIG_LCD_FT800)
+  /* Configure the REG_TOUCH_RZTHRESH the value 1200 may need to be tweaked
+   * for your application.
+   */
+
+  ft80x_write_hword(priv, FT80X_REG_TOUCH_RZTHRESH, 1200);
+
+#elif defined(CONFIG_LCD_FT801)
+#  warning Missing logic
+#else
+#  error No FT80x device configured
+#endif
+
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: ft80x_register
