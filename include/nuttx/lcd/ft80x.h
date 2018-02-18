@@ -62,6 +62,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration */
+
+#ifdef CONFIG_DISABLE_SIGNALS
+#  error Signal support is required by this driver
+#endif
 
 /* FT80x IOCTL commands:
  *
@@ -116,16 +121,28 @@
  *   Returns:      The 32-bit value read from the display list.
  *
  * FT80X_IOC_GETTRACKER:
- *   Description:  After CMD_TRACK has been issued, the coprocessor will update
+ *   Description:  After CMD_TRACK has been issued, the co-processor will update
  *                 the TRACKER register with new position data.
  *   Argument:     A pointer to a writable uint32_t memory location.
  *   Returns:      The new content of the tracker register.
+ *
+ * FT80X_IOC_EVENTNOTIFY:
+ *   Description:  Setup to receive a signal when there is a change in any
+ *                 touch tag value.  Additional information may be provided in
+ *                 the signinfo.si_val file of the notification:
+ *
+ *                 For touch tag events, siginfo.si_value will indicate the
+ *                 touch tag.  For the FT801 in extended mode, it will
+ *                 indicate only the tag value for TOUCH0.
+ *   Argument:     A reference to an instance of struct ft80x_notify_s.
+ *   Returns:      None
  */
 
 #define FT80X_IOC_CREATEDL          _LCDIOC(FT80X_NIOCTL_BASE + 0)
 #define FT80X_IOC_APPENDDL          _LCDIOC(FT80X_NIOCTL_BASE + 1)
 #define FT80X_IOC_GETRESULT32       _LCDIOC(FT80X_NIOCTL_BASE + 2)
 #define FT80X_IOC_GETTRACKER        _LCDIOC(FT80X_NIOCTL_BASE + 3)
+#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 4)
 
 /* Host commands.  3 word commands.  The first word begins with 0b01, the next two are zero */
 
@@ -1035,6 +1052,30 @@ struct ft80x_result32_s
 {
   uint32_t offset;         /* 32-bit aligned offset into the display list (input)  */
   uint32_t value;          /* 32-bit value read from display list + offset */
+};
+
+/* This structure is used with the FT80X_IOC_EVENTNOTIFY IOCTL command to describe
+ * the requested event notification.
+ */
+
+enum ft80x_notify_e
+{
+  FT80X_NOTIFY_SWAP = 0,     /* Bit 0: Display swap occurred */
+  FT80X_NOTIFY_TOUCH,        /* Touch-screen touch detected */
+  FT80X_NOTIFY_TAG,          /* Touch-screen tag value change */
+  FT80X_NOTIFY_SOUND,        /* Sound effect ended */
+  FT80X_NOTIFY_PLAYBACK,     /* Audio playback ended */
+  FT80X_NOTIFY_CMDEMPTY,     /* Bit 5: Command FIFO empty */
+  FT80X_NOTIFY_CMDFLAG,      /* Command FIFO flag */
+  FT80X_NOTIFY_CONVCOMPLETE  /* Touch-screen conversions completed */
+};
+
+struct ft80x_notify_s
+{
+  int signo;                 /* Notify using this signal number */
+  pid_t pid;                 /* Send the notification to this task */
+  enum ft80x_notify_e event; /* Notify on this event */
+  bool enable;               /* True: enable notification; false: disable */
 };
 
 /****************************************************************************

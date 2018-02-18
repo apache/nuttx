@@ -237,7 +237,12 @@
 
 /* FT80x Register Bit Definitions **********************************************************/
 
+/* FT80X_REG_ID */
+
 #define ID_MASK                        0xff      /* Bits 0-7: Register ID */
+
+/* FT80X_REG_DLSWAP */
+
 #define DLSWAP_LINE                    1         /* Bits 0-1: 1=Graphics engine will render
                                                   * the screen immediately after current line.
                                                   * May cause a tearing effect.
@@ -246,16 +251,25 @@
                                                   * the screen immediately after the current
                                                   * frame is scanned out (recommended).
                                                   */
+/* FT80X_REG_TOUCH_TAG */
+
+#define TOUCH_TAG_MASK                 0xff      /* Bits 0-7: Tag of touched graphic object */
 
 /* Interrupts ******************************************************************************/
-
-/* The interrupt output pin is enabled by REG_INT_EN. When REG_INT_EN is 0, INT_N is
- * tri-state (pulled to high by external pull-up resistor). When REG_INT_EN is 1, INT_N is
+/* The interrupt output pin is enabled by REG_INT_EN.  When REG_INT_EN is 0, INT_N is
+ * tri-state (pulled to high by external pull-up resistor).  When REG_INT_EN is 1, INT_N is
  * driven low when any of the interrupt flags in REG_INT_FLAGS are high, after masking with
- * REG_INT_MASK. Writing a ‘1’ in any bit of REG_INT_MASK will enable the correspond
- * interrupt. Each bit in REG_INT_FLAGS is set by a corresponding interrupt source.
+ * REG_INT_MASK. Writing a '1' in any bit of REG_INT_MASK will enable the correspond
+ * interrupt.  Each bit in REG_INT_FLAGS is set by a corresponding interrupt source.
  * REG_INT_FLAGS is readable by the host at any time, and clears when read.
  */
+
+/* FT80X_REG_INT_EN */
+
+#define FT80X_INT_ENABLE               (0)       /* Bit 0: 0=Interrupts disabled */
+#define FT80X_INT_DISABLE              (1 << 0)  /*        1=Interrupts enabled */
+
+/* FT80X_REG_INT_FLAGS and FT80X_REG_INT_MASK */
 
 #define FT80X_INT_SWAP                 (1 << 0)  /* Bit 0: Display swap occurred */
 #define FT80X_INT_TOUCH                (1 << 1)  /* Bit 1: Touch-screen touch detected */
@@ -265,6 +279,9 @@
 #define FT80X_INT_CMDEMPTY             (1 << 5)  /* Bit 5: Command FIFO empty */
 #define FT80X_INT_CMDFLAG              (1 << 6)  /* Bit 6: Command FIFO flag */
 #define FT80X_INT_CONVCOMPLETE         (1 << 7)  /* Bit 7: Touch-screen conversions completed */
+
+#define FT80X_INT_NEVENTS              8
+#define FT80X_INT(n)                   (1 << (n))
 
 /*******************************************************************************************
  * Public Types
@@ -368,6 +385,15 @@ struct ft80x_i2cwrite_s
                    /* Write data follows */
 };
 
+/* This structure describes one signal notification */
+
+struct ft80x_eventinfo_s
+{
+  uint8_t signo;                          /* Notify using this signal number */
+  bool enable;                            /* True: enable notification; false: disable */
+  int16_t pid;                            /* Send the notification to this task */
+};
+
 /* This structure describes the overall state of the FT80x driver */
 
 struct spi_dev_s;    /* Forward reference */
@@ -375,12 +401,17 @@ struct i2c_master_s; /* Forward reference */
 
 struct ft80x_dev_s
 {
+  /* Cached interface instances */
+
 #ifdef CONFIG_LCD_FT80X_SPI
   FAR struct spi_dev_s  *spi;             /* Cached SPI device reference */
 #else
   FAR struct i2c_master_s *i2c;           /* Cached SPI device reference */
 #endif
   FAR const struct ft80x_config_s *lower; /* Cached lower half instance */
+
+  /* Internal driver logic */
+
   struct work_s intwork;                  /* Support back end interrupt processing */
   uint32_t frequency;                     /* Effective frequency */
   sem_t exclsem;                          /* Mutual exclusion semaphore */
@@ -388,6 +419,10 @@ struct ft80x_dev_s
   uint8_t crefs;                          /* Number of open references */
   bool unlinked;                          /* True if the driver has been unlinked */
 #endif
+
+  /* Event notification support */
+
+  struct ft80x_eventinfo_s notify[FT80X_INT_NEVENTS];
 };
 
 /****************************************************************************

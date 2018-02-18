@@ -1,5 +1,5 @@
 /**************************************************************************************
- * drivers/lcd/ft80x_base.c
+ * drivers/lcd/ft80x.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,12 +53,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <poll.h>
+#include <signal.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
@@ -91,6 +92,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static void ft80x_notify(FAR struct ft80x_dev_s *priv,
+              enum ft80x_notify_e event, int value);
 static void ft80x_interrupt_work(FAR void *arg);
 static int  ft80x_interrupt(int irq, FAR void *context, FAR void *arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -140,6 +143,39 @@ static const struct file_operations g_ft80x_fops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ft80x_notify
+ *
+ * Description:
+ *   Notify any registered client of the FT80x event
+ *
+ ****************************************************************************/
+
+static void ft80x_notify(FAR struct ft80x_dev_s *priv,
+                         enum ft80x_notify_e event, int arg)
+{
+  FAR struct ft80x_eventinfo_s *info = &priv->notify[event];
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  union sigval value;
+#endif
+
+  /* Are notifications enabled for this event? */
+
+  if (info->enable)
+    {
+      DEBUGASSERT(info->signo > 0 && GOOD_SIGNAL(info->signo) && info->pid > 0);
+
+      /* Yes.. Signal the client */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+      value.sival_int = arg;
+      (void)nxsig_queue(info->pid, info->signo, value);
+#else
+      (void)nxsig_queue(info->pid, info->signo, (FAR void *)arg);
+#endif
+    }
+}
+
+/****************************************************************************
  * Name: ft80x_interrupt_work
  *
  * Description:
@@ -151,8 +187,19 @@ static void ft80x_interrupt_work(FAR void *arg)
 {
   FAR struct ft80x_dev_s *priv = (FAR struct ft80x_dev_s *)arg;
   uint32_t intflags;
+  uint32_t regval;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
+
+  /* Get exclusive access to the device structures */
+
+  do
+    {
+      ret = nxsem_wait(&priv->exclsem);
+      DEBUGASSERT(ret == OK || ret == -EINTR);
+    }
+  while (ret < 0);
 
   /* Get the set of pending interrupts.  Note that simply reading this
    * register is sufficient to clear all pending interrupts.
@@ -171,6 +218,7 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Display swap occurred */
 
        lcdinfo("Display swap occurred\n");
+       ft80x_notify(priv, FT80X_NOTIFY_SWAP, 0);
      }
 
    if ((intflags & FT80X_INT_TOUCH) != 0)
@@ -178,6 +226,7 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Touch-screen touch detected */
 
        lcdinfo("Touch-screen touch detected\n");
+       ft80x_notify(priv, FT80X_NOTIFY_TOUCH, 0);
      }
 
    if ((intflags & FT80X_INT_TAG) != 0)
@@ -185,6 +234,12 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Touch-screen tag value change */
 
        lcdinfo("Touch-screen tag value change\n");
+#ifdef CONFIG_LCD_FT800
+       regval = ft80x_read_word(priv, FT80X_REG_TOUCH_TAG);
+#else
+       regval = ft80x_read_word(priv, FT80X_REG_CTOUCH_TAG);
+#endif
+       ft80x_notify(priv, FT80X_NOTIFY_TAG, (int)(regval & TOUCH_TAG_MASK));
      }
 
    if ((intflags & FT80X_INT_SOUND) != 0)
@@ -192,6 +247,7 @@ static void ft80x_interrupt_work(FAR void *arg)
        /*  Sound effect ended */
 
        lcdinfo(" Sound effect ended\n");
+       ft80x_notify(priv, FT80X_NOTIFY_SOUND, 0);
      }
 
    if ((intflags & FT80X_INT_PLAYBACK) != 0)
@@ -199,6 +255,7 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Audio playback ended */
 
        lcdinfo("Audio playback ended\n");
+       ft80x_notify(priv, FT80X_NOTIFY_PLAYBACK, 0);
      }
 
    if ((intflags & FT80X_INT_CMDEMPTY) != 0)
@@ -206,6 +263,7 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Command FIFO empty */
 
        lcdinfo("Command FIFO empty\n");
+       ft80x_notify(priv, FT80X_NOTIFY_CMDEMPTY, 0);
      }
 
    if ((intflags & FT80X_INT_CMDFLAG) != 0)
@@ -213,6 +271,7 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Command FIFO flag */
 
        lcdinfo("Command FIFO flag\n");
+       ft80x_notify(priv, FT80X_NOTIFY_CMDFLAG, 0);
      }
 
    if ((intflags & FT80X_INT_CONVCOMPLETE) != 0)
@@ -220,12 +279,14 @@ static void ft80x_interrupt_work(FAR void *arg)
        /* Touch-screen conversions completed */
 
        lcdinfo(" Touch-screen conversions completed\n");
+       ft80x_notify(priv, FT80X_NOTIFY_CONVCOMPLETE, 0);
      }
 
   /* Re-enable interrupts */
 
   DEBUGASSERT(priv->lower != NULL && priv->lower->enable != NULL);
   priv->lower->enable(priv->lower, true);
+  nxsem_post(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -247,8 +308,9 @@ static int ft80x_interrupt(int irq, FAR void *context, FAR void *arg)
   work_queue(HPWORK, &priv->intwork, ft80x_interrupt_work, priv, 0);
 
   /* Disable further interrupts for the GPIO interrupt source.
-   * REVISIT:  This assumes that interrupts will pend until re-enabled.
-   * In certain implementations, this can cause a loss of interrupts.
+   * REVISIT:  This assumes that GPIO interrupts will pend until re-enabled.
+   * In certain implementations, that assumption is not true and could cause
+   * a loss of interrupts.
    */
 
   DEBUGASSERT(priv->lower != NULL && priv->lower->enable != NULL);
@@ -522,18 +584,18 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* FALLTHROUGH */
 
-     /* FT80X_IOC_APPENDDL:
-      *   Description:  Write additional display list entries to the FT80x
-      *                 display list memory at the current display list offset.
-      *                 This IOCTL command permits display lists to be completed
-      *                 incrementally, starting with FT80X_IOC_CREATEDL and
-      *                 finishing the display list using FT80XIO_APPENDDL.
-      *   Argument:     A reference to a display list structure instance.  See
-      *                 struct ft80x_displaylist_s.
-      *   Returns:      None
-      */
+      /* FT80X_IOC_APPENDDL:
+       *   Description:  Write additional display list entries to the FT80x
+       *                 display list memory at the current display list offset.
+       *                 This IOCTL command permits display lists to be completed
+       *                 incrementally, starting with FT80X_IOC_CREATEDL and
+       *                 finishing the display list using FT80XIO_APPENDDL.
+       *   Argument:     A reference to a display list structure instance.  See
+       *                 struct ft80x_displaylist_s.
+       *   Returns:      None
+       */
 
-     case FT80X_IOC_APPENDDL:
+      case FT80X_IOC_APPENDDL:
         {
           FAR struct ft80x_displaylist_s *dl =
             (FAR struct ft80x_displaylist_s *)((uintptr_t)arg);
@@ -613,6 +675,72 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               *tracker = ft80x_read_word(priv, FT80X_REG_TRACKER);
               ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_EVENTNOTIFY:
+       *   Description:  Setup to receive a signal when an event occurs.
+       *   Argument:     A reference to an instance of struct ft80x_notify_s.
+       *   Returns:      None
+       */
+
+      case FT80X_IOC_EVENTNOTIFY:
+        {
+          FAR struct ft80x_notify_s *notify =
+            (FAR struct ft80x_notify_s *)((uintptr_t)arg);
+
+          if (notify == NULL || !GOOD_SIGNO(notify->signo) || notify->pid < 0 ||
+              (unsigned int)notify->event >= FT80X_INT_NEVENTS)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              FAR struct ft80x_eventinfo_s *info = &priv->notify[notify->event];
+              uint32_t regval;
+
+              /* Are we enabling or disabling */
+
+              if (notify->enable)
+                {
+                  /* Make sure that arguments are valid for the enable */
+
+                  if (notify->signo == 0 || notify->pid == 0)
+                    {
+                      ret = -EINVAL;
+                    }
+                  else
+                    {
+                      /* Setup the new notification information */
+
+                      info->signo  = notify->signo;
+                      info->pid    = notify->pid;
+                      info->enable = true;
+
+                      /* Enable interrupts associated with the event */
+
+                      regval  = ft80x_read_word(priv, FT80X_REG_INT_MASK);
+                      regval |= (1 << notify->event);
+                      ft80x_write_word(priv, FT80X_REG_INT_MASK, regval);
+                      ret = OK;
+                    }
+                }
+              else
+                {
+                  /* Disable the notification */
+
+                  info->signo  = 0;
+                  info->pid    = 0;
+                  info->enable = false;
+
+                  /* Disable interrupts associated with the event */
+
+                  regval  = ft80x_read_word(priv, FT80X_REG_INT_MASK);
+                  regval &= ~(1 << notify->event);
+                  ft80x_write_word(priv, FT80X_REG_INT_MASK, regval);
+                  ret = OK;
+                }
             }
         }
         break;
@@ -968,7 +1096,7 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
    */
 
   ft80x_write_word(priv, FT80X_REG_INT_MASK, 0);
-  ft80x_write_word(priv, FT80X_REG_INT_EN, 1);
+  ft80x_write_word(priv, FT80X_REG_INT_EN, FT80X_INT_ENABLE);
   lower->enable(lower, true);
 
   /* Register the FT80x character driver */
@@ -983,7 +1111,7 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
 
 errout_with_interrupts:
   lower->enable(lower, false);
-  ft80x_write_word(priv, FT80X_REG_INT_EN, 0);
+  ft80x_write_word(priv, FT80X_REG_INT_EN, FT80X_INT_DISABLE);
   lower->attach(lower, NULL, NULL);
 
 errout_with_sem:

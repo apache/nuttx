@@ -44,7 +44,7 @@ endif
 # Include support for Graphics LCD drivers
 
 ifeq ($(CONFIG_LCD_FT80X),y)
-  CSRCS += ft80x_base.c
+  CSRCS += ft80x.c
 ifeq ($(CONFIG_LCD_FT80X_SPI),y)
   CSRCS += ft80x_spi.c
 else ifeq ($(CONFIG_LCD_FT80X_I2C),y)
