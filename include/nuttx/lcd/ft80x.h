@@ -1,4 +1,4 @@
-/****************************************************************************
+/********************************************************************************************
  * include/nuttx/lcd/ft80x.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -43,14 +43,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_LCD_FT80X_H
 #define __INCLUDE_NUTTX_LCD_FT80X_H
 
-/****************************************************************************
+/********************************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
@@ -60,10 +60,10 @@
 
 #ifdef CONFIG_LCD_FT80X
 
-/****************************************************************************
+/********************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+ ********************************************************************************************/
+/* Configuration ****************************************************************************/
 
 #ifdef CONFIG_DISABLE_SIGNALS
 #  error Signal support is required by this driver
@@ -79,7 +79,7 @@
 #  error Unknown display size
 #endif
 
-/* FT80x IOCTL commands *****************************************************
+/* FT80x IOCTL commands *********************************************************************
  *
  * FT80X_IOC_CREATEDL:
  *   Description:  Write a display list to the FT80x display list memory
@@ -184,7 +184,236 @@
 #define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 8)
 #define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 9)
 
-/* FT80x Display List Commands **********************************************/
+/* FT80x Memory Map *************************************************************************/
+
+/* Address region */
+
+#define FT80X_RAM_G                    0x000000  /* Main graphics RAM (256Kb) */
+#define FT80X_ROM_CHIPID               0x0c0000  /* FT80x chip identification and revision
+                                                  * information (4b):
+                                                  * Byte [0:1] Chip ID: 0800 or 0801
+                                                  * Byte [2:3] Version ID: 0100 */
+#define FT80X_ROM_FONT                 0x0bb23c  /* Font table and bitmap (275Kb) */
+#define FT80X_ROM_FONT_ADDR            0x0ffffc  /* Font table pointer address (4b) */
+#define FT80X_RAM_DL                   0x100000  /* Display List RAM (8Kb) */
+#define FT80X_RAM_PAL                  0x102000  /* Palette RAM (1Kb) */
+#define FT80X_REG                      0x102400  /* Registers (380b) */
+#define FT80X_RAM_CMD                  0x108000  /* Command Buffer (4Kb) */
+
+#ifdef CONFIG_LCD_FT801
+#  define FT80X_RAM_SCREENSHOT         0x1c2000  /* Screenshot readout buffer  (2Kb) */
+#endif
+
+/* Memory buffer sizes */
+
+#define FT80X_RAM_G_SIZE               (256 * 1024)
+#define FT80X_CMDFIFO_SIZE             (4 * 1024)
+#define FT80X_RAM_DL_SIZE              (8 * 1024)
+#define FT80X_RAM_PAL_SIZE             (1 * 1024)
+
+/* FT80x Register Addresses *****************************************************************/
+
+#define FT80X_REG_ID                   0x102400  /* Identification register, always reads as 7c */
+#define FT80X_REG_FRAMES               0x102404  /* Frame counter, since reset */
+#define FT80X_REG_CLOCK                0x102408  /* Clock cycles, since reset */
+#define FT80X_REG_FREQUENCY            0x10240c  /* Main clock frequency */
+
+#if defined(CONFIG_LCD_FT800)
+#  define FT80X_REG_RENDERMODE         0x102410  /* Rendering mode: 0 = normal, 1 = single-line */
+#  define FT80X_REG_SNAPY              0x102414  /* Scan line select for RENDERMODE 1 */
+#  define FT80X_REG_SNAPSHOT           0x102418  /* Trigger for RENDERMODE 1 */
+#elif defined(CONFIG_LCD_FT801)
+#  define FT80X_REG_SCREENSHOT_EN      0x102410  /* Set to enable screenshot mode */
+#  define FT80X_REG_SCREENSHOT_Y       0x102414  /* Y line number for screenshot */
+#  define FT80X_REG_SCREENSHOT_START   0x102418  /* Screenshot start trigger */
+#endif
+
+#define FT80X_REG_CPURESET             0x10241c  /* Graphics, audio and touch engines reset
+                                                  * control */
+#define FT80X_REG_TAP_CRC              0x102420  /* Live video tap crc. Frame CRC is computed
+                                                  * every DL SWAP. */
+#define FT80X_REG_TAP_MASK             0x102424  /* Live video tap mask */
+#define FT80X_REG_HCYCLE               0x102428  /* Horizontal total cycle count */
+#define FT80X_REG_HOFFSET              0x10242c  /* Horizontal display start offset */
+#define FT80X_REG_HSIZE                0x102430  /* Horizontal display pixel count */
+#define FT80X_REG_HSYNC0               0x102434  /* Horizontal sync fall offset */
+#define FT80X_REG_HSYNC1               0x102438  /* Horizontal sync rise offset */
+#define FT80X_REG_VCYCLE               0x10243c  /* Vertical total cycle count */
+#define FT80X_REG_VOFFSET              0x102440  /* Vertical display start offset */
+#define FT80X_REG_VSIZE                0x102444  /* Vertical display line count */
+#define FT80X_REG_VSYNC0               0x102448  /* Vertical sync fall offset */
+#define FT80X_REG_VSYNC1               0x10244c  /* Vertical sync rise offset */
+#define FT80X_REG_DLSWAP               0x102450  /* Display list swap control */
+#define FT80X_REG_ROTATE               0x102454  /* Screen 180 degree rotate */
+#define FT80X_REG_OUTBITS              0x102458  /* Output bit resolution, 3x3x3 bits */
+#define FT80X_REG_DITHER               0x10245c  /* Output dither enable */
+#define FT80X_REG_SWIZZLE              0x102460  /* Output RGB signal swizzle */
+#define FT80X_REG_CSPREAD              0x102464  /* Output clock spreading enable */
+#define FT80X_REG_PCLK_POL             0x102468  /* PCLK polarity: 0=rising edge, 1= falling edge */
+#define FT80X_REG_PCLK                 0x10246c  /* PCLK frequency divider, 0 = disable */
+#define FT80X_REG_TAG_X                0x102470  /* Tag query X coordinate */
+#define FT80X_REG_TAG_Y                0x102474  /* Tag query Y coordinate */
+#define FT80X_REG_TAG                  0x102478  /* Tag query result */
+#define FT80X_REG_VOL_PB               0x10247c  /* Volume for playback */
+#define FT80X_REG_VOL_SOUND            0x102480  /* Volume for synthesizer sound */
+#define FT80X_REG_SOUND                0x102484  /* Sound effect select */
+#define FT80X_REG_PLAY                 0x102488  /* Start effect playback */
+#define FT80X_REG_GPIO_DIR             0x10248c  /* GPIO pin direction, 0=input, 1=output */
+#define FT80X_REG_GPIO                 0x102490  /* Pin value (bits 0,1,7); Drive strength
+                                                  * (bits 2-6) */
+                                                 /* 0x102494 Reserved */
+#define FT80X_REG_INT_FLAGS            0x102498  /* Interrupt flags, clear by read */
+#define FT80X_REG_INT_EN               0x10249c  /* Global interrupt enable */
+#define FT80X_REG_INT_MASK             0x1024a0  /* Interrupt enable mask */
+#define FT80X_REG_PLAYBACK_START       0x1024a4  /* Audio playback RAM start address */
+#define FT80X_REG_PLAYBACK_LENGTH      0x1024a8  /* Audio playback sample length (bytes) */
+#define FT80X_REG_PLAYBACK_READPTR     0x1024ac  /* Audio playback current read pointer */
+#define FT80X_REG_PLAYBACK_FREQ        0x1024b0  /* Audio playback sampling frequency (Hz) */
+#define FT80X_REG_PLAYBACK_FORMAT      0x1024b4  /* Audio playback format */
+#define FT80X_REG_PLAYBACK_LOOP        0x1024b8  /* Audio playback loop enable */
+#define FT80X_REG_PLAYBACK_PLAY        0x1024bc  /* Start audio playback */
+#define FT80X_REG_PWM_HZ               0x1024c0  /* BACKLIGHT PWM output frequency (Hz) */
+#define FT80X_REG_PWM_DUTY             0x1024c4  /* BACKLIGHT PWM output duty cycle 0=0%,
+                                                  * 128=100% */
+#define FT80X_REG_MACRO_0              0x1024c8  /* Display list macro command 0 */
+#define FT80X_REG_MACRO_1              0x1024cc  /* Display list macro command 1 */
+
+#if defined(CONFIG_LCD_FT800)
+                                             /* 0x1024d0 – 0x1024e0 Reserved */
+#elif defined(CONFIG_LCD_FT801)
+                                             /* 0x1024d0 – 0x1024d4 Reserved */
+#  define FT80X_REG_SCREENSHOT_BUSY    0x1024d8  /* Screenshot ready flags */
+                                             /* 0x1024e0 Reserved */
+#endif
+
+#define FT80X_REG_CMD_READ             0x1024e4  /* Command buffer read pointer */
+#define FT80X_REG_CMD_WRITE            0x1024e8  /* Command buffer write pointer */
+#define FT80X_REG_CMD_DL               0x1024ec  /* Command display list offset */
+#define FT80X_REG_TOUCH_MODE           0x1024f0  /* Touch-screen sampling mode */
+
+#if defined(CONFIG_LCD_FT800)
+#  define FT80X_REG_TOUCH_ADC_MODE     0x1024f4  /* Select single ended (low power) or
+                                                  * differential (accurate) sampling */
+#  define FT80X_REG_TOUCH_CHARGE       0x1024f8  /* Touch-screen charge time, units of 6 clocks */
+#  define FT80X_REG_TOUCH_SETTLE       0x1024fc  /* Touch-screen settle time, units of 6 clocks */
+#  define FT80X_REG_TOUCH_OVERSAMPLE   0x102500  /* Touch-screen oversample factor */
+#  define FT80X_REG_TOUCH_RZTHRESH     0x102504  /* Touch-screen resistance threshold */
+#  define FT80X_REG_TOUCH_RAW_XY       0x102508  /* Touch-screen raw (x-MSB16; y-LSB16) */
+#  define FT80X_REG_TOUCH_RZ           0x10250c  /* Touch-screen resistance */
+#  define FT80X_REG_TOUCH_SCREEN_XY    0x102510  /* Touch-screen screen (x-MSB16; y-LSB16) */
+#  define FT80X_REG_TOUCH_TAG_XY       0x102514  /* Touch-screen screen (x-MSB16; y-LSB16)
+                                                  * used for tag lookup */
+#  define FT80X_REG_TOUCH_TAG          0x102518  /* Touch-screen tag result */
+#  define FT80X_REG_TOUCH_TRANSFORM_A  0x10251c  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_TOUCH_TRANSFORM_B  0x102520  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_TOUCH_TRANSFORM_C  0x102524  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_TOUCH_TRANSFORM_D  0x102528  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_TOUCH_TRANSFORM_E  0x10252c  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_TOUCH_TRANSFORM_F  0x102530  /* Touch-screen transform coefficient (s15.16) */
+                                                 /* 0x102534 – 0x102470 Reserved */
+#  define FT80X_REG_TOUCH_DIRECT_XY    0x102574  /* Touch screen direct (x-MSB16; y-LSB16)
+                                                  * conversions */
+#  define FT80X_REG_TOUCH_DIRECT_Z1Z2  0x102578  /* Touch screen direct (z1-MSB16; z2-LSB16)
+                                                  * conversions */
+#elif defined(CONFIG_LCD_FT801)
+                                                 /* 0x1024d0 – 0x1024d4 Reserved */
+#  define FT80X_REG_CTOUCH_EXTENDED    0x1024f4  /* Set capacitive touch operation mode:
+                                                  * 0: extended mode (multi-touch)
+                                                  * 0: 1: FT800 compatibility mode (single touch) */
+#  define FT80X_REG_CTOUCH_REG         0x1024f8  /* CTPM configure register write
+                                                  * Bits [7:0]: configure register address
+                                                  * Bits [15:8]: configure register value */
+                                                 /* 0x1024fc - 0x102504 Reserved */
+#  define FT80X_REG_CTOUCH_RAW_XY      0x102508  /* Compatibility mode: touch-screen raw
+                                                  * (x-MSB16; y-LSB16) */
+#  define FT80X_REG_CTOUCH_TOUCH1_XY   0x102508  /* Extended mode: touch-screen screen data for touch 1
+                                                  * (x-MSB16; y-LSB16) */
+#  define FT80X_REG_CTOUCH_TOUCH4_XY   0x10250c  /* Extended mode: touch-screen screen Y data for touch 4 */
+#  define FT80X_REG_CTOUCH_SCREEN_XY   0x102510  /* Compatibility mode: touch-screen screen
+                                                  * (x-MSB16; y-LSB16) */
+#  define FT80X_REG_CTOUCH_TOUCH0_XY   0x102510  /* Extended mode: touch-screen screen data for touch 0
+                                                  * (x-MSB16; y-LSB16) */
+#  define FT80X_REG_CTOUCH_TAG_XY      0x102514  /* Touch-screen screen (x-MSB16; y-LSB16)
+                                                  * used for tag lookup */
+#  define FT80X_REG_CTOUCH_TAG         0x102518  /* Touch-screen tag result */
+#  define FT80X_REG_CTOUCH_TRANSFORM_A 0x10251c  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_CTOUCH_TRANSFORM_B 0x102520  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_CTOUCH_TRANSFORM_C 0x102524  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_CTOUCH_TRANSFORM_D 0x102528  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_CTOUCH_TRANSFORM_E 0x10252c  /* Touch-screen transform coefficient (s15.16) */
+#  define FT80X_REG_CTOUCH_TRANSFORM_F 0x102530  /* Touch-screen transform coefficient (s15.16) */
+                                                 /* 0x102534 Reserved */
+#  define FT80X_REG_CTOUCH_TOUCH4_X    0x102538  /* Extended mode: touch-screen screen X data for
+                                                  * touch 4 */
+                                                 /* 0x10253c – 0x102450 Reserved */
+#  define FT80X_REG_SCREENSHOT_READ    0x102554  /* Set to enable readout of the screenshot of the
+                                                  * selected Y line */
+                                                 /* 0x10253c – 0x102468 Reserved */
+#  define FT80X_REG_TRIM               0x10256c  /* Internal relaxation clock trimming */
+                                                 /* 0x102570 Reserved */
+#  define FT80X_REG_CTOUCH_DIRECT_XY   0x102574  /* Compatibility mode: Touch screen direct
+                                                  * (x-MSB16; y-LSB16) conversions */
+#  define FT80X_REG_CTOUCH_TOUCH2_XY   0x102574  /* Extended mode: touch-screen screen data for
+                                                  * touch 2 (x-MSB16; y-LSB16) */
+#  define FT80X_REG_CTOUCH_DIRECT_Z1Z2 0x102578  /* Compatibility mode: Touch screen direct
+                                                  * (z1-MSB16; z2-LSB16) conversions */
+#  define FT80X_REG_CTOUCH_TOUCH3_XY   0x102578  /* Extended mode: touch-screen screen data for
+                                                  * touch 3 (x-MSB16; y-LSB16) */
+#endif
+
+#define FT80X_REG_TRACKER              0x109000  /* Track register (Track value – MSB16;
+                                                  * Tag value - LSB8) */
+
+/* FT80x Register Bit Definitions ***********************************************************/
+
+/* FT80X_REG_ID */
+
+#define ID_MASK                        0xff      /* Bits 0-7: Register ID */
+
+/* FT80X_REG_DLSWAP */
+
+#define DLSWAP_DONE                    0         /* Bits 0-1: 0=Swap is complete */
+#define DLSWAP_LINE                    1         /* Bits 0-1: 1=Graphics engine will render
+                                                  * the screen immediately after current line.
+                                                  * May cause a tearing effect.
+                                                  */
+#define DLSWAP_FRAME                   2         /* Bits 0-1: 2=Graphics engine will render
+                                                  * the screen immediately after the current
+                                                  * frame is scanned out (recommended).
+                                                  */
+/* FT80X_REG_TOUCH_TAG */
+
+#define TOUCH_TAG_MASK                 0xff      /* Bits 0-7: Tag of touched graphic object */
+
+/* Interrupts *******************************************************************************/
+/* The interrupt output pin is enabled by REG_INT_EN.  When REG_INT_EN is 0, INT_N is
+ * tri-state (pulled to high by external pull-up resistor).  When REG_INT_EN is 1, INT_N is
+ * driven low when any of the interrupt flags in REG_INT_FLAGS are high, after masking with
+ * REG_INT_MASK. Writing a '1' in any bit of REG_INT_MASK will enable the correspond
+ * interrupt.  Each bit in REG_INT_FLAGS is set by a corresponding interrupt source.
+ * REG_INT_FLAGS is readable by the host at any time, and clears when read.
+ */
+
+/* FT80X_REG_INT_EN */
+
+#define FT80X_INT_ENABLE               (0)       /* Bit 0: 0=Interrupts disabled */
+#define FT80X_INT_DISABLE              (1 << 0)  /*        1=Interrupts enabled */
+
+/* FT80X_REG_INT_FLAGS and FT80X_REG_INT_MASK */
+
+#define FT80X_INT_SWAP                 (1 << 0)  /* Bit 0: Display swap occurred */
+#define FT80X_INT_TOUCH                (1 << 1)  /* Bit 1: Touch-screen touch detected */
+#define FT80X_INT_TAG                  (1 << 2)  /* Bit 2: Touch-screen tag value change */
+#define FT80X_INT_SOUND                (1 << 3)  /* Bit 3: Sound effect ended */
+#define FT80X_INT_PLAYBACK             (1 << 4)  /* Bit 4: Audio playback ended */
+#define FT80X_INT_CMDEMPTY             (1 << 5)  /* Bit 5: Command FIFO empty */
+#define FT80X_INT_CMDFLAG              (1 << 6)  /* Bit 6: Command FIFO flag */
+#define FT80X_INT_CONVCOMPLETE         (1 << 7)  /* Bit 7: Touch-screen conversions completed */
+
+#define FT80X_INT_NEVENTS              8
+#define FT80X_INT(n)                   (1 << (n))
+
+/* FT80x Display List Commands **************************************************************/
 /* Host commands.  3 word commands.  The first word begins with 0b01, the next two are zero */
 
 #define FT80X_CMD_ACTIVE           0x00        /* Switch from Standby/Sleep modes to active mode */
@@ -503,11 +732,11 @@
 #define FT80X_OPT_NOHANDS          0x0000c000  /* Co-processor clock widget is drawn without hour, minutes or
                                                 * seconds hands */
 
-/****************************************************************************
+/********************************************************************************************
  * Public Types
- ****************************************************************************/
+ ********************************************************************************************/
 
-/* FT80x Lower Half Interface Definitions ***********************************/
+/* FT80x Lower Half Interface Definitions ***************************************************/
 /* Pins relevant to software control.  The FT80X is a 48-pin part.  Most of
  * the pins are associated with the TFT panel and other board-related
  * support.  A few a relevant to software control of the part.  Those are
@@ -566,7 +795,7 @@ struct ft80x_config_s
 #endif
 };
 
-/* FT80x Display List Command Structures ************************************/
+/* FT80x Display List Command Structures ****************************************************/
 /* This structure describes one generic display list command */
 
 struct ft80x_dlcmd_s
@@ -1077,9 +1306,9 @@ struct ft80x_cmd_translate_s
   int32_t ty;       /* 8:  Y translate factor (b16) (input) */
 };
 
-/* FT80x IOCTL Argument Structures ******************************************/
+/* FT80x IOCTL Argument Structures **********************************************************/
 /* This container structure is used by FT80X_IOC_CREATEDL and FT80X_IOC_APPENDDL.  It
- * and defines the list of display commands to be written into display list memory.
+ * defines the list of display commands to be written into display list memory.
  */
 
 struct ft80x_displaylist_s
@@ -1143,9 +1372,9 @@ struct ft80x_register_s
   } value;
 };
 
-/****************************************************************************
+/********************************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
+ ********************************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -1155,23 +1384,23 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/********************************************************************************************
  * Name: ft80x_register
  *
  * Description:
- *   Configure the ADS7843E to use the provided SPI device instance.  This
- *   will register the driver as /dev/ft80x.
+ *   Configure the ADS7843E to use the provided SPI device instance.  This will register
+ *   the driver as /dev/ft800 or /dev/ft801, depending upon the configuration.
  *
  * Input Parameters:
- *   spi     - An SPI driver instance
- *   i2c     - An I2C master driver instance
- *   lower   - Persistent board configuration data / lower half interface
+ *   spi   - An SPI driver instance
+ *   i2c   - An I2C master driver instance
+ *   lower - Persistent board configuration data / lower half interface
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate
+ *   the nature of the failure.
  *
- ****************************************************************************/
+ ********************************************************************************************/
 
 #if defined(CONFIG_LCD_FT80X_SPI)
 int ft80x_register(FAR struct spi_dev_s *spi,

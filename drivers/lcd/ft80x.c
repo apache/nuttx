@@ -1173,12 +1173,13 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
  *
  * Description:
  *   Configure the ADS7843E to use the provided SPI device instance.  This
- *   will register the driver as /dev/ft80x.
+ *   will register the driver as /dev/ft800 or /dev/ft801, depending upon
+ *   the configuration.
  *
  * Input Parameters:
- *   spi     - An SPI driver instance
- *   i2c     - An I2C master driver instance
- *   lower   - Persistent board configuration data / lower half interface
+ *   spi   - An SPI driver instance
+ *   i2c   - An I2C master driver instance
+ *   lower - Persistent board configuration data / lower half interface
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
