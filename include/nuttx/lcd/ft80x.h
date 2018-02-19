@@ -105,10 +105,10 @@
  * FT80x display list memory.  Display lists should generally be formed as
  * follows:
  *
- *   struct ft80x_cmd_dlstart_s dlstart;  # Mark the start of the display list
- *                                        # Various display commands follow...
- *   FT80X_DISPLAY();                     # Finish the last display
- *   struct ft80x_cmd_swap_s swap;        # Swap to the new display list
+ *                                        # Various display commands ...
+ *   FT80X_DISPLAY();                     # Terminate the display list
+ *
+ * Then write to the REG_DLSWAP register to set REG_swap to the new display list.
  *
  * NOTE: The functionality of FT80X_IOC_CREATEDL is the equivalent to that of
  * the driver write() method.  Either the write() method or the FT80X_IOC_CREATEDL
@@ -124,12 +124,17 @@
  * display list offset.
  *
  * Output values from display commands are not automatically written back in
- * either case but must be subsequently obtained using FT80X_IOC_GETDL32.
+ * either case but must be subsequently obtained using FT80X_IOC_GETRAMDL.
  *
- * FT80X_IOC_GETDL32:
+ * FT80X_IOC_GETRAMDL:
  *   Description:  Read a 32-bit value from the display list.
- *   Argument:     A reference to an instance of struct ft80x_dlmem_s below.
+ *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
  *   Returns:      The 32-bit value read from the display list.
+ *
+ * FT80X_IOC_PUTRAMG
+ *   Description:  Write byte data to FT80x graphics memory (RAM_G)
+ *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
+ *   Returns:      None.
  *
  * FT80X_IOC_GETREG8:
  *   Description:  Read an 8-bit register value from the FT80x.
@@ -175,14 +180,15 @@
 
 #define FT80X_IOC_CREATEDL          _LCDIOC(FT80X_NIOCTL_BASE + 0)
 #define FT80X_IOC_APPENDDL          _LCDIOC(FT80X_NIOCTL_BASE + 1)
-#define FT80X_IOC_GETDL32           _LCDIOC(FT80X_NIOCTL_BASE + 2)
-#define FT80X_IOC_GETREG8           _LCDIOC(FT80X_NIOCTL_BASE + 3)
-#define FT80X_IOC_GETREG16          _LCDIOC(FT80X_NIOCTL_BASE + 4)
-#define FT80X_IOC_GETREG32          _LCDIOC(FT80X_NIOCTL_BASE + 5)
-#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 6)
-#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 7)
-#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 8)
-#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 9)
+#define FT80X_IOC_GETRAMDL          _LCDIOC(FT80X_NIOCTL_BASE + 2)
+#define FT80X_IOC_PUTRAMG           _LCDIOC(FT80X_NIOCTL_BASE + 3)
+#define FT80X_IOC_GETREG8           _LCDIOC(FT80X_NIOCTL_BASE + 4)
+#define FT80X_IOC_GETREG16          _LCDIOC(FT80X_NIOCTL_BASE + 5)
+#define FT80X_IOC_GETREG32          _LCDIOC(FT80X_NIOCTL_BASE + 6)
+#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 7)
+#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 8)
+#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 9)
+#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 10)
 
 /* FT80x Memory Map *************************************************************************/
 
@@ -452,6 +458,21 @@
   ((7 << 24) | (((format) & 31) << 19) | (((linestride) & 1023) << 9) | \
    (((height) & 511) << 0))
 
+/* format */
+
+#define FT80X_FORMAT_ARGB1555      0
+#define FT80X_FORMAT_L1            1
+#define FT80X_FORMAT_L4            2
+#define FT80X_FORMAT_L8            3
+#define FT80X_FORMAT_RGB332        4
+#define FT80X_FORMAT_ARGB2         5
+#define FT80X_FORMAT_ARGB4         6
+#define FT80X_FORMAT_RGB565        7
+#define FT80X_FORMAT_PALETTED      8
+#define FT80X_FORMAT_TEXT8X8       9
+#define FT80X_FORMAT_TEXTVGA       10
+#define FT80X_FORMAT_BARGRAPH      11
+
 /* BITMAP_SIZE (0x08) - Set the screen drawing of bitmaps for the current
  * handle
  */
@@ -459,6 +480,16 @@
 #define FT80X_BITMAP_SIZE(filter,wrapx,wrapy,width,height) \
   ((8 << 24) | (((filter) & 1) << 20) | (((wrapx) & 1) << 19) | \
    (((wrapy) & 1) << 18) | (((width) & 511) << 9) | (((height) & 511) << 0))
+
+/* filter */
+
+#define FT80X_FILTER_NEAREST       0
+#define FT80X_FILTER_BILINEAR      1
+
+/* wrapx/wrapy */
+
+#define FT80X_WRAP_BORDER          0
+#define FT80X_WRAP_REPEAT          1
 
 /* BITMAP_SOURCE (0x01) - Set the source address for bitmap graphics */
 
@@ -749,10 +780,9 @@
  ********************************************************************************************/
 
 /* FT80x Lower Half Interface Definitions ***************************************************/
-/* Pins relevant to software control.  The FT80X is a 48-pin part.  Most of
- * the pins are associated with the TFT panel and other board-related
- * support.  A few a relevant to software control of the part.  Those are
- * listed here:
+/* Pins relevant to software control.  The FT80X is a 48-pin part.  Most of the pins are
+ * associated with the TFT panel and other board-related support.  A few a relevant to
+ * software control of the part.  Those are listed here:
  *
  * FT80X PIN  DIR DESCRIPTION
  *  3          I  SPI: SCLK, I2C: SCL
@@ -762,17 +792,21 @@
  *  11        OD  nINT Host interrupt
  *  12         *  nPD  Power down input
  *
- * SCL/SDA, SCLK/MISO/MOSI/nCS are handled by generic I2C or SPI logic. nInt
- * and nPD are directly managed by this interface.
+ * In addition, if there is a audio amplifier on board (such as TPA6205A or LM4864), then
+ * there may also be an active low audio shutdown output:
+ *
+ *  N/A        O  nSHDN Audio shutdown (active los)
+ *
+ * SCL/SDA, SCLK/MISO/MOSI/nCS are handled by generic I2C or SPI logic. nInt and nPD are
+ * directly managed by this interface.
  */
 
-/* A reference to a structure of this type must be passed to the FT80X
- * driver.  This structure provides information about the configuration
- * of the FT80X and provides some board-specific hooks.
+/* A reference to a structure of this type must be passed to the FT80X driver.  This
+ * structure provides information about the configuration of the FT80X and provides some
+ * board-specific hooks.
  *
- * Memory for this structure is provided by the caller.  It is not copied
- * by the driver and is presumed to persist while the driver is active.  The
- * memory may be read-only.
+ * Memory for this structure is provided by the caller.  It is not copied by the driver and
+ * is presumed to persist while the driver is active.  The memory may be read-only.
  */
 
 struct ft80x_config_s
@@ -785,25 +819,27 @@ struct ft80x_config_s
   uint8_t address;          /* 7-bit I2C address */
 #endif
 
-  /* IRQ/GPIO access callbacks.  These operations all hidden behind
-   * callbacks to isolate the FT80X driver from differences in GPIO
-   * interrupt handling by varying boards and MCUs. Interrupts should be
-   * configured on the falling edge of nINT.
+  /* IRQ/GPIO access callbacks.  These operations all hidden behind callbacks to isolate the
+   * FT80X driver from differences in GPIO interrupt handling by varying boards and MCUs.
+   * Interrupts should be configured on the falling edge of nINT.
    *
    *   attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
    *   enable  - Enable or disable the GPIO interrupt
-   *   clear   - Acknowledge/clear any pending GPIO interrupt
-   *   pwrdown - Power down the FT80X
+   *   clear   - Acknowledge/clear any pending GPIO interrupt as necessary.
+   *   pwrdown - Power the FT80X up or down.
+   *   audio   - Enable audio (i.e., set the external audio amplifier shutdown pin to the
+   *             appropriate level to enable or disable the external audio amplifier)
    *   destroy - The driver has been unlinked. Cleanup as necessary.
    */
 
-  CODE int  (*attach)(FAR const struct ft80x_config_s *state, xcpt_t isr,
+  CODE int  (*attach)(FAR const struct ft80x_config_s *lower, xcpt_t isr,
                       FAR void *arg);
-  CODE void (*enable)(FAR const struct ft80x_config_s *state, bool enable);
-  CODE void (*clear)(FAR const struct ft80x_config_s *state);
-  CODE bool (*pwrdown)(FAR const struct ft80x_config_s *state, bool pwrdown);
+  CODE void (*enable)(FAR const struct ft80x_config_s *lower, bool enable);
+  CODE void (*clear)(FAR const struct ft80x_config_s *lower);
+  CODE bool (*pwrdown)(FAR const struct ft80x_config_s *lower, bool pwrdown);
+  CODE bool (*audio)(FAR const struct ft80x_config_s *lower, bool enable);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  CODE void (*destroy)(FAR const struct ft80x_config_s *state);
+  CODE void (*destroy)(FAR const struct ft80x_config_s *lower);
 #endif
 };
 
@@ -1317,14 +1353,19 @@ struct ft80x_displaylist_s
   struct ft80x_dlcmd_s cmd; /* First command in the display list  */
 };
 
-/* This structure is used with the FT80X_IOC_GETDL32 IOCTL command to
- * retrieve the result of the display list operation from display list memory.
+/* This structure is used with the FT80X_IOC_GETRAMDL and FT80X_IOC_PUTRAMG IOCTL commands to
+ * access particular memory regions via an offset.
+ *
+ * NOTES:
+ *   - For FT80X_IOC_GET* commands, the value is an output; for FT80X_IOC_PUT* command, the
+ *     value is an input.
  */
 
-struct ft80x_dlmem_s
+struct ft80x_relmem_s
 {
   uint32_t offset;         /* 32-bit aligned offset into the display list */
-  uint32_t value;          /* 32-bit value read from display list + offset */
+  uint32_t nbytes;         /* Number of bytes to access */
+  FAR void *value;         /* Value(s) read from memory base + offset */
 };
 
 /* This structure is used with the FT80X_IOC_EVENTNOTIFY IOCTL command to describe

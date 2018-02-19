@@ -632,26 +632,51 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* FT80X_IOC_GETDL32:
+      /* FT80X_IOC_GETRAMDL:
        *   Description:  Read a 32-bit value from the display list.
-       *   Argument:     A reference to an instance of struct ft80x_dlmem_s.
+       *   Argument:     A reference to an instance of struct ft80x_relmem_s.
        *   Returns:      The 32-bit value read from the display list.
        */
 
-      case FT80X_IOC_GETDL32:
+      case FT80X_IOC_GETRAMDL:
         {
-          FAR struct ft80x_dlmem_s *result =
-            (FAR struct ft80x_dlmem_s *)((uintptr_t)arg);
+          FAR struct ft80x_relmem_s *ramdl =
+            (FAR struct ft80x_relmem_s *)((uintptr_t)arg);
 
-          if (result == NULL || ((uintptr_t)&result->offset & 3) != 0 ||
-              result->offset >= FT80X_RAM_DL_SIZE)
+          if (ramdl == NULL || ((uintptr_t)&ramdl->offset & 3) != 0 ||
+              ramdl->offset >= FT80X_RAM_DL_SIZE)
             {
               ret = -EINVAL;
             }
           else
             {
-              result->value = ft80x_read_word(priv,
-                                              FT80X_RAM_DL + result->offset);
+              ft80x_read_memory(priv, FT80X_RAM_DL + ramdl->offset,
+                                ramdl->value, ramdl->nbytes);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_PUTRAMG
+       *   Description:  Write byte data to FT80x graphics memory (RAM_G)
+       *   Argument:     A reference to an instance of struct ft80x_relmem_s.
+       *   Returns:      None.
+       */
+
+      case FT80X_IOC_PUTRAMG:
+        {
+          FAR struct ft80x_relmem_s *ramg =
+            (FAR struct ft80x_relmem_s *)((uintptr_t)arg);
+
+          if (ramg == NULL ||
+             (ramg->offset + ramg->nbytes) >= FT80X_RAM_G_SIZE)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_write_memory(priv, FT80X_RAM_G + ramg->offset,
+                                 ramg->value, ramg->nbytes);
               ret = OK;
             }
         }
@@ -974,8 +999,9 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
   /* Initialization Sequence during the boot up:
    *
    * 1. Use MCU SPI clock not more than 11MHz
-   * 2. Send Host command CLKEXT to FT800
-   * 3. Send Host command ACTIVE to enable clock to FT800.
+   * 2. Send Host command CLKEXT to FT800 to enable PLL input from oscillator
+   *    or external clock.  Should default to 48MHz PLL output.
+   * 3. Send Host command ACTIVE to enable clock and wake up the FT80x.
    * 4. Configure video timing registers, except FT80X_REG_PCLK
    * 5. Write first display list
    * 6. Write FT80X_REG_DLSWAP, FT800 swaps display list immediately
@@ -989,14 +1015,30 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
   DEBUGASSERT(priv->lower->init_frequency <= 11000000);
   priv->frequency = priv->lower->init_frequency;
 
-  /* 2. Send Host command CLKEXT to FT800
-   * 3. Send Host command ACTIVE to enable clock to FT800.
-   *
-   * PLL output should default to 48MHz.
+  /* 2. Send Host command CLKEXT to FT800 to enable PLL input from oscillator
+   *    or external clock.
    */
 
   ft80x_host_command(priv, FT80X_CMD_CLKEXT);
+  up_mdelay(10);
+
+#if 0 /* Un-necessary? */
+  /* Switch PLL output to 48MHz (should be the default) */
+
+  ft80x_host_command(priv, FT80X_CMD_CLK48M);
+  up_mdelay(10);
+#endif
+
+  /* 3. Send Host command ACTIVE to enable clock and wake up the FT80x. */
+
   ft80x_host_command(priv, FT80X_CMD_ACTIVE);
+  up_mdelay(10);
+
+#if 0 /* Un-necessary? */
+  /* Do a core reset for safer */
+
+  ft80x_host_command(priv, FT80X_CMD_CORERST);
+#endif
 
   /* Verify the chip ID.  Read repeatedly until FT80x is ready. */
 
