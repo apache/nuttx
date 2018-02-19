@@ -55,6 +55,7 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 
 #include "stm32l4_rcc.h"
 #include "stm32l4_waste.h"
@@ -75,26 +76,37 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define FLASH_KEY1      0x45670123
-#define FLASH_KEY2      0xCDEF89AB
+#define FLASH_KEY1         0x45670123
+#define FLASH_KEY2         0xCDEF89AB
 
-#define OPTBYTES_KEY1   0x08192A3B
-#define OPTBYTES_KEY2   0x4C5D6E7F
+#define OPTBYTES_KEY1      0x08192A3B
+#define OPTBYTES_KEY2      0x4C5D6E7F
+
+#define FLASH_PAGE_SIZE    STM32L4_FLASH_PAGESIZE
+#define FLASH_PAGE_WORDS   (FLASH_PAGE_SIZE / 4)
+#define FLASH_PAGE_MASK    (FLASH_PAGE_SIZE - 1)
+#define FLASH_PAGE_SHIFT   (11)    /* 2**11  = 2048B */
+#define FLASH_BYTE2PAGE(o) ((o) >> FLASH_PAGE_SHIFT)
 
 #define FLASH_CR_PAGE_ERASE              FLASH_CR_PER
 #define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPERR
 
 /* All errors for Standard Programming, not for other operations. */
 
-#define FLASH_SR_ALLERRS  (FLASH_SR_PGSERR | FLASH_SR_SIZERR | \
-                           FLASH_SR_PGAERR | FLASH_SR_WRPERR | \
-                           FLASH_SR_PROGERR)
+#define FLASH_SR_ALLERRS   (FLASH_SR_PGSERR | FLASH_SR_SIZERR | \
+                            FLASH_SR_PGAERR | FLASH_SR_WRPERR | \
+                            FLASH_SR_PROGERR)
+
+#ifndef MIN
+#  define MIN(a, b)        ((a) < (b) ? (a) : (b))
+#endif
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
 
 static sem_t g_sem = SEM_INITIALIZER(1);
+static uint32_t g_page_buffer[FLASH_PAGE_WORDS];
 
 /************************************************************************************
  * Private Functions
@@ -165,6 +177,22 @@ static inline void flash_optbytes_lock(void)
    */
 
   flash_lock();
+}
+
+static inline void flash_erase(size_t page)
+{
+  finfo("erase page %u\n", page);
+
+  modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
+  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
+  modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_START);
+
+  while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
+
+  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
 }
 
 /************************************************************************************
@@ -290,22 +318,12 @@ ssize_t up_progmem_erasepage(size_t page)
       return -EFAULT;
     }
 
+  /* Erase single page */
+
   sem_lock();
-
-  /* Get flash ready and begin erasing single page. */
-
   flash_unlock();
 
-  modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
-  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
-  modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_START);
-
-  while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
-    {
-      up_waste();
-    }
-
-  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
+  flash_erase(page);
 
   flash_lock();
   sem_unlock();
@@ -347,40 +365,39 @@ ssize_t up_progmem_ispageerased(size_t page)
   return bwritten;
 }
 
-ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
+ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 {
-  uint32_t *word = (uint32_t *)buf;
-  size_t written = count;
+  uint32_t *dest;
+  const uint32_t *src;
+  size_t written;
+  size_t xfrsize;
+  size_t offset;
+  size_t page;
+  int i;
   int ret = OK;
-
-  /* STM32L4 requires double-word access and alignment. */
-
-  if (addr & 7)
-    {
-      return -EINVAL;
-    }
-
-  /* But we can complete single-word writes by writing the
-   * erase value 0xffffffff as second word ourselves, so
-   * allow odd number of words here.
-   */
-
-  if (count & 3)
-    {
-      return -EINVAL;
-    }
 
   /* Check for valid address range. */
 
+  offset = addr;
   if (addr >= STM32L4_FLASH_BASE)
     {
-      addr -= STM32L4_FLASH_BASE;
+      offset -= STM32L4_FLASH_BASE;
     }
 
-  if ((addr + count) > STM32L4_FLASH_SIZE)
+  if (offset + buflen > STM32L4_FLASH_SIZE)
     {
       return -EFAULT;
     }
+
+  /* Get the page number corresponding to the flash offset and the byte
+   * offset into the page. Align write destination to page boundary.
+   */
+
+  page = FLASH_BYTE2PAGE((uint32_t)offset);
+  offset &= FLASH_PAGE_MASK;
+
+  dest = (uint32_t *)((uint8_t *)addr - offset);
+  written = 0;
 
   sem_lock();
 
@@ -388,49 +405,93 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   flash_unlock();
 
-  modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PG);
+  /* Loop until all of the data has been written */
 
-  for (addr += STM32L4_FLASH_BASE; count; count -= 8, word += 2, addr += 8)
+  while (buflen > 0)
     {
-      uint32_t second_word;
+      /* How much can we write into this page? */
 
-      /* Write first word. */
+      xfrsize = MIN((size_t)FLASH_PAGE_SIZE - offset, buflen);
 
-      putreg32(*word, addr);
+      /* Do we need to use the intermediate buffer? */
 
-      /* Write second word and wait to complete. */
-
-      second_word = (count == 4) ? 0xffffffff : *(word + 1);
-      putreg32(second_word, (addr + 4));
-
-      while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
+      if (offset == 0 && xfrsize == FLASH_PAGE_SIZE)
         {
-          up_waste();
+          /* No, we can take the data directly from the user buffer */
+
+          src = (const uint32_t *)buf;
+        }
+      else
+        {
+          /* Yes, copy data into global page buffer */
+
+          if (offset > 0)
+            {
+              memcpy(g_page_buffer, dest, offset);
+            }
+
+          memcpy((uint8_t *)g_page_buffer + offset, buf, xfrsize);
+
+          if (offset + xfrsize < FLASH_PAGE_SIZE)
+            {
+              memcpy((uint8_t *)g_page_buffer + offset + xfrsize,
+                     (const uint8_t *)dest + offset + xfrsize,
+                     FLASH_PAGE_SIZE - offset - xfrsize);
+            }
+
+          src = g_page_buffer;
         }
 
-      /* Verify */
+      /* Erase the page. Unlike most flash chips, STM32L4 is unable to
+       * write back existing data read from page without erase.
+       */
 
-      if (getreg32(STM32L4_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
+      flash_erase(page);
+
+      /* Write the page. Must be with double-words. */
+
+      modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PG);
+
+      for (i = 0; i < FLASH_PAGE_WORDS; i += 2)
         {
-          ret = -EROFS;
-          goto out;
+          *dest++ = *src++;
+          *dest++ = *src++;
+
+          while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
+            {
+              up_waste();
+            }
+
+          /* Verify */
+
+          if (getreg32(STM32L4_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
+            {
+              modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
+              ret = -EROFS;
+              goto out;
+            }
+
+          if (getreg32(dest-1) != *(src-1) || getreg32(dest-2) != *(src-2))
+            {
+              modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
+              ret = -EIO;
+              goto out;
+            }
         }
 
-      if (getreg32(addr) != *word || getreg32((addr + 4)) != second_word)
-        {
-          ret = -EIO;
-          goto out;
-        }
+      modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
 
-      if (count == 4)
-        {
-          break;
-        }
+      /* Adjust pointers and counts for the next time through the loop */
+
+      written += xfrsize;
+      addr    += xfrsize;
+      dest     = (uint32_t *)addr;
+      buf      = (void *)((uintptr_t)buf + xfrsize);
+      buflen  -= xfrsize;
+      page++;
     }
 
 out:
-  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
-
   /* If there was an error, clear all error flags in status
    * register (rc_w1 register so do this by writing the
    * error bits).

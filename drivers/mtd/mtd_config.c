@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_config.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2017-2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *           With Updates from Gregory Nutt <gnutt@nuttx.org>
@@ -153,8 +153,8 @@ static const struct file_operations mtdconfig_fops =
  *
  ****************************************************************************/
 
-static int  mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
-                                FAR uint8_t *pdata, int readlen)
+static int mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
+                               FAR uint8_t *pdata, int readlen)
 {
   off_t  bytestoread = readlen;
   off_t  bytesthisblock, firstbyte;
@@ -250,8 +250,8 @@ errout:
  *
  ****************************************************************************/
 
-static int  mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
-                                 FAR const uint8_t *pdata, int writelen)
+static int mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
+                                FAR const uint8_t *pdata, int writelen)
 {
   int ret = OK;
 
@@ -285,17 +285,6 @@ static int  mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
               ret = -EIO;
               goto errout;
             }
-
-          /* Now erase the block */
-
-          ret = MTD_ERASE(dev->mtd, block, 1);
-          if (ret < 0)
-            {
-              /* Error erasing the block */
-
-              ret = -EIO;
-              goto errout;
-          }
 
           index = offset - block * dev->blocksize;
           bytes_this_block = dev->blocksize - index;
@@ -563,11 +552,11 @@ read_next:
  *    block is available in the partition.
  *
  * Returned Value:
- *     offset to the next available entry (after consolidation)..
+ *     Offset to the next available entry (after consolidation).
  *
  ****************************************************************************/
 
-static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
+static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 {
   FAR uint8_t *pBuf;
   FAR struct  mtdconfig_header_s *phdr;
@@ -601,7 +590,6 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
         {
           /* Error doing block read */
 
-          dst_offset = 0;
           goto errout;
         }
 
@@ -612,7 +600,6 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
         {
           /* Error erasing the block */
 
-          dst_offset = 0;
           goto errout;
         }
 
@@ -623,17 +610,25 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
           sig[0] = 'C';
           sig[1] = 'D';
           sig[2] = CONFIGDATA_FORMAT_VERSION;
-          mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
+
+          ret = mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
+          if (ret != sizeof(sig))
+            {
+              /* Cannot write even the signature. */
+
+              ret = -EIO;
+              goto errout;
+            }
         }
 
-      /* Copy active items back to the MTD device */
+      /* Copy active items back to the MTD device. */
 
       while (src_offset < dev->erasesize)
         {
           phdr = (FAR struct mtdconfig_header_s *) &pBuf[src_offset];
           if (phdr->id == MTD_ERASED_ID)
             {
-              /* No more data in this erase block */
+              /* No more data in this erase block. */
 
               src_offset = dev->erasesize;
               continue;
@@ -650,7 +645,7 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
               if (bytes_left_in_block < sizeof(*phdr) + phdr->len)
                 {
                   /* Item won't fit in the destination block.  Move to
-                   * the next block
+                   * the next block.
                    */
 
                   dst_block++;
@@ -663,19 +658,29 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
                   DEBUGASSERT(dst_block != dev->neraseblocks);
                 }
 
-              /* Now Write the item to the current dst_offset location */
+              /* Now write the item to the current dst_offset location. */
 
               ret = mtdconfig_writebytes(dev, dst_offset, (uint8_t *) phdr,
                                          sizeof(hdr));
-              if (ret < 0)
+              if (ret != sizeof(hdr))
                 {
-                  dst_offset = 0;
+                  /* I/O Error! */
+
+                  ret = -EIO;
                   goto errout;
                 }
 
               dst_offset += sizeof(hdr);
-              ret = mtdconfig_writebytes(dev, dst_offset, &pBuf[src_offset
-                  + sizeof(hdr)], phdr->len);
+              ret = mtdconfig_writebytes(dev, dst_offset,
+                                         &pBuf[src_offset + sizeof(hdr)], phdr->len);
+              if (ret != phdr->len)
+                {
+                  /* I/O Error! */
+
+                  ret = -EIO;
+                  goto errout;
+                }
+
               dst_offset += phdr->len;
 
               /* Test if enough space in dst block for another header */
@@ -705,9 +710,13 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
       src_offset = CONFIGDATA_BLOCK_HDR_SIZE;
     }
 
-errout:
   kmm_free(pBuf);
   return dst_offset;
+
+errout:
+  kmm_free(pBuf);
+  ferr("ERROR: fail ram consolidate: %d\n", ret);
+  return 0;
 }
 
 /****************************************************************************
@@ -720,7 +729,7 @@ errout:
  *    partition as it goes.
  *
  * Returned Value:
- *     offset to the next available entry (after consolidation)..
+ *     Offset to the next available entry (after consolidation).
  *
  ****************************************************************************/
 
@@ -781,9 +790,17 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
   sig[0] = 'C';
   sig[1] = 'D';
   sig[2] = CONFIGDATA_FORMAT_VERSION;
-  mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
 
-  /* Now consolidate entries */
+  ret = mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
+  if (ret != sizeof(sig))
+    {
+      /* Cannot write even the signature. */
+
+      ret = -EIO;
+      goto errout;
+    }
+
+  /* Now consolidate entries. */
 
   src_block = 1;
   dst_block = 0;
@@ -800,6 +817,7 @@ retry_relocate:
         {
           /* I/O Error! */
 
+          ret = -EIO;
           goto errout;
         }
 
@@ -840,7 +858,15 @@ retry_relocate:
 
               /* Copy this entry to the destination */
 
-              mtdconfig_writebytes(dev, dst_offset, (uint8_t *) &hdr, sizeof(hdr));
+              ret = mtdconfig_writebytes(dev, dst_offset, (uint8_t *) &hdr, sizeof(hdr));
+              if (ret != sizeof(hdr))
+                {
+                  /* I/O Error! */
+
+                  ret = -EIO;
+                  goto errout;
+                }
+
               src_offset += sizeof(hdr);
               dst_offset += sizeof(hdr);
 
@@ -856,8 +882,23 @@ retry_relocate:
 
                   /* Move the data. */
 
-                  mtdconfig_readbytes(dev, src_offset, pBuf, bytes);
-                  mtdconfig_writebytes(dev, dst_offset, pBuf, bytes);
+                  ret = mtdconfig_readbytes(dev, src_offset, pBuf, bytes);
+                  if (ret != OK)
+                    {
+                      /* I/O Error! */
+
+                      ret = -EIO;
+                      goto errout;
+                    }
+
+                  ret = mtdconfig_writebytes(dev, dst_offset, pBuf, bytes);
+                  if (ret != bytes)
+                    {
+                      /* I/O Error! */
+
+                      ret = -EIO;
+                      goto errout;
+                    }
 
                   /* Update control variables */
 
@@ -916,10 +957,15 @@ retry_relocate:
         }
     }
 
+  kmm_free(pBuf);
+  return dst_offset;
+
 errout:
   kmm_free(pBuf);
+  ferr("ERROR: fail consolidate: %d\n", ret);
   return 0;
 }
+
 #endif /* CONFIG_MTD_CONFIG_RAM_CONSOLIDATE */
 
 /****************************************************************************
@@ -1108,7 +1154,15 @@ retry:
       sig[0] = 'C';
       sig[1] = 'D';
       sig[2] = CONFIGDATA_FORMAT_VERSION;
-      mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
+
+      ret = mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
+      if (ret != sizeof(sig))
+        {
+          /* Cannot write even the signature. */
+
+          ret = -EIO;
+          goto errout;
+        }
 
       /* Now go try to read the signature again (as verification) */
 
@@ -1147,6 +1201,7 @@ retry:
   /* Now find a new entry for this config data */
 
   retrycount = 0;
+
 retry_find:
   offset = mtdconfig_findfirstentry(dev, &hdr);
   if (offset > 0 && hdr.id == MTD_ERASED_ID)
@@ -1226,7 +1281,7 @@ retry_find:
       hdr.flags = MTD_ERASED_FLAGS;
 
       ret = mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
-      if (ret < 0)
+      if (ret != sizeof(hdr))
         {
           /* Cannot write even header! */
 
