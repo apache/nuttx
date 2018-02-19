@@ -332,6 +332,22 @@
 #define GPIO_USART6_RX GPIO_USART6_RX_1
 #define GPIO_USART6_TX GPIO_USART6_TX_1
 
+/* USART1:
+ *
+ * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK controller.
+ *
+ *   -------- ---------------
+ *               STM32F7
+ *   SIGNAME  FUNCTION  GPIO
+ *   -- ----- --------- -----
+ *   VCP_RX   USART1_RX PB7
+ *   VCP_TX   USART1_TX PA9
+ *   -- ----- --------- -----
+ */
+
+#define GPIO_USART1_RX GPIO_USART1_RX_2
+#define GPIO_USART1_TX GPIO_USART1_TX_1
+
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
  *   STM32 F7 BOARD        LAN8742A
