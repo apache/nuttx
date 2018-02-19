@@ -82,7 +82,7 @@ void ssd1306_configspi(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
+int ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 {
 #ifdef CONFIG_LCD_SSD1306_REGDEBUG
   _err("->0x%02x\n", regval);
@@ -91,6 +91,7 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
   /* Send byte value to display */
 
   (void)SPI_SEND(priv->spi, regval);
+  return OK;
 }
 
 /****************************************************************************
@@ -101,11 +102,12 @@ void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
  *
  ****************************************************************************/
 
-void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
+int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
   /* Send byte value to display */
 
   (void)SPI_SNDBLOCK(priv->spi, data, len);
+  return OK;
 }
 
 /****************************************************************************

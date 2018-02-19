@@ -304,8 +304,8 @@ struct ssd1306_dev_s
  * Public Function Prototypes
  **************************************************************************************/
 
-void ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval);
-void ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len);
+int ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval);
+int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len);
 
 #ifdef CONFIG_LCD_SSD1306_SPI
 void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs);

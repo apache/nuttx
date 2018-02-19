@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/lcd/lcd_frambuffer.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017=-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ struct lcdfb_dev_s
 
 /* Update the LCD when there is a change to the framebuffer */
 
-static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
+static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
              FAR const struct nxgl_rect_s *rect);
 
 /* Get information about the video controller configuration and the
@@ -174,8 +174,8 @@ static FAR struct lcdfb_dev_s *lcdfb_find(int display)
  *
  ****************************************************************************/
 
-static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
-                         FAR const struct nxgl_rect_s *rect)
+static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
+                        FAR const struct nxgl_rect_s *rect)
 {
   FAR struct lcd_planeinfo_s *pinfo = &priv->pinfo;
   FAR uint8_t *run;
@@ -185,6 +185,7 @@ static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
   fb_coord_t width;
   fb_coord_t starty;
   fb_coord_t endy;
+  int ret;
 
   /* Clip to fit in the framebuffer */
 
@@ -235,9 +236,16 @@ static void lcdfb_update(FAR struct lcdfb_dev_s *priv,
        * memory.
        */
 
-      pinfo->putrun(row, startx, run, width);
+      ret = pinfo->putrun(row, startx, run, width);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       run += priv->stride;
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -573,7 +581,11 @@ int up_fbinitialize(int display)
   rect.pt2.x = priv->xres - 1;
   rect.pt2.y = priv->yres - 1;
 
-  lcdfb_update(priv, &rect);
+  ret = lcdfb_update(priv, &rect);
+  if (ret < 0)
+    {
+      lcderr("FB update failed: %d\n", ret);
+    }
 
   /* Turn the LCD on at 75% power */
 
@@ -717,6 +729,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
 {
   FAR struct fb_planeinfo_s *fpinfo = (FAR struct fb_planeinfo_s *)pinfo;
   FAR struct lcdfb_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(fpinfo != NULL && rect != NULL);
 
@@ -729,7 +742,11 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
   priv = lcdfb_find(fpinfo->display);
   if (priv != NULL)
     {
-      lcdfb_update(priv, rect);
+      ret = lcdfb_update(priv, rect);
+      if (ret < 0)
+        {
+          lcderr("FB update failed: %d\n", ret);
+        }
     }
 }
 #endif

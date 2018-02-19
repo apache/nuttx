@@ -4,7 +4,7 @@
  * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
  * in SPI mode.
  *
- *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -175,14 +175,14 @@ static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 /* LCD Specific Controls */
 
-static int ssd1306_getpower(struct lcd_dev_s *dev);
-static int ssd1306_setpower(struct lcd_dev_s *dev, int power);
-static int ssd1306_getcontrast(struct lcd_dev_s *dev);
-static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int  ssd1306_getpower(struct lcd_dev_s *dev);
+static int  ssd1306_setpower(struct lcd_dev_s *dev, int power);
+static int  ssd1306_getcontrast(struct lcd_dev_s *dev);
+static int  ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
-static void ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on);
-static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv);
-static void ssd1306_redrawfb(struct ssd1306_dev_s *priv);
+static int  ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on);
+static int  ssd1306_configuredisplay(struct ssd1306_dev_s *priv);
+static int  ssd1306_redrawfb(struct ssd1306_dev_s *priv);
 
 /**************************************************************************************
  * Private Data
@@ -279,6 +279,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   uint8_t usrmask;
   int pixlen;
   uint8_t i;
+  int ret;
 
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);
@@ -433,12 +434,25 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   /* Set the starting position for the run */
   /* Set the column address to the XOFFSET value */
 
-  ssd1306_sendbyte(priv, SSD1306_SETCOLL(devcol & 0x0f));
-  ssd1306_sendbyte(priv, SSD1306_SETCOLH(devcol >> 4));
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(devcol & 0x0f));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(devcol >> 4));
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the page address */
 
-  ssd1306_sendbyte(priv, SSD1306_PAGEADDR(page));
+  ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(page));
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Select data transfer */
 
@@ -446,7 +460,11 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   /* Then transfer all of the data */
 
-  ssd1306_sendblk(priv, fbptr, pixlen);
+  ret = ssd1306_sendblk(priv, fbptr, pixlen);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* De-select and unlock the device */
 
@@ -680,8 +698,10 @@ static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
  *
  **************************************************************************************/
 
-static void ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
+static int ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
 {
+  int ret;
+
   /* Lock and select device */
 
   ssd1306_select(priv, true);
@@ -692,12 +712,14 @@ static void ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
 
   /* Turn the display on/off */
 
-  (void)ssd1306_sendbyte(priv, (on ? SSD1306_DISPON : SSD1306_DISPOFF));
+  ret = ssd1306_sendbyte(priv, (on ? SSD1306_DISPON : SSD1306_DISPOFF));
 
   /* De-select and unlock the device */
 
   ssd1306_cmddata(priv, false);
   ssd1306_select(priv, false);
+
+  return ret;
 }
 
 /**************************************************************************************
@@ -712,15 +734,21 @@ static void ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
 static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
-  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
+  int ret;
 
   lcdinfo("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
+  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   if (power <= 0)
     {
       /* Turn the display off */
 
-      ssd1306_do_disponoff(priv, false);
+      ret = ssd1306_do_disponoff(priv, false);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       priv->on = false;
 
       /* Try turn off power completely */
@@ -750,17 +778,26 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
         {
           /* Configure display and turn the display on */
 
-          ssd1306_configuredisplay(priv);
+          ret = ssd1306_configuredisplay(priv);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           /* Draw the framebuffer */
 
-          ssd1306_redrawfb(priv);
+          ret = ssd1306_redrawfb(priv);
         }
       else
         {
           /* Turn the display on */
 
-          ssd1306_do_disponoff(priv, true);
+          ret = ssd1306_do_disponoff(priv, true);
+        }
+
+      if (ret < 0)
+        {
+          return ret;
         }
 
       priv->on = true;
@@ -798,6 +835,7 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   unsigned int scaled;
+  int ret;
 
   lcdinfo("contrast: %d\n", contrast);
   DEBUGASSERT(priv);
@@ -831,8 +869,18 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Set the contrast */
 
-  (void)ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Set contrast control register */
-  (void)ssd1306_sendbyte(priv, SSD1306_CONTRAST(scaled)); /* Data 1: Set 1 of 256 contrast steps */
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Set contrast control register */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST(scaled)); /* Data 1: Set 1 of 256 contrast steps */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   priv->contrast = contrast;
 
   /* De-select and unlock the device */
@@ -849,8 +897,10 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  **************************************************************************************/
 
-static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
+static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 {
+  int ret;
+
   /* Lock and select device */
 
   ssd1306_select(priv, true);
@@ -867,74 +917,340 @@ static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 
 #ifdef IS_SSD1309
 
-  ssd1306_sendbyte(priv, SSD1309_PROTOFF);         /* Unlock driver IC */
-  ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
-  ssd1306_sendbyte(priv, SSD1309_SETMEMORY);       /* Set page addressing mode: 0x0, 0x01 or 0x02 */
-  ssd1306_sendbyte(priv, SSD1309_MEMADDR(0x02));
-  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
-  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
-  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
-  ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));     /* Set page address (Can ignore) */
-  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
-  ssd1306_sendbyte(priv ,SSD1306_CONTRAST(SSD1309_DEV_CONTRAST));  /* Default contrast 0xff */
-  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
-  ssd1306_sendbyte(priv, SSD1306_EDISPOFF);        /* Normal display off 0xa4 (Can ignore) */
-  ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
-  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
-  ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
-  ssd1306_sendbyte(priv, SSD1306_SCANFROMCOM0);    /* Com scan direction: Scan from COM[0] to COM[n-1] */
-  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
-  ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
-  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5 */
-  ssd1306_sendbyte(priv, SSD1306_CLKDIV(7,0));     /* 0x70 */
+  ret = ssd1306_sendbyte(priv, SSD1309_PROTOFF);         /* Unlock driver IC */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
-  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,0x0a)); /* 0xfa: Fh cycles for discharge and Ah cycles for pre-charge */
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFF);         /* Display off 0xae */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
-  ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  ret = ssd1306_sendbyte(priv, SSD1309_SETMEMORY);       /* Set page addressing mode: 0x0, 0x01 or 0x02 */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb */
-  ssd1306_sendbyte(priv, SSD1306_VCOM(0x3C));
+  ret = ssd1306_sendbyte(priv, SSD1309_MEMADDR(0x02));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));      /* Set lower column address 0x00 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));     /* Set page address (Can ignore) */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv ,SSD1306_CONTRAST(SSD1309_DEV_CONTRAST));  /* Default contrast 0xff */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_EDISPOFF);        /* Normal display off 0xa4 (Can ignore) */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_SCANFROMCOM0);    /* Com scan direction: Scan from COM[0] to COM[n-1] */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV(7,0));     /* 0x70 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f,0x0a)); /* 0xfa: Fh cycles for discharge and Ah cycles for pre-charge */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM_SET);        /* set vcomh 0xdb */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM(0x3C));
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #else
 
-  ssd1306_sendbyte(priv, SSD1306_DISPOFF);          /* Display off 0xae */
-  ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));       /* Set lower column address 0x00 */
-  ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));       /* Set higher column address 0x10 */
-  ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));     /* Set display start line 0x40 */
-  //ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));    /* Set page address  (Can ignore) */
-  ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Contrast control 0x81 */
-  ssd1306_sendbyte(priv, SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
-  ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);       /* Set segment remap left 95 to 0 | 0xa1 */
-  //ssd1306_sendbyte(priv, SSD1306_EDISPOFF);       /* Normal display off 0xa4 (Can ignore) */
-  ssd1306_sendbyte(priv, SSD1306_NORMAL);           /* Normal (un-reversed) display mode 0xa6 */
-  ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);      /* Multiplex ratio 0xa8 */
-  ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
-  //ssd1306_sendbyte(priv, SSD1306_SCANTOCOM0);     /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore) */
-  ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);    /* Set display offset 0xd3 */
-  ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
-  ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);       /* Set clock divider 0xd5 */
-  ssd1306_sendbyte(priv, SSD1306_CLKDIV(8, 0));     /* 0x80 */
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFF);          /* Display off 0xae */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);      /* Set pre-charge period 0xd9 */
-  ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f, 1)); /* 0xf1 or 0x22 Enhanced mode */
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(0));       /* Set lower column address 0x00 */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);    /* Set common pads / set com pins hardware configuration 0xda */
-  ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));       /* Set higher column address 0x10 */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_VCOM_SET);         /* set vcomh 0xdb */
-  ssd1306_sendbyte(priv, SSD1306_VCOM(0x40));
+  ret = ssd1306_sendbyte(priv, SSD1306_STARTLINE(0));     /* Set display start line 0x40 */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);      /* Set Charge Pump enable/disable 0x8d ssd1306 */
-  ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);       /* 0x14 close 0x10 */
-
-  //ssd1306_sendbyte(priv, SSD1306_DCDC_MODE);      /* DC/DC control mode: on (SSD1306 Not supported) */
-  //ssd1306_sendbyte(priv, SSD1306_DCDC_ON);
-
+#if 0
+  ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(0));    /* Set page address  (Can ignore) */
+  if (ret < 0)
+    {
+      return ret;
+    }
 #endif
 
-  ssd1306_sendbyte(priv, SSD1306_DISPON);           /* Display ON 0xaf */
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST_MODE);    /* Contrast control 0x81 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_REMAPPLEFT);       /* Set segment remap left 95 to 0 | 0xa1 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#if 0
+  ret = ssd1306_sendbyte(priv, SSD1306_EDISPOFF);       /* Normal display off 0xa4 (Can ignore) */
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  ret = ssd1306_sendbyte(priv, SSD1306_NORMAL);           /* Normal (un-reversed) display mode 0xa6 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO_MODE);      /* Multiplex ratio 0xa8 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#if 0
+  ret = ssd1306_sendbyte(priv, SSD1306_SCANTOCOM0);     /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore) */
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS_MODE);    /* Set display offset 0xd3 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPOFFS(0));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV_SET);       /* Set clock divider 0xd5 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CLKDIV(8, 0));     /* 0x80 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER_SET);      /* Set pre-charge period 0xd9 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRGPER(0x0f, 1)); /* 0xf1 or 0x22 Enhanced mode */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD_CONFIG);    /* Set common pads / set com pins hardware configuration 0xda */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM_SET);         /* set vcomh 0xdb */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_VCOM(0x40));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRPUMP_SET);      /* Set Charge Pump enable/disable 0x8d ssd1306 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_CHRPUMP_ON);       /* 0x14 close 0x10 */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#if 0
+  ret = ssd1306_sendbyte(priv, SSD1306_DCDC_MODE);      /* DC/DC control mode: on (SSD1306 Not supported) */
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DCDC_ON);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+#endif
+
+  ret = ssd1306_sendbyte(priv, SSD1306_DISPON);           /* Display ON 0xaf */
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* De-select and unlock the device */
 
@@ -943,6 +1259,7 @@ static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
   up_mdelay(100);
 
   priv->is_conf = true;
+  return OK;
 }
 
 /**************************************************************************************
@@ -959,9 +1276,10 @@ static void ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
  *
  **************************************************************************************/
 
-static void ssd1306_redrawfb(struct ssd1306_dev_s *priv)
+static int ssd1306_redrawfb(struct ssd1306_dev_s *priv)
 {
   unsigned int page;
+  int ret;
 
   /* Lock and select device */
 
@@ -977,12 +1295,25 @@ static void ssd1306_redrawfb(struct ssd1306_dev_s *priv)
 
       /* Set the column address to the XOFFSET value */
 
-      ssd1306_sendbyte(priv, SSD1306_SETCOLL(SSD1306_DEV_XOFFSET));
-      ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));
+      ret = ssd1306_sendbyte(priv, SSD1306_SETCOLL(SSD1306_DEV_XOFFSET));
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = ssd1306_sendbyte(priv, SSD1306_SETCOLH(0));
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Set the page address */
 
-      ssd1306_sendbyte(priv, SSD1306_PAGEADDR(page));
+      ret = ssd1306_sendbyte(priv, SSD1306_PAGEADDR(page));
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Select data transfer */
 
@@ -990,13 +1321,18 @@ static void ssd1306_redrawfb(struct ssd1306_dev_s *priv)
 
       /* Transfer one page of the selected color */
 
-      ssd1306_sendblk(priv, &priv->fb[page * SSD1306_DEV_XRES],
-                         SSD1306_DEV_XRES);
+      ret = ssd1306_sendblk(priv, &priv->fb[page * SSD1306_DEV_XRES],
+                            SSD1306_DEV_XRES);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   /* De-select and unlock the device */
 
   ssd1306_select(priv, false);
+  return OK;
 }
 
 /**************************************************************************************
@@ -1087,7 +1423,7 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
  *
  **************************************************************************************/
 
-void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
+int ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 {
   FAR struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
 
@@ -1108,7 +1444,7 @@ void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 
   /* Draw the framebuffer */
 
-  ssd1306_redrawfb(priv);
+  return ssd1306_redrawfb(priv);
 }
 
 #endif /* CONFIG_LCD_SSD1306 */
