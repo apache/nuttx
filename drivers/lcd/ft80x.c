@@ -682,6 +682,31 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* FT80X_IOC_PUTRAMCMD
+       *   Description:  Write 32-bit aligned data to FT80x FIFO (RAM_CMD)
+       *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
+       *   Returns:      None.
+       */
+
+      case FT80X_IOC_PUTRAMCMD:
+        {
+          FAR struct ft80x_relmem_s *ramcmd =
+            (FAR struct ft80x_relmem_s *)((uintptr_t)arg);
+
+          if (ramcmd == NULL || ((uintptr_t)&ramcmd->offset & 3) != 0 /* ||
+              ramcmd->offset >= FT80X_CMDFIFO_SIZE */ )
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_write_memory(priv, FT80X_RAM_CMD + ramcmd->offset,
+                                ramcmd->value, ramcmd->nbytes);
+              ret = OK;
+            }
+        }
+        break;
+
       /* FT80X_IOC_GETREG8:
        *   Description:  Read an 8-bit register value from the FT80x.
        *   Argument:     A reference to an instance of struct ft80x_register_s.

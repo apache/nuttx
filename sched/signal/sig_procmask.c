@@ -113,7 +113,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
   /* Return the old signal mask if requested */
 
   oldsigprocmask = rtcb->sigprocmask;
-  if (oset)
+  if (oset != NULL)
     {
       *oset = oldsigprocmask;
     }

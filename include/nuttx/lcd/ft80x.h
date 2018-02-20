@@ -127,12 +127,17 @@
  * either case but must be subsequently obtained using FT80X_IOC_GETRAMDL.
  *
  * FT80X_IOC_GETRAMDL:
- *   Description:  Read a 32-bit value from the display list.
+ *   Description:  Read a 32-bit aligned data from the display list.
  *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
  *   Returns:      The 32-bit value read from the display list.
  *
  * FT80X_IOC_PUTRAMG
  *   Description:  Write byte data to FT80x graphics memory (RAM_G)
+ *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
+ *   Returns:      None.
+ *
+ * FT80X_IOC_PUTRAMCMD
+ *   Description:  Write 32-bit aligned data to FT80x FIFO (RAM_CMD)
  *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
  *   Returns:      None.
  *
@@ -182,13 +187,14 @@
 #define FT80X_IOC_APPENDDL          _LCDIOC(FT80X_NIOCTL_BASE + 1)
 #define FT80X_IOC_GETRAMDL          _LCDIOC(FT80X_NIOCTL_BASE + 2)
 #define FT80X_IOC_PUTRAMG           _LCDIOC(FT80X_NIOCTL_BASE + 3)
-#define FT80X_IOC_GETREG8           _LCDIOC(FT80X_NIOCTL_BASE + 4)
-#define FT80X_IOC_GETREG16          _LCDIOC(FT80X_NIOCTL_BASE + 5)
-#define FT80X_IOC_GETREG32          _LCDIOC(FT80X_NIOCTL_BASE + 6)
-#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 7)
-#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 8)
-#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 9)
-#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 10)
+#define FT80X_IOC_PUTRAMCMD         _LCDIOC(FT80X_NIOCTL_BASE + 4)
+#define FT80X_IOC_GETREG8           _LCDIOC(FT80X_NIOCTL_BASE + 5)
+#define FT80X_IOC_GETREG16          _LCDIOC(FT80X_NIOCTL_BASE + 6)
+#define FT80X_IOC_GETREG32          _LCDIOC(FT80X_NIOCTL_BASE + 7)
+#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 8)
+#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 9)
+#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 10)
+#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 11)
 
 /* FT80x Memory Map *************************************************************************/
 
@@ -1353,8 +1359,8 @@ struct ft80x_displaylist_s
   struct ft80x_dlcmd_s cmd; /* First command in the display list  */
 };
 
-/* This structure is used with the FT80X_IOC_GETRAMDL and FT80X_IOC_PUTRAMG IOCTL commands to
- * access particular memory regions via an offset.
+/* This structure is used with the FT80X_IOC_GETRAMDL, FT80X_IOC_PUTRAMG, and
+ * FT80X_IOC_PUTRAMCMD IOCTL commands to access particular memory regions via an offset.
  *
  * NOTES:
  *   - For FT80X_IOC_GET* commands, the value is an output; for FT80X_IOC_PUT* command, the
