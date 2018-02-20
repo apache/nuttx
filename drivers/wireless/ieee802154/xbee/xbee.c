@@ -1267,7 +1267,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
   ret = nxsem_wait(&priv->atquery_sem);
   if (ret < 0)
     {
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1298,7 +1298,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
       ret = nxsem_wait(&priv->atresp_sem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           wd_cancel(priv->atquery_wd);
           priv->querycmd[0] = 0;
           priv->querycmd[1] = 0;

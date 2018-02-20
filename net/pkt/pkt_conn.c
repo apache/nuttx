@@ -99,7 +99,7 @@ static inline void _pkt_semtake(sem_t *sem)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
 
   UNUSED(ret);

@@ -1005,7 +1005,7 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
            */
 
           ierr("ERROR: nxsem_wait: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
 

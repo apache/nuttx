@@ -519,7 +519,7 @@ static void lpc43_takesem(struct lpc43_dev_s *priv)
        * awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(errno == EINTR || errno == ECANCELED);
     }
 }
 

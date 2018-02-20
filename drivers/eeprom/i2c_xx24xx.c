@@ -311,7 +311,7 @@ static void ee24xx_semtake(FAR struct ee24xx_dev_s *eedev)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(errno == EINTR || errno == ECANCELED);
     }
 }
 

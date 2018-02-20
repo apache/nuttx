@@ -83,7 +83,7 @@ void gran_enter_critical(FAR struct gran_s *priv)
       ret = nxsem_wait(&priv->exclsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
         }
     }
   while (ret == -EINTR);
@@ -101,5 +101,3 @@ void gran_leave_critical(FAR struct gran_s *priv)
 
 
 #endif /* CONFIG_GRAN */
-
-

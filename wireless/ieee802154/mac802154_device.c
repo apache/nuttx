@@ -444,7 +444,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
       ret = nxsem_wait(&dev->readsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           dev->readpending = false;
           return ret;
         }
@@ -681,7 +681,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
               ret = nxsem_wait(&dev->geteventsem);
               if (ret < 0)
                 {
-                  DEBUGASSERT(ret == -EINTR);
+                  DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
                   dev->geteventpending = false;
                   return ret;
                 }

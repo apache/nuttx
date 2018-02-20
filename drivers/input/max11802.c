@@ -395,7 +395,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
            */
 
           ierr("ERROR: nxsem_wait: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
     }
@@ -773,7 +773,7 @@ static int max11802_open(FAR struct file *filep)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -830,7 +830,7 @@ static int max11802_close(FAR struct file *filep)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -892,7 +892,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1004,7 +1004,7 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1064,7 +1064,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

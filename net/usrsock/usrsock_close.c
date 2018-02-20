@@ -175,7 +175,7 @@ int usrsock_close(FAR struct usrsock_conn_s *conn)
 
       while ((ret = net_lockedwait(&state.recvsem)) < OK)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
         }
 
       ret = state.result;

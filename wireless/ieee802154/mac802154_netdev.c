@@ -1114,7 +1114,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                       ret = nxsem_wait(&priv->md_eventsem);
                       if (ret < 0)
                         {
-                          DEBUGASSERT(ret == -EINTR);
+                          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
                           priv->md_eventpending = false;
                           return ret;
                         }

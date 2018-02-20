@@ -165,7 +165,7 @@ static int uart_takesem(FAR sem_t *sem, bool errout)
            * awakened by a signal.
            */
 
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
 
           /* When the signal is received, should we errout? Or should we just
            * continue waiting until we have the semaphore?

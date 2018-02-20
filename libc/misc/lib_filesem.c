@@ -99,7 +99,7 @@ void lib_take_semaphore(FAR struct file_struct *stream)
            * was awakened by a signal.
            */
 
-          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
           UNUSED(ret);
         }
 

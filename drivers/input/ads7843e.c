@@ -768,7 +768,7 @@ static int ads7843e_open(FAR struct file *filep)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -825,7 +825,7 @@ static int ads7843e_close(FAR struct file *filep)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -886,7 +886,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -998,7 +998,7 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1058,7 +1058,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

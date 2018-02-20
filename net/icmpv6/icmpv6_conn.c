@@ -170,7 +170,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
 
   UNUSED(ret);

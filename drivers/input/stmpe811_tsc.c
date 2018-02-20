@@ -312,7 +312,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
            */
 
           ierr("ERROR: nxsem_wait failed: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
     }
@@ -365,7 +365,7 @@ static int stmpe811_open(FAR struct file *filep)
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -425,7 +425,7 @@ static int stmpe811_close(FAR struct file *filep)
       /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -488,7 +488,7 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
       /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -603,7 +603,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -668,7 +668,7 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -908,7 +908,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

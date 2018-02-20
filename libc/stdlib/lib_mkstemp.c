@@ -155,7 +155,7 @@ static void get_base62(FAR uint8_t *ptr)
 
   while ((ret = _SEM_WAIT(&g_b62sem)) < 0)
     {
-      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
     }
 
   memcpy(ptr, g_base62, MAX_XS);
@@ -294,4 +294,3 @@ int mkstemp(FAR char *path_template)
 }
 
 #endif /* CONFIG_FS_WRITABLE */
-

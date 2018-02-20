@@ -95,7 +95,7 @@ static void _usrsock_semtake(FAR sem_t *sem)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
 }
 

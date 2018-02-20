@@ -233,7 +233,7 @@ int usrsock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   while ((ret = net_lockedwait(&state.recvsem)) < 0)
     {
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
 
   if (state.result < 0)

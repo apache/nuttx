@@ -73,7 +73,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
       ret = nxsem_wait(&server->lc_waitsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           return ret;
         }
     }

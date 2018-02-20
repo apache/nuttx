@@ -103,7 +103,7 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
            * was interrupted by a signal.
            */
 
-          DEBUGASSERT(errno == EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
         }
     }
   while (ret < 0);

@@ -1215,7 +1215,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   while ((ret = net_lockedwait(&dev->req.sem)) < 0)
     {
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
 
   if (usrsockdev_is_opened(dev))
@@ -1234,7 +1234,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
       while ((ret = net_lockedwait(&dev->req.acksem)) < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
         }
     }
   else

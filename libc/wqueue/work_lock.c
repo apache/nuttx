@@ -77,7 +77,7 @@ int work_lock(void)
   ret = sem_wait(&g_usrsem);
   if (ret < 0)
     {
-      DEBUGASSERT(errno == EINTR);
+      DEBUGASSERT(errno == EINTR || errno == ECANCELED);
       return -EINTR;
     }
 #else

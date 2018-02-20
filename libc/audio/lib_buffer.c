@@ -80,7 +80,7 @@ static void apb_semtake(FAR struct ap_buffer_s *apb)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
       UNUSED(ret);
     }
 }

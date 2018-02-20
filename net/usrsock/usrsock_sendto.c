@@ -400,7 +400,7 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
 
           while ((ret = net_lockedwait(&state.recvsem)) < 0)
             {
-              DEBUGASSERT(ret == -EINTR);
+              DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
             }
 
           ret = state.result;

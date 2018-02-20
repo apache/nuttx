@@ -510,7 +510,7 @@ static int telnet_open(FAR struct file *filep)
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       goto errout;
     }
 
@@ -559,7 +559,7 @@ static int telnet_close(FAR struct file *filep)
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       goto errout;
     }
 

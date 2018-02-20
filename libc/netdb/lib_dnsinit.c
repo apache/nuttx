@@ -169,7 +169,7 @@ void dns_semtake(void)
        if (ret < 0)
          {
            errcode = _SEM_ERRNO(ret);
-           DEBUGASSERT(errcode == EINTR);
+           DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
          }
     }
   while (ret < 0 && errcode == EINTR);

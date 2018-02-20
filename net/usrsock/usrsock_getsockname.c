@@ -235,7 +235,7 @@ int usrsock_getsockname(FAR struct socket *psock,
 
       while ((ret = net_lockedwait(&state.reqstate.recvsem)) < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
         }
 
       ret = state.reqstate.result;

@@ -321,7 +321,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
            * the failure now.
            */
 
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
           goto errout;
         }
     }
@@ -411,7 +411,7 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
       return ret;
     }
 
@@ -509,7 +509,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
       return ret;
     }
 
@@ -553,7 +553,7 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
       return ret;
     }
 
@@ -815,4 +815,3 @@ int up_buttonevent(int x, int y, int buttons)
   up_notify(priv);
   return OK;
 }
-

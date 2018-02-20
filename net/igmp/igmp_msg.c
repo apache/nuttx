@@ -113,7 +113,7 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
            * the wait is awakened by a signal.
            */
 
-          ASSERT(ret == -EINTR);
+          ASSERT(ret == -EINTR || ret == -ECANCELED);
         }
 
       UNUSED(ret);

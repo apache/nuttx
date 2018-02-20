@@ -1286,7 +1286,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, s
 
           cc3000_deselect_and_unlock(priv->spi);
           ninfo("nxsem_wait: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           nwritten = ret;
           goto errout_without_sem;
         }

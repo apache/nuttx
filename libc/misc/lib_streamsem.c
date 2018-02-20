@@ -66,7 +66,7 @@ void stream_semtake(FAR struct streamlist *list)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR);
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
       UNUSED(ret);
     }
 }

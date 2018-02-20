@@ -212,7 +212,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
 
       while ((ret = net_lockedwait(&state.recvsem)) < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
         }
 
       ret = state.result;

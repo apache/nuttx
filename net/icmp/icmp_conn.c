@@ -170,7 +170,7 @@ void icmp_free(FAR struct icmp_conn_s *conn)
        * the wait was awakened by a signal.
        */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
 
   UNUSED(ret);

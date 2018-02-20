@@ -718,7 +718,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
            * the failure now.
            */
 
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
     }
@@ -1148,7 +1148,7 @@ static int mxt_open(FAR struct file *filep)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1229,7 +1229,7 @@ static int mxt_close(FAR struct file *filep)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1300,7 +1300,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1522,7 +1522,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1583,7 +1583,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This should only happen if the wait was cancelled by an signal */
 
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

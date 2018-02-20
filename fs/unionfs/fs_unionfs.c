@@ -254,7 +254,7 @@ static int unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint)
       ret = nxsem_wait(&ui->ui_exclsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           if (!noint)
             {
               return ret;

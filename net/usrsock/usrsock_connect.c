@@ -229,7 +229,7 @@ int usrsock_connect(FAR struct socket *psock,
       ret = net_lockedwait(&state.recvsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
 
           /* Wait interrupted, exit early. */
 

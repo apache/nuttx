@@ -685,7 +685,7 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
            */
 
           ierr("ERROR: nxsem_wait failed: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR);
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
     }
@@ -812,7 +812,7 @@ static int ft5x06_open(FAR struct file *filep)
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -874,7 +874,7 @@ static int ft5x06_close(FAR struct file *filep)
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -938,7 +938,7 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1001,7 +1001,7 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1062,7 +1062,7 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This should only happen if the wait was cancelled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR);
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
