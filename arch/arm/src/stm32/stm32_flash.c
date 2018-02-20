@@ -4,6 +4,9 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
+ * STM32L1 support:
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -59,7 +62,7 @@
 
 #include "up_arch.h"
 
-/* Only for the STM32F[1|3|4]0xx family and STM32L15xx (EEPROM only) for now */
+/* Only for the STM32F[1|3|4]0xx family and STM32L15xx. */
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined (CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
@@ -76,6 +79,10 @@
 #if defined(CONFIG_STM32_STM32L15XX)
 #  define FLASH_KEY1      0x8C9DAEBF
 #  define FLASH_KEY2      0x13141516
+#  define FLASH_OPTKEY1   0xFBEAD9C8
+#  define FLASH_OPTKEY2   0x24252627
+#  define EEPROM_KEY1     0x89ABCDEF
+#  define EEPROM_KEY2     0x02030405
 #else
 #  define FLASH_KEY1      0x45670123
 #  define FLASH_KEY2      0xCDEF89AB
@@ -89,11 +96,19 @@
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  define FLASH_CR_PAGE_ERASE              FLASH_CR_SER
 #  define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPERR
+#elif defined(CONFIG_STM32_STM32L15XX)
+#  define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPERR
+#  define FLASH_SR_ALLERRS                (FLASH_SR_RDERR | FLASH_SR_SIZERR | \
+                                           FLASH_SR_PGAERR | FLASH_SR_WRPERR)
 #endif
 
+/* STM32L1 internal flash is based on EEPROM-technology while most others
+ * are NOR-flash, thus many things are different including the erase value.
+ */
 #if defined(CONFIG_STM32_STM32L15XX)
-#  define EEPROM_KEY1     0x89ABCDEF
-#  define EEPROM_KEY2     0x02030405
+#  define FLASH_ERASEDVALUE                0x00
+#else
+#  define FLASH_ERASEDVALUE                0xff
 #endif
 
 /************************************************************************************
@@ -382,17 +397,29 @@ size_t stm32_eeprom_getaddress(void)
 
 ssize_t stm32_eeprom_write(size_t addr, const void *buf, size_t buflen)
 {
+  ssize_t outlen;
+
   if (!buf)
     {
       return -EINVAL;
     }
 
-  return stm32_eeprom_erase_write(addr, buf, buflen);
+  sem_lock();
+  outlen = stm32_eeprom_erase_write(addr, buf, buflen);
+  sem_unlock();
+
+  return outlen;
 }
 
 ssize_t stm32_eeprom_erase(size_t addr, size_t eraselen)
 {
-  return stm32_eeprom_erase_write(addr, NULL, eraselen);
+  ssize_t outlen;
+
+  sem_lock();
+  outlen = stm32_eeprom_erase_write(addr, NULL, eraselen);
+  sem_unlock();
+
+  return outlen;
 }
 
 #endif /* defined(CONFIG_STM32_STM32L15XX) */
@@ -478,7 +505,8 @@ int stm32_flash_writeprotect(size_t page, bool enabled)
 }
 #endif
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
 size_t up_progmem_pagesize(size_t page)
 {
   return STM32_FLASH_PAGESIZE;
@@ -509,10 +537,10 @@ size_t up_progmem_getaddress(size_t page)
   return page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE;
 }
 
-#endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) */
+#endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+          defined(CONFIG_STM32_STM32L15XX) */
 
 #ifdef CONFIG_STM32_STM32F4XXX
-
 size_t up_progmem_pagesize(size_t page)
 {
   static const size_t page_sizes[STM32_FLASH_NPAGES] = STM32_FLASH_SIZES;
@@ -572,9 +600,7 @@ size_t up_progmem_getaddress(size_t page)
   return base_address;
 }
 
-#endif /* def CONFIG_STM32_STM32F4XXX */
-
-#if !defined(CONFIG_STM32_STM32L15XX)
+#endif /* defined(CONFIG_STM32_STM32F4XXX) */
 
 size_t up_progmem_npages(void)
 {
@@ -590,6 +616,155 @@ bool up_progmem_isuniform(void)
 #endif
 }
 
+ssize_t up_progmem_ispageerased(size_t page)
+{
+  size_t addr;
+  size_t count;
+  size_t bwritten = 0;
+
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return -EFAULT;
+    }
+
+  /* Verify */
+
+  for (addr = up_progmem_getaddress(page), count = up_progmem_pagesize(page);
+       count; count--, addr++)
+    {
+      if (getreg8(addr) != FLASH_ERASEDVALUE)
+        {
+          bwritten++;
+        }
+    }
+
+  return bwritten;
+}
+
+#if defined(CONFIG_STM32_STM32L15XX)
+ssize_t up_progmem_erasepage(size_t page)
+{
+  size_t page_address;
+
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return -EFAULT;
+    }
+
+  page_address = up_progmem_getaddress(page);
+
+  /* Get flash ready and begin erasing single page */
+
+  sem_lock();
+  flash_unlock();
+
+  modifyreg32(STM32_FLASH_PECR, 0, FLASH_PECR_ERASE);
+  modifyreg32(STM32_FLASH_PECR, 0, FLASH_PECR_PROG);
+
+  /* Erase is started by writing 0x00000000 to the first word
+   * of the program page.
+   */
+
+  putreg32(0x00, page_address);
+
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
+
+  flash_lock();
+  sem_unlock();
+
+  /* Verify */
+
+  if (up_progmem_ispageerased(page) == 0)
+    {
+      return up_progmem_pagesize(page);
+    }
+  else
+    {
+      return -EIO;
+    }
+}
+
+ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
+{
+  uint32_t *word = (uint32_t *)buf;
+  size_t written = count;
+  int ret = OK;
+
+  /* STM32L1 requires word access and alignment. */
+
+  if (addr & 3)
+    {
+      return -EINVAL;
+    }
+
+  if (count & 3)
+    {
+      return -EINVAL;
+    }
+
+  /* Check for valid address range */
+
+  if (addr >= STM32_FLASH_BASE)
+    {
+      addr -= STM32_FLASH_BASE;
+    }
+
+  if ((addr+count) > STM32_FLASH_SIZE)
+    {
+      return -EFAULT;
+    }
+
+  /* Get flash ready and begin flashing */
+
+  sem_lock();
+  flash_unlock();
+
+  for (addr += STM32_FLASH_BASE; count; count -= 4, word++, addr += 4)
+    {
+      /* Write word and wait to complete */
+
+      putreg32(*word, addr);
+
+      while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+        {
+          up_waste();
+        }
+
+      /* Verify */
+
+      if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
+        {
+          ret = -EROFS;
+          goto out;
+        }
+
+      if (getreg32(addr) != *word)
+        {
+          ret = -EIO;
+          goto out;
+        }
+    }
+
+out:
+  /* If there was an error, clear all error flags in status
+   * register (rc_w1 register so do this by writing the
+   * error bits).
+   */
+
+  if (ret != OK)
+    {
+      ferr("flash write error: %d, status: 0x%x\n", ret, getreg32(STM32_FLASH_SR));
+      modifyreg32(STM32_FLASH_SR, 0, FLASH_SR_ALLERRS);
+    }
+
+  flash_lock();
+  sem_unlock();
+  return (ret == OK) ? written : ret;
+}
+#else /* !defined(CONFIG_STM32_STM32L15XX) */
 ssize_t up_progmem_erasepage(size_t page)
 {
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
@@ -643,31 +818,6 @@ ssize_t up_progmem_erasepage(size_t page)
     {
       return -EIO; /* failure */
     }
-}
-
-ssize_t up_progmem_ispageerased(size_t page)
-{
-  size_t addr;
-  size_t count;
-  size_t bwritten = 0;
-
-  if (page >= STM32_FLASH_NPAGES)
-    {
-      return -EFAULT;
-    }
-
-  /* Verify */
-
-  for (addr = up_progmem_getaddress(page), count = up_progmem_pagesize(page);
-       count; count--, addr++)
-    {
-      if (getreg8(addr) != 0xff)
-        {
-          bwritten++;
-        }
-    }
-
-  return bwritten;
 }
 
 ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
@@ -753,7 +903,6 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   sem_unlock();
   return written;
 }
-
 #endif /* !defined(CONFIG_STM32_STM32L15XX) */
 
 #endif /* defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
