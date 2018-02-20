@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_NET_WARNx)
+#ifdef CONFIG_DEBUG_NET_WARN
 static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 {
   /* Size is determined by the following protocol header, */
