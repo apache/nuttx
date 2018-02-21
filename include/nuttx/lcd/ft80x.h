@@ -144,17 +144,22 @@
  * FT80X_IOC_GETREG8:
  *   Description:  Read an 8-bit register value from the FT80x.
  *   Argument:     A reference to an instance of struct ft80x_register_s below.
- *   Returns:      The 8-bit value read from the display list.
+ *   Returns:      The 8-bit value read from the register.
  *
  * FT80X_IOC_GETREG16:
  *   Description:  Read a 16-bit register value from the FT80x.
  *   Argument:     A reference to an instance of struct ft80x_register_s below.
- *   Returns:      The 16-bit value read from the display list.
+ *   Returns:      The 16-bit value read from the register.
  *
  * FT80X_IOC_GETREG32:
  *   Description:  Read a 32-bit register value from the FT80x.
  *   Argument:     A reference to an instance of struct ft80x_register_s below.
- *   Returns:      The 32-bit value read from the display list.
+ *   Returns:      The 32-bit value read from the register.
+ *
+ * FT80X_IOC_GETREGS:
+ *   Description:  Read multiple 32-bit register values from the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_registers_s below.
+ *   Returns:      The 32-bit values read from the consecutive registers .
  *
  * FT80X_IOC_PUTREG8:
  *   Description:  Write an 8-bit register value to the FT80x.
@@ -162,13 +167,18 @@
  *   Returns:      None.
  *
  * FT80X_IOC_PUTREG16:
- *   Description:  Write a 16-bit  register value to the FT80x.
+ *   Description:  Write a 16-bit register value to the FT80x.
  *   Argument:     A reference to an instance of struct ft80x_register_s below.
  *   Returns:      None.
  *
  * FT80X_IOC_PUTREG32:
- *   Description:  Write a 32-bit  register value to the FT80x.
+ *   Description:  Write a 32-bit register value to the FT80x.
  *   Argument:     A reference to an instance of struct ft80x_register_s below.
+ *   Returns:      None.
+ *
+ * FT80X_IOC_PUTREGS:
+ *   Description:  Write multiple 32-bit register values to the FT80x.
+ *   Argument:     A reference to an instance of struct ft80x_registers_s below.
  *   Returns:      None.
  *
  * FT80X_IOC_EVENTNOTIFY:
@@ -191,10 +201,12 @@
 #define FT80X_IOC_GETREG8           _LCDIOC(FT80X_NIOCTL_BASE + 5)
 #define FT80X_IOC_GETREG16          _LCDIOC(FT80X_NIOCTL_BASE + 6)
 #define FT80X_IOC_GETREG32          _LCDIOC(FT80X_NIOCTL_BASE + 7)
-#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 8)
-#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 9)
-#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 10)
-#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 11)
+#define FT80X_IOC_GETREGS           _LCDIOC(FT80X_NIOCTL_BASE + 8)
+#define FT80X_IOC_PUTREG8           _LCDIOC(FT80X_NIOCTL_BASE + 9)
+#define FT80X_IOC_PUTREG16          _LCDIOC(FT80X_NIOCTL_BASE + 10)
+#define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 11)
+#define FT80X_IOC_PUTREGS           _LCDIOC(FT80X_NIOCTL_BASE + 12)
+#define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 13)
 
 /* FT80x Memory Map *************************************************************************/
 
@@ -1417,6 +1429,13 @@ struct ft80x_register_s
     uint16_t u16;            /* 16-bit register value */
     uint32_t u32;            /* 32-bit register value */
   } value;
+};
+
+struct ft80x_registers_s
+{
+  uint32_t addr;             /* 32-bit aligned start register address */
+  uint8_t nregs;             /* Number of 32-bit registers to be accessed */
+  FAR uint32_t *value;       /* A pointer to an array of 32-bit register values */
 };
 
 /********************************************************************************************

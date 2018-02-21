@@ -643,7 +643,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_relmem_s *ramdl =
             (FAR struct ft80x_relmem_s *)((uintptr_t)arg);
 
-          if (ramdl == NULL || ((uintptr_t)&ramdl->offset & 3) != 0 ||
+          if (ramdl == NULL || ((uintptr_t)ramdl->offset & 3) != 0 ||
               ramdl->offset >= FT80X_RAM_DL_SIZE)
             {
               ret = -EINVAL;
@@ -693,7 +693,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_relmem_s *ramcmd =
             (FAR struct ft80x_relmem_s *)((uintptr_t)arg);
 
-          if (ramcmd == NULL || ((uintptr_t)&ramcmd->offset & 3) != 0 /* ||
+          if (ramcmd == NULL || ((uintptr_t)ramcmd->offset & 3) != 0 /* ||
               ramcmd->offset >= FT80X_CMDFIFO_SIZE */ )
             {
               ret = -EINVAL;
@@ -710,7 +710,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* FT80X_IOC_GETREG8:
        *   Description:  Read an 8-bit register value from the FT80x.
        *   Argument:     A reference to an instance of struct ft80x_register_s.
-       *   Returns:      The 8-bit value read from the display list.
+       *   Returns:      The 8-bit value read from the register.
        */
 
       case FT80X_IOC_GETREG8:
@@ -718,7 +718,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_register_s *reg =
             (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+          if (reg == NULL || ((uintptr_t)reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
@@ -733,7 +733,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* FT80X_IOC_GETREG16:
        *   Description:  Read a 16-bit register value from the FT80x.
        *   Argument:     A reference to an instance of struct ft80x_register_s.
-       *   Returns:      The 16-bit value read from the display list.
+       *   Returns:      The 16-bit value read from the register.
        */
 
       case FT80X_IOC_GETREG16:
@@ -741,7 +741,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_register_s *reg =
             (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+          if (reg == NULL || ((uintptr_t)reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
@@ -756,7 +756,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* FT80X_IOC_GETREG32:
        *   Description:  Read a 32-bit register value from the FT80x.
        *   Argument:     A reference to an instance of struct ft80x_register_s.
-       *   Returns:      The 32-bit value read from the display list.
+       *   Returns:      The 32-bit value read from the register.
        */
 
       case FT80X_IOC_GETREG32:
@@ -764,13 +764,37 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_register_s *reg =
             (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+          if (reg == NULL || ((uintptr_t)reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
           else
             {
               reg->value.u32 = ft80x_read_word(priv, reg->addr);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_GETREGS:
+       *   Description:  Read multiple 32-bit register values from the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_registers_s.
+       *   Returns:      The 32-bit values read from the consecutive registers .
+       */
+
+      case FT80X_IOC_GETREGS:
+        {
+          FAR struct ft80x_registers_s *regs =
+            (FAR struct ft80x_registers_s *)((uintptr_t)arg);
+
+          if (regs == NULL || ((uintptr_t)regs->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_read_memory(priv, regs->addr, regs->value,
+                                (size_t)regs->nregs << 2);
               ret = OK;
             }
         }
@@ -787,7 +811,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_register_s *reg =
             (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+          if (reg == NULL || ((uintptr_t)reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
@@ -810,7 +834,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_register_s *reg =
             (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+          if (reg == NULL || ((uintptr_t)reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
@@ -833,13 +857,37 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_register_s *reg =
             (FAR struct ft80x_register_s *)((uintptr_t)arg);
 
-          if (reg == NULL || ((uintptr_t)&reg->addr & 3) != 0)
+          if (reg == NULL || ((uintptr_t)reg->addr & 3) != 0)
             {
               ret = -EINVAL;
             }
           else
             {
               ft80x_write_word(priv, reg->addr, reg->value.u32);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* FT80X_IOC_PUTREGS:
+       *   Description:  Write multiple 32-bit register values to the FT80x.
+       *   Argument:     A reference to an instance of struct ft80x_registers_s.
+       *   Returns:      None.
+       */
+
+      case FT80X_IOC_PUTREGS:
+        {
+          FAR struct ft80x_registers_s *regs =
+            (FAR struct ft80x_registers_s *)((uintptr_t)arg);
+
+          if (regs == NULL || ((uintptr_t)regs->addr & 3) != 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ft80x_write_memory(priv, regs->addr, regs->value,
+                                 (size_t)regs->nregs << 2);
               ret = OK;
             }
         }
