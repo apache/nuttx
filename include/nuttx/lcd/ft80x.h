@@ -533,8 +533,17 @@
 
 /* BLEND_FUNC(0x0b) - Set pixel arithmetic */
 
-#define FT80X_BLEND_FUNC(src,dst) \
-  ((11 << 24) | (((src) & 7) << 3) | (((dst) & 7) << 0))
+#define FT80X_BLEND_FUNC(src,dest) \
+  ((11 << 24) | (((src) & 7) << 3) | (((dest) & 7) << 0))
+
+/* src/dest */
+
+#define FT80X_BLEND_ZERO                0
+#define FT80X_BLEND_ONE                 1
+#define FT80X_BLEND_SRC_ALPHA           2
+#define FT80X_BLEND_DST_ALPHA           3
+#define FT80X_BLEND_ONE_MINUS_SRC_ALPHA 4
+#define FT80X_BLEND_ONE_MINUS_DST_ALPHA 5
 
 /* CELL (0x06) - Set the bitmap cell number for the VERTEX2F command */
 
