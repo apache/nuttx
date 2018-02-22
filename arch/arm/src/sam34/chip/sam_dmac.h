@@ -489,8 +489,8 @@
 #  define DMACHAN_INTF_SPI0RX          2         /* SPI0 Receive */
 #  define DMACHAN_INTF_SSC0TX          3         /* SSC0 Transmit */
 #  define DMACHAN_INTF_SSC0RX          4         /* SSC0 Receive */
-#  define DMACHAN_INTF_SPI0TX          5         /* SPI1 Transmit */
-#  define DMACHAN_INTF_SPI0RX          6         /* SPI1 Receive */
+#  define DMACHAN_INTF_SPI1TX          5         /* SPI1 Transmit */
+#  define DMACHAN_INTF_SPI1RX          6         /* SPI1 Receive */
 #  define DMACHAN_INTF_USART0TX        11        /* USART0 Transmit */
 #  define DMACHAN_INTF_USART0RX        12        /* USART0 Receive */
 #  define DMACHAN_INTF_USART1TX        13        /* USART1 Transmit */
