@@ -70,13 +70,14 @@
 #include <nuttx/net/tcp.h>
 
 #include "netdev/netdev.h"
+#include "devif/devif.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
+#include "route/route.h"
 #include "tcp/tcp.h"
-#include "devif/devif.h"
 
 /****************************************************************************
  * Pre-processor Definitions
