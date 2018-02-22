@@ -292,11 +292,41 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
   else
 #endif
     {
-#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_findentry(conn->u.ipv6.raddr) != NULL);
-#else
-      return true;
+      /* For historical reasons, we will return true if both the ARP and the
+       * routing table are disabled.
+       */
+
+      bool ret = true;
+#ifdef CONFIG_NET_ROUTE
+      net_ipv6addr_t router;
 #endif
+
+#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
+      if (neighbor_findentry(conn->u.ipv6.raddr) != NULL)
+        {
+          /* Return true if the address was found in the ARP table */
+
+          return true;
+        }
+
+      /* Otherwise, return false */
+
+      ret = false;
+#endif
+#ifdef CONFIG_NET_ROUTE
+      if (net_ipv6_router(conn->u.ipv6.raddr, router) == OK)
+        {
+          /* Return true if the address was found in the routing table */
+
+          return true;
+        }
+
+      /* Otherwise, return false */
+
+      ret = false;
+#endif
+
+      return ret;
     }
 #endif /* CONFIG_NET_IPv6 */
 }
