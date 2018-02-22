@@ -184,26 +184,29 @@ static inline void psock_lost_connection(FAR struct socket *psock,
       psock->s_sndcb->event = NULL;
     }
 
-  /* Free all queued write buffers */
-
-  for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
+  if (conn != NULL)
     {
-      next = sq_next(entry);
-      tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+      /* Free all queued write buffers */
+
+      for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
+        {
+          next = sq_next(entry);
+          tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+        }
+
+      for (entry = sq_peek(&conn->write_q); entry; entry = next)
+        {
+          next = sq_next(entry);
+          tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+        }
+
+      /* Reset write buffering variables */
+
+      sq_init(&conn->unacked_q);
+      sq_init(&conn->write_q);
+      conn->sent       = 0;
+      conn->sndseq_max = 0;
     }
-
-  for (entry = sq_peek(&conn->write_q); entry; entry = next)
-    {
-      next = sq_next(entry);
-      tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
-    }
-
-  /* Reset write buffering variables */
-
-  sq_init(&conn->unacked_q);
-  sq_init(&conn->write_q);
-  conn->sent       = 0;
-  conn->sndseq_max = 0;
 }
 
 /****************************************************************************
