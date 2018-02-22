@@ -285,6 +285,7 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_ETHERNET
 static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 {
+  /* Only Ethernet drivers are supported by this function */
   /* REVISIT: Could the MAC address not also be in a routing table? */
 
   if (conn->dev->d_lltype != NET_LL_ETHERNET)
@@ -297,11 +298,41 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
   if (conn->domain == PF_INET)
 #endif
     {
-#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(conn->u.ipv4.raddr) != NULL);
-#else
-      return true;
+      /* For historical reasons, we will return true if both the ARP and the
+       * routing table are disabled.
+       */
+
+      bool ret = true;
+#ifdef CONFIG_NET_ROUTE
+      in_addr_t router;
 #endif
+
+#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
+      if (arp_find(conn->u.ipv4.raddr) != NULL)
+        {
+          /* Return true if the address was found in the ARP table */
+
+          return true;
+        }
+
+      /* Otherwise, return false */
+
+      ret = false;
+#endif
+#ifdef CONFIG_NET_ROUTE
+      if (net_ipv4_router(conn->u.ipv4.raddr, &router) == OK)
+        {
+          /* Return true if the address was found in the routing table */
+
+          return true;
+        }
+
+      /* Otherwise, return false */
+
+      ret = false;
+#endif
+
+      return ret;
     }
 #endif /* CONFIG_NET_IPv4 */
 
