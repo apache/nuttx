@@ -292,8 +292,8 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
   else
 #endif
     {
-      /* For historical reasons, we will return true if both the ARP and the
-       * routing table are disabled.
+      /* For historical reasons, we will return true if both the ICMPv6
+       * neighbor support and the routing table are disabled.
        */
 
       bool ret = true;
