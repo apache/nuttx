@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6.h
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,10 +101,10 @@ struct icmpv6_conn_s
 
 struct icmpv6_notify_s
 {
-  FAR struct icmpv6_notify_s *nt_flink; /* Supports singly linked list */
-  net_ipv6addr_t nt_ipaddr;             /* Waited for IP address in the mapping */
-  sem_t nt_sem;                         /* Will wake up the waiter */
-  int nt_result;                        /* The result of the wait */
+  FAR struct icmpv6_notify_s *nt_flink;  /* Supports singly linked list */
+  net_ipv6addr_t nt_ipaddr;              /* Waited for IP address in the mapping */
+  sem_t nt_sem;                          /* Will wake up the waiter */
+  int nt_result;                         /* The result of the wait */
 };
 #endif
 
@@ -113,10 +113,10 @@ struct icmpv6_notify_s
 
 struct icmpv6_rnotify_s
 {
-  FAR struct icmpv6_notify_s *rn_flink; /* Supports singly linked list */
-  char rn_ifname[IFNAMSIZ];             /* Device name */
-  sem_t rn_sem;                         /* Will wake up the waiter */
-  int rn_result;                        /* The result of the wait */
+  FAR struct icmpv6_rnotify_s *rn_flink; /* Supports singly linked list */
+  char rn_ifname[IFNAMSIZ];              /* Device name */
+  sem_t rn_sem;                          /* Will wake up the waiter */
+  int rn_result;                         /* The result of the wait */
 };
 #endif
 
