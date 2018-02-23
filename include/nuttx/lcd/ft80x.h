@@ -191,6 +191,11 @@
  *                 indicate only the tag value for TOUCH0.
  *   Argument:     A reference to an instance of struct ft80x_notify_s.
  *   Returns:      None
+ *
+ * FT80X_IOC_FADE:
+ *   Description:  Change the backlight intensity with a controllable fade.
+ *   Argument:     A reference to an instance of struct ft80x_fade_s below.
+ *   Returns:      None.
  */
 
 #define FT80X_IOC_CREATEDL          _LCDIOC(FT80X_NIOCTL_BASE + 0)
@@ -207,6 +212,7 @@
 #define FT80X_IOC_PUTREG32          _LCDIOC(FT80X_NIOCTL_BASE + 11)
 #define FT80X_IOC_PUTREGS           _LCDIOC(FT80X_NIOCTL_BASE + 12)
 #define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 13)
+#define FT80X_IOC_FADE              _LCDIOC(FT80X_NIOCTL_BASE + 14)
 
 /* FT80x Memory Map *************************************************************************/
 
@@ -1445,6 +1451,14 @@ struct ft80x_registers_s
   uint32_t addr;             /* 32-bit aligned start register address */
   uint8_t nregs;             /* Number of 32-bit registers to be accessed */
   FAR uint32_t *value;       /* A pointer to an array of 32-bit register values */
+};
+
+/* Used with FT80X_IOC_FADE: */
+
+struct ft80x_fade_s
+{
+  uint8_t duty ;             /* Terminal backlight duty as a percentage (0-100) */
+  uint16_t delay;            /* Total number of milliseconds for the fade (10-16700)*/
 };
 
 /********************************************************************************************

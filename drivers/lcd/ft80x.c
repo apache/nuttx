@@ -61,6 +61,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -90,9 +91,16 @@
 #  error No FT80x device configured
 #endif
 
+#define MIN_FADE_DELAY 10     /* Milliseconds */
+#define MAX_FADE_DELAY 16700  /* Milliseconds */
+#define FADE_STEP_MSEC 10     /* Milliseconds */
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static int  ft80x_fade(FAR struct ft80x_dev_s *priv,
+              FAR const struct ft80x_fade_s *fade);
 
 static void ft80x_notify(FAR struct ft80x_dev_s *priv,
               enum ft80x_notify_e event, int value);
@@ -143,6 +151,103 @@ static const struct file_operations g_ft80x_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ft80x_fade
+ *
+ * Description:
+ *   Change the backlight intensity with a controllable fade.
+ *
+ ****************************************************************************/
+
+static int ft80x_fade(FAR struct ft80x_dev_s *priv,
+                      FAR const struct ft80x_fade_s *fade)
+{
+  systime_t start;
+  systime_t elapsed;
+  int32_t delay;
+  int32_t duty;
+  int16_t endduty;
+  int16_t delta;
+
+  /* 0% corresponds to the value 0, but 100% corresponds to the value 128 */
+
+  endduty = (uint16_t)((uint16_t)fade->duty << 7) / 100;
+
+  /* Get the change in duty from the current to the terminal duty. */
+
+  duty  = (int32_t)(ft80x_read_byte(priv, FT80X_REG_PWM_DUTY) & 0x7f);
+  delta = endduty - (int16_t)duty;
+
+  /* The "smoothness" of the steps will depend on the resolution of the
+   * system timer.  The minimum delay is <= 2 * system_clock_period.
+   *
+   * We will try for a FADE_STEP_MSEC delay, but we will try to adapt to
+   * whatever we get is we are working close the system time resolution.
+   * For human factors reasons, any delay less than 100 MS or so should
+   * appear more or less smooth.
+   *
+   * The delay calculation should never overflow:
+   *
+   *   Max delay:        16,700 msec (MAX_FADE_DELAY)
+   *   Min clock period: 1 usec
+   *   Max delay:        16,700,000 ticks
+   *   INT32_MAX         2,147,483,647
+   */
+
+  delay = MSEC2TICK((int32_t)fade->delay);
+  if (delay <= 0)
+    {
+      delay = 1;
+    }
+
+  start = clock_systimer();
+
+  do
+    {
+      /* Wait for FADE_STEP_MSEC msec (or whatever we get) */
+
+      (void)nxsig_usleep(FADE_STEP_MSEC * 1000);
+
+      /* Get the elapsed time */
+
+      elapsed = clock_systimer() - start;
+      if (elapsed > INT32_MAX || (int32_t)elapsed >= delay)
+        {
+          duty = endduty;
+        }
+      else
+        {
+          /* Interpolate to get the next PWM duty in the fade.  This
+           * calculation should never overflow:
+           *
+           *   Max delta:       128
+           *   Max elapsed:     16,700,000 ticks
+           *   Max numerator:   2,137,600,000
+           *   Min denominator: 1
+           *   Max duty:        2,137,600,000
+           *   INT32_MAX        2,147,483,647
+           */
+
+          duty += ((int32_t)delta * (int32_t)elapsed) / delay;
+          if (duty > 128)
+            {
+              duty = 128;
+            }
+          else if (duty < 0)
+            {
+              duty = 0;
+            }
+        }
+
+      /* The set the new backlight PWM duty */
+
+      ft80x_write_byte(priv, FT80X_REG_PWM_DUTY, (uint8_t)duty);
+    }
+  while (duty != endduty);
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: ft80x_notify
@@ -955,6 +1060,30 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   ft80x_write_word(priv, FT80X_REG_INT_MASK, regval);
                   ret = OK;
                 }
+            }
+        }
+        break;
+
+       /* FT80X_IOC_FADE:
+        *   Description:  Change the backlight intensity with a controllable
+        *                 fade.
+        *   Argument:     A reference to an instance of struct ft80x_fade_s.
+        *   Returns:      None.
+        */
+
+       case FT80X_IOC_FADE:
+        {
+          FAR const struct ft80x_fade_s *fade =
+            (FAR const struct ft80x_fade_s *)((uintptr_t)arg);
+
+          if (fade == NULL || fade->duty > 100 ||
+              fade->delay < MIN_FADE_DELAY || fade->delay > MAX_FADE_DELAY)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = ft80x_fade(priv, fade);
             }
         }
         break;

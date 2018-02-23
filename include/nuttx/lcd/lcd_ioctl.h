@@ -50,7 +50,7 @@
 
 /* IOCTL commands set aside for FT80x character driver */
 
-#define FT80X_NIOCTL_CMDS  14
+#define FT80X_NIOCTL_CMDS  15
 #define FT80X_NIOCTL_BASE  0x0001
 
 #endif /* __INCLUDE_NUTTX_INPUT_LCD_IOCTL_H */
