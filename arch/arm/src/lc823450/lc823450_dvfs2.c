@@ -51,6 +51,8 @@
 #include "lc823450_syscontrol.h"
 #include "lc823450_intc.h"
 #include "lc823450_sdc.h"
+#include "lc823450_gpio.h"
+#include "lc823450_timer.h"
 #include "lc823450_dvfs2.h"
 
 /****************************************************************************
@@ -60,6 +62,25 @@
 #define FREQ_160 0
 #define FREQ_080 1
 #define FREQ_040 2
+
+#define FREQ_KP  2
+#define FREQ_UP  1
+#define FREQ_DN  0
+
+#define UP_THRESHOLD 20
+#define DN_THRESHOLD 60
+
+#ifndef CONFIG_SMP_NCPUS
+#  define CONFIG_SMP_NCPUS 1
+#endif
+
+#ifdef CONFIG_DVFS_CHANGE_VOLTAGE
+#  define CORE12V_PIN (GPIO_PORT2 | GPIO_PIN1)
+#endif
+
+#ifndef CONFIG_RTC_HIRES
+#  error "Should be enabled to get high-accuracy for CPU idle time"
+#endif
 
 /****************************************************************************
  * Private Data
@@ -90,27 +111,48 @@ static struct freq_entry _dvfs_idl_tbl[3] =
 static uint16_t _dvfs_cur_idx  = 0; /* current speed index */
 static uint16_t _dvfs_cur_hdiv = 3;
 static uint16_t _dvfs_cur_mdiv = OSCCNT_MAINDIV_1;
+static uint16_t _dvfs_core12v = 0;
 
-#if 0
-static uint16_t _dvfs_init_timeout = (5 * 100); /* in ticks */
-#endif
-
-#if defined(CONFIG_SMP) && (CONFIG_SMP_NCPUS == 2)
 static uint8_t  _dvfs_cpu_is_active[CONFIG_SMP_NCPUS];
-#endif
 
 static void lc823450_dvfs_set_div(int idx, int tbl);
+
+static uint64_t g_idle_starttime[CONFIG_SMP_NCPUS];
+static uint64_t g_idle_totaltime[CONFIG_SMP_NCPUS];
+static uint64_t g_idle_totaltime0[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 int8_t   g_dvfs_enabled  = 0;
+int8_t   g_dvfs_auto     = 0;
 uint16_t g_dvfs_cur_freq = 160;
+
+uint32_t g_dvfs_freq_stat[3] =
+  {
+    0, 0, 0
+  };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_get_current_time()
+ ****************************************************************************/
+
+static uint64_t _get_current_time64(void)
+{
+  struct timespec ts;
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+  clock_gettime(CLOCK_REALTIME, &ts);
+#endif
+  return (uint64_t)ts.tv_sec * NSEC_PER_SEC + (uint64_t)ts.tv_nsec;
+}
 
 /****************************************************************************
  * Name: lc823450_dvfs_update_lpm
@@ -121,7 +163,7 @@ static void lc823450_dvfs_update_lpm(int freq)
   /* TODO */
 }
 
-#if defined(CONFIG_SMP) && (CONFIG_SMP_NCPUS == 2)
+#if CONFIG_SMP_NCPUS == 2
 static int _dvfs_another_cpu_state(int me)
 {
   if (0 == me)
@@ -134,6 +176,50 @@ static int _dvfs_another_cpu_state(int me)
     }
 }
 #endif
+
+/****************************************************************************
+ * Name: lc823450_dvfs_oneshot
+ * Callback for 1 shot timer
+ ****************************************************************************/
+
+int lc823450_dvfs_oneshot(int irq, uint32_t *regs, FAR void *arg)
+{
+  /* voltage has reached at 1.2V */
+
+  _dvfs_core12v = 1;
+
+  lc823450_mtm_stop_oneshot();
+
+  /* go to max freq */
+
+  lc823450_dvfs_set_div(FREQ_160, 0);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: lc832450_set_core_voltage
+ * high=true (1.2V), high=false (1.0V)
+ ****************************************************************************/
+
+#ifdef CONFIG_DVFS_CHANGE_VOLTAGE
+static void lc832450_set_core_voltage(bool high)
+{
+  if (false == high)
+    {
+      _dvfs_core12v = 0;
+    }
+
+  lc823450_gpio_write(CORE12V_PIN, (int)high);
+
+  if (high)
+    {
+      /* start 3ms timer to change internal dividers */
+
+      lc823450_mtm_start_oneshot(3);
+    }
+}
+#endif
+
 
 /****************************************************************************
  * Name: lc823450_dvfs_set_div
@@ -159,6 +245,16 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
       t_hdiv  = _dvfs_idl_tbl[idx].hdiv;
       t_mdiv  = _dvfs_idl_tbl[idx].mdiv;
     }
+
+#ifdef CONFIG_DVFS_CHANGE_VOLTAGE
+  if (100 < target && !_dvfs_core12v)
+    {
+      /* Set high voltage (i.e. 1.2v) */
+
+      lc832450_set_core_voltage(true);
+      return;
+    }
+#endif
 
   if (100 < target)
     {
@@ -242,6 +338,18 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
   _dvfs_cur_mdiv  = t_mdiv;
   g_dvfs_cur_freq = target;
 
+
+#ifdef CONFIG_DVFS_CHANGE_VOLTAGE
+  /* NOTE: check the index instead of the target freq */
+
+  if (_dvfs_core12v && _dvfs_cur_idx != FREQ_160)
+    {
+      /* set to lower voltage (i.e. 1.0v) */
+
+      lc832450_set_core_voltage(false);
+    }
+#endif
+
   if (100 > target)
     {
       /* Clear ROM wait cycle (CPU=0wait) */
@@ -252,8 +360,121 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
 }
 
 /****************************************************************************
+ * Name: lc823450_dvfs_change_idx
+ * up: 1=clock up, 0=clock down
+ * called in autonomous mode from interrupt context
+ ****************************************************************************/
+
+static void lc823450_dvfs_change_idx(int up)
+{
+  uint16_t idx = _dvfs_cur_idx;
+
+  /* NOTE: clock index is in reverse order to the speed */
+
+  /* clock up */
+
+  if (up && (FREQ_160 < idx))
+    {
+      idx--;
+    }
+
+  /* clock down */
+
+  if (!up && (FREQ_040 > idx))
+    {
+      idx++;
+    }
+
+#ifdef CONFIG_DVFS_EXCLUDE_40M
+  if (idx == FREQ_040)
+    {
+      return;
+    }
+#endif
+
+  if (idx != _dvfs_cur_idx)
+    {
+      lc823450_dvfs_set_div(idx, 0);
+    }
+
+}
+
+/****************************************************************************
+ * Name: lc823450_dvfs_do_auto
+ ****************************************************************************/
+
+static void lc823450_dvfs_do_auto(uint32_t idle[])
+{
+  uint32_t state[CONFIG_SMP_NCPUS];
+  int i;
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (UP_THRESHOLD >= idle[i])
+        {
+          state[i] = FREQ_UP;
+        }
+      else if (DN_THRESHOLD <= idle[i])
+        {
+          state[i] = FREQ_DN;
+        }
+      else
+        {
+          state[i] = FREQ_KP;
+        }
+    }
+
+#if CONFIG_SMP_NCPUS == 1
+  if (FREQ_UP == state[0])
+#elif CONFIG_SMP_NCPUS == 2
+  if (FREQ_UP == state[0] || FREQ_UP == state[1])
+#endif
+    {
+      lc823450_dvfs_change_idx(FREQ_UP);
+    }
+
+#if CONFIG_SMP_NCPUS == 1
+  if (FREQ_DN == state[0])
+#elif CONFIG_SMP_NCPUS == 2
+  if (FREQ_DN == state[0] && FREQ_DN == state[1])
+#endif
+    {
+      lc823450_dvfs_change_idx(FREQ_DN);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lc823450_dvfs_get_idletime
+ ****************************************************************************/
+
+void lc823450_dvfs_get_idletime(uint64_t idletime[])
+{
+  irqstate_t flags = spin_lock_irqsave();
+
+  /* First, copy g_idle_totaltime to the caller */
+
+  memcpy(idletime, g_idle_totaltime, sizeof(g_idle_totaltime));
+
+#if CONFIG_SMP_NCPUS == 2
+  int me = up_cpu_index();
+
+  if (0 == _dvfs_another_cpu_state(me))
+    {
+      /* Another CPU is in idle, so consider this situation */
+
+      int cpu = (me == 0) ? 1 : 0;
+      idletime[cpu] += (_get_current_time64() - g_idle_starttime[cpu]);
+
+      /* NOTE: g_idletotaltime[cpu] must not be updated */
+    }
+#endif
+
+  spin_unlock_irqrestore(flags);
+}
 
 /****************************************************************************
  * Name: lc823450_get_apb
@@ -267,22 +488,39 @@ uint32_t lc823450_get_apb(void)
 
 /****************************************************************************
  * Name: lc823450_dvfs_tick_callback
- * This callback is called in the timer interupt
+ * This callback is called in the timer interupt on CPU0
  ****************************************************************************/
 
 void lc823450_dvfs_tick_callback(void)
 {
-#if 0
-  if (_dvfs_init_timeout)
-    {
-      _dvfs_init_timeout--;
+  uint64_t tmp_idle_total[CONFIG_SMP_NCPUS];
+  uint32_t idle[CONFIG_SMP_NCPUS];
+  int i;
 
-      if (0 == _dvfs_init_timeout)
+  if (g_dvfs_enabled && g_dvfs_auto)
+    {
+      lc823450_dvfs_get_idletime(tmp_idle_total);
+
+      /* Calculate idle ratio for each CPU */
+
+      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
         {
-          g_dvfs_enabled = 1;
+          idle[i] = 100 * (tmp_idle_total[i] - g_idle_totaltime0[i])
+            / NSEC_PER_TICK;
         }
+
+      /* Update g_idle_totaltime0 */
+
+      memcpy(g_idle_totaltime0, tmp_idle_total, sizeof(tmp_idle_total));
+
+      /* Do autonomous mode */
+
+      lc823450_dvfs_do_auto(idle);
     }
-#endif
+
+  /* Update freqency statistics */
+
+  g_dvfs_freq_stat[_dvfs_cur_idx]++;
 }
 
 /****************************************************************************
@@ -293,18 +531,22 @@ void lc823450_dvfs_enter_idle(void)
 {
   irqstate_t flags = spin_lock_irqsave();
 
-  if (0 == g_dvfs_enabled)
-    {
-      goto exit_with_error;
-    }
-
-#if defined(CONFIG_SMP) && (CONFIG_SMP_NCPUS == 2)
   int me = up_cpu_index();
 
   /* Update my state first : 0 (idle) */
 
   _dvfs_cpu_is_active[me] = 0;
 
+  /* Update my idle start time */
+
+  g_idle_starttime[me] = _get_current_time64();
+
+  if (0 == g_dvfs_enabled)
+    {
+      goto exit_with_error;
+    }
+
+#if CONFIG_SMP_NCPUS == 2
   /* check if another core is still active */
 
   if (_dvfs_another_cpu_state(me))
@@ -313,7 +555,6 @@ void lc823450_dvfs_enter_idle(void)
 
       goto exit_with_error;
     }
-
 #endif
 
 #ifdef CONFIG_DVFS_CHECK_SDC
@@ -340,18 +581,16 @@ void lc823450_dvfs_exit_idle(int irq)
 {
   irqstate_t flags = spin_lock_irqsave();
 
+  int me = up_cpu_index();
+  uint64_t d;
+  uint64_t now;
+
   if (0 == g_dvfs_enabled)
     {
       goto exit_with_error;
     }
 
-#if defined(CONFIG_SMP) && (CONFIG_SMP_NCPUS == 2)
-  int me = up_cpu_index();
-
-  /* Update my state first: 1 (active) */
-
-  _dvfs_cpu_is_active[me] = 1;
-
+#if CONFIG_SMP_NCPUS == 2
   /* Check if another core is already active */
 
   if (_dvfs_another_cpu_state(me))
@@ -367,6 +606,21 @@ void lc823450_dvfs_exit_idle(int irq)
   lc823450_dvfs_set_div(_dvfs_cur_idx, 0);
 
 exit_with_error:
+
+  if (0 == _dvfs_cpu_is_active[me])
+    {
+      /* In case of idle to active transition */
+      /* Accumulate idle total time on this CPU */
+
+      now = _get_current_time64();
+      d = now - g_idle_starttime[me];
+      g_idle_totaltime[me] += d;
+    }
+
+  /* Finally update my state : 1 (active) */
+
+  _dvfs_cpu_is_active[me] = 1;
+
   spin_unlock_irqrestore(flags);
 }
 
@@ -410,9 +664,11 @@ int lc823450_dvfs_set_freq(int freq)
         idx = FREQ_080;
         break;
 
+#ifndef CONFIG_DVFS_EXCLUDE_40M
       case 40:
         idx = FREQ_040;
         break;
+#endif
 
       default:
         ret = -1;

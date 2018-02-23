@@ -59,6 +59,7 @@
 #include "lc823450_dma.h"
 #include "lc823450_gpio.h"
 #include "lc823450_syscontrol.h"
+#include "lc823450_timer.h"
 
 #ifdef CONFIG_LC823450_SDC_DMA
 #  include <semaphore.h>

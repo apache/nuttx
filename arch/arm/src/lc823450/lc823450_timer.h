@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_idle.c
+ * arch/arm/src/lc823450/lc823450_timer.h
  *
- *   Copyright (C) 2014-2018 Sony Corporation. All rights reserved.
+ *   Copyright (C) 2018 Sony Corporation. All rights reserved.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,85 +33,47 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_TIMER_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_TIMER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "nvic.h"
-#include "up_internal.h"
-#include "up_arch.h"
-
-#ifdef CONFIG_DVFS
-#  include "lc823450_dvfs2.h"
-#endif
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
-static uint32_t g_idle_counter[2];
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when their is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
- *
- ****************************************************************************/
-
-void up_idle(void)
-{
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
-
-  sched_process_timer();
-#else
-
-  /* DVFS and LED control must be done with local interrupts disabled */
-
-  irqstate_t flags;
-  flags = up_irq_save();
-
-#ifdef CONFIG_LC823450_SLEEP_MODE
-  /* Clear SLEEPDEEP flag */
-
-  uint32_t regval  = getreg32(NVIC_SYSCON);
-  regval &= ~NVIC_SYSCON_SLEEPDEEP;
-  putreg32(regval, NVIC_SYSCON);
+#ifdef CONFIG_HRT_TIMER
+int up_hrttimer_usleep(unsigned int usec);
 #endif
 
 #ifdef CONFIG_DVFS
-  lc823450_dvfs_enter_idle();
+void lc823450_mtm_start_oneshot(int msec);
+void lc823450_mtm_stop_oneshot(void);
 #endif
 
-  board_autoled_off(LED_CPU0 + up_cpu_index());
-
-  up_irq_restore(flags);
-
-  /* Sleep until an interrupt occurs to save power */
-
-  asm("WFI");
-
-  g_idle_counter[up_cpu_index()]++;
-
-#endif
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_TIMER_H */

@@ -484,16 +484,16 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   irq_attach(LC823450_IRQ_AUDIOBUF0, _i2s_isr, NULL);
 
+  /* Enable IRQ for Audio Buffer */
+
+  up_enable_irq(LC823450_IRQ_AUDIOBUF0);
+
 #ifdef CONFIG_SMP
   /* Restore the original affinity */
 
   (void)nxsched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
   nxsig_usleep(10 * 1000);
 #endif
-
-  /* Enable IRQ for Audio Buffer */
-
-  up_enable_irq(LC823450_IRQ_AUDIOBUF0);
 
   /* Success exit */
 

@@ -65,14 +65,6 @@ index 687f50ca..8418eff8 100644
  
  /****************************************************************************
 
-If other deadlocks or ASSERT() still happen, please try the following.
-
-$ cd nuttx; git revert e238c8b0904988b966c3b33e7df2ba3faba52e2b
-
-This will revert the changes for clock_systimer() for 64bit so that it can
-use spinlock to protect the internal data. We think that there still exist
-race conditions somewhere in SMP logic but the revert might relax the conditions.
-
 Other Status
 ^^^^^^^^^^^^
 
@@ -281,13 +273,20 @@ By default, DVFS is disabled. To enable,
 
 nsh> echo "enable 1" > /proc/dvfs
 
-In addition, you can change CPU frequency to 160/80/40. To change the
-frequency, enable the DVFS first then do the following.
+In addition, you can change CPU frequency to 160/80/40 manually.
+To change the frequency, enable the DVFS first then do the following.
 
 nsh> echo "cur_freq 80" > /proc/dvfs.
 
-Currently, DVFS works in manual mode and Vdd1 is fixed to 1.2V
-which will be changed in the future version.
+If you want to run in autonomous mode,
+
+nsh> echo "auto 1" > /proc/dvfs.
+
+In autonomous mode, you don't need to set cur_freq. Instead,
+cur_freq will show the current CPU frequency.
+
+NOTE: Currently Vdd1 is fixed to 1.2V which will be changed
+in the future version.
 
 TODO
 ^^^^

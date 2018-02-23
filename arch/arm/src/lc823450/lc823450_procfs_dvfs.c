@@ -68,10 +68,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DVFS_LINELEN  64
+#define DVFS_LINELEN  128
 
 #ifndef MIN
 #  define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef CONFIG_SMP_NCPUS
+#  define CONFIG_SMP_NCPUS 1
 #endif
 
 /****************************************************************************
@@ -129,7 +133,9 @@ static const struct procfs_entry_s g_procfs_dvfs =
  ****************************************************************************/
 
 extern int8_t   g_dvfs_enabled;
+extern int8_t   g_dvfs_auto;
 extern uint16_t g_dvfs_cur_freq;
+extern uint32_t g_dvfs_freq_stat[3];
 
 
 /****************************************************************************
@@ -202,7 +208,9 @@ static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
   size_t copysize;
   size_t remaining;
   size_t totalsize;
-  off_t offset = filep->f_pos;
+  off_t  offset = filep->f_pos;
+  int    i;
+  uint64_t idletime[CONFIG_SMP_NCPUS];
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
@@ -230,6 +238,42 @@ static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
                       "enable %d \n", g_dvfs_enabled);
   copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
   totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  linesize = snprintf(priv->line,
+                      DVFS_LINELEN,
+                      "auto %d \n", g_dvfs_auto);
+  copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  linesize = snprintf(priv->line,
+                      DVFS_LINELEN,
+                      "fstat %d %d %d \n",
+                      g_dvfs_freq_stat[0],
+                      g_dvfs_freq_stat[1],
+                      g_dvfs_freq_stat[2]);
+  copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  lc823450_dvfs_get_idletime(idletime);
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      linesize = snprintf(priv->line,
+                          DVFS_LINELEN,
+                          "idle%d %lld \n",
+                          i, idletime[i]);
+
+      copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
+      totalsize += copysize;
+      buffer    += copysize;
+      remaining -= copysize;
+    }
 
   /* Update the file offset */
 
@@ -251,8 +295,7 @@ static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
   char line[DVFS_LINELEN];
   char cmd[16];
   int  n;
-  int  freq;
-  int  enable;
+  int  tmp;
 
   n = MIN(buflen, DVFS_LINELEN - 1);
   strncpy(line, buffer, n);
@@ -264,13 +307,18 @@ static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
 
   if (0 == strcmp(cmd, "cur_freq"))
     {
-      freq = atoi(line + (n + 1));
-      (void)lc823450_dvfs_set_freq(freq);
+      tmp = atoi(line + (n + 1));
+      (void)lc823450_dvfs_set_freq(tmp);
     }
   else if (0 == strcmp(cmd, "enable"))
     {
-      enable = atoi(line + (n + 1));
-      g_dvfs_enabled = enable;
+      tmp = atoi(line + (n + 1));
+      g_dvfs_enabled = tmp;
+    }
+  else if (0 == strcmp(cmd, "auto"))
+    {
+      tmp = atoi(line + (n + 1));
+      g_dvfs_auto = tmp;
     }
   else
     {

@@ -717,10 +717,6 @@ void up_ack_irq(int irq)
     }
 #endif
 
-#ifdef CONFIG_LC823450_SLEEP_MODE
-  extern void up_update_idle_time(void);
-  up_update_idle_time();
-#endif
 }
 
 /****************************************************************************

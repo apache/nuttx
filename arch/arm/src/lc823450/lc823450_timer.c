@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_timerisr.c
+ * arch/arm/src/lc823450/lc823450_timer.c
  *
  *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
  *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
@@ -61,6 +61,7 @@
 #include "lc823450_syscontrol.h"
 #include "lc823450_clockconfig.h"
 #include "lc823450_serial.h"
+#include "lc823450_timer.h"
 
 #ifdef CONFIG_DVFS
 #  include "lc823450_dvfs2.h"
@@ -115,6 +116,17 @@
 #  define rMT30OPR  (LC823450_MTM3_REGBASE + LC823450_MTM_OPR)
 #  define rMT30CNT  (LC823450_MTM3_REGBASE + LC823450_MTM_0CNT)
 #endif /* CONFIG_PROFILE */
+
+#ifdef CONFIG_DVFS
+#  define rMT01STS  (LC823450_MTM0_REGBASE + LC823450_MTM_1STS)
+#  define rMT01A    (LC823450_MTM0_REGBASE + LC823450_MTM_1A)
+#  define rMT01B    (LC823450_MTM0_REGBASE + LC823450_MTM_1B)
+#  define rMT01CTL  (LC823450_MTM0_REGBASE + LC823450_MTM_1CTL)
+#  define rMT01PSCL (LC823450_MTM0_REGBASE + LC823450_MTM_1PSCL)
+#  define rMT01TIER (LC823450_MTM0_REGBASE + LC823450_MTM_1TIER)
+#  define rMT01CNT  (LC823450_MTM0_REGBASE + LC823450_MTM_1CNT)
+#  define rMT0OPR   (LC823450_MTM0_REGBASE + LC823450_MTM_OPR)
+#endif
 
 #ifndef container_of
 #  define container_of(ptr, type, member) \
@@ -612,23 +624,85 @@ void arm_timer_initialize(void)
   putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE |
             NVIC_SYSTICK_CTRL_TICKINT |
             NVIC_SYSTICK_CTRL_ENABLE),
-           NVIC_SYSTICK_CTRL);
+            NVIC_SYSTICK_CTRL);
 
   /* And enable the timer interrupt */
 
   up_enable_irq(LC823450_IRQ_SYSTICK);
 #endif
+
+#ifdef CONFIG_DVFS
+  /* attach timer interrupt handler */
+
+  (void)irq_attach(LC823450_IRQ_MTIMER01, (xcpt_t)lc823450_dvfs_oneshot, NULL);
+
+  /* enable MTM0-ch1 */
+
+  up_enable_irq(LC823450_IRQ_MTIMER01);
+#endif
 }
 
 /****************************************************************************
- * Name: up_hr_gettime
+ * Name: lc823450_mtm_start_oneshot
+ * NOTE: Assumption: MTM0-ch0 is running (i.e. tick timer)
+ ****************************************************************************/
+
+#ifdef CONFIG_DVFS
+void lc823450_mtm_start_oneshot(int msec)
+{
+  uint32_t r = MTM_RELOAD; /* 10ms */
+
+  r /= 10;   /* 1ms */
+  r *= msec;
+
+  putreg32(0, rMT01A); /* AEVT counter */
+  putreg32(r - 1, rMT01B); /* BEVT counter */
+
+  /* Clear the counter by BEVT */
+
+  putreg32(0x80, rMT01CTL);
+
+  /* Set prescaler to 9 : (1/10) */
+
+  putreg32(9, rMT01PSCL);
+
+  /* Enable BEVT Interrupt */
+
+  putreg32(1 << 1, rMT01TIER);
+
+
+  /* Enable MTM0-ch1 */
+
+  modifyreg32(rMT0OPR, 0, 1 << 1);
+}
+#endif
+
+/****************************************************************************
+ * Name: lc823450_mtm_stop_oneshot
+ ****************************************************************************/
+
+#ifdef CONFIG_DVFS
+void lc823450_mtm_stop_oneshot(void)
+{
+  /* Clear the interrupt (BEVT) */
+
+  putreg32(1 << 1, rMT01STS);
+
+  /* Disable MTM0-ch1 */
+
+  modifyreg32(rMT0OPR, 1 << 1, 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: up_rtc_gettime
  *
  * Description:
  *   This function is used in clock_gettime() to obtain high resolution time.
  *
  ****************************************************************************/
 
-int up_hr_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(FAR struct timespec *tp)
 {
   uint64_t secs;
   uint64_t nsecs;

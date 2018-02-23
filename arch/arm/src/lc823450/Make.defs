@@ -84,7 +84,7 @@ endif
 CHIP_ASRCS  =
 
 CHIP_CSRCS  = lc823450_start.c lc823450_irq.c lc823450_idle.c
-CHIP_CSRCS += lc823450_timerisr.c lc823450_lowputc.c
+CHIP_CSRCS += lc823450_timer.c lc823450_lowputc.c
 CHIP_CSRCS += lc823450_serial.c lc823450_clockconfig.c lc823450_syscontrol.c
 CHIP_CSRCS += lc823450_gpio.c
 
