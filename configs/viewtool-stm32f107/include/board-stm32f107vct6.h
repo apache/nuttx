@@ -117,7 +117,7 @@
  *
  *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz
  *
- * NOTE: The Viewtool DP83848C module has its on, on-board 50MHz clock.  No
+ * NOTE: The Viewtool DP83848C module has its own, on-board 50MHz clock.  No
  * MCO clock need be provided on that board.
  */
 

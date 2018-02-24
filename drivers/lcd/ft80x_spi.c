@@ -64,8 +64,7 @@
 
 static void ft80x_select(FAR struct ft80x_dev_s *priv)
 {
-  lcdinfo("Mode: %d Bits: 8 Frequency: %d\n",
-          CONFIG_FT80X_SPIMODE, CONFIG_FT80X_FREQUENCY);
+  lcdinfo("Mode: %d Bits: 8 Frequency: %d\n", SPIDEV_MODE0, priv->frequency);
 
   DEBUGASSERT(priv != NULL);
 

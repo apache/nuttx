@@ -828,7 +828,7 @@
  * In addition, if there is a audio amplifier on board (such as TPA6205A or LM4864), then
  * there may also be an active low audio shutdown output:
  *
- *  N/A        O  nSHDN Audio shutdown (active los)
+ *  N/A        O  nSHDN Audio shutdown (active low)
  *
  * SCL/SDA, SCLK/MISO/MOSI/nCS are handled by generic I2C or SPI logic. nInt and nPD are
  * directly managed by this interface.
@@ -869,8 +869,8 @@ struct ft80x_config_s
                       FAR void *arg);
   CODE void (*enable)(FAR const struct ft80x_config_s *lower, bool enable);
   CODE void (*clear)(FAR const struct ft80x_config_s *lower);
-  CODE bool (*pwrdown)(FAR const struct ft80x_config_s *lower, bool pwrdown);
-  CODE bool (*audio)(FAR const struct ft80x_config_s *lower, bool enable);
+  CODE void (*pwrdown)(FAR const struct ft80x_config_s *lower, bool pwrdown);
+  CODE void (*audio)(FAR const struct ft80x_config_s *lower, bool enable);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   CODE void (*destroy)(FAR const struct ft80x_config_s *lower);
 #endif

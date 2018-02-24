@@ -1,7 +1,7 @@
 ############################################################################
 # configs/viewtool-stm32f107/src/Makefile
 #
-#   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ CSRCS += stm32_mpl115a.c
 endif
 
 ifeq ($(CONFIG_INPUT_ADS7843E),y) # F103
-CSRCS += stm32_touchscreen.c
+CSRCS += stm32_ads7843e.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1289),y) # F103
@@ -80,6 +80,12 @@ endif
 
 ifeq ($(CONFIG_VIEWTOOL_HIGHPRI),y)
 CSRCS += stm32_highpri.c
+endif
+
+ifeq ($(CONFIG_VIEWTOOL_FT80X_SPI1),y)
+CSRCS += stm32_ft80x.c
+else ifeq ($(CONFIG_VIEWTOOL_FT80X_SPI2),y)
+CSRCS += stm32_ft80x.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

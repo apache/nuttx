@@ -193,6 +193,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_VIEWTOOL_FT80X_SPI1) || defined(CONFIG_VIEWTOOL_FT80X_SPI2)
+  ret = stm32_ft80x_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ft80x_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

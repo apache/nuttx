@@ -85,6 +85,12 @@ void weak_function stm32_spidev_initialize(void)
 
   (void)stm32_configgpio(GPIO_MPL115A_CS);
 #endif
+
+#if defined(CONFIG_VIEWTOOL_FT80X_SPI1) || defined(CONFIG_VIEWTOOL_FT80X_SPI2)
+  /* Configure the FT80x CS pin as an input */
+
+  (void)stm32_configgpio(GPIO_FT80X_CS);
+#endif
 }
 
 /****************************************************************************
@@ -116,6 +122,19 @@ void weak_function stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#ifdef CONFIG_VIEWTOOL_FT80X_SPI1
+  /* Select/de-select the FT80x */
+
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(GPIO_FT80X_CS, !selected);
+    }
+  else
+#endif
+   {
+    spierr("ERROR:  Unrecognized devid: %08lx\n", (unsigned long)devid);
+   }
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -136,7 +155,20 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
     {
       stm32_gpiowrite(GPIO_LCDTP_CS, !selected);
     }
+  else
 #endif
+#ifdef CONFIG_VIEWTOOL_FT80X_SPI2
+  /* Select/de-select the FT80x */
+
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(GPIO_FT80X_CS, !selected);
+    }
+  else
+#endif
+   {
+    spierr("ERROR:  Unrecognized devid: %08lx\n", (unsigned long)devid);
+   }
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
