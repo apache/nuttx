@@ -358,7 +358,7 @@
                                                   * (x-MSB16; y-LSB16) */
 #  define FT80X_REG_CTOUCH_TOUCH1_XY   0x102508  /* Extended mode: touch-screen screen data for touch 1
                                                   * (x-MSB16; y-LSB16) */
-#  define FT80X_REG_CTOUCH_TOUCH4_XY   0x10250c  /* Extended mode: touch-screen screen Y data for touch 4 */
+#  define FT80X_REG_CTOUCH_TOUCH4_Y    0x10250c  /* Extended mode: touch-screen screen Y data for touch 4 */
 #  define FT80X_REG_CTOUCH_SCREEN_XY   0x102510  /* Compatibility mode: touch-screen screen
                                                   * (x-MSB16; y-LSB16) */
 #  define FT80X_REG_CTOUCH_TOUCH0_XY   0x102510  /* Extended mode: touch-screen screen data for touch 0
