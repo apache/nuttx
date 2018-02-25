@@ -202,9 +202,9 @@ static void ft80x_enable(FAR const struct ft80x_config_s *lower,
   flags = enter_critical_section();
   if (enable && priv->handler)
     {
-      /* Configure the EXTI interrupt using the SAVED handler */
+      /* Configure the EXTI interrupt using the saved handler */
 
-      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true,
+      (void)stm32_gpiosetevent(GPIO_FT80X_INT, true, true, true,
                                priv->handler, priv->arg);
     }
   else
@@ -212,10 +212,10 @@ static void ft80x_enable(FAR const struct ft80x_config_s *lower,
       /* Configure the EXTI interrupt with a NULL handler to disable it.
        *
        * REVISIT:  There is a problem here... interrupts received while
-       * the EXIT is de-configured will not pend but will be lost.
+       * the EXTI is de-configured will not pend but will be lost.
        */
 
-     (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false,
+     (void)stm32_gpiosetevent(GPIO_FT80X_INT, false, false, false,
                               NULL, NULL);
     }
 

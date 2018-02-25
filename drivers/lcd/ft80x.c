@@ -1388,19 +1388,28 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
   DEBUGASSERT(priv->lower->op_frequency <= 30000000);
   priv->frequency = priv->lower->op_frequency;
 
-  /* Configure touch threshold.
-   * REVISIT:  For FT800 set REG_TOUCH_RZTHRESH to 1200.
-   */
+  /* Configure touch mode.  Using default touch mode of FRAME_SYNC (~60Hz) */
+
+  ft80x_write_byte(priv, FT80X_REG_TOUCH_MODE, TOUCH_MODE_FRAMESYNC);
 
 #if defined(CONFIG_LCD_FT800)
-  /* Configure the REG_TOUCH_RZTHRESH the value 1200 may need to be tweaked
+  /* Configure the touch threshold.  The value 1200 may need to be tweaked
    * for your application.
    */
 
   ft80x_write_hword(priv, FT80X_REG_TOUCH_RZTHRESH, 1200);
 
 #elif defined(CONFIG_LCD_FT801)
-#  warning Missing logic
+#ifdef CONFIG_LCD_FT801_MULTITOUCH
+  /* Selected extended mode */
+
+  ft80x_write_byte(priv, FT80X_REG_CTOUCH_EXTENDED, 0);
+#else
+  /* Selected compatibility mode */
+
+  ft80x_write_byte(priv, FT80X_REG_CTOUCH_EXTENDED, 1);
+#endif
+
 #else
 #  error No FT80x device configured
 #endif

@@ -349,7 +349,7 @@
                                                  /* 0x1024d0 – 0x1024d4 Reserved */
 #  define FT80X_REG_CTOUCH_EXTENDED    0x1024f4  /* Set capacitive touch operation mode:
                                                   * 0: extended mode (multi-touch)
-                                                  * 0: 1: FT800 compatibility mode (single touch) */
+                                                  * 1: FT800 compatibility mode (single touch) */
 #  define FT80X_REG_CTOUCH_REG         0x1024f8  /* CTPM configure register write
                                                   * Bits [7:0]: configure register address
                                                   * Bits [15:8]: configure register value */
@@ -414,6 +414,18 @@
 /* FT80X_REG_TOUCH_TAG */
 
 #define TOUCH_TAG_MASK                 0xff      /* Bits 0-7: Tag of touched graphic object */
+
+/* FT80X_REG_TOUCH_MODE */
+
+#define TOUCH_MODE_OFF                 0         /* Acquisition stopped, touch detection
+                                                  * interrupt is still valid. */
+#define TOUCH_MODE_ONESHOT             1         /* Perform acquisition once every write of 1
+                                                  * to REG_TOUCH_MODE. */
+#define TOUCH_MODE_FRAMESYNC           2         /* Perform acquisition for every frame sync
+                                                  * (~60 data acquisition/second). */
+#define TOUCH_MODE_CONTINUOUS          3         /* Perform acquisition continuously at
+                                                  * approximately 1000 data acquisition /
+                                                  * second. */
 
 /* Interrupts *******************************************************************************/
 /* The interrupt output pin is enabled by REG_INT_EN.  When REG_INT_EN is 0, INT_N is

@@ -199,14 +199,18 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   flags = enter_critical_section();
   if (enable && priv->handler)
     {
-      /* Configure the EXTI interrupt using the SAVED handler */
+      /* Configure the EXTI interrupt using the saved handler */
 
       (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true,
                                priv->handler, NULL);
     }
   else
     {
-      /* Configure the EXTI interrupt with a NULL handler to disable it */
+      /* Configure the EXTI interrupt with a NULL handler to disable it.
+       *
+       * REVISIT:  There is a problem here... interrupts received while
+       * the EXTI is de-configured will not pend but will be lost.
+       */
 
      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false,
                               NULL, NULL);
