@@ -411,6 +411,12 @@
                                                   * the screen immediately after the current
                                                   * frame is scanned out (recommended).
                                                   */
+/* FT80X_REG_PLAYBACK_FORMAT */
+
+#define AUDIO_FORMAT_LINEAR            0         /* Linear Sample format */
+#define AUDIO_FORMAT_ULAW              1         /* uLaw Sample format */
+#define AUDIO_FORMAT_ADPCM             2         /* 4-bit IMA ADPCM Sample format */
+
 /* FT80X_REG_TOUCH_TAG */
 
 #define TOUCH_TAG_MASK                 0xff      /* Bits 0-7: Tag of touched graphic object */
