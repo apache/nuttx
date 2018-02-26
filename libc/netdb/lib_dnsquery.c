@@ -5,7 +5,7 @@
  * The DNS resolver functions are used to lookup a hostname and map it to a
  * numerical IP address.
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2017 Gregory Nutt. All rights
+ *   Copyright (C) 2007, 2009, 2012, 2014-2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -108,8 +108,8 @@ static uint8_t g_seqno;           /* Sequence number of the next request */
  *
  * Input Parameters:
  *
- *   query - A pointer to the starting byte of the name entry in the DNS response.
- *
+ *   query    - A pointer to the starting byte of the name entry in the DNS
+ *              response.
  *   queryend - A pointer to the byte after the last byte of the DNS response.
  *
  * Returned Value:
@@ -148,7 +148,6 @@ static FAR uint8_t *dns_parse_name(FAR uint8_t *query, FAR uint8_t *queryend)
 
       query += n;
     }
-
 
   if (query >= queryend)
     {
@@ -303,7 +302,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
       return -EILSEQ;
     }
 
-  hdr = (FAR struct dns_header_s *)buffer;
+  hdr         = (FAR struct dns_header_s *)buffer;
   endofbuffer = (FAR uint8_t*)buffer + ret;
 
   ninfo("ID %d\n", htons(hdr->id));
@@ -335,10 +334,10 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
    * match.
    */
 
-
 #if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
   {
     int d = 64;
+
     nameptr = dns_parse_name((uint8_t *)buffer + 12, endofbuffer);
     if (nameptr == endofbuffer)
       {
