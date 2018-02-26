@@ -411,6 +411,159 @@
                                                   * the screen immediately after the current
                                                   * frame is scanned out (recommended).
                                                   */
+/* FT80X_REG_SOUND */
+/* Sound effect (Bits 0-7) */
+
+#define FT08X_EFFECT_SILENCE           0x00      /* Silence */
+#define FT08X_EFFECT_SQUARE            0x01      /* Square wave */
+#define FT08X_EFFECT_SINE              0x02      /* Sine wave */
+#define FT08X_EFFECT_SAWTOOTH          0x03      /* Sawtooth wave */
+#define FT08X_EFFECT_TRIANGLE          0x04      /* Triangle wave */
+#define FT08X_EFFECT_BEEPING           0x05      /* Beeping */
+#define FT08X_EFFECT_ALARM             0x06      /* Alarm */
+#define FT08X_EFFECT_WARBLE            0x07      /* Warble */
+#define FT08X_EFFECT_CAROUSEL          0x08      /* Carousel */
+#define FT08X_EFFECT_PIP1              0x10      /* 1 short pip */
+#define FT08X_EFFECT_PIP2              0x11      /* 2 short pips */
+#define FT08X_EFFECT_PIP3              0x12      /* 3 short pips */
+#define FT08X_EFFECT_PIP4              0x13      /* 4 short pips */
+#define FT08X_EFFECT_PIP5              0x14      /* 5 short pips */
+#define FT08X_EFFECT_PIP6              0x15      /* 6 short pips */
+#define FT08X_EFFECT_PIP7              0x16      /* 7 short pips */
+#define FT08X_EFFECT_PIP8              0x17      /* 8 short pips */
+#define FT08X_EFFECT_PIP9              0x18      /* 9 short pips */
+#define FT08X_EFFECT_PIP10             0x19      /* 10 short pips */
+#define FT08X_EFFECT_PIP11             0x1a      /* 11 short pips */
+#define FT08X_EFFECT_PIP12             0x1b      /* 12 short pips */
+#define FT08X_EFFECT_PIP13             0x1c      /* 13 short pips */
+#define FT08X_EFFECT_PIP14             0x1d      /* 14 short pips */
+#define FT08X_EFFECT_PIP15             0x1e      /* 15 short pips */
+#define FT08X_EFFECT_PIP16             0x1f      /* 16 short pips */
+#define FT08X_EFFECT_DTMFHASH          0x23      /* DTMF # */
+#define FT08X_EFFECT_DTMFASTERISK      0x2c      /* DTMF * */
+#define FT08X_EFFECT_DTMF0             0x30      /* DTMF 0 */
+#define FT08X_EFFECT_DTMF1             0x31      /* DTMF 1 */
+#define FT08X_EFFECT_DTMF2             0x32      /* DTMF 2 */
+#define FT08X_EFFECT_DTMF3             0x33      /* DTMF 3 */
+#define FT08X_EFFECT_DTMF4             0x34      /* DTMF 4 */
+#define FT08X_EFFECT_DTMF5             0x35      /* DTMF 5 */
+#define FT08X_EFFECT_DTMF6             0x36      /* DTMF 6 */
+#define FT08X_EFFECT_DTMF7             0x37      /* DTMF 7 */
+#define FT08X_EFFECT_DTMF8             0x38      /* DTMF 8 */
+#define FT08X_EFFECT_DTMF9             0x39      /* DTMF 9 */
+#define FT08X_EFFECT_HARP              0x40      /* Harp */
+#define FT08X_EFFECT_XYLOPHONE         0x41      /* Xylophone */
+#define FT08X_EFFECT_TUBA              0x42      /* Tuba */
+#define FT08X_EFFECT_GLOCKENSPIEL      0x43      /* Glockenspiel */
+#define FT08X_EFFECT_ORGAN             0x44      /* Organ */
+#define FT08X_EFFECT_TRUMPET           0x45      /* Trumpet */
+#define FT08X_EFFECT_PIANO             0x46      /* Piano */
+#define FT08X_EFFECT_CHIMES            0x47      /* Chimes */
+#define FT08X_EFFECT_MUSICBOX          0x48      /* Music box */
+#define FT08X_EFFECT_BELL              0x49      /* Bell */
+#define FT08X_EFFECT_CLICK             0x50      /* Click */
+#define FT08X_EFFECT_SWITCH            0x51      /* Switch */
+#define FT08X_EFFECT_COWBELL           0x52      /* Cowbell */
+#define FT08X_EFFECT_NOTCH             0x53      /* Notch */
+#define FT08X_EFFECT_HIHAT             0x54      /* Hihat */
+#define FT08X_EFFECT_KICKDRUM          0x55      /* Kickdrum */
+#define FT08X_EFFECT_POP               0x56      /* Pop */
+#define FT08X_EFFECT_CLACK             0x57      /* Clack */
+#define FT08X_EFFECT_CHACK             0x58      /* Chack */
+#define FT08X_EFFECT_MUTE              0x60      /* Mute */
+#define FT08X_EFFECT_UNMUTE            0x61      /* Unmute */
+
+/* MIDI Note Effect (Bots 8-15) */
+
+#define FT08X_NOTE_A0                  ((uint16_t)21 << 8)  /* A0, 27.5 Hz */
+#define FT08X_NOTE_ASHARP0             ((uint16_t)22 << 8)  /* A#0, 29.14 Hz */
+#define FT08X_NOTE_B0                  ((uint16_t)23 << 8)  /* B0, 30.9 Hz */
+#define FT08X_NOTE_C1                  ((uint16_t)24 << 8)  /* C1, 32.7 Hz */
+#define FT08X_NOTE_CSHARP1             ((uint16_t)25 << 8)  /* C#1, 34.6 Hz */
+#define FT08X_NOTE_D1                  ((uint16_t)26 << 8)  /* D1, 36.7 Hz */
+#define FT08X_NOTE_DSHARP1             ((uint16_t)27 << 8)  /* D#1, 38.9 Hz */
+#define FT08X_NOTE_E1                  ((uint16_t)28 << 8)  /* E1, 41.2 Hz */
+#define FT08X_NOTE_F1                  ((uint16_t)29 << 8)  /* F1, 43.7 Hz */
+#define FT08X_NOTE_FSHARP1             ((uint16_t)30 << 8)  /* F#1, 46.2 Hz */
+#define FT08X_NOTE_G1                  ((uint16_t)31 << 8)  /* G1, 49.0 Hz */
+#define FT08X_NOTE_GSHARP1             ((uint16_t)32 << 8)  /* G#1, 51.9 Hz */
+#define FT08X_NOTE_A1                  ((uint16_t)33 << 8)  /* A1, 55.0 Hz */
+#define FT08X_NOTE_ASHARP1             ((uint16_t)34 << 8)  /* A#1, 58.3 Hz */
+#define FT08X_NOTE_B1                  ((uint16_t)35 << 8)  /* B1, 61.7 Hz */
+#define FT08X_NOTE_C2                  ((uint16_t)36 << 8)  /* C2, 65.4 Hz */
+#define FT08X_NOTE_CSHARP1             ((uint16_t)37 << 8)  /* C#2, 69.3 Hz */
+#define FT08X_NOTE_DSHARP2             ((uint16_t)39 << 8)  /* D#2, 77.8 Hz */
+#define FT08X_NOTE_E2                  ((uint16_t)40 << 8)  /* E2, 82.4 Hz */
+#define FT08X_NOTE_F2                  ((uint16_t)41 << 8)  /* F2, 87.3 Hz */
+#define FT08X_NOTE_FSHARP2             ((uint16_t)42 << 8)  /* F#2, 92.5 Hz */
+#define FT08X_NOTE_G2                  ((uint16_t)43 << 8)  /* G2, 98.0 Hz */
+#define FT08X_NOTE_GSHARP2             ((uint16_t)44 << 8)  /* G#2, 103.8 Hz */
+#define FT08X_NOTE_A2                  ((uint16_t)45 << 8)  /* A2, 110.0 Hz */
+#define FT08X_NOTE_ASHARP2             ((uint16_t)46 << 8)  /* A#2, 116.5 Hz */
+#define FT08X_NOTE_B2                  ((uint16_t)47 << 8)  /* B2, 123.5 Hz */
+#define FT08X_NOTE_C3                  ((uint16_t)48 << 8)  /* C3, 130.8 Hz */
+#define FT08X_NOTE_CSHARP3             ((uint16_t)49 << 8)  /* C#3, 138.6 Hz */
+#define FT08X_NOTE_D3                  ((uint16_t)50 << 8)  /* D3, 146.8 Hz */
+#define FT08X_NOTE_DSHARP3             ((uint16_t)51 << 8)  /* D#3, 155.6 Hz */
+#define FT08X_NOTE_E3                  ((uint16_t)52 << 8)  /* E3, 164.8 Hz */
+#define FT08X_NOTE_F3                  ((uint16_t)53 << 8)  /* F3, 174.6 Hz */
+#define FT08X_NOTE_FSHARP3             ((uint16_t)54 << 8)  /* F#3, 185.0 Hz */
+#define FT08X_NOTE_G3                  ((uint16_t)55 << 8)  /* G3, 196.0 Hz */
+#define FT08X_NOTE_GSHARP7             ((uint16_t)56 << 8)  /* G#3, 207.7 Hz */
+#define FT08X_NOTE_A3                  ((uint16_t)57 << 8)  /* A3, 220.0 Hz */
+#define FT08X_NOTE_ASHARP3             ((uint16_t)58 << 8)  /* A#3, 233.1 Hz */
+#define FT08X_NOTE_B3                  ((uint16_t)59 << 8)  /* B3, 246.9 Hz */
+#define FT08X_NOTE_C4                  ((uint16_t)60 << 8)  /* C4, 261.6 Hz */
+#define FT08X_NOTE_CSHARP4             ((uint16_t)61 << 8)  /* C#4, 277.2 Hz */
+#define FT08X_NOTE_D4                  ((uint16_t)62 << 8)  /* D4, 293.7 Hz */
+#define FT08X_NOTE_DSHARP4             ((uint16_t)63 << 8)  /* D#4, 311.1 Hz */
+#define FT08X_NOTE_E4                  ((uint16_t)64 << 8)  /* E4, 329.6 Hz */
+#define FT08X_NOTE_F4                  ((uint16_t)65 << 8)  /* F4, 349.2 Hz */
+#define FT08X_NOTE_FSHARP4             ((uint16_t)66 << 8)  /* F#4, 370.0 Hz */
+#define FT08X_NOTE_G4                  ((uint16_t)67 << 8)  /* G4, 392.0 Hz */
+#define FT08X_NOTE_GSHARP4             ((uint16_t)68 << 8)  /* G#4, 415.3 Hz */
+#define FT08X_NOTE_A4                  ((uint16_t)69 << 8)  /* A4, 440.0 Hz */
+#define FT08X_NOTE_ASHARP4             ((uint16_t)70 << 8)  /* A#4, 466.2 Hz */
+#define FT08X_NOTE_B4                  ((uint16_t)71 << 8)  /* B4, 493.9 Hz */
+#define FT08X_NOTE_C5                  ((uint16_t)72 << 8)  /* C5, 523.3 Hz */
+#define FT08X_NOTE_CSHARP5             ((uint16_t)73 << 8)  /* C#5, 554.4 Hz */
+#define FT08X_NOTE_D5                  ((uint16_t)74 << 8)  /* D5, 587.3 Hz */
+#define FT08X_NOTE_DSHARP5             ((uint16_t)75 << 8)  /* D#5, 622.3 Hz */
+#define FT08X_NOTE_E5                  ((uint16_t)76 << 8)  /* E5, 659.3 Hz */
+#define FT08X_NOTE_F5                  ((uint16_t)77 << 8)  /* F5, 698.5 Hz */
+#define FT08X_NOTE_FSHARP5             ((uint16_t)78 << 8)  /* F#5, 740.0 Hz */
+#define FT08X_NOTE_G5                  ((uint16_t)79 << 8)  /* G5, 784.0 Hz */
+#define FT08X_NOTE_G5                  ((uint16_t)80 << 8)  /* G#5, 830.6 Hz */
+#define FT08X_NOTE_A5                  ((uint16_t)81 << 8)  /* A5, 880.0 Hz */
+#define FT08X_NOTE_D2                  ((uint16_t)38 << 8)  /* D2, 73.4 Hz */
+#define FT08X_NOTE_ASHARP5             ((uint16_t)82 << 8)  /* A#5, 932.3 Hz */
+#define FT08X_NOTE_B5                  ((uint16_t)83 << 8)  /* B5, 987.8 Hz */
+#define FT08X_NOTE_C6                  ((uint16_t)84 << 8)  /* C6, 1046.5 Hz */
+#define FT08X_NOTE_CSHARP6             ((uint16_t)85 << 8)  /* C#6, 1108.7 Hz */
+#define FT08X_NOTE_D6                  ((uint16_t)86 << 8)  /* D6, 1174.7 Hz */
+#define FT08X_NOTE_DSHARP6             ((uint16_t)87 << 8)  /* D#6, 1244.5 Hz */
+#define FT08X_NOTE_E6                  ((uint16_t)88 << 8)  /* E6, 1318.5 Hz */
+#define FT08X_NOTE_F6                  ((uint16_t)89 << 8)  /* F6, 1396.9 Hz */
+#define FT08X_NOTE_FSHARP6             ((uint16_t)90 << 8)  /* F#6, 1480.0 Hz */
+#define FT08X_NOTE_G6                  ((uint16_t)91 << 8)  /* G6, 1568.0 Hz */
+#define FT08X_NOTE_GSHARP6             ((uint16_t)92 << 8)  /* G#6, 1661.2 Hz */
+#define FT08X_NOTE_A6                  ((uint16_t)93 << 8)  /* A6, 1760.0 Hz */
+#define FT08X_NOTE_ASHARP6             ((uint16_t)94 << 8)  /* A#6, 1864.7 Hz */
+#define FT08X_NOTE_B6                  ((uint16_t)95 << 8)  /* B6, 1975.5 Hz */
+#define FT08X_NOTE_C7                  ((uint16_t)96 << 8)  /* C7, 2093.0 Hz */
+#define FT08X_NOTE_CSHARP7             ((uint16_t)97 << 8)  /* C#7, 2217.5 Hz */
+#define FT08X_NOTE_D7                  ((uint16_t)98 << 8)  /* D7, 2349.3 Hz */
+#define FT08X_NOTE_DSHARP7             ((uint16_t)99 << 8)  /* D#7, 2489.03 Hz */
+#define FT08X_NOTE_E7                  ((uint16_t)100 << 8) /* E7, 2637.0 Hz */
+#define FT08X_NOTE_F7                  ((uint16_t)101 << 8) /* F7, 2793.8 Hz */
+#define FT08X_NOTE_FSHARP7             ((uint16_t)102 << 8) /* F#7, 2960.0 Hz */
+#define FT08X_NOTE_G7                  ((uint16_t)103 << 8) /* G7, 3136.0 Hz */
+#define FT08X_NOTE_GSHARP7             ((uint16_t)104 << 8) /* G#7, 3322.4 Hz */
+#define FT08X_NOTE_A7                  ((uint16_t)105 << 8) /* A7, 3520.0 Hz */
+#define FT08X_NOTE_ASHARP7             ((uint16_t)106 << 8) /* A#7, 3729.3 Hz */
+#define FT08X_NOTE_B7                  ((uint16_t)107 << 8) /* B7, 3951.1 Hz */
+#define FT08X_NOTE_C8                  ((uint16_t)108 << 8) /* C8, 4186.0 Hz */
+
 /* FT80X_REG_PLAYBACK_FORMAT */
 
 #define AUDIO_FORMAT_LINEAR            0         /* Linear Sample format */
@@ -658,6 +811,17 @@
 #define FT80X_STENCIL_FUNC(func,ref,mask) \
   ((10 << 24) | (((func) & 7) << 16) | (((ref) & 255) << 8) | (((mask) & 255) << 0))
 
+/* func */
+
+#define STENCIL_FUNC_NEVER       0
+#define STENCIL_FUNC_LESS        1
+#define STENCIL_FUNC_LEQUAL      2
+#define STENCIL_FUNC_GREATER     3
+#define STENCIL_FUNC_GEQUAL      4
+#define STENCIL_FUNC_EQUAL       5
+#define STENCIL_FUNC_NOTEQUAL    6
+#define STENCIL_FUNC_ALWAYS      7
+
 /* STENCIL_MASK (0x13) - Control the writing of individual bits in the
  * stencil planes
  */
@@ -669,6 +833,15 @@
 
 #define FT80X_STENCIL_OP(sfail,spass) \
   ((12 << 24) | (((sfail) & 7) << 3) | (((spass) & 7) << 0))
+
+/* sfail and spass */
+
+#define STENCIL_OP_ZERO          0
+#define STENCIL_OP_KEEP          1
+#define STENCIL_OP_REPLACE       2
+#define STENCIL_OP_INCR          3
+#define STENCIL_OP_DECR          4
+#define STENCIL_OP_INVERT        5
 
 /* TAG (0x03) - Set the current tag value */
 
