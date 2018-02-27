@@ -526,6 +526,12 @@ FT80x Integration
    7   INT    J18 Pin  8  PA1         8   PD     J18 Pin 6  PC5
    9   AUDIO-L                       10   GND    J18 Pin 4
 
+  The Haoyu display has no audio amplifier on board;  Output is raw PWM
+  audio.  MikroElektronkia ConnectEVE FT800.
+
+  GPIO0 and MODE are pulled low meaning that SPI is the default interface
+  with slave address bit 0 = 0.  GPIO1 is not connected.
+
   MikroElektronkia ConnectEVE FT800
   ---------------------------------
 
@@ -617,6 +623,13 @@ FT80x Integration
     PB3/SCK1  also used by USART1 and JTAG
     PB4/MISO1 also used by JTAG
     PB5/MOSI1 also used by USART1, Ethernet, and J28 pin 10
+
+  There is a LM4864 audio amplifier on board so audio outputs are ready for
+  use with a small 1W 8Ohm speaker.    GPIO0 should be configured as an
+  output because it is used to control the shutdown pin of the LM4864 audio
+  output.
+
+  GPIO0 is not connected.
 
 Toolchains
 ==========

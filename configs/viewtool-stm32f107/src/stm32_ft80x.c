@@ -101,7 +101,9 @@ static void ft80x_clear(FAR const struct ft80x_config_s *lower);
 
 static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
                           bool pwrdown);
+#ifdef CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN
 static void ft80x_audio(FAR const struct ft80x_config_s *lower, bool enable);
+#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void ft80x_destroy(FAR const struct ft80x_config_s *lower);
 #endif
@@ -131,7 +133,9 @@ static struct viewtool_ft80xlower_s g_ft80xlower =
     .enable         = ft80x_enable,
     .clear          = ft80x_clear,
     .pwrdown        = ft80x_pwrdown,
+#ifdef CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN
     .audio          = ft80x_audio,
+#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
     .destroy        = ft80x_destroy,
 #endif
@@ -235,10 +239,12 @@ static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
   stm32_gpiowrite(GPIO_FT80_PD, !pwrdown);
 }
 
+#ifdef CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN
 static void ft80x_audio(FAR const struct ft80x_config_s *lower, bool enable)
 {
   /* Does nothing */
 }
+#endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void ft80x_destroy(FAR const struct ft80x_config_s *lower)

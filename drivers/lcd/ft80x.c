@@ -1088,6 +1088,55 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+       /* FT80X_IOC_AUDIO:
+        *   Description:  Enable/disable an external audio amplifer.
+        *   Argument:     0=disable; 1=enable.
+        *   Returns:      None.
+        */
+
+       case FT80X_IOC_AUDIO:
+        {
+#if defined(CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN)
+          /* Amplifier is controlled by an MCU GPIO pin */
+
+          DEBUGASSERT(priv->lower->attach != NULL && priv->lower->audio != NULL);
+          DEBUGASSERT(arg == 0 || arg == 1);
+
+          priv->lower->audio(priv->lower, (arg != 0));
+          ret = OK;
+
+#elif defined(CONFIG_LCD_FT80X_AUDIO_GPIOSHUTDOWN)
+          /* Amplifier is controlled by an FT80x GPIO pin */
+
+          uint8_t regval8;
+
+          DEBUGASSERT(arg == 0 || arg == 1);
+
+          regval8  = ft80x_read_byte(priv, FT80X_REG_GPIO);
+
+          /* Active low logic assumed */
+
+          if (arg == 0)
+            {
+              regval8 |= (1 << CONFIG_LCD_FT80X_AUDIO_GPIO);
+            }
+          else
+            {
+              regval8 &= ~(1 << CONFIG_LCD_FT80X_AUDIO_GPIO);
+            }
+
+          ft80x_write_byte(priv, FT80X_REG_GPIO, regval8);
+          ret = OK;
+
+#else
+          /* Amplifier is not controllable. */
+
+          DEBUGASSERT(arg == 0 || arg == 1);
+          return OK;
+#endif
+        }
+        break;
+
       /* Unrecognized IOCTL command */
 
       default:
@@ -1360,14 +1409,24 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    * be enabled by writing value of 1 into GPIO bit 7 or the display can be
    * disabled by writing a value of 0 into GPIO bit 7. By default GPIO bit 7
    * direction is output and the value is 0.
+   *
+   * If an external audio amplified is controlled by an FT80x GPIO, then
+   * configure that GPIO as well.  Active low logic is assumed so that the
+   * amplifier is initially in the shutdown state.
    */
 
   regval8  = ft80x_read_byte(priv, FT80X_REG_GPIO_DIR);
   regval8 |= (1 << 7);
+#ifdef CONFIG_LCD_FT80X_AUDIO_GPIOSHUTDOWN
+  regval8 |= (1 << CONFIG_LCD_FT80X_AUDIO_GPIO);
+#endif
   ft80x_write_byte(priv, FT80X_REG_GPIO_DIR, regval8);
 
   regval8  = ft80x_read_byte(priv, FT80X_REG_GPIO);
   regval8 |= (1 << 7);
+#ifdef CONFIG_LCD_FT80X_AUDIO_GPIOSHUTDOWN
+  regval8 |= (1 << CONFIG_LCD_FT80X_AUDIO_GPIO);
+#endif
   ft80x_write_byte(priv, FT80X_REG_GPIO, regval8);
 
   /* 7. Enable back light control for display */

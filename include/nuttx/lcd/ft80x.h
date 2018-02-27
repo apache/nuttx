@@ -196,6 +196,11 @@
  *   Description:  Change the backlight intensity with a controllable fade.
  *   Argument:     A reference to an instance of struct ft80x_fade_s below.
  *   Returns:      None.
+ *
+ * FT80X_IOC_AUDIO:
+ *   Description:  Enable/disable an external audio amplifer.
+ *   Argument:     0=disable; 1=enable.
+ *   Returns:      None.
  */
 
 #define FT80X_IOC_CREATEDL          _LCDIOC(FT80X_NIOCTL_BASE + 0)
@@ -213,6 +218,7 @@
 #define FT80X_IOC_PUTREGS           _LCDIOC(FT80X_NIOCTL_BASE + 12)
 #define FT80X_IOC_EVENTNOTIFY       _LCDIOC(FT80X_NIOCTL_BASE + 13)
 #define FT80X_IOC_FADE              _LCDIOC(FT80X_NIOCTL_BASE + 14)
+#define FT80X_IOC_AUDIO             _LCDIOC(FT80X_NIOCTL_BASE + 15)
 
 /* FT80x Memory Map *************************************************************************/
 
@@ -563,6 +569,19 @@
 #define FT08X_NOTE_ASHARP7             ((uint16_t)106 << 8) /* A#7, 3729.3 Hz */
 #define FT08X_NOTE_B7                  ((uint16_t)107 << 8) /* B7, 3951.1 Hz */
 #define FT08X_NOTE_C8                  ((uint16_t)108 << 8) /* C8, 4186.0 Hz */
+
+/* FT80X_REG_GPIO */
+
+                                                 /* Bits 0-1:  GPIO 0-1 value */
+                                                 /* Bits 2-3:  MISO and nINT drive strength */
+                                                 /* Bits 4:    Display signal drive strength */
+#define FT80X_GPIO_DRIVE_SHIFT         5         /* Bits 5-6:  GPIO output drive strength */
+#define FT80X_GPIO_DRIVE_MASK          (3 << FT80X_GPIO_DRIVE_SHIFT)
+#  define FT80X_GPIO_DRIVE_4MA         (0 << FT80X_GPIO_DRIVE_SHIFT)
+#  define FT80X_GPIO_DRIVE_8MA         (1 << FT80X_GPIO_DRIVE_SHIFT)
+#  define FT80X_GPIO_DRIVE_12MA        (2 << FT80X_GPIO_DRIVE_SHIFT)
+#  define FT80X_GPIO_DRIVE_16MA        (3 << FT80X_GPIO_DRIVE_SHIFT)
+                                                 /* Bit 7:     GPIO 7 value */
 
 /* FT80X_REG_PLAYBACK_FORMAT */
 
@@ -1021,6 +1040,9 @@
  *
  *  N/A        O  nSHDN Audio shutdown (active low)
  *
+ * REVISIT:  In all of the architectures that I am aware of, the audio amplifier is
+ * controlled by GPIOs driven by the FT80x and, hence, not controllable by board logic.
+ *
  * SCL/SDA, SCLK/MISO/MOSI/nCS are handled by generic I2C or SPI logic. nInt and nPD are
  * directly managed by this interface.
  */
@@ -1061,7 +1083,9 @@ struct ft80x_config_s
   CODE void (*enable)(FAR const struct ft80x_config_s *lower, bool enable);
   CODE void (*clear)(FAR const struct ft80x_config_s *lower);
   CODE void (*pwrdown)(FAR const struct ft80x_config_s *lower, bool pwrdown);
+#ifdef CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN
   CODE void (*audio)(FAR const struct ft80x_config_s *lower, bool enable);
+#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   CODE void (*destroy)(FAR const struct ft80x_config_s *lower);
 #endif

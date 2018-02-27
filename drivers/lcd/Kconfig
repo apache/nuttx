@@ -1227,6 +1227,38 @@ config LCD_FT80X_QVGA
 	bool "QVGA 320x240"
 
 endchoice # Display size
+
+choice
+	prompt "Audio Shutdown Options"
+	default LCD_FT80X_AUDIO_NOSHUTDOWN
+
+config LCD_FT80X_AUDIO_NOSHUTDOWN
+	bool "No amplifier shutdown control"
+	---help---
+		There is no audio amplifier or the audio amplifier is not under
+		software control.
+
+config LCD_FT80X_AUDIO_MCUSHUTDOWN
+	bool "MCU controls audio shutdown"
+	---help---
+		The audio amplifier is controlled via an MCU GPIO output pin.
+
+config LCD_FT80X_AUDIO_GPIOSHUTDOWN
+	bool "FT80X controls audio shutdown"
+	---help---
+		The audio amplifier is controlled via an FT80x GPIO output pin.
+
+endchoice # Audio Shutdown Option
+
+config LCD_FT80X_AUDIO_GPIO
+	int "FT80x audio shutdown GPIO"
+	default 0
+	range 0 1
+	depends on LCD_FT80X_AUDIO_GPIOSHUTDOWN
+	---help---
+		Identifies the GPIO pin used to control the amplifier shutdown
+		output.
+
 endif # LCD_FT80X
 
 endmenu # LCD Driver selection
