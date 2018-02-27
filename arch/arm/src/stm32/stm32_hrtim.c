@@ -729,6 +729,8 @@ static int hrtim_cmp_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
                             uint8_t index, uint16_t cmp);
 static int hrtim_per_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
                             uint16_t per);
+static int hrtim_rep_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                            uint8_t rep);
 static uint16_t hrtim_per_get(FAR struct hrtim_dev_s *dev, uint8_t timer);
 static uint16_t hrtim_cmp_get(FAR struct hrtim_dev_s *dev, uint8_t timer,
                               uint8_t index);
@@ -1538,6 +1540,7 @@ static const struct stm32_hrtim_ops_s g_hrtim1ops =
 {
   .cmp_update     = hrtim_cmp_update,
   .per_update     = hrtim_per_update,
+  .rep_update     = hrtim_rep_update,
   .per_get        = hrtim_per_get,
   .cmp_get        = hrtim_cmp_get,
   .fclk_get       = hrtim_fclk_get,
@@ -4895,6 +4898,31 @@ static uint16_t hrtim_per_get(FAR struct hrtim_dev_s *dev, uint8_t timer)
   FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
 
   return (uint16_t)hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_PER_OFFSET);
+}
+
+/****************************************************************************
+ * Name: hrtim_rep_update
+ *
+ * Description:
+ *  Try update HRTIM Timer repetition register.
+ *
+ * Input Parameters:
+ *   dev    - HRTIM device structure
+ *   timer  - HRTIM Timer index
+ *   rep    - New repetition register value
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int hrtim_rep_update(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                            uint8_t rep)
+{
+  FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
+  hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_REPR_OFFSET, rep);
+
+  return OK;
 }
 
 /****************************************************************************

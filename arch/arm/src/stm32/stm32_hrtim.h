@@ -397,9 +397,12 @@ enum stm32_hrtim_tim_rst_e
   HRTIM_RST_TDCMP2    = (1<<29),
   HRTIM_RST_TDCMP4    = (1<<30),
   HRTIM_RST_TECMP1    = (1<<31),
-  HRTIM_RST_TECMP2    = (1<<32),
-  HRTIM_RST_TECMP4    = (1<<33),
 };
+
+/* This definitions does not fit to the above 32 bit enum */
+
+#define HRTIM_RST_TECMP2 (1ull<<32)
+#define HRTIM_RST_TECMP4 (1ull<<33)
 
 /* HRTIM Timer X prescaler */
 
@@ -1000,6 +1003,7 @@ struct stm32_hrtim_ops_s
   int      (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                          uint8_t index, uint16_t cmp);
   int      (*per_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint16_t per);
+  int      (*rep_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint8_t rep);
   uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                       uint8_t index);
