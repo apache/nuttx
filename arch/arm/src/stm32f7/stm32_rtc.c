@@ -42,7 +42,6 @@
 
 #include <stdbool.h>
 #include <sched.h>
-#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -67,7 +66,7 @@
 /* Configuration ************************************************************/
 /* This RTC implementation supports
  *  - date/time RTC hardware
- *  - extended functions Alarm A and B for STM32F4xx and onwards
+ *  - extended functions Alarm A and B
  * */
 
 #ifndef CONFIG_RTC_DATETIME
@@ -604,6 +603,12 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
   uint32_t cr;
   int ret = OK;
 
+  /* Enable write access to the backup domain (RTC registers, RTC
+   * backup data registers and backup SRAM).
+   */
+
+  (void)stm32_pwr_enablebkp(true);
+
   isr  = getreg32(STM32_RTC_ISR);
 
   /* Check for EXTI from Alarm A or B and handle according */
@@ -627,8 +632,9 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
               cb(cbarg, RTC_ALARMA);
             }
 
-          isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRAF;
-          putreg32(isr, STM32_RTC_CR);
+          isr  = getreg32(STM32_RTC_ISR);
+          isr &= ~RTC_ISR_ALRAF;
+          putreg32(isr, STM32_RTC_ISR);
         }
     }
 
@@ -652,11 +658,18 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
               cb(cbarg, RTC_ALARMB);
             }
 
-          isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRBF;
-          putreg32(isr, STM32_RTC_CR);
+          isr  = getreg32(STM32_RTC_ISR);
+          isr &= ~RTC_ISR_ALRBF;
+          putreg32(isr, STM32_RTC_ISR);
         }
     }
 #endif
+
+  /* Disable write access to the backup domain (RTC registers, RTC backup
+   * data registers and backup SRAM).
+   */
+
+  (void)stm32_pwr_enablebkp(false);
 
   return ret;
 }
@@ -746,17 +759,25 @@ static int rtchw_check_alrbwf(void)
 #ifdef CONFIG_RTC_ALARM
 static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 {
+  int isr;
   int ret = -EBUSY;
 
-  /* Need to follow RTC register wrote protection
+  /* Need to allow RTC register write
    * Disable the write protection for RTC registers
    */
 
   rtc_wprunlock();
 
-  /* Disable RTC alarm & Interrupt */
+  /* Disable RTC alarm A & Interrupt A */
 
   modifyreg32(STM32_RTC_CR, (RTC_CR_ALRAE | RTC_CR_ALRAIE), 0);
+
+  /* Ensure Alarm A flag reset; this is edge triggered */
+
+  isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRAF;
+  putreg32(isr, STM32_RTC_ISR);
+
+  /* Wait for Alarm A to be writable */
 
   ret = rtchw_check_alrawf();
   if (ret != OK)
@@ -764,13 +785,13 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
       goto errout_with_wprunlock;
     }
 
-  /* Set the RTC Alarm register */
+  /* Set the RTC Alarm A register */
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
-  rtcinfo("  TR: %08x ALRMAR: %08x\n",
-          getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMAR));
+  putreg32(0, STM32_RTC_ALRMASSR);
+  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
 
-  /* Enable RTC alarm */
+  /* Enable RTC alarm A */
 
   modifyreg32(STM32_RTC_CR, 0, (RTC_CR_ALRAE | RTC_CR_ALRAIE));
 
@@ -783,9 +804,10 @@ errout_with_wprunlock:
 #if defined(CONFIG_RTC_ALARM) && CONFIG_RTC_NALARMS > 1
 static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
+  int isr;
   int ret = -EBUSY;
 
-  /* Need to follow RTC register wrote protection
+  /* Need to allow RTC register write
    * Disable the write protection for RTC registers
    */
 
@@ -795,17 +817,24 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 
   modifyreg32(STM32_RTC_CR, (RTC_CR_ALRBE | RTC_CR_ALRBIE), 0);
 
+  /* Ensure Alarm B flag reset; this is edge triggered */
+
+  isr  = getreg32(STM32_RTC_ISR) & ~RTC_ISR_ALRBF;
+  putreg32(isr, STM32_RTC_ISR);
+
+  /* Wait for Alarm B to be writable */
+
   ret = rtchw_check_alrbwf();
   if (ret != OK)
     {
       goto rtchw_set_alrmbr_exit;
     }
 
-  /* Set the RTC Alarm register */
+  /* Set the RTC Alarm B register */
 
   putreg32(alarmreg, STM32_RTC_ALRMBR);
-  rtcinfo("  TR: %08x ALRMBR: %08x\n",
-          getreg32(STM32_RTC_TR), getreg32(STM32_RTC_ALRMBR));
+  putreg32(0, STM32_RTC_ALRMBSSR);
+  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
 
@@ -1078,7 +1107,7 @@ int up_rtc_initialize(void)
    *
    * 1. Configure and enable the EXTI Line 17 RTC ALARM in interrupt mode
    *    and select the rising edge sensitivity.
-   *    For STM32F4xx
+   *    For STM32F7:
    *    EXTI line 21 RTC Tamper & Timestamp
    *    EXTI line 22 RTC Wakeup
    * 2. Configure and enable the RTC_Alarm IRQ channel in the NVIC.
@@ -1086,12 +1115,10 @@ int up_rtc_initialize(void)
    */
 
   (void)stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
-  rtc_dumpregs("After InitExtiAlarm");
-#else
-  rtc_dumpregs("After Initialization");
 #endif
 
   g_rtc_enabled = true;
+  rtc_dumpregs("After Initialization");
   return OK;
 }
 
@@ -1162,9 +1189,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   rtc_dumpregs("Reading Time");
 
-  /* Convert the RTC time to fields in struct tm format.  All of the STM32
-   * All of the ranges of values correspond between struct tm and the time
-   * register.
+  /* Convert the RTC time to fields in struct tm format. All of the STM32
+   * ranges of values correspond between struct tm and the time register.
    */
 
   tmp = (tr & (RTC_TR_SU_MASK | RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
@@ -1204,7 +1230,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 #endif
 
 #ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
-  /* Return RTC sub-seconds if no configured and if a non-NULL value
+  /* Return RTC sub-seconds if a non-NULL value
    * of nsec has been provided to receive the sub-second value.
    */
 
@@ -1261,7 +1287,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime_with_subseconds
  *
  * Description:
@@ -1283,7 +1309,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
 #  ifndef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
@@ -1321,14 +1347,15 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
   /* Then write the broken out values to the RTC */
 
-  /* Convert the struct tm format to RTC time register fields.  All of the
-   * STM32 All of the ranges of values correspond between struct tm and the
+  /* Convert the struct tm format to RTC time register fields.
+   * All of the ranges of values correspond between struct tm and the
    * time register.
    */
 
   tr = (rtc_bin2bcd(tp->tm_sec)  << RTC_TR_SU_SHIFT) |
        (rtc_bin2bcd(tp->tm_min)  << RTC_TR_MNU_SHIFT) |
        (rtc_bin2bcd(tp->tm_hour) << RTC_TR_HU_SHIFT);
+  tr &= ~RTC_TR_RESERVED_BITS;
 
   /* Now convert the fields in struct tm format to the RTC date register
    * fields:
@@ -1387,6 +1414,22 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
   rtc_wprlock();
   rtc_dumpregs("New time setting");
   return ret;
+}
+
+/****************************************************************************
+ * Name: stm32_rtc_havesettime
+ *
+ * Description:
+ *   Check if RTC time has been set.
+ *
+ * Returned Value:
+ *   Returns true if RTC date-time have been previously set.
+ *
+ ****************************************************************************/
+
+bool stm32_rtc_havesettime(void)
+{
+  return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
 }
 
 /****************************************************************************
@@ -1470,8 +1513,6 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
-
-          rtc_dumpregs("Set AlarmA");
         }
         break;
 
@@ -1488,8 +1529,6 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
             }
-
-          rtc_dumpregs("Set AlarmB");
         }
         break;
 #endif
@@ -1498,6 +1537,8 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         rtcerr("ERROR: Invalid ALARM%d\n", alminfo->as_id);
         break;
     }
+
+  rtc_dumpregs("After alarm setting");
 
   return ret;
 }
@@ -1554,6 +1595,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
           /* Unset the alarm */
 
           putreg32(-1, STM32_RTC_ALRMAR);
+          modifyreg32(STM32_RTC_ISR, RTC_ISR_ALRAF, 0);
           rtc_wprlock();
           ret = OK;
         }
@@ -1586,6 +1628,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
           /* Unset the alarm */
 
           putreg32(-1, STM32_RTC_ALRMBR);
+          modifyreg32(STM32_RTC_ISR, RTC_ISR_ALRBF, 0);
           rtc_wprlock();
           ret = OK;
         }
@@ -1605,7 +1648,7 @@ errout_with_wprunlock:
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_rdalarm
  *
  * Description:
@@ -1617,7 +1660,7 @@ errout_with_wprunlock:
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)

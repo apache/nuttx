@@ -133,13 +133,13 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_is_initialized
  *
  * Description:
  *    Returns 'true' if the RTC has been initialized
- *    Returns 'false' if the RTC has never been initialized since first time power
- *    up, and the counters are stopped until it is first initialized.
+ *    Returns 'false' if the RTC has never been initialized since first time
+ *    power up, and the counters are stopped until it is first initialized.
  *
  * Input Parameters:
  *   None
@@ -147,7 +147,7 @@ extern "C"
  * Returned Value:
  *   Returns true if RTC has been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_rtc_is_initialized(void);
 
@@ -198,7 +198,7 @@ int stm32l4_rtc_setdatetime(FAR const struct tm *tp);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_rtc_setdatetime
+ * Name: stm32l4_rtc_havesettime
  *
  * Description:
  *   Check if RTC time has been set.
@@ -227,7 +227,7 @@ bool stm32l4_rtc_havesettime(void);
 
 int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_rtc_rdalarm
  *
  * Description:
@@ -239,7 +239,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
 

@@ -111,8 +111,7 @@ extern "C"
  *   during initialization to set up the system time when CONFIG_RTC and
  *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
- *   Thatsub-second accuracy is returned through 'nsec'.
+ *   NOTE: The sub-second accuracy is returned through 'nsec'.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -147,6 +146,19 @@ int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 struct tm;
 int stm32_rtc_setdatetime(FAR const struct tm *tp);
 #endif
+
+/****************************************************************************
+ * Name: stm32_rtc_havesettime
+ *
+ * Description:
+ *   Check if RTC time has been set.
+ *
+ * Returned Value:
+ *   Returns true if RTC date-time have been previously set.
+ *
+ ****************************************************************************/
+
+bool stm32_rtc_havesettime(void);
 
 /****************************************************************************
  * Name: stm32_rtc_lowerhalf
