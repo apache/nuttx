@@ -82,8 +82,10 @@ struct spi_driver_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     spidrvr_open(FAR struct file *filep);
 static int     spidrvr_close(FAR struct file *filep);
+#endif
 static ssize_t spidrvr_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t spidrvr_write(FAR struct file *filep, FAR const char *buffer,
@@ -130,7 +132,7 @@ static const struct file_operations spidrvr_fops =
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int spidrvr_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   FAR struct spi_driver_s *priv;
   int ret;
 
@@ -151,7 +153,7 @@ static int spidrvr_open(FAR struct file *filep)
       return ret;
     }
 
-  /* Increment the count of open references on the RTC driver */
+  /* Increment the count of open references on the driver */
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
@@ -168,7 +170,7 @@ static int spidrvr_open(FAR struct file *filep)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int spidrvr_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   FAR struct spi_driver_s *priv;
   int ret;
 
@@ -189,7 +191,7 @@ static int spidrvr_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Decrement the count of open references on the RTC driver */
+  /* Decrement the count of open references on the driver */
 
   DEBUGASSERT(priv->crefs > 0);
   priv->crefs--;
@@ -236,7 +238,7 @@ static ssize_t spidrvr_write(FAR struct file *filep, FAR const char *buffer,
 
 static int spidrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   FAR struct spi_driver_s *priv;
   FAR struct spi_sequence_s *seq;
   int ret;
@@ -253,12 +255,14 @@ static int spidrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the SPI driver state structure */
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
       DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
+#endif
 
   /* Process the IOCTL command */
 
@@ -288,7 +292,9 @@ static int spidrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   nxsem_post(&priv->exclsem);
+#endif
   return ret;
 }
 

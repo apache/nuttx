@@ -132,7 +132,7 @@ static const struct file_operations i2cdrvr_fops =
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int i2cdrvr_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   FAR struct i2c_driver_s *priv;
   int ret;
 
@@ -152,7 +152,7 @@ static int i2cdrvr_open(FAR struct file *filep)
       return ret;
     }
 
-  /* Increment the count of open references on the RTC driver */
+  /* Increment the count of open references on the driver */
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
@@ -169,7 +169,7 @@ static int i2cdrvr_open(FAR struct file *filep)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int i2cdrvr_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   FAR struct i2c_driver_s *priv;
   int ret;
 
@@ -189,7 +189,7 @@ static int i2cdrvr_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Decrement the count of open references on the RTC driver */
+  /* Decrement the count of open references on the driver */
 
   DEBUGASSERT(priv->crefs > 0);
   priv->crefs--;
@@ -236,7 +236,7 @@ static ssize_t i2cdrvr_write(FAR struct file *filep, FAR const char *buffer,
 
 static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode *inode;
   FAR struct i2c_driver_s *priv;
   FAR struct i2c_transfer_s *transfer;
   int ret;
