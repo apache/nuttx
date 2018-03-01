@@ -18158,11 +18158,11 @@
 	  I2S aliases to follow other arch names.  From Alan Carvalho de Assis
 	  (2017-11-30).
 
-7.24 2018-03-01 Gregory Nutt <gnutt@nuttx.org>
+7.24 2018-03-02 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/pipes: poll: fix off-by-one error in calculation of bytes in the
 	  buffer.  Buffer calculation in pipe poll setup is off-by-one when read
-	  indexis larger than write index. This causes poll() not getting POLLIN when
+	  index is larger than write index. This causes poll() not getting POLLIN when
 	  buffer has one byte as calculation gives zero bytes in buffer.  From Jussi
 	  Kivilinna (2017-12-07).
 	* This adds basic architectural support for the LPC546xx family and
@@ -18185,9 +18185,8 @@
 	  This change will improve load balancing for networking with RNDIS.  From
 	  Masayuki Ishikawa (2017-12-08).
 	* drivers/audio/wm8776.c: Improve stability in SMP mode.  Apply irq_spin
-	  APIs to improbe performance.
-	  Repeat to process a message to avoid deadlock.  From Masayuki Ishikawa
-	    (2017-12-08).
+	  APIs to improve performance.  Repeat to process a message to avoid
+	  deadlock.  From Masayuki Ishikawa (2017-12-08).
 	* configs/lc823450-xgevk: Enable SPINLOCK_IRQ and NXPLAYER in rndis.  From
 	  Masayuki Ishikawa (2017-12-08).
 	* arch/arm/src/xmc4:  Only setup USB clock when USB PLL is enabled  From
@@ -18212,7 +18211,7 @@
 	  albeit corrupted data on the display.  From Gregory Nutt (2017-12-13).
 	* arch/arm/src/lpc43xx:  Adapt LPC176x RTC driver for the LPC43xx.  From
 	  Gintaras Drukteinis (2017-12-14).
-	*arch/arm/src/lpc54xx:  LCD.. Fix some miconceptions about how the video
+	*arch/arm/src/lpc54xx:  LCD.. Fix some misconceptions about how the video
 	  address lines are used.  Fix some LCD BPP and BRG vs RGB settings.  From
 	  Gregory Nutt (2017-12-14).
 	* fs/fat:  CONFIG_FAT_MAXFNAME may not exceed NAME_MAX (CONFIG_NAME_MAX)
@@ -18231,7 +18230,7 @@
 	  config/lpcxpresso-lpc545628:  Add an intermediate interrupt handler to
 	  support acknowledgment of rising and falling edge interrupts.  From Gregory
 	  Nutt (2017-12-16).
-	* confgs/indium-f7:  Adds support for the RAF Research Indium-F7 board.
+	* configs/indium-f7:  Adds support for the RAF Research Indium-F7 board.
 	  From Bob Feretich (2017-12-16).
 	* configs/*/include;  Remove prototype of xyz_boardinitialize() from
 	  board.h files.  The authoritative prototype is in
@@ -18369,7 +18368,7 @@
 	* arch/arm/src/lpc54xx:  Finishes open design issues with AVBTP
 	  multi-channel operation.  From Gregory Nutt (2017-12-30).
 	* net:  Fix an error introduced when ICMP and ICMP6 socket support was
-	  added in NuttX-7.3.  A gratuitous ARP (or solitication) was being sent
+	  added in NuttX-7.3.  A gratuitous ARP (or solicitation) was being sent
 	  after receive of the ECHO replay (advertisement).  From Gregory Nutt
 	  (2018-01-01).
 	* arch/arm/src/lpc54xx:  Correct handling of the Ethernet RBU error.  With
@@ -18492,8 +18491,6 @@
 	  CTRLA register  From Matt Thompson (2018-01-17).
 	* arch/arm/src/lc823450:  Explicitly assign I2S IRQ handling to CPU0.  From
 	  Masayuki Ishikawa (2018-01-18).
-	* arch/arm/src/samdl: SPI must be disabled before changing the mode bits in
-	  CTRLA register.  From Matt Thompson (2018-01-18).
 	* drivers/input/ft5x06.c:  Remove logic to disable polling when there there
 	  is no client waiting for read data.  That was a great idea to save CPU
 	  cycles when there is nothing reading from the touchscrren but,
@@ -18722,8 +18719,6 @@
 	  set the fractional divider (FDR) the baud rate in nuttx will be wrong
 	  (multiplied by this fraction).  So if it is not used, it should be
 	  disabled. From hg42 (2018-02-08).
-	* Fix some coding standard violations in the last PR.  From Gregory Nutt
-	  (2018-02-08).
 	* arch/mips/src/mips32:  In up_idle, the kludge that was conditionally
 	  enabled if the work queue was enable appears to be needed even when he work
 	  queue is not enabled on the PIC32MZ.
@@ -18752,10 +18747,11 @@
 	* configs/stm32f103-minimum:  Add zerocross support to STM32F103-Minimum
 	  board  From Alan Carvalho de Assis (2018-02-11).
 	* configs/flipnclick-sam3x:  Adds basic board support for the HiletGo
-	  OLED.  From Gregory Nutt (2018-02-11).  Disable LPC17 FDR when not used
-	  (second fix).  If a boot loader sets the fractional divider (FDR) the baud
-	  rate in nuttx will be wrong (multiplied by this fraction).  This also has
-	  to be added to lpc17_lowputc.c.  From Harald Gutsche (2018-02-11).
+	  OLED.  From Gregory Nutt (2018-02-11).
+	* Disable LPC17 FDR when not used (second fix).  If a boot loader sets
+	  the fractional divider (FDR) the baud rate in nuttx will be wrong
+	  (multiplied by this fraction).  This also has to be added to
+	  lpc17_lowputc.c.  From Harald Gutsche (2018-02-11).
 	* arch/arm/src/samdl: Fix DMA controller support.  From Matt Thompson
 	  (2018-02-11).
 	* arch/arm/src/samdl: Added experimental DMA support to SPI driver.
@@ -18807,7 +18803,7 @@
 	  (2018-02-15).
 	* lcd/lcd/ft80x:  This commit adds an FTDI/BridgeTek FT80x driver.  It is
 	  untested (I don't even have hardware yet and, hence, it is marked as
-	  EXPERIMENTAL
+	  EXPERIMENTAL (2018-02-16).
 	* arch/arm/src/stm32/stm32f33xxx_rcc.c:  A flash wait state configuration.
 	  Flash latency must be fixed according to sysclk frequency. If this
 	  operation is not done or done after PLL configuration, the STM32 fail to
@@ -18838,8 +18834,8 @@
 	* net/tcp:  Generalize Juho Grundstrom's IPv4 change for IPv6 as well.
 	  From Gregory Nutt (2018-02-22).
 	* arch/arm/src/lc823450: Fix up_enable_irq() timing for I2S.  In previous
-	  commit, I2S IRQ might be sometimes assigned to CPU1 when CONFIG_SMP=y. This
-	  change fixes this issue.  Refactor timer driver.  Introduce
+	  commit, I2S IRQ might be sometimes assigned to CPU1 when CONFIG_SMP=y.
+	  This change fixes this issue.  Refactor timer driver.  Introduce
 	  lc823450_timer.h and move lc823450_timerisr.c to lc823450_timer.c Add MTM
 	  timer APIs for DVFS.  Introduce up_rtc_gettime() for CONFIG_RTC_HIRES.
 	  Introduce idle time calculation in DVFS.  Also, DVFS autonomous mode based

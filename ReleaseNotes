@@ -16421,8 +16421,6 @@ detailed bugfix information):
       - ARM Stack Check:  Fix assert panic when both TLS and interrupt stack
         are enable.  From Jussi Kivilinna.
 
-    * Expressif ESP32:
-
     * Infineon XMC4xxx Drivers:
 
       - XMC4 USIC: Kconfig was not selecting XMC4_USIC for USIC1. From Alan
