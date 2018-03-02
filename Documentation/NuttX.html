@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 4, 2017</p>
+      <p>Last Updated: March 2, 2017</p>
     </td>
   </tr>
 </table>
@@ -1425,11 +1425,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.23.
-  NuttX 7.23 is the 123<sup>rd</sup> release of NuttX.
-  It was released on December 4, 2017, and is available for download from the
+  The current release is NuttX 7.24.
+  NuttX 7.24 is the 124<sup>th</sup> release of NuttX.
+  It was released on March 2, 2017, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.23.tar.gz</code> and <code>apps-7.23.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.24.tar.gz</code> and <code>apps-7.24.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1438,7 +1438,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.23 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.24 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1446,7 +1446,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.23 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.24 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1504,9 +1504,9 @@
       <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (37)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (43)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (9)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (38)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (44)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (10)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1529,7 +1529,7 @@
   <li>MicroChip
     <ul>
       <li><a href="#pic32mxmips">PIC32MX</a> (MIPS 24Kc) (4)</li>
-      <li><a href="#pic32mzmips">PIC32MZ</a> (MIPS M14K) (1)</li>
+      <li><a href="#pic32mzmips">PIC32MZ</a> (MIPS M14K) (2)</li>
     </ul>
   </li>
   <li>Misoc
@@ -1633,6 +1633,7 @@
       <li><a href="#pic32mx4xx">PIC32MX4xx Family</a> <small>(MIPS32 24Kc)</small></li>
       <li><a href="#pic32mx7xx">PIC32MX7xx Family</a> <small>(MIPS32 24Kc)</small></li>
       <li><a href="#pic32mzec">PIC32MZEC Family</a> <small>(MIPS32 M14K)</small></li>
+      <li><a href="#pic32mzef">PIC32MZEF Family</a> <small>(MIPS32 M14K)</small></li>
     </ul>
   </li>
   <li>Moxa
@@ -1675,6 +1676,7 @@
       <li><a href="#nxplpc176x">NXP LPC176x</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#nxplpc178x">NXP LPC178x</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#nxplpc43xx">NXP LPC43xx</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#nxplpc54xx">NXP LPC54xx</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
   </li>
   <li>ON Semiconductor:
@@ -3451,15 +3453,27 @@ nsh>
   <td>
     <p>
       <a name="at91sam3x"><b>Atmel SAM3X</b>.</a>
-      This port uses the <a href="http://arduino.cc//">Arduino</a> Due development board that features the ATSAM3X8E MCU running at 84MHz.
-      See the <a href="http://arduino.cc/en/Main/arduinoBoardDue">Arduino Due</a> page for more information.
+      There are two SAM3X boards supported:
+    </p>
+    <ol>
+      <li>
+        The <a href="http://arduino.cc//">Arduino</a> Due development board that features the ATSAM3X8E MCU running at 84MHz.
+        See the <a href="http://arduino.cc/en/Main/arduinoBoardDue">Arduino Due</a> page for more information.
+      </li>
+      <li>
+        The Mikroelektronika <a href="https://www.mikroe.com/flip-n-click-sam3x">Flip&amp;Click SAM3X</a> development board.  This board is an Arduino Due <i>work-alike</i> with additional support for 4 mikroBUS Click boards.
+      </li>
+    </ol>
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        As of this writing, the basic Arduino Due port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         The first fully functional Arduino Due port was released in NuttX-6.29.
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/arduino-due/README.txt" target="_blank">README</a> file for further information.
+      </p>
+      <p>
+        Support for the Flip&amp;Click SAM3X was added in NuttX-7.24.
       </p>
      </ul>
      <p>
@@ -4607,9 +4621,48 @@ nsh>
         <p><b>NuttX-7.23</b>
         A CAN driver was contributed by Alexander Vasiljev in NuttX-7.23.
       </li>
+      <li>
+        <p><b>NuttX-7.24</b>
+        RTC and Windowed Watchdog Timer (WWDT) drivers were leveraged from the LPC17 and contributed by Gintaras Drukteinis.
+        Leveraged the LPC54xx SD/MMC to the LPC43xx.
+        There are still remaining issues with the SD/MMC driver and it is not yet functional.
+      </li>
     </ul>
   </td>
 </tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="nxplpc54xx"><b>NCP LPC54xx</b>.</a>
+      A port to the <a href="https://www.nxp.com/support/developer-resources/hardware-development-tools/lpcxpresso-boards/lpcxpresso54628-development-board:OM13098">LPCXpresso-LPC54628</a> was added in NuttX-7.24.  Initial configurations include:  A basic NSH configuration (nsh), a networking configuration (netnsh), and three graphics configurations (nxwm, fb, and lvgl).
+    </p>
+  </td>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Driver Status</b>.
+    </p>
+    <ul>
+      <li>
+        <p><b>NuttX-7.24</b>
+        The initial release for the LPC54xx in NuttX included the following drivers:  UARTs, SysTick, SD/MMC, DMA, GPIO, GPIO interrupts, LEDs and buttons, LCD, WWDT, RTC, RNG, Ethernet, and SPI.  The SPI driver is untested and there are known issues with the SD/MMC driver, however.
+      </li>
+    </ul>
+    <p>
+      Refer to the LPCXpresso-LPC54628 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpcxpresso-lpc54628/README.txt" target="_blank">README</a> file for more detailed information about this port.
+    </p>
+  </td>
+</tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -5085,17 +5138,30 @@ Mem:         29232       5920      23312      23312
   <td>
     <p>
       <a name="stm32f74x"><b>STMicro STM32 F745/F746</b>.</a>
-      Two boards are supported for this MCU:
+      Three boards are supported for this MCU:
     </p>
+    <ol>
+      <li>
+        <p>
+          <b>STM32F746G Discovery</b>.
+           One port uses the STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash.
+           Refer to the <a href="http://www.st.com/stm32f7-discovery">STMicro web site</a> for further information about this board.
+        </p>
+      </li>
+      <li>
+        <p>
+           <b>Nucleo-144 board with STM32F746ZG</b>.
+           A basic port for the Nucleo-144 board with the STM32F746ZG MCU was contributed in NuttX-7.16 by Kconstantin Berezenko.
+        </p>
+      </li>
+      <li>
+        <p>
+           <b>RAF Research Indium-F7 board</b>.
+           A port to the RAF Research Indium-F7 board with the STM32F746ZG MCU was contributed in NuttX-7.24 by Bob Feretich (there are actually variants of the Indium boards with F722, F746, and F767 parts).
+        </p>
+      </li>
+    </ol>
     <ul>
-      <p>
-        <b>STM32F746G Discovery</b>.
-         One port uses the STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash.
-         Refer to the <a href="http://www.st.com/stm32f7-discovery">STMicro web site</a> for further information about this board.
-      </p>
-      <p>
-         A basic port for the Nucleo-144 board with the STM32F746ZG MCU was contribued in NuttX-7.16 by Kconstantin Berezenko.
-      </p>
       <p>
         <b>STATUS:</b>
       </p>
@@ -5711,6 +5777,11 @@ Mem:         29232       5920      23312      23312
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pic32mz-starterkit/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
+    <p>
+      <a name="pic32mzef"><b>PIC32MZEF Family</b>.</a>
+      A port is in available for the MikroElectronika <a href="https://www.mikroe.com/flipclick-pic32mz">Flip&amp;Click PIC32MZ</a> development board based on the PIC32MZ2048EFH100 MCU.
+      This board configuration was added in NuttX-7.24 and is, for the most part, compatible with the PIC32MZEC family.
+    </p>
   </td>
 <tr>
   <td><br></td>

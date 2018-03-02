@@ -16918,6 +16918,9 @@ Additional new features and extended functionality:
         dma/usbdev.  From Masayuki Ishikawa.
       - LC823450: Introduce DVFS.   This version only supports manual mode
         and Vdd1 is fixed to 1.2V.  From Masayuki Ishikawa.
+
+    * On Semiconductor LC823450 Drivers
+
       - LC823450:  Refactor timer driver.  Add MTM timer APIs for DVFS.
         Introduce up_rtc_gettime() for CONFIG_RTC_HIRES.  Introduce idle
         time calculation in DVFS.  Also, DVFS autonomous mode based on CPU
