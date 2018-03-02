@@ -9321,7 +9321,7 @@
 	* configs/stm32f429i-disco/src/stm32_boot.c: Initialize ltdc during
 	  bootup. From Marco Krahl (2014-12-19).
 	* configs/stm32f429i-disco/ltdc: Add default platform configuration to
-	  test framebuffer support for the ltdc. . From Marco Krahl
+	  test framebuffer support for the ltdc. From Marco Krahl
 	  (2014-12-19).
 	* libnx/nxfonts/nxfonts_getfont.c: A patch to add previous added font
 	  into nxf_getfonthandle function.  From  Pierre-Noel Bouteville
@@ -18390,8 +18390,9 @@
 	  (2018-01-03).
 	* fs/vfs:  Add support for truncate() and ftruncate().  The infrastructure
 	  is complete.  Now, however, the actual implementation of ftruncate() will
-	  have to be done for each file 	* fs/nxffs:  Add partial implementation of
-	  the truncate method:  It extend files, but cannot yet shrink them,
+	  have to be done for each file.  From Gregory Nutt (2018-01-04).
+	* fs/nxffs:  Add partial implementation of the truncate method:  It
+	  extends files, but cannot yet shrink them.  From Gregory Nutt (2018-01-04).
 	  fs/smartfs:  Add implementation of the truncate method, fs/fat:  Add
 	  implementation of the truncate method.  fs/nfs:  Add support for the
 	  truncate method to the NFS file system.  From Gregory Nutt (2018-01-04).
@@ -18466,7 +18467,7 @@
 	* Fixed nucleo-l432kc broken build when CONFIG_USERLED_LOWER defined  From
 	  Fanda (2018-01-16).
 	* Remove the BOARDIOC_TSCTEST_TEARDOWN boardctl() command.  Remove all
-	  implementations of board_tsc_teardown() (the were all stubs anyway except
+	  implementations of board_tsc_teardown() (they were all stubs anyway except
 	  for the simulation).  From Gregory Nutt (2018-01-16).
 	* SMP: Introduce spin_lock_wo_note() and spin_unlock_wo_note().  These APIs
 	  are used in sched_note.c to protect instrumentation data.  The difference
@@ -18540,7 +18541,8 @@
 	* drivers/mtd/at24xx.c: Correct page size for AT24C02 part.  From Alexander
 	  Oryshchenko (2018-01-24).
 	* arch/arm/src/stm32:  Make STM32 usable with an external RTC.
-	  drivers/timers/ds3231.c:  Correct some debug statments.  From Alexander Oryshchenko (2018-01-24).
+	* drivers/timers/ds3231.c:  Correct some debug statments.  From Alexander
+	  Oryshchenko (2018-01-24).
 	* arch/arm/src/stm32/stm32_spi.c: Removed unnecessary (and incorrect) speed
 	  limitation  From Alexander Oryshchenko (2018-01-24).
 	* arch/arm/src/stm32/stm32f40xxx_i2c.c:  Correct some recent changes to
@@ -18549,8 +18551,6 @@
 	* arch/arm/src/samdl: Added SAMD DAC header file. Fixed SAMD EVSYS header.
 	  Added SAMD TC header file. Fixed some minor typos.  Added missing EVCTRL
 	  register bits in TC.  From Matt Thompson (2018-01-24).
-	* arch/arm/src/samdl:  SAMD External Interrupt Controller (EIC) support.
-	  From Matt Thompson (2018-01-24).
 	* configs/flipnclick-sam3x (also Arduio-Due): Remove disabling of
 	  environment, mountpoints, and poll.  Add NSH arch initialization so that
 	  procfs will be automounted.  Increase task name size from 0 to 32.  Update
@@ -18714,7 +18714,7 @@
 	  (2018-02-06).
 	* sched/task:  It is not appropriate for logic in task_exit() to call the
 	  new version of this_task().  sched/irq:  Remove redundant fetch of CPU
-	  index; configs/sabre-6qguad: update README.  From Gregory Nutt (2018-02-06).
+	  index; configs/sabre-6quad: update README.  From Gregory Nutt (2018-02-06).
 	* arch/arm/src/lpc17xx:  Disable LPC17 FDR when not used.  If a boot loader
 	  set the fractional divider (FDR) the baud rate in nuttx will be wrong
 	  (multiplied by this fraction).  So if it is not used, it should be
@@ -18723,7 +18723,7 @@
 	  enabled if the work queue was enable appears to be needed even when he work
 	  queue is not enabled on the PIC32MZ.
 	* arch/mips/src/pic32mz:  Fix some typos in debug instrumentation in
-	  pic32mz-gpio.c; fix some types releated to UART5 configuration in
+	  pic32mz-gpio.c; fix some typos related to UART5 configuration in
 	  pic32mz-serial.c.
 	* configs/flipnclick-pic32mz/nsh:  Switch serial console to UART3.  There
 	  is some problem with the UART4 RX pin documentation or configuration.  From
@@ -18748,10 +18748,10 @@
 	  board  From Alan Carvalho de Assis (2018-02-11).
 	* configs/flipnclick-sam3x:  Adds basic board support for the HiletGo
 	  OLED.  From Gregory Nutt (2018-02-11).
-	* Disable LPC17 FDR when not used (second fix).  If a boot loader sets
-	  the fractional divider (FDR) the baud rate in nuttx will be wrong
-	  (multiplied by this fraction).  This also has to be added to
-	  lpc17_lowputc.c.  From Harald Gutsche (2018-02-11).
+	* arch/arm/src/lpc17xx:  DisableDisable LPC17 FDR when not used (second
+	  fix).  If a boot loader sets the fractional divider (FDR) the baud rate
+	  in nuttx will be wrong (multiplied by this fraction).  This also has to
+	  be added to lpc17_lowputc.c.  From Harald Gutsche (2018-02-11).
 	* arch/arm/src/samdl: Fix DMA controller support.  From Matt Thompson
 	  (2018-02-11).
 	* arch/arm/src/samdl: Added experimental DMA support to SPI driver.
@@ -18801,7 +18801,7 @@
 	* include/lcd:  Eliminate a warning from an SSD1306 header file by adding a
 	  forward reference to struct i2c_master_s.  From Sebastien Lorquet
 	  (2018-02-15).
-	* lcd/lcd/ft80x:  This commit adds an FTDI/BridgeTek FT80x driver.  It is
+	* lcd/ft80x:  This commit adds an FTDI/BridgeTek FT80x driver.  It is
 	  untested (I don't even have hardware yet and, hence, it is marked as
 	  EXPERIMENTAL (2018-02-16).
 	* arch/arm/src/stm32/stm32f33xxx_rcc.c:  A flash wait state configuration.
