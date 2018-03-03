@@ -908,8 +908,8 @@ void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 {
   char outbuf[3 * 48];
   uint8_t regbuf[48];
-  int ndx = 0;
   int i;
+  int j;
 
   DEBUGASSERT(length < 48);
 
@@ -919,9 +919,9 @@ void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 
   /* Format the output data */
 
-  for (i = 0; i < length; i++)
+  for (i = 0, j = 0; i < length; i++, j += 3)
     {
-      ndx = sprintf(&outbuf[ndx], "%02x ", regbuf[i]);
+      (void)sprintf(&outbuf[j], "%02x ", regbuf[i]);
     }
 
   /* Dump the formatted data to the syslog output */
