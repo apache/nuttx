@@ -296,7 +296,6 @@ static ssize_t keypad_read(struct file *filep, FAR char *buf, size_t buflen)
       if ((scancode & 0x80) == 0)
         {
           keycode = g_kdbus[scancode];
-          //printf("%02x ",scancode);
           buf[0] = keycode;
           return 1;
         }

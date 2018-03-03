@@ -46,7 +46,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
 #include <semaphore.h>
@@ -1366,7 +1365,7 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   ret = psock_socket(PF_INET, SOCK_DGRAM, 0, &priv->psock);
   if (ret < 0)
     {
-      printf("client: ERROR socket failure %d\n", ret);
+      ferr("ERROR: socket() failed: %d\n", ret);
       goto errout_with_alloc;
     }
 

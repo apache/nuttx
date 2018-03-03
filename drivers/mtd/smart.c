@@ -51,12 +51,13 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include <debug.h>
 #include <errno.h>
 
 #include <crc8.h>
 #include <crc16.h>
 #include <crc32.h>
+#include <debug.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -3476,10 +3477,11 @@ static int smart_findfreephyssector(FAR struct smart_struct_s *dev,
   uint8_t   maxwearlevel;
 #endif
   uint16_t  physicalsector;
-  uint16_t  x, block;
+  uint16_t  block;
   uint32_t  readaddr;
   struct    smart_sect_header_s header;
   int       ret;
+  uint16_t  i;
 
   /* Determine which erase block we should allocate the new
    * sector from. This is based on the number of free sectors
@@ -3504,7 +3506,7 @@ retry:
     }
 
   block = dev->lastallocblock;
-  for (x = 0; x < dev->neraseblocks; x++)
+  for (i = 0; i < dev->neraseblocks; i++)
     {
       /* Test if this block has more free blocks than the
        * currently selected block
@@ -3533,7 +3535,7 @@ retry:
                * free sectors left, then we will use it.
                */
 
-              if (x < dev->neraseblocks - 1 || !wornfreecount)
+              if (i < dev->neraseblocks - 1 || !wornfreecount)
                 {
                   wornfreecount = count;
                   wornblock = block;
@@ -3548,7 +3550,7 @@ retry:
         {
           /* Assign this block to alloc from */
 
-          if (x < dev->neraseblocks - 1 || !allocfreecount)
+          if (i < dev->neraseblocks - 1 || !allocfreecount)
             {
               allocblock = block;
               allocfreecount = count;
@@ -3576,7 +3578,7 @@ retry:
           /* Relocate up to 8 unworn blocks */
 
           block = 0;
-          for (x = 0; x < 8; )
+          for (i = 0; i < 8; )
             {
               if (smart_get_wear_level(dev, block) < SMART_WEAR_FORCE_REORG_THRESHOLD)
                 {
@@ -3586,13 +3588,13 @@ retry:
                       return -1;
                     }
 
-                  x++;
+                  i++;
                 }
 
               block++;
             }
 
-          if (x > 0)
+          if (i > 0)
             {
               /* Disable relocate for retry */
 
@@ -3615,25 +3617,37 @@ retry:
 #endif
 
       {
-        ferr("ERROR: Program bug!  Expected a free sector, free=%d\n", dev->freesectors);
-        for (x = 0; x < dev->neraseblocks; x++)
-          {
-            /* REVISIT:  Use of printf is not permitted within the OS */
+        char buffer[8 * 12 + 1];
+        long remaining;
+        int j;
+        int k;
 
-            printf("%d ", dev->freecount[x]);
+        ferr("ERROR: Program bug!  Expected a free sector, free=%d\n",
+             dev->freesectors);
+
+        for (i = 0, remaining = dev->neraseblock;
+             remaining > 0;
+             i += 8, remaining -= 8)
+          {
+            for (j = 0, k = 0; j < 8 && j < remaining ; j++)
+              {
+                k += sprintf(&buffer[k], "%12d", dev->freecount[i + j]);
+            }
+
+            ferr("%04x:%s\n", i, buffer);
           }
 
         /* No free sectors found!  Bug? */
 
-        return -1;
+        return -ENOSPC;
       }
     }
 
   /* Now find a free physical sector within this selected
    * erase block to allocate. */
 
-  for (x = allocblock * dev->sectorsPerBlk;
-       x < allocblock * dev->sectorsPerBlk + dev->availSectPerBlk; x++)
+  for (i = allocblock * dev->sectorsPerBlk;
+       i < allocblock * dev->sectorsPerBlk + dev->availSectPerBlk; i++)
     {
       /* Check if this physical sector is available. */
 
@@ -3645,7 +3659,7 @@ retry:
 
       while (allocsect)
         {
-          if (allocsect->physical == x)
+          if (allocsect->physical == i)
             {
               break;
             }
@@ -3666,7 +3680,7 @@ retry:
 
       /* Now check on the physical media */
 
-      readaddr = x * dev->mtdBlksPerSector * dev->geo.blocksize;
+      readaddr = i * dev->mtdBlksPerSector * dev->geo.blocksize;
       ret = MTD_READ(dev->mtd, readaddr, sizeof(struct smart_sect_header_s),
               (FAR uint8_t *) &header);
       if (ret != sizeof(struct smart_sect_header_s))
@@ -3684,7 +3698,7 @@ retry:
           ((header.status & SMART_STATUS_COMMITTED) ==
            (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_COMMITTED)))
         {
-          physicalsector = x;
+          physicalsector = i;
           dev->lastallocblock = allocblock;
           break;
         }

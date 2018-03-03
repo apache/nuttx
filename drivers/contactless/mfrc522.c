@@ -42,12 +42,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <assert.h>
+
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <assert.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>

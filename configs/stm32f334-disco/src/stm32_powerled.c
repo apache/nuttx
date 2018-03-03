@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f334-disco/src/stm32_powerled.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,18 @@
 
 #include <nuttx/config.h>
 
-#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/boardctl.h>
 #include <stdint.h>
-#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include <debug.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <sys/boardctl.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
@@ -258,19 +257,19 @@ static int powerled_setup(FAR struct powerled_dev_s *dev)
   hrtim = lower->hrtim;
   if (hrtim == NULL)
     {
-      printf("ERROR: failed to get hrtim ");
+      pwrerr("ERROR: failed to get hrtim ");
     }
 
   comp = lower->comp;
   if (comp == NULL)
     {
-      printf("ERROR: failed to get lower level interface");
+      pwrerr("ERROR: failed to get lower level interface");
     }
 
   dac = lower->dac;
   if (dac == NULL)
     {
-      printf("ERROR: failed to get lower level interface");
+      pwrerr("ERROR: failed to get lower level interface");
     }
 
   /* Do nothing */
@@ -465,7 +464,7 @@ static int powerled_mode_set(FAR struct powerled_dev_s *dev, uint8_t mode)
 
       default:
         {
-          printf("ERROR: unsupported POWERLED mode %d!\n", mode);
+          pwrerr("ERROR: unsupported POWERLED mode %d!\n", mode);
           ret = ERROR;
           goto errout;
         }
@@ -485,7 +484,7 @@ static int powerled_limits_set(FAR struct powerled_dev_s *dev,
 
   if (limits->current <= 0)
     {
-      printf("Output current limit must be set!\n");
+      pwrerr("ERROR: Output current limit must be set!\n");
       ret = ERROR;
       goto errout;
     }
@@ -493,9 +492,10 @@ static int powerled_limits_set(FAR struct powerled_dev_s *dev,
   if (limits->current * 1000 > LED_ABSOLUTE_CURRENT_LIMIT_mA)
     {
       limits->current = (float)LED_ABSOLUTE_CURRENT_LIMIT_mA/1000.0;
-      printf("LED current limiit > LED absoulute current limit."
-             " Set current limit to %d.\n",
-             limits->current);
+      pwrwarn("WARNING: "
+              "LED current limiit > LED absoulute current limit."
+              " Set current limit to %d.\n",
+              limits->current);
     }
 
   /* We need only output current */
@@ -584,7 +584,7 @@ int stm32_powerled_setup(void)
       hrtim = stm32_hrtiminitialize();
       if (hrtim == NULL)
         {
-          printf("ERROR: Failed to get HRTIM1 interface\n");
+          pwrerr("ERROR: Failed to get HRTIM1 interface\n");
           return -ENODEV;
         }
 
@@ -593,7 +593,7 @@ int stm32_powerled_setup(void)
       dac = stm32_dacinitialize(DAC_CURRENT_LIMIT);
       if (dac == NULL)
         {
-          printf("ERROR: Failed to get DAC %d interface\n", DAC_CURRENT_LIMIT);
+          pwrerr("ERROR: Failed to get DAC %d interface\n", DAC_CURRENT_LIMIT);
           return -ENODEV;
         }
 
@@ -602,7 +602,7 @@ int stm32_powerled_setup(void)
       comp = stm32_compinitialize(COMP_CURRENT_LIMIT);
       if (comp == NULL)
         {
-          printf("ERROR: Failed to get COMP %d interface\n",
+          pwrerr("ERROR: Failed to get COMP %d interface\n",
                  COMP_CURRENT_LIMIT);
           return -ENODEV;
         }
@@ -623,7 +623,7 @@ int stm32_powerled_setup(void)
                               (void *)lower);
       if (ret < 0)
         {
-          printf("ERROR: powerled_register failed: %d\n", ret);
+          pwrerr("ERROR: powerled_register failed: %d\n", ret);
           return ret;
         }
 

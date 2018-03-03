@@ -44,9 +44,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
@@ -120,13 +120,13 @@
 #  ifdef CONFIG_DEBUG_INFO
 #    define message(...) _info(__VA_ARGS__)
 #  else
-#    define message(...) printf(__VA_ARGS__)
+#    define message(...) _err(__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_INFO
 #    define message _info
 #  else
-#    define message printf
+#    define message _err
 #  endif
 #endif
 

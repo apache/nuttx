@@ -322,7 +322,7 @@ static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
     }
   else
     {
-      printf("%s not supported.\n", cmd);
+      serr("ERROR: %s not supported.\n", cmd);
     }
 
   return buflen;

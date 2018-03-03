@@ -42,7 +42,6 @@
 
 #include <sys/ioctl.h>
 
-#include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -364,7 +363,7 @@ int stm32_bbsram_int(void)
   rv = hardfault_get_desc(&desc);
   if (rv >= OK)
     {
-      printf("There is a hard fault logged.\n");
+      _err("ERROR: There is a hard fault logged.\n");
       state = (desc.lastwrite.tv_sec || desc.lastwrite.tv_nsec) ?  OK : 1;
 
       syslog(LOG_INFO, "Fault Log info File No %d Length %d flags:0x%02x "
