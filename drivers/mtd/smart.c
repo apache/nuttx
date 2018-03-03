@@ -3618,6 +3618,8 @@ retry:
         ferr("ERROR: Program bug!  Expected a free sector, free=%d\n", dev->freesectors);
         for (x = 0; x < dev->neraseblocks; x++)
           {
+            /* REVISIT:  Use of printf is not permitted within the OS */
+
             printf("%d ", dev->freecount[x]);
           }
 

@@ -1285,13 +1285,16 @@ void mfrc522_init(FAR struct mfrc522_dev_s *dev)
 
 int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
 {
-  uint8_t i;
-  uint8_t result[64];
   uint8_t zeros[25] = {0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0};
+  char outbuf[3 * 8 + 1]
+  uint8_t result[64];
+  int i;
+  int j;
+  int k;
 
   /* Execute a software reset */
 
@@ -1347,14 +1350,15 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
   mfrc522_writeu8(dev, MFRC522_AUTOTEST_REG, 0x00);
 
   mfrc522info("Self Test Result:\n");
-  for (i = 1; i <= 64; i++)
-    {
-      printf("0x%02X ", result[i - 1]);
 
-      if ((i % 8) == 0)
+  for (i = 0; i < 64; i += 8)
+    {
+      for (j = 0; k = 0; j < 8; j++, k += 3)
         {
-          printf("\n");
+          (void)sprintf(&outbuf[k], " %02x", result[i + j]);
         }
+
+      mfrc522info("  %02x:%s\n", i, outbuf);
     }
 
   mfrc522info("Done!\n");

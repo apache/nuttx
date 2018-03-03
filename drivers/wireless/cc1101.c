@@ -900,33 +900,42 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
  * Description:
  *   Dump the specified range of registers to the syslog.
  *
- *   WARNING:  Uses around 200 bytes of stack!
+ *   WARNING:  Uses around 75 bytes of stack!
  *
  ****************************************************************************/
 
 void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 {
-  char outbuf[3 * 48];
-  uint8_t regbuf[48];
+  char outbuf[3 * 16 + 1];
+  uint8_t regbuf[16];
+  int readsize;
+  int remaining;
   int i;
   int j;
 
-  DEBUGASSERT(length < 48);
-
-  /* Read the registers into a buffer */
-
-  cc1101_access(dev, addr, (FAR uint8_t *)regbuf, length);
-
-  /* Format the output data */
-
-  for (i = 0, j = 0; i < length; i++, j += 3)
+  for (remaining = length; remaining > 0; remaining -= 16, addr += 16)
     {
-      (void)sprintf(&outbuf[j], "%02x ", regbuf[i]);
+      /* Read up to 16 registers into a buffer */
+
+      readsize = remaining;
+      if (readsize > 16)
+        {
+          readsize = 16;
+        }
+
+      cc1101_access(dev, addr, (FAR uint8_t *)regbuf, readsize);
+
+      /* Format the output data */
+
+      for (i = 0, j = 0; i < readsize; i++, j += 3)
+        {
+          (void)sprintf(&outbuf[j], " %02x", regbuf[i]);
+        }
+
+      /* Dump the formatted data to the syslog output */
+
+      wlinfo("CC1101[%2x]:%s\n", addr, outbuf);
     }
-
-  /* Dump the formatted data to the syslog output */
-
-  wlinfo("CC1101[%2x]: %s\n", addr, outbuf);
 }
 
 /****************************************************************************
