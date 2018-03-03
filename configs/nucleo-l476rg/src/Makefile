@@ -55,6 +55,10 @@ CSRCS += stm32_io.c
 endif
 endif
 
+ifeq ($(CONFIG_WL_CC1101),y)
+CSRCS += stm32_cc1101.c
+endif
+
 ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 ifeq ($(CONFIG_AJOYSTICK),y)

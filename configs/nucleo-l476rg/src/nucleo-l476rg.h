@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l476rg/src/nucleo-l476rg.h
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
  *            Gregory Nutt <gnutt@nuttx.org>
  *            Sebastien Lorquet <sebastien@lorquet.fr>
@@ -164,6 +164,16 @@
 #  define GPIO_SPI_CS_WIFI_OFF \
     (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
      GPIO_PORTB | GPIO_PIN6)
+#endif
+
+#ifdef CONFIG_WL_CC1101
+#  define GPIO_CC1101_PWR  (GPIO_PORTC | GPIO_PIN6 | GPIO_OUTPUT_SET | \
+                            GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
+#  define GPIO_CC1101_CS   (GPIO_PORTB | GPIO_PIN12 | GPIO_OUTPUT_SET | \
+                            GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
+#  define GPIO_CC1101_MISO (GPIO_PORTB | GPIO_PIN14)
+#  define GPIO_CC1101_GDO2 (GPIO_PORTC | GPIO_PIN10 | \
+                            GPIO_EXTI | GPIO_SPEED_50MHz)
 #endif
 
 #ifdef HAVE_MMCSD
@@ -385,6 +395,18 @@ int board_timer_driver_initialize(FAR const char *devpath, int timer);
 
 #ifdef CONFIG_SENSORS_QENCODER
 int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
+#endif
+
+/****************************************************************************
+ * Name: stm32_cc1101_initialize
+ *
+ * Description:
+ *   Initialize and register the cc1101 radio driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WL_CC1101
+int stm32_cc1101_initialize(void);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */

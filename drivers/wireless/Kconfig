@@ -9,6 +9,19 @@ config WL_CC1101
 	bool "CC1101 RF transceiver support"
 	default n
 	select SPI
+	select SCHED_HPWORK
+	select SCHED_LPWORK
+
+if WL_CC1101
+
+config CC1101_SPIDEV
+	int "SPI bus number"
+	default 2
+	---help---
+		Selects the SPI bus number identying that SPI interface that
+		connects the CC1101 to the MCU.
+
+endif
 
 menuconfig WL_CC3000
 	bool "CC3000 Wireless Module support"

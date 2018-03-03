@@ -41,10 +41,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi/spi.h>
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <poll.h>
+#include <semaphore.h>
+
+#include <nuttx/wqueue.h>
+#include <nuttx/spi/spi.h>
 
 /****************************************************************************
  * Pre-Processor Declarations
@@ -55,9 +59,7 @@
 #define CC1101_PACKET_MAXTOTALLEN    63
 #define CC1101_PACKET_MAXDATALEN     61
 
-/*
- * General Purpose, Test Output Pin Options
- */
+/* General Purpose, Test Output Pin Options */
 
 /* CC1101 General Purpose Pins */
 
@@ -113,7 +115,9 @@
 #define CC1101_GDO_SYNC                         0x06
 
 /* Asserts when a packet has been received with CRC OK. De-asserts when
- * the first byte is read from the RX FIFO. */
+ * the first byte is read from the RX FIFO.
+ */
+
 #define CC1101_GDO_PKTRCV_CRCOK                 0x07
 
 /* Preamble Quality Reached. Asserts when the PQI is above the programmed
@@ -180,7 +184,7 @@
  * instead.
  */
 
-#define CC1101_GDO_PA_PD                        0x1B
+#define CC1101_GDO_PA_PD                        0x1b
 
 /* LNA_PD. Note: LNA_PD will have the same signal level in SLEEP and RX
  * states. To control an external LNA or RX/TX switch in applications
@@ -188,13 +192,13 @@
  * instead.
  */
 
-#define CC1101_GDO_LNA_PD                       0x1C
+#define CC1101_GDO_LNA_PD                       0x1c
 
 /* RX_SYMBOL_TICK. Can be used together with RX_HARD_DATA for alternative
  * serial RX output.
  */
 
-#define CC1101_GDO_RXSYMTICK                    0x1D
+#define CC1101_GDO_RXSYMTICK                    0x1d
 
 #define CC1101_GDO_WOR_EVNT0                    0x24
 #define CC1101_GDO_WOR_EVNT1                    0x25
@@ -210,13 +214,13 @@
 
 /* High impedance (3-state). */
 
-#define CC1101_GDO_HIZ                          0x2E
+#define CC1101_GDO_HIZ                          0x2e
 
 /* HW to 0 (HW1 achieved by setting GDOx_INV=1). Can be used to control
  * an external LNA/PA or RX/TX switch.
  */
 
-#define CC1101_GDO_HW                           0x2F
+#define CC1101_GDO_HW                           0x2f
 
 /* There are 3 GDO pins, but only one CLK_XOSC/n can be selected as an
  * output at any time. If CLK_XOSC/n is to be monitored on one of the
@@ -236,12 +240,12 @@
 #define CC1101_GDO_CLK_XOSC12                   0x37
 #define CC1101_GDO_CLK_XOSC16                   0x38
 #define CC1101_GDO_CLK_XOSC24                   0x39
-#define CC1101_GDO_CLK_XOSC32                   0x3A
-#define CC1101_GDO_CLK_XOSC48                   0x3B
-#define CC1101_GDO_CLK_XOSC64                   0x3C
-#define CC1101_GDO_CLK_XOSC96                   0x3D
-#define CC1101_GDO_CLK_XOSC128                  0x3E
-#define CC1101_GDO_CLK_XOSC192                  0x3F
+#define CC1101_GDO_CLK_XOSC32                   0x3a
+#define CC1101_GDO_CLK_XOSC48                   0x3b
+#define CC1101_GDO_CLK_XOSC64                   0x3c
+#define CC1101_GDO_CLK_XOSC96                   0x3d
+#define CC1101_GDO_CLK_XOSC128                  0x3e
+#define CC1101_GDO_CLK_XOSC192                  0x3f
 
 /****************************************************************************
  * Public Data Types
@@ -250,69 +254,127 @@
 #ifndef __ASSEMBLY__
 #undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
+#  define EXTERN extern "C"
 extern "C"
 {
 #else
 #  define EXTERN extern
 #endif
 
+typedef int (*wait_cc1101_ready)(FAR struct cc1101_dev_s *dev, uint32_t);
 struct cc1101_dev_s;
+
+struct cc1101_ops_s
+{
+  CODE void (*wait)(FAR struct cc1101_dev_s *dev, uint32_t);
+  CODE void (*irq)(FAR struct cc1101_dev_s *dev, bool enable);
+  CODE void (*pwr)(FAR struct cc1101_dev_s *dev, bool enable);
+};
+
+enum cc1101_status
+{
+  CC1101_INIT,
+  CC1101_IDLE,
+  CC1101_SEND,
+  CC1101_RECV,
+  CC1101_SLEEP,
+  CC1101_SXOFF
+};
+
+struct cc1101_dev_s
+{
+  const struct c1101_rfsettings_s *rfsettings;
+  struct spi_dev_s *spi;
+  struct cc1101_ops_s ops;
+  enum cc1101_status status;
+  uint8_t flags;
+  uint8_t channel;
+  uint8_t power;
+  uint32_t dev_id;        /*SPI device Id*/
+  uint32_t gdo;           /*GDO for interrupt*/
+  uint32_t isr_pin;       /*ISR Pin*/
+  uint32_t miso_pin;      /*MISO Pin*/
+  struct work_s irq_work; /* Interrupt handling "bottom half" */
+  uint8_t nopens;         /* The number of times the device has been opened */
+  sem_t devsem;           /* Ensures exclusive access to this structure */
+  uint8_t *rx_buffer;     /* Circular RX buffer.  [pipe# / pkt_len] [packet data...] */
+  uint16_t fifo_len;      /* Number of bytes stored in fifo */
+  uint16_t nxt_read;      /* Next read index */
+  uint16_t nxt_write;     /* Next write index */
+  sem_t sem_rx_buffer;    /* Protect access to rx fifo */
+  sem_t sem_rx;           /* Wait for availability of received data */
+  sem_t sem_tx;           /* Wait for availability of send data */
+#ifndef CONFIG_DISABLE_POLL
+  FAR struct pollfd *pfd; /* Polled file descr  (or NULL if any) */
+#endif
+};
 
 /* The RF Settings includes only those fields required to configure
  * the RF radio. Other configuration fields depended on this driver
  * are configured by the cc1101_init().
+ *
+ * REVISIT:  Upper case field names violates the NuttX coding standard.
  */
 
 struct c1101_rfsettings_s
 {
-  uint8_t FSCTRL1;    /* Frequency synthesizer control. */
-  uint8_t FSCTRL0;    /* Frequency synthesizer control. */
+  uint8_t FIFOTHR;  /* FIFOTHR */
+  uint8_t SYNC1;    /* SYNC1 */
+  uint8_t SYNC0;    /* SYNC0 */
 
-  uint8_t FREQ2;      /* Frequency control word, high byte. */
-  uint8_t FREQ1;      /* Frequency control word, middle byte. */
-  uint8_t FREQ0;      /* Frequency control word, low byte. */
+  uint8_t PKTLEN;   /* PKTLEN */
+  uint8_t PKTCTRL0; /* Packet Automation Control */
+  uint8_t PKTCTRL1; /* Packet Automation Control */
 
-  uint8_t MDMCFG4;    /* Modem configuration. */
-  uint8_t MDMCFG3;    /* Modem configuration. */
-  uint8_t MDMCFG2;    /* Modem configuration. */
-  uint8_t MDMCFG1;    /* Modem configuration. */
-  uint8_t MDMCFG0;    /* Modem configuration. */
+  uint8_t ADDR;     /* ADDR */
+  uint8_t CHANNR;   /* CHANNR */
 
-  uint8_t DEVIATN;    /* Modem deviation setting (when FSK modulation is enabled). */
+  uint8_t FSCTRL1;  /* Frequency synthesizer control. */
+  uint8_t FSCTRL0;  /* Frequency synthesizer control. */
+
+  uint8_t FREQ2;    /* Frequency control word, high byte. */
+  uint8_t FREQ1;    /* Frequency control word, middle byte. */
+  uint8_t FREQ0;    /* Frequency control word, low byte. */
+
+  uint8_t MDMCFG4;  /* Modem configuration. */
+  uint8_t MDMCFG3;  /* Modem configuration. */
+  uint8_t MDMCFG2;  /* Modem configuration. */
+  uint8_t MDMCFG1;  /* Modem configuration. */
+  uint8_t MDMCFG0;  /* Modem configuration. */
+  uint8_t DEVIATN;  /* Modem deviation setting (when FSK modulation is enabled). */
 
   /* GAP */
 
-  uint8_t FOCCFG;     /* Frequency Offset Compensation Configuration. */
+  uint8_t FOCCFG;   /* Frequency Offset Compensation Configuration. */
 
-  uint8_t BSCFG;      /* Bit synchronization Configuration. */
+  uint8_t BSCFG;    /* Bit synchronization Configuration. */
 
-  uint8_t AGCCTRL2;   /* AGC control. */
-  uint8_t AGCCTRL1;   /* AGC control. */
-  uint8_t AGCCTRL0;   /* AGC control. */
+  uint8_t AGCCTRL2; /* AGC control. */
+  uint8_t AGCCTRL1; /* AGC control. */
+  uint8_t AGCCTRL0; /* AGC control. */
 
   /* GAP */
 
-  uint8_t FREND1;     /* Front end RX configuration. */
-  uint8_t FREND0;     /* Front end RX configuration. */
+  uint8_t FREND1;   /* Front end RX configuration. */
+  uint8_t FREND0;   /* Front end RX configuration. */
 
-  uint8_t FSCAL3;     /* Frequency synthesizer calibration. */
-  uint8_t FSCAL2;     /* Frequency synthesizer calibration. */
-  uint8_t FSCAL1;     /* Frequency synthesizer calibration. */
-  uint8_t FSCAL0;     /* Frequency synthesizer calibration. */
+  uint8_t FSCAL3;   /* Frequency synthesizer calibration. */
+  uint8_t FSCAL2;   /* Frequency synthesizer calibration. */
+  uint8_t FSCAL1;   /* Frequency synthesizer calibration. */
+  uint8_t FSCAL0;   /* Frequency synthesizer calibration. */
 
   /* REGULATORY LIMITS */
 
-  uint8_t CHMIN;      /* Channel Range defintion MIN .. */
-  uint8_t CHMAX;      /* .. and MAX */
-  uint8_t PAMAX;      /* at given maximum output power */
+  uint8_t CHMIN;    /* Channel Range defintion MIN .. */
+  uint8_t CHMAX;    /* .. and MAX */
+  uint8_t PAMAX;    /* at given maximum output power */
 
   /* Power Table, for ramp-up/down and ASK modulation defined for
    * output power values as:
    *   PA = {-30, -20, -15, -10, -5, 0, 5, 10} [dBm]
    */
 
-   uint8_t PA[8];
+  uint8_t PA[8];
 };
 
 /****************************************************************************
@@ -330,9 +392,10 @@ struct c1101_rfsettings_s
  * Frequency            ERP         Duty Cycle  Bandwidth   Remarks
  * 868 – 868.6 MHz      +14 dBm     < 1%        No limits
  * 868.7 – 869.2 MHz    +14 dBm     < 0.1%      No limits
- * 869.3 – 869.4 MHz    +10 dBm     No limits   < 25 kHz    Appropriate access protocol required
- * 869.4 – 869.65 MHz   +27 dBm     < 10%       < 25 kHz    Channels may be combined to one high speed channel
- * 869.7 -870 MHz       +7 dBm      No limits   No limits
+ * 869.3 – 869.4 MHz    +10 dBm     No limits   < 25 kHz    Appropriate access
+ * protocol required 869.4 – 869.65 MHz   +27 dBm     < 10%       < 25 kHz
+ * Channels may be combined to one high speed channel 869.7 -870 MHz       +7
+ * dBm      No limits   No limits
  *
  * Frequency Band For License-Free Specific Applications in Europe
  *
@@ -344,17 +407,18 @@ struct c1101_rfsettings_s
  * 863 – 865 MHz        Radio Microphones +10 dBm No limits 200 kHz
  * 863 -865 MHz Wireless Audio Applications +10 dBm No limits 300 kHz
  *
- * Duty Cycle Limit     Total On Time       Maximum On Time of      Minimum Off Time of
- *                      Within One Hour     One Transmission        Two Transmission
- * < 0.1%               3.6 seconds         0.72 seconds            0.72 seconds
- * < 1%                 36 seconds          3.6 seconds             1.8 seconds
- * < 10%                360 seconds         36 seconds              3.6 seconds
+ * Duty Cycle Limit     Total On Time       Maximum On Time of      Minimum
+ * Off Time of Within One Hour     One Transmission        Two Transmission <
+ * 0.1% 3.6 seconds         0.72 seconds            0.72 seconds < 1% 36
+ * seconds 3.6 seconds             1.8 seconds < 10%                360
+ * seconds         36 seconds              3.6 seconds
  *
  * Reference: TI Application Report: swra048.pdf, May 2005
  *   ISM-Band and Short Range Device Regulatory Compliance Overview
  */
 
-EXTERN const struct c1101_rfsettings_s cc1101_rfsettings_ISM1_868MHzGFSK100kbps;
+EXTERN const struct c1101_rfsettings_s
+    cc1101_rfsettings_ISM1_868MHzGFSK100kbps;
 
 /* 905 MHz, GFSK, 250 kbps, ISM Region 2 (America only)
  *
@@ -366,11 +430,17 @@ EXTERN const struct c1101_rfsettings_s cc1101_rfsettings_ISM1_868MHzGFSK100kbps;
  * Military radar        1000 kW
  */
 
-EXTERN const struct c1101_rfsettings_s cc1101_rfsettings_ISM2_905MHzGFSK250kbps;
+EXTERN const struct c1101_rfsettings_s
+    cc1101_rfsettings_ISM2_905MHzGFSK250kbps;
+
+EXTERN const struct c1101_rfsettings_s
+    cc1101_rfsettings_ISM2_433MHzMSK500kbps;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+FAR int cc1101_init2(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Initialize Chipcon CC1101 Chip.
@@ -395,8 +465,9 @@ EXTERN const struct c1101_rfsettings_s cc1101_rfsettings_ISM2_905MHzGFSK250kbps;
  *
  ****************************************************************************/
 
-struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
-    uint32_t pinset, const struct c1101_rfsettings_s *rfsettings);
+struct cc1101_dev_s *cc1101_init(
+    FAR struct spi_dev_s *spi, uint32_t isr_pin, uint32_t miso_pin,
+    FAR const struct c1101_rfsettings_s *rfsettings, wait_cc1101_ready wait);
 
 /****************************************************************************
  ** Deinitialize Chipcon CC1101 Chip
@@ -409,32 +480,32 @@ struct cc1101_dev_s *cc1101_init(struct spi_dev_s *spi, uint8_t isrpin,
  *
  ****************************************************************************/
 
-int cc1101_deinit(struct cc1101_dev_s *dev);
+int cc1101_deinit(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Power up device, start conversion. Returns zero on success.
  ****************************************************************************/
 
-int cc1101_powerup(struct cc1101_dev_s *dev);
+int cc1101_powerup(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Power down device, stop conversion. Returns zero on success.
  ****************************************************************************/
 
-int cc1101_powerdown(struct cc1101_dev_s *dev);
+int cc1101_powerdown(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Set Multi Purpose Output Function. Returns zero on success.
  ****************************************************************************/
 
-int cc1101_setgdo(struct cc1101_dev_s *dev, uint8_t pin, uint8_t function);
+int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin, uint8_t function);
 
 /****************************************************************************
  * Set RF settings. Use one from the database above.
  ****************************************************************************/
 
-int cc1101_setrf(struct cc1101_dev_s *dev,
-                 const struct c1101_rfsettings_s *settings);
+int cc1101_setrf(FAR struct cc1101_dev_s *dev,
+                 FAR const struct c1101_rfsettings_s *settings);
 
 /****************************************************************************
  * Set Channel.
@@ -447,7 +518,7 @@ int cc1101_setrf(struct cc1101_dev_s *dev,
  *
  ****************************************************************************/
 
-int cc1101_setchannel(struct cc1101_dev_s *dev, uint8_t channel);
+int cc1101_setchannel(FAR struct cc1101_dev_s *dev, uint8_t channel);
 
 /****************************************************************************
  * Set Output Power
@@ -465,10 +536,12 @@ int cc1101_setchannel(struct cc1101_dev_s *dev, uint8_t channel);
  *
  ****************************************************************************/
 
-uint8_t cc1101_setpower(struct cc1101_dev_s *dev, uint8_t power);
+uint8_t cc1101_setpower(FAR struct cc1101_dev_s *dev, uint8_t power);
 
 /****************************************************************************
- * Convert RSSI as obtained from CC1101 to [dBm] */
+ * Convert RSSI as obtained from CC1101 to [dBm]
+ *
+ ****************************************************************************/
 
 int cc1101_calcRSSIdBm(int rssi);
 
@@ -486,7 +559,7 @@ int cc1101_calcRSSIdBm(int rssi);
  *
  ****************************************************************************/
 
-int cc1101_receive(struct cc1101_dev_s *dev);
+int cc1101_receive(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Read received packet
@@ -508,7 +581,7 @@ int cc1101_receive(struct cc1101_dev_s *dev);
  *
  ****************************************************************************/
 
-int cc1101_read(struct cc1101_dev_s *dev, uint8_t *buf, size_t size);
+int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size);
 
 /****************************************************************************
  * Write data to be send, using the cc1101_send()
@@ -522,7 +595,8 @@ int cc1101_read(struct cc1101_dev_s *dev, uint8_t *buf, size_t size);
  *
  ****************************************************************************/
 
-int cc1101_write(struct cc1101_dev_s *dev, const uint8_t *buf, size_t size);
+int cc1101_write(FAR struct cc1101_dev_s *dev, FAR const uint8_t *buf,
+                 size_t size);
 
 /****************************************************************************
  * Send data previously written using cc1101_write()
@@ -535,7 +609,7 @@ int cc1101_write(struct cc1101_dev_s *dev, const uint8_t *buf, size_t size);
  *
  ****************************************************************************/
 
-int cc1101_send(struct cc1101_dev_s *dev);
+int cc1101_send(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Enter idle state (after reception and transmission completes).
@@ -545,7 +619,12 @@ int cc1101_send(struct cc1101_dev_s *dev);
  *
  ****************************************************************************/
 
-int cc1101_idle(struct cc1101_dev_s *dev);
+int cc1101_idle(FAR struct cc1101_dev_s *dev);
+
+int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev);
+
+void cc1101_isr_process(FAR void *arg);
+int cc1101_isr(int irq, FAR void *context, FAR void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -553,4 +632,4 @@ int cc1101_idle(struct cc1101_dev_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_WIRELESS_CC1101_H */
+#endif   /* __INCLUDE_NUTTX_WIRELESS_CC1101_H */

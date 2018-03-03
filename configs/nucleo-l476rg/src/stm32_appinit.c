@@ -173,7 +173,7 @@ int board_app_initialize(uintptr_t arg)
   /* Now bind the SDIO interface to the MMC/SD driver */
 
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
@@ -214,7 +214,7 @@ int board_app_initialize(uintptr_t arg)
   /* Initialize and register the joystick driver */
 
   ret = board_ajoy_initialize();
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the joystick driver: %d\n",
@@ -227,7 +227,7 @@ int board_app_initialize(uintptr_t arg)
   /* Initialize and register the timer driver */
 
   ret = board_timer_driver_initialize("/dev/timer0", 2);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the timer driver: %d\n",
@@ -237,7 +237,6 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
-
   /* Initialize and register the qencoder driver */
 
   index = 0;
@@ -245,7 +244,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32L4_TIM1_QE
   sprintf(buf, "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 1);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
@@ -257,7 +256,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32L4_TIM2_QE
   sprintf(buf, "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 2);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
@@ -269,7 +268,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32L4_TIM3_QE
   sprintf(buf, "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 3);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
@@ -281,7 +280,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32L4_TIM4_QE
   sprintf(buf, "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 4);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
@@ -293,7 +292,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32L4_TIM5_QE
   sprintf(buf, "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 5);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
@@ -305,7 +304,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32L4_TIM8_QE
   sprintf(buf, "/dev/qe%d", index++);
   ret = stm32l4_qencoder_initialize(buf, 8);
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
@@ -313,7 +312,19 @@ int board_app_initialize(uintptr_t arg)
       return ret;
     }
 #endif
+#endif /* CONFIG_SENSORS_QENCODER */
 
+#ifdef CONFIG_WL_CC1101
+  /* Initialize and register the cc1101 radio */
+
+  ret = stm32_cc1101_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: stm32_cc1101_initialize failed: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
   UNUSED(ret);
@@ -339,4 +350,3 @@ int board_uniqueid(uint8_t *uniqueid)
   return OK;
 }
 #endif
-

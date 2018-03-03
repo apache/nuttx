@@ -50,7 +50,8 @@
  *   - Extend max packet length up to 255 bytes or rather infinite < 4096 bytes
  *   - Power up/down modes
  *   - Sequencing between states or add protection for correct termination of
- *     various different state (so that CC1101 does not block in case of improper use)
+ *     various different state (so that CC1101 does not block in case of
+ *     improper use)
  *
  * RSSI and LQI value interpretation
  *
@@ -81,9 +82,11 @@
  *
  * There are four to five "extreme cases" that can be used to illustrate
  * how RSSI and LQI work:
+ *
  *  1. A weak signal in the presence of noise may give low RSSI and low LQI.
  *  2. A weak signal in "total" absence of noise may give low RSSI and high LQI.
- *  3. Strong noise (usually coming from an interferer) may give high RSSI and low LQI.
+ *  3. Strong noise (usually coming from an interferer) may give high RSSI
+ *     and low LQI.
  *  4. A strong signal without much noise may give high RSSI and high LQI.
  *  5. A very strong signal that causes the receiver to saturate may give
  *     high RSSI and low LQI.
@@ -98,14 +101,17 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/wireless/cc1101.h>
 
 /****************************************************************************
@@ -183,22 +189,22 @@
 #define CC1101_WORTIME0         (0x37 | 0xc0)   /* Low byte of WOR timer */
 #define CC1101_PKTSTATUS        (0x38 | 0xc0)   /* Current GDOx status and packet status */
 #define CC1101_VCO_VC_DAC       (0x39 | 0xc0)   /* Current setting from PLL cal module */
-#define CC1101_TXBYTES          (0x3A | 0xc0)   /* Underflow and # of bytes in TXFIFO */
-#define CC1101_RXBYTES          (0x3B | 0xc0)   /* Overflow and # of bytes in RXFIFO */
-#define CC1101_RCCTRL1_STATUS   (0x3C | 0xc0)   /* Last RC oscilator calibration results */
-#define CC1101_RCCTRL0_STATUS   (0x3D | 0xc0)   /* Last RC oscilator calibration results */
+#define CC1101_TXBYTES          (0x3a | 0xc0)   /* Underflow and # of bytes in TXFIFO */
+#define CC1101_RXBYTES          (0x3b | 0xc0)   /* Overflow and # of bytes in RXFIFO */
+#define CC1101_RCCTRL1_STATUS   (0x3c | 0xc0)   /* Last RC oscilator calibration results */
+#define CC1101_RCCTRL0_STATUS   (0x3d | 0xc0)   /* Last RC oscilator calibration results */
 
 /* Multi byte memory locations */
 
-#define CC1101_PATABLE          0x3E
-#define CC1101_TXFIFO           0x3F
-#define CC1101_RXFIFO           0x3F
+#define CC1101_PATABLE          0x3e
+#define CC1101_TXFIFO           0x3f
+#define CC1101_RXFIFO           0x3f
 
 /* Definitions for burst/single access to registers */
 
 #define CC1101_WRITE_BURST      0x40
 #define CC1101_READ_SINGLE      0x80
-#define CC1101_READ_BURST       0xC0
+#define CC1101_READ_BURST       0xc0
 
 /* Strobe commands */
 
@@ -213,23 +219,21 @@
 #define CC1101_SAFC             0x37        /* Perform AFC adjustment of the frequency synthesizer */
 #define CC1101_SWOR             0x38        /* Start automatic RX polling sequence (Wake-on-Radio) */
 #define CC1101_SPWD             0x39        /* Enter power down mode when CSn goes high. */
-#define CC1101_SFRX             0x3A        /* Flush the RX FIFO buffer. */
-#define CC1101_SFTX             0x3B        /* Flush the TX FIFO buffer. */
-#define CC1101_SWORRST          0x3C        /* Reset real time clock. */
-#define CC1101_SNOP             0x3D        /* No operation. */
+#define CC1101_SFRX             0x3a        /* Flush the RX FIFO buffer. */
+#define CC1101_SFTX             0x3b        /* Flush the TX FIFO buffer. */
+#define CC1101_SWORRST          0x3c        /* Reset real time clock. */
+#define CC1101_SNOP             0x3d        /* No operation. */
 
 /* Modem Control */
 
 #define CC1101_MCSM0_XOSC_FORCE_ON  0x01
 
-/* Chip Status Byte
- */
-
+/* Chip Status Byte */
 /* Bit fields in the chip status byte */
 
 #define CC1101_STATUS_CHIP_RDYn_BM              0x80
 #define CC1101_STATUS_STATE_BM                  0x70
-#define CC1101_STATUS_FIFO_BYTES_AVAILABLE_BM   0x0F
+#define CC1101_STATUS_FIFO_BYTES_AVAILABLE_BM   0x0f
 
 /* Chip states */
 
@@ -272,59 +276,479 @@
 /* Part number and version */
 
 #define CC1101_PARTNUM_VALUE                    0x00
-#define CC1101_VERSION_VALUE                    0x04
+#define CC1101_VERSION_VALUE                    0x17
 
 /*  Others ... */
 
 #define CC1101_LQI_CRC_OK_BM                    0x80
-#define CC1101_LQI_EST_BM                       0x7F
+#define CC1101_LQI_EST_BM                       0x7f
 
+#define FLAGS_RXONLY                            1 /* Indicates receive operation only */
+#define FLAGS_XOSCENABLED                       2 /* Indicates that one pin is configured as XOSC/n */
+
+#ifndef CONFIG_WL_CC1101_RXFIFO_LEN
+#  define CONFIG_WL_CC1101_RXFIFO_LEN 3
+#endif
 
 /****************************************************************************
- * Private Data Types
+ * Private Function Prototypes
  ****************************************************************************/
 
-#define FLAGS_RXONLY        1   /* Indicates receive operation only */
-#define FLAGS_XOSCENABLED   2   /* Indicates that one pin is configured as XOSC/n */
-
-struct cc1101_dev_s
-{
-  const struct c1101_rfsettings_s *rfsettings;
-
-  struct spi_dev_s *spi;
-  uint8_t           isrpin;     /* CC1101 pin used to trigger interrupts */
-  uint32_t          pinset;     /* GPIO of the MCU */
-  uint8_t           flags;
-  uint8_t           channel;
-  uint8_t           power;
-};
+static int cc1101_file_open(FAR struct file *filep);
+static int cc1101_file_close(FAR struct file *filep);
+static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen);
+static ssize_t cc1101_file_write(FAR struct file *filep, FAR const char *buffer,
+                                 size_t buflen);
+#ifndef CONFIG_DISABLE_POLL
+static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                            bool setup);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static volatile int cc1101_interrupt = 0;
+static const struct file_operations g_cc1101ops =
+{
+  cc1101_file_open,  /* open */
+  cc1101_file_close, /* close */
+  cc1101_file_read,  /* read */
+  cc1101_file_write, /* write */
+  NULL,              /* seek */
+  NULL               /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  ,
+  cc1101_file_poll   /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  ,
+  NULL               /* unlink */
+#endif
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+static int cc1101_takesem(FAR sem_t *sem)
+{
+  int ret;
+
+  /* Take a count from the semaphore, possibly waiting */
+
+  ret = nxsem_wait(sem);
+
+  /* The only case that an error should occur here is if the wait
+   * was awakened by a signal
+   */
+
+  DEBUGASSERT(ret == OK || ret == -EINTR);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cc1101_givesem
+ ****************************************************************************/
+
+#define cc1101_givesem(sem) nxsem_post(sem)
+
+/****************************************************************************
+ * Name: cc1101_file_open
+ *
+ * Description:
+ *   This function is called whenever the CC1101 device is opened.
+ *
+ ****************************************************************************/
+
+static int cc1101_file_open(FAR struct file *filep)
+{
+  FAR struct inode *inode;
+  FAR struct cc1101_dev_s *dev;
+  int ret;
+
+  wlinfo("Opening CC1101 dev\n");
+
+  DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct cc1101_dev_s *)inode->i_private;
+
+  /* Get exclusive access to the driver data structure */
+
+  ret = cc1101_takesem(&dev->devsem);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  /* Check if device is not already used */
+
+  if (dev->nopens > 0)
+    {
+      ret = -EBUSY;
+      goto errout;
+    }
+
+  dev->ops.irq(dev, true);
+  cc1101_receive(dev);
+  dev->nopens++;
+
+errout:
+  nxsem_post(&dev->devsem);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cc1101_file_close
+ *
+ * Description:
+ *   This routine is called when the CC1101 device is closed.
+ *   It waits for the last remaining data to be sent.
+ *
+ ****************************************************************************/
+
+static int cc1101_file_close(FAR struct file *filep)
+{
+  FAR struct inode *inode;
+  FAR struct cc1101_dev_s *dev;
+  int ret;
+
+  wlinfo("Closing CC1101 dev\n");
+  DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct cc1101_dev_s *)inode->i_private;
+
+  /* Get exclusive access to the driver data structure */
+
+  ret = cc1101_takesem(&dev->devsem);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  dev->ops.irq(dev, false);
+  // nrf24l01_changestate(dev, ST_POWER_DOWN);
+  dev->nopens--;
+
+  nxsem_post(&dev->devsem);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cc1101_file_write
+ *
+ * Description:
+ *   Standard driver write method.
+ *
+ ****************************************************************************/
+
+static ssize_t cc1101_file_write(FAR struct file *filep,
+                                 FAR const char *buffer,
+                                 size_t buflen)
+{
+  FAR struct inode *inode;
+  FAR struct cc1101_dev_s *dev;
+  int ret;
+
+  wlinfo("write CC1101 dev\n");
+  DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct cc1101_dev_s *)inode->i_private;
+
+  /* Get exclusive access to the driver data structure */
+
+  ret = cc1101_takesem(&dev->devsem);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  ret = cc1101_write(dev, (const uint8_t *)buffer, buflen);
+  cc1101_send(dev);
+  nxsem_post(&dev->devsem);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fifo_put
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+static void fifo_put(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
+                     uint8_t buflen)
+{
+  int ret;
+  int i;
+
+  ret = cc1101_takesem(&dev->sem_rx_buffer);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return;
+    }
+
+  dev->fifo_len++;
+  if (dev->fifo_len >= CONFIG_WL_CC1101_RXFIFO_LEN)
+    {
+      dev->fifo_len = CONFIG_WL_CC1101_RXFIFO_LEN;
+      dev->nxt_read = (dev->nxt_read + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
+    }
+
+  for (i = 0; i < buflen && i < CC1101_PACKET_MAXDATALEN + 3; i++)
+    {
+      *(dev->rx_buffer + i + dev->nxt_write * (CC1101_PACKET_MAXDATALEN + 3)) =
+          buffer[i];
+    }
+
+  dev->nxt_write = (dev->nxt_write + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
+  nxsem_post(&dev->sem_rx_buffer);
+}
+
+/****************************************************************************
+ * Name: fifo_get
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+static uint8_t fifo_get(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
+                        uint8_t buflen)
+{
+  uint8_t pktlen;
+  uint8_t i;
+  int ret;
+
+  ret = cc1101_takesem(&dev->sem_rx_buffer);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  if (dev->fifo_len == 0)
+    {
+      pktlen = 0;
+      goto no_data;
+    }
+
+  pktlen =
+      *(dev->rx_buffer + dev->nxt_read * (CC1101_PACKET_MAXDATALEN + 3)) - 3;
+
+  for (i = 0; i < pktlen && i < CC1101_PACKET_MAXDATALEN; i++)
+    {
+      *(buffer++) =
+          dev->rx_buffer[dev->nxt_read * (CC1101_PACKET_MAXDATALEN + 3) + i +
+                         1];
+    }
+
+  dev->nxt_read = (dev->nxt_read + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
+  dev->fifo_len--;
+
+no_data:
+  nxsem_post(&dev->sem_rx_buffer);
+  return pktlen;
+}
+
+/****************************************************************************
+ * Name: cc1101_file_read
+ *
+ * Description:
+ *   Standard driver read method
+ *
+ ****************************************************************************/
+
+static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen)
+{
+  FAR struct cc1101_dev_s *dev;
+  FAR struct inode *inode;
+  int ret;
+
+  DEBUGASSERT(filep);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct cc1101_dev_s *)inode->i_private;
+
+  ret = cc1101_takesem(&dev->devsem);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  if ((filep->f_oflags & O_NONBLOCK) == 0)
+    {
+      nxsem_trywait(&dev->sem_rx);
+      ret = 0;
+    }
+  else
+    {
+      ret = nxsem_wait(&dev->sem_rx);
+    }
+
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  buflen = fifo_get(dev, (uint8_t *)buffer, buflen);
+  nxsem_post(&dev->devsem);
+  return buflen;
+}
+
+/****************************************************************************
+ * Name: nrf24l01_poll
+ *
+ * Description:
+ *   Standard driver poll method.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                            bool setup)
+{
+  FAR struct inode *inode;
+  FAR struct cc1101_dev_s *dev;
+  int ret;
+
+  wlinfo("setup: %d\n", (int)setup);
+  DEBUGASSERT(filep && fds);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct cc1101_dev_s *)inode->i_private;
+
+  /* Exclusive access */
+
+  ret = cc1101_takesem(&dev->devsem);
+  if (ret < 0)
+    {
+      /* This should only happen if the wait was canceled by an signal */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  /* Are we setting up the poll?  Or tearing it down? */
+
+  if (setup)
+    {
+      /* Ignore waits that do not include POLLIN */
+
+      if ((fds->events & POLLIN) == 0)
+        {
+          ret = -EDEADLK;
+          goto errout;
+        }
+
+      /* Check if we can accept this poll.
+       * For now, only one thread can poll the device at any time
+       * (shorter / simpler code)
+       */
+
+      if (dev->pfd)
+        {
+          ret = -EBUSY;
+          goto errout;
+        }
+
+      dev->pfd = fds;
+
+      /* Is there is already data in the fifo? then trigger POLLIN now -
+       * don't wait for RX.
+       */
+
+      (void)cc1101_takesem(&dev->sem_rx_buffer);
+      if (dev->fifo_len > 0)
+        {
+          dev->pfd->revents |= POLLIN; /* Data available for input */
+          nxsem_post(dev->pfd->sem);
+        }
+
+      nxsem_post(&dev->sem_rx_buffer);
+    }
+  else /* Tear it down */
+    {
+      dev->pfd = NULL;
+    }
+
+errout:
+  nxsem_post(&dev->devsem);
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: cc1101_access_begin
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 {
   (void)SPI_LOCK(dev->spi, true);
-  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
-  SPI_SETMODE(dev->spi, SPIDEV_MODE0);     /* CPOL=0, CPHA=0 */
+  SPI_SELECT(dev->spi, dev->dev_id, true);
+  SPI_SETMODE(dev->spi, SPIDEV_MODE0); /* CPOL=0, CPHA=0 */
   SPI_SETBITS(dev->spi, 8);
   (void)SPI_HWFEATURES(dev->spi, 0);
+
+  if (dev->ops.wait)
+    {
+      dev->ops.wait(dev, dev->miso_pin);
+    }
+  else
+    {
+      usleep(150 * 1000);
+    }
 }
+
+/****************************************************************************
+ * Name: cc1101_access_end
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 {
-  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
+  SPI_SELECT(dev->spi, dev->dev_id, false);
   (void)SPI_LOCK(dev->spi, false);
 }
 
-/* CC1101 Access with Range Check
+/****************************************************************************
+ * Name: cc1101_access_end
+ *
+ * Description:
+ *   CC1101 Access with Range Check
  *
  * Input Parameters:
  *   dev CC1101 Private Structure
@@ -336,7 +760,8 @@ void cc1101_access_end(FAR struct cc1101_dev_s *dev)
  *
  * Returned Value:
  *   OK on success or a negated errno value on any failure.
- */
+ *
+ ****************************************************************************/
 
 int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
                   FAR uint8_t *buf, int length)
@@ -344,7 +769,7 @@ int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
   int stabyte;
 
   /* Address cannot explicitly define READ command while length WRITE.
-   * Also access to these cells is only permitted as one byte, eventhough
+   * Also access to these cells is only permitted as one byte, even though
    * transfer is marked as BURST!
    */
 
@@ -399,14 +824,19 @@ int cc1101_access(FAR struct cc1101_dev_s *dev, uint8_t addr,
   return stabyte;
 }
 
-/* Strobes command and returns chip status byte
+/****************************************************************************
+ * Name: cc1101_strobe
  *
- *  By default commands are send as Write. To a command,
- *  CC1101_READ_SINGLE may be OR'ed to obtain the number of RX bytes
- *  pending in RX FIFO.
- */
+ * Description:
+ *    Strobes command and returns chip status byte
+ *
+ *    By default commands are send as Write. To a command,
+ *    CC1101_READ_SINGLE may be OR'ed to obtain the number of RX bytes
+ *    pending in RX FIFO.
+ *
+ ****************************************************************************/
 
-inline uint8_t cc1101_strobe(struct cc1101_dev_s *dev, uint8_t command)
+uint8_t cc1101_strobe(struct cc1101_dev_s *dev, uint8_t command)
 {
   uint8_t status;
 
@@ -420,11 +850,25 @@ inline uint8_t cc1101_strobe(struct cc1101_dev_s *dev, uint8_t command)
   return status;
 }
 
+/****************************************************************************
+ * Name: cc1101_reset
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 int cc1101_reset(struct cc1101_dev_s *dev)
 {
   cc1101_strobe(dev, CC1101_SRES);
   return OK;
 }
+
+/****************************************************************************
+ * Name: cc1101_checkpart
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 int cc1101_checkpart(struct cc1101_dev_s *dev)
 {
@@ -437,6 +881,8 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
       return -ENODEV;
     }
 
+  winfo("CC1101 cc1101_checkpart 0x%X 0x%X\n", partnum, version);
+
   if (partnum == CC1101_PARTNUM_VALUE && version == CC1101_VERSION_VALUE)
     {
       return OK;
@@ -445,29 +891,50 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
   return -ENOTSUP;
 }
 
+/****************************************************************************
+ * Name: cc1101_dumpregs
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 {
-  uint8_t buf[0x30], i;
+  uint8_t buf[0x30];
+  int i;
 
   cc1101_access(dev, addr, (FAR uint8_t *)buf, length);
 
-  /* REVISIT: printf() should not be used from within the OS */
+  /* printf() may not be used from within the OS!  The following logic
+   * will not work correctly because of the ornamentationadded by each
+   * winfo call.  printf() is forbidden in the OS;  the best option is
+   * to buffer the formatted data then output with one winfo() call.
+   */
 
-  printf("CC1101[%2x]: ", addr);
+  winfo("CC1101[%2x]: ", addr);
   for (i = 0; i < length; i++)
     {
-      printf(" %2x,", buf[i]);
+      winfo("%02X ", buf[i]);
     }
 
-  printf("\n");
+  winfo("\n");
 }
+
+/****************************************************************************
+ * Name: cc1101_setpacketctrl
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 void cc1101_setpacketctrl(struct cc1101_dev_s *dev)
 {
   uint8_t values[3];
 
-  values[0] = 0;      /* Rx FIFO threshold = 32, Tx FIFO threshold = 33 */
-  cc1101_access(dev, CC1101_FIFOTHR, values, -1);
+  values[0] = dev->rfsettings->FIFOTHR;
+  values[1] = dev->rfsettings->SYNC1;
+  values[2] = dev->rfsettings->SYNC0;
+  cc1101_access(dev, CC1101_FIFOTHR, values, -3);
 
   /* Packet length
    * Limit it to 61 bytes in total: pktlen, data[61], rssi, lqi
@@ -478,19 +945,26 @@ void cc1101_setpacketctrl(struct cc1101_dev_s *dev)
 
   /* Packet Control */
 
-  values[0] = 0x04;   /* Append status: RSSI and LQI at the end of received packet */
-                      /* TODO: CRC Auto Flash bit 0x08 ??? */
-  values[1] = 0x05;   /* CRC in Rx and Tx Enabled: Variable Packet mode, defined by first byte */
-                      /* TODO: Enable data whitening ... */
+  values[0] = dev->rfsettings->PKTCTRL1; /* Append status: RSSI and LQI at the
+                                          * end of received packet */
+
+  /* TODO: CRC Auto Flash bit 0x08 ??? */
+
+  values[1] = dev->rfsettings->PKTCTRL0; /* CRC in Rx and Tx Enabled: Variable
+                                          * Packet mode, defined by first byte */
+
+  /* TODO: Enable data whitening ... */
+
   cc1101_access(dev, CC1101_PKTCTRL1, values, -2);
 
   /* Main Radio Control State Machine */
 
-  values[0] = 0x07;   /* No time-out */
-  values[1] = 0x00;   /* Clear channel if RSSI < thr && !receiving;
-                       * TX -> RX, RX -> RX: 0x3F */
-  values[2] = CC1101_MCSM0_VALUE;   /* Calibrate on IDLE -> RX/TX, OSC Timeout = ~500 us
-                       * TODO: has XOSC_FORCE_ON */
+  values[0] = 0x07; /* No time-out */
+  values[1] = 0x03; /* Clear channel if RSSI < thr && !receiving;
+                     * TX -> RX, RX -> RX: 0x3F */
+  values[2] =
+      CC1101_MCSM0_VALUE; /* Calibrate on IDLE -> RX/TX, OSC Timeout = ~500 us
+                           * TODO: has XOSC_FORCE_ON */
   cc1101_access(dev, CC1101_MCSM2, values, -3);
 
   /* Wake-On Radio Control */
@@ -500,47 +974,74 @@ void cc1101_setpacketctrl(struct cc1101_dev_s *dev)
 }
 
 /****************************************************************************
- * Callbacks
- ****************************************************************************/
-
-/* External line triggers this callback
- *
- * The concept todo is:
- *  - GPIO provides EXTI Interrupt
- *  - It should handle EXTI Interrupts in ISR, to which chipcon can
- *    register a callback (and others). The ISR then foreach() calls a
- *    its callback, and it is up to peripheral to find, whether the cause
- *    of EXTI ISR was itself.
- **/
-
-int cc1101_eventcb(int irq, FAR void *context)
-{
-  cc1101_interrupt++;
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-FAR struct cc1101_dev_s *
-  cc1101_init(FAR struct spi_dev_s *spi, uint8_t isrpin,
-              uint32_t pinset,
-              FAR const struct c1101_rfsettings_s *rfsettings)
+/****************************************************************************
+ * Name: cc1101_init2
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+FAR int cc1101_init2(FAR struct cc1101_dev_s *dev)
+{
+  int ret;
+
+  DEBUGASSERT(dev);
+
+  /* Reset chip, check status bytes */
+
+  ret = cc1101_reset(dev)
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Check part compatibility */
+
+  ret = cc1101_checkpart(dev)
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  cc1101_setgdo(dev, CC1101_PIN_GDO0, CC1101_GDO_HIZ);
+  cc1101_setgdo(dev, CC1101_PIN_GDO1, CC1101_GDO_HIZ);
+  cc1101_setgdo(dev, CC1101_PIN_GDO2, CC1101_GDO_HIZ);
+  cc1101_setrf(dev, dev->rfsettings);
+  cc1101_setpacketctrl(dev);
+  cc1101_setgdo(dev, dev->gdo, CC1101_GDO_SYNC);
+  cc1101_dumpregs(dev, CC1101_PIN_GDO2, 39);
+  dev->status = CC1101_IDLE;
+  return 0;
+}
+
+/****************************************************************************
+ * Name: cc1101_init
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+FAR struct cc1101_dev_s *cc1101_init(
+    FAR struct spi_dev_s *spi, uint32_t isr_pin, uint32_t miso_pin,
+    FAR const struct c1101_rfsettings_s *rfsettings, wait_cc1101_ready wait)
 {
   FAR struct cc1101_dev_s *dev;
 
-  ASSERT(spi);
+  DEBUGASSERT(spi);
 
-  if ((dev = kmm_malloc(sizeof(struct cc1101_dev_s))) == NULL)
+  dev = kmm_malloc(sizeof(struct cc1101_dev_s));
+  if (dev == NULL)
     {
       return NULL;
     }
 
+  dev->isr_pin    = isr_pin;
+  dev->miso_pin   = miso_pin;
   dev->rfsettings = rfsettings;
   dev->spi        = spi;
-  dev->isrpin     = isrpin;
-  dev->pinset     = pinset;
   dev->flags      = 0;
   dev->channel    = rfsettings->CHMIN;
   dev->power      = rfsettings->PAMAX;
@@ -573,7 +1074,7 @@ FAR struct cc1101_dev_s *
   cc1101_setrf(dev, rfsettings);
   cc1101_setpacketctrl(dev);
 
-  /* Set the ISR to be triggerred on falling edge of the:
+  /* Set the ISR to be triggered on falling edge of the:
    *
    * 6 (0x06) Asserts when sync word has been sent / received, and
    * de-asserts at the end of the packet. In RX, the pin will de-assert
@@ -581,7 +1082,7 @@ FAR struct cc1101_dev_s *
    * In TX the pin will de-assert if the TX FIFO underflows.
    */
 
-  cc1101_setgdo(dev, dev->isrpin, CC1101_GDO_SYNC);
+  cc1101_setgdo(dev, dev->gdo, CC1101_GDO_SYNC);
 
   /* Configure to receive interrupts on the external GPIO interrupt line.
    *
@@ -592,9 +1093,16 @@ FAR struct cc1101_dev_s *
   return dev;
 }
 
-int cc1101_deinit(struct cc1101_dev_s *dev)
+/****************************************************************************
+ * Name: cc1101_deinit
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_deinit(FAR struct cc1101_dev_s *dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Release the external GPIO interrupt
    *
@@ -612,22 +1120,43 @@ int cc1101_deinit(struct cc1101_dev_s *dev)
   return 0;
 }
 
-int cc1101_powerup(struct cc1101_dev_s *dev)
+/****************************************************************************
+ * Name: cc1101_powerup
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_powerup(FAR struct cc1101_dev_s *dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
   return 0;
 }
 
-int cc1101_powerdown(struct cc1101_dev_s *dev)
+/****************************************************************************
+ * Name: cc1101_powerdown
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_powerdown(FAR struct cc1101_dev_s *dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
   return 0;
 }
 
-int cc1101_setgdo(struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
+/****************************************************************************
+ * Name: cc1101_setgdo
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
 {
-  ASSERT(dev);
-  ASSERT(pin <= CC1101_IOCFG0);
+  DEBUGASSERT(dev);
+  DEBUGASSERT(pin <= CC1101_IOCFG0);
 
   if (function >= CC1101_GDO_CLK_XOSC1)
     {
@@ -658,22 +1187,33 @@ int cc1101_setgdo(struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
   return cc1101_access(dev, pin, &function, -1);
 }
 
-int cc1101_setrf(struct cc1101_dev_s *dev, const struct c1101_rfsettings_s *settings)
+/****************************************************************************
+ * Name: cc1101_setrf
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_setrf(FAR struct cc1101_dev_s *dev,
+                 FAR const struct c1101_rfsettings_s *settings)
 {
-  ASSERT(dev);
-  ASSERT(settings);
+  DEBUGASSERT(dev);
+  DEBUGASSERT(settings);
 
-  if (cc1101_access(dev, CC1101_FSCTRL1, (FAR uint8_t *)&settings->FSCTRL1, -11) < 0)
+  if (cc1101_access(
+          dev, CC1101_FSCTRL1, (FAR uint8_t *)&settings->FSCTRL1, -11) < 0)
     {
       return -EIO;
     }
 
-  if (cc1101_access(dev, CC1101_FOCCFG,  (FAR uint8_t *)&settings->FOCCFG,  -5) < 0)
+  if (cc1101_access(dev, CC1101_FOCCFG, (FAR uint8_t *)&settings->FOCCFG, -5) <
+      0)
     {
       return -EIO;
     }
 
-  if (cc1101_access(dev, CC1101_FREND1,  (FAR uint8_t *)&settings->FREND1,  -6) < 0)
+  if (cc1101_access(dev, CC1101_FREND1, (FAR uint8_t *)&settings->FREND1, -6) <
+      0)
     {
       return -EIO;
     }
@@ -696,11 +1236,18 @@ int cc1101_setrf(struct cc1101_dev_s *dev, const struct c1101_rfsettings_s *sett
   return OK;
 }
 
-int cc1101_setchannel(struct cc1101_dev_s *dev, uint8_t channel)
-{
-  ASSERT(dev);
+/****************************************************************************
+ * Name: cc1101_setchannel
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
-  /* Store localy in further checks */
+int cc1101_setchannel(FAR struct cc1101_dev_s *dev, uint8_t channel)
+{
+  DEBUGASSERT(dev);
+
+  /* Store locally in further checks */
 
   dev->channel = channel;
 
@@ -716,12 +1263,19 @@ int cc1101_setchannel(struct cc1101_dev_s *dev, uint8_t channel)
     }
 
   cc1101_access(dev, CC1101_CHANNR, &dev->channel, -1);
-  return dev->flags & FLAGS_RXONLY;
+  return dev->flags;
 }
 
-uint8_t cc1101_setpower(struct cc1101_dev_s *dev, uint8_t power)
+/****************************************************************************
+ * Name: cc1101_setpower
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+uint8_t cc1101_setpower(FAR struct cc1101_dev_s *dev, uint8_t power)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   if (power > dev->rfsettings->PAMAX)
     {
@@ -752,8 +1306,15 @@ uint8_t cc1101_setpower(struct cc1101_dev_s *dev, uint8_t power)
       dev->power = 0;
     }
 
-    return dev->power;
+  return dev->power;
 }
+
+/****************************************************************************
+ * Name: cc1101_calcRSSIdBm
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 int cc1101_calcRSSIdBm(int rssi)
 {
@@ -765,80 +1326,97 @@ int cc1101_calcRSSIdBm(int rssi)
   return (rssi >> 1) - 74;
 }
 
-int cc1101_receive(struct cc1101_dev_s *dev)
+/****************************************************************************
+ * Name: cc1101_receive
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_receive(FAR struct cc1101_dev_s *dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
-  /* \todo Wait for IDLE before going into another state? */
+  /* REVISIT: Wait for IDLE before going into another state? */
 
-  cc1101_interrupt = 0;
-
+  dev->status = CC1101_RECV;
   cc1101_strobe(dev, CC1101_SRX | CC1101_READ_SINGLE);
-
   return 0;
 }
 
-int cc1101_read(struct cc1101_dev_s *dev, uint8_t * buf, size_t size)
+/****************************************************************************
+ * Name: cc1101_read
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
 {
-  ASSERT(dev);
+  uint8_t nbytes;
+  int ret = 0;
 
-  if (buf == NULL)
+  DEBUGASSERT(dev);
+
+  if (buf == NULL || size == 0)
     {
-      if (size == 0)
-        {
-          return 64;
-        }
-
-      /* else received packet size */
-
+      cc1101_strobe(dev, CC1101_SRX);
       return 0;
     }
 
-  if (cc1101_interrupt == 0)
+  cc1101_access(dev, CC1101_RXFIFO, &nbytes, 1);
+
+  if (nbytes & 0x80)
     {
-      return 0;
+      wlwarn("RX FIFO full\n");
+      ret = 0;
+      goto breakout;
     }
 
-  int status = cc1101_strobe(dev, CC1101_SNOP | CC1101_READ_SINGLE);
+  nbytes += 2; /* RSSI and LQI */
+  ret = buf[0] = nbytes + 1;
+  cc1101_access(dev, CC1101_RXFIFO, buf + 1, (nbytes > size) ? size : nbytes);
 
-  if (status & CC1101_STATUS_FIFO_BYTES_AVAILABLE_BM &&
-      (status & CC1101_STATE_MASK) == CC1101_STATE_IDLE)
+  /* Flush remaining bytes, if there is no room to receive or if there is a
+   * BAD CRC
+   */
+
+  if (!(buf[nbytes] & 0x80))
     {
-      uint8_t nbytes;
-
-      cc1101_access(dev, CC1101_RXFIFO, &nbytes, 1);
-
-      nbytes += 2;    /* RSSI and LQI */
-
-      cc1101_access(dev, CC1101_RXFIFO, buf, (nbytes > size) ? size : nbytes);
-
-      /* Flush remaining bytes, if there is no room to receive
-       * or if there is a BAD CRC
-       */
-
-      if (nbytes > size || (nbytes <= size && !(buf[nbytes-1]&0x80)))
-        {
-          ninfo("Flushing RX FIFO\n");
-          cc1101_strobe(dev, CC1101_SFRX);
-        }
-
-      return nbytes;
+      wlwarn("RX CRC error\n");
+      ret = 0;
     }
 
-  return 0;
+breakout:
+  cc1101_strobe(dev, CC1101_SIDLE);
+  cc1101_strobe(dev, CC1101_SFRX);
+  cc1101_strobe(dev, CC1101_SRX);
+  return ret;
 }
 
-int cc1101_write(struct cc1101_dev_s *dev, const uint8_t *buf, size_t size)
+/****************************************************************************
+ * Name: cc1101_write
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_write(FAR struct cc1101_dev_s *dev, FAR const uint8_t *buf,
+                 size_t size)
 {
   uint8_t packetlen;
 
-  ASSERT(dev);
-  ASSERT(buf);
+  DEBUGASSERT(dev);
+  DEBUGASSERT(buf);
 
   if (dev->flags & FLAGS_RXONLY)
     {
       return -EPERM;
     }
+
+  cc1101_strobe(dev, CC1101_SIDLE);
+  cc1101_strobe(dev, CC1101_SFTX);
+  dev->status = CC1101_SEND;
 
   /* Present limit */
 
@@ -853,33 +1431,171 @@ int cc1101_write(struct cc1101_dev_s *dev, const uint8_t *buf, size_t size)
 
   cc1101_access(dev, CC1101_TXFIFO, &packetlen, -1);
   cc1101_access(dev, CC1101_TXFIFO, (FAR uint8_t *)buf, -size);
-
   return 0;
 }
 
-int cc1101_send(struct cc1101_dev_s *dev)
+/****************************************************************************
+ * Name: cc1101_send
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_send(FAR struct cc1101_dev_s *dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   if (dev->flags & FLAGS_RXONLY)
     {
       return -EPERM;
     }
 
-  cc1101_interrupt = 0;
-
   cc1101_strobe(dev, CC1101_STX);
+  cc1101_takesem(&dev->sem_tx);
 
-  /* wait until send, going to IDLE */
+  /* this is set MCSM1, send auto to rx */
 
-  while (cc1101_interrupt == 0);
-
+  dev->status = CC1101_RECV;
   return 0;
 }
 
-int cc1101_idle(struct cc1101_dev_s *dev)
+/****************************************************************************
+ * Name: cc1101_idle
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_idle(FAR struct cc1101_dev_s *dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
   cc1101_strobe(dev, CC1101_SIDLE);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: cc1101_unregister
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_unregister(FAR struct cc1101_dev_s *dev)
+{
+  DEBUGASSERT(dev);
+
+  /* Release IRQ */
+
+  dev->ops.irq(dev, false);
+
+  /* Free memory */
+
+  kmm_free(dev->rx_buffer);
+  kmm_free(dev);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cc1101_register
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev)
+{
+  DEBUGASSERT(path);
+  DEBUGASSERT(dev);
+
+  dev->status = CC1101_INIT;
+  dev->rx_buffer =
+      kmm_malloc((CC1101_PACKET_MAXDATALEN + 3) * CONFIG_WL_CC1101_RXFIFO_LEN);
+  if (dev->rx_buffer == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  dev->nxt_read  = 0;
+  dev->nxt_write = 0;
+  dev->fifo_len  = 0;
+  nxsem_init(&(dev->devsem), 0, 1);
+  nxsem_init(&(dev->sem_rx_buffer), 0, 1);
+  nxsem_init(&(dev->sem_rx), 0, 0);
+  nxsem_init(&(dev->sem_tx), 0, 0);
+
+  if (cc1101_init2(dev) < 0)
+    {
+      kmm_free(dev);
+      wlerr("ERROR: Failed to initialize cc1101_init\n");
+      return -ENODEV;
+    }
+
+  return register_driver(path, &g_cc1101ops, 0666, dev);
+}
+
+/****************************************************************************
+ * Name: cc1101_isr_process
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+void cc1101_isr_process(FAR void *arg)
+{
+  DEBUGASSERT(arg);
+  FAR struct cc1101_dev_s *dev = (struct cc1101_dev_s *)arg;
+  switch (dev->status)
+    {
+      case CC1101_SEND:
+        nxsem_post(&dev->sem_tx);
+        break;
+
+      case CC1101_RECV:
+        {
+          uint8_t buf[CC1101_PACKET_MAXDATALEN + 3], len;
+
+          memset(buf, 0, sizeof(buf));
+          len = cc1101_read(dev, buf, sizeof(buf));
+          wlinfo("recv==>[%d]\n", len);
+
+          if (len < 1)
+            {
+              return;
+            }
+
+          fifo_put(dev, buf, len);
+          nxsem_post(&dev->sem_rx);
+
+#ifndef CONFIG_DISABLE_POLL
+          if (dev->pfd)
+            {
+              dev->pfd->revents |= POLLIN; /* Data available for input */
+              wlinfo("Wake up polled fd\n");
+              nxsem_post(dev->pfd->sem);
+            }
+#endif
+        }
+        break;
+
+      default:
+        wlinfo("not process isr\n");
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: cc1101_isr
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_isr(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct cc1101_dev_s *dev = (struct cc1101_dev_s *)arg;
+
+  DEBUGASSERT(arg);
+
+  work_queue(HPWORK, &dev->irq_work, cc1101_isr_process, arg, 0);
   return 0;
 }
