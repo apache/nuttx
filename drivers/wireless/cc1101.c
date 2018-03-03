@@ -419,6 +419,7 @@ static int cc1101_file_close(FAR struct file *filep)
   int ret;
 
   wlinfo("Closing CC1101 dev\n");
+
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -461,6 +462,7 @@ static ssize_t cc1101_file_write(FAR struct file *filep,
   int ret;
 
   wlinfo("write CC1101 dev\n");
+
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -640,6 +642,7 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret;
 
   wlinfo("setup: %d\n", (int)setup);
+
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
@@ -745,18 +748,18 @@ void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: cc1101_access_end
+ * Name: cc1101_access
  *
  * Description:
  *   CC1101 Access with Range Check
  *
  * Input Parameters:
- *   dev CC1101 Private Structure
- *   addr CC1101 Address
- *   buf Pointer to buffer, either for read or write access
- *   length when >0 it denotes read access, when <0 it denotes write
- *        access of -length. abs(length) greater of 1 implies burst mode,
- *        however
+ *   dev    - CC1101 Private Structure
+ *   addr   - CC1101 Address
+ *   buf    - Pointer to buffer, either for read or write access
+ *   length - When >0 it denotes read access, when <0 it denotes write
+ *            access of -length. abs(length) greater of 1 implies burst mode,
+ *            however
  *
  * Returned Value:
  *   OK on success or a negated errno value on any failure.
@@ -881,7 +884,7 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
       return -ENODEV;
     }
 
-  winfo("CC1101 cc1101_checkpart 0x%X 0x%X\n", partnum, version);
+  wlinfo("CC1101 cc1101_checkpart 0x%X 0x%X\n", partnum, version);
 
   if (partnum == CC1101_PARTNUM_VALUE && version == CC1101_VERSION_VALUE)
     {
@@ -895,29 +898,35 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
  * Name: cc1101_dumpregs
  *
  * Description:
+ *   Dump the specified range of registers to the syslog.
+ *
+ *   WARNING:  Uses around 200 bytes of stack!
  *
  ****************************************************************************/
 
 void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 {
-  uint8_t buf[0x30];
+  char outbuf[3 * 48];
+  uint8_t regbuf[48];
+  int ndx = 0;
   int i;
 
-  cc1101_access(dev, addr, (FAR uint8_t *)buf, length);
+  DEBUGASSERT(length < 48);
 
-  /* printf() may not be used from within the OS!  The following logic
-   * will not work correctly because of the ornamentationadded by each
-   * winfo call.  printf() is forbidden in the OS;  the best option is
-   * to buffer the formatted data then output with one winfo() call.
-   */
+  /* Read the registers into a buffer */
 
-  winfo("CC1101[%2x]: ", addr);
+  cc1101_access(dev, addr, (FAR uint8_t *)regbuf, length);
+
+  /* Format the output data */
+
   for (i = 0; i < length; i++)
     {
-      winfo("%02X ", buf[i]);
+      ndx = sprintf(&outbuf[ndx], "%02x ", regbuf[i]);
     }
 
-  winfo("\n");
+  /* Dump the formatted data to the syslog output */
+
+  wlinfo("CC1101[%2x]: %s\n", addr, outbuf);
 }
 
 /****************************************************************************
@@ -992,7 +1001,7 @@ FAR int cc1101_init2(FAR struct cc1101_dev_s *dev)
 
   /* Reset chip, check status bytes */
 
-  ret = cc1101_reset(dev)
+  ret = cc1101_reset(dev);
   if (ret < 0)
     {
       return ret;
@@ -1000,7 +1009,7 @@ FAR int cc1101_init2(FAR struct cc1101_dev_s *dev)
 
   /* Check part compatibility */
 
-  ret = cc1101_checkpart(dev)
+  ret = cc1101_checkpart(dev);
   if (ret < 0)
     {
       return ret;
@@ -1578,7 +1587,7 @@ void cc1101_isr_process(FAR void *arg)
         break;
 
       default:
-        wlinfo("not process isr\n");
+        wlwarn("WARNING:  Interrupt not processed\n");
         break;
     }
 }
