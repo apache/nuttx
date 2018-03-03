@@ -1911,9 +1911,9 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
   /* Initialize the device variables */
 
-  totalsectors = dev->totalsectors;
-  dev->formatstatus = SMART_FMT_STAT_NOFMT;
-  dev->freesectors = dev->availSectPerBlk * dev->geo.neraseblocks;
+  totalsectors        = dev->totalsectors;
+  dev->formatstatus   = SMART_FMT_STAT_NOFMT;
+  dev->freesectors    = dev->availSectPerBlk * dev->geo.neraseblocks;
   dev->releasesectors = 0;
 
   /* Initialize the freecount and releasecount arrays */
@@ -2352,8 +2352,10 @@ static int smart_scan(FAR struct smart_struct_s *dev)
           dev->releasecount[sector / dev->sectorsPerBlk]++;
 #else
           smart_update_cache(dev, 0, newsector);
+#ifdef CONFIG_MTD_SMART_PACK_COUNTS
           smart_add_count(dev, dev->freecount, newsector / dev->sectorsPerBlk, -1);
           smart_add_count(dev, dev->releasecount, sector / dev->sectorsPerBlk, 1);
+#endif
 #endif
         }
     }
@@ -2450,24 +2452,24 @@ static inline int smart_getformat(FAR struct smart_struct_s *dev,
       fmt->flags = 0;
     }
 
-  fmt->sectorsize = dev->sectorsize;
-  fmt->availbytes = dev->sectorsize - sizeof(struct smart_sect_header_s);
-  fmt->nsectors = dev->totalsectors;
+  fmt->sectorsize      = dev->sectorsize;
+  fmt->availbytes      = dev->sectorsize - sizeof(struct smart_sect_header_s);
+  fmt->nsectors        = dev->totalsectors;
 
   fmt->nfreesectors = dev->freesectors;
-  fmt->namesize = dev->namesize;
+  fmt->namesize        = dev->namesize;
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
   fmt->nrootdirentries = dev->rootdirentries;
-  fmt->rootdirnum = rootdirnum;
+  fmt->rootdirnum      = rootdirnum;
 #endif
 
   /* Add the released sectors to the reported free sector count */
 
-  fmt->nfreesectors += dev->releasesectors;
+  fmt->nfreesectors   += dev->releasesectors;
 
   /* Subtract the reserved sector count */
 
-  fmt->nfreesectors -= dev->sectorsPerBlk + 4;
+  fmt->nfreesectors   -= dev->sectorsPerBlk + 4;
 
   ret = OK;
 
@@ -3016,9 +3018,9 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
       return ret;
     }
 
-  dev->formatstatus = SMART_FMT_STAT_UNKNOWN;
-  dev->freesectors = dev->availSectPerBlk * dev->geo.neraseblocks - 1;
-  dev->releasesectors = 0;
+  dev->formatstatus     = SMART_FMT_STAT_UNKNOWN;
+  dev->freesectors      = dev->availSectPerBlk * dev->geo.neraseblocks - 1;
+  dev->releasesectors   = 0;
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
   dev->uneven_wearcount = 0;
 #endif
@@ -3243,7 +3245,8 @@ static int smart_relocate_block(FAR struct smart_struct_s *dev, uint16_t block)
 #ifdef CONFIG_SMART_LOCAL_CHECKFREE
   if (smart_checkfree(dev, __LINE__) != OK)
     {
-      fwarn("   ...while relocating block %d, free=%d\n", block, dev->freesectors);
+      fwarn("   ...while relocating block %d, free=%d\n",
+            block, dev->freesectors);
     }
 #endif
 
@@ -3417,16 +3420,16 @@ static int smart_relocate_block(FAR struct smart_struct_s *dev, uint16_t block)
     }
 
 #ifdef CONFIG_MTD_SMART_PACK_COUNTS
-  oldrelease = smart_get_count(dev, dev->releasecount, block);
-  dev->freesectors += oldrelease-prerelease;
-  dev->releasesectors -= oldrelease-prerelease;
+  oldrelease               = smart_get_count(dev, dev->releasecount, block);
+  dev->freesectors        += oldrelease-prerelease;
+  dev->releasesectors     -= oldrelease-prerelease;
   smart_set_count(dev, dev->freecount, block, dev->availSectPerBlk-prerelease);
   smart_set_count(dev, dev->releasecount, block, prerelease);
 #else
-  oldrelease = dev->releasecount[block];
-  dev->freesectors += oldrelease-prerelease;
-  dev->releasesectors -= oldrelease-prerelease;
-  dev->freecount[block] = dev->availSectPerBlk-prerelease;
+  oldrelease               = dev->releasecount[block];
+  dev->freesectors        += oldrelease-prerelease;
+  dev->releasesectors     -= oldrelease-prerelease;
+  dev->freecount[block]    = dev->availSectPerBlk-prerelease;
   dev->releasecount[block] = prerelease;
 #endif
 
@@ -3625,7 +3628,7 @@ retry:
         ferr("ERROR: Program bug!  Expected a free sector, free=%d\n",
              dev->freesectors);
 
-        for (i = 0, remaining = dev->neraseblock;
+        for (i = 0, remaining = dev->neraseblocks;
              remaining > 0;
              i += 8, remaining -= 8)
           {
@@ -5258,32 +5261,32 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
       /* Get ProcFS data */
 
-      procfs_data = (FAR struct mtd_smart_procfs_data_s *) arg;
-      procfs_data->totalsectors = dev->totalsectors;
-      procfs_data->sectorsize = dev->sectorsize;
-      procfs_data->freesectors = dev->freesectors;
+      procfs_data = (FAR struct mtd_smart_procfs_data_s *)arg;
+      procfs_data->totalsectors   = dev->totalsectors;
+      procfs_data->sectorsize     = dev->sectorsize;
+      procfs_data->freesectors    = dev->freesectors;
       procfs_data->releasesectors = dev->releasesectors;
-      procfs_data->namelen = dev->namesize;
-      procfs_data->formatversion = dev->formatversion;
-      procfs_data->unusedsectors = dev->unusedsectors;
-      procfs_data->blockerases = dev->blockerases;
-      procfs_data->sectorsperblk = dev->sectorsPerBlk;
+      procfs_data->namelen        = dev->namesize;
+      procfs_data->formatversion  = dev->formatversion;
+      procfs_data->unusedsectors  = dev->unusedsectors;
+      procfs_data->blockerases    = dev->blockerases;
+      procfs_data->sectorsperblk  = dev->sectorsPerBlk;
 
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
-      procfs_data->formatsector = dev->sMap[0];
-      procfs_data->dirsector = dev->sMap[3];
+      procfs_data->formatsector   = dev->sMap[0];
+      procfs_data->dirsector      = dev->sMap[3];
 #else
-      procfs_data->formatsector = smart_cache_lookup(dev, 0);
-      procfs_data->dirsector = smart_cache_lookup(dev, 3);
+      procfs_data->formatsector   = smart_cache_lookup(dev, 0);
+      procfs_data->dirsector      = smart_cache_lookup(dev, 3);
 #endif
 
 #ifdef CONFIG_MTD_SMART_SECTOR_ERASE_DEBUG
-      procfs_data->neraseblocks = dev->geo.neraseblocks;
-      procfs_data->erasecounts = dev->erasecounts;
+      procfs_data->neraseblocks   = dev->geo.neraseblocks;
+      procfs_data->erasecounts    = dev->erasecounts;
 #endif
 #ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
-      procfs_data->allocs = dev->alloc;
-      procfs_data->alloccount = SMART_MAX_ALLOCS;
+      procfs_data->allocs         = dev->alloc;
+      procfs_data->alloccount     = SMART_MAX_ALLOCS;
 #endif
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
       procfs_data->uneven_wearcount = dev->uneven_wearcount;
@@ -5406,8 +5409,8 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
           totalsectors -= 2;
         }
 
-      dev->totalsectors = (uint16_t) totalsectors;
-      dev->freesectors = (uint16_t) dev->availSectPerBlk * dev->geo.neraseblocks;
+      dev->totalsectors = (uint16_t)totalsectors;
+      dev->freesectors = (uint16_t)dev->availSectPerBlk * dev->geo.neraseblocks;
       dev->lastallocblock = 0;
       dev->debuglevel = 0;
 

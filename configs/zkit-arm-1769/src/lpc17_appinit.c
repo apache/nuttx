@@ -120,7 +120,7 @@
 #  ifdef CONFIG_DEBUG_INFO
 #    define message(...) _info(__VA_ARGS__)
 #  else
-#    define message(...) _err(__VA_ARGS__)
+#    define message(...) syslog(LOG_INFO, __VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_INFO

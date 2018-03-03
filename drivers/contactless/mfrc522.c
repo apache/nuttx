@@ -1291,7 +1291,7 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
                        0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0};
-  char outbuf[3 * 8 + 1]
+  char outbuf[3 * 8 + 1];
   uint8_t result[64];
   int i;
   int j;
@@ -1354,7 +1354,7 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
 
   for (i = 0; i < 64; i += 8)
     {
-      for (j = 0; k = 0; j < 8; j++, k += 3)
+      for (j = 0, k = 0; j < 8; j++, k += 3)
         {
           (void)sprintf(&outbuf[k], " %02x", result[i + j]);
         }
