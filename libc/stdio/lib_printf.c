@@ -1,7 +1,8 @@
 /****************************************************************************
  * libc/stdio/lib_printf.c
  *
- *   Copyright (C) 2007-2008, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011-2012, 2014, 2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +41,8 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/syslog/syslog.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -59,7 +62,7 @@ int printf(FAR const IPTR char *fmt, ...)
 #if CONFIG_NFILE_STREAMS > 0
   ret = vfprintf(stdout, fmt, ap);
 #else
-  ret = vsyslog(LOG_INFO, fmt, ap);
+  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
 #endif
   va_end(ap);
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,7 +178,7 @@ uintptr_t STUB_timer_settime(int nbr, uintptr_t parm1, uintptr_t parm2,
 
 /* System logging */
 
-uintptr_t STUB__vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
+uintptr_t STUB_nx_vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 
 /* The following are defined if either file or socket descriptor are

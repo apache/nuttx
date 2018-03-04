@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_trace.c
  *
- *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,9 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
+
 #undef usbtrace
 
 /****************************************************************************
@@ -100,10 +102,10 @@ static int usbtrace_syslog(const char *fmt, ...)
   va_list ap;
   int ret;
 
-  /* Let vsyslog do the real work */
+  /* Let nx_vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = vsyslog(LOG_INFO, fmt, ap);
+  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
   va_end(ap);
   return ret;
 }

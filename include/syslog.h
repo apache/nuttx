@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/syslog.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -212,8 +212,8 @@ void closelog(void);
  *
  ****************************************************************************/
 
-int syslog(int priority, FAR const IPTR char *fmt, ...);
-int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap);
+void syslog(int priority, FAR const IPTR char *fmt, ...);
+void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap);
 
 /****************************************************************************
  * Name: setlogmask

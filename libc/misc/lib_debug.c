@@ -1,7 +1,8 @@
 /****************************************************************************
  * libc/misc/lib_err.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,58 +61,46 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_ALERT
-int _alert(const char *format, ...)
+void _alert(const char *format, ...)
 {
   va_list ap;
-  int     ret;
 
   va_start(ap, format);
-  ret = vsyslog(LOG_EMERG, format, ap);
+  vsyslog(LOG_EMERG, format, ap);
   va_end(ap);
-
-  return ret;
 }
 #endif /* CONFIG_DEBUG_ALERT */
 
 #ifdef CONFIG_DEBUG_ERROR
-int  _err(const char *format, ...)
+void _err(const char *format, ...)
 {
   va_list ap;
-  int     ret;
 
   va_start(ap, format);
-  ret = vsyslog(LOG_ERR, format, ap);
+  vsyslog(LOG_ERR, format, ap);
   va_end(ap);
-
-  return ret;
 }
 #endif /* CONFIG_DEBUG_ERROR */
 
 #ifdef CONFIG_DEBUG_WARN
-int _warn(const char *format, ...)
+void _warn(const char *format, ...)
 {
   va_list ap;
-  int     ret;
 
   va_start(ap, format);
-  ret = vsyslog(LOG_WARNING, format, ap);
+  vsyslog(LOG_WARNING, format, ap);
   va_end(ap);
-
-  return ret;
 }
 #endif /* CONFIG_DEBUG_WARN */
 
 #ifdef CONFIG_DEBUG_INFO
-int _info(const char *format, ...)
+void _info(const char *format, ...)
 {
   va_list ap;
-  int     ret;
 
   va_start(ap, format);
-  ret = vsyslog(LOG_INFO, format, ap);
+  vsyslog(LOG_INFO, format, ap);
   va_end(ap);
-
-  return ret;
 }
 #endif /* CONFIG_DEBUG_INFO */
 

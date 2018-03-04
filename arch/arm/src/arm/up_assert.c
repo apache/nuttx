@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/arm/up_assert.c
  *
- *   Copyright (C) 2007-2010, 2012-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +49,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/board/board.h>
@@ -148,12 +150,12 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   va_list ap;
   int ret;
 
-  /* Let vsyslog do the real work */
+  /* Let nx_vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = vsyslog(LOG_EMERG, fmt, ap);
+  ret = nx_vsyslog(LOG_EMERG, fmt, &ap);
   va_end(ap);
-  return ret;
+  return OK;
 }
 
 static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)

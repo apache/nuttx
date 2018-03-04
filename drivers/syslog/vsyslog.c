@@ -54,10 +54,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vsyslog
+ * Name: nx_vsyslog
  *
  * Description:
- *   _vsyslog() handles the system logging system calls. It is functionally
+ *   nx_vsyslog() handles the system logging system calls. It is functionally
  *   equivalent to vsyslog() except that (1) the per-process priority
  *   filtering has already been performed and the va_list parameter is
  *   passed by reference.  That is because the va_list is a structure in
@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
+int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslogstream_s stream;
   int ret;

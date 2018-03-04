@@ -1572,19 +1572,19 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
 #ifdef CONFIG_DEBUG_ALERT
-int _alert(const char *format, ...);
+void _alert(const char *format, ...);
 #endif
 
 #ifdef CONFIG_DEBUG_ERROR
-int  _err(const char *format, ...);
+void _err(const char *format, ...);
 #endif
 
 #ifdef CONFIG_DEBUG_WARN
-int _warn(const char *format, ...);
+void _warn(const char *format, ...);
 #endif
 
 #ifdef CONFIG_DEBUG_INFO
-int _info(const char *format, ...);
+void _info(const char *format, ...);
 #endif
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 

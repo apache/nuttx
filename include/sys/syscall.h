@@ -263,7 +263,7 @@
 
 /* Unconditional system logging */
 
-#define SYS__vsyslog                   (__SYS_syslog+0)
+#define SYS_nx_vsyslog                 (__SYS_syslog+0)
 #define __SYS_descriptors              (__SYS_syslog+1)
 
 /* The following are defined if either file or socket descriptor are

@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_lookup.h
  *
- *   Copyright (C) 2011, 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,7 +184,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 
 /* System logging */
 
-  SYSCALL_LOOKUP(_vsyslog,                 3, STUB__vsyslog)
+  SYSCALL_LOOKUP(nx_vsyslog,               3, STUB_nx_vsyslog)
 
 /* The following are defined if either file or socket descriptor are
  * enabled.

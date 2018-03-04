@@ -1,7 +1,8 @@
 /****************************************************************************
  * libc/syslog/lib_syslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,27 +58,26 @@
  *   difference that it takes a set of arguments which have been obtained
  *   using the stdarg variable argument list macros.
  *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
-int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
-  int ret = 0;
-
   /* Check if this priority is enabled */
 
   if ((g_syslog_mask & LOG_MASK(priority)) != 0)
     {
-      /* Yes.. Perform the _vsyslog system call.
+      /* Yes.. Perform the nx_vsyslog system call.
        *
        * NOTE:  The va_list parameter is passed by reference.  That is
        * because the va_list is a structure in some compilers and passing
        * of structures in the NuttX sycalls does not work.
        */
 
-      ret = _vsyslog(priority, fmt, &ap);
+      (void)nx_vsyslog(priority, fmt, &ap);
     }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -92,18 +92,18 @@ int vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
  *   The NuttX implementation does not support any special formatting
  *   characters beyond those supported by printf.
  *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
-int syslog(int priority, FAR const IPTR char *fmt, ...)
+void syslog(int priority, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
-  int ret;
 
   /* Let vsyslog do the work */
 
   va_start(ap, fmt);
-  ret = vsyslog(priority, fmt, ap);
+  vsyslog(priority, fmt, ap);
   va_end(ap);
-
-  return ret;
 }
