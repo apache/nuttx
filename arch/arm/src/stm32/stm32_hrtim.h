@@ -218,10 +218,16 @@
         (hrtim)->hd_ops->fclk_get(hrtim, tim)
 #define HRTIM_IRQ_GET(hrtim, irq)                           \
         (hrtim)->hd_ops->irq_get(hrtim, irq)
+#define HRTIM_CAPTURE_GET(hrtim, timer, cap)                \
+        (hrtim)->hd_ops->capture_get(hrtim, timer, cap)
 #define HRTIM_IRQ_ACK(hrtim, irq, ack)                      \
         (hrtim)->hd_ops->irq_ack(hrtim, irq, ack)
 #define HRTIM_SOFT_UPDATE(hrtim, timer)                     \
         (hrtim)->hd_ops->soft_update(hrtim, timer)
+#define HRTIM_SOFT_CAPTURE(hrtim, timer, index)             \
+        (hrtim)->hd_ops->soft_capture(hrtim, timer, index)
+#define HRTIM_SOFT_RESET(hrtim, timer)                      \
+        (hrtim)->hd_ops->soft_reset(hrtim, timer)
 #define HRTIM_FREQ_SET(hrtim, timer,freq)                   \
         (hrtim)->hd_ops->freq_set(hrtim, timer, freq)
 #define HRTIM_OUTPUTS_ENABLE(hrtim, outputs, state)         \
@@ -588,6 +594,14 @@ enum stm32_outputs_e
   HRTIM_OUT_TIMD_CH2 = (1 << 7),
   HRTIM_OUT_TIME_CH1 = (1 << 8),
   HRTIM_OUT_TIME_CH2 = (1 << 9)
+};
+
+/* HRTIM Output polarisation */
+
+enum stm32_output_polarisation_e
+{
+  HRTIM_OUT_POL_POS = 0,
+  HRTIM_OUT_POL_NEG = 1
 };
 
 /* HRTIM Deadtime sign */
@@ -1009,6 +1023,7 @@ struct stm32_hrtim_ops_s
                       uint8_t index);
   uint64_t (*fclk_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   int      (*soft_update)(FAR struct hrtim_dev_s *dev, uint8_t timer);
+  int      (*soft_reset)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   int      (*freq_set)(FAR struct hrtim_dev_s  *hrtim, uint8_t timer,
                                  uint64_t freq);
 
@@ -1046,6 +1061,9 @@ struct stm32_hrtim_ops_s
 #ifdef CONFIG_STM32_HRTIM_CAPTURE
   uint16_t (*capture_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                           uint8_t index);
+  int      (*soft_capture)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+                           uint8_t index);
+
 #endif
 };
 
