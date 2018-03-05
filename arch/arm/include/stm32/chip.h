@@ -1839,8 +1839,22 @@
 #  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
 
 /* STM23 F4 Family ******************************************************************/
+/* STM32F01xB/C Family Differences:
+ *
+ * PART        PACKAGE          FLASH SDIO ADC Channels
+ * ----------- ---------------- ----- ---- ------------
+ * STM32F401CB WLCSP49/UFQFPN48 128Kb No   10
+ * STM32F401RB LQFP64           128Kb Yes  16
+ * STM32F401VB UFBGA100/LQFP100 128Kb Yes  16
+ * STM32F401CC WLCSP49/UFQFPN48 256Kb No   10
+ * STM32F401RC LQFP64           256Kb Yes  16
+ * STM32F401VC UFBGA100/LQFP100 256Kb Yes  16
+ */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F401RC)  /* LQFP64 package, 256Kb FLASH, 64Kb SRAM */
+#elif defined(CONFIG_ARCH_CHIP_STM32F401CB) || defined(CONFIG_ARCH_CHIP_STM32F401RB) || \
+      defined(CONFIG_ARCH_CHIP_STM32F401VB) || defined(CONFIG_ARCH_CHIP_STM32F401CC) || \
+      defined(CONFIG_ARCH_CHIP_STM32F401RC) || defined(CONFIG_ARCH_CHIP_STM32F401VC)
+
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -1867,11 +1881,15 @@
 #  define STM32_NUSART                   3   /* USART1, 2 and 6 */
 #  define STM32_NI2C                     3   /* I2C1-3 */
 #  define STM32_NCAN                     0   /* No CAN */
-#  define STM32_NSDIO                    1   /* One SDIO interface */
+#  if defined(CONFIG_ARCH_CHIP_STM32F401CB) || defined(CONFIG_ARCH_CHIP_STM32F401CC)
+#    define STM32_NSDIO                  0   /* No SDIO interface */
+#  else
+#    define STM32_NSDIO                  1   /* One SDIO interface */
+#  endif
 #  define STM32_NLCD                     0   /* No LCD */
 #  define STM32_NUSBOTG                  1   /* USB OTG FS (only) */
 #  define STM32_NGPIO                    50  /* GPIOA-H */
-#  define STM32_NADC                     1   /* One 12-bit ADC1, 16 channels */
+#  define STM32_NADC                     1   /* One 12-bit ADC1, 10 or 16 channels */
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* No CRC */
@@ -1879,7 +1897,22 @@
 #  define STM32_NRNG                     0   /* No Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F401RE)  /* LQFP64 package, 512Kb FLASH, 96KiB SRAM */
+/* STM32F01xD/E Family Differences:
+ *
+ * PART        PACKAGE          FLASH SDIO ADC Channels
+ * ----------- ---------------- ----- ---- ------------
+ * STM32F401CD WLCSP49/UFQFPN48 384Kb No   10
+ * STM32F401RD LQFP64           384Kb Yes  16
+ * STM32F401VD UFBGA100/LQFP100 384Kb Yes  16
+ * STM32F401CE WLCSP49/UFQFPN48 512Kb No   10
+ * STM32F401RE LQFP64           512Kb Yes  16
+ * STM32F401VE UFBGA100/LQFP100 512Kb Yes  16
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F401CD) || defined(CONFIG_ARCH_CHIP_STM32F401RD) || \
+      defined(CONFIG_ARCH_CHIP_STM32F401VD) || defined(CONFIG_ARCH_CHIP_STM32F401CE) || \
+      defined(CONFIG_ARCH_CHIP_STM32F401RE) || defined(CONFIG_ARCH_CHIP_STM32F401VE)
+
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -1906,11 +1939,15 @@
 #  define STM32_NUSART                   6   /* Actually only 3: USART1, 2 and 6 */
 #  define STM32_NI2C                     3   /* I2C1-3 */
 #  define STM32_NCAN                     0   /* No CAN */
-#  define STM32_NSDIO                    1   /* One SDIO interface */
+#  if defined(CONFIG_ARCH_CHIP_STM32F401CD) || defined(CONFIG_ARCH_CHIP_STM32F401CE)
+#    define STM32_NSDIO                  0   /* No SDIO interface */
+#  else
+#    define STM32_NSDIO                  1   /* One SDIO interface */
+#  endif
 #  define STM32_NLCD                     0   /* No LCD */
 #  define STM32_NUSBOTG                  1   /* USB OTG FS (only) */
 #  define STM32_NGPIO                    50  /* GPIOA-H */
-#  define STM32_NADC                     1   /* One 12-bit ADC1, 16 channels */
+#  define STM32_NADC                     1   /* One 12-bit ADC1, 10 or 16 channels */
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* No CRC */
