@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 #ifndef CONFIG_PCA9540BDP_BASEADDR
-#  define CONFIG_PCA9540BDP_BASEADDR          0x70
+#  define CONFIG_PCA9540BDP_BASEADDR        0x70
 #endif
 
 #define PCA9540BDP_SEL_PORT0                0x0
@@ -76,7 +76,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-
 /****************************************************************************
  * Name: pca9540bdp_lower_half
  *
@@ -94,8 +93,8 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s* pca9540bdp_lower_half(FAR struct pca9540bdp_dev_s *dev,
-                                              uint8_t port);
+FAR struct i2c_master_s *
+  pca9540bdp_lower_half(FAR struct pca9540bdp_dev_s *dev, uint8_t port);
 
 /****************************************************************************
  * Name: pca9540bdp_initialize
@@ -104,17 +103,18 @@ FAR struct i2c_master_s* pca9540bdp_lower_half(FAR struct pca9540bdp_dev_s *dev,
  *   Initialize the PCA9540BDP device.
  *
  * Input Parameters:
- *   i2c - An instance of the I2C interface to use to communicate with PCA9540BDP
- *   addr - The I2C address of the PCA9540BDP.  The base I2C address of the PCA9540BDP
- *   is 0x70.
+ *   i2c  - An instance of the I2C interface to use to communicate with
+ *          PCA9540BDP
+ *   addr - The I2C address of the PCA9540BDP.  The base I2C address of the
+ *          PCA9540BDP is 0x70.
  *
  * Returned Value:
  *   Common i2c multiplexer device instance; NULL on failure.
  *
  ****************************************************************************/
 
-FAR struct pca9540bdp_dev_s* pca9540bdp_initialize(FAR struct i2c_master_s *i2c,
-                    uint8_t addr);
+FAR struct pca9540bdp_dev_s *
+  pca9540bdp_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
 
 #undef EXTERN
 #ifdef __cplusplus

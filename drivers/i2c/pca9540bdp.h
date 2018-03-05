@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 #ifndef __DRIVERS_I2C_PCA9540BDP_H
 #define __DRIVERS_I2C_PCA9540BDP_H
 
@@ -72,17 +73,17 @@
 
 struct pca9540bdp_dev_s
 {
-  FAR struct i2c_master_s *i2c; /* I2C interface */
+  FAR struct i2c_master_s *i2c;      /* I2C interface */
   uint16_t addr;
-  uint8_t state;  /* control register state */
+  uint8_t state;                     /* Control register state */
 };
 
 struct i2c_port_dev_s
 {
-  FAR struct i2c_master_s vi2c;  /* Nested structure to allow casting as
-                                    public i2c master */
-  uint8_t port;  /* associated port on the mux */
-  FAR struct pca9540bdp_dev_s* dev;  /* associated device */
+  FAR struct i2c_master_s vi2c;      /* Nested structure to allow casting as
+                                      * public i2c master */
+  uint8_t port;                      /* Associated port on the mux */
+  FAR struct pca9540bdp_dev_s* dev;  /* Associated device */
 };
 
 #endif /* CONFIG_I2CMULTIPLEXER_PCA9540BDP */
