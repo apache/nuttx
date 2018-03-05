@@ -1,8 +1,8 @@
 /****************************************************************************
  * arch/arm/src/include/stm32f7/stm32_alarm.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Authors: Neil hancock - delegated to Gregory Nutt Mar 30, 2016
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
+ *   Authors: Neil Hancock - delegated to Gregory Nutt Mar 30, 2016
  *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,14 @@
 #include <nuttx/config.h>
 #include <time.h>
 
-#ifdef CONFIG_RTC_ALARM
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_RTC_ALARM
 typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
 
-/* These features map to STM32 RTC from stm32F7xx
- */
+/* These features map to STM32 RTC from stm32F7xx */
 
 enum alm_id_e
 {
@@ -79,11 +77,17 @@ struct alm_rdalarm_s
   int ar_id;                    /* enum alm_id_e */
   FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
 };
+#endif
+
+#ifdef CONFIG_RTC_PERIODIC
+typedef CODE int (*wakeupcb_t)(void);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_RTC_ALARM
 /****************************************************************************
  * Name: stm32_rtc_setalarm
  *
@@ -100,7 +104,7 @@ struct alm_rdalarm_s
 
 int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_rdalarm
  *
  * Description:
@@ -112,7 +116,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
 
@@ -131,6 +135,41 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
  ****************************************************************************/
 
 int stm32_rtc_cancelalarm(enum alm_id_e alarmid);
-
 #endif /* CONFIG_RTC_ALARM */
+
+#ifdef CONFIG_RTC_PERIODIC
+/****************************************************************************
+ * Name: stm32_rtc_setperiodic
+ *
+ * Description:
+ *   Set a periodic RTC wakeup
+ *
+ * Input Parameters:
+ *  period   - Time to sleep between wakeups
+ *  callback - Function to call when the period expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_setperiodic(FAR const struct timespec *period,
+                          wakeupcb_t callback);
+
+/****************************************************************************
+ * Name: stm32_rtc_cancelperiodic
+ *
+ * Description:
+ *   Cancel a periodic wakeup
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_cancelperiodic(void);
+#endif /* CONFIG_RTC_PERIODIC */
+
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_ALARM_H */

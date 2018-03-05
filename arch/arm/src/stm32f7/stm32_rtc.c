@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_rtc.c
  *
- *   Copyright (C) 2011, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -137,6 +137,11 @@ struct alm_cbinfo_s
 static struct alm_cbinfo_s g_alarmcb[RTC_ALARM_LAST];
 #endif
 
+#ifdef CONFIG_RTC_PERIODIC
+static wakeupcb_t g_wakeupcb;
+static bool g_wakeup_enabled;  /* True: Wakeup interrupts are enabled */
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -268,8 +273,8 @@ static void rtc_wprunlock(void)
 
   stm32_pwr_enablebkp(true);
 
-  /* The following steps are required to unlock the write protection on all the
-   * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
+  /* The following steps are required to unlock the write protection on all
+   * the RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
    *
    * 1. Write 0xCA into the RTC_WPR register.
    * 2. Write 0x53 into the RTC_WPR register.
@@ -1551,7 +1556,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
  *   Cancel an alarm.
  *
  * Input Parameters:
- *  alarmid - Identifies the alarm to be cancelled
+ *  alarmid - Identifies the alarm to be canceled
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -1695,6 +1700,283 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
         rtcerr("ERROR: Invalid ALARM%d\n", alminfo->ar_id);
         break;
     }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_rtc_wakeup_handler
+ *
+ * Description:
+ *   RTC WAKEUP interrupt service routine through the EXTI line
+ *
+ * Input Parameters:
+ *   irq - The IRQ number that generated the interrupt
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+static int stm32_rtc_wakeup_handler(int irq, FAR void *context,
+                                    FAR void *arg)
+{
+  uint32_t regval = 0;
+
+  stm32_pwr_enablebkp(true);
+
+  regval = getreg32(STM32_RTC_ISR);
+  regval &= ~RTC_ISR_WUTF;
+  putreg32(regval, STM32_RTC_ISR);
+
+  stm32_pwr_enablebkp(false);
+
+  if (g_wakeupcb != NULL)
+    {
+      g_wakeupcb();
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: rtc_enable_wakeup
+ *
+ * Description:
+ *   Enable periodic wakeup interrupts
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+static inline void rtc_enable_wakeup(void)
+{
+  if (!g_wakeup_enabled)
+    {
+      (void)stm32_exti_wakeup(true, false, true, stm32_rtc_wakeup_handler,
+                              NULL);
+      g_wakeup_enabled = true;
+    }
+}
+#endif
+
+/************************************************************************************
+ * Name: rtc_set_wcksel
+ *
+ * Description:
+ *   Sets RTC wakeup clock selection value
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+static inline void rtc_set_wcksel(unsigned int wucksel)
+{
+  uint32_t regval = 0;
+
+  regval = getreg32(STM32_RTC_CR);
+  regval &= ~RTC_CR_WUCKSEL_MASK;
+  regval |= wucksel;
+  putreg32(regval, STM32_RTC_CR);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_rtc_setperiodic
+ *
+ * Description:
+ *   Set a periodic RTC wakeup
+ *
+ * Input Parameters:
+ *   period   - Time to sleep between wakeups
+ *   callback - Function to call when the period expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+int stm32_rtc_setperiodic(FAR const struct timespec *period,
+                          wakeupcb_t callback)
+{
+  unsigned int wutr_val;
+  int ret;
+  int timeout;
+  uint32_t regval;
+  uint32_t secs;
+  uint32_t millisecs;
+
+#if defined(CONFIG_STM32F7_RTC_HSECLOCK)
+#  error "Periodic wakeup not available for HSE"
+#elif defined(CONFIG_STM32F7_RTC_LSICLOCK)
+#  error "Periodic wakeup not available for LSI (and it is too inaccurate!)"
+#elif defined(CONFIG_STM32F7_RTC_LSECLOCK)
+  const uint32_t rtc_div16_max_msecs = 16 * 1000 * 0xffffU / STM32_LSE_FREQUENCY;
+#else
+#  error "No clock for RTC!"
+#endif
+
+  /* Lets use RTC wake-up with 0.001 sec to ~18 hour range.
+   *
+   * TODO: scale to higher periods, with necessary losing some precision.
+   * We currently go for subseconds accuracy instead of maximum period.
+   */
+
+  if (period->tv_sec > 0xffffU ||
+     (period->tv_sec == 0xffffU && period->tv_nsec > 0))
+    {
+      /* More than max. */
+
+      secs = 0xffffU;
+      millisecs = secs * 1000;
+    }
+  else
+    {
+      secs = period->tv_sec;
+      millisecs = secs * 1000 + period->tv_nsec / NSEC_PER_MSEC;
+    }
+
+  if (millisecs == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Make sure the alarm interrupt is enabled at the NVIC */
+
+  rtc_enable_wakeup();
+
+  rtc_wprunlock();
+
+  /* Clear WUTE in RTC_CR to disable the wakeup timer */
+
+  regval = getreg32(STM32_RTC_CR);
+  regval &= ~RTC_CR_WUTE;
+  putreg32(regval, STM32_RTC_CR);
+
+  /* Poll WUTWF until it is set in RTC_ISR (takes around 2 RTCCLK clock
+   * cycles)
+   */
+
+  ret = -ETIMEDOUT;
+  for (timeout = 0; timeout < SYNCHRO_TIMEOUT; timeout++)
+    {
+      regval = getreg32(STM32_RTC_ISR);
+      if ((regval & RTC_ISR_WUTWF) != 0)
+        {
+          /* Synchronized */
+
+          ret = OK;
+          break;
+        }
+    }
+
+  /* Set callback function pointer. */
+
+  g_wakeupcb = callback;
+
+  if (millisecs <= rtc_div16_max_msecs)
+    {
+      unsigned int ticks;
+
+      /* Select wake-up with 32768/16 hz counter. */
+
+      rtc_set_wcksel(RTC_CR_WUCKSEL_RTCDIV16);
+
+      /* Get number of ticks. */
+
+      ticks = millisecs * STM32_LSE_FREQUENCY / (16 * 1000);
+
+      /* Wake-up is after WUT+1 ticks. */
+
+      wutr_val = ticks - 1;
+    }
+  else
+    {
+      /* Select wake-up with 1hz counter. */
+
+      rtc_set_wcksel(RTC_CR_WUCKSEL_CKSPRE);
+
+      /* Wake-up is after WUT+1 ticks. */
+
+      wutr_val = secs - 1;
+    }
+
+  /* Program the wakeup auto-reload value WUT[15:0], and the wakeup clock
+   * selection.
+   */
+
+  putreg32(wutr_val, STM32_RTC_WUTR);
+
+  regval = getreg32(STM32_RTC_CR);
+  regval |= RTC_CR_WUTIE | RTC_CR_WUTE;
+  putreg32(regval, STM32_RTC_CR);
+
+  /* Just in case resets the WUTF flag in RTC_ISR */
+
+  regval = getreg32(STM32_RTC_ISR);
+  regval &= ~RTC_ISR_WUTF;
+  putreg32(regval, STM32_RTC_ISR);
+
+  rtc_wprlock();
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_rtc_cancelperiodic
+ *
+ * Description:
+ *   Cancel a periodic wakeup
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+int stm32_rtc_cancelperiodic(void)
+{
+  int ret = OK;
+  int timeout = 0;
+  uint32_t regval = 0;
+
+  rtc_wprunlock();
+
+  /* Clear WUTE and WUTIE in RTC_CR to disable the wakeup timer */
+
+  regval = getreg32(STM32_RTC_CR);
+  regval &= ~(RTC_CR_WUTE | RTC_CR_WUTIE);
+  putreg32(regval, STM32_RTC_CR);
+
+  /* Poll WUTWF until it is set in RTC_ISR (takes around 2 RTCCLK clock
+   * cycles)
+   */
+
+  ret = -ETIMEDOUT;
+  for (timeout = 0; timeout < SYNCHRO_TIMEOUT; timeout++)
+    {
+      regval = getreg32(STM32_RTC_ISR);
+      if ((regval & RTC_ISR_WUTWF) != 0)
+        {
+          /* Synchronized */
+
+          ret = OK;
+          break;
+        }
+    }
+
+  /* Clears RTC_WUTR register */
+
+  regval = getreg32(STM32_RTC_WUTR);
+  regval &= ~RTC_WUTR_MASK;
+  putreg32(regval, STM32_RTC_WUTR);
+
+  rtc_wprlock();
 
   return ret;
 }

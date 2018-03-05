@@ -74,17 +74,17 @@ uint8_t g_syslog_mask = LOG_ALL;
  *   is not modified."  In this implementation, the value zero is permitted
  *   in order to disable all syslog levels.
  *
- *   REVISIT: Per POSIX the syslog mask should be a per-process value but in
- *   NuttX, the scope of the mask is dependent on the nature of the build:
+ * REVISIT: Per POSIX the syslog mask should be a per-process value but in
+ * NuttX, the scope of the mask is dependent on the nature of the build:
  *
  *   Flat Build:  There is one, global SYSLOG mask that controls all output.
  *   Protected Build:  There are two SYSLOG masks.  One within the kernel
  *     that controls only kernel output.  And one in user-space that controls
  *     only user SYSLOG output.
  *   Kernel Build:  The kernel build is compliant with the POSIX requirement:
- *     There will be one mask for for each user process, controlling the
- *     SYSLOG output only form that process.  There will be a separate mask
- *     accessable only in the kernel code to control kernel SYSLOG output.
+ *     There will be one mask for each user process, controlling the SYSLOG
+ *     output only form that process.  There will be a separate mask
+ *     accessible only in the kernel code to control kernel SYSLOG output.
  *
  ****************************************************************************/
 

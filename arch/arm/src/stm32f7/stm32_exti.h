@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_exti.h
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ extern "C"
  *   Zero (OK) on success; a negated errno value on failure indicating the
  *   nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                        bool event, xcpt_t func, void *arg);
@@ -111,6 +111,29 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 #ifdef CONFIG_RTC_ALARM
 int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
                      xcpt_t func, void *arg);
+#endif
+
+/****************************************************************************
+ * Name: stm32_exti_wakeup
+ *
+ * Description:
+ *   Sets/clears EXTI wakeup interrupt.
+ *
+ * Input Parameters:
+ *  - rising/falling edge: enables interrupt on rising/falling edges
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_PERIODIC
+int stm32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
+                      xcpt_t func, void *arg);
 #endif
 
 #undef EXTERN

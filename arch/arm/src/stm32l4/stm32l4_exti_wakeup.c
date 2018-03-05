@@ -102,7 +102,7 @@ static int stm32l4_exti_wakeup_isr(int irq, void *context, FAR void *arg)
  * Description:
  *   Sets/clears EXTI wakeup interrupt.
  *
- * Parameters:
+ * Input Parameters:
  *  - rising/falling edge: enables interrupt on rising/falling edges
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt

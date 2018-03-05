@@ -103,7 +103,7 @@ typedef CODE int (*wakeupcb_t)(void);
 
 int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_rdalarm
  *
  * Description:
@@ -115,7 +115,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
 
