@@ -6814,7 +6814,7 @@ void pm_initialize(void);
 </pre></ul>
 <p><b>Description:</b>
 This function is called by MCU-specific one-time at power on reset in order to initialize the power management capabilities.
-This function must be called <i>very</i> early in the initialization sequence <i>before</i> any other device drivers are initialize (since they may attempt to register with the power management subsystem).
+This function must be called <i>very</i> early in the initialization sequence <i>before</i> any other device drivers are initialized (since they may attempt to register with the power management subsystem).
 </p>
 <p><b>Input Parameters:</b>
 None
@@ -6843,7 +6843,27 @@ int pm_register(FAR struct pm_callback_s *callbacks);
 Zero (<code>OK</code>) on success; otherwise a negated <code>errno</code> value is returned.
 </p>
 
-<h4><a name="pmactivity">6.5.2.3 <code>pm_activity()</code></a></h4>
+<h4><a name="pmunregister">6.5.2.3 <code>pm_unregister()</code></a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/power/pm.h&gt;
+int pm_unregister(FAR struct pm_callback_s *callbacks);
+</pre></ul>
+<p><b>Description:</b>
+  This function is called by a device driver in order to unregister previously registered power management event callbacks.
+  Refer to the <a href="#pmcallbacks">PM Callback</a> section for more details.
+</p>
+<p><b>Input Parameters:</b>
+ <dl>
+   <dt><code>callbacks</code>
+   <dd>An instance of <code>struct pm_callback_s</code> providing the driver callback functions.
+ </dl>
+</p>
+<p><b>Returned Value:</b>
+Zero (<code>OK</code>) on success; otherwise a negated <code>errno</code> value is returned.
+</p>
+
+<h4><a name="pmactivity">6.5.2.4 <code>pm_activity()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -6872,7 +6892,7 @@ void pm_activity(int domain, int priority);
   This function may be called from an interrupt handler (this is the ONLY PM function that may be called from an interrupt handler!).
 </p>
 
-<h4><a name="pmcheckstate">6.5.2.4 <code>pm_checkstate()</code></a></h4>
+<h4><a name="pmcheckstate">6.5.2.5 <code>pm_checkstate()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;
@@ -6902,7 +6922,7 @@ enum pm_state_e pm_checkstate(int domain);
   The recommended power management state.
 </p>
 
-<h4><a name="pmchangestate">6.5.2.5 <code>pm_changestate()</code></a></h4>
+<h4><a name="pmchangestate">6.5.2.6 <code>pm_changestate()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/power/pm.h&gt;

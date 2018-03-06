@@ -1,8 +1,8 @@
 /****************************************************************************
- * drivers/power/pm_register.c
+ * drivers/power/pm_unregister.c
  *
- *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,33 +53,33 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pm_register
+ * Name: pm_unregister
  *
  * Description:
- *   This function is called by a device driver in order to register to
- *   receive power management event callbacks.
+ *   This function is called by a device driver in order to unregister
+ *   previously registered power management event callbacks.
  *
- * Input Parameters:
+ * Input parameters:
  *   callbacks - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
- * Returned Value:
+ * Returned value:
  *    Zero (OK) on success; otherwise a negated errno value is returned.
  *
  ****************************************************************************/
 
-int pm_register(FAR struct pm_callback_s *callbacks)
+int pm_unregister(FAR struct pm_callback_s *callbacks)
 {
   int ret;
 
   DEBUGASSERT(callbacks);
 
-  /* Add the new entry to the end of the list of registered callbacks */
+  /* Remove entry from the list of registered callbacks. */
 
   ret = pm_lock();
   if (ret == OK)
     {
-      sq_addlast(&callbacks->entry, &g_pmglobals.registry);
+      sq_rem(&callbacks->entry, &g_pmglobals.registry);
       pm_unlock();
     }
 

@@ -386,11 +386,29 @@ void pm_initialize(void);
  *               callback functions.
  *
  * Returned Value:
- *    Zero (OK) on success; otherwise a negater errno value is returned.
+ *    Zero (OK) on success; otherwise a negated errno value is returned.
  *
  ****************************************************************************/
 
 int pm_register(FAR struct pm_callback_s *callbacks);
+
+/****************************************************************************
+ * Name: pm_unregister
+ *
+ * Description:
+ *   This function is called by a device driver in order to unregister
+ *   previously registered power management event callbacks.
+ *
+ * Input parameters:
+ *   callbacks - An instance of struct pm_callback_s providing the driver
+ *               callback functions.
+ *
+ * Returned value:
+ *    Zero (OK) on success; otherwise a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int pm_unregister(FAR struct pm_callback_s *callbacks);
 
 /****************************************************************************
  * Name: pm_activity
@@ -503,6 +521,7 @@ int pm_changestate(int domain, enum pm_state_e newstate);
 
 #  define pm_initialize()
 #  define pm_register(cb)             (0)
+#  define pm_unregister(cb)           (0)
 #  define pm_activity(domain,prio)
 #  define pm_checkstate(domain)       (0)
 #  define pm_changestate(domain,state)
