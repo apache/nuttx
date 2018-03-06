@@ -62,6 +62,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 
@@ -226,6 +227,11 @@ struct stm32_dev_s
   uint32_t pclck;       /* The PCLK frequency that drives this timer */
   uint32_t freq;        /* The desired frequency of conversions */
 #endif
+
+#ifdef CONFIG_PM
+  struct pm_callback_s pm_callback;
+#endif
+
 #ifdef ADC_HAVE_DMA
   DMA_HANDLE dma;       /* Allocated DMA channel */
 
@@ -297,6 +303,11 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
 
 static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable);
 
+#ifdef CONFIG_PM
+static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e state);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -333,6 +344,12 @@ static struct stm32_dev_s g_adcpriv1 =
   .dmachan     = ADC1_DMA_CHAN,
   .hasdma      = true,
 #endif
+#ifdef CONFIG_PM
+  .pm_callback =
+    {
+      .prepare = adc_pm_prepare,
+    }
+#endif
 };
 
 static struct adc_dev_s g_adcdev1 =
@@ -362,6 +379,12 @@ static struct stm32_dev_s g_adcpriv2 =
   .dmachan     = ADC2_DMA_CHAN,
   .hasdma      = true,
 #endif
+#ifdef CONFIG_PM
+  .pm_callback =
+    {
+      .prepare = adc_pm_prepare,
+    }
+#endif
 };
 
 static struct adc_dev_s g_adcdev2 =
@@ -390,6 +413,12 @@ static struct stm32_dev_s g_adcpriv3 =
 #ifdef ADC3_HAVE_DMA
   .dmachan     = ADC3_DMA_CHAN,
   .hasdma      = true,
+#endif
+#ifdef CONFIG_PM
+  .pm_callback =
+    {
+      .prepare = adc_pm_prepare,
+    }
 #endif
 };
 
@@ -977,6 +1006,33 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   adc_timstart(priv, true);
 
   tim_dumpregs(priv, "After starting timers");
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_pm_prepare
+ *
+ * Description:
+ *   Called by power management framework when it wants to enter low power
+ *   states. Check if ADC is in progress and if so prevent from entering STOP.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_PM
+static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e state)
+{
+  struct stm32_dev_s *priv =
+      (struct stm32_dev_s *)((char *)cb -
+                             offsetof(struct stm32_dev_s, pm_callback));
+  uint32_t regval;
+
+  regval = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
+  if ((state >= PM_IDLE) && (regval & ADC_CR2_SWSTART))
+    {
+      return -EBUSY;
+    }
 
   return OK;
 }

@@ -66,6 +66,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
@@ -74,6 +75,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/power/pm.h>
 
 #include <arch/board/board.h>
 
@@ -165,6 +167,9 @@ struct stm32_spidev_s
   uint32_t         actual;     /* Actual clock frequency */
   int8_t           nbits;      /* Width of word in bits */
   uint8_t          mode;       /* Mode 0,1,2,3 */
+#ifdef CONFIG_PM
+  struct pm_callback_s pm_cb;  /* PM callbacks */
+#endif
 };
 
 /************************************************************************************
@@ -221,6 +226,13 @@ static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
 
 static void        spi_bus_initialize(FAR struct stm32_spidev_s *priv);
 
+/* PM interface */
+
+#ifdef CONFIG_PM
+static int         spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                                  enum pm_state_e pmstate);
+#endif
+
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -266,6 +278,9 @@ static struct stm32_spidev_s g_spi1dev =
   .rxch     = DMAMAP_SPI1_RX,
   .txch     = DMAMAP_SPI1_TX,
 #endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -309,6 +324,9 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32F7_SPI_DMA
   .rxch     = DMAMAP_SPI2_RX,
   .txch     = DMAMAP_SPI2_TX,
+#endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
 #endif
@@ -354,6 +372,9 @@ static struct stm32_spidev_s g_spi3dev =
   .rxch     = DMAMAP_SPI3_RX,
   .txch     = DMAMAP_SPI3_TX,
 #endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -397,6 +418,9 @@ static struct stm32_spidev_s g_spi4dev =
 #ifdef CONFIG_STM32F7_SPI_DMA
   .rxch     = DMAMAP_SPI4_RX,
   .txch     = DMAMAP_SPI4_TX,
+#endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
 #endif
@@ -442,6 +466,9 @@ static struct stm32_spidev_s g_spi5dev =
   .rxch     = DMAMAP_SPI5_RX,
   .txch     = DMAMAP_SPI5_TX,
 #endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -485,6 +512,9 @@ static struct stm32_spidev_s g_spi6dev =
 #ifdef CONFIG_STM32F7_SPI_DMA
   .rxch     = DMAMAP_SPI6_RX,
   .txch     = DMAMAP_SPI6_TX,
+#endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
 #endif
@@ -1694,6 +1724,76 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
 #endif
 
 /************************************************************************************
+ * Name: spi_pm_prepare
+ *
+ * Description:
+ *   Request the driver to prepare for a new power state. This is a
+ *   warning that the system is about to enter into a new power state.  The
+ *   driver should begin whatever operations that may be required to enter
+ *   power state.  The driver may abort the state change mode by returning
+ *   a non-zero value from the callback function.
+ *
+ * Input Parameters:
+ *   cb      - Returned to the driver.  The driver version of the callback
+ *             structure may include additional, driver-specific state
+ *             data at the end of the structure.
+ *   domain  - Identifies the activity domain of the state change
+ *   pmstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   0 (OK) means the event was successfully processed and that the driver
+ *   is prepared for the PM state change.  Non-zero means that the driver
+ *   is not prepared to perform the tasks needed achieve this power setting
+ *   and will cause the state change to be aborted.  NOTE:  The prepare
+ *   method will also be recalled when reverting from lower back to higher
+ *   power consumption modes (say because another driver refused a lower
+ *   power state change).  Drivers are not permitted to return non-zero
+ *   values when reverting back to higher power consumption modes!
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PM
+static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate)
+{
+  struct stm32_spidev_s *priv =
+      (struct stm32_spidev_s *)((char *)cb -
+                                    offsetof(struct stm32_spidev_s, pm_cb));
+  int sval;
+
+  /* Logic to prepare for a reduced power state goes here. */
+
+  switch (pmstate)
+    {
+    case PM_NORMAL:
+    case PM_IDLE:
+      break;
+
+    case PM_STANDBY:
+    case PM_SLEEP:
+      /* Check if exclusive lock for SPI bus is held. */
+
+      if (nxsem_getvalue(&priv->exclsem, &sval) < 0)
+        {
+          DEBUGASSERT(false);
+          return -EINVAL;
+        }
+
+      if (sval <= 0)
+        {
+          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+
+          return -EBUSY;
+        }
+
+      break;
+    }
+
+  return OK;
+}
+#endif
+
+/************************************************************************************
  * Name: spi_bus_initialize
  *
  * Description:
@@ -1707,10 +1807,13 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  *
  ************************************************************************************/
 
-static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
+static void spi_bus_initialize(struct stm32_spidev_s *priv)
 {
   uint16_t setbits;
   uint16_t clrbits;
+#ifdef CONFIG_PM
+  int ret;
+#endif
 
   /* Configure CR1 and CR2. Default configuration:
    *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
@@ -1776,6 +1879,14 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   /* Enable spi */
 
   spi_modifycr1(priv, SPI_CR1_SPE, 0);
+
+#ifdef CONFIG_PM
+  /* Register to receive power management callbacks */
+
+  ret = pm_register(&priv->pm_cb);
+  DEBUGASSERT(ret == OK);
+  UNUSED(ret);
+#endif
 }
 
 /************************************************************************************
