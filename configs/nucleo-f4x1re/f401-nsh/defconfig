@@ -1,6 +1,5 @@
 # CONFIG_ARCH_FPU is not set
 # CONFIG_NSH_ARGCAT is not set
-# CONFIG_NSH_CMDOPT_DF_H is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
 # CONFIG_NSH_CMDPARMS is not set
 # CONFIG_NSH_DISABLE_IFCONFIG is not set
