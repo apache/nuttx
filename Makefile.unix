@@ -521,9 +521,9 @@ savedefconfig: do_savedefconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
-	-$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp
-	-$(Q) grep "CONFIG_ARCH_BOARD=" .config && grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp
-	-$(Q) grep "^CONFIG_ARCH_CUSTOM" .config && grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp
+	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
+	$(Q) grep "CONFIG_ARCH_BOARD=" .config && grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp; true
+	$(Q) grep "^CONFIG_ARCH_CUSTOM" .config && grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp; true
 	$(Q) cat defconfig.tmp | sort | uniq > defconfig
 	$(Q) rm -f defconfig.tmp
 

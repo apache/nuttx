@@ -19,7 +19,8 @@ further information about this board.
 
 NOTE: This port was developed on the original board, order code
 STM32F4DISCOVERY.  That board has been replaced with the new order code
-STM32F407G-DISC1.  The new board differs in at least these ways:
+STM32F407VG-DISC1.  The new version of the board differs in at least these
+ways:
 
   - The ST-LINK/V2 has been updated to ST-LINK/V2-A on STM32F407G-DISC1
     with a Virtual Com port and Mass storage.
