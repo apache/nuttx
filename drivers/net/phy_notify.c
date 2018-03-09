@@ -193,7 +193,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
 
   /* Ooops... too many */
 
-  nerr("ERROR: No free client entries\n");
+  phyerr("ERROR: No free client entries\n");
   phy_semgive();
   return NULL;
 }
@@ -259,7 +259,7 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
 
   if (ret < 0)
     {
-      nerr("ERROR: nxsig_queue failed: %d\n", ret);
+      phyerr("ERROR: nxsig_queue failed: %d\n", ret);
     }
 
   return OK;
@@ -303,7 +303,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
 
   DEBUGASSERT(intf);
 
-  ninfo("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
+  phyinfo("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
 
   /* The special value pid == 0 means to use the pid of the current task. */
 
@@ -330,7 +330,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
       client = phy_find_unassigned();
       if (!client)
         {
-          nerr("ERROR: Failed to allocate a client entry\n");
+          phyerr("ERROR: Failed to allocate a client entry\n");
           return -ENOMEM;
         }
 
@@ -380,14 +380,14 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 {
   FAR struct phy_notify_s *client;
 
-  ninfo("%s: PID=%d\n", intf, pid);
+  phyinfo("%s: PID=%d\n", intf, pid);
 
   /* Find the client entry for this interface */
 
   client = phy_find_assigned(intf, pid);
   if (!client)
     {
-      nerr("ERROR: No such client\n");
+      phyerr("ERROR: No such client\n");
       return -ENOENT;
     }
 
