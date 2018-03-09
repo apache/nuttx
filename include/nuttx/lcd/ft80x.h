@@ -634,15 +634,17 @@
 #define FT80X_INT(n)                   (1 << (n))
 
 /* FT80x Display List Commands **************************************************************/
-/* Host commands.  3 word commands.  The first word begins with 0b01, the next two are zero */
+/* Host commands.  3 byte commands.  The first byte begins with [7:6]==01.  Bits [5:0] of
+ * the first byte are actual command.  The following two bytes must be zero.
+ */
 
 #define FT80X_CMD_ACTIVE           0x00        /* Switch from Standby/Sleep modes to active mode */
 #define FT80X_CMD_STANDBY          0x41        /* Put FT80x core to standby mode */
 #define FT80X_CMD_SLEEP            0x42        /* Put FT80x core to sleep mode */
-#define FT80X_CMD_PWRDOWN          0x50        /* Switch off 1.2V internal regulator */
 #define FT80X_CMD_CLKEXT           0x44        /* Enable PLL input from oscillator or external clock */
-#define FT80X_CMD_CLK48M           0x62        /* Switch PLL output clock to 48MHz (default). */
+#define FT80X_CMD_PWRDOWN          0x50        /* Switch off 1.2V internal regulator */
 #define FT80X_CMD_CLK36M           0x61        /* Switch PLL output clock to 36MHz */
+#define FT80X_CMD_CLK48M           0x62        /* Switch PLL output clock to 48MHz (default). */
 #define FT80X_CMD_CORERST          0x68        /* Send reset pulse to FT800 core */
 
 /* Display list command encoding

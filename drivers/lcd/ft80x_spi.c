@@ -113,9 +113,11 @@ static void ft80x_deselect(FAR struct ft80x_dev_s *priv)
  * Description:
  *   Send a host command to the FT80x
  *
- *   FFor a SPI write command write transaction, the host writes a zero bit
+ *   For an SPI write command write transaction, the host writes a zero bit
  *   followed by a one bit, followed by the 5-bit command, followed by two
  *   bytes of zero. All data is streamed with a single chip select.
+ *
+ *   NOTE:  Commands are defined in ft80x.h with bit 7 = 0 and bit 6 = 1.
  *
  ****************************************************************************/
 
@@ -123,11 +125,11 @@ void ft80x_host_command(FAR struct ft80x_dev_s *priv, uint8_t cmd)
 {
   struct ft80x_hostwrite_s hostwrite;
 
-  DEBUGASSERT(priv != NULL && (cnd & 0xc0) == 0);
+  DEBUGASSERT(priv != NULL && (cmd == 0x00 || (cmd & 0xc0) == 0x40));
 
   /* Format the host write command */
 
-  hostwrite.cmd  = 0x40 | cmd;
+  hostwrite.cmd  = cmd;
   hostwrite.pad1 = 0;
   hostwrite.pad2 = 0;
 
@@ -162,7 +164,7 @@ void ft80x_read_memory(FAR struct ft80x_dev_s *priv, uint32_t addr,
   struct ft80x_spiread_s spiread;
 
   DEBUGASSERT(priv != NULL && (addr & 0xffc00000) == 0 &&
-              buffer != NULL && bulen > 0);
+              buffer != NULL && buflen > 0);
 
   /* Format the read header */
 
@@ -238,7 +240,7 @@ void ft80x_write_memory(FAR struct ft80x_dev_s *priv, uint32_t addr,
   struct ft80x_spiwrite_s spiwrite;
 
   DEBUGASSERT(priv != NULL && (addr & 0xffc00000) == 0 &&
-              buffer != NULL && bulen > 0);
+              buffer != NULL && buflen > 0);
 
   /* Format the write header */
 

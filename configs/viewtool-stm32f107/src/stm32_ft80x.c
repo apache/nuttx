@@ -234,7 +234,7 @@ static void ft80x_clear(FAR const struct ft80x_config_s *lower)
 static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
                           bool pwrdown)
 {
-  /* Powerdown pin is active low */
+  /* Powerdown pin is active low.  Hence, it is really a power up pin. */
 
   stm32_gpiowrite(GPIO_FT80_PD, !pwrdown);
 }

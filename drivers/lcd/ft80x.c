@@ -79,21 +79,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CHIPID     0x7c
-#define ROMID_MASK 0x0000ffff
+#define CHIPID         0x7c
+#define ROMID_MASK     0x0000ffff
+#define VERSION_MASK   0xffff0000
 #if defined(CONFIG_LCD_FT800)
-#  define DEVNAME  "/dev/ft800"
-#  define ROMID    0x00000800
+#  define DEVNAME      "/dev/ft800"
+#  define ROM_CHIPID   0x00010008  /* Byte [0:1] Chip ID "0800" BCD
+                                    * Byte [2:3] Version "0100" BCD */
 #elif defined(CONFIG_LCD_FT801)
-#  define DEVNAME  "/dev/ft801"
-#  define ROMID    0x00000801
+#  define DEVNAME      "/dev/ft801"
+#  define ROM_CHIPID   0x00010108  /* Byte [0:1] Chip ID "0801" BCD
+                                    * Byte [2:3] Version "0100" BCD */
 #else
 #  error No FT80x device configured
 #endif
 
-#define MIN_FADE_DELAY 10     /* Milliseconds */
-#define MAX_FADE_DELAY 16700  /* Milliseconds */
-#define FADE_STEP_MSEC 10     /* Milliseconds */
+#define ROMID          (ROM_CHIPID & ROMID_MASK)
+#define VERSION        (ROM_CHIPID & VERSION_MASK)
+
+#define MIN_FADE_DELAY 10          /* Milliseconds */
+#define MAX_FADE_DELAY 16700       /* Milliseconds */
+#define FADE_STEP_MSEC 10          /* Milliseconds */
 
 /****************************************************************************
  * Private Function Prototypes
@@ -269,7 +275,7 @@ static void ft80x_notify(FAR struct ft80x_dev_s *priv,
 
   if (info->enable)
     {
-      DEBUGASSERT(info->signo > 0 && GOOD_SIGNAL(info->signo) && info->pid > 0);
+      DEBUGASSERT(info->signo > 0 && GOOD_SIGNO(info->signo) && info->pid > 0);
 
       /* Yes.. Signal the client */
 
