@@ -767,8 +767,19 @@ Configurations
   f80x:
 
     This configuration was added in order to verify the FTDI/Bridgetick
-    Ft80x driver.  At this point, I have no hardware in that.  So this
-    configuration is totally unverified.
+    Ft80x driver using apps/examples/ft80x with apps/graphics/ft80x.  It
+    is very similar to the NSH configuration with support for the FTDI
+    FT80x LCD enabled on SPI1.
+
+    STATUS:
+    2018-03-09:  The ConnectEVE display is basically working.  There are
+      some specific issues with some of the demos in apps/examples/ft80x
+      that still need to be addressed.  I have the Riverdi display FT801
+      display in hand as well, but have not tested with the display yet.
+
+      I have seen issues also where the board does not recover after a
+      reset.  It required a full power cycle to get functionality back.
+      It might be necessary to reset the FT80x during initialization.
 
   netnsh:
 

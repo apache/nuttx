@@ -1178,7 +1178,6 @@ config LCD_FT80X
 	bool "FTDI FT80x GUI Controller"
 	default n
 	select SCHED_HPWORK
-	depends on EXPERIMENTAL
 	---help---
 		Integrated LCD, Audio, Touchscreen controller driver for the FTDI
 		FT80x "EVE" series.
