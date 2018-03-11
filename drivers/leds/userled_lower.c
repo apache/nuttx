@@ -88,7 +88,7 @@ static const struct userled_lowerhalf_s g_userled_lower =
 
 static userled_set_t userled_supported(FAR const struct userled_lowerhalf_s *lower)
 {
-  iinfo("BOARD_NLEDS: %02x\n", BOARD_NLEDS);
+  ledinfo("BOARD_NLEDS: %02x\n", BOARD_NLEDS);
   return (userled_set_t)((1 << BOARD_NLEDS) - 1);
 }
 
