@@ -1199,7 +1199,7 @@ static int ft80x_unlink(FAR struct inode *inode)
 static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
 {
   uint32_t timeout;
-  uint8_t regval32;
+  uint32_t regval32;
   uint8_t regval8;
 
   /* To configure the display, load the timing control registers with values
