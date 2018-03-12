@@ -385,11 +385,58 @@ found:
 
   dev->d_len -= (len + iplen);
 
-  /* First, check if the sequence number of the incoming packet is
-   * what we're expecting next.  If not, we send out an ACK with the
-   * correct numbers in, unless we are in the SYN_RCVD state and
-   * receive a SYN, in which case we should retransmit our SYNACK
-   * (which is done further down).
+#ifdef CONFIG_NET_TCP_KEEPALIVE
+  /* Check for a to KeepAlive probes.  These packets have these properties:
+   *
+   *   - TCP_ACK flag is set.  SYN/FIN/RST never appear in a Keepalive probe.
+   *   - Sequence number is the sequence number of previously ACKed data, i.e.,
+   *     the expected sequence number minus one.
+   *   - The data payload is one or two bytes.
+   *
+   * We would expect a KeepAlive only in the ESTABLISHED state and only after
+   * some time has elapsed with no network activity.  If there is un-ACKed data,
+   * then we will let the normal TCP re-transmission logic handle that case.
+   */
+
+  if ((tcp->flags & TCP_ACK) != 0 &&
+      (tcp->flags & (TCP_SYN | TCP_FIN | TCP_RST)) == 0 &&
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED &&
+      (dev->d_len == 0 || dev->d_len == 1) &&
+      conn->unacked <= 0)
+    {
+      uint32_t ackseq;
+      uint32_t rcvseq;
+
+      /* Get the sequence number of that has just been acknowledged by this
+       * incoming packet.
+       */
+
+      ackseq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
+      if (ackseq < rcvseq)
+        {
+          if (dev->d_len > 0)
+            {
+              /* Increment the received sequence number (perhaps including the
+               * discarded dummy byte in the probe).
+               */
+
+              net_incr32(conn->rcvseq, dev->d_len);
+            }
+
+          /* And send a "normal" acknowledgment of the KeepAlive probe */
+
+          tcp_send(dev, conn, TCP_ACK, tcpiplen);
+          return;
+        }
+    }
+#endif
+
+  /* Check if the sequence number of the incoming packet is what we are
+   * expecting next.  If not, we send out an ACK with the correct numbers
+   * in, unless we are in the SYN_RCVD state and receive a SYN, in which
+   * case we should retransmit our SYNACK (which is done further down).
    */
 
   if (!((((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
@@ -405,10 +452,9 @@ found:
         }
     }
 
-  /* Next, check if the incoming segment acknowledges any outstanding
-   * data. If so, we update the sequence number, reset the length of
-   * the outstanding data, calculate RTT estimations, and reset the
-   * retransmission timer.
+  /* Check if the incoming segment acknowledges any outstanding data. If so,
+   * we update the sequence number, reset the length of the outstanding
+   * data, calculate RTT estimations, and reset the retransmission timer.
    */
 
   if ((tcp->flags & TCP_ACK) != 0 && conn->unacked > 0)
@@ -764,7 +810,7 @@ found:
 #endif /* CONFIG_NET_TCPURGDATA */
           }
 
-#ifdef NET_TCP_KEEPALIVE
+#ifdef CONFIG_NET_TCP_KEEPALIVE
         /* If the established socket receives an ACK or any kind of data
          * from the remote peer (whether we accept it or not), then reset
          * the keep alive timer.
