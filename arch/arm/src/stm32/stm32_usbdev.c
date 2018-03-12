@@ -2028,18 +2028,11 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
       {
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETDESC), priv->ctrl.type);
-        if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
-          {
-            /* The request seems valid... let the class implementation handle it */
 
-            stm32_dispatchrequest(priv);
-            handled = true;
-          }
-        else
-          {
-            usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADGETSETDESC), 0);
-            priv->ep0state = EP0STATE_STALLED;
-          }
+        /* The request seems valid... let the class implementation handle it */
+
+        stm32_dispatchrequest(priv);
+        handled = true;
       }
       break;
 
