@@ -440,7 +440,7 @@ Related Repositories
     There are snapshots of some tools here that you will need to work with
     NuttX:  kconfig-frontends, genromfs, and others.
 
-  * https://bitbucket.org/nuttx/drivers
+  * https://bitbucket.org/nuttx/nonbsd
 
     A few drivers that are not integrated into the main NuttX source tree due
     to licensing issues.
