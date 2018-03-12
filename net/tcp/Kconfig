@@ -20,6 +20,14 @@ config NET_TCP_NO_STACK
 
 if NET_TCP && !NET_TCP_NO_STACK
 
+config NET_TCP_KEEPALIVE
+	bool "TCP/IP Keep-alive support"
+	default n
+	select NET_TCPPROTO_OPTIONS
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for the SO_KEEPALIVE socket option
+
 config NET_TCPURGDATA
 	bool "Urgent data"
 	default n

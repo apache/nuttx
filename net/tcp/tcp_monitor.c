@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_monitor.c
  *
- *   Copyright (C) 2007-2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -206,7 +206,7 @@ static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
+static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
 {
   DEBUGASSERT(conn);
 

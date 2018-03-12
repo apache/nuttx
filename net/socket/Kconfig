@@ -24,6 +24,12 @@ config NET_SOCKOPTS
 	---help---
 		Enable or disable support for socket options
 
+config NET_TCPPROTO_OPTIONS
+	bool
+	default n
+	---help---
+		Enable or disable support for TCP protocol level socket options.
+
 if NET_SOCKOPTS
 
 config NET_SOLINGER

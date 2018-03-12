@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016-2017 Gregory Nutt.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016-2018 Gregory Nutt.
              All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -120,6 +120,21 @@
 
 #define NSEC_PER_USEC               1000L /* Microseconds */
 
+#define SEC_PER_MIN                   60L
+#define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
+#define USEC_PER_MIN           (USEC_PER_SEC * SEC_PER_MIN)
+#define MSEC_PER_MIN           (MSEC_PER_SEC * SEC_PER_MIN)
+#define DSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
+#define HSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
+
+#define MIN_PER_HOUR                  60L
+#define NSEC_PER_HOUR          (NSEC_PER_MIN * MIN_PER_HOUR)
+#define USEC_PER_HOUR          (USEC_PER_MIN * MIN_PER_HOUR)
+#define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
+#define DSEC_PER_HOUR          (HSEC_PER_SEC * MIN_PER_HOUR)
+#define HSEC_PER_HOUR          (DSEC_PER_MIN * MIN_PER_HOUR)
+#define SEC_PER_HOUR           (SEC_PER_MIN * MIN_PER_HOUR)
+
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
  * the system timer is given by USEC_PER_TICK.  This is the expected number
  * of microseconds between calls from the processor-specific logic to
@@ -145,10 +160,13 @@
  * preferred for that reason (at the risk of overflow)
  */
 
-#define TICK_PER_DSEC         (USEC_PER_DSEC / USEC_PER_TICK)            /* Truncates! */
-#define TICK_PER_HSEC         (USEC_PER_HSEC / USEC_PER_TICK)            /* Truncates! */
+#define TICK_PER_HOUR         (USEC_PER_HOUR / USEC_PER_TICK)            /* Truncates! */
+#define TICK_PER_MIN          (USEC_PER_MIN  / USEC_PER_TICK)            /* Truncates! */
 #define TICK_PER_SEC          (USEC_PER_SEC  / USEC_PER_TICK)            /* Truncates! */
 #define TICK_PER_MSEC         (USEC_PER_MSEC / USEC_PER_TICK)            /* Truncates! */
+#define TICK_PER_DSEC         (USEC_PER_DSEC / USEC_PER_TICK)            /* Truncates! */
+#define TICK_PER_HSEC         (USEC_PER_HSEC / USEC_PER_TICK)            /* Truncates! */
+
 #define MSEC_PER_TICK         (USEC_PER_TICK / USEC_PER_MSEC)            /* Truncates! */
 #define NSEC_PER_TICK         (USEC_PER_TICK * NSEC_PER_USEC)            /* Exact */
 

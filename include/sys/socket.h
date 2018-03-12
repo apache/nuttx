@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/sys/socket.h
  *
- *   Copyright (C) 2007, 2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2015-2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,7 +129,7 @@
                            * an integer value */
 #define SO_KEEPALIVE    5 /* Keeps connections active by enabling the periodic transmission
                            * of messages (get/set).
-                           * arg: pointer to integer containing a boolean value */
+                           * arg:  pointer to integer containing a boolean int value */
 #define SO_LINGER       6 /* Lingers on a close() if data is present (get/set)
                            * arg: struct linger */
 #define SO_OOBINLINE    7 /* Leaves received out-of-band data (data marked urgent) inline
@@ -149,15 +150,22 @@
                            * being sent(get/set). arg: struct timeval */
 #define SO_TYPE        15 /* Reports the socket type (get only). return: int */
 
+/* Protocol-level socket operations */
+
+#define SOL_IP          1 /* See options in include/netinet/ip.h */
+#define SOL_IPV6        2 /* See options in include/netinet/ip6.h */
+#define SOL_TCP         3 /* See options in include/netinet/tcp.h */
+#define SOL_UDP         4 /* See options in include/netinit/udp.h */
+
 /* Protocol-level socket options may begin with this value */
 
 #define __SO_PROTOCOL  16
 
 /* Values for the 'how' argument of shutdown() */
 
-#define SHUT_RD        1  /* Bit 0: Disables further receive operations */
-#define SHUT_WR        2  /* Bit 1: Disables further send operations */
-#define SHUT_RDWR      3  /* Bits 0+1: Disables further send and receive operations */
+#define SHUT_RD         1 /* Bit 0: Disables further receive operations */
+#define SHUT_WR         2 /* Bit 1: Disables further send operations */
+#define SHUT_RDWR       3 /* Bits 0+1: Disables further send and receive operations */
 
 /****************************************************************************
  * Type Definitions

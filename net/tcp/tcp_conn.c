@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_conn.c
  *
- *   Copyright (C) 2007-2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013-2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -53,6 +54,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -714,6 +716,12 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
       conn->tcpstateflags = TCP_ALLOCATED;
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain        = domain;
+#endif
+#ifdef CONFIG_NET_TCP_KEEPALIVE
+      conn->keeptime      = clock_systimer();
+      conn->keepidle      = 2 * DSEC_PER_HOUR;
+      conn->keepintvl     = 2 * DSEC_PER_SEC;
+      conn->keepcnt       = 3;
 #endif
     }
 

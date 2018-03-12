@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/netinet/tcp.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,15 +46,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* "The netinet/tcp.h header shall define the following macro for use as a
- *  socket option at the IPPROTO_TCP level:" -- OpenGroup.org
+/* Per OpenGroup.org:
+ *
+ *   "The netinet/tcp.h header shall define the following macro for use as a
+ *    socket option at the IPPROTO_TCP level:" -- OpenGroup.org
  */
 
-#define TCP_NODELAY  __SO_PROTOCOL /* Avoid coalescing of small segments. */
+#define TCP_NODELAY   (__SO_PROTOCOL + 0) /* Avoid coalescing of small segments. */
 
-/* "The macro shall be defined in the header. The implementation need not
- *  allow the value of the option to be set via setsockopt() or retrieved via
- *  getsockopt()."  -- OpenGroup.org
+/*   "The macro shall be defined in the header.  The implementation need not
+ *    allow the value of the option to be set via setsockopt() or retrieved via
+ *    getsockopt()."
  */
+
+/* Additional TCP protocol socket operations not specified at OpenGroup.org */
+/* TCP protocol socket operations needed to support TCP Keep-Alive: */
+
+#define TCP_KEEPIDLE  (__SO_PROTOCOL + 1) /* Start keeplives after this IDLE period
+                                           * Argument: struct timeval */
+#define TCP_KEEPINTVL (__SO_PROTOCOL + 2) /* Interval between keepalives
+                                           * Argument: struct timeval */
+#define TCP_KEEPCNT   (__SO_PROTOCOL + 3) /* Number of keepalives before death
+                                           * Argument: max retry count */
 
 #endif /* __INCLUDE_NETINET_TCP_H */

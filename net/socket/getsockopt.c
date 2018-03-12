@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/socket/getsockopt.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,19 +49,20 @@
 #include <errno.h>
 
 #include "socket/socket.h"
+#include "tcp/tcp.h"
 #include "usrsock/usrsock.h"
 #include "utils/utils.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_getsockopt
+ * Name: psock_socketlevel_option
  *
  * Description:
- *   getsockopt() retrieve thse value for the option specified by the
- *   'option' argument for the socket specified by the 'psock' argument. If
+ *   getsockopt() retrieve the value for the option specified by the
+ *   'option' argument for the socket specified by the 'psock' argument.  If
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
  *   truncated. Otherwise, the length pointed to by the 'value_len' argument
@@ -68,9 +70,12 @@
  *
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
- *   SOL_SOCKET.
+ *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
+ *   argument is SOL_CP.
  *
- *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *   See <sys/socket.h> a complete list of values for the socket-level
+ *   'option' argument.  Protocol-specific options are are protocol specific
+ *   header files (such as netinet/tcp.h for the case of the TCP protocol).
  *
  * Parameters:
  *   psock     Socket structure of the socket to query
@@ -80,24 +85,14 @@
  *   value_len The length of the argument value
  *
  * Returned Value:
- *  Returns zero (OK) on success.  On failure, it returns a negated errno
- *  value to indicate the nature of the error.
- *
- *  EINVAL
- *    The specified option is invalid at the specified socket 'level' or the
- *    socket has been shutdown.
- *  ENOPROTOOPT
- *    The 'option' is not supported by the protocol.
- *  ENOTSOCK
- *    The 'psock' argument does not refer to a socket.
- *  ENOBUFS
- *    Insufficient resources are available in the system to complete the
- *    call.
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_getsockopt() for
+ *   the complete list of appropriate return error codes.
  *
  ****************************************************************************/
 
-int psock_getsockopt(FAR struct socket *psock, int level, int option,
-                     FAR void *value, FAR socklen_t *value_len)
+static int psock_socketlevel_option(FAR struct socket *psock, int option,
+                                    FAR void *value, FAR socklen_t *value_len)
 {
   /* Verify that the socket option if valid (but might not be supported ) */
 
@@ -126,7 +121,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
           default:          /* Other options are passed to usrsock daemon. */
             {
-              return usrsock_getsockopt(conn, level, option, value, value_len);
+              return usrsock_getsockopt(conn, SOL_SOCKET, option, value, value_len);
             }
         }
     }
@@ -144,8 +139,10 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
       case SO_DEBUG:      /* Enables recording of debugging information */
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
       case SO_REUSEADDR:  /* Allow reuse of local addresses */
-      case SO_KEEPALIVE:  /* Keeps connections active by enabling the
-                           * periodic transmission */
+#ifndef CONFIG_NET_TCPPROTO_OPTIONS
+      case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
+                           * periodic transmission of probes */
+#endif
       case SO_OOBINLINE:  /* Leaves received out-of-band data inline */
       case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
         {
@@ -171,6 +168,23 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
           *value_len        = sizeof(int);
         }
         break;
+
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      /* Any connection-oriented protocol could potentially support
+       * SO_KEEPALIVE.  However, this option is currently only available for
+       * TCP/IP.
+       *
+       * NOTE: SO_KEEPALIVE is not really a socket-level option; it is a
+       * protocol-level option.  A given TCP connection may service multiple
+       * sockets (via dup'ing of the socket).  There is, however, still only
+       * one connection to be monitored and that is a global attribute across
+       * all of the clones that may use the underlying connection.
+       */
+
+      case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
+                           * periodic transmission of probes */
+        return tcp_getsockopt(psock, option, value, value_len);
+#endif
 
       case SO_TYPE:       /* Reports the socket type */
         {
@@ -258,23 +272,113 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: psock_getsockopt
+ *
+ * Description:
+ *   getsockopt() retrieve the value for the option specified by the
+ *   'option' argument for the socket specified by the 'psock' argument.  If
+ *   the size of the option value is greater than 'value_len', the value
+ *   stored in the object pointed to by the 'value' argument will be silently
+ *   truncated. Otherwise, the length pointed to by the 'value_len' argument
+ *   will be modified to indicate the actual length of the 'value'.
+ *
+ *   The 'level' argument specifies the protocol level of the option. To
+ *   retrieve options at the socket level, specify the level argument as
+ *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
+ *   argument is SOL_CP.
+ *
+ *   See <sys/socket.h> a complete list of values for the socket-level
+ *   'option' argument.  Protocol-specific options are are protocol specific
+ *   header files (such as netinet/tcp.h for the case of the TCP protocol).
+ *
+ * Parameters:
+ *   psock     Socket structure of the socket to query
+ *   level     Protocol level to set the option
+ *   option    identifies the option to get
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.
+ *
+ *   EINVAL
+ *     The specified option is invalid at the specified socket 'level' or the
+ *     socket has been shutdown.
+ *   ENOPROTOOPT
+ *     The 'option' is not supported by the protocol.
+ *   ENOTSOCK
+ *     The 'psock' argument does not refer to a socket.
+ *   ENOBUFS
+ *     Insufficient resources are available in the system to complete the
+ *     call.
+ *
+ ****************************************************************************/
+
+int psock_getsockopt(FAR struct socket *psock, int level, int option,
+                     FAR void *value, FAR socklen_t *value_len)
+{
+  int ret;
+
+  /* Handle retrieval of the socket option according to the level at which
+   * option should be applied.
+   */
+
+  switch (level)
+    {
+      case SOL_SOCKET: /* Socket-level options (see include/sys/socket.h) */
+       ret = psock_socketlevel_option(psock, option, value, value_len);
+       break;
+
+      case SOL_TCP:    /* TCP protocol socket options (see include/netinet/tcp.h) */
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+       ret = tcp_getsockopt(psock, option, value, value_len);
+       break;
+#endif
+
+      /* These levels are defined in sys/socket.h, but are not yet
+       * implemented.
+       */
+
+      case SOL_IP:     /* TCP protocol socket options (see include/netinet/ip.h) */
+      case SOL_IPV6:   /* TCP protocol socket options (see include/netinet/ip6.h) */
+      case SOL_UDP:    /* TCP protocol socket options (see include/netinit/udp.h) */
+        ret = -ENOSYS;
+       break;
+
+      default:         /* The provided level is invalid */
+        ret = -EINVAL;
+       break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: getsockopt
  *
  * Description:
- *   getsockopt() retrieve thse value for the option specified by the
+ *   getsockopt() retrieve the value for the option specified by the
  *   'option' argument for the socket specified by the 'sockfd' argument. If
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
  *   truncated. Otherwise, the length pointed to by the 'value_len' argument
- *   will be modified to indicate the actual length of the'value'.
+ *   will be modified to indicate the actual length of the 'value'.
  *
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
- *   SOL_SOCKET.
+ *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
+ *   argument is SOL_CP.
  *
- *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *   See <sys/socket.h> a complete list of values for the socket-level
+ *   'option' argument.  Protocol-specific options are are protocol specific
+ *   header files (such as netinet/tcp.h for the case of the TCP protocol).
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd    Socket descriptor of socket
  *   level     Protocol level to set the option
  *   option    identifies the option to get
@@ -282,21 +386,21 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *   value_len The length of the argument value
  *
  * Returned Value:
- *  Returns zero (OK) on success.  On failure, -1 (ERROR) is returned and th
- *  errno variable is set appropriately:
+ *   Returns zero (OK) on success.  On failure, -1 (ERROR) is returned and th
+ *   errno variable is set appropriately:
  *
- *  EBADF
- *    The 'sockfd' argument is not a valid socket descriptor.
- *  EINVAL
- *    The specified option is invalid at the specified socket 'level' or the
- *    socket has been shutdown.
- *  ENOPROTOOPT
- *    The 'option' is not supported by the protocol.
- *  ENOTSOCK
- *    The 'sockfd' argument does not refer to a socket.
- *  ENOBUFS
- *    Insufficient resources are available in the system to complete the
- *    call.
+ *   EBADF
+ *     The 'sockfd' argument is not a valid socket descriptor.
+ *   EINVAL
+ *     The specified option is invalid at the specified socket 'level' or the
+ *     socket has been shutdown.
+ *   ENOPROTOOPT
+ *     The 'option' is not supported by the protocol.
+ *   ENOTSOCK
+ *     The 'sockfd' argument does not refer to a socket.
+ *   ENOBUFS
+ *     Insufficient resources are available in the system to complete the
+ *     call.
  *
  ****************************************************************************/
 
