@@ -133,7 +133,10 @@
 #define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
 #define DSEC_PER_HOUR          (HSEC_PER_SEC * MIN_PER_HOUR)
 #define HSEC_PER_HOUR          (DSEC_PER_MIN * MIN_PER_HOUR)
-#define SEC_PER_HOUR           (SEC_PER_MIN * MIN_PER_HOUR)
+#define SEC_PER_HOUR           (SEC_PER_MIN  * MIN_PER_HOUR)
+
+#define HOURS_PER_DAY                 24L
+#define SEC_PER_DAY            (HOURS_PER_DAY * SEC_PER_HOUR)
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
  * the system timer is given by USEC_PER_TICK.  This is the expected number
