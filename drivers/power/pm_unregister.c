@@ -63,7 +63,7 @@
  *   callbacks - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
- * Returned value:
+ * Returned Value:
  *    Zero (OK) on success; otherwise a negated errno value is returned.
  *
  ****************************************************************************/

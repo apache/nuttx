@@ -62,7 +62,7 @@
  *   on the current CPU. In SMP, this must be done by disabling local
  *   interrupts to avoid CPU switching during access to current_task()
  *
- * Return Value:
+ * Returned Value:
  *   the TCB that is currently running on the current CPU.
  *
  ****************************************************************************/
