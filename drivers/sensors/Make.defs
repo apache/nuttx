@@ -133,6 +133,10 @@ ifeq ($(CONFIG_SENSORS_INA219),y)
   CSRCS += ina219.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SHT21),y)
+  CSRCS += sht21.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support

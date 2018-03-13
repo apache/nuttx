@@ -427,6 +427,30 @@ config LM92_I2C_FREQUENCY
 	range 1 400000
 	depends on LM92
 
+config SENSORS_SHT21
+	bool "Sensirion SHT21 temperature and humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Sensirion SHT20 and SHT21 temperature
+		and humidity sensors. SHT20 is a budget model with limited humidity
+		precision.
+
+if SENSORS_SHT21
+
+config SHT21_I2C_FREQUENCY
+	int "SHT21 I2C frequency"
+	default 400000
+	range 1 400000
+
+config SHT21_DEBUG
+	bool "Debug support for the SHT21"
+	default n
+	---help---
+		Enables debug features for the SHT21
+
+endif # SENSORS_SHT21
+
 config SENSORS_QENCODER
 	bool "Qencoder"
 	default n
