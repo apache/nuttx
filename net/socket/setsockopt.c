@@ -129,15 +129,15 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
        * is outside of the scope of setsockopt.
        */
 
-      case SO_DEBUG:      /* Enables recording of debugging information */
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
-      case SO_REUSEADDR:  /* Allow reuse of local addresses */
+      case SO_DEBUG:      /* Enables recording of debugging information */
+      case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
 #ifndef CONFIG_NET_TCPPROTO_OPTIONS
       case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
                            * periodic transmission of probes */
 #endif
       case SO_OOBINLINE:  /* Leaves received out-of-band data inline */
-      case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
+      case SO_REUSEADDR:  /* Allow reuse of local addresses */
         {
           int setting;
 
@@ -236,7 +236,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         break;
 
 #ifdef CONFIG_NET_SOLINGER
-      case SO_LINGER:
+      case SO_LINGER:  /* Lingers on a close() if data is present */
         {
           FAR struct linger *setting;
 
@@ -276,9 +276,9 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 #endif
       /* The following are not yet implemented */
 
-      case SO_SNDBUF:     /* Sets send buffer size */
       case SO_RCVBUF:     /* Sets receive buffer size */
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
+      case SO_SNDBUF:     /* Sets send buffer size */
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
 
       /* There options are only valid when used with getopt */

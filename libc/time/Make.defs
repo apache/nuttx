@@ -1,7 +1,8 @@
 ############################################################################
 # libc/time/Make.defs
 #
-#   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014-2015, 2018 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +38,7 @@
 
 CSRCS += lib_strftime.c lib_calendar2utc.c lib_daysbeforemonth.c
 CSRCS += lib_gettimeofday.c lib_isleapyear.c lib_settimeofday.c lib_time.c
-CSRCS += lib_difftime.c
+CSRCS += lib_difftime.c lib_clock.c
 
 ifndef CONFIG_DISABLE_SIGNALS
 CSRCS += lib_nanosleep.c

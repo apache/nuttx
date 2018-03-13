@@ -74,7 +74,7 @@ static const char * const g_mon_name[12] =
  *   string representation.  asctime is not re-entrant; asctime_r is re-
  *   entrant.
  *
- * Parameters:
+ * Input Parameters:
  *   tp  - Pointer to the time to be converted.
  *   buf - A user provided buffer to receive the 26 character time string.
  *

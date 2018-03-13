@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/time/lib_ctime.c
+ * libc/time/lib_clock.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,42 +41,34 @@
 
 #include <time.h>
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  ctime
+ * Name:  clock
  *
  * Description:
- *   ctime and ctime_r convert the time provided in seconds since the
- *   epoch to a string representation. ctime is not re-entrant; ctime_r is
- *   re-entrant.
+ *   The clock() function returns the implementation's best approximation to
+ *   the processor time used by the process since the beginning of a
+ *   implementation-defined era related only to the process invocation.
+ *
+ *   To determine the time in seconds, the value returned by clock() should
+ *   be divided by the value of the macro CLOCKS_PER_SEC as defined in <time.h>.
  *
  * Input Parameters:
- *   timep - The current time represented as seconds since the epoch.
+ *   None
  *
  * Returned Value:
- *   One success a pointer to the string is returned; on failure, NULL is
- *   returned.
+ *   The system time in units of clock ticks is returend.  If the processor
+ *   time used is not available or its value cannot be represented, the
+ *   function will return the value (clock_t)-1.
  *
  ****************************************************************************/
 
-FAR char *ctime(FAR const time_t *timep)
+clock_t clock(void)
 {
-#ifdef CONFIG_LIBC_LOCALTIME
-  /* Section 4.12.3.2 of X3.159-1989 requires that
-   *    The ctime function converts the calendar time pointed to by timer
-   *    to local time in the form of a string. It is equivalent to
-   *    asctime(localtime(timer))
-   */
-
-  return asctime(localtime(timep));
-#else
-  return asctime(gmtime(timep));
-#endif
+  return (clock_t)clock_systimer();
 }
-
-#endif /* CONFIG_LIBC_LOCALTIME || CONFIG_TIME_EXTENDED */

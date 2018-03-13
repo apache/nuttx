@@ -57,7 +57,7 @@
  *   and is provided for compatibility.  clock_gettime() is the preferred way
  *   to obtain system time.
  *
- * Parameters:
+ * Input Parameters:
  *   Pointer to an object of type time_t, where the time value is stored.
  *   Alternatively, this parameter can be a null pointer, in which case the
  *   parameter is not used, but a time_t object is still returned by the

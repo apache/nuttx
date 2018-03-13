@@ -55,7 +55,7 @@
  *   string representation.  asctime is not re-entrant; asctime_r is re-
  *   entrant
  *
- * Parameters:
+ * Input Parameters:
  *   tp - Pointer to the time to be converted.
  *
  * Returned Value:

@@ -63,7 +63,7 @@
  *   The use of the nanosleep() function has no effect on the action or
  *   blockage of any signal.
  *
- * Parameters:
+ * Input Parameters:
  *   rqtp - The amount of time to be suspended from execution.
  *   rmtp - If the rmtp argument is non-NULL, the timespec structure
  *          referenced by it is updated to contain the amount of time
