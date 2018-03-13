@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/sam_mpuinit.c
+ * arch/arm/src/samv7/sam_mpuinit.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

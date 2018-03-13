@@ -50,7 +50,7 @@
  ************************************************************************************/
 
 /* Configuration *********************************************************************/
-/* Make sure that no unsupported USART, I2C master, or SPI masgter peripherals are
+/* Make sure that no unsupported USART, I2C master, or SPI master peripherals are
  * enabled.
  */
 
@@ -178,7 +178,6 @@
 #endif
 
 /* Check if we have an I2C device */
-
 
 #undef CONFIG_LPC54_HAVE_I2C_MASTER
 #undef HAVE_I2C_MASTER_DEVICE
