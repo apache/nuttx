@@ -58,7 +58,7 @@
  *
  *   NOTE: netdev semaphore held throughout enumeration.
  *
- * Parameters:
+ * Input Parameters:
  *   callback - Will be called for each registered device
  *   arg      - User argument passed to callback()
  *

@@ -79,7 +79,7 @@ struct accept_s
  * Description:
  *   Get the sender's address from the UDP packet
  *
- * Parameters:
+ * Input Parameters:
  *   psock  - The state structure of the accepting socket
  *   conn   - The newly accepted TCP connection
  *   pstate - the recvfrom state structure
@@ -150,7 +150,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
  * Description:
  *   Receive event callbacks when connections occur
  *
- * Parameters:
+ * Input Parameters:
  *   listener The connection structure of the listener
  *   conn     The connection structure that was just accepted
  *
@@ -209,7 +209,7 @@ static int accept_eventhandler(FAR struct tcp_conn_s *listener,
  *   This function implements accept() for TCP/IP sockets.  See the
  *   description of accept() for further information.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    The listening TCP socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of

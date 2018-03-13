@@ -191,7 +191,7 @@ int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -230,7 +230,7 @@ static int bcmf_transmit(FAR struct bcmf_dev_s *priv,
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -412,7 +412,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -482,7 +482,7 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
  * Description:
  *   Process RX frames
  *
- * Parameters:
+ * Input Parameters:
  *   arg - context of device to use
  *
  * Returned Value:
@@ -557,7 +557,7 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -615,7 +615,7 @@ exit_unlock:
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -644,7 +644,7 @@ static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -699,7 +699,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -742,7 +742,7 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg - Reference to the NuttX driver state structure (cast to void*)
  *
  * Returned Value:
@@ -797,7 +797,7 @@ exit_unlock:
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -834,7 +834,7 @@ static int bcmf_txavail(FAR struct net_driver_s *dev)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -864,7 +864,7 @@ static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -893,7 +893,7 @@ static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Description:
  *   Configure the IPv6 multicast MAC address.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -968,7 +968,7 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
  * Description:
  *   Handle network IOCTL commands directed to this device.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *   cmd - The IOCTL command
  *   arg - The argument for the IOCTL command
@@ -1089,7 +1089,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Description:
  *   Register a network driver and set Broadcom chip in a proper state
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Broadcom driver device
  *
  * Returned Value:

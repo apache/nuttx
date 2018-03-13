@@ -90,7 +90,7 @@ static const uint16_t g_icmpv_mcastaddr[6] =
  *   - The IPv6 header
  *   - The ICMPv6 Neighbor Solicitation Message
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to an Ethernet device driver structure
  *   ipaddr - IP address of Neighbor to be solicited
  *

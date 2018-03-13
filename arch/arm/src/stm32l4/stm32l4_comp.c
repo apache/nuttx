@@ -304,7 +304,7 @@ static int comp_bind(FAR struct comp_dev_s *dev,
  * Description:
  *   Enable/disable comparator
  *
- * Parameters:
+ * Input Parameters:
  *  cmp - comparator
  *  cfg - enable/disable flag
  *
@@ -339,7 +339,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, FAR void *arg)
  * Description:
  *   Configure comparator and I/Os used as comparators inputs
  *
- * Parameters:
+ * Input Parameters:
  *  cfg - configuration
  *
  * Returned Value:

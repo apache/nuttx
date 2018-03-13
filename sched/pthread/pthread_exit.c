@@ -64,7 +64,7 @@
  * Description:
  *   Terminate execution of a thread started with pthread_create.
  *
- * Parameters:
+ * Input Parameters:
  *   exit_valie
  *
  * Returned Value:

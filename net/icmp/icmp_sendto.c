@@ -106,7 +106,7 @@ struct icmp_sendto_s
  * Description:
  *   Check for send timeout.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate - Reference to instance ot sendto state structure
  *
  * Returned Value:
@@ -146,7 +146,7 @@ static inline int sendto_timeout(FAR struct icmp_sendto_s *pstate)
  * Description:
  *   Setup to send an ICMP request packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device driver structure to use in the send operation
  *   pstate - Reference to an instance of the ICMP sendto state structure
  *
@@ -230,7 +230,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
  *   ECHO request and/or ECHO reply actions when polled by the lower, device
  *   interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev        The structure of the network driver that caused the interrupt
  *   conn       The received packet, cast to void *
  *   pvpriv     An instance of struct icmp_sendto_s cast to void*

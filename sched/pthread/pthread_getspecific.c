@@ -62,7 +62,7 @@
  *   not obtained from pthread_create() or after a key has been deleted
  *   with pthread_key_delete() is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   key = The data key to get or set
  *
  * Returned Value:

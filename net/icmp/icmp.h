@@ -125,7 +125,7 @@ struct pollfd;    /* Forward reference */
  * Description:
  *   Handle incoming ICMP input
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received ICMP
  *         packet
  *
@@ -232,7 +232,7 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev, uint8_t id);
  * Description:
  *   Poll a device "connection" structure for availability of ICMP TX data
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:

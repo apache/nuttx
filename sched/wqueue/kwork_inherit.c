@@ -62,7 +62,7 @@
  *   priority worker thread is at least at the requested level, reqprio. This
  *   function would normally be called just before calling work_queue().
  *
- * Parameters:
+ * Input Parameters:
  *   reqprio - Requested minimum worker thread priority
  *
  * Returned Value:
@@ -174,7 +174,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
  *   the scheduled work completes.  It will check if we need to drop the
  *   priority of the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   reqprio - Previously requested minimum worker thread priority to be
  *     "unboosted"
  *
@@ -321,7 +321,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
  *   priority worker thread is at least at the requested level, reqprio. This
  *   function would normally be called just before calling work_queue().
  *
- * Parameters:
+ * Input Parameters:
  *   reqprio - Requested minimum worker thread priority
  *
  * Returned Value:
@@ -366,7 +366,7 @@ void lpwork_boostpriority(uint8_t reqprio)
  *   the scheduled work completes.  It will check if we need to drop the
  *   priority of the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   reqprio - Previously requested minimum worker thread priority to be
  *     "unboosted"
  *

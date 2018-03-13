@@ -139,7 +139,7 @@ static int do_bind_request(FAR struct usrsock_conn_s *conn,
  *   to a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
  *
- * Parameters:
+ * Input Parameters:
  *   conn     usrsock socket connection structure
  *   addr     Socket local address
  *   addrlen  Length of 'addr'

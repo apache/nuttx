@@ -52,7 +52,7 @@
  *
  * Description:
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *   cpuset
  *

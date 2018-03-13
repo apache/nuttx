@@ -59,7 +59,7 @@
  *   and that are pending for the calling process in the space pointed to by
  *   set.
  *
- * Parameters:
+ * Input Parameters:
  *   set - The location to return the pending signal set.
  *
  * Returned Value:

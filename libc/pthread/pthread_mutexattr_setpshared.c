@@ -53,7 +53,7 @@
  * Description:
  *    Set pshared  mutex attribute.
  *
- * Parameters:
+ * Input Parameters:
  *    attr
  *    pshared
  *

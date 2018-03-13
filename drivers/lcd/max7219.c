@@ -344,7 +344,7 @@ static inline FAR const char *max7219_powerstring(uint8_t power)
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
  *
- * Parameters:
+ * Input Parameters:
  *   spi - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -377,7 +377,7 @@ static void max7219_select(FAR struct spi_dev_s *spi)
  * Description:
  *   De-select the SPI
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:

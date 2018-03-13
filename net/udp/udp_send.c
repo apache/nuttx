@@ -85,7 +85,7 @@
  * Description:
  *   Set-up to send a UDP packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" structure holding port information
  *

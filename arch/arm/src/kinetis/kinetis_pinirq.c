@@ -262,7 +262,7 @@ void kinetis_pinirqinitialize(void)
  *   2. Call kinetis_pinirqattach() to attach the pin interrupt handling function.
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
- * Parameters:
+ * Input Parameters:
  *   pinset - Pin configuration
  *   pinisr - Pin interrupt service routine
  *   arg    - An argument that will be provided to the interrupt service routine.

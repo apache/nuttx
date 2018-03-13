@@ -83,7 +83,7 @@
  *   eventually making forward progress in its execution.  Eligibility for
  *   processing resources will be determined by the scheduling policy.
  *
- * Parameters:
+ * Input Parameters:
  *   barrier - the barrier to wait on
  *
  * Returned Value:

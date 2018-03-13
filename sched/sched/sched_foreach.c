@@ -55,7 +55,7 @@
  *   task to a user callback functions.  Interrupts will be
  *   disabled throughout this enumeration!
  *
- * Parameters:
+ * Input Parameters:
  *   handler - The function to be called with the TCB of
  *     each task
  *

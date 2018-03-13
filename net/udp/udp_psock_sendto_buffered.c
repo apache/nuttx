@@ -135,7 +135,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
  * Description:
  *   Release the write buffer at the head of the write buffer queue.
  *
- * Parameters:
+ * Input Parameters:
  *   dev   - The structure of the network driver that caused the event
  *   psock - Socket state structure
  *
@@ -199,7 +199,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
  *   domain is selected, then the setup is already in place and we need do
  *   nothing.
  *
- * Parameters:
+ * Input Parameters:
  *   dev   - The structure of the network driver that caused the event
  *   psock - Socket state structure
  *
@@ -251,7 +251,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
  *   address mapping is already in the ARP table.
  *
- * Parameters:
+ * Input Parameters:
  *   conn - The UDP connection structure
  *   dev  - Polling network device
  *
@@ -309,7 +309,7 @@ static inline bool sendto_addrcheck(FAR struct udp_conn_s *conn,
  * Description:
  *   Check for send timeout.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate - sendto state structure
  *
  * Returned Value:
@@ -355,7 +355,7 @@ static inline int sendto_timeout(FAR struct socket *psock,
  * Description:
  *   Setup for the next packet transfer
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket state structure
  *   conn  - The UDP connection structure
  *
@@ -459,7 +459,7 @@ static int sendto_next_transfer(FAR struct socket *psock,
  *   This function is called to perform the actual send operation when
  *   polled by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked

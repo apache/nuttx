@@ -102,7 +102,7 @@ struct xbee_maccb_s
  * Description:
  *   Bind the XBee callback table to the MAC state.
  *
- * Parameters:
+ * Input Parameters:
  *   xbee - Reference to the XBee driver state structure
  *   cb  -  XBee callback operations
  *
@@ -119,7 +119,7 @@ int xbee_bind(XBEEHANDLE xbee, FAR struct xbee_maccb_s *cb);
  * Description:
  *   Handle MAC and radio IOCTL commands directed to the XBee device.
  *
- * Parameters:
+ * Input Parameters:
  *   mac - Reference to the Xbee driver state structure
  *   cmd - The IOCTL command
  *   arg - The argument for the IOCTL command

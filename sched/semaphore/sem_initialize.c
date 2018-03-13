@@ -56,7 +56,7 @@
  *   The control structures for all semaphores may be initialized by calling
  *   nxsem_initialize().  This should be done once at power-on.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

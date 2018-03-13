@@ -71,7 +71,7 @@ extern "C"
  *   logic must provide lpc43_phyinitialize();  The LPC43 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - Always zero for now.
  *
  * Returned Value:

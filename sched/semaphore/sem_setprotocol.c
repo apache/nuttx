@@ -77,7 +77,7 @@
  *    the sem_init() call so that there will be no priority inheritance
  *    operations on this semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               modified
  *    protocol - The new protocol to use
@@ -148,7 +148,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol)
  *    the sem_init() call so that there will be no priority inheritance
  *    operations on this semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               modified
  *    protocol - The new protocol to use

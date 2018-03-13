@@ -154,7 +154,7 @@ struct pollfd;       /* Forward reference */
  * Description:
  *   Handle incoming ICMPv6 input
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received ICMPv6
  *         packet
  *
@@ -184,7 +184,7 @@ void icmpv6_input(FAR struct net_driver_s *dev);
  *   or (2) a configurable number of timeouts occur without receiving the
  *   ICMPv6 Neighbor Advertisement.
  *
- * Parameters:
+ * Input Parameters:
  *   ipaddr   The IPv6 address to be queried.
  *
  * Returned Value:
@@ -211,7 +211,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr);
  * Description:
  *   Poll a UDP "connection" structure for availability of ICMPv6 TX data
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:
@@ -232,7 +232,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev);
  * Description:
  *   Set up to send an ICMPv6 Neighbor Solicitation message
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to an Ethernet device driver structure
  *   ipaddr - IP address of Neighbor to be solicited
  *
@@ -258,7 +258,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
  *   The device IP address should have been set to the link local address
  *   prior to calling this function.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to an Ethernet device driver structure
  *
  * Returned Value:
@@ -276,7 +276,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev);
  * Description:
  *   Send an ICMPv6 Neighbor Advertisement
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *
@@ -297,7 +297,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
  * Description:
  *   Send an ICMPv6 Router Advertisement
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *
@@ -403,7 +403,7 @@ void icmpv6_notify(net_ipv6addr_t ipaddr);
  *   Perform IPv6 auto-configuration to assign an IPv6 address to this
  *   device.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to assign the address to
  *
  * Returned Value:

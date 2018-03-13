@@ -64,7 +64,7 @@
  *   thread.  See nxsig_kill() for further information as this is just a
  *   simple wrapper around the nxsig_kill() function.
  *
- * Parameters:
+ * Input Parameters:
  *   thread - The id of the thread to receive the signal. Only positive,
  *     non-zero values of 'thread' are supported.
  *   signo - The signal number to send.  If 'signo' is zero, no signal is

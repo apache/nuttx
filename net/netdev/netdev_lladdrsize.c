@@ -65,7 +65,7 @@
  *   case that there ar mutiple packet radios.  In that case, we have to
  *   query the radio for its address length.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - A reference to the device of interest
  *
  * Returned Value:
@@ -101,7 +101,7 @@ static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
  * Description:
  *   Returns the size of the MAC address associated with a network device.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - A reference to the device of interest
  *
  * Returned Value:

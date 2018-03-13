@@ -1046,7 +1046,7 @@ int file_truncate(FAR struct file *filep, off_t length);
  * Description:
  *   Perform device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   file     File structure instance
  *   req      The ioctl command
  *   arg      The argument of the ioctl cmd

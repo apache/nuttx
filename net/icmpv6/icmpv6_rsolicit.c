@@ -81,7 +81,7 @@
  *   The device IP address should have been set to the link local address
  *   prior to calling this function.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to an Ethernet device driver structure
  *
  * Returned Value:

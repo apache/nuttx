@@ -61,7 +61,7 @@
  *   of all name-value pairs and sets the value of the external variable
  *   environ to NULL.
  *
- * Parameters:
+ * Input Parameters:
  *   group Identifies the task group containing the environment structure
  *     to be released.
  *

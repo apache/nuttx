@@ -124,7 +124,7 @@ struct send_s
  * Description:
  *   Check for send timeout.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate   send state structure
  *
  * Returned Value:
@@ -167,7 +167,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
  *   domain is selected, then the setup is already in place and we need do
  *   nothing.
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The structure of the network driver that caused the event
  *   pstate - sendto state structure
  *
@@ -219,7 +219,7 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
  *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
  *   address mapping is already in the ARP table.
  *
- * Parameters:
+ * Input Parameters:
  *   conn  - The TCP connection structure
  *
  * Returned Value:
@@ -342,7 +342,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  *   This function is called to perform the actual send operation when
  *   polled by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
@@ -686,7 +686,7 @@ end_wait:
  *   Notify the appropriate device driver that we are have data ready to
  *   be send (TCP)
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket state structure
  *   conn  - The TCP connection structure
  *
@@ -737,7 +737,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  *   psock_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
@@ -961,7 +961,7 @@ errout:
  *   would block.  It is still possible that the write may block if another
  *   write occurs first.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *
  * Returned Value:

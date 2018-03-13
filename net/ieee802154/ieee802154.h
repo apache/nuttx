@@ -258,7 +258,7 @@ FAR struct ieee802154_conn_s *
  *   - The io_flink field points to the next frame in the list (if enable)
  *   - The last frame in the list will have io_flink == NULL.
  *
- * Parameters:
+ * Input Parameters:
  *   radio       The radio network driver interface.
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
@@ -314,7 +314,7 @@ uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer
@@ -360,7 +360,7 @@ FAR struct radio_driver_s *
  * Description:
  *   Poll a IEEE 802.15.4 "connection" structure for availability of TX data
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *   conn - The IEEE 802.15.4 "connection" to poll for TX data
  *
@@ -385,7 +385,7 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
  *   may be returned when they are not NULL and 0), and the error ENOTCONN is
  *   returned when the socket was not actually connected.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send

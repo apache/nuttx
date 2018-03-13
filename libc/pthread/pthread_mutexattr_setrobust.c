@@ -51,7 +51,7 @@
  * Description:
  *   Set the mutex robustness in the mutex attributes.
  *
- * Parameters:
+ * Input Parameters:
  *   attr   - The mutex attributes in which to set the mutex type.
  *   robust - The mutex type value to set.
  *

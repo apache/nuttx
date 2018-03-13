@@ -94,7 +94,7 @@
  *   Interactions between sleep() and any of setitimer(), ualarm() or sleep()
  *   are unspecified.
  *
- * Parameters:
+ * Input Parameters:
  *   seconds - The number of seconds to sleep
  *
  * Returned Value:

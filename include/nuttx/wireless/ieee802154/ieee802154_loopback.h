@@ -57,7 +57,7 @@
  * Description:
  *   Initialize and register the Ieee802.15.4 MAC loopback network driver.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

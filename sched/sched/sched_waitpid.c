@@ -142,7 +142,7 @@
  *   WIFCONTINUED(stat_val) - Evaluates to a non-zero value if status was
  *    returned for a child process that has continued from a job control stop.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The task ID of the thread to waid for
  *   stat_loc - The location to return the exit status
  *   options - ignored

@@ -63,7 +63,7 @@
  *   deallocates any system resources allocated by the system for use by
  *   this task for its message queue.
  *
- * Parameters:
+ * Input Parameters:
  *   mqdes - Message queue descriptor.
  *   group - Group that has the open descriptor.
  *
@@ -122,7 +122,7 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
  *   via this mqdes, this attachment will be removed and the message queue
  *   is available for another process to attach a notification.
  *
- * Parameters:
+ * Input Parameters:
  *   mqdes - Message queue descriptor.
  *
  * Returned Value:
@@ -173,7 +173,7 @@ int mq_close(mqd_t mqdes)
  * Description:
  *   Release a reference count on a message queue inode.
  *
- * Parameters:
+ * Input Parameters:
  *   inode - The message queue inode
  *
  * Returned Value:

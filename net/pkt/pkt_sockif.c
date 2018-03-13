@@ -155,7 +155,7 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
  *   protocol are usable by this address family.  Perform any family-
  *   specific socket fields.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a user allocated socket structure to be
  *            initialized.
  *   protocol (see sys/socket.h)
@@ -191,7 +191,7 @@ static int pkt_setup(FAR struct socket *psock, int protocol)
  * Description:
  *   Return the bit encoded capabilities of this socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket structure of the socket whose capabilities are being
  *           queried.
  *
@@ -211,7 +211,7 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock)
  * Description:
  *   Increment the refernce count on the underlying connection structure.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket structure of the socket whose reference count will be
  *           incremented.
  *
@@ -253,7 +253,7 @@ static void pkt_addref(FAR struct socket *psock)
  *   Connectionless sockets may dissolve the association by connecting to
  *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
  *
- * Parameters:
+ * Input Parameters:
  *   psock     Pointer to a socket structure initialized by psock_socket()
  *   addr      Server address (form depends on type of socket)
  *   addrlen   Length of actual 'addr'
@@ -298,7 +298,7 @@ static int pkt_connect(FAR struct socket *psock,
  *   pending connections are present on the queue, pkt_accept returns
  *   EAGAIN.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
@@ -328,7 +328,7 @@ static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   name to a socket."  When a socket is created with socket(), it exists
  *   in a name space (address family) but has no name assigned.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure of the socket to bind
  *   addr     Socket local address
  *   addrlen  Length of 'addr'
@@ -410,7 +410,7 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *   If the socket has not been bound to a local name, the value stored in
  *   the object pointed to by address is unspecified.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure of the socket to be queried
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]
@@ -440,7 +440,7 @@ static int pkt_getsockname(FAR struct socket *psock,
  *   packet sockets, psock_listen() calls this function.  The psock_listen()
  *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client
@@ -491,7 +491,7 @@ static int pkt_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
  * Description:
  *   Socket send() method for the raw packet socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
@@ -535,7 +535,7 @@ static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
  * Description:
  *   Implements the sendto() operation for the case of the raw packet socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
@@ -564,7 +564,7 @@ static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
  * Description:
  *   Performs the close operation on a raw packet socket instance
  *
- * Parameters:
+ * Input Parameters:
  *   psock   Socket instance
  *
  * Returned Value:

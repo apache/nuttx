@@ -63,7 +63,7 @@
  * Description:
  *   Configure the idle thread's TCB.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - tcb of the idle task.
  *
  * Returned Value:

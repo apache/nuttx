@@ -67,7 +67,7 @@ extern "C"
  *   Register RNDIS USB device interface. Register the corresponding network driver
  *   to NuttX and bring up the network.
  *
- * Parameters:
+ * Input Parameters:
  *   mac_address: an array of 6 bytes which make the MAC address of the host side
  *                of the network.
  *

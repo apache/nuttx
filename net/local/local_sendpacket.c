@@ -78,7 +78,7 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
  * Description:
  *   Write a data on the write-only FIFO.
  *
- * Parameters:
+ * Input Parameters:
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
@@ -128,7 +128,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  * Description:
  *   Send a packet on the write-only FIFO.
  *
- * Parameters:
+ * Input Parameters:
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send

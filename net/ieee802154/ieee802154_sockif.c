@@ -160,7 +160,7 @@ static int ieee802154_sockif_alloc(FAR struct socket *psock)
  *   protocol are usable by this address family.  Perform any family-
  *   specific socket fields.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a user allocated socket structure to be
  *            initialized.
  *   protocol (see sys/socket.h)
@@ -196,7 +196,7 @@ static int ieee802154_setup(FAR struct socket *psock, int protocol)
  * Description:
  *   Return the bit encoded capabilities of this socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket structure of the socket whose capabilities are being
  *           queried.
  *
@@ -216,7 +216,7 @@ static sockcaps_t ieee802154_sockcaps(FAR struct socket *psock)
  * Description:
  *   Increment the refernce count on the underlying connection structure.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket structure of the socket whose reference count will be
  *           incremented.
  *
@@ -258,7 +258,7 @@ static void ieee802154_addref(FAR struct socket *psock)
  *   Connectionless sockets may dissolve the association by connecting to
  *   an address with the sa_family member of sockaddr set to AF_UNSPEC.
  *
- * Parameters:
+ * Input Parameters:
  *   psock     Pointer to a socket structure initialized by psock_socket()
  *   addr      Server address (form depends on type of socket)
  *   addrlen   Length of actual 'addr'
@@ -303,7 +303,7 @@ static int ieee802154_connect(FAR struct socket *psock,
  *   pending connections are present on the queue, ieee802154_accept returns
  *   EAGAIN.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
@@ -336,7 +336,7 @@ static int ieee802154_accept(FAR struct socket *psock,
  *   socket(), it exists in a name space (address family) but has no name
  *   assigned.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure of the socket to bind
  *   addr     Socket local address
  *   addrlen  Length of 'addr'
@@ -431,7 +431,7 @@ static int ieee802154_bind(FAR struct socket *psock,
  *   If the socket has not been bound to a local name, the value stored in
  *   the object pointed to by address is unspecified.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure of the socket to be queried
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]
@@ -489,7 +489,7 @@ static int ieee802154_getsockname(FAR struct socket *psock,
  *   PF_IEEE802154 sockets, psock_listen() calls this function.  The listen()
  *   call does not apply only to PF_IEEE802154 sockets.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client
@@ -545,7 +545,7 @@ static int ieee802154_poll_local(FAR struct socket *psock,
  * Description:
  *   Socket send() method for the PF_IEEE802154 socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
@@ -612,7 +612,7 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
  *   Implements the sendto() operation for the case of the PF_IEEE802154
  *   socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
@@ -659,7 +659,7 @@ static ssize_t ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
  * Description:
  *   Performs the close operation on a PF_IEEE802154 socket instance
  *
- * Parameters:
+ * Input Parameters:
  *   psock   Socket instance
  *
  * Returned Value:

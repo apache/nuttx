@@ -2533,7 +2533,7 @@ errout:
  * Description:
  *   Initialize the RNDIS USB device driver.
  *
- * Parameters:
+ * Input Parameters:
  *   mac_address: pointer to an array of six octets which is the MAC address
  *                of the host side of the interface. May be NULL to use the
  *                default MAC address.

@@ -297,7 +297,7 @@ void udp_ipv6_select(FAR struct net_driver_s *dev);
  * Description:
  *   Poll a UDP "connection" structure for availability of TX data
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" to poll for TX data
  *
@@ -317,7 +317,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  * Description:
  *   Set-up to send a UDP packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" structure holding port information
  *
@@ -423,7 +423,7 @@ void udp_wrbuffer_dump(FAR const char *msg, FAR struct udp_wrbuffer_s *wrb,
  * Description:
  *   Handle incoming UDP input in an IPv4 packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
  * Returned Value:
@@ -446,7 +446,7 @@ int udp_ipv4_input(FAR struct net_driver_s *dev);
  * Description:
  *   Handle incoming UDP input in an IPv6 packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
  * Returned Value:

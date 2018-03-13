@@ -50,7 +50,7 @@
  *   This function initializes the signal set specified by set such that all
  *   signals are excluded.
  *
- * Parameters:
+ * Input Parameters:
  *   set - Signal set to initialize
  *
  * Returned Value:

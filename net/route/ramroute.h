@@ -138,7 +138,7 @@ extern struct net_route_ipv6_queue_s g_ipv6_routes;
  * Description:
  *   Initialize the in-memory, RAM routing table
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -157,7 +157,7 @@ void net_init_ramroute(void);
  * Description:
  *   Allocate one route by removing it from the free list
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -180,7 +180,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void);
  * Description:
  *   Free one route by adding it from the free list
  *
- * Parameters:
+ * Input Parameters:
  *   route - The route to be freed
  *
  * Returned Value:
@@ -202,7 +202,7 @@ void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
  * Description:
  *   Perform operations on in-memory routing table lists 
  *
- * Parameters:
+ * Input Parameters:
  *   entry - A pointer to the new entry to add to the list
  *   list - The list to be used.
  *

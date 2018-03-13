@@ -69,7 +69,7 @@
  *   See the description of sleep() for additional information that is not
  *   duplicated here.
  *
- * Parameters:
+ * Input Parameters:
  *   seconds - The number of seconds to sleep
  *
  * Returned Value:

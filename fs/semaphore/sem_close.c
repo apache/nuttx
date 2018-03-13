@@ -68,7 +68,7 @@
  *   named semaphore has been fully unlinked, the semaphore will vanish when
  *   the last task closes it.
  *
- * Parameters:
+ * Input Parameters:
  *  sem - semaphore descriptor
  *
  * Returned Value:

@@ -51,7 +51,7 @@
  *   This function adds the signal specified by signo to the signal set
  *   specified by set.
  *
- * Parameters:
+ * Input Parameters:
  *   set - Signal set to add signal to
  *   signo - Signal to add
  *

@@ -95,7 +95,7 @@
  *      into RAM.  munmap() is required in this case to free the allocated
  *      memory holding the shared copy of the file.
  *
- * Parameters:
+ * Input Parameters:
  *   start   The start address of the mapping to delete.  For this
  *           simplified munmap() implementation, the *must* be the start
  *           address of the memory region (the same address returned by

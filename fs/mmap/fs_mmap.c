@@ -76,7 +76,7 @@
  *      support simulation of memory mapped files by copying files whole
  *      into RAM.
  *
- * Parameters:
+ * Input Parameters:
  *   start   A hint at where to map the memory -- ignored.  The address
  *           of the underlying media is fixed and cannot be re-mapped without
  *           MMU support.

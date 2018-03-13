@@ -51,7 +51,7 @@
  *   This function deletes the signal specified by signo from the signal
  *   set specified by the 'set' argument.
  *
- * Parameters:
+ * Input Parameters:
  *   set - Signal set to delete the signal from
  *   signo - Signal to delete
  *

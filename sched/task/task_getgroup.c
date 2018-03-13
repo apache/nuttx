@@ -57,7 +57,7 @@
  * Description:
  *   Given a task ID, return the group structure of this task.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The task ID to use in the lookup.
  *
  * Returned Value:

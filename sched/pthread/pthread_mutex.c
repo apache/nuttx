@@ -61,7 +61,7 @@
  * Description:
  *   Add the mutex to the list of mutexes held by this pthread.
  *
- * Parameters:
+ * Input Parameters:
  *  mutex - The mutex to be locked
  *
  * Returned Value:
@@ -104,7 +104,7 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
  * Description:
  *   Remove the mutex to the list of mutexes held by this pthread.
  *
- * Parameters:
+ * Input Parameters:
  *  mutex - The mutex to be locked
  *
  * Returned Value:
@@ -167,7 +167,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
  *   Take the pthread_mutex, waiting if necessary.  If successful, add the
  *   mutex to the list of mutexes held by this thread.
  *
- * Parameters:
+ * Input Parameters:
  *  mutex - The mutex to be locked
  *  intr  - false: ignore EINTR errors when locking; true treat EINTR as
  *          other errors by returning the errno value
@@ -237,7 +237,7 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
  *   Try to take the pthread_mutex without waiting.  If successful, add the
  *   mutex to the list of mutexes held by this thread.
  *
- * Parameters:
+ * Input Parameters:
  *  mutex - The mutex to be locked
  *  intr  - false: ignore EINTR errors when locking; true treat EINTR as
  *          other errors by returning the errno value
@@ -296,7 +296,7 @@ int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
  *   Take the pthread_mutex and, if successful, add the mutex to the ist of
  *   mutexes held by this thread.
  *
- * Parameters:
+ * Input Parameters:
  *  mutex - The mutex to be unlocked
  *
  * Returned Value:

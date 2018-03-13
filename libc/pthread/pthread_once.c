@@ -58,7 +58,7 @@
  *   calls to pthread_once() with the same once_control will have no effect.
  *   On return from pthread_once(), init_routine will have completed.
  *
- * Parameters:
+ * Input Parameters:
  *   once_control - Determines if init_routine should be called.
  *     once_control should be declared and initializeed as follows:
  *

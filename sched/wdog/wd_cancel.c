@@ -61,7 +61,7 @@
  *   This function cancels a currently running watchdog timer. Watchdog
  *   timers may be cancelled from the interrupt level.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog - ID of the watchdog to cancel.
  *
  * Returned Value:

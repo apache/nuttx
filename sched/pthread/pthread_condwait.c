@@ -59,7 +59,7 @@
  * Description:
  *   A thread can wait for a condition variable to be signalled or broadcast.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

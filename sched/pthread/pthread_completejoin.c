@@ -112,7 +112,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
  * Description:
  *   Remove a join structure from the local data set.
  *
- * Parameters:
+ * Input Parameters:
  *   pid
  *
  * Returned Value:
@@ -188,7 +188,7 @@ static void pthread_removejoininfo(FAR struct task_group_s *group,
  *   pthread_exit(), or through pthread_cancel().  In any event, we must
  *   complete any pending join events.
  *
- * Parameters:
+ * Input Parameters:
  *   exit_value
  *
  * Returned Value:

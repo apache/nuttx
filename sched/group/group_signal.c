@@ -76,7 +76,7 @@ struct group_signal_s
  * Description:
  *   Callback from group_foreachchild that handles one member of the group.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The ID of the group member that may be signalled.
  *   arg - A pointer to a struct group_signal_s instance.
  *
@@ -192,7 +192,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
  * Description:
  *   Send a signal to every member of the group.
  *
- * Parameters:
+ * Input Parameters:
  *   group - The task group that needs to be signalled.
  *
  * Returned Value:

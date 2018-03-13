@@ -50,7 +50,7 @@
  * Description:
  *   Convert a decisecond value to a system clock ticks.  Used by IGMP logic.
  *
- * Parameters:
+ * Input Parameters:
  *   dsec The decisecond value to convert
  *
  * Returned Value:

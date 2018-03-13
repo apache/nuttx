@@ -290,7 +290,7 @@ FAR struct lcd_dev_s *ili9341_initialize(FAR struct ili9341_lcd_s *lcd, int devn
  *   entire display can be very slow.  Here the display is cleared by simply setting
  *   all GRAM memory to the specified color.
  *
- * Parameter:
+ * Input Parameters:
  *   dev   - A reference to the lcd driver structure
  *   color - The background color
  *

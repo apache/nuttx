@@ -281,7 +281,7 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
  *   driver in support of the SIOCMIISIG ioctl command.  It should never
  *   by called directly by application logic.
  *
- * Parameters:
+ * Input Parameters:
  *   intf  - Provides the name of the network interface, for example, "eth0".
  *           The length of intf must not exceed 4 bytes (excluding NULL
  *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
@@ -365,7 +365,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
  *   driver in support of the SIOCMIISIG ioctl command.  It should never
  *   by called directly by application logic.
  *
- * Parameters:
+ * Input Parameters:
  *   intf  - Provides the name of the network interface, for example, "eth0".
  *           The length of 'intf' must not exceed 4 bytes (excluding NULL
  *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.

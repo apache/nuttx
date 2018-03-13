@@ -100,7 +100,7 @@ struct sendto_s
  * Description:
  *   Check for send timeout.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate - sendto state structure
  *
  * Returned Value:
@@ -143,7 +143,7 @@ static inline int sendto_timeout(FAR struct sendto_s *pstate)
  *   domain is selected, then the setup is already in place and we need do
  *   nothing.
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The structure of the network driver that caused the event
  *   pstate - sendto state structure
  *
@@ -187,7 +187,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *   This function is called to perform the actual send operation when
  *   polled by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev        The structure of the network driver that caused the event
  *   conn       An instance of the UDP connection structure cast to void *
  *   pvpriv     An instance of struct sendto_s cast to void*

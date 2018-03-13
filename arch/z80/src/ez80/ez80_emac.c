@@ -443,7 +443,7 @@ static int  ez80_emacinitialize(void);
  * Description:
  *   Wait for the MII to become available.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *
  * Returned Value:
@@ -464,7 +464,7 @@ static void ez80emac_waitmiibusy(void)
  * Description:
  *   Write a signel MII register
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   offset - Register offset in PMD
  *   value  - Value to write
@@ -505,7 +505,7 @@ static void ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, uint8_t offset
  * Description:
  *   Read a single MII register
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   offset - Register offset in PMD
  *
@@ -546,7 +546,7 @@ static uint16_t ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32_t of
  *   Read an MII register until the bit has the specified polarity (or until
  *   the maximum number of retries occurs
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   offset - Register offset in PMD
  *   bits   - Selects set of bits to wait for
@@ -591,7 +591,7 @@ static bool ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32_t offset
  * Description:
  *   Dump all MII registers
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   offset - Register offset in PMD
  *   bits   - Selects set of bits to wait for
@@ -897,7 +897,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
  *   Given a MAC address, perform the CRC32 calculation and return the
  *   index and bit number for the multi-cast hash table.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   mac    - The MAC address to add
  *   enable - true: Enable filtering on this address; false: disable
@@ -975,7 +975,7 @@ static void ez80emac_machash(FAR uint8_t *mac, int *ndx, int *bitno)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1103,7 +1103,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -1167,7 +1167,7 @@ static int ez80emac_txpoll(struct net_driver_s *dev)
  * Description:
  *   Get the eZ80 RWP value
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -1187,7 +1187,7 @@ static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void)
  * Description:
  *   Get the eZ80 RRP value
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -1207,7 +1207,7 @@ static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void)
  * Description:
  *   Process received packets pending in the RX buffer
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Driver data instance
  *
  * Returned Value:
@@ -1455,7 +1455,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
  * Description:
  *   Perform Tx interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -1570,7 +1570,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
  * Description:
  *   Process Tx-related interrupt events
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1619,7 +1619,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg)
  * Description:
  *   Perform Rx interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -1672,7 +1672,7 @@ static void ez80emac_rxinterrupt_work(FAR void *arg)
  * Description:
  *   Process Rx-related interrupt events
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1706,7 +1706,7 @@ static int ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg)
  * Description:
  *   Perform system interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -1793,7 +1793,7 @@ static void ez80emac_sysinterrupt_work(FAR void *arg)
  * Description:
  *   System interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1827,7 +1827,7 @@ static int ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg)
  * Description:
  *   Perform TX timeout related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1872,7 +1872,7 @@ static void ez80emac_txtimeout_work(FAR void *arg)
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
  *   The last TX never completed.  Reset the hardware and start again.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -1906,7 +1906,7 @@ static void ez80emac_txtimeout_expiry(int argc, wdparm_t arg, ...)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1938,7 +1938,7 @@ static void ez80emac_poll_work(FAR void *arg)
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -1982,7 +1982,7 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2078,7 +2078,7 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2127,7 +2127,7 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg - Reference to the NuttX driver state structure (cast to void*)
  *
  * Returned Value:
@@ -2165,7 +2165,7 @@ static void ez80emac_txavail_work(FAR void *arg)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2202,7 +2202,7 @@ static int ez80emac_txavail(FAR struct net_driver_s *dev)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -2232,7 +2232,7 @@ static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -2261,7 +2261,7 @@ static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Description:
  *   Initialize the Ethernet driver
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -2481,7 +2481,7 @@ errout:
  * Description:
  *   Initialize the Ethernet driver
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -2560,7 +2560,7 @@ errout:
  * Description:
  *   Add one MAC address to the multi-cast hash table
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - Reference to the network driver state structure
  *   mac    - The MAC address to add
  *   enable - true: Enable filtering on this address; false: disable
@@ -2615,7 +2615,7 @@ int up_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac, bool enab
  * Description:
  *   Un-initialize the Ethernet driver
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

@@ -58,7 +58,7 @@
  *   Check if a timeout has elapsed.  This can be called from a socket poll
  *   function to determine if a timeout has occurred.
  *
- * Parameters:
+ * Input Parameters:
  *   start_time Timeout start time in system clock ticks
  *   timeout    Timeout value in deciseconds.
  *

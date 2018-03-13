@@ -60,7 +60,7 @@
  *   This is the internal implementation of lseek.  See the comments in
  *   lseek() for further information.
  *
- * Parameters:
+ * Input Parameters:
  *   file     File structure instance
  *   offset   Defines the offset to position to
  *   whence   Defines how to use offset
@@ -143,7 +143,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
  *  at this point, subsequent reads of the data in the gap (a "hole") return null
  *  bytes ('\0') until data is actually written into the gap.
  *
- * Parameters:
+ * Input Parameters:
  *   fd       File descriptor of device
  *   offset   Defines the offset to position to
  *   whence   Defines how to use offset

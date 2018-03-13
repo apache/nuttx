@@ -64,7 +64,7 @@ extern "C"
  * Description:
  *   Initialize the Broadcom 43362 controller and driver
  *
- * Parameters:
+ * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value
  *          identifies which EMAC is to be initialized.
  *

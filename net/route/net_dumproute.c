@@ -56,7 +56,7 @@
  * Description:
  *   Dump a routing table entry
  *
- * Parameters:
+ * Input Parameters:
  *   route - The entry to be dumped
  *
  * Returned Value:

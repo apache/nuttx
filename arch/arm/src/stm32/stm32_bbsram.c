@@ -718,7 +718,7 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
  * Description:
  *   Initialize the Battery Backed up SRAM driver.
  *
- * Parameters:
+ * Input Parameters:
  *   devpath - the path to instantiate the files.
  *   sizes   - Pointer to a any array of file sizes to create
  *             the last entry should be 0
@@ -799,7 +799,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
  * Description:
  *   Saves the panic context in a previously allocated BBSRAM file
  *
- * Parameters:
+ * Input Parameters:
  *   fileno  - the value returned by the ioctl STM32_BBSRAM_GETDESC_IOCTL
  *   context - Pointer to a any array of bytes to save
  *   length  - The length of the data pointed to byt context

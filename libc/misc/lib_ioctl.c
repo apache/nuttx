@@ -60,7 +60,7 @@
  * Description:
  *   Perform device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
  *   ...      A third argument of type unsigned long is expected

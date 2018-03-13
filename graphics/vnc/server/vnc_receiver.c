@@ -497,7 +497,7 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
  *   configured using vnc_fbinitialize(), the 'arg' must be the correct
  *   NXHANDLE value.
  *
- * Parameters:
+ * Input Parameters:
  *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
  *   callouts have arguments that match the inputs to nx_kbdin() and
  *   nx_mousein() (if arg is really of type NXHANDLE).

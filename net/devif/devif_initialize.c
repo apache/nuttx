@@ -82,7 +82,7 @@ uint8_t g_reassembly_timer;
  * Description:
  *   Perform initialization of the network device interface layer
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

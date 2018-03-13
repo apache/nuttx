@@ -241,7 +241,7 @@ FAR const struct sock_intf_s *
  *   Check if a timeout has elapsed.  This can be called from a socket poll
  *   function to determine if a timeout has occurred.
  *
- * Parameters:
+ * Input Parameters:
  *   start_time Timeout start time in system clock ticks
  *   timeout    Timeout value in deciseconds.
  *
@@ -266,7 +266,7 @@ int net_timeo(systime_t start_time, socktimeo_t timeo);
  *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
  *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send

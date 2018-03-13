@@ -180,7 +180,7 @@ static void setup_conn_getsockname(FAR struct usrsock_conn_s *conn,
  *   If the socket has not been bound to a local name, the value stored in
  *   the object pointed to by address is unspecified.
  *
- * Parameters:
+ * Input Parameters:
  *   conn     usrsock socket connection structure
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]

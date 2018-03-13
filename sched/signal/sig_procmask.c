@@ -80,7 +80,7 @@
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sigprocmask() except that it does not modify the errno value.
  *
- * Parameters:
+ * Input Parameters:
  *   how - How the signal mast will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.
@@ -185,7 +185,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
  *   If sigprocmask() fails, the signal mask of the process is not changed
  *   by this function call.
  *
- * Parameters:
+ * Input Parameters:
  *   how - How the signal mast will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.

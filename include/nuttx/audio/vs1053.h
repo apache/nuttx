@@ -98,7 +98,7 @@ extern "C"
  *   Initialize the VS1053 driver.  This will perform a chip reset of the
  *   device as part of initialization.
  *
- * Parameters:
+ * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the VS1053
  *   lower - The MCU-specific interrupt used to control low-level MCU
  *           functions (i.e., VS1053 GPIO interrupts).

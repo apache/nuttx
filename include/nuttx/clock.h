@@ -290,7 +290,7 @@ EXTERN volatile systime_t g_system_timer;
  *   Time going backward could have bad consequences if there are ongoing
  *   timers and delays.  So use this interface with care.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -320,7 +320,7 @@ void clock_synchronize(void);
  *   time. If setting system time with RTC would result time going "backward"
  *   then resynchronization is not performed.
  *
- * Parameters:
+ * Input Parameters:
  *   diff:  amount of time system-time is adjusted forward with RTC
  *
  * Returned Value:
@@ -347,7 +347,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
  *   Use of this function is also required to assue atomic access to the
  *   64-bit system timer.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -368,7 +368,7 @@ systime_t clock_systimer(void);
  *   Return the current value of the system timer counter as a struct
  *   timespec.
  *
- * Parameters:
+ * Input Parameters:
  *   ts - Location to return the time
  *
  * Returned Value:
@@ -386,7 +386,7 @@ int clock_systimespec(FAR struct timespec *ts);
  * Description:
  *   Return load measurement data for the select PID.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The task ID of the thread of interest.  pid == 0 is the IDLE thread.
  *   cpuload - The location to return the CPU load
  *

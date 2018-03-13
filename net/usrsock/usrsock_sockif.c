@@ -107,7 +107,7 @@ const struct sock_intf_s g_usrsock_sockif =
  *   protocol are usable by this address family.  Perform any family-
  *   specific socket fields.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a user allocated socket structure to be initialized.
  *   protocol (see sys/socket.h)
  *
@@ -186,7 +186,7 @@ static int usrsock_sockif_setup(FAR struct socket *psock, int protocol)
  * Description:
  *   Return the bit encoded capabilities of this socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket structure of the socket whose capabilities are being
  *           queried.
  *
@@ -206,7 +206,7 @@ static sockcaps_t usrsock_sockif_sockcaps(FAR struct socket *psock)
  * Description:
  *   Increment the reference count on the underlying connection structure.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket structure of the socket whose reference count will be
  *           incremented.
  *
@@ -238,7 +238,7 @@ static void usrsock_sockif_addref(FAR struct socket *psock)
  *   psock_listen() call applies only to sockets of type SOCK_STREAM or
  *   SOCK_SEQPACKET.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client
@@ -287,7 +287,7 @@ int usrsock_sockif_listen(FAR struct socket *psock, int backlog)
  *   pending connections are present on the queue, inet_accept returns
  *   EAGAIN.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
@@ -319,7 +319,7 @@ static int usrsock_sockif_accept(FAR struct socket *psock,
  *   The usrsock_sockif_send() call may be used only when the socket is in
  *   a connected state  (so that the intended recipient is known).
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
@@ -345,7 +345,7 @@ static ssize_t usrsock_sockif_send(FAR struct socket *psock,
  * Description:
  *   Performs the close operation on an USRSOCK socket instance
  *
- * Parameters:
+ * Input Parameters:
  *   psock   Socket instance
  *
  * Returned Value:

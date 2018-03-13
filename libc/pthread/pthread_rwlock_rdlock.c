@@ -90,7 +90,7 @@ static int tryrdlock(FAR pthread_rwlock_t *rw_lock)
  * Description:
  *   Locks a read/write lock for reading
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

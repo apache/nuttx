@@ -65,7 +65,7 @@ static const uint8_t g_lookup[12] = {2, 5, 7, 10, 12, 15, 17, 20, 23, 25, 28, 30
  *   an algorithm pubished in 1990 by Michael Keith and Tom Craver with some
  *   tweaks to handle months in the range 0-11.
  *
- * Parameters:
+ * Input Parameters:
  *   year  - year (e.g., 1988)
  *   month - 0 through 11
  *   day   - 1 through 31

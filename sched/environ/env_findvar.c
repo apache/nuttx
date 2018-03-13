@@ -82,7 +82,7 @@ static bool env_cmpname(const char *pszname, const char *peqname)
  *   Search the provided environment structure for the variable of the
  *   specified name.
  *
- * Parameters:
+ * Input Parameters:
  *   group The task group containging environment array to be searched.
  *   pname The variable name to find
  *

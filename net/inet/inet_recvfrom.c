@@ -118,7 +118,7 @@ struct inet_recvfrom_s
  *   of data in buffer,  This logic accounts for the case where
  *   inet_udp_readahead() sets state.ir_recvlen == -1 .
  *
- * Parameters:
+ * Input Parameters:
  *   pstate   recvfrom state structure
  *   recvlen  size of new data appended to buffer
  *
@@ -149,7 +149,7 @@ static inline void inet_update_recvlen(FAR struct inet_recvfrom_s *pstate,
  * Description:
  *   Copy the read data from the packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
@@ -197,7 +197,7 @@ static size_t inet_recvfrom_newdata(FAR struct net_driver_s *dev,
  * Description:
  *   Copy the read data from the packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
@@ -269,7 +269,7 @@ static inline void inet_tcp_newdata(FAR struct net_driver_s *dev,
  * Description:
  *   Copy the read data from the packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
@@ -301,7 +301,7 @@ static inline void inet_udp_newdata(FAR struct net_driver_s *dev,
  * Description:
  *   Copy the read-ahead data from the packet
  *
- * Parameters:
+ * Input Parameters:
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -468,7 +468,7 @@ out:
  * Description:
  *   Check for recvfrom timeout.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -542,7 +542,7 @@ static int inet_recvfrom_timeout(struct inet_recvfrom_s *pstate)
  * Description:
  *   Getting the sender's address from the UDP packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device driver data structure
  *   pstate - the recvfrom state structure
  *
@@ -614,7 +614,7 @@ static inline void inet_tcp_sender(FAR struct net_driver_s *dev,
  *   This function is called from the interrupt level to perform the actual
  *   TCP receive operation via by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the interrupt
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
@@ -839,7 +839,7 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
  * Description:
  *   Getting the sender's address from the UDP packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device driver data structure
  *   pstate - the recvfrom state structure
  *
@@ -940,7 +940,7 @@ static inline void inet_udp_sender(struct net_driver_s *dev, struct inet_recvfro
  * Description:
  *   Terminate the UDP transfer.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate - The recvfrom state structure
  *   result - The result of the operation
  *
@@ -977,7 +977,7 @@ static void inet_udp_terminate(FAR struct inet_recvfrom_s *pstate, int result)
  *   This function is called from the interrupt level to perform the actual
  *   UDP receive operation via by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the interrupt
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
@@ -1070,7 +1070,7 @@ static uint16_t inet_udp_eventhandler(FAR struct net_driver_s *dev,
  * Description:
  *   Initialize the state structure
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Pointer to the socket structure for the socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
@@ -1127,7 +1127,7 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
  * Description:
  *   Evaluate the result of the recv operations
  *
- * Parameters:
+ * Input Parameters:
  *   result   The result of the net_lockedwait operation (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
@@ -1173,7 +1173,7 @@ static ssize_t inet_recvfrom_result(int result, struct inet_recvfrom_s *pstate)
  * Description:
  *   Perform the recvfrom operation for a UDP SOCK_DGRAM
  *
- * Parameters:
+ * Input Parameters:
  *   psock  Pointer to the socket structure for the SOCK_DRAM socket
  *   buf    Buffer to receive data
  *   len    Length of buffer
@@ -1309,7 +1309,7 @@ errout_with_state:
  * Description:
  *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
  *
- * Parameters:
+ * Input Parameters:
  *   psock  Pointer to the socket structure for the SOCK_DRAM socket
  *   buf    Buffer to receive data
  *   len    Length of buffer

@@ -97,7 +97,7 @@ struct tcp_close_s
  * Description:
  *   Check for a timeout on a lingering close.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate - close state structure
  *
  * Returned Value:
@@ -142,7 +142,7 @@ static inline int tcp_close_timeout(FAR struct tcp_close_s *pstate)
  * Description:
  *   Handle network callback events.
  *
- * Parameters:
+ * Input Parameters:
  *   conn - TCP connection structure
  *
  * Returned Value:
@@ -267,7 +267,7 @@ end_wait:
  *   Notify the appropriate device driver that we are have data ready to
  *   be send (TCP)
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket state structure
  *   conn  - The TCP connection structure
  *
@@ -315,7 +315,7 @@ static inline void tcp_close_txnotify(FAR struct socket *psock,
  * Description:
  *   Break any current TCP connection
  *
- * Parameters:
+ * Input Parameters:
  *   conn - TCP connection structure
  *
  * Returned Value:
@@ -468,7 +468,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
  * Description:
  *   Performs the close operation on an AF_INET or AF_INET6 socket instance
  *
- * Parameters:
+ * Input Parameters:
  *   psock   Socket instance
  *
  * Returned Value:

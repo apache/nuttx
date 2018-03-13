@@ -245,7 +245,7 @@ int sam_emac_setmacaddr(int intf, uint8_t mac[6]);
  *   logic must provide sam_phyinitialize();  The SAMV7 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - Always zero for now.
  *
  * Returned Value:

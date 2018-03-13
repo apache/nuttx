@@ -66,7 +66,7 @@
  *   This function is a lighter weight version of sem_timedwait().  It is
  *   non-standard and intended only for use within the RTOS.
  *
- * Parameters:
+ * Input Parameters:
  *   sem     - Semaphore object
  *   start   - The system time that the delay is relative to.  If the
  *             current time is not the same as the start time, then the

@@ -239,7 +239,7 @@ void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata);
  * Description:
  *   Initialize and register the Ieee802.15.4 MAC loopback network driver.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

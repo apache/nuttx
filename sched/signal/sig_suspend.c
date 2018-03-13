@@ -72,7 +72,7 @@
  *   Waiting for an empty signal set stops a task without freeing any
  *   resources.
  *
- * Parameters:
+ * Input Parameters:
  *   set - signal mask to use while suspended.
  *
  * Returned Value:

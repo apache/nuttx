@@ -55,7 +55,7 @@
  * Description:
  *   Set the scheduling algorithm attribute.
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *   policy
  *

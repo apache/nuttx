@@ -74,7 +74,7 @@ static void timer_timeout(int argc, wdparm_t itimer);
  *   This function basically reimplements nxsig_queue() so that the si_code
  *   can be correctly set to SI_TIMER
  *
- * Parameters:
+ * Input Parameters:
  *   timer - A reference to the POSIX timer that just timed out
  *
  * Returned Value:
@@ -129,7 +129,7 @@ static inline void timer_signotify(FAR struct posix_timer_s *timer)
  * Description:
  *   If a periodic timer has been selected, then restart the watchdog.
  *
- * Parameters:
+ * Input Parameters:
  *   timer - A reference to the POSIX timer that just timed out
  *
  * Returned Value:
@@ -160,7 +160,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
  *   This function is called if the timeout elapses before the condition is
  *   signaled.
  *
- * Parameters:
+ * Input Parameters:
  *   argc   - the number of arguments (should be 1)
  *   itimer - A reference to the POSIX timer that just timed out
  *   signo  - The signal to use to wake up the task
@@ -276,7 +276,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
  *   the timer was disarmed, together with the previous timer reload value.
  *   Timers will not expire before their scheduled time.
  *
- * Parameters:
+ * Input Parameters:
  *   timerid - The pre-thread timer, previously created by the call to
  *     timer_create(), to be be set.
  *   flags - Specifie characteristics of the timer (see above)

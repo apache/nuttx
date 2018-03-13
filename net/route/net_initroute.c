@@ -56,7 +56,7 @@
  * Description:
  *   Initialize to the routing table
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

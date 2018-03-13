@@ -563,7 +563,7 @@ static void lpc54_putreg(uint32_t val, uintptr_t addr)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *   chan - The channel to send the packet on
  *
@@ -696,7 +696,7 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
  *   8021QVLAN AVB packets (and CONFIG_LPC54_ETH_MULTIQUEUE not selected):
  *     Always send on ring 1
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -738,7 +738,7 @@ static unsigned int lpc54_eth_getring(struct lpc54_ethdriver_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -852,7 +852,7 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
  *   may return return with an outgoing packet.  This function checks for
  *   that case and performs the transmission if necessary.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -922,7 +922,7 @@ static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
  *   A new packet has been received and will be forwarded to the network
  *   stack.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -1046,7 +1046,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *   chan - The channel with the completed Rx transfer
  *
@@ -1234,7 +1234,7 @@ static int lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *   chan - The channel with the completed Tx transfer
  *
@@ -1321,7 +1321,7 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Perform interrupt related work for a channel DMA interrupt
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *   chan - The channel that received the interrupt event.
  *
@@ -1460,7 +1460,7 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Perform interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -1508,7 +1508,7 @@ static void lpc54_eth_interrupt_work(void *arg)
  * Description:
  *   Ethernet interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1548,7 +1548,7 @@ static int lpc54_eth_interrupt(int irq, void *context, void *arg)
  * Description:
  *   Ethernet power management interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1571,7 +1571,7 @@ static int  lpc54_pmt_interrupt(int irq, void *context, void *arg)
  * Description:
  *   Ethernet MAC interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1594,7 +1594,7 @@ static int lpc54_mac_interrupt(int irq, void *context, void *arg)
  * Description:
  *   Perform TX timeout related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1641,7 +1641,7 @@ static void lpc54_eth_txtimeout_work(void *arg)
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
  *   The last TX never completed.  Reset the hardware and start again.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -1678,7 +1678,7 @@ static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
  *   Check if there are Tx descriptors available and, if so, allocate a Tx
  *   then perform the normal Tx poll
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -1745,7 +1745,7 @@ static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv)
  *   Check if there are Tx descriptors available and, if so, allocate a Tx
  *   then perform the normal Tx poll
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -1811,7 +1811,7 @@ static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1851,7 +1851,7 @@ static void lpc54_eth_poll_work(void *arg)
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -1880,7 +1880,7 @@ static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2164,7 +2164,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2240,7 +2240,7 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg - Reference to the NuttX driver state structure (cast to void*)
  *
  * Returned Value:
@@ -2283,7 +2283,7 @@ static void lpc54_eth_txavail_work(void *arg)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2320,7 +2320,7 @@ static int lpc54_eth_txavail(struct net_driver_s *dev)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -2348,7 +2348,7 @@ static int lpc54_eth_addmac(struct net_driver_s *dev, const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -2375,7 +2375,7 @@ static int lpc54_eth_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  * Description:
  *   Handle network IOCTL commands directed to this device.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *   cmd - The IOCTL command
  *   arg - The argument for the IOCTL command
@@ -2443,7 +2443,7 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
  *   Initialize packet buffers my placing all of the pre-allocated packet
  *   buffers into a free list.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -2470,7 +2470,7 @@ static void lpc54_pktbuf_initialize(struct lpc54_ethdriver_s *priv)
  * Description:
  *   Allocate one packet buffer by removing it from the free list.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -2494,7 +2494,7 @@ static inline uint32_t *lpc54_pktbuf_alloc(struct lpc54_ethdriver_s *priv)
  * Description:
  *   Allocate one packet buffer by removing it from the free list.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   pktbuf - The packet buffer to be freed
  *
@@ -2519,7 +2519,7 @@ static inline void lpc54_pktbuf_free(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Initialize one Tx descriptor ring.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   chan   - Channel being initialized
  *
@@ -2569,7 +2569,7 @@ static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Initialize one Rx descriptor ring.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   chan   - Channel being initialized
  *
@@ -2646,7 +2646,7 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Initialize the Rx and Tx rings for every channel.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *
  * Returned Value:
@@ -2701,7 +2701,7 @@ static void lpc54_ring_initialize(struct lpc54_ethdriver_s *priv)
  *   Set the CSR clock divider.  The MDC clock derives from the divided down
  *   CSR clock (aka core clock or main clock).
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -2743,7 +2743,7 @@ static void lpc54_set_csrdiv(void)
  * Description:
  *   Read the content from one PHY register.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   phyreg - The 5-bit PHY address to read
  *
@@ -2785,7 +2785,7 @@ static uint16_t lpc54_phy_read(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Write a new value to of one PHY register.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *   phyreg - The 5-bit PHY address to write
  *   phyval - The 16-bit value to write to the PHY register
@@ -2830,7 +2830,7 @@ static void lpc54_phy_write(struct lpc54_ethdriver_s *priv,
  * Description:
  *   Read the MII status register and return tru if the link is up.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -2851,7 +2851,7 @@ static inline bool lpc54_phy_linkstatus(struct lpc54_ethdriver_s *priv)
  * Description:
  *   Initialize the PHY.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -2930,7 +2930,7 @@ static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
  * Description:
  *   Reset the PHY and bring it to the operational status
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -2992,7 +2992,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  *   This is the "standard" network initialization logic called from the
  *   low-level initialization logic in up_initialize.c.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value
  *          identifies which EMAC is to be initialized.
  *

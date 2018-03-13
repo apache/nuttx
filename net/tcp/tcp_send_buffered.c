@@ -114,7 +114,7 @@
  *   Insert a new segment in a write buffer queue, keep the segment queue in
  *   ascending order of sequence number.
  *
- * Parameters:
+ * Input Parameters:
  *   wrb   The segment to be inserted
  *   q     The write buffer queue in which to insert the segment
  *
@@ -162,7 +162,7 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
  * Description:
  *   The TCP connection has been lost.  Free all write buffers.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    The socket structure
  *   conn     The connection structure associated with the socket
  *
@@ -219,7 +219,7 @@ static inline void psock_lost_connection(FAR struct socket *psock,
  *   domain is selected, then the setup is already in place and we need do
  *   nothing.
  *
- * Parameters:
+ * Input Parameters:
  *   dev   - The structure of the network driver that caused the event
  *   psock - Socket state structure
  *
@@ -271,7 +271,7 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
  *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
  *   address mapping is already in the ARP table.
  *
- * Parameters:
+ * Input Parameters:
  *   conn  - The TCP connection structure
  *
  * Returned Value:
@@ -392,7 +392,7 @@ static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
  *   This function is called to perform the actual send operation when
  *   polled by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
@@ -912,7 +912,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  *   Notify the appropriate device driver that we are have data ready to
  *   be send (TCP)
  *
- * Parameters:
+ * Input Parameters:
  *   psock - Socket state structure
  *   conn  - The TCP connection structure
  *
@@ -963,7 +963,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  *   psock_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
@@ -1205,7 +1205,7 @@ errout:
  *   possible that the write may still block if the buffer is filled by
  *   another means.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *
  * Returned Value:

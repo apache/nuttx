@@ -70,7 +70,7 @@
  *   See the description of usleep() for additional information that is not
  *   duplicated here.
  *
- * Parameters:
+ * Input Parameters:
  *   usec - the number of microseconds to wait.
  *
  * Returned Value:

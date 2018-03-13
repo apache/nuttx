@@ -64,7 +64,7 @@
  *   may be returned when they are not NULL and 0), and the error ENOTCONN is
  *   returned when the socket was not actually connected.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Data to send
  *   len      Length of data to send
@@ -181,7 +181,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  *   may be returned when they are not NULL and 0), and the error ENOTCONN is
  *   returned when the socket was not actually connected.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   Socket descriptor of socket
  *   buf      Data to send
  *   len      Length of data to send

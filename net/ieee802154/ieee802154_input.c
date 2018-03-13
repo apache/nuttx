@@ -61,7 +61,7 @@
  * Description:
  *   Return the number of frames in the RX queue.
  *
- * Parameters:
+ * Input Parameters:
  *   conn   - The socket connection structure.
  *
  * Returned Value:
@@ -91,7 +91,7 @@ static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
  * Description:
  *   Add one frame to the connection's RX queue.
  *
- * Parameters:
+ * Input Parameters:
  *   conn   - The socket connection structure.
  *   framel - A single frame to add to the RX queue.
  *   meta   - Meta data characterizing the received frane.
@@ -217,7 +217,7 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
  *   - The io_flink field points to the next frame in the list (if enable)
  *   - The last frame in the list will have io_flink == NULL.
  *
- * Parameters:
+ * Input Parameters:
  *   radio       The radio network driver interface.
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if

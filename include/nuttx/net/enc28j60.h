@@ -115,7 +115,7 @@ extern "C"
  *   Initialize the Ethernet driver.  The ENC28J60 device is assumed to be
  *   in the post-reset state upon entry to this function.
  *
- * Parameters:
+ * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the ENC28J60
  *   lower - The MCU-specific interrupt used to control low-level MCU
  *           functions (i.e., ENC28J60 GPIO interrupts).

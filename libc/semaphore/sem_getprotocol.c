@@ -53,7 +53,7 @@
  * Description:
  *    Return the value of the semaphore protocol attribute.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               queried.
  *    protocol - The user provided location in which to store the protocol

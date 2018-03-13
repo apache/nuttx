@@ -606,7 +606,7 @@ static void pic32mz_putreg(uint32_t val, uint32_t addr)
  * Description:
  *   Dump the contents of the specified TX descriptor
  *
- * Parameters:
+ * Input Parameters:
  *   txdesc - Pointer to the TX descriptor to dump
  *   msg    - Annotation for the TX descriptor
  *
@@ -633,7 +633,7 @@ static void pic32mz_dumptxdesc(struct pic32mz_txdesc_s *txdesc, const char *msg)
  * Description:
  *   Dump the contents of the specified RX descriptor
  *
- * Parameters:
+ * Input Parameters:
  *   txdesc - Pointer to the RX descriptor to dump
  *   msg    - Annotation for the RX descriptor
  *
@@ -660,7 +660,7 @@ static void pic32mz_dumprxdesc(struct pic32mz_rxdesc_s *rxdesc, const char *msg)
  * Description:
  *   Initialize the buffers by placing them all in a free list
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
@@ -691,7 +691,7 @@ static inline void pic32mz_bufferinit(struct pic32mz_driver_s *priv)
  * Description:
  *   Allocate one buffer by removing it from the free list
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
@@ -712,7 +712,7 @@ static uint8_t *pic32mz_allocbuffer(struct pic32mz_driver_s *priv)
  * Description:
  *   Free one buffer by returning it to the free list
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
@@ -733,7 +733,7 @@ static void pic32mz_freebuffer(struct pic32mz_driver_s *priv, uint8_t *buffer)
  * Description:
  *   Initialize the EMAC Tx descriptor table
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
@@ -801,7 +801,7 @@ static inline void pic32mz_txdescinit(struct pic32mz_driver_s *priv)
  * Description:
  *   Initialize the EMAC Rx descriptor table
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
@@ -868,7 +868,7 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
  * Description:
  *   Check if the next Tx descriptor is available.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -917,7 +917,7 @@ static inline struct pic32mz_txdesc_s *pic32mz_txdesc(struct pic32mz_driver_s *p
  *   After the next Tx descriptor has been given to the hardware, update the
  *   index to the next Tx descriptor in the ring.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -951,7 +951,7 @@ static inline void pic32mz_txnext(struct pic32mz_driver_s *priv)
  * Description:
  *   Return an RX descriptor to the hardware.
  *
- * Parameters:
+ * Input Parameters:
  *   rxdesc - Reference to the RX descriptor to be returned
  *
  * Returned Value:
@@ -975,7 +975,7 @@ static inline void pic32mz_rxreturn(struct pic32mz_rxdesc_s *rxdesc)
  * Description:
  *   Check if a RX descriptor is owned by the software.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -1024,7 +1024,7 @@ static struct pic32mz_rxdesc_s *pic32mz_rxdesc(struct pic32mz_driver_s *priv)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1130,7 +1130,7 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -1217,7 +1217,7 @@ static int pic32mz_txpoll(struct net_driver_s *dev)
  * Description:
  *   Perform the network poll.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1265,7 +1265,7 @@ static void pic32mz_poll(struct pic32mz_driver_s *priv)
  * Description:
  *   Perform the network timer poll.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1317,7 +1317,7 @@ static void pic32mz_timerpoll(struct pic32mz_driver_s *priv)
  *   (2) hold the outgoing packet in a pending state until the next Tx
  *   interrupt occurs.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1359,7 +1359,7 @@ static void pic32mz_response(struct pic32mz_driver_s *priv)
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1596,7 +1596,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1696,7 +1696,7 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
  * Description:
  *   Perform interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -1870,7 +1870,7 @@ static void pic32mz_interrupt_work(void *arg)
  * Description:
  *   Hardware interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1931,7 +1931,7 @@ static int pic32mz_interrupt(int irq, void *context, FAR void *arg)
  * Description:
  *   Perform TX timeout related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1975,7 +1975,7 @@ static void pic32mz_txtimeout_work(void *arg)
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
  *   The last TX never completed.  Reset the hardware and start again.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -2013,7 +2013,7 @@ static void pic32mz_txtimeout_expiry(int argc, wdparm_t arg, ...)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -2056,7 +2056,7 @@ static void pic32mz_poll_work(void *arg)
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -2084,7 +2084,7 @@ static void pic32mz_poll_expiry(int argc, wdparm_t arg, ...)
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2393,7 +2393,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2436,7 +2436,7 @@ static int pic32mz_ifdown(struct net_driver_s *dev)
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg - Reference to the NuttX driver state structure (cast to void*)
  *
  * Returned Value:
@@ -2479,7 +2479,7 @@ static void pic32mz_txavail_work(void *arg)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2516,7 +2516,7 @@ static int pic32mz_txavail(struct net_driver_s *dev)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -2546,7 +2546,7 @@ static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -2575,7 +2575,7 @@ static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  * Description:
  *   Dump PHY MII registers
  *
- * Parameters:
+ * Input Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *
  * Returned Value:
@@ -2606,7 +2606,7 @@ static void pic32mz_showmii(uint8_t phyaddr, const char *msg)
  * Description:
  *   Wait until the PHY is no longer busy
  *
- * Parameters:
+ * Input Parameters:
  *  None
  *
  * Returned Value:
@@ -2627,7 +2627,7 @@ static void pic32mz_phybusywait(void)
  * Description:
  *   Write a value to an MII PHY register
  *
- * Parameters:
+ * Input Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *   regaddr - The address of the PHY register to be written
  *   phydata - The data to write to the PHY register
@@ -2670,7 +2670,7 @@ static void pic32mz_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata)
  * Description:
  *   Read a value from an MII PHY register
  *
- * Parameters:
+ * Input Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *   regaddr - The address of the PHY register to be written
  *
@@ -2721,7 +2721,7 @@ static uint16_t pic32mz_phyread(uint8_t phyaddr, uint8_t regaddr)
  * Description:
  *   Reset the PHY
  *
- * Parameters:
+ * Input Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *
  * Returned Value:
@@ -2769,7 +2769,7 @@ static inline int pic32mz_phyreset(uint8_t phyaddr)
  * Description:
  *   Enable auto-negotiation.
  *
- * Parameters:
+ * Input Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *
  * Returned Value:
@@ -2816,7 +2816,7 @@ static inline int pic32mz_phyautoneg(uint8_t phyaddr)
  * Description:
  *   Set the PHY to operate at a selected speed/duplex mode.
  *
- * Parameters:
+ * Input Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *   mode - speed/duplex mode
  *
@@ -2895,7 +2895,7 @@ static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode)
  * Description:
  *   Initialize the PHY
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
@@ -3194,7 +3194,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
  * Description:
  *   Set the MAC to operate at a selected speed/duplex mode.
  *
- * Parameters:
+ * Input Parameters:
  *   mode - speed/duplex mode
  *
  * Returned Value:
@@ -3253,7 +3253,7 @@ static void pic32mz_macmode(uint8_t mode)
  * Description:
  *   Configure and reset the Ethernet module, leaving it in a disabled state.
  *
- * Parameters:
+ * Input Parameters:
  *   priv   - Reference to the driver state structure
  *
  * Returned Value:
@@ -3343,7 +3343,7 @@ static void pic32mz_ethreset(struct pic32mz_driver_s *priv)
  * Description:
  *   Initialize one Ethernet controller and driver structure.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - Selects the interface to be initialized.
  *
  * Returned Value:

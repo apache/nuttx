@@ -59,7 +59,7 @@
  * Description:
  *   Poll a device "connection" structure for availability of ICMP TX data
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:

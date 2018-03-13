@@ -56,7 +56,7 @@
  * Description:
  *   Dump a data buffer to the SYSLOG.
  *
- * Parameters:
+ * Input Parameters:
  *   buffer - The buffer to be dumped
  *   buflen - The length of the buffer in bytes.
  *

@@ -62,7 +62,7 @@
  *   connections are accepted with psock_accept(). The psock_listen() call
  *   applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client
@@ -119,7 +119,7 @@ int psock_listen(FAR struct socket *psock, int backlog)
  *   accepted with accept(). The listen() call applies only to sockets of
  *   type SOCK_STREAM or SOCK_SEQPACKET.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   Socket descriptor of the bound socket
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client

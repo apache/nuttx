@@ -90,7 +90,7 @@ extern "C"
  *   Add a new route to the routing table.  This is just a convenience
  *   wrapper for the SIOCADDRT ioctl call.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   - Any socket descriptor
  *   target   - Target address on external network(required)
  *   netmask  - Network mask defining the external network (required)
@@ -113,7 +113,7 @@ int addroute(int sockfd, FAR struct sockaddr_storage *target,
  *   Add a new route to the routing table.  This is just a convenience
  *   wrapper for the SIOCADDRT ioctl call.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   - Any socket descriptor
  *   target   - Target address on the remote network (required)
  *   netmask  - Network mask defining the external network (required)

@@ -60,7 +60,7 @@
  *   The wd_create function will create a watchdog timer by allocating one
  *   from the list of free watchdog timers.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

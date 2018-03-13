@@ -54,7 +54,7 @@
  *
  * Description:
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *   param
  *

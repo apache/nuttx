@@ -67,7 +67,7 @@
  *   The ipv6_getsockname() function retrieves the locally-bound name of the
  *   specified PF_NET6 socket.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Point to the socket structure instance [in]
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]

@@ -57,7 +57,7 @@
  *   Returns a chunk of kernel memory to the list of free nodes, merging
  *   with adjacent free chunks if possible.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

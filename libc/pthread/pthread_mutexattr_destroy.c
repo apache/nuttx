@@ -53,7 +53,7 @@
  * Description:
  *    Destroy mutex attributes.
  *
- * Parameters:
+ * Input Parameters:
  *    attr
  *
  * Returned Value:

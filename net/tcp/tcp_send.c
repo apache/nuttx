@@ -83,7 +83,7 @@
  * Description:
  *   Get the length of the IP header
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:
@@ -119,7 +119,7 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
  *   Complete the final portions of the send operation.  This function sets
  *   up IP header and computes the TCP checksum
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:
@@ -187,7 +187,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
  *   Complete the final portions of the send operation.  This function sets
  *   up IP header and computes the TCP checksum
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:
@@ -250,7 +250,7 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
  *   Complete the final portions of the send operation.  This function sets
  *   up IP header and computes the TCP checksum
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to use in the send operation
  *
  * Returned Value:
@@ -297,7 +297,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev,
  *   Our job is to fill in all the fields of the TCP and IP headers before
  *   calculating the checksum and finally send the packet.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP connection structure holding connection information
  *
@@ -396,7 +396,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
  * Description:
  *   Setup to send a TCP packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device driver structure to use in the send operation
  *   conn   - The TCP connection structure holding connection information
  *   flags  - flags to apply to the TCP header
@@ -428,7 +428,7 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  * Description:
  *   Send a TCP reset (no-data) message
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device driver structure to use in the send operation
  *
  * Returned Value:
@@ -543,7 +543,7 @@ void tcp_reset(FAR struct net_driver_s *dev)
  * Description:
  *   Send the SYN or SYNACK response.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP connection structure holding connection information
  *   ack  - The ACK response to send

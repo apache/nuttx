@@ -60,7 +60,7 @@
  * Description:
  *   Send a local packet as a stream.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send

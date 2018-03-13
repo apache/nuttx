@@ -51,7 +51,7 @@
  * Description:
  *   Return the mutex robustneess from the mutex attributes.
  *
- * Parameters:
+ * Input Parameters:
  *   attr   - The mutex attributes to query
  *   robust - Location to return the robustness indication
  *

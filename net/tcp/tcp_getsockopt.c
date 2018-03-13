@@ -80,7 +80,7 @@
  *   'option' argument.  Protocol-specific options are are protocol specific
  *   header files (such as netinet/tcp.h for the case of the TCP protocol).
  *
- * Parameters:
+ * Input Parameters:
  *   psock     Socket structure of the socket to query
  *   level     Protocol level to set the option
  *   option    identifies the option to get

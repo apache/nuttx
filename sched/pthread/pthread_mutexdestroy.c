@@ -60,7 +60,7 @@
  * Description:
  *   Destroy a mutex.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

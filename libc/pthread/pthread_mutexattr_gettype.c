@@ -51,7 +51,7 @@
  * Description:
  *   Return the mutex type from the mutex attributes.
  *
- * Parameters:
+ * Input Parameters:
  *   attr - The mutex attributes to query
  *   type - Location to return the mutex type
  *

@@ -70,7 +70,7 @@
  * Description:
  *   Handle incoming packet input
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received packet
  *
  * Returned Value:

@@ -121,7 +121,7 @@ void rammap_initialize(void);
  * Description:
  *   Support simulation of memory mapped files by copying files into RAM.
  *
- * Parameters:
+ * Input Parameters:
  *   fd      file descriptor of the backing file -- required.
  *   length  The length of the mapping.  For exception #1 above, this length
  *           ignored:  The entire underlying media is always accessible.

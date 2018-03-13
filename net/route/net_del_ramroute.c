@@ -84,7 +84,7 @@ struct route_match_ipv6_s
  * Description:
  *   Return 1 if the route is available
  *
- * Parameters:
+ * Input Parameters:
  *   route - The next route to examine
  *   arg   - The match values (cast to void*)
  *
@@ -201,7 +201,7 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
  * Description:
  *   Remove an existing route from the routing table
  *
- * Parameters:
+ * Input Parameters:
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.

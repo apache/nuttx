@@ -70,7 +70,7 @@
  * Description:
  *   Initialize the GMAC driver
  *
- * Parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:
@@ -101,7 +101,7 @@ static inline void up_gmac_initialize(void)
  * Description:
  *   Initialize the EMAC driver
  *
- * Parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:
@@ -164,7 +164,7 @@ static inline void up_emac_initialize(void)
  *   and GMAC are enabled, then this single entry point must initialize
  *   both.
  *
- * Parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:

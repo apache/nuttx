@@ -77,7 +77,7 @@ static WDOG_ID g_arptimer;           /* ARP timer */
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -110,7 +110,7 @@ static void arptimer_poll(int argc, wdparm_t arg, ...)
  *   Initialized the 10 second timer that is need by the ARP logic in order
  *   to age ARP address associations
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

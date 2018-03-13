@@ -50,7 +50,7 @@
  *   This function initializes the signal set specified by set such that all
  *   signals are included.
  *
- * Parameters:
+ * Input Parameters:
  *   set - Signal set to initalize
  *
  * Returned Value:

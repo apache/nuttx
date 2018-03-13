@@ -53,7 +53,7 @@
  * Description:
  *   Obtain the scheduling algorithm attribute.
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *   policy
  *

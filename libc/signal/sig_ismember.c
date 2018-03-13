@@ -50,7 +50,7 @@
  *   This function tests whether the signal specified by signo is a member
  *   of the set specified by set.
  *
- * Parameters:
+ * Input Parameters:
  *   set - Signal set to test
  *   signo - Signal to test for
  *

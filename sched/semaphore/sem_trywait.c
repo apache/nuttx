@@ -62,7 +62,7 @@
  *   currently not locked.  Otherwise, it locks the semaphore.  In either
  *   case, the call returns without blocking.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - the semaphore descriptor
  *
  * Returned Value:
@@ -133,7 +133,7 @@ int nxsem_trywait(FAR sem_t *sem)
  *   currently not locked.  Otherwise, it locks the semaphore.  In either
  *   case, the call returns without blocking.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - the semaphore descriptor
  *
  * Returned Value:

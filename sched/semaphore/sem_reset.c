@@ -60,7 +60,7 @@
  *   tasks waiting on a count.  This kind of operation is sometimes required
  *   within the OS (only) for certain error handling conditions.
  *
- * Parameters:
+ * Input Parameters:
  *   sem   - Semaphore descriptor to be reset
  *   count - The requested semaphore count
  *

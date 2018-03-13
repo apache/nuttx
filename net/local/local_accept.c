@@ -94,7 +94,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
  *   This function implements accept() for Unix domain sockets.  See the
  *   description of accept() for further information.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    The listening Unix domain socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'

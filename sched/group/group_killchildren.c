@@ -55,7 +55,7 @@
  * Description:
  *   Callback from group_foreachchild that handles one member of the group.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The ID of the group member that may be signalled.
  *   arg - The PID of the thread to be retained.
  *
@@ -92,7 +92,7 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
  *   used by the task restart logic.  When the main task is restarted,
  *   all of its child pthreads must be terminated.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - TCB of the task to be retained.
  *
  * Returned Value:

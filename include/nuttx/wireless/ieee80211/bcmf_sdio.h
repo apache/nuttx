@@ -64,7 +64,7 @@ extern "C"
  * Description:
  *   Initialize Broadcom FullMAC driver.
  *
- * Parameters:
+ * Input Parameters:
  *   minor - zero based minor device number which is unique
  *           for each wlan device.
  *   dev   - SDIO device used to communicate with the wlan chip

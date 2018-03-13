@@ -85,7 +85,7 @@
  *   pending connections are present on the queue, psock_accept returns
  *   EAGAIN.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
@@ -196,7 +196,7 @@ errout_with_lock:
  *   is present. If the socket is marked non-blocking and no pending
  *   connections are present on the queue, accept returns EAGAIN.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   The listening socket descriptor
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'

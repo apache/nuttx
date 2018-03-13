@@ -182,7 +182,7 @@ static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
  *   or (2) a configurable number of timeouts occur without receiving the
  *   ICMPv6 Neighbor Advertisement.
  *
- * Parameters:
+ * Input Parameters:
  *   ipaddr   The IPv6 address to be queried.
  *
  * Returned Value:

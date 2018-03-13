@@ -297,7 +297,7 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
  *   Un-lock the SPI bus after each transfer, possibly losing the current
  *   configuration if we are sharing the SPI bus with other devices.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -320,7 +320,7 @@ static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
  * Description:
  *   Configure the SPI for use with the NRF24L01.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:

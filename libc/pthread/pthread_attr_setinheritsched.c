@@ -57,7 +57,7 @@
  *   attributes will be used or if the thread will
  *   inherit the properties of the parent.
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *   policy
  *

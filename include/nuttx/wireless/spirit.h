@@ -92,7 +92,7 @@ struct spi_dev_s; /* Forward reference */
  * Description:
  *   Initialize the IEEE802.15.4 driver and register it as a network device.
  *
- * Parameters:
+ * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the spirit
  *   lower - The MCU-specific interrupt used to control low-level MCU
  *           functions (i.e., spirit GPIO interrupts).

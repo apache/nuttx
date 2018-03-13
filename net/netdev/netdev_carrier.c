@@ -65,7 +65,7 @@
  *   Notifies the networking layer about an available carrier.
  *   (e.g. a cable was plugged in)
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure
  *
  * Returned Value:
@@ -91,7 +91,7 @@ int netdev_carrier_on(FAR struct net_driver_s *dev)
  *   Notifies the networking layer about an disappeared carrier.
  *   (e.g. a cable was unplugged)
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure
  *
  * Returned Value:

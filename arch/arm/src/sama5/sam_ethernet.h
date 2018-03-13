@@ -319,7 +319,7 @@ int sam_emac_initialize(int intf);
  *   logic must provide sam_phyinitialize();  The SAMA5 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - Always zero for now.
  *
  * Returned Value:

@@ -67,7 +67,7 @@
  *   called, destruction of the semaphore will be postponed until all
  *   references to the semaphore have been destroyed by calls of sem_close().
  *
- * Parameters:
+ * Input Parameters:
  *   name - Semaphore name
  *
  * Returned Value:

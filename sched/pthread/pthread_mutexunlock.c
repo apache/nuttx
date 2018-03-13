@@ -58,7 +58,7 @@
  * Description:
  *   Return true is the mutex is locked.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -102,7 +102,7 @@ static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
  *   the signal handler the thread resumes waiting for the mutex as if it was
  *   not interrupted.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

@@ -88,7 +88,7 @@ extern "C"
  *   Initialize the IEEE802.15.4 driver.  The at86rf23x device is assumed to be
  *   in the post-reset state upon entry to this function.
  *
- * Parameters:
+ * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the at86rf23x
  *   lower - The MCU-specific interrupt used to control low-level MCU
  *           functions (i.e., at86rf23x GPIO interrupts).

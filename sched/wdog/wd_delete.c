@@ -63,7 +63,7 @@
  *   it to the free pool of watchdog timers.  The watchdog timer will be
  *   removed from the active timer queue if had been started.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog - The watchdog ID to delete.  This is actually a pointer to a
  *          watchdog structure.
  *

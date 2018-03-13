@@ -170,7 +170,7 @@ static sem_t g_ipv6_cachelock;
  * Description:
  *   Lock the routing table cache list.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -188,7 +188,7 @@ static sem_t g_ipv6_cachelock;
  * Description:
  *   Unlock the routing table cache list.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -206,7 +206,7 @@ static sem_t g_ipv6_cachelock;
  *   Add a new entry to the routing table cache list.  The list is ordered
  *   by "new-ness" so this would be the entry at the head of the list.
  *
- * Parameters:
+ * Input Parameters:
  *   cache - The cache entry to add to the head of the routing table cache
  *           list.
  *
@@ -251,7 +251,7 @@ static void net_add_newest_ipv6(FAR struct net_cache_ipv6_entry_s *cache)
  *   Remove the oldest entry from the routing table cache list.  The list is
  *   ordered
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -339,7 +339,7 @@ FAR struct net_cache_ipv6_entry_s *net_remove_oldest_ipv6(void)
  *   list.  If the free list is empty, then remove the entry at the tail
  *   of the current routing table cache.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -427,7 +427,7 @@ FAR struct net_cache_ipv6_entry_s *net_alloccache_ipv6(void)
  * Description:
  *   Clear the routing table cache and return the entries to the free list.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -480,7 +480,7 @@ static void net_reset_ipv6_cache(void)
  * Description:
  *   Initialize the in-memory, routing table cache
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -512,7 +512,7 @@ void net_init_cacheroute(void)
  * Description:
  *   Add one route to the routing table cache
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -687,7 +687,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
  * Description:
  *   Traverse the routing table cahce
  *
- * Parameters:
+ * Input Parameters:
  *   handler - Will be called for each route in the routing table cache.
  *   arg     - An arbitrary value that will be passed tot he handler.
  *
@@ -772,7 +772,7 @@ int net_foreachcache_ipv6(route_handler_ipv6_t handler, FAR void *arg)
  * Description:
  *   Flush the content of the routing table cache
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

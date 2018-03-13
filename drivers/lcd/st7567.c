@@ -342,7 +342,7 @@ static struct st7567_dev_s g_st7567dev =
  * Description:
  *   Select the SPI, locking and  re-configuring if necessary
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -379,7 +379,7 @@ static void st7567_select(FAR struct spi_dev_s *spi)
  * Description:
  *   De-select the SPI
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:

@@ -16,6 +16,7 @@
 "cfgetspeed","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","speed_t","FAR const struct termios *"
 "cfsetspeed","termios.h","CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SERIAL_TERMIOS)","int","FAR struct termios *","speed_t"
 "chdir","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char *"
+"clock","time.h","","clock_t"
 "crc32","crc32.h","","uint32_t","FAR const uint8_t *","size_t"
 "crc32part","crc32.h","","uint32_t","FAR const uint8_t *","size_t","uint32_t"
 "dirname","libgen.h","","FAR char","FAR char *"

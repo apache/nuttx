@@ -224,7 +224,7 @@ void weak_function sched_process_cpuload(void)
  * Description:
  *   Return load measurement data for the select PID.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The task ID of the thread of interest.  pid == 0 is the IDLE thread.
  *   cpuload - The location to return the CPU load
  *

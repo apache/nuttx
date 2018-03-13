@@ -96,7 +96,7 @@
  *   nanosleep(), setitimer(), timer_create(), timer_delete(), timer_getoverrun(),
  *   timer_gettime(), timer_settime(), ualarm(), sleep()
  *
- * Parameters:
+ * Input Parameters:
  *   usec - the number of microseconds to wait.
  *
  * Returned Value:

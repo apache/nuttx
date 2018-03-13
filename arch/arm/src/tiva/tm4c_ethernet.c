@@ -899,7 +899,7 @@ static void tiva_checksetup(void)
  * Description:
  *   Initialize the free buffer list.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -936,7 +936,7 @@ static void tiva_initbuffer(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Allocate one buffer from the free buffer list.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -962,7 +962,7 @@ static inline uint8_t *tiva_allocbuffer(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Return a buffer to the free buffer list.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *   buffer - A pointer to the buffer to be freed
  *
@@ -989,7 +989,7 @@ static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv, uint8_t *buff
  * Description:
  *   Return TRUE if the free buffer list is not empty.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1015,7 +1015,7 @@ static inline bool tiva_isfreebuffer(FAR struct tiva_ethmac_s *priv)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1226,7 +1226,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -1333,7 +1333,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
  *   3. After a TX timeout to restart the sending process
  *      (tiva_txtimeout_process).
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1394,7 +1394,7 @@ static void tiva_dopoll(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Enable a "normal" interrupt
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1422,7 +1422,7 @@ static void tiva_enableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit)
  * Description:
  *   Disable a normal interrupt.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1461,7 +1461,7 @@ static void tiva_disableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit)
  *   The function is called when a frame is received using the DMA receive
  *   interrupt.  It scans the RX descriptors to the received frame.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1517,7 +1517,7 @@ static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
  *
  *   NOTE: This function will silently discard any packets containing errors.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1680,7 +1680,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1841,7 +1841,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Scans the TX descriptors and frees the buffers of completed TX transfers.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1937,7 +1937,7 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1984,7 +1984,7 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Perform interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -2091,7 +2091,7 @@ static void tiva_interrupt_work(FAR void *arg)
  * Description:
  *   Hardware interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -2163,7 +2163,7 @@ static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
  * Description:
  *   Perform TX timeout related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -2197,7 +2197,7 @@ static void tiva_txtimeout_work(FAR void *arg)
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
  *   The last TX never completed.  Reset the hardware and start again.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -2235,7 +2235,7 @@ static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -2308,7 +2308,7 @@ static void tiva_poll_work(FAR void *arg)
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -2336,7 +2336,7 @@ static void tiva_poll_expiry(int argc, uint32_t arg, ...)
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2391,7 +2391,7 @@ static int tiva_ifup(struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2438,7 +2438,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg  - Reference to the NuttX driver state structure (cast to void*)
  *
  * Returned Value:
@@ -2476,7 +2476,7 @@ static void tiva_txavail_work(FAR void *arg)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2512,7 +2512,7 @@ static int tiva_txavail(struct net_driver_s *dev)
  * Description:
  *   Function to calculate the CRC used to check an ethernet frame
  *
- * Parameters:
+ * Input Parameters:
  *   data   - the data to be checked
  *   length - length of the data
  *
@@ -2557,7 +2557,7 @@ static uint32_t tiva_calcethcrc(const uint8_t *data, size_t length)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -2614,7 +2614,7 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -2676,7 +2676,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Description:
  *   Initializes the DMA TX descriptors in chain mode.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -2758,7 +2758,7 @@ static void tiva_txdescinit(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Initializes the DMA RX descriptors in chain mode.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -2849,7 +2849,7 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
  *  is specified using the req->reg_no struct field and use req->val_in as
  *  its input.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Ethernet device structure
  *   cmd - SIOCxMIIxxx command code
  *   arg - Request structure also used to return values
@@ -2927,7 +2927,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
  *    is received.
  *  - Interrupt status is cleared when the interrupt is re-enabled.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3018,7 +3018,7 @@ static void tiva_phy_intenable(bool enable)
  * Description:
  *  Read a PHY register.
  *
- * Parameters:
+ * Input Parameters:
  *   phydevaddr - The PHY device address
  *   phyregaddr - The PHY register address
  *   value - The location to return the 16-bit PHY register value.
@@ -3073,7 +3073,7 @@ static int tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *valu
  * Description:
  *  Write to a PHY register.
  *
- * Parameters:
+ * Input Parameters:
  *   phydevaddr - The PHY device address
  *   phyregaddr - The PHY register address
  *   value - The 16-bit value to write to the PHY register value.
@@ -3132,7 +3132,7 @@ static int tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t valu
  * Description:
  *  Configure the PHY and determine the link speed/duplex.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3334,7 +3334,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
  *  Configure to support the selected PHY.  Called after each reset since
  *  many properties of the PHY configuration are lost at each reset.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3410,7 +3410,7 @@ static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
  * Description:
  *  Perform one-time PHY initialization
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3598,7 +3598,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
  * Description:
  *  Reset the Ethernet block.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3657,7 +3657,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
  * Description:
  *  Configure the Ethernet MAC for DMA operation.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3740,7 +3740,7 @@ static int tiva_macconfig(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Configure the selected MAC address.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3782,7 +3782,7 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Configure the IPv6 multicast MAC address.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3855,7 +3855,7 @@ static void tiva_ipv6multicast(FAR struct tiva_ethmac_s *priv)
  * Description:
  *  Enable normal MAC operation.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3933,7 +3933,7 @@ static int tiva_macenable(FAR struct tiva_ethmac_s *priv)
  * Description:
  *  Configure the Ethernet interface for DMA operation.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -4005,7 +4005,7 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
  *   must implement up_netinitialize() and call this function to initialize
  *   the desired interfaces.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value
  *          identifies which EMAC is to be initialized.
  *
@@ -4147,7 +4147,7 @@ int tiva_ethinitialize(int intf)
  *   version of up_netinitialize() that calls tiva_ethinitialize() with
  *   the appropriate interface number.
  *
- * Parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:

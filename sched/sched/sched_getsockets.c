@@ -54,7 +54,7 @@
  * Description:
  *   Return a pointer to the socket list for this thread
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

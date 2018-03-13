@@ -57,7 +57,7 @@
  *   out the bits that are to be compared:  Buts within the mask much
  *   match exactly; bits outside if the mask are ignored.
  *
- * Parameters:
+ * Input Parameters:
  *   addr1 - The first IP address.
  *   addr2 - The second IP address.
  *   mask  - The netmask.

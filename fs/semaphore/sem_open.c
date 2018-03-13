@@ -77,7 +77,7 @@
  *   the same semaphore address is returned (provided there have been no
  *   calls to sem_unlink()).
  *
- * Parameters:
+ * Input Parameters:
  *   name  - Semaphore name
  *   oflags - Semaphore creation options.  This may either or both of the
  *     following bit settings.

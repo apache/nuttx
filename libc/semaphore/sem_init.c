@@ -63,7 +63,7 @@
  *   of referring to copies of sem in calls to nxsem_wait(), nxsem_trywait(),
  *   nxsem_post(), and nxsem_destroy() is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore to be initialized
  *   pshared - Process sharing (not used)
  *   value - Semaphore initialization value
@@ -119,7 +119,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
  *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
  *   sem_post(), and sem_destroy() is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore to be initialized
  *   pshared - Process sharing (not used)
  *   value - Semaphore initialization value

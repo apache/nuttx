@@ -61,7 +61,7 @@
  *   no longer does anything since all of the pthread data structures have
  *   been moved into the "task group"
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -86,7 +86,7 @@ void pthread_initialize(void)
  *   would be to use an internal version of the semaphore functions that
  *   return the error value in the correct form.
  *
- * Parameters:
+ * Input Parameters:
  *  sem  - The semaphore to lock or unlock
  *  intr - false: ignore EINTR errors when locking; true tread EINTR as
  *         other errors by returning the errno value

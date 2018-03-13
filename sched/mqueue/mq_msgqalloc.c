@@ -60,7 +60,7 @@
  *   This function implements a part of the POSIX message queue open logic.
  *   It allocates and initializes a struct mqueue_inode_s structure.
  *
- * Parameters:
+ * Input Parameters:
  *   mode   - mode_t value is ignored
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of

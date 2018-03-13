@@ -163,7 +163,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *   This function is called to perform the actual connection operation via
  *   by the lower, device interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that reported the event
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
@@ -316,7 +316,7 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
  * Description:
  *   Perform a TCP connection
  *
- * Parameters:
+ * Input Parameters:
  *   psock - A reference to the socket structure of the socket to be connected
  *   addr  - The address of the remote server to connect to
  *

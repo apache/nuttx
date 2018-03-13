@@ -58,7 +58,7 @@
  *   sam_emac_intiialize() and to provide support for future chips that
  *   may have multiple EMAC peripherals.
  *
- * Parameters:
+ * Input Parameters:
  *   None.
  *
  * Returned Value:

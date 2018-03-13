@@ -222,7 +222,7 @@ struct ftmac100_rxdes_s
  * Description:
  *   Initialize the Ethernet controller and driver
  *
- * Parameters:
+ * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value
  *          identifies which EMAC is to be initialized.
  *

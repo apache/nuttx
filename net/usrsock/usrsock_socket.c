@@ -159,7 +159,7 @@ static int do_socket_request(FAR struct usrsock_conn_s *conn, int domain,
  *   socket() creates an endpoint for communication and returns a socket
  *   structure.
  *
- * Parameters:
+ * Input Parameters:
  *   domain   (see sys/socket.h)
  *   type     (see sys/socket.h)
  *   protocol (see sys/socket.h)

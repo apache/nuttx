@@ -117,7 +117,7 @@ static int stm32_exti_pvd_isr(int irq, void *context, void *arg)
  * Description:
  *   Sets/clears EXTI PVD interrupt.
  *
- * Parameters:
+ * Input Parameters:
  *  - rising/falling edge: enables interrupt on rising/falling edge
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt

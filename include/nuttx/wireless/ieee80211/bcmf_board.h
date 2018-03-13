@@ -66,7 +66,7 @@ extern "C"
  *   Board specific function called from Broadcom FullMAC driver
  *   that must be implemented to configure WLAN chip GPIOs
  *
- * Parameters:
+ * Input Parameters:
  *   minor - zero based minor device number which is unique
  *           for each wlan device.
  ************************************************************************************/
@@ -80,7 +80,7 @@ void bcmf_board_initialize(int minor);
  *   Board specific function called from Broadcom FullMAC driver
  *   that must be implemented to power WLAN chip
  *
- * Parameters:
+ * Input Parameters:
  *   minor - zero based minor device number which is unique
  *           for each wlan device.
  *   power - true to power WLAN chip else false
@@ -95,7 +95,7 @@ void bcmf_board_power(int minor, bool power);
  *   Board specific function called from Broadcom FullMAC driver
  *   that must be implemented to reset WLAN chip
  *
- * Parameters:
+ * Input Parameters:
  *   minor - zero based minor device number which is unique
  *           for each wlan device.
  *   reset - true to set WLAN chip in reset state else false
@@ -110,7 +110,7 @@ void bcmf_board_reset(int minor, bool reset);
  *   Board specific function called from Broadcom FullMAC driver
  *   that must be implemented to use WLAN chip interrupt signal
  *
- * Parameters:
+ * Input Parameters:
  *   minor - zero based minor device number which is unique
  *           for each wlan device.
  *   func  - WLAN chip callback function that must be called on gpio event

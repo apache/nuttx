@@ -69,7 +69,7 @@
  * Description:
  *   Return the current value of the 32/64-bit system timer counter
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

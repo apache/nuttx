@@ -67,7 +67,7 @@
  * Description:
  *   Remove a group from the list of groups.
  *
- * Parameters:
+ * Input Parameters:
  *   group - The group to be removed.
  *
  * Returned Value:
@@ -126,7 +126,7 @@ static void group_remove(FAR struct task_group_s *group)
  * Description:
  *   Release group resources after the last member has left the group.
  *
- * Parameters:
+ * Input Parameters:
  *   group - The group to be removed.
  *
  * Returned Value:
@@ -285,7 +285,7 @@ static inline void group_release(FAR struct task_group_s *group)
  * Description:
  *   Remove a member from a group.
  *
- * Parameters:
+ * Input Parameters:
  *   group - The group from which to remove the member.
  *   pid - The member to be removed.
  *
@@ -343,7 +343,7 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
  *   reference count decrements to zero, then it frees the group and all of
  *   resources contained in the group.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - The TCB of the task that is exiting.
  *
  * Returned Value:

@@ -529,7 +529,7 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
  *   Get horicontal resolution of the connected LCD driver depending on the
  *   configured display orientation.
  *
- * Parameters:
+ * Input Parameters:
  *   dev   - Reference to private driver structure
  *
  * Returned Value:
@@ -557,7 +557,7 @@ static inline uint16_t ili9341_getxres(FAR struct ili9341_dev_s *dev)
  *   Get vertical resolution of the connected LCD driver depending on the
  *   configured display orientation.
  *
- * Parameter:
+ * Input Parameters:
  *   dev   - Reference to private driver structure
  *
  * Returned Value:
@@ -584,7 +584,7 @@ static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev)
  * Description:
  *   Select the active area for displaying pixel
  *
- * Parameter:
+ * Input Parameters:
  *   lcd       - Reference to private driver structure
  *   x0        - Start x position
  *   y0        - Start y position
@@ -620,7 +620,7 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
  * Description:
  *   Write a partial raster line to the LCD.
  *
- * Parameters:
+ * Input Parameters:
  *   devno   - Number of lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
@@ -680,7 +680,7 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
  * Description:
  *   Read a partial raster line from the LCD.
  *
- * Parameter:
+ * Input Parameters:
  *   devno   - Number of the lcd device
  *   row     - Starting row to read from (range: 0 <= row < yres)
  *   col     - Starting column to read read (range: 0 <= col <= xres-npixels)
@@ -741,7 +741,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
  * Description:
  *   Initialize and configure the ILI9341 LCD driver hardware.
  *
- * Parameter:
+ * Input Parameters:
  *   dev - A reference to the driver specific structure
  *
  * Returned Value:
@@ -839,7 +839,7 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
  * Description:
  *   Write a partial raster line to the LCD.
  *
- * Parameter:
+ * Input Parameters:
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be writen to the LCD
@@ -876,7 +876,7 @@ static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
  * Description:
  *   Read a partial raster line from the LCD.
  *
- * Parameter:
+ * Input Parameters:
  *   row     - Starting row to read from (range: 0 <= row < yres)
  *   col     - Starting column to read from (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be writen to the LCD
@@ -915,7 +915,7 @@ static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- * Parameter:
+ * Input Parameters:
  *   dev - A reference to the driver specific structure
  *   vinfo - A reference to the videoinfo structure
  *
@@ -953,7 +953,7 @@ static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- * Parameter:
+ * Input Parameters:
  *   dev     - A reference to the driver specific structure
  *   planeno - The plane number
  *   pinfo   - A reference to the planeinfo structure
@@ -994,7 +994,7 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on.
  *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- * Parameter:
+ * Input Parameters:
  *   dev     - A reference to the driver specific structure
  *
  * Returned Value:
@@ -1025,7 +1025,7 @@ static int ili9341_getpower(FAR struct lcd_dev_s *dev)
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on).
  *   On backlight LCDs, this setting may correspond to the backlight setting.
  *
- * Parameter:
+ * Input Parameters:
  *   dev   - A reference to the driver specific structure
  *   power - Value of the power
  *
@@ -1081,7 +1081,7 @@ static int ili9341_setpower(FAR struct lcd_dev_s *dev, int power)
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- * Parameter:
+ * Input Parameters:
  *   dev   - A reference to the lcd driver structure
  *
  * Returned Value:
@@ -1103,7 +1103,7 @@ static int ili9341_getcontrast(struct lcd_dev_s *dev)
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- * Parameter:
+ * Input Parameters:
  *   dev   - A reference to the lcd driver structure
  *
  * Returned Value:
@@ -1190,7 +1190,7 @@ FAR struct lcd_dev_s *
  *   covers the entire display can be very slow. Here the display is cleared by
  *   simply setting all GRAM memory to the specified color.
  *
- * Parameter:
+ * Input Parameters:
  *   dev   - A reference to the lcd driver structure
  *   color - The background color
  *

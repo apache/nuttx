@@ -70,7 +70,7 @@ static void wrlock_cleanup(FAR void *arg)
  * Description:
  *   Locks a read/write lock for writing
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

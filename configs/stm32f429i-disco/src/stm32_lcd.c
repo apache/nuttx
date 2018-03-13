@@ -418,7 +418,7 @@ static int stm32_ili9341_initialize(void)
  * Description:
  *   Unitialize the LCD Device.
  *
- * Parameter:
+ * Input Parameters:
  *
  * Returned Value:
  *
@@ -441,7 +441,7 @@ void board_lcd_uninitialize(void)
  *   Return a reference to the LCD object for the specified LCD Device.
  *   This allows support for multiple LCD devices.
  *
- * Parameter:
+ * Input Parameters:
  *   lcddev - Number of the LDC Device.
  *
  * Returned Value:
@@ -467,7 +467,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  *   fully initialized, display memory cleared, and the LCD ready to use, but
  *   with the power setting at 0 (full off).
  *
- * Parameter:
+ * Input Parameters:
  *
  * Returned Value:
  *   On success - Ok
@@ -598,7 +598,7 @@ void up_fbuninitialize(int display)
  *   The application function name to get a reference to the hardware layer of
  *   the ltdc device.
  *
- * Parameter:
+ * Input Parameters:
  *   lid - The specific layer identifier
  *
  ************************************************************************************/

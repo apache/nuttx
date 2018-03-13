@@ -154,7 +154,7 @@ extern "C"
  *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
  *   sem_post(), and sem_destroy() is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore to be initialized
  *   pshared - Process sharing (not used)
  *   value - Semaphore initialization value
@@ -182,7 +182,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value);
  *   The effect of destroying a semaphore upon which other processes are
  *   currently blocked is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore to be destroyed.
  *
  * Returned Value:
@@ -208,7 +208,7 @@ int nxsem_destroy (FAR sem_t *sem);
  *   - It is not a cancellaction point, and
  *   - It does not modify the errno value.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor.
  *
  * Returned Value:
@@ -232,7 +232,7 @@ int nxsem_wait(FAR sem_t *sem);
  *   currently not locked.  Otherwise, it locks the semaphore.  In either
  *   case, the call returns without blocking.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - the semaphore descriptor
  *
  * Returned Value:
@@ -272,7 +272,7 @@ int nxsem_trywait(FAR sem_t *sem);
  *   - It is not a cancellaction point, and
  *   - It does not modify the errno value.
  *
- * Parameters:
+ * Input Parameters:
  *   sem     - Semaphore object
  *   abstime - The absolute time to wait until a timeout is declared.
  *
@@ -303,7 +303,7 @@ int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime);
  *   This function is a lighter weight version of sem_timedwait().  It is
  *   non-standard and intended only for use within the RTOS.
  *
- * Parameters:
+ * Input Parameters:
  *   sem     - Semaphore object
  *   start   - The system time that the delay is relative to.  If the
  *             current time is not the same as the start time, then the
@@ -339,7 +339,7 @@ int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
  *   then one of the tasks blocked waiting for the semaphore shall be
  *   allowed to return successfully from its call to sem_wait().
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor
  *
  * Returned Value:
@@ -369,7 +369,7 @@ int nxsem_post(FAR sem_t *sem);
  *   zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor
  *   sval - Buffer by which the value is returned
  *
@@ -391,7 +391,7 @@ int nxsem_getvalue(FAR sem_t *sem, FAR int *sval);
  *   tasks waiting on a count.  This kind of operation is sometimes required
  *   within the OS (only) for certain error handling conditions.
  *
- * Parameters:
+ * Input Parameters:
  *   sem   - Semaphore descriptor to be reset
  *   count - The requested semaphore count
  *
@@ -410,7 +410,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
  * Description:
  *    Return the value of the semaphore protocol attribute.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               queried.
  *    protocol - The user provided location in which to store the protocol
@@ -431,7 +431,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
  * Description:
  *    Return the value of the semaphore protocol attribute.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               queried.
  *    protocol - The user provided location in which to store the protocol
@@ -471,7 +471,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  *    the sem_init() call so that there will be no priority inheritance
  *    operations on this semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               modified
  *    protocol - The new protocol to use
@@ -510,7 +510,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol);
  *    the sem_init() call so that there will be no priority inheritance
  *    operations on this semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *    sem      - A pointer to the semaphore whose attributes are to be
  *               modified
  *    protocol - The new protocol to use

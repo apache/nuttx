@@ -779,7 +779,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer, size
  *   Create a character driver to "wrap" the telnet session.  This function
  *   will select and return a unique path for the new telnet device.
  *
- * Parameters:
+ * Input Parameters:
  *   session - On input, contains the socket descriptor that represents the
  *   new telnet connection.  On output, it holds the path to the new Telnet driver.
  *
@@ -975,7 +975,7 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Description:
  *   Create the Telnet factory at /dev/telnet.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

@@ -53,7 +53,7 @@
  *
  * Description:
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *   stacksize
  *

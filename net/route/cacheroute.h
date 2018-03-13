@@ -56,7 +56,7 @@
  * Description:
  *   Initialize the in-memory, routing table cache
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -75,7 +75,7 @@ void net_init_cacheroute(void);
  * Description:
  *   Add one route to the routing table cache
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -98,7 +98,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route);
  * Description:
  *   Traverse the routing table cahce
  *
- * Parameters:
+ * Input Parameters:
  *   handler - Will be called for each route in the routing table cache.
  *   arg     - An arbitrary value that will be passed tot he handler.
  *
@@ -123,7 +123,7 @@ int net_foreachcache_ipv6(route_handler_ipv6_t handler, FAR void *arg);
  * Description:
  *   Flush the content of the routing table cache
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

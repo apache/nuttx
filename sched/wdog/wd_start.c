@@ -98,7 +98,7 @@ typedef void (*wdentry4_t)(int argc, wdparm_t arg1, wdparm_t arg2,
  *   Check if the timer for the watchdog at the head of list is ready to
  *   run.  If so, remove the watchdog from the list and execute it.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -203,7 +203,7 @@ static inline void wd_expiration(void)
  *   call wd_start again with the same wdog; only the most recent wdStart()
  *   on a given watchdog ID has any effect.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog     - watchdog ID
  *   delay    - Delay count in clock ticks
  *   wdentry  - function to call on timeout
@@ -400,7 +400,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
  *   function will be executed in the context of the timer interrupt
  *   handler.
  *
- * Parameters:
+ * Input Parameters:
  *   ticks - If CONFIG_SCHED_TICKLESS is defined then the number of ticks
  *     in the interval that just expired is provided.  Otherwise,
  *     this function is called on each timer interrupt and a value of one

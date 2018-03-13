@@ -85,7 +85,7 @@
  * Description:
  *   Handle MAC and radio IOCTL commands directed to the MAC.
  *
- * Parameters:
+ * Input Parameters:
  *   mac - Reference to the XBee driver state structure
  *   cmd - The IOCTL command
  *   arg - The argument for the IOCTL command

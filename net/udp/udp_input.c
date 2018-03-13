@@ -66,7 +66,7 @@
  * Description:
  *   Handle incoming UDP input
  *
- * Parameters:
+ * Input Parameters:
  *   dev   - The device driver structure containing the received UDP packet
  *   udp   - A pointer to the UDP header in the packet
  *   iplen - Length of the IP and UDP headers
@@ -238,7 +238,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
  * Description:
  *   Handle incoming UDP input in an IPv4 packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
  * Returned Value:
@@ -270,7 +270,7 @@ int udp_ipv4_input(FAR struct net_driver_s *dev)
  * Description:
  *   Handle incoming UDP input in an IPv6 packet
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received UDP packet
  *
  * Returned Value:

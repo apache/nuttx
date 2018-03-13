@@ -69,7 +69,7 @@
  *   - It is not a cancellaction point, and
  *   - It does not modify the errno value.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor.
  *
  * Returned Value:
@@ -218,7 +218,7 @@ int nxsem_wait(FAR sem_t *sem)
  *   the semaphore value is (<=) zero, then the calling task will not return
  *   until it successfully acquires the lock.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor.
  *
  * Returned Value:

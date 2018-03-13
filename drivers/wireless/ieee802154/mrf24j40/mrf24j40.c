@@ -149,7 +149,7 @@ static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
  *   3. After a TX timeout to restart the sending process
  *      (mrf24j40_txtimeout_csma).
  *
- * Parameters:
+ * Input Parameters:
  *   radio  - Reference to the radio driver state structure
  *
  * Returned Value:
@@ -207,7 +207,7 @@ void mrf24j40_dopoll_csma(FAR void *arg)
  *   3. After a TX timeout to restart the sending process
  *      (mrf24j40_txtimeout_gts).
  *
- * Parameters:
+ * Input Parameters:
  *   arg  - Reference to the radio driver state structure
  *
  * Returned Value:

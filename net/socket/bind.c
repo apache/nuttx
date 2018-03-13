@@ -68,7 +68,7 @@
  *   to a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure of the socket to bind
  *   addr     Socket local address
  *   addrlen  Length of 'addr'
@@ -124,7 +124,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
  *   a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   Socket descriptor of the socket to bind
  *   addr     Socket local address
  *   addrlen  Length of 'addr'

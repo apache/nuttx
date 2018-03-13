@@ -309,7 +309,7 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg);
  *   must implement up_netinitialize() and call this function to initialize
  *   the desiresed interfaces.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

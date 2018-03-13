@@ -62,7 +62,7 @@
  *   The effect of destroying a semaphore upon which other processes are
  *   currently blocked is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore to be destroyed.
  *
  * Returned Value:
@@ -116,7 +116,7 @@ int nxsem_destroy (FAR sem_t *sem)
  *   The effect of destroying a semaphore upon which other processes are
  *   currently blocked is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore to be destroyed.
  *
  * Returned Value:

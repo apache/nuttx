@@ -66,7 +66,7 @@
  *   pointed to by cpuset.  Typically, this argument would be specified as
  *   sizeof(cpu_set_t).
  *
- * Parameters:
+ * Input Parameters:
  *   thread     - The ID of thread whose affinity set will be retrieved.
  *   cpusetsize - Size of cpuset.  MUST be sizeofcpu_set_t().
  *   cpuset     - The location to return the thread's new affinity set.

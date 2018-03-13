@@ -56,7 +56,7 @@
  * Description:
  *   Allocate and zero memory from the user heap.
  *
- * Parameters:
+ * Input Parameters:
  *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Returned Value:

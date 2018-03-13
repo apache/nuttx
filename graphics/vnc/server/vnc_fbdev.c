@@ -683,7 +683,7 @@ int up_fbinitialize(int display)
  *   higher level level callouts can then call nx_kbdin() or nx_mousein() on
  *   behalf of the VNC server.
  *
- * Parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *   kbdout - If non-NULL, then the pointed-to function will be called to

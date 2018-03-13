@@ -57,7 +57,7 @@
  *   The clearenv() function clears the environment of all name-value pairs
  *   and sets the value of the external variable environ to NULL.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

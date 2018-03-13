@@ -102,7 +102,7 @@ struct net_driver_s *g_netdevices = NULL;
  *   Given a device name format string, find the next device number for the
  *   class of device represented by that format string.
  *
- * Parameters:
+ * Input Parameters:
  *   devfmt - The device format string
  *
  * Returned Value:
@@ -153,7 +153,7 @@ static int find_devnum(FAR const char *devfmt)
  *   Register a network device driver and assign a name to it so that it can
  *   be found in subsequent network ioctl operations on the device.
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device driver structure to be registered.
  *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
  *              ...

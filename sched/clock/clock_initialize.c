@@ -263,7 +263,7 @@ void clock_initialize(void)
  *   Time going backward could have bad consequences if there are ongoing
  *   timers and delays.  So use this interface with care.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -302,7 +302,7 @@ void clock_synchronize(void)
  *   time. If setting system time with RTC would result time going "backward"
  *   then resynchronization is not performed.
  *
- * Parameters:
+ * Input Parameters:
  *   rtc_diff:  amount of time system-time is adjusted forward with RTC
  *
  * Returned Value:

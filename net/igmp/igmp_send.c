@@ -100,7 +100,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
  *   Sends an IGMP IP packet on a network interface. This function constructs
  *   the IP header and calculates the IP header checksum.
  *
- * Parameters:
+ * Input Parameters:
  *   dev        - The device driver structure to use in the send operation.
  *   group      - Describes the multicast group member and identifies the
  *                message to be sent.

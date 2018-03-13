@@ -166,7 +166,7 @@ static struct max11802_dev_s *g_max11802list;
  *   to assure: (1) exclusive access to the SPI bus, and (2) to assure that
  *   the shared bus is properly configured for the touchscreen controller.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -202,7 +202,7 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
  *   Un-lock the SPI bus after each transfer, possibly losing the current
  *   configuration if we are sharing the SPI bus with other devices
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:

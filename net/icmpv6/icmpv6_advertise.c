@@ -81,7 +81,7 @@
  * Description:
  *   Send an ICMPv6 Neighbor Advertisement
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the outgoing ICMPv6 packet
  *         buffer
  *

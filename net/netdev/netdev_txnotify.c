@@ -61,7 +61,7 @@
  *   Notify the device driver that forwards the IPv4 address that new TX
  *   data is available.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - The local address bound to the socket
  *   ripaddr - The remote address to send the data
  *
@@ -98,7 +98,7 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
  *   Notify the device driver that forwards the IPv4 address that new TX
  *   data is available.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - The local address bound to the socket
  *   ripaddr - The remote address to send the data
  *
@@ -136,7 +136,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  *   would be called when the upper level logic already understands how the
  *   packet will be routed.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The network device driver state structure.
  *
  * Returned Value:

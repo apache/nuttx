@@ -99,7 +99,7 @@ void up_netinitialize(void);
  *   logic must provide sam_phyinitialize();  The SAM34 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - Always zero for now.
  *
  * Returned Value:

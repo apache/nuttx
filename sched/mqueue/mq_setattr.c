@@ -60,7 +60,7 @@
  *   previous message queue attributes at that location (just
  *   as would have been returned by mq_getattr()).
  *
- * Parameters:
+ * Input Parameters:
  *   mqdes - Message queue descriptor
  *   mq_stat - New attributes
  *   oldstate - Old attributes

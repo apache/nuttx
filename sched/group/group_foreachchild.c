@@ -55,7 +55,7 @@
  * Description:
  *   Execute a function for each child of a group.
  *
- * Parameters:
+ * Input Parameters:
  *   group - The group containing the children
  *   handler - The function to be called
  *   arg - An additional argument to provide to the handler

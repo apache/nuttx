@@ -54,7 +54,7 @@
  * Description:
  *    An attributes object can be deleted when it is no longer needed.
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *
  * Returned Value:

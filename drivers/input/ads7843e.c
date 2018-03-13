@@ -167,7 +167,7 @@ static struct ads7843e_dev_s *g_ads7843elist;
  *   to assure: (1) exclusive access to the SPI bus, and (2) to assure that
  *   the shared bus is properly configured for the touchscreen controller.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -205,7 +205,7 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
  *   Un-lock the SPI bus after each transfer,  possibly losing the current
  *   configuration if we are sharing the bus with other devices.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:

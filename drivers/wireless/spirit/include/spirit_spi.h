@@ -227,7 +227,7 @@ int spirit_update_status(FAR struct spirit_library_s *spirit);
  *   Poll until the Spirit status is the requested value or until a timeout
  *   occurs.
  *
- * Parameters:
+ * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
  *   state  - That that we are waiting for.
  *   msec   - Timeout in millisedonds

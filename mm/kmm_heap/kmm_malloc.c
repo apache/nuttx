@@ -53,7 +53,7 @@
  * Description:
  *   Allocate memory from the kernel heap.
  *
- * Parameters:
+ * Input Parameters:
  *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Returned Value:

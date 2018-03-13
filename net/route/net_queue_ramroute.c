@@ -54,7 +54,7 @@
  * Description:
  *   Remove the entry at the end of an IPv4/IPv6 routing table list
  *
- * Parameters:
+ * Input Parameters:
  *   entry - A pointer to the new entry to add to the list
  *   list - The list to be used.
  *
@@ -105,7 +105,7 @@ void ramroute_ipv6_addlast(FAR struct net_route_ipv6_entry_s *entry,
  * Description:
  *   Add an entry to the end of an IPv4/IPv6 routing table list
  *
- * Parameters:
+ * Input Parameters:
  *   entry - A pointer to the new entry to add to the list
  *   list - The list to be used.
  *
@@ -164,7 +164,7 @@ FAR struct net_route_ipv6_entry_s *
  *   Remove the entry in the IPv4/IPv6 routing table list after the specified
      entry.
  *
- * Parameters:
+ * Input Parameters:
  *   entry - A pointer to the new entry to add to the list
  *   list - The list to be used.
  *

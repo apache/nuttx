@@ -365,7 +365,7 @@ bool kl_gpioread(uint32_t pinset);
  *   2. Call kl_gpioirqattach() to attach the pin interrupt handling function.
  *   3. Call kl_gpioirqenable() to enable interrupts on the pin.
  *
- * Parameters:
+ * Input Parameters:
  *  - pinset:  Pin configuration
  *  - pinisr:  Pin interrupt service routine
  *  - pinarg:  The argument that will accompany the pin interrupt

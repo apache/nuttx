@@ -140,7 +140,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
  *   bases for per-thread timers. All implementations shall support a
  *   clock_id of CLOCK_REALTIME.
  *
- * Parameters:
+ * Input Parameters:
  *   clockid - Specifies the clock to use as the timing base.
  *   evp - Refers to a user allocated sigevent structure that defines the
  *     asynchronous notification.  evp may be NULL (see above).

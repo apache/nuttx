@@ -614,7 +614,7 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
  *  last line (byte) zero so that the cursor can use this line, but this is
  *  not strictly required.
  *
- * Parameters:
+ * Input Parameters:
  *  priv - device instance
  *  idxchar - which character is being imaged; 0 - 7
  *  chardata - the character image bitmap; must be 8 bytes always
@@ -644,7 +644,7 @@ static void lcd_create_char(FAR struct pcf8574_lcd_dev_s *priv,
  * Description:
  *  This sets the cursor position based on row, column addressing.
  *
- * Parameters:
+ * Input Parameters:
  *  priv - device instance
  *  row - row position
  *  col - column position
@@ -665,7 +665,7 @@ static void lcd_set_curpos(FAR struct pcf8574_lcd_dev_s *priv,
  * Description:
  *  This gets the cursor position based on row, column addressing.
  *
- * Parameters:
+ * Input Parameters:
  *  priv - device instance
  *  row - row position
  *  col - column position
@@ -735,7 +735,7 @@ static void lcd_scroll_up(FAR struct pcf8574_lcd_dev_s *priv)
  * Description:
  *  Perform an 'action' as per the Segment LCD codec.
  *
- * Parameters:
+ * Input Parameters:
  *  priv - device instance
  *  code - SLCD code action code
  *  count - count param for those actions that take it

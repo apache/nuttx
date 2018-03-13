@@ -88,7 +88,7 @@ volatile sq_queue_t g_alloctimers;
  * Description:
  *   Boot up configuration of the POSIX timer facility.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -129,7 +129,7 @@ void weak_function timer_initialize(void)
  *   like timer_intitialize(), be brought into the link whenever the timer
  *   resources are referenced.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - the task ID of the thread that exited
  *
  * Returned Value:

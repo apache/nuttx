@@ -210,7 +210,7 @@ drop:
  * Description:
  *   Handle incoming ICMP input
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received ICMP
  *         packet
  *

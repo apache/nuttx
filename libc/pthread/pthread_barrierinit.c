@@ -61,7 +61,7 @@
  *   being initialized. The results are undefined if pthread_barrier_init()
  *   is called specifying an already initialized barrier.
  *
- * Parameters:
+ * Input Parameters:
  *   barrier - the barrier to be initialized
  *   attr - barrier attributes to be used in the initialization.
  *   count - the count to be associated with the barrier.  The count

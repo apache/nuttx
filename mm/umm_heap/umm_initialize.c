@@ -85,7 +85,7 @@
  *     This function is not called at all.  Rather, this function is called
  *     when each user process is created before the first allocation is made.
  *
- * Parameters:
+ * Input Parameters:
  *   heap_start - Address of the beginning of the (initial) memory region
  *   heap_size  - The size (in bytes) if the (initial) memory region.
  *

@@ -60,7 +60,7 @@
  * Description:
  *   The unsetenv() function deletes the variable name from the environment.
  *
- * Parameters:
+ * Input Parameters:
  *   name - The name of the variable to delete
  *
  * Returned Value:

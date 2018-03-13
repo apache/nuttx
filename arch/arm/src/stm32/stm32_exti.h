@@ -117,7 +117,7 @@ int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event, xcpt_t func,
  * Description:
  *   Sets/clears EXTI wakeup interrupt.
  *
- * Parameters:
+ * Input Parameters:
  *  - rising/falling edge: enables interrupt on rising/falling edges
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt

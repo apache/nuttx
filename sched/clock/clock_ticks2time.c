@@ -52,7 +52,7 @@
  * Description:
  *   Convert the system time tick value to a relative time.
  *
- * Parameters:
+ * Input Parameters:
  *   ticks - The number of system time ticks to convert.
  *   reltime - Return the converted system time here.
  *

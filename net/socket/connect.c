@@ -79,7 +79,7 @@
  *   the association by connecting to an address with the sa_family member of
  *   sockaddr set to AF_UNSPEC.
  *
- * Parameters:
+ * Input Parameters:
  *   psock     Pointer to a socket structure initialized by psock_socket()
  *   addr      Server address (form depends on type of socket)
  *   addrlen   Length of actual 'addr'
@@ -180,7 +180,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *   the association by connecting to an address with the sa_family member of
  *   sockaddr set to AF_UNSPEC.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd    Socket descriptor returned by socket()
  *   addr      Server address (form depends on type of socket)
  *   addrlen   Length of actual 'addr'

@@ -114,7 +114,7 @@ bool netdev_verify(FAR struct net_driver_s *dev);
  *   Find a previously registered network device using its assigned
  *   network interface name
  *
- * Parameters:
+ * Input Parameters:
  *   ifname The interface name of the device of interest
  *
  * Returned Value:
@@ -137,7 +137,7 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
  *
  *   NOTE: netdev semaphore held throughout enumeration.
  *
- * Parameters:
+ * Input Parameters:
  *   callback - Will be called for each registered device
  *   arg      - User argument passed to callback()
  *
@@ -158,7 +158,7 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg);
  *   Find a previously registered network device by matching an arbitrary
  *   IPv4 address.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - Local, bound address of a connection.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
@@ -183,7 +183,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  *   Find a previously registered network device by matching an arbitrary
  *   IPv6 address.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - Local, bound address of a connection.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
@@ -211,7 +211,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
  *   registered device causing a given index to be meaningless (unless, of
  *   course, the caller keeps the network locked).
  *
- * Parameters:
+ * Input Parameters:
  *   index - the index of the interface to file
  *
  * Returned Value:
@@ -238,7 +238,7 @@ FAR struct net_driver_s *netdev_findbyindex(int index);
  *   if a socket is connected with INADDY_ANY.  In this case, I suppose we
  *   should use the IP address associated with some default device???
  *
- * Parameters:
+ * Input Parameters:
  *   NULL
  *
  * Returned Value:
@@ -260,7 +260,7 @@ FAR struct net_driver_s *netdev_default(void);
  *   Notify the device driver that forwards the IPv4 address that new TX
  *   data is available.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - The local address bound to the socket
  *   ripaddr - The remote address to send the data
  *
@@ -284,7 +284,7 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
  *   Notify the device driver that forwards the IPv4 address that new TX
  *   data is available.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - The local address bound to the socket
  *   ripaddr - The remote address to send the data
  *
@@ -310,7 +310,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  *   would be called when the upper level logic already understands how the
  *   packet will be routed.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The network device driver state structure.
  *
  * Returned Value:
@@ -329,7 +329,7 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev);
  * Description:
  *   Return the number of network devices
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -350,7 +350,7 @@ int netdev_count(void);
  * Description:
  *   Return the IPv4 configuration of each network adaptor
  *
- * Parameters:
+ * Input Parameters:
  *   ifc - A reference to the instance of struct ifconf in which to return
  *         the information.
  *
@@ -374,7 +374,7 @@ int netdev_ipv4_ifconf(FAR struct ifconf *ifc);
  * Description:
  *   Return the IPv6 configuration of each network adaptor
  *
- * Parameters:
+ * Input Parameters:
  *   lifc - A reference to the instance of struct lifconf in which to return
  *          the information.
  *
@@ -398,7 +398,7 @@ int netdev_ipv6_ifconf(FAR struct lifconf *lifc);
  * Description:
  *   Returns the size of the MAC address associated with a network device.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - A reference to the device of interest
  *
  * Returned Value:

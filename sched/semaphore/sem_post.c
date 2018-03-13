@@ -71,7 +71,7 @@
  *   then one of the tasks blocked waiting for the semaphore shall be
  *   allowed to return successfully from its call to nxsem_wait().
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor
  *
  * Returned Value:
@@ -208,7 +208,7 @@ int nxsem_post(FAR sem_t *sem)
  *   then one of the tasks blocked waiting for the semaphore shall be
  *   allowed to return successfully from its call to nxsem_wait().
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor
  *
  * Returned Value:

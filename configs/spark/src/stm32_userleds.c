@@ -100,7 +100,7 @@ void board_userled(int led, bool ledon)
  * Description:
  *   This function will be called to set the state of the Leds on the board
  *
- * Paramaters:
+ * Input Parameters:
  *   ledset: is a bit set of 1s for the LEDs to effect
  *   led_states_set: a bit set of 1 for on 0 for off
  *     N.B. The led_states_set terms are in true logic, the led polarity is

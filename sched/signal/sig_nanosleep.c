@@ -73,7 +73,7 @@
  *   The use of the nxsig_nanosleep() function has no effect on the action
  *   or blockage of any signal.
  *
- * Parameters:
+ * Input Parameters:
  *   rqtp - The amount of time to be suspended from execution.
  *   rmtp - If the rmtp argument is non-NULL, the timespec structure
  *          referenced by it is updated to contain the amount of time
@@ -239,7 +239,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
  *   to the CPU-time clock of the calling thread. It is unspecified whether
  *   clock_id values of other CPU-time clocks are allowed.
  *
- * Parameters:
+ * Input Parameters:
  *   clockid - The clock to use to interpret the absolute time
  *   flags   - Open flags.  TIMER_ABSTIME  is the only supported flag.
  *   rqtp    - The amount of time to be suspended from execution.

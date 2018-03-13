@@ -88,7 +88,7 @@
  *   from the signal handler the thread resumes waiting for the mutex as if
  *   it was not interrupted.
  *
- * Parameters:
+ * Input Parameters:
  *   mutex - A reference to the mutex to be locked.
  *
  * Returned Value:

@@ -82,7 +82,7 @@
  *   - It is not a cancellaction point, and
  *   - It does not modify the errno value.
  *
- * Parameters:
+ * Input Parameters:
  *   sem     - Semaphore object
  *   abstime - The absolute time to wait until a timeout is declared.
  *
@@ -231,7 +231,7 @@ errout_with_irqdisabled:
  *   absolute time specified by abstime has already been passed at the
  *   time of the call.
  *
- * Parameters:
+ * Input Parameters:
  *   sem     - Semaphore object
  *   abstime - The absolute time to wait until a timeout is declared.
  *

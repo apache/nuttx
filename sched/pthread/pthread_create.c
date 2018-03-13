@@ -130,7 +130,7 @@ static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb, pthread_addr_
  * Description:
  *   Add a join structure to the local data set.
  *
- * Parameters:
+ * Input Parameters:
  *   pjoin
  *
  * Returned Value:
@@ -163,7 +163,7 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
  * Description:
  *   This function is the low level entry point into the pthread
  *
- * Parameters:
+ * Input Parameters:
  * None
  *
  ****************************************************************************/

@@ -72,7 +72,7 @@
  *   Realtime Signals Extension is not supported, the return value of
  *   timer_getoverrun() is unspecified.
  *
- * Parameters:
+ * Input Parameters:
  *   timerid - The pre-thread timer, previously created by the call to
  *   timer_create(), whose overrun count will be returned..
  *

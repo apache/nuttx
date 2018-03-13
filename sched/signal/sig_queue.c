@@ -71,7 +71,7 @@
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sigqueue() except that it does not modify the errno value.
  *
- * Parameters:
+ * Input Parameters:
  *   pid - Process ID of task to receive signal
  *   signo - Signal number
  *   value - Value to pass to task with signal
@@ -152,7 +152,7 @@ int nxsig_queue(int pid, int signo, void *sival_ptr)
  *   implementation defined as to whether the signal is delivered more than
  *   once."
  *
- * Parameters:
+ * Input Parameters:
  *   pid - Process ID of task to receive signal
  *   signo - Signal number
  *   value - Value to pass to task with signal

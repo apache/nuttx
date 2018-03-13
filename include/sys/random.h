@@ -61,7 +61,7 @@
  *
  *   Note that this function cannot fail, other than by asserting.
  *
- * Parameters:
+ * Input Parameters:
  *   bytes  - Buffer for returned random bytes
  *   nbytes - Number of bytes requested.
  *

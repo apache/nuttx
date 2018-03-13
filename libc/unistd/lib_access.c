@@ -75,7 +75,7 @@
  *   ID and the real group ID in place of the effective group ID.
  *   As there are no users in NuttX, the function always succeeds.
  *
- * Parameters:
+ * Input Parameters:
  *   path - a pointer to the path
  *   amode - the access mode
  *

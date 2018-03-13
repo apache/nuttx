@@ -306,7 +306,7 @@ EXTERN systime_t g_polltime;
  * Description:
  *   Perform initialization of the network device interface layer
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

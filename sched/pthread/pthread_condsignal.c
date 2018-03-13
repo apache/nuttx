@@ -55,7 +55,7 @@
  * Description:
  *    A thread can signal on a condition variable.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

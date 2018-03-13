@@ -75,7 +75,7 @@
  * Description:
  *   Dump a data buffer to the SYSLOG.
  *
- * Parameters:
+ * Input Parameters:
  *   buffer - The buffer to be dumped
  *   buflen - The length of the buffer in bytes.
  *
@@ -126,7 +126,7 @@ static void spirit_dump_buffer(FAR const uint8_t *buffer, unsigned int buflen)
  * Description:
  *   Dump a register access.
  *
- * Parameters:
+ * Input Parameters:
  *   msg    - Describes the access
  *   header - Two byte header before the access
  *   buffer - The buffer to be dumped
@@ -154,7 +154,7 @@ static void spirit_regdebug(FAR const char *msg, FAR uint8_t *header,
  * Description:
  *   Dump a FIFO access.
  *
- * Parameters:
+ * Input Parameters:
  *   msg    - Describes the access
  *   header - Two byte header before the access
  *   buffer - The buffer to be dumped
@@ -185,7 +185,7 @@ static void spirit_fifodebug(FAR const char *msg, FAR uint8_t *header,
  *   multiple devices on the bus because while the bus was unlocked, another
  *   device may have re-configured the SPIO.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -227,7 +227,7 @@ static void spirit_lock(FAR struct spi_dev_s *spi)
  *   Un-lock the SPI bus after each transfer, possibly losing the current
  *   configuration if we are sharing the SPI bus with other devices.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -624,7 +624,7 @@ int spirit_update_status(FAR struct spirit_library_s *spirit)
  *   Poll until the Spirit status is the requested value or until a timeout
  *   occurs.
  *
- * Parameters:
+ * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
  *   state  - That that we are waiting for.
  *   msec   - Timeout in millisedonds

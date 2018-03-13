@@ -134,7 +134,7 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  *   Once an action is installed for a specific signal, it remains installed
  *   until another action is explicitly requested by another call to sigaction().
  *
- * Parameters:
+ * Input Parameters:
  *   sig - Signal of interest
  *   act - Location of new handler
  *   oact - Location to store only handler

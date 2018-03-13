@@ -191,7 +191,7 @@ static void setup_conn_getsockopt(FAR struct usrsock_conn_s *conn,
  *
  *   See <sys/socket.h> a complete list of values for the 'option' argument.
  *
- * Parameters:
+ * Input Parameters:
  *   conn      usrsock socket connection structure
  *   level     Protocol level to set the option
  *   option    identifies the option to get

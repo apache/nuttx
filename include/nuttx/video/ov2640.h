@@ -68,7 +68,7 @@ extern "C"
  * Description:
  *   Initialize the OV2640 camera.
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *
  * Returned Value:

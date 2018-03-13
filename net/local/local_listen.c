@@ -74,7 +74,7 @@ dq_queue_t g_local_listeners;
  *   Unix sockets, psock_listen() calls this function.  The psock_listen()
  *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client

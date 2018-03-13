@@ -75,7 +75,7 @@
  *   The SCHED_FIFO and SCHED_RR policies will have a single scheduling
  *   parameter, sched_priority.
  *
- * Parameters:
+ * Input Parameters:
  *   thread - The ID of thread whose scheduling parameters will be queried.
  *   policy - The location to store the thread's scheduling policy.
  *   param  - The location to store the thread's priority.

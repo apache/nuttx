@@ -53,7 +53,7 @@
  * Description:
  *    Return the value of the mutex protocol attribute.
  *
- * Parameters:
+ * Input Parameters:
  *    attr     - A pointer to the mutex attributes to be queried.
  *    protocol - The user provided location in which to store the protocol
  *               value.

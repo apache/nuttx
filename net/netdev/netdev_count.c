@@ -58,7 +58,7 @@
  * Description:
  *   Return the number of network devices
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

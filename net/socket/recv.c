@@ -56,7 +56,7 @@
  * Description:
  *   The recv() call is identical to recvfrom() with a NULL from parameter.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   Socket descriptor of socket
  *   buf      Buffer to receive data
  *   len      Length of buffer

@@ -55,7 +55,7 @@
  * Description:
  *   Allocate aligned memory in the kernel heap.
  *
- * Parameters:
+ * Input Parameters:
  *   alignment - Log2 byte alignment
  *   size - Size (in bytes) of the new memory region to be allocated.
  *

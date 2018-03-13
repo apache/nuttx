@@ -186,7 +186,7 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
  * Description:
  *   Send an ICMPv6 Router Solicitation to resolve an IPv6 address.
  *
- * Parameters:
+ * Input Parameters:
  *   dev       - The device to use to send the solicitation
  *   advertise - True: Send the Neighbor Advertisement message
  *
@@ -273,7 +273,7 @@ errout_with_semaphore:
  *   Wait for the receipt of the Router Advertisement matching the Router
  *   Solicitation that we just sent.
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - The device to use to send the solicitation
  *   notify - The pre-initialized notification structure
  *
@@ -328,7 +328,7 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
  *   the characteristics of the network it is on, and then create a permanent
  *   address it can use based on that information.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to assign the address to
  *
  * Returned Value:

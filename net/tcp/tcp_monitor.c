@@ -70,7 +70,7 @@ static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
  * Description:
  *   Called when a loss-of-connection event has occurred.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    The TCP socket structure associated.
  *   flags    Set of connection events events
  *
@@ -125,7 +125,7 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
  * Description:
  *   Some connection related event has occurred
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The device which as active when the event was detected.
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
@@ -406,7 +406,7 @@ void tcp_close_monitor(FAR struct socket *psock)
  *   explicitly mark this socket and (2) disable further callbacks the to the
  *   event handler.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - The TCP socket structure whose connection was lost.
  *   cb    - devif callback structure
  *   flags - Set of connection events events

@@ -320,7 +320,7 @@ static void tun_pollnotify(FAR struct tun_device_s *priv, pollevent_t eventset)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -364,7 +364,7 @@ static int tun_fd_transmit(FAR struct tun_device_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -408,7 +408,7 @@ static int tun_txpoll(struct net_driver_s *dev)
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -510,7 +510,7 @@ static void tun_net_receive(FAR struct tun_device_s *priv)
  * Description:
  *   An interrupt was received indicating that the last TX packet(s) is done
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the driver state structure
  *
  * Returned Value:
@@ -539,7 +539,7 @@ static void tun_txdone(FAR struct tun_device_s *priv)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -585,7 +585,7 @@ static void tun_poll_work(FAR void *arg)
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -613,7 +613,7 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...)
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -664,7 +664,7 @@ static int tun_ifup(struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -701,7 +701,7 @@ static int tun_ifdown(struct net_driver_s *dev)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -747,7 +747,7 @@ static void tun_txavail_work(FAR void *arg)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -779,7 +779,7 @@ static int tun_txavail(struct net_driver_s *dev)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -806,7 +806,7 @@ static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -832,7 +832,7 @@ static int tun_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Description:
  *   Configure the IPv6 multicast MAC address.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -854,7 +854,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv)
  * Description:
  *   Initialize the TUN device
  *
- * Parameters:
+ * Input Parameters:
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1271,7 +1271,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Description:
  *   Instantiate a SLIP network interface.
  *
- * Parameters:
+ * Input Parameters:
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.

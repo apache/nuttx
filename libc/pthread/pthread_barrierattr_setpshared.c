@@ -83,7 +83,7 @@
  *   Both constants PTHREAD_PROCESS_SHARED and PTHREAD_PROCESS_PRIVATE are defined
  *   in pthread.h.
  *
- * Parameters:
+ * Input Parameters:
  *   attr - barrier attributes to be modified.
  *   pshared - the new value of the pshared attribute.
  *

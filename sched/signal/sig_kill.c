@@ -65,7 +65,7 @@
  *   Limitation: Sending of signals to 'process groups' is not
  *   supported in NuttX
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The id of the task to receive the signal.  The POSIX nxsig_kill
  *     specification encodes process group information as zero and
  *     negative pid values.  Only positive, non-zero values of pid are
@@ -140,7 +140,7 @@ int nxsig_kill(pid_t pid, int signo)
  *   Limitation: Sending of signals to 'process groups' is not
  *   supported in NuttX
  *
- * Parameters:
+ * Input Parameters:
  *   pid - The id of the task to receive the signal.  The POSIX kill
  *     specification encodes process group information as zero and
  *     negative pid values.  Only positive, non-zero values of pid are

@@ -63,7 +63,7 @@
  * Description:
  *   Performs the close operation on a socket instance
  *
- * Parameters:
+ * Input Parameters:
  *   psock   Socket instance
  *
  * Returned Value:
@@ -120,7 +120,7 @@ int psock_close(FAR struct socket *psock)
  * Description:
  *   Performs the close operation on socket descriptors
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   Socket descriptor of socket
  *
  * Returned Value:

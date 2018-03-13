@@ -53,7 +53,7 @@
  *   This functions gets status information and attributes
  *   associated with the specified message queue.
  *
- * Parameters:
+ * Input Parameters:
  *   mqdes - Message queue descriptor
  *   mq_stat - Buffer in which to return attributes
  *

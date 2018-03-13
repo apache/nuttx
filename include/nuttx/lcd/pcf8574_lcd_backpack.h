@@ -165,7 +165,7 @@ struct slcd_createchar_s
  *  details.  This driver supports an additional ioctl for defining custom
  *  characters; see above for details.
  *
- * Parameters:
+ * Input Parameters:
  *  devpath - path to device node; arbitrary, but typically '/dev/lcd0' or such
  *  i2c - the low-level i2c bus onto which to bind
  *  cfg - the board-specific configuration

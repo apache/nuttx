@@ -55,7 +55,7 @@
  *   This function is equivalent to sigtimedwait with a NULL timeout
  *   parameter.
  *
- * Parameters:
+ * Input Parameters:
  *   set - The pending signal set
  *   info - The returned value
  *

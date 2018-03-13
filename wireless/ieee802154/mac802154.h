@@ -94,7 +94,7 @@ struct iob_s;  /* Forward reference */
  * Description:
  *   Bind the MAC callback table to the MAC state.
  *
- * Parameters:
+ * Input Parameters:
  *   mac - Reference to the MAC driver state structure
  *   cb  - MAC callback operations
  *
@@ -111,7 +111,7 @@ int mac802154_bind(MACHANDLE mac, FAR struct mac802154_maccb_s *cb);
  * Description:
  *   Handle MAC and radio IOCTL commands directed to the MAC.
  *
- * Parameters:
+ * Input Parameters:
  *   mac - Reference to the MAC driver state structure
  *   cmd - The IOCTL command
  *   arg - The argument for the IOCTL command

@@ -88,7 +88,7 @@ static void xbee_assocworker(FAR void *arg);
  *   is called when it expires. The watchdog timer is scheduled again until
  *   the association is either successful or fails.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -130,7 +130,7 @@ static void xbee_assoctimer(int argc, uint32_t arg, ...)
  *   scheduled rom xbee_req_associate in order to poll the device for association
  *   progress.
  *
- * Parameters:
+ * Input Parameters:
  *   arg     - The reference to the driver structure (cast to void*)
  *
  * Returned Value:
@@ -159,7 +159,7 @@ static void xbee_assocworker(FAR void *arg)
  * Description:
  *   Bind the MAC callback table to the XBee driver.
  *
- * Parameters:
+ * Input Parameters:
  *   xbee - Reference to the XBee driver structure
  *   cb   - MAC callback operations
  *

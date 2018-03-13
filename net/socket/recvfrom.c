@@ -185,7 +185,7 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
  *   initialized to the size of the buffer associated with from, and modified
  *   on return to indicate the actual size of the address stored there.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd  - Socket descriptor of socket
  *   buf     - Buffer to receive data
  *   len     - Length of buffer

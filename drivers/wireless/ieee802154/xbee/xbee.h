@@ -233,7 +233,7 @@ static inline uint8_t xbee_next_frameid(FAR struct xbee_priv_s *priv)
  * Description:
  *   Insert checksum into outbound API frame.
  *
- * Parameters:
+ * Input Parameters:
  *    frame - pointer to the frame data
  *    framelen - size of the overall frame. NOT the data length field
  *

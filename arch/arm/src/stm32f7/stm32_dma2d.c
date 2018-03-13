@@ -395,7 +395,7 @@ static struct stm32_interrupt_s g_interrupt =
  * Description:
  *   Change the DMA2D control register
  *
- * Parameter:
+ * Input Parameters:
  *   setbits - The bits to set
  *   clrbits - The bits to clear
  *
@@ -523,7 +523,7 @@ static int stm32_dma2d_waitforirq(void)
  * Description:
  *   Starts clut loading but doesn't wait until loading is complete!
  *
- * Parameter:
+ * Input Parameters:
  *   pfcreg - PFC control Register
  *
  * Returned Value:
@@ -569,7 +569,7 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
  * Description:
  *   Starts the dma transfer and waits until completed.
  *
- * Parameter:
+ * Input Parameters:
  *   reg       - Register to set the start
  *   startflag - The related flag to start the dma transfer
  *   irqflag   - The interrupt enable flag in the DMA2D_CR register
@@ -611,7 +611,7 @@ static int stm32_dma2d_start(void)
  * Description:
  *   Helper to calculate the layer memory address
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *
  * Returned Value:
@@ -637,7 +637,7 @@ static uint32_t stm32_dma2d_memaddress(FAR const struct stm32_dma2d_s *layer,
  * Description:
  *   Helper to calculate the layer line offset
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *
  * Returned Value:
@@ -660,7 +660,7 @@ static fb_coord_t stm32_dma2d_lineoffset(FAR const struct stm32_dma2d_s *layer,
  * Description:
  *   Helper to map to dma2d controller pixel format
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *   fmt   - Reference to the location to store the pixel format
  *
@@ -719,7 +719,7 @@ static int stm32_dma2d_pixelformat(uint8_t fmt, uint8_t *fmtmap)
  * Description:
  *   Helper to get the bits per pixel
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *   bpp   - Reference to the location to store the pixel format
  *
@@ -896,7 +896,7 @@ static inline bool stm32_dma2d_lvalidate(FAR const struct stm32_dma2d_s *layer)
  * Description:
  *   Helper to check if area is outside the whole layer.
  *
- * Parameter:
+ * Input Parameters:
  *   layer   - Reference to the layer control structure
  *   xpos    - The x position inside the whole layer
  *   ypos    - The y position inside the whole layer
@@ -922,7 +922,7 @@ static bool stm32_dma2d_lvalidatesize(FAR const struct stm32_dma2d_s *layer,
  * Description:
  *   Initialize the internal layer structure
  *
- * Parameter:
+ * Input Parameters:
  *
  *
  ****************************************************************************/
@@ -971,7 +971,7 @@ static void stm32_dma2d_linit(FAR struct stm32_dma2d_s *layer,
  *   Configures the memory address register
  *   Configures the line offset register
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *
  ****************************************************************************/
@@ -993,7 +993,7 @@ static void stm32_dma2d_lfifo(FAR const struct stm32_dma2d_s *layer, int lid,
  * Description:
  *   Set the color for the layer
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *
  ****************************************************************************/
@@ -1011,7 +1011,7 @@ static void stm32_dma2d_lcolor(FAR const struct stm32_dma2d_s *layer,
  * Description:
  *   Set the number of line register
  *
- * Parameter:
+ * Input Parameters:
  *   layer   - Reference to the common layer state structure
  *   area    - Reference to the area to copy
  *
@@ -1035,7 +1035,7 @@ static void stm32_dma2d_llnr(FAR struct stm32_dma2d_s *layer,
  * Description:
  *   Set the output PFC control register
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *
  ****************************************************************************/
@@ -1068,7 +1068,7 @@ static int stm32_dma2d_loutpfc(FAR const struct stm32_dma2d_s *layer)
  * Description:
  *   Configure foreground and background layer PFC control register
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the common layer state structure
  *
  ****************************************************************************/
@@ -1152,7 +1152,7 @@ static void stm32_dma2d_lpfc(FAR const struct stm32_dma2d_s *layer,
  * Description:
  *   Get video information about the layer
  *
- * Parameter:
+ * Input Parameters:
  *   layer  - Reference to the layer control structure
  *   vinfo  - Reference to the video info structure
  *
@@ -1188,7 +1188,7 @@ static int stm32_dma2dgetvideoinfo(FAR struct dma2d_layer_s *layer,
  * Description:
  *   Get plane information about the layer
  *
- * Parameter:
+ * Input Parameters:
  *   layer   - Reference to the layer control structure
  *   planeno - Number of the plane
  *   pinfo   - Reference to the plane info structure
@@ -1225,7 +1225,7 @@ static int stm32_dma2dgetplaneinfo(FAR struct dma2d_layer_s *layer, int planeno,
  * Description:
  *   Get a specific layer identifier.
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the layer structure
  *   lid   - Reference to store the layer id
  *
@@ -1261,7 +1261,7 @@ static int stm32_dma2dgetlid(FAR struct dma2d_layer_s *layer, int *lid)
  *   Configure layer clut (color lookup table).
  *   Non clut is defined during initializing.
  *
- * Parameter:
+ * Input Parameters:
  *   layer  - Reference to the layer structure
  *   cmap   - color lookup table with up the 256 entries
  *
@@ -1379,7 +1379,7 @@ static int stm32_dma2dsetclut(FAR struct dma2d_layer_s *layer,
  * Description:
  *   Get configured layer clut (color lookup table).
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the layer structure
  *   cmap  - Reference to valid color lookup table accept up the 256 color
  *           entries
@@ -1472,7 +1472,7 @@ static int stm32_dma2dgetclut(FAR struct dma2d_layer_s *layer,
  *   alpha value for blend operation.
  *   Default value during initializing: 0xff
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the layer structure
  *   alpha - Alpha value
  *
@@ -1507,7 +1507,7 @@ static int stm32_dma2dsetalpha(FAR struct dma2d_layer_s *layer, uint8_t alpha)
  * Description:
  *   Get configured layer alpha value factor for blend operation.
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the layer structure
  *   alpha - Reference to store the alpha value
  *
@@ -1544,7 +1544,7 @@ static int stm32_dma2dgetalpha(FAR struct dma2d_layer_s *layer, uint8_t *alpha)
  *   Default mode during initializing: DMA2D_BLEND_NONE
  *   Blendmode is active after next update.
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the layer structure
  *   mode  - Blend mode (see DMA2D_BLEND_*)
  *
@@ -1593,7 +1593,7 @@ static int stm32_dma2dsetblendmode(FAR struct dma2d_layer_s *layer,
  * Description:
  *   Get configured blend mode of the layer.
  *
- * Parameter:
+ * Input Parameters:
  *   layer - Reference to the layer structure
  *   mode  - Reference to store the blend mode
  *
@@ -1630,7 +1630,7 @@ static int stm32_dma2dgetblendmode(FAR struct dma2d_layer_s *layer,
  *   Copy selected area from a source layer to selected position of the
  *   destination layer.
  *
- * Parameter:
+ * Input Parameters:
  *   dest     - Valid reference to the destination layer
  *   destxpos - Valid selected x position of the destination layer
  *   destypos - Valid selected y position of the destination layer
@@ -1738,7 +1738,7 @@ static int stm32_dma2dblit(FAR struct dma2d_layer_s *dest,
  *   layer keeps unchanged as long destination layer is unequal to the
  *   foreground and background layer.
  *
- * Parameter:
+ * Input Parameters:
  *   dest     - Reference to the destination layer
  *   fore     - Reference to the foreground layer
  *   forexpos - Selected x target position of the foreground layer
@@ -1847,7 +1847,7 @@ static int stm32_dma2dblend(FAR struct dma2d_layer_s *dest,
  * Description:
  *   Fill the selected area of the whole layer with a specific color.
  *
- * Parameter:
+ * Input Parameters:
  *   layer    - Reference to the layer structure
  *   area     - Reference to the valid area structure select the area
  *   color    - Color to fill the selected area. Color must be formatted
@@ -1926,7 +1926,7 @@ static int stm32_dma2dfillarea(FAR struct dma2d_layer_s *layer,
  * Description:
  *   Get a dma2d layer structure by the layer identifier
  *
- * Parameter:
+ * Input Parameters:
  *   lid - Layer identifier
  *
  * Returned Value:
@@ -1957,7 +1957,7 @@ FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid)
  * Description:
  *   Create a new dma2d layer object to interact with the dma2d controller
  *
- * Parameter:
+ * Input Parameters:
  *   width  - Layer width
  *   height - Layer height
  *   fmt    - Pixel format of the layer
@@ -2079,7 +2079,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
  * Description:
  *  Remove and deallocate the dma2d layer
  *
- * Parameter:
+ * Input Parameters:
  *   layer  - Reference to the layer to remove
  *
  * Returned Value:
@@ -2236,7 +2236,7 @@ void up_dma2duninitialize(void)
  *   2. Share the planeinfo information
  *   3. Share the videoinfo information
  *
- * Parameter:
+ * Input Parameters:
  *   layer  - a valid reference to the low level ltdc layer structure
  *   clut   - a pointer to a valid memory region to hold 256 clut colors
  *

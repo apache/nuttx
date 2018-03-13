@@ -60,7 +60,7 @@
  *   blocked on the barrier, or if this function is called with an
  *   uninitialized barrier.
  *
- * Parameters:
+ * Input Parameters:
  *   barrier - barrier to be destroyed.
  *
  * Returned Value:

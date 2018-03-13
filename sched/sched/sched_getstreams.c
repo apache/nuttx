@@ -51,7 +51,7 @@
  * Description:
  *   Return a pointer to the streams list for this thread
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

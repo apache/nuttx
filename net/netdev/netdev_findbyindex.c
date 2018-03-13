@@ -62,7 +62,7 @@
  *   registered device causing a given index to be meaningless (unless, of
  *   course, the caller keeps the network locked).
  *
- * Parameters:
+ * Input Parameters:
  *   index - the index of the interface to file
  *
  * Returned Value:

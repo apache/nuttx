@@ -73,7 +73,7 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  *   default values for all of the individual attributes
  *   used by a given implementation.
  *
- * Parameters:
+ * Input Parameters:
  *   attr
  *
  * Returned Value:

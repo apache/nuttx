@@ -192,7 +192,7 @@ void arp_reset(void);
  *   Initialized the 10 second timer that is need by the ARP logic in order
  *   to age ARP address associations
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -250,7 +250,7 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
  *   address mapping is now in the ARP table, or (2) a configurable number
  *   of timeouts occur without receiving the ARP replay.
  *
- * Parameters:
+ * Input Parameters:
  *   ipaddr   The IP address to be queried.
  *
  * Returned Value:

@@ -56,7 +56,7 @@
  *   suitable for calculating relative time delays and does not depend on
  *   the other clock_* logic.
  *
- * Parameters:
+ * Input Parameters:
  *   reltime - Convert this relative time to system clock ticks.
  *   ticks - Return the converted number of ticks here.
  *

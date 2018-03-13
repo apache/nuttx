@@ -624,7 +624,7 @@ void stm32_ltdcuninitialize(void);
  * Description:
  *   Get the ltdc layer structure to perform hardware layer operation
  *
- * Parameter:
+ * Input Parameters:
  *   lid - Layer identifier
  *
  * Returned Value:

@@ -65,7 +65,7 @@
  *    pthread is (or was) a member of.  The thread may or may not still
  *    be running.
  *
- * Parameters:
+ * Input Parameters:
  *   thread
  *
  * Returned Value:

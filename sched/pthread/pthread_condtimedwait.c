@@ -70,7 +70,7 @@
  *   This function is called if the timeout elapses before
  *   the condition is signaled.
  *
- * Parameters:
+ * Input Parameters:
  *   argc  - the number of arguments (should be 2)
  *   pid   - the task ID of the task to wakeup
  *   signo - The signal to use to wake up the task
@@ -151,7 +151,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
  * Description:
  *   A thread can perform a timed wait on a condition variable.
  *
- * Parameters:
+ * Input Parameters:
  *   cond   - the condition variable to wait on
  *   mutex   - the mutex that protects the condition variable
  *   abstime - wait until this absolute time

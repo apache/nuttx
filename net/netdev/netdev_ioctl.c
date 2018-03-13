@@ -376,7 +376,7 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
  * Description:
  *   Perform IEEE802.15.4 network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure
  *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
@@ -438,7 +438,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Perform non-IEEE802.15.4 packet radio network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure
  *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
@@ -501,7 +501,7 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Perform wireless network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure
  *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
@@ -545,7 +545,7 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Verify the struct ifreq and get the Ethernet device.
  *
- * Parameters:
+ * Input Parameters:
  *   req - The argument of the ioctl cmd
  *
  * Returned Value:
@@ -573,7 +573,7 @@ static FAR struct net_driver_s *netdev_ifr_dev(FAR struct ifreq *req)
  * Description:
  *   Perform network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure
  *   cmd      The ioctl command
  *   req      The argument of the ioctl cmd
@@ -1027,7 +1027,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Verify the struct ip_msfilter and get the Ethernet device.
  *
- * Parameters:
+ * Input Parameters:
  *   req - The argument of the ioctl cmd
  *
  * Returned Value:
@@ -1057,7 +1057,7 @@ static FAR struct net_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
  * Description:
  *   Perform network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure
  *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
@@ -1116,7 +1116,7 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Perform ARP table specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock  Socket structure
  *   dev    Ethernet driver device structure
  *   cmd    The ioctl command
@@ -1239,7 +1239,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Perform routing table specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Socket structure
  *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
@@ -1354,7 +1354,7 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
  * Description:
  *   Perform network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
@@ -1464,7 +1464,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
  * Description:
  *   Perform network device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd   Socket descriptor of device
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd

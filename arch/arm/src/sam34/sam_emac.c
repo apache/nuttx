@@ -729,7 +729,7 @@ static void sam_buffer_free(struct sam_emac_s *priv)
  *   Start hardware transmission.  Called either from the txdone interrupt
  *   handling or from watchdog based polling.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -844,7 +844,7 @@ static int sam_transmit(struct sam_emac_s *priv)
  *   2. When the preceding TX packet send timesout and the interface is reset
  *   3. During normal TX polling
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -926,7 +926,7 @@ static int sam_txpoll(struct net_driver_s *dev)
  *   3. After a TX timeout to restart the sending process
  *      (sam_txtimeout_process).
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
@@ -962,7 +962,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
  *
  *   NOTE: This function will silently discard any packets containing errors.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1174,7 +1174,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
  *   An interrupt was received indicating the availability of one or more
  *   new RX packets in FIFO memory.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1325,7 +1325,7 @@ static void sam_receive(struct sam_emac_s *priv)
  *   An interrupt was received indicating that one or more frames have
  *   completed transmission.
  *
- * Parameters:
+ * Input Parameters:
  *   priv  - Reference to the driver state structure
  *
  * Returned Value:
@@ -1410,7 +1410,7 @@ static void sam_txdone(struct sam_emac_s *priv)
  * Description:
  *   Perform interrupt related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
@@ -1604,7 +1604,7 @@ static void sam_interrupt_work(FAR void *arg)
  * Description:
  *   Hardware interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -1659,7 +1659,7 @@ static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
  * Description:
  *   Perform TX timeout related work from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1697,7 +1697,7 @@ static void sam_txtimeout_work(FAR void *arg)
  *   Our TX watchdog timed out.  Called from the timer interrupt handler.
  *   The last TX never completed.  Reset the hardware and start again.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -1731,7 +1731,7 @@ static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
  * Description:
  *   Perform periodic polling from the worker thread
  *
- * Parameters:
+ * Input Parameters:
  *   arg - The argument passed when work_queue() as called.
  *
  * Returned Value:
@@ -1771,7 +1771,7 @@ static void sam_poll_work(FAR void *arg)
  * Description:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -1799,7 +1799,7 @@ static void sam_poll_expiry(int argc, uint32_t arg, ...)
  *   NuttX Callback: Bring up the EMAC interface when an IP address is
  *   provided
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -1875,7 +1875,7 @@ static int sam_ifup(struct net_driver_s *dev)
  * Description:
  *   NuttX Callback: Stop the interface.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -1922,7 +1922,7 @@ static int sam_ifdown(struct net_driver_s *dev)
  * Description:
  *   Perform an out-of-cycle poll on the worker thread.
  *
- * Parameters:
+ * Input Parameters:
  *   arg - Reference to the NuttX driver state structure (cast to void*)
  *
  * Returned Value:
@@ -1960,7 +1960,7 @@ static void sam_txavail_work(FAR void *arg)
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
@@ -2126,7 +2126,7 @@ static unsigned int sam_hashindx(const uint8_t *mac)
  *   NuttX Callback: Add the specified MAC address to the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
@@ -2199,7 +2199,7 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
  *   NuttX Callback: Remove the specified MAC address from the hardware multicast
  *   address filtering
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
@@ -2298,7 +2298,7 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *    is specified using the req->reg_no struct field and use req->val_in as
  *    its input.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - Ethernet device structure
  *   cmd - SIOCxMIIxxx command code
  *   arg - Request structure also used to return values
@@ -2400,7 +2400,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
  * Description:
  *   Dump the contents of PHY registers
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -2456,7 +2456,7 @@ static void sam_phydump(struct sam_emac_s *priv)
  *    is received.
  *  - Interrupt status is cleared when the interrupt is re-enabled.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -2508,7 +2508,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
  * Description:
  *  Wait for the PHY to become IDLE
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -2541,7 +2541,7 @@ static int sam_phywait(struct sam_emac_s *priv)
  * Description:
  *  Reset the PHY
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -2607,7 +2607,7 @@ static int sam_phyreset(struct sam_emac_s *priv)
  * Description:
  *  Verify the PHY address and, if it is bad, try to one that works.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -2690,7 +2690,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
  * Description:
  *  Read a PHY register.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *   phyaddr - The PHY device address
  *   regaddr - The PHY register address
@@ -2754,7 +2754,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
  * Description:
  *  Write to a PHY register.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *   phyaddr - The PHY device address
  *   regaddr - The PHY register address
@@ -2815,7 +2815,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
  * Description:
  *  Autonegotiate speed and duplex.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3039,7 +3039,7 @@ errout:
  * Description:
  *   Check if the link is up
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3136,7 +3136,7 @@ errout:
  * Description:
  *  Configure the PHY and determine the link speed/duplex.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3192,7 +3192,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
  * Description:
  *  Configure GPIOs for the EMAC MII interface.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3232,7 +3232,7 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
  * Description:
  *  Reset the transmit logic
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3287,7 +3287,7 @@ static void sam_txreset(struct sam_emac_s *priv)
  * Description:
  *  Reset the receive logic
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3342,7 +3342,7 @@ static void sam_rxreset(struct sam_emac_s *priv)
  * Description:
  *  Reset the EMAC block.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3403,7 +3403,7 @@ static void sam_emac_reset(struct sam_emac_s *priv)
  * Description:
  *   Configure the selected MAC address.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3443,7 +3443,7 @@ static void sam_macaddress(struct sam_emac_s *priv)
  * Description:
  *   Configure the IPv6 multicast MAC address.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
@@ -3516,7 +3516,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
  * Description:
  *  Configure the EMAC interface for normal operation.
  *
- * Parameters:
+ * Input Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:

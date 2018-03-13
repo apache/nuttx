@@ -122,7 +122,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, FAR void *arg)
  * Description:
  *   Sets/clears comparator based events and interrupt triggers.
  *
- * Parameters:
+ * Input Parameters:
  *  - cmp: comparator
  *  - rising/falling edge: enables interrupt on rising/falling edget
  *  - event:  generate event when set

@@ -68,7 +68,7 @@
  *   with the subnet served by the device.  Only "up" devices are considered
  *   (since a "down" device has no meaningful address).
  *
- * Parameters:
+ * Input Parameters:
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
@@ -121,7 +121,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
  *   with the subnet served by the device.  Only "up" devices are considered
  *   (since a "down" device has no meaningful address).
  *
- * Parameters:
+ * Input Parameters:
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
@@ -178,7 +178,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  *   Find a previously registered network device by matching an arbitrary
  *   IPv4 address.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - Local, bound address of a connection.
  *   ripaddr - Remote address of a connection to use in the lookup
  *
@@ -278,7 +278,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  *   Find a previously registered network device by matching an arbitrary
  *   IPv6 address.
  *
- * Parameters:
+ * Input Parameters:
  *   lipaddr - Local, bound address of a connection.
  *   ripaddr - Remote address of a connection to use in the lookup
  *

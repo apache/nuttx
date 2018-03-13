@@ -55,7 +55,7 @@
  *   object attr with the default value for all of the attributes defined by the
  *   implementation.
  *
- * Parameters:
+ * Input Parameters:
  *   attr - barrier attributes to be initialized.
  *
  * Returned Value:

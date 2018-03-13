@@ -61,7 +61,7 @@
  * Description:
  *   Traverse the routing table
  *
- * Parameters:
+ * Input Parameters:
  *   handler - Will be called for each route in the routing table.
  *   arg     - An arbitrary value that will be passed tot he handler.
  *

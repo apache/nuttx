@@ -78,7 +78,7 @@
  *   This function performs the portion of the mq_close operation related
  *   to freeing resource used by the message queue descriptor itself.
  *
- * Parameters:
+ * Input Parameters:
  *   mqdes - Message queue descriptor.
  *   group - Group that has the open descriptor.
  *

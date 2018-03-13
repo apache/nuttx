@@ -107,7 +107,7 @@ struct route_ipv6_match_s
  * Description:
  *   Return 1 if the IPv4 route is available
  *
- * Parameters:
+ * Input Parameters:
  *   route - The next route to examine
  *   arg   - The match values (cast to void*)
  *
@@ -150,7 +150,7 @@ static int net_ipv4_match(FAR struct net_route_ipv4_s *route, FAR void *arg)
  * Description:
  *   Return 1 if the IPv6 route is available
  *
- * Parameters:
+ * Input Parameters:
  *   route - The next route to examine
  *   arg   - The match values (cast to void*)
  *
@@ -198,7 +198,7 @@ static int net_ipv6_match(FAR struct net_route_ipv6_s *route, FAR void *arg)
  *   Given an IPv4 address on a external network, return the address of the
  *   router on a local network that can forward to the external network.
  *
- * Parameters:
+ * Input Parameters:
  *   target - An IPv4 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
  *     packets to the target.
@@ -273,7 +273,7 @@ int net_ipv4_router(in_addr_t target, FAR in_addr_t *router)
  *   Given an IPv6 address on a external network, return the address of the
  *   router on a local network that can forward to the external network.
  *
- * Parameters:
+ * Input Parameters:
  *   target - An IPv6 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
  *     packets to the target.

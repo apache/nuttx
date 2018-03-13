@@ -677,7 +677,7 @@ static const struct ovr2640_reg_s g_ov2640_jpeg_uxga_resolution[] =
  * Description:
  *   Set one OV2640 register
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *   regaddr - The address of the OV2640 register to set
  *   regval - The new value of the register
@@ -728,7 +728,7 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
  * Description:
  *   Set one OV2640 register
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *   regaddr - The address of the OV2640 register to set
  *   regval - The new value of the register
@@ -784,7 +784,7 @@ static uint8_t ov2640_getreg(FAR struct i2c_master_s *i2c, uint8_t regaddr)
  * Description:
  *   Set a list of OV2640 register values.
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *   reglist - The address of list of OV2640 register settings
  *   nentries - The number of entries in the list
@@ -821,7 +821,7 @@ static int ov2640_putreglist(FAR struct i2c_master_s *i2c,
  * Description:
  *   Read and verify the CHIP ID
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *
  * Returned Value:
@@ -874,7 +874,7 @@ static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
  * Description:
  *   Reset the OV2640.
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *   reglist - The address of list of OV2640 register settings
  *   nentries - The number of entries in the list
@@ -909,7 +909,7 @@ static int ov2640_reset(FAR struct i2c_master_s *i2c)
  * Description:
  *   Initialize the OV2640 camera.
  *
- * Parameters:
+ * Input Parameters:
  *   i2c - Reference to the I2C driver structure
  *
  * Returned Value:

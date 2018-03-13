@@ -116,7 +116,7 @@ extern struct entropy_pool_s board_entropy_pool;
  *   Add one integer to entropy pool, contributing a specific kind
  *   of entropy to pool.
  *
- * Parameters:
+ * Input Parameters:
  *   kindof  - Enumeration constant telling where val came from
  *   val     - Integer to be added
  *
@@ -133,7 +133,7 @@ void up_rngaddint(enum rnd_source_t kindof, int val);
  * Description:
  *   Add buffer of integers to entropy pool.
  *
- * Parameters:
+ * Input Parameters:
  *   kindof  - Enumeration constant telling where val came from
  *   buf     - Buffer of integers to be added
  *   n       - Number of elements in buf

@@ -55,7 +55,7 @@
  *   This function returns the time remaining before the specified watchdog
  *   timer expires.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog - watchdog ID
  *
  * Returned Value:

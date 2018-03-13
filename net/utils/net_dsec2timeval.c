@@ -59,7 +59,7 @@
  *   Convert a decisecond timeout value to a struct timeval.  Needed by
  *   getsockopt() to report timeout values.
  *
- * Parameters:
+ * Input Parameters:
  *   dsec The decisecond value to convert
  *   tv   The struct timeval to receive the converted value
  *

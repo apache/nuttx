@@ -68,7 +68,7 @@ extern "C"
  *   multiple Ethernet controllers, then board specific logic must implement
  *   up_netinitialize() and call this function to initialize the desired interfaces.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value identifies which
  *   EMAC is to be initialized.
  *
@@ -93,7 +93,7 @@ int stm32_ethinitialize(int intf);
  *   logic must provide stm32_phyinitialize();  The STM32 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
- * Parameters:
+ * Input Parameters:
  *   intf - Always zero for now.
  *
  * Returned Value:

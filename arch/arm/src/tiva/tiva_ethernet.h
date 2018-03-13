@@ -84,7 +84,7 @@ extern "C"
  *   must implement up_netinitialize() and call this function to initialize
  *   the desired interfaces.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

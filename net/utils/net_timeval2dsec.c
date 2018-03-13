@@ -56,7 +56,7 @@
  *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
  *   save new timeout values.
  *
- * Parameters:
+ * Input Parameters:
  *   tv        - The struct timeval to convert
  *   remainder - Determines how to handler the microsecond remainder
  *

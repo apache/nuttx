@@ -71,7 +71,7 @@
  *   See comments with send() for more a more complete description of the
  *   functionality.
  *
- * Parameters:
+ * Input Parameters:
  *   psock - An instance of the internal socket structure.
  *   buf   - Data to send
  *   len   - Length of data to send
@@ -133,7 +133,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
  *   See comments with send() for more a more complete description of the
  *   functionality.
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd - Socket descriptor of the socket
  *   buf    - Data to send
  *   len    - Length of data to send
@@ -169,7 +169,7 @@ ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags)
  *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
  *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
  *
- * Parameters:
+ * Input Parameters:
  *   sockfd - Socket descriptor of the socket
  *   buf    - Data to send
  *   len    - Length of data to send

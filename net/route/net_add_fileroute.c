@@ -64,7 +64,7 @@
  * Description:
  *   Add a new route to the routing table
  *
- * Parameters:
+ * Input Parameters:
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.

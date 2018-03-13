@@ -60,7 +60,7 @@
  *   The getenv() function searches the environment list for a string that
  *   matches the string pointed to by name.
  *
- * Parameters:
+ * Input Parameters:
  *   name - The name of the variable to find.
  *
  * Returned Value:

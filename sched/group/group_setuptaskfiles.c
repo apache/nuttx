@@ -195,7 +195,7 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
  *   Configure a newly allocated TCB so that it will inherit
  *   file descriptors and streams from the parent task.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - tcb of the new task.
  *
  * Returned Value:

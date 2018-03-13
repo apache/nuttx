@@ -223,7 +223,7 @@ static void setup_conn_recvfrom(FAR struct usrsock_conn_s *conn,
  *   initialized to the size of the buffer associated with from, and modified
  *   on return to indicate the actual size of the address stored there.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer

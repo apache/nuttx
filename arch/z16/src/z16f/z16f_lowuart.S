@@ -188,7 +188,7 @@ _up_lowputc:
  * Description:
  *   Send one character on the selected port (really a part of up_lowputc)
  *
- * Parameters:
+ * Input Parameters:
  *   r1 = character
  *
  * Returned Value:
@@ -227,7 +227,7 @@ _z16f_xmitc1:
  * Description:
  *   Get a character from the serial port
  *
- * Parmeters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

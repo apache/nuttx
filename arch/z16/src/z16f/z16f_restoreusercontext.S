@@ -64,7 +64,7 @@
  * Description:
  *   Restore the current user context.
  *
- * Parameters:
+ * Input Parameters:
  *   r1: pointer to the register save array in the XCPT structure
  *
  *************************************************************************/

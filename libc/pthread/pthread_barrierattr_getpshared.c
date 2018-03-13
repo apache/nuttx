@@ -54,7 +54,7 @@
  *   The pthread_barrierattr_getpshared() function will obtain the value of the
  *   process-shared attribute from the attributes object referenced by attr.
  *
- * Parameters:
+ * Input Parameters:
  *   attr - barrier attributes to be queried.
  *   pshared - the location to stored the current value of the pshared attribute.
  *

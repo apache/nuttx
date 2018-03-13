@@ -84,7 +84,7 @@ static long compare_timespec(FAR const struct timespec *a,
  * Description:
  *   Convert an absolute timespec delay to system timer ticks.
  *
- * Parameters:
+ * Input Parameters:
  *   clockid - The timing source to use in the conversion
  *   reltime - Convert this absolue time to system clock ticks.
  *   ticks - Return the converted number of ticks here.

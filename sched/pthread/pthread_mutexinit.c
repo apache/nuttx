@@ -58,7 +58,7 @@
  * Description:
  *   Create a mutex
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

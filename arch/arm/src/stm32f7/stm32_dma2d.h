@@ -337,7 +337,7 @@ struct stm32_ltdc_s; /* Forward declaration */
  *   2. Share the planeinfo information
  *   3. Share the videoinfo information
  *
- * Parameter:
+ * Input Parameters:
  *   layer  - a valid reference to the low level ltdc layer structure
  *
  * Returned Value:
@@ -355,7 +355,7 @@ FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
  * Description:
  *   Get a dma2d layer structure by the layer identifier
  *
- * Parameter:
+ * Input Parameters:
  *   lid - Layer identifier
  *
  * Returned Value:
@@ -372,7 +372,7 @@ FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid);
  * Description:
  *   Create a new dma2d layer object to interact with the dma2d controller
  *
- * Parameter:
+ * Input Parameters:
  *   width  - Layer width
  *   height - Layer height
  *   fmt    - Pixel format of the layer
@@ -396,7 +396,7 @@ FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
  * Description:
  *  Remove and deallocate the dma2d layer
  *
- * Parameter:
+ * Input Parameters:
  *   layer  - Reference to the layer to remove
  *
  * Returned Value:

@@ -51,7 +51,7 @@
  *   A thread may tell the scheduler that its processor can be
  *   made available.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

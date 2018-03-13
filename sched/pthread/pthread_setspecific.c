@@ -68,7 +68,7 @@
  *   after a key has been deleted with pthread_key_delete()
  *   is undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   key = The data key to get or set
  *   value = The value to bind to the key.
  *

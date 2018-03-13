@@ -64,7 +64,7 @@
  *   restored task and, hence, we must handle the worst case -- restore
  *   everythihng.
  *
- * Parameters:
+ * Input Parameters:
  *   On entry, the following stack organization is assumed:
  *
  *          Pointer to the context save structure

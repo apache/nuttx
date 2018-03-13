@@ -70,7 +70,7 @@
  * Description:
  *   Handle a TCP timer expiration for the provided TCP connection
  *
- * Parameters:
+ * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP "connection" to poll for TX data
  *   hsed - The polling interval in halves of a second

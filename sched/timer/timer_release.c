@@ -102,7 +102,7 @@ static inline void timer_free(struct posix_timer_s *timer)
  *   the OS internals and differs only in that return value of 1 means that
  *   the timer was not actually deleted.
  *
- * Parameters:
+ * Input Parameters:
  *   timer - The per-thread timer, previously created by the call to
  *     timer_create(), to be deleted.
  *

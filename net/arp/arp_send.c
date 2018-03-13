@@ -171,7 +171,7 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
  *   address mapping is now in the ARP table, or (2) a configurable number
  *   of timeouts occur without receiving the ARP replay.
  *
- * Parameters:
+ * Input Parameters:
  *   ipaddr   The IP address to be queried (in network order).
  *
  * Returned Value:

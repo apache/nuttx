@@ -68,7 +68,7 @@
  *   - Stack pointer (sph, spl)
  *   - Return address
  *
- * Parameters:
+ * Input Parameters:
  *   On entry, the following stack organization is assumed:
  *
  *          Pointer to the context save structure

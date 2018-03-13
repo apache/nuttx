@@ -104,7 +104,7 @@ static void xbee_atquery_timeout(int argc, uint32_t arg, ...);
  * Description:
  *   Hardware interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *
@@ -145,7 +145,7 @@ static int xbee_interrupt(int irq, FAR void *context, FAR void *arg)
  *   Perform interrupt handling (Attention) logic outside of the interrupt handler
  *   (on the work queue thread).
  *
- * Parameters:
+ * Input Parameters:
  *   arg     - The reference to the driver structure (cast to void*)
  *
  * Returned Value:
@@ -381,7 +381,7 @@ static void xbee_attnworker(FAR void *arg)
  *   Verifies that the API frame type is known and that the length makes
  *   sense for that frame type.
  *
- * Parameters:
+ * Input Parameters:
  *    frame - pointer to the frame data
  *    datalen - The size of the data section of the frame.  This is the value
  *              included as the second and third byte of the frame.
@@ -449,7 +449,7 @@ static bool xbee_validate_apiframe(uint8_t frametype, uint16_t datalen)
  * Description:
  *   Verifies API frame checksum.
  *
- * Parameters:
+ * Input Parameters:
  *    frame - pointer to the frame data
  *    framelen - size of the overall frame. NOT the data length field
  *
@@ -942,7 +942,7 @@ static void xbee_notify_worker(FAR void *arg)
  *   from the XBee module. This really should never happen, but if it does,
  *   handle it gracefully by retrying the query.
  *
- * Parameters:
+ * Input Parameters:
  *   argc - The number of available arguments
  *   arg  - The first argument
  *
@@ -977,7 +977,7 @@ static void xbee_atquery_timeout(int argc, uint32_t arg, ...)
  *   Initialize an XBee driver.  The XBee device is assumed to be
  *   in the post-reset state upon entry to this function.
  *
- * Parameters:
+ * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the XBee
  *   lower - The MCU-specific interrupt used to control low-level MCU
  *           functions (i.e., XBee GPIO interrupts).

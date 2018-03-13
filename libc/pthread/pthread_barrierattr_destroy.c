@@ -56,7 +56,7 @@
  *   pthread_barrierattr_init(); the results of otherwise referencing the object
  *   after it has been destroyed are undefined.
  *
- * Parameters:
+ * Input Parameters:
  *   attr - barrier attributes to be destroyed.
  *
  * Returned Value:

@@ -67,7 +67,7 @@
  *   message queue remains usable until it is closed by a successful call to
  *   mq_close().
  *
- * Parameters:
+ * Input Parameters:
  *   mq_name - Name of the queue to open
  *   oflags - open flags
  *   Optional parameters.  When the O_CREAT flag is specified, two optional

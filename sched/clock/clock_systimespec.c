@@ -59,7 +59,7 @@
  *   Return the current value of the system timer counter as a struct
  *   timespec.  The returned time is the elapsed time since power up.
  *
- * Parameters:
+ * Input Parameters:
  *   ts - Location to return the time
  *
  * Returned Value:

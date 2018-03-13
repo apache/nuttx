@@ -91,7 +91,7 @@ EXTERN const net_ipv6addr_t g_lo_ipv6mask;
  * Description:
  *   Initialize the localhost, loopback network driver
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

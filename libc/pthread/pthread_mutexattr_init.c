@@ -53,7 +53,7 @@
  * Description:
  *    Create mutex attributes.
  *
- * Parameters:
+ * Input Parameters:
  *    attr
  *
  * Returned Value:

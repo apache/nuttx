@@ -60,7 +60,7 @@
  *   disarmed before removal. The disposition of pending signals for the
  *   deleted timer is unspecified.
  *
- * Parameters:
+ * Input Parameters:
  *   timerid - The per-thread timer, previously created by the call to
  *   timer_create(), to be deleted.
  *

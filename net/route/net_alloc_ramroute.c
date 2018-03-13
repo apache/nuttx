@@ -103,7 +103,7 @@ static struct net_route_ipv6_entry_s
  * Description:
  *   Initialize the in-memory, RAM routing table
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -151,7 +151,7 @@ void net_init_ramroute(void)
  * Description:
  *   Allocate one route by removing it from the free list
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -202,7 +202,7 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
  * Description:
  *   Free one route by adding it from the free list
  *
- * Parameters:
+ * Input Parameters:
  *   route - The route to be freed
  *
  * Returned Value:

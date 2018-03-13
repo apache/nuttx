@@ -76,7 +76,7 @@
  *   If the pthread_setschedparam() function fails, the scheduling parameters
  *   will not be changed for the target thread.
  *
- * Parameters:
+ * Input Parameters:
  *   thread - The ID of thread whose scheduling parameters will be modified.
  *   policy - The new scheduling policy of the thread.  Either SCHED_FIFO or
  *            SCHED_RR. SCHED_OTHER and SCHED_SPORADIC are not supported.

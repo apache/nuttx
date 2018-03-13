@@ -64,7 +64,7 @@
  *   zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor
  *   sval - Buffer by which the value is returned
  *
@@ -101,7 +101,7 @@ int nxsem_getvalue(FAR sem_t *sem, FAR int *sval)
  *   zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - Semaphore descriptor
  *   sval - Buffer by which the value is returned
  *

@@ -702,7 +702,7 @@ static int nxsem_restoreholderprioB(FAR struct semholder_s *pholder,
  *   threads holding a count on the semaphore.  Their priority could have
  *   been boosted while they held the count.
  *
- * Parameters:
+ * Input Parameters:
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
@@ -763,7 +763,7 @@ static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
  *   of any threads holding a count on the semaphore.  Their priority could
  *   have been boosted while they held the count.
  *
- * Parameters:
+ * Input Parameters:
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
@@ -845,7 +845,7 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
  * Description:
  *   Called from nxsem_initialize() to set up semaphore holder information.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -879,7 +879,7 @@ void nxsem_initholders(void)
  *   Called from nxsem_destroyholder() to handle any holders of a semaphore
  *   when it is destroyed.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - A reference to the semaphore being destroyed
  *
  * Returned Value:
@@ -929,7 +929,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
  *   Called from nxsem_wait() when the calling thread obtains the semaphore;
  *   Called from sem_post() when the waiting thread obtains the semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   htcb - TCB of the thread that just obtained the semaphore
  *   sem  - A reference to the incremented semaphore
  *
@@ -973,7 +973,7 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
  * Description:
  *   Called from nxsem_wait() when the calling thread obtains the semaphore
  *
- * Parameters:
+ * Input Parameters:
  *   sem - A reference to the incremented semaphore
  *
  * Returned Value:
@@ -995,7 +995,7 @@ void nxsem_addholder(FAR sem_t *sem)
  * Description:
  *
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -1024,7 +1024,7 @@ void nxsem_boostpriority(FAR sem_t *sem)
  *   Called from sem_post() after a thread releases one count on the
  *   semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - A reference to the semaphore being posted
  *
  * Returned Value:
@@ -1062,7 +1062,7 @@ void nxsem_releaseholder(FAR sem_t *sem)
  *   count on the semaphore.  Their priority could have been boosted while
  *   they held the count.
  *
- * Parameters:
+ * Input Parameters:
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
@@ -1119,7 +1119,7 @@ void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
  *   cancelled.  This function restores the correct thread priority of each
  *   holder of the semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - A reference to the semaphore no longer being waited for
  *
  * Returned Value:
@@ -1148,7 +1148,7 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
  * Description:
  *   Show information about threads currently waiting on this semaphore
  *
- * Parameters:
+ * Input Parameters:
  *   sem - A reference to the semaphore
  *
  * Returned Value:
@@ -1174,7 +1174,7 @@ void sem_enumholders(FAR sem_t *sem)
  *   Return the number of available holder containers.  This is a good way
  *   to find out which threads are not calling sem_destroy.
  *
- * Parameters:
+ * Input Parameters:
  *   sem - A reference to the semaphore
  *
  * Returned Value:

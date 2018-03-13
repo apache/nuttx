@@ -104,7 +104,7 @@ extern "C"
  *
  *   ioctl() is a non-standard UNIX-like API
  *
- * Parameters:
+ * Input Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
  *   arg      The argument of the ioctl cmd, OR

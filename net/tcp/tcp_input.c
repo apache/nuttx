@@ -72,7 +72,7 @@
  * Description:
  *   Handle incoming TCP input
  *
- * Parameters:
+ * Input Parameters:
  *   dev   - The device driver structure containing the received TCP packet.
  *   domain - IP domain (PF_INET or PF_INET6)
  *   iplen - Lngth of the IP header (IPv4_HDRLEN or IPv6_HDRLEN).
@@ -1010,7 +1010,7 @@ drop:
  * Description:
  *   Handle incoming TCP input with IPv4 header
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received TCP packet.
  *
  * Returned Value:
@@ -1040,7 +1040,7 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
  * Description:
  *   Handle incoming TCP input with IPv4 header
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received TCP packet.
  *
  * Returned Value:

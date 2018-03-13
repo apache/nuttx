@@ -90,7 +90,7 @@ extern "C"
  *   Initialize an XBee driver.  The XBee device is assumed to be
  *   in the post-reset state upon entry to this function.
  *
- * Parameters:
+ * Input Parameters:
  *   spi   - A reference to the platform's SPI driver for the XBee
  *   lower - The MCU-specific interrupt used to control low-level MCU
  *           functions (i.e., XBee GPIO interrupts).
@@ -115,7 +115,7 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
  *   Register XBee network device.  The network device is what binds the XBee MAC
  *   to the network layer (6LoWPAN, PF_IEEE802154).
  *
- * Parameters:
+ * Input Parameters:
  *   xbee   - A reference to the XBee Mac driver
  *
  * Returned Value:

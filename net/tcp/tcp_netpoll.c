@@ -76,7 +76,7 @@ struct tcp_poll_s
  *   This function is called to perform the actual TCP receive operation via
  *   the device interface layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev      The structure of the network driver that caused the event
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked

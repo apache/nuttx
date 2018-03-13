@@ -302,7 +302,7 @@ done:
  *   Perform interrupt handling logic outside of the interrupt handler (on
  *   the work queue thread).
  *
- * Parameters:
+ * Input Parameters:
  *   arg     - The reference to the driver structure (cast to void*)
  *
  * Returned Value:
@@ -422,7 +422,7 @@ void mrf24j40_irqworker(FAR void *arg)
  * Description:
  *   Hardware interrupt handler
  *
- * Parameters:
+ * Input Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
  *   context - Interrupt register state save info (architecture-specific)
  *

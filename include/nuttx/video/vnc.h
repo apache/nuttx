@@ -110,7 +110,7 @@ extern "C"
  *
  *   See also vnc_default_fbinitialize() below.
  *
- * Parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *   kbdout - If non-NULL, then the pointed-to function will be called to
@@ -142,7 +142,7 @@ int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
  *
  *   See also vnc_default_fbinitialize() below.
  *
- * Parameters:
+ * Input Parameters:
  *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
  *   callouts have arguments that match the inputs to nx_kbdin() and
  *   nx_mousein() (if arg is really of type NXHANDLE).
@@ -168,7 +168,7 @@ void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
  *   This is just a wrapper around vnc_fbinitialize() that will establish
  *   the default mouse and keyboard callout functions.
  *
- * Parameters:
+ * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
  *     specifies the display.  Normally this is zero.
  *   handle - And instance of NXHANDLE returned from initialization of the

@@ -70,7 +70,7 @@ static char g_retchar[2];
  *   basename() may return pointers to statically allocated memory which may
  *   be overwritten by subsequent calls.
  *
- * Parameter:
+ * Input Parameters:
  *   path The null-terminated string referring to the path to be decomposed
  *
  * Returned Value:

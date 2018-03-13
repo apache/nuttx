@@ -56,7 +56,7 @@
  * Description:
  *   Check if an address lies in the kernel heap.
  *
- * Parameters:
+ * Input Parameters:
  *   mem - The address to check
  *
  * Returned Value:

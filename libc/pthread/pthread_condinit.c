@@ -56,7 +56,7 @@
  * Description:
  *   A thread can create condition variables.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

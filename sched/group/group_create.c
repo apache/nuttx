@@ -89,7 +89,7 @@ FAR struct task_group_s *g_grouphead;
  * Description:
  *   Create a unique group ID.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - The tcb in need of the task group.
  *
  * Returned Value:
@@ -161,7 +161,7 @@ static void group_assigngid(FAR struct task_group_s *group)
  *   group container, then (2) group_initialize() is called to set up the
  *   group membership.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb   - The tcb in need of the task group.
  *   ttype - Type of the thread that is the parent of the group
  *
@@ -271,7 +271,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
  *   allocated by group_allocate() early in the task creation sequence, then
  *   (2) this function  is called to set up the initial group membership.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - The tcb in need of the task group.
  *
  * Returned Value:

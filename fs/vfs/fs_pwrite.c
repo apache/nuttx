@@ -121,7 +121,7 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
  *   require four system calls.  If it is implemented within the kernel,
  *   only three.
  *
- * Parameters:
+ * Input Parameters:
  *   fd       file descriptor (or socket descriptor) to write to
  *   buf      Data to write
  *   nbytes   Length of data to write

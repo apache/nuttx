@@ -108,7 +108,7 @@ struct route_ipv6_devmatch_s
  * Description:
  *   Return 1 if the IPv4 route is available on the device's network.
  *
- * Parameters:
+ * Input Parameters:
  *   route - The next route to examine
  *   arg   - The match values (cast to void*)
  *
@@ -157,7 +157,7 @@ static int net_ipv4_devmatch(FAR struct net_route_ipv4_s *route,
  * Description:
  *   Return 1 if the IPv6 route is available on the device's network.
  *
- * Parameters:
+ * Input Parameters:
  *   route - The next route to examine
  *   arg   - The match values (cast to void*)
  *
@@ -214,7 +214,7 @@ static int net_ipv6_devmatch(FAR struct net_route_ipv6_s *route,
  *   This is similar to net_ipv4_router().  However, the set of routers is
  *   constrained to those accessible by the specific device
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - We are committed to using this device.
  *   target - An IPv4 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our
@@ -292,7 +292,7 @@ void netdev_ipv4_router(FAR struct net_driver_s *dev, in_addr_t target,
  *   This is similar to net_ipv6_router().  However, the set of routers is
  *   constrained to those accessible by the specific device
  *
- * Parameters:
+ * Input Parameters:
  *   dev    - We are committed to using this device.
  *   target - An IPv6 address on a remote network to use in the lookup.
  *   router - The address of router on a local network that can forward our

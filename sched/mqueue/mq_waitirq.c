@@ -61,7 +61,7 @@
  *   becoming not full (on mq_send and friends) or not empty (on mq_receive
  *   and friends).
  *
- * Parameters:
+ * Input Parameters:
  *   wtcb - A pointer to the TCB of the task that is waiting on a message
  *          queue, but has received a signal instead.
  *

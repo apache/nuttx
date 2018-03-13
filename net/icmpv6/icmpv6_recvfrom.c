@@ -92,7 +92,7 @@ struct icmpv6_recvfrom_s
  * Description:
  *   Check for send timeout.
  *
- * Parameters:
+ * Input Parameters:
  *   pstate - Reference to instance ot recvfrom state structure
  *
  * Returned Value:
@@ -134,7 +134,7 @@ static inline int recvfrom_timeout(FAR struct icmpv6_recvfrom_s *pstate)
  *   ECHO request and/or ECHO reply actions when polled by the lower, device
  *   interfacing layer.
  *
- * Parameters:
+ * Input Parameters:
  *   dev        The structure of the network driver that caused the interrupt
  *   conn       The received packet, cast to void *
  *   pvpriv     An instance of struct icmpv6_recvfrom_s cast to void*

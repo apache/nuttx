@@ -56,7 +56,7 @@
  *   Convert a IPv6 prefix length to a network mask.  The prefix length
  *   specifies the number of MS bits under mask (0-128)
  *
- * Parameters:
+ * Input Parameters:
  *   preflen  - Determines the width of the netmask (in bits).  Range 0-128
  *   mask  - The location to return the netmask.
  *

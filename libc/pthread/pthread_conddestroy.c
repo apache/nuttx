@@ -53,7 +53,7 @@
  * Description:
  *   A thread can delete condition variables.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

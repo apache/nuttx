@@ -90,7 +90,7 @@ extern uint16_t g_wdnfree;
  * Description:
  * This function initializes the watchdog data structures
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -114,7 +114,7 @@ void weak_function wd_initialize(void);
  *   function will be executed in the context of the timer interrupt
  *   handler.
  *
- * Parameters:
+ * Input Parameters:
  *   ticks - If CONFIG_SCHED_TICKLESS is defined then the number of ticks
  *     in the interval that just expired is provided.  Otherwise,
  *     this function is called on each timer interrupt and a value of one

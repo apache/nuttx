@@ -169,7 +169,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
  * Description:
  *   socket() creates an endpoint for communication and returns a descriptor.
  *
- * Parameters:
+ * Input Parameters:
  *   domain   (see sys/socket.h)
  *   type     (see sys/socket.h)
  *   protocol (see sys/socket.h)

@@ -61,7 +61,7 @@
  *  the given output or update stream via the stream's underlying write
  *  function.  The open status of the stream is unaffected.
  *
- * Parmeters:
+ * Input Parameters:
  *  stream - the stream to flush
  *  bforce - flush must be complete.
  *

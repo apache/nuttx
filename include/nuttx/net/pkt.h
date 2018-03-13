@@ -70,7 +70,7 @@
  *   packet socket logic.  All frames that are received should be provided to
  *   pkt_input() prior to other routing.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received packet
  *
  * Returned Value:

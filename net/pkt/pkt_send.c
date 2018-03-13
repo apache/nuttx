@@ -157,7 +157,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  *   The psock_pkt_send() call may be used only when the packet socket is in a
  *   connected state (so that the intended recipient is known).
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send

@@ -217,7 +217,7 @@ drop:
  * Description:
  *   Handle incoming ICMPv6 input
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure containing the received ICMPv6
  *         packet
  *

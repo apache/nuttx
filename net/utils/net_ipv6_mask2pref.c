@@ -149,7 +149,7 @@ static inline uint8_t net_msbits16(uint16_t hword)
  *   there might not be additional '1' bits following the firs '0', but that
  *   will be a malformed netmask.
  *
- * Parameters:
+ * Input Parameters:
  *   mask   Points to an IPv6 netmask in the form of uint16_t[8]
  *
  * Returned Value:

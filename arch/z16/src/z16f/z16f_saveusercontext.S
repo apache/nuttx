@@ -69,7 +69,7 @@
  *   r14:    Frame pointer
  *   r15:    Stack pointer (with return address on stack)
  *
- * Parameters:
+ * Input Parameters:
  *   r1: pointer to the register save array in the XCPT structure
  *
  *************************************************************************/

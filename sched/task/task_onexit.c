@@ -79,7 +79,7 @@
  *      2. on_exit functions are not inherited when a new task is
  *         created.
  *
- * Parameters:
+ * Input Parameters:
  *   func - A pointer to the function to be called when the task exits.
  *   arg -  An argument that will be provided to the on_exit() function when
  *          the task exits.

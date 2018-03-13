@@ -56,7 +56,7 @@
  * Description:
  *   Remove the referenced name=value pair from the environment
  *
- * Parameters:
+ * Input Parameters:
  *   group The task group with the environment containing the name=value pair
  *   pvar A pointer to the name=value pair in the restroom
  *

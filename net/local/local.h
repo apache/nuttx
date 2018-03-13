@@ -317,7 +317,7 @@ int local_release(FAR struct local_conn_s *conn);
  *   Unix sockets, psock_listen() calls this function.  The psock_listen()
  *   call applies only to sockets of type SOCK_STREAM or SOCK_SEQPACKET.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    Reference to an internal, boound socket structure.
  *   backlog  The maximum length the queue of pending connections may grow.
  *            If a connection request arrives with the queue full, the client
@@ -342,7 +342,7 @@ int local_listen(FAR struct socket *psock, int backlog);
  *   This function implements accept() for Unix domain sockets.  See the
  *   description of accept() for further information.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    The listening Unix domain socket structure
  *   addr     Receives the address of the connecting client
  *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
@@ -369,7 +369,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  * Description:
  *   Send a local packet as a stream.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
@@ -424,7 +424,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
  * Description:
  *   Send a packet on the write-only FIFO.
  *
- * Parameters:
+ * Input Parameters:
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
@@ -450,7 +450,7 @@ int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
  *   initialized to the size of the buffer associated with from, and modified
  *   on return to indicate the actual size of the address stored there.
  *
- * Parameters:
+ * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   buf      Buffer to receive data
  *   len      Length of buffer
@@ -476,7 +476,7 @@ ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
  * Description:
  *   Read a data from the read-only FIFO.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - File structure of write-only FIFO.
  *   buf   - Local to store the received data
  *   len   - Length of data to receive [in]
@@ -498,7 +498,7 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len);
  * Description:
  *   Return the Unix domain address of a connection.
  *
- * Parameters:
+ * Input Parameters:
  *   conn - The connection
  *   addr - The location to return the address
  *   addrlen - The size of the memory allocat by the caller to receive the
@@ -518,7 +518,7 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
  * Description:
  *   Read a sync bytes until the start of the packet is found.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - File structure of write-only FIFO.
  *
  * Returned Value:

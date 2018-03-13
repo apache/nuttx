@@ -95,7 +95,7 @@ static int g_ipv6_count;
  * Description:
  *   Open and detach the routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   pathname - The full path to the routing table entry
  *   oflags   - Open flags
  *   filep    - Location in which to return the detached file instance.
@@ -144,7 +144,7 @@ int net_openroute_detached(FAR const char *pathname, int oflags,
  *   Return the size of a routing table in terms of the number of entries in
  *   the routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   path      - The path to the routing table
  *   entrysize - The size of one entry in the routing table
  *
@@ -218,7 +218,7 @@ int net_routesize(FAR const char *path, size_t entrysize)
  * Description:
  *   Initialize the in-memory, RAM routing table
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -248,7 +248,7 @@ void net_init_fileroute(void)
  * Description:
  *   Open the IPv4/IPv6 routing table with the specified access privileges.
  *
- * Parameters:
+ * Input Parameters:
  *   oflags - Open flags
  *   filep  - Location in which to return the detached file instance.
  *
@@ -324,7 +324,7 @@ int net_openroute_ipv6(int oflags, FAR struct file *filep)
  * Description:
  *   Read one route entry from the IPv4/IPv6 routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *   route - Location to return the next route read from the file
  *
@@ -437,7 +437,7 @@ ssize_t net_readroute_ipv6(FAR struct file *filep,
  * Description:
  *   Write one route entry to the IPv4/IPv6 routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *   route - Location to return the next route read from the file
  *
@@ -549,7 +549,7 @@ ssize_t net_writeroute_ipv6(FAR struct file *filep,
  * Description:
  *   Seek to a specific entry entry to the IPv4/IPv6 routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *   index - The index of the routing table entry to seek to.
  *
@@ -612,7 +612,7 @@ off_t net_seekroute_ipv6(FAR struct file *filep, unsigned int index)
  *   Return the size of a routing table in terms of the number of entries in
  *   the routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -647,7 +647,7 @@ int net_routesize_ipv6(void)
  *   Lock access to the routing table.  Necessary when a routing table is
  *   being reorganized due to deletion of a route.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -740,7 +740,7 @@ int net_lockroute_ipv6(void)
  * Description:
  *   Release the read lock.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -837,7 +837,7 @@ int net_unlockroute_ipv6(void)
  * Description:
  *   Close the IPv4/IPv6 routing table.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - Detached file instance obtained by net_openroute_ipv{4|6}[_rdonly]
  *
  * Returned Value:

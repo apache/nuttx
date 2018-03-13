@@ -55,7 +55,7 @@
  * Description:
  *   Return a pointer to the file list for this thread
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

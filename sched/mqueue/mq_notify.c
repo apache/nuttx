@@ -71,7 +71,7 @@
  *   registration will be removed.  The message queue will then be
  *   available for registration.
  *
- * Parameters:
+ * Input Parameters:
  *   mqdes - Message queue descriptor
  *   notification - Real-time signal structure containing:
  *      sigev_notify - Should be SIGEV_SIGNAL or SIGEV_THREAD

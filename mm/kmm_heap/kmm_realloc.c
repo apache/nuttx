@@ -53,7 +53,7 @@
  * Description:
  *   Re-allocate memory in the kernel heap.
  *
- * Parameters:
+ * Input Parameters:
  *   oldmem  - The old memory allocated
  *   newsize - Size (in bytes) of the new memory region to be re-allocated.
  *

@@ -117,7 +117,7 @@ extern "C"
  * Description:
  *   Initialize the Battery Backed up SRAM driver.
  *
- * Parameters:
+ * Input Parameters:
  *   devpath - the path to instantiate the files.
  *   sizes   - Pointer to a any array of file sizes to create
  *             the last entry should be 0

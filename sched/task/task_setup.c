@@ -158,7 +158,7 @@ static int task_assignpid(FAR struct tcb_s *tcb)
  *   well.  pthread_setup() will have to fix up the affinity mask in this
  *   case.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - The TCB of the new task.
  *
  * Returned Value:
@@ -187,7 +187,7 @@ static inline void task_inherit_affinity(FAR struct tcb_s *tcb)
  *   Save the task ID of the parent task in the child task's group and allocate
  *   a child status structure to catch the child task's exit status.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb   - The TCB of the new, child task.
  *   ttype - Type of the new thread: task, pthread, or kernel thread
  *
@@ -296,7 +296,7 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
  *   module (probably) intends the task or thread to execute in the same
  *   D-Space.  This function will duplicate the D-Space for that purpose.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - The TCB of the new task.
  *
  * Returned Value:

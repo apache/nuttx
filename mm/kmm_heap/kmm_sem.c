@@ -53,7 +53,7 @@
  * Description:
  *   Try to take the kernel heap semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -72,7 +72,7 @@ int kmm_trysemaphore(void)
  * Description:
  *   Give the kernel heap semaphore.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

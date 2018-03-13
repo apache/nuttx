@@ -54,7 +54,7 @@
  * Description:
  *    Set mutex protocol attribute.
  *
- * Parameters:
+ * Input Parameters:
  *    attr     - A pointer to the mutex attributes to be modified
  *    protocol - The new protocol to use
  *

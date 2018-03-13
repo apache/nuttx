@@ -69,7 +69,7 @@
  *   associated with it are freed; if the descriptor was the last reference
  *   to a file which has been removed using unlink(2) the file is deleted.
  *
- * Parameters:
+ * Input Parameters:
  *   fd   file descriptor to close
  *
  * Returned Value:

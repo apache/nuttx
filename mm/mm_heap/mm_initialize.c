@@ -55,7 +55,7 @@
  * Description:
  *   This function adds a region of contiguous memory to the selected heap.
  *
- * Parameters:
+ * Input Parameters:
  *   heap      - The selected heap
  *   heapstart - Start of the heap region
  *   heapsize  - Size of the heap region
@@ -140,7 +140,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
  *   Initialize the selected heap data structures, providing the initial
  *   heap region.
  *
- * Parameters:
+ * Input Parameters:
  *   heap      - The selected heap
  *   heapstart - Start of the initial heap region
  *   heapsize  - Size of the initial heap region

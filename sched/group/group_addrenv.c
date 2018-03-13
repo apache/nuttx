@@ -77,7 +77,7 @@ gid_t g_gid_current;
  *   run list).  This function will change the address environment if the
  *   new thread is part of a different task group.
  *
- * Parameters:
+ * Input Parameters:
  *   tcb - The TCB of thread that needs an address environment.  This should
  *         be the TCB at the head of the ready-to-run list, but that is not
  *         enough.

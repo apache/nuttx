@@ -145,7 +145,7 @@ static const uint32_t pool_twist[8] =
  *
  * Code is inspired by add_entropy_words() function of OpenBSD kernel.
  *
- * Parameters:
+ * Input Parameters:
  *   buf     -   Buffer of integers to be added
  *   n       -   Number of elements in buf
  *   inc_new -   Count element as new entry
@@ -215,7 +215,7 @@ static void addentropy(FAR const uint32_t *buf, size_t n, bool inc_new)
  *   exported to userspace. This interface MUST NOT be used as a
  *   general-purpose random bit generator!
  *
- * Parameters:
+ * Input Parameters:
  *   S  - BLAKE2s instance that will absorb entropy pool
  *
  * Returned Value:
@@ -391,7 +391,7 @@ static void rng_init(void)
  *   Add one integer to entropy pool, contributing a specific kind
  *   of entropy to pool.
  *
- * Parameters:
+ * Input Parameters:
  *   kindof  - Enumeration constant telling where val came from
  *   val     - Integer to be added
  *
@@ -415,7 +415,7 @@ void up_rngaddint(enum rnd_source_t kindof, int val)
  * Description:
  *   Add buffer of integers to entropy pool.
  *
- * Parameters:
+ * Input Parameters:
  *   kindof  - Enumeration constant telling where val came from
  *   buf     - Buffer of integers to be added
  *   n       - Number of elements in buf
@@ -551,7 +551,7 @@ void up_randompool_initialize(void)
  *
  *   Note that this function cannot fail, other than by asserting.
  *
- * Parameters:
+ * Input Parameters:
  *   bytes  - Buffer for returned random bytes
  *   nbytes - Number of bytes requested.
  *

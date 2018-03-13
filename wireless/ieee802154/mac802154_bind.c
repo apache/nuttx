@@ -60,7 +60,7 @@
  * Description:
  *   Bind the MAC callback table to the MAC state.
  *
- * Parameters:
+ * Input Parameters:
  *   mac - Reference to the MAC driver state structure
  *   cb  - MAC callback operations
  *

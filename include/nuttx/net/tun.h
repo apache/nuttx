@@ -85,7 +85,7 @@ extern "C"
  * Description:
  *   Instantiate a TUN network interface.
  *
- * Parameters:
+ * Input Parameters:
  *
  * Returned Value:
  *   OK on success; Negated errno value on failure.

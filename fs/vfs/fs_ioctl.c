@@ -63,7 +63,7 @@
  * Description:
  *   Perform device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   file     File structure instance
  *   req      The ioctl command
  *   arg      The argument of the ioctl cmd
@@ -109,7 +109,7 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
  * Description:
  *   Perform device specific operations.
  *
- * Parameters:
+ * Input Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
  *   arg      The argument of the ioctl cmd

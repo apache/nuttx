@@ -53,7 +53,7 @@
  * Description:
  *   Operations on condition variable attributes
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:

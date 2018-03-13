@@ -59,7 +59,7 @@
  * Description:
  *   Change the parent of a task.
  *
- * Parameters:
+ * Input Parameters:
  *   ppid - PID of the new parent task (0 for grandparent, i.e. the parent
  *     of the current parent task)
  *   chpid  - PID of the child to be reparented.

@@ -62,7 +62,7 @@
  *   if a socket is connected with INADDY_ANY.  In this case, I suppose we
  *   should use the IP address associated with some default device???
  *
- * Parameters:
+ * Input Parameters:
  *   NULL
  *
  * Returned Value:

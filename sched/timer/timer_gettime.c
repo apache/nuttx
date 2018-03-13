@@ -64,7 +64,7 @@
  *   absolute time. The it_interval member of value will contain the reload
  *   value last set by timer_settime().
  *
- * Parameters:
+ * Input Parameters:
  *   timerid - The pre-thread timer, previously created by the call to
  *   timer_create(), whose remaining time count will be returned..
  *

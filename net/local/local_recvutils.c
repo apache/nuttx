@@ -63,7 +63,7 @@
  * Description:
  *   Read a data from the read-only FIFO.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - File structure of write-only FIFO.
  *   buf   - Local to store the received data
  *   len   - Length of data to receive [in]
@@ -130,7 +130,7 @@ errout:
  * Description:
  *   Read a sync bytes until the start of the packet is found.
  *
- * Parameters:
+ * Input Parameters:
  *   filep - File structure of write-only FIFO.
  *
  * Returned Value:
@@ -195,7 +195,7 @@ int local_sync(FAR struct file *filep)
  * Description:
  *   Return the Unix domain address of a connection.
  *
- * Parameters:
+ * Input Parameters:
  *   conn - The connection
  *   addr - The location to return the address
  *   addrlen - The size of the memory allocated by the caller to receive the

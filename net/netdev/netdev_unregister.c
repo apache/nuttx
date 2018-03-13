@@ -75,7 +75,7 @@
  * Description:
  *   Unregister a network device driver.
  *
- * Parameters:
+ * Input Parameters:
  *   dev - The device driver structure to un-register
  *
  * Returned Value:

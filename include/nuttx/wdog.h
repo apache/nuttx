@@ -173,7 +173,7 @@ extern "C"
  *   The wd_create function will create a watchdog timer by allocating one
  *   from the list of free watchdog timers.
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  * Returned Value:
@@ -192,7 +192,7 @@ WDOG_ID wd_create(void);
  *   it to the free pool of watchdog timers.  The watchdog timer will be
  *   removed from the active timer queue if had been started.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog - The watchdog ID to delete.  This is actually a pointer to a
  *          watchdog structure.
  *
@@ -225,7 +225,7 @@ int wd_delete(WDOG_ID wdog);
  *   call wd_start again with the same wdog; only the most recent wdStart()
  *   on a given watchdog ID has any effect.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog     - watchdog ID
  *   delay    - Delay count in clock ticks
  *   wdentry  - function to call on timeout
@@ -250,7 +250,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...);
  *   This function cancels a currently running watchdog timer. Watchdog
  *   timers may be cancelled from the interrupt level.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog - ID of the watchdog to cancel.
  *
  * Returned Value:
@@ -268,7 +268,7 @@ int wd_cancel(WDOG_ID wdog);
  *   This function returns the time remaining before the specified watchdog
  *   timer expires.
  *
- * Parameters:
+ * Input Parameters:
  *   wdog - watchdog ID
  *
  * Returned Value:

@@ -245,7 +245,7 @@ static inline void cc3000_devgive(FAR struct cc3000_dev_s *priv)
  *   called to configure the SPI
  *   bus.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -274,7 +274,7 @@ static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
  *   to assure: (1) exclusive access to the SPI bus, and (2) to assure that
  *   the shared bus is properly configured for the cc3000 module.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -306,7 +306,7 @@ static void cc3000_lock_and_select(FAR struct spi_dev_s *spi)
  *   Un-lock the SPI bus after each transfer, possibly losing the current
  *   configuration if we are sharing the SPI bus with other devices.
  *
- * Parameters:
+ * Input Parameters:
  *   spi  - Reference to the SPI driver structure
  *
  * Returned Value:
@@ -333,7 +333,7 @@ static void cc3000_deselect_and_unlock(FAR struct spi_dev_s *spi)
  * Description:
  *  Helper function to wait on the semaphore signaled by the
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the CC3000 driver structure
  *   priv -
  *
@@ -375,7 +375,7 @@ static int cc3000_wait(FAR struct cc3000_dev_s *priv, sem_t *psem)
  * Description:
  *  Helper function to wait on the irqsem signaled by the interrupt
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the CC3000 driver structure
  *
  * Returned Value:
@@ -397,7 +397,7 @@ static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
  * Description:
  *  Helper function to wait on the readysem signaled by the interrupt
  *
- * Parameters:
+ * Input Parameters:
  *   priv - Reference to the CC3000 driver structure
  *
  * Returned Value:
