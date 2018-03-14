@@ -1,0 +1,639 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LPUART_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART0_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART1_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART2_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART3_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART4_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART5_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART6_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART7_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config LPUART8_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+menu "LPUART0 Configuration"
+	depends on LPUART0_SERIALDRIVER
+
+config LPUART0_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART0_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART0_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART0_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART0_PARITY
+	int "Parity setting"
+	range 0 2
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART0_2STOP
+	int "use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART0_IFLOWCONTROL
+	bool "LPUART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART0 RTS flow control
+
+config LPUART0_OFLOWCONTROL
+	bool "LPUART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART0 CTS flow control
+
+config LPUART0_DMA
+	bool "LPUART0 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART0
+
+endmenu
+
+menu "LPUART1 Configuration"
+	depends on LPUART1_SERIALDRIVER
+
+config LPUART1_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART1_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART1_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART1_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART1_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART1_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART1_IFLOWCONTROL
+	bool "LPUART1 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART1 RTS flow control
+
+config LPUART1_OFLOWCONTROL
+	bool "LPUART1 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART1 CTS flow control
+
+config LPUART1_DMA
+	bool "LPUART1 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART1
+
+endmenu
+
+menu "LPUART2 Configuration"
+	depends on LPUART2_SERIALDRIVER
+
+config LPUART2_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART2_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART2_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART2_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART2_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART2_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART2_IFLOWCONTROL
+	bool "LPUART2 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART2 RTS flow control
+
+config LPUART2_OFLOWCONTROL
+	bool "LPUART2 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART2 CTS flow control
+
+config LPUART2_DMA
+	bool "LPUART2 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART2
+
+endmenu
+
+menu "LPUART3 Configuration"
+	depends on LPUART3_SERIALDRIVER
+
+config LPUART3_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART3_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART3_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART3_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART3_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART3_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART3_IFLOWCONTROL
+	bool "LPUART3 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART3 RTS flow control
+
+config LPUART3_OFLOWCONTROL
+	bool "LPUART3 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART3 CTS flow control
+
+config LPUART3_DMA
+	bool "LPUART3 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART3
+
+endmenu
+
+menu "LPUART4 Configuration"
+	depends on LPUART4_SERIALDRIVER
+
+config LPUART4_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART4_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART4_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART4_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART4_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART4_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART4_IFLOWCONTROL
+	bool "LPUART4 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART4 RTS flow control
+
+config LPUART4_OFLOWCONTROL
+	bool "LPUART4 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART4 CTS flow control
+
+config LPUART4_DMA
+	bool "LPUART4 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART4
+
+endmenu
+
+menu "LPUART5 Configuration"
+	depends on LPUART5_SERIALDRIVER
+
+config LPUART5_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART5_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART5_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART5_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART5_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART5_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART5_IFLOWCONTROL
+	bool "LPUART5 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART5 RTS flow control
+
+config LPUART5_OFLOWCONTROL
+	bool "LPUART5 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART5 CTS flow control
+
+config LPUART5_DMA
+	bool "LPUART5 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART5
+
+endmenu
+
+menu "LPUART6 Configuration"
+	depends on LPUART6_SERIALDRIVER
+
+config LPUART6_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART6_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART6_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART6_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART6_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART6_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART6_IFLOWCONTROL
+	bool "LPUART6 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART6 RTS flow control
+
+config LPUART6_OFLOWCONTROL
+	bool "LPUART6 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART6 CTS flow control
+
+config LPUART6_DMA
+	bool "LPUART6 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART6
+
+endmenu
+
+menu "LPUART7 Configuration"
+	depends on LPUART7_SERIALDRIVER
+
+config LPUART7_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART7_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART7_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART7_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART7_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART7_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART7_IFLOWCONTROL
+	bool "LPUART7 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART7 RTS flow control
+
+config LPUART7_OFLOWCONTROL
+	bool "LPUART7 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART7 CTS flow control
+
+config LPUART7_DMA
+	bool "LPUART7 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART7
+
+endmenu
+
+menu "LPUART8 Configuration"
+	depends on LPUART8_SERIALDRIVER
+
+config LPUART8_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config LPUART8_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config LPUART8_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the LPUART.
+
+config LPUART8_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config LPUART8_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config LPUART8_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config LPUART8_IFLOWCONTROL
+	bool "LPUART8 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable LPUART8 RTS flow control
+
+config LPUART8_OFLOWCONTROL
+	bool "LPUART8 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable LPUART8 CTS flow control
+
+config LPUART8_DMA
+	bool "LPUART8 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on LPUART8
+
+endmenu

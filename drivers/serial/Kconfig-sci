@@ -1,0 +1,102 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config SCI0_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI1_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+menu "SCI0 Configuration"
+	depends on SCI0_SERIALDRIVER
+
+config SCI0_RXBUFSIZE
+	int "SCI0 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI0_TXBUFSIZE
+	int "SCI0 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI0_BAUD
+	int "SCI0 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI0_BITS
+	int "SCI0 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI0_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI0_2STOP
+	int "SCI0 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI0 Configuration
+
+menu "SCI1 Configuration"
+	depends on SCI1_SERIALDRIVER
+
+config SCI1_RXBUFSIZE
+	int "SCI1 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI1_TXBUFSIZE
+	int "SCI1 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI1_BAUD
+	int "SCI1 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI1_BITS
+	int "SCI1 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI1_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI1_2STOP
+	int "SCI1 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI1 Configuration

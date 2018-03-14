@@ -394,7 +394,7 @@ config KINETIS_LPUART0
 	bool "Low power LPUART0"
 	default n
 	depends on KINETIS_HAVE_LPUART0
-	select OTHER_UART_SERIALDRIVER
+	select LPUART0_SERIALDRIVER
 	select KINETIS_LPUART
 	select KINETIS_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
@@ -405,7 +405,7 @@ config KINETIS_LPUART1
 	bool "Low power LPUART1"
 	default n
 	depends on KINETIS_HAVE_LPUART1
-	select OTHER_UART_SERIALDRIVER
+	select LPUART1_SERIALDRIVER
 	select KINETIS_LPUART
 	select KINETIS_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
@@ -997,163 +997,6 @@ config KINETIS_UARTFIFOS
 	depends on KINETIS_UART0
 
 endmenu # Kinetis UART Configuration
-
-menu "Kinetis LPUART0 Configuration"
-	depends on KINETIS_LPUART0
-
-config LPUART0_RXBUFSIZE
-	int "Receive buffer size"
-	default 256
-	---help---
-		Characters are buffered as they are received. This specifies
-		the size of the receive buffer.
-
-config LPUART0_TXBUFSIZE
-	int "Transmit buffer size"
-	default 256
-	---help---
-		Characters are buffered before being sent.  This specifies
-		the size of the transmit buffer.
-
-config LPUART0_BAUD
-	int "BAUD rate"
-	default 115200
-	---help---
-		The configured BAUD of the UART.
-
-config LPUART0_BITS
-	int "Character size"
-	default 8
-	---help---
-		The number of bits.  Must be either 7 or 8.
-
-config LPUART0_PARITY
-	int "Parity setting"
-	range 0 2
-	default 0
-	---help---
-		0=no parity, 1=odd parity, 2=even parity
-
-config LPUART0_2STOP
-	int "use 2 stop bits"
-	default 0
-	---help---
-		1=Two stop bits
-
-config LPUART0_IFLOWCONTROL
-	bool "LPUART0 RTS flow control"
-	default n
-	select SERIAL_IFLOWCONTROL
-	---help---
-		Enable LPUART0 RTS flow control
-
-config LPUART0_OFLOWCONTROL
-	bool "LPUART0 CTS flow control"
-	default n
-	select SERIAL_OFLOWCONTROL
-	---help---
-		Enable LPUART0 CTS flow control
-
-config LPUART0_DMA
-	bool "LPUART0 DMA support"
-	default n
-	select SERIAL_DMA
-	---help---
-		Enable DMA transfers on LPUART0
-
-endmenu # Kinetis LPUART0 Configuration
-
-menu "Kinetis LPUART1 Configuration"
-	depends on KINETIS_LPUART1
-
-config LPUART1_RXBUFSIZE
-	int "Receive buffer size"
-	default 256
-	---help---
-		Characters are buffered as they are received. This specifies
-		the size of the receive buffer.
-
-config LPUART1_TXBUFSIZE
-	int "Transmit buffer size"
-	default 256
-	---help---
-		Characters are buffered before being sent.  This specifies
-		the size of the transmit buffer.
-
-config LPUART1_BAUD
-	int "BAUD rate"
-	default 115200
-	---help---
-		The configured BAUD of the UART.
-
-config LPUART1_BITS
-	int "Character size"
-	default 8
-	---help---
-		The number of bits.  Must be either 7 or 8.
-
-config LPUART1_PARITY
-	int "Parity setting"
-	range 0 2
-	default 0
-	---help---
-		0=no parity, 1=odd parity, 2=even parity
-
-config LPUART1_2STOP
-	int "use 2 stop bits"
-	default 0
-	---help---
-		1=Two stop bits
-
-config LPUART1_IFLOWCONTROL
-	bool "LPUART1 RTS flow control"
-	default n
-	select SERIAL_IFLOWCONTROL
-	---help---
-		Enable LPUART1 RTS flow control
-
-config LPUART1_OFLOWCONTROL
-	bool "LPUART1 CTS flow control"
-	default n
-	select SERIAL_OFLOWCONTROL
-	---help---
-		Enable LPUART1 CTS flow control
-
-config LPUART1_DMA
-	bool "LPUART1 DMA support"
-	default n
-	select SERIAL_DMA
-	---help---
-		Enable DMA transfers on LPUART1
-
-endmenu # Kinetis LPUART1 Configuration
-
-choice
-	prompt "Kinetis LPUART Serial Console"
-	default NO_LPUART_SERIAL_CONSOLE
-	depends on DEV_CONSOLE && KINETIS_LPUART
-
-config LPUART0_SERIAL_CONSOLE
-	bool "Use LPUART0 as the serial console"
-	depends on KINETIS_LPUART0
-	select OTHER_SERIAL_CONSOLE
-	---help---
-		Use the LPUART0 device as the serial console
-
-config LPUART1_SERIAL_CONSOLE
-	bool "Use LPUART1 as the serial console"
-	depends on KINETIS_LPUART1
-	select OTHER_SERIAL_CONSOLE
-	---help---
-		Use the LPUART1 device as the serial console
-
-config NO_LPUART_SERIAL_CONSOLE
-	bool "No LPUART serial console"
-	---help---
-		No serial LPUART based console OR some other serial device provides
-		the serial console
-
-endchoice # Kinetis LPUART Serial Console
 
 config KINETIS_MERGE_TTY
 	bool "Kinetis Merge TTY names for LPUARTS"

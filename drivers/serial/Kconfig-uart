@@ -1,0 +1,639 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config UART_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART0_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART1_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART2_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART3_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART4_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART5_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART6_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART7_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config UART8_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+menu "UART0 Configuration"
+	depends on UART0_SERIALDRIVER
+
+config UART0_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART0_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART0_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART0_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART0_PARITY
+	int "Parity setting"
+	range 0 2
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART0_2STOP
+	int "use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART0_IFLOWCONTROL
+	bool "UART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART0 RTS flow control
+
+config UART0_OFLOWCONTROL
+	bool "UART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART0 CTS flow control
+
+config UART0_DMA
+	bool "UART0 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART0
+
+endmenu
+
+menu "UART1 Configuration"
+	depends on UART1_SERIALDRIVER
+
+config UART1_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART1_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART1_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART1_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART1_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART1_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART1_IFLOWCONTROL
+	bool "UART1 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART1 RTS flow control
+
+config UART1_OFLOWCONTROL
+	bool "UART1 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART1 CTS flow control
+
+config UART1_DMA
+	bool "UART1 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART1
+
+endmenu
+
+menu "UART2 Configuration"
+	depends on UART2_SERIALDRIVER
+
+config UART2_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART2_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART2_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART2_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART2_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART2_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART2_IFLOWCONTROL
+	bool "UART2 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART2 RTS flow control
+
+config UART2_OFLOWCONTROL
+	bool "UART2 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART2 CTS flow control
+
+config UART2_DMA
+	bool "UART2 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART2
+
+endmenu
+
+menu "UART3 Configuration"
+	depends on UART3_SERIALDRIVER
+
+config UART3_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART3_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART3_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART3_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART3_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART3_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART3_IFLOWCONTROL
+	bool "UART3 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART3 RTS flow control
+
+config UART3_OFLOWCONTROL
+	bool "UART3 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART3 CTS flow control
+
+config UART3_DMA
+	bool "UART3 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART3
+
+endmenu
+
+menu "UART4 Configuration"
+	depends on UART4_SERIALDRIVER
+
+config UART4_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART4_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART4_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART4_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART4_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART4_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART4_IFLOWCONTROL
+	bool "UART4 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART4 RTS flow control
+
+config UART4_OFLOWCONTROL
+	bool "UART4 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART4 CTS flow control
+
+config UART4_DMA
+	bool "UART4 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART4
+
+endmenu
+
+menu "UART5 Configuration"
+	depends on UART5_SERIALDRIVER
+
+config UART5_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART5_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART5_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART5_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART5_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART5_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART5_IFLOWCONTROL
+	bool "UART5 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART5 RTS flow control
+
+config UART5_OFLOWCONTROL
+	bool "UART5 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART5 CTS flow control
+
+config UART5_DMA
+	bool "UART5 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART5
+
+endmenu
+
+menu "UART6 Configuration"
+	depends on UART6_SERIALDRIVER
+
+config UART6_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART6_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART6_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART6_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART6_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART6_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART6_IFLOWCONTROL
+	bool "UART6 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART6 RTS flow control
+
+config UART6_OFLOWCONTROL
+	bool "UART6 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART6 CTS flow control
+
+config UART6_DMA
+	bool "UART6 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART6
+
+endmenu
+
+menu "UART7 Configuration"
+	depends on UART7_SERIALDRIVER
+
+config UART7_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART7_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART7_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART7_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART7_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART7_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART7_IFLOWCONTROL
+	bool "UART7 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART7 RTS flow control
+
+config UART7_OFLOWCONTROL
+	bool "UART7 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART7 CTS flow control
+
+config UART7_DMA
+	bool "UART7 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART7
+
+endmenu
+
+menu "UART8 Configuration"
+	depends on UART8_SERIALDRIVER
+
+config UART8_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART8_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART8_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART8_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART8_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART8_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART8_IFLOWCONTROL
+	bool "UART8 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART8 RTS flow control
+
+config UART8_OFLOWCONTROL
+	bool "UART8 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART8 CTS flow control
+
+config UART8_DMA
+	bool "UART8 DMA support"
+	default n
+	select SERIAL_DMA
+	---help---
+		Enable DMA transfers on UART8
+
+endmenu
