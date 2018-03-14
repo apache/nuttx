@@ -1659,9 +1659,11 @@ Information Common to All Configurations
 Each SAMV71-XULT configuration is maintained in a sub-directory and
 can be selected as follow:
 
-  cd tools
-  ./configure.sh samv71-xult/<subdir>
-  cd -
+   tools/configure.sh [OPTIONS] samv71-xult/<subdir>
+
+Where typical options are -l to configure to build on Linux or -c to
+configure for Cygwin under Linux.  'tools/configure.sh -h' will show
+you all of the options.
 
 Before building, make sure the PATH environment variable include the
 correct path to the directory than holds your toolchain binaries.
