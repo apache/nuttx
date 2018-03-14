@@ -33,6 +33,7 @@ we have:
   hex2bin   - hex2bin.h
   libgen    - libgen.h
   locale    - locale.h
+  lzf       - lzf.h
   fixedmath - fixedmath.h
   inttypes  - inttypes.h
   machine   - Various architecture-specific implementations.

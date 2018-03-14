@@ -62,6 +62,7 @@ include hex2bin/Make.defs
 include inttypes/Make.defs
 include libgen/Make.defs
 include locale/Make.defs
+include lzf/Make.defs
 include machine/Make.defs
 include math/Make.defs
 include misc/Make.defs

@@ -15,6 +15,7 @@ source libc/dllfcn/Kconfig
 source libc/modlib/Kconfig
 source libc/wchar/Kconfig
 source libc/locale/Kconfig
+source libc/lzf/Kconfig
 source libc/time/Kconfig
 source libc/tls/Kconfig
 source libc/net/Kconfig

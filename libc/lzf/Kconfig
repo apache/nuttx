@@ -1,0 +1,39 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_LZF
+	bool "LZF compression"
+	default n
+	---help---
+		Enable the LZF compression library from Marc Alexander Lehmann
+
+if LIBC_LZF
+
+choice
+	prompt "Compression options"
+	default LIBC_LZF_SMALL
+	---help---
+		Trade-offs between faster and smaller compression.  These sections
+		have no effect on decompression.
+
+config LIBC_LZF_SMALL
+	bool "Better compression"
+
+config LIBC_LZF_FAST
+	bool "Faster compression"
+
+config LIBC_LZF_FASTEST
+	bool "Fastest compression"
+
+endchoice # Compression options
+
+config LIBC_LZF_ALIGN
+	bool "Strict alignment"
+	default y
+	---help---
+		Unconditionally aligning does not cost very much, so do it if unsure.
+
+endif # LIBC_LZF
+
