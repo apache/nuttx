@@ -67,15 +67,24 @@
  * Name: clock_systimer
  *
  * Description:
- *   Return the current value of the 32/64-bit system timer counter
+ *   Return the current value of the 32/64-bit system timer counter.
+ *
+ *   Indirect access to the system timer counter is required through this
+ *   function if the execution environment does not have direct access to
+ *   kernel global data.
+ *
+ *   Use of this function is also required to assure atomic access to the
+ *   64-bit system timer.
+ *
+ *   NOTE:  This is an internal OS interface and should not be called from
+ *   application code.  Rather, the functionally equivalent, standard
+ *   interface clock() should be used.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
  *   The current value of the system timer counter
- *
- * Assumptions:
  *
  ****************************************************************************/
 
