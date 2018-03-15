@@ -263,8 +263,11 @@ unsigned int lzf_decompress (FAR const void *const in_data,
                 *op++ = *ref++;
 
               case 1:
+                *op++ = *ref++;
+
               case 0:
-                /* two octets more */
+                /* Two octets more */
+
                 *op++ = *ref++;
                 *op++ = *ref++;
             }
