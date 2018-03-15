@@ -92,13 +92,36 @@
  * Public Functions
  ****************************************************************************/
 
-/* Compressed format
+/****************************************************************************
+ * Name: lzf_compress
  *
- * 000LLLLL <L+1>    ; literal, L+1=1..33 octets
- * LLLooooo oooooooo ; backref L+1=1..7 octets, o+1=1..4096 offset
- * 111ooooo LLLLLLLL oooooooo ; backref L+8 octets, o+1=1..4096 offset
+ * Description:
+ * Compress in_len bytes stored at the memory block starting at
+ *   in_data and write the result to out_data, up to a maximum length
+ *   of out_len bytes.
  *
- */
+ *   If the output buffer is not large enough or any error occurs return 0,
+ *   otherwise return the number of bytes used, which might be considerably
+ *   more than in_len (but less than 104% of the original size), so it
+ *   makes sense to always use out_len == in_len - 1), to ensure _some_
+ *   compression, and store the data uncompressed otherwise (with a flag, of
+ *   course.
+ *
+ *   lzf_compress might use different algorithms on different systems and
+ *   even different runs, thus might result in different compressed strings
+ *   depending on the phase of the moon or similar factors. However, all
+ *   these strings are architecture-independent and will result in the
+ *   original data when decompressed using lzf_decompress.
+ *
+ *   The buffers must not be overlapping.
+ *
+ *   Compressed format:
+ *
+ *     000LLLLL <L+1>    ; literal, L+1=1..33 octets
+ *     LLLooooo oooooooo ; backref L+1=1..7 octets, o+1=1..4096 offset
+ *     111ooooo LLLLLLLL oooooooo ; backref L+8 octets, o+1=1..4096 offset
+ *
+ ****************************************************************************/
 
 unsigned int lzf_compress(FAR const void *const in_data,
                           unsigned int in_len, FAR void *out_data,
