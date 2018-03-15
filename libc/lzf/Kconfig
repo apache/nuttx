@@ -48,13 +48,9 @@ config LIBC_LZF_HLOG
 		be half that or about 16Kb.
 
 		The application calling lzf_compress() must provide the hash table to
-		the compresser and may allocate that memory in the most efficient way
-		for the application.
-
-#ifndef HLOG
-#  define HLOG 13
-#endif
-
+		the compressor and may allocate that memory in the most efficient way
+		for the application.  The hash table is not necessary if your application
+		only decompresses.
 
 config LIBC_LZF_ALIGN
 	bool "Strict alignment"
@@ -63,4 +59,3 @@ config LIBC_LZF_ALIGN
 		Unconditionally aligning does not cost very much, so do it if unsure.
 
 endif # LIBC_LZF
-
