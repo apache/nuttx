@@ -249,10 +249,12 @@ unsigned int lzf_decompress (FAR const void *const in_data,
                   }
                 else
                   {
-                    /* Overlapping, use octte by octte copying */
+                    /* Overlapping, use octet by octet copying */
 
                     do
-                      *op++ = *ref++;
+                      {
+                        *op++ = *ref++;
+                      }
                     while (--len);
                   }
 
