@@ -201,7 +201,7 @@
 
 #define BOARD_LED0_BIT    (1 << BOARD_LED0)
 
-/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+/* This LED is not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
  * include/board.h and src/sam_autoleds.c. The LEDs are used to encode
  * OS-related events as follows:
