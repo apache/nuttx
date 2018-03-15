@@ -50,7 +50,7 @@
   typedef const uint8_t *lzf_hslot_t;
 #endif
 
-typedef lzf_hslot_t LZF_STATE[1 << HLOG];
+typedef lzf_hslot_t lzf_state_t[1 << HLOG];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -74,15 +74,11 @@ typedef lzf_hslot_t LZF_STATE[1 << HLOG];
  * original data when decompressed using lzf_decompress.
  *
  * The buffers must not be overlapping.
- *
- * If the option LZF_STATE_ARG is enabled, an extra argument must be
- * supplied which is not reflected in this header file. Refer to lzfP.h
- * and lzf_c.c.
  */
 
 unsigned int lzf_compress(FAR const void *const in_data,
                           unsigned int in_len, FAR void *out_data,
-                          unsigned int out_len);
+                          unsigned int out_len, lzf_state_t htab);
 
 /* Decompress data compressed with some version of the lzf_compress
  * function and stored at location in_data and length in_len. The result

@@ -30,7 +30,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "lzf/lzfP.h"
+#include "lzf/lzf.h"
 
 #ifdef CONFIG_LIBC_LZF
 
@@ -100,16 +100,10 @@
  *
  */
 
-unsigned int lzf_compress(FAR const void *const in_data, unsigned int in_len,
-                          FAR void *out_data, unsigned int out_len
-#if LZF_STATE_ARG
-              , LZF_STATE htab
-#endif
-              )
+unsigned int lzf_compress(FAR const void *const in_data,
+                          unsigned int in_len, FAR void *out_data,
+                          unsigned int out_len, lzf_state_t htab)
 {
-#if !LZF_STATE_ARG
-  LZF_STATE htab;
-#endif
   FAR const uint8_t *ip = (const uint8_t *)in_data;
   FAR       uint8_t *op = (uint8_t *)out_data;
   FAR const uint8_t *in_end  = ip + in_len;

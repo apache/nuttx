@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/lzf/lzf_c.c
+ * libc/lzf/lzf.h
  *
  * Copyright (c) 2000-2007 Marc Alexander Lehmann <schmorp@schmorp.de>
  * 
@@ -26,8 +26,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_LZF_LZFP_H
-#define __LIBC_LZF_LZFP_H 1
+#ifndef __LIBC_LZF_LZF_H
+#define __LIBC_LZF_LZF_H 1
 
 /****************************************************************************
  * Included Files
@@ -63,15 +63,6 @@ using namespace std;
 #  define INIT_HTAB 0
 #endif
 
-/* Whether to pass the LZF_STATE variable as argument, or allocate it
- * on the stack. For small-stack environments, define this to 1.
- * NOTE: this breaks the prototype in lzf.h.
- */
-
-#ifndef LZF_STATE_ARG
-#  define LZF_STATE_ARG 0
-#endif
-
 /* Whether to add extra checks for input validity in lzf_decompress
  * and return EINVAL if the input stream has been corrupted. This
  * only shields against overflowing the input buffer and will not
@@ -99,4 +90,4 @@ using namespace std;
  * Public Types
  ****************************************************************************/
 
-#endif /* __LIBC_LZF_LZFP_H */
+#endif /* __LIBC_LZF_LZF_H */

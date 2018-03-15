@@ -30,7 +30,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "lzf/lzfP.h"
+#include "lzf/lzf.h"
 
 #ifdef CONFIG_LIBC_LZF
 
