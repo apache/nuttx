@@ -40,6 +40,17 @@ config LIBC_LZF_HLOG
 		low-memory/faster configuration, use HLOG == 13;  For best compression,
 		use 15 or 16 (or more, up to 22).
 
+		Memory usage for the hash table will be approximately:
+
+			4 * (1 << CONFIG_LIBC_LZF_HLOG)
+
+		For the default setting of 13, this is 32Kb.  A setting of 12 would
+		be half that or about 16Kb.
+
+		The application calling lzf_compress() must provide the hash table to
+		the compresser and may allocate that memory in the most efficient way
+		for the application.
+
 #ifndef HLOG
 #  define HLOG 13
 #endif
