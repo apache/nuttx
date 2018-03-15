@@ -54,17 +54,6 @@ using namespace std;
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Size of hashtable is (1 << HLOG) * sizeof (char *).  Decompression is
- * independent of the hash table size the difference between 15 and 14 is
- * very small for small blocks (and 14 is usually a bit faster).  For a
- * low-memory/faster configuration, use HLOG == 13;  For best compression,
- * use 15 or 16 (or more, up to 22).
- */
-
-#ifndef HLOG
-#  define HLOG 13
-#endif
-
 /* You may choose to pre-set the hash table (might be faster on some modern
  * CPUs and large (>>64k) blocks, and also makes compression deterministic/
  * repeatable when the configuration otherwise is the same).
@@ -109,15 +98,5 @@ using namespace std;
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#if LZF_USE_OFFSETS
-# define LZF_HSLOT_BIAS ((const uint8_t *)in_data)
-  typedef unsigned int LZF_HSLOT;
-#else
-# define LZF_HSLOT_BIAS 0
-  typedef const uint8_t *LZF_HSLOT;
-#endif
-
-typedef LZF_HSLOT LZF_STATE[1 << (HLOG)];
 
 #endif /* __LIBC_LZF_LZFP_H */

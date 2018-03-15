@@ -1,5 +1,9 @@
-/*
- * Copyright (c) 2000-2008 Marc Alexander Lehmann <schmorp@schmorp.de>
+/****************************************************************************
+ * lzf -- an extremely fast/free compression/decompression-method
+ * http://liblzf.plan9.de/
+ *
+ *   Copyright (c) 2000-2008 Marc Alexander Lehmann <schmorp@schmorp.de>
+ *   This algorithm is believed to be patent-free.
  * 
  * Redistribution and use in source and binary forms, with or without modifica-
  * tion, are permitted provided that the following conditions are met:
@@ -22,34 +26,37 @@
  * ERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Alternatively, the contents of this file may be used under the terms of
- * the GNU General Public License ("GPL") version 2 or any later version,
- * in which case the provisions of the GPL are applicable instead of
- * the above. If you wish to allow the use of your version of this file
- * only under the terms of the GPL and not to allow others to use your
- * version of this file under the BSD license, indicate your decision
- * by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL. If you do not delete the
- * provisions above, a recipient may use your version of this file under
- * either the BSD or the GPL.
- */
+ ****************************************************************************/
 
-#ifndef LZF_H
-#define LZF_H
+#ifndef __INCLUDE_LZF_H
+#define __INCLUDE_LZF_H 1
 
-/***********************************************************************
-**
-**	lzf -- an extremely fast/free compression/decompression-method
-**	http://liblzf.plan9.de/
-**
-**	This algorithm is believed to be patent-free.
-**
-***********************************************************************/
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define LZF_VERSION 0x0105 /* 1.5, API version */
+#define HLOG        CONFIG_LIBC_LZF_HLOG
 
-/*
- * Compress in_len bytes stored at the memory block starting at
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#if LZF_USE_OFFSETS
+# define LZF_HSLOT_BIAS ((const uint8_t *)in_data)
+  typedef unsigned int lzf_hslot_t;
+#else
+# define LZF_HSLOT_BIAS 0
+  typedef const uint8_t *lzf_hslot_t;
+#endif
+
+typedef lzf_hslot_t LZF_STATE[1 << HLOG];
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Compress in_len bytes stored at the memory block starting at
  * in_data and write the result to out_data, up to a maximum length
  * of out_len bytes.
  *
@@ -71,14 +78,13 @@
  * If the option LZF_STATE_ARG is enabled, an extra argument must be
  * supplied which is not reflected in this header file. Refer to lzfP.h
  * and lzf_c.c.
- *
  */
-unsigned int 
-lzf_compress (const void *const in_data,  unsigned int in_len,
-              void             *out_data, unsigned int out_len);
 
-/*
- * Decompress data compressed with some version of the lzf_compress
+unsigned int lzf_compress(FAR const void *const in_data,
+                          unsigned int in_len, FAR void *out_data,
+                          unsigned int out_len);
+
+/* Decompress data compressed with some version of the lzf_compress
  * function and stored at location in_data and length in_len. The result
  * will be stored at out_data up to a maximum of out_len characters.
  *
@@ -92,9 +98,9 @@ lzf_compress (const void *const in_data,  unsigned int in_len,
  *
  * This function is very fast, about as fast as a copying loop.
  */
-unsigned int 
-lzf_decompress (const void *const in_data,  unsigned int in_len,
-                void             *out_data, unsigned int out_len);
 
-#endif
+unsigned int lzf_decompress(FAR const void *const in_data,
+                            unsigned int in_len, FAR void *out_data,
+                            unsigned int out_len);
 
+#endif /* __INCLUDE_LZF_H */

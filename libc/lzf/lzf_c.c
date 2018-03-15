@@ -147,7 +147,7 @@ unsigned int lzf_compress(FAR const void *const in_data, unsigned int in_len,
   hval = FRST (ip);
   while (ip < in_end - 2)
     {
-      LZF_HSLOT *hslot;
+      lzf_hslot_t *hslot;
 
       hval = NEXT (hval, ip);
       hslot = htab + IDX (hval);

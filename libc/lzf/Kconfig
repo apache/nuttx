@@ -29,6 +29,22 @@ config LIBC_LZF_FASTEST
 
 endchoice # Compression options
 
+config LIBC_LZF_HLOG
+	int "Log2 Hash table size"
+	default 13
+	range 1 22
+	---help---
+		Size of hashtable is (1 << HLOG) * sizeof (char *).  Decompression is
+		independent of the hash table size the difference between 15 and 14 is
+		very small for small blocks (and 14 is usually a bit faster).  For a
+		low-memory/faster configuration, use HLOG == 13;  For best compression,
+		use 15 or 16 (or more, up to 22).
+
+#ifndef HLOG
+#  define HLOG 13
+#endif
+
+
 config LIBC_LZF_ALIGN
 	bool "Strict alignment"
 	default y
