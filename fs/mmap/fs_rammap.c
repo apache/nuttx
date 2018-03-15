@@ -189,7 +189,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
               ferr("ERROR: Read failed: offset=%d errno=%d\n",
                    (int)offset, (int)nread);
 
-              errcode = (int)-ret;
+              errcode = (int)-nread;
               goto errout_with_region;
             }
         }
