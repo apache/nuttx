@@ -38,6 +38,11 @@
 #define LZF_VERSION 0x0105 /* 1.5, API version */
 #define HLOG        CONFIG_LIBC_LZF_HLOG
 
+#define LZF_TYPE0_HDR_SIZE 5
+#define LZF_TYPE1_HDR_SIZE 7
+#define LZF_MAX_HDR_SIZE   7
+#define LZF_MIN_HDR_SIZE   5
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -87,9 +92,10 @@ typedef lzf_hslot_t lzf_state_t[1 << HLOG];
  *
  ****************************************************************************/
 
-unsigned int lzf_compress(FAR const void *const in_data,
-                          unsigned int in_len, FAR void *out_data,
-                          unsigned int out_len, lzf_state_t htab);
+size_t lzf_compress(FAR const void *const in_data,
+                    unsigned int in_len, FAR void *out_data,
+                    unsigned int out_len, lzf_state_t htab,
+                    FAR uint8_t **reshdr);
 
 /****************************************************************************
  * Name: lzf_decompress
