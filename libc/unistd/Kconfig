@@ -38,9 +38,20 @@ config EXECFUNCS_HAVE_SYMTAB
 	default n if BUILD_KERNEL
 	default y if !BUILD_KERNEL
 	---help---
-		If you have a system symbol table, then you must select this
+		If you have a system symbol table, then you may select this
 		option in order to use it.  Symbol tables are required in most
-		cases in order to like executable programs to the base code.
+		cases in order to link executable programs to the base code.
+
+		NOTE: This option only pre-initializes the system symbol table as
+		defined by CONFIG_EXECFUNCS_SYMTAB and CONFIG_EXECFUNCS_NSYMBOLS.
+		This is is simply an optional, automatic initialization of the
+		system symbol table.  You would need to do this, for example, in
+		in the kernel build were the first task must be run from a program
+		on the file system.  This option has no other effect.
+
+		Optionally, you can always call binfmt_setsymtabl() from your
+		board-specific logic or, equivalently, call boardctl(BOARDIOC_APP_SYMTAB)
+		from your application initialization logic.
 
 if EXECFUNCS_HAVE_SYMTAB
 config EXECFUNCS_SYMTAB

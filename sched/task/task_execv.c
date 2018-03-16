@@ -93,7 +93,7 @@
  *   provided to 'exec()' from 'exec[l|v]()' via NuttX configuration settings:
  *
  *     CONFIG_LIBC_EXECFUNCS        : Enable exec[l|v] support
- *     CONFIG_EXECFUNCS_HAVE_SYMTAB : Defined if there is a symbol table
+ *     CONFIG_EXECFUNCS_HAVE_SYMTAB : Defined if there is a pre-defined symbol table
  *       CONFIG_EXECFUNCS_SYMTAB    : Symbol table used by exec[l|v]
  *       CONFIG_EXECFUNCS_NSYMBOLS  : Number of symbols in the table
  *
