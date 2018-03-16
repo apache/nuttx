@@ -116,7 +116,7 @@ ifeq ($(CONFIG_SENSORS_XEN1210),y)
 CSRCS += stm32_xen1210.c
 endif
 
-ifeq ($(CONFIG_NSH_LIBRARY),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

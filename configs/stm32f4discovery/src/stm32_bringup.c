@@ -107,6 +107,10 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
+#ifdef CONFIG_SENSORS_BMP180
+  stm32_bmp180initialize("/dev/press0");
+#endif
+
 #ifdef CONFIG_SENSORS_BH1750FVI
   stm32_bh1750initialize("/dev/light0");
 #endif
