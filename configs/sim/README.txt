@@ -615,7 +615,7 @@ nsh
   2. This version has password protection enable.  Here is the login:
 
        USERNAME:  admin
-       PASSWORD:  Adminstrator
+       PASSWORD:  Administrator
 
      The encrypted password is retained in /etc/passwd.  I am sure that
      you will find this annoying.  You can disable the password protection
