@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_STM32F103_MINIMUM_BOARD_H
-#define __CONFIGS_STM32F103_MINIMUM_BOARD_H
+#ifndef __CONFIGS_STM32F103_MINIMUM_INCLUDE_BOARD_H
+#define __CONFIGS_STM32F103_MINIMUM_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -56,7 +56,7 @@
 
 #define STM32_BOARD_XTAL        8000000ul
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1, PLL multiplier is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -194,4 +194,4 @@
 #define RGBLED_BPWMTIMER   4
 #define RGBLED_BPWMCHANNEL 4
 
-#endif  /* __CONFIGS_STM32F103_MINIMUM_BOARD_H */
+#endif  /* __CONFIGS_STM32F103_MINIMUM_INCLUDE_BOARD_H */

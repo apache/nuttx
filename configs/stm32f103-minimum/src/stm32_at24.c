@@ -135,7 +135,7 @@ int stm32_at24_automount(int minor)
           return ret;
         }
 #endif
-      /* Now we are initializeed */
+      /* Now we are initialized */
 
       initialized = true;
     }

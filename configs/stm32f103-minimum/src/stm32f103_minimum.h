@@ -112,7 +112,7 @@
 #define MAX_IRQBUTTON     BUTTON_USER2
 #define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
 
-/* ZERO CROSS pin definiton */
+/* ZERO CROSS pin definition */
 
 #define GPIO_ZEROCROSS    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
 
@@ -214,7 +214,7 @@
  *   CONFIG_LIB_BOARDCTL=y:
  *     If CONFIG_NSH_ARCHINITIALIZE=y:
  *       Called from the NSH library (or other application)
- *     Otherse, assumed to be called from some other application.
+ *     Otherwise, assumed to be called from some other application.
  *
  *   Otherwise CONFIG_BOARD_INITIALIZE=y:
  *     Called from board_initialize().

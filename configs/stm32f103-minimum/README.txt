@@ -53,7 +53,7 @@ STM32F103C8T6 Minimum System Development Boards:
     Good things about the blue board:
 
     - Four soldered anchor point on the USB connector. What you can't tell
-      from this picture is that there is a notch in the pcb board and the USB
+      from this picture is that there is a notch in the PCB board and the USB
       connector sits down inside it some. This provides some lateral stability
       that takes some of the stress off the solder points.
     - It has nice clear readable silkscreen printing.
@@ -123,7 +123,7 @@ LEDs
   enabled.
 
   If enabled the LED is simply turned on when the board boots
-  succesfully, and is blinking on panic / assertion failed.
+  successfully, and is blinking on panic / assertion failed.
 
 UARTs
 =====
@@ -282,7 +282,7 @@ Nintendo Wii Nunchuck:
 Quadrature Encoder:
 ===================
 
-  The nsh configuration has been used to test the Quadrture Encoder
+  The nsh configuration has been used to test the Quadrature Encoder
   (QEncoder, QE) with the following modifications to the configuration
   file:
 
@@ -443,7 +443,7 @@ Nokia 5110 LCD Display support:
   Device Drivers  --->
       LCD Driver Support  --->
           [*] Graphic LCD Driver Support  --->
-              [*]   Nokia 5110 LCD Display (Philips PCD8544)
+              [*]   Nokia 5110 LCD Display (Phillips PCD8544)
               (1)     Number of PCD8544 Devices
               (84)    PCD8544 X Resolution
               (48)    PCD8544 Y Resolution
@@ -561,7 +561,7 @@ STM32F103 Minimum - specific Configuration Options
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=stm32f103-minium
+       CONFIG_ARCH_BOARD=stm32f103-minimum
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
@@ -593,7 +593,7 @@ STM32F103 Minimum - specific Configuration Options
 
     CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
        cause a 100 second delay during boot-up.  This 100 second delay
-       serves no purpose other than it allows you to calibratre
+       serves no purpose other than it allows you to calibrate
        CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
        the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
        the delay actually is 100 seconds.
@@ -770,7 +770,7 @@ Configurations
     4. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
-       emptied and dumped to the system loggin device (UART2 in this
+       emptied and dumped to the system logging device (UART2 in this
        configuraion):
 
        CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature

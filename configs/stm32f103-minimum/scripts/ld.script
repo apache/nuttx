@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f103-minimum/scripts/ld.script
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -39,6 +39,11 @@
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to
  * begin execution by jumping to the entry point in the 0x0800:0000 address
  * range.
+ *
+ * NOTE: While the STM32F103C8T6 states that the part has 64Kb of FLASH,
+ * all parts that I have seen do, in fact, have 128Kb of FLASH.  That
+ * additional 64Kb of FLASH can be utilized by simply change the LENGTH
+ * of the flash region from 64K to 128K.
  */
 
 MEMORY
