@@ -126,14 +126,13 @@
 size_t lzf_compress(FAR const void *const in_data,
                     unsigned int in_len, FAR void *out_data,
                     unsigned int out_len, lzf_state_t htab,
-                    uint8_t **reshdr)
+                    FAR struct lzf_header_s **reshdr)
 {
   FAR const uint8_t *ip = (const uint8_t *)in_data;
   FAR       uint8_t *op = (uint8_t *)out_data;
   FAR const uint8_t *in_end  = ip + in_len;
   FAR       uint8_t *out_end = op + out_len;
   FAR const uint8_t *ref;
-  FAR uint8_t *header;
   ssize_t cs;
   ssize_t retlen;
 
@@ -420,30 +419,43 @@ size_t lzf_compress(FAR const void *const in_data,
 genhdr:
   if (cs)
     {
-      header    = (uint8_t *)out_data - LZF_TYPE1_HDR_SIZE;
-      header[0] = 'Z';
-      header[1] = 'V';
-      header[2] = 1;
-      header[3] = cs >> 8;
-      header[4] = cs & 0xff;
-      header[5] = in_len >> 8;
-      header[6] = in_len & 0xff;
-      retlen    = cs + LZF_TYPE1_HDR_SIZE;
+      FAR struct lzf_type1_header_s *header;
+
+      /* Write compressed */
+
+      header = (FAR struct lzf_type1_header_s *)
+               ((uintptr_t)out_data - LZF_TYPE1_HDR_SIZE);
+      
+      header->lzf_magic[0] = 'Z';
+      header->lzf_magic[1] = 'V';
+      header->lzf_type     = LZF_TYPE1_HDR;
+      header->lzf_clen[0]  = cs >> 8;
+      header->lzf_clen[1]  = cs & 0xff;
+      header->lzf_ulen[0]  = in_len >> 8;
+      header->lzf_ulen[1]  = in_len & 0xff;
+
+      *reshdr              = (FAR struct lzf_header_s *)header;
+      retlen               = cs + LZF_TYPE1_HDR_SIZE;
     }
   else
     {
+      FAR struct lzf_type0_header_s *header;
+
       /* Write uncompressed */
 
-      header    = (uint8_t *)in_data - LZF_TYPE0_HDR_SIZE;
-      header[0] = 'Z';
-      header[1] = 'V';
-      header[2] = 0;
-      header[3] = in_len >> 8;
-      header[4] = in_len & 0xff;
-      retlen    = in_len + LZF_TYPE0_HDR_SIZE;
+      header = (FAR struct lzf_type0_header_s *)
+               ((uintptr_t)in_data - LZF_TYPE0_HDR_SIZE);
+
+      header->lzf_magic[0] = 'Z';
+      header->lzf_magic[1] = 'V';
+      header->lzf_type     = LZF_TYPE0_HDR;
+      header->lzf_len[0]   = in_len >> 8;
+      header->lzf_len[1]   = in_len & 0xff;
+
+      *reshdr              = (FAR struct lzf_header_s *)header;
+      retlen               = in_len + LZF_TYPE0_HDR_SIZE;
     }
 
-  *reshdr = header;
   return retlen;
 }
 

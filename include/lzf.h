@@ -38,14 +38,43 @@
 #define LZF_VERSION 0x0105 /* 1.5, API version */
 #define HLOG        CONFIG_LIBC_LZF_HLOG
 
+#define LZF_TYPE0_HDR      0
+#define LZF_TYPE1_HDR      1
+
 #define LZF_TYPE0_HDR_SIZE 5
 #define LZF_TYPE1_HDR_SIZE 7
+
 #define LZF_MAX_HDR_SIZE   7
 #define LZF_MIN_HDR_SIZE   5
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* LZF headers */
+
+struct lzf_header_s         /* Common data header */
+{
+  uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
+  uint8_t lzf_type;         /* LZF_TYPE0_HDR or LZF_TYPE1_HDR */
+};
+
+struct lzf_type0_header_s   /* Uncompressed data header */
+{
+  uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
+  uint8_t lzf_type;         /* LZF_TYPE0_HDR */
+  uint8_t lzf_len[2];       /* Data length (big-endian) */
+};
+
+struct lzf_type1_header_s   /* Compressed data header */
+{
+  uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
+  uint8_t lzf_type;         /* LZF_TYPE1_HDR */
+  uint8_t lzf_clen[2];      /* Compressed data length (big-endian) */
+  uint8_t lzf_ulen[2];      /* Unompressed data length (big-endian) */
+};
+
+/* LZF hash table */
 
 #if LZF_USE_OFFSETS
 # define LZF_HSLOT_BIAS ((const uint8_t *)in_data)
@@ -95,7 +124,7 @@ typedef lzf_hslot_t lzf_state_t[1 << HLOG];
 size_t lzf_compress(FAR const void *const in_data,
                     unsigned int in_len, FAR void *out_data,
                     unsigned int out_len, lzf_state_t htab,
-                    FAR uint8_t **reshdr);
+                    FAR struct lzf_header_s **reshdr);
 
 /****************************************************************************
  * Name: lzf_decompress
