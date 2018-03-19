@@ -78,15 +78,15 @@
 #define MAX_REF     ((1 << 8) + (1 << 3))
 
 #if __GNUC__ >= 3
-#  define expect(expr,value) __builtin_expect ((expr),(value))
+#  define expect(expr,value) __builtin_expect((expr),(value))
 #  define inline             inline
 #else
 #  define expect(expr,value) (expr)
-#  define inline              static
+#  define inline             static
 #endif
 
-#define expect_false(expr) expect ((expr) != 0, 0)
-#define expect_true(expr)  expect ((expr) != 0, 1)
+#define expect_false(expr)   expect((expr) != 0, 0)
+#define expect_true(expr)    expect((expr) != 0, 1)
 
 /****************************************************************************
  * Public Functions
@@ -159,20 +159,20 @@ size_t lzf_compress(FAR const void *const in_data,
     }
 
 #if INIT_HTAB
-  memset(htab, 0, sizeof (htab));
+  memset(htab, 0, sizeof(htab));
 #endif
 
   lit = 0; /* start run */
   op++;
 
-  hval = FRST (ip);
+  hval = FRST(ip);
   while (ip < in_end - 2)
     {
       lzf_hslot_t *hslot;
 
-      hval = NEXT (hval, ip);
-      hslot = htab + IDX (hval);
-      ref = *hslot + LZF_HSLOT_BIAS; *hslot = ip - LZF_HSLOT_BIAS;
+      hval  = NEXT(hval, ip);
+      hslot = htab + IDX(hval);
+      ref   = *hslot + LZF_HSLOT_BIAS; *hslot = ip - LZF_HSLOT_BIAS;
 
       if (1
 #if INIT_HTAB
@@ -196,7 +196,7 @@ size_t lzf_compress(FAR const void *const in_data,
 
           /* First a faster conservative test */
 
-          if (expect_false (op + 3 + 1 >= out_end))
+          if (expect_false(op + 3 + 1 >= out_end))
             {
               /* Second the exact but rare test */
 
@@ -207,105 +207,105 @@ size_t lzf_compress(FAR const void *const in_data,
                 }
             }
 
-          op [- lit - 1] = lit - 1; /* Stop run */
-          op -= !lit;               /* Undo run if length is zero */
+          op[- lit - 1] = lit - 1; /* Stop run */
+          op -= !lit;              /* Undo run if length is zero */
 
           for (;;)
             {
-              if (expect_true (maxlen > 16))
+              if (expect_true(maxlen > 16))
                 {
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
 
                   len++;
-                  if (ref [len] != ip [len])
+                  if (ref[len] != ip[len])
                     {
                       break;
                     }
@@ -340,22 +340,24 @@ size_t lzf_compress(FAR const void *const in_data,
           ip += len + 1;
 
           if (expect_false (ip >= in_end - 2))
-            break;
+            {
+              break;
+            }
 
 #if defined(CONFIG_LIBC_LZF_FASTEST) || defined(CONFIG_LIBC_LZF_FAST)
           --ip;
 #  if defined(CONFIG_LIBC_LZF_FAST) && !defined(CONFIG_LIBC_LZF_FASTEST)
           --ip;
 #  endif
-          hval = FRST (ip);
+          hval = FRST(ip);
 
-          hval = NEXT (hval, ip);
-          htab[IDX (hval)] = ip - LZF_HSLOT_BIAS;
+          hval = NEXT(hval, ip);
+          htab[IDX(hval)] = ip - LZF_HSLOT_BIAS;
           ip++;
 
 #  if defined(CONFIG_LIBC_LZF_FAST) && !defined(CONFIG_LIBC_LZF_FASTEST)
-          hval = NEXT (hval, ip);
-          htab[IDX (hval)] = ip - LZF_HSLOT_BIAS;
+          hval = NEXT(hval, ip);
+          htab[IDX(hval)] = ip - LZF_HSLOT_BIAS;
           ip++;
 #  endif
 #else
@@ -363,8 +365,8 @@ size_t lzf_compress(FAR const void *const in_data,
 
           do
             {
-              hval = NEXT (hval, ip);
-              htab[IDX (hval)] = ip - LZF_HSLOT_BIAS;
+              hval = NEXT(hval, ip);
+              htab[IDX(hval)] = ip - LZF_HSLOT_BIAS;
               ip++;
             }
           while (len--);
@@ -374,7 +376,7 @@ size_t lzf_compress(FAR const void *const in_data,
         {
           /* One more literal byte we must copy */
 
-          if (expect_false (op >= out_end))
+          if (expect_false(op >= out_end))
             {
               cs = 0;
               goto genhdr;
@@ -383,10 +385,11 @@ size_t lzf_compress(FAR const void *const in_data,
           lit++;
           *op++ = *ip++;
 
-          if (expect_false (lit == MAX_LIT))
+          if (expect_false(lit == MAX_LIT))
             {
-              op [- lit - 1] = lit - 1; /* stop run */
-              lit = 0; op++; /* start run */
+              op[- lit - 1] = lit - 1; /* Stop run */
+              lit = 0;;                /* Start run */
+              op++'
             }
         }
     }
@@ -403,16 +406,16 @@ size_t lzf_compress(FAR const void *const in_data,
     {
       lit++; *op++ = *ip++;
 
-      if (expect_false (lit == MAX_LIT))
+      if (expect_false(lit == MAX_LIT))
         {
-          op [- lit - 1] = lit - 1; /* Stop run */
-          lit = 0;                  /* Start run */
+          op[- lit - 1] = lit - 1; /* Stop run */
+          lit = 0;                 /* Start run */
           op++;
         }
     }
 
-  op [- lit - 1] = lit - 1; /* End run */
-  op -= !lit;               /* Undo run if length is zero */
+  op[- lit - 1] = lit - 1; /* End run */
+  op -= !lit;              /* Undo run if length is zero */
 
   cs = op - (uint8_t *)out_data;
 
