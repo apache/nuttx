@@ -122,9 +122,9 @@ struct stat
 {
   /* Required, standard fields */
 
-  mode_t    st_mode;    /* File type, atributes, and access mode bits */
+  mode_t    st_mode;    /* File type, attributes, and access mode bits */
   off_t     st_size;    /* Size of file/directory, in bytes */
-  blksize_t st_blksize; /* Blocksize used for filesystem I/O */
+  blksize_t st_blksize; /* Block size used for filesystem I/O */
   blkcnt_t  st_blocks;  /* Number of blocks allocated */
   time_t    st_atime;   /* Time of last access */
   time_t    st_mtime;   /* Time of last modification */

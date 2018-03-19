@@ -81,6 +81,7 @@ source fs/fat/Kconfig
 source fs/nfs/Kconfig
 source fs/nxffs/Kconfig
 source fs/romfs/Kconfig
+source fs/cromfs/Kconfig
 source fs/tmpfs/Kconfig
 source fs/smartfs/Kconfig
 source fs/binfs/Kconfig

@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/fs/dirent.h
  *
- *   Copyright (C) 2007, 2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013, 2015, 20189 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,16 +103,26 @@ struct fs_romfsdir_s
 };
 #endif /* CONFIG_FS_ROMFS */
 
+#ifdef CONFIG_FS_CROMFS
+/* For CROMFS, we need to return the next compressed node to be examined. */
+
+struct fs_cromfsdir_s
+{
+  off_t        cr_firstoffset;         /* Offset to the first entry in the directory */
+  off_t        cr_curroffset;          /* Current offset into the directory contents */
+};
+#endif /* CONFIG_FS_ROMFS */
+
 #ifdef CONFIG_FS_TMPFS
 /* For TMPFS, we need the directory object and an index into the directory
  * entries.
  */
 
-struct tmpfs_directory_s;              /* Forward reference */
+struct tmpfs_directory_s;               /* Forward reference */
 struct fs_tmpfsdir_s
 {
   FAR struct tmpfs_directory_s *tf_tdo; /* Directory being enumerated */
-  unsigned int tf_index;               /* Directory index */
+  unsigned int tf_index;                /* Directory index */
 };
 #endif /* CONFIG_FS_TMPFS */
 
@@ -243,6 +254,9 @@ struct fs_dirent_s
 #endif
 #ifdef CONFIG_FS_ROMFS
       struct fs_romfsdir_s   romfs;
+#endif
+#ifdef CONFIG_FS_ROMFS
+      struct fs_cromfsdir_s  cromfs;
 #endif
 #ifdef CONFIG_FS_TMPFS
       struct fs_tmpfsdir_s   tmpfs;

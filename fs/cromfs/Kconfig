@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_CROMFS
+	bool "CROMFS file system"
+	default n
+	depends on !DISABLE_MOUNTPOINT && EXPERIMENTAL
+	select FS_READABLE
+	---help---
+		Enable Compessed Read-Only Filesystem (CROMFS) support
+
+if FS_CROMFS
+endif
