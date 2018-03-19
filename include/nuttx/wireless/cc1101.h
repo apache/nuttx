@@ -56,6 +56,7 @@
 
 /* Present maximum packet length */
 
+#define CC1101_FIFO_SIZE             64
 #define CC1101_PACKET_MAXTOTALLEN    63
 #define CC1101_PACKET_MAXDATALEN     61
 

@@ -276,7 +276,7 @@
 /* Part number and version */
 
 #define CC1101_PARTNUM_VALUE                    0x00
-#define CC1101_VERSION_VALUE                    0x17
+#define CC1101_VERSION_VALUE                    0x14
 
 /*  Others ... */
 
@@ -287,7 +287,7 @@
 #define FLAGS_XOSCENABLED                       2 /* Indicates that one pin is configured as XOSC/n */
 
 #ifndef CONFIG_WL_CC1101_RXFIFO_LEN
-#  define CONFIG_WL_CC1101_RXFIFO_LEN 3
+#  define CONFIG_WL_CC1101_RXFIFO_LEN           5
 #endif
 
 /****************************************************************************
@@ -509,16 +509,15 @@ static void fifo_put(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
     }
 
   dev->fifo_len++;
-  if (dev->fifo_len >= CONFIG_WL_CC1101_RXFIFO_LEN)
+  if (dev->fifo_len > CONFIG_WL_CC1101_RXFIFO_LEN)
     {
       dev->fifo_len = CONFIG_WL_CC1101_RXFIFO_LEN;
       dev->nxt_read = (dev->nxt_read + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
     }
 
-  for (i = 0; i < buflen && i < CC1101_PACKET_MAXDATALEN + 3; i++)
+  for (i = 0; i < (buflen + 1) && i < CC1101_FIFO_SIZE; i++)
     {
-      *(dev->rx_buffer + i + dev->nxt_write * (CC1101_PACKET_MAXDATALEN + 3)) =
-          buffer[i];
+      *(dev->rx_buffer + i + dev->nxt_write * CC1101_FIFO_SIZE) = buffer[i];
     }
 
   dev->nxt_write = (dev->nxt_write + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
@@ -554,14 +553,12 @@ static uint8_t fifo_get(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
       goto no_data;
     }
 
-  pktlen =
-      *(dev->rx_buffer + dev->nxt_read * (CC1101_PACKET_MAXDATALEN + 3)) - 3;
+  pktlen = *(dev->rx_buffer + dev->nxt_read * CC1101_FIFO_SIZE);
 
-  for (i = 0; i < pktlen && i < CC1101_PACKET_MAXDATALEN; i++)
+  for (i = 0; i < pktlen && i < CC1101_PACKET_MAXTOTALLEN; i++)
     {
       *(buffer++) =
-          dev->rx_buffer[dev->nxt_read * (CC1101_PACKET_MAXDATALEN + 3) + i +
-                         1];
+          dev->rx_buffer[dev->nxt_read * CC1101_FIFO_SIZE + i + 1];
     }
 
   dev->nxt_read = (dev->nxt_read + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
@@ -602,7 +599,7 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  if ((filep->f_oflags & O_NONBLOCK) == 0)
+  if ((filep->f_oflags & O_NONBLOCK) != 0)
     {
       nxsem_trywait(&dev->sem_rx);
       ret = 0;
@@ -1371,8 +1368,7 @@ int cc1101_receive(FAR struct cc1101_dev_s *dev)
 
 int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
 {
-  uint8_t nbytes;
-  int ret = 0;
+  uint8_t nbytes = 0;
 
   DEBUGASSERT(dev);
 
@@ -1387,12 +1383,12 @@ int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
   if (nbytes & 0x80)
     {
       wlwarn("RX FIFO full\n");
-      ret = 0;
+      nbytes = 0;
       goto breakout;
     }
 
   nbytes += 2; /* RSSI and LQI */
-  ret = buf[0] = nbytes + 1;
+  buf[0] = nbytes;
   cc1101_access(dev, CC1101_RXFIFO, buf + 1, (nbytes > size) ? size : nbytes);
 
   /* Flush remaining bytes, if there is no room to receive or if there is a
@@ -1402,14 +1398,14 @@ int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
   if (!(buf[nbytes] & 0x80))
     {
       wlwarn("RX CRC error\n");
-      ret = 0;
+      nbytes = 0;
     }
 
 breakout:
   cc1101_strobe(dev, CC1101_SIDLE);
   cc1101_strobe(dev, CC1101_SFRX);
   cc1101_strobe(dev, CC1101_SRX);
-  return ret;
+  return nbytes;
 }
 
 /****************************************************************************
@@ -1527,7 +1523,7 @@ int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev)
 
   dev->status = CC1101_INIT;
   dev->rx_buffer =
-      kmm_malloc((CC1101_PACKET_MAXDATALEN + 3) * CONFIG_WL_CC1101_RXFIFO_LEN);
+      kmm_malloc(CC1101_FIFO_SIZE * CONFIG_WL_CC1101_RXFIFO_LEN);
   if (dev->rx_buffer == NULL)
     {
       return -ENOMEM;
@@ -1570,7 +1566,7 @@ void cc1101_isr_process(FAR void *arg)
 
       case CC1101_RECV:
         {
-          uint8_t buf[CC1101_PACKET_MAXDATALEN + 3], len;
+          uint8_t buf[CC1101_FIFO_SIZE], len;
 
           memset(buf, 0, sizeof(buf));
           len = cc1101_read(dev, buf, sizeof(buf));

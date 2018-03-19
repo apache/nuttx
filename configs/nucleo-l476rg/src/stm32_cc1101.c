@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <string.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -130,6 +132,8 @@ int stm32_cc1101_initialize(void)
     {
       return -ENOMEM;
     }
+
+  memset(dev, 0, sizeof(struct cc1101_dev_s));
 
   dev->spi        = spi;
   dev->isr_pin    = GPIO_CC1101_GDO2;
