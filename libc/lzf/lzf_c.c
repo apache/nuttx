@@ -38,7 +38,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HSIZE (1 << (HLOG))
+#define HSIZE (1 << HLOG)
 
 /* Don't play with this unless you benchmark!  The data format is not
  * dependent on the hash function. The hash function might seem strange, just
@@ -74,7 +74,7 @@
 #endif
 
 #define MAX_LIT     (1 <<  5)
-#define MAX_OFF     (1 << 13)
+#define MAX_OFF     (1 << HLOG)
 #define MAX_REF     ((1 << 8) + (1 << 3))
 
 #if __GNUC__ >= 3
@@ -170,9 +170,10 @@ size_t lzf_compress(FAR const void *const in_data,
     {
       lzf_hslot_t *hslot;
 
-      hval  = NEXT(hval, ip);
-      hslot = htab + IDX(hval);
-      ref   = *hslot + LZF_HSLOT_BIAS; *hslot = ip - LZF_HSLOT_BIAS;
+      hval   = NEXT(hval, ip);
+      hslot  = htab + IDX(hval);
+      ref    = *hslot + LZF_HSLOT_BIAS;
+      *hslot = ip - LZF_HSLOT_BIAS;
 
       if (1
 #if INIT_HTAB
@@ -184,7 +185,7 @@ size_t lzf_compress(FAR const void *const in_data,
 #ifdef CONFIG_LIBC_LZF_ALIGN
           && ((ref[1] << 8) | ref[0]) == ((ip[1] << 8) | ip[0])
 #else
-          && *(uin16_t *)ref == *(uin16_t *)ip
+          && *(uint16_t *)ref == *(uint16_t *)ip
 #endif
         )
         {
@@ -388,8 +389,8 @@ size_t lzf_compress(FAR const void *const in_data,
           if (expect_false(lit == MAX_LIT))
             {
               op[- lit - 1] = lit - 1; /* Stop run */
-              lit = 0;;                /* Start run */
-              op++'
+              lit = 0;                 /* Start run */
+              op++;
             }
         }
     }

@@ -71,7 +71,7 @@ struct lzf_type1_header_s   /* Compressed data header */
   uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
   uint8_t lzf_type;         /* LZF_TYPE1_HDR */
   uint8_t lzf_clen[2];      /* Compressed data length (big-endian) */
-  uint8_t lzf_ulen[2];      /* Unompressed data length (big-endian) */
+  uint8_t lzf_ulen[2];      /* Uncompressed data length (big-endian) */
 };
 
 /* LZF hash table */
