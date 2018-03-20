@@ -111,20 +111,20 @@
 
 /* Floating point types */
 
-typedef float  float32;
+typedef float        float32;
 #ifndef CONFIG_HAVE_DOUBLE
-typedef float  double_t;
-typedef float  float64;
+typedef float        double_t;
+typedef float        float64;
 #else
-typedef double double_t;
-typedef double float64;
+typedef double       double_t;
+typedef double       float64;
 #endif
 
 /* Misc. scalar types */
 
 /* mode_t is an integer type used for file attributes.  mode_t needs
- * to be at least 16-bits but, in fact must be sizeof(int) because it is
- * pased via varargs.
+ * to be at least 16-bits but, in fact, must be sizeof(int) because it is
+ * passed via varargs.
  */
 
 typedef unsigned int mode_t;

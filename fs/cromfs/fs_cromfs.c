@@ -100,8 +100,8 @@ struct cromfs_comparenode_s
 /* Helpers */
 
 static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
-                                    size_t offset);
-static size_t   cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
+                                    uint32_t offset);
+static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
                                    FAR const void *addr);
 static int      cromfs_foreach_node(FAR const struct cromfs_volume_s *fs,
                                     cromfs_foreach_t callback, FAR void *arg);
@@ -200,7 +200,7 @@ extern const struct cromfs_volume_s g_cromfs_image;
  ****************************************************************************/
 
 static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
-                                    size_t offset)
+                                    uint32_t offset)
 {
   /* Zero offset is a specials case:  It corresponds to a NULL address */
 
@@ -222,12 +222,12 @@ static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
  * Name: cromfs_offset2addr
  ****************************************************************************/
 
-static size_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
-                                 FAR const void *addr)
+static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
+                                   FAR const void *addr)
 {
   uintptr_t start;
   uintptr_t target;
-  size_t offset;
+  uint32_t offset;
 
   /* NULL is a specials case:  It corresponds to offset zero */
 
@@ -346,7 +346,8 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
            * and return 1 to stop the traversal.
            */
 
-          *cpnode->node = node;
+          *cpnode->node = (FAR const struct cromfs_node_s *)
+                           cromfs_offset2addr(fs, node->u.cn_child);
           return 1;
         }
 
@@ -574,7 +575,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
   FAR const uint8_t *src;
   off_t fpos;
   size_t remaining;
-  size_t blkoffs;
+  uint32_t blkoffs;
   uint16_t ulen;
   uint16_t clen;
   unsigned int copysize;
@@ -638,7 +639,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
 
       do
         {
-          size_t blksize;
+          uint32_t blksize;
 
           /* Go to the next block */
 
@@ -652,7 +653,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
 
               ulen    = (uint16_t)hdr0->lzf_len[0] << 8 |
                         (uint16_t)hdr0->lzf_len[1];
-              blksize = (size_t)ulen + LZF_TYPE0_HDR_SIZE;
+              blksize = (uint32_t)ulen + LZF_TYPE0_HDR_SIZE;
             }
           else
             {
@@ -663,7 +664,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                         (uint16_t)hdr1->lzf_ulen[1];
               clen    = (uint16_t)hdr1->lzf_clen[0] << 8 |
                         (uint16_t)hdr1->lzf_clen[1];
-              blksize = (size_t)clen + LZF_TYPE1_HDR_SIZE;
+              blksize = (uint32_t)clen + LZF_TYPE1_HDR_SIZE;
             }
 
           nexthdr  = (FAR struct lzf_header_s *)((FAR uint8_t *)currhdr + blksize);
@@ -836,8 +837,8 @@ static int cromfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct inode *inode;
   FAR struct cromfs_volume_s *fs;
   FAR struct cromfs_file_s *ff;
-  size_t fsize;
-  size_t bsize;
+  uint32_t fsize;
+  uint32_t bsize;
 
   /* Sanity checks */
 
@@ -916,7 +917,7 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Set the start node and next node to the first entry in the directory */
 
-  dir->u.cromfs.cr_firstoffset = (size_t)cromfs_addr2offset(fs, node);
+  dir->u.cromfs.cr_firstoffset = cromfs_addr2offset(fs, node);
   dir->u.cromfs.cr_curroffset  = dir->u.cromfs.cr_firstoffset;
   return OK;
 }
@@ -933,7 +934,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   FAR const struct cromfs_volume_s *fs;
   FAR const struct cromfs_node_s *node;
   FAR char *name;
-  size_t offset;
+  uint32_t offset;
 
   finfo("mountpt: %p dir: %p\n", mountpt, dir);
 

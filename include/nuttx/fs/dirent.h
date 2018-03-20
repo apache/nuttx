@@ -108,8 +108,8 @@ struct fs_romfsdir_s
 
 struct fs_cromfsdir_s
 {
-  off_t        cr_firstoffset;         /* Offset to the first entry in the directory */
-  off_t        cr_curroffset;          /* Current offset into the directory contents */
+  uint32_t     cr_firstoffset;         /* Offset to the first entry in the directory */
+  uint32_t     cr_curroffset;          /* Current offset into the directory contents */
 };
 #endif /* CONFIG_FS_CROMFS */
 

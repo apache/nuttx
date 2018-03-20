@@ -4,6 +4,14 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * The function lzf_compress() comes from the file lzf_c.c (wich substantial
+ * modification):
+ *
+ *   Copyright (c) 2000-2010 Marc Alexander Lehmann <schmorp@schmorp.de>
+ *
+ * Which has a compatible BSD license and included here under the NuttX BSD
+ * license:
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -114,54 +122,63 @@
  * Private Types
  ****************************************************************************/
 
+/* Maximum size of an offset.  This should normally be size_t since this is
+ * an in-memory file system.  However, size_t is 32-bits on most 32-bit
+ * target machines but 64-bits on 64-host machines.  We restrict offsets to
+ * 32-bits for commonality (limiting the size of the CROMFS image to 4Gb)
+ *
+ * Similarly, the NuttX mode_t is only 16-bits so uint16_t is explicitly used
+ * for NuttX file modes.
+ */
+
 /* CROMFS structures */
 
 struct cromfs_volume_s
 {
-  uint32_t cv_magic;     /* Must be first.  Must be CROMFS_MAGIC */
-  uint16_t cv_nnodes;    /* Total number of nodes in-use */
-  uint16_t cv_nblocks;   /* Total number of data blocks in-use */
-  size_t cv_root;        /* Offset to the first node in the root file system */
-  size_t cv_fsize;       /* Size of the compressed file system image */
-  size_t cv_bsize;       /* Optimal block size for transfers */
+  uint32_t cv_magic;      /* Must be first.  Must be CROMFS_MAGIC */
+  uint16_t cv_nnodes;     /* Total number of nodes in-use */
+  uint16_t cv_nblocks;    /* Total number of data blocks in-use */
+  uint32_t cv_root;       /* Offset to the first node in the root file system */
+  uint32_t cv_fsize;      /* Size of the compressed file system image */
+  uint32_t cv_bsize;      /* Optimal block size for transfers */
 };
 
 struct cromfs_node_s
 {
-  mode_t cn_mode;        /* File type, attributes, and access mode bits */
-  size_t cn_name;        /* Offset from the beginning of the volume header to the
-                          * node name string.  NUL-terminated. */
-  size_t cn_size;        /* Size of the uncompressed data (in bytes) */
-  size_t cn_peer;        /* Offset to next node in this directory (for readdir()) */
+  uint16_t cn_mode;       /* File type, attributes, and access mode bits */
+  uint32_t cn_name;       /* Offset from the beginning of the volume header to the
+                           * node name string.  NUL-terminated. */
+  uint32_t cn_size;       /* Size of the uncompressed data (in bytes) */
+  uint32_t cn_peer;       /* Offset to next node in this directory (for readdir()) */
   union
   {
-    size_t cn_child;     /* Offset to first node in sub-directory (directories only) */
-    size_t cn_link;      /* Offset to an arbitrary node (for hard link) */
-    size_t cn_blocks;    /* Offset to first block of compressed data (for read) */
+    uint32_t cn_child;    /* Offset to first node in sub-directory (directories only) */
+    uint32_t cn_link;     /* Offset to an arbitrary node (for hard link) */
+    uint32_t cn_blocks;   /* Offset to first block of compressed data (for read) */
   } u;
 };
 
 /* LZF headers */
 
-struct lzf_header_s         /* Common data header */
+struct lzf_header_s       /* Common data header */
 {
-  uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
-  uint8_t lzf_type;         /* LZF_TYPE0_HDR or LZF_TYPE1_HDR */
+  uint8_t lzf_magic[2];   /* [0]='Z', [1]='V' */
+  uint8_t lzf_type;       /* LZF_TYPE0_HDR or LZF_TYPE1_HDR */
 };
 
-struct lzf_type0_header_s   /* Uncompressed data header */
+struct lzf_type0_header_s /* Uncompressed data header */
 {
-  uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
-  uint8_t lzf_type;         /* LZF_TYPE0_HDR */
-  uint8_t lzf_len[2];       /* Data length (big-endian) */
+  uint8_t lzf_magic[2];   /* [0]='Z', [1]='V' */
+  uint8_t lzf_type;       /* LZF_TYPE0_HDR */
+  uint8_t lzf_len[2];     /* Data length (big-endian) */
 };
 
-struct lzf_type1_header_s   /* Compressed data header */
+struct lzf_type1_header_s /* Compressed data header */
 {
-  uint8_t lzf_magic[2];     /* [0]='Z', [1]='V' */
-  uint8_t lzf_type;         /* LZF_TYPE1_HDR */
-  uint8_t lzf_clen[2];      /* Compressed data length (big-endian) */
-  uint8_t lzf_ulen[2];      /* Uncompressed data length (big-endian) */
+  uint8_t lzf_magic[2];   /* [0]='Z', [1]='V' */
+  uint8_t lzf_type;       /* LZF_TYPE1_HDR */
+  uint8_t lzf_clen[2];    /* Compressed data length (big-endian) */
+  uint8_t lzf_ulen[2];    /* Uncompressed data length (big-endian) */
 };
 
 /* LZF data buffer */
@@ -209,9 +226,9 @@ static const char g_delim[] =
   "*************************************************************************"
   "***********************";
 
-static size_t g_offset;        /* Current image offset */
-static size_t g_diroffset;     /* Offset for '.' */
-static size_t g_parent_offset; /* Offset for '..' */
+static uint32_t g_offset;        /* Current image offset */
+static uint32_t g_diroffset;     /* Offset for '.' */
+static uint32_t g_parent_offset; /* Offset for '..' */
 
 static unsigned int g_nnodes;  /* Number of nodes generated */
 static unsigned int g_nblocks; /* Number of blocks of data generated */
@@ -237,8 +254,8 @@ static void dump_hexbuffer(FILE *stream, const void *buffer, unsigned int nbytes
 static void dump_nextline(FILE *stream);
 static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
                            union lzf_result_u *result);
-static mode_t get_mode(mode_t mode);
-static void gen_dirlink(const char *name, size_t tgtoffs);
+static uint16_t get_mode(mode_t mode);
+static void gen_dirlink(const char *name, uint32_t tgtoffs);
 static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry);
 static void gen_file(const char *path, const char *name, mode_t mode,
@@ -789,9 +806,9 @@ genhdr:
   return retlen;
 }
 
-static mode_t get_mode(mode_t mode)
+static uint16_t get_mode(mode_t mode)
 {
-  mode_t ret = 0;
+  uint16_t ret = 0;
 
   if ((mode & S_IXOTH) != 0)
     {
@@ -841,7 +858,7 @@ static mode_t get_mode(mode_t mode)
   return ret;
 }
 
-static void gen_dirlink(const char *name, size_t tgtoffs)
+static void gen_dirlink(const char *name, uint32_t tgtoffs)
 {
   struct cromfs_node_s node;
   int namlen;
@@ -850,6 +867,7 @@ static void gen_dirlink(const char *name, size_t tgtoffs)
 
   /* Generate the hardlink node */
 
+  dump_nextline(g_tmpstream);
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  Hard link %s*/\n\n",
           (unsigned long)g_offset, name);
 
@@ -863,7 +881,6 @@ static void gen_dirlink(const char *name, size_t tgtoffs)
   node.cn_peer    = g_offset;
   node.u.cn_link  = tgtoffs;
 
-  dump_nextline(g_tmpstream);
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
 
@@ -874,9 +891,9 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry)
 {
   struct cromfs_node_s node;
-  size_t save_offset        = g_offset;
-  size_t save_diroffset     = g_diroffset;
-  size_t save_parent_offset = g_parent_offset;
+  uint32_t save_offset        = g_offset;
+  uint32_t save_diroffset     = g_diroffset;
+  uint32_t save_parent_offset = g_parent_offset;
   FILE *save_tmpstream      = g_tmpstream;
   FILE *subtree_stream;
   int namlen;
@@ -921,6 +938,10 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   /* Generate the directory node */
 
+  dump_nextline(g_tmpstream);
+  fprintf(g_tmpstream, "\n  /* Offset %6lu:  Directory %s */\n\n",
+          (unsigned long)save_offset, path);
+
   node.cn_mode    = (NUTTX_IFDIR | get_mode(mode));
 
   save_offset    += sizeof(struct cromfs_node_s);
@@ -931,9 +952,6 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
   node.cn_peer    = lastentry ? 0 : g_offset;
   node.u.cn_child = save_offset;
 
-  fprintf(g_tmpstream, "\n  /* Offset %6lu:  Directory %s */\n\n",
-          (unsigned long)save_offset, path);
-  dump_nextline(g_tmpstream);
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
 
@@ -949,7 +967,7 @@ static void gen_file(const char *path, const char *name, mode_t mode,
 {
   struct cromfs_node_s node;
   union lzf_result_u result;
-  size_t nodeoffs = g_offset;
+  uint32_t nodeoffs = g_offset;
   FILE *save_tmpstream = g_tmpstream;
   FILE *outstream;
   FILE *instream;
@@ -1033,9 +1051,9 @@ static void gen_file(const char *path, const char *name, mode_t mode,
 
   dump_nextline(g_tmpstream);
 
-  fprintf(g_tmpstream, "\n  /* Offset %6lu:  File %s/%s:  "
+  fprintf(g_tmpstream, "\n  /* Offset %6lu:  File %s:  "
           "Uncompressed=%lu Compressed=%lu */\n\n",
-          (unsigned long)nodeoffs, path, name, (unsigned long)ntotal,
+          (unsigned long)nodeoffs, path, (unsigned long)ntotal,
           (unsigned long)blktotal);
 
   node.cn_mode       = (NUTTX_IFREG | get_mode(mode));

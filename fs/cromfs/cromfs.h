@@ -47,6 +47,17 @@
  * Public Types
  ****************************************************************************/
 
+/* Maximum size of an offset.  This should normally be size_t since this is
+ * an in-memory file system.  However, uint32_t is 32-bits on most 32-bit
+ * target machines but 64-bits on 64-host machines.  We restrict offsets to
+ * 32-bits for commonality (limiting the size of the CROMFS image to 4Gb).
+ *
+ * REVISIT:  What about small memory systems where the size_t is only 16-bits?
+ *
+ * Similarly, the NuttX mode_t is only 16-bits so uint16_t is explicitly used
+ * for NuttX file modes.
+ */
+
 /* This structure describes the CROMFS volume.  It provides most of the
  * information needed for statfs() including:
  *
@@ -70,10 +81,7 @@
  *
  * The volume header is followed immediately by the root directory node.  An
  * offset to that node is used to permit future variable length data (such as
- * a volumne name) which may intervene.
- *
- * Since this is an in-memory file system, size_t is the most relevant type for
- * internal file system offsets.
+ * a volume name) which may intervene.
  */
 
 struct cromfs_volume_s
@@ -81,9 +89,9 @@ struct cromfs_volume_s
   uint32_t cv_magic;     /* Must be first.  Must be CROMFS_MAGIC */
   uint16_t cv_nnodes;    /* Total number of nodes in-use */
   uint16_t cv_nblocks;   /* Total number of data blocks in-use */
-  size_t cv_root;        /* Offset to the first node in the root file system */
-  size_t cv_fsize;       /* Size of the compressed file system image */
-  size_t cv_bsize;       /* Optimal block size for transfers */
+  uint32_t cv_root;      /* Offset to the first node in the root file system */
+  uint32_t cv_fsize;     /* Size of the compressed file system image */
+  uint32_t cv_bsize;     /* Optimal block size for transfers */
 };
 
 /* This describes one node in the CROMFS file system.  It holds node meta
@@ -111,16 +119,16 @@ struct cromfs_volume_s
 
 struct cromfs_node_s
 {
-  mode_t cn_mode;        /* File type, attributes, and access mode bits */
-  size_t cn_name;        /* Offset from the beginning of the volume header to the
+  uint16_t cn_mode;      /* File type, attributes, and access mode bits */
+  uint32_t cn_name;      /* Offset from the beginning of the volume header to the
                           * node name string.  NUL-terminated. */
-  size_t cn_size;        /* Size of the uncompressed data (in bytes) */
-  size_t cn_peer;        /* Offset to next node in this directory (for readdir()) */
+  uint32_t cn_size;      /* Size of the uncompressed data (in bytes) */
+  uint32_t cn_peer;      /* Offset to next node in this directory (for readdir()) */
   union
   {
-    size_t cn_child;     /* Offset to first node in sub-directory (directories only) */
-    size_t cn_link;      /* Offset to an arbitrary node (for hard link) */
-    size_t cn_blocks;    /* Offset to first block of compressed data (for read) */
+    uint32_t cn_child;   /* Offset to first node in sub-directory (directories only) */
+    uint32_t cn_link;    /* Offset to an arbitrary node (for hard link) */
+    uint32_t cn_blocks;  /* Offset to first block of compressed data (for read) */
   } u;
 };
 
