@@ -313,6 +313,7 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
                               FAR void *arg)
 {
   FAR struct cromfs_comparenode_s *cpnode;
+  FAR const struct cromfs_node_s *child;
   FAR char *name;
   int namlen;
 
@@ -323,6 +324,8 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
 
   name   = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
   namlen = strlen(name);
+
+  finfo("Compare %s to %s[0-%u]\n", name, cpnode->segment, cpnode->seglen);
 
   /* If the lengths of the name does not match the length of the next path
    * segment, then this is not the node we are looking for.
@@ -350,8 +353,20 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
            * and return 1 to stop the traversal.
            */
 
+#if 1 /* REVISIT:  This seems to work, but I don't fully follow the logic. */
+          if (S_ISDIR(node->cn_mode))
+            {
+              *cpnode->node = (FAR const struct cromfs_node_s *)
+                              cromfs_offset2addr(fs, node->u.cn_child);
+            }
+          else
+            {
+              *cpnode->node = node;
+            }
+#else
           *cpnode->node = (FAR const struct cromfs_node_s *)
                           cromfs_offset2addr(fs, node->u.cn_child);
+#endif
           return 1;
         }
 
@@ -380,6 +395,8 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
        * this recurses and could potentially eat up a lot of stack.
        */
 
+      child   = (FAR const struct cromfs_node_s *)
+                 cromfs_offset2addr(fs, node->u.cn_child);
       segment = cpnode->segment + cpnode->seglen;
 
       /* Skip over any '/' delimiter */
@@ -395,7 +412,7 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
 
       /* Then recurse */
 
-      return cromfs_foreach_node(fs, node, cromfs_comparenode, cpnode);
+      return cromfs_foreach_node(fs, child, cromfs_comparenode, cpnode);
     }
   else
     {
@@ -414,6 +431,8 @@ static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
   struct cromfs_comparenode_s cpnode;
   FAR const struct cromfs_node_s *root;
   int ret;
+
+  finfo("relpath: %s\n", relpath);
 
   /* Get the root node */
 
@@ -470,7 +489,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct cromfs_file_s *ff;
   int ret;
 
-  finfo("Open '%s'\n", relpath);
+  finfo("Open: %s\n", relpath);
 
   /* Sanity checks */
 
@@ -894,7 +913,7 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR const struct cromfs_node_s *node;
   int ret;
 
-  finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
+  finfo("relpath: %s\n", relpath);
 
   /* Sanity checks */
 
@@ -977,7 +996,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   /* Save the filename and file type */
 
   name = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
-  finfo("Entry %lu: \"%s\"\n", (unsigned long)offset, name);
+  finfo("Entry %lu: %s\n", (unsigned long)offset, name);
   strncpy(dir->fd_dir.d_name, name, NAME_MAX + 1);
 
   switch (node->cn_mode & s_IFTGT)
@@ -1020,7 +1039,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
 static int cromfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
-  finfo("Entry\n");
+  finfo("mountpt: %p dir: %p\n", mountpt, dir);
 
   dir->u.cromfs.cr_curroffset  = dir->u.cromfs.cr_firstoffset;
   return OK;
@@ -1062,8 +1081,8 @@ static int cromfs_bind(FAR struct inode *blkdriver, const void *data,
 static int cromfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                         unsigned int flags)
 {
-   finfo("handle: %p blkdriver: %p flags: %02x\n",
-          handle, blkdriver, flags);
+  finfo("handle: %p blkdriver: %p flags: %02x\n",
+        handle, blkdriver, flags);
   return OK;
 }
 
@@ -1113,7 +1132,7 @@ static int cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   FAR const struct cromfs_node_s *node;
   int ret;
 
-  finfo("mountptr: %p relpath: %s buf: %p\n", mountpt, relpath, buf);
+  finfo("mountpt: %p relpath: %s buf: %p\n", mountpt, relpath, buf);
 
   /* Sanity checks */
 

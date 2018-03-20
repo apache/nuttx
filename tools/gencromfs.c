@@ -211,6 +211,11 @@ union lzf_result_u
 
 static uint8_t *g_lzf_hashtab[LZF_HSIZE];
 
+/* Type of the callback from traverse_directory() */
+
+typedef int (*traversal_callback_t)(const char *dirpath, const char *name,
+                                    void *arg, bool lastentry);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -260,9 +265,10 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry);
 static void gen_file(const char *path, const char *name, mode_t mode,
                           bool lastentry);
-static void process_direntry(const char *dirpath, const char *name,
-                             bool lastentry);
-static void traverse_directory(const char *dirpath);
+static int  process_direntry(const char *dirpath, const char *name,
+                             void *arg, bool lastentry);
+static int  traverse_directory(const char *dirpath,
+                               traversal_callback_t callback, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -923,7 +929,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   /* Then recurse to generate all of the nodes for the subtree */
 
-  traverse_directory(path);
+  (void)traverse_directory(path, process_direntry, NULL);
 
   /* When traverse_directory() returns, all of the nodes in the sub-tree under
    * 'name' will have been written to the new tmpfile.  g_offset is correct,
@@ -1079,8 +1085,8 @@ static void gen_file(const char *path, const char *name, mode_t mode,
   append_tmpfile(g_tmpstream, outstream);
 }
 
-static void process_direntry(const char *dirpath,  const char *name,
-                             bool lastentry)
+static int process_direntry(const char *dirpath, const char *name,
+                            void *arg, bool lastentry)
 {
   struct stat buf;
   char *path;
@@ -1121,13 +1127,16 @@ static void process_direntry(const char *dirpath,  const char *name,
     }
 
   free(path);
+  return 0;
 }
 
-static void traverse_directory(const char *dirpath)
+static int traverse_directory(const char *dirpath,
+                              traversal_callback_t callback, void *arg)
 {
   DIR *dirp;
   struct dirent *direntry;
   char name[NAME_MAX + 1];
+  int ret = 0;
 
   /* Open the directory */
 
@@ -1163,9 +1172,16 @@ static void traverse_directory(const char *dirpath)
         {
           /* Process the directory entry */
 
-          process_direntry(dirpath, name, direntry == NULL);
+          ret = callback(dirpath, name, arg, direntry == NULL);
+          if (ret != 0)
+            {
+              break;
+            }
         }
     }
+
+  closedir(dirp);
+  return ret;
 }
 
 /****************************************************************************
@@ -1221,7 +1237,7 @@ int main(int argc, char **argv, char **envp)
    * directory entry encountered.
    */
 
-  traverse_directory(g_dirname);
+  (void)traverse_directory(g_dirname, process_direntry, NULL);
 
   /* Now append the volume header to output file */
 
