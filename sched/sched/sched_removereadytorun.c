@@ -187,7 +187,9 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       me = this_cpu();
       if (cpu != me)
         {
+          sched_tasklist_unlock(lock);
           DEBUGVERIFY(up_cpu_pause(cpu));
+          lock = sched_tasklist_lock();
         }
 
       /* The task is running but the CPU that it was running on has been

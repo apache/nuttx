@@ -47,6 +47,10 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
+#ifdef CONFIG_SMP
+#  include <nuttx/irq.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -128,6 +132,9 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
 
 int mm_trysemaphore(FAR struct mm_heap_s *heap)
 {
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
   pid_t my_pid = getpid();
   int ret;
 
@@ -138,7 +145,7 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
       /* Yes, just increment the number of references that I have */
 
       heap->mm_counts_held++;
-      return OK;
+      ret = OK;
     }
   else
     {
@@ -148,15 +155,21 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
       if (ret < 0)
        {
          _SEM_GETERROR(ret);
-         return ret;
+         goto errout;
        }
 
       /* We have it.  Claim the heap and return */
 
       heap->mm_holder      = my_pid;
       heap->mm_counts_held = 1;
-      return OK;
+      ret = OK;
     }
+
+errout:
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
+  return ret;
 }
 
 /****************************************************************************
@@ -170,6 +183,9 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
 
 void mm_takesemaphore(FAR struct mm_heap_s *heap)
 {
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
   pid_t my_pid = getpid();
 
   /* Do I already have the semaphore? */
@@ -216,6 +232,9 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       heap->mm_counts_held = 1;
     }
 
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
   mseminfo("Holder=%d count=%d\n", heap->mm_holder, heap->mm_counts_held);
 }
 
@@ -229,6 +248,9 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
 #if defined(CONFIG_DEBUG_ASSERTIONS) || \
    (defined(MONITOR_MM_SEMAPHORE) && defined(CONFIG_DEBUG_INFO))
   pid_t my_pid = getpid();
@@ -258,4 +280,8 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
       heap->mm_counts_held = 0;
       DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }

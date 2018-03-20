@@ -275,7 +275,9 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
+          sched_tasklist_unlock(lock);
           DEBUGVERIFY(up_cpu_pause(cpu));
+          lock = sched_tasklist_lock();
         }
 
       /* Add the task to the list corresponding to the selected state

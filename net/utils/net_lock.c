@@ -131,6 +131,9 @@ void net_lockinitialize(void)
 
 void net_lock(void)
 {
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
   pid_t me = getpid();
 
   /* Does this thread already hold the semaphore? */
@@ -152,6 +155,10 @@ void net_lock(void)
       g_holder = me;
       g_count  = 1;
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************
@@ -170,6 +177,9 @@ void net_lock(void)
 
 void net_unlock(void)
 {
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
   DEBUGASSERT(g_holder == getpid() && g_count > 0);
 
   /* If the count would go to zero, then release the semaphore */
@@ -188,6 +198,10 @@ void net_unlock(void)
 
       g_count--;
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************
@@ -209,12 +223,14 @@ void net_unlock(void)
 
 int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
 {
-  pid_t        me = getpid();
   unsigned int count;
   irqstate_t   flags;
   int          ret;
 
   flags = enter_critical_section(); /* No interrupts */
+
+  pid_t        me = getpid();
+
   sched_lock();      /* No context switches */
   if (g_holder == me)
     {

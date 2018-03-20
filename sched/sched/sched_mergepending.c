@@ -242,7 +242,9 @@ bool sched_mergepending(void)
 
           /* Add the pending task to the correct ready-to-run list. */
 
+          sched_tasklist_unlock(lock);
           ret |= sched_addreadytorun(tcb);
+          lock = sched_tasklist_lock();
 
           /* This operation could cause the scheduler to become locked.
            * Check if that happened.
