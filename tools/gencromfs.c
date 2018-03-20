@@ -260,11 +260,13 @@ static void dump_nextline(FILE *stream);
 static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
                            union lzf_result_u *result);
 static uint16_t get_mode(mode_t mode);
-static void gen_dirlink(const char *name, uint32_t tgtoffs);
+static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty);
 static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry);
 static void gen_file(const char *path, const char *name, mode_t mode,
                           bool lastentry);
+static int  dir_notempty(const char *dirpath, const char *name,
+                         void *arg, bool lastentry);
 static int  process_direntry(const char *dirpath, const char *name,
                              void *arg, bool lastentry);
 static int  traverse_directory(const char *dirpath,
@@ -864,7 +866,7 @@ static uint16_t get_mode(mode_t mode)
   return ret;
 }
 
-static void gen_dirlink(const char *name, uint32_t tgtoffs)
+static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
 {
   struct cromfs_node_s node;
   int namlen;
@@ -884,7 +886,7 @@ static void gen_dirlink(const char *name, uint32_t tgtoffs)
   node.cn_size    = 0;
 
   g_offset       += namlen;
-  node.cn_peer    = g_offset;
+  node.cn_peer    = dirempty ? 0 : g_offset;
   node.u.cn_link  = tgtoffs;
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
@@ -903,6 +905,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
   FILE *save_tmpstream      = g_tmpstream;
   FILE *subtree_stream;
   int namlen;
+  int result;
 
   namlen          = strlen(name) + 1;
 
@@ -922,14 +925,24 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   g_offset       += sizeof(struct cromfs_node_s) + namlen;
 
-  /* Generate the '.' and '..' links for the directory (in the new temporary file) */
+  /* We are going to traverse the new directory twice; the first time just
+   * see if the directory is empty.  The second time is the real thing.
+   */
 
-  gen_dirlink(".", g_diroffset);
-  gen_dirlink("..", g_parent_offset);
+  result = traverse_directory(path, dir_notempty, NULL);
 
-  /* Then recurse to generate all of the nodes for the subtree */
+  /* Generate the '.' and '..' links for the directory (in the new temporary
+   * file).
+   */
 
-  (void)traverse_directory(path, process_direntry, NULL);
+  gen_dirlink(".", g_diroffset, false);
+  gen_dirlink("..", g_parent_offset, result == 0);
+  if (result != 0)
+    {
+      /* Then recurse to generate all of the nodes for the subtree */
+
+      (void)traverse_directory(path, process_direntry, NULL);
+    }
 
   /* When traverse_directory() returns, all of the nodes in the sub-tree under
    * 'name' will have been written to the new tmpfile.  g_offset is correct,
@@ -1085,6 +1098,14 @@ static void gen_file(const char *path, const char *name, mode_t mode,
   append_tmpfile(g_tmpstream, outstream);
 }
 
+static int  dir_notempty(const char *dirpath, const char *name,
+                         void *arg, bool lastentry)
+{
+  /* If we get here, then the directory is not empty */
+
+  return 1;
+}
+
 static int process_direntry(const char *dirpath, const char *name,
                             void *arg, bool lastentry)
 {
@@ -1192,6 +1213,7 @@ int main(int argc, char **argv, char **envp)
 {
   struct cromfs_volume_s vol;
   char *ptr;
+  int result;
 
   /* Verify arguments */
 
@@ -1229,15 +1251,23 @@ int main(int argc, char **argv, char **envp)
   g_diroffset     = sizeof(struct cromfs_volume_s);  /* Offset for '.' */
   g_parent_offset = sizeof(struct cromfs_volume_s);  /* Offset for '..' */
 
-  /* Generate the '.' link for the root directory (it can't have a '..') */
-
-  gen_dirlink(".", g_diroffset);
-
-  /* Then traverse each entry in the directory, generating node data for each
-   * directory entry encountered.
+  /* We are going to traverse the new directory twice; the first time just
+   * see if the directory is empty.  The second time is the real thing.
    */
 
-  (void)traverse_directory(g_dirname, process_direntry, NULL);
+  result = traverse_directory(g_dirname, dir_notempty, NULL);
+
+  /* Generate the '.' link for the root directory (it can't have a '..') */
+
+  gen_dirlink(".", g_diroffset, result == 0);
+  if (result != 0)
+    {
+      /* Then traverse each entry in the directory, generating node data for
+       * each directory entry encountered.
+       */
+
+      (void)traverse_directory(g_dirname, process_direntry, NULL);
+    }
 
   /* Now append the volume header to output file */
 
