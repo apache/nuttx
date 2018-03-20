@@ -104,6 +104,7 @@ static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
 static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
                                    FAR const void *addr);
 static int      cromfs_foreach_node(FAR const struct cromfs_volume_s *fs,
+                                    FAR const struct cromfs_node_s *node,
                                     cromfs_foreach_t callback, FAR void *arg);
 static uint16_t cromfs_seglen(FAR const char *relpath);
 static int      cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
@@ -256,12 +257,15 @@ static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
  ****************************************************************************/
 
 static int cromfs_foreach_node(FAR const struct cromfs_volume_s *fs,
-                              cromfs_foreach_t callback, FAR void *arg)
+                               FAR const struct cromfs_node_s *node,
+                               cromfs_foreach_t callback, FAR void *arg)
 {
-  FAR const struct cromfs_node_s *node;
   int ret = OK;
 
-  node = (FAR const struct cromfs_node_s *)cromfs_offset2addr(fs, fs->cv_root);
+  /* Traverse all entries in this directory (i.e., following the 'peer'
+   * links).
+   */
+
   while (node != NULL)
     {
       ret = callback(fs, node, arg);
@@ -347,11 +351,11 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
            */
 
           *cpnode->node = (FAR const struct cromfs_node_s *)
-                           cromfs_offset2addr(fs, node->u.cn_child);
+                          cromfs_offset2addr(fs, node->u.cn_child);
           return 1;
         }
 
-      /* A specal cas is if the path ends in "/".  In this case I suppose
+      /* A special case is if the path ends in "/".  In this case I suppose
        * we need to interpret the as matching as long as it is a directory?
        */
 
@@ -391,7 +395,7 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
 
       /* Then recurse */
 
-      return cromfs_foreach_node(fs, cromfs_comparenode, cpnode);
+      return cromfs_foreach_node(fs, node, cromfs_comparenode, cpnode);
     }
   else
     {
@@ -408,14 +412,19 @@ static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
                            FAR const char *relpath)
 {
   struct cromfs_comparenode_s cpnode;
+  FAR const struct cromfs_node_s *root;
   int ret;
+
+  /* Get the root node */
+
+  root = (FAR const struct cromfs_node_s *)
+          cromfs_offset2addr(fs, fs->cv_root);
 
   /* NULL or empty string refers to the root node */
 
   if (relpath == NULL || relpath[0] == '\0')
     {
-      *node = (FAR const struct cromfs_node_s *)
-              cromfs_offset2addr(fs, fs->cv_root);
+      *node = root;
       return OK;
     }
 
@@ -433,7 +442,7 @@ static int cromfs_findnode(FAR const struct cromfs_volume_s *fs,
   cpnode.segment = relpath;
   cpnode.seglen  = (uint16_t)cromfs_seglen(relpath);
 
-  ret = cromfs_foreach_node(fs, cromfs_comparenode, &cpnode);
+  ret = cromfs_foreach_node(fs, root, cromfs_comparenode, &cpnode);
   if (ret > 0)
     {
       return OK;

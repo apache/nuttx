@@ -260,7 +260,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry);
 static void gen_file(const char *path, const char *name, mode_t mode,
                           bool lastentry);
-static void process_direntry(const char *dirpath, struct dirent *direntry,
+static void process_direntry(const char *dirpath, const char *name,
                              bool lastentry);
 static void traverse_directory(const char *dirpath);
 
@@ -1079,14 +1079,14 @@ static void gen_file(const char *path, const char *name, mode_t mode,
   append_tmpfile(g_tmpstream, outstream);
 }
 
-static void process_direntry(const char *dirpath, struct dirent *direntry,
+static void process_direntry(const char *dirpath,  const char *name,
                              bool lastentry)
 {
   struct stat buf;
   char *path;
   int ret;
 
-  asprintf(&path, "%s/%s", dirpath, direntry->d_name);
+  asprintf(&path, "%s/%s", dirpath, name);
 
   ret = stat(path, &buf);
   if (ret < 0)
@@ -1109,11 +1109,11 @@ static void process_direntry(const char *dirpath, struct dirent *direntry,
 
   else if (S_ISDIR(buf.st_mode))
     {
-      gen_directory(path, direntry->d_name, buf.st_mode, lastentry);
+      gen_directory(path, name, buf.st_mode, lastentry);
     }
   else if (S_ISREG(buf.st_mode))
     {
-      gen_file(path, direntry->d_name, buf.st_mode, lastentry);
+      gen_file(path, name, buf.st_mode, lastentry);
     }
   else
     {
@@ -1127,7 +1127,7 @@ static void traverse_directory(const char *dirpath)
 {
   DIR *dirp;
   struct dirent *direntry;
-  struct dirent *nextentry;
+  char name[NAME_MAX + 1];
 
   /* Open the directory */
 
@@ -1144,25 +1144,27 @@ static void traverse_directory(const char *dirpath)
   direntry = readdir(dirp);
   while (direntry != NULL)
     {
-      /* Get the next entry so that we can anticipate the end of the
-       * directory.
+      /* Preserve the name from the directory entry.  The return value
+       * from readdir() only persists until the next time that readdir()
+       * is called (alternatively, use readdir_r).
        */
 
-      nextentry = readdir(dirp);
+      strncpy(name, direntry->d_name, NAME_MAX + 1);
+
+      /* Get the next entry in advance so that we can anticipate the end of
+       * the directory.
+       */
+
+      direntry = readdir(dirp);
 
       /* Skip the '.' and '..' hard links */
 
-      if (strcmp(direntry->d_name, ".") != 0 &&
-          strcmp(direntry->d_name, "..") != 0)
+      if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0)
         {
           /* Process the directory entry */
 
-          process_direntry(dirpath, direntry, nextentry == NULL);
+          process_direntry(dirpath, name, direntry == NULL);
         }
-
-      /* Skip to the next entry */
-
-      direntry = nextentry;
     }
 }
 
