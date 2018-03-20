@@ -822,6 +822,26 @@ config STM32L4_HAVE_TIM17
 	bool
 	default n
 
+config STM32L4_HAVE_USART1
+	bool
+	default n
+
+config STM32L4_HAVE_USART2
+	bool
+	default n
+
+config STM32L4_HAVE_USART3
+	bool
+	default n
+
+config STM32L4_HAVE_UART4
+	bool
+	default n
+
+config STM32L4_HAVE_UART5
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -1152,7 +1172,6 @@ config STM32L4_USART2
 	default n
 	depends on STM32L4_HAVE_USART2
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART2_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_USART3
@@ -1160,7 +1179,6 @@ config STM32L4_USART3
 	default n
 	depends on STM32L4_HAVE_USART3
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART3_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_UART4
@@ -1168,7 +1186,6 @@ config STM32L4_UART4
 	default n
 	depends on STM32L4_HAVE_UART4
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART4_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_UART5
@@ -1176,7 +1193,6 @@ config STM32L4_UART5
 	default n
 	depends on STM32L4_HAVE_UART5
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART5_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_I2C1
@@ -1294,7 +1310,6 @@ config STM32L4_USART1
 	default n
 	depends on STM32L4_HAVE_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART1_SERIALDRIVER
 	select STM32L4_USART
 
 config STM32L4_TIM15
@@ -3458,28 +3473,32 @@ config STM32L4_DFSDM1_DMA
 
 endmenu
 
-config STM32L4_HAVE_USART1
+config STM32L4_SERIALDRIVER
 	bool
-	default n
 
-config STM32L4_HAVE_USART2
+config STM32L4_1WIREDRIVER
 	bool
-	default n
-
-config STM32L4_HAVE_USART3
-	bool
-	default n
-
-config STM32L4_HAVE_UART4
-	bool
-	default n
-
-config STM32L4_HAVE_UART5
-	bool
-	default n
 
 menu "U[S]ART Configuration"
 	depends on STM32L4_USART
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32L4_USART1_SERIALDRIVER
+	depends on STM32L4_USART1
+
+config STM32L4_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select STM32L4_SERIALDRIVER
+
+config STM32L4_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32L4_1WIREDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if USART1_SERIALDRIVER
 
 config USART1_RS485
 	bool "RS-485 on USART1"
@@ -3506,6 +3525,26 @@ config USART1_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+endif # USART1_SERIALDRIVER
+
+choice
+	prompt "USART2 Driver Configuration"
+	default STM32L4_USART2_SERIALDRIVER
+	depends on STM32L4_USART2
+
+config STM32L4_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select STM32L4_SERIALDRIVER
+
+config STM32L4_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32L4_1WIREDRIVER
+
+endchoice # USART2 Driver Configuration
+
+if USART2_SERIALDRIVER
+
 config USART2_RS485
 	bool "RS-485 on USART2"
 	default n
@@ -3530,6 +3569,26 @@ config USART2_RXDMA
 	depends on STM32L4_USART2 && STM32L4_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART2_SERIALDRIVER
+
+choice
+	prompt "USART3 Driver Configuration"
+	default STM32L4_USART3_SERIALDRIVER
+	depends on STM32L4_USART3
+
+config STM32L4_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select STM32L4_SERIALDRIVER
+
+config STM32L4_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32L4_1WIREDRIVER
+
+endchoice # USART3 Driver Configuration
+
+if USART3_SERIALDRIVER
 
 config USART3_RS485
 	bool "RS-485 on USART3"
@@ -3556,6 +3615,26 @@ config USART3_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+endif # USART3_SERIALDRIVER
+
+choice
+	prompt "UART4 Driver Configuration"
+	default STM32L4_UART4_SERIALDRIVER
+	depends on STM32L4_UART4
+
+config STM32L4_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select STM32L4_SERIALDRIVER
+
+config STM32L4_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32L4_1WIREDRIVER
+
+endchoice # UART4 Driver Configuration
+
+if UART4_SERIALDRIVER
+
 config UART4_RS485
 	bool "RS-485 on UART4"
 	default n
@@ -3581,6 +3660,26 @@ config UART4_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+endif # UART4_SERIALDRIVER
+
+choice
+	prompt "UART5 Driver Configuration"
+	default STM32L4_UART5_SERIALDRIVER
+	depends on STM32L4_UART5
+
+config STM32L4_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select STM32L4_SERIALDRIVER
+
+config STM32L4_UART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32L4_1WIREDRIVER
+
+endchoice # UART5 Driver Configuration
+
+if UART5_SERIALDRIVER
+
 config UART5_RS485
 	bool "RS-485 on UART5"
 	default n
@@ -3605,6 +3704,12 @@ config UART5_RXDMA
 	depends on STM32L4_UART5 && STM32L4_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # UART5_SERIALDRIVER
+
+if STM32L4_SERIALDRIVER
+
+comment "Serial Driver Configuration"
 
 config STM32L4_SERIAL_RXDMA_BUFFER_SIZE
 	int "Rx DMA buffer size"
@@ -3662,6 +3767,14 @@ config STM32L4_SERIALBRK_BSDCOMPAT
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
 
+config STM32L4_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32L4_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32 serial driver.
+
 if PM
 config PM_SERIAL_ACTIVITY
 	int "PM serial activity"
@@ -3670,6 +3783,8 @@ config PM_SERIAL_ACTIVITY
 		PM activity reported to power management logic on every serial
 		interrupt.
 endif
+
+endif # STM32L4_SERIALDRIVER
 
 endmenu # U[S]ART Configuration
 

@@ -242,3 +242,7 @@ endif
 ifeq ($(CONFIG_STM32L4_SDMMC1),y)
 CHIP_CSRCS += stm32l4_sdmmc.c
 endif
+
+ifeq ($(CONFIG_STM32L4_1WIREDRIVER),y)
+CHIP_CSRCS += stm32l4_1wire.c
+endif

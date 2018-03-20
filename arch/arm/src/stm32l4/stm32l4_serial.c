@@ -387,7 +387,7 @@ static const struct uart_ops_s g_uart_dma_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_STM32L4_USART1
+#ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 # ifdef CONFIG_USART1_RXDMA
@@ -395,7 +395,7 @@ static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32L4_USART2
+#ifdef CONFIG_STM32L4_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 # ifdef CONFIG_USART2_RXDMA
@@ -403,7 +403,7 @@ static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32L4_USART3
+#ifdef CONFIG_STM32L4_USART3_SERIALDRIVER
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 # ifdef CONFIG_USART3_RXDMA
@@ -411,7 +411,7 @@ static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32L4_UART4
+#ifdef CONFIG_STM32L4_UART4_SERIALDRIVER
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 # ifdef CONFIG_UART4_RXDMA
@@ -419,7 +419,7 @@ static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-#ifdef CONFIG_STM32L4_UART5
+#ifdef CONFIG_STM32L4_UART5_SERIALDRIVER
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 # ifdef CONFIG_UART5_RXDMA
@@ -429,7 +429,7 @@ static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
 
 /* This describes the state of the STM32 USART1 ports. */
 
-#ifdef CONFIG_STM32L4_USART1
+#ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
 static struct stm32l4_serial_s g_usart1priv =
 {
   .dev =
@@ -490,7 +490,7 @@ static struct stm32l4_serial_s g_usart1priv =
 
 /* This describes the state of the STM32 USART2 port. */
 
-#ifdef CONFIG_STM32L4_USART2
+#ifdef CONFIG_STM32L4_USART2_SERIALDRIVER
 static struct stm32l4_serial_s g_usart2priv =
 {
   .dev =
@@ -551,7 +551,7 @@ static struct stm32l4_serial_s g_usart2priv =
 
 /* This describes the state of the STM32 USART3 port. */
 
-#ifdef CONFIG_STM32L4_USART3
+#ifdef CONFIG_STM32L4_USART3_SERIALDRIVER
 static struct stm32l4_serial_s g_usart3priv =
 {
   .dev =
@@ -612,7 +612,7 @@ static struct stm32l4_serial_s g_usart3priv =
 
 /* This describes the state of the STM32 UART4 port. */
 
-#ifdef CONFIG_STM32L4_UART4
+#ifdef CONFIG_STM32L4_UART4_SERIALDRIVER
 static struct stm32l4_serial_s g_uart4priv =
 {
   .dev =
@@ -677,7 +677,7 @@ static struct stm32l4_serial_s g_uart4priv =
 
 /* This describes the state of the STM32 UART5 port. */
 
-#ifdef CONFIG_STM32L4_UART5
+#ifdef CONFIG_STM32L4_UART5_SERIALDRIVER
 static struct stm32l4_serial_s g_uart5priv =
 {
   .dev =
@@ -744,19 +744,19 @@ static struct stm32l4_serial_s g_uart5priv =
 
 FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART + STM32L4_NUART] =
 {
-#ifdef CONFIG_STM32L4_USART1
+#ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
   [0] = &g_usart1priv,
 #endif
-#ifdef CONFIG_STM32L4_USART2
+#ifdef CONFIG_STM32L4_USART2_SERIALDRIVER
   [1] = &g_usart2priv,
 #endif
-#ifdef CONFIG_STM32L4_USART3
+#ifdef CONFIG_STM32L4_USART3_SERIALDRIVER
   [2] = &g_usart3priv,
 #endif
-#ifdef CONFIG_STM32L4_UART4
+#ifdef CONFIG_STM32L4_UART4_SERIALDRIVER
   [3] = &g_uart4priv,
 #endif
-#ifdef CONFIG_STM32L4_UART5
+#ifdef CONFIG_STM32L4_UART5_SERIALDRIVER
   [4] = &g_uart5priv,
 #endif
 };
@@ -1236,31 +1236,31 @@ static void stm32l4serial_setapbclock(FAR struct uart_dev_s *dev, bool on)
     {
     default:
       return;
-#ifdef CONFIG_STM32L4_USART1
+#ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
     case STM32L4_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
       regaddr = STM32L4_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32L4_USART2
+#ifdef CONFIG_STM32L4_USART2_SERIALDRIVER
     case STM32L4_USART2_BASE:
       rcc_en = RCC_APB1ENR1_USART2EN;
       regaddr = STM32L4_RCC_APB1ENR1;
       break;
 #endif
-#ifdef CONFIG_STM32L4_USART3
+#ifdef CONFIG_STM32L4_USART3_SERIALDRIVER
     case STM32L4_USART3_BASE:
       rcc_en = RCC_APB1ENR1_USART3EN;
       regaddr = STM32L4_RCC_APB1ENR1;
       break;
 #endif
-#ifdef CONFIG_STM32L4_UART4
+#ifdef CONFIG_STM32L4_UART4_SERIALDRIVER
     case STM32L4_UART4_BASE:
       rcc_en = RCC_APB1ENR1_UART4EN;
       regaddr = STM32L4_RCC_APB1ENR1;
       break;
 #endif
-#ifdef CONFIG_STM32L4_UART5
+#ifdef CONFIG_STM32L4_UART5_SERIALDRIVER
     case STM32L4_UART5_BASE:
       rcc_en = RCC_APB1ENR1_UART5EN;
       regaddr = STM32L4_RCC_APB1ENR1;
@@ -1688,8 +1688,8 @@ static int up_interrupt(int irq, FAR void *context, FAR void *arg)
        * "           "      USART_ISR_ORE    Overrun Error Detected
        * USART_CR3_CTSIE    USART_ISR_CTS    CTS flag                        (not used)
        *
-       * NOTE: Some of these status bits must be cleared by explicity writing zero
-       * to the SR register: USART_ISR_CTS, USART_ISR_LBD. Note of those are currently
+       * NOTE: Some of these status bits must be cleared by explicity writing one
+       * to the ICR register: USART_ICR_CTSCF, USART_ICR_LBDCF. Note of those are currently
        * being used.
        */
 
@@ -1787,7 +1787,6 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
 #endif
 
 #ifdef CONFIG_STM32L4_USART_SINGLEWIRE
-#warning please review the potential use of ALTERNATE_FUNCTION_OPENDRAIN
     case TIOCSSINGLEWIRE:
       {
         /* Change the TX port to be open-drain/push-pull and enable/disable
