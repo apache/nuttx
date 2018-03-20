@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/dirent.h
  *
- *   Copyright (C) 2007, 2009, 2011-2013, 2015, 20189 Gregory Nutt. All
+ *   Copyright (C) 2007, 2009, 2011-2013, 2015, 2018 Gregory Nutt. All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -111,7 +111,7 @@ struct fs_cromfsdir_s
   off_t        cr_firstoffset;         /* Offset to the first entry in the directory */
   off_t        cr_curroffset;          /* Current offset into the directory contents */
 };
-#endif /* CONFIG_FS_ROMFS */
+#endif /* CONFIG_FS_CROMFS */
 
 #ifdef CONFIG_FS_TMPFS
 /* For TMPFS, we need the directory object and an index into the directory
@@ -255,7 +255,7 @@ struct fs_dirent_s
 #ifdef CONFIG_FS_ROMFS
       struct fs_romfsdir_s   romfs;
 #endif
-#ifdef CONFIG_FS_ROMFS
+#ifdef CONFIG_FS_CROMFS
       struct fs_cromfsdir_s  cromfs;
 #endif
 #ifdef CONFIG_FS_TMPFS
