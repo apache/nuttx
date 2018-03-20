@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/iob/iob_copyin.c
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -264,7 +264,7 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 {
   if (iob_copyin_internal(iob, src, len, offset, throttled, false) == 0)
     {
-      return OK;
+      return len;
     }
   else
     {
