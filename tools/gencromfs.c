@@ -241,7 +241,7 @@ static void gen_dirlink(const char *name, size_t tgtoffs);
 static void gen_directory(const char *path, const char *name, mode_t mode);
 static void gen_file(const char *path, const char *name, mode_t mode);
 static void process_direntry(const char *dirpath, struct dirent *direntry);
-static void traverse_directory(const char *dirpath, const char *subdir);
+static void traverse_directory(const char *dirpath);
 
 /****************************************************************************
  * Private Functions
@@ -901,7 +901,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode)
 
   /* Then recurse to generate all of the nodes for the subtree */
 
-  traverse_directory(path, name);
+  traverse_directory(path);
 
   /* When traverse_directory() returns, all of the nodes in the sub-tree under
    * 'name' will have been written to the new tmpfile.  g_offset is correct,
@@ -1098,32 +1098,18 @@ static void process_direntry(const char *dirpath, struct dirent *direntry)
   free(path);
 }
 
-static void traverse_directory(const char *dirpath, const char *subdir)
+static void traverse_directory(const char *dirpath)
 {
   DIR *dirp;
   struct dirent *direntry;
-  char *diralloc = NULL;
-  const char *dirptr;
-
-  /* The first time this function is called, subdir will be NULL */
-
-  if (subdir)
-    {
-      asprintf(&diralloc, "%s/%s", dirpath, subdir);
-      dirptr = diralloc;
-    }
-  else
-    {
-      dirptr = dirpath;
-    }
 
   /* Open the directory */
 
-  dirp = opendir(dirptr);
+  dirp = opendir(dirpath);
   if (dirp == NULL)
     {
       fprintf(stderr, "ERROR: opendir(%s) failed: %s\n",
-              dirptr, strerror(errno));
+              dirpath, strerror(errno));
       show_usage();
     }
 
@@ -1141,18 +1127,11 @@ static void traverse_directory(const char *dirpath, const char *subdir)
             {
               /* Process the directory entry */
 
-              process_direntry(dirptr, direntry);
+              process_direntry(dirpath, direntry);
             }
         }
     }
   while (direntry != NULL);
-
-  /* Free any allocation that we made above */
-
-  if (diralloc)
-    {
-      free(diralloc);
-    }
 }
 
 /****************************************************************************
@@ -1208,7 +1187,7 @@ int main(int argc, char **argv, char **envp)
    * directory entry encountered.
    */
 
-  traverse_directory(g_dirname, NULL);
+  traverse_directory(g_dirname);
 
   /* Now append the volume header to output file */
 
