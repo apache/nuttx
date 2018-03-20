@@ -39,6 +39,7 @@
 
 #define _GNU_SOURCE 1
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -238,9 +239,12 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
                            union lzf_result_u *result);
 static mode_t get_mode(mode_t mode);
 static void gen_dirlink(const char *name, size_t tgtoffs);
-static void gen_directory(const char *path, const char *name, mode_t mode);
-static void gen_file(const char *path, const char *name, mode_t mode);
-static void process_direntry(const char *dirpath, struct dirent *direntry);
+static void gen_directory(const char *path, const char *name, mode_t mode,
+                          bool lastentry);
+static void gen_file(const char *path, const char *name, mode_t mode,
+                          bool lastentry);
+static void process_direntry(const char *dirpath, struct dirent *direntry,
+                             bool lastentry);
 static void traverse_directory(const char *dirpath);
 
 /****************************************************************************
@@ -866,7 +870,8 @@ static void gen_dirlink(const char *name, size_t tgtoffs)
   g_nnodes++;
 }
 
-static void gen_directory(const char *path, const char *name, mode_t mode)
+static void gen_directory(const char *path, const char *name, mode_t mode,
+                          bool lastentry)
 {
   struct cromfs_node_s node;
   size_t save_offset        = g_offset;
@@ -923,7 +928,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode)
   node.cn_size    = 0;
 
   save_offset    += namlen;
-  node.cn_peer    = g_offset;
+  node.cn_peer    = lastentry ? 0 : g_offset;
   node.u.cn_child = save_offset;
 
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  Directory %s */\n\n",
@@ -939,7 +944,8 @@ static void gen_directory(const char *path, const char *name, mode_t mode)
   append_tmpfile(g_tmpstream, subtree_stream);
 }
 
-static void gen_file(const char *path, const char *name, mode_t mode)
+static void gen_file(const char *path, const char *name, mode_t mode,
+                     bool lastentry)
 {
   struct cromfs_node_s node;
   union lzf_result_u result;
@@ -1043,7 +1049,7 @@ static void gen_file(const char *path, const char *name, mode_t mode)
   node.u.cn_blocks   = nodeoffs;
 
   nodeoffs          += blktotal;
-  node.cn_peer       = nodeoffs;
+  node.cn_peer       = lastentry ? 0 : nodeoffs;
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
@@ -1055,7 +1061,8 @@ static void gen_file(const char *path, const char *name, mode_t mode)
   append_tmpfile(g_tmpstream, outstream);
 }
 
-static void process_direntry(const char *dirpath, struct dirent *direntry)
+static void process_direntry(const char *dirpath, struct dirent *direntry,
+                             bool lastentry)
 {
   struct stat buf;
   char *path;
@@ -1084,11 +1091,11 @@ static void process_direntry(const char *dirpath, struct dirent *direntry)
 
   else if (S_ISDIR(buf.st_mode))
     {
-      gen_directory(path, direntry->d_name, buf.st_mode);
+      gen_directory(path, direntry->d_name, buf.st_mode, lastentry);
     }
   else if (S_ISREG(buf.st_mode))
     {
-      gen_file(path, direntry->d_name, buf.st_mode);
+      gen_file(path, direntry->d_name, buf.st_mode, lastentry);
     }
   else
     {
@@ -1102,6 +1109,7 @@ static void traverse_directory(const char *dirpath)
 {
   DIR *dirp;
   struct dirent *direntry;
+  struct dirent *nextentry;
 
   /* Open the directory */
 
@@ -1115,23 +1123,29 @@ static void traverse_directory(const char *dirpath)
 
   /* Visit each entry in the directory */
 
-  do
+  direntry = readdir(dirp);
+  while (direntry != NULL)
     {
-      direntry = readdir(dirp);
-      if (direntry != NULL)
+      /* Get the next entry so that we can anticipate the end of the
+       * directory.
+       */
+
+      nextentry = readdir(dirp);
+
+      /* Skip the '.' and '..' hard links */
+
+      if (strcmp(direntry->d_name, ".") != 0 &&
+          strcmp(direntry->d_name, "..") != 0)
         {
-          /* Skip the '.' and '..' hard links */
+          /* Process the directory entry */
 
-          if (strcmp(direntry->d_name, ".") != 0 &&
-              strcmp(direntry->d_name, "..") != 0)
-            {
-              /* Process the directory entry */
-
-              process_direntry(dirpath, direntry);
-            }
+          process_direntry(dirpath, direntry, nextentry == NULL);
         }
+
+      /* Skip to the next entry */
+
+      direntry = nextentry;
     }
-  while (direntry != NULL);
 }
 
 /****************************************************************************

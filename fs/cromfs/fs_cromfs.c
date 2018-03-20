@@ -600,9 +600,19 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos > ff->ff_node->cn_size)
     {
-      /* Return the end-of-file indication */
+      /* Start read position is past the end of file.  Return the end-of-
+       * file indication.
+       */
 
       return 0;
+    }
+  else if ((filep->f_pos + buflen) > ff->ff_node->cn_size)
+    {
+      /* The final read position is past the end of file.  Truncate the
+       * read length.
+       */
+
+      buflen = ff->ff_node->cn_size - filep->f_pos;
     }
 
   /* Find the compressed block containing the current offset, f_pos */
@@ -633,7 +643,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
           /* Go to the next block */
 
           currhdr  = nexthdr;
-          blkoffs += blksize;
+          blkoffs += ulen;
 
           if (currhdr->lzf_type == LZF_TYPE0_HDR)
             {
@@ -641,7 +651,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                 (FAR struct lzf_type0_header_s *)currhdr;
 
               ulen    = (uint16_t)hdr0->lzf_len[0] << 8 |
-                        (uint16_t)hdr0->lzf_len[0];
+                        (uint16_t)hdr0->lzf_len[1];
               blksize = (size_t)ulen + LZF_TYPE0_HDR_SIZE;
             }
           else
@@ -650,15 +660,15 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                 (FAR struct lzf_type1_header_s *)currhdr;
 
               ulen    = (uint16_t)hdr1->lzf_ulen[0] << 8 |
-                        (uint16_t)hdr1->lzf_ulen[0];
+                        (uint16_t)hdr1->lzf_ulen[1];
               clen    = (uint16_t)hdr1->lzf_clen[0] << 8 |
-                        (uint16_t)hdr1->lzf_clen[0];
+                        (uint16_t)hdr1->lzf_clen[1];
               blksize = (size_t)clen + LZF_TYPE1_HDR_SIZE;
             }
 
-          nexthdr = (FAR struct lzf_header_s *)((FAR uint8_t *)currhdr + blksize);
+          nexthdr  = (FAR struct lzf_header_s *)((FAR uint8_t *)currhdr + blksize);
         }
-      while (blkoffs <= fpos && (blkoffs + ulen) > fpos);
+      while (blkoffs < fpos && (blkoffs + ulen) > fpos);
 
       /* Check if we need to decompress the next block into the user buffer */
 
@@ -695,9 +705,9 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                   copysize = remaining;
                 }
 
-                  src = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
+              src       = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
               decomplen = lzf_decompress(src, clen, dest, copysize);
-              DEBUGASSERT(decomplen = copysize);
+              DEBUGASSERT(decomplen == copysize);
             }
           else
             {
@@ -728,13 +738,13 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
               memcpy(dest, &ff->ff_buffer[copyoffs], copysize);
             }
         }
+
+      /* Adjust pointers counts and offset */
+
+      dest      += copysize;
+      remaining -= copysize;
+      fpos      += copysize;
     }
-
-  /* Adjust pointers counts and offset */
-
-  dest      += copysize;
-  remaining -= copysize;
-  fpos      += copysize;
 
   /* Update the file pointer */
 
@@ -1021,7 +1031,9 @@ static int cromfs_bind(FAR struct inode *blkdriver, const void *data,
                       void **handle)
 {
   finfo("blkdriver: %p data: %p handle: %p\n", blkdriver, data, handle);
+
   DEBUGASSERT(blkdriver == NULL && handle != NULL);
+  DEBUGASSERT(g_cromfs_image.cv_magic == CROMFS_MAGIC);
 
   /* Return the new file system handle */
 
