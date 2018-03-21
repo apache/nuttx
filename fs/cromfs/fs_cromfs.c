@@ -661,8 +661,9 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
   while (remaining > 0)
     {
       /* Search for the next block containing the fpos file offset.  This is
-       * real search on the first time through but the reamining blocks should
-       * be contiguous.
+       * real search on the first time through but the remaining blocks should
+       * be contiguous so that the logic should not loop.
+       *
        */
 
       do
@@ -695,17 +696,20 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
               blksize = (uint32_t)clen + LZF_TYPE1_HDR_SIZE;
             }
 
-          nexthdr  = (FAR struct lzf_header_s *)((FAR uint8_t *)currhdr + blksize);
+          nexthdr  = (FAR struct lzf_header_s *)
+                     ((FAR uint8_t *)currhdr + blksize);
         }
-      while (blkoffs < fpos && (blkoffs + ulen) > fpos);
+      while (fpos >= (blkoffs + ulen));
 
-      /* Check if we need to decompress the next block into the user buffer */
+      /* Check if we need to decompress the next block into the user buffer. */
 
       if (currhdr->lzf_type == LZF_TYPE0_HDR)
         {
-          /* Just copy the uncompressed data copy data from image to the user buffer */
+          /* Just copy the uncompressed data copy data from image to the
+           * user buffer.
+           */
 
-          copyoffs = blkoffs >= filep->f_pos ? 0 : filep->f_pos - blkoffs;
+          copyoffs = (blkoffs >= filep->f_pos) ? 0 : filep->f_pos - blkoffs;
           DEBUGASSERT(ulen > copyoffs);
           copysize = ulen - copyoffs;
 
@@ -746,7 +750,7 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                * decompression buffer.
                */
 
-              copyoffs = blkoffs >= filep->f_pos ? 0 : filep->f_pos - blkoffs;
+              copyoffs = (blkoffs >= filep->f_pos) ? 0 : filep->f_pos - blkoffs;
               DEBUGASSERT(ulen > copyoffs);
               copysize = ulen - copyoffs;
 
