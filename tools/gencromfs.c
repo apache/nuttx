@@ -59,6 +59,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* HOST_BIGENDIAN or TGT_BIGENDIAN may be defined on the command line to
+ * adapt to different host/target combinations.  Otherwise, both are assumed
+ * to be the same endian-ness.
+ */
+
+#undef HOST_TGTSWAP
+
+#if (defined(HOST_BIGENDIAN) && !defined(TGT_BIGENDIAN)) || \
+    (!defined(HOST_BIGENDIAN) && defined(TGT_BIGENDIAN))
+#  define HOST_TGTSWAP 1
+#endif
+
+/* mkstemp() has been giving me errors on Cygwin */
+
 #undef USE_MKSTEMP
 
 #define TMP_NAMLEN         32         /* Actually only 22 */
@@ -260,6 +274,15 @@ static void dump_nextline(FILE *stream);
 static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
                            union lzf_result_u *result);
 static uint16_t get_mode(mode_t mode);
+#ifdef HOST_TGTSWAP
+static inline uint16_t tgt_uint16(uint16_t a);
+static inline uint32_t tgt_uint32(uint32_t a);
+#  define TGT_UINT16(a) tgt_uint16(a)
+#  define TGT_UINT32(a) tgt_uint32(a)
+#else
+#  define TGT_UINT16(a) (a)
+#  define TGT_UINT32(a) (a)
+#endif
 static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty);
 static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry);
@@ -866,6 +889,23 @@ static uint16_t get_mode(mode_t mode)
   return ret;
 }
 
+#ifdef HOST_TGTSWAP
+static inline uint16_t tgt_uint16(uint16_t a)
+{
+  /* [15:8][7:0] -> [7:0][15:8] */
+
+  return (a >> 8) | (a << 8);
+}
+
+static inline uint32_t tgt_uint32(uint32_t a)
+{
+  /* [31:24][23:16][15:8][7:0] -> [7:0][15:8][23:16][31:24] */
+
+  return (a >> 24) | ((a >> 8) & 0x0000ff00) |
+         ((a << 8) & 0x00ff0000) | (a << 24);
+}
+#endif
+
 static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
 {
   struct cromfs_node_s node;
@@ -879,15 +919,15 @@ static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  Hard link %s*/\n\n",
           (unsigned long)g_offset, name);
 
-  node.cn_mode    = DIRLINK_MODEFLAGS;
+  node.cn_mode    = TGT_UINT16(DIRLINK_MODEFLAGS);
 
   g_offset       += sizeof(struct cromfs_node_s);
-  node.cn_name    = g_offset;
+  node.cn_name    = TGT_UINT32(g_offset);
   node.cn_size    = 0;
 
   g_offset       += namlen;
-  node.cn_peer    = dirempty ? 0 : g_offset;
-  node.u.cn_link  = tgtoffs;
+  node.cn_peer    = TGT_UINT32(dirempty ? 0 : g_offset);
+  node.u.cn_link  = TGT_UINT32(tgtoffs);
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
@@ -961,15 +1001,15 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  Directory %s */\n\n",
           (unsigned long)save_offset, path);
 
-  node.cn_mode    = (NUTTX_IFDIR | get_mode(mode));
+  node.cn_mode    = TGT_UINT16(NUTTX_IFDIR | get_mode(mode));
 
   save_offset    += sizeof(struct cromfs_node_s);
-  node.cn_name    = save_offset;
+  node.cn_name    = TGT_UINT32(save_offset);
   node.cn_size    = 0;
 
   save_offset    += namlen;
-  node.cn_peer    = lastentry ? 0 : g_offset;
-  node.u.cn_child = save_offset;
+  node.cn_peer    = TGT_UINT32(lastentry ? 0 : g_offset);
+  node.u.cn_child = TGT_UINT32(save_offset);
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
@@ -1057,6 +1097,8 @@ static void gen_file(const char *path, const char *name, mode_t mode,
           ntotal   += nread;
           blktotal += blklen;
           g_offset += blklen;
+
+          g_nblocks++;
           blkno++;
         }
     }
@@ -1075,18 +1117,18 @@ static void gen_file(const char *path, const char *name, mode_t mode,
           (unsigned long)nodeoffs, path, (unsigned long)ntotal,
           (unsigned long)blktotal);
 
-  node.cn_mode       = (NUTTX_IFREG | get_mode(mode));
+  node.cn_mode       = TGT_UINT16(NUTTX_IFREG | get_mode(mode));
 
   nodeoffs          += sizeof(struct cromfs_node_s);
-  node.cn_name       = nodeoffs;
+  node.cn_name       = TGT_UINT32(nodeoffs);
 
-  node.cn_size       = ntotal;
+  node.cn_size       = TGT_UINT32(ntotal);
 
   nodeoffs          += namlen;
-  node.u.cn_blocks   = nodeoffs;
+  node.u.cn_blocks   = TGT_UINT32(nodeoffs);
 
   nodeoffs          += blktotal;
-  node.cn_peer       = lastentry ? 0 : nodeoffs;
+  node.cn_peer       = TGT_UINT32(lastentry ? 0 : nodeoffs);
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
@@ -1098,12 +1140,33 @@ static void gen_file(const char *path, const char *name, mode_t mode,
   append_tmpfile(g_tmpstream, outstream);
 }
 
-static int  dir_notempty(const char *dirpath, const char *name,
-                         void *arg, bool lastentry)
+static int dir_notempty(const char *dirpath, const char *name,
+                        void *arg, bool lastentry)
 {
-  /* If we get here, then the directory is not empty */
+  struct stat buf;
+  char *path;
+  int ret;
 
-  return 1;
+  asprintf(&path, "%s/%s", dirpath, name);
+
+  /* stat() should not fail for any reason */
+
+  ret = stat(path, &buf);
+  if (ret < 0)
+    {
+      int errcode = errno;
+      fprintf(stderr, "ERROR: stat(%s) failed: %s\n",
+             path, strerror(errcode));
+      exit(1);
+    }
+
+  /* The directory is not empty if it contains with a file or a directory
+   * entry.  Anything else will be ignored and the directly may be
+   * effectively empty.
+   */
+
+  free(path);
+  return (S_ISREG(buf.st_mode) || S_ISDIR(buf.st_mode));
 }
 
 static int process_direntry(const char *dirpath, const char *name,
@@ -1276,12 +1339,12 @@ int main(int argc, char **argv, char **envp)
   fprintf(g_outstream, "{\n");
   fprintf(g_outstream, "\n  /* Offset %6lu:  Volume header */\n\n", 0ul);
 
-  vol.cv_magic    = CROMFS_MAGIC;
-  vol.cv_nnodes   = g_nnodes;
-  vol.cv_nblocks  = g_nblocks;
-  vol.cv_root     = sizeof(struct cromfs_volume_s);
-  vol.cv_fsize    = g_offset;
-  vol.cv_bsize    = CROMFS_BLOCKSIZE;
+  vol.cv_magic    = TGT_UINT32(CROMFS_MAGIC);
+  vol.cv_nnodes   = TGT_UINT16(g_nnodes);
+  vol.cv_nblocks  = TGT_UINT16(g_nblocks);
+  vol.cv_root     = TGT_UINT32(sizeof(struct cromfs_volume_s));
+  vol.cv_fsize    = TGT_UINT32(g_offset);
+  vol.cv_bsize    = TGT_UINT32(CROMFS_BLOCKSIZE);
 
   g_nhex          = 0;
   dump_hexbuffer(g_outstream, &vol, sizeof(struct cromfs_volume_s));

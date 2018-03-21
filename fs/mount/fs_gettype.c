@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,6 +81,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
 #ifdef CONFIG_FS_ROMFS
       case ROMFS_MAGIC:
         fstype = "romfs";
+        break;
+#endif
+
+#ifdef CONFIG_FS_CROMFS
+      case CROMFS_MAGIC:
+        fstype = "cromfs";
         break;
 #endif
 
