@@ -2857,7 +2857,7 @@ int stm32_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 #ifdef CONFIG_PM
   /* Unregister power management callbacks */
 
-  pm_unregister(&priv->pm_cb);
+  pm_unregister(&((struct stm32_i2c_inst_s *)dev)->priv->pm_cb);
 #endif
 
   /* Disable power and other HW resource (GPIO's) */
