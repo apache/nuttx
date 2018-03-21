@@ -596,7 +596,7 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = -EIO;
         }
 
-      lis2dh_clear_interrupts(priv, LIS2DH_INT2);
+      lis2dh_clear_interrupts(priv, LIS2DH_INT1);
     }
     break;
 
