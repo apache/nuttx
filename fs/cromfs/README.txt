@@ -101,6 +101,68 @@ The "." and ".." hard links also work:
 
   nsh>
 
+Architecture
+============
+
+The CROMFS file system is represented by an in-memory data structure.  This
+structure is a tree.  At the root of the tree is a "volume" node that
+describes the overall operating system.  Other entities within the file
+system are presented by other nodes:  hard links, directories, and files.
+These nodes are all described in fs/cromfs/cromfs.h.
+
+In addition to general volume information, the volume node provides an
+offset to the the "root directory".  The root directory, like all other
+CROMFS directories is simply a singly linked list of other nodes:  hard link
+nodes, directory nodes, and files.  This list is managed by a "peer
+offsets":  Each node in the directory contains an offset to its peer in the
+same directory.  This directory list is terminated with a zero offset.
+
+Hard link, directory, and file nodes all include such a "peer offset".  Hard
+link nodes simply refer to other others and are more or less contained.
+Directory nodes contain, in addition, a "child offset" to the first entry in
+another singly linked list of nodes comprising the directory.
+
+File nodes provide file data.  They are followed by a variable length list
+of compressed data blocks.  Each compressed data block contains an LZF
+header as described in include/lzf.h.
+
+So, given this information, we could illustrate the sample CROMFS file
+system above with these nodes (where V=volume node, H=Hard link node,
+D=directory node, F=file node, D=Data block:
+
+  V
+  `- +- H: .
+     |
+     +- F: BaaBaaBlackSheep.txt
+     |  `- D,D,D,...D
+     +- D: emptydir
+     |  |- H: .
+     |  `- H: ..
+     +- F: JackSprat.txt
+     |  `- D,D,D,...D
+     +- D: testdir1
+     |  |- H: .
+     |  |- H: ..
+     |  |- F: DingDongDell.txt
+     |  |  `- D,D,D,...D
+     |  `- F: SeeSawMargorieDaw.txt
+     |     `- D,D,D,...D
+     +- D: testdir2
+     |  |- H: .
+     |  |- H: ..
+     |  |- F: HickoryDickoryDock.txt
+     |  |  `- D,D,D,...D
+     |  `- F: TheThreeLittlePigs.txt
+     |     `- D,D,D,...D
+     +- D: testdir3
+        |- H: .
+        |- H: ..
+        `- F: JackBeNimble.txt
+           `- D,D,D,...D
+
+Configuration
+=============
+
 To build the CROMFS file system, you would add the following to your
 configuration:
 
