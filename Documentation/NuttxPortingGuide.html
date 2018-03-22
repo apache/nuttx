@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 14, 2018</p>
+      <p>Last Updated: March 22, 2018</p>
     </td>
   </tr>
 </table>
@@ -412,34 +412,49 @@
 
 <p>
   <b>Configuration Files</b>.
-  The NuttX configuration consists of:
+  The NuttX configuration consists of logic in processor architecture directories, chip/SoC directories, and board configuration directories.
+  The complete configuration is specified by several settings in the NuttX configuration file.
 </p>
 <ul>
   <li>
-    <i>Processor architecture specific files</i>.
-    These are the files contained in the <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory
-    and are discussed in a paragraph <a href="#archdirectorystructure">below</a>.
-  </li>
-  <li>
-    <i>Chip/SoC specific files</i>.
-    Each processor architecture is embedded in chip or <i>System-on-a-Chip</i> (SoC) architecture.
-    The full chip architecture includes the processor architecture plus chip-specific interrupt logic,
-    clocking logic, general purpose I/O (GPIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
     <p>
-      These chip-specific files are contained within chip-specific sub-directories in the
-      <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory and are selected via
-      the <code>CONFIG_ARCH_name</code> selection.
+      <i>Processor architecture specific files</i>.
+      These are the files contained in the <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory and are discussed in a paragraph <a href="#archdirectorystructure">below</a>.
+      As an example, all ARM processor architectures are provided under the <code>arch/arm/</code> directory which is selected with the <code>CONFIG_ARCH=&quot;arm&quot;</code> configuration option.
+    </p>
+    <p>
+      Variants of the processor architecture may be provided in sub-directories of the 
+      Extending this example, the ARMv7-M ARM family is supported by logic in <code>arch/arm/include/armv7-m</code> and <code>arch/arm/src/armv7-m</code> directories which are selected by the <code>CONFIG_ARCH_CORTEXM3=y</code> or <code>CONFIG_ARCH_CORTEXM4=y</code> configuration options
     </p>
   </li>
   <li>
-    <i>Board specific configurations</i>.
-    In order to be usable, the chip must be contained in a board environment.
-    The board configuration defines additional properties of the board including such things as
-    peripheral LEDs, external peripherals (such as network, USB, etc.).
+    <p>
+      <i>Chip/SoC specific files</i>.
+      Each processor architecture is embedded in a <i>System-on-a-Chip</i> (SoC) architecture.
+      The full SoC architecture includes the processor architecture plus chip-specific interrupt logic, clocking logic, general purpose I/O (GPIO) logic, and specialized, internal peripherals (such as UARTs, USB, etc.).
+    </p>
+    <p>
+      These chip-specific files are contained within chip-specific sub-directories also under the
+      <code>arch/</code><i>&lt;arch-name&gt;</i><code>/</code> directory and are selected via
+      the <code>CONFIG_ARCH_CHIP</code> selection.
+    </p>
+    <p>
+      As an example, the STMicro STM32 SoC architecture is based on the ARMv7-M processor and is supported by logic in the <code>arch/arm/include/stm32</code> and <code>arch/arm/src/stm32</code> directories which are selected with the <code>CONFIG_ARCH_CHIP="stm32"</code> configuration setting.
+    </p>
+  </li>
+  <li>
+    <p>
+      <i>Board specific configurations</i>.
+      In order to be usable, the chip must be contained in a board environment.
+      The board configuration defines additional properties of the board including such things as peripheral LEDs, external peripherals (such as networks, USB, etc.).
+    </p>
     <p>
       These board-specific configuration files can be found in the
       <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directories and are discussed
       in a paragraph <a href="#configsdirectorystructure">below</a>.
+    </p>
+    <p>
+      The directory <code>configs/stm32f4disovery/</code>, as an example, holds board-specific logic for the STM32F4 Discovery board and is selected via the <code>CONFIG_ARCH_BOARD=&quot;stm32f4discovery&quot;</code> configuration setting.
     </p>
   </li>
 </ul>
