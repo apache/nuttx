@@ -26,7 +26,7 @@ accept that for now.  That means, for example, that you could have a file
 system with 512Kb of data in only 322Kb of FLASH, giving you 190Kb to do
  other things with.
 
-LZF compression is not known for its high compression rations, but rather
+LZF compression is not known for its high compression ratios, but rather
 for fast decompression.  According to the author of the LZF decompression
 routine, it is nearly as fast as a memcpy!
 
@@ -138,7 +138,7 @@ Architecture
 ============
 
 The CROMFS file system is represented by an in-memory data structure.  This
-structure is a tree.  At the root of the tree is a "volume node" that
+structure is a "tree."  At the root of the tree is a "volume node" that
 describes the overall operating system.  Other entities within the file
 system are presented by other types of nodes:  hard links, directories, and
 files.  These nodes are all described in fs/cromfs/cromfs.h.
@@ -146,22 +146,34 @@ files.  These nodes are all described in fs/cromfs/cromfs.h.
 In addition to general volume information, the volume node provides an
 offset to the the "root directory".  The root directory, like all other
 CROMFS directories is simply a singly linked list of other nodes:  hard link
-nodes, directory nodes, and files.  This list is managed by a "peer
-offsets":  Each node in the directory contains an offset to its peer in the
-same directory.  This directory list is terminated with a zero offset.
+nodes, directory nodes, and files.  This list is managed by "peer offsets":
+Each node in the directory contains an offset to its peer in the same
+directory.  This directory list is terminated with a zero offset.
 
-Hard link, directory, and file nodes all include such a "peer offset".  Hard
-link nodes simply refer to other others and are more or less contained.
-Directory nodes contain, in addition, a "child offset" to the first entry in
-another singly linked list of nodes comprising the sub-directory.
+The volume header lies at offset zero.  Hence, any offset to a node or data
+block can be converted to an absolute address in the in-memory CROMFS image
+by simply adding that offset to the well-known address of the volume header.
 
-File nodes provide file data.  They are followed by a variable length list
-of compressed data blocks.  Each compressed data block contains an LZF
-header as described in include/lzf.h.
+Each hard link, directory, and file node in the directory list includes
+such a "peer offset" to to the next node in the list.  Each node is followed
+by the NUL-terminated name of the node.  Each node also holds an additional
+offset.  Directory nodes contain a "child offset".  That is, the offset to
+the first entry in another singly linked list of nodes comprising the sub-
+directory.
 
-So, given this information, we could illustrate the sample CROMFS file
+Hard link nodes hold the "link offset" to the node which is the target of
+the link.  The link offset may be an offset to another hard link node, to a
+directory, or to a file node.  The directory link offset would refer the
+first node in singly linked directory list that represents the directory.
+
+File nodes provide file data.  The file name string is followed by a
+variable length list of compressed data blocks.  In this case each
+compressed data block begins with an LZF header as described in
+include/lzf.h.
+
+So, given this description, we could illustrate the sample CROMFS file
 system above with these nodes (where V=volume node, H=Hard link node,
-D=directory node, F=file node, D=Data block:
+D=directory node, F=file node, D=Data block):
 
   V
   `- +- H: .
@@ -192,6 +204,26 @@ D=directory node, F=file node, D=Data block:
         |- H: ..
         `- F: JackBeNimble.txt
            `- D,D,D,...D
+
+Where, for example:
+
+  H: ..
+
+    Represents a hard-link node with name ".."
+
+  |
+  +- D: testdir1
+  |  |- H: .
+
+    Represents a directory node named "testdir1".  The first node of the
+    directory list is a hard link with name "."
+
+  |
+  +- F: JackSprat.txt
+  |  `- D,D,D,...D
+
+    Represents f file node named "JackSprat.txt" and is followed by some
+    sequence of compressed data blocks, D.
 
 Configuration
 =============
