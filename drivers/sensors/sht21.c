@@ -171,7 +171,7 @@ static int sht21_access(FAR struct sht21_dev_s *priv,
 
   sht21_dbg("reg_addr: 0x%02X len: %d reg_value: 0x%02x ret: %d\n",
             reg_addr, len, reg_value ? *reg_value : 0, ret);
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
