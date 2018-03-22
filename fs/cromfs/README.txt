@@ -1,6 +1,14 @@
 README
 ======
 
+  o Overview
+  o gencromfs
+  o Architecture
+  o Configuration
+
+Overview
+========
+
 This directory contains the the CROMFS file system.  This is an in-memory
 (meaning no block driver), read-only (meaning that can lie in FLASH) file
 system.  It uses LZF decompression on data only (meta data is not
@@ -12,8 +20,8 @@ with on-chip FLASH available on most MCUs (the design could probably be
 extended to access non-random-access FLASH as well, but those extensions
 are not yet in place).
 
-I do not have a good way to measure how much compression we get use LZF.  I
-have seen 37% compression reported in other applications, so I have to
+I do not have a good way to measure how much compression we get using LZF.
+I have seen 37% compression reported in other applications, so I have to
 accept that for now.  That means, for example, that you could have a file
 system with 512Kb of data in only 322Kb of FLASH, giving you 190Kb to do
  other things with.
@@ -101,14 +109,39 @@ The "." and ".." hard links also work:
 
   nsh>
 
+gencromfs
+=========
+
+  The genromfs program can be found in tools/.  It is a single C file called
+  gencromfs.c.  It can be built in this way:
+
+    cd tools
+    make -f Makefile.host gencromfs
+
+  The genromfs tool used to generate CROMFS file system images.  Usage is
+  simple:
+
+    gencromfs <dir-path> <out-file>
+
+  Where:
+
+    <dir-path> is the path to the directory will be at the root of the
+      new CROMFS file system image.
+    <out-file> the name of the generated, output C file.  This file must
+      be compiled in order to generate the binary CROMFS file system
+      image.
+
+  All of these steps are automated in the apps/examples/cromfs/Makefile.
+  Refer to that Makefile as an reference.
+
 Architecture
 ============
 
 The CROMFS file system is represented by an in-memory data structure.  This
-structure is a tree.  At the root of the tree is a "volume" node that
+structure is a tree.  At the root of the tree is a "volume node" that
 describes the overall operating system.  Other entities within the file
-system are presented by other nodes:  hard links, directories, and files.
-These nodes are all described in fs/cromfs/cromfs.h.
+system are presented by other types of nodes:  hard links, directories, and
+files.  These nodes are all described in fs/cromfs/cromfs.h.
 
 In addition to general volume information, the volume node provides an
 offset to the the "root directory".  The root directory, like all other
@@ -120,7 +153,7 @@ same directory.  This directory list is terminated with a zero offset.
 Hard link, directory, and file nodes all include such a "peer offset".  Hard
 link nodes simply refer to other others and are more or less contained.
 Directory nodes contain, in addition, a "child offset" to the first entry in
-another singly linked list of nodes comprising the directory.
+another singly linked list of nodes comprising the sub-directory.
 
 File nodes provide file data.  They are followed by a variable length list
 of compressed data blocks.  Each compressed data block contains an LZF
@@ -166,17 +199,18 @@ Configuration
 To build the CROMFS file system, you would add the following to your
 configuration:
 
-1. Enable LZF
+1. Enable LZF (The other LZF settings apply only to compression
+   and, hence, have no impact on CROMFS which only decompresses):
 
    CONFIG_LIBC_LZF=y
-   CONFIG_LIBC_LZF_ALIGN=y
-   CONFIG_LIBC_LZF_HLOG=13
-   CONFIG_LIBC_LZF_SMALL=y
 
 2. Enable the CROMFS file system:
 
    CONFIG_FS_CROMFS=y
 
-3. Enable the apps/examples/cromfs example:
+3. Enable the apps/examples/cromfs example if you like:
 
    CONFIG_EXAMPLES_CROMFS=y
+
+   Or implement your own custom CROMFS file system that example as a
+   guideline.
