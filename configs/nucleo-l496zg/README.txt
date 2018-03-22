@@ -23,22 +23,20 @@ Nucleo-144 Boards:
 =================
 
 The Nucleo-144 is a standard board for use with several STM32 parts in the
-LQFP144 package.  Variants include
+LQFP144 package.  Variants with a STM32L4 MCU include:
 
   STM32 Part     Board Variant Name
   -------------  ------------------
-  STM32F207ZGT6  NUCLEO-F207ZG
-  STM32F303ZET6  NUCLEO-F303ZE
-  STM32F429ZIT6  NUCLEO-F429ZI
-  STM32F446ZET6  NUCLEO-F446ZE
-  STM32F746ZGT6  NUCLEO-F746ZG
-  STM32F767ZIT6  NUCLEO-F767ZI
   STM32L496ZGT6  NUCLEO-L496ZG
   STM32L496ZGT6P NUCLEO-L496ZG-P
+  STM32L4A6ZGT6  NUCLEO-L4A6ZG
+  STM32L4R5ZIT6  NUCLEO-L4R5ZI
+  STM32L4R5ZIT6P NUCLEO-L4R5ZI-P
 
   ------------- ------------------
 
-This directory supports the STM32L4 variants of Nucleo-144.
+This directory supports only the STM32L4 variants of Nucleo-144. For others,
+see configs/nucleo-144 configuration.
 
 Please read the User Manual UM2179: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the
@@ -111,11 +109,11 @@ Hardware
    1) The I/O is 3.3 Volt not 5 Volt like on the Arduino products.
    2) The Nucleo-144 board family has 3 pages of Solder Bridges AKA Solder
       Blobs (SB) that can alter the factory configuration. We will note SB
-      in effect but will assume the facitory defualt settings.
+      in effect but will assume the factory default settings.
 
   Our main concern is establishing a console and LED utilization for
   debugging. Because so many pins can be multiplexed with so many functions,
-  the above mentioned graphic may be helpful in indentifying a serial port.
+  the above mentioned graphic may be helpful in identifying a serial port.
 
   There are 4 choices that can be made from the menuconfig:
 
@@ -123,10 +121,10 @@ Hardware
   CONFIG_NUCLEO_CONSOLE_VIRTUAL or CONFIG_NUCLEO_CONSOLE_NONE
 
   The CONFIG_NUCLEO_CONSOLE_NONE makes no preset for the console. You should still visit
-  the U[S]ART selection and Device Drivers to disable any U[S]ART reamaing.
+  the U[S]ART selection and Device Drivers to disable any U[S]ART remaining.
 
   The CONFIG_NUCLEO_CONSOLE_ARDUINO configurations assume that you are using a
-  standard Arduio RS-232 shield with the serial interface with RX on pin D0 and
+  standard Arduino RS-232 shield with the serial interface with RX on pin D0 and
   TX on pin D1 from USART6:
 
             -------- ---------------
@@ -139,21 +137,23 @@ Hardware
 
   The CONFIG_NUCLEO_CONSOLE_MORPHO configurations uses Serial Port 8 (USART8)
   with TX on PE1 and RX on PE0.
-          Serial
+
+            Serial
             ------
             SERIAL_RX         PE_0
             SERIAL_TX         PE_1
 
   The CONFIG_NUCLEO_CONSOLE_VIRTUAL configurations uses Serial Port 3 (USART3)
   with TX on PD8 and RX on PD9.
-          Serial
+
+            Serial
             ------
             SERIAL_RX         PD9
             SERIAL_TX         PD8
 
   These signals are internally connected to the on board ST-Link
 
-  Of course if your design  has used those pins you can choose a completely
+  Of course if your design has used those pins you can choose a completely
   different U[S]ART to use as the console. In that Case, you will need to edit
   the include/board.h to select different U[S]ART and / or pin selections.
 
@@ -316,11 +316,13 @@ nsh:
      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
         see additional README.txt files in the NuttX tools repository.
 
-     b. If this is the intall configuration then Execute
-           'cd tools && ./configure.sh nucleo-144/nsh && cd ..'
+     b. If this is the initial configuration then execute
+
+           ./tools/configure.sh nucleo-l496zg/nsh
+
         in nuttx/ in order to start configuration process.
         Caution: Doing this step more than once will overwrite .config with
-        the contents of the nucleo-144/nsh/defconfig file.
+        the contents of the nucleo-l496zg/nsh/defconfig file.
 
      c. Execute 'make oldconfig' in nuttx/ in order to refresh the
         configuration.

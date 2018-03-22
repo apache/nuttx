@@ -14,14 +14,13 @@ choice
 		Virtual COM Port:
 
 		Advantage: Use the ST-Link as a console. No Extra wiring
-		neded.
+		needed.
 
-		Disdvantage: Not the best choice for initanl bring up.
+		Disdvantage: Not the best choice for initial bring up.
 
 		ARDUINO Connector:
 
-		Advantage: You have a shield so it is
-		easy.
+		Advantage: You have a shield so it is easy.
 
 		Disdvantage: You loose the use of the
 		other functions on PC6, PC7
@@ -89,7 +88,7 @@ config NUCLEO_SPI_TEST
 	bool "Enable SPI test"
 	default n
 	---help---
-		Enable Spi test - initalize and configure SPI to send
+		Enable Spi test - initialize and configure SPI to send
 		NUCLEO_SPI_TEST_MESSAGE text. The text is sent on the
 		selected SPI Buses with the configured parameters.
 		Note the CS lines will not be asserted.
