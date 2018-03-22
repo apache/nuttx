@@ -1937,6 +1937,8 @@ nuttx/
  |- fs/
  |   |- binfs/
  |   |   `- README.txt
+ |   |- cromfs/
+ |   |   `- README.txt
  |   |- mmap/
  |   |   `- README.txt
  |   |- nxffs/
