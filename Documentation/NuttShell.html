@@ -1060,7 +1060,7 @@ mount -t vfat /dev/ram1 /tmp
     </li>
     <li>
       NSH will execute the script at <code>/etc/init.d/rcS</code> at start-up (before the
-      first NSH prompt.  After execution of the script, the root FS will look
+      first NSH prompt).  After execution of the script, the root FS will look
       like:
 <ul><pre>
 |--dev/
@@ -2952,7 +2952,7 @@ telnetd
   The Telnet daemon may be started either programmatically by calling <code>nsh_telnetstart()</code> or it may be started from the NSH command line using this <code>telnetd</code> command.
 </p>
 <p>
-  Normally this command would be suppressed with <code>CONFIG_NSH_DISABLE_TELNETD</code>because the Telnet daemon is automatically started in <code>nsh_main.c</code>.  The exception is when <code>CONFIG_NSH_NETLOCAL</code> is selected.  In that case, the network is not enabled at initialization but rather must be enabled from the NSH command line or via other applications.
+  Normally this command would be suppressed with <code>CONFIG_NSH_DISABLE_TELNETD</code> because the Telnet daemon is automatically started in <code>nsh_main.c</code>.  The exception is when <code>CONFIG_NSH_NETLOCAL</code> is selected.  In that case, the network is not enabled at initialization but rather must be enabled from the NSH command line or via other applications.
 </p>
 <p>
   In that case, when <code>nsh_telnetstart()</code> is called before the the network is initialized, it will fail.
@@ -4561,11 +4561,9 @@ nsh&gt; help
   <b>Implementation of Your Command.</b>
   For example, if you want to add a new a new command called <code>mycmd</code> to NSH, you would first implement  the <code>mycmd</code> code in a function with this prototype:
 </p>
-
-<ul></pre>
+<ul><pre>
 int cmd_mycmd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv);
 </pre></ul>
-
 <p>
   The <code>argc</code> and <code>argv</code> are used to pass command line arguments to the NSH command.
   Command line parameters are passed in a very standard way: <code>argv[0]</code> will be the name of the command, and <code>argv[1]</code> through <code>argv[argc-1]</code> are the additional arguments provided on the NSH command line.
@@ -4587,12 +4585,12 @@ void nsh_output(FAR struct nsh_vtbl_s *vtbl, const char *fmt, &hellip;);
 <ul><pre>
 int cmd_mycmd(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
 {
-  nsh_output(vtbl, &quote;Hello, World!&quote;);
+  nsh_output(vtbl, &quot;Hello, World!&quot;);
   return 0;
 }
 </pre></ul>
 <p>
-  The prototype for the new command should be placed in <code>apps/examples/nshlib/nsh.h></code>.
+  The prototype for the new command should be placed in <code>apps/examples/nshlib/nsh.h</code>.
 </p>
 
 <p>

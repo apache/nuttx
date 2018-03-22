@@ -1843,7 +1843,7 @@ int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
 </p>
 <p>
   Optionally, a Nuttx task or thread can be configured with round-robin or <i>sporadic</i> scheduler.
-  The round-roben is similar to priority scheduling <i>except</i> that tasks with equal priority and share CPU time via <i>time-slicing</i>.
+  The round-robin is similar to priority scheduling <i>except</i> that tasks with equal priority and share CPU time via <i>time-slicing</i>.
   The time-slice interval is a constant determined by the configuration
   setting <code>CONFIG_RR_INTERVAL</code> to a positive, non-zero value.
   Sporadic scheduling scheduling is more complex, varying the priority of a thread over a <i>replenishment</i> period.
@@ -2221,7 +2221,7 @@ priority of the calling task is returned.
       <b>Task Exit Hooks</b>.
       <code>atexit()</code> and <code>on_exit()</code> may be use to register callback functions that are executed when a <i>task group</i> terminates.
       A task group is the functional analog of a process:
-      It is a group that consists of the main task thread and of all of the pthreads created by the main task thread or any of the other pthreads within the task broup.
+      It is a group that consists of the main task thread and of all of the pthreads created by the main task thread or any of the other pthreads within the task group.
       Members of a task group share certain resources such as environment variables, file descriptors, <code>FILE</code> streams, sockets, pthread keys and open message queues.
     </p>
     <blockquote><small>
@@ -5704,7 +5704,7 @@ be sent.
   NuttX only supports simple threads or tasks running within the same address space.
   However, NuttX does support the concept of a <i>task group</i>.
   A task group is the functional analog of a process:
-  It is a group that consists of the main task thread and of all of the pthreads created by the main thread or any of the other pthreads within the task broup.
+  It is a group that consists of the main task thread and of all of the pthreads created by the main thread or any of the other pthreads within the task group.
   Members of a task group share certain resources such as environment variables, file descriptors, <code>FILE</code> streams, sockets, pthread keys and open message queues.
 </p>
 <blockquote><small>
