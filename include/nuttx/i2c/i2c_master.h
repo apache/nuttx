@@ -112,7 +112,7 @@
  * Description:
  *   Perform a sequence of I2C transfers, each transfer is started with a
  *   START and the final transfer is completed with a STOP. Each sequence
- *   will be an 'atomic'  operation in the sense that any other I2C actions
+ *   will be an 'atomic' operation in the sense that any other I2C actions
  *   will be serialized and pend until this sequence of transfers completes.
  *
  * Input Parameters:
@@ -121,7 +121,10 @@
  *   count - The number of transfers to perform
  *
  * Returned Value:
- *   The number of transfers completed
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ *   Note : some implementations of this interface return the number of
+ *          transfers completed, but others return OK on success.
  *
  ****************************************************************************/
 

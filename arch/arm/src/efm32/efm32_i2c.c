@@ -1441,11 +1441,11 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
   FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
   int ret = OK;
 
-  ASSERT(count);
+  DEBUGASSERT(count > 0);
 
-  if (count == 0 || msgs == NULL)
+  if (count <= 0 || msgs == NULL)
     {
-      return -1;
+      return -EINVAL;
     }
 
   /* Ensure that address or flags don't change meanwhile */

@@ -2459,7 +2459,7 @@ static int stm32l4_i2c_process(FAR struct i2c_master_s *dev,
   int         errval = 0;
   int         waitrc = 0;
 
-  ASSERT(count);
+  DEBUGASSERT(count > 0);
 
   /* Wait for any STOP in progress */
 

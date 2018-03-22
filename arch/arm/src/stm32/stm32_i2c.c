@@ -1583,14 +1583,15 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s
                               int count)
 {
   FAR struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  stm32_i2c_sem_wait(priv);   /* Ensure that address or flags don't change meanwhile */
   uint32_t status = 0;
 #ifdef I2C1_FSMC_CONFLICT
   uint32_t ahbenr;
 #endif
   int ret = 0;
 
-  ASSERT(count);
+  DEBUGASSERT(count > 0);
+
+  stm32_i2c_sem_wait(priv);   /* Ensure that address or flags don't change meanwhile */
 
 #ifdef I2C1_FSMC_CONFLICT
   /* Disable FSMC that shares a pin with I2C1 (LBAR) */

@@ -967,8 +967,12 @@ static int lc823450_i2c_transfer(FAR struct i2c_master_s *dev,
                                  FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct lc823450_i2c_priv_s *priv = (struct lc823450_i2c_priv_s *)dev;
+  irqstate_t irqs;
+  int ret = 0;
 
-  if (!msgs || count == 0)
+  DEBUGASSERT(count > 0);
+
+  if (count <= 0 || msgs == NULL)
     {
       i2cerr("ERROR: invalid param, %p %d\n", msgs, count);
       return -EINVAL;
@@ -977,11 +981,6 @@ static int lc823450_i2c_transfer(FAR struct i2c_master_s *dev,
    /* ensure that address or flags don't change meanwhile */
 
   lc823450_i2c_sem_wait(priv);
-
-  irqstate_t irqs;
-  int ret = 0;
-
-  ASSERT(count);
 
   priv->timedout = false;
 
