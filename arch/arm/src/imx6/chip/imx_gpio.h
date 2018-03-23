@@ -165,6 +165,6 @@
 
 #define GPIO_ICR_SHIFT(n)        (((n) & 15) << 1)
 #define GPIO_ICR_MASK(n)         (3 << GPIO_ICR_SHIFT(n))
-#define GPIO_ICR(i,n)            ((uint32_t)(n) << GPIO_ICR_SHIFT(n))
+#define GPIO_ICR(i,n)            ((uint32_t)(i) << GPIO_ICR_SHIFT(n))
 
 #endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPIO_H */
