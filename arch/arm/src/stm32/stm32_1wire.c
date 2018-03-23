@@ -82,7 +82,11 @@
 #define WRITE_TX0       0x00
 #define WRITE_TX1       0xFF
 
-#define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_CNF_OUTOD)
+#if defined(CONFIG_STM32_STM32F10XX)
+#  define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_CNF_OUTOD)
+#else
+#  define PIN_OPENDRAIN(GPIO) ((GPIO) | GPIO_OPENDRAIN)
+#endif
 
 #if defined(CONFIG_STM32_STM32F10XX)
 #  define USART_CR3_ONEBIT (0)
@@ -99,7 +103,9 @@ enum stm32_1wire_msg_e
   ONEWIRETASK_NONE = 0,
   ONEWIRETASK_RESET,
   ONEWIRETASK_WRITE,
-  ONEWIRETASK_READ
+  ONEWIRETASK_READ,
+  ONEWIRETASK_WRITEBIT,
+  ONEWIRETASK_READBIT
 };
 
 struct stm32_1wire_msg_s
@@ -169,6 +175,8 @@ static int stm32_1wire_read(FAR struct onewire_dev_s *dev, uint8_t *buffer,
 static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
                                 const uint8_t *txbuffer, int txbuflen,
                                 uint8_t *rxbuffer, int rxbuflen);
+static int stm32_1wire_writebit(FAR struct onewire_dev_s *dev, const uint8_t *bit);
+static int stm32_1wire_readbit(FAR struct onewire_dev_s *dev, uint8_t *bit);
 
 /****************************************************************************
  * Private Data
@@ -335,7 +343,9 @@ static const struct onewire_ops_s stm32_1wire_ops =
   .reset    = stm32_1wire_reset,
   .write    = stm32_1wire_write,
   .read     = stm32_1wire_read,
-  .exchange = stm32_1wire_exchange
+  .exchange = stm32_1wire_exchange,
+  .writebit = stm32_1wire_writebit,
+  .readbit  = stm32_1wire_readbit
 };
 
 /****************************************************************************
@@ -822,6 +832,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           break;
 
         case ONEWIRETASK_WRITE:
+        case ONEWIRETASK_WRITEBIT:
           /* Set baud rate */
 
           priv->baud = TIMESLOT_BAUD;
@@ -844,6 +855,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           break;
 
         case ONEWIRETASK_READ:
+        case ONEWIRETASK_READBIT:
           /* Set baud rate */
 
           priv->baud = TIMESLOT_BAUD;
@@ -967,6 +979,20 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
               /* Recv next bit */
 
               stm32_1wire_send(priv, READ_TX);
+              break;
+
+            case ONEWIRETASK_WRITEBIT:
+              *priv->byte = 0;
+              priv->msgs = NULL;
+              priv->result = OK;
+              nxsem_post(&priv->sem_isr);
+              break;
+
+            case ONEWIRETASK_READBIT:
+              *priv->byte = (dr == READ_RX1) ? 1 : 0;
+              priv->msgs = NULL;
+              priv->result = OK;
+              nxsem_post(&priv->sem_isr);
               break;
             }
         }
@@ -1134,6 +1160,50 @@ static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
       result = stm32_1wire_process(priv, msgs, 2);
     }
   return result;
+}
+
+/****************************************************************************
+ * Name: stm32_1wire_writebit
+ *
+ * Description:
+ *   Write one bit of 1-Wire data
+ *
+ ****************************************************************************/
+
+static int stm32_1wire_writebit(FAR struct onewire_dev_s *dev, const uint8_t *bit)
+{
+  struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
+  const struct stm32_1wire_msg_s msgs[1] =
+  {
+    [0].task = ONEWIRETASK_WRITEBIT,
+    [0].buffer = (uint8_t *)bit,
+    [0].buflen = 1
+  };
+
+  DEBUGASSERT(*bit == 0 || *bit == 1);
+
+  return stm32_1wire_process(priv, msgs, 1);
+}
+
+/****************************************************************************
+ * Name: stm32_1wire_readbit
+ *
+ * Description:
+ *   Sample one bit of 1-Wire data
+ *
+ ****************************************************************************/
+
+static int stm32_1wire_readbit(FAR struct onewire_dev_s *dev, uint8_t *bit)
+{
+  struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
+  const struct stm32_1wire_msg_s msgs[1] =
+  {
+    [0].task = ONEWIRETASK_READBIT,
+    [0].buffer = bit,
+    [0].buflen = 1
+  };
+
+  return stm32_1wire_process(priv, msgs, 1);
 }
 
 /****************************************************************************

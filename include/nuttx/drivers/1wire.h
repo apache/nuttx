@@ -111,7 +111,7 @@
  *
  * Description:
  *   Reset pulse and presence detect, send a block of data and receive a block
- *   of data from 1-Wir. Each write operational will be an 'atomic'
+ *   of data from 1-Wire. Each write operational will be an 'atomic'
  *   operation in the sense that any other 1-Wire actions will be serialized
  *   and pend until this write completes.
  *
@@ -131,6 +131,44 @@
 #define ONEWIRE_EXCHANGE(d,r,tx,tl,rx,rl) ((d)->ops->exchange(d,r,tx,tl,rx,rl))
 
 /****************************************************************************
+ * Name: ONEWIRE_WRITEBIT
+ *
+ * Description:
+ *   Send a single bit on 1-Wire. Each write operational will be an 'atomic'
+ *   operation in the sense that any other 1-Wire actions will be serialized
+ *   and pend until this write completes.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - A pointer to the read-only 1 byte buffer for the bit value
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+#define ONEWIRE_WRITEBIT(d,b) ((d)->ops->writebit(d,b))
+
+/****************************************************************************
+ * Name: ONEWIRE_READBIT
+ *
+ * Description:
+ *   Sample a single bit from 1-Wire. Each read operational will be an 'atomic'
+ *   operation in the sense that any other 1-Wire actions will be serialized
+ *   and pend until this read completes.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - A pointer to a 1 byte buffer for the bit value
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+#define ONEWIRE_READBIT(d,b) ((d)->ops->readbit(d,b))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -147,6 +185,8 @@ struct onewire_ops_s
   int    (*exchange)(FAR struct onewire_dev_s *dev, bool reset,
                      FAR const uint8_t *txbuffer, int txbuflen,
                      FAR uint8_t *rxbuffer, int rxbuflen);
+  int    (*writebit)(FAR struct onewire_dev_s *dev, FAR const uint8_t *bit);
+  int    (*readbit)(FAR struct onewire_dev_s *dev, FAR uint8_t *bit);
 };
 
 /* 1-Wire private data. This structure only defines the initial fields of the
