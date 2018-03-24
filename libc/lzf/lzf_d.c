@@ -233,7 +233,7 @@ unsigned int lzf_decompress (FAR const void *const in_data,
 
 #ifdef lzf_movsb
           len += 2;
-          lzf_movsb (op, ref, len);
+          lzf_movsb(op, ref, len);
 #else
           switch (len)
             {

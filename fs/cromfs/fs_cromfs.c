@@ -71,6 +71,8 @@
 struct cromfs_file_s
 {
   FAR const struct cromfs_node_s *ff_node;  /* The open file node */
+  uint32_t ff_offset;                       /* Cached offset (zero means none) */
+  uint32_t ff_ulen;                         /* Length of uncompressed data in cache */
   FAR uint8_t *ff_buffer;                   /* Decompression buffer */
 };
 
@@ -720,31 +722,49 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
 
           src = (FAR const uint8_t *)currhdr + LZF_TYPE0_HDR_SIZE;
           memcpy(dest, &src[copyoffs], copysize);
+
+          finfo("blkoffs=%lu ulen=%u copysize=%u\n",
+                (unsigned long)blkoffs, ulen, copysize);
         }
       else
         {
-          unsigned int decomplen;
-
           /* If the source of the data is at the beginning of the compressed
-           * data buffer, then we can decompress directly into the user buffer.
+           * data buffer and if the uncompressed data would not overrun the
+           * buffer, then we can decompress directly into the user buffer.
            */
 
-          if (filep->f_pos <= blkoffs)
+          if (filep->f_pos <= blkoffs && ulen <= remaining)
             {
+              uint32_t voloffs;
+
               copyoffs = 0;
               copysize = ulen;
-              if (copysize > remaining)
+
+              /* Get the address and offset in the CROMFS image to obtain
+               * the data.  Check if we already have this offset in the
+               * cache.
+               */
+
+              src     = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
+              voloffs = cromfs_addr2offset(fs, src);
+              if (voloffs != ff->ff_offset)
                 {
-                  copysize = remaining;
+                  unsigned int decomplen;
+
+                  decomplen = lzf_decompress(src, clen, dest, fs->cv_bsize);
+
+                  ff->ff_offset = voloffs;
+                  ff->ff_ulen   = decomplen;
                 }
 
-              src       = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
-              decomplen = lzf_decompress(src, clen, dest, copysize);
-              DEBUGASSERT(decomplen == copysize);
+              finfo("voloffs=%lu blkoffs=%lu ulen=%u ff_offset=%u copysize=%u\n",
+                    (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
+                    ff->ff_offset, copysize);
+              DEBUGASSERT(ff->ff_ulen >= copysize);
             }
           else
             {
-              unsigned int outsize;
+              uint32_t voloffs;
 
               /* No, we will need to decompress into the our intermediate
                * decompression buffer.
@@ -759,12 +779,26 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                   copysize = remaining;
                 }
 
-              outsize = copyoffs + copysize;
-              DEBUGASSERT(outsize <=  fs->cv_bsize);
+              DEBUGASSERT((copyoffs + copysize) <=  fs->cv_bsize);
 
               src = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
-              decomplen = lzf_decompress(src, clen, ff->ff_buffer, outsize);
-              DEBUGASSERT(decomplen == outsize);
+              voloffs = cromfs_addr2offset(fs, src);
+              if (voloffs != ff->ff_offset)
+                {
+                  unsigned int decomplen;
+
+                  decomplen = lzf_decompress(src, clen, ff->ff_buffer,
+                                             fs->cv_bsize);
+
+                  ff->ff_offset = voloffs;
+                  ff->ff_ulen   = decomplen;
+                }
+
+              finfo("voloffs=%lu blkoffs=%lu ulen=%u clen=%u ff_offset=%u "
+                    "copyoffs=%u copysize=%u\n",
+                    (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
+                    clen, ff->ff_offset, copyoffs, copysize);
+              DEBUGASSERT(ff->ff_ulen >= (copyoffs + copysize));
 
               /* Then copy to user buffer */
 

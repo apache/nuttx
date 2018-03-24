@@ -236,13 +236,21 @@ configuration:
 
    CONFIG_LIBC_LZF=y
 
+   NOTE: This should be selected automatically when CONFIG_FS_CROMFS
+   is enabled.
+
 2. Enable the CROMFS file system:
 
    CONFIG_FS_CROMFS=y
 
-3. Enable the apps/examples/cromfs example if you like:
+3. Enable the apps/examples/cromfs example:
 
    CONFIG_EXAMPLES_CROMFS=y
+
+   Or the apps/examples/elf example if you like:
+
+   CONFIG_EXAMPLES_ELF=y
+   CONFIG_EXAMPLES_ELF_CROMFS=y
 
    Or implement your own custom CROMFS file system that example as a
    guideline.

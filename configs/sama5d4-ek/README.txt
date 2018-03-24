@@ -3920,6 +3920,18 @@ Configurations
       Application Configurations -> Examples -> ELF Loader Example
         CONFIG_EXAMPLES_ELF_SYSCALL=y          : Link apps with the SYStem call library
 
+    5. By default, this configuration uses the ROMFS file system.  It can also
+       be modified to use the compressed CROMFS:
+
+       -CONFIG_PATH_INITIAL="/mnt/romfs"
+       +CONFIG_PATH_INITIAL="/mnt/cromfs"
+
+       -CONFIG_FS_ROMFS=y
+       +CONFIG_FS_CROMFS=y
+
+       -CONFIG_EXAMPLES_ELF_ROMFS=y
+       +CONFIG_EXAMPLES_ELF_CROMFS=y
+
     STATUS:
       2014-8-24: This configuration works with the address environment
                  and system call options disabled.

@@ -1150,7 +1150,19 @@ Where <subdir> is one of the following:
        CONFIG_EXAMPLES_ELF_CXXINITIALIZE=y
        CONFIG_EXAMPLES_ELF_UCLIBCXX=y
 
-    4. The network initialization thread is enabled in this configuration.
+    7. By default, this configuration uses the ROMFS file system.  It can also
+       be modified to use the compressed CROMFS:
+
+       -CONFIG_PATH_INITIAL="/mnt/romfs"
+       +CONFIG_PATH_INITIAL="/mnt/cromfs"
+
+       -CONFIG_FS_ROMFS=y
+       +CONFIG_FS_CROMFS=y
+
+       -CONFIG_EXAMPLES_ELF_ROMFS=y
+       +CONFIG_EXAMPLES_ELF_CROMFS=y
+
+    8. The network initialization thread is enabled in this configuration.
        As a result, networking initialization is performed asynchronously with
        NSH bring-up.
 
