@@ -842,14 +842,11 @@ static uint16_t get_mode(mode_t mode)
 {
   uint16_t ret = 0;
 
+  /* Convert mode to CROMFS NuttX read-only mode */
+
   if ((mode & S_IXOTH) != 0)
     {
       ret |= NUTTX_IXOTH;
-    }
-
-  if ((mode & S_IWOTH) != 0)
-    {
-      ret |= NUTTX_IWOTH;
     }
 
   if ((mode & S_IROTH) != 0)
@@ -862,11 +859,6 @@ static uint16_t get_mode(mode_t mode)
       ret |= NUTTX_IXGRP;
     }
 
-  if ((mode & S_IWGRP) != 0)
-    {
-      ret |= NUTTX_IWGRP;
-    }
-
   if ((mode & S_IRGRP) != 0)
     {
       ret |= NUTTX_IRGRP;
@@ -875,11 +867,6 @@ static uint16_t get_mode(mode_t mode)
   if ((mode & S_IXUSR) != 0)
     {
       ret |= NUTTX_IXUSR;
-    }
-
-  if ((mode & S_IWUSR) != 0)
-    {
-      ret |= NUTTX_IWUSR;
     }
 
   if ((mode & S_IRUSR) != 0)
@@ -917,7 +904,7 @@ static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
   /* Generate the hardlink node */
 
   dump_nextline(g_tmpstream);
-  fprintf(g_tmpstream, "\n  /* Offset %6lu:  Hard link %s*/\n\n",
+  fprintf(g_tmpstream, "\n  /* Offset %6lu:  Hard link %s */\n\n",
           (unsigned long)g_offset, name);
 
   node.cn_mode    = TGT_UINT16(DIRLINK_MODEFLAGS);

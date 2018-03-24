@@ -120,7 +120,7 @@ struct cromfs_volume_s
 struct cromfs_node_s
 {
   uint16_t cn_mode;      /* File type, attributes, and access mode bits */
-  uint16_t cn_pad;        /* Not used */
+  uint16_t cn_pad;       /* Not used */
   uint32_t cn_name;      /* Offset from the beginning of the volume header to the
                           * node name string.  NUL-terminated. */
   uint32_t cn_size;      /* Size of the uncompressed data (in bytes) */
