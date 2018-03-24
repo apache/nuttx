@@ -249,6 +249,8 @@ configuration:
 
    Or the apps/examples/elf example if you like:
 
+   CONFIG_ELF=y
+   # CONFIG_BINFMT_DISABLE is not set
    CONFIG_EXAMPLES_ELF=y
    CONFIG_EXAMPLES_ELF_CROMFS=y
 

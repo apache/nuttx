@@ -160,6 +160,7 @@ struct cromfs_volume_s
 struct cromfs_node_s
 {
   uint16_t cn_mode;       /* File type, attributes, and access mode bits */
+  uint16_t cn_pad;        /* Not used */
   uint32_t cn_name;       /* Offset from the beginning of the volume header to the
                            * node name string.  NUL-terminated. */
   uint32_t cn_size;       /* Size of the uncompressed data (in bytes) */
@@ -920,6 +921,7 @@ static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
           (unsigned long)g_offset, name);
 
   node.cn_mode    = TGT_UINT16(DIRLINK_MODEFLAGS);
+  node.cn_pad     = 0;
 
   g_offset       += sizeof(struct cromfs_node_s);
   node.cn_name    = TGT_UINT32(g_offset);
@@ -954,16 +956,16 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
   subtree_stream  = open_tmpfile();
   g_tmpstream     = subtree_stream;
 
-  /* Update offsets for the subdirectory */
-
-  g_parent_offset = g_diroffset;  /* New offset for '..' */
-  g_diroffset     = g_offset;     /* New offset for '.' */
-
   /* Update the offset to account for the file node which we have not yet
    * written (we can't, we don't have enough information yet)
    */
 
   g_offset       += sizeof(struct cromfs_node_s) + namlen;
+
+  /* Update offsets for the subdirectory */
+
+  g_parent_offset = g_diroffset;  /* New offset for '..' */
+  g_diroffset     = g_offset;     /* New offset for '.' */
 
   /* We are going to traverse the new directory twice; the first time just
    * see if the directory is empty.  The second time is the real thing.
@@ -1002,6 +1004,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
           (unsigned long)save_offset, path);
 
   node.cn_mode    = TGT_UINT16(NUTTX_IFDIR | get_mode(mode));
+  node.cn_pad     = 0;
 
   save_offset    += sizeof(struct cromfs_node_s);
   node.cn_name    = TGT_UINT32(save_offset);
@@ -1118,6 +1121,7 @@ static void gen_file(const char *path, const char *name, mode_t mode,
           (unsigned long)blktotal);
 
   node.cn_mode       = TGT_UINT16(NUTTX_IFREG | get_mode(mode));
+  node.cn_pad        = 0;
 
   nodeoffs          += sizeof(struct cromfs_node_s);
   node.cn_name       = TGT_UINT32(nodeoffs);

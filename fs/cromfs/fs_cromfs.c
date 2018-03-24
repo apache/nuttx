@@ -71,9 +71,9 @@
 struct cromfs_file_s
 {
   FAR const struct cromfs_node_s *ff_node;  /* The open file node */
-  uint32_t ff_offset;                       /* Cached offset (zero means none) */
-  uint32_t ff_ulen;                         /* Length of uncompressed data in cache */
-  FAR uint8_t *ff_buffer;                   /* Decompression buffer */
+  uint32_t ff_offset;                       /* Cached block offset (zero means none) */
+  uint16_t ff_ulen;                         /* Length of decompressed data in cache */
+  FAR uint8_t *ff_buffer;                   /* Cached, decompressed data */
 };
 
 /* This is the form of the callback from cromfs_foreach_node(): */
