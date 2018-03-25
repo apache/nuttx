@@ -95,6 +95,7 @@ else
 endif
 
 LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(ARCROSSDEV)ar rcs
 NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
