@@ -189,6 +189,17 @@ config ARCH_CHIP_MOXART
 	---help---
 		MoxART family
 
+config ARCH_CHIP_NRF52
+	bool "Nordic NRF52"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_CMNVECTOR
+	select ARMV7M_CMNVECTOR
+	#select ARCH_HAVE_MPU
+	#select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	---help---
+		Nordic NRF52 architectures (ARM Cortex-M4).
+
 config ARCH_CHIP_NUC1XX
 	bool "Nuvoton NUC100/120"
 	select ARCH_CORTEXM0
@@ -551,6 +562,7 @@ config ARCH_CHIP
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "lpc54xx"	if ARCH_CHIP_LPC54XX
 	default "moxart"	if ARCH_CHIP_MOXART
+	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samdl"		if ARCH_CHIP_SAMD || ARCH_CHIP_SAML
@@ -796,6 +808,9 @@ source arch/arm/src/lpc54xx/Kconfig
 endif
 if ARCH_CHIP_MOXART
 source arch/arm/src/moxart/Kconfig
+endif
+if ARCH_CHIP_NRF52
+source arch/arm/src/nrf52/Kconfig
 endif
 if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig

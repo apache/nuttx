@@ -402,6 +402,10 @@ configs/ne64badge
   STATUS:  Under development.  The port is code-complete but has
   not yet been fully tested.
 
+configs/nrf52-pca10040
+  NuttX port to the NRF PCA10040 board from Nordic Semiconductor
+  featuring the NRF52832 MCU.
+
 configs/ntosd-dm320
   This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-nuttx-elf
   toolchain*: see

@@ -492,6 +492,14 @@ config ARCH_BOARD_NTOSD_DM320
 		STATUS: This port is code complete, verified, and included in the
 		NuttX 0.2.1 release.
 
+config ARCH_BOARD_NRF52_PCA10040
+	bool "NRF52 PCA10040 eval board"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		PCA10040 Evaluation board
+
 config ARCH_BOARD_LPC1766STK
 	bool "Olimex LPC1766-STK board"
 	depends on ARCH_CHIP_LPC1766
@@ -1664,6 +1672,7 @@ config ARCH_BOARD
 	default "mirtoo"                   if ARCH_BOARD_MIRTOO
 	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
+	default "nrf52-pca10040"           if ARCH_BOARD_NRF52_PCA10040
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"            if ARCH_BOARD_NUCLEO_F072RB
@@ -1954,6 +1963,9 @@ source "configs/moxa/Kconfig"
 endif
 if ARCH_BOARD_NE64BADGE
 source "configs/ne64badge/Kconfig"
+endif
+if ARCH_BOARD_NRF52_PCA10040
+source "configs/nrf52-pca10040/Kconfig"
 endif
 if ARCH_BOARD_NTOSD_DM320
 source "configs/ntosd-dm320/Kconfig"

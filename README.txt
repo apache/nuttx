@@ -1735,6 +1735,8 @@ nuttx/
  |   |   `- README.txt
  |   |- ne63badge/
  |   |   `- README.txt
+ |   |- nrf52-pca10040/
+ |   |   `- README.txt
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt
  |   |   `- README.txt
