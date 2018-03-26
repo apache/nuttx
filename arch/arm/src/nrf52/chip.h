@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF53_CHIP_H
-#define __ARCH_ARM_SRC_NRF53_CHIP_H
+#ifndef __ARCH_ARM_SRC_NRF52_CHIP_H
+#define __ARCH_ARM_SRC_NRF52_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -74,4 +74,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_NRF53_CHIP_H */
+#endif /* __ARCH_ARM_SRC_NRF52_CHIP_H */

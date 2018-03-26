@@ -176,8 +176,6 @@ void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
   /* Enable */
 
   putreg32(NRF52_UART_ENABLE_ENABLE, base + NRF52_UART_ENABLE_OFFSET);
-  putreg32(1, base + NRF52_UART_TASKS_STARTTX_OFFSET);
-  putreg32(1, base + NRF52_UART_TASKS_STARTRX_OFFSET);
 }
 #endif
 
@@ -216,10 +214,13 @@ void nrf52_usart_disable(uintptr_t base)
 void up_lowputc(char ch)
 {
 #ifdef HAVE_UART_CONSOLE
+  putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STARTTX_OFFSET);
   putreg32(0, CONSOLE_BASE + NRF52_UART_EVENTS_TXDRDY_OFFSET);
   putreg32(ch, CONSOLE_BASE + NRF52_UART_TXD_OFFSET);
   while (getreg32(CONSOLE_BASE + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0 )
     {
     }
+
+  putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STOPTX_OFFSET);
 #endif
 }

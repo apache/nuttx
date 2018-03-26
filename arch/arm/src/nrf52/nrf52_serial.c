@@ -212,11 +212,17 @@ static uart_dev_t g_uart0port =
 static int nrf52_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+  /* struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv; */
 
   /* Configure the UART as an RS-232 UART */
 
-  nrf52_usart_configure(priv->uartbase, &priv->config);
+  /* REVISIT: If nrf52_usart_configure() called 2nd time uart stops working.
+   * Rx interrupt keeps firing.
+   * configuring is done on __start
+   */
+
+  /* nrf52_usart_configure(priv->uartbase, &priv->config); */
+
 #endif
 
   return OK;
@@ -290,6 +296,7 @@ static void nrf52_detach(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
+  putreg32(NRF52_UART_INTENSET_RXDRDY, priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
   up_disable_irq(priv->irq);
 
   /* Detach from the interrupt(s) */
@@ -313,17 +320,25 @@ static int nrf52_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct nrf52_dev_s *priv;
+  uint32_t regval;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct nrf52_dev_s *)dev->priv;
 
-  /* Clear RX event */
-  putreg32(0 , priv->uartbase + NRF52_UART_EVENTS_RXDRDY_OFFSET);
-  priv->rx_available = true;
+  /* Check RX event */
 
-  uart_recvchars(dev);
+  regval = getreg32(priv->uartbase + NRF52_UART_EVENTS_RXDRDY_OFFSET);
 
-  //uart_xmitchars(dev);
+  if (regval != 0)
+    {
+      putreg32(0, priv->uartbase + NRF52_UART_EVENTS_RXDRDY_OFFSET);
+      priv->rx_available = true;
+      uart_recvchars(dev);
+    }
+
+  /* Clear errors */
+
+  putreg32(0, priv->uartbase + NRF52_UART_ERRORSRC_OFFSET);
 
   return OK;
 }
@@ -394,6 +409,7 @@ static void nrf52_rxint(struct uart_dev_s *dev, bool enable)
 
       putreg32(NRF52_UART_INTENSET_RXDRDY,
                priv->uartbase + NRF52_UART_INTENSET_OFFSET);
+      putreg32(1, priv->uartbase + NRF52_UART_TASKS_STARTRX_OFFSET);
 
 #endif
     }
@@ -401,6 +417,7 @@ static void nrf52_rxint(struct uart_dev_s *dev, bool enable)
     {
       putreg32(NRF52_UART_INTENSET_RXDRDY,
                priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
+      putreg32(1, priv->uartbase + NRF52_UART_TASKS_STOPRX_OFFSET);
     }
 }
 
@@ -434,10 +451,15 @@ static void nrf52_send(struct uart_dev_s *dev, int ch)
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
 
   putreg32(0, priv->uartbase + NRF52_UART_EVENTS_TXDRDY_OFFSET);
+  putreg32(1, priv->uartbase + NRF52_UART_TASKS_STARTTX_OFFSET);
+
   putreg32(ch, priv->uartbase + NRF52_UART_TXD_OFFSET);
   while (getreg32(priv->uartbase + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0 )
     {
     }
+
+  putreg32(1, priv->uartbase + NRF52_UART_TASKS_STOPTX_OFFSET);
+
 }
 
 /****************************************************************************

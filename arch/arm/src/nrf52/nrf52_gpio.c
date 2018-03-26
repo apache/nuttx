@@ -194,4 +194,5 @@ void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
 
 bool nrf52_gpio_read(nrf52_pinset_t pinset)
 {
+#warning Missing implementation!
 }
