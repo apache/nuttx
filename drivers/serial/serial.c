@@ -1339,6 +1339,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 }
 
               leave_critical_section(flags);
+              ret = 0;
             }
             break;
 
