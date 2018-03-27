@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_eth.c
  *
- *   Copyright (C) 2011-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -757,7 +758,7 @@ static inline void stm32_selectmii(void);
 static inline void stm32_selectrmii(void);
 #endif
 static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
-static void stm32_ethreset(FAR struct stm32_ethmac_s *priv);
+static int  stm32_ethreset(FAR struct stm32_ethmac_s *priv);
 static int  stm32_macconfig(FAR struct stm32_ethmac_s *priv);
 static void stm32_macaddress(FAR struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_ICMPv6
@@ -2392,6 +2393,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
+  int ret = OK;
 
   ninfo("Taking the network down\n");
 
@@ -2410,13 +2412,18 @@ static int stm32_ifdown(struct net_driver_s *dev)
    * successfully brings the interface back up.
    */
 
-  stm32_ethreset(priv);
+  ret = stm32_ethreset(priv);
+  if (ret < 0)
+    {
+      nerr("ERROR: stm32_ethreset failed (timeout), "
+           "still assuming it's going down.\n");
+    }
 
   /* Mark the device "down" */
 
   priv->ifup = false;
   leave_critical_section(flags);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -3572,15 +3579,16 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
- *   None.
+ *   Zero on success, or a negated errno value on any failure.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
+static int stm32_ethreset(FAR struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
+  uint32_t retries;
 
   /* Reset the Ethernet on the AHB bus (F1 Connectivity Line) or AHB1 bus (F2
    * and F4)
@@ -3615,7 +3623,20 @@ static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
    * after the reset operation has completed in all of the core clock domains.
    */
 
-  while ((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0);
+  retries = 10;
+  while (((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0) &&
+         retries > 0)
+    {
+      retries --;
+      up_mdelay(10);
+    }
+
+  if (retries == 0)
+    {
+      return -ETIMEDOUT;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -3929,7 +3950,12 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
   /* Reset the Ethernet block */
 
   ninfo("Reset the Ethernet block\n");
-  stm32_ethreset(priv);
+  ret = stm32_ethreset(priv);
+  if (ret < 0)
+    {
+      nerr("ERROR: Reset of Ethernet block failed\n");
+      return ret;
+    }
 
   /* Initialize the PHY */
 
