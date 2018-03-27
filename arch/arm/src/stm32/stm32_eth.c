@@ -2169,8 +2169,8 @@ static void stm32_txtimeout_work(FAR void *arg)
   /* Reset the hardware.  Just take the interface down, then back up again. */
 
   net_lock();
-  stm32_ifdown(&priv->dev);
-  stm32_ifup(&priv->dev);
+  (void)stm32_ifdown(&priv->dev);
+  (void)stm32_ifup(&priv->dev);
 
   /* Then poll for new XMIT data */
 
@@ -2329,7 +2329,8 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
- *   None
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
  *
  * Assumptions:
  *
@@ -2383,7 +2384,8 @@ static int stm32_ifup(struct net_driver_s *dev)
  *   dev  - Reference to the NuttX driver state structure
  *
  * Returned Value:
- *   None
+ *   Returns zero on success; a negated errno value is returned on any
+ *   failure.
  *
  * Assumptions:
  *
@@ -4024,6 +4026,7 @@ static inline
 int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
+  int ret;
 
   ninfo("intf: %d\n", intf);
 
@@ -4067,7 +4070,12 @@ int stm32_ethinitialize(int intf)
 
   /* Put the interface in the down state. */
 
-  stm32_ifdown(&priv->dev);
+  ret = stm32_ifdown(&priv->dev);
+  if (ret < 0)
+    {
+      nerr("ERROR: Initialization of Ethernet block failed: %d\n", ret);
+      return ret;
+    }
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
