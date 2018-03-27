@@ -112,9 +112,9 @@
 
 #define GPIO_MODE_SHIFT         (7)      /* Bits 7-8: Pin pull-up mode */
 #define GPIO_MODE_MASK          (0x3 << GPIO_MODE_SHIFT)
-#  define GPIO_FLOAT            (GPIO_MODE_FLOAT    << GPIO_MODE_SHIFT) /* Neither pull-up nor -down */
-#  define GPIO_PULLDOWN         (GPIO_MODE_PULLDOWN << GPIO_MODE_SHIFT) /* Pull-down resistor enabled */
-#  define GPIO_PULLUP           (GPIO_MODE_PULLUP   << GPIO_MODE_SHIFT) /* Pull-up resistor enabled */
+#  define GPIO_FLOAT            (0 << GPIO_MODE_SHIFT) /* Neither pull-up nor -down */
+#  define GPIO_PULLDOWN         (1 << GPIO_MODE_SHIFT) /* Pull-down resistor enabled */
+#  define GPIO_PULLUP           (2 << GPIO_MODE_SHIFT) /* Pull-up resistor enabled */
 
 /* Initial value: V
  *

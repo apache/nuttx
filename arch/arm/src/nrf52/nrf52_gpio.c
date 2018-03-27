@@ -69,7 +69,7 @@ static inline void nrf52_gpio_input(unsigned int port, unsigned int pin)
 
   if (port == 0)
     {
-      putreg32(1 << pin, NRF52_GPIO0_DIRCLR);
+      putreg32(1U << pin, NRF52_GPIO0_DIRCLR);
     }
 }
 
@@ -89,9 +89,42 @@ static inline void nrf52_gpio_output(nrf52_pinset_t cfgset,
   /* Configure the pin as an output */
 
   if (port == 0)
-  {
-    putreg32(1 << pin, NRF52_GPIO0_DIRSET);
-  }
+    {
+      putreg32(1U << pin, NRF52_GPIO0_DIRSET);
+    }
+}
+
+/****************************************************************************
+ * Name: nrf52_gpio_mode
+ *
+ * Description:
+ *   Configure a GPIO mode based on bit-encoded description of the pin.
+ *
+ ****************************************************************************/
+
+static inline void nrf52_gpio_mode(nrf52_pinset_t cfgset,
+                                   unsigned int port, unsigned int pin)
+{
+  uint32_t mode;
+  uint32_t regval;
+
+  mode = cfgset & GPIO_MODE_MASK;
+  regval = getreg32(NRF52_GPIO0_CNF(pin));
+
+  regval &= NRF52_GPIO_CNF_PULL_MASK;
+
+  if (mode == GPIO_PULLUP)
+    {
+      regval &= NRF52_GPIO_CNF_PULL_MASK;
+      regval |= NRF52_GPIO_CNF_PULL_UP;
+    }
+  else if (mode == GPIO_PULLDOWN)
+    {
+      regval &= NRF52_GPIO_CNF_PULL_MASK;
+      regval |= NRF52_GPIO_CNF_PULL_DOWN;
+    }
+
+  putreg32(regval, NRF52_GPIO0_CNF(pin));
 }
 
 /****************************************************************************
@@ -131,7 +164,7 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
 
       /* Set the mode bits */
 
-      //nrf52_gpio_iocon(cfgset, port, pin);
+      nrf52_gpio_mode(cfgset, port, pin);
 
       /* Handle according to pin function */
 
@@ -194,5 +227,11 @@ void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
 
 bool nrf52_gpio_read(nrf52_pinset_t pinset)
 {
-#warning Missing implementation!
+  uint32_t regval;
+  unsigned int pin;
+
+  pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  regval = getreg32(NRF52_GPIO0_IN);
+
+  return (regval >> pin) & 1UL;
 }
