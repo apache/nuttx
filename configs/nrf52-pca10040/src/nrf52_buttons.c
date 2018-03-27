@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/nrf52-pca10040/src/lpc4357-evb.h
+ * configs/nrf52-pca10400/src/nrf52_buttons.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author:  Janne Rosberg <janne@offcode.fi>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,82 +33,132 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_NRF52PCA10040_SRC_NRF52PCA10040_H
-#define _CONFIGS_NRF52PCA10040_SRC_NRF52PCA10040_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+#include <stdint.h>
+#include <errno.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "nrf52_gpio.h"
 
+#include "nrf52-pca10040.h"
+
+#ifdef CONFIG_ARCH_BUTTONS
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-/* LED definitions **********************************************************/
-/* The PCA10040 has 4 user-controllable LEDs
- *
- *  ---- ------- -------------
- *  LED  SIGNAL  MCU
- *  ---- ------- -------------
- *  LED1         GPIO 17
- *  LED2         GPIO 18
- *  LED3         GPIO 19
- *  LED4         GPIO 20
- *  ---- ------- -------------
- *
- * A low output illuminates the LED.
- *
+/* Pin configuration for each PCA10400 button.  This array is indexed by
+ * the BUTTON_* definitions in board.h
  */
 
-/* Definitions to configure LED GPIO as outputs */
-
-#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN17)
-#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN18)
-#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN19)
-#define GPIO_LED4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN20)
-
-/* Button definitions *******************************************************/
-/* Board supports four buttons. */
-
-#define GPIO_BUTTON1 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN13)
-#define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN14)
-#define GPIO_BUTTON3 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN15)
-#define GPIO_BUTTON4 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN16)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+static const uint32_t g_buttons[NUM_BUTTONS] =
+{
+  GPIO_BUTTON1,
+  GPIO_BUTTON2,
+  GPIO_BUTTON3,
+  GPIO_BUTTON4
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
+ * Name: board_button_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-int nrf52_bringup(void);
+void board_button_initialize(void)
+{
+  int i;
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_NRF52PCA10040_SRC_NRF52PCA10040_H */
+  /* Configure the GPIO pins as inputs. */
+
+  for (i = 0; i < NUM_BUTTONS; i++)
+    {
+      nrf52_gpio_config(g_buttons[i]);
+    }
+}
+
+/****************************************************************************
+ * Name: board_buttons
+ ****************************************************************************/
+
+uint32_t board_buttons(void)
+{
+  uint32_t ret = 0;
+
+  /* Check that state of each key */
+
+  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN1]))
+    {
+      ret |= BUTTON_BTN1_BIT;
+    }
+
+  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN2]))
+    {
+      ret |= BUTTON_BTN2_BIT;
+    }
+
+  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN3]))
+    {
+      ret |= BUTTON_BTN3_BIT;
+    }
+
+  if (!nrf52_gpio_read(g_buttons[BUTTON_BTN4]))
+    {
+      ret |= BUTTON_BTN4_BIT;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
+ *
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   32-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
+ *
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.  The ID value is
+ *   a button enumeration value that uniquely identifies a button resource.
+ *   See the BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  int ret = -ENOSYS;
+
+#warning Missing Implementation!
+
+  return ret;
+}
+#endif
+
+#endif /* CONFIG_ARCH_BUTTONS */

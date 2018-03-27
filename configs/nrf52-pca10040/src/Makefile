@@ -48,4 +48,8 @@ else
 CSRCS += nrf52_userleds.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += nrf52_buttons.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
