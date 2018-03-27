@@ -393,7 +393,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
       if (ans->type  == HTONS(DNS_RECTYPE_A) &&
           ans->class == HTONS(DNS_CLASS_IN) &&
           ans->len   == HTONS(4) &&
-          nameptr + 10 + 4 < endofbuffer)
+          nameptr + 10 + 4 <= endofbuffer)
         {
           ans->u.ipv4.s_addr = *(FAR uint32_t *)(nameptr + 10);
 
@@ -426,7 +426,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
       if (ans->type  == HTONS(DNS_RECTYPE_AAAA) &&
           ans->class == HTONS(DNS_CLASS_IN) &&
           ans->len   == HTONS(16) &&
-          nameptr + 10 + 16 < endofbuffer)
+          nameptr + 10 + 16 <= endofbuffer)
         {
           memcpy(&ans->u.ipv6.s6_addr, nameptr + 10, 16);
 

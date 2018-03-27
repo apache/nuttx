@@ -56,14 +56,14 @@
 /* DNS classes */
 
 #define DNS_CLASS_IN                1 /* RFC 1035 Internet */
-#define DNS_CLASS CH                3 /* N/A      Chaos */
+#define DNS_CLASS_CH                3 /* N/A      Chaos */
 #define DNS_CLASS_HS                4 /* N/A      Hesiod */
 #define DNS_CLASS_QNONE           254 /* RFC 2136 QCLASS NONE */
 #define DNS_CLASS_QANY            255 /* RFC 1035 QCLASS ANY */
 
 /* DNS resource record types */
 
-#define DNS_RECTYPE_A                1 /* RFC 1035 IPv4 ddress record */
+#define DNS_RECTYPE_A                1 /* RFC 1035 IPv4 address record */
 #define DNS_RECTYPE_AAAA            28 /* RFC 3596 IPv6 address record */
 #define DNS_RECTYPE_AFSDB           18 /* RFC 1183 AFS database record */
 #define DNS_RECTYPE_APL             42 /* RFC 3123 Address Prefix List */
