@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig DMA
+	bool "DMA driver interfaces"
+	default n
+	select ARCH_DMA
+	---help---
+		Drivers for various DMA devices.
+
+if DMA
+
+config DMA_LINK
+	bool "Support DMA link configure"
+
+endif
