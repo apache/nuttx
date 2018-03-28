@@ -441,7 +441,7 @@ static void mac802154_notify_worker(FAR void *arg)
               if (cb->notify != NULL)
                 {
                   ret = cb->notify(cb, primitive);
-                  if (ret <= 0)
+                  if (ret < 0)
                     {
                       ieee802154_primitive_free(primitive);
                     }
