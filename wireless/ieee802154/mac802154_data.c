@@ -258,6 +258,7 @@ int mac802154_req_data(MACHANDLE mac,
   txdesc->conf->handle = meta->handle;
   txdesc->frame = frame;
   txdesc->frametype = IEEE802154_FRAME_DATA;
+  txdesc->ackreq = meta->flags.ackreq;
 
   /* If the TxOptions parameter specifies that a GTS transmission is required,
    * the MAC sublayer will determine whether it has a valid GTS as described

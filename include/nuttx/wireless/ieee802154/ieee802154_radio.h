@@ -84,6 +84,7 @@ struct ieee802154_txdesc_s
 
   enum ieee802154_frametype_e frametype;
 
+  bool ackreq;          /* Are we requesting an ACK? */
   bool framepending;    /* Did the ACK have the frame pending bit set */
   uint32_t purgetime;   /* Time to purge transaction */
   uint8_t  retrycount;  /* Number of remaining retries. Set to macMaxFrameRetries
