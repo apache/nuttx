@@ -51,11 +51,51 @@
 #include <string.h>
 
 #include "mac802154.h"
+#include "mac802154_internal.h"
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void mac802154_rxenabletimeout(FAR void *arg);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mac802154_rxenabletimeout
+ *
+ * Description:
+ *   Function registered with MAC timer that gets called via the work queue to
+ *   handle a timeout for extracting the Association Response from the Coordinator.
+ *
+ ****************************************************************************/
+
+static void mac802154_rxenabletimeout(FAR void *arg)
+{
+  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
+
+  while(mac802154_lock(priv, true) != 0);
+
+  if (priv->curr_op != MAC802154_OP_RXENABLE)
+    {
+      mac802154_unlock(priv);
+      return;
+    }
+
+  mac802154_rxdisable(priv);
+
+  priv->curr_op = MAC802154_OP_NONE;
+  mac802154_givesem(&priv->opsem);
+
+  mac802154_unlock(priv)
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,9 +112,87 @@
 int mac802154_req_rxenable(MACHANDLE mac,
                            FAR struct ieee802154_rxenable_req_s *req)
 {
-#if 0
   FAR struct ieee802154_privmac_s * priv =
     (FAR struct ieee802154_privmac_s *)mac;
-#endif
-  return -ENOTTY;
+  int ret;
+
+  /* If this is a Beacon-enabled network */
+
+  if (priv->sfspec.sforder < 15)
+    {
+      return -EINVAL;
+      goto errout_with_sem;
+    }
+
+  /* Non-beacon enabled network */
+
+  else
+    {
+      if (req->rxon_dur > 0)
+        {
+          /* Get exlusive access to the operation sempaphore. This must happen before
+           * getting exclusive access to the MAC struct or else there could be a lockup
+           * condition. This would occur if another thread is using the cmdtrans but
+           * needs access to the MAC in order to unlock it.
+           */
+
+          ret = mac802154_takesem(&priv->opsem, true);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          priv->curr_op = MAC802154_OP_RXENABLE;
+
+          /* Get exclusive access to the MAC */
+
+          ret = mac802154_lock(priv, true);
+          if (ret < 0)
+            {
+              /* Should only fail if interrupted by a signal */
+
+              wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+
+              mac802154_givesem(&priv->opsem);
+              return ret;
+            }
+
+          mac802154_rxenable(priv);
+
+          if (req->rxon_dur != 0xFFFFFFFF)
+            {
+              mac802154_timerstart(priv, req->rxon_dur, mac802154_rxenabletimeout);
+            }
+        }
+      else
+        {
+          ret = mac802154_lock(priv, true);
+          if (ret < 0)
+            {
+              /* Should only fail if interrupted by a signal */
+
+              wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+              return ret;
+            }
+
+          if (priv->curr_op != MAC802154_OP_RXENABLE)
+            {
+              ret = -EINVAL;
+              goto errout_with_sem;
+            }
+
+          mac802154_timercancel(priv);
+          mac802154_rxdisable(priv);
+
+          priv->curr_op = MAC802154_OP_NONE;
+          mac802154_givesem(&priv->opsem);
+        }
+    }
+
+  mac802154_unlock(priv)
+  return OK;
+
+errout_with_sem:
+  mac802154_unlock(priv)
+  return ret;
 }
