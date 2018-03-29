@@ -1,0 +1,125 @@
+#############################################################################
+# Kconfig - Bluetooth LE stack configuration options
+#
+#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Ported from the Intel/Zephyr arduino101_firmware_source-v1.tar package
+# where the code was released with a compatible 3-clause BSD license:
+#
+#   Copyright (c) 2016, Intel Corporation
+#   All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its
+#    contributors may be used to endorse or promote products derived from this
+#    software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+#############################################################################
+
+menuconfig WIRELESS_BLUETOOTH
+	bool
+	prompt "Bluetooth LE support"
+	default n
+	select MM_IOB
+	depends on EXPERIMENTAL
+	---help---
+		This option enables Bluetooth Low Energy support.
+
+		NOTE: This selection is marked EXPERIMENTAL.  It is incomplete and,
+		hence, untested.  It still lacks any low-level Bluetooth drivers and
+		is missing the network interface driver.
+
+if WIRELESS_BLUETOOTH
+
+config BLUETOOTH_MAX_CONN
+	int
+	prompt "Maximum number of simultaneous connections"
+	default 1
+	range 1 16
+	---help---
+		Maximum number of simultaneous Bluetooth connections
+		supported. The minimum (and default) number is 1.
+
+config BLUETOOTH_MAX_PAIRED
+	int
+	prompt "Maximum number of paired devices"
+	default 1
+	range 1 32
+	---help---
+		Maximum number of paired Bluetooth devices. The minimum (and
+		default) number is 1.
+
+menu "Kernel Thread Configuration"
+
+config BLUETOOTH_RXTHREAD_STACKSIZE
+	int "Rx thread stack size"
+	default 1024
+
+config BLUETOOTH_RXTHREAD_PRIORITY
+	int "Rx thread priority"
+	default 100
+	range 1 255
+
+config BLUETOOTH_RXTHREAD_NMSGS
+	int "Rx thread mqueue size"
+	default 16
+
+config BLUETOOTH_TXCMD_STACKSIZE
+	int "Tx command thread stack size"
+	default 1024
+
+config BLUETOOTH_TXCMD_PRIORITY
+	int "Tx command thread priority"
+	default 100
+	range 1 255
+
+config BLUETOOTH_TXCMD_NMSGS
+	int "Tx command thread mqueue size"
+	default 16
+
+config BLUETOOTH_TXCONN_STACKSIZE
+	int "Tx connection thread stack size"
+	default 1024
+
+config BLUETOOTH_TXCONN_PRIORITY
+	int "Tx connection thread priority"
+	default 100
+	range 1 255
+
+config BLUETOOTH_TXCONN_NMSGS
+	int "Tx connection thread mqueue size"
+	default 16
+
+endmenu # Kernel Thread Configuration
+
+config BLUETOOTH_SMP_SELFTEST
+	bool
+	prompt "Bluetooth SMP self tests executed on init"
+	default n
+	---help---
+		This option enables SMP self-tests executed on startup
+		to verify security and crypto functions.
+
+endif # WIRELESS_BLUETOOTH
