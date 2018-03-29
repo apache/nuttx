@@ -60,11 +60,12 @@ struct bt_driver_s
 
   /* Open the HCI transport */
 
-  CODE int (*open)(void);
+  CODE int (*open)(FAR const struct bt_driver_s *dev);
 
   /* Send data to HCI */
 
-  CODE int (*send)(FAR struct bt_buf_s *buf);
+  CODE int (*send)(FAR const struct bt_driver_s *dev,
+                   FAR struct bt_buf_s *buf);
 };
 
 /****************************************************************************
@@ -73,11 +74,11 @@ struct bt_driver_s
 
 /* Register a new HCI driver to the Bluetooth stack */
 
-int bt_driver_register(FAR struct bt_driver_s *drv);
+int bt_driver_register(FAR const struct bt_driver_s *dev);
 
 /* Unregister a previously registered HCI driver */
 
-void bt_driver_unregister(FAR struct bt_driver_s *drv);
+void bt_driver_unregister(FAR const struct bt_driver_s *dev);
 
 /* Receive data from the controller/HCI driver */
 

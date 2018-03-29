@@ -358,7 +358,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
         }
 
       wlinfo("passing buf %p len %u to driver\n", buf, buf->len);
-      g_btdev.dev->send(buf);
+      g_btdev.dev->send(g_btdev.dev, buf);
       bt_buf_put(buf);
     }
 

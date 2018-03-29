@@ -169,7 +169,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
 
   if (opcode == BT_HCI_OP_HOST_NUM_COMPLETED_PACKETS)
     {
-      g_btdev.dev->send(buf);
+      g_btdev.dev->send(g_btdev.dev, buf);
       bt_buf_put(buf);
       return 0;
     }
@@ -975,7 +975,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
 
 static int hci_tx_kthread(int argc, FAR char *argv[])
 {
-  FAR struct bt_driver_s *dev = g_btdev.dev;
+  FAR const struct bt_driver_s *dev = g_btdev.dev;
   int ret;
 
   wlinfo("started\n");
@@ -1006,7 +1006,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       wlinfo("Sending command %x (buf %p) to driver\n",
              buf->u.hci.opcode, buf);
 
-      dev->send(buf);
+      dev->send(dev, buf);
 
       /* Clear out any existing sent command */
 
@@ -1397,44 +1397,36 @@ void bt_recv(FAR struct bt_buf_s *buf)
     }
 }
 
-int bt_driver_register(FAR struct bt_driver_s *dev)
+int bt_driver_register(FAR const struct bt_driver_s *dev)
 {
-  if (g_btdev.dev)
+  DEBUGASSERT(dev != NULL && dev->open != NULL && dev->send != NULL);
+
+  if (g_btdev.dev != NULL)
     {
       return -EALREADY;
-    }
-
-  if (!dev->open || !dev->send)
-    {
-      return -EINVAL;
     }
 
   g_btdev.dev = dev;
   return 0;
 }
 
-void bt_driver_unregister(FAR struct bt_driver_s *dev)
+void bt_driver_unregister(FAR const struct bt_driver_s *dev)
 {
   g_btdev.dev = NULL;
 }
 
 int bt_init(void)
 {
-  FAR struct bt_driver_s *dev = g_btdev.dev;
+  FAR const struct bt_driver_s *dev = g_btdev.dev;
   int err;
 
-  if (!dev)
-    {
-      wlerr("ERROR: No HCI driver registered\n");
-      return -ENODEV;
-    }
-
+  DEBUGASSERT(dev != NULL);
   bt_buf_init();
 
   cmd_queue_init();
   rx_queue_init();
 
-  err = dev->open();
+  err = dev->open(dev);
   if (err)
     {
       wlerr("ERROR: HCI driver open failed (%d)\n", err);

@@ -136,7 +136,7 @@ struct bt_dev_s
 
   /* Registered HCI driver */
 
-  FAR struct bt_driver_s *dev;
+  FAR const struct bt_driver_s *dev;
 };
 
 /****************************************************************************
