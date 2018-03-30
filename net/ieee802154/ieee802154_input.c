@@ -94,7 +94,7 @@ static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
  * Input Parameters:
  *   conn   - The socket connection structure.
  *   framel - A single frame to add to the RX queue.
- *   meta   - Meta data characterizing the received frane.
+ *   meta   - Meta data characterizing the received frame.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
@@ -222,9 +222,9 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
  *   framelist - The head of an incoming list of frames.  Normally this
  *               would be a single frame.  A list may be provided if
  *               appropriate, however.
- *   meta      - Meta data characterizing the received frane.
+ *   meta      - Meta data characterizing the received frame.
  *
- *               If there are multilple frames in the list, this metadata
+ *               If there are multiple frames in the list, this metadata
  *               must apply to all of the frames in the list.
  *
  * Returned Value:
