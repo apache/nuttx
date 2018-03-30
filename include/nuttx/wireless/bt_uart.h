@@ -1,0 +1,125 @@
+/****************************************************************************
+ * drivers/wireless/bluetooth/bt_uart.h
+ * UART based Bluetooth driver
+ *
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Ported from the Intel/Zephyr arduino101_firmware_source-v1.tar package
+ * where the code was released with a compatible 3-clause BSD license:
+ *
+ *   Copyright (c) 2016, Intel Corporation
+ *   All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+#ifndef __INCLUDE_NUTTX_WIRELESS_BT_UART_H
+#define __INCLUDE_NUTTX_WIRELESS_BT_UART_H 1
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdbool.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+/* This is the type of the Bluetooth UART upper-half driver interrupt
+ * handler used with the struct btuart_lowerhalf_s attach() method.
+ */
+
+struct btuart_lowerhalf_s;
+typedef CODE void (*btuart_handler_t)
+  (FAR const struct btuart_lowerhalf_s *lower, FAR void *arg);
+
+/* The Bluetooth UART driver is a two-part driver:
+ *
+ * 1) A common upper half driver that provides the common Bluetooth stack
+ *    interface to UART.
+ * 2) Platform-specific lower half drivers that provide the interface
+ *    between the common upper half and the platform-specific UARTs.
+ *
+ * This structure defines the interface between an instance of the lower
+ * half driver and the common upper half driver.  Such an instance is
+ * passed to the upper half driver when the driver is initialized, binding
+ * the upper and lower halves into one driver.
+ */
+
+struct btuart_lowerhalf_s
+{
+  /* Attach the upper half interrupt handler */
+
+  CODE void (*attach)(FAR const struct btuart_lowerhalf_s *lower,
+                      btuart_handler_t handler, FAR void *arg);
+
+  /* Enable/disable RX/TX interrupts from the UART. */
+
+  CODE void (*rxenable)(FAR const struct btuart_lowerhalf_s *lower,
+                        bool enable);
+  CODE void (*txenable)(FAR const struct btuart_lowerhalf_s *lower,
+                        bool enable);
+
+  /* Read/write UART data */
+
+  CODE ssize_t (*read)(FAR const struct btuart_lowerhalf_s *lower,
+                       FAR void *buffer, size_t buflen);
+  CODE ssize_t (*write)(FAR const struct btuart_lowerhalf_s *lower,
+                        FAR const void *buffer, size_t buflen);
+
+  /* Flush/drain all buffered RX data */
+
+  CODE ssize_t (*rxdrain)(FAR const struct btuart_lowerhalf_s *lower);
+};
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: btuart_register
+ *
+ * Description:
+ *   Create the UART-based Bluetooth device and register it with the
+ *   Bluetooth stack.
+ *
+ * Input Parameters:
+ *   lower - an instance of the lower half driver interface
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int btuart_register(FAR const struct btuart_lowerhalf_s *lower);
+
+#endif /* __INCLUDE_NUTTX_WIRELESS_BT_UART_H */
