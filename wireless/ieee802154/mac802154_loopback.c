@@ -889,12 +889,12 @@ static int lo_ioctl(FAR struct net_driver_s *dev, int cmd,
  *   Calculate the MAC header length given the frame meta-data.
  *
  * Input Parameters:
- *   netdev    - The networkd device that will mediate the MAC interface
+ *   netdev    - The network device that will mediate the MAC interface
  *   meta      - Obfuscated metadata structure needed to create the radio
  *               MAC header
  *
  * Returned Value:
- *   A non-negative MAC headeer length is returned on success; a negated
+ *   A non-negative MAC header length is returned on success; a negated
  *   errno value is returned on any failure.
  *
  ****************************************************************************/
@@ -912,7 +912,7 @@ static int lo_get_mhrlen(FAR struct radio_driver_s *netdev,
  *   Requests the transfer of a list of frames to the MAC.
  *
  * Input Parameters:
- *   netdev    - The networkd device that will mediate the MAC interface
+ *   netdev    - The network device that will mediate the MAC interface
  *   meta      - Obfuscated metadata structure needed to create the radio
  *               MAC header
  *   framelist - Head of a list of frames to be transferred.
@@ -985,7 +985,7 @@ static int lo_req_data(FAR struct radio_driver_s *netdev,
  *
  * Input Parameters:
  *   netdev     - The network device to be queried
- *   properties - Location where radio properities will be returned.
+ *   properties - Location where radio properties will be returned.
  *
  * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on
