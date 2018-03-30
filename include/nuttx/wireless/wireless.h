@@ -2,7 +2,7 @@
  * include/nuttx/wireless/wireless.h
  * Wireless network IOCTL commands
  *
- *   Copyright (C) 2011-2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,12 +159,20 @@
 #define WL_NETFIRST         0x0001          /* First network command */
 #define WL_NNETCMDS         0x0032          /* Number of network commands */
 
+/* Reserved for Bluetooth network devices (see bt_ioctls.h) */
+
+#define WL_BLUETOOTHFIRST     (WL_NETFIRST + WL_NNETCMDS)
+#define WL_BLUETOOTHCMDS      (5)
+#define WL_IBLUETOOTHCMD(cmd) (_WLIOCVALID(cmd) && \
+                              _IOC_NR(cmd) >= WL_BLUETOOTHFIRST && \
+                              _IOC_NR(cmd) < (WL_BLUETOOTHFIRST + WL_BLUETOOTHCMDS))
+
 /* Reserved for IEEE802.15.4 wireless network devices
  * NOTE:  Not used.  Currently logic uses IOCTL commands from the IEEE802.15.4
  * character driver space.
  */
 
-#define WL_802154FIRST        (WL_NETFIRST + WL_NNETCMDS)
+#define WL_802154FIRST        (WL_BLUETOOTHFIRST + WL_BLUETOOTHCMDS)
 #define WL_N802154CMDS        (3)
 #define WL_IS802154CMD(cmd)   (_WLIOCVALID(cmd) && \
                                _IOC_NR(cmd) >= WL_802154FIRST && \
@@ -178,25 +186,25 @@
                                _IOC_NR(cmd) >= WL_PKTRADIOFIRST && \
                                _IOC_NR(cmd) < (WL_PKTRADIOFIRST + WL_NPKTRADIOCMDS))
 
-/* ------------------------------- WIRELESS EVENTS ------------------------------- */
+/* ------------------------------ WIRELESS EVENTS -------------------------------- */
 /* Those are *NOT* ioctls, do not issue request on them !!! */
 /* Most events use the same identifier as ioctl requests */
 
-#define IWEVTXDROP      0x8C00    /* Packet dropped to excessive retry */
-#define IWEVQUAL        0x8C01    /* Quality part of statistics (scan) */
-#define IWEVCUSTOM      0x8C02    /* Driver specific ascii string */
-#define IWEVREGISTERED  0x8C03    /* Discovered a new node (AP mode) */
-#define IWEVEXPIRED     0x8C04    /* Expired a node (AP mode) */
-#define IWEVGENIE       0x8C05    /* Generic IE (WPA, RSN, WMM, ..)
+#define IWEVTXDROP      0x8c00    /* Packet dropped to excessive retry */
+#define IWEVQUAL        0x8c01    /* Quality part of statistics (scan) */
+#define IWEVCUSTOM      0x8c02    /* Driver specific ascii string */
+#define IWEVREGISTERED  0x8c03    /* Discovered a new node (AP mode) */
+#define IWEVEXPIRED     0x8c04    /* Expired a node (AP mode) */
+#define IWEVGENIE       0x8c05    /* Generic IE (WPA, RSN, WMM, ..)
                                    * (scan results); This includes id and
                                    * length fields. One IWEVGENIE may
                                    * contain more than one IE. Scan
                                    * results may contain one or more
                                    * IWEVGENIE events. */
-#define IWEVMICHAELMICFAILURE 0x8C06  /* Michael MIC failure
+#define IWEVMICHAELMICFAILURE 0x8c06  /* Michael MIC failure
                                        * (struct iw_michaelmicfailure)
                                        */
-#define IWEVASSOCREQIE  0x8C07    /* IEs used in (Re)Association Request.
+#define IWEVASSOCREQIE  0x8c07    /* IEs used in (Re)Association Request.
                                    * The data includes id and length
                                    * fields and may contain more than one
                                    * IE. This event is required in
@@ -205,18 +213,18 @@
                                    * should be sent just before
                                    * IWEVREGISTERED event for the
                                    * association. */
-#define IWEVASSOCRESPIE 0x8C08    /* IEs used in (Re)Association
+#define IWEVASSOCRESPIE 0x8c08    /* IEs used in (Re)Association
                                    * Response. The data includes id and
                                    * length fields and may contain more
                                    * than one IE. This may be sent
                                    * between IWEVASSOCREQIE and
                                    * IWEVREGISTERED events for the
                                    * association. */
-#define IWEVPMKIDCAND   0x8C09    /* PMKID candidate for RSN
+#define IWEVPMKIDCAND   0x8c09    /* PMKID candidate for RSN
                                    * pre-authentication
                                    * (struct iw_pmkid_cand) */
 
-#define IWEVFIRST       0x8C00
+#define IWEVFIRST       0x8c00
 #define IW_EVENT_IDX(cmd) ((cmd) - IWEVFIRST)
 
 /* Other Common Wireless Definitions ***********************************************/

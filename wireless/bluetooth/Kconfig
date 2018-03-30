@@ -72,6 +72,30 @@ config BLUETOOTH_MAX_PAIRED
 		Maximum number of paired Bluetooth devices. The minimum (and
 		default) number is 1.
 
+config BLUETOOTH_MAXSCANDATA
+	int "Max scan data size"
+	default 64
+	range 1 255
+	---help---
+		Scan results will be buffered in memory until the user requests the
+		scan results.  This parameter specifies the maximum size of the
+		advertiser data that accompanies the scan result.
+
+		This contributes to a static memory allocation that will be greater
+		than CONFIG_BLUETOOTH_MAXSCANDATA * CONFIG_BLUETOOTH_MAXSCANRESULT
+
+config BLUETOOTH_MAXSCANRESULT
+	int "Max scan results"
+	default 8
+	range 1 255
+	---help---
+		Scan results will be buffered in memory until the user requests the
+		scan results.  This parameter specifies the maximum number of
+		results that can be buffered before scan results are lost.
+
+		This contributes to a static memory allocation that will be greater
+		than CONFIG_BLUETOOTH_MAXSCANDATA * CONFIG_BLUETOOTH_MAXSCANRESULT
+
 menu "Kernel Thread Configuration"
 
 config BLUETOOTH_RXTHREAD_STACKSIZE

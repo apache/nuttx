@@ -53,6 +53,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the type of the Bluetooth UART upper-half driver interrupt
  * handler used with the struct btuart_lowerhalf_s attach() method.
  */

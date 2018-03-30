@@ -1,6 +1,6 @@
 /****************************************************************************
- * wireless/bluetooth/bt_atomic.c
- * Linux like atomic operations
+ * wireless/bluetooth/bt_ioctl.h
+ * Bluetooth network IOCTL handler
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,114 +34,40 @@
  *
  ****************************************************************************/
 
+#ifndef __WIRELESS_BLUETOOTH_BT_IOCTL_H
+#define __WIRELESS_BLUETOOTH_BT_IOCTL_H 1
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-
-#include "bt_atomic.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
-void bt_atomic_set(FAR bt_atomic_t *ptr, bt_atomic_t value)
-{
-  *ptr = value;
-}
-#endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-bt_atomic_t bt_atomic_incr(FAR bt_atomic_t *ptr)
-{
-  irqstate_t flags;
-  bt_atomic_t value;
+ /****************************************************************************
+ * Name: bt_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
 
-  flags = spin_lock_irqsave();
-  value = *ptr;
-  *ptr  = value + 1;
-  spin_unlock_irqrestore(flags);
+struct net_driver_s;  /* Forward reference */
+int bt_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg);
 
-  return value;
-}
-
-bt_atomic_t bt_atomic_decr(FAR bt_atomic_t *ptr)
-{
-  irqstate_t flags;
-  bt_atomic_t value;
-
-  flags = spin_lock_irqsave();
-  value = *ptr;
-  *ptr  = value - 1;
-  spin_unlock_irqrestore(flags);
-
-  return value;
-}
-
-bt_atomic_t bt_atomic_setbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
-{
-  irqstate_t flags;
-  bt_atomic_t value;
-
-  flags = spin_lock_irqsave();
-  value = *ptr;
-  *ptr  = value | (1 << bitno);
-  spin_unlock_irqrestore(flags);
-
-  return value;
-}
-
-bt_atomic_t bt_atomic_clrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
-{
-  irqstate_t flags;
-  bt_atomic_t value;
-
-  flags = spin_lock_irqsave();
-  value = *ptr;
-  *ptr  = value & ~(1 << bitno);
-  spin_unlock_irqrestore(flags);
-
-  return value;
-}
-
-#ifndef CONFIG_HAVE_INLINE
-bt_atomic_t bt_atomic_get(FAR bt_atomic_t *ptr)
-{
-  return *ptr;
-}
-#endif
-
-#ifndef CONFIG_HAVE_INLINE
-bool bt_atomic_testbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
-{
-  return (*ptr & (1 << bitno)) != 0;
-}
-#endif
-
-bool bt_atomic_testsetbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
-{
-  irqstate_t flags;
-  bt_atomic_t value;
-
-  flags = spin_lock_irqsave();
-  value = *ptr;
-  *ptr  = value | (1 << bitno);
-  spin_unlock_irqrestore(flags);
-
-  return (value & (1 << bitno)) != 0;
-}
-
-bool bt_atomic_testclrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno)
-{
-  irqstate_t flags;
-  bt_atomic_t value;
-
-  flags = spin_lock_irqsave();
-  value = *ptr;
-  *ptr  = value & ~(1 << bitno);
-  spin_unlock_irqrestore(flags);
-
-  return (value & (1 << bitno)) != 0;
-}
+#endif /* __WIRELESS_BLUETOOTH_BT_IOCTL_H */

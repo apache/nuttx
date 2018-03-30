@@ -1442,6 +1442,23 @@ int bt_init(void)
   return bt_l2cap_init();
 }
 
+/****************************************************************************
+ * Name: bt_start_advertising
+ *
+ * Description:
+ *   Set advertisement data, scan response data, advertisement parameters
+ *   and start advertising.
+ *
+ * Input Parameters:
+ *   type - Advertising type.
+ *   ad   - Data to be used in advertisement packets.
+ *   sd   - Data to be used in scan response packets.
+ *
+ * Returned Value:
+ *   Zero on success or (negative) error code otherwise.
+ *
+ ****************************************************************************/
+
 int bt_start_advertising(uint8_t type, FAR const struct bt_eir_s *ad,
                          FAR const struct bt_eir_s *sd)
 {
@@ -1543,6 +1560,17 @@ send_set_param:
   return bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_ADV_ENABLE, buf, NULL);
 }
 
+/****************************************************************************
+ * Name: bt_stop_advertising
+ *
+ * Description:
+ *   Stops ongoing advertising.
+ *
+ * Returned Value:
+ *   Zero on success or (negative) error code otherwise.
+ *
+ ****************************************************************************/
+
 int bt_stop_advertising(void)
 {
   FAR struct bt_buf_s *buf;
@@ -1564,6 +1592,23 @@ int bt_stop_advertising(void)
   return bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_ADV_ENABLE, buf, NULL);
 }
 
+/****************************************************************************
+ * Name: bt_start_scanning
+ *
+ * Description:
+ *   Start LE scanning with and provide results through the specified
+ *   callback.
+ *
+ * Input Parameters:
+ *   filter_dups - Enable duplicate filtering (or not).
+ *   cb          - Callback to notify scan results.
+ *
+ * Returned Value:
+ *   Zero on success or error code otherwise, positive in case
+ *   of protocol error or negative (POSIX) in case of stack internal error
+ *
+ ****************************************************************************/
+
 int bt_start_scanning(uint8_t scan_filter, bt_le_scan_cb_t cb)
 {
   /* Return if active scan is already enabled */
@@ -1578,6 +1623,18 @@ int bt_start_scanning(uint8_t scan_filter, bt_le_scan_cb_t cb)
 
   return bt_le_scan_update();
 }
+
+/****************************************************************************
+ * Name: bt_stop_scanning
+ *
+ * Description:
+ *   Stops ongoing LE scanning.
+ *
+ * Returned Value:
+ *   Zero on success or error code otherwise, positive in case
+ *   of protocol error or negative (POSIX) in case of stack internal error
+ *
+ ****************************************************************************/
 
 int bt_stop_scanning(void)
 {

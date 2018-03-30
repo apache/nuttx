@@ -59,8 +59,9 @@
 #define PF_INET        2 /* IPv4 Internet protocols */
 #define PF_INET6       3 /* IPv6 Internet protocols */
 #define PF_PACKET      4 /* Low level packet interface */
-#define PF_IEEE802154  5 /* Low level IEEE 802.15.4 radio frame interface */
-#define PF_PKTRADIO    6 /* Low level packet radio interface */
+#define PF_BLUETOOTH   5 /* Bluetooth sockets */
+#define PF_IEEE802154  6 /* Low level IEEE 802.15.4 radio frame interface */
+#define PF_PKTRADIO    7 /* Low level packet radio interface */
 
 /* Supported Address Families. Opengroup.org requires only AF_UNSPEC,
  * AF_UNIX, AF_INET and AF_INET6.
@@ -72,6 +73,7 @@
 #define AF_INET        PF_INET
 #define AF_INET6       PF_INET6
 #define AF_PACKET      PF_PACKET
+#define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154
 #define AF_PKTRADIO    PF_PKTRADIO
 
