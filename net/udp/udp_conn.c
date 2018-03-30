@@ -486,7 +486,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       conn->lport  = 0;
       conn->ttl    = IP_TTL;
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
 
       sq_init(&conn->write_q);

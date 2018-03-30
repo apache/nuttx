@@ -114,7 +114,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
            ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr)))
 #endif
         {
-          /* Get pointers to the IPv4 header and the offset TCP header */
+          /* Get pointers to the IPv4 header and the offset UDP header */
 
           FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
 
@@ -176,7 +176,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
       else
 #endif
         {
-          /* Get pointers to the IPv6 header and the offset TCP header */
+          /* Get pointers to the IPv6 header and the offset UDP header */
 
           FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
