@@ -1,8 +1,7 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_sendto.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +77,7 @@ struct ieee802154_sendto_s
 {
   FAR struct socket *is_sock;            /* Points to the parent socket structure */
   FAR struct devif_callback_s *is_cb;    /* Reference to callback instance */
-  struct ieee802154_saddr_s is_destaddr; /* Frame destinatin address */
+  struct ieee802154_saddr_s is_destaddr; /* Frame destination address */
   sem_t is_sem;                          /* Used to wake up the waiting thread */
   FAR const uint8_t *is_buffer;          /* User buffer of data to send */
   size_t is_buflen;                      /* Number of bytes in the is_buffer */

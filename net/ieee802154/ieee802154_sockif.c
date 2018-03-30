@@ -47,10 +47,11 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <socket/socket.h>
+#include <netpacket/ieee802154.h>
+
 #include <nuttx/net/net.h>
 #include <nuttx/net/radiodev.h>
-#include <netpacket/packet.h>
-#include <socket/socket.h>
 
 #include "ieee802154/ieee802154.h"
 

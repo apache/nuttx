@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_finddev.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,8 +56,8 @@
 
 struct ieee802154_finddev_s
 {
-    FAR const struct ieee802154_saddr_s *addr;
-    FAR struct radio_driver_s *radio;
+  FAR const struct ieee802154_saddr_s *addr;
+  FAR struct radio_driver_s *radio;
 };
 
 /****************************************************************************
@@ -65,7 +65,7 @@ struct ieee802154_finddev_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee8021545_dev_callback
+ * Name: ieee802154_dev_callback
  *
  * Description:
  *   Check if this device matches the connections local address.
@@ -79,7 +79,7 @@ struct ieee802154_finddev_s
  *
  ****************************************************************************/
 
-static int ieee8021545_dev_callback(FAR struct net_driver_s *dev, FAR void *arg)
+static int ieee802154_dev_callback(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct ieee802154_finddev_s *match =
     (FAR struct ieee802154_finddev_s *)arg;
@@ -174,10 +174,10 @@ FAR struct radio_driver_s *
               addr->s_mode == IEEE802154_ADDRMODE_EXTENDED);
 
   /* Other, search for the IEEE 802.15.4 network device whose MAC is equal to
-   * the sockets bount local address.
+   * the sockets bound local address.
    */
 
-  ret = netdev_foreach(ieee8021545_dev_callback, (FAR void *)&match);
+  ret = netdev_foreach(ieee802154_dev_callback, (FAR void *)&match);
   if (ret == 1)
     {
       DEBUGASSERT(match.radio != NULL);
