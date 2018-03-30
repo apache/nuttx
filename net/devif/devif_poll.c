@@ -272,7 +272,7 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
 
   return bstop;
 }
-#endif /* CONFIG_NET_PKT */
+#endif /* CONFIG_NET_IEEE802154 */
 
 /****************************************************************************
  * Name: devif_poll_icmp

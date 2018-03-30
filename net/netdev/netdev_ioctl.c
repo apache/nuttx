@@ -356,7 +356,7 @@ static void ioctl_set_ipv4addr(FAR in_addr_t *outaddr,
  *
  * Input Parameters:
  *   outaddr - Pointer to the source IP address in the device structure.
- *   inaddr - Pointer to the user-provided memory to containing the new IP
+ *   inaddr  - Pointer to the user-provided memory to containing the new IP
  *     address.
  *
  ****************************************************************************/
@@ -377,10 +377,10 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
  *   Perform IEEE802.15.4 network device specific operations.
  *
  * Input Parameters:
- *   psock    Socket structure
- *   dev      Ethernet driver device structure
- *   cmd      The ioctl command
- *   req      The argument of the ioctl cmd
+ *   psock  - Socket structure
+ *   dev    - Ethernet driver device structure
+ *   cmd    - The ioctl command
+ *   req    - The argument of the ioctl cmd
  *
  * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
@@ -439,10 +439,10 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
  *   Perform non-IEEE802.15.4 packet radio network device specific operations.
  *
  * Input Parameters:
- *   psock    Socket structure
- *   dev      Ethernet driver device structure
- *   cmd      The ioctl command
- *   req      The argument of the ioctl cmd
+ *   psock  - Socket structure
+ *   dev    - Ethernet driver device structure
+ *   cmd    - The ioctl command
+ *   req    - The argument of the ioctl cmd
  *
  * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
