@@ -66,7 +66,7 @@
 
 /* Frame size */
 
-/* This maximum size of an IEEE802.15.4 frame.  Certain, non-standard
+/* This maximum size of an IEEE 802.15.4 frame.  Certain, non-standard
  * devices may exceed this value, however.
  */
 
@@ -175,7 +175,7 @@ void ieee802154_initialize(void);
  * Name: ieee802154_conn_initialize
  *
  * Description:
- *   Initialize the IEEE 802.15.5 connection structure allocator.  Called
+ *   Initialize the IEEE 802.15.4 connection structure allocator.  Called
  *   once and only from ieee802154_initialize().
  *
  * Assumptions:

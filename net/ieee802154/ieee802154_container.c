@@ -1,5 +1,5 @@
 /****************************************************************************
- *  wireless/pktradio/ieee802154_container.c
+ *  net/ieee802154/ieee802154_container.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

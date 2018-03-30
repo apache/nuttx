@@ -163,7 +163,7 @@ static inline bool ieee802154_eaddrnull(FAR const uint8_t *eaddr)
  *
  * Description:
  *   Based on the collected attributes and addresses, construct the MAC meta
- *   data structure that we need to interface with the IEEE802.15.4 MAC.
+ *   data structure that we need to interface with the IEEE 802.15.4 MAC.
  *
  * Input Parameters:
  *   radio   - Radio network driver state instance.

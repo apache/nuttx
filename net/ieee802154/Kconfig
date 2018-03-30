@@ -13,7 +13,7 @@ config NET_IEEE802154
 	---help---
 		Enable support for raw, IEEE 802.15.4 sockets.
 
-		Raw sockets allow receiving and transmitting IEEE 802.15.3 radio
+		Raw sockets allow receiving and transmitting IEEE 802.15.4 radio
 		frames without a layer2 protocol such as 6LoWPAN in between. Frames
 		received are copied into a IEEE 802.15.4 socket tap before they
 		enter the network. Frames written into a IEEE 802.15.4 socket will
@@ -23,7 +23,7 @@ config NET_IEEE802154
 if NET_IEEE802154
 
 config NET_IEEE802154_FRAMELEN
-	int "IEEE802.15.4 Frame Length"
+	int "IEEE 802.15.4 Frame Length"
 	default 127
 	range 1 999999
 	---help---

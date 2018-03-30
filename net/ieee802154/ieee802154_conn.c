@@ -83,7 +83,7 @@ static dq_queue_t g_active_ieee802154_connections;
  * Name: ieee802154_conn_initialize
  *
  * Description:
- *   Initialize the IEEE 802.15.5 connection structure allocator.  Called
+ *   Initialize the IEEE 802.15.4 connection structure allocator.  Called
  *   once and only from ieee802154_initialize().
  *
  * Assumptions:
