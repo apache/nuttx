@@ -684,7 +684,9 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       /* Initialize the write buffer */
 
       memcpy(&wrb->wb_dest, to, tolen);
+#ifdef CONFIG_NET_SOCKOPTS
       wrb->wb_start = clock_systimer();
+#endif
 
       /* Copy the user data into the write buffer.  We cannot wait for
        * buffer space if the socket was opened non-blocking.

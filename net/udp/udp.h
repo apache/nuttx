@@ -115,7 +115,7 @@ struct udp_conn_s
   struct iob_queue_s readahead;   /* Read-ahead buffering */
 #endif
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Write buffering
    *
    *   write_q   - The queue of unsent I/O buffers.  The head of this
