@@ -56,7 +56,6 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/ip.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -178,9 +177,9 @@ static inline bool ieee802154_eaddrnull(FAR const uint8_t *eaddr)
  *
  ****************************************************************************/
 
-void ieee802154_meta_data(FAR struct radio_driver_s *radio,
-                          FAR struct ieee802154_sendto_s *pstate,
-                          FAR struct ieee802154_frame_meta_s *meta)
+static void ieee802154_meta_data(FAR struct radio_driver_s *radio,
+                                 FAR struct ieee802154_sendto_s *pstate,
+                                 FAR struct ieee802154_frame_meta_s *meta)
 {
   FAR struct ieee802154_saddr_s *destaddr;
   FAR struct ieee802154_saddr_s *srcaddr;
@@ -537,7 +536,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  /* Check for a errors, Errors are signalled by negative errno values
+  /* Check for a errors, Errors are signaled by negative errno values
    * for the send length
    */
 

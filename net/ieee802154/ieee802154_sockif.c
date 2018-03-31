@@ -271,9 +271,42 @@ static void ieee802154_addref(FAR struct socket *psock)
  ****************************************************************************/
 
 static int ieee802154_connect(FAR struct socket *psock,
-                       FAR const struct sockaddr *addr, socklen_t addrlen)
+                              FAR const struct sockaddr *addr,
+                              socklen_t addrlen)
 {
-  return -EAFNOSUPPORT;
+  FAR struct ieee802154_conn_s *conn;
+  FAR struct sockaddr_ieee802154_s *ieeeaddr;
+  int ret;
+
+  DEBUGASSERT(psock != NULL || addr != NULL);
+  conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* Verify the address family */
+
+  if (addr->sa_family == AF_IEEE802154)
+    {
+      /* Save the "connection" address */
+
+      ieeeaddr = (FAR struct sockaddr_ieee802154_s *)addr;
+      memcpy(&conn->raddr, &ieeeaddr->sa_addr,
+             sizeof(struct ieee802154_saddr_s));
+
+      /* Mark the socket as connected. */
+
+      psock->s_flags |= _SF_CONNECTED;
+      ret = OK;
+    }
+  else
+    {
+      /* The specified address is not a valid address for the address family
+       * of the specified socket.
+       */
+
+      ret = -EAFNOSUPPORT;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -363,7 +396,7 @@ static int ieee802154_bind(FAR struct socket *psock,
       addrlen < sizeof(struct sockaddr_ieee802154_s))
     {
       nerr("ERROR: Invalid family: %u or address length: %d < %d\n",
-           addr->sa_family, addrlen, sizeof(struct sockaddr_ll));
+           addr->sa_family, addrlen, sizeof(struct sockaddr_ieee802154_s));
       return -EBADF;
     }
 
@@ -460,7 +493,7 @@ static int ieee802154_getsockname(FAR struct socket *psock,
 
   /* Create a copy of the full address on the stack */
 
-  tmp.sa_family = PF_IEEE802154;
+  tmp.sa_family = AF_IEEE802154;
   memcpy(&tmp.sa_addr, &conn->laddr, sizeof(struct ieee802154_saddr_s));
 
   /* Copy to the user buffer, truncating if necessary */
@@ -574,7 +607,7 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
 
   if (psock->s_type == SOCK_DGRAM)
     {
-      /* send() may be used only if the socket is has been connected. */
+      /* send() may be used only if the socket has been connected. */
 
       if (!_SS_ISCONNECTED( psock->s_flags) ||
           conn->raddr.s_mode == IEEE802154_ADDRMODE_NONE)
@@ -583,7 +616,7 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          to.sa_family = PF_IEEE802154;
+          to.sa_family = AF_IEEE802154;
           memcpy(&to.sa_addr, &conn->raddr,
                  sizeof(struct ieee802154_saddr_s));
 

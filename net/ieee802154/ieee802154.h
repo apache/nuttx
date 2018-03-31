@@ -153,7 +153,6 @@ EXTERN const struct sock_intf_s g_ieee802154_sockif;
 struct ieee802154_data_ind_s; /* Forward reference */
 struct radio_driver_s;        /* Forward reference */
 struct net_driver_s;          /* Forward reference */
-struct eth_hdr_s;             /* Forward reference */
 struct socket;                /* Forward reference */
 struct sockaddr;              /* Forward reference */
 
