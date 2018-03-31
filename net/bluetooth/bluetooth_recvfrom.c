@@ -134,7 +134,7 @@ static ssize_t bluetooth_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
                                            FAR struct bluetooth_recvfrom_s *pstate)
 {
   FAR struct bluetooth_container_s *container;
-  FAR struct sockaddr_rc_s *iaddr;
+  FAR struct sockaddr_bt_s *iaddr;
   FAR struct bluetooth_conn_s *conn;
   FAR struct iob_s *iob;
   size_t copylen;
@@ -190,10 +190,10 @@ static ssize_t bluetooth_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
 
       if (pstate->ir_from != NULL)
         {
-          iaddr             = (FAR struct sockaddr_rc_s *)pstate->ir_from;
-          iaddr->rc_family  = AF_BLUETOOTH;
-          BLUETOOTH_ADDRCOPY(&iaddr->rc_bdaddr, &container->bn_raddr);
-          iaddr->rc_channel = container->bn_channel;
+          iaddr             = (FAR struct sockaddr_bt_s *)pstate->ir_from;
+          iaddr->bt_family  = AF_BLUETOOTH;
+          BLUETOOTH_ADDRCOPY(&iaddr->bt_bdaddr, &container->bn_raddr);
+          iaddr->bt_channel = container->bn_channel;
         }
 
       /* Free both the IOB and the container */
@@ -332,12 +332,12 @@ ssize_t bluetooth_recvfrom(FAR struct socket *psock, FAR void *buf,
    * enough to hold this address family.
    */
 
-  if (from != NULL && *fromlen < sizeof(struct sockaddr_rc_s))
+  if (from != NULL && *fromlen < sizeof(struct sockaddr_bt_s))
     {
       return -EINVAL;
     }
 
-  if (psock->s_type != SOCK_DGRAM)
+  if (psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
       return -EPROTONOSUPPORT;

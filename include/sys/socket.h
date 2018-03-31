@@ -158,6 +158,10 @@
 #define SOL_IPV6        2 /* See options in include/netinet/ip6.h */
 #define SOL_TCP         3 /* See options in include/netinet/tcp.h */
 #define SOL_UDP         4 /* See options in include/netinit/udp.h */
+#define SOL_HCI         5 /* See options in include/netpacket/bluetooth.h */
+#define SOL_L2CAP       6 /* See options in include/netpacket/bluetooth.h */
+#define SOL_SCO         7 /* See options in include/netpacket/bluetooth.h */
+#define SOL_RFCOMM      8 /* See options in include/netpacket/bluetooth.h */
 
 /* Protocol-level socket options may begin with this value */
 

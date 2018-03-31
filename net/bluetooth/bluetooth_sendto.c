@@ -247,7 +247,7 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
                                 size_t len, int flags,
                                 FAR const struct sockaddr *to, socklen_t tolen)
 {
-  FAR struct sockaddr_rc_s *destaddr;
+  FAR struct sockaddr_bt_s *destaddr;
   FAR struct radio_driver_s *radio;
   FAR struct bluetooth_conn_s *conn;
   struct bluetooth_sendto_s state;
@@ -307,8 +307,8 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Copy the destination address */
 
-  destaddr = (FAR struct sockaddr_rc_s *)to;
-  memcpy(&state.is_destaddr, &destaddr->rc_bdaddr,
+  destaddr = (FAR struct sockaddr_bt_s *)to;
+  memcpy(&state.is_destaddr, &destaddr->bt_bdaddr,
          sizeof(bt_addr_t));
 
   if (len > 0)

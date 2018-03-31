@@ -180,10 +180,10 @@ static int bluetooth_setup(FAR struct socket *psock, int protocol)
    * the connection structure is is unallocated at this point.  It will
    * not actually be initialized until the socket is connected.
    *
-   * Only SOCK_DGRAM is supported (since the MAC header is stripped)
+   * Only SOCK_RAW is supported
    */
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type == SOCK_RAW)
     {
       return bluetooth_sockif_alloc(psock);
     }
@@ -233,7 +233,7 @@ static void bluetooth_addref(FAR struct socket *psock)
   FAR struct bluetooth_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              psock->s_type == SOCK_DGRAM);
+              psock->s_type == SOCK_RAW);
 
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
   DEBUGASSERT(conn->bc_crefs > 0 && conn->bc_crefs < 255);
@@ -249,17 +249,11 @@ static void bluetooth_addref(FAR struct socket *psock)
  *   specifies the size of 'addr'.  The format of the address in 'addr' is
  *   determined by the address space of the socket 'psock'.
  *
- *   If the socket 'psock' is of type SOCK_DGRAM then 'addr' is the address
- *   to which datagrams are sent by default, and the only address from which
- *   datagrams are received. If the socket is of type SOCK_STREAM or
- *   SOCK_SEQPACKET, this call attempts to make a connection to the socket
- *   that is bound to the address specified by 'addr'.
- *
  *   Generally, connection-based protocol sockets may successfully
  *   bluetooth_connect() only once; connectionless protocol sockets may use
  *   bluetooth_connect() multiple times to change their association.
  *   Connectionless sockets may dissolve the association by connecting to
- *   an address with the rc_family member of sockaddr set to AF_UNSPEC.
+ *   an address with the bt_family member of sockaddr set to AF_UNSPEC.
  *
  * Input Parameters:
  *   psock     Pointer to a socket structure initialized by psock_socket()
@@ -277,7 +271,7 @@ static int bluetooth_connect(FAR struct socket *psock,
                              socklen_t addrlen)
 {
   FAR struct bluetooth_conn_s *conn;
-  FAR struct sockaddr_rc_s *btaddr;
+  FAR struct sockaddr_bt_s *btaddr;
   int ret;
 
   DEBUGASSERT(psock != NULL || addr != NULL);
@@ -290,9 +284,9 @@ static int bluetooth_connect(FAR struct socket *psock,
     {
       /* Save the "connection" address */
 
-      btaddr = (FAR struct sockaddr_rc_s *)addr;
-      memcpy(&conn->bc_raddr, &btaddr->rc_bdaddr, sizeof(bt_addr_t));
-      conn->bc_channel = btaddr->rc_channel;
+      btaddr = (FAR struct sockaddr_bt_s *)addr;
+      memcpy(&conn->bc_raddr, &btaddr->bt_bdaddr, sizeof(bt_addr_t));
+      conn->bc_channel = btaddr->bt_channel;
 
       /* Mark the socket as connected. */
 
@@ -386,7 +380,7 @@ static int bluetooth_accept(FAR struct socket *psock,
 static int bluetooth_bind(FAR struct socket *psock,
                            FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR const struct sockaddr_rc_s *iaddr;
+  FAR const struct sockaddr_bt_s *iaddr;
   FAR struct radio_driver_s *radio;
   FAR struct bluetooth_conn_s *conn;
 
@@ -395,16 +389,19 @@ static int bluetooth_bind(FAR struct socket *psock,
   /* Verify that a valid address has been provided */
 
   if (addr->sa_family != AF_BLUETOOTH ||
-      addrlen < sizeof(struct sockaddr_rc_s))
+      addrlen < sizeof(struct sockaddr_bt_s))
     {
       nerr("ERROR: Invalid family: %u or address length: %d < %d\n",
            addr->sa_family, addrlen, sizeof(struct sockaddr_ll));
       return -EBADF;
     }
 
-  /* Bind a PF_BLUETOOTH socket to an network device. */
+  /* Bind a PF_BLUETOOTH socket to an network device.
+   *
+   * Only SOCK_RAW is supported
+   */
 
-  if (psock->s_type != SOCK_DGRAM)
+  if (psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Invalid socket type: %u\n", psock->s_type);
       return -EBADF;
@@ -418,7 +415,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       return -EINVAL;
     }
 
-  iaddr = (FAR const struct sockaddr_rc_s *)addr;
+  iaddr = (FAR const struct sockaddr_bt_s *)addr;
 
   /* Very that some address was provided */
   /* REVISIT: Currently and explict address must be assigned.  Should we
@@ -429,7 +426,7 @@ static int bluetooth_bind(FAR struct socket *psock,
 
   /* Find the device associated with the requested address */
 
-  radio = bluetooth_find_device(conn, &iaddr->rc_bdaddr);
+  radio = bluetooth_find_device(conn, &iaddr->bt_bdaddr);
   if (radio == NULL)
     {
       nerr("ERROR: No radio at this address\n");
@@ -438,7 +435,7 @@ static int bluetooth_bind(FAR struct socket *psock,
 
   /* Save the address as the socket's local address */
 
-  memcpy(&conn->bc_laddr, &iaddr->rc_bdaddr, sizeof(bt_addr_t));
+  memcpy(&conn->bc_laddr, &iaddr->bt_bdaddr, sizeof(bt_addr_t));
 
   /* Mark the socket bound */
 
@@ -479,7 +476,7 @@ static int bluetooth_getsockname(FAR struct socket *psock,
                                   socklen_t *addrlen)
 {
   FAR struct bluetooth_conn_s *conn;
-  FAR struct sockaddr_rc_s tmp;
+  FAR struct sockaddr_bt_s tmp;
   socklen_t copylen;
 
   DEBUGASSERT(psock != NULL && addr != NULL && addrlen != NULL);
@@ -489,12 +486,12 @@ static int bluetooth_getsockname(FAR struct socket *psock,
 
   /* Create a copy of the full address on the stack */
 
-  tmp.rc_family = AF_BLUETOOTH;
-  memcpy(&tmp.rc_bdaddr, &conn->bc_laddr, sizeof(bt_addr_t));
+  tmp.bt_family = AF_BLUETOOTH;
+  memcpy(&tmp.bt_bdaddr, &conn->bc_laddr, sizeof(bt_addr_t));
 
   /* Copy to the user buffer, truncating if necessary */
 
-  copylen = sizeof(struct sockaddr_rc_s);
+  copylen = sizeof(struct sockaddr_bt_s);
   if (copylen > *addrlen)
     {
       copylen = *addrlen;
@@ -591,7 +588,7 @@ static int bluetooth_poll_local(FAR struct socket *psock,
 static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
                                size_t len, int flags)
 {
-  struct sockaddr_rc_s to;
+  struct sockaddr_bt_s to;
   FAR struct bluetooth_conn_s *conn;
   ssize_t ret;
 
@@ -599,9 +596,9 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
-  /* Only SOCK_DGRAM is supported (because the MAC header is stripped) */
+  /* Only SOCK_RAW is supported */
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type == SOCK_RAW)
     {
       /* send() may be used only if the socket is has been connected. */
 
@@ -611,15 +608,15 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          to.rc_family = AF_BLUETOOTH;
-          memcpy(&to.rc_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
-          to.rc_channel = conn->bc_channel;
+          to.bt_family = AF_BLUETOOTH;
+          memcpy(&to.bt_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
+          to.bt_channel = conn->bc_channel;
 
           /* Then perform the send() as sendto() */
 
           ret = psock_bluetooth_sendto(psock, buf, len, flags,
                                         (FAR const struct sockaddr *)&to,
-                                        sizeof(struct sockaddr_rc_s));
+                                        sizeof(struct sockaddr_bt_s));
         }
     }
   else
@@ -662,9 +659,9 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   ssize_t ret;
 
-  /* Only SOCK_DGRAM is supported (because the MAC header is stripped) */
+  /* Only SOCK_RAW is supported */
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type == SOCK_RAW)
     {
       /* Raw packet send */
 
@@ -704,7 +701,9 @@ static int bluetooth_close(FAR struct socket *psock)
 
   switch (psock->s_type)
     {
-      case SOCK_DGRAM:
+      /* Only SOCK_RAW is supported */
+
+      case SOCK_RAW:
         {
           FAR struct bluetooth_conn_s *conn = psock->s_conn;
 

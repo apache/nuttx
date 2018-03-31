@@ -53,11 +53,54 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define HCI_DEVNAME_SIZE  32   /* Maximum size of node name */
+#define HCI_FEATURES_SIZE  8   /* LMP features */
+
 /* Bluetooth network device IOCTL commands. */
 
-#ifndef WL_BLUETOOTHCMDS != 5
+#ifndef WL_BLUETOOTHCMDS != 14
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
+
+/* All of the following use an argument of type struct btreg_s:
+ *
+ * SIOCGBTINFO
+ *   Get Bluetooth device Info.  Given the device name, fill in the btreq_s
+ *   structure including the address field for use with socket addressing as
+ *   above.
+ * SIOCGBTINFOA
+ *   Get Bluetooth device Info from Address.  Given the device address, fill
+ *   in the btreq_s structure including the name field.
+ * SIOCNBTINFO
+ *   Next Bluetooth device Info.  If name field is empty, the first device
+ *   will be returned.  Otherwise, the next device will be returned until
+ *   no more devices are found when the call will fail, with error ENXIO.
+ *   Thus, you can cycle through all devices in the system.
+ * SIOCSBTFLAGS
+ *   Set Bluetooth device Flags.  Not all flags are settable.
+ * SIOCGBTFEAT
+ *   Get Bluetooth device Features.  This returns the cached basic (page 0)
+ *   and extended (page 1 & 2) features.
+ * SIOCSBTPOLICY
+ *   Set Bluetooth device Link Policy bits.
+ * SIOCSBTPTYPE
+ *   Set Bluetooth device Packet Types.  You can only set packet types that
+ *   the device supports.
+ * SIOCGBTSTATS
+ *   Read device statistics.
+ * SIOCZBTSTATS
+ *   Read device statistics, and zero them.
+ */
+
+#define SIOCGBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 0)
+#define SIOCGBTINFOA           _WLIOC(WL_BLUETOOTHFIRST + 1)
+#define SIOCNBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 2)
+#define SIOCSBTFLAGS           _WLIOC(WL_BLUETOOTHFIRST + 3)
+#define SIOCGBTFEAT            _WLIOC(WL_BLUETOOTHFIRST + 4)
+#define SIOCSBTPOLICY          _WLIOC(WL_BLUETOOTHFIRST + 5)
+#define SIOCSBTPTYPE           _WLIOC(WL_BLUETOOTHFIRST + 6)
+#define SIOCGBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 7)
+#define SIOCZBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 8)
 
 /* SIOCBT_ADVERTISESTART
  *   Description:   Set advertisement data, scan response data,
@@ -67,7 +110,7 @@
  *   Output:        None
  */
 
-#define SIOCBT_ADVERTISESTART  _WLIOC(WL_BLUETOOTHFIRST + 0)
+#define SIOCBT_ADVERTISESTART  _WLIOC(WL_BLUETOOTHFIRST + 9)
 
 /* SIOCBT_ADVERTISESTOP
  *   Description:   Stop advertising.
@@ -75,7 +118,7 @@
  *   Output:        None
  */
 
-#define SIOCBT_ADVERTISESTOP   _WLIOC(WL_BLUETOOTHFIRST + 1)
+#define SIOCBT_ADVERTISESTOP   _WLIOC(WL_BLUETOOTHFIRST + 10)
 
 /* SIOCBT_SCANSTART
  *   Description:   Start LE scanning.  Buffered scan results may be
@@ -84,7 +127,7 @@
  *   Output:        None
  */
 
-#define SIOCBT_SCANSTART       _WLIOC(WL_BLUETOOTHFIRST + 2)
+#define SIOCBT_SCANSTART       _WLIOC(WL_BLUETOOTHFIRST + 11)
 
 /* SIOCBT_SCANGET
  *   Description:   Return scan results buffered since the call time that
@@ -95,7 +138,7 @@
  *                  provided buffer space.
  */
 
-#define SIOCBT_SCANGET         _WLIOC(WL_BLUETOOTHFIRST + 3)
+#define SIOCBT_SCANGET         _WLIOC(WL_BLUETOOTHFIRST + 12)
 
 /* SIOCBT_SCANSTOP
  *   Description:   Stop LE scanning and discard any buffered results.
@@ -103,11 +146,88 @@
  *   Output:        None
  */
 
-#define SIOCBT_SCANSTOP        _WLIOC(WL_BLUETOOTHFIRST + 4)
+#define SIOCBT_SCANSTOP        _WLIOC(WL_BLUETOOTHFIRST + 13)
+
+/* struct btreq_s union field accessors */
+
+#define btr_flags              btru.btri.btri_flags
+#define btr_bdaddr             btru.btri.btri_bdaddr
+#define btr_num_cmd            btru.btri.btri_num_cmd
+#define btr_num_acl            btru.btri.btri_num_acl
+#define btr_num_sco            btru.btri.btri_num_sco
+#define btr_acl_mtu            btru.btri.btri_acl_mtu
+#define btr_sco_mtu            btru.btri.btri_sco_mtu
+#define btr_link_policy        btru.btri.btri_link_policy
+#define btr_packet_type        btru.btri.btri_packet_type
+#define btr_max_acl            btru.btri.btri_max_acl
+#define btr_max_sco            btru.btri.btri_max_sco
+#define btr_features0          btru.btrf.btrf_page0
+#define btr_features1          btru.btrf.btrf_page1
+#define btr_features2          btru.btrf.btrf_page2
+#define btr_stats              btru.btrs
+
+/* btr_flags */
+
+#define BTF_UP                 (1 << 0)  /* unit is up */
+#define BTF_RUNNING            (1 << 1)  /* unit is running */
+#define BTF_XMIT_CMD           (1 << 2)  /* transmitting CMD packets */
+#define BTF_XMIT_ACL           (1 << 3)  /* transmitting ACL packets */
+#define BTF_XMIT_SCO           (1 << 4)  /* transmitting SCO packets */
+#define BTF_INIT_BDADDR        (1 << 5)  /* waiting for bdaddr */
+#define BTF_INIT_BUFFER_SIZE   (1 << 6)  /* waiting for buffer size */
+#define BTF_INIT_FEATURES      (1 << 7)  /* waiting for features */
+#define BTF_NOOP_ON_RESET      (1 << 8)  /* wait for No-op on reset */
+#define BTF_INIT_COMMANDS      (1 << 9)  /* waiting for supported commands */
+#define BTF_MASTER             (1 << 10) /* request Master role */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Common structure for Bluetooth IOCTL commands */
+
+struct bt_stats
+{
+  uint32_t err_tx;
+  uint32_t err_rx;
+  uint32_t cmd_tx;
+  uint32_t evt_rx;
+  uint32_t acl_tx;
+  uint32_t acl_rx;
+  uint32_t sco_tx;
+  uint32_t sco_rx;
+  uint32_t byte_tx;
+  uint32_t byte_rx;
+};
+
+struct btreq_s
+  {
+    char btr_name[HCI_DEVNAME_SIZE]; /* Device name */
+    union
+    {
+      struct
+      {
+         bt_addr_t btri_bdaddr;      /* Device bdaddr */
+         uint16_t btri_flags;        /* flags */
+         uint16_t btri_num_cmd;      /* # of free cmd buffers */
+         uint16_t btri_num_acl;      /* # of free ACL buffers */
+         uint16_t btri_num_sco;      /* # of free SCO buffers */
+         uint16_t btri_acl_mtu;      /* ACL mtu */
+         uint16_t btri_sco_mtu;      /* SCO mtu */
+         uint16_t btri_link_policy;  /* Link Policy */
+         uint16_t btri_packet_type;  /* Packet Type */
+         uint16_t btri_max_acl;      /* max ACL buffers */
+         uint16_t btri_max_sco;      /* max SCO buffers */
+       } btri;
+       struct
+       {
+         uint8_t btrf_page0[HCI_FEATURES_SIZE]; /* basic */
+         uint8_t btrf_page1[HCI_FEATURES_SIZE]; /* extended page 1 */
+         uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* extended page 2 */
+       } btrf;
+       struct bt_stats btrs;   /* unit stats */
+   } btru;
+};
 
 /* Read-only data that accompanies the SIOCBT_ADVERTISESTART IOCTL command.
  * Advertising types are defined in bt_hci.h.
@@ -115,6 +235,7 @@
 
 struct bt_advertisestart_s
 {
+  char as_name[HCI_DEVNAME_SIZE];  /* Device name */
   uint8_t as_type;                 /* Advertising type */
   FAR const struct bt_eir_s as_ad; /* Data for advertisement packets */
   FAR const struct bt_eir_s as_sd; /* Data for scan response packets */
@@ -124,17 +245,19 @@ struct bt_advertisestart_s
 
 struct bt_scanresponse_s
 {
- bt_addr_le_t sr_addr;             /* Advertiser LE address and type */
- int8_t sr_rssi;                   /* Strength of advertiser signal */
- uint8_t sr_type;                  /* Type of advertising response */
- uint8_t sr_len;                   /* Length of advertiser data */
- uint8_t sr_data[CONFIG_BLUETOOTH_MAXSCANDATA];
+  char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
+  bt_addr_le_t sr_addr;             /* Advertiser LE address and type */
+  int8_t sr_rssi;                   /* Strength of advertiser signal */
+  uint8_t sr_type;                  /* Type of advertising response */
+  uint8_t sr_len;                   /* Length of advertiser data */
+  uint8_t sr_data[CONFIG_BLUETOOTH_MAXSCANDATA];
 };
 
 struct bt_scanresult_s
 {
-  uint8_t sc_nrsp;                 /* Input:  Max number of responses
-                                    * Return: Actual number of responses */
+  char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
+  uint8_t sc_nrsp;                  /* Input:  Max number of responses
+                                     * Return: Actual number of responses */
   struct bt_scanresponse_s sc_rsp[1];
 };
 
