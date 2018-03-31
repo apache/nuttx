@@ -116,7 +116,7 @@ static struct ieee802154_priv_primitive_s *g_primfree;
 static struct ieee802154_priv_primitive_s *g_primfree_irq;
 #endif
 
-/* Pool of pre-allocated primitive stuctures */
+/* Pool of pre-allocated primitive structures */
 
 static struct ieee802154_priv_primitive_s g_primpool[CONFIG_IEEE802154_PRIMITIVE_PREALLOC];
 #endif /* CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0 */

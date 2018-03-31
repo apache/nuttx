@@ -122,7 +122,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This is our private version of the MAC callback stucture */
+/* This is our private version of the MAC callback structure */
 
 struct macnet_callback_s
 {
@@ -1419,7 +1419,7 @@ int mac802154netdev_register(MACHANDLE mac)
 
   radio->r_get_mhrlen = macnet_get_mhrlen;  /* Get MAC header length */
   radio->r_req_data   = macnet_req_data;    /* Enqueue frame for transmission */
-  radio->r_properties = macnet_properties;  /* Return radio properies */
+  radio->r_properties = macnet_properties;  /* Return radio properties */
 
   /* Initialize fields related to MAC event handling */
 
