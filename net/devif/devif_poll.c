@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/devif/devif_poll.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014, 2016-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +54,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"
@@ -237,6 +239,42 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Name: devif_poll_bluetooth_connections
+ *
+ * Description:
+ *   Poll all packet connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_BLUETOOTH
+static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
+                                            devif_poll_callback_t callback)
+{
+  FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
+  int bstop = 0;
+
+  /* Traverse all of the allocated packet connections and perform the poll action */
+
+  while (!bstop && (bluetooth_conn = bluetooth_conn_next(bluetooth_conn)))
+    {
+      /* Perform the packet TX poll */
+
+      bluetooth_poll(dev, bluetooth_conn);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  return bstop;
+}
+#endif /* CONFIG_NET_BLUETOOTH */
 
 /****************************************************************************
  * Name: devif_poll_ieee802154_connections
@@ -557,6 +595,15 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
       /* Check for pending packet socket transfer */
 
       bstop = devif_poll_pkt_connections(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_BLUETOOTH
+    {
+      /* Check for pending PF_BLUETOOTH socket transfer */
+
+      bstop = devif_poll_bluetooth_connections(dev, callback);
     }
 
   if (!bstop)

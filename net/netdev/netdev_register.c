@@ -53,6 +53,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/bluetooth.h>
 
 #include "utils/utils.h"
 #include "igmp/igmp.h"
@@ -66,6 +67,8 @@
 #define NETDEV_LO_FORMAT    "lo"
 #define NETDEV_SLIP_FORMAT  "sl%d"
 #define NETDEV_TUN_FORMAT   "tun%d"
+#define NETDEV_BNEP_FORMAT  "bnep%d"
+#define NETDEV_PAN_FORMAT   "pan%d"
 #define NETDEV_WLAN_FORMAT  "wlan%d"
 #define NETDEV_WPAN_FORMAT  "wpan%d"
 
@@ -212,6 +215,21 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
 #endif
             devfmt          = NETDEV_WLAN_FORMAT;
+            break;
+#endif
+
+#ifdef CONFIG_NET_BLUETOOTH
+          case NET_LL_BLUETOOTH:  /* Bluetooth */
+            dev->d_llhdrlen = BLUETOOTH_HDRLEN;
+#ifdef CONFIG_NET_6LOWPAN
+#  warning Missing logic
+            dev->d_mtu      = ???;
+#ifdef CONFIG_NET_TCP
+#  warning Missing logic
+            dev->d_recvwndo = ???;
+#endif
+#endif
+            devfmt          = NETDEV_BNEP_FORMAT;
             break;
 #endif
 

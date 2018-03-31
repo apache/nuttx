@@ -436,7 +436,7 @@ static uint8_t notify_cb(FAR const struct bt_gatt_attr_s *attr,
       if (!buf)
         {
           wlwarn("No buffer available to send notification");
-          bt_conn_put(conn);
+          bt_conn_release(conn);
           return BT_GATT_ITER_STOP;
         }
 
@@ -449,7 +449,7 @@ static uint8_t notify_cb(FAR const struct bt_gatt_attr_s *attr,
       memcpy(nfy->value, data->data, data->len);
 
       bt_l2cap_send(conn, BT_L2CAP_CID_ATT, buf);
-      bt_conn_put(conn);
+      bt_conn_release(conn);
     }
 
   return BT_GATT_ITER_CONTINUE;
@@ -555,7 +555,7 @@ static uint8_t disconnected_cb(FAR const struct bt_gatt_attr_s *attr,
           tmp = bt_conn_lookup_addr_le(&ccc->cfg[i].peer);
           if (tmp && tmp->state == BT_CONN_CONNECTED)
             {
-              bt_conn_put(tmp);
+              bt_conn_release(tmp);
               return BT_GATT_ITER_CONTINUE;
             }
         }

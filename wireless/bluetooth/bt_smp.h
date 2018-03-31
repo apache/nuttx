@@ -48,7 +48,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/wireless/bt_conn.h>
+#include "bt_conn.h"
 
 /****************************************************************************
  * Pre-processor Definitions

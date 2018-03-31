@@ -223,17 +223,4 @@ static inline int bt_addr_le_to_str(FAR const bt_addr_le_t *addr, char *str,
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: bt_init
- *
- * Description:
- *   Initialize Bluetooth. Must be the called before anything else.
- *
- * Returned Value:
- *    Zero on success or (negative) error code otherwise.
- *
- ****************************************************************************/
-
-int bt_init(void);
-
 #endif /* __INCLUDE_NUTTX_WIRELESS_BT_CORE_H */

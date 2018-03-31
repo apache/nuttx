@@ -77,6 +77,12 @@
 #  endif
 #elif defined(CONFIG_WIRELESS_IEEE802154)
 #  define RADIO_MAX_ADDRLEN 8
+#elif defined(CONFIG_WIRELESS_BLUETOOTH)
+#  if CONFIG_PKTRADIO_ADDRLEN > 6
+#    define RADIO_MAX_ADDRLEN CONFIG_PKTRADIO_ADDRLEN
+#  else
+#    define RADIO_MAX_ADDRLEN 6
+#  endif
 #else /* if defined(CONFIG_WIRELESS_PKTRADIO) */
 #  define RADIO_MAX_ADDRLEN CONFIG_PKTRADIO_ADDRLEN
 #endif
@@ -182,9 +188,13 @@ struct netdev_statistics_s
 };
 #endif
 
-#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_BLUETOOTH) || \
+    defined(CONFIG_NET_IEEE802154)
 /* This structure is used to represent addresses of varying length.  This
  * structure is used to represent the address assigned to a radio.
+ *
+ * NOTE: the Bluetooth address is not variable, but shares struct
+ * radio_driver_s which depends on this type.
  */
 
 struct netdev_maxaddr_s
@@ -237,7 +247,7 @@ struct net_driver_s
 #endif
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN) || \
-    defined(CONFIG_NET_IEEE802154)
+    defined(CONFIG_NET_BLUETOOTH) || defined(CONFIG_NET_IEEE802154)
 
   /* Link layer address */
 
@@ -249,13 +259,14 @@ struct net_driver_s
     struct ether_addr ether;    /* Device Ethernet MAC address */
 #endif
 
-#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_BLUETOOTH) || \
+    defined(CONFIG_NET_IEEE802154)
   /* The address assigned to an IEEE 802.15.4 or generic packet radio. */
 
     struct netdev_varaddr_s radio;
-#endif /* CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
+#endif
   } d_mac;
-#endif /* CONFIG_NET_ETHERNET || CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
+#endif /* CONFIG_NET_ETHERNET || CONFIG_NET_6LOWPAN ... || CONFIG_NET_IEEE802154 */
 
   /* Network identity */
 

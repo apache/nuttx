@@ -62,7 +62,7 @@
 
 /* This structure encapsulates all globals used by the IOCTL logic */
 
-struct bt_scanstate_s
+struct btnet_scanstate_s
 {
   sem_t bs_exclsem;                 /* Manages exclusive access */
   bool bs_scanning;                 /* True:  Scanning in progress */
@@ -80,14 +80,14 @@ struct bt_scanstate_s
  * maintain the scan state as a global.
  */
 
-static struct bt_scanstate_s g_scanstate;
+static struct btnet_scanstate_s g_scanstate;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_scan_callback
+ * Name: btnet_scan_callback
  *
  * Description:
  *   This is an HCI callback function.  HCI provides scan result data via
@@ -102,9 +102,9 @@ static struct bt_scanstate_s g_scanstate;
  *
  ****************************************************************************/
 
-static void bt_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
-                             uint8_t adv_type, FAR const uint8_t *adv_data,
-                             uint8_t len)
+static void btnet_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
+                                uint8_t adv_type, FAR const uint8_t *adv_data,
+                                uint8_t len)
 {
   FAR struct bt_scanresponse_s *rsp;
   uint8_t nexttail;
@@ -174,7 +174,7 @@ static void bt_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
 }
 
 /****************************************************************************
- * Name: bt_scan_result
+ * Name: btnet_scan_result
  *
  * Description:
  *   This is an HCI callback function.  HCI provides scan result data via
@@ -189,7 +189,7 @@ static void bt_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
  *
  ****************************************************************************/
 
-static int bt_scan_result(FAR struct bt_scanresult_s *result)
+static int btnet_scan_result(FAR struct bt_scanresult_s *result)
 {
   uint8_t head;
   uint8_t tail;
@@ -248,7 +248,7 @@ static int bt_scan_result(FAR struct bt_scanresult_s *result)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_ioctl
+ * Name: btnet_ioctl
  *
  * Description:
  *   Handle network IOCTL commands directed to this device.
@@ -263,7 +263,7 @@ static int bt_scan_result(FAR struct bt_scanresult_s *result)
  *
  ****************************************************************************/
 
-int bt_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
+int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 {
   int ret;
 
@@ -338,7 +338,7 @@ int bt_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
               g_scanstate.bs_head     = 0;
               g_scanstate.bs_tail     = 0;
 
-              ret = bt_start_scanning(dup_enable, bt_scan_callback);
+              ret = bt_start_scanning(dup_enable, btnet_scan_callback);
               wlinfo("Start scan: %d\n", ret);
 
               if (ret < 0)
@@ -370,7 +370,7 @@ int bt_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
             }
           else
             {
-              ret = bt_scan_result(result);
+              ret = btnet_scan_result(result);
               wlinfo("Get scan results: %d\n", ret);
             }
         }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_lladdrsize.c
+ * net/bluetooth/bluetooth_finddev.c
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,136 +39,121 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <assert.h>
-#include <errno.h>
-
-#include <net/if.h>
 
 #include <nuttx/net/net.h>
-#include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>
-#include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/bt_hci.h>
 
 #include "netdev/netdev.h"
+#include "bluetooth/bluetooth.h"
+
+#ifdef CONFIG_NET_BLUETOOTH
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct bluetooth_finddev_s
+{
+  FAR const bt_addr_t       *bf_addr;
+  FAR struct radio_driver_s *bf_radio;
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_pktradio_addrlen
+ * Name: bluetooth_dev_callback
  *
  * Description:
- *   Returns the size of the node address associated with a packet radio.
- *   This is probably CONFIG_PKTRADIO_ADDRLEN but we cannot be sure in the
- *   case that there are multiple packet radios.  In that case, we have to
- *   query the radio for its address length.
+ *   Check if this device matches the connections local address.
  *
  * Input Parameters:
- *   dev - A reference to the device of interest
+ *   dev - The next network device in the enumeration
  *
  * Returned Value:
- *   The size of the MAC address associated with this radio
+ *   0 if there is no match (meaning to continue looking); 1 if there is a
+ *   match (meaning to stop the search).
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_WIRELESS_PKTRADIO)
-static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
+static int bluetooth_dev_callback(FAR struct net_driver_s *dev, FAR void *arg)
 {
-  FAR struct radio_driver_s *radio = (FAR struct radio_driver_s *)dev;
-  struct radiodev_properties_s properties;
-  int ret;
+  FAR struct bluetooth_finddev_s *match =
+    (FAR struct bluetooth_finddev_s *)arg;
 
-  DEBUGASSERT(radio != NULL && radio->r_properties != NULL);
-  ret = radio->r_properties(radio, &properties);
-  if (ret < 0)
+  DEBUGASSERT(dev != NULL && match != NULL && match->bf_addr != NULL);
+
+  /* First, check if this network device is an Bluetooth radio and that
+   * it has an assigned Bluetooth address.
+   */
+
+  if (dev->d_lltype == NET_LL_BLUETOOTH && dev->d_mac.radio.nv_addrlen > 0)
     {
-      return ret;
+      DEBUGASSERT(dev->d_mac.radio.nv_addrlen == BLUETOOTH_ADDRSIZE);
+
+      /* Does the device address match */
+
+      if (BLUETOOTH_ADDRCMP(dev->d_mac.radio.nv_addr, match->bf_addr))
+        {
+          /* Yes.. save the match and return 1 to stop the search */
+
+          match->bf_radio = (FAR struct radio_driver_s *)dev;
+          return 1;
+        }
     }
 
-  return properties.sp_addrlen;
+  /* Keep looking */
+
+  return 0;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_dev_lladdrsize
+ * Name: bluetooth_find_device
  *
  * Description:
- *   Returns the size of the MAC address associated with a network device.
+ *   Select the network driver to use with the Bluetooth transaction.
  *
  * Input Parameters:
- *   dev - A reference to the device of interest
+ *   conn - Bluetooth connection structure (not currently used).
+ *   addr - The address to match the devices assigned address
  *
  * Returned Value:
- *   The size of the MAC address associated with this device
+ *   A pointer to the network driver to use.  NULL is returned on any
+ *   failure.
  *
  ****************************************************************************/
 
-int netdev_dev_lladdrsize(FAR struct net_driver_s *dev)
+FAR struct radio_driver_s *
+  bluetooth_find_device(FAR struct bluetooth_conn_s *conn,
+                        FAR const bt_addr_t *addr)
 {
-  DEBUGASSERT(dev != NULL);
+  struct bluetooth_finddev_s match;
+  int ret;
 
-  /* Get the length of the address for this link layer type */
+  DEBUGASSERT(conn != NULL);
+  match.bf_addr  = addr;
+  match.bf_radio = NULL;
 
-  switch (dev->d_lltype)
+  /* Search for the Bluetooth network device whose MAC is equal to the
+   * sockets bound local address.
+   */
+
+  ret = netdev_foreach(bluetooth_dev_callback, (FAR void *)&match);
+  if (ret == 1)
     {
-#ifdef CONFIG_NET_ETHERNET
-      case NET_LL_ETHERNET:
-        {
-          /* Size of the Ethernet MAC address */
-
-          return IFHWADDRLEN;
-        }
-#endif
-
-#ifdef CONFIG_NET_6LOWPAN
-#ifdef CONFIG_WIRELESS_BLUETOOTH
-      case NET_LL_BLUETOOTH:
-        {
-          /* 6LoWPAN can be configured to use either extended or short
-           * addressing.
-           */
-
-          return BLUETOOTH_HDRLEN;
-        }
-#endif /* CONFIG_WIRELESS_BLUETOOTH */
-
-#ifdef CONFIG_WIRELESS_IEEE802154
-      case NET_LL_IEEE802154:
-        {
-          /* 6LoWPAN can be configured to use either extended or short
-           * addressing.
-           */
-
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-          return NET_6LOWPAN_EADDRSIZE;
-#else
-          return NET_6LOWPAN_SADDRSIZE;
-#endif
-        }
-#endif /* CONFIG_WIRELESS_IEEE802154 */
-
-#ifdef CONFIG_WIRELESS_PKTRADIO
-      case NET_LL_PKTRADIO:
-        {
-           /* Return the size of the packet radio address */
-
-           return netdev_pktradio_addrlen(dev);
-        }
-#endif /* CONFIG_WIRELESS_PKTRADIO */
-#endif /* CONFIG_NET_6LOWPAN */
-
-       default:
-        {
-          /* The link layer type associated has no address */
-
-          return 0;
-        }
+      DEBUGASSERT(match.bf_radio != NULL);
+      return match.bf_radio;
     }
+
+  return NULL;
 }
+
+#endif /* CONFIG_NET_BLUETOOTH */

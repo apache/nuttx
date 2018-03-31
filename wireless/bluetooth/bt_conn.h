@@ -50,8 +50,6 @@
 
 #include <mqueue.h>
 
-#include <nuttx/wireless/bt_conn.h>
-
 #include "bt_atomic.h"
 
 /****************************************************************************
@@ -116,38 +114,301 @@ struct bt_conn_s
  * Public Data
  ****************************************************************************/
 
-/* Process incoming data for a connection */
+/****************************************************************************
+ * Name: bt_conn_input
+ *
+ * Description:
+ *   Receive packets from the HCI core on a registered connection.
+ *
+ * Input Parameters:
+ *   conn  - The registered connection
+ *   buf   - The buffer structure containing the received packet
+ *   flags - Packet boundary flags
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-void bt_conn_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
-                  uint8_t flags);
+void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
+                   uint8_t flags);
 
-/* Send data over a connection */
+/****************************************************************************
+ * Name: bt_conn_send
+ *
+ * Description:
+ *   Send data over a connection
+ *
+ * Input Parameters:
+ *   conn  - The registered connection
+ *   buf   - The buffer structure containing the packet to be sent
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf);
 
-/* Add a new connection */
+/****************************************************************************
+ * Name: bt_conn_add
+ *
+ * Description:
+ *   Add a new connection
+ *
+ * Input Parameters:
+ *   peer - The address of the Bluetooth peer
+ *   role - Either BT_HCI_ROLE_MASTER or BT_HCI_ROLE_SLAVE
+ *
+ * Returned Value:
+ *   A reference to the new connection structure is returned on success.
+ *
+ ****************************************************************************/
 
 FAR struct bt_conn_s *bt_conn_add(FAR const bt_addr_le_t *peer, uint8_t role);
 
-/* Look up an existing connection */
-
-FAR struct bt_conn_s *bt_conn_lookup_handle(uint16_t handle);
-
-/* Look up a connection state. For BT_ADDR_LE_ANY, returns the first connection
- * with the specific state
- */
-
-FAR struct bt_conn_s *bt_conn_lookup_state(FAR const bt_addr_le_t * peer,
-                                           enum bt_conn_state_e state);
-
-/* Set connection object in certain state and perform action related to state */
+/****************************************************************************
+ * Name: bt_conn_set_state
+ *
+ * Description:
+ *   Set connection object in certain state and perform actions related to
+ *   state change.
+ *
+ * Input Parameters:
+ *   conn - The connection whose state will be changed.
+ *   state - The new state of the connection.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void bt_conn_set_state(FAR struct bt_conn_s *conn, enum bt_conn_state_e state);
 
-/* rand and ediv should be in BT order */
+/****************************************************************************
+ * Name: bt_conn_lookup_handle
+ *
+ * Description:
+ *   Look up an existing connection
+ *
+ * Input Parameters:
+ *   handle - The handle to be used to perform the lookup
+ *
+ * Returned Value:
+ *   A reference to the connection state instance is returned on success.
+ *   NULL is returned if the connection is not found.  On succes, the
+ *   caller gets a new reference to the connection object which must be
+ *   released with bt_conn_release() once done using the connection.
+ *
+ ****************************************************************************/
+
+FAR struct bt_conn_s *bt_conn_lookup_handle(uint16_t handle);
+
+/****************************************************************************
+ * Name: bt_conn_lookup_addr_le
+ *
+ * Description:
+ *   Look up an existing connection based on the remote address.
+ *
+ * Input Parameters:
+ *   peer - Remote address.
+ *
+ * Returned Value:
+ *   A reference to the connection state instance is returned on success.
+ *   NULL is returned if the connection is not found.  On succes, the
+ *   caller gets a new reference to the connection object which must be
+ *   released with bt_conn_release() once done using the connection.
+ *
+ ****************************************************************************/
+
+FAR struct bt_conn_s *bt_conn_lookup_addr_le(const bt_addr_le_t *peer);
+
+/****************************************************************************
+ * Name: bt_conn_lookup_state
+ *
+ * Description:
+ *   Look up a connection state.  For BT_ADDR_LE_ANY, returns the first
+ *   connection with the specific state
+ *
+ * Input Parameters:
+ *   peer  - The peer address to match
+ *   state - The connection state to match
+ *
+ * Returned Value:
+ *   A reference to the connection state instance is returned on success.
+ *   NULL is returned if the connection is not found.  On succes, the
+ *   caller gets a new reference to the connection object which must be
+ *   released with bt_conn_release() once done using the connection.
+ *
+ ****************************************************************************/
+
+FAR struct bt_conn_s *bt_conn_lookup_state(FAR const bt_addr_le_t *peer,
+                                           enum bt_conn_state_e state);
+
+/****************************************************************************
+ * Name: bt_conn_addref
+ *
+ * Description:
+ *   Increment the reference count of a connection object.
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *
+ * Returned Value:
+ *   Connection object with incremented reference count.
+ *
+ ****************************************************************************/
+
+FAR struct bt_conn_s *bt_conn_addref(FAR struct bt_conn_s *conn);
+
+/****************************************************************************
+ * Name: bt_conn_release
+ *
+ * Description:
+ *   Decrement the reference count of a connection object.
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_conn_release(FAR struct bt_conn_s *conn);
+
+/****************************************************************************
+ * Name: bt_conn_get_dst
+ *
+ * Description:
+ *   Get destination (peer) address of a connection.
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *
+ * Returned Value:
+ *   Destination address.
+ *
+ ****************************************************************************/
+
+FAR const bt_addr_le_t *bt_conn_get_dst(FAR const struct bt_conn_s *conn);
+
+/****************************************************************************
+ * Name: bt_conn_security
+ *
+ * Description:
+ *   This function enable security (encryption) for a connection. If device is
+ *   already paired with sufficiently strong key encryption will be enabled. If
+ *   link is already encrypted with sufficiently strong key this function does
+ *   nothing.
+ *
+ *   If device is not paired pairing will be initiated. If device is paired and
+ *   keys are too weak but input output capabilities allow for strong enough keys
+ *   pairing will be initiated.
+ *
+ *   This function may return error if required level of security is not possible
+ *   to achieve due to local or remote device limitation (eg input output
+ *   capabilities).
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *   sec  - Requested security level.
+ *
+ * Returned Value:
+ *   0 on success or negative error
+ *
+ ****************************************************************************/
+
+int bt_conn_security(FAR struct bt_conn_s *conn, enum bt_security_e sec);
+
+/****************************************************************************
+ * Name:bt_conn_set_auto_conn
+ *
+ * Description:
+ *   This function enables/disables automatic connection initiation.
+ *   Every time the device looses the connection with peer, this connection
+ *   will be re-established if connectible advertisement from peer is
+ *   received.
+ *
+ * Input Parameters:
+ *   conn      - Existing connection object.
+ *   auto_conn - boolean value. If true, auto connect is enabled, if false,
+ *               auto connect is disabled.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_conn_set_auto_conn(FAR struct bt_conn_s *conn, bool auto_conn);
+
+/****************************************************************************
+ * Name: bt_conn_disconnect
+ *
+ * Description:
+ *   Disconnect an active connection with the specified reason code or cancel
+ *   pending outgoing connection.
+ *
+ * Input Parameters:
+ *   conn   - Connection to disconnect.
+ *   reason - Reason code for the disconnection.
+ *
+ * Returned Value:
+ *   Zero on success or (negative) error code on failure.
+ *
+ ****************************************************************************/
+
+int bt_conn_disconnect(FAR struct bt_conn_s *conn, uint8_t reason);
+
+/****************************************************************************
+ * Name: bt_conn_create_le
+ *
+ * Description:
+ *  Allows initiate new LE link to remote peer using its address.
+ *  Returns a new reference that the the caller is responsible for managing.
+ *
+ * Input Parameters:
+ *   peer - Remote address.
+ *
+ * Returned Value:
+ *   Valid connection object on success or NULL otherwise.
+ *
+ ****************************************************************************/
+
+FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer);
+
+/****************************************************************************
+ * Name: bt_conn_le_start_encryption
+ *
+ * Description:
+ *   See the HCI start encryption command.
+ *
+ *   NOTE: rand and ediv should be in BT order.
+ *
+ * Input Parameters:
+ *   conn       - The connection to send the command on.
+ *   rand, ediv - Values to use for the encryption key
+ *   ltk        - 
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
 
 int bt_conn_le_start_encryption(FAR struct bt_conn_s *conn, uint64_t rand,
                                 uint16_t ediv, FAR const uint8_t *ltk);
+
+/****************************************************************************
+ * Name:
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 int bt_conn_le_conn_update(FAR struct bt_conn_s *conn, uint16_t min,
                            uint16_t max, uint16_t latency,

@@ -128,11 +128,144 @@ static void bt_conn_reset_rx_state(FAR struct bt_conn_s *conn)
   conn->rx_len = 0;
 }
 
+static int conn_tx_kthread(int argc, FAR char *argv[])
+{
+  FAR struct bt_conn_s *conn;
+  FAR struct bt_buf_s *buf;
+  int ret;
+
+  /* Get the connection instance */
+
+  conn = g_conn_handoff.conn;
+  DEBUGASSERT(conn != NULL);
+  nxsem_post(&g_conn_handoff.sync_sem);
+
+  wlinfo("Started for handle %u\n", conn->handle);
+
+  while (conn->state == BT_CONN_CONNECTED)
+    {
+      /* Wait until the controller can accept ACL packets */
+
+      wlinfo("calling nxsem_wait\n");
+
+      do
+        {
+          ret = nxsem_wait(&g_btdev.le_pkts_sem);
+        }
+      while (ret == -EINTR);
+
+      DEBUGASSERT(ret == OK);
+
+      /* Check for disconnection */
+
+      if (conn->state != BT_CONN_CONNECTED)
+        {
+          nxsem_post(&g_btdev.le_pkts_sem);
+          break;
+        }
+
+      /* Get next ACL packet for connection */
+
+      ret = bt_queue_recv(conn->tx_queue, &buf);
+      DEBUGASSERT(ret >= 0 && buf != NULL);
+      UNUSED(ret);
+
+      if (conn->state != BT_CONN_CONNECTED)
+        {
+          nxsem_post(&g_btdev.le_pkts_sem);
+          bt_buf_put(buf);
+          break;
+        }
+
+      wlinfo("passing buf %p len %u to driver\n", buf, buf->len);
+      g_btdev.dev->send(g_btdev.dev, buf);
+      bt_buf_put(buf);
+    }
+
+  wlinfo("handle %u disconnected - cleaning up\n", conn->handle);
+
+  /* Give back any allocated buffers */
+
+  do
+    {
+      buf = NULL;
+      ret = bt_queue_recv(conn->tx_queue, &buf);
+      if (ret >= 0)
+        {
+          DEBUGASSERT(buf != NULL);
+          bt_buf_put(buf);
+        }
+    }
+  while (ret >= OK);
+
+  bt_conn_reset_rx_state(conn);
+
+  wlinfo("handle %u exiting\n", conn->handle);
+  bt_conn_release(conn);
+  return EXIT_SUCCESS;
+}
+
+static int bt_hci_disconnect(FAR struct bt_conn_s *conn, uint8_t reason)
+{
+  FAR struct bt_buf_s *buf;
+  FAR struct bt_hci_cp_disconnect_s *disconn;
+  int err;
+
+  buf = bt_hci_cmd_create(BT_HCI_OP_DISCONNECT, sizeof(*disconn));
+  if (!buf)
+    {
+      return -ENOBUFS;
+    }
+
+  disconn         = bt_buf_add(buf, sizeof(*disconn));
+  disconn->handle = BT_HOST2LE16(conn->handle);
+  disconn->reason = reason;
+
+  err = bt_hci_cmd_send(BT_HCI_OP_DISCONNECT, buf);
+  if (err)
+    {
+      return err;
+    }
+
+  bt_conn_set_state(conn, BT_CONN_DISCONNECT);
+  return 0;
+}
+
+static int bt_hci_connect_le_cancel(FAR struct bt_conn_s *conn)
+{
+  int err;
+
+  err = bt_hci_cmd_send(BT_HCI_OP_LE_CREATE_CONN_CANCEL, NULL);
+  if (err)
+    {
+      return err;
+    }
+
+  return 0;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void bt_conn_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf, uint8_t flags)
+/****************************************************************************
+ * Name: bt_conn_input
+ *
+ * Description:
+ *   Receive packets from the HCI core on a registered connection.
+ *
+ * Input Parameters:
+ *   conn  - The registered connection
+ *   buf   - The buffer structure containing the packet
+ *   flags - Packet boundary flags
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
+                   uint8_t flags)
 {
   FAR struct bt_l2cap_hdr_s *hdr;
   uint16_t len;
@@ -140,6 +273,7 @@ void bt_conn_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf, uint8_t 
   wlinfo("handle %u len %u flags %02x\n", conn->handle, buf->len, flags);
 
   /* Check packet boundary flags */
+
   switch (flags)
     {
       case 0x02:
@@ -232,6 +366,21 @@ void bt_conn_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf, uint8_t 
   bt_l2cap_recv(conn, buf);
 }
 
+/****************************************************************************
+ * Name: bt_conn_send
+ *
+ * Description:
+ *   Send data over a connection
+ *
+ * Input Parameters:
+ *   conn  - The registered connection
+ *   buf   - The buffer structure containing the packet to be sent
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_acl_hdr_s *hdr;
@@ -308,82 +457,20 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
     }
 }
 
-static int conn_tx_kthread(int argc, FAR char *argv[])
-{
-  FAR struct bt_conn_s *conn;
-  FAR struct bt_buf_s *buf;
-  int ret;
-
-  /* Get the connection instance */
-
-  conn = g_conn_handoff.conn;
-  DEBUGASSERT(conn != NULL);
-  nxsem_post(&g_conn_handoff.sync_sem);
-
-  wlinfo("Started for handle %u\n", conn->handle);
-
-  while (conn->state == BT_CONN_CONNECTED)
-    {
-      /* Wait until the controller can accept ACL packets */
-
-      wlinfo("calling nxsem_wait\n");
-
-      do
-        {
-          ret = nxsem_wait(&g_btdev.le_pkts_sem);
-        }
-      while (ret == -EINTR);
-
-      DEBUGASSERT(ret == OK);
-
-      /* Check for disconnection */
-
-      if (conn->state != BT_CONN_CONNECTED)
-        {
-          nxsem_post(&g_btdev.le_pkts_sem);
-          break;
-        }
-
-      /* Get next ACL packet for connection */
-
-      ret = bt_queue_recv(conn->tx_queue, &buf);
-      DEBUGASSERT(ret >= 0 && buf != NULL);
-      UNUSED(ret);
-
-      if (conn->state != BT_CONN_CONNECTED)
-        {
-          nxsem_post(&g_btdev.le_pkts_sem);
-          bt_buf_put(buf);
-          break;
-        }
-
-      wlinfo("passing buf %p len %u to driver\n", buf, buf->len);
-      g_btdev.dev->send(g_btdev.dev, buf);
-      bt_buf_put(buf);
-    }
-
-  wlinfo("handle %u disconnected - cleaning up\n", conn->handle);
-
-  /* Give back any allocated buffers */
-
-  do
-    {
-      buf = NULL;
-      ret = bt_queue_recv(conn->tx_queue, &buf);
-      if (ret >= 0)
-        {
-          DEBUGASSERT(buf != NULL);
-          bt_buf_put(buf);
-        }
-    }
-  while (ret >= OK);
-
-  bt_conn_reset_rx_state(conn);
-
-  wlinfo("handle %u exiting\n", conn->handle);
-  bt_conn_put(conn);
-  return EXIT_SUCCESS;
-}
+/****************************************************************************
+ * Name: bt_conn_add
+ *
+ * Description:
+ *   Add a new connection
+ *
+ * Input Parameters:
+ *   peer - The address of the Bluetooth peer
+ *   role - Either BT_HCI_ROLE_MASTER or BT_HCI_ROLE_SLAVE
+ *
+ * Returned Value:
+ *   A reference to the new connection structure is returned on success.
+ *
+ ****************************************************************************/
 
 FAR struct bt_conn_s *bt_conn_add(FAR const bt_addr_le_t *peer,
                                   uint8_t role)
@@ -414,6 +501,22 @@ FAR struct bt_conn_s *bt_conn_add(FAR const bt_addr_le_t *peer,
   return conn;
 }
 
+/****************************************************************************
+ * Name: bt_conn_set_state
+ *
+ * Description:
+ *   Set connection object in certain state and perform actions related to
+ *   state change.
+ *
+ * Input Parameters:
+ *   conn - The connection whose state will be changed.
+ *   state - The new state of the connection.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 void bt_conn_set_state(FAR struct bt_conn_s *conn,
                        enum bt_conn_state_e state)
 {
@@ -436,7 +539,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
 
   if (old_state == BT_CONN_DISCONNECTED)
     {
-      bt_conn_get(conn);
+      bt_conn_addref(conn);
     }
 
   switch (conn->state)
@@ -465,7 +568,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
 
           /* Start the Tx connection kernel thread */
 
-          g_conn_handoff.conn = bt_conn_get(conn);
+          g_conn_handoff.conn = bt_conn_addref(conn);
           pid = kthread_create("BT Conn Tx", CONFIG_BLUETOOTH_TXCONN_PRIORITY,
                                CONFIG_BLUETOOTH_TXCONN_STACKSIZE,
                                conn_tx_kthread, NULL);
@@ -498,7 +601,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
 
         /* Release the reference we took for the very first state transition. */
 
-        bt_conn_put(conn);
+        bt_conn_release(conn);
         break;
 
       case BT_CONN_CONNECT_SCAN:
@@ -511,6 +614,23 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
         break;
     }
 }
+
+/****************************************************************************
+ * Name: bt_conn_lookup_handle
+ *
+ * Description:
+ *   Look up an existing connection
+ *
+ * Input Parameters:
+ *   handle - The handle to be used to perform the lookup
+ *
+ * Returned Value:
+ *   A reference to the connection state instance is returned on success.
+ *   NULL is returned if the connection is not found.  On succes, the
+ *   caller gets a new reference to the connection object which must be
+ *   released with bt_conn_release() once done using the connection.
+ *
+ ****************************************************************************/
 
 FAR struct bt_conn_s *bt_conn_lookup_handle(uint16_t handle)
 {
@@ -528,12 +648,29 @@ FAR struct bt_conn_s *bt_conn_lookup_handle(uint16_t handle)
 
       if (g_conns[i].handle == handle)
         {
-          return bt_conn_get(&g_conns[i]);
+          return bt_conn_addref(&g_conns[i]);
         }
     }
 
   return NULL;
 }
+
+/****************************************************************************
+ * Name: bt_conn_lookup_addr_le
+ *
+ * Description:
+ *   Look up an existing connection based on the remote address.
+ *
+ * Input Parameters:
+ *   peer - Remote address.
+ *
+ * Returned Value:
+ *   A reference to the connection state instance is returned on success.
+ *   NULL is returned if the connection is not found.  On succes, the
+ *   caller gets a new reference to the connection object which must be
+ *   released with bt_conn_release() once done using the connection.
+ *
+ ****************************************************************************/
 
 FAR struct bt_conn_s *bt_conn_lookup_addr_le(FAR const bt_addr_le_t * peer)
 {
@@ -543,12 +680,31 @@ FAR struct bt_conn_s *bt_conn_lookup_addr_le(FAR const bt_addr_le_t * peer)
     {
       if (!bt_addr_le_cmp(peer, &g_conns[i].dst))
         {
-          return bt_conn_get(&g_conns[i]);
+          return bt_conn_addref(&g_conns[i]);
         }
     }
 
   return NULL;
 }
+
+/****************************************************************************
+ * Name: bt_conn_lookup_state
+ *
+ * Description:
+ *   Look up a connection state.  For BT_ADDR_LE_ANY, returns the first
+ *   connection with the specific state
+ *
+ * Input Parameters:
+ *   peer  - The peer address to match
+ *   state - The connection state to match
+ *
+ * Returned Value:
+ *   A reference to the connection state instance is returned on success.
+ *   NULL is returned if the connection is not found.  On succes, the
+ *   caller gets a new reference to the connection object which must be
+ *   released with bt_conn_release() once done using the connection.
+ *
+ ****************************************************************************/
 
 FAR struct bt_conn_s *bt_conn_lookup_state(FAR const bt_addr_le_t * peer,
                                            enum bt_conn_state_e state)
@@ -570,14 +726,28 @@ FAR struct bt_conn_s *bt_conn_lookup_state(FAR const bt_addr_le_t * peer,
 
       if (g_conns[i].state == state)
         {
-          return bt_conn_get(&g_conns[i]);
+          return bt_conn_addref(&g_conns[i]);
         }
     }
 
   return NULL;
 }
 
-FAR struct bt_conn_s *bt_conn_get(FAR struct bt_conn_s *conn)
+/****************************************************************************
+ * Name: bt_conn_addref
+ *
+ * Description:
+ *   Increment the reference count of a connection object.
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *
+ * Returned Value:
+ *   Connection object with incremented reference count.
+ *
+ ****************************************************************************/
+
+FAR struct bt_conn_s *bt_conn_addref(FAR struct bt_conn_s *conn)
 {
   bt_atomic_incr(&conn->ref);
 
@@ -586,7 +756,21 @@ FAR struct bt_conn_s *bt_conn_get(FAR struct bt_conn_s *conn)
   return conn;
 }
 
-void bt_conn_put(FAR struct bt_conn_s *conn)
+/****************************************************************************
+ * Name: bt_conn_release
+ *
+ * Description:
+ *   Decrement the reference count of a connection object.
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_conn_release(FAR struct bt_conn_s *conn)
 {
   bt_atomic_t old_ref;
 
@@ -602,10 +786,50 @@ void bt_conn_put(FAR struct bt_conn_s *conn)
   bt_addr_le_copy(&conn->dst, BT_ADDR_LE_ANY);
 }
 
-const bt_addr_le_t *bt_conn_get_dst(FAR const struct bt_conn_s *conn)
+/****************************************************************************
+ * Name: bt_conn_get_dst
+ *
+ * Description:
+ *   Get destination (peer) address of a connection.
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *
+ * Returned Value:
+ *   Destination address.
+ *
+ ****************************************************************************/
+
+FAR const bt_addr_le_t *bt_conn_get_dst(FAR const struct bt_conn_s *conn)
 {
   return &conn->dst;
 }
+
+/****************************************************************************
+ * Name: bt_conn_security
+ *
+ * Description:
+ *   This function enable security (encryption) for a connection. If device is
+ *   already paired with sufficiently strong key encryption will be enabled. If
+ *   link is already encrypted with sufficiently strong key this function does
+ *   nothing.
+ *
+ *   If device is not paired pairing will be initiated. If device is paired and
+ *   keys are too weak but input output capabilities allow for strong enough keys
+ *   pairing will be initiated.
+ *
+ *   This function may return error if required level of security is not possible
+ *   to achieve due to local or remote device limitation (eg input output
+ *   capabilities).
+ *
+ * Input Parameters:
+ *   conn - Connection object.
+ *   sec  - Requested security level.
+ *
+ * Returned Value:
+ *   0 on success or negative error
+ *
+ ****************************************************************************/
 
 int bt_conn_security(FAR struct bt_conn_s *conn, enum bt_security_e sec)
 {
@@ -650,6 +874,25 @@ int bt_conn_security(FAR struct bt_conn_s *conn, enum bt_security_e sec)
   return bt_smp_send_pairing_req(conn);
 }
 
+/****************************************************************************
+ * Name:bt_conn_set_auto_conn
+ *
+ * Description:
+ *   This function enables/disables automatic connection initiation.
+ *   Every time the device looses the connection with peer, this connection
+ *   will be re-established if connectible advertisement from peer is
+ *   received.
+ *
+ * Input Parameters:
+ *   conn      - Existing connection object.
+ *   auto_conn - boolean value. If true, auto connect is enabled, if false,
+ *               auto connect is disabled.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 void bt_conn_set_auto_conn(FAR struct bt_conn_s *conn, bool auto_conn)
 {
   if (auto_conn)
@@ -662,44 +905,21 @@ void bt_conn_set_auto_conn(FAR struct bt_conn_s *conn, bool auto_conn)
     }
 }
 
-static int bt_hci_disconnect(FAR struct bt_conn_s *conn, uint8_t reason)
-{
-  FAR struct bt_buf_s *buf;
-  FAR struct bt_hci_cp_disconnect_s *disconn;
-  int err;
-
-  buf = bt_hci_cmd_create(BT_HCI_OP_DISCONNECT, sizeof(*disconn));
-  if (!buf)
-    {
-      return -ENOBUFS;
-    }
-
-  disconn         = bt_buf_add(buf, sizeof(*disconn));
-  disconn->handle = BT_HOST2LE16(conn->handle);
-  disconn->reason = reason;
-
-  err = bt_hci_cmd_send(BT_HCI_OP_DISCONNECT, buf);
-  if (err)
-    {
-      return err;
-    }
-
-  bt_conn_set_state(conn, BT_CONN_DISCONNECT);
-  return 0;
-}
-
-static int bt_hci_connect_le_cancel(FAR struct bt_conn_s *conn)
-{
-  int err;
-
-  err = bt_hci_cmd_send(BT_HCI_OP_LE_CREATE_CONN_CANCEL, NULL);
-  if (err)
-    {
-      return err;
-    }
-
-  return 0;
-}
+/****************************************************************************
+ * Name: bt_conn_disconnect
+ *
+ * Description:
+ *   Disconnect an active connection with the specified reason code or cancel
+ *   pending outgoing connection.
+ *
+ * Input Parameters:
+ *   conn   - Connection to disconnect.
+ *   reason - Reason code for the disconnection.
+ *
+ * Returned Value:
+ *   Zero on success or (negative) error code on failure.
+ *
+ ****************************************************************************/
 
 int bt_conn_disconnect(FAR struct bt_conn_s *conn, uint8_t reason)
 {
@@ -732,6 +952,21 @@ int bt_conn_disconnect(FAR struct bt_conn_s *conn, uint8_t reason)
     }
 }
 
+/****************************************************************************
+ * Name: bt_conn_create_le
+ *
+ * Description:
+ *  Allows initiate new LE link to remote peer using its address.
+ *  Returns a new reference that the the caller is responsible for managing.
+ *
+ * Input Parameters:
+ *   peer - Remote address.
+ *
+ * Returned Value:
+ *   Valid connection object on success or NULL otherwise.
+ *
+ ****************************************************************************/
+
 FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer)
 {
   FAR struct bt_conn_s *conn;
@@ -747,7 +982,7 @@ FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer)
             return conn;
 
           default:
-            bt_conn_put(conn);
+            bt_conn_release(conn);
             return NULL;
         }
     }
@@ -762,6 +997,25 @@ FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer)
   bt_le_scan_update();
   return conn;
 }
+
+/****************************************************************************
+ * Name: bt_conn_le_start_encryption
+ *
+ * Description:
+ *   See the HCI start encryption command.
+ *
+ *   NOTE: rand and ediv should be in BT order.
+ *
+ * Input Parameters:
+ *   conn       - The connection to send the command on.
+ *   rand, ediv - Values to use for the encryption key
+ *   ltk        - 
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
 
 int bt_conn_le_start_encryption(FAR struct bt_conn_s *conn, uint64_t rand,
                                 uint16_t ediv, FAR const uint8_t *ltk)

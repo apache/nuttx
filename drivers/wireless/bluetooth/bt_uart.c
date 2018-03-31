@@ -268,7 +268,7 @@ static void btuart_interrupt(FAR const struct btuart_lowerhalf_s *lower,
 
       /* Pass buffer to the stack */
 
-      bt_recv(buf);
+      bt_input(buf);
       buf = NULL;
     }
 

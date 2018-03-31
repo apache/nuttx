@@ -1,5 +1,5 @@
 ############################################################################
-# wireless/bluetooth/Make.defs
+# net/bluetooth/Make.defs
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,16 +33,32 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_WIRELESS_BLUETOOTH),y)
+# Packet socket support
 
-# Include Bluetooth support
+ifeq ($(CONFIG_NET_BLUETOOTH),y)
 
-CSRCS += bt_atomic.c bt_att.c bt_buf.c bt_conn.c bt_gatt.c bt_hcicore.c
-CSRCS += bt_ioctl.c bt_keys.c bt_l2cap.c bt_netdev.c bt_queue.c bt_smp.c
-CSRCS += bt_uuid.c
+# Initialization / resource managment
+
+NET_CSRCS  += bluetooth_initialize.c
+NET_CSRCS  += bluetooth_conn.c
+NET_CSRCS  += bluetooth_container.c
+
+# Socket layer
+
+SOCK_CSRCS += bluetooth_sockif.c
+SOCK_CSRCS += bluetooth_sendto.c
+SOCK_CSRCS += bluetooth_recvfrom.c
+
+# Device interface
+
+NET_CSRCS  += bluetooth_input.c
+NET_CSRCS  += bluetooth_callback.c
+NET_CSRCS  += bluetooth_poll.c
+NET_CSRCS  += bluetooth_finddev.c
+
+# Include packet socket build support
 
 DEPPATH += --dep-path bluetooth
 VPATH += :bluetooth
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)bluetooth}
 
-endif # CONFIG_WIRELESS_BLUETOOTH
+endif # CONFIG_NET_BLUETOOTH

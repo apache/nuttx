@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_att.c
+ * wireless/bluetooth/bt_hdicore.h
  * HCI core Bluetooth handling.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -139,6 +139,16 @@ struct bt_dev_s
   FAR const struct bt_driver_s *dev;
 };
 
+/* Connection callback structure */
+
+struct bt_conn_s; /* Forward reference */
+struct bt_conn_cb_s
+{
+  CODE void (*connected)(FAR struct bt_conn_s *conn);
+  CODE void (*disconnected)(FAR struct bt_conn_s *conn);
+  FAR struct bt_conn_cb_s *next;
+};
+
 /****************************************************************************
  * Name: bt_le_scan_cb_t
  *
@@ -227,11 +237,40 @@ static inline bool bt_addr_le_is_identity(FAR const bt_addr_le_t *addr)
  * Public Function Prototypes
  ****************************************************************************/
 
+struct bt_eir_s; /* Forward reference */
+
+/****************************************************************************
+ * Name: bt_initialize
+ *
+ * Description:
+ *   Initialize Bluetooth. Must be the called before anything else.
+ *
+ * Returned Value:
+ *    Zero on success or (negative) error code otherwise.
+ *
+ ****************************************************************************/
+
+int bt_initialize(void);
+
+/****************************************************************************
+ * Name: bt_hci_cmd_create
+ *
+ * Description:
+ *   Allocate and initialize a buffer for a command
+ *
+ * Returned Value:
+ *   A reference to the allocated buffer.  NULL could possibly be returned
+ *   on any failure to allocate.
+ *
+ ****************************************************************************/
+
 FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len);
+
+/* Send HCI commands */
+
 int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf);
 int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
                          FAR struct bt_buf_s **rsp);
-int bt_le_scan_update(void);
 
 /* The helper is only safe to be called from internal kernel threads as it's
  * not multi-threading safe
@@ -307,5 +346,36 @@ int bt_start_scanning(uint8_t filter_dups, bt_le_scan_cb_t cb);
  ****************************************************************************/
 
 int bt_stop_scanning(void);
+
+/****************************************************************************
+ * Name: bt_le_scan_update
+ *
+ * Description:
+ *   Used to determine whether to start scan and which scan type should be
+ *   used.
+ *
+ * Returned Value:
+ *   Zero on success or error code otherwise, positive in case
+ *   of protocol error or negative (POSIX) in case of stack internal error
+ *
+ ****************************************************************************/
+
+int bt_le_scan_update(void);
+
+/****************************************************************************
+ * Name: bt_conn_cb_register
+ *
+ * Description:
+ *   Register callbacks to monitor the state of connections.
+ *
+ * Input Parameters:
+ *   cb - Instance of the callback structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb);
 
 #endif /* __WIRELESS_BLUETOOTH_BT_HDICORE_H */

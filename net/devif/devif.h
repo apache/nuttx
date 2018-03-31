@@ -74,7 +74,8 @@
  *   TCP_NEWDATA      IN: Set to indicate that the peer has sent us new data.
  *   UDP_NEWDATA     OUT: Cleared (only) by the socket layer logic to indicate
  *   PKT_NEWDATA          that the new data was consumed, suppressing further
- *   IEEE802154_NEWDATA   attempts to process the new data.
+ *   BLUETOOTH_NEWDATA    attempts to process the new data.
+ *   IEEE802154_NEWDATA
  *
  *   TCP_SNDACK       IN: Not used; always zero
  *                   OUT: Set by the socket layer if the new data was consumed
@@ -87,8 +88,8 @@
  *   TCP_POLL        IN:  Used for polling the socket layer.  This is provided
  *   UDP_POLL             periodically from the drivers to support (1) timed
  *   PKT_POLL             operations, and (2) to check if the socket layer has
- *   IEEE802154_POLL      data that it wants to send.  These are socket oriented
- *                        callbacks where the context depends on the specific
+ *   BLUETOOTH_POLL       data that it wants to send.  These are socket oriented
+ *   IEEE802154_POLL      callbacks where the context depends on the specific
  *                        set
  *                   OUT: Not used
  *
@@ -177,6 +178,7 @@
 #define TCP_ACKDATA        (1 << 0)
 #define TCP_NEWDATA        (1 << 1)
 #define UDP_NEWDATA        TCP_NEWDATA
+#define BLUETOOTH_NEWDATA  TCP_NEWDATA
 #define IEEE802154_NEWDATA TCP_NEWDATA
 #define PKT_NEWDATA        TCP_NEWDATA
 #define WPAN_NEWDATA       TCP_NEWDATA
@@ -186,6 +188,7 @@
 #define TCP_POLL           (1 << 4)
 #define UDP_POLL           TCP_POLL
 #define PKT_POLL           TCP_POLL
+#define BLUETOOTH_POLL     TCP_POLL
 #define IEEE802154_POLL    TCP_POLL
 #define WPAN_POLL          TCP_POLL
 #define TCP_BACKLOG        (1 << 5)

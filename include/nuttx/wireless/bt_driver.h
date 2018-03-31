@@ -72,16 +72,60 @@ struct bt_driver_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Register a new HCI driver to the Bluetooth stack */
+/****************************************************************************
+ * Name: bt_driver_register
+ *
+ * Description:
+ *   Register the Bluetooth low-level driver with the Bluetooth stack.
+ *   This is called from the low-level driver and is part of the driver
+ *   interface prototyped in include/nuttx/wireless/bt_driver.h
+ *
+ * Input Parameters:
+ *   dev - An instance of the low-level drivers interface structure.
+ *
+ * Returned Value:
+ *  Zero is returned on success; a negated errno value is returned on any
+ *  failure.
+ *
+ ****************************************************************************/
 
 int bt_driver_register(FAR const struct bt_driver_s *dev);
 
-/* Unregister a previously registered HCI driver */
+/****************************************************************************
+ * Name: bt_driver_unregister
+ *
+ * Description:
+ *   Unregister a Bluetooth low-level driver previously registered with
+ *   bt_driver_register.  This may be called from the low-level driver and
+ *   is part of the driver interface prototyped in
+ *   include/nuttx/wireless/bt_driver.h
+ *
+ * Input Parameters:
+ *   dev - An instance of the low-level drivers interface structure.
+ *
+ * Returned Value:
+ *  None
+ *
+ ****************************************************************************/
 
 void bt_driver_unregister(FAR const struct bt_driver_s *dev);
 
-/* Receive data from the controller/HCI driver */
+/****************************************************************************
+ * Name: bt_input
+ *
+ * Description:
+ *   Called by the Bluetooth low-level driver when new data is received from
+ *   the radio.  This may be called from the low-level driver and is part of
+ *   the driver interface prototyped in include/nuttx/wireless/bt_driver.h
+ *
+ * Input Parameters:
+ *   buf - An instance of the buffer structure providing the received frame.
+ *
+ * Returned Value:
+ *  None
+ *
+ ****************************************************************************/
 
-void bt_recv(FAR struct bt_buf_s *buf);
+void bt_input(FAR struct bt_buf_s *buf);
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H */

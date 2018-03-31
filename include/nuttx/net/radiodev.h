@@ -44,7 +44,8 @@
 
 #include <nuttx/net/netdev.h>
 
-#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
+#if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_BLUETOOTH) || \
+    defined (CONFIG_NET_IEEE802154)
 
 /****************************************************************************
  * Public Types
@@ -155,7 +156,7 @@ struct iob_s;  /* Forward reference */
 
 struct radio_driver_s
 {
-  /* This definitiona must appear first in the structure definition to
+  /* This definition must appear first in the structure definition to
    * assure cast compatibility.
    */
 
@@ -251,5 +252,5 @@ struct radio_driver_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* CONFIG_NET_6LOWPAN || CONFIG_NET_IEEE802154 */
+#endif /* CONFIG_NET_6LOWPAN || CONFIG_NET_BLUETOOTH || CONFIG_NET_IEEE802154 */
 #endif /* __INCLUDE_NUTTX_NET_RADIODEV_H */

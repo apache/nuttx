@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/net_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +57,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
+#include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
 #include "local/local.h"
 #include "igmp/igmp.h"
@@ -138,6 +140,12 @@ void net_setup(void)
   /* Initialize IPPPROTO_ICMP6 socket support */
 
   icmpv6_sock_initialize();
+#endif
+
+#ifdef CONFIG_NET_BLUETOOTH
+  /* Initialize Bluetooth  socket support */
+
+  bluetooth_initialize();
 #endif
 
 #ifdef CONFIG_NET_IEEE802154
