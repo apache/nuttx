@@ -43,7 +43,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver Library.
+ * This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver
+ * Library.
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -82,13 +84,8 @@
     (((((div) << ADC_CC_CLKDIV_SHIFT) & ADC_CC_CLKDIV_MASK) | \
     ((src) & ADC_CC_CS_MASK)) & (ADC_CC_CLKDIV_MASK + ADC_CC_CS_MASK))
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+#define INTERNAL_VREF  0x00
+#define EXTERNAL_VREF  0x01
 
 /****************************************************************************
  * Private Data
@@ -181,14 +178,6 @@ static uint32_t ain2gpio[] =
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -220,18 +209,19 @@ void tiva_adc_one_time_init(uint32_t clock, uint8_t sample_rate)
   if (one_time_init == false)
     {
       ainfo("performing ADC one-time initialization...\n");
-      /* set clock */
+
+      /* Set clock */
 
       tiva_adc_clock(clock);
 
-      /* set sampling rate */
+      /* Set sampling rate */
 
       tiva_adc_sample_rate(sample_rate);
 
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-      /* voltage reference */
+      /* Voltage reference */
 
-      tiva_adc_vref();
+      tiva_adc_vref(INTERNAL_VREF);
 #endif
       one_time_init = true;
     }
@@ -247,8 +237,8 @@ void tiva_adc_one_time_init(uint32_t clock, uint8_t sample_rate)
  * Name: tiva_adc_configure
  *
  * Description:
- *   Performs configuration of a single ADC, it's valid sample sequencers and
- *   available steps.
+ *   Performs configuration of a single ADC, it's valid sample sequencers
+ *   and available steps.
  *
  ****************************************************************************/
 
@@ -298,13 +288,13 @@ void tiva_adc_configure(struct tiva_adc_cfg_s *cfg)
 void tiva_adc_sse_cfg(uint8_t adc, uint8_t sse,
                       struct tiva_adc_sse_cfg_s *ssecfg)
 {
+  uint8_t priority = ssecfg->priority;
+  uint8_t trigger  = ssecfg->trigger;
+
   ainfo("configure ADC%d SSE%d...\n", adc, sse);
 #ifdef CONFIG_DEBUG_ANALOG
   ainfo("priority=%d trigger=%d...\n", ssecfg->priority, ssecfg->trigger);
 #endif
-
-  uint8_t priority = ssecfg->priority;
-  uint8_t trigger  = ssecfg->trigger;
 
   /* Ensure SSE is disabled before configuring */
 
@@ -326,11 +316,6 @@ void tiva_adc_sse_cfg(uint8_t adc, uint8_t sse,
 
 void tiva_adc_step_cfg(struct tiva_adc_step_cfg_s *stepcfg)
 {
-#ifdef CONFIG_DEBUG_ANALOG
-  ainfo("  shold=0x%02x flags=0x%02x ain=%d...\n",
-        stepcfg->shold, stepcfg->flags, stepcfg->ain);
-#endif
-
   uint8_t  adc   = stepcfg->adc;
   uint8_t  sse   = stepcfg->sse;
   uint8_t  step  = stepcfg->step;
@@ -342,8 +327,12 @@ void tiva_adc_step_cfg(struct tiva_adc_step_cfg_s *stepcfg)
   uint32_t gpio  = ain2gpio[stepcfg->ain];
 
   ainfo("configure ADC%d SSE%d STEP%d...\n", adc, sse, step);
+#ifdef CONFIG_DEBUG_ANALOG
+  ainfo("  shold=0x%02x flags=0x%02x ain=%d...\n",
+        stepcfg->shold, stepcfg->flags, stepcfg->ain);
+#endif
 
-  /* Configure the AIN GPIO for analog input if not flagged to be muxed to
+  /* Configure the AIN GPIO for analog input if not flagged to be mux'ed to
    * the internal temperature sensor
    */
 
@@ -356,7 +345,7 @@ void tiva_adc_step_cfg(struct tiva_adc_step_cfg_s *stepcfg)
 
   tiva_adc_sse_register_chn(adc, sse, step, ain);
   tiva_adc_sse_differential(adc, sse, step, 0); /* TODO: update when differential
-                                        * support is added. */
+                                                 * support is added. */
 #ifdef CONFIG_EXPERIMENTAL
   tiva_adc_sse_sample_hold_time(adc, sse, step, shold);
 #endif
@@ -392,8 +381,6 @@ uint8_t tiva_adc_get_ain(uint8_t adc, uint8_t sse, uint8_t step)
   uint32_t ssmux = getreg32(ssmuxaddr) & ADC_SSMUX_MUX_MASK(step);
   return (ssmux >> ADC_SSMUX_MUX_SHIFT(step));
 }
-
-/* IRQS *********************************************************************/
 
 /****************************************************************************
  * Name: tiva_adc_irq_attach
@@ -463,8 +450,6 @@ int tiva_adc_getirq(uint8_t adc, uint8_t sse)
 {
   return sse2irq[SSE_IDX(adc, sse)];
 }
-
-/* Peripheral (base) level **************************************************/
 
 /****************************************************************************
  * Name: tiva_adc_enable
@@ -538,32 +523,34 @@ void tiva_adc_clock(uint32_t freq)
   modifyreg32(ccreg, ADC_CC_CS_MASK, (ADC_CC_CS_PIOSC & ADC_CC_CS_MASK));
 
 #elif defined (CONFIG_ARCH_CHIP_TM4C129)
-  /* check clock bounds and specific match cases */
+  /* Check clock bounds and specific match cases */
 
   uint32_t clk_src = 0;
   uint32_t div = 0;
+  uintptr_t ccreg;
+
   if (freq > TIVA_ADC_CLOCK_MAX)
     {
       clk_src = ADC_CC_CS_SYSPLL;
-      div = (BOARD_FVCO_FREQUENCY / TIVA_ADC_CLOCK_MAX);
+      div     = (BOARD_FVCO_FREQUENCY / TIVA_ADC_CLOCK_MAX);
     }
   else if (freq < TIVA_ADC_CLOCK_MIN)
     {
       clk_src = ADC_CC_CS_PIOSC;
-      div = 1;
+      div     = 1;
     }
   else if (freq == XTAL_FREQUENCY)
     {
       clk_src = ADC_CC_CS_MOSC;
-      div = 1;
+      div     = 1;
     }
   else
     {
       clk_src = ADC_CC_CS_SYSPLL;
-      div = (BOARD_FVCO_FREQUENCY / freq);
+      div     = (BOARD_FVCO_FREQUENCY / freq);
     }
 
-  uintptr_t ccreg = (TIVA_ADC0_BASE + TIVA_ADC_CC_OFFSET);
+  ccreg = (TIVA_ADC0_BASE + TIVA_ADC_CC_OFFSET);
   modifyreg32(ccreg, ADC_CC_CLKDIV_MASK, CLOCK_CONFIG(div, clk_src));
 #else
 #  error Unsupported architecture reported
@@ -661,8 +648,6 @@ uint32_t tiva_adc_int_status(uint8_t adc)
   return ris;
 }
 
-/* Sample sequencer (SSE) functions *****************************************/
-
 /****************************************************************************
  * Name: tiva_adc_sse_enable
  *
@@ -682,9 +667,10 @@ uint32_t tiva_adc_int_status(uint8_t adc)
 
 uint8_t tiva_adc_sse_enable(uint8_t adc, uint8_t sse, bool state)
 {
+  uintptr_t actssreg = TIVA_ADC_ACTSS(adc);
+
   ainfo("ADC%d SSE%d=%01d\n", adc, sse, state);
 
-  uintptr_t actssreg = TIVA_ADC_ACTSS(adc);
   if (state == true)
     {
       modifyreg32(actssreg, 0, (1 << sse));
@@ -797,7 +783,7 @@ void tiva_adc_sse_int_enable(uint8_t adc, uint8_t sse, bool state)
  * Name: tiva_adc_sse_int_status
  *
  * Description:
- *   Returns interrupt status for the specificed SSE
+ *   Returns interrupt status for the specified SSE
  *
  * Input Parameters:
  *   adc - which ADC peripherals' interrupt status to retrieve
@@ -819,8 +805,8 @@ bool tiva_adc_sse_int_status(uint8_t adc, uint8_t sse)
  *   Clears the interrupt bit for the SSE.
  *
  * Input Parameters:
- *   adc - peripheral state
- *   sse - sample sequencer
+ *   adc   - peripheral state
+ *   sse   - sample sequencer
  *   state - sample sequencer
  *
  ****************************************************************************/
@@ -881,8 +867,8 @@ uint8_t tiva_adc_sse_data(uint8_t adc, uint8_t sse, int32_t *buf)
  *   the lowest. There can be no duplicate values.
  *
  * Input Parameters:
- *   adc - peripheral state
- *   sse - sample sequencer
+ *   adc      - peripheral state
+ *   sse      - sample sequencer
  *   priority - conversion priority
  *
  ****************************************************************************/

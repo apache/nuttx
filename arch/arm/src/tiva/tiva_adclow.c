@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_adclow.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
  *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -129,11 +129,6 @@
 #define SEM_PROCESS_PRIVATE 0
 #define SEM_PROCESS_SHARED  1
 
-/* DEBUG ********************************************************************/
-
-#ifdef CONFIG_DEBUG_ANALOG
-#endif
-
 /****************************************************************************
  * Public Functions
  * **************************************************************************/
@@ -179,12 +174,12 @@ struct tiva_adc_s
 
 struct tiva_adc_sse_s
 {
-  sem_t exclsem;      /* Mutual exclusion semaphore */
-  struct work_s work; /* Supports the interrupt handling "bottom half" */
-  bool cfg;           /* Configuration state */
-  bool ena;           /* Sample sequencer operation state */
-  uint8_t adc;        /* Parent peripheral */
-  uint8_t num;        /* SSE number */
+  sem_t exclsem;         /* Mutual exclusion semaphore */
+  struct work_s work;    /* Supports the interrupt handling "bottom half" */
+  bool cfg;              /* Configuration state */
+  bool ena;              /* Sample sequencer operation state */
+  uint8_t adc;           /* Parent peripheral */
+  uint8_t num;           /* SSE number */
 };
 
 /****************************************************************************
@@ -414,11 +409,11 @@ static int tiva_adc_bind(FAR struct adc_dev_s *dev,
 
 static void tiva_adc_reset(struct adc_dev_s *dev)
 {
-  ainfo("Resetting...\n");
-
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
   struct tiva_adc_sse_s *sse;
   uint8_t s;
+
+  ainfo("Resetting...\n");
 
   tiva_adc_rxint(dev, false);
 
@@ -446,11 +441,11 @@ static void tiva_adc_reset(struct adc_dev_s *dev)
 
 static int tiva_adc_setup(struct adc_dev_s *dev)
 {
-  ainfo("Setup\n");
-
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
   struct tiva_adc_sse_s *sse;
   uint8_t s = 0;
+
+  ainfo("Setup\n");
 
   priv->ena = true;
 
@@ -480,8 +475,8 @@ static int tiva_adc_setup(struct adc_dev_s *dev)
 static void tiva_adc_shutdown(struct adc_dev_s *dev)
 {
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
-  ainfo("Shutdown\n");
 
+  ainfo("Shutdown\n");
   DEBUGASSERT(priv->ena);
 
   /* Resetting the ADC peripheral disables interrupts and all SSEs */
@@ -515,13 +510,12 @@ static void tiva_adc_shutdown(struct adc_dev_s *dev)
 
 static void tiva_adc_rxint(struct adc_dev_s *dev, bool enable)
 {
-  ainfo("RXINT=%d\n", enable);
-
   struct tiva_adc_s *priv = (struct tiva_adc_s *)dev->ad_priv;
   struct tiva_adc_sse_s *sse;
   uint32_t trigger;
   uint8_t s = 0;
 
+  ainfo("RXINT=%d\n", enable);
   DEBUGASSERT(priv->ena);
 
   for (s = 0; s < 4; ++s)
@@ -665,6 +659,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
 static void tiva_adc_read(void *arg)
 {
+  struct tiva_adc_s     *priv;
   struct tiva_adc_sse_s *sse        = (struct tiva_adc_sse_s *)arg;
   struct adc_dev_s      *dev        = 0;
   int                    irq        = tiva_adc_getirq(sse->adc, sse->num);
@@ -693,6 +688,8 @@ static void tiva_adc_read(void *arg)
       PANIC();
       return;
     }
+
+  priv = (struct tiva_adc_s *)dev->ad_priv;
 
   /* Verify that the upper-half driver has bound its callback functions */
 
@@ -737,7 +734,7 @@ static void tiva_adc_interrupt(struct tiva_adc_sse_s *sse)
 
   DEBUGASSERT(sse->ena == true);
 
-  /* disable further  interrupts. Interrupts will be re-enabled
+  /* Disable further  interrupts. Interrupts will be re-enabled
    * after the worker thread executes.
    */
 
@@ -946,13 +943,13 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 
 void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 {
-  ainfo("Locking...\n");
-
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
   int ret;
 #ifdef CONFIG_DEBUG_ANALOG
   uint16_t loop_count = 0;
 #endif
+
+  ainfo("Locking...\n");
 
   do
     {
@@ -986,12 +983,10 @@ void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 
 void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse)
 {
-  ainfo("Unlocking\n");
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
+  ainfo("Unlocking\n");
   nxsem_post(&s->exclsem);
 }
-
-/* DEBUG ********************************************************************/
 
 #ifdef CONFIG_DEBUG_ANALOG
 
@@ -1041,6 +1036,7 @@ static void tiva_adc_runtimeobj_vals(void)
 {
   struct tiva_adc_sse_s *sse;
   uint8_t s;
+
 #  ifdef CONFIG_TIVA_ADC0
   ainfo("ADC0 [0x%08x] cfg=%d ena=%d devno=%d\n",
          &adc0, adc0.cfg, adc0.ena, adc0.devno);
