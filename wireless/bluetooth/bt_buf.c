@@ -216,9 +216,11 @@ void bt_buf_initialize(void)
  *
  * Input Parameters:
  *   type         - Buffer type.
- *   iob          - The raw I/O buffer.  If NULL, then bt_buf_alloc will
- *                  allocate.
- *   reserve_head - How much headroom to reserve.
+ *   iob          - The raw I/O buffer.  If NULL, then bt_buf_alloc() will
+ *                  allocate the frame IOB.
+ *   reserve_head - How much headroom to reserve.  Will be ignored if
+ *                  a non-NULL iob is provided.  In that case, the head
+ *                  room is determined by the actual data offset.
  *
  * Returned Value:
  *   A reference to the allocated buffer structure.  All user fields in this
@@ -316,30 +318,51 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
         }
     }
 
-  /* We have successfully allocated memory from some source.  Now allocate
-   * an IOB to hold the actual frame data.  This call will normally block
-   * in the event that there is no available IOB memory.  It will return
-   * NULL is called from an interrupt handler with no available buffers.
+  /* We have successfully allocated memory from some source.  Initialize the
+   * allocated buffer structure.
    */
-
-  memset(buf, 0, sizeof(struct bt_buf_s));
-  buf->frame = iob_alloc(false);
-  if (!buf->frame)
-    {
-      bt_buf_release(buf);
-      return NULL;
-    }
-
-  /* Initialize the allocated buffer structure. */
 
   buf->pool = pool;
   buf->ref  = 1;
   buf->type = type;
-  buf->data = buf->frame->io_data + reserve_head;
 
-  buf->frame->io_offset = reserve_head;
-  buf->frame->io_len    = reserve_head;
-  buf->frame->io_pktlen = reserve_head;
+  /* Were we provided with an IOB? */
+
+  if (iob != NULL)
+    {
+      /* Yes.. use that IOB */
+
+      DEBUGASSERT(iob->io_len >= iob->io_offset &&
+                  iob->io_len <= BLUETOOTH_MAX_FRAMELEN);
+
+      buf->frame = iob;
+      buf->data  = &iob->io_data[iob->io_offset];
+      buf->len   = iob->io_len - iob->io_offset; /* IOB length includes offset */
+    }
+  else
+    {
+      /* No.. Allocate an IOB to hold the actual frame data.  This call will
+       * normally block in the event that there is no available IOB memory.
+       * It will return NULL is called from an interrupt handler with no
+       * available buffers.
+       */
+
+      memset(buf, 0, sizeof(struct bt_buf_s));
+      buf->frame = iob_alloc(false);
+      if (!buf->frame)
+        {
+          wlerr("ERROR:  Failed to allocate an IOB\n");
+          bt_buf_release(buf);
+          return NULL;
+        }
+
+      buf->frame->io_offset = reserve_head;
+      buf->frame->io_len    = reserve_head; /* IOB length includes offset */
+      buf->frame->io_pktlen = reserve_head;
+
+      buf->data = buf->frame->io_data + reserve_head;
+    }
+
 
   wlinfo("buf %p type %d reserve %u\n", buf, buf->type, reserve_head);
 

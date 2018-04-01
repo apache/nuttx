@@ -898,7 +898,8 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
   /* Create a connection structure for this peer if one does not already
    * exist.
    *
-   * REVISIT:  Can we do a handle lookup? ... That would be faster.
+   * REVISIT:  Can we do a handle lookup? Should we cache the last
+   * connection (since there is probably only one).  Either would be faster.
    */
 #warning Missing logic
 
@@ -914,6 +915,9 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
 
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
+
+      DEBUGASSERT(iob->io_offset == BLUETOOTH_FRAME_HDRLEN &&
+                  iob->io_len >= BLUETOOTH_FRAME_HDRLEN);
 
       /* Allocate a buffer to contain the IOB */
 
