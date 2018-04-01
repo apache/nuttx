@@ -43,6 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <netpacket/bluetooth.h>
 #include <arch/irq.h>
 
 #include <nuttx/mm/iob.h>
@@ -74,6 +75,11 @@ static dq_queue_t g_free_bluetooth_connections;
 /* A list of all allocated packet socket connections */
 
 static dq_queue_t g_active_bluetooth_connections;
+
+static const bt_addr_t g_any_addr =
+{
+  BT_ADDR_ANY
+};
 
 /****************************************************************************
  * Public Functions
@@ -218,12 +224,11 @@ FAR struct bluetooth_conn_s *
        conn = (FAR struct bluetooth_conn_s *)conn->bc_node.flink)
     {
       /* Does the destination address match the bound address of the socket. */
-      /* REVISIT: Currently and explicit address must be assigned.  Should we
-       * support some moral equivalent to INADDR_ANY?
-       */
 
-      if (!BLUETOOTH_ADDRCMP(&meta->bm_raddr, &conn->bc_laddr) ||
-          meta->bm_channel != conn->bc_channel)
+      if ((BLUETOOTH_ADDRCMP(&conn->bc_raddr, &meta->bm_raddr) ||
+           BLUETOOTH_ADDRCMP(&conn->bc_raddr, &g_any_addr)) &&
+          (meta->bm_channel == conn->bc_channel ||
+           BT_CHANNEL_ANY   == conn->bc_channel))
         {
           continue;
         }
