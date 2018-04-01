@@ -50,6 +50,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bt_hci.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_uuid.h>
@@ -559,9 +560,9 @@ static uint8_t att_mtu_rsp(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
    * L2CAP, ACL and driver headers.
    */
 
-  maxmtu = BT_BUF_MAX_DATA - (sizeof(struct bt_l2cap_hdr_s) +
-                              sizeof(struct bt_hci_acl_hdr_s) +
-                              g_btdev.dev->head_reserve);
+  maxmtu = BLUETOOTH_MAX_FRAMELEN - (sizeof(struct bt_l2cap_hdr_s) +
+                                     sizeof(struct bt_hci_acl_hdr_s) +
+                                     g_btdev.dev->head_reserve);
   if (mtu > maxmtu)
     {
       mtu = maxmtu;

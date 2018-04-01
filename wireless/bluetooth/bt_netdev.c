@@ -85,10 +85,8 @@
 
 /* Frame size */
 
-#if defined(CONFIG_NET_BLUETOOTH_FRAMELEN)
-#  define MACNET_FRAMELEN CONFIG_NET_BLUETOOTH_FRAMELEN
-#else
-#  define MACNET_FRAMELEN BLUETOOTH_MAX_PHY_PACKET_SIZE
+#if BLUETOOTH_MAX_FRAMELEN > CONFIG_IOB_BUFSIZE
+#  error CONFIG_IOB_BUFSIZE to small for max Bluetooth frame
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -861,7 +859,7 @@ static int btnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 static int btnet_get_mhrlen(FAR struct radio_driver_s *netdev,
                          FAR const void *meta)
 {
-  return sizeof(struct bt_l2cap_hdr_s);
+  return BLUETOOTH_FRAME_HDRLEN;
 }
 
 /****************************************************************************
@@ -919,7 +917,7 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
 
       /* Allocate a buffer to contain the IOB */
 
-      buf = bt_buf_alloc(BT_ACL_OUT, iob, sizeof(struct bt_l2cap_hdr_s));
+      buf = bt_buf_alloc(BT_ACL_OUT, iob, BLUETOOTH_FRAME_HDRLEN);
       if (buf == NULL)
         {
           wlerr("ERROR:  Failed to allocate buffer container\n");
@@ -962,25 +960,10 @@ static int btnet_properties(FAR struct radio_driver_s *netdev,
 
   /* General */
 
-  properties->sp_addrlen  = BLUETOOTH_ADDRSIZE;  /* Length of an address */
-  properties->sp_framelen = MACNET_FRAMELEN;  /* Fixed frame length */
+  properties->sp_addrlen  = BLUETOOTH_ADDRSIZE;     /* Length of an address */
+  properties->sp_framelen = BLUETOOTH_MAX_FRAMELEN; /* Fixed frame length */
 
-  /* Multicast address -- not supported */
-
-  properties->sp_mcast.nv_addrlen = BLUETOOTH_ADDRSIZE;
-  memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
-
-  /* Broadcast address -- not supported */
-
-  properties->sp_bcast.nv_addrlen = BLUETOOTH_ADDRSIZE;
-  memset(properties->sp_mcast.nv_addr, 0xff, RADIO_MAX_ADDRLEN);
-
-#ifdef CONFIG_NET_STARPOINT
-  /* Star hub node address -- not supported. */
-
-  properties->sp_hubnode.nv_addrlen = BLUETOOTH_ADDRSIZE;
-  memset(properties->sp_hubnode.nv_addr, RADIO_MAX_ADDRLEN);
-#endif
+  /* Multicast, multicast, and star hub node addresses not supported */
 
   return OK;
 }

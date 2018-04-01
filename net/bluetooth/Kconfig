@@ -22,17 +22,6 @@ config NET_BLUETOOTH
 
 if NET_BLUETOOTH
 
-config NET_BLUETOOTH_FRAMELEN
-	int "Bluetooth Frame Length"
-	default 127
-	range 1 999999
-	---help---
-		For standard Bluetooth radios, this should always be 127 bytes.
-		However, some Bluetooth radios may non-standard frame lengths.
-
-		This setting is currently used only for detection data transfers
-		that would exceed the radio frame length.
-
 config NET_BLUETOOTH_NCONNS
 	int "Max Bluetooth sockets"
 	default 4

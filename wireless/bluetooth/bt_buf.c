@@ -53,6 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bt_hci.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_buf.h>
@@ -641,5 +642,5 @@ size_t bt_buf_headroom(FAR struct bt_buf_s *buf)
 
 size_t bt_buf_tailroom(FAR struct bt_buf_s * buf)
 {
-  return BT_BUF_MAX_DATA - bt_buf_headroom(buf) - buf->len;
+  return BLUETOOTH_MAX_FRAMELEN - bt_buf_headroom(buf) - buf->len;
 }

@@ -146,8 +146,8 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
        * MAC header.
        */
 
-      DEBUGASSERT(CONFIG_NET_BLUETOOTH_FRAMELEN <= CONFIG_IOB_BUFSIZE);
-      if (pstate->is_buflen + hdrlen > BLUETOOTH_FRAMELEN)
+      DEBUGASSERT(BLUETOOTH_MAX_FRAMELEN <= CONFIG_IOB_BUFSIZE);
+      if (pstate->is_buflen + hdrlen > BLUETOOTH_MAX_FRAMELEN)
         {
           nerr("ERROR: User buffer will not fit into the frame: %u > %u\n",
                (unsigned int)(pstate->is_buflen + hdrlen),

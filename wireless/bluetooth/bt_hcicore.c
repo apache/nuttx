@@ -54,6 +54,7 @@
 
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_hci.h>
 
@@ -1102,7 +1103,7 @@ static int hci_init(void)
 
   hbs = bt_buf_extend(buf, sizeof(*hbs));
   memset(hbs, 0, sizeof(*hbs));
-  hbs->acl_mtu = BT_HOST2LE16(BT_BUF_MAX_DATA -
+  hbs->acl_mtu = BT_HOST2LE16(BLUETOOTH_MAX_FRAMELEN -
                                  sizeof(struct bt_hci_acl_hdr_s) -
                                  g_btdev.dev->head_reserve);
   hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_RXTHREAD_NMSGS);

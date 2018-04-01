@@ -46,13 +46,31 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/* REVISIT:  Is there any header on the Bluetooth data as received by the
- * network stack?
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* BLUETOOTH_MAX_FRAMELEN
+ * Maximum amount of data that can fit in a buffer.
+ *
+ * The biggest foreseeable buffer size requirement right now comes from
+ * the Bluetooth 4.2 SMP MTU which is 65. This then become 65 + 4 (L2CAP
+ * header) + 4 (ACL header) + 1 (H4 header) = 74. This also covers the
+ * biggest HCI commands and events which are a bit under the 70 byte
+ * mark.
  */
 
-#warning REVISIT
+#define BLUETOOTH_SMP_MTU      65
 
-#define BLUETOOTH_HDRLEN        8  /* Size of L2CAP header */
+#define BLUETOOTH_L2CAP_HDRLEN  4  /* Size of L2CAP header */
+#define BLUETOOTH_ACL_HDRLEN    4  /* Size of ACL header */
+#define BLUETOOTH_H4_HDRLEN     1  /* Size of H4 header */
+
+#define BLUETOOTH_FRAME_HDRLEN \
+  (BLUETOOTH_L2CAP_HDRLEN + BLUETOOTH_ACL_HDRLEN + BLUETOOTH_H4_HDRLEN)
+
+#define BLUETOOTH_MAX_FRAMELEN (BLUETOOTH_SMP_MTU + BLUETOOTH_FRAME_HDRLEN)
+
 #define BLUETOOTH_ADDRSIZE      6
 #define BLUETOOTH_ADDRCOPY(d,s) memcpy((d),(s),BLUETOOTH_ADDRSIZE)
 #define BLUETOOTH_ADDRCMP(a,b)  (memcmp((a),(b),BLUETOOTH_ADDRSIZE) == 0)

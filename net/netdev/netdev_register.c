@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_register.c
  *
- *   Copyright (C) 2007-2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014-2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -220,13 +221,13 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #ifdef CONFIG_NET_BLUETOOTH
           case NET_LL_BLUETOOTH:  /* Bluetooth */
-            dev->d_llhdrlen = BLUETOOTH_HDRLEN;
+            dev->d_llhdrlen = BLUETOOTH_FRAME_HDRLEN;
 #ifdef CONFIG_NET_6LOWPAN
 #  warning Missing logic
-            dev->d_mtu      = ???;
+            dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
 #ifdef CONFIG_NET_TCP
 #  warning Missing logic
-            dev->d_recvwndo = ???;
+            dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
 #endif
 #endif
             devfmt          = NETDEV_BNEP_FORMAT;

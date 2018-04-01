@@ -65,28 +65,6 @@
 #define BLUETOOTH_POOL_PREALLOCATED  0
 #define BLUETOOTH_POOL_DYNAMIC       1
 
-/* Frame size */
-
-/* This maximum size of an Bluetooth frame.  Certain, non-standard
- * devices may exceed this value, however.
- */
-
-#define BLUETOOTH_MAC_STDFRAME 127
-
-/* Space for a two byte FCS must be reserved at the end of the frame */
-
-#define BLUETOOTH_MAC_FCSSIZE  2
-
-/* This, then, is the usable size of the frame... */
-
-#if defined(CONFIG_NET_BLUETOOTH_FRAMELEN)
-#  define BLUETOOTH_MAX_FRAMELEN CONFIG_NET_BLUETOOTH_FRAMELEN
-#else
-#  define BLUETOOTH_MAX_FRAMELEN BLUETOOTH_MAC_STDFRAME
-#endif
-
-#define BLUETOOTH_FRAMELEN (BLUETOOTH_MAX_FRAMELEN - BLUETOOTH_MAC_FCSSIZE)
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
