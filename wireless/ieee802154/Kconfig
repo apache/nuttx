@@ -29,8 +29,8 @@ config IEEE802154_PRIMITIVE_IRQRESERVE
 	default 0
 	depends on EXPERIMENTAL
 	---help---
-		If primitves can be allocated from interrupt handlers, then this
-		specifies the number of pre-allocatd meta-data structures that are
+		If primitives can be allocated from interrupt handlers, then this
+		specifies the number of pre-allocated meta-data structures that are
 		reserved for for use only by interrupt handlers.  This may be zero to
 		reserve no meta-data structures for interrupt handlers. In that case,
 		the allocation will fail if tasking logic has allocated them all.

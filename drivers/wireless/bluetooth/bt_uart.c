@@ -148,10 +148,10 @@ static FAR struct bt_buf_s *btuart_evt_recv(FAR struct btuart_upperhalf_s *upper
 
   *remaining = hdr.len;
 
-  buf = bt_buf_get(BT_EVT, 0);
+  buf = bt_buf_alloc(BT_EVT, 0);
   if (buf != NULL)
     {
-      memcpy(bt_buf_add(buf, sizeof(struct bt_hci_evt_hdr_s)), &hdr,
+      memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_evt_hdr_s)), &hdr,
              sizeof(struct bt_hci_evt_hdr_s));
     }
   else
@@ -181,10 +181,10 @@ static FAR struct bt_buf_s *btuart_acl_recv(FAR struct btuart_upperhalf_s *upper
       return NULL;
     }
 
-  buf = bt_buf_get(BT_ACL_IN, 0);
+  buf = bt_buf_alloc(BT_ACL_IN, 0);
   if (buf)
     {
-      memcpy(bt_buf_add(buf, sizeof(struct bt_hci_acl_hdr_s)), &hdr,
+      memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_acl_hdr_s)), &hdr,
              sizeof(struct bt_hci_acl_hdr_s));
     }
   else
@@ -268,14 +268,14 @@ static void btuart_interrupt(FAR const struct btuart_lowerhalf_s *lower,
 
       /* Pass buffer to the stack */
 
-      bt_input(buf);
+      bt_hci_receive(buf);
       buf = NULL;
     }
 
   return;
 
 failed:
-  bt_buf_put(buf);
+  bt_buf_release(buf);
   remaining = 0;
   buf       = NULL;
   return;
@@ -299,7 +299,7 @@ static int btuart_send(FAR const struct bt_driver_s *dev,
       return -EINVAL;
     }
 
-  type = bt_buf_push(buf, 1);
+  type = bt_buf_provide(buf, 1);
 
   switch (buf->type)
     {

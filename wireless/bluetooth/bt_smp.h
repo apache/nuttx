@@ -172,8 +172,8 @@ begin_packed_struct struct bt_smp_security_request_s
  ****************************************************************************/
 
 bool bt_smp_irk_matches(FAR const uint8_t irk[16], FAR const bt_addr_t *addr);
-int bt_smp_send_pairing_req(FAR struct bt_conn_s *conn);
-int bt_smp_send_security_req(FAR struct bt_conn_s *conn);
-int bt_smp_init(void);
+int  bt_smp_send_pairing_req(FAR struct bt_conn_s *conn);
+int  bt_smp_send_security_req(FAR struct bt_conn_s *conn);
+int  bt_smp_initialize(void);
 
 #endif /* __WIRELESS_BLUETOOTH_BT_SMP_H */

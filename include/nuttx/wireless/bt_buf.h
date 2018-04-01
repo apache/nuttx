@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_att.h
+ * include/nuttx/wireless/bt_buf.h
  * Bluetooth buffer management.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -105,7 +105,8 @@ struct bt_buf_acl_data_s
 
 struct bt_buf_s
 {
-  FAR struct iob_s *iob; /* IOB container of the buffer */
+  FAR struct bt_buf_s *flink;
+
   union
   {
     struct bt_buf_hci_data_s hci;
@@ -114,12 +115,13 @@ struct bt_buf_s
 
   FAR uint8_t *data;     /* Start of data in the buffer */
   uint8_t len;           /* Length of data in the buffer */
-  uint8_t ref  : 5;      /* Reference count */
-  uint8_t type : 3;      /* Type of data contained in the buffer */
+  uint8_t pool;          /* Memory pool */
+  uint8_t ref;           /* Reference count */
+  uint8_t type;          /* Type of data contained in the buffer */
 
   /* The full available buffer. */
 
-  uint8_t buf[BT_BUF_MAX_DATA];
+  FAR struct iob_s *frame;
 };
 
 /****************************************************************************
@@ -127,43 +129,55 @@ struct bt_buf_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_buf_get
+ * Name: bt_buf_alloc
  *
  * Description:
- *   Get buffer from the available buffers pool with specified type and
- *   reserved headroom.
+ *   The bt_buf_alloc function will get a free buffer for use by the
+ *   Bluetooth stack with specified type and reserved headroom.  The
+ *   reference count is initially set to one.
+ *
+ *   Interrupt handling logic will first attempt to allocate from the
+ *   g_buf_free list.  If that list is empty, it will attempt to allocate
+ *   from its reserve, g_buf_free_irq.  If that list is empty, then the
+ *   allocation fails (NULL is returned).
+ *
+ *   Non-interrupt handler logic will attempt to allocate from g_buf_free
+ *   list.  If that the list is empty, then the buffer structure will be
+ *   allocated from the dynamic memory pool with some performance hit.
  *
  * Input Parameters:
  *   type         - Buffer type.
  *   reserve_head - How much headroom to reserve.
  *
  * Returned Value:
- *   New buffer or NULL if out of buffers.
- *
- *   WARNING: If there are no available buffers and the function is
- *   called from a task or thread the call will block until a buffer
- *   becomes available in the pool.
+ *   A reference to the allocated buffer structure.  All user fields in this
+ *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   returned.
  *
  ****************************************************************************/
 
-FAR struct bt_buf_s *bt_buf_get(enum bt_buf_type_e type, size_t reserve_head);
+FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
+                                  size_t reserve_head);
 
 /****************************************************************************
- * Name: bt_buf_put
+ * Name: bt_buf_release
  *
  * Description:
- *   Decrements the reference count of a buffer and puts it back into the
- *   pool if the count reaches zero.
+ *   Decrements the reference count of a buffer and returns the buffer to the
+ *   memory pool if the count decrements zero.
  *
  * Input Parameters:
  *   buf - Buffer.
  *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-void bt_buf_put(FAR struct bt_buf_s *buf);
+void bt_buf_release(FAR struct bt_buf_s *buf);
 
 /****************************************************************************
- * Name: bt_buf_hold
+ * Name: bt_buf_addref
  *
  * Description:
  *   Increment the reference count of a buffer.
@@ -173,14 +187,14 @@ void bt_buf_put(FAR struct bt_buf_s *buf);
  *
  ****************************************************************************/
 
-FAR struct bt_buf_s *bt_buf_hold(FAR struct bt_buf_s *buf);
+FAR struct bt_buf_s *bt_buf_addref(FAR struct bt_buf_s *buf);
 
 /****************************************************************************
- * Name: bt_buf_add
+ * Name: bt_buf_extend
  *
  * Description:
  *   Increments the data length of a buffer to account for more data
- *   at the end.
+ *   at the end of the buffer.
  *
  * Input Parameters:
  *   buf - Buffer to update.
@@ -191,10 +205,10 @@ FAR struct bt_buf_s *bt_buf_hold(FAR struct bt_buf_s *buf);
  *
  ****************************************************************************/
 
-FAR void *bt_buf_add(FAR struct bt_buf_s *buf, size_t len);
+FAR void *bt_buf_extend(FAR struct bt_buf_s *buf, size_t len);
 
 /****************************************************************************
- * Name: bt_buf_add_le16
+ * Name: bt_buf_put_le16
  *
  * Description:
  *   Adds 16-bit value in little endian format at the end of buffer.
@@ -210,10 +224,10 @@ FAR void *bt_buf_add(FAR struct bt_buf_s *buf, size_t len);
  *
  ****************************************************************************/
 
-void bt_buf_add_le16(FAR struct bt_buf_s *buf, uint16_t value);
+void bt_buf_put_le16(FAR struct bt_buf_s *buf, uint16_t value);
 
 /****************************************************************************
- * Name: bt_buf_push
+ * Name: bt_buf_provide
  *
  * Description:
  *   Modifies the data pointer and buffer length to account for more data
@@ -228,10 +242,10 @@ void bt_buf_add_le16(FAR struct bt_buf_s *buf, uint16_t value);
  *
  ****************************************************************************/
 
-FAR void *bt_buf_push(FAR struct bt_buf_s *buf, size_t len);
+FAR void *bt_buf_provide(FAR struct bt_buf_s *buf, size_t len);
 
 /****************************************************************************
- * Name: bt_buf_pull
+ * Name: bt_buf_consume
  *
  * Description:
  *   Removes data from the beginning of the buffer by modifying the data
@@ -245,10 +259,10 @@ FAR void *bt_buf_push(FAR struct bt_buf_s *buf, size_t len);
  *
  ****************************************************************************/
 
-FAR void *bt_buf_pull(FAR struct bt_buf_s *buf, size_t len);
+FAR void *bt_buf_consume(FAR struct bt_buf_s *buf, size_t len);
 
 /****************************************************************************
- * Name: bt_buf_pull_le16
+ * Name: bt_buf_get_le16
  *
  * Description:
  *   Same idea as with bt_buf_pull(), but a helper for operating on
@@ -262,7 +276,7 @@ FAR void *bt_buf_pull(FAR struct bt_buf_s *buf, size_t len);
  *
  ****************************************************************************/
 
-uint16_t bt_buf_pull_le16(FAR struct bt_buf_s *buf);
+uint16_t bt_buf_get_le16(FAR struct bt_buf_s *buf);
 
 /****************************************************************************
  * Name: bt_buf_tailroom
@@ -305,23 +319,5 @@ size_t bt_buf_headroom(FAR struct bt_buf_s *buf);
  ****************************************************************************/
 
 #define bt_buf_tail(buf) ((buf)->data + (buf)->len)
-
-/****************************************************************************
- * Name: bt_buf_init
- *
- * Description:
- *   Initialize the buffers with specified amount of incoming and outgoing
- *   ACL buffers. The HCI command and event buffers will be allocated from
- *   whatever is left over.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero on success or (negative) error code on failure.
- *
- ****************************************************************************/
-
-int bt_buf_init(void);
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_BT_BUF_H */

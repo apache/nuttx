@@ -123,7 +123,7 @@ static void bt_conn_reset_rx_state(FAR struct bt_conn_s *conn)
       return;
     }
 
-  bt_buf_put(conn->rx);
+  bt_buf_release(conn->rx);
   conn->rx     = NULL;
   conn->rx_len = 0;
 }
@@ -166,20 +166,20 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
 
       /* Get next ACL packet for connection */
 
-      ret = bt_queue_recv(conn->tx_queue, &buf);
+      ret = bt_queue_receive(conn->tx_queue, &buf);
       DEBUGASSERT(ret >= 0 && buf != NULL);
       UNUSED(ret);
 
       if (conn->state != BT_CONN_CONNECTED)
         {
           nxsem_post(&g_btdev.le_pkts_sem);
-          bt_buf_put(buf);
+          bt_buf_release(buf);
           break;
         }
 
       wlinfo("passing buf %p len %u to driver\n", buf, buf->len);
       g_btdev.dev->send(g_btdev.dev, buf);
-      bt_buf_put(buf);
+      bt_buf_release(buf);
     }
 
   wlinfo("handle %u disconnected - cleaning up\n", conn->handle);
@@ -189,11 +189,11 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
   do
     {
       buf = NULL;
-      ret = bt_queue_recv(conn->tx_queue, &buf);
+      ret = bt_queue_receive(conn->tx_queue, &buf);
       if (ret >= 0)
         {
           DEBUGASSERT(buf != NULL);
-          bt_buf_put(buf);
+          bt_buf_release(buf);
         }
     }
   while (ret >= OK);
@@ -217,7 +217,7 @@ static int bt_hci_disconnect(FAR struct bt_conn_s *conn, uint8_t reason)
       return -ENOBUFS;
     }
 
-  disconn         = bt_buf_add(buf, sizeof(*disconn));
+  disconn         = bt_buf_extend(buf, sizeof(*disconn));
   disconn->handle = BT_HOST2LE16(conn->handle);
   disconn->reason = reason;
 
@@ -249,7 +249,7 @@ static int bt_hci_connect_le_cancel(FAR struct bt_conn_s *conn)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_conn_input
+ * Name: bt_conn_receive
  *
  * Description:
  *   Receive packets from the HCI core on a registered connection.
@@ -264,8 +264,8 @@ static int bt_hci_connect_le_cancel(FAR struct bt_conn_s *conn)
  *
  ****************************************************************************/
 
-void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
-                   uint8_t flags)
+void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
+                     uint8_t flags)
 {
   FAR struct bt_l2cap_hdr_s *hdr;
   uint16_t len;
@@ -307,7 +307,7 @@ void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
           {
             wlerr("ERROR: Unexpected L2CAP continuation\n");
             bt_conn_reset_rx_state(conn);
-            bt_buf_put(buf);
+            bt_buf_release(buf);
             return;
           }
 
@@ -315,7 +315,7 @@ void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
           {
             wlerr("ERROR: L2CAP data overflow\n");
             bt_conn_reset_rx_state(conn);
-            bt_buf_put(buf);
+            bt_buf_release(buf);
             return;
           }
 
@@ -325,13 +325,13 @@ void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
           {
             wlerr("ERROR: Not enough buffer space for L2CAP data\n");
             bt_conn_reset_rx_state(conn);
-            bt_buf_put(buf);
+            bt_buf_release(buf);
             return;
           }
 
-        memcpy(bt_buf_add(conn->rx, buf->len), buf->data, buf->len);
+        memcpy(bt_buf_extend(conn->rx, buf->len), buf->data, buf->len);
         conn->rx_len -= buf->len;
-        bt_buf_put(buf);
+        bt_buf_release(buf);
 
         if (conn->rx_len)
           {
@@ -347,7 +347,7 @@ void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
       default:
         wlerr("ERROR: Unexpected ACL flags (0x%02x)\n", flags);
         bt_conn_reset_rx_state(conn);
-        bt_buf_put(buf);
+        bt_buf_release(buf);
         return;
     }
 
@@ -357,13 +357,13 @@ void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
   if (sizeof(*hdr) + len != buf->len)
     {
       wlerr("ERROR: ACL len mismatch (%u != %u)\n", len, buf->len);
-      bt_buf_put(buf);
+      bt_buf_release(buf);
       return;
     }
 
   wlinfo("Successfully parsed %u byte L2CAP packet\n", buf->len);
 
-  bt_l2cap_recv(conn, buf);
+  bt_l2cap_receive(conn, buf);
 }
 
 /****************************************************************************
@@ -385,7 +385,6 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_acl_hdr_s *hdr;
   sq_queue_t fraglist;
-  sq_entry_t *fragment;
   uint16_t len;
   uint16_t remaining = buf->len;
   FAR uint8_t *ptr;
@@ -405,7 +404,7 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
       len = g_btdev.le_mtu;
     }
 
-  hdr         = bt_buf_push(buf, sizeof(*hdr));
+  hdr         = bt_buf_provide(buf, sizeof(*hdr));
   hdr->handle = BT_HOST2LE16(conn->handle);
   hdr->len    = BT_HOST2LE16(len);
 
@@ -414,10 +413,7 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
   /* Add the fragment to the end of the list */
 
-  fragment    = (FAR sq_entry_t *)buf->iob;
-  DEBUGASSERT(fragment != NULL);
-  sq_addlast(fragment, &fraglist);
-
+  sq_addlast((FAR sq_entry_t *)buf, &fraglist);
   remaining  -= len;
 
   while (remaining)
@@ -432,27 +428,23 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
       /* Copy from original buffer */
 
-      memcpy(bt_buf_add(buf, len), ptr, len);
+      memcpy(bt_buf_extend(buf, len), ptr, len);
       ptr        += len;
 
-      hdr         = bt_buf_push(buf, sizeof(*hdr));
+      hdr         = bt_buf_provide(buf, sizeof(*hdr));
       hdr->handle = BT_HOST2LE16(conn->handle | (1 << 12));
       hdr->len    = BT_HOST2LE16(len);
 
       /* Add the fragment to the end of the list */
 
-      fragment    = (FAR sq_entry_t *)buf->iob;
-      DEBUGASSERT(fragment != NULL);
-      sq_addlast(fragment, &fraglist);
-
+      sq_addlast((FAR sq_entry_t *)buf, &fraglist);
       remaining  -= len;
     }
 
   /* Then send each fragment in the correct order */
 
-  while ((fragment = sq_remfirst(&fraglist)) != NULL)
+  while ((buf = (FAR struct bt_buf_s *)sq_remfirst(&fraglist)) != NULL)
     {
-      buf = (FAR struct bt_buf_s *)(((FAR struct iob_s *)fragment)->io_data);
       bt_queue_send(conn->tx_queue, buf, BT_NORMAL_PRIO);
     }
 }
@@ -596,7 +588,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
 
         if (old_state == BT_CONN_CONNECTED || old_state == BT_CONN_DISCONNECT)
           {
-            bt_queue_send(conn->tx_queue, bt_buf_get(BT_DUMMY, 0), BT_NORMAL_PRIO);
+            bt_queue_send(conn->tx_queue, bt_buf_alloc(BT_DUMMY, 0), BT_NORMAL_PRIO);
           }
 
         /* Release the reference we took for the very first state transition. */
@@ -1009,7 +1001,7 @@ FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer)
  * Input Parameters:
  *   conn       - The connection to send the command on.
  *   rand, ediv - Values to use for the encryption key
- *   ltk        - 
+ *   ltk        -
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -1029,7 +1021,7 @@ int bt_conn_le_start_encryption(FAR struct bt_conn_s *conn, uint64_t rand,
       return -ENOBUFS;
     }
 
-  cp         = bt_buf_add(buf, sizeof(*cp));
+  cp         = bt_buf_extend(buf, sizeof(*cp));
   cp->handle = BT_HOST2LE16(conn->handle);
   cp->rand   = rand;
   cp->ediv   = ediv;
@@ -1050,7 +1042,7 @@ int bt_conn_le_conn_update(FAR struct bt_conn_s *conn, uint16_t min,
       return -ENOBUFS;
     }
 
-  conn_update                      = bt_buf_add(buf, sizeof(*conn_update));
+  conn_update                      = bt_buf_extend(buf, sizeof(*conn_update));
   memset(conn_update, 0, sizeof(*conn_update));
   conn_update->handle              = BT_HOST2LE16(conn->handle);
   conn_update->conn_interval_min   = BT_HOST2LE16(min);

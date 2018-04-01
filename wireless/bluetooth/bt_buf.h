@@ -1,6 +1,6 @@
 /****************************************************************************
- * wireless/bluetooth/bt_driver.h
- * Bluetooth HCI driver API.
+ * wireless/bluetooth/bt_buf.h
+ * Bluetooth buffer management.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,93 +39,36 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H 1
+#ifndef __WIRELESS_BLUETOOTH_BT_BUF_H
+#define __WIRELESS_BLUETOOTH_BT_BUF_H 1
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/wireless/bt_buf.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct bt_driver_s
-{
-  /* How much headroom is needed for HCI transport headers */
-
-  size_t head_reserve;
-
-  /* Open the HCI transport */
-
-  CODE int (*open)(FAR const struct bt_driver_s *dev);
-
-  /* Send data to HCI */
-
-  CODE int (*send)(FAR const struct bt_driver_s *dev,
-                   FAR struct bt_buf_s *buf);
-};
+#include <stddef.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_driver_register
+ * Name: bt_buf_initialize
  *
  * Description:
- *   Register the Bluetooth low-level driver with the Bluetooth stack.
- *   This is called from the low-level driver and is part of the driver
- *   interface prototyped in include/nuttx/wireless/bt_driver.h
+ *   This function initializes the buffer allocator.  This function must
+ *   be called early in the initialization sequence before any radios
+ *   begin operation.
  *
  * Input Parameters:
- *   dev - An instance of the low-level drivers interface structure.
+ *   None
  *
  * Returned Value:
- *  Zero is returned on success; a negated errno value is returned on any
- *  failure.
+ *   None
  *
  ****************************************************************************/
 
-int bt_driver_register(FAR const struct bt_driver_s *dev);
+void bt_buf_initialize(void);
 
-/****************************************************************************
- * Name: bt_driver_unregister
- *
- * Description:
- *   Unregister a Bluetooth low-level driver previously registered with
- *   bt_driver_register.  This may be called from the low-level driver and
- *   is part of the driver interface prototyped in
- *   include/nuttx/wireless/bt_driver.h
- *
- * Input Parameters:
- *   dev - An instance of the low-level drivers interface structure.
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-void bt_driver_unregister(FAR const struct bt_driver_s *dev);
-
-/****************************************************************************
- * Name: bt_hci_receive
- *
- * Description:
- *   Called by the Bluetooth low-level driver when new data is received from
- *   the radio.  This may be called from the low-level driver and is part of
- *   the driver interface prototyped in include/nuttx/wireless/bt_driver.h
- *
- * Input Parameters:
- *   buf - An instance of the buffer structure providing the received frame.
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-void bt_hci_receive(FAR struct bt_buf_s *buf);
-
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H */
+#endif /* __WIRELESS_BLUETOOTH_BT_BUF_H */

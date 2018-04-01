@@ -179,11 +179,15 @@ static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
                   FAR struct bt_buf_s *buf);
 static uint8_t smp_security_request(FAR struct bt_conn_s *conn,
                   FAR struct bt_buf_s *buf);
-static void    bt_smp_recv(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
-static void    bt_smp_connected(FAR struct bt_conn_s *conn);
-static void    bt_smp_disconnected(FAR struct bt_conn_s *conn);
-static void    bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn);
+static void    bt_smp_receive(FAR struct bt_conn_s *conn,
+                  FAR struct bt_buf_s *buf, FAR void *context,
+                  uint16_t cid);
+static void    bt_smp_connected(FAR struct bt_conn_s *conn,
+                  FAR void *context, uint16_t cid);
+static void    bt_smp_disconnected(FAR struct bt_conn_s *conn,
+                  FAR void *context, uint16_t cid);
+static void    bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
+                  FAR void *context, uint16_t cid);
 #ifdef CONFIG_BLUETOOTH_SMP_SELFTEST
 static void    swap_buf(FAR const uint8_t *src, FAR uint8_t *dst,
                   uint16_t len);
@@ -373,7 +377,7 @@ static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
       return -ENOBUFS;
     }
 
-  cp = bt_buf_add(buf, sizeof(*cp));
+  cp = bt_buf_extend(buf, sizeof(*cp));
   memcpy(cp->key, key, sizeof(cp->key));
   memcpy(cp->plaintext, plaintext, sizeof(cp->plaintext));
 
@@ -385,7 +389,7 @@ static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
 
   rp = (void *)rsp->data;
   memcpy(enc_data, rp->enc_data, sizeof(rp->enc_data));
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
 
   wlinfo("enc_data %s\n", h(enc_data, 16));
 
@@ -418,7 +422,7 @@ static int le_rand(FAR void *buf, size_t len)
         }
 
       memcpy(ptr, rp->rand, copy);
-      bt_buf_put(rsp);
+      bt_buf_release(rsp);
 
       len -= copy;
       ptr += copy;
@@ -532,7 +536,7 @@ static FAR struct bt_buf_s *bt_smp_create_pdu(FAR struct bt_conn_s *conn,
       return NULL;
     }
 
-  hdr = bt_buf_add(buf, sizeof(*hdr));
+  hdr = bt_buf_extend(buf, sizeof(*hdr));
   hdr->code = op;
 
   return buf;
@@ -549,7 +553,7 @@ static void send_err_rsp(FAR struct bt_conn_s *conn, uint8_t reason)
       return;
     }
 
-  rsp         = bt_buf_add(buf, sizeof(*rsp));
+  rsp         = bt_buf_extend(buf, sizeof(*rsp));
   rsp->reason = reason;
 
   bt_l2cap_send(conn, BT_L2CAP_CID_SMP, buf);
@@ -603,7 +607,7 @@ static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
-  rsp = bt_buf_add(rsp_buf, sizeof(*rsp));
+  rsp = bt_buf_extend(rsp_buf, sizeof(*rsp));
 
   /* For JustWorks pairing simplify rsp parameters. TODO: needs to be reworked
    * later on.
@@ -652,7 +656,7 @@ static uint8_t smp_send_pairing_confirm(FAR struct bt_conn_s *conn)
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
-  req = bt_buf_add(rsp_buf, sizeof(*req));
+  req = bt_buf_extend(rsp_buf, sizeof(*req));
 
   if (conn->role == BT_HCI_ROLE_MASTER)
     {
@@ -668,7 +672,7 @@ static uint8_t smp_send_pairing_confirm(FAR struct bt_conn_s *conn)
   err = smp_c1(smp->tk, smp->prnd, smp->preq, smp->prsp, ia, ra, req->val);
   if (err)
     {
-      bt_buf_put(rsp_buf);
+      bt_buf_release(rsp_buf);
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
@@ -715,7 +719,7 @@ static uint8_t smp_send_pairing_random(FAR struct bt_conn_s *conn)
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
-  req = bt_buf_add(rsp_buf, sizeof(*req));
+  req = bt_buf_extend(rsp_buf, sizeof(*req));
   memcpy(req->val, smp->prnd, sizeof(req->val));
 
   bt_l2cap_send(conn, BT_L2CAP_CID_SMP, rsp_buf);
@@ -895,7 +899,7 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
           return;
         }
 
-      info = bt_buf_add(buf, sizeof(struct bt_smp_encrypt_info_s));
+      info = bt_buf_extend(buf, sizeof(struct bt_smp_encrypt_info_s));
       memcpy(info->ltk, keys->slave_ltk.val, sizeof(info->ltk));
 
       bt_l2cap_send(conn, BT_L2CAP_CID_SMP, buf);
@@ -908,7 +912,7 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
           return;
         }
 
-      ident       = bt_buf_add(buf, sizeof(struct bt_smp_master_ident_s));
+      ident       = bt_buf_extend(buf, sizeof(struct bt_smp_master_ident_s));
       ident->rand = keys->slave_ltk.rand;
       ident->ediv = keys->slave_ltk.ediv;
 
@@ -1080,8 +1084,9 @@ pair:
   return 0;
 }
 
-static void bt_smp_recv(FAR struct bt_conn_s *conn,
-                        FAR struct bt_buf_s *buf)
+static void bt_smp_receive(FAR struct bt_conn_s *conn,
+                           FAR struct bt_buf_s *buf, FAR void *context,
+                           uint16_t cid)
 {
   FAR struct bt_smp_hdr_s *hdr = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
@@ -1095,7 +1100,7 @@ static void bt_smp_recv(FAR struct bt_conn_s *conn,
 
   wlinfo("Received SMP code 0x%02x len %u\n", hdr->code, buf->len);
 
-  bt_buf_pull(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(*hdr));
 
   if (hdr->code >= NHANDLERS || !g_smp_handlers[hdr->code].func)
     {
@@ -1138,10 +1143,11 @@ static void bt_smp_recv(FAR struct bt_conn_s *conn,
     }
 
 done:
-  bt_buf_put(buf);
+  bt_buf_release(buf);
 }
 
-static void bt_smp_connected(FAR struct bt_conn_s *conn)
+static void bt_smp_connected(FAR struct bt_conn_s *conn, FAR void *context,
+                             uint16_t cid)
 {
   int i;
 
@@ -1176,7 +1182,8 @@ static void bt_smp_connected(FAR struct bt_conn_s *conn)
   wlerr("ERROR: No available SMP context for conn %p\n", conn);
 }
 
-static void bt_smp_disconnected(FAR struct bt_conn_s *conn)
+static void bt_smp_disconnected(FAR struct bt_conn_s *conn,
+                                FAR void *context, uint16_t cid)
 {
   struct bt_smp_s *smp = conn->smp;
 
@@ -1191,7 +1198,8 @@ static void bt_smp_disconnected(FAR struct bt_conn_s *conn)
   memset(smp, 0, sizeof(*smp));
 }
 
-static void bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn)
+static void bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
+                                  FAR void *context, uint16_t cid)
 {
   struct bt_smp_s *smp = conn->smp;
 
@@ -1539,12 +1547,12 @@ static inline int smp_self_test(void)
  * Public Functions
  ****************************************************************************/
 
-int bt_smp_init(void)
+int bt_smp_initialize(void)
 {
   static struct bt_l2cap_chan_s chan =
   {
     .cid            = BT_L2CAP_CID_SMP,
-    .recv           = bt_smp_recv,
+    .receive        = bt_smp_receive,
     .connected      = bt_smp_connected,
     .disconnected   = bt_smp_disconnected,
     .encrypt_change = bt_smp_encrypt_change,
@@ -1569,7 +1577,7 @@ int bt_smp_send_security_req(FAR struct bt_conn_s *conn)
       return -ENOBUFS;
     }
 
-  req = bt_buf_add(req_buf, sizeof(struct bt_smp_security_request_s));
+  req = bt_buf_extend(req_buf, sizeof(struct bt_smp_security_request_s));
   req->auth_req = BT_SMP_AUTH_BONDING;
   bt_l2cap_send(conn, BT_L2CAP_CID_SMP, req_buf);
 
@@ -1595,7 +1603,7 @@ int bt_smp_send_pairing_req(FAR struct bt_conn_s *conn)
       return -ENOBUFS;
     }
 
-  req = bt_buf_add(req_buf, sizeof(*req));
+  req = bt_buf_extend(req_buf, sizeof(*req));
 
   /* For JustWorks pairing simplify req parameters. TODO: needs to be reworked
    * later on

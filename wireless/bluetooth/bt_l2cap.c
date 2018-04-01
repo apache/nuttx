@@ -75,6 +75,7 @@
  ****************************************************************************/
 
 static FAR struct bt_l2cap_chan_s *g_channels;
+static FAR struct bt_l2cap_chan_s *g_default;
 
 /****************************************************************************
  * Private Functions
@@ -98,20 +99,35 @@ void bt_l2cap_chan_register(FAR struct bt_l2cap_chan_s *chan)
 {
   wlinfo("CID 0x%04x\n", chan->cid);
 
-  chan->next  = g_channels;
+  chan->flink = g_channels;
   g_channels  = chan;
+}
+
+void bt_l2cap_chan_default(FAR struct bt_l2cap_chan_s *chan)
+{
+  g_default  = chan;
 }
 
 void bt_l2cap_connected(FAR struct bt_conn_s *conn)
 {
   FAR struct bt_l2cap_chan_s *chan;
 
-  for (chan = g_channels; chan; chan = chan->next)
+  /* Notify all registered channels of the connection event */
+
+  for (chan = g_channels; chan; chan = chan->flink)
     {
-      if (chan->connected)
+      if (chan->connected != NULL)
         {
-          chan->connected(conn);
+          chan->connected(conn, chan->context, chan->cid);
         }
+    }
+
+  /* Notify any default listener of the connection event */
+
+  chan = g_default;
+  if (chan != NULL && chan->connected != NULL)
+    {
+      chan->connected(conn, chan->context, chan->cid);
     }
 }
 
@@ -119,12 +135,22 @@ void bt_l2cap_disconnected(FAR struct bt_conn_s *conn)
 {
   FAR struct bt_l2cap_chan_s *chan;
 
-  for (chan = g_channels; chan; chan = chan->next)
+  /* Notify all registered channels of the disconnection event */
+
+  for (chan = g_channels; chan; chan = chan->flink)
     {
-      if (chan->disconnected)
+      if (chan->disconnected != NULL)
         {
-          chan->disconnected(conn);
+          chan->disconnected(conn, chan->context, chan->cid);
         }
+    }
+
+  /* Notify any default listener of the disconnection event */
+
+  chan = g_default;
+  if (chan != NULL && chan->disconnected != NULL)
+    {
+      chan->disconnected(conn, chan->context, chan->cid);
     }
 }
 
@@ -132,12 +158,22 @@ void bt_l2cap_encrypt_change(FAR struct bt_conn_s *conn)
 {
   FAR struct bt_l2cap_chan_s *chan;
 
-  for (chan = g_channels; chan; chan = chan->next)
+  /* Notify all registered channels of the encryption change event */
+
+  for (chan = g_channels; chan; chan = chan->flink)
     {
-      if (chan->encrypt_change)
+      if (chan->encrypt_change != NULL)
         {
-          chan->encrypt_change(conn);
+          chan->encrypt_change(conn, chan->context, chan->cid);
         }
+    }
+
+  /* Notify any default listener of the encryption change event */
+
+  chan = g_default;
+  if (chan != NULL && chan->encrypt_change != NULL)
+    {
+      chan->encrypt_change(conn, chan->context, chan->cid);
     }
 }
 
@@ -146,7 +182,7 @@ struct bt_buf_s *bt_l2cap_create_pdu(FAR struct bt_conn_s *conn)
   size_t head_reserve = sizeof(struct bt_l2cap_hdr_s) +
     sizeof(struct bt_hci_acl_hdr_s) + g_btdev.dev->head_reserve;
 
-  return bt_buf_get(BT_ACL_OUT, head_reserve);
+  return bt_buf_alloc(BT_ACL_OUT, head_reserve);
 }
 
 void bt_l2cap_send(FAR struct bt_conn_s *conn, uint16_t cid,
@@ -154,7 +190,7 @@ void bt_l2cap_send(FAR struct bt_conn_s *conn, uint16_t cid,
 {
   FAR struct bt_l2cap_hdr_s *hdr;
 
-  hdr      = bt_buf_push(buf, sizeof(*hdr));
+  hdr      = bt_buf_provide(buf, sizeof(*hdr));
   hdr->len = BT_HOST2LE16(buf->len - sizeof(*hdr));
   hdr->cid = BT_HOST2LE16(cid);
 
@@ -173,12 +209,12 @@ static void rej_not_understood(FAR struct bt_conn_s *conn, uint8_t ident)
       return;
     }
 
-  hdr         = bt_buf_add(buf, sizeof(*hdr));
+  hdr         = bt_buf_extend(buf, sizeof(*hdr));
   hdr->code   = BT_L2CAP_CMD_REJECT;
   hdr->ident  = ident;
   hdr->len    = BT_HOST2LE16(sizeof(*rej));
 
-  rej         = bt_buf_add(buf, sizeof(*rej));
+  rej         = bt_buf_extend(buf, sizeof(*rej));
   rej->reason = BT_HOST2LE16(BT_L2CAP_REJ_NOT_UNDERSTOOD);
 
   bt_l2cap_send(conn, BT_L2CAP_CID_LE_SIG, buf);
@@ -266,12 +302,12 @@ static void le_conn_param_update_req(FAR struct bt_conn_s *conn,
 
   result      = le_validate_conn_params(min, max, latency, timeout);
 
-  hdr         = bt_buf_add(buf, sizeof(*hdr));
+  hdr         = bt_buf_extend(buf, sizeof(*hdr));
   hdr->code   = BT_L2CAP_CONN_PARAM_RSP;
   hdr->ident  = ident;
   hdr->len    = BT_HOST2LE16(sizeof(*rsp));
 
-  rsp         = bt_buf_add(buf, sizeof(*rsp));
+  rsp         = bt_buf_extend(buf, sizeof(*rsp));
   memset(rsp, 0, sizeof(*rsp));
   rsp->result = BT_HOST2LE16(result);
 
@@ -283,7 +319,8 @@ static void le_conn_param_update_req(FAR struct bt_conn_s *conn,
     }
 }
 
-static void le_sig(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
+static void le_sig(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
+                   FAR void *context, uint16_t cid)
 {
   struct bt_l2cap_sig_hdr_s *hdr = (FAR void *)buf->data;
   uint16_t len;
@@ -295,7 +332,7 @@ static void le_sig(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
     }
 
   len = BT_LE162HOST(hdr->len);
-  bt_buf_pull(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(*hdr));
 
   wlinfo("LE signaling code 0x%02x ident %u len %u\n", hdr->code,
          hdr->ident, len);
@@ -329,10 +366,10 @@ static void le_sig(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
     }
 
 drop:
-  bt_buf_put(buf);
+  bt_buf_release(buf);
 }
 
-void bt_l2cap_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
+void bt_l2cap_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 {
   FAR struct bt_l2cap_hdr_s *hdr = (FAR void *)buf->data;
   FAR struct bt_l2cap_chan_s *chan;
@@ -341,16 +378,18 @@ void bt_l2cap_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
   if (buf->len < sizeof(*hdr))
     {
       wlerr("ERROR: Too small L2CAP PDU received\n");
-      bt_buf_put(buf);
+      bt_buf_release(buf);
       return;
     }
 
   cid = BT_LE162HOST(hdr->cid);
-  bt_buf_pull(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(*hdr));
 
   wlinfo("Packet for CID %u len %u\n", cid, buf->len);
 
-  for (chan = g_channels; chan; chan = chan->next)
+  /* Search for a subscriber to this channel */
+
+  for (chan = g_channels; chan != NULL; chan = chan->flink)
     {
       if (chan->cid == cid)
         {
@@ -358,14 +397,23 @@ void bt_l2cap_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
         }
     }
 
-  if (!chan)
+  /* If there is no subscriber, then send all received frames to the default
+   * listener (if one is registered).
+   */
+
+  if (chan == NULL)
     {
-      wlwarn("Ignoring data for unknown CID 0x%04x\n", cid);
-      bt_buf_put(buf);
+      chan = g_default;
+    }
+
+  if (chan == NULL)
+    {
+      wlwarn("WARNING: No subscriber to CID 0x%04x\n", cid);
+      bt_buf_release(buf);
       return;
     }
 
-  chan->recv(conn, buf);
+  chan->receive(conn, buf, chan->context, chan->cid);
 }
 
 void bt_l2cap_update_conn_param(FAR struct bt_conn_s *conn)
@@ -388,12 +436,12 @@ void bt_l2cap_update_conn_param(FAR struct bt_conn_s *conn)
       return;
     }
 
-  hdr               = bt_buf_add(buf, sizeof(*hdr));
+  hdr               = bt_buf_extend(buf, sizeof(*hdr));
   hdr->code         = BT_L2CAP_CONN_PARAM_REQ;
   hdr->ident        = get_ident(conn);
   hdr->len          = BT_HOST2LE16(sizeof(*req));
 
-  req               = bt_buf_add(buf, sizeof(*req));
+  req               = bt_buf_extend(buf, sizeof(*req));
   req->min_interval = BT_HOST2LE16(LE_CONN_MIN_INTERVAL);
   req->max_interval = BT_HOST2LE16(LE_CONN_MAX_INTERVAL);
   req->latency      = BT_HOST2LE16(LE_CONN_LATENCY);
@@ -404,22 +452,22 @@ void bt_l2cap_update_conn_param(FAR struct bt_conn_s *conn)
 
 int bt_l2cap_init(void)
 {
-  int err;
+  int ret;
 
   static struct bt_l2cap_chan_s chan =
   {
-    .cid  = BT_L2CAP_CID_LE_SIG,
-    .recv = le_sig,
+    .cid     = BT_L2CAP_CID_LE_SIG,
+    .receive = le_sig,
   };
 
-  bt_att_init();
+  bt_att_initialize();
 
-  err = bt_smp_init();
-  if (err)
+  ret = bt_smp_initialize();
+  if (ret < 0)
     {
-      return err;
+      return ret;
     }
 
   bt_l2cap_chan_register(&chan);
-  return 0;
+  return ret;
 }

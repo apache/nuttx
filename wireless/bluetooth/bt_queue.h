@@ -105,7 +105,7 @@ int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
                   FAR mqd_t *mqd);
 
 /****************************************************************************
- * Name: bt_queue_recv
+ * Name: bt_queue_receive
  *
  * Description:
  *   Block until the next buffer is received on the queue.
@@ -120,7 +120,7 @@ int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
  *
  ****************************************************************************/
 
-int bt_queue_recv(mqd_t mqd, FAR struct bt_buf_s **buf);
+int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf);
 
 /****************************************************************************
  * Name: bt_queue_send

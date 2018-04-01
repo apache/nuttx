@@ -144,9 +144,11 @@ struct bt_dev_s
 struct bt_conn_s; /* Forward reference */
 struct bt_conn_cb_s
 {
-  CODE void (*connected)(FAR struct bt_conn_s *conn);
-  CODE void (*disconnected)(FAR struct bt_conn_s *conn);
-  FAR struct bt_conn_cb_s *next;
+  FAR struct bt_conn_cb_s *flink;
+  FAR void *context;
+
+  CODE void (*connected)(FAR struct bt_conn_s *conn, FAR void *context);
+  CODE void (*disconnected)(FAR struct bt_conn_s *conn, FAR void *context);
 };
 
 /****************************************************************************

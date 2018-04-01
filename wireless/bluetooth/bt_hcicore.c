@@ -58,10 +58,11 @@
 #include <nuttx/wireless/bt_hci.h>
 
 #include "bt_queue.h"
-#include "bt_hcicore.h"
+#include "bt_buf.h"
 #include "bt_keys.h"
 #include "bt_conn.h"
 #include "bt_l2cap.h"
+#include "bt_hcicore.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,11 +96,11 @@ static void bt_connected(FAR struct bt_conn_s *conn)
 {
   FAR struct bt_conn_cb_s *cb;
 
-  for (cb = g_callback_list; cb; cb = cb->next)
+  for (cb = g_callback_list; cb; cb = cb->flink)
     {
       if (cb->connected)
         {
-          cb->connected(conn);
+          cb->connected(conn, cb->context);
         }
     }
 }
@@ -108,11 +109,11 @@ static void bt_disconnected(FAR struct bt_conn_s *conn)
 {
   FAR struct bt_conn_cb_s *cb;
 
-  for (cb = g_callback_list; cb; cb = cb->next)
+  for (cb = g_callback_list; cb; cb = cb->flink)
     {
       if (cb->disconnected)
         {
-          cb->disconnected(conn);
+          cb->disconnected(conn, cb->context);
         }
     }
 }
@@ -131,14 +132,14 @@ static void hci_acl(FAR struct bt_buf_s *buf)
   flags             = (handle >> 12);
   buf->u.acl.handle = bt_acl_handle(handle);
 
-  bt_buf_pull(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(*hdr));
 
   wlinfo("handle %u len %u flags %u\n", buf->u.acl.handle, len, flags);
 
   if (buf->len != len)
     {
       wlerr("ERROR: ACL data length mismatch (%u != %u)\n", buf->len, len);
-      bt_buf_put(buf);
+      bt_buf_release(buf);
       return;
     }
 
@@ -146,11 +147,11 @@ static void hci_acl(FAR struct bt_buf_s *buf)
   if (!conn)
     {
       wlerr("ERROR: Unable to find conn for handle %u\n", buf->u.acl.handle);
-      bt_buf_put(buf);
+      bt_buf_release(buf);
       return;
     }
 
-  bt_conn_input(conn, buf, flags);
+  bt_conn_receive(conn, buf, flags);
   bt_conn_release(conn);
 }
 
@@ -229,14 +230,14 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
         }
       else
         {
-          sent->u.hci.sync = bt_buf_hold(buf);
+          sent->u.hci.sync = bt_buf_addref(buf);
         }
 
       nxsem_post(sem);
     }
   else
     {
-      bt_buf_put(sent);
+      bt_buf_release(sent);
     }
 }
 
@@ -248,7 +249,7 @@ static void hci_cmd_complete(FAR struct bt_buf_s *buf)
 
   wlinfo("opcode %x\n", opcode);
 
-  bt_buf_pull(buf, sizeof(*evt));
+  bt_buf_consume(buf, sizeof(*evt));
 
   /* All command return parameters have a 1-byte status in the beginning, so we
    * can safely make this generalization.
@@ -285,7 +286,7 @@ static void hci_cmd_status(FAR struct bt_buf_s *buf)
 
   wlinfo("opcode %x\n", opcode);
 
-  bt_buf_pull(buf, sizeof(*evt));
+  bt_buf_consume(buf, sizeof(*evt));
 
   switch (opcode)
     {
@@ -392,7 +393,7 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
       return -ENOBUFS;
     }
 
-  set_param = bt_buf_add(buf, sizeof(*set_param));
+  set_param = bt_buf_extend(buf, sizeof(*set_param));
   memset(set_param, 0, sizeof(*set_param));
   set_param->scan_type = scan_type;
 
@@ -412,7 +413,7 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
       return -ENOBUFS;
     }
 
-  scan_enable             = bt_buf_add(buf, sizeof(*scan_enable));
+  scan_enable             = bt_buf_extend(buf, sizeof(*scan_enable));
   memset(scan_enable, 0, sizeof(*scan_enable));
   scan_enable->filter_dup = scan_filter;
   scan_enable->enable     = BT_LE_SCAN_ENABLE;
@@ -431,7 +432,7 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
       g_btdev.scan_enable = BT_LE_SCAN_ENABLE;
     }
 
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
   return err;
 }
 
@@ -453,7 +454,7 @@ static int bt_hci_stop_scanning(void)
       return -ENOBUFS;
     }
 
-  scan_enable             = bt_buf_add(buf, sizeof(*scan_enable));
+  scan_enable             = bt_buf_extend(buf, sizeof(*scan_enable));
   memset(scan_enable, 0x0, sizeof(*scan_enable));
   scan_enable->filter_dup = 0x00;
   scan_enable->enable     = BT_LE_SCAN_DISABLE;
@@ -472,7 +473,7 @@ static int bt_hci_stop_scanning(void)
       g_btdev.scan_enable = BT_LE_SCAN_DISABLE;
     }
 
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
   return err;
 }
 
@@ -487,7 +488,7 @@ static int hci_le_create_conn(FAR const bt_addr_le_t *addr)
       return -ENOBUFS;
     }
 
-  cp                      = bt_buf_add(buf, sizeof(*cp));
+  cp                      = bt_buf_extend(buf, sizeof(*cp));
   memset(cp, 0x0, sizeof(*cp));
   bt_addr_le_copy(&cp->peer_addr, addr);
   cp->conn_interval_max   = BT_HOST2LE16(0x0028);
@@ -538,7 +539,7 @@ static void hci_disconn_complete(FAR struct bt_buf_s *buf)
       buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_ADV_ENABLE, 1);
       if (buf)
         {
-          memcpy(bt_buf_add(buf, 1), &g_btdev.adv_enable, 1);
+          memcpy(bt_buf_extend(buf, 1), &g_btdev.adv_enable, 1);
           bt_hci_cmd_send(BT_HCI_OP_LE_SET_ADV_ENABLE, buf);
         }
     }
@@ -665,7 +666,7 @@ static void le_adv_report(FAR struct bt_buf_s *buf)
 
   wlinfo("Adv number of reports %u\n", num_reports);
 
-  info = bt_buf_pull(buf, sizeof(num_reports));
+  info = bt_buf_consume(buf, sizeof(num_reports));
 
   while (num_reports--)
     {
@@ -701,7 +702,7 @@ static void le_adv_report(FAR struct bt_buf_s *buf)
        * according to spec 4.2, Vol 2, Part E, 7.7.65.2.
        */
 
-      info = bt_buf_pull(buf, sizeof(*info) + info->length + sizeof(rssi));
+      info = bt_buf_consume(buf, sizeof(*info) + info->length + sizeof(rssi));
     }
 }
 
@@ -740,7 +741,7 @@ static void le_ltk_request(FAR struct bt_buf_s *buf)
           goto done;
         }
 
-      cp         = bt_buf_add(buf, sizeof(*cp));
+      cp         = bt_buf_extend(buf, sizeof(*cp));
       cp->handle = evt->handle;
       memcpy(cp->ltk, conn->keys->slave_ltk.val, 16);
 
@@ -757,7 +758,7 @@ static void le_ltk_request(FAR struct bt_buf_s *buf)
           goto done;
         }
 
-      cp         = bt_buf_add(buf, sizeof(*cp));
+      cp         = bt_buf_extend(buf, sizeof(*cp));
       cp->handle = evt->handle;
 
       bt_hci_cmd_send(BT_HCI_OP_LE_LTK_REQ_NEG_REPLY, buf);
@@ -771,7 +772,7 @@ static void hci_le_meta_event(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_le_meta_event_s *evt = (FAR void *)buf->data;
 
-  bt_buf_pull(buf, sizeof(*evt));
+  bt_buf_consume(buf, sizeof(*evt));
 
   switch (evt->subevent)
     {
@@ -799,7 +800,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
 
   wlinfo("event %u\n", hdr->evt);
 
-  bt_buf_pull(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(*hdr));
 
   switch (hdr->evt)
     {
@@ -836,7 +837,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
         break;
     }
 
-  bt_buf_put(buf);
+  bt_buf_release(buf);
 }
 
 static int hci_tx_kthread(int argc, FAR char *argv[])
@@ -863,7 +864,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       /* Get next command - wait if necessary */
 
       buf = NULL;
-      ret = bt_queue_recv(g_btdev.tx_queue, &buf);
+      ret = bt_queue_receive(g_btdev.tx_queue, &buf);
       DEBUGASSERT(ret >= 0 && buf != NULL);
       UNUSED(ret);
 
@@ -879,7 +880,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       if (g_btdev.sent_cmd)
         {
           wlerr("ERROR: Uncleared pending sent_cmd\n");
-          bt_buf_put(g_btdev.sent_cmd);
+          bt_buf_release(g_btdev.sent_cmd);
           g_btdev.sent_cmd = NULL;
         }
 
@@ -898,10 +899,10 @@ static int hci_rx_kthread(int argc, FAR char *argv[])
 
   while (1)
     {
-      ret = bt_queue_recv(g_btdev.rx_queue, &buf);
+      ret = bt_queue_receive(g_btdev.rx_queue, &buf);
       if (ret < 0)
         {
-          wlerr("ERROR: bt_queue_recv() failed: %d\n", ret);
+          wlerr("ERROR: bt_queue_receive() failed: %d\n", ret);
           continue;
         }
 
@@ -919,7 +920,7 @@ static int hci_rx_kthread(int argc, FAR char *argv[])
 
           default:
             wlerr("ERROR: Unknown buf type %u\n", buf->type);
-            bt_buf_put(buf);
+            bt_buf_release(buf);
             break;
         }
     }
@@ -1014,7 +1015,7 @@ static int hci_init(void)
     }
 
   read_local_features_complete(rsp);
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
 
   /* Read Local Version Information */
 
@@ -1025,7 +1026,7 @@ static int hci_init(void)
     }
 
   read_local_ver_complete(rsp);
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
 
   /* Read Bluetooth Address */
 
@@ -1036,7 +1037,7 @@ static int hci_init(void)
     }
 
   read_bdaddr_complete(rsp);
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
 
   /* For now we only support LE capable controllers */
 
@@ -1055,7 +1056,7 @@ static int hci_init(void)
     }
 
   read_le_features_complete(rsp);
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
 
   /* Read LE Buffer Size */
 
@@ -1066,7 +1067,7 @@ static int hci_init(void)
     }
 
   le_read_buffer_size_complete(rsp);
-  bt_buf_put(rsp);
+  bt_buf_release(rsp);
 
   buf = bt_hci_cmd_create(BT_HCI_OP_SET_EVENT_MASK, sizeof(*ev));
   if (!buf)
@@ -1074,7 +1075,7 @@ static int hci_init(void)
       return -ENOBUFS;
     }
 
-  ev = bt_buf_add(buf, sizeof(*ev));
+  ev = bt_buf_extend(buf, sizeof(*ev));
   memset(ev, 0, sizeof(*ev));
   ev->events[0] |= 0x10;        /* Disconnection Complete */
   ev->events[1] |= 0x08;        /* Read Remote Version Information Complete */
@@ -1099,7 +1100,7 @@ static int hci_init(void)
       return -ENOBUFS;
     }
 
-  hbs = bt_buf_add(buf, sizeof(*hbs));
+  hbs = bt_buf_extend(buf, sizeof(*hbs));
   memset(hbs, 0, sizeof(*hbs));
   hbs->acl_mtu = BT_HOST2LE16(BT_BUF_MAX_DATA -
                                  sizeof(struct bt_hci_acl_hdr_s) -
@@ -1118,7 +1119,7 @@ static int hci_init(void)
       return -ENOBUFS;
     }
 
-  enable  = bt_buf_add(buf, sizeof(*enable));
+  enable  = bt_buf_extend(buf, sizeof(*enable));
   *enable = 0x01;
 
   err = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
@@ -1142,7 +1143,7 @@ static int hci_init(void)
             }
 
           read_buffer_size_complete(rsp);
-          bt_buf_put(rsp);
+          bt_buf_release(rsp);
         }
 
       buf = bt_hci_cmd_create(BT_HCI_OP_LE_WRITE_LE_HOST_SUPP, sizeof(*cp));
@@ -1153,7 +1154,7 @@ static int hci_init(void)
 
       /* Explicitly enable LE for dual-mode controllers */
 
-      cp        = bt_buf_add(buf, sizeof *cp);
+      cp        = bt_buf_extend(buf, sizeof *cp);
       cp->le    = 0x01;
       cp->simul = 0x00;
 
@@ -1205,8 +1206,8 @@ static void rx_queue_init(void)
   pid_t pid;
   int ret;
 
-  /* When a buffer is received from the Bluetooth driver via bt_input() on
-   * the Rx queue and received by logic on the Rx kernel thread.
+  /* When a buffer is received from the Bluetooth driver via bt_hci_receive()
+   * on the Rx queue and received by logic on the Rx kernel thread.
    */
 
   g_btdev.rx_queue = NULL;
@@ -1243,7 +1244,7 @@ int bt_initialize(void)
   int err;
 
   DEBUGASSERT(dev != NULL);
-  bt_buf_init();
+  bt_buf_initialize();
 
   cmd_queue_init();
   rx_queue_init();
@@ -1317,7 +1318,7 @@ void bt_driver_unregister(FAR const struct bt_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: bt_input
+ * Name: bt_hci_receive
  *
  * Description:
  *   Called by the Bluetooth low-level driver when new data is received from
@@ -1332,7 +1333,7 @@ void bt_driver_unregister(FAR const struct bt_driver_s *dev)
  *
  ****************************************************************************/
 
-void bt_input(FAR struct bt_buf_s *buf)
+void bt_hci_receive(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_hdr_s *hdr;
   int prio = BT_NORMAL_PRIO;
@@ -1345,7 +1346,7 @@ void bt_input(FAR struct bt_buf_s *buf)
       if (buf->type != BT_EVT)
         {
           wlerr("ERROR: Invalid buf type %u\n", buf->type);
-          bt_buf_put(buf);
+          bt_buf_release(buf);
           return;
         }
 
@@ -1386,7 +1387,7 @@ FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
 
   wlinfo("opcode %x param_len %u\n", opcode, param_len);
 
-  buf = bt_buf_get(BT_CMD, g_btdev.dev->head_reserve);
+  buf = bt_buf_alloc(BT_CMD, g_btdev.dev->head_reserve);
   if (!buf)
     {
       wlerr("ERROR: Cannot get free buffer\n");
@@ -1398,7 +1399,7 @@ FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
   buf->u.hci.opcode = opcode;
   buf->u.hci.sync   = NULL;
 
-  hdr              = bt_buf_add(buf, sizeof(*hdr));
+  hdr              = bt_buf_extend(buf, sizeof(*hdr));
   hdr->opcode      = BT_HOST2LE16(opcode);
   hdr->param_len   = param_len;
 
@@ -1426,7 +1427,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
   if (opcode == BT_HCI_OP_HOST_NUM_COMPLETED_PACKETS)
     {
       g_btdev.dev->send(g_btdev.dev, buf);
-      bt_buf_put(buf);
+      bt_buf_release(buf);
       return 0;
     }
 
@@ -1500,10 +1501,10 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
     }
   else if (buf->u.hci.sync)
     {
-      bt_buf_put(buf->u.hci.sync);
+      bt_buf_release(buf->u.hci.sync);
     }
 
-  bt_buf_put(buf);
+  bt_buf_release(buf);
   return ret;
 }
 
@@ -1544,7 +1545,7 @@ int bt_start_advertising(uint8_t type, FAR const struct bt_eir_s *ad,
       return -ENOBUFS;
     }
 
-  set_data = bt_buf_add(buf, sizeof(*set_data));
+  set_data = bt_buf_extend(buf, sizeof(*set_data));
 
   memset(set_data, 0, sizeof(*set_data));
 
@@ -1576,7 +1577,7 @@ send_scan_rsp:
       return -ENOBUFS;
     }
 
-  scan_rsp = bt_buf_add(buf, sizeof(*scan_rsp));
+  scan_rsp = bt_buf_extend(buf, sizeof(*scan_rsp));
 
   memset(scan_rsp, 0, sizeof(*scan_rsp));
 
@@ -1603,7 +1604,7 @@ send_set_param:
       return -ENOBUFS;
     }
 
-  set_param = bt_buf_add(buf, sizeof(*set_param));
+  set_param = bt_buf_extend(buf, sizeof(*set_param));
 
   memset(set_param, 0, sizeof(*set_param));
   set_param->min_interval = BT_HOST2LE16(0x0800);
@@ -1620,7 +1621,7 @@ send_set_param:
     }
 
   g_btdev.adv_enable = 0x01;
-  memcpy(bt_buf_add(buf, 1), &g_btdev.adv_enable, 1);
+  memcpy(bt_buf_extend(buf, 1), &g_btdev.adv_enable, 1);
 
   return bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_ADV_ENABLE, buf, NULL);
 }
@@ -1652,7 +1653,7 @@ int bt_stop_advertising(void)
     }
 
   g_btdev.adv_enable = 0x00;
-  memcpy(bt_buf_add(buf, 1), &g_btdev.adv_enable, 1);
+  memcpy(bt_buf_extend(buf, 1), &g_btdev.adv_enable, 1);
 
   return bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_ADV_ENABLE, buf, NULL);
 }
@@ -1776,7 +1777,7 @@ int bt_le_scan_update(void)
 
 void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb)
 {
-  cb->next        = g_callback_list;
+  cb->flink       = g_callback_list;
   g_callback_list = cb;
 }
 

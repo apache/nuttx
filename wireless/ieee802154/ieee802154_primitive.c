@@ -159,7 +159,7 @@ void ieee802154_primitivepool_initialize(void)
   int remaining = CONFIG_IEEE802154_PRIMITIVE_PREALLOC;
 
 #if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
-  /* Initialize g_primfree, thelist of primitive structures that are available
+  /* Initialize g_primfree, the list of primitive structures that are available
    * for general use.
    */
 
@@ -324,7 +324,7 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
     }
 
   /* We have successfully allocated memory from some source.
-   * Zero and tag the alloated primitive structure.
+   * Zero and tag the allocated primitive structure.
    */
 
   prim->pool = pool;

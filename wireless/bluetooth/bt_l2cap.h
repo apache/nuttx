@@ -100,23 +100,31 @@ begin_packed_struct struct bt_l2cap_conn_param_rsp_s
 
 struct bt_l2cap_chan_s
 {
+  FAR struct bt_l2cap_chan_s *flink;
+  FAR void *context;
   uint16_t cid;
 
-  CODE void (*connected)(FAR struct bt_conn_s *conn);
-  CODE void (*disconnected)(FAR struct bt_conn_s *conn);
-  CODE void (*encrypt_change)(FAR struct bt_conn_s *conn);
-  CODE void (*recv)(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf);
-
-  FAR struct bt_l2cap_chan_s *next;
+  CODE void (*connected)(FAR struct bt_conn_s *conn,
+              FAR void *context, uint16_t cid);
+  CODE void (*disconnected)(FAR struct bt_conn_s *conn, FAR void *context,
+              uint16_t cid);
+  CODE void (*encrypt_change)(FAR struct bt_conn_s *conn,
+              FAR void *context, uint16_t cid);
+  CODE void (*receive)(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
+              FAR void *context, uint16_t cid);
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Register a fixed L2CAP channel for L2CAP */
+/* Register a fixed L2CAP channel handler for L2CAP */
 
 void bt_l2cap_chan_register(FAR struct bt_l2cap_chan_s *chan);
+
+/* Register a default L2CAP channel handle for L2CAP */
+
+void bt_l2cap_chan_default(FAR struct bt_l2cap_chan_s *chan);
 
 /* Notify L2CAP channels of a new connection */
 
@@ -141,7 +149,7 @@ void bt_l2cap_send(FAR struct bt_conn_s *conn, uint16_t cid,
 
 /* Receive a new L2CAP PDU from a connection */
 
-void bt_l2cap_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf);
+void bt_l2cap_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf);
 
 /* Perform connection parameter update request */
 

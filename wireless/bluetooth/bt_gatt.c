@@ -442,10 +442,10 @@ static uint8_t notify_cb(FAR const struct bt_gatt_attr_s *attr,
 
       wlinfo("conn %p handle 0x%04x\n", conn, data->handle);
 
-      nfy         = bt_buf_add(buf, sizeof(*nfy));
+      nfy         = bt_buf_extend(buf, sizeof(*nfy));
       nfy->handle = BT_HOST2LE16(data->handle);
 
-      bt_buf_add(buf, data->len);
+      bt_buf_extend(buf, data->len);
       memcpy(nfy->value, data->data, data->len);
 
       bt_l2cap_send(conn, BT_L2CAP_CID_ATT, buf);
@@ -595,7 +595,7 @@ static int gatt_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
   if (err)
     {
       wlerr("ERROR: Error sending ATT PDU: %d\n", err);
-      bt_buf_put(buf);
+      bt_buf_release(buf);
     }
 
   return err;
@@ -627,7 +627,7 @@ int bt_gatt_exchange_mtu(FAR struct bt_conn_s *conn,
 
   wlinfo("Client MTU %u\n", mtu);
 
-  req      = bt_buf_add(buf, sizeof(*req));
+  req      = bt_buf_extend(buf, sizeof(*req));
   req->mtu = BT_HOST2LE16(mtu);
 
   return gatt_send(conn, buf, gatt_mtu_rsp, func, NULL);
@@ -721,7 +721,7 @@ int bt_gatt_discover(FAR struct bt_conn_s *conn,
       return -ENOMEM;
     }
 
-  req               = bt_buf_add(buf, sizeof(*req));
+  req               = bt_buf_extend(buf, sizeof(*req));
   req->start_handle = BT_HOST2LE16(params->start_handle);
   req->end_handle   = BT_HOST2LE16(params->end_handle);
   req->type         = BT_HOST2LE16(BT_UUID_GATT_PRIMARY);
@@ -732,18 +732,18 @@ int bt_gatt_discover(FAR struct bt_conn_s *conn,
   switch (params->uuid->type)
     {
       case BT_UUID_16:
-        value  = bt_buf_add(buf, sizeof(*value));
+        value  = bt_buf_extend(buf, sizeof(*value));
         *value = BT_HOST2LE16(params->uuid->u.u16);
         break;
 
       case BT_UUID_128:
-        bt_buf_add(buf, sizeof(params->uuid->u.u128));
+        bt_buf_extend(buf, sizeof(params->uuid->u.u128));
         memcpy(req->value, params->uuid->u.u128, sizeof(params->uuid->u.u128));
         break;
 
       default:
         wlerr("ERROR: Unkown UUID type %u\n", params->uuid->type);
-        bt_buf_put(buf);
+        bt_buf_release(buf);
         return -EINVAL;
     }
 
@@ -885,11 +885,11 @@ int bt_gatt_discover_characteristic(FAR struct bt_conn_s *conn,
       return -ENOMEM;
     }
 
-  req               = bt_buf_add(buf, sizeof(*req));
+  req               = bt_buf_extend(buf, sizeof(*req));
   req->start_handle = BT_HOST2LE16(params->start_handle);
   req->end_handle   = BT_HOST2LE16(params->end_handle);
 
-  value             = bt_buf_add(buf, sizeof(*value));
+  value             = bt_buf_extend(buf, sizeof(*value));
   *value            = BT_HOST2LE16(BT_UUID_GATT_CHRC);
 
   wlinfo("start_handle 0x%04x end_handle 0x%04x\n", params->start_handle,
@@ -1031,7 +1031,7 @@ int bt_gatt_discover_descriptor(FAR struct bt_conn_s *conn,
       return -ENOMEM;
     }
 
-  req               = bt_buf_add(buf, sizeof(*req));
+  req               = bt_buf_extend(buf, sizeof(*req));
   req->start_handle = BT_HOST2LE16(params->start_handle);
   req->end_handle   = BT_HOST2LE16(params->end_handle);
 
@@ -1070,7 +1070,7 @@ static int gatt_read_blob(FAR struct bt_conn_s *conn, uint16_t handle,
       return -ENOMEM;
     }
 
-  req         = bt_buf_add(buf, sizeof(*req));
+  req         = bt_buf_extend(buf, sizeof(*req));
   req->handle = BT_HOST2LE16(handle);
   req->offset = BT_HOST2LE16(offset);
 
@@ -1101,7 +1101,7 @@ int bt_gatt_read(FAR struct bt_conn_s *conn, uint16_t handle,
       return -ENOMEM;
     }
 
-  req         = bt_buf_add(buf, sizeof(*req));
+  req         = bt_buf_extend(buf, sizeof(*req));
   req->handle = BT_HOST2LE16(handle);
 
   wlinfo("handle 0x%04x\n", handle);
@@ -1132,10 +1132,10 @@ static int gatt_write_cmd(FAR struct bt_conn_s *conn, uint16_t handle,
       return -ENOMEM;
     }
 
-  cmd         = bt_buf_add(buf, sizeof(*cmd));
+  cmd         = bt_buf_extend(buf, sizeof(*cmd));
   cmd->handle = BT_HOST2LE16(handle);
   memcpy(cmd->value, data, length);
-  bt_buf_add(buf, length);
+  bt_buf_extend(buf, length);
 
   wlinfo("handle 0x%04x length %u\n", handle, length);
 
@@ -1165,10 +1165,10 @@ int bt_gatt_write(FAR struct bt_conn_s *conn, uint16_t handle,
       return -ENOMEM;
     }
 
-  req         = bt_buf_add(buf, sizeof(*req));
+  req         = bt_buf_extend(buf, sizeof(*req));
   req->handle = BT_HOST2LE16(handle);
   memcpy(req->value, data, length);
-  bt_buf_add(buf, length);
+  bt_buf_extend(buf, length);
 
   wlinfo("handle 0x%04x length %u\n", handle, length);
 
@@ -1206,7 +1206,7 @@ int bt_gatt_read_multiple(FAR struct bt_conn_s *conn,
 
   for (i = 0; i < count; i++)
     {
-      bt_buf_add_le16(buf, handles[i]);
+      bt_buf_put_le16(buf, handles[i]);
     }
 
   return gatt_send(conn, buf, att_read_rsp, func, NULL);

@@ -62,8 +62,11 @@
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/net/sixlowpan.h>
+#include <nuttx/wireless/bt_core.h>
 
 #include "bt_hcicore.h"
+#include "bt_l2cap.h"
+#include "bt_conn.h"
 #include "bt_ioctl.h"
 
 #if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_BLUETOOTH)
@@ -113,16 +116,17 @@ struct btnet_driver_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct radio_driver_s bd_dev;     /* Interface understood by the network */
-                                    /* Cast compatible with struct btnet_driver_s */
+  struct radio_driver_s bd_dev;      /* Interface understood by the network */
+                                     /* Cast compatible with struct btnet_driver_s */
 
   /* For internal use by this driver */
 
-  sem_t bd_exclsem;                 /* Exclusive access to struct */
-  bool bd_bifup;                    /* true:ifup false:ifdown */
-  WDOG_ID bd_txpoll;                /* TX poll timer */
-  struct work_s bd_pollwork;        /* Defer poll work to the work queue */
-  FAR struct bt_conn_cb_s bd_hcicb; /* Connection status callbacks */
+  sem_t bd_exclsem;                  /* Exclusive access to struct */
+  bool bd_bifup;                     /* true:ifup false:ifdown */
+  WDOG_ID bd_txpoll;                 /* TX poll timer */
+  struct work_s bd_pollwork;         /* Defer poll work to the work queue */
+  struct bt_conn_cb_s bd_hcicb;      /* HCI connection status callbacks */
+  struct bt_l2cap_chan_s bd_l2capcb; /* L2CAP status callbacks */
 };
 
 /****************************************************************************
@@ -136,10 +140,23 @@ static inline void btnet_netmask(FAR struct net_driver_s *dev);
 
 /* Bluetooth callback functions ***************************************/
 
-static int  btnet_rxframe(FAR struct btnet_driver_s *maccb,
-              FAR struct bluetooth_frame_meta_s *meta);
-static void btnet_connected(FAR struct bt_conn_s *conn);
-static void btnet_disconnected(FAR struct bt_conn_s *conn);
+/* L2CAP callbacks */
+
+static void btnet_l2cap_connected(FAR struct bt_conn_s *conn,
+              FAR void *context, uint16_t cid);
+static void btnet_l2cap_disconnected(FAR struct bt_conn_s *conn,
+              FAR void *context, uint16_t cid);
+static void btnet_l2cap_encrypt_change(FAR struct bt_conn_s *conn,
+              FAR void *context, uint16_t cid);
+static void btnet_l2cap_receive(FAR struct bt_conn_s *conn,
+              FAR struct bt_buf_s *buf, FAR void *context, uint16_t cid);
+
+/* HCI callbacks */
+
+static void btnet_hci_connected(FAR struct bt_conn_s *conn,
+              FAR void *context);
+static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
+              FAR void *context);
 
 /* Network interface support ************************************************/
 /* Common TX logic */
@@ -252,10 +269,50 @@ static inline void btnet_netmask(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: btnet_rxframe
+ * Name: btnet_hci_connect/disconnect/encrypt_change
  *
  * Description:
- *   Handle received frames forward by the Bluetooth stack.
+ *   There are callbacks that are involved by the core HCI layer when a
+ *   change is detected in the connection status or encryption.
+ *
+ * Input Parameters:
+ *   conn - The connection whose
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   No assumption should be made about the thread of execution that these
+ *   are called from
+ *
+ ****************************************************************************/
+
+static void btnet_l2cap_connected(FAR struct bt_conn_s *conn,
+                                  FAR void *context, uint16_t cid)
+{
+  wlinfo("Connected\n");
+#warning Missing logic
+}
+
+static void btnet_l2cap_disconnected(FAR struct bt_conn_s *conn,
+                                     FAR void *context, uint16_t cid)
+{
+  wlinfo("Disconnected\n");
+#warning Missing logic
+}
+
+static void btnet_l2cap_encrypt_change(FAR struct bt_conn_s *conn,
+                                       FAR void *context, uint16_t cid)
+{
+  wlinfo("Encryption change\n");
+#warning Missing logic
+}
+
+/****************************************************************************
+ * Name: btnet_l2cap_receive
+ *
+ * Description:
+ *   Handle received frames forward by the Bluetooth L2CAP layer.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -265,24 +322,55 @@ static inline void btnet_netmask(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int btnet_rxframe(FAR struct btnet_driver_s *priv,
-                         FAR struct bluetooth_frame_meta_s *meta)
+static void btnet_l2cap_receive(FAR struct bt_conn_s *conn,
+                                FAR struct bt_buf_s *buf,
+                                FAR void *context, uint16_t cid)
 {
-  FAR struct iob_s *iob;
-  int ret;
+  FAR struct btnet_driver_s *priv;
+  FAR struct iob_s *frame;
+  struct bluetooth_frame_meta_s meta;
+  int ret = -ENODEV;
 
-  DEBUGASSERT(priv != NULL && meta != NULL);
+  wlinfo("Received frame\n");
+
+  DEBUGASSERT(conn != NULL && buf != NULL && buf->frame != NULL &&
+              context != NULL && cid < UINT8_MAX);
+
+  /* Detach the IOB frame from the buffer structure */
+
+  frame      = buf->frame;
+  buf->frame = NULL;
 
   /* Ignore the frame if the network is not up */
 
+  priv = (FAR struct btnet_driver_s *)context;
   if (!priv->bd_bifup)
     {
       wlwarn("WARNING: Dropped... Network is down\n");
-      return -ENETDOWN;
+      goto drop;
     }
 
+  /* Make sure that the size/offset data matches the buffer structure data.
+   * REVISIT:  Wouldn't it be better to just have one copy rather than having
+   * to synchronize?
+   */
+
+  frame->io_len    = buf->len;
+  frame->io_pktlen = buf->len;
+  frame->io_offset = (unsigned int)
+    ((uintptr_t)buf->data - (uintptr_t)frame->io_data);
+
+  DEBUGASSERT(frame->io_len <= CONFIG_IOB_BUFSIZE);
+  DEBUGASSERT(frame->io_offset < CONFIG_IOB_BUFSIZE);
+
+  /* Construct the frame meta data.
+   * REVISIT: Where do we get the channel number?
+   */
+
+  BLUETOOTH_ADDRCOPY(meta.bm_raddr.val, conn->src.val);
+  meta.bm_channel = cid;
+
   /* Transfer the frame to the network logic */
-#warning Missing logic
 
   net_lock();
 
@@ -292,14 +380,13 @@ static int btnet_rxframe(FAR struct btnet_driver_s *priv,
    * frame and return success.
    */
 
-  ret = bluetooth_input(&priv->bd_dev, iob, (FAR void *)meta);
-  if (ret < 0)
+  ret = bluetooth_input(&priv->bd_dev, frame, (FAR void *)&meta);
 #endif
 #ifdef CONFIG_NET_6LOWPAN
+  if (ret < 0)
     {
-      /* If the frame is not a 6LoWPAN frame, then return an error.  The
-       * first byte following the MAC head at the io_offset should be a
-       * valid IPHC header.
+      /* If the frame is not a 6LoWPAN frame, then thefirst byte at the
+       * io_offset should be a valid IPHC header.
        */
 
       if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
@@ -320,25 +407,36 @@ static int btnet_rxframe(FAR struct btnet_driver_s *priv,
           ret = sixlowpan_input(&priv->bd_dev, iob, (FAR void *)meta);
         }
     }
+#endif
+
+drop:
+
+  /* Handle errors */
 
   if (ret < 0)
-#endif
     {
-      net_unlock();
-      return ret;
+      iob_free(frame);
+
+      /* Increment statistics */
+
+      NETDEV_RXDROPPED(&priv->bd_dev.r_dev);
+    }
+  else
+    {
+      /* Increment statistics */
+
+      NETDEV_RXPACKETS(&priv->bd_dev.r_dev);
+      NETDEV_RXIPV6(&priv->bd_dev.r_dev);
     }
 
-  /* Increment statistics */
+  /* Release our reference on the buffer */
 
-  NETDEV_RXPACKETS(&priv->bd_dev.r_dev);
-  NETDEV_RXIPV6(&priv->bd_dev.r_dev);
-
+  bt_buf_release(buf);
   net_unlock();
-  return OK;
 }
 
 /****************************************************************************
- * Name: btnet_txpoll_callback
+ * Name: btnet_hci_connect/disconnect
  *
  * Description:
  *   There are callbacks that are involved by the core HCI layer when a
@@ -356,13 +454,17 @@ static int btnet_rxframe(FAR struct btnet_driver_s *priv,
  *
  ****************************************************************************/
 
-static void btnet_connected(FAR struct bt_conn_s *conn)
+static void btnet_hci_connected(FAR struct bt_conn_s *conn,
+                                FAR void *context)
 {
+  wlinfo("Connected\n");
 #warning Missing logic
 }
 
-static void btnet_disconnected(FAR struct bt_conn_s *conn)
+static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
+                                   FAR void *context)
 {
+  wlinfo("Disconnected\n");
 #warning Missing logic
 }
 
@@ -914,6 +1016,7 @@ int bt_netdev_register(void)
   FAR struct radio_driver_s *radio;
   FAR struct net_driver_s  *dev;
   FAR struct bt_conn_cb_s *hcicb;
+  FAR struct bt_l2cap_chan_s *l2capcb;
   int ret;
 
   /* Get the interface structure associated with this interface number. */
@@ -946,13 +1049,22 @@ int bt_netdev_register(void)
   /* Connection status change callbacks */
 
   hcicb               = &priv->bd_hcicb;
-  hcicb->connected    = btnet_connected;
-  hcicb->disconnected = btnet_disconnected;
+  hcicb->context      = priv;
+  hcicb->connected    = btnet_hci_connected;
+  hcicb->disconnected = btnet_hci_disconnected;
 
   bt_conn_cb_register(hcicb);
 
-  /* REVISIT:  When and where to we register to get frames on a connection? */
-#warning Missing logic
+  /* L2CAP status change callbacks */
+
+  l2capcb                 = &priv->bd_l2capcb;
+  l2capcb->context        = priv;
+  l2capcb->connected      = btnet_l2cap_connected;
+  l2capcb->disconnected   = btnet_l2cap_disconnected;
+  l2capcb->encrypt_change = btnet_l2cap_encrypt_change;
+  l2capcb->receive        = btnet_l2cap_receive;
+
+  bt_l2cap_chan_default(l2capcb);
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

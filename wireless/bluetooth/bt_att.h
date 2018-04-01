@@ -434,7 +434,7 @@ typedef void (*bt_att_destroy_t)(FAR void *user_data);
  * Public Function Prototypes
  ****************************************************************************/
 
-void bt_att_init(void);
+void bt_att_initialize(void);
 struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn, uint8_t op,
                                  size_t len);
 

@@ -64,9 +64,11 @@
  * Private Types
  ****************************************************************************/
 
+/* A message is just a buffer structure */
+
 struct bt_bufmsg_s
 {
-  FAR struct iob_s *iob;
+  FAR struct bt_buf_s *buf;
 };
 
 /****************************************************************************
@@ -119,7 +121,7 @@ int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
 }
 
 /****************************************************************************
- * Name: bt_queue_recv
+ * Name: bt_queue_receive
  *
  * Description:
  *   Block until the next buffer is received on the queue.
@@ -134,7 +136,7 @@ int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
  *
  ****************************************************************************/
 
-int bt_queue_recv(mqd_t mqd, FAR struct bt_buf_s **buf)
+int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
 {
   union
   {
@@ -142,7 +144,6 @@ int bt_queue_recv(mqd_t mqd, FAR struct bt_buf_s **buf)
     char msgbuf[BT_MSGSIZE];
   } u;
 
-  FAR struct bt_buf_s *retbuf;
   ssize_t msgsize;
   int priority;
   int ret;
@@ -158,17 +159,16 @@ int bt_queue_recv(mqd_t mqd, FAR struct bt_buf_s **buf)
       return ret;
     }
 
-  /* Only message buffer messages are expected */
+  /* Only buffers are expected as messages and all messages should have an
+   * attached IOB frame.
+   */
 
   DEBUGASSERT(msgsize == sizeof(struct bt_bufmsg_s));
-  DEBUGASSERT(u.msg.iob != NULL);
+  DEBUGASSERT(u.msg.buf->frame != NULL);
 
-  /* A few more sanity checks, then return the buffer */
+  /* Return the buffer */
 
-  retbuf = (FAR struct bt_buf_s *)u.msg.iob->io_data;
-  DEBUGASSERT(retbuf->iob == u.msg.iob);
-
-  *buf = retbuf;
+  *buf = u.msg.buf;
   return OK;
 }
 
@@ -197,11 +197,11 @@ int bt_queue_send(mqd_t mqd, FAR struct bt_buf_s *buf, int priority)
   struct bt_bufmsg_s msg;
   int ret;
 
-  DEBUGASSERT(mqd != NULL && buf != NULL && buf->iob != NULL);
+  DEBUGASSERT(mqd != NULL && buf != NULL && buf->frame != NULL);
 
   /* Format and send the buffer message */
 
-  msg.iob = buf->iob;
+  msg.buf = buf;
   ret = nxmq_send(mqd, (FAR const char *)&msg, sizeof(struct bt_bufmsg_s),
                   priority);
   if (ret < 0)

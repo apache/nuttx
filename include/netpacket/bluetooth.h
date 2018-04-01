@@ -99,7 +99,7 @@
 #define BTPROTO_HIDP    6
 #define BTPROTO_AVDTP   7
 
-/* HCI socket options:
+/* HCI socket options (SOL_HCI, see include/sys/socket.h):
  *
  * SO_HCI_EVT_FILTER
  *   Controls which events will be received at the socket.  By default,
@@ -116,7 +116,7 @@
 #define SO_HCI_PKT_FILTER   (__SO_PROTOCOL + 1)
 #define SO_HCI_DIRECTION    (__SO_PROTOCOL + 2)
 
-/* L2CAP socket options:
+/* L2CAP socket options (SOL_L2CAP, see include/sys/socket.h):
 
  * SO_L2CAP_IMTU [uint16_t]
  *   Incoming MTU
@@ -145,7 +145,7 @@
 #  define L2CAP_LM_ENCRYPT  (1 << 1)
 #  define L2CAP_LM_SECURE   (1 << 2)
 
-/* RFCOMM socket options:
+/* RFCOMM socket options (SOL_RFCOMM, see include/sys/socket.h):
  *
  * SO_RFCOMM_MTU [uint16_t]
  *   Maximum Frame Size to use for this link.
@@ -171,7 +171,7 @@
 #  define RFCOMM_LM_ENCRYPT (1 << 1)
 #  define RFCOMM_LM_SECURE  (1 << 2)
 
-/* SCO socket options:
+/* SCO socket options (SOL_SCO, see include/sys/socket.h):
  *
  * SO_SCO_MTU [uint16_t]
  *   Maximum packet size for use on this link.  This is read-only and will
@@ -183,6 +183,78 @@
 
 #define SO_SCO_MTU          (__SO_PROTOCOL + 8)
 #define SO_SCO_HANDLE       (__SO_PROTOCOL + 9)
+
+/* The CID name space for the ACL-U, ASB-C, and AMP-U logical links is as
+ * follows:
+ */
+
+#define BT_CID_NULL             0x0000  /* Null identifier */
+#define BT_CID_L2CAP            0x0001  /* L2CAP Signaling channel */
+#define BT_CID_CONNECTIONLESS   0x0002  /* Connectionless channel */
+#define BT_CID_AMP              0x0003  /* AMP Manager Protocol */
+                                        /* 0x0004-0x0006 Reserved for future
+                                         * use */
+#define BT_CID_BREDR            0x0007  /* BR/EDR Security Manager */
+                                        /* 0x0008-0x003e Reserved for future
+                                         * use */
+#define BT_CID_AMPTEST          0x003f  /* AMP Test Manager */
+                                        /* 0x0040-0xffff Dynamically
+                                         * allocated */
+
+/* The CID name space for the LE-U logical link is as follows:
+ *
+ * NOTE: 0x0004, 0x0005, and 0x0006 are used internally by ATT, L2CAP, and
+ * and SMP.  These are unavailable for use use in socket connection.
+ */
+
+#define BT_LE_CID_NULL          0x0000  /* Null identifier */
+                                        /* 0x0001-0x0003 Reserved for future
+                                         * use */
+#define BT_LE_CID_ATT           0x0004  /* Attribute Protocol */
+#define BT_LE_CID_L2CAP         0x0005  /* Low Energy L2CAP Signaling channel */
+#define BT_LE_CID_SMP           0x0006  /* Security Manager Protocol
+                                        /* 0x0007-0x001f Reserved for future
+                                        /* 0x0020-0x003e Assigned Numbers
+                                        /* 0x003f Reserved for future use */
+                                        /* 0x0040-0x007f Dynamically allocated
+                                         * using the L2CAP LE credit based
+                                         * connection mechanism
+                                        /* Others reserved for future use */
+
+/* Protocol and Service Multiplexers (PSMs) */
+
+#define BT_PSM_SDP              0x0001  /* Bluetooth Service Discovery
+                                         * Protocol (SDP), Bluetooth SIG */
+#define BT_PSM_RFCOMM           0x0003  /* RFCOMM with TS 07.10, Bluetooth
+                                         * SIG */
+#define BT_PSM_TCS_BIN          0x0005  /* Bluetooth Telephony Control
+                                         * Specification / TCS Binary,
+                                         * Bluetooth SIG */
+#define BT_PSM_TCS_BIN_CORDLESS 0x0007  /* Bluetooth Telephony Control
+                                         * Specification / TCS Binary,
+                                         * Bluetooth SIG */
+#define BT_PSM_BNEP             0x000f  /* Bluetooth Network Encapsulation
+                                         * Protocol, Bluetooth SIG */
+#define BT_PSM_HID_CTRL         0x0011  /* Human Interface Device, Bluetooth
+                                         * SIG */
+#define BT_PSM_HID_INT          0x0013  /* Human Interface Device, Bluetooth
+                                         * SIG */
+#define BT_PSM_UPnP             0x0015  /* [ESDP] , Bluetooth SIG */
+#define BT_PSM_AVCTP            0x0017  /* Audio/Video Control Transport
+                                         * Protocol, Bluetooth SIG */
+#define BT_PSM_AVDTP            0x0019  /* Audio/Video Distribution Transport
+                                         * Protocol, Bluetooth SIG */
+#define BT_PSM_AVCTP_BROWSING   0x001b  /* Audio/Video Remote Control
+                                         * Profile, Bluetooth SIG */
+#define BT_PSM_UDI_CPLANE       0x001d  /* Unrestricted Digital Information
+                                         * Profile [UDI], Bluetooth SIG */
+#define BT_PSM_ATT              0x001f  /* Bluetooth Core Specification */
+#define BT_PSM_3DSP             0x0021  /* 3D Synchronization Profile,
+                                         * Bluetooth SIG. */
+#define BT_PSM_LE_PSM_IPSP      0x0023  /* Internet Protocol Support Profile
+                                         * (IPSP), Bluetooth SIG */
+#define BT_PSM_OTS              0x0025  /* Object Transfer Service (OTS),
+                                         * Bluetooth SIG  */
 
 /****************************************************************************
  * Public Type Definitions
@@ -204,9 +276,9 @@
 
 struct sockaddr_bt_s
 {
-  sa_family_t  bt_family;
-  bt_addr_t    bt_bdaddr;
-  uint8_t      bt_channel;
+  sa_family_t  bt_family;  /* Must be AF_BLUETOOTH */
+  bt_addr_t    bt_bdaddr;  /* 6-byte Bluetooth address */
+  uint8_t      bt_channel; /* Channel identifier (CID) */
 };
 
 /****************************************************************************

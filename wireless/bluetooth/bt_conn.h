@@ -111,11 +111,11 @@ struct bt_conn_s
 };
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_conn_input
+ * Name: bt_conn_receive
  *
  * Description:
  *   Receive packets from the HCI core on a registered connection.
@@ -130,8 +130,8 @@ struct bt_conn_s
  *
  ****************************************************************************/
 
-void bt_conn_input(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
-                   uint8_t flags);
+void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
+                     uint8_t flags);
 
 /****************************************************************************
  * Name: bt_conn_send

@@ -276,10 +276,12 @@ static uint8_t att_handle_read_mult_rsp(FAR struct bt_conn_s *conn,
                  FAR struct bt_buf_s *buf);
 static uint8_t att_handle_write_rsp(FAR struct bt_conn_s *conn,
                  FAR struct bt_buf_s *buf);
-static void bt_att_recv(FAR struct bt_conn_s *conn,
-                 FAR struct bt_buf_s *buf);
-static void bt_att_connected(FAR struct bt_conn_s *conn);
-static void bt_att_disconnected(FAR struct bt_conn_s *conn);
+static void bt_att_receive(FAR struct bt_conn_s *conn,
+                 FAR struct bt_buf_s *buf, FAR void *context, uint16_t cid);
+static void bt_att_connected(FAR struct bt_conn_s *conn, FAR void *context,
+                 uint16_t cid);
+static void bt_att_disconnected(FAR struct bt_conn_s *conn,
+                 FAR void *context, uint16_t cid);
 
 /****************************************************************************
  * Private Data
@@ -451,7 +453,7 @@ static void send_err_rsp(struct bt_conn_s *conn, uint8_t req, uint16_t handle,
       return;
     }
 
-  rsp = bt_buf_add(buf, sizeof(*rsp));
+  rsp = bt_buf_extend(buf, sizeof(*rsp));
   rsp->request = req;
   rsp->handle = BT_HOST2LE16(handle);
   rsp->error = err;
@@ -499,7 +501,7 @@ static uint8_t att_mtu_req(struct bt_conn_s *conn, struct bt_buf_s *data)
 
   att->mtu = mtu;
 
-  rsp = bt_buf_add(buf, sizeof(*rsp));
+  rsp = bt_buf_extend(buf, sizeof(*rsp));
   rsp->mtu = BT_HOST2LE16(mtu);
 
   bt_l2cap_send(conn, BT_L2CAP_CID_ATT, buf);
@@ -610,7 +612,7 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
 
   if (!data->rsp)
     {
-      data->rsp = bt_buf_add(data->buf, sizeof(*data->rsp));
+      data->rsp = bt_buf_extend(data->buf, sizeof(*data->rsp));
       data->rsp->format = (attr->uuid->type == BT_UUID_16) ?
         BT_ATT_INFO_16 : BT_ATT_INFO_128;
     }
@@ -625,7 +627,7 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
 
         /* Fast foward to next item position */
 
-        data->u.info16         = bt_buf_add(data->buf, sizeof(*data->u.info16));
+        data->u.info16         = bt_buf_extend(data->buf, sizeof(*data->u.info16));
         data->u.info16->handle = BT_HOST2LE16(attr->handle);
         data->u.info16->uuid   = BT_HOST2LE16(attr->uuid->u.u16);
 
@@ -640,7 +642,7 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
 
         /* Fast foward to next item position */
 
-        data->u.info128         = bt_buf_add(data->buf, sizeof(*data->u.info128));
+        data->u.info128         = bt_buf_extend(data->buf, sizeof(*data->u.info128));
         data->u.info128->handle = BT_HOST2LE16(attr->handle);
         memcpy(data->u.info128->uuid, attr->uuid->u.u128,
                sizeof(data->u.info128->uuid));
@@ -670,7 +672,7 @@ static uint8_t att_find_info_rsp(FAR struct bt_conn_s *conn,
 
   if (!data.rsp)
     {
-      bt_buf_put(data.buf);
+      bt_buf_release(data.buf);
 
       /* Respond since handle is set */
 
@@ -759,7 +761,7 @@ static uint8_t find_type_cb(FAR const struct bt_gatt_attr_s *attr,
 
   /* Fast foward to next item position */
 
-  data->group               = bt_buf_add(data->buf, sizeof(*data->group));
+  data->group               = bt_buf_extend(data->buf, sizeof(*data->group));
   data->group->start_handle = BT_HOST2LE16(attr->handle);
   data->group->end_handle   = BT_HOST2LE16(attr->handle);
 
@@ -791,7 +793,7 @@ static uint8_t att_find_type_rsp(FAR struct bt_conn_s *conn,
 
   if (!data.group)
     {
-      bt_buf_put(data.buf);
+      bt_buf_release(data.buf);
 
       /* Respond since handle is set */
 
@@ -819,7 +821,7 @@ static uint8_t att_find_type_req(FAR struct bt_conn_s *conn,
   start_handle = BT_LE162HOST(req->start_handle);
   end_handle   = BT_LE162HOST(req->end_handle);
   type         = BT_LE162HOST(req->type);
-  value        = bt_buf_pull(data, sizeof(*req));
+  value        = bt_buf_consume(data, sizeof(*req));
 
   wlinfo("start_handle 0x%04x end_handle 0x%04x type %u\n", start_handle,
          end_handle, type);
@@ -858,7 +860,7 @@ static bool uuid_create(FAR struct bt_uuid_s *uuid, FAR struct bt_buf_s *data)
     {
     case 2:
       uuid->type  = BT_UUID_16;
-      uuid->u.u16 = bt_buf_pull_le16(data);
+      uuid->u.u16 = bt_buf_get_le16(data);
       return true;
 
     case 16:
@@ -888,7 +890,7 @@ static uint8_t read_type_cb(FAR const struct bt_gatt_attr_s *attr,
 
   /* Fast foward to next item position */
 
-  data->item = bt_buf_add(data->buf, sizeof(*data->item));
+  data->item = bt_buf_extend(data->buf, sizeof(*data->item));
   data->item->handle = BT_HOST2LE16(attr->handle);
 
   /* Read attribute value and store in the buffer */
@@ -916,7 +918,7 @@ static uint8_t read_type_cb(FAR const struct bt_gatt_attr_s *attr,
       return BT_GATT_ITER_STOP;
     }
 
-  bt_buf_add(data->buf, read);
+  bt_buf_extend(data->buf, read);
 
   /* Return true only if there are still space for more items */
 
@@ -941,14 +943,14 @@ static uint8_t att_read_type_rsp(FAR struct bt_conn_s *conn,
     }
 
   data.uuid     = uuid;
-  data.rsp      = bt_buf_add(data.buf, sizeof(*data.rsp));
+  data.rsp      = bt_buf_extend(data.buf, sizeof(*data.rsp));
   data.rsp->len = 0;
 
   bt_gatt_foreach_attr(start_handle, end_handle, read_type_cb, &data);
 
   if (!data.rsp->len)
     {
-      bt_buf_put(data.buf);
+      bt_buf_release(data.buf);
 
       /* Response here since handle is set */
 
@@ -981,7 +983,7 @@ static uint8_t att_read_type_req(FAR struct bt_conn_s *conn,
   req          = (FAR void *)data->data;
   start_handle = BT_LE162HOST(req->start_handle);
   end_handle   = BT_LE162HOST(req->end_handle);
-  bt_buf_pull(data, sizeof(*req));
+  bt_buf_consume(data, sizeof(*req));
 
   if (!uuid_create(&uuid, data))
     {
@@ -1062,7 +1064,7 @@ static uint8_t read_cb(FAR const struct bt_gatt_attr_s *attr,
 
   wlinfo("handle 0x%04x\n", attr->handle);
 
-  data->rsp = bt_buf_add(data->buf, sizeof(*data->rsp));
+  data->rsp = bt_buf_extend(data->buf, sizeof(*data->rsp));
 
   if (!attr->read)
     {
@@ -1088,7 +1090,7 @@ static uint8_t read_cb(FAR const struct bt_gatt_attr_s *attr,
       return BT_GATT_ITER_STOP;
     }
 
-  bt_buf_add(data->buf, read);
+  bt_buf_extend(data->buf, read);
   return BT_GATT_ITER_CONTINUE;
 }
 
@@ -1119,7 +1121,7 @@ static uint8_t att_read_rsp(FAR struct bt_conn_s *conn, uint8_t op,
 
   if (data.err)
     {
-      bt_buf_put(data.buf);
+      bt_buf_release(data.buf);
 
       /* Respond here since handle is set */
 
@@ -1181,7 +1183,7 @@ static uint8_t att_read_mult_req(FAR struct bt_conn_s *conn,
 
   while (buf->len >= sizeof(uint16_t))
     {
-      handle = bt_buf_pull_le16(buf);
+      handle = bt_buf_get_le16(buf);
 
       wlinfo("handle 0x%04x \n", handle);
 
@@ -1191,7 +1193,7 @@ static uint8_t att_read_mult_req(FAR struct bt_conn_s *conn,
 
       if (data.err)
         {
-          bt_buf_put(data.buf);
+          bt_buf_release(data.buf);
 
           /* Respond here since handle is set */
 
@@ -1235,7 +1237,7 @@ static uint8_t read_group_cb(FAR const struct bt_gatt_attr_s *attr,
 
   /* Fast forward to next group position */
 
-  data->group               = bt_buf_add(data->buf, sizeof(*data->group));
+  data->group               = bt_buf_extend(data->buf, sizeof(*data->group));
 
   /* Initialize group handle range */
 
@@ -1267,7 +1269,7 @@ static uint8_t read_group_cb(FAR const struct bt_gatt_attr_s *attr,
       return false;
     }
 
-  bt_buf_add(data->buf, read);
+  bt_buf_extend(data->buf, read);
 
   /* Continue to find the end handle */
 
@@ -1292,14 +1294,14 @@ static uint8_t att_read_group_rsp(FAR struct bt_conn_s *conn,
 
   data.conn     = conn;
   data.uuid     = uuid;
-  data.rsp      = bt_buf_add(data.buf, sizeof(*data.rsp));
+  data.rsp      = bt_buf_extend(data.buf, sizeof(*data.rsp));
   data.rsp->len = 0;
 
   bt_gatt_foreach_attr(start_handle, end_handle, read_group_cb, &data);
 
   if (!data.rsp->len)
     {
-      bt_buf_put(data.buf);
+      bt_buf_release(data.buf);
 
       /* Respond here since handle is set */
 
@@ -1332,7 +1334,7 @@ static uint8_t att_read_group_req(FAR struct bt_conn_s *conn,
   req          = (FAR void *)data->data;
   start_handle = BT_LE162HOST(req->start_handle);
   end_handle   = BT_LE162HOST(req->end_handle);
-  bt_buf_pull(data, sizeof(*req));
+  bt_buf_consume(data, sizeof(*req));
 
   if (!uuid_create(&uuid, data))
     {
@@ -1456,7 +1458,7 @@ static uint8_t att_write_rsp(FAR struct bt_conn_s *conn, uint8_t op,
     {
       if (rsp)
         {
-          bt_buf_put(data.buf);
+          bt_buf_release(data.buf);
 
           /* Respond here since handle is set */
 
@@ -1474,10 +1476,10 @@ static uint8_t att_write_rsp(FAR struct bt_conn_s *conn, uint8_t op,
         {
           FAR struct bt_att_prepare_write_rsp_s *wrrsp;
 
-          wrrsp         = bt_buf_add(data.buf, sizeof(*wrrsp));
+          wrrsp         = bt_buf_extend(data.buf, sizeof(*wrrsp));
           wrrsp->handle = BT_HOST2LE16(handle);
           wrrsp->offset = BT_HOST2LE16(offset);
-          bt_buf_add(data.buf, len);
+          bt_buf_extend(data.buf, len);
           memcpy(wrrsp->value, value, len);
         }
 
@@ -1496,7 +1498,7 @@ static uint8_t att_write_req(FAR struct bt_conn_s *conn,
   req = (FAR void *)data->data;
 
   handle = BT_LE162HOST(req->handle);
-  bt_buf_pull(data, sizeof(*req));
+  bt_buf_consume(data, sizeof(*req));
 
   wlinfo("handle 0x%04x\n", handle);
 
@@ -1514,7 +1516,7 @@ static uint8_t att_prepare_write_req(FAR struct bt_conn_s *conn,
   req    = (FAR void *)data->data;
   handle = BT_LE162HOST(req->handle);
   offset = BT_LE162HOST(req->offset);
-  bt_buf_pull(data, sizeof(*req));
+  bt_buf_consume(data, sizeof(*req));
 
   wlinfo("handle 0x%04x offset %u\n", handle, offset);
 
@@ -1577,7 +1579,7 @@ static uint8_t att_exec_write_rsp(FAR struct bt_conn_s *conn, uint8_t flags)
 
   if (data.err)
     {
-      bt_buf_put(data.buf);
+      bt_buf_release(data.buf);
       return data.err;
     }
 
@@ -1628,7 +1630,7 @@ static uint8_t att_signed_write_cmd(FAR struct bt_conn_s *conn,
   req = (FAR void *)data->data;
 
   handle = BT_LE162HOST(req->handle);
-  bt_buf_pull(data, sizeof(*req));
+  bt_buf_consume(data, sizeof(*req));
 
   wlinfo("handle 0x%04x\n", handle);
 
@@ -1712,7 +1714,9 @@ static uint8_t att_handle_write_rsp(FAR struct bt_conn_s *conn,
   return att_handle_rsp(conn, buf->data, buf->len, 0);
 }
 
-static void bt_att_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
+static void bt_att_receive(FAR struct bt_conn_s *conn,
+                           FAR struct bt_buf_s *buf, FAR void *context,
+                           uint16_t cid)
 {
   FAR struct bt_att_hdr_s *hdr = (FAR void *)buf->data;
   uint8_t err = BT_ATT_ERR_NOT_SUPPORTED;
@@ -1728,7 +1732,7 @@ static void bt_att_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
   wlinfo("Received ATT code 0x%02x len %u\n", hdr->code, buf->len);
 
-  bt_buf_pull(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(*hdr));
 
   for (i = 0; i < NHANDLERS; i++)
     {
@@ -1763,10 +1767,11 @@ static void bt_att_recv(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
     }
 
 done:
-  bt_buf_put(buf);
+  bt_buf_release(buf);
 }
 
-static void bt_att_connected(FAR struct bt_conn_s *conn)
+static void bt_att_connected(FAR struct bt_conn_s *conn, FAR void *context,
+                             uint16_t cid)
 {
   int i;
 
@@ -1789,7 +1794,8 @@ static void bt_att_connected(FAR struct bt_conn_s *conn)
   wlerr("ERROR: No available ATT context for conn %p\n", conn);
 }
 
-static void bt_att_disconnected(FAR struct bt_conn_s *conn)
+static void bt_att_disconnected(FAR struct bt_conn_s *conn,
+                                FAR void *context, uint16_t cid)
 {
   FAR struct bt_att_s *att = conn->att;
 
@@ -1809,12 +1815,12 @@ static void bt_att_disconnected(FAR struct bt_conn_s *conn)
  * Public Functions
  ****************************************************************************/
 
-void bt_att_init(void)
+void bt_att_initialize(void)
 {
   static struct bt_l2cap_chan_s chan =
   {
     .cid          = BT_L2CAP_CID_ATT,
-    .recv         = bt_att_recv,
+    .receive      = bt_att_receive,
     .connected    = bt_att_connected,
     .disconnected = bt_att_disconnected,
   };
@@ -1841,7 +1847,7 @@ FAR struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn, uint8_t op,
       return NULL;
     }
 
-  hdr = bt_buf_add(buf, sizeof(*hdr));
+  hdr = bt_buf_extend(buf, sizeof(*hdr));
   hdr->code = op;
 
   return buf;
