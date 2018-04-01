@@ -588,7 +588,8 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
 
         if (old_state == BT_CONN_CONNECTED || old_state == BT_CONN_DISCONNECT)
           {
-            bt_queue_send(conn->tx_queue, bt_buf_alloc(BT_DUMMY, 0), BT_NORMAL_PRIO);
+            bt_queue_send(conn->tx_queue, bt_buf_alloc(BT_DUMMY, NULL, 0),
+                          BT_NORMAL_PRIO);
           }
 
         /* Release the reference we took for the very first state transition. */
@@ -618,7 +619,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
  *
  * Returned Value:
  *   A reference to the connection state instance is returned on success.
- *   NULL is returned if the connection is not found.  On succes, the
+ *   NULL is returned if the connection is not found.  On success, the
  *   caller gets a new reference to the connection object which must be
  *   released with bt_conn_release() once done using the connection.
  *
@@ -658,7 +659,7 @@ FAR struct bt_conn_s *bt_conn_lookup_handle(uint16_t handle)
  *
  * Returned Value:
  *   A reference to the connection state instance is returned on success.
- *   NULL is returned if the connection is not found.  On succes, the
+ *   NULL is returned if the connection is not found.  On success, the
  *   caller gets a new reference to the connection object which must be
  *   released with bt_conn_release() once done using the connection.
  *
@@ -692,7 +693,7 @@ FAR struct bt_conn_s *bt_conn_lookup_addr_le(FAR const bt_addr_le_t * peer)
  *
  * Returned Value:
  *   A reference to the connection state instance is returned on success.
- *   NULL is returned if the connection is not found.  On succes, the
+ *   NULL is returned if the connection is not found.  On success, the
  *   caller gets a new reference to the connection object which must be
  *   released with bt_conn_release() once done using the connection.
  *

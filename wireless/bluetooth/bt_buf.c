@@ -63,11 +63,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* NOTE:  The CONFIG_BLUETOOTH_BUFFER_IRQRESERVE options is marked as marked
- * 'experimental' and with the default 0 zero because there are no interrupt
- * level allocations performed by the current Bluetooth code.
- */
-
 #if !defined(CONFIG_BLUETOOTH_BUFFER_PREALLOC) || \
     CONFIG_BLUETOOTH_BUFFER_PREALLOC < 1
 #  undef CONFIG_BLUETOOTH_BUFFER_PREALLOC
@@ -220,6 +215,8 @@ void bt_buf_initialize(void)
  *
  * Input Parameters:
  *   type         - Buffer type.
+ *   iob          - The raw I/O buffer.  If NULL, then bt_buf_alloc will
+ *                  allocate.
  *   reserve_head - How much headroom to reserve.
  *
  * Returned Value:
@@ -229,8 +226,9 @@ void bt_buf_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type, size_t
-                                  reserve_head)
+FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
+                                  FAR struct iob_s *iob,
+                                  size_t reserve_head)
 {
   FAR struct bt_buf_s *buf;
   irqstate_t flags;

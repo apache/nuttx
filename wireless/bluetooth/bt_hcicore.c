@@ -1387,7 +1387,7 @@ FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
 
   wlinfo("opcode %x param_len %u\n", opcode, param_len);
 
-  buf = bt_buf_alloc(BT_CMD, g_btdev.dev->head_reserve);
+  buf = bt_buf_alloc(BT_CMD, NULL, g_btdev.dev->head_reserve);
   if (!buf)
     {
       wlerr("ERROR: Cannot get free buffer\n");

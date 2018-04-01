@@ -52,7 +52,7 @@
 
 #warning REVISIT
 
-#define BLUETOOTH_HDRLEN        0
+#define BLUETOOTH_HDRLEN        8  /* Size of L2CAP header */
 #define BLUETOOTH_ADDRSIZE      6
 #define BLUETOOTH_ADDRCOPY(d,s) memcpy((d),(s),BLUETOOTH_ADDRSIZE)
 #define BLUETOOTH_ADDRCMP(a,b)  (memcmp((a),(b),BLUETOOTH_ADDRSIZE) == 0)

@@ -120,7 +120,6 @@ config BLUETOOTH_BUFFER_PREALLOC
 config BLUETOOTH_BUFFER_IRQRESERVE
 	int "Reserved pre-allocated primitive structures"
 	default 0
-	depends on EXPERIMENTAL
 	---help---
 		If buffer structures can be allocated from interrupt handlers, then
 		this specifies the number of pre-allocated structures that are
@@ -139,9 +138,9 @@ config BLUETOOTH_BUFFER_IRQRESERVE
 		dynamically allocate the buffer with an additional cost in
 		performance.
 
-		NOTE: Currently marked as experimental and with a default of zero
-		because there are no interrupt level allocations performed by the
-		current Bluetooth stack.
+		NOTE:  The Bluetooth stack never allocates buffers from the
+		interrupt level.  This setting only needs to be non-zero if your
+		low-level Bluetooth driver needs to do such allocations.
 
 menu "Kernel Thread Configuration"
 

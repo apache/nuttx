@@ -861,7 +861,7 @@ static int btnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 static int btnet_get_mhrlen(FAR struct radio_driver_s *netdev,
                          FAR const void *meta)
 {
-  return BLUETOOTH_HDRLEN;
+  return sizeof(struct bt_l2cap_hdr_s);
 }
 
 /****************************************************************************
@@ -885,16 +885,24 @@ static int btnet_get_mhrlen(FAR struct radio_driver_s *netdev,
 static int btnet_req_data(FAR struct radio_driver_s *netdev,
                           FAR const void *meta, FAR struct iob_s *framelist)
 {
-  FAR struct btnet_driver_s *priv =
-    (FAR struct btnet_driver_s *)netdev;
-  FAR const struct bluetooth_frame_meta_s *pktmeta =
-    (FAR const struct bluetooth_frame_meta_s *)meta;
+  FAR struct btnet_driver_s *priv;
+  FAR struct bluetooth_frame_meta_s *btmeta;
+  FAR struct bt_conn_s *conn;
+  FAR struct bt_buf_s *buf;
   FAR struct iob_s *iob;
-  int ret;
 
   wlinfo("Received framelist\n");
+  DEBUGASSERT(priv != NULL && meta != NULL && framelist != NULL);
 
-  DEBUGASSERT(priv != NULL && pktmeta != NULL && framelist != NULL);
+  priv   = (FAR struct btnet_driver_s *)netdev;
+  btmeta = (FAR struct bluetooth_frame_meta_s *)meta;
+
+  /* Create a connection structure for this peer if one does not already
+   * exist.
+   *
+   * REVISIT:  Can we do a handle lookup? ... That would be faster.
+   */
+#warning Missing logic
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
@@ -909,31 +917,18 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      /* Transfer the frame to the MAC. */
+      /* Allocate a buffer to contain the IOB */
 
-      do
+      buf = bt_buf_alloc(BT_ACL_OUT, iob, sizeof(struct bt_l2cap_hdr_s));
+      if (buf == NULL)
         {
-          ret = btnet_req_data(netdev, pktmeta, iob);
-        }
-      while (ret == -EINTR);
-
-      if (ret < 0)
-        {
-          wlerr("ERROR: btnet_req_data failed: %d\n", ret);
-
-          iob_free(iob);
-          for (iob = framelist; iob != NULL; iob = framelist)
-            {
-              /* Remove the IOB from the queue and free */
-
-              framelist = iob->io_flink;
-              iob_free(iob);
-            }
-
-          NETDEV_TXERRORS(&priv->bd_dev.r_dev);
-          return ret;
+          wlerr("ERROR:  Failed to allocate buffer container\n");
+          return -ENOMEM;
         }
 
+      /* Transfer the frame to the Bluetooth stack. */
+
+      bt_l2cap_send(conn, (uint16_t)btmeta->bm_channel, buf);
       NETDEV_TXDONE(&priv->bd_dev.r_dev);
     }
 

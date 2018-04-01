@@ -148,7 +148,7 @@ static FAR struct bt_buf_s *btuart_evt_recv(FAR struct btuart_upperhalf_s *upper
 
   *remaining = hdr.len;
 
-  buf = bt_buf_alloc(BT_EVT, 0);
+  buf = bt_buf_alloc(BT_EVT, NULL, 0);
   if (buf != NULL)
     {
       memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_evt_hdr_s)), &hdr,
@@ -181,7 +181,7 @@ static FAR struct bt_buf_s *btuart_acl_recv(FAR struct btuart_upperhalf_s *upper
       return NULL;
     }
 
-  buf = bt_buf_alloc(BT_ACL_IN, 0);
+  buf = bt_buf_alloc(BT_ACL_IN, NULL, 0);
   if (buf)
     {
       memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_acl_hdr_s)), &hdr,

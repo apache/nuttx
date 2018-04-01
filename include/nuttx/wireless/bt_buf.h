@@ -103,6 +103,8 @@ struct bt_buf_acl_data_s
   uint16_t handle;
 };
 
+struct iob_s;  /* Forward reference */
+
 struct bt_buf_s
 {
   FAR struct bt_buf_s *flink;
@@ -147,6 +149,8 @@ struct bt_buf_s
  *
  * Input Parameters:
  *   type         - Buffer type.
+ *   iob          - The raw I/O buffer.  If NULL, then bt_buf_alloc will
+ *                  allocate.
  *   reserve_head - How much headroom to reserve.
  *
  * Returned Value:
@@ -156,7 +160,10 @@ struct bt_buf_s
  *
  ****************************************************************************/
 
+struct iob_s; /* Forward reference */
+
 FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
+                                  FAR struct iob_s *iob,
                                   size_t reserve_head);
 
 /****************************************************************************

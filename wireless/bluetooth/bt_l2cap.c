@@ -182,7 +182,7 @@ struct bt_buf_s *bt_l2cap_create_pdu(FAR struct bt_conn_s *conn)
   size_t head_reserve = sizeof(struct bt_l2cap_hdr_s) +
     sizeof(struct bt_hci_acl_hdr_s) + g_btdev.dev->head_reserve;
 
-  return bt_buf_alloc(BT_ACL_OUT, head_reserve);
+  return bt_buf_alloc(BT_ACL_OUT, NULL, head_reserve);
 }
 
 void bt_l2cap_send(FAR struct bt_conn_s *conn, uint16_t cid,
@@ -413,7 +413,7 @@ void bt_l2cap_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
       return;
     }
 
-  chan->receive(conn, buf, chan->context, chan->cid);
+  chan->receive(conn, buf, chan->context, cid);
 }
 
 void bt_l2cap_update_conn_param(FAR struct bt_conn_s *conn)
