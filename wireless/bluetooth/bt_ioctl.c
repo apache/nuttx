@@ -300,7 +300,8 @@ int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 
       /* SIOCBT_ADVERTISESTOP
        *   Description:   Stop advertising.
-       *   Input:         None
+       *   Input:         A reference to a write-able instance of struct
+       *                  bt_scanstop_s.
        *   Output:        None
        */
 

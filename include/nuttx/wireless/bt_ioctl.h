@@ -116,7 +116,8 @@
 
 /* SIOCBT_ADVERTISESTOP
  *   Description:   Stop advertising.
- *   Input:         None
+ *   Input:         A reference to a write-able instance of struct
+ *                  bt_scanstop_s.
  *   Output:        None
  */
 
@@ -243,6 +244,13 @@ struct bt_advertisestart_s
   uint8_t as_type;                 /* Advertising type */
   FAR const struct bt_eir_s as_ad; /* Data for advertisement packets */
   FAR const struct bt_eir_s as_sd; /* Data for scan response packets */
+};
+
+/* The read-only data that accompanies the SIOCBT_SCANSTOP IOCTL command */
+
+struct bt_advertisestop_s
+{
+  char at_name[HCI_DEVNAME_SIZE];   /* Device name */
 };
 
 /* The read-only data that accompanies the SIOCBT_SCANSTART IOCTL command */
