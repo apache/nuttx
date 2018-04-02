@@ -315,17 +315,23 @@ int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
       /* SIOCBT_SCANSTART
        *   Description:   Start LE scanning.  Buffered scan results may be
        *                  obtained via SIOCBT_SCANGET
-       *   Input:         1=Duplicate filtering enabled
+       *   Input:         A read-only referent to struct bt_scanstart_s.
        *   Output:        None
        */
 
       case SIOCBT_SCANSTART:
         {
-          uint8_t dup_enable = (arg == 0) ? 0 : BT_LE_SCAN_FILTER_DUP_ENABLE;
+          FAR struct bt_scanstart_s *start =
+            (FAR struct bt_scanstart_s *)((uintptr_t)arg);
+
+          if (start == NULL)
+            {
+              ret = -EINVAL;
+            }
 
           /* Are we already scanning? */
 
-          if (g_scanstate.bs_scanning)
+          else if (g_scanstate.bs_scanning)
             {
               ret = -EBUSY;
             }
@@ -338,7 +344,8 @@ int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
               g_scanstate.bs_head     = 0;
               g_scanstate.bs_tail     = 0;
 
-              ret = bt_start_scanning(dup_enable, btnet_scan_callback);
+              ret = bt_start_scanning(start->ss_dupenable,
+                                      btnet_scan_callback);
               wlinfo("Start scan: %d\n", ret);
 
               if (ret < 0)
@@ -378,7 +385,8 @@ int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 
       /* SIOCBT_SCANSTOP
        *   Description:   Stop LE scanning and discard any buffered results.
-       *   Input:         None
+       *   Input:         A reference to a write-able instance of struct
+       *                  bt_scanstop_s.
        *   Output:        None
        */
 

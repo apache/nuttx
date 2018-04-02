@@ -125,7 +125,7 @@
 /* SIOCBT_SCANSTART
  *   Description:   Start LE scanning.  Buffered scan results may be
  *                  obtained via SIOCBT_SCANGET
- *   Input:         1=Duplicate filtering enabled
+ *   Input:         A read-only referent to struct bt_scanstart_s.
  *   Output:        None
  */
 
@@ -144,7 +144,8 @@
 
 /* SIOCBT_SCANSTOP
  *   Description:   Stop LE scanning and discard any buffered results.
- *   Input:         None
+ *   Input:         A reference to a write-able instance of struct
+ *                  bt_scanstop_s.
  *   Output:        None
  */
 
@@ -244,6 +245,21 @@ struct bt_advertisestart_s
   FAR const struct bt_eir_s as_sd; /* Data for scan response packets */
 };
 
+/* The read-only data that accompanies the SIOCBT_SCANSTART IOCTL command */
+
+struct bt_scanstart_s
+{
+  char ss_name[HCI_DEVNAME_SIZE];   /* Device name */
+  bool ss_dupenable;                /* True: enable duplicate filtering */
+};
+
+/* The read-only data that accompanies the SIOCBT_SCANSTOP IOCTL command */
+
+struct bt_scanstop_s
+{
+  char st_name[HCI_DEVNAME_SIZE];   /* Device name */
+};
+
 /* Write-able data that accompanies the SIOCBT_SCANGET IOCTL command */
 
 struct bt_scanresponse_s
@@ -259,9 +275,9 @@ struct bt_scanresponse_s
 struct bt_scanresult_s
 {
   char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
-  uint8_t sc_nrsp;                  /* Input:  Max number of responses
+  uint8_t sr_nrsp;                  /* Input:  Max number of responses
                                      * Return: Actual number of responses */
-  struct bt_scanresponse_s sc_rsp[1];
+  struct bt_scanresponse_s sr_rsp[1];
 };
 
 #define SIZEOF_BT_SCANRESULT_S(n) \
