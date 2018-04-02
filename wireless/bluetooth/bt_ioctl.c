@@ -52,6 +52,7 @@
 #include <nuttx/wireless/bt_ioctl.h>
 
 #include "bt_hcicore.h"
+#include "bt_conn.h"
 #include "bt_ioctl.h"
 
 #ifdef CONFIG_NETDEV_IOCTL  /* Not optional! */
@@ -216,7 +217,7 @@ static int btnet_scan_result(FAR struct bt_scanresult_s *result)
 
   head   = g_scanstate.bs_head;
   tail   = g_scanstate.bs_tail;
-  maxrsp = result->sc_nrsp;
+  maxrsp = result->sr_nrsp;
 
   for (nrsp = 0; nrsp < maxrsp && head != tail; nrsp++)
     {
@@ -226,7 +227,7 @@ static int btnet_scan_result(FAR struct bt_scanresult_s *result)
       /* Copy data from the head index into the user buffer */
 
       src  = (FAR const uint8_t *)&g_scanstate.bs_rsp[head];
-      dest = (FAR uint8_t *)&result->sc_rsp[nrsp];
+      dest = (FAR uint8_t *)&result->sr_rsp[nrsp];
       memcpy(dest, src, sizeof(struct bt_scanresponse_s));
 
       /* Increment the head index */
@@ -238,7 +239,7 @@ static int btnet_scan_result(FAR struct bt_scanresult_s *result)
     }
 
   g_scanstate.bs_head = head;
-  result->sc_nrsp     = nrsp;
+  result->sr_nrsp     = nrsp;
   nxsem_post(&g_scanstate.bs_exclsem);
   return OK;
 }
@@ -400,6 +401,48 @@ int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 
           nxsem_destroy(&g_scanstate.bs_exclsem);
           g_scanstate.bs_scanning = false;
+        }
+        break;
+
+      /* SIOCBT_SECURITY
+       *   Description:   Enable security for a connection.
+       *   Input:         A reference to a write-able instance of struct
+       *                  bt_security_s.
+       *   Output:        None
+       */
+
+      case SIOCBT_SECURITY:
+        {
+          FAR struct bt_security_s *sec =
+            (FAR struct bt_security_s *)((uintptr_t)arg);
+
+          if (sec == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              FAR struct bt_conn_s *conn;
+
+              /* Get the connection associated with the provided LE address */
+
+              conn = bt_conn_lookup_addr_le(&sec->se_addr);
+              if (conn == NULL)
+                {
+                  wlwarn("WARNING:  Peer not connected\n");
+                  ret = -ENOTCONN;
+                }
+              else
+                {
+                  ret = bt_conn_security(conn, sec->se_level);
+                  if (ret < 0)
+                    {
+                      wlerr("ERROR:  Security setting failed: %d\n", ret);
+                    }
+
+                  bt_conn_release(conn);
+                }
+            }
         }
         break;
 

@@ -58,7 +58,7 @@
 
 /* Bluetooth network device IOCTL commands. */
 
-#ifndef WL_BLUETOOTHCMDS != 14
+#ifndef WL_BLUETOOTHCMDS != 15
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 
@@ -91,6 +91,9 @@
  *   Read device statistics.
  * SIOCZBTSTATS
  *   Read device statistics, and zero them.
+ *
+ * NOTE: These are here for reference.  None of the NetBSD IOCTL commands
+ * have been implemented in NuttX.
  */
 
 #define SIOCGBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 0)
@@ -151,6 +154,15 @@
  */
 
 #define SIOCBT_SCANSTOP        _WLIOC(WL_BLUETOOTHFIRST + 13)
+
+/* SIOCBT_SECURITY
+ *   Description:   Enable security for a connection.
+ *   Input:         A reference to a write-able instance of struct
+ *                  bt_security_s.
+ *   Output:        None
+ */
+
+#define SIOCBT_SECURITY        _WLIOC(WL_BLUETOOTHFIRST + 14)
 
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
@@ -291,6 +303,15 @@ struct bt_scanresult_s
 #define SIZEOF_BT_SCANRESULT_S(n) \
   (sizeof(struct bt_scanresult_s) + \
    ((n) - 1) * sizeof(struct bt_scanresponse_s))
+
+/* Read-only data that accompanies the SIOCBT_SECURITY IOCTL command */
+
+struct bt_security_s
+{
+  char se_name[HCI_DEVNAME_SIZE];   /* Device name */
+  bt_addr_le_t se_addr;             /* BLE address */
+  enum bt_security_e se_level;      /* Security level */
+};
 
 /****************************************************************************
  * Public Function Prototypes
