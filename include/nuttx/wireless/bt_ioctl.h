@@ -242,8 +242,8 @@ struct bt_advertisestart_s
 {
   char as_name[HCI_DEVNAME_SIZE];  /* Device name */
   uint8_t as_type;                 /* Advertising type */
-  FAR const struct bt_eir_s as_ad; /* Data for advertisement packets */
-  FAR const struct bt_eir_s as_sd; /* Data for scan response packets */
+  FAR struct bt_eir_s as_ad;       /* Data for advertisement packets */
+  FAR struct bt_eir_s as_sd;       /* Data for scan response packets */
 };
 
 /* The read-only data that accompanies the SIOCBT_SCANSTOP IOCTL command */
