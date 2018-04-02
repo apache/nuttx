@@ -964,8 +964,12 @@ FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer)
 {
   FAR struct bt_conn_s *conn;
 
+  /* First check if this connection exists and that it is in a proper
+   * state.
+   */
+
   conn = bt_conn_lookup_addr_le(peer);
-  if (conn)
+  if (conn != NULL)
     {
       switch (conn->state)
         {
@@ -979,6 +983,10 @@ FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer)
             return NULL;
         }
     }
+
+  /* No.. the connection does not exist.  Create it assuming MASTER role
+   * and put it in the BT_CONNECT_SCAN state.
+   */
 
   conn = bt_conn_add(peer, BT_HCI_ROLE_MASTER);
   if (!conn)

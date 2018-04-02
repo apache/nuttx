@@ -62,6 +62,7 @@
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 
+/* NetBSD IOCTL commands ****************************************************/
 /* All of the following use an argument of type struct btreg_s:
  *
  * SIOCGBTINFO
@@ -102,6 +103,7 @@
 #define SIOCGBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 7)
 #define SIOCZBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 8)
 
+/* NuttX-specific IOCTL commands. *******************************************/
 /* SIOCBT_ADVERTISESTART
  *   Description:   Set advertisement data, scan response data,
  *                  advertisement parameters and start advertising.
@@ -148,6 +150,7 @@
 
 #define SIOCBT_SCANSTOP        _WLIOC(WL_BLUETOOTHFIRST + 13)
 
+/* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
 
 #define btr_flags              btru.btri.btri_flags
@@ -168,17 +171,17 @@
 
 /* btr_flags */
 
-#define BTF_UP                 (1 << 0)  /* unit is up */
-#define BTF_RUNNING            (1 << 1)  /* unit is running */
-#define BTF_XMIT_CMD           (1 << 2)  /* transmitting CMD packets */
-#define BTF_XMIT_ACL           (1 << 3)  /* transmitting ACL packets */
-#define BTF_XMIT_SCO           (1 << 4)  /* transmitting SCO packets */
-#define BTF_INIT_BDADDR        (1 << 5)  /* waiting for bdaddr */
-#define BTF_INIT_BUFFER_SIZE   (1 << 6)  /* waiting for buffer size */
-#define BTF_INIT_FEATURES      (1 << 7)  /* waiting for features */
-#define BTF_NOOP_ON_RESET      (1 << 8)  /* wait for No-op on reset */
-#define BTF_INIT_COMMANDS      (1 << 9)  /* waiting for supported commands */
-#define BTF_MASTER             (1 << 10) /* request Master role */
+#define BTF_UP                 (1 << 0)  /* Unit is up */
+#define BTF_RUNNING            (1 << 1)  /* Unit is running */
+#define BTF_XMIT_CMD           (1 << 2)  /* Transmitting CMD packets */
+#define BTF_XMIT_ACL           (1 << 3)  /* Transmitting ACL packets */
+#define BTF_XMIT_SCO           (1 << 4)  /* Transmitting SCO packets */
+#define BTF_INIT_BDADDR        (1 << 5)  /* Waiting for bdaddr */
+#define BTF_INIT_BUFFER_SIZE   (1 << 6)  /* Waiting for buffer size */
+#define BTF_INIT_FEATURES      (1 << 7)  /* Waiting for features */
+#define BTF_NOOP_ON_RESET      (1 << 8)  /* Wait for No-op on reset */
+#define BTF_INIT_COMMANDS      (1 << 9)  /* Waiting for supported commands */
+#define BTF_MASTER             (1 << 10) /* Request Master role */
 
 /****************************************************************************
  * Public Types

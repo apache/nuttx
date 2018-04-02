@@ -54,9 +54,10 @@
 #define BT_ADDR_ANY   {0, 0, 0, 0, 0, 0}
 #define BT_ADDR_LOCAL {0, 0, 0, 0xff, 0xff, 0xff}
 
-/* Any channel */
+/* Any channel, any PSM */
 
 #define BT_CHANNEL_ANY 0
+#define BT_PSM_ANY     0
 
 /* Socket protocols.
  *

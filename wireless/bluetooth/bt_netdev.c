@@ -231,7 +231,8 @@ static int btnet_advertise(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[0]  = HTONS(0xfe80);
   dev->d_ipv6addr[1]  = 0;
   dev->d_ipv6addr[2]  = 0;
-  dev->d_ipv6addr[3]  = 0x200;
+  dev->d_ipv6addr[3]  = 0;
+  dev->d_ipv6addr[4]  = HTONS(0x0200);
   dev->d_ipv6addr[5]  = (uint16_t)addr[0] << 8 | (uint16_t)addr[1];
   dev->d_ipv6addr[6]  = (uint16_t)addr[2] << 8 | (uint16_t)addr[3];
   dev->d_ipv6addr[7]  = (uint16_t)addr[4] << 8 | (uint16_t)addr[5];
@@ -888,6 +889,7 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
   FAR struct bt_conn_s *conn;
   FAR struct bt_buf_s *buf;
   FAR struct iob_s *iob;
+  bt_addr_le_t peer;
 
   wlinfo("Received framelist\n");
   DEBUGASSERT(priv != NULL && meta != NULL && framelist != NULL);
@@ -898,10 +900,25 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
   /* Create a connection structure for this peer if one does not already
    * exist.
    *
-   * REVISIT:  Can we do a handle lookup? Should we cache the last
-   * connection (since there is probably only one).  Either would be faster.
+   * Assumptions to REVISIT:
+   *
+   *   1. Role is Master (see bt_conn_create_le())
+   *   2. Address type is BT_ADDR_LE_PUBLIC (vs. BT_ADDR_LE_RANDOM)
    */
-#warning Missing logic
+
+  BLUETOOTH_ADDRCOPY(peer.val, btmeta->bm_raddr.val);
+  peer.type = BT_ADDR_LE_PUBLIC;
+
+  conn = bt_conn_create_le(&peer);
+  if (conn == NULL)
+    {
+      /* bt_conn_create_le() can fail if (1) the connection exists, but is
+       * in a bad state or (2) CONFIG_BLUETOOTH_MAX_CONN has been exceeded.
+       * Assume the latter.
+       */
+
+      return -ENOMEM;
+    }
 
   /* Add the incoming list of frames to the MAC's outgoing queue */
 
