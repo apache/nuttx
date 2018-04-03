@@ -249,7 +249,7 @@ config AUDIO_NULL
 	default n
 	depends on AUDIO
 	---help---
-		A do-nothinig audio device driver to simplify testing of audio
+		A do-nothing audio device driver to simplify testing of audio
 		decoders.
 
 if AUDIO_NULL

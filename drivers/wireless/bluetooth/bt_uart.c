@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bluetooth/btuart.c
+ * drivers/wireless/bluetooth/bt_uart.c
  * UART based Bluetooth driver
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.

@@ -47,4 +47,13 @@ config BLUETOOTH_UART
 	---help---
 		Enable Bluetooth UART driver.
 
+config BLUETOOTH_NULL
+	bool "NULL Bluetooth device"
+	default n
+	---help---
+		A do-nothing Bluetooth device driver to permit some basic testing of
+		the Bluetooth stack on the simulator.  This driver just "closes the
+		loop" and nothing more:  It is a just a bit-bucket for outgoing
+		packets; it generates no incoming packets.
+
 endif # DRIVERS_BLUETOOTH

@@ -43,6 +43,10 @@ ifeq ($(CONFIG_BLUETOOTH_UART),y)
 CSRCS += bt_uart.c
 endif
 
+ifeq ($(CONFIG_BLUETOOTH_NULL),y)
+CSRCS += bt_null.c
+endif
+
 # Include common Bluetooth drvier build support
 
 DEPPATH += --dep-path wireless$(DELIM)bluetooth
