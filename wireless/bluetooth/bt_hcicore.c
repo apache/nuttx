@@ -206,7 +206,7 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
 {
   FAR struct bt_buf_s *sent = g_btdev.sent_cmd;
 
-  if (!sent)
+  if (sent == NULL)
     {
       return;
     }

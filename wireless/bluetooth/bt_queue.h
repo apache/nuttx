@@ -55,7 +55,7 @@
 
 #define BT_CONN_TX       "btconntx"
 #define BT_HCI_TX        "bthcitx"
-#define BT_HCI_RX        "bthcitx"
+#define BT_HCI_RX        "bthcirx"
 
 /* All messages are sent FIFO at the mid-message priorities except for high-
  * priority messages received from the Bluetooth driver.
