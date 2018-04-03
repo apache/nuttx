@@ -492,6 +492,12 @@ Common Configuration Information
 Configuration Sub-Directories
 -----------------------------
 
+bluetooth
+
+  Supports some very limited, primitive, low-level debug of the Bluetoot
+  stack using the Bluetooth "Swiss Army Knife" at apps/wireless/bluetooth/btsak
+  and the NULL Bluetooth device at drivers/wireless/bluetooth/bt_null.c
+
 configdata
 
   A unit test for the MTD configuration data driver.
