@@ -73,6 +73,27 @@ struct bt_driver_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: bt_netdev_register
+ *
+ * Description:
+ *   Register a network driver to access the Bluetooth layer using a 6LoWPAN
+ *   IPv6 or AF_BLUETOOTH socket.
+ *
+ *   This function should be called only once from board bring-up logic
+ *   before any Bluetooth devices are registered.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int bt_netdev_register(void);
+
+/****************************************************************************
  * Name: bt_driver_register
  *
  * Description:

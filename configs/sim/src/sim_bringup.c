@@ -52,6 +52,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
+#include <nuttx/wireless/bt_driver.h>
 #include <nuttx/wireless/bt_null.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
@@ -257,6 +258,15 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH
+  /* Initialize the Bluetooth stack */
+
+  ret = bt_netdev_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: bt_netdev_register() failed: %d\n", ret);
+    }
+
 #ifdef CONFIG_BLUETOOTH_NULL
   /* Register the NULL Bluetooth network device */
 
@@ -265,6 +275,7 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: btnull_register() failed: %d\n", ret);
     }
+#endif
 #endif
 
   UNUSED(ret);

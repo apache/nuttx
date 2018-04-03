@@ -146,7 +146,6 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
 
   ssize_t msgsize;
   int priority;
-  int ret;
 
   DEBUGASSERT(mqd != NULL && buf != NULL);
 
@@ -155,8 +154,8 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
   msgsize = nxmq_receive(mqd, u.msgbuf, BT_MSGSIZE, &priority);
   if (msgsize < 0)
     {
-      wlerr("ERROR: nxmq_receive() failed: %d\n", ret);
-      return ret;
+      wlerr("ERROR: nxmq_receive() failed: %ld\n", (long)msgsize);
+      return (int)msgsize;
     }
 
   /* Only buffers are expected as messages and all messages should have an

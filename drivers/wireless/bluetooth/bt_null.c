@@ -56,7 +56,7 @@ static const struct bt_driver_s g_bt_null =
   0,            /* head_reserve */
   btnull_open,  /* open */
   btnull_send   /* send */
-}
+};
 
 /****************************************************************************
  * Private Functions

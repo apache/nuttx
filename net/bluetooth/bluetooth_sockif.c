@@ -392,7 +392,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       addrlen < sizeof(struct sockaddr_bt_s))
     {
       nerr("ERROR: Invalid family: %u or address length: %d < %d\n",
-           addr->sa_family, addrlen, sizeof(struct sockaddr_ll));
+           addr->sa_family, addrlen, sizeof(struct sockaddr_bt_s));
       return -EBADF;
     }
 

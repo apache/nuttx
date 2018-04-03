@@ -601,41 +601,20 @@ static int btnet_ifup(FAR struct net_driver_s *dev)
   if (ret >= 0)
     {
 #ifdef CONFIG_NET_IPv6
-      wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+      wlinfo("Bringing up: IP   %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
              dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
              dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
              dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      wlinfo("             Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
+      wlinfo("             ADDR %02x:%02x:%02x:%02x:%02x:%02x\n",
              dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
              dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
-             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
-             dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7]);
+             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5]);
+
 #else
-      wlinfo("             Node: %02x:%02x\n",
-             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
-#endif
-#else
-      if (dev->d_mac.radio.nv_addrlen == 8)
-        {
-          ninfo("Bringing up: Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
-                 dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-                 dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
-                 dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
-                 dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7],
-                 priv->lo_panid[0], priv->lo_panid[1]);
-        }
-      else if (dev->d_mac.radio.nv_addrlen == 2)
-        {
-          ninfo("Bringing up: Node: %02x:%02x PANID=%02x:%02x\n",
-                 dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-                 priv->lo_panid[0], priv->lo_panid[1]);
-        }
-      else
-        {
-          nerr("ERROR: No address assigned\n");
-        }
+      wlinfo("Bringing up: %02x:%02x:%02x:%02x:%02x:%02x\n",
+             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
+             dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
+             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5]);
 #endif
 
       /* Set and activate a timer process */
@@ -997,8 +976,11 @@ static int btnet_properties(FAR struct radio_driver_s *netdev,
  * Name: bt_netdev_register
  *
  * Description:
- *   Register a network driver to access the Bluetooth MAC layer using a
- *   6LoWPAN IPv6 or AF_BLUETOOTH socket.
+ *   Register a network driver to access the Bluetooth layer using a 6LoWPAN
+ *   IPv6 or AF_BLUETOOTH socket.
+ *
+ *   This function should be called only once from board bring-up logic
+ *   before any Bluetooth devices are registered.
  *
  * Input Parameters:
  *   None
