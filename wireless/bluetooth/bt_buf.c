@@ -363,9 +363,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
       buf->data = buf->frame->io_data + reserve_head;
     }
 
-
   wlinfo("buf %p type %d reserve %u\n", buf, buf->type, reserve_head);
-
   return buf;
 }
 

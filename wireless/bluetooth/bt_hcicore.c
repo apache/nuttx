@@ -248,7 +248,7 @@ static void hci_cmd_complete(FAR struct bt_buf_s *buf)
   uint16_t opcode = BT_LE162HOST(evt->opcode);
   FAR uint8_t *status;
 
-  wlinfo("opcode %x\n", opcode);
+  wlinfo("opcode %04x\n", opcode);
 
   bt_buf_consume(buf, sizeof(*evt));
 
@@ -271,7 +271,7 @@ static void hci_cmd_complete(FAR struct bt_buf_s *buf)
 
   hci_cmd_done(opcode, *status, buf);
 
-  if (evt->ncmd && !g_btdev.ncmd)
+  if (evt->ncmd > 0 && g_btdev.ncmd == 0)
     {
       /* Allow next command to be sent */
 
@@ -801,7 +801,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
 
   wlinfo("event %u\n", hdr->evt);
 
-  bt_buf_consume(buf, sizeof(*hdr));
+  bt_buf_consume(buf, sizeof(struct bt_hci_evt_hdr_s));
 
   switch (hdr->evt)
     {
@@ -1186,8 +1186,8 @@ static void cmd_queue_init(void)
    */
 
   g_btdev.tx_queue = NULL;
-  ret = bt_queue_open(BT_HCI_RX, O_RDWR | O_CREAT,
-                      CONFIG_BLUETOOTH_RXTHREAD_NMSGS, &g_btdev.tx_queue);
+  ret = bt_queue_open(BT_HCI_TX, O_RDWR | O_CREAT,
+                      CONFIG_BLUETOOTH_TXCMD_NMSGS, &g_btdev.tx_queue);
   DEBUGASSERT(ret >= 0 &&  g_btdev.tx_queue != NULL);
   UNUSED(ret);
 
@@ -1213,7 +1213,7 @@ static void rx_queue_init(void)
 
   g_btdev.rx_queue = NULL;
   ret = bt_queue_open(BT_HCI_RX, O_RDWR | O_CREAT,
-                      CONFIG_BLUETOOTH_TXCMD_NMSGS, &g_btdev.rx_queue);
+                      CONFIG_BLUETOOTH_RXTHREAD_NMSGS, &g_btdev.rx_queue);
   DEBUGASSERT(ret >= 0 &&  g_btdev.rx_queue != NULL);
   UNUSED(ret);
 
@@ -1410,7 +1410,8 @@ FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
 int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
 {
   int ret;
-  if (!buf)
+
+  if (buf == NULL)
     {
       buf = bt_hci_cmd_create(opcode, 0);
       if (!buf)

@@ -50,7 +50,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void btnull_send_cmdcomplete(FAR const struct bt_driver_s *dev);
+static void btnull_send_cmdcomplete(FAR const struct bt_driver_s *dev,
+                                    uint16_t opcode);
 
 static int  btnull_open(FAR const struct bt_driver_s *dev);
 static int  btnull_send(FAR const struct bt_driver_s *dev,
@@ -71,21 +72,29 @@ static const struct bt_driver_s g_bt_null =
  * Private Functions
  ****************************************************************************/
 
-static void btnull_send_cmdcomplete(FAR const struct bt_driver_s *dev)
+static void btnull_send_cmdcomplete(FAR const struct bt_driver_s *dev,
+                                    uint16_t opcode)
 {
   FAR struct bt_buf_s *buf;
 
   buf = bt_buf_alloc(BT_EVT, NULL, 0);
   if (buf != NULL)
     {
-      FAR struct bt_hci_evt_hdr_s hdr;
+      struct bt_hci_evt_hdr_s evt;
+      struct hci_evt_cmd_complete_s cmd;
 
       /* Minimal setup for the command complete event */
 
-      hdr.evt = BT_HCI_EVT_CMD_COMPLETE;
-      hdr.len = sizeof(struct bt_hci_evt_hdr_s);
-      memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_evt_hdr_s)), &hdr,
-             sizeof(struct bt_hci_evt_hdr_s));
+      evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
+      evt.len    = sizeof(struct bt_hci_evt_hdr_s) +
+                   sizeof(struct hci_evt_cmd_complete_s);
+      memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_evt_hdr_s)), &evt,
+                           sizeof(struct bt_hci_evt_hdr_s));
+
+      cmd.ncmd   = 1;
+      cmd.opcode = opcode;
+      memcpy(bt_buf_extend(buf, sizeof(struct hci_evt_cmd_complete_s)),
+                           &cmd, sizeof(struct hci_evt_cmd_complete_s));
 
       wlinfo("Send CMD complete event\n");
 
@@ -105,7 +114,7 @@ static int btnull_send(FAR const struct bt_driver_s *dev,
       FAR struct bt_hci_cmd_hdr_s *hdr = (FAR void *)buf->data;
 
       wlinfo("CMD: %04x\n", hdr->opcode);
-      btnull_send_cmdcomplete(dev);
+      btnull_send_cmdcomplete(dev, hdr->opcode);
     }
 
   return buf->len;
