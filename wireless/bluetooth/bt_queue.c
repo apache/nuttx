@@ -151,6 +151,7 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
 
   /* Wait for the next message */
 
+  u.msg.buf = NULL;
   msgsize = nxmq_receive(mqd, u.msgbuf, BT_MSGSIZE, &priority);
   if (msgsize < 0)
     {
@@ -163,7 +164,7 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
    */
 
   DEBUGASSERT(msgsize == sizeof(struct bt_bufmsg_s));
-  DEBUGASSERT(u.msg.buf->frame != NULL);
+  DEBUGASSERT(u.msg.buf != NULL && u.msg.buf->frame != NULL);
 
   /* Return the buffer */
 

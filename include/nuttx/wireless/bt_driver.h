@@ -80,7 +80,7 @@ struct bt_driver_s
  *   IPv6 or AF_BLUETOOTH socket.
  *
  *   This function should be called only once from board bring-up logic
- *   before any Bluetooth devices are registered.
+ *   *AFTER* any Bluetooth devices have been registered.
  *
  * Input Parameters:
  *   None

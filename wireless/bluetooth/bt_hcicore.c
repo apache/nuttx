@@ -221,7 +221,7 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
 
   /* If the command was synchronous wake up bt_hci_cmd_send_sync() */
 
-  if (sent->u.hci.sync)
+  if (sent->u.hci.sync != NULL)
     {
       FAR sem_t *sem = sent->u.hci.sync;
 
@@ -871,7 +871,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
       g_btdev.ncmd = 0;
 
-      wlinfo("Sending command %x (buf %p) to driver\n",
+      wlinfo("Sending command %04x buf %p to driver\n",
              buf->u.hci.opcode, buf);
 
       dev->send(dev, buf);
@@ -994,7 +994,7 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
   g_btdev.le_pkts = rp->le_max_num;
 }
 
-static int hci_init(void)
+static int hci_initialize(void)
 {
   FAR struct bt_hci_cp_host_buffer_size_s *hbs;
   FAR struct bt_hci_cp_set_event_mask_s *ev;
@@ -1257,7 +1257,7 @@ int bt_initialize(void)
       return err;
     }
 
-  err = hci_init();
+  err = hci_initialize();
   if (err)
     {
       return err;
@@ -1452,7 +1452,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
    * back the blocking semaphore.
    */
 
-  if (!buf)
+  if (buf == NULL)
     {
       buf = bt_hci_cmd_create(opcode, 0);
       if (!buf)
@@ -1486,7 +1486,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
 
   if (ret >= 0)
     {
-      if (!buf->u.hci.sync)
+      if (buf->u.hci.sync == NULL)
         {
           ret = -EIO;
         }

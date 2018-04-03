@@ -259,14 +259,6 @@ int sim_bringup(void)
 #endif
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH
-  /* Initialize the Bluetooth stack */
-
-  ret = bt_netdev_register();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: bt_netdev_register() failed: %d\n", ret);
-    }
-
 #ifdef CONFIG_BLUETOOTH_NULL
   /* Register the NULL Bluetooth network device */
 
@@ -276,6 +268,17 @@ int sim_bringup(void)
       syslog(LOG_ERR, "ERROR: btnull_register() failed: %d\n", ret);
     }
 #endif
+
+  /* Initialize the Bluetooth stack (This will fail if no device has been
+   * registered).
+   */
+
+  ret = bt_netdev_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: bt_netdev_register() failed: %d\n", ret);
+    }
+
 #endif
 
   UNUSED(ret);
