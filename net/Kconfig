@@ -133,11 +133,6 @@ config NET_ETHERNET
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
-#menu "IEEE 802.15.4"
-#	depends on WIRELESS_IEEE802154
-#
-#endmenu # IEEE 802.15.4
-
 config NET_LOOPBACK
 	bool "Local loopback"
 	default n
