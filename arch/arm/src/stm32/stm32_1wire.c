@@ -981,15 +981,12 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
               stm32_1wire_send(priv, READ_TX);
               break;
 
-            case ONEWIRETASK_WRITEBIT:
-              *priv->byte = 0;
-              priv->msgs = NULL;
-              priv->result = OK;
-              nxsem_post(&priv->sem_isr);
-              break;
-
             case ONEWIRETASK_READBIT:
               *priv->byte = (dr == READ_RX1) ? 1 : 0;
+
+              /* Fall through */
+
+            case ONEWIRETASK_WRITEBIT:
               priv->msgs = NULL;
               priv->result = OK;
               nxsem_post(&priv->sem_isr);
