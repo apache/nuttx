@@ -878,7 +878,7 @@ static void w25_cacheflush(struct w25_dev_s *priv)
     {
       /* Write entire erase block to FLASH */
 
-      w25_pagewrite(priv, priv->sector, (off_t)priv->esectno << W25_PAGE_SHIFT,
+      w25_pagewrite(priv, priv->sector, (off_t)priv->esectno << W25_SECTOR_SHIFT,
                       W25_SECTOR_SIZE);
 
       /* The case is no long dirty and the FLASH is no longer erased */
