@@ -61,11 +61,9 @@
 /* Global driver instances */
 
 #ifdef CONFIG_STM32_SPI1
-xxx
 struct spi_dev_s *g_spi1;
 #endif
 #ifdef CONFIG_STM32_SPI2
-yyy
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -85,7 +83,7 @@ struct spi_dev_s *g_spi2;
 void weak_function stm32_spiinitialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
-  /* Configure SPI-based devices */
+  /* Configure SPI-based devices on SPI1 */
 
   g_spi1 = up_spiinitialize(1);
   if (!g_spi1)
@@ -99,7 +97,7 @@ void weak_function stm32_spiinitialize(void)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-  /* Configure SPI-based devices */
+  /* Configure SPI-based devices on SPI2 */
 
   g_spi2 = up_spiinitialize(2);
   if (!g_spi2)
@@ -139,12 +137,6 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-  if (devid == SPIDEV_WIRELESS(0))
-    {
-      stm32_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
-    }
-  else
-#endif
 #ifdef HAVE_MMCSD
   if (devid == SPIDEV_MMCSD(0))
     {
