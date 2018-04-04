@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_dvfs2.h
  *
- *   Copyright (C) 2015-2017 Sony Corporation. All rights reserved.
+ *   Copyright 2015,2016,2017,2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without

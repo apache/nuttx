@@ -2,7 +2,7 @@
  * arch/arm/src/lc823450/lc823450_sddrv_type.h
  *
  *   Copyright (C) 2014-2015 ON Semiconductor. All rights reserved.
- *   Copyright (C) 2014-2017 Sony Corporation. All rights reserved.
+ *   Copyright 2014,2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without

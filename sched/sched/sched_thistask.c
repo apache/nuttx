@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_thistask.c
  *
- *   Copyright (C) 2018 Sony Corporation. All rights reserved.
+ *   Copyright 2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *           Gregory Nutt <gnutt@nuttx.org>
  *
