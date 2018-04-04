@@ -382,7 +382,7 @@ static int smps_setup(FAR struct smps_dev_s *dev)
 
   /* TODO: create current limit table */
 
-errout:
+  UNUSED(priv);
   return OK;
 }
 
