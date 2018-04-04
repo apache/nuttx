@@ -1843,8 +1843,6 @@ nuttx/
  |   |   `- README.txt
  |   |- skp16c26/
  |   |   `- README.txt
- |   |- spark/
- |   |   `- README.txt
  |   |- stm3210e-eval/
  |   |   |- RIDE/README.txt
  |   |   `- README.txt

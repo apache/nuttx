@@ -86,14 +86,10 @@
  * command numbers from overlapping.
  */
 
-/* See include/nuttx/wireless/cc3000.h */
-
-#define CC3000_FIRST        (WL_FIRST + WL_NCMDS)
-#define CC3000_NCMDS        7
 
 /* See include/nuttx/wireless/nrf24l01.h */
 
-#define NRF24L01_FIRST      (CC3000_FIRST + CC3000_NCMDS)
+#define NRF24L01_FIRST      (WL_FIRST + WL_NCMDS)
 #define NRF24L01_NCMDS      14
 
 /************************************************************************************

@@ -48,13 +48,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_WL_CC3000),y)
-CSRCS += stm32_wireless.c
-ifeq ($(CONFIG_CC3000_PROBES),)
-CSRCS += stm32_io.c
-endif
-endif
-
 ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 ifeq ($(CONFIG_AJOYSTICK),y)

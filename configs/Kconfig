@@ -1111,17 +1111,6 @@ config ARCH_BOARD_SKP16C26
 		uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
 		due to issues with compiler internal errors.
 
-config ARCH_BOARD_SPARK
-	bool "Spark Core"
-	depends on ARCH_CHIP_STM32F103CB
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		A configuration for the Spark Core from Spark Devices
-		(http://www.spark.io).  This board features the STM32103CBT6
-		MCU from STMicro.
-
 config ARCH_BOARD_PHOTON
 	bool "Photon wifi board"
 	depends on ARCH_CHIP_STM32F205RG
@@ -1726,7 +1715,6 @@ config ARCH_BOARD
 	default "samv71-xult"              if ARCH_BOARD_SAMV71_XULT
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
-	default "spark"                    if ARCH_BOARD_SPARK
 	default "photon"                   if ARCH_BOARD_PHOTON
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
@@ -2119,9 +2107,6 @@ source "configs/shenzhou/Kconfig"
 endif
 if ARCH_BOARD_SKP16C26
 source "configs/skp16c26/Kconfig"
-endif
-if ARCH_BOARD_SPARK
-source "configs/spark/Kconfig"
 endif
 if ARCH_BOARD_PHOTON
 source "configs/photon/Kconfig"

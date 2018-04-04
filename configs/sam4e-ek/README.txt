@@ -581,8 +581,7 @@ USB Full-Speed Device
      directories that can be used for reference.
 
   2. Linux supports the CDC/ACM driver out of the box.  Windows, on the other
-     than requires that you first install a serial driver (a .inf file).  There
-     are example .inf files for NuttX in the nuttx/configs/spark directories.
+     than requires that you first install a serial driver (a .inf file).
 
   3. There is hand-shaking to pace incoming serial data.  As a result, you may
      experience data loss due to RX overrun errors.  The overrun errors occur
@@ -1380,8 +1379,7 @@ Configurations
     5. By default, this configuration uses the CDC/ACM serial device to
        provide the USB console.  This works out-of-the-box for Linux.
        Windows, on the other hand, will require a CDC/ACM device driver
-       (.inf file).  There is a sample .inf file in the nuttx/configs/spark
-       directories.
+       (.inf file).
 
     5. Using the Prolifics PL2303 Emulation
 

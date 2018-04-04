@@ -196,10 +196,8 @@ static int  at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
  ****************************************************************************/
 
 /* These are pointers to ALL registered at86rf23x devices.
- * This table is used during irqs to find the context
+ * This table is used during interrupt handling to find the context.
  * Only one device is supported for now.
- * More devices can be supported in the future by lookup them up
- * using the IRQ number. See the ENC28J60 or CC3000 drivers for reference.
  */
 
 static struct at86rf23x_dev_s g_at86rf23x_devices[1];

@@ -127,10 +127,5 @@ void board_initialize(void)
   (void)board_app_initialize(0);
 #endif
 
-  /* CC3000 wireless initialization */
-
-#ifdef CONFIG_WL_CC3000
-  wireless_archinitialize(0);
-#endif
 }
 #endif

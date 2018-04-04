@@ -42,10 +42,6 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += kl_appinit.c
 endif
 
-ifeq ($(CONFIG_WL_CC3000),y)
-CSRCS += kl_cc3000.c
-endif
-
 ifeq ($(CONFIG_KL_TSI),y)
 CSRCS += kl_tsi.c
 endif

@@ -23,12 +23,6 @@ config CC1101_SPIDEV
 
 endif
 
-menuconfig WL_CC3000
-	bool "CC3000 Wireless Module support"
-	default n
-	select SPI
-
-source drivers/wireless/cc3000/Kconfig
 source drivers/wireless/spirit/Kconfig
 
 menuconfig DRIVERS_IEEE802154

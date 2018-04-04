@@ -103,33 +103,6 @@
  *
  */
 
-#ifdef CONFIG_WL_CC3000
-#  define GPIO_WIFI_INT (GPIO_PORTB | GPIO_PIN3 | GPIO_INPUT | \
-                         GPIO_PULLUP | GPIO_EXTI)
-#  define GPIO_WIFI_EN  (GPIO_PORTB | GPIO_PIN4 | GPIO_OUTPUT_CLEAR | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_WIFI_CS  (GPIO_PORTB | GPIO_PIN6 | GPIO_OUTPUT_SET | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_D14      (GPIO_PORTB | GPIO_PIN9 | GPIO_OUTPUT_CLEAR | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_D15      (GPIO_PORTB | GPIO_PIN8 | GPIO_OUTPUT_CLEAR | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_D0       (GPIO_PORTA | GPIO_PIN3 | GPIO_INPUT | \
-                         GPIO_PULLUP)
-#  define GPIO_D1       (GPIO_PORTA | GPIO_PIN2 | GPIO_OUTPUT_CLEAR | \
-                         GPIO_PULLUP)
-#  define GPIO_D2       (GPIO_PORTA | GPIO_PIN10 | GPIO_OUTPUT_CLEAR | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_A0       (GPIO_PORTA | GPIO_PIN0 | GPIO_OUTPUT_SET | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_A1       (GPIO_PORTA | GPIO_PIN1 | GPIO_OUTPUT_SET | \
-                         GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#  define GPIO_A2       (GPIO_PORTA | GPIO_PIN4 | GPIO_INPUT | \
-                         GPIO_PULLUP)
-#  define GPIO_A3       (GPIO_PORTB | GPIO_PIN0 | GPIO_INPUT | \
-                         GPIO_PULLUP)
-#endif
-
 /* SPI1 off */
 
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
@@ -139,26 +112,10 @@
 #define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTA | GPIO_PIN5)
 
-/* SPI1 chip selects off */
-
-#ifdef CONFIG_WL_CC3000
-#  define GPIO_SPI_CS_WIFI_OFF \
-    (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
-     GPIO_PORTB | GPIO_PIN6)
-#endif
-
 #ifdef HAVE_MMCSD
 #  define GPIO_SPI_CS_SD_CARD_OFF \
     (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
      GPIO_PORTB | GPIO_PIN5)
-#endif
-
-/* SPI chip selects */
-
-#ifdef CONFIG_WL_CC3000
-#  define GPIO_SPI_CS_WIFI \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN6)
 #endif
 
 #ifdef HAVE_MMCSD
@@ -174,24 +131,6 @@
 
 #define NUCLEO_I2C_OBDEV_LED       0x55
 #define NUCLEO_I2C_OBDEV_HMC5883   0x1e
-
-/* User GPIOs
- *
- * GPIO0-1 are for probing WIFI status
- */
-
-#ifdef CONFIG_WL_CC3000
-#  define GPIO_GPIO0_INPUT \
-    (GPIO_INPUT | GPIO_PULLUP | GPIO_PORTB | GPIO_PIN8)
-#  define GPIO_GPIO1_INPUT \
-    (GPIO_INPUT | GPIO_PULLUP | GPIO_PORTB | GPIO_PIN9)
-#  define GPIO_GPIO0_OUTPUT \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN8)
-#  define GPIO_GPIO1_OUTPUT \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN9)
-#endif
 
 /* Itead Joystick Shield
  *

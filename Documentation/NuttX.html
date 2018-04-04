@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 2, 2017</p>
+      <p>Last Updated: April 4, 2018</p>
     </td>
   </tr>
 </table>
@@ -974,7 +974,7 @@
   <td>
     <p>
       <li>
-        Support for networking modules (e.g., the TI CC3000 WLAN module and ESP8266).
+        Support for networking modules (e.g., ESP8266).
       </li>
     </p>
   </td>
@@ -1504,7 +1504,7 @@
       <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (38)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (37)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (44)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (10)</li>
     </ul>
@@ -3128,7 +3128,7 @@ nsh>
   <td>
     <p>
       <a name="stm32f103x"><b>STMicro STM32F103x (STM32 F1 Family)</b>.</a>
-      Support for four MCUs and four board configurations are available.
+      Support for five board configurations are available.
       MCU support includes all of the high density and connectivity line families.
       Board supported is available specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT, STM32F103VET6, STM32F103RBT6, and STM32103CBT6.
       Boards supported include:
@@ -3162,19 +3162,6 @@ nsh>
             These boards are based on the STM32F103RBT6 chip for the standard version and on the STM32F103CBT6 for the mini version.
             See the <a href="http://leaflabs.com/docs/hardware/maple.html">LeafLabs</a> web site for hardware information;
             see the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/maple/README.txt" target="_blank">README</a> file for further information about the NuttX port.
-         </p>
-      </li>
-      <li>
-         <p>
-            <b>Spark (and <i>emulated Spark</i>)</b>.
-            The Spark boards are based on the STM32F103CBT6 chip and feature wireless networking using the TI CC3000 WLAN module.
-            See the <a href="http://www.spark.io">Spark</a> web site for hardware information;
-            The <i>emulated Spark</i> is a base board for the Maple Mini board (see above) developed by David Sidrane that supports Spark development while we all way breathlessly for or Spark boards.
-            see the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/spark/README.txt" target="_blank">README</a> file for further information about the NuttX port.
-         <p>
-         </p>
-            Initially Spark support was introduced in NuttX 6.31 and completed in NuttX 6.32.
-            Most of this work is the result of the effort of David Sidrane.
          </p>
       </li>
       <li>
@@ -3227,13 +3214,6 @@ nsh>
           <p>
             <b>Maple</b>.
             Support for the Maple boards was contributed by Yiran Liao and first appear in NuttX 6-30.
-          </p>
-        </li>
-        <li>
-          <p>
-            <b>Spark</b>.
-              David Sidrane has the <i>emulated</i> Spark board up-and-running with a functional CC3000 network, SST25 FAT file system, an NSH shell, and a composite USB CDC/ACM and USBMSC devices.  This configuration is was first available NuttX 6.31 and completed in NuttX 6.32.
-              That is really quite a lot of high end functionality on an STM32 that only has 20KB of RAM!  I am impressed!
           </p>
         </li>
         <li>

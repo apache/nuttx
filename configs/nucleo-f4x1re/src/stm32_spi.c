@@ -91,10 +91,6 @@ void weak_function stm32_spidev_initialize(void)
       spierr("ERROR: FAILED to initialize SPI port 1\n");
     }
 
-#ifdef CONFIG_WL_CC3000
-  stm32_configgpio(GPIO_SPI_CS_WIFI);
-#endif
-
 #ifdef HAVE_MMCSD
   stm32_configgpio(GPIO_SPI_CS_SD_CARD);
 #endif
@@ -104,14 +100,6 @@ void weak_function stm32_spidev_initialize(void)
   /* Configure SPI-based devices */
 
   g_spi2 = stm32_spibus_initialize(2);
-
-  /* Setup CS, EN & IRQ line IOs */
-
-#ifdef CONFIG_WL_CC3000
-  stm32_configgpio(GPIO_WIFI_CS);
-  stm32_configgpio(GPIO_WIFI_EN);
-  stm32_configgpio(GPIO_WIFI_INT);
-#endif
 #endif
 }
 
@@ -145,13 +133,6 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#ifdef CONFIG_WL_CC3000
-  if (devid == SPIDEV_WIRELESS(0))
-    {
-      stm32_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
-    }
-  else
-#endif
 #ifdef HAVE_MMCSD
   if (devid == SPIDEV_MMCSD(0))
     {
@@ -170,13 +151,6 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-
-#ifdef CONFIG_WL_CC3000
-  if (devid == SPIDEV_WIRELESS(0))
-    {
-      stm32_gpiowrite(GPIO_WIFI_CS, !selected);
-    }
-#endif
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32_tiny/src/stm32_cc3000.c
+ * configs/stm32_tiny/src/stm32_nrf24l01.c
  *
  *   Copyright (C) 2009, 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>
