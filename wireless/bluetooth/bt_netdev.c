@@ -217,10 +217,15 @@ static int btnet_advertise(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(dev != NULL && dev->d_private != NULL);
 
-  /* Get the 6-byte local address from the device */
-#warning Missing logic
+  /* Get the 6-byte local address from the device.
+   *
+   * REVISIT: The use of the g_btdev global restricts the implementation to
+   * a single Bluetooth device.
+   */
 
-  /* Set the MAC address using that address */
+  addr = g_btdev.bdaddr.val
+
+  /* Set the MAC address using 6-byte local address from the device. */
 
   BLUETOOTH_ADDRCOPY(dev->d_mac.radio.nv_addr, addr);
   dev->d_mac.radio.nv_addrlen = BLUETOOTH_ADDRSIZE;
@@ -228,15 +233,16 @@ static int btnet_advertise(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
   /* Set the IP address based on the 6-byte address */
 
-  dev->d_ipv6addr[0]  = HTONS(0xfe80);
-  dev->d_ipv6addr[1]  = 0;
-  dev->d_ipv6addr[2]  = 0;
-  dev->d_ipv6addr[3]  = 0;
-  dev->d_ipv6addr[4]  = HTONS(0x0200);
-  dev->d_ipv6addr[5]  = (uint16_t)addr[0] << 8 | (uint16_t)addr[1];
-  dev->d_ipv6addr[6]  = (uint16_t)addr[2] << 8 | (uint16_t)addr[3];
-  dev->d_ipv6addr[7]  = (uint16_t)addr[4] << 8 | (uint16_t)addr[5];
+  dev->d_ipv6addr[0] = HTONS(0xfe80);
+  dev->d_ipv6addr[1] = 0;
+  dev->d_ipv6addr[2] = 0;
+  dev->d_ipv6addr[3] = 0;
+  dev->d_ipv6addr[4] = HTONS(0x0200);
+  dev->d_ipv6addr[5] = (uint16_t)addr[0] << 8 | (uint16_t)addr[1];
+  dev->d_ipv6addr[6] = (uint16_t)addr[2] << 8 | (uint16_t)addr[3];
+  dev->d_ipv6addr[7] = (uint16_t)addr[4] << 8 | (uint16_t)addr[5];
 #endif
+
   return OK;
 }
 

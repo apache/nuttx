@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if 1WIRE
+
+config 1WIRE_DS28E17
+	bool "DS28E17 1-wire to I2C converter"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the Maxim DS28E17 1-wire to I2C converter
+
+endif # 1WIRE

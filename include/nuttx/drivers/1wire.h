@@ -48,6 +48,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Supported 1-Wire commands */
+
+#define ONEWIRE_CMD_SEARCH           0xf0
+#define ONEWIRE_CMD_ALARM_SEARCH     0xec
+#define ONEWIRE_CMD_SKIP_ROM         0xcc
+#define ONEWIRE_CMD_COPY_SCRATCHPAD  0x48
+#define ONEWIRE_CMD_WRITE_SCRATCHPAD 0x4e
+#define ONEWIRE_CMD_READ_SCRATCHPAD  0xbe
+#define ONEWIRE_CMD_READ_ROM         0x33
+#define ONEWIRE_CMD_MATCH_ROM        0x55
+#define ONEWIRE_CMD_RESUME           0xa5
+
 /****************************************************************************
  * Name: ONEWIRE_RESET
  *

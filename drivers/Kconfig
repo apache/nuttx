@@ -477,4 +477,12 @@ menuconfig DRIVERS_CONTACTLESS
 
 source drivers/contactless/Kconfig
 
+menuconfig 1WIRE
+	bool "1wire Device Support"
+	default n
+	---help---
+		Drivers for various 1wire devices.
+
+source drivers/1wire/Kconfig
+
 source drivers/syslog/Kconfig
