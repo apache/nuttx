@@ -1063,7 +1063,7 @@ int stm32_smps_setup(void)
       ret = up_prioritize_irq(STM32_IRQ_ADC12, NVIC_SYSH_HIGH_PRIORITY);
       if (ret < 0)
         {
-          pwrerr("ERROR: ""
+          pwrerr("ERROR: "
                  "highpri_main: ERROR: up_prioritize_irq failed: %d\n",
                  ret);
           ret = EXIT_FAILURE;

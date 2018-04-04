@@ -66,6 +66,9 @@ struct spi_dev_s *g_spi1;
 #ifdef CONFIG_STM32_SPI2
 struct spi_dev_s *g_spi2;
 #endif
+#ifdef CONFIG_STM32_SPI3
+struct spi_dev_s *g_spi3;
+#endif
 
 /************************************************************************************
  * Public Functions
@@ -104,6 +107,20 @@ void weak_function stm32_spiinitialize(void)
     {
       spierr("ERROR: [boot] FAILED to initialize SPI port 2\n");
     }
+
+#warning No devices specified on SPI2
+#endif
+
+#ifdef CONFIG_STM32_SPI2
+  /* Configure SPI-based devices on SPI3 */
+
+  g_spi2 = up_spiinitialize(3);
+  if (!g_spi2)
+    {
+      spierr("ERROR: [boot] FAILED to initialize SPI port 3\n");
+    }
+
+#warning No devices specified on SPI3
 #endif
 }
 
