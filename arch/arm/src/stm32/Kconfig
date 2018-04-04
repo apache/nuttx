@@ -2381,26 +2381,38 @@ if STM32_HRTIM1
 config STM32_HRTIM_MASTER
 	bool "HRTIM MASTER"
 	default n
+	---help---
+		Enable HRTIM Master Timer
 
 config STM32_HRTIM_TIMA
 	bool "HRTIM TIMA"
 	default n
+	---help---
+		Enable HRTIM Timer A
 
 config STM32_HRTIM_TIMB
 	bool "HRTIM TIMB"
 	default n
+	---help---
+		Enable HRTIM Timer B
 
 config STM32_HRTIM_TIMC
 	bool "HRTIM TIMC"
 	default n
+	---help---
+		Enable HRTIM Timer C
 
 config STM32_HRTIM_TIMD
 	bool "HRTIM TIMD"
 	default n
+	---help---
+		Enable HRTIM Timer D
 
 config STM32_HRTIM_TIME
 	bool "HRTIM TIME"
 	default n
+	---help---
+		Enable HRTIM Timer E
 
 endif # STM32_HRTIM
 
@@ -5853,10 +5865,15 @@ if STM32_HRTIM1
 config STM32_HRTIM_DISABLE_CHARDRV
 	bool "HRTIM Disable Character Driver"
 	default n
+	---help---
+		In most cases we do not need HRTIM Character Driver, so we can disable it
+		and save some memory.
 
 menuconfig STM32_HRTIM_ADC
-	bool "HRTIM ADC Configuration"
+	bool "HRTIM ADC Triggering"
 	default n
+	---help---
+		Enable HRTIM ADC Triggering support.
 
 if STM32_HRTIM_ADC
 
@@ -5897,33 +5914,54 @@ endif # STM32_HRTIM_ADC
 config STM32_HRTIM_DAC
 	bool "HRTIM DAC Triggering"
 	default n
+	---help---
+		Enable HRTIM DAC Triggering support.
 
 config STM32_HRTIM_PWM
 	bool "HRTIM PWM Outputs"
 	default n
+	---help---
+		Enable HRTIM PWM Outputs support.
 
 config STM32_HRTIM_CAP
 	bool "HRTIM Capture"
 	default n
+	---help---
+		Enable HRTIM Capture support.
 
 config STM32_HRTIM_INTERRUPTS
 	bool "HRTIM Interrupts"
 	default n
+	---help---
+		Enable HRTIM Interrupts support.
 
 config STM32_HRTIM_BURST
 	bool "HRTIM Burst Mode"
 	depends on STM32_HRTIM_PWM
 	default n
+	---help---
+		Enable HRTIM Burst Mode support for PWM outputs.
 
 config STM32_HRTIM_DEADTIME
 	bool "HRTIM Dead-time"
 	depends on STM32_HRTIM_PWM
 	default n
+	---help---
+		Enable HRTIM Deadtime support for PWM outputs.
 
 config STM32_HRTIM_PUSHPULL
-	bool "HRTIM push-pull mode"
+	bool "HRTIM Push-Pull Mode"
 	depends on STM32_HRTIM_PWM
 	default n
+	---help---
+		Enable HRTIM Push-Pull Mode support for PWM outputs.
+
+config STM32_HRTIM_CHOPPER
+	bool "HRTIM Chopper"
+	depends on STM32_HRTIM_PWM
+	default n
+	---help---
+		Enable HRTIM Chopper Mode for PWM outputs.
 
 config STM32_HRTIM_DMA
 	bool "HRTIM DMA"
@@ -5931,11 +5969,6 @@ config STM32_HRTIM_DMA
 
 config STM32_HRTIM_DMABURST
 	bool "HRTIM DMA Burst"
-	default n
-
-config STM32_HRTIM_CHOPPER
-	bool "HRTIM Chopper"
-	depends on STM32_HRTIM_PWM
 	default n
 
 config STM32_HRTIM_AUTODELAY
@@ -5946,6 +5979,8 @@ config STM32_HRTIM_AUTODELAY
 menuconfig STM32_HRTIM_EVENTS
 	bool "HRTIM Events Configuration"
 	default n
+	---help---
+		Enable HRTIM Events support.
 
 if STM32_HRTIM_EVENTS
 
@@ -5994,6 +6029,8 @@ endif # STM32_HRTIM_EVENTS
 menuconfig STM32_HRTIM_FAULTS
 	bool "HRTIM Faults Configuration"
 	default n
+	---help---
+		Enable HRTIM Faults support.
 
 if STM32_HRTIM_FAULTS
 
@@ -6018,6 +6055,11 @@ endif # STM32_HRTIM_FAULTS
 config STM32_HRTIM_CLK_FROM_PLL
 	bool "HRTIM Clock from PLL"
 	default n
+	---help---
+		Set PLL as the clock source for HRTIM.
+		This configuration requires the following conditions:
+		  1) system clock is PLL,
+			2) SYSCLK and PCLK2 ratio must be 1 o 2.
 
 menu "HRTIM Master Configuration"
 	depends on STM32_HRTIM_MASTER
@@ -6445,6 +6487,22 @@ config STM32_ADC4_DMA
 		If DMA is selected, then the ADC may be configured to support
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
+
+config STM32_ADC1_INJECTED
+	bool "ADC1 INJECTED"
+	depends on STM32_ADC1 && STM32_STM32F33XX
+	default n
+	---help---
+		Support for ADC1 injected channels.
+		Only for STM32_STM32F33XX at this moment.
+
+config STM32_ADC2_INJECTED
+	bool "ADC2 INJECTED"
+	depends on STM32_ADC2 && STM32_STM32F33XX
+	default n
+	---help---
+		Support for ADC2 injected channels.
+		Only for STM32_STM32F33XX at this moment.
 
 endmenu
 

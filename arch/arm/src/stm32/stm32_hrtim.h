@@ -212,6 +212,8 @@
         (hrtim)->hd_ops->cmp_update(hrtim, tim, index, cmp)
 #define HRTIM_PER_SET(hrtim, tim, per)                      \
         (hrtim)->hd_ops->per_update(hrtim, tim, per)
+#define HRTIM_REP_SET(hrtim, tim, per)                      \
+        (hrtim)->hd_ops->rep_update(hrtim, tim, per)
 #define HRTIM_PER_GET(hrtim, tim)                           \
         (hrtim)->hd_ops->per_get(hrtim, tim)
 #define HRTIM_FCLK_GET(hrtim, tim)                          \
