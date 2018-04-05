@@ -82,7 +82,7 @@ struct i2c_master_s;
 
 int ds28e17_search(FAR struct ds28e17_dev_s *priv,
                    CODE void (*cb_search)(int family, uint64_t romcode, FAR void *arg),
-                   FAR oid *arg);
+                   FAR void *arg);
 
 /****************************************************************************
  * Name: ds28e17_lower_half
