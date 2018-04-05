@@ -223,7 +223,7 @@ static int btnet_advertise(FAR struct net_driver_s *dev)
    * a single Bluetooth device.
    */
 
-  addr = g_btdev.bdaddr.val
+  addr = g_btdev.bdaddr.val;
 
   /* Set the MAC address using 6-byte local address from the device. */
 
@@ -845,7 +845,9 @@ static int btnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 static int btnet_get_mhrlen(FAR struct radio_driver_s *netdev,
                          FAR const void *meta)
 {
-  return BLUETOOTH_FRAME_HDRLEN;
+  /* Always report the maximum frame length. */
+
+  return BLUETOOTH_MAX_HDRLEN;
 }
 
 /****************************************************************************
@@ -918,12 +920,12 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
       framelist     = iob->io_flink;
       iob->io_flink = NULL;
 
-      DEBUGASSERT(iob->io_offset == BLUETOOTH_FRAME_HDRLEN &&
-                  iob->io_len >= BLUETOOTH_FRAME_HDRLEN);
+      DEBUGASSERT(iob->io_offset == BLUETOOTH_MAX_HDRLEN &&
+                  iob->io_len >= BLUETOOTH_MAX_HDRLEN);
 
       /* Allocate a buffer to contain the IOB */
 
-      buf = bt_buf_alloc(BT_ACL_OUT, iob, BLUETOOTH_FRAME_HDRLEN);
+      buf = bt_buf_alloc(BT_ACL_OUT, iob, BLUETOOTH_MAX_HDRLEN);
       if (buf == NULL)
         {
           wlerr("ERROR:  Failed to allocate buffer container\n");

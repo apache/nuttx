@@ -74,7 +74,8 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_WIRELESS_PKTRADIO)
+#if defined(CONFIG_NET_6LOWPAN) && (defined(CONFIG_WIRELESS_PKTRADIO) || \
+    defined(CONFIG_NET_BLUETOOTH))
 static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
 {
   FAR struct radio_driver_s *radio = (FAR struct radio_driver_s *)dev;
@@ -154,14 +155,19 @@ int netdev_dev_lladdrsize(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_WIRELESS_IEEE802154 */
 
+#if defined(CONFIG_WIRELESS_PKTRADIO) || defined(CONFIG_NET_BLUETOOTH)
 #ifdef CONFIG_WIRELESS_PKTRADIO
       case NET_LL_PKTRADIO:
+#endif
+#ifdef CONFIG_NET_BLUETOOTH
+      case NET_LL_BLUETOOTH:
+#endif
         {
            /* Return the size of the packet radio address */
 
            return netdev_pktradio_addrlen(dev);
         }
-#endif /* CONFIG_WIRELESS_PKTRADIO */
+#endif /* CONFIG_WIRELESS_PKTRADIO || CONFIG_NET_BLUETOOTH */
 #endif /* CONFIG_NET_6LOWPAN */
 
        default:

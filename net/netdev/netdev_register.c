@@ -221,7 +221,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #ifdef CONFIG_NET_BLUETOOTH
           case NET_LL_BLUETOOTH:  /* Bluetooth */
-            dev->d_llhdrlen = BLUETOOTH_FRAME_HDRLEN;
+            dev->d_llhdrlen = BLUETOOTH_MAX_HDRLEN; /* Determined at runtime */
 #ifdef CONFIG_NET_6LOWPAN
 #  warning Missing logic
             dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
@@ -237,7 +237,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
           case NET_LL_IEEE802154: /* IEEE 802.15.4 MAC */
           case NET_LL_PKTRADIO:   /* Non-IEEE 802.15.4 packet radio */
-            dev->d_llhdrlen = 0;
+            dev->d_llhdrlen = 0;  /* Determined at runtime */
 #ifdef CONFIG_NET_6LOWPAN
             dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
 #ifdef CONFIG_NET_TCP
