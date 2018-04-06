@@ -72,18 +72,16 @@
 #  include <nuttx/wireless/wireless.h>
 #endif
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-#  ifdef CONFIG_WIRELESS_BLUETOOTH
-#    include <nuttx/wireless/bt_ioctl.h>
-#  endif
+#ifdef CONFIG_WIRELESS_BLUETOOTH
+#  include <nuttx/wireless/bt_ioctl.h>
+#endif
 
-#  ifdef CONFIG_WIRELESS_IEEE802154
-#    include <nuttx/wireless/ieee802154/ieee802154_mac.h>
-#  endif
+#ifdef CONFIG_WIRELESS_IEEE802154
+#  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
+#endif
 
-#  ifdef CONFIG_WIRELESS_PKTRADIO
-#    include <nuttx/wireless/pktradio.h>
-#  endif
+#ifdef CONFIG_WIRELESS_PKTRADIO
+#  include <nuttx/wireless/pktradio.h>
 #endif
 
 #include "arp/arp.h"
@@ -113,6 +111,31 @@
 #    define HAVE_WRITABLE_IPv6ROUTE 1
 #  endif
 #endif
+
+#undef HAVE_IEEE802154_IOCTL
+#undef HAVE_PKTRADIO_IOCTL
+#undef HAVE_BLUETOOTH_IOCTL
+
+#ifdef CONFIG_NETDEV_IOCTL
+/* IEEE 802.15.4 6LoWPAN or raw packet support */
+
+#if defined(CONFIG_NET_IEEE802154) || (defined(CONFIG_NET_6LOWPAN) && \
+    defined(CONFIG_WIRELESS_IEEE802154))
+#  define HAVE_IEEE802154_IOCTL 1
+#endif
+
+/* pktradio raw packet support not implemented */
+
+#if defined(CONFIG_NET_6LOWPAN) && defined(CONFIG_WIRELESS_PKTRADIO)
+#  define HAVE_PKTRADIO_IOCTL 1
+#endif
+
+/* Bluetooth 6LoWPAN support not implemented */
+
+#if defined(CONFIG_NET_BLUETOOTH)
+#  define HAVE_BLUETOOTH_IOCTL 1
+#endif
+#endif /* CONFIG_NETDEV_IOCTL */
 
 /* This is really kind of bogus.. When asked for an IP address, this is
  * family that is returned in the ifr structure.  Probably could just skip
@@ -375,7 +398,7 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 #endif
 
 /****************************************************************************
- * Name: netdev_iee802154_ioctl
+ * Name: netdev_bluetooth_ioctl
  *
  * Description:
  *   Perform Bluetooth network device specific operations.
@@ -392,14 +415,13 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN) && \
-    defined(CONFIG_WIRELESS_BLUETOOTH)
-static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
+#ifdef HAVE_BLUETOOTH_IOCTL
+static int netdev_bluetooth_ioctl(FAR struct socket *psock, int cmd,
                                   unsigned long arg)
 {
   FAR struct net_driver_s *dev;
   FAR char *ifname;
-  int ret = -ENOTTY;
+  int ret = -EINVAL;
 
   if (arg != 0ul)
     {
@@ -409,10 +431,10 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
            * command
            */
 
-          FAR struct bluetooth_ifreq_s *cmddata =
-            (FAR struct bluetooth_ifreq_s *)((uintptr_t)arg);
+          FAR struct btreq_s *btreq =
+            (FAR struct btreq_s *)((uintptr_t)arg);
 
-          ifname = cmddata->ifr_name;
+          ifname = btreq->btr_name;
         }
       else
         {
@@ -424,6 +446,8 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
       /* Find the device with this name */
 
       dev = netdev_findbyname(ifname);
+      ret = -ENODEV;
+
       if (dev != NULL && dev->d_lltype == NET_LL_BLUETOOTH)
         {
           /* Perform the device IOCTL */
@@ -454,8 +478,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN) && \
-    defined(CONFIG_WIRELESS_IEEE802154)
+#ifdef HAVE_IEEE802154_IOCTL
 static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
                                   unsigned long arg)
 {
@@ -496,7 +519,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
 
   return ret;
 }
-#endif
+#endif /* HAVE_IEEE802154_IOCTL */
 
 /****************************************************************************
  * Name: netdev_pktradio_ioctl
@@ -516,8 +539,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN) && \
-    defined(CONFIG_WIRELESS_PKTRADIO)
+#ifdef HAVE_PKTRADIO_IOCTL
 static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
                                  unsigned long arg)
 {
@@ -559,7 +581,7 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
 
   return ret;
 }
-#endif
+#endif /* HAVE_PKTRADIO_IOCTL */
 
 /****************************************************************************
  * Name: netdev_wifr_ioctl
@@ -1472,23 +1494,31 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     }
 #endif
 
-#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_6LOWPAN)
-#ifdef CONFIG_WIRELESS_IEEE802154
-  /* Check for a IEEE802.15.4 network device command */
+#ifdef HAVE_IEEE802154_IOCTL
+  /* Check for a IEEE802.15.4 network device IOCTL command */
 
   if (ret == -ENOTTY)
     {
       ret = netdev_iee802154_ioctl(psock, cmd, arg);
     }
 #endif
-#ifdef CONFIG_WIRELESS_PKTRADIO
-  /* Check for a non-IEEE802.15.4 packet radio network device command */
+
+#ifdef HAVE_PKTRADIO_IOCTL
+  /* Check for a non-IEEE802.15.4 packet radio network device IOCTL command */
 
   if (ret == -ENOTTY)
     {
       ret = netdev_pktradio_ioctl(psock, cmd, arg);
     }
 #endif
+
+#ifdef HAVE_BLUETOOTH_IOCTL
+  /* Check for Bluetooth network device IOCTL command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_bluetooth_ioctl(psock, cmd, arg);
+    }
 #endif
 
 #ifdef CONFIG_NET_IGMP

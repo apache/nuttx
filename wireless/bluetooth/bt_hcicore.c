@@ -1536,7 +1536,7 @@ int bt_start_advertising(uint8_t type, FAR const struct bt_eir_s *ad,
   FAR struct bt_hci_cp_le_set_adv_parameters_s *set_param;
   int i;
 
-  if (!ad)
+  if (ad == NULL)
     {
       goto send_scan_rsp;
     }
@@ -1551,7 +1551,7 @@ int bt_start_advertising(uint8_t type, FAR const struct bt_eir_s *ad,
 
   memset(set_data, 0, sizeof(*set_data));
 
-  for (i = 0; ad[i].len; i++)
+  for (i = 0; ad[i].len > 0; i++)
     {
       /* Check if ad fit in the remaining buffer */
 
@@ -1567,7 +1567,7 @@ int bt_start_advertising(uint8_t type, FAR const struct bt_eir_s *ad,
   bt_hci_cmd_send(BT_HCI_OP_LE_SET_ADV_DATA, buf);
 
 send_scan_rsp:
-  if (!sd)
+  if (sd == NULL)
     {
       goto send_set_param;
     }
@@ -1583,7 +1583,7 @@ send_scan_rsp:
 
   memset(scan_rsp, 0, sizeof(*scan_rsp));
 
-  for (i = 0; sd[i].len; i++)
+  for (i = 0; sd[i].len > 0; i++)
     {
       /* Check if ad fit in the remaining buffer */
 

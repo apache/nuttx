@@ -65,6 +65,8 @@
 /* NetBSD IOCTL commands ****************************************************/
 /* All of the following use an argument of type struct btreg_s:
  *
+ * Bluetooth Information Queries
+ *
  * SIOCGBTINFO
  *   Get Bluetooth device Info.  Given the device name, fill in the btreq_s
  *   structure including the address field for use with socket addressing as
@@ -77,92 +79,96 @@
  *   will be returned.  Otherwise, the next device will be returned until
  *   no more devices are found when the call will fail, with error ENXIO.
  *   Thus, you can cycle through all devices in the system.
- * SIOCSBTFLAGS
- *   Set Bluetooth device Flags.  Not all flags are settable.
  * SIOCGBTFEAT
  *   Get Bluetooth device Features.  This returns the cached basic (page 0)
  *   and extended (page 1 & 2) features.
- * SIOCSBTPOLICY
- *   Set Bluetooth device Link Policy bits.
- * SIOCSBTPTYPE
- *   Set Bluetooth device Packet Types.  You can only set packet types that
- *   the device supports.
- * SIOCGBTSTATS
- *   Read device statistics.
- * SIOCZBTSTATS
- *   Read device statistics, and zero them.
- *
- * NOTE: These are here for reference.  None of the NetBSD IOCTL commands
- * have been implemented in NuttX.
  */
 
 #define SIOCGBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 0)
 #define SIOCGBTINFOA           _WLIOC(WL_BLUETOOTHFIRST + 1)
 #define SIOCNBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 2)
-#define SIOCSBTFLAGS           _WLIOC(WL_BLUETOOTHFIRST + 3)
-#define SIOCGBTFEAT            _WLIOC(WL_BLUETOOTHFIRST + 4)
+#define SIOCGBTFEAT            _WLIOC(WL_BLUETOOTHFIRST + 3)
+
+/* Set Flags, Link Policy, and Packet Types
+ *
+ * SIOCSBTFLAGS
+ *   Set Bluetooth device Flags.  Not all flags are settable.
+ * SIOCSBTPOLICY
+ *   Set Bluetooth device Link Policy bits.
+ * SIOCSBTPTYPE
+ *   Set Bluetooth device Packet Types.  You can only set packet types that
+ *   the device supports.
+ */
+
+#define SIOCSBTFLAGS           _WLIOC(WL_BLUETOOTHFIRST + 4)
 #define SIOCSBTPOLICY          _WLIOC(WL_BLUETOOTHFIRST + 5)
 #define SIOCSBTPTYPE           _WLIOC(WL_BLUETOOTHFIRST + 6)
+
+/* Get Statistics:
+ *
+ * SIOCGBTSTATS
+ *   Read device statistics.
+ * SIOCZBTSTATS
+ *   Read device statistics, and zero them.
+ */
+
 #define SIOCGBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 7)
 #define SIOCZBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 8)
 
 /* NuttX-specific IOCTL commands. *******************************************/
-/* SIOCBT_ADVERTISESTART
+/* All of the following use an argument of type struct btreg_s: */
+
+/* SIOCBTADVSTART
  *   Description:   Set advertisement data, scan response data,
  *                  advertisement parameters and start advertising.
- *   Input:         Pointer to read-write instance of struct
- *                  bt_advertisestart_s.
+ *   Input:         Pointer to read-btreq_s instance of struct btreq_s.
  *   Output:        None
  */
 
-#define SIOCBT_ADVERTISESTART  _WLIOC(WL_BLUETOOTHFIRST + 9)
+#define SIOCBTADVSTART         _WLIOC(WL_BLUETOOTHFIRST + 9)
 
-/* SIOCBT_ADVERTISESTOP
+/* SIOCBTADVSTOP
  *   Description:   Stop advertising.
- *   Input:         A reference to a write-able instance of struct
- *                  bt_scanstop_s.
+ *   Input:         A reference to a write-able instance of struct btreq_s.
  *   Output:        None
  */
 
-#define SIOCBT_ADVERTISESTOP   _WLIOC(WL_BLUETOOTHFIRST + 10)
+#define SIOCBTADVSTOP          _WLIOC(WL_BLUETOOTHFIRST + 10)
 
-/* SIOCBT_SCANSTART
+/* SIOCBTSCANSTART
  *   Description:   Start LE scanning.  Buffered scan results may be
- *                  obtained via SIOCBT_SCANGET
- *   Input:         A read-only referent to struct bt_scanstart_s.
+ *                  obtained via SIOCBTSCANGET
+ *   Input:         A read-only referent to struct btreq_s.
  *   Output:        None
  */
 
-#define SIOCBT_SCANSTART       _WLIOC(WL_BLUETOOTHFIRST + 11)
+#define SIOCBTSCANSTART        _WLIOC(WL_BLUETOOTHFIRST + 11)
 
-/* SIOCBT_SCANGET
+/* SIOCBTSCANGET
  *   Description:   Return scan results buffered since the call time that
- *                  the SIOCBT_SCANGET command was invoked.
- *   Input:         A reference to a write-able instance of struct
- *                  bt_scanresult_s.
+ *                  the SIOCBTSCANGET command was invoked.
+ *   Input:         A reference to a write-able instance of struct btreq_s.
  *   Output:        Buffered scan result results are returned in the user-
  *                  provided buffer space.
  */
 
-#define SIOCBT_SCANGET         _WLIOC(WL_BLUETOOTHFIRST + 12)
+#define SIOCBTSCANGET          _WLIOC(WL_BLUETOOTHFIRST + 12)
 
-/* SIOCBT_SCANSTOP
+/* SIOCBTSCANSTOP
  *   Description:   Stop LE scanning and discard any buffered results.
- *   Input:         A reference to a write-able instance of struct
- *                  bt_scanstop_s.
+ *   Input:         A reference to a read-only instance of struct btreq_s.
  *   Output:        None
  */
 
-#define SIOCBT_SCANSTOP        _WLIOC(WL_BLUETOOTHFIRST + 13)
+#define SIOCBTSCANSTOP         _WLIOC(WL_BLUETOOTHFIRST + 13)
 
-/* SIOCBT_SECURITY
+/* SIOCBTSECURITY
  *   Description:   Enable security for a connection.
- *   Input:         A reference to a write-able instance of struct
- *                  bt_security_s.
+ *   Input:         A reference to a write-able instance of struct btreq_s.
  *   Output:        None
  */
 
-#define SIOCBT_SECURITY        _WLIOC(WL_BLUETOOTHFIRST + 14)
+#define SIOCBTSECURITY         _WLIOC(WL_BLUETOOTHFIRST + 14)
 
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
@@ -178,9 +184,23 @@
 #define btr_packet_type        btru.btri.btri_packet_type
 #define btr_max_acl            btru.btri.btri_max_acl
 #define btr_max_sco            btru.btri.btri_max_sco
+
 #define btr_features0          btru.btrf.btrf_page0
 #define btr_features1          btru.btrf.btrf_page1
 #define btr_features2          btru.btrf.btrf_page2
+
+#define btr_advtype            btru.btras.btras_advtype
+#define btr_advad              btru.btras.btras_advad
+#define btr_advas              btru.btras.btras_advsd
+
+#define btr_dupenable          btru.btrss.btrss_dupenable
+
+#define btr_nrsp               btru.btrsr.brtsr_nrsp
+#define btr_rsp                btru.btrsr.btrsr_rsp
+
+#define btr_secaddr            btru.btrse.btrse_secaddr
+#define btr_seclevel           btru.btrse.btrse_seclevel
+
 #define btr_stats              btru.btrs
 
 /* btr_flags */
@@ -201,9 +221,21 @@
  * Public Types
  ****************************************************************************/
 
-/* Common structure for Bluetooth IOCTL commands */
+/* Write-able data that accompanies the SIOCBTSCANGET IOCTL command */
 
-struct bt_stats
+struct bt_scanresponse_s
+{
+  char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
+  bt_addr_le_t sr_addr;             /* Advertiser LE address and type */
+  int8_t sr_rssi;                   /* Strength of advertiser signal */
+  uint8_t sr_type;                  /* Type of advertising response */
+  uint8_t sr_len;                   /* Length of advertiser data */
+  uint8_t sr_data[CONFIG_BLUETOOTH_MAXSCANDATA];
+};
+
+/* Bluetooth statistics */
+
+struct bt_stats_s
 {
   uint32_t err_tx;
   uint32_t err_rx;
@@ -217,11 +249,15 @@ struct bt_stats
   uint32_t byte_rx;
 };
 
+/* Common structure for Bluetooth IOCTL commands */
+
 struct btreq_s
   {
     char btr_name[HCI_DEVNAME_SIZE]; /* Device name */
     union
     {
+      /* Bluetooth information used by most NetBSD IOCTL commands */
+
       struct
       {
          bt_addr_t btri_bdaddr;      /* Device bdaddr */
@@ -236,81 +272,68 @@ struct btreq_s
          uint16_t btri_max_acl;      /* max ACL buffers */
          uint16_t btri_max_sco;      /* max SCO buffers */
        } btri;
+
+       /* Bluetooth Features */
+
        struct
        {
          uint8_t btrf_page0[HCI_FEATURES_SIZE]; /* basic */
          uint8_t btrf_page1[HCI_FEATURES_SIZE]; /* extended page 1 */
          uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* extended page 2 */
        } btrf;
-       struct bt_stats btrs;   /* unit stats */
+
+      /* Read-only data that accompanies the SIOCBTADVSTART IOCTL command.
+       * Advertising types are defined in bt_hci.h.  NOTE that btras_ad and
+       * btras_sd pointers to the beginning of a list of "Extended Inquire
+       * Responses".   Each list is terminated with a dummy, NULL entry
+       * identified with a length of zero.
+       */
+
+      struct
+      {
+        uint8_t btras_advtype;             /* Advertising type */
+        FAR struct bt_eir_s *btras_advad;  /* Data for advertisement packets */
+        FAR struct bt_eir_s *btras_advsd;  /* Data for scan response packets */
+      } btras;
+
+      /* NOTE: No additional data accompanies the SIOCBTADVSTOP */
+
+      /* The read-only data that accompanies the SIOCBTSCANSTART IOCTL
+       * command.
+       */
+
+      struct
+      {
+        bool btrss_dupenable;           /* True: enable duplicate filtering */
+      } btrss;
+
+      /* Write-able data that accompanies the SIOCBTSCANGET IOCTL command */
+
+      struct
+      {
+        uint8_t brtsr_nrsp;             /* Input:  Max number of responses
+                                         * Return: Actual number of responses */
+
+        /* Reference to a beginning of an array in user memory in which to
+         * return the scan response data.  The size of the array is
+         * btrsr_nrsp.
+         */
+
+        FAR struct bt_scanresponse_s *btrsr_rsp;
+      } btrsr;
+
+      /* NOTE: No additional data accompanies the SIOCBTSCANSTOP */
+
+      /* Read-only data that accompanies the SIOCBTSECURITY IOCTL command */
+
+      struct
+      {
+        bt_addr_le_t btrse_secaddr;        /* BLE address */
+        enum bt_security_e btrse_seclevel; /* Security level */
+      } btrse;
+
+      struct bt_stats_s btrs;           /* Unit statistics */
    } btru;
-};
-
-/* Read-only data that accompanies the SIOCBT_ADVERTISESTART IOCTL command.
- * Advertising types are defined in bt_hci.h.
- */
-
-struct bt_advertisestart_s
-{
-  char as_name[HCI_DEVNAME_SIZE];  /* Device name */
-  uint8_t as_type;                 /* Advertising type */
-  FAR struct bt_eir_s as_ad;       /* Data for advertisement packets */
-  FAR struct bt_eir_s as_sd;       /* Data for scan response packets */
-};
-
-/* The read-only data that accompanies the SIOCBT_SCANSTOP IOCTL command */
-
-struct bt_advertisestop_s
-{
-  char at_name[HCI_DEVNAME_SIZE];   /* Device name */
-};
-
-/* The read-only data that accompanies the SIOCBT_SCANSTART IOCTL command */
-
-struct bt_scanstart_s
-{
-  char ss_name[HCI_DEVNAME_SIZE];   /* Device name */
-  bool ss_dupenable;                /* True: enable duplicate filtering */
-};
-
-/* The read-only data that accompanies the SIOCBT_SCANSTOP IOCTL command */
-
-struct bt_scanstop_s
-{
-  char st_name[HCI_DEVNAME_SIZE];   /* Device name */
-};
-
-/* Write-able data that accompanies the SIOCBT_SCANGET IOCTL command */
-
-struct bt_scanresponse_s
-{
-  char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
-  bt_addr_le_t sr_addr;             /* Advertiser LE address and type */
-  int8_t sr_rssi;                   /* Strength of advertiser signal */
-  uint8_t sr_type;                  /* Type of advertising response */
-  uint8_t sr_len;                   /* Length of advertiser data */
-  uint8_t sr_data[CONFIG_BLUETOOTH_MAXSCANDATA];
-};
-
-struct bt_scanresult_s
-{
-  char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
-  uint8_t sr_nrsp;                  /* Input:  Max number of responses
-                                     * Return: Actual number of responses */
-  struct bt_scanresponse_s sr_rsp[1];
-};
-
-#define SIZEOF_BT_SCANRESULT_S(n) \
-  (sizeof(struct bt_scanresult_s) + \
-   ((n) - 1) * sizeof(struct bt_scanresponse_s))
-
-/* Read-only data that accompanies the SIOCBT_SECURITY IOCTL command */
-
-struct bt_security_s
-{
-  char se_name[HCI_DEVNAME_SIZE];   /* Device name */
-  bt_addr_le_t se_addr;             /* BLE address */
-  enum bt_security_e se_level;      /* Security level */
 };
 
 /****************************************************************************
