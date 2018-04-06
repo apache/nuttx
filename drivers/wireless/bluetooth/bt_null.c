@@ -41,8 +41,11 @@
 
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
+#include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bt_hci.h>
 #include <nuttx/wireless/bt_null.h>
 
@@ -50,8 +53,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void btnull_send_cmdcomplete(FAR const struct bt_driver_s *dev,
-                                    uint16_t opcode);
+static void btnull_format_cmdcomplete(FAR struct bt_buf_s *buf,
+                                      uint16_t opcode);
+static void btnull_format_bdaddr_rsp(FAR struct bt_buf_s *buf,
+                                     uint16_t opcode);
 
 static int  btnull_open(FAR const struct bt_driver_s *dev);
 static int  btnull_send(FAR const struct bt_driver_s *dev,
@@ -68,38 +73,115 @@ static const struct bt_driver_s g_bt_null =
   btnull_send   /* send */
 };
 
+static const bt_addr_t g_bt_addr =
+{
+  {0xfe, 0xed, 0xb0, 0x0b, 0xfa, 0xce}
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void btnull_send_cmdcomplete(FAR const struct bt_driver_s *dev,
-                                    uint16_t opcode)
+static void btnull_format_cmdcomplete(FAR struct bt_buf_s *buf,
+                                      uint16_t opcode)
 {
-  FAR struct bt_buf_s *buf;
+  struct bt_hci_evt_hdr_s evt;
+  struct hci_evt_cmd_complete_s cmd;
+  FAR uint8_t *data = buf->frame->io_data;
+  int ndx;
+  int len;
 
-  buf = bt_buf_alloc(BT_EVT, NULL, 0);
-  if (buf != NULL)
-    {
-      struct bt_hci_evt_hdr_s evt;
-      struct hci_evt_cmd_complete_s cmd;
+  /* Minimal setup for the command complete event */
 
-      /* Minimal setup for the command complete event */
+  len        = sizeof(struct bt_hci_evt_hdr_s) +
+               sizeof(struct hci_evt_cmd_complete_s);
+  ndx        = 0;
 
-      evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
-      evt.len    = sizeof(struct bt_hci_evt_hdr_s) +
-                   sizeof(struct hci_evt_cmd_complete_s);
-      memcpy(bt_buf_extend(buf, sizeof(struct bt_hci_evt_hdr_s)), &evt,
-                           sizeof(struct bt_hci_evt_hdr_s));
+  evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
+  evt.len    = len;
+  memcpy(&data[ndx], &evt, sizeof(struct bt_hci_evt_hdr_s));
+  ndx       += sizeof(struct bt_hci_evt_hdr_s);
 
-      cmd.ncmd   = 1;
-      cmd.opcode = opcode;
-      memcpy(bt_buf_extend(buf, sizeof(struct hci_evt_cmd_complete_s)),
-                           &cmd, sizeof(struct hci_evt_cmd_complete_s));
+  cmd.ncmd   = 1;
+  cmd.opcode = opcode;
+  memcpy(&data[ndx], &cmd, sizeof(struct hci_evt_cmd_complete_s));
+  ndx       += sizeof(struct hci_evt_cmd_complete_s);
 
-      wlinfo("Send CMD complete event\n");
+  buf->frame->io_len = len;
+  buf->len           = len;
+}
 
-      bt_hci_receive(buf);
-    }
+static void btnull_format_local_features_rsp(FAR struct bt_buf_s *buf,
+                                             uint16_t opcode)
+{
+  struct bt_hci_evt_hdr_s evt;
+  struct hci_evt_cmd_complete_s cmd;
+  struct bt_hci_rp_le_read_local_features_s features;
+  FAR uint8_t *data = buf->frame->io_data;
+  int ndx;
+  int len;
+
+  /* Return local features */
+
+  len        = sizeof(struct bt_hci_evt_hdr_s) +
+               sizeof(struct hci_evt_cmd_complete_s) +
+               sizeof(struct bt_hci_rp_le_read_local_features_s);
+  ndx        = 0;
+
+  evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
+  evt.len    = len;
+  memcpy(&data[ndx], &evt, sizeof(struct bt_hci_evt_hdr_s));
+  ndx       += sizeof(struct bt_hci_evt_hdr_s);
+
+  cmd.ncmd   = 1;
+  cmd.opcode = opcode;
+  memcpy(&data[ndx], &cmd, sizeof(struct hci_evt_cmd_complete_s));
+  ndx       += sizeof(struct hci_evt_cmd_complete_s);
+
+  memset(&features, 0, sizeof(struct bt_hci_rp_le_read_local_features_s));
+  features.features[4] = BT_LMP_LE;
+  memcpy(&data[ndx], &features,
+         sizeof(struct bt_hci_rp_le_read_local_features_s));
+  ndx       += sizeof(struct bt_hci_rp_le_read_local_features_s);
+
+  buf->frame->io_len = len;
+  buf->len           = len;
+}
+
+static void btnull_format_bdaddr_rsp(FAR struct bt_buf_s *buf,
+                                     uint16_t opcode)
+{
+  struct bt_hci_evt_hdr_s evt;
+  struct hci_evt_cmd_complete_s cmd;
+  struct bt_hci_rp_read_bd_addr_s bdaddr;
+  FAR uint8_t *data = buf->frame->io_data;
+  int ndx;
+  int len;
+
+  /* Return BDAddr */
+
+  len        = sizeof(struct bt_hci_evt_hdr_s) +
+               sizeof(struct hci_evt_cmd_complete_s) +
+               sizeof(struct bt_hci_rp_read_bd_addr_s);
+  ndx        = 0;
+
+  evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
+  evt.len    = len;
+  memcpy(&data[ndx], &evt, sizeof(struct bt_hci_evt_hdr_s));
+  ndx       += sizeof(struct bt_hci_evt_hdr_s);
+
+  cmd.ncmd   = 1;
+  cmd.opcode = opcode;
+  memcpy(&data[ndx], &cmd, sizeof(struct hci_evt_cmd_complete_s));
+  ndx       += sizeof(struct hci_evt_cmd_complete_s);
+
+  BLUETOOTH_ADDRCOPY(bdaddr.bdaddr.val, g_bt_addr.val);
+  bdaddr.status = 0;
+  memcpy(&data[ndx], &bdaddr, sizeof(struct bt_hci_rp_read_bd_addr_s));
+  ndx       += sizeof(struct bt_hci_rp_read_bd_addr_s);
+
+  buf->frame->io_len = len;
+  buf->len           = len;
 }
 
 static int btnull_send(FAR const struct bt_driver_s *dev,
@@ -112,9 +194,36 @@ static int btnull_send(FAR const struct bt_driver_s *dev,
   if (buf->type == BT_CMD)
     {
       FAR struct bt_hci_cmd_hdr_s *hdr = (FAR void *)buf->data;
+      FAR struct bt_buf_s *outbuf;
+      uint16_t opcode = hdr->opcode;
 
-      wlinfo("CMD: %04x\n", hdr->opcode);
-      btnull_send_cmdcomplete(dev, hdr->opcode);
+      wlinfo("CMD: %04x\n", opcode);
+
+      outbuf = bt_buf_alloc(BT_EVT, NULL, 0);
+      if (outbuf == NULL)
+        {
+          wlerr("ERROR: Failed to allocate buffer\n");
+          return -ENOMEM;
+        }
+
+      switch (opcode)
+        {
+          case BT_HCI_OP_READ_LOCAL_FEATURES:
+            btnull_format_local_features_rsp(outbuf, opcode);
+            break;
+
+          case BT_HCI_OP_READ_BD_ADDR:
+            btnull_format_bdaddr_rsp(outbuf, opcode);
+            break;
+
+          default:
+            btnull_format_cmdcomplete(outbuf, opcode);
+            break;
+        }
+
+      wlinfo("Send CMD complete event\n");
+
+      bt_hci_receive(outbuf);
     }
 
   return buf->len;

@@ -225,7 +225,7 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
     {
       FAR sem_t *sem = sent->u.hci.sync;
 
-      if (status)
+      if (status != 0)
         {
           sent->u.hci.sync = NULL;
         }
