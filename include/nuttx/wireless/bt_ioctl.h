@@ -118,54 +118,38 @@
 /* NuttX-specific IOCTL commands. *******************************************/
 /* All of the following use an argument of type struct btreg_s: */
 
-/* SIOCBTADVSTART
- *   Description:   Set advertisement data, scan response data,
- *                  advertisement parameters and start advertising.
- *   Input:         Pointer to read-btreq_s instance of struct btreq_s.
- *   Output:        None
+/* Advertisement
+ *
+ * SIOCBTADVSTART
+ *   Set advertisement data, scan response data, advertisement parameters
+ *   and start advertising.
+ * SIOCBTADVSTOP
+ *   Stop advertising.
  */
 
 #define SIOCBTADVSTART         _WLIOC(WL_BLUETOOTHFIRST + 9)
-
-/* SIOCBTADVSTOP
- *   Description:   Stop advertising.
- *   Input:         A reference to a write-able instance of struct btreq_s.
- *   Output:        None
- */
-
 #define SIOCBTADVSTOP          _WLIOC(WL_BLUETOOTHFIRST + 10)
 
-/* SIOCBTSCANSTART
- *   Description:   Start LE scanning.  Buffered scan results may be
- *                  obtained via SIOCBTSCANGET
- *   Input:         A read-only referent to struct btreq_s.
- *   Output:        None
+/* Scanning
+ *
+ * SIOCBTSCANSTART
+ *   Start LE scanning.  Buffered scan results may be obtained via
+ *   SIOCBTSCANGET
+ * SIOCBTSCANGET
+ *   Return scan results buffered since the call time that the
+ *   SIOCBTSCANGET command was invoked.
+ * SIOCBTSCANSTOP
+ *   Stop LE scanning and discard any buffered results.
  */
 
 #define SIOCBTSCANSTART        _WLIOC(WL_BLUETOOTHFIRST + 11)
-
-/* SIOCBTSCANGET
- *   Description:   Return scan results buffered since the call time that
- *                  the SIOCBTSCANGET command was invoked.
- *   Input:         A reference to a write-able instance of struct btreq_s.
- *   Output:        Buffered scan result results are returned in the user-
- *                  provided buffer space.
- */
-
 #define SIOCBTSCANGET          _WLIOC(WL_BLUETOOTHFIRST + 12)
-
-/* SIOCBTSCANSTOP
- *   Description:   Stop LE scanning and discard any buffered results.
- *   Input:         A reference to a read-only instance of struct btreq_s.
- *   Output:        None
- */
-
 #define SIOCBTSCANSTOP         _WLIOC(WL_BLUETOOTHFIRST + 13)
 
-/* SIOCBTSECURITY
- *   Description:   Enable security for a connection.
- *   Input:         A reference to a write-able instance of struct btreq_s.
- *   Output:        None
+/* Security
+ *
+ * SIOCBTSECURITY
+ *   Enable security for a connection.
  */
 
 #define SIOCBTSECURITY         _WLIOC(WL_BLUETOOTHFIRST + 14)
@@ -173,8 +157,8 @@
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
 
-#define btr_flags              btru.btri.btri_flags
 #define btr_bdaddr             btru.btri.btri_bdaddr
+#define btr_flags              btru.btri.btri_flags
 #define btr_num_cmd            btru.btri.btri_num_cmd
 #define btr_num_acl            btru.btri.btri_num_acl
 #define btr_num_sco            btru.btri.btri_num_sco
