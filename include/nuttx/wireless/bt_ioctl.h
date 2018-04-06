@@ -175,7 +175,7 @@
 
 #define btr_advtype            btru.btras.btras_advtype
 #define btr_advad              btru.btras.btras_advad
-#define btr_advas              btru.btras.btras_advsd
+#define btr_advsd              btru.btras.btras_advsd
 
 #define btr_dupenable          btru.btrss.btrss_dupenable
 
