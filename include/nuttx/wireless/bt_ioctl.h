@@ -58,12 +58,13 @@
 
 /* Bluetooth network device IOCTL commands. */
 
-#ifndef WL_BLUETOOTHCMDS != 15
+#ifndef WL_BLUETOOTHCMDS != 16
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 
-/* NetBSD IOCTL commands ****************************************************/
-/* All of the following use an argument of type struct btreg_s:
+/* IOCTL Commands ***********************************************************
+ * Many derive from NetBSD, at least in name.
+ * All of the following use an argument of type struct btreg_s:
  *
  * Bluetooth Information Queries
  *
@@ -79,15 +80,24 @@
  *   will be returned.  Otherwise, the next device will be returned until
  *   no more devices are found when the call will fail, with error ENXIO.
  *   Thus, you can cycle through all devices in the system.
- * SIOCGBTFEAT
- *   Get Bluetooth device Features.  This returns the cached basic (page 0)
- *   and extended (page 1 & 2) features.
  */
 
 #define SIOCGBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 0)
 #define SIOCGBTINFOA           _WLIOC(WL_BLUETOOTHFIRST + 1)
 #define SIOCNBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 2)
+
+/* Features
+ *
+ * SIOCGBTFEAT
+ *   Get Bluetooth BR/BDR device Features.  This returns the cached basic
+ *   (page 0) and extended (page 1 & 2) features.  Only page 0 is valid.
+ * SIOCGBTLEFEAT
+ *   Get Bluetooth LE device Features.  This returns the cached page 0-2
+ *   features.  Only page 0 is value.
+ */
+
 #define SIOCGBTFEAT            _WLIOC(WL_BLUETOOTHFIRST + 3)
+#define SIOCGBTLEFEAT          _WLIOC(WL_BLUETOOTHFIRST + 4)
 
 /* Set Flags, Link Policy, and Packet Types
  *
@@ -100,9 +110,9 @@
  *   the device supports.
  */
 
-#define SIOCSBTFLAGS           _WLIOC(WL_BLUETOOTHFIRST + 4)
-#define SIOCSBTPOLICY          _WLIOC(WL_BLUETOOTHFIRST + 5)
-#define SIOCSBTPTYPE           _WLIOC(WL_BLUETOOTHFIRST + 6)
+#define SIOCSBTFLAGS           _WLIOC(WL_BLUETOOTHFIRST + 5)
+#define SIOCSBTPOLICY          _WLIOC(WL_BLUETOOTHFIRST + 6)
+#define SIOCSBTPTYPE           _WLIOC(WL_BLUETOOTHFIRST + 7)
 
 /* Get Statistics:
  *
@@ -112,11 +122,8 @@
  *   Read device statistics, and zero them.
  */
 
-#define SIOCGBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 7)
-#define SIOCZBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 8)
-
-/* NuttX-specific IOCTL commands. *******************************************/
-/* All of the following use an argument of type struct btreg_s: */
+#define SIOCGBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 8)
+#define SIOCZBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 9)
 
 /* Advertisement
  *
@@ -127,8 +134,8 @@
  *   Stop advertising.
  */
 
-#define SIOCBTADVSTART         _WLIOC(WL_BLUETOOTHFIRST + 9)
-#define SIOCBTADVSTOP          _WLIOC(WL_BLUETOOTHFIRST + 10)
+#define SIOCBTADVSTART         _WLIOC(WL_BLUETOOTHFIRST + 10)
+#define SIOCBTADVSTOP          _WLIOC(WL_BLUETOOTHFIRST + 11)
 
 /* Scanning
  *
@@ -142,9 +149,9 @@
  *   Stop LE scanning and discard any buffered results.
  */
 
-#define SIOCBTSCANSTART        _WLIOC(WL_BLUETOOTHFIRST + 11)
-#define SIOCBTSCANGET          _WLIOC(WL_BLUETOOTHFIRST + 12)
-#define SIOCBTSCANSTOP         _WLIOC(WL_BLUETOOTHFIRST + 13)
+#define SIOCBTSCANSTART        _WLIOC(WL_BLUETOOTHFIRST + 12)
+#define SIOCBTSCANGET          _WLIOC(WL_BLUETOOTHFIRST + 13)
+#define SIOCBTSCANSTOP         _WLIOC(WL_BLUETOOTHFIRST + 14)
 
 /* Security
  *
@@ -152,7 +159,7 @@
  *   Enable security for a connection.
  */
 
-#define SIOCBTSECURITY         _WLIOC(WL_BLUETOOTHFIRST + 14)
+#define SIOCBTSECURITY         _WLIOC(WL_BLUETOOTHFIRST + 15)
 
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
@@ -261,9 +268,9 @@ struct btreq_s
 
        struct
        {
-         uint8_t btrf_page0[HCI_FEATURES_SIZE]; /* basic */
-         uint8_t btrf_page1[HCI_FEATURES_SIZE]; /* extended page 1 */
-         uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* extended page 2 */
+         uint8_t btrf_page0[HCI_FEATURES_SIZE]; /* Basic */
+         uint8_t btrf_page1[HCI_FEATURES_SIZE]; /* Extended page 1 */
+         uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* Extended page 2 */
        } btrf;
 
       /* Read-only data that accompanies the SIOCBTADVSTART IOCTL command.

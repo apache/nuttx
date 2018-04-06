@@ -97,6 +97,7 @@
 #define BT_LMP_LE                0x40
 
 /* LE features */
+
 #define BT_HCI_LE_ENCRYPTION     0x01
 
 /* OpCode Group Fields */

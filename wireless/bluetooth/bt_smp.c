@@ -1536,11 +1536,6 @@ static int smp_self_test(void)
 
   return 0;
 }
-#else
-static inline int smp_self_test(void)
-{
-  return 0;
-}
 #endif
 
 /****************************************************************************

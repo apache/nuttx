@@ -305,6 +305,35 @@ int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
          }
          break;
 
+       /* SIOCGBTFEAT
+        *   Get Bluetooth BR/BDR device Features.  This returns the cached
+        *   basic (page 0) and extended (page 1 & 2) features.  Only page 0
+        *   is valid.
+        * SIOCGBTLEFEAT
+        *   Get Bluetooth LE device Features.  This returns the cached page
+        *   0-2  features.  Only page 0 is value.
+        */
+
+       case SIOCGBTFEAT:
+       case SIOCGBTLEFEAT:
+         {
+           FAR const uint8_t *src;
+
+           memset(&btreq->btru.btrf, 0, sizeof(btreq->btru.btrf));
+           if (cmd == SIOCGBTFEAT)
+             {
+               src = g_btdev.features;
+             }
+           else
+             {
+               src = g_btdev.le_features;
+             }
+
+           memcpy(btreq->btr_features0, src, 8);
+           ret = OK;
+         }
+         break;
+
       /* SIOCBTADVSTART:  Set advertisement data, scan response data,
        * advertisement parameters and start advertising.
        */

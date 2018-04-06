@@ -405,7 +405,7 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
    * pool.
    */
 
-  if (buf->frame == NULL)
+  if (buf->frame != NULL)
     {
       iob_free(buf->frame);
       buf->frame = NULL;

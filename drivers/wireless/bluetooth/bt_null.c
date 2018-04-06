@@ -114,8 +114,6 @@ static void btnull_format_cmdcomplete(FAR struct bt_buf_s *buf,
 static void btnull_format_local_features_rsp(FAR struct bt_buf_s *buf,
                                              uint16_t opcode)
 {
-  struct bt_hci_evt_hdr_s evt;
-  struct hci_evt_cmd_complete_s cmd;
   struct bt_hci_rp_le_read_local_features_s features;
   FAR uint8_t *data = buf->frame->io_data;
   int ndx;
@@ -123,23 +121,22 @@ static void btnull_format_local_features_rsp(FAR struct bt_buf_s *buf,
 
   /* Return local features */
 
-  len        = sizeof(struct bt_hci_evt_hdr_s) +
-               sizeof(struct hci_evt_cmd_complete_s) +
+  btnull_format_cmdcomplete(buf, opcode);
+
+  len        = buf->len +
                sizeof(struct bt_hci_rp_le_read_local_features_s);
-  ndx        = 0;
-
-  evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
-  evt.len    = len;
-  memcpy(&data[ndx], &evt, sizeof(struct bt_hci_evt_hdr_s));
-  ndx       += sizeof(struct bt_hci_evt_hdr_s);
-
-  cmd.ncmd   = 1;
-  cmd.opcode = opcode;
-  memcpy(&data[ndx], &cmd, sizeof(struct hci_evt_cmd_complete_s));
-  ndx       += sizeof(struct hci_evt_cmd_complete_s);
+  ndx        = buf->len;
 
   memset(&features, 0, sizeof(struct bt_hci_rp_le_read_local_features_s));
-  features.features[4] = BT_LMP_LE;
+  if (opcode == BT_HCI_OP_READ_LOCAL_FEATURES)
+    {
+      features.features[4] = BT_LMP_LE;
+    }
+  else /* if opcode == BT_HCI_OP_LE_READ_LOCAL_FEATURES */
+    {
+      features.features[0] = BT_HCI_LE_ENCRYPTION;
+    }
+
   memcpy(&data[ndx], &features,
          sizeof(struct bt_hci_rp_le_read_local_features_s));
   ndx       += sizeof(struct bt_hci_rp_le_read_local_features_s);
@@ -151,29 +148,16 @@ static void btnull_format_local_features_rsp(FAR struct bt_buf_s *buf,
 static void btnull_format_bdaddr_rsp(FAR struct bt_buf_s *buf,
                                      uint16_t opcode)
 {
-  struct bt_hci_evt_hdr_s evt;
-  struct hci_evt_cmd_complete_s cmd;
   struct bt_hci_rp_read_bd_addr_s bdaddr;
   FAR uint8_t *data = buf->frame->io_data;
   int ndx;
   int len;
 
-  /* Return BDAddr */
+  btnull_format_cmdcomplete(buf, opcode);
 
-  len        = sizeof(struct bt_hci_evt_hdr_s) +
-               sizeof(struct hci_evt_cmd_complete_s) +
+  len        = buf->len +
                sizeof(struct bt_hci_rp_read_bd_addr_s);
-  ndx        = 0;
-
-  evt.evt    = BT_HCI_EVT_CMD_COMPLETE;
-  evt.len    = len;
-  memcpy(&data[ndx], &evt, sizeof(struct bt_hci_evt_hdr_s));
-  ndx       += sizeof(struct bt_hci_evt_hdr_s);
-
-  cmd.ncmd   = 1;
-  cmd.opcode = opcode;
-  memcpy(&data[ndx], &cmd, sizeof(struct hci_evt_cmd_complete_s));
-  ndx       += sizeof(struct hci_evt_cmd_complete_s);
+  ndx        = buf->len;
 
   BLUETOOTH_ADDRCOPY(bdaddr.bdaddr.val, g_bt_addr.val);
   bdaddr.status = 0;
@@ -184,10 +168,34 @@ static void btnull_format_bdaddr_rsp(FAR struct bt_buf_s *buf,
   buf->len           = len;
 }
 
+static void btnull_format_buffersize_rsp(FAR struct bt_buf_s *buf,
+                                         uint16_t opcode)
+{
+  struct bt_hci_rp_le_read_buffer_size_s bufsize;
+  FAR uint8_t *data = buf->frame->io_data;
+  int ndx;
+  int len;
+
+  btnull_format_cmdcomplete(buf, opcode);
+
+  len        = buf->len +
+               sizeof(struct bt_hci_rp_le_read_buffer_size_s);
+  ndx        = buf->len;
+
+  bufsize.status     = 0;
+  bufsize.le_max_len = BLUETOOTH_MAX_FRAMELEN;
+  bufsize.le_max_num = 1;
+  memcpy(&data[ndx], &bufsize, sizeof(struct bt_hci_rp_le_read_buffer_size_s));
+  ndx       += sizeof(struct bt_hci_rp_le_read_buffer_size_s);
+
+  buf->frame->io_len = len;
+  buf->len           = len;
+}
+
 static int btnull_send(FAR const struct bt_driver_s *dev,
                        FAR struct bt_buf_s *buf)
 {
-  wlinfo("Bit buffer: length %d\n", (int)buf->len);
+  wlinfo("Bit bucket: length %d\n", (int)buf->len);
 
   /* Is the Bluetooth stack waiting for an event? */
 
@@ -209,11 +217,16 @@ static int btnull_send(FAR const struct bt_driver_s *dev,
       switch (opcode)
         {
           case BT_HCI_OP_READ_LOCAL_FEATURES:
+          case BT_HCI_OP_LE_READ_LOCAL_FEATURES:
             btnull_format_local_features_rsp(outbuf, opcode);
             break;
 
           case BT_HCI_OP_READ_BD_ADDR:
             btnull_format_bdaddr_rsp(outbuf, opcode);
+            break;
+
+          case BT_HCI_OP_LE_READ_BUFFER_SIZE:
+            btnull_format_buffersize_rsp(outbuf, opcode);
             break;
 
           default:
