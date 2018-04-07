@@ -178,6 +178,13 @@ config LIS331DL_I2C_FREQUENCY
 	range 1 100000
 	depends on LIS331DL
 
+config SENSORS_LSM330SPI
+	bool "STMicro LSM330 SPI support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the STMicro LSM330 on SPI.
+
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n
@@ -303,7 +310,7 @@ config MPL115A_REGDEBUG
 		Enables register level debug features for the MPL115A
 
 config SENSORS_ADXL345
-	bool "AnalogDevices ADXL345 Driver"
+	bool "Analog Devices ADXL345 Driver"
 	default n
 	---help---
 		Enables support for the ADXL345 driver
@@ -344,6 +351,13 @@ config ADXL345_REGDEBUG
 		Enable very low register-level debug output.
 
 endif # SENSORS_ADXL345
+
+config SENSORS_ADXL372
+	bool "Analog Devices ADXL372 Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Analog Devices ADXL372 Sensor.
 
 config SENSORS_MAX44009
 	bool "Maxim MAX44009 ALS sensor"
