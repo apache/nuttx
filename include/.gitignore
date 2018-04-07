@@ -6,3 +6,5 @@
 /stdarg.h
 /features.h
 /uClibc++
+/libcxx
+/machine
