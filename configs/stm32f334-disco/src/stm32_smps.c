@@ -68,8 +68,6 @@
 
 #if defined(CONFIG_EXAMPLES_SMPS) && defined(CONFIG_DRIVERS_SMPS)
 
-#warning "STM32F334-DISCO buck-boost converter example under development!"
-
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 #  error CONFIG_ARCH_HIPRI_INTERRUPT is required
 #endif
@@ -643,25 +641,21 @@ static int smps_state_get(FAR struct smps_dev_s *dev,
 
 static int smps_fault_set(FAR struct smps_dev_s *dev, uint8_t fault)
 {
-#warning "missing logic"
   return OK;
 }
 
 static int smps_fault_get(FAR struct smps_dev_s *dev, FAR uint8_t *fault)
 {
-#warning "missing logic"
   return OK;
 }
 
 static int smps_fault_clean(FAR struct smps_dev_s *dev, uint8_t fault)
 {
-#warning "missing logic"
   return OK;
 }
 
 static int smps_ioctl(FAR struct smps_dev_s *dev, int cmd, unsigned long arg)
 {
-#warning "missing logic"
   return OK;
 }
 

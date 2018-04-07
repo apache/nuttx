@@ -57,8 +57,6 @@
 
 #if defined(CONFIG_STM32_STM32F33XX)
 
-#warning "HRTIM UNDER DEVELOPMENT !"
-
 #if defined(CONFIG_STM32_HRTIM_TIMA_PWM) || defined(CONFIG_STM32_HRTIM_TIMA_DAC) || \
     defined(CONFIG_STM32_HRTIM_TIMA_CAP) || defined(CONFIG_STM32_HRTIM_TIMA_IRQ) || \
     defined(CONFIG_STM32_HRTIM_TIMA_DT)  || defined(CONFIG_STM32_HRTIM_TIMA_CHOP)
@@ -230,11 +228,6 @@
  ****************************************************************************/
 
 /* HRTIM default configuration **********************************************/
-
-#ifndef HRTIM_MASTER_PRESCALER
-#  warning "HRTIM_MASTER_PRESCALER is not set. Set the default value HRTIM_PRESCALER_2"
-#  define HRTIM_MASTER_PRESCALER HRTIM_PRESCALER_2
-#endif
 
 #if defined(CONFIG_STM32_HRTIM_MASTER) && !defined(HRTIM_MASTER_MODE)
 #  warning "HRTIM_MASTER_MODE is not set. Set the default value 0"
@@ -3604,8 +3597,46 @@ errout:
 static uint16_t hrtim_deadtime_get(FAR struct hrtim_dev_s *dev, uint8_t timer,
                                    uint8_t dt)
 {
-#warning missing logic
-  return 0;
+  FAR struct stm32_hrtim_s *priv = (FAR struct stm32_hrtim_s *)dev->hd_priv;
+  uint16_t regval = 0;
+  uint32_t shift  = 0;
+  uint32_t mask   = 0;
+
+  /* Get shift value */
+
+  switch (dt)
+    {
+      case HRTIM_DT_EDGE_RISING:
+        {
+          shift = HRTIM_TIMDT_DTR_SHIFT;
+          mask  = HRTIM_TIMDT_DTR_MASK;
+          break;
+        }
+
+      case HRTIM_DT_EDGE_FALLING:
+        {
+          shift = HRTIM_TIMDT_DTF_SHIFT;
+          mask  = HRTIM_TIMDT_DTF_MASK;
+          break;
+        }
+
+      default:
+        {
+          regval = 0;
+          goto errout;
+        }
+    }
+
+  /* Get Deadtime Register */
+
+  regval = hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_DTR_OFFSET);
+
+  /* Get Deadtime value  */
+
+  regval = (regval & mask) >> shift;
+
+errout:
+  return regval;
 }
 
 /****************************************************************************

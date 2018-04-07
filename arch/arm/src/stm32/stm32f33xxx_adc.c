@@ -119,6 +119,10 @@
 #  define ADC2_HAVE_JEXTSEL
 #endif
 
+#if defined(CONFIG_STM32_ADC_NOIRQ) && defined(ADC_HAVE_DMA)
+#  error "ADC DMA support requires common ADC interrupts"
+#endif
+
 /* RCC reset ****************************************************************/
 
 #define STM32_RCC_RSTR    STM32_RCC_AHBRSTR
@@ -162,10 +166,13 @@
  */
 
 #define ADC_MAX_CHANNELS_DMA   16
+#define ADC_MAX_CHANNELS_NOIRQ 16
 #define ADC_MAX_CHANNELS_NODMA 1
 
-#ifdef ADC_HAVE_DMA
+#if defined(ADC_HAVE_DMA)
 #  define ADC_REG_MAX_SAMPLES ADC_MAX_CHANNELS_DMA
+#elif defined(CONFIG_STM32_ADC_NOIRQ)
+#  define ADC_REG_MAX_SAMPLES ADC_MAX_CHANNELS_NOIRQ
 #else
 #  define ADC_REG_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #endif
@@ -1911,7 +1918,7 @@ static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
        i < priv->rnchannels && i < last;
        i++, offset += ADC_SQ_OFFSET)
     {
-      bits |= (uint32_t)priv->r_chanlist[i] << offset;
+      bits |= ((uint32_t)priv->r_chanlist[i]) << offset;
     }
 
   return bits;
