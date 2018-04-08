@@ -79,6 +79,7 @@
  *   . of the sensor.
  *
  * To perform I/O to a sensor, the cluster driver needs...
+ *
  * > A pointer to the spi instance (struct spi_dev_s *). The cluster driver
  *   has this pointer, because it provides it to the leaf driver as an input
  *   parameter to the leaf driver's registration function.
@@ -88,7 +89,7 @@
  * > A pointer to the leaf driver instance. The leaf driver communicates this
  *   pointer to the cluster driver by storing it into the config struct
  *   leaf_handle (struct spi_dev_s *) field that is also passed as an in/out
- *  parameter in the leaf driver's registration function.
+ *   parameter in the leaf driver's registration function.
  *
  * With the above information, the sensor cluster driver may efficiently access
  * multiple sensors and aggregate their data.
