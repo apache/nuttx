@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l476rg/src/stm32l4_appinit.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,6 +196,19 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+/* Initialize CAN and register the CAN driver.
+ * Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
+ */
+
+#ifdef CONFIG_CAN
+  ret = stm32l4_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32l4_can_setup failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_AJOYSTICK
   /* Initialize and register the joystick driver */
 
@@ -299,6 +312,19 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 #endif /* CONFIG_SENSORS_QENCODER */
+
+/* Initialize CAN and register the CAN driver.
+ * Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
+ */
+
+#ifdef CONFIG_DEV_GPIO
+  ret = stm32l4_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
 
 #ifdef CONFIG_WL_CC1101
   /* Initialize and register the cc1101 radio */

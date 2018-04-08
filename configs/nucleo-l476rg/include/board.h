@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l476rg/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,18 @@
 #define ADC3_DMA_CHAN DMACHAN_ADC3_2
 
 /* Alternate function pin selections ************************************************/
+
+/* CAN1: (added 31-03 -- Ben vd Veen (DisruptiveNL)
+ *   RXD: PA11
+ *        PB8
+ *        PD0
+ *   TXD: PA12
+ *        PB9
+ *        PD1
+ */
+
+#define GPIO_CAN1_RX   GPIO_CAN1_RX_2        /* PA11 - AF9 */
+#define GPIO_CAN1_TX   GPIO_CAN1_TX_2        /* PA12 - AF9 */
 
 /* USART1:
  *   RXD: PA10  CN9 pin 3, CN10 pin 33

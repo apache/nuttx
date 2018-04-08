@@ -59,6 +59,16 @@ CSRCS += stm32_ajoystick.c
 endif
 endif
 
+# Ben vd Veen (DisruptiveNL) -- 31-03-2018
+ifeq ($(CONFIG_DEV_GPIO),y)
+  CSRCS += stm32_gpio.c
+endif
+
+# Ben vd Veen (DisruptiveNL) -- 31-03-2018
+ifeq ($(CONFIG_CAN),y)
+  CSRCS += stm32_can.c
+endif
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif

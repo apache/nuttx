@@ -50,6 +50,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
 #define HAVE_PROC             1
@@ -119,7 +120,6 @@
  *                      D7=PA_8     I2C1_SCL=D15=PB_8 WIFI Probe
  *
  *  mostly from: https://mbed.org/platforms/ST-Nucleo-F401RE/
- *
  */
 
 /* SPI1 off */
@@ -243,6 +243,26 @@
 #define GPIO_FIRE     GPIO_BUTTON_2
 #define GPIO_JUMP     GPIO_BUTTON_3
 
+/* GPIO pins used by the GPIO Subsystem
+ * Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
+ */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+/* This was really something to find out! But the GPIOA Port was causing
+ * conflicts with the nsh console.  So thats why I have chosen GPIOB
+ *
+ * Author: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
+ * https://www.youtube.com/watch?v=VXsTLzI6idA -- Original video GPIO
+ */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
+#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -282,6 +302,32 @@ void stm32l4_spiinitialize(void);
  ************************************************************************************/
 
 void stm32l4_usbinitialize(void);
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *   Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32l4_gpio_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32l4_can_setup -- DisruptiveNL
+ *
+ * Description:
+ *   Initialize CAN and register the CAN device.
+ *   Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32l4_can_setup(void);
+#endif
 
 /************************************************************************************
  * Name: stm32l4_pwm_setup
