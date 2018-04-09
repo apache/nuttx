@@ -60,8 +60,7 @@
 
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_LM3S) || defined(CONFIG_ARCH_CHIP_LM4F) || \
-    defined(CONFIG_ARCH_CHIP_CC3200)
+#if defined(CONFIG_ARCH_CHIP_LM3S) || defined(CONFIG_ARCH_CHIP_LM4F)
 
   /* I don't believe that any of these families support interrupts on port J.  Many
    * do not support interrupts on port H either.

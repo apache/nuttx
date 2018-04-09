@@ -53,8 +53,6 @@
 #  include "chip/tm4c123_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C129)
 #  include "chip/tm4c129_syscontrol.h"
-#elif defined(CONFIG_ARCH_CHIP_CC3200)
-#  include "chip/cc3200_syscontrol.h"
 #else
 #  error "Unsupported Tiva/Stellaris system control module"
 #endif

@@ -50,8 +50,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM4F120) || \
     defined(CONFIG_ARCH_CHIP_LM3S8962) || defined(CONFIG_ARCH_CHIP_LM3S9B96) || \
-    defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI) || \
-    defined(CONFIG_ARCH_CHIP_CC3200)
+    defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI)
 
 /* These parts all support a 1KiB erase page size and a total FLASH memory size
  * of 256Kib or 256 pages.

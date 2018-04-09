@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_irq.c
  *
- *   Copyright (C) 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013-2014, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -409,7 +410,9 @@ void up_irqinitialize(void)
   up_ramvec_initialize();
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_CC3200
+#ifdef CONFIG_TIVA_RAMVBAR
+  /* Set the interrupt vector table to beginning of RAM */
+
   putreg32((uint32_t)CONFIG_RAM_START, NVIC_VECTAB);
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_syscontrol.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -199,6 +199,12 @@ static inline void tiva_pll_lock(void)
 
 void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 {
+  /* We are probably using the main oscillator.  The main oscillator is
+   * disabled on reset and so probably must be enabled here.  The internal
+   * oscillator is enabled on reset and if that is selected, most likely
+   * nothing needs to be done.
+   */
+
   uint32_t rcc;
   uint32_t rcc2;
 
@@ -206,12 +212,6 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 
   rcc  = getreg32(TIVA_SYSCON_RCC);
   rcc2 = getreg32(TIVA_SYSCON_RCC2);
-
-  /* We are probably using the main oscillator.  The main oscillator is
-   * disabled on reset and so probably must be enabled here.  The internal
-   * oscillator is enabled on reset and if that is selected, most likely
-   * nothing needs to be done.
-   */
 
 #if defined(LM4F) || defined(TM4C)
   if ((rcc & SYSCON_RCC_MOSCDIS) != 0 && (newrcc & SYSCON_RCC_MOSCDIS) == 0)
@@ -318,12 +318,6 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
           putreg32(rcc2, TIVA_SYSCON_RCC2);
         }
     }
-#elif defined(CONFIG_ARCH_CHIP_CC3200)
-#if 0
-  /* NOTE: we do this in up_earlyconsoleinit() */
-
-  cc3200_init();
-#endif
 #else
   if (((rcc & SYSCON_RCC_MOSCDIS) != 0 && (newrcc & SYSCON_RCC_MOSCDIS) == 0) ||
       ((rcc & SYSCON_RCC_IOSCDIS) != 0 && (newrcc & SYSCON_RCC_IOSCDIS) == 0))
@@ -419,8 +413,14 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 
 void up_clockconfig(void)
 {
+#if defined(CONFIG_TIVA_BOARD_CLOCKCONFIG)
+  /* Execute the board specific clock configuration logic */
+
+  tiva_board_clockconfig();
+
+#else
 #ifdef CONFIG_LM_REVA2
-  /* Some early LM3 silicon returned an increase LDO voltage or 2.75V to work
+  /* Some early LM3 silicon returned an increase LDO voltage to 2.75V to work
    * around a PLL bug
    */
 
@@ -432,4 +432,5 @@ void up_clockconfig(void)
    */
 
   tiva_clockconfig(TIVA_RCC_VALUE, TIVA_RCC2_VALUE);
+#endif
 }

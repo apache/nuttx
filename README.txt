@@ -1638,8 +1638,6 @@ nuttx/
  |   |   `- README.txt
  |   |- c5471evm/
  |   |   `- README.txt
- |   |- cc3200-launchpad/
- |   |   `- README.txt
  |   |- clicker2-stm32
  |   |   `- README.txt
  |   |- cloudctrl

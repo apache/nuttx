@@ -81,7 +81,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_TM4C129
+#if defined(CONFIG_ARCH_CHIP_TM4C129)
 /****************************************************************************
  * Name: tiva_clockconfig
  *
@@ -130,6 +130,20 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
  ****************************************************************************/
 
 void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2);
+#endif
+
+#if defined(CONFIG_TIVA_BOARD_CLOCKCONFIG)
+/****************************************************************************
+ * Name: tiva_board_clockconfig
+ *
+ * Description:
+ *   If CONFIG_TIVA_BOARD_CLOCKCONFIG is defined, then the board-specific
+ *   logic must provide the function tiva_board_clockconfig().  That
+ *   function will then be called to perform all clock initialization.
+ *
+ ****************************************************************************/
+
+void tiva_board_clockconfig(void);
 #endif
 
 /****************************************************************************

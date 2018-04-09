@@ -286,31 +286,6 @@
 #  define TIVA_NAES            1  /* One AES module */
 #  define TIVA_NDES            1  /* One DES module */
 #  define TIVA_NHASH           1  /* One SHA1/MD5 hash module */
-#elif defined(CONFIG_ARCH_CHIP_CC3200)
-#  undef  LM3S                    /* Not LM3S family */
-#  undef  LM4F                    /* Not LM4F family */
-#  define TM4C                 1  /* TM4C family */
-#  define TIVA_NTIMERS         4  /* Four 16/32-bit timers */
-#  define TIVA_NWIDETIMERS     2  /* Two 32/64-bit timers */
-#  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
-#  define TIVA_NLCD            0  /* No LCD controller */
-#  define TIVA_NSSI            0  /* No SSI module */
-#  define TIVA_NUARTS          2  /* Two UART modules */
-#  define TIVA_NI2C            2  /* Two I2C modules */
-#  define TIVA_NADC            3  /* Three ADC modules */
-#  define TIVA_NPWM            0  /* No PWM generator modules */
-#  define TIVA_NQEI            0  /* No quadrature encoders */
-#  define TIVA_NPORTS          4  /* 4 Ports (GPIOA-D), 0-31 GPIOs */
-#  define TIVA_DES             1  /* 1 DES hw crypto */
-#  define TIVA_AES             1  /* 1 AES hw crypto */
-#  define TIVA_CRC             1  /* 1 CRC hw crypto */
-#  define TIVA_SHA             1  /* 1 SHA/MD5 hw crypto */
-#  define TIVA_SPI             2  /* Two SPI modules */
-#  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
-#  define TIVA_NCRC            0  /* No CRC module */
-#  define TIVA_NAES            0  /* No AES module */
-#  define TIVA_NDES            0  /* No DES module */
-#  define TIVA_NHASH           0  /* No SHA1/MD5 hash module */
 #else
 #  error "Capabilities not specified for this TIVA/Stellaris chip"
 #endif
