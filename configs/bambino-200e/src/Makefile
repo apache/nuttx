@@ -37,7 +37,11 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = lpc43_boot.c
+CSRCS = lpc43_boot.c lpc43_ssp.c
+
+ifeq ($(CONFIG_SENSORS_MAX31855),y)
+CSRCS += lpc43_max31855.c
+endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc43_appinit.c

@@ -1,7 +1,8 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +49,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration *************************************************************/
+
+/* Configuration ************************************************************/
 
 /* Define what timer and channel to use as XEN1210 CLK */
 
@@ -233,7 +235,7 @@
 
 #define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 
-/* ZERO CROSS pin definiton */
+/* ZERO CROSS pin definition */
 
 #define GPIO_ZEROCROSS  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
 
@@ -256,16 +258,16 @@
 #define GPIO_MAX31855_CS  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
 
-#define GPIO_MAX6675_CS  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define GPIO_MAX6675_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
 
 /* XEN1210 magnetic sensor */
 
-#define GPIO_XEN1210_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
-                          GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN5)
+#define GPIO_XEN1210_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN5)
 
-#define GPIO_CS_XEN1210  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                          GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_CS_XEN1210   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
 /* USB OTG FS
  *
@@ -283,7 +285,6 @@
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|\
                            GPIO_SPEED_100MHz|GPIO_PUSHPULL|\
                            GPIO_PORTD|GPIO_PIN5)
-
 #else
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
                            GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN5)
@@ -324,13 +325,13 @@
 
 /* Display JLX12864G */
 
-#define STM32_LCD_RST   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define STM32_LCD_RST     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN6)
 
-#define STM32_LCD_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define STM32_LCD_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
 
-#define STM32_LCD_RS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define STM32_LCD_RS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
 
 /* STM32F4DIS-BB MicroSD
@@ -428,14 +429,14 @@ void weak_function stm32_spidev_initialize(void);
   *
   ****************************************************************************/
 
- FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
+FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
 
 /****************************************************************************
  * Name: stm32_bh1750initialize
  *
  * Description:
- *   Called to configure an I2C and to register BH1750FVI for the stm32f4discovery
- *   board.
+ *   Called to configure an I2C and to register BH1750FVI for the
+ *   stm32f4discovery board.
  *
  ****************************************************************************/
 
@@ -447,8 +448,8 @@ int stm32_bh1750initialize(FAR const char *devpath);
  * Name: stm32_bmp180initialize
  *
  * Description:
- *   Called to configure an I2C and to register BMP180 for the stm32f4discovery
- *   board.
+ *   Called to configure an I2C and to register BMP180 for the
+ *   stm32f4discovery board.
  *
  ****************************************************************************/
 
@@ -460,8 +461,8 @@ int stm32_bmp180initialize(FAR const char *devpath);
  * Name: stm32_lis3dshinitialize
  *
  * Description:
- *   Called to configure SPI 1, and to register LIS3DSH and its external interrupt
- *   for the stm32f4discovery board.
+ *   Called to configure SPI 1, and to register LIS3DSH and its external
+ *   interrupt for the stm32f4discovery board.
  *
  ****************************************************************************/
 
@@ -548,7 +549,7 @@ void stm32_extmemgpios(const uint32_t *gpios, int ngpios);
  * Name: stm32_extmemaddr
  *
  * Description:
- *   Initialize adress line GPIOs for external memory access
+ *   Initialize address line GPIOs for external memory access
  *
  ****************************************************************************/
 
@@ -614,7 +615,8 @@ void stm32_led_pminitialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && \
+    defined(CONFIG_PM_BUTTONS)
 void stm32_pm_buttons(void);
 #endif
 
@@ -667,6 +669,27 @@ int stm32_zerocross_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_max31855initialize
+ *
+ * Description:
+ *   Initialize and register the MAX31855 Temperature Sensor driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
+ *   bus     - Bus number (for hardware that has mutiple SPI interfaces)
+ *   devid   - ID associated to the device. E.g., 0, 1, 2, etc.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_MAX31855
+int stm32_max31855initialize(FAR const char *devpath, int bus,
+                             uint16_t devid);
+#endif
+
+/****************************************************************************
  * Name: stm32_max6675initialize
  *
  * Description:
@@ -683,8 +706,9 @@ int stm32_max6675initialize(FAR const char *devpath);
  *
  * Description:
  *   This function is called by platform-specific, setup logic to configure
- *   and register the CS43L22 device.  This function will register the driver
- *   as /dev/cs43l22[x] where x is determined by the minor device number.
+ *   and register the CS43L22 device.  This function will register the
+ *   driver as /dev/cs43l22[x] where x is determined by the minor device
+ *   number.
  *
  * Input Parameters:
  *   minor - The input device minor number

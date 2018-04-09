@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_max31855.c
+ * configs/bambino-200e/src/lpc43_max31855.c
  *
  *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -41,56 +41,62 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
 
-#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/max31855.h>
 
-#include "stm32.h"
-#include "stm32_spi.h"
-#include "stm32f4discovery.h"
+#include "bambino-200e.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MAX31855) && defined(CONFIG_STM32_SPI2)
+#include <nuttx/spi/spi.h>
+
+
+#include "lpc43_spi.h"
+#include "lpc43_ssp.h"
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/random.h>
+
+#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MAX31855)
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_max31855initialize
+ * Name: lpc43_max31855initialize
  *
  * Description:
  *   Initialize and register the MAX31855 Temperature Sensor driver.
  *
- * Input Parameters:
+ * Input parameters:
  *   devpath - The full path to the driver to register.  E.g., "/dev/temp0"
- *   bus     - Bus number (for hardware that has mutiple SPI interfaces)
- *   devid   - ID associated to the device.  E.g., 0, 1, 2, etc.
- *
+ *   spi     - An instance of the SPI interface to use to communicate with
+ *             MAX31855
+ *   devid   - Minor device number. E.g., 0, 1, 2, etc.
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
-int stm32_max31855initialize(FAR const char *devpath, int bus, uint16_t devid)
+int lpc43_max31855initialize(FAR const char *devpath, int bus, uint16_t devid)
 {
   FAR struct spi_dev_s *spi;
-  int ret;
-
-  spi = stm32_spibus_initialize(bus);
-
+  spi = lpc43_sspbus_initialize(bus);
   if (!spi)
     {
+      snerr("ERROR: Failed to initialize SSP%d\n", bus);
       return -ENODEV;
     }
 
-  /* Then register the barometer sensor */
+  /* Then register the temperature sensor */
 
-  ret = max31855_register(devpath, spi, devid);
+  int ret = max31855_register(devpath, spi, devid);
   if (ret < 0)
     {
       snerr("ERROR: Error registering MAX31855\n");
     }
-
+    
   return ret;
 }
 

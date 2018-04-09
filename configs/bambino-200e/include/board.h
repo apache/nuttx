@@ -349,6 +349,38 @@
 #define PINCONF_U3_RXD      PINCONF_U3_RXD_2
 #define PINCONF_U3_DIR      PINCONF_U3_DIR_2
 
+/* SPI Pins ****************************************************************/
+/* The Bambino 200E has SPI peripheral pins reserved for SPIFI.
+ * SSP0 and SSP1 are available on Socket 1 and 10, respectively:
+ *
+ *   ---------  ----------  -----------------
+ *    SIGNAL    Socket/Pin  LPC4330FBD144 PIN
+ *   ---------  ----------  -----------------
+ *   SSP0_SCK   s:1  / p:9      112  P3_0
+ *   SSP0_SSEL  s:1  / p:6      38   P1_0
+ *   SSP0_MISO  s:1  / p:8      42   P1_1
+ *   SSP0_MOSI  s:1  / p:7      43   P1_2
+ *   SSP1_SCK   s:10 / p:9      120  PF_4
+ *   SSP1_SSEL  s:10 / p:6      48   P1_5
+ *   SSP1_MISO  s:10 / p:8      44   P1_3
+ *   SSP1_MOSI  s:10 / p:7      47   P1_4
+ *   ---------  ----------  -----------------
+ *
+ * The following definitions must be provided so that the LPC43 serial
+ * driver can set up the SPI ports properly (see the
+ * file arch/arm/src/lpc43xx/lpc4310203050_pinconf.h for more info).
+ */
+
+#define PINCONF_SSP0_SCK  PINCONF_SSP0_SCK_3
+#define PINCONF_SSP0_SSEL PINCONF_SSP0_SSEL_3
+#define PINCONF_SSP0_MISO PINCONF_SSP0_MISO_3
+#define PINCONF_SSP0_MOSI PINCONF_SSP0_MOSI_3
+
+#define PINCONF_SSP1_SCK  PINCONF_SSP1_SCK_1
+#define PINCONF_SSP1_SSEL PINCONF_SSP1_SSEL_3
+#define PINCONF_SSP1_MISO PINCONF_SSP1_MISO_3
+#define PINCONF_SSP1_MOSI PINCONF_SSP1_MOSI_3
+
 /* Ethernet */
 
 #define PINCONF_ENET_RX_DV  PINCONF_ENET_RX_DV_2
