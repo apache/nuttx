@@ -1260,9 +1260,10 @@ int apds9960_register(FAR const char *devpath,
       return -ENOMEM;
     }
 
-  priv->config = config;
-  nxsem_init(&priv->sample_sem, 0, 0);
+  priv->config         = config;
+  priv->work.worker    = NULL;
   priv->gesture_motion = DIR_NONE;
+  nxsem_init(&priv->sample_sem, 0, 0);
 
   /* Probe APDS9960 device */
 
