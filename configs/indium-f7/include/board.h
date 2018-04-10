@@ -49,13 +49,6 @@
 # include <stdint.h>
 #endif
 
-#ifdef __KERNEL__
-#include "stm32_rcc.h"
-#ifdef CONFIG_STM32F7_SDMMC1
-#  include "stm32_sdmmc.h"
-#endif
-#endif
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -274,21 +267,20 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channel/Stream Selections *****************************************************/
 /* Stream selections for DMA1 */
 
 #define DMAMAP_I2C1_RX STM32_DMA_MAP(DMA1,DMA_STREAM0,DMA_CHAN1)
 #define DMAMAP_I2C2_RX STM32_DMA_MAP(DMA1,DMA_STREAM2,DMA_CHAN7)
-#define DMAMAP_SPI2_RX STM32_DMA_MAP(DMA1,DMA_STREAM3,DMA_CHAN0)
-#define DMAMAP_SPI2_TX STM32_DMA_MAP(DMA1,DMA_STREAM4,DMA_CHAN0)
+
 #define DMAMAP_I2C1_TX STM32_DMA_MAP(DMA1,DMA_STREAM6,DMA_CHAN1)
 #define DMAMAP_I2C2_TX STM32_DMA_MAP(DMA1,DMA_STREAM7,DMA_CHAN7)
 
 /* Stream selections for DMA2 */
 
-#define DMAMAP_SPI2_RX   STM32_DMA_MAP(DMA2,DMA_STREAM0,DMA_CHAN3)
+#define DMAMAP_SPI1_RX   STM32_DMA_MAP(DMA2,DMA_STREAM0,DMA_CHAN3)
 #define DMAMAP_USART1_RX STM32_DMA_MAP(DMA2,DMA_STREAM2,DMA_CHAN4)
-#define DMAMAP_SPI2_TX   STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN3)
+#define DMAMAP_SPI1_TX   STM32_DMA_MAP(DMA2,DMA_STREAM3,DMA_CHAN3)
 #define DMAMAP_ADC1      STM32_DMA_MAP(DMA2,DMA_STREAM4,DMA_CHAN0)
 #define DMAMAP_SDMMC1    STM32_DMA_MAP(DMA2,DMA_STREAM6,DMA_CHAN6)
 #define DMAMAP_USART1_TX STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN4)

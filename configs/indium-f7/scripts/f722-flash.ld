@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/indium-f7/scripts/f722-flash.ld
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Bob Feretich <bob.feretich@rafresearch.com>
  *
@@ -66,6 +66,11 @@
  * the 0x0800:0000 address range.
  */
 
+/* Size of the 512-byte buffer pool. Must match configs//include/dtcm_defs.h */
+
+_Buf_512_size = (64 * 512);      /* Size of the 512-byte buffer pool */
+_Buf_256_size = (32 * 256);      /* Size of the 256-byte buffer pool */
+
 MEMORY
 {
 	itcm  (rwx) : ORIGIN = 0x00200000, LENGTH = 512K
@@ -80,7 +85,8 @@ EXTERN(_vectors)
 ENTRY(_stext)
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -96,25 +102,30 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > flash
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > flash
 
 	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
+
+	.ARM.exidx :
+	{
 		*(.ARM.exidx*)
 	} > flash
 	__exidx_end = ABSOLUTE(.);
 
 	_eronly = ABSOLUTE(.);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -122,7 +133,8 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > sram1 AT > flash
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -130,7 +142,26 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sram1
 
+	.dtcm (NOLOAD) :
+	{
+		_DTCM_HDR_START = ABSOLUTE(.);  /* global variable at dtcm header start */
+		KEEP(*(.dtcmstart) )   			/* beginning of dtcm header section     */
+		_DTCM_HDR_END = ABSOLUTE(.);  	/* global variable at dtcm header end   */
+		. = ALIGN(512);
+		_DTCM512_START = ABSOLUTE(.); 	/* global variable at 512 byte buffer start */
+		. = . + _Buf_512_size;
+		_DTCM512_END = ABSOLUTE(.); 	/* global variable at 512 byte buffer end */
+		. = ALIGN(256);
+		_DTCM256_START = ABSOLUTE(.); 	/* global variable at 256 byte buffer start */
+		. = . + _Buf_256_size;
+		_DTCM256_END = ABSOLUTE(.); 	/* global variable at 256 byte buffer end */
+		ASSERT (_DTCM256_END <= 0x20010000, ".dtcm region overflow!");
+		*(.dtcmdata)    				/* beginning of dtcm initialized data */
+		*(.dtcmbss)    					/* beginning of dtcm zeroed data      */
+	} > dtcm
+
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

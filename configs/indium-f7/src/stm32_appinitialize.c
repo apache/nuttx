@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/indium-f7/src/stm32_appinitialize.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Mark Olsson <post@markolsson.se>
  *            David Sidrane <david_s5@nscdg.com>
@@ -47,8 +47,12 @@
 #include <debug.h>
 #include <syslog.h>
 
-#include "indium-f7.h"
+#include <nuttx/spi/spi.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/sensors/lsm330.h>
+
+#include "stm32_spi.h"
+#include "indium-f7.h"
 
 /****************************************************************************
  * Public Functions
