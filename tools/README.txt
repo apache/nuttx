@@ -916,6 +916,8 @@ uncrustify.cfg
 
     - FAR attributes in pointer declarations.
     - The Nuttx standard function header block comments.
+    - Naming violations such as use of CamelCase variable names,
+      lower case pre-processor definitions, etc.
 
   Comment blocks, function headers, files headers, etc. must be formatted
   manually.
@@ -923,6 +925,14 @@ uncrustify.cfg
   Its handling of block comments is fragile. If the comment is perfect,
   it leaves it alone, but if the block comment is deemed to need a fix
   it starts erroneously indenting the continuation lines of the comment.
+
+  NOTE: uncrustify.cfg should *ONLY* be used with new files that have an
+  inconsistent coding style.  uncrustify.cfg should get you in the ballpark,
+  but you should expect to review and hand-edit the files to assume 100%
+  compliance.
+
+  WARNING: *NEVER* use uncrustify.cfg for modifications to existing NuttX
+  files.  It will probably corrupt the style in subtle ways!
 
   This was last verified against uncrustify 0.66.1 by Bob Feretich.
 
