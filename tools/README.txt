@@ -275,6 +275,8 @@ nxstyle.c
 
   Usage: nxstyle <path-to-file-to-check>
 
+   ***No longer recommended*** Try uncrustify.cfg instead.
+
 pic32mx
 -------
 
@@ -728,6 +730,8 @@ indent.sh
    You will manually need to check for the issues listed above after
    performing the conversions.
 
+   ***No longer recommended*** Try uncrustify.cfg instead.
+
 sethost.sh
 ----------
 
@@ -899,6 +903,42 @@ testbuild.sh
   path to the application directory when running this script like:
 
     $ export APPSDIR=../apps
+
+uncrustify.cfg
+--------------
+
+  This is a configuration script for the uncrustify code beautifier.
+  Uncrustify does well with forcing braces into "if" statements and
+  indenting per the Nuttx C coding standard. It correctly does things
+  like placing all braces on separate lines at the proper indentation
+  level.  It cannot handle certain requirements of the coding standard
+  such as
+
+    - FAR attributes in pointer declarations.
+    - The Nuttx standard function header block comments.
+
+  Comment blocks, function headers, files headers, etc. must be formatted
+  manually.
+
+  Its handling of block comments is fragile. If the comment is perfect,
+  it leaves it alone, but if the block comment is deemed to need a fix
+  it starts erroneously indenting the continuation lines of the comment.
+
+  This was last verified against uncrustify 0.66.1 by Bob Feretich.
+
+  About uncrustify:  Uncrustify is a highly configurable, easily modifiable
+  source code beautifier.  To learn more about uncrustify:
+
+    http://uncrustify.sourceforge.net/
+
+  Source code is available on GitHub:
+
+    https://github.com/uncrustify/uncrustify
+
+  Binary packages are available for Linux via command line installers.
+  Binaries fro both Windows and Linux are avaialbe at:
+
+    https://sourceforge.net/projects/uncrustify/files/
 
 zipme.sh
 --------
