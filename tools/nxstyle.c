@@ -56,6 +56,7 @@ int main(int argc, char **argv, char **envp)
 {
   FILE *instream;
   char line[LINE_SIZE];
+  char *lptr;
   bool btabs;
   bool bfunctions;
   bool bstatm;
@@ -73,6 +74,9 @@ int main(int argc, char **argv, char **envp)
   int prevncomment;
   int n;
   int i;
+  int last_oneline_comment;
+  int last_blank_line;
+  int linelen;
 
   instream = fopen(argv[1], "r");
   if (!instream)
@@ -91,6 +95,9 @@ int main(int argc, char **argv, char **envp)
   declnest     = 0;
   prevdeclnest = 0;
   prevncomment = 0;
+  last_oneline_comment = -1; /* Line on which the last one line comment was
+                              * closed */
+  last_blank_line = -1;      /* lineno of last blank line */
 
   while (fgets(line, LINE_SIZE, instream))
     {
@@ -101,6 +108,22 @@ int main(int argc, char **argv, char **envp)
       prevncomment = ncomment;
       bstatm       = false;
       bfor         = false;  /* REVISIT: Implies for() is all on one line */
+
+      /* Check for a blank line */
+
+      if (line[0] == '\n')
+        {
+          last_blank_line = lineno;
+        }
+      else /* this line is non-blank */
+        {
+          if (lineno == last_oneline_comment + 1)
+            {
+              fprintf(stderr,
+                      "Missing blank line after comment line. Found at line %d\n",
+                      last_oneline_comment);
+            }
+        }
 
       /* STEP 1: Find the indentation level and the start of real stuff on
        * the line.
@@ -142,6 +165,27 @@ int main(int argc, char **argv, char **envp)
       if (line[indent] == '#')
         {
           continue;
+        }
+
+      /* Check for a single line comment */
+
+      linelen = strlen(line);
+      if (linelen >= 5)      /* Minimum is slash, star, star, slash, newline */
+        {
+          lptr = strstr(line, "*/");
+          if (line[indent] == '/' && line[indent +1] == '*' &&
+              lptr - line == linelen - 3)
+            {
+              if (last_oneline_comment != lineno - 1 &&
+                  last_blank_line != lineno - 1)
+                {
+                  fprintf(stderr,
+                          "Missing blank line before comment found at line %d\n",
+                          lineno);
+                }
+
+              last_oneline_comment = lineno;
+            }
         }
 
       /* Check for the comment block indicating the beginning of functions. */

@@ -926,6 +926,21 @@ uncrustify.cfg
   it leaves it alone, but if the block comment is deemed to need a fix
   it starts erroneously indenting the continuation lines of the comment.
 
+    - uncrustify.cfg messed up the indent of most block comments.
+      cmt_sp_before_star_cont is applied inconsistently.  I added
+
+        cmt_indent_multi = false # disable all multi-line comment changes
+
+      to the .cfg file to limit its damage to block comments.
+    - It is very strict at wrapping lines at column 78. Even when column 79
+      just contained the '/' of a closing "*/".  That created many
+      bad continuation lines.
+    - It moved '{' that opened a struct to the line defining the struct.
+      nl_struct_brace = add (or force) seemed to be ignored.
+    - It also aligned variable names in declarations and '=' signs in
+      assignment statements in a seemingly arbitrary manner. Making changes
+      that were not necessary.
+
   NOTE: uncrustify.cfg should *ONLY* be used with new files that have an
   inconsistent coding style.  uncrustify.cfg should get you in the ballpark,
   but you should expect to review and hand-edit the files to assume 100%
