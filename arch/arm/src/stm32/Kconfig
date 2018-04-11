@@ -7365,6 +7365,7 @@ choice
 
 config RTC_LSECLOCK
 	bool "LSE clock"
+	select STM32_PWR
 	---help---
 		Drive the RTC with the LSE clock
 

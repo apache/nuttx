@@ -660,6 +660,15 @@ static void stm32_stdclockconfig(void)
 #endif
 
 #if defined(CONFIG_RTC_LSECLOCK)
+  /* Normally peripheral clocks are enabled later in bootup, but we need
+   * clock on PWR *now* as without this setting registers that enable LSE
+   * won't work
+   */
+
+  regval  = getreg32(STM32_RCC_APB1ENR);
+  regval |= RCC_APB1ENR_PWREN;
+  putreg32(regval, STM32_RCC_APB1ENR);
+
   /* Low speed external clock source LSE
    *
    * TODO: There is another case where the LSE needs to
