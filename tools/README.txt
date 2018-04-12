@@ -275,7 +275,7 @@ nxstyle.c
 
   Usage: nxstyle <path-to-file-to-check>
 
-   ***No longer recommended*** Try uncrustify.cfg instead.
+  See also indent.sh and uncrustify.cfg
 
 pic32mx
 -------
@@ -730,7 +730,7 @@ indent.sh
    You will manually need to check for the issues listed above after
    performing the conversions.
 
-   ***No longer recommended*** Try uncrustify.cfg instead.
+   See also nxstyle.c and uncrustify.cfg
 
 sethost.sh
 ----------
@@ -964,6 +964,8 @@ uncrustify.cfg
   Binaries fro both Windows and Linux are avaialbe at:
 
     https://sourceforge.net/projects/uncrustify/files/
+
+  See also indent.sh and nxstyle.c
 
 zipme.sh
 --------
