@@ -79,6 +79,22 @@ config ARCH_CHIP_IMX6
 	---help---
 		Freescale iMX.6 architectures (Cortex-A9)
 
+config ARCH_CHIP_IMXRT
+	bool "NXP/Freescale iMX.RT"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_SPI_CS_CONTROL
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		NXP i.MX RT (ARM Cortex-M7) architectures
+
 config ARCH_CHIP_KINETIS
 	bool "NXP/Freescale Kinetis"
 	select ARCH_CORTEXM4
@@ -550,6 +566,7 @@ config ARCH_CHIP
 	default "efm32"		if ARCH_CHIP_EFM32
 	default "imx1"		if ARCH_CHIP_IMX1
 	default "imx6"		if ARCH_CHIP_IMX6
+	default "imxrt"		if ARCH_CHIP_IMXRT
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
 	default "lc823450"	if ARCH_CHIP_LC823450
@@ -772,6 +789,9 @@ source arch/arm/src/imx1/Kconfig
 endif
 if ARCH_CHIP_IMX6
 source arch/arm/src/imx6/Kconfig
+endif
+if ARCH_CHIP_IMXRT
+source arch/arm/src/imxrt/Kconfig
 endif
 if ARCH_CHIP_KINETIS
 source arch/arm/src/kinetis/Kconfig

@@ -1,0 +1,316 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_IMXRT
+
+comment "i.MX RT Configuration Options"
+
+choice
+	prompt "i.MX RT Chip Selection"
+	default ARCH_CHIP_MIMXRT1052DVL6A
+	depends on ARCH_CHIP_IMXRT
+
+config ARCH_CHIP_MIMXRT1051DVL6A
+	bool "MIMXRT1051DVL6A"
+	select ARCH_FAMILY_MXRT105xDVL6A
+
+config ARCH_CHIP_MIMXRT1051CVL5A
+	bool "MIMXRT1051CVL5A"
+	select ARCH_FAMILY_IMIMXRT105xCVL5A
+
+config ARCH_CHIP_MIMXRT1052DVL6A
+	bool "MIMXRT1052DVL6A"
+	select ARCH_FAMILY_MXRT105xDVL6A
+
+config ARCH_CHIP_MIMXRT1052CVL5A
+	bool "MIMXRT1052DVL6A"
+	select ARCH_FAMILY_MIMXRT1052CVL5A
+
+endchoice # i.MX RT Chip Selection
+
+# i.MX RT Families
+
+config ARCH_FAMILY_MXRT105xDVL6A
+	bool
+	default n
+	select ARCH_FAMILY_IMXRT105x
+	---help---
+		i.MX RT1050 Crossover Processors for Consumer Products
+
+config ARCH_FAMILY_MIMXRT1052CVL5A
+	bool
+	default n
+	select ARCH_FAMILY_IMXRT105x
+	---help---
+		i.MX RT1050 Crossover Processors for Industrial Products
+
+config ARCH_FAMILY_IMXRT105x
+	bool
+	default n
+
+# Peripheral support
+
+config IMXRT_HAVE_LPUART
+	bool
+	default n
+
+menu "i.MX RT Peripheral Selection"
+
+menu "FlexIO Peripherals"
+
+endmenu # FlexIO Peripherals
+
+menu "LPUART Peripherals"
+
+config IMXRT_LPUART1
+	bool "LPUART1"
+	default n
+	select LPUART1_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART2
+	bool "LPUART2"
+	default n
+	select LPUART2_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART3
+	bool "LPUART3"
+	default n
+	select LPUART3_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART4
+	bool "LPUART4"
+	default n
+	select LPUART4_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART5
+	bool "LPUART5"
+	default n
+	select LPUART5_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART6
+	bool "LPUART6"
+	default n
+	select LPUART6_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART7
+	bool "LPUART7"
+	default n
+	select LPUART7_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART8
+	bool "LPUART8"
+	default n
+	select LPUART8_SERIALDRIVER
+	select IMXRT_HAVE_LPUART
+
+endmenu # LPUART Peripherals
+
+config IMXRT_SEMC
+	bool "Smart External Memory Controller (SEMC)"
+	default n
+
+endmenu # i.MX RT Peripheral Selection
+
+menuconfig IMXRT_GPIO_IRQ
+	bool "GPIO Interrupt Support"
+	default n
+
+if IMXRT_GPIO_IRQ
+
+config IMXRT_GPIO1_0_15_IRQ
+	bool "GPIO1 Pins 8-15 interrupts"
+	default n
+
+config IMXRT_GPIO1_16_31_IRQ
+	bool "GPIO1 Pins 16-31 interrupts"
+	default n
+
+config IMXRT_GPIO2_0_15_IRQ
+	bool "GPIO2 Pins 0-15 interrupts"
+	default n
+
+config IMXRT_GPIO2_16_31_IRQ
+	bool "GPIO2 Pins 16-31 interrupts"
+	default n
+
+config IMXRT_GPIO3_0_15_IRQ
+	bool "GPIO3 Pins 0-15 interrupts"
+	default n
+
+config IMXRT_GPIO3_16_31_IRQ
+	bool "GPIO3 Pins 16-31 interrupts"
+	default n
+
+config IMXRT_GPIO4_0_15_IRQ
+	bool "GPIO4 Pins 0-15 interrupts"
+	default n
+
+config IMXRT_GPIO4_16_31_IRQ
+	bool "GPIO4 Pins 16-31 interrupts"
+	default n
+
+endif # IMXRT_GPIO_IRQ
+
+menu "Memory Configuration"
+
+config IMXRT_DTCM
+	bool "Enable DTCM"
+	default n
+	depends on !IMXRT_OCRAM_PRIMARY && EXPERIMENTAL
+
+config IMXRT_ITCM
+	bool "Enable ITCM"
+	default n
+	depends on !IMXRT_OCRAM_PRIMARY && EXPERIMENTAL
+
+config IMXRT_SEMC_SDRAM
+	bool "External SDRAM installed"
+	default n
+	depends on IMXRT_SEMC
+
+if IMXRT_SEMC_SDRAM
+
+config IMXRT_SDRAM_START
+	hex "SDRAM start address"
+	default 0x10000000
+
+config IMXRT_SDRAM_SIZE
+	int "SDRAM size (bytes)"
+	default 268435456
+
+endif # IMXRT_SEMC_SDRAM
+
+config IMXRT_SEMC_SRAM
+	bool "External SRAM installed"
+	default n
+	depends on IMXRT_SEMC
+
+if IMXRT_SEMC_SRAM
+
+config IMXRT_SRAM_START
+	hex "SRAM start address"
+	default 0x10000000
+
+config IMXRT_SRAM_SIZE
+	int "SRAM size (bytes)"
+	default 268435456
+
+endif # IMXRT_SRAM_SIZE
+
+config IMXRT_SEMC_NOR
+	bool "External NOR FLASH installed"
+	default n
+	depends on IMXRT_SEMC
+
+choice
+	prompt "i.MX RT Boot Configuration"
+	default IMXRT_BOOT_NOR if IMXRT_SEMC_NOR
+	default IMXRT_BOOT_SDRAM if IMXRT_SEMC_SDRAM && !IMXRT_SEMC_NOR
+	default IMXRT_BOOT_SRAM if IMXRT_SEMC_SRAM && !IMXRT_SEMC_SDRAM  && !IMXRT_SEMC_NOR
+	default IMXRT_BOOT_OCRAM if !IMXRT_SEMC_SRAM && !IMXRT_SEMC_SDRAM  && !IMXRT_SEMC_NOR
+	---help---
+		The startup code needs to know if the code is running from internal
+		OCRAM, external SDRAM, external NOR, or external SDRAM in order to
+		initialize properly.  Note that the boot device is not known for
+		cases where the code is copied into RAM by a bootloader.
+
+config IMXRT_BOOT_OCRAM
+	bool "Running from internal OCRAM"
+	select BOOT_RUNFROMISRAM
+
+config IMXRT_BOOT_SDRAM
+	bool "Running from external SDRAM"
+	select BOOT_RUNFROMSDRAM
+	depends on IMXRT_SEMC_SDRAM
+
+config IMXRT_BOOT_NOR
+	bool "Running from external NOR FLASH"
+	select BOOT_RUNFROMFLASH
+	depends on IMXRT_SEMC_NOR
+
+config IMXRT_BOOT_SRAM
+	bool "Running from external SRAM"
+	select BOOT_RUNFROMEXTSRAM
+	depends on IMXRT_SEMC_SRAM
+
+endchoice # i.MX RT Boot Configuration
+
+choice
+	prompt "i.MX6 Primary RAM"
+	default IMXRT_OCRAM_PRIMARY
+	---help---
+		The primary RAM is the RAM that contains the system BLOB's .data and
+		.bss.  The unused portion of the primary RAM will automatically be
+		added to the system heap.
+
+config IMXRT_OCRAM_PRIMARY
+	bool "Internal OCRAM primary"
+
+config IMXRT_SDRAM_PRIMARY
+	bool "External SDRAM primary"
+	depends on IMXRT_SEMC_SDRAM
+
+config IMXRT_SRAM_PRIMARY
+	bool "External SRAM primary"
+	depends on IMXRT_SEMC_SRAM
+
+endchoice # i.MX6 Primary RAM
+
+menu "i.MX RT Heap Configuration"
+
+config IMXRT_OCRAM_HEAP
+	bool "Add OCRAM to heap"
+	depends on !IMXRT_OCRAM_PRIMARY
+	---help---
+		Select to add the entire OCRAM to the heap
+
+config IMXRT_SDRAM_HEAP
+	bool "Add SDRAM to heap"
+	depends on IMXRT_SEMC_SDRAM && !IMXRT_SDRAM_PRIMARY
+	---help---
+		Add a region of SDRAM to the heap.  A region of SDRAM will be added
+		to the heap that starts at (CONFIG_IMXRT_SDRAM_START +
+		CONFIG_IMXRT_SDRAM_HEAPOFFSET) and extends up to
+		(CONFIG_IMXRT_SDRAM_START + CONFIG_IMXRT_SDRAM_SIZE).  Note that the
+		START is the actual start of SDRAM but SIZE is not necessarily the
+		actual SIZE.
+
+config IMXRT_SDRAM_HEAPOFFSET
+	hex "SDRAM heap offset"
+	default 0x0
+	depends on IMXRT_SDRAM_HEAP
+	---help---
+		Used to reserve memory at the beginning of SDRAM for, as an example,
+		a framebuffer.
+
+config IMXRT_SRAM_HEAP
+	bool "Add SRAM to heap"
+	depends on IMXRT_SEMC_SRAM && !IMXRT_SRAM_PRIMARY
+	---help---
+		Add a region of SRAM to the heap.  A region of SDRAM will be added
+		to the heap that starts at (CONFIG_IMXRT_SRAM_START +
+		CONFIG_IMXRT_SRAM_HEAPOFFSET) and extends up to
+		(CONFIG_IMXRT_SRAM_START + CONFIG_IMXRT_SRAM_SIZE).  Note that the
+		START is the actual start of SRAM but SIZE is not necessarily the
+		actual SIZE.
+
+config IMXRT_SRAM_HEAPOFFSET
+	hex "SRAM heap offset"
+	default 0x0
+	depends on IMXRT_SRAM_HEAP
+	---help---
+		Used to reserve memory at the beginning of SRAM for, as an example,
+		a framebuffer.
+
+endmenu  # i.MX6 Primary RAM
+endmenu # Memory Configuration
+endif # ARCH_CHIP_IMXRT

@@ -1,0 +1,630 @@
+/****************************************************************************
+ * arch/arm/src/imxrt/imxrt_gpioirq.c
+ *
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+
+#include "up_arch.h"
+
+#include "imxrt_config.h"
+#include "imxrt_irq.h"
+#include "imxrt_gpio.h"
+
+#ifdef CONFIG_IMXRT_GPIO_IRQ
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: imxrt_gpio_info
+ *
+ * Description:
+ *   Given an IRQ number, provide the register and bit setting to enable or
+ *   disable the irq.
+ *
+ ****************************************************************************/
+
+static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
+{
+  DEBUGASSERT(irq >= IMXRT_GPIO_IRQ_FIRST && irq < IMXRT_GPIO_IRQ_LAST);
+
+#ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
+  if (irq < _IMXRT_GPIO1_16_31_BASE)
+    {
+      *regaddr = IMXRT_GPIO1_IMR;
+      *pin     = irq - _IMXRT_GPIO1_0_15_BASE;
+    }
+  else
+#endif
+#ifdef CONFIG_IMXRT_GPIO1_16_31_IRQ
+  if (irq < _IMXRT_GPIO2_0_15_BASE)
+    {
+      *regaddr = IMXRT_GPIO1_IMR;
+      *pin     = irq - _IMXRT_GPIO1_16_31_BASE + 16;
+    }
+  else
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
+  if (irq < _IMXRT_GPIO2_16_31_BASE)
+    {
+      *regaddr = IMXRT_GPIO2_IMR;
+      *pin     = irq - _IMXRT_GPIO2_0_15_BASE;
+    }
+  else
+#endif
+#ifdef CONFIG_IMXRT_GPIO2_16_31_IRQ
+  if (irq < _IMXRT_GPIO3_0_15_BASE)
+    {
+      *regaddr = IMXRT_GPIO2_IMR;
+      *pin     = irq - _IMXRT_GPIO2_16_31_BASE + 16;
+    }
+  else
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
+  if (irq < _IMXRT_GPIO3_16_31_BASE)
+    {
+      *regaddr = IMXRT_GPIO3_IMR;
+      *pin     = irq - _IMXRT_GPIO3_0_15_BASE;
+    }
+  else
+#endif
+#ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
+  if (irq < _IMXRT_GPIO4_0_15_BASE)
+    {
+      *regaddr = IMXRT_GPIO3_IMR;
+      *pin     = irq - _IMXRT_GPIO3_16_31_BASE + 16;
+    }
+  else
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
+  if (irq < _IMXRT_GPIO4_16_31_BASE)
+    {
+      *regaddr = IMXRT_GPIO4_IMR;
+      *pin     = irq - _IMXRT_GPIO4_0_15_BASE;
+    }
+  else
+#endif
+#ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
+  if (irq < IMXRT_GPIO_IRQ_LAST)
+    {
+      *regaddr = IMXRT_GPIO4_IMR;
+      *pin     = irq - _IMXRT_GPIO4_16_31_BASE + 16;
+    }
+  else
+#endif
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: imxrt_gpioN_A_B_interrupt
+ *
+ * Description:
+ *   GPIO interrupt handlers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
+static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
+                                      FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO1_ISR) & 0x0000fffff;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 0, irq = _IMXRT_GPIO1_0_15_BASE;
+       bit < 16 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO1_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO1_16_31_IRQ
+static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO1_ISR) & 0xffff0000;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 16, irq = _IMXRT_GPIO1_16_31_BASE;
+       bit < 32 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO1_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
+static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO2_ISR) & 0x0000fffff;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 0, irq = _IMXRT_GPIO2_0_15_BASE;
+       bit < 16 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO2_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO2_16_31_IRQ
+static int imxrt_gpio2_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO2_ISR) & 0xffff0000;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 16, irq = _IMXRT_GPIO2_16_31_BASE;
+       bit < 32 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO2_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
+static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO3_ISR) & 0x0000fffff;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 0, irq = _IMXRT_GPIO3_0_15_BASE;
+       bit < 16 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO3_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
+static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO3_ISR) & 0xffff0000;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 16, irq = _IMXRT_GPIO3_16_31_BASE;
+       bit < 32 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO3_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
+static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO4_ISR) & 0x0000fffff;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 0, irq = _IMXRT_GPIO4_0_15_BASE;
+       bit < 16 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO4_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO4_16_31_IRQ
+static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t status;
+  int irq;
+  int bit;
+
+  /* Get the pending interrupt indications */
+
+  status = getreg32(IMXRT_GPIO4_ISR) & 0xffff0000;
+
+  /* Decode the pending interrupts */
+
+  for (bit = 16, irq = _IMXRT_GPIO4_16_31_BASE;
+       bit < 32 && status != 0;
+       bit++, irq++)
+    {
+      /* Is the IRQ associate with this pin pending? */
+
+      uint32_t mask = (1 << bit);
+      if ((status & mask) != 0)
+        {
+          /* Yes, clear the status bit and dispatch the interrupt */
+
+          putreg32(mask, IMXRT_GPIO4_ISR)
+          status &= ~mask;
+
+          irq_dispath(irq, context);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/************************************************************************************
+ * Name: imxrt_gpioirq_initialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *
+ ************************************************************************************/
+
+void imxrt_gpioirq_initialize(void)
+{
+  /* Disable all GPIO interrupts at the source */
+
+  putreg32(0, IMXRT_GPIO1_IMR);
+  putreg32(0, IMXRT_GPIO2_IMR);
+  putreg32(0, IMXRT_GPIO3_IMR);
+  putreg32(0, IMXRT_GPIO4_IMR);
+
+  /* Disable all unconfigured GPIO interrupts at the NVIC */
+
+#ifndef CONFIG_IMXRT_GPIO1_0_15_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO1_0_15);
+#endif
+#ifndef CONFIG_IMXRT_GPIO1_16_31_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO1_16_31);
+#endif
+#ifndef CONFIG_IMXRT_GPIO2_0_15_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO2_0_15);
+#endif
+#ifndef CONFIG_IMXRT_GPIO2_16_31_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO2_16_31);
+#endif
+#ifndef CONFIG_IMXRT_GPIO3_0_15_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO3_0_15);
+#endif
+#ifndef CONFIG_IMXRT_GPIO3_16_31_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO3_16_31);
+#endif
+#ifndef CONFIG_IMXRT_GPIO4_0_15_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO4_0_15);
+#endif
+#ifndef CONFIG_IMXRT_GPIO4_16_31_IRQ
+  up_disable_irq(IMXRT_IRQ_GPIO4_16_31);
+#endif
+
+  /* Attach all configured GPIO interrupts and enable the interrupt at the
+   * NVIC
+   */
+
+#ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio1_0_15_interrupt,
+                         IMXRT_IRQ_GPIO1_0_15, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO1_0_15);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO1_16_31_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio1_16_31_interrupt,
+                         IMXRT_IRQ_GPIO1_16_31, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO1_16_31);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio2_0_15_interrupt,
+                         IMXRT_IRQ_GPIO2_0_15, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO2_0_15);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO2_16_31_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio2_16_31_interrupt,
+                         IMXRT_IRQ_GPIO2_16_31, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO2_16_31);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio3_0_15_interrupt,
+                         IMXRT_IRQ_GPIO3_0_15, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO3_0_15);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio3_16_31_interrupt,
+                         IMXRT_IRQ_GPIO3_16_31, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO3_16_31);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio4_0_15_interrupt,
+                         IMXRT_IRQ_GPIO4_0_15, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO4_0_15);
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
+  DEBUGVERIFY(irq_attach(imxrt_gpio4_16_31_interrupt,
+                         IMXRT_IRQ_GPIO4_16_31, NULL));
+  up_enable_irq(IMXRT_IRQ_GPIO4_16_31);
+#endif
+}
+
+/************************************************************************************
+ * Name: imxrt_gpioirq_configure
+ *
+ * Description:
+ *   Configure an interrupt for the specified GPIO pin.
+ *
+ ************************************************************************************/
+
+int imxrt_gpioirq_configure(gpio_pinset_t pinset)
+{
+  unsigned int port;
+  unsigned int pin;
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t icr;
+
+  /* Decode information in the pin configuration */
+
+  port    = ((unsigned int)pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin     = ((unsigned int)pinset & GPIO_PIN_MASK)  >> GPIO_PIN_SHIFT;
+  icr     = ((uint32_t)pinset & GPIO_INTCFG_MASK)   >> GPIO_INTCFG_SHIFT;
+
+  /* Set the right field in the right ICR register */
+
+  regaddr = pin < 16 ? IMXRT_GPIO_ICR1(port) : IMXRT_GPIO_ICR2(port);
+  regval  = getreg32(regaddr);
+  regval &= ~GPIO_ICR_MASK(pin);
+  regval |= GPIO_ICR(icr, pin);
+  putreg32(regval, regaddr);
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: imxrt_gpioirq_enable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+int imxrt_gpioirq_enable(int irq)
+{
+  uintptr_t regaddr;
+  unsigned int pin;
+  uint32_t regval;
+  int ret;
+
+  ret = imxrt_gpio_info(irq, &regaddr, &pin);
+  if (ret >= 0)
+    {
+      regval  = getreg32(regaddr);
+      regval |= (1 << pin);
+      putreg32(regval, regaddr);
+    }
+
+  return ret;
+}
+
+/************************************************************************************
+ * Name: imxrt_gpioirq_disable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+int imxrt_gpioirq_disable(int irq)
+{
+  uintptr_t regaddr;
+  unsigned int pin;
+  uint32_t regval;
+  int ret;
+
+  ret = imxrt_gpio_info(irq, &regaddr, &pin);
+  if (ret >= 0)
+    {
+      regval  = getreg32(regaddr);
+      regval &= ~(1 << pin);
+      putreg32(regval, regaddr);
+    }
+
+  return ret;
+}
+
+#endif /* CONFIG_IMXRT_GPIO_IRQ */
