@@ -383,6 +383,7 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
 /* TODO:
  *
  * - Add types for statistics (struct iw_statistics and related)
@@ -516,17 +517,17 @@ struct  iw_encode_ext
   uint8_t    key[0];
 };
 
-/*
- *  Optional data for scan request
+/* Optional data for scan request
  *
- *  Note: these optional parameters are controlling parameters for the
- *  scanning behavior, these do not apply to getting scan results
- *  (SIOCGIWSCAN). Drivers are expected to keep a local BSS table and
- *  provide a merged results with all BSSes even if the previous scan
- *  request limited scanning to a subset, e.g., by specifying an SSID.
- *  Especially, scan results are required to include an entry for the
- *  current BSS if the driver is in Managed mode and associated with an AP.
+ * Note: these optional parameters are controlling parameters for the
+ * scanning behavior, these do not apply to getting scan results
+ * (SIOCGIWSCAN). Drivers are expected to keep a local BSS table and
+ * provide a merged results with all BSSes even if the previous scan
+ * request limited scanning to a subset, e.g., by specifying an SSID.
+ * Especially, scan results are required to include an entry for the
+ * current BSS if the driver is in Managed mode and associated with an AP.
  */
+
 struct  iw_scan_req
 {
   uint8_t scan_type; /* IW_SCAN_TYPE_{ACTIVE,PASSIVE} */
@@ -539,16 +540,15 @@ struct  iw_scan_req
   struct sockaddr bssid; /* ff:ff:ff:ff:ff:ff for broadcast BSSID or
         * individual address of a specific BSS */
 
-  /*
-   * Use this ESSID if IW_SCAN_THIS_ESSID flag is used instead of using
+  /* Use this ESSID if IW_SCAN_THIS_ESSID flag is used instead of using
    * the current ESSID. This allows scan requests for specific ESSID
    * without having to change the current ESSID and potentially breaking
    * the current association.
    */
+
   uint8_t essid[IW_ESSID_MAX_SIZE];
 
-  /*
-   * Optional parameters for changing the default scanning behavior.
+  /* Optional parameters for changing the default scanning behavior.
    * These are based on the MLME-SCAN.request from IEEE Std 802.11.
    * TU is 1.024 ms. If these are set to 0, driver is expected to use
    * reasonable default values. min_channel_time defines the time that
@@ -557,6 +557,7 @@ struct  iw_scan_req
    * replies are received, total time waited on the channel is defined by
    * max_channel_time.
    */
+
   uint32_t min_channel_time; /* in TU */
   uint32_t max_channel_time; /* in TU */
 

@@ -74,14 +74,6 @@
  * are used.
  */
 
-#ifndef STM32_GPIO_INCR
-# error "Not defined -> STM32_GPIO_INCR"
-#endif
-
-#ifndef STM32_GPIOA_BSRR
-# error "Not defined -> STM32_GPIOA_BSRR"
-#endif
-
 #define INDIUM_GPIOSR(GPR, BOOL)  \
   *((uint32_t *)(((GPR & 0x0F0) >> 4) * STM32_GPIO_INCR + STM32_GPIOA_BSRR)) \
   = ((uint32_t)(1 << (16 * (1 - (BOOL & 0x1)) + (GPR & 0x0F))))
