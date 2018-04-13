@@ -58,19 +58,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enabling debug increases stack size requirement considerably */
-
-#if defined(CONFIG_DEBUG_WIRELESS_INFO)
-#  define BT_STACK_DEBUG_EXTRA  512
-#else
-#  define BT_STACK_DEBUG_EXTRA  0
-#endif
-
-#define BT_STACK(name, size) \
-  char __stack name[(size) + BT_STACK_DEBUG_EXTRA]
-#define BT_STACK_NOINIT(name, size) \
-  char __noinit __stack name[(size) + BT_STACK_DEBUG_EXTRA]
-
 /* LMP feature helpers */
 
 #define lmp_bredr_capable(dev)  (!((dev).features[4] & BT_LMP_NO_BREDR))
@@ -278,7 +265,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
  * not multi-threading safe
  */
 
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
+#ifdef CONFIG_DEBUG_WIRELESS_ERROR
 FAR const char *bt_addr_str(FAR const bt_addr_t *addr);
 FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr);
 #endif

@@ -345,6 +345,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_HCIUART
+  ret = hciuart_dev_initialize();
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize HCI UART driver: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_RNDIS) && defined(CONFIG_NSH_MACADDR)
   uint8_t mac[6];
   mac[0] = 0xaa; /* TODO */

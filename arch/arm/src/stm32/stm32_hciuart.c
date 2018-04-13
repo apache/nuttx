@@ -54,14 +54,16 @@
 #include <nuttx/wireless/bt_uart.h>
 #include <nuttx/power/pm.h>
 
-#include <arch/board/board.h>
+#include "up_arch.h"
+#include "up_internal.h"
 
 #include "chip.h"
 #include "stm32_uart.h"
 #include "stm32_dma.h"
 #include "stm32_rcc.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "stm32_hciuart.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -929,6 +931,7 @@ static uint16_t hciuart_rxinuse(const struct hciuart_config_s *config)
       inuse = (state->rxtail + config->rxbufsize) - state->rxhead;
     }
 
+  wlinfo("inuse %lu\n", (unsigned long)inuse);
   return inuse;
 }
 
@@ -956,6 +959,8 @@ static inline void hciuart_rxflow_enable(const struct hciuart_config_s *config)
 
       if (inuse >= config->rxupper)
         {
+          wlinfo("Enable RTS flow control\n");
+
           stm32_gpiowrite(config->rts_gpio, true);
           state->rxflow = true;
         }
@@ -981,10 +986,12 @@ static inline void hciuart_rxflow_disable(const struct hciuart_config_s *config)
 
   if (state->rxflow)
     {
-      uin16_t inused = hciuart_rxinuse(config);
+      uint16_t inused = hciuart_rxinuse(config);
 
       if (inuse <= config->rxlower)
         {
+          wlinfo("Disable RTS flow control\n");
+
           stm32_gpiowrite(config->rts_gpio, false);
           state->rxflow = false;
         }
@@ -1129,6 +1136,7 @@ static ssize_t hciuart_copytorxbuffer(const struct hciuart_config_s *config)
       nxsem_post(&state->rxwait);
     }
 
+  wlinfo("nbytes %ld\n", (long)nbytes);
   return nbytes;
 }
 
@@ -1191,6 +1199,8 @@ static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
   /* Save the updated Rx buffer head index */
 
   state->rxhead = rxhead;
+
+  wlinfo("nbytes %ld\n", (long)nbytes);
   return nbytes;
 }
 
@@ -1248,6 +1258,7 @@ static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
       nbytes++;
     }
 
+  wlinfo("nbytes %ld\n", (long)nbytes);
   return nbytes;
 }
 
@@ -1279,6 +1290,8 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
 #endif
   uint32_t regval;
   uint32_t brr;
+
+  wlinfo("baud %lu\n", (unsigned long)config->baud);
 
   /* Load CR1 */
 
@@ -1539,6 +1552,8 @@ static int hciuart_configure(const struct hciuart_config_s *config)
    * was enabled in stm32_lowsetup().
    */
 
+  wlinfo("config %p\n", config);
+
   /* Enable USART APB1/2 clock */
 
   hciuart_apbclock_enable(config);
@@ -1676,6 +1691,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
       /* Get the masked USART status word. */
 
       status = hciuart_getreg32(config, STM32_USART_SR_OFFSET);
+      wlinfo("status %08x\n", status);
 
       /* USART interrupts:
        *
@@ -1809,6 +1825,8 @@ static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
   struct hciuart_state_s *state;
   irqstate_t flags;
 
+  wlinfo("config %p callback %p arg %p\n", config, callback, arg);
+
   DEBUGASSERT(config != NULL && config->state != NULL);
   state = config->state;
 
@@ -1864,6 +1882,8 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
 
   if (config->rxdmabuffer != NULL)
     {
+      wlinfo("config %p enable %u (DMA)\n", config, enable);
+
       /* En/disable DMA reception.
        *
        * Note that it is not safe to check for available bytes and immediately
@@ -1879,6 +1899,8 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
     {
       uint32_t intset;
       irqstate_t flags;
+
+      wlinfo("config %p enable %u (non-DMA)\n", config, enable);
 
       /* USART receive interrupts:
        *
@@ -1939,6 +1961,9 @@ static ssize_t hciuart_read(const struct btuart_lowerhalf_s *lower,
   size_t ntotal;
   ssize_t nbytes;
   bool rxenable;
+
+  wlinfo("config %p buffer %p buflen %lu\n",
+         config, buffer, (unsigned long)buflen);
 
   /* NOTE:  This assumes that the caller has exclusive access to the Rx
    * buffer, i.e., one lower half instance can server only one upper half!
@@ -2053,6 +2078,9 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
   uint16_t txnext;
   size_t remaining;
   irqstate_t flags;
+
+  wlinfo("config %p buffer %p buflen %lu\n",
+         config, buffer, (unsigned long)buflen);
 
   DEBUGASSERT(config != NULL && config->state != NULL);
   state = config->state;
@@ -2183,6 +2211,8 @@ static ssize_t hciuart_rxdrain(const struct btuart_lowerhalf_s *lower)
   ssize_t nbytes;
   bool rxenable;
 
+  wlinfo("config %p\n");
+
   DEBUGASSERT(config != NULL && config->state != NULL);
   state = config->state;
 
@@ -2235,9 +2265,11 @@ static void hciuart_dma_rxcallback(DMA_HANDLE handle, uint8_t status,
                                    void *arg)
 {
   const struct hciuart_config_s *config =
-    (const struct hciuart_config_s *)lower;
-  struct hciuart_state_s *state = config->state;
+    (const struct hciuart_config_s *)arg;
+  struct hciuart_state_s *state;
   ssize_t nbytes;
+
+  wlinfo("status %u config %p\n", status, config);
 
   DEBUGASSERT(config != NULL && config->state != NULL);
   state = config->state;
@@ -2377,21 +2409,31 @@ static int hciuart_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: hciuart_instantiate
  *
  * Description:
- *   Register serial console and serial ports.  This assumes that
- *   hciuart_initialize was called previously.
+ *   Obtain an instance of the HCI UART interface for the specified HCI UART
+ *   This assumes that hciuart_initialize was called previously.
+ *
+ * Input Parameters:
+ *   uart - Identifies the HCI UART to be configured
+ *
+ * Returned Value:
+ *   On success, a reference to the HCI UART lower driver for the associated
+ *   U[S]ART
  *
  ****************************************************************************/
 
-const struct btuart_lowerhalf_s *hciuart_instantiate(int uart)
+const struct btuart_lowerhalf_s *hciuart_instantiate(enum hciuart_devno_e uart)
 {
   const struct hciuart_config_s *config;
 #ifdef CONFIG_PM
   int ret;
 #endif
 
+  wlinfo("Instantiating HCIUART%d\n", (int)uart + 1);
+  DEBUGASSERT((int)uart >= 0 && (int)uart < 8);
+
   /* Check if this uart is available in the configuration */
 
-  config = g_hciuarts[uart];
+  config = g_hciuarts[(int)uart];
   if (config == NULL)
     {
       wlerr("ERROR: UART%d not configured\n", uart + 1);
@@ -2406,7 +2448,7 @@ const struct btuart_lowerhalf_s *hciuart_instantiate(int uart)
   UNUSED(ret);
 #endif
 
-  /* Configure the UART */
+  /* Configure and enable the UART */
 
   hciuart_configure(config);
   return &config->lower;
@@ -2416,9 +2458,14 @@ const struct btuart_lowerhalf_s *hciuart_instantiate(int uart)
  * Name: hciuart_initialize
  *
  * Description:
- *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
- *   after hciuart_instantiate.
+ *   Performs the low-level, one-time USART initialization.  This must be
+ *   called before hciuart_instantiate.
+ *
+ * Input Paramters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -2437,6 +2484,8 @@ void hciuart_initialize(void)
       if (config != NULL)
         {
           state = config->state;
+
+          wlinfo("Initializing HCIUART%d\n", i + 1);
 
           /* Disable U[S]ART interrupts */
 
@@ -2473,6 +2522,12 @@ void hciuart_initialize(void)
  *   to the point where the DMA half/full interrupt has triggered.
  *
  *   This function should be called from a timer or other periodic context.
+ *
+ * Input Paramters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 

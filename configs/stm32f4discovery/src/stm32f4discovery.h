@@ -83,6 +83,7 @@
 #define HAVE_RTC_DRIVER 1
 #define HAVE_ELF        1
 #define HAVE_NETMONITOR 1
+#define HAVE_HCIUART    1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
@@ -213,6 +214,26 @@
 #  else
 #    define STM32_PROCFS_MOUNTPOINT "/proc"
 #  endif
+#endif
+
+/* Check if we have the prequisites for an HCI UART */
+
+#if !defined(CONFIG_STM32_HCIUART) || !defined(CONFIG_BLUETOOTH_UART)
+#  undef HAVE_HCIUART
+#elif defined(CONFIG_STM32_USART1_HCIUART)
+#  define HCIUART_SERDEV HCIUART1
+#elif defined(CONFIG_STM32_USART2_HCIUART)
+#  define HCIUART_SERDEV HCIUART2
+#elif defined(CONFIG_STM32_USART3_HCIUART)
+#  define HCIUART_SERDEV HCIUART3
+#elif defined(CONFIG_STM32_USART6_HCIUART)
+#  define HCIUART_SERDEV HCIUART6
+#elif defined(CONFIG_STM32_UART7_HCIUART)
+#  define HCIUART_SERDEV HCIUART7
+#elif defined(CONFIG_STM32_UART8_HCIUART)
+#  define HCIUART_SERDEV HCIUART8
+#else
+#  error No HCI UART specifified
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
@@ -788,8 +809,30 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
  * Name: xen1210_archinitialize
  *
  * Description:
+ *   Each board that supports an xen1210 device must provide this function.
+ *   This function is called by application-specific, setup logic to
+ *   configure the accelerometer device.  This function will register the
+ *   driver as /dev/accelN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_XEN1210
+int xen1210_archinitialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: hciuart_dev_initialize
+ *
+ * Description:
  *   This function is called by board initialization logic to configure the
- *   XEN1210 driver.  This function will register the driver as /dev/mag0
+ *   Bluetooth HCI UART driver
  *
  * Input Parameters:
  *   None
@@ -800,8 +843,8 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_XEN1210
-int xen1210_archinitialize(int minor);
+#ifdef HAVE_HCIUART
+int hciuart_dev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

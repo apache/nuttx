@@ -1,7 +1,8 @@
 ############################################################################
 # configs/stm32f4discovery/src/Makefile
 #
-#   Copyright (C) 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013, 2015-2016, 2018 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -162,6 +163,12 @@ endif
 
 ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
+endif
+
+ifeq ($(CONFIG_STM32_HCIUART),y)
+ifeq ($(CONFIG_BLUETOOTH_UART),y)
+CSRCS += stm32_hciuart.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32_ROMFS),y)

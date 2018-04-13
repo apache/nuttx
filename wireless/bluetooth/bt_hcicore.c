@@ -1785,7 +1785,7 @@ void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb)
   g_callback_list = cb;
 }
 
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
+#ifdef CONFIG_DEBUG_WIRELESS_ERROR
 FAR const char *bt_addr_str(FAR const bt_addr_t *addr)
 {
   static char bufs[2][18];
@@ -1811,4 +1811,4 @@ FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr)
 
   return str;
 }
-#endif /* CONFIG_DEBUG_WIRELESS_INFO */
+#endif /* CONFIG_DEBUG_WIRELESS_ERROR */
