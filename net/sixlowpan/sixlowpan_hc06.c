@@ -3,7 +3,7 @@
  * 6lowpan HC06 implementation (draft-ietf-6lowpan-hc-06, updated to RFC
  * 6282)
  *
- *   Copyright (C) 2017, Gregory Nutt, all rights reserved
+ *   Copyright (C) 2017-2018 Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from Contiki:
@@ -506,7 +506,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       if (fullmac)
         {
-          ipaddr[7] ^= 0x0200;
+          ipaddr[7] ^= HTONS(0x0200);
         }
 
       /* If we took the data from packet, then update the packet pointer */
