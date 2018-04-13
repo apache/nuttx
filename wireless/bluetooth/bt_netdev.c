@@ -938,6 +938,7 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
       NETDEV_TXDONE(&priv->bd_dev.r_dev);
     }
 
+  UNUSED(priv);
   return OK;
 }
 

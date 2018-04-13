@@ -247,7 +247,7 @@
 #  define GPIO_CAN2_TX GPIO_CAN2_TX_1
 #endif
 
-/* UART2:
+/* USART2:
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
  * brought out to PA2 (TX) and PA3 (RX) for connection to an external serial
@@ -257,23 +257,29 @@
  */
 
 #ifndef CONFIG_STM32F4DISBB
-#  define GPIO_USART2_RX GPIO_USART2_RX_1
-#  define GPIO_USART2_TX GPIO_USART2_TX_1
+#  define GPIO_USART2_RX GPIO_USART2_RX_1     /* PA3 */
+#  define GPIO_USART2_TX GPIO_USART2_TX_1     /* PA2 */
 #endif
 
-/* UART3: (Used in pseudoterm configuration) */
+/* USART3:
+ *
+ * Used in pseudoterm configuration and also with the BT860 HCI UART.
+ * RTS/CTS Flow control support is need by the HCI UART.
+ */
 
-#define GPIO_USART3_TX GPIO_USART3_TX_1
-#define GPIO_USART3_RX GPIO_USART3_RX_1
+#define GPIO_USART3_TX   GPIO_USART3_TX_1     /* PB10 */
+#define GPIO_USART3_RX   GPIO_USART3_RX_1     /* PB11 */
+#define GPIO_USART3_CTS  GPIO_USART3_CTS_1    /* PB13 */
+#define GPIO_USART3_RTS  GPIO_USART3_RTS_1    /* PB14 */
 
-/* UART6:
+/* USART6:
  *
  * The STM32F4DIS-BB base board provides RS-232 drivers and a DB9 connector
  * for USART6.  This is the preferred serial console for use with the STM32F4DIS-BB.
  */
 
-#define GPIO_USART6_RX GPIO_USART6_RX_1
-#define GPIO_USART6_TX GPIO_USART6_TX_1
+#define GPIO_USART6_RX   GPIO_USART6_RX_1     /* PC7 */
+#define GPIO_USART6_TX   GPIO_USART6_TX_1     /* PC6 */
 
 /* PWM
  *

@@ -53,8 +53,6 @@
 #include <net/if.h>
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_DRIVERS_WIRELESS
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -564,5 +562,4 @@ struct  iw_scan_req
   struct iw_freq  channel_list[IW_MAX_FREQUENCIES];
 };
 
-#endif /* CONFIG_DRIVERS_WIRELESS */
 #endif /* __INCLUDE_NUTTX_WIRELESS_WIRELESS_H */

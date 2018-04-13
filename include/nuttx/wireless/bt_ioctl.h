@@ -46,6 +46,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_hci.h>
 
@@ -58,7 +59,7 @@
 
 /* Bluetooth network device IOCTL commands. */
 
-#ifndef WL_BLUETOOTHCMDS != 16
+#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 16
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 

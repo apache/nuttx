@@ -316,12 +316,14 @@ static void hci_num_completed_packets(FAR struct bt_buf_s *buf)
 
   for (i = 0; i < num_handles; i++)
     {
-      uint16_t handle, count;
+      uint16_t handle;
+      uint16_t count;
 
       handle = BT_LE162HOST(evt->h[i].handle);
       count  = BT_LE162HOST(evt->h[i].count);
 
       wlinfo("handle %u count %u\n", handle, count);
+      UNUSED(handle);
 
       while (count--)
         {

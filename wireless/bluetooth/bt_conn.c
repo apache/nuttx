@@ -565,6 +565,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
                                CONFIG_BLUETOOTH_TXCONN_STACKSIZE,
                                conn_tx_kthread, NULL);
           DEBUGASSERT(pid > 0);
+          UNUSED(pid);
 
           /* Take the semaphore again.  This will force us to wait with the
            * sem_count at -1.  It will be zero again when we continue.
