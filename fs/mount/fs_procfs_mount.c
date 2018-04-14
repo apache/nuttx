@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_procfs_mount.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <sys/statfs.h>
@@ -293,9 +294,15 @@ static int usage_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
   FAR const char *fstype;
+#ifdef CONFIG_HAVE_LONG_LONG
+  uint64_t size;
+  uint64_t used;
+  uint64_t free;
+#else
   uint32_t size;
   uint32_t used;
   uint32_t free;
+#endif
   int which;
   char sizelabel;
   char freelabel;
@@ -316,9 +323,15 @@ static int usage_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
 
   fstype = fs_gettype(statbuf);
 
+#ifdef CONFIG_HAVE_LONG_LONG
+  size = (uint64_t)statbuf->f_bsize * statbuf->f_blocks;
+  free = (uint64_t)statbuf->f_bsize * statbuf->f_bavail;
+  used = (uint64_t)size - free;
+#else
   size = statbuf->f_bsize * statbuf->f_blocks;
   free = statbuf->f_bsize * statbuf->f_bavail;
   used = size - free;
+#endif
 
   /* Find the label for size */
 
@@ -355,9 +368,15 @@ static int usage_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
 
   /* Generate usage list one line at a time */
 
+#ifdef CONFIG_HAVE_LONG_LONG
+  mount_sprintf(info, "  %-10s %6llu%c %8llu%c  %8llu%c %s\n", fstype,
+                size, sizelabel, used, usedlabel, free, freelabel,
+                mountpoint);
+#else
   mount_sprintf(info, "  %-10s %6ld%c %8ld%c  %8ld%c %s\n", fstype,
                 size, sizelabel, used, usedlabel, free, freelabel,
-                 mountpoint);
+                mountpoint);
+#endif
 
   return (info->totalsize >= info->buflen) ? 1 : 0;
 }
