@@ -242,7 +242,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
    * then try the list of messages reserved for interrupt handlers
    */
 
-  flags = enter_critical_section(); /* Always necessary in SMP mode */
+  flags = spin_lock_irqsave(); /* Always necessary in SMP mode */
   if (up_interrupt_context())
     {
 #if CONFIG_BLUETOOTH_BUFFER_PREALLOC > CONFIG_BLUETOOTH_BUFFER_IRQRESERVE
@@ -253,7 +253,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf            = g_buf_free;
           g_buf_free     = buf->flink;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
           pool           = POOL_BUFFER_GENERAL;
         }
       else
@@ -266,13 +266,13 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf            = g_buf_free_irq;
           g_buf_free_irq = buf->flink;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
           pool           = POOL_BUFFER_IRQ;
         }
       else
 #endif
         {
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(flags);
           return NULL;
         }
     }
@@ -422,10 +422,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
        * list from interrupt handlers.
        */
 
-      flags      = enter_critical_section();
+      flags      = spin_lock_irqsave();
       buf->flink = g_buf_free;
       g_buf_free = buf;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
     }
   else
 #endif
@@ -441,10 +441,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
        * list from interrupt handlers.
        */
 
-      flags          = enter_critical_section();
+      flags          = spin_lock_irqsave();
       buf->flink     = g_buf_free_irq;
       g_buf_free_irq = buf;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
     }
   else
 #endif

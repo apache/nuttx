@@ -50,10 +50,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
@@ -1518,20 +1518,23 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
   else
     {
       struct timespec abstime;
-      irqstate_t flags;
 
       /* Wait for the response to the command.  An I/O error will be
        * declared if the response does not occur within the timeout
        * interval.
        *
-       * Get the current time.  Not that we must be in critical section here
-       * so that we can be assured that there will be no context switches
+       * REVISIT: The cause of the timeout could be a failure to receive a
+       * response to a sent frame or, perhaps, a failure to send the frame.
+       * Should there also be logic to flush any unsent Tx packets?
+       *
+       * Get the current time.  Not that we lock the scheduler here so that
+       * we can be assured that there will be no context switches will occur
        * between the time that we calculate the delay time and until we get
        * to the wait.
        */
 
-      flags = enter_critical_section();
-      ret   = clock_gettime(CLOCK_REALTIME, &abstime);
+      sched_lock();
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
       if (ret >= 0)
         {
           /* Add the offset to the time in the future */
@@ -1560,7 +1563,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
           while (ret == -EINTR);
         }
 
-      leave_critical_section(flags);
+      sched_unlock();
     }
 
   /* Indicate failure if we failed to get the response */
