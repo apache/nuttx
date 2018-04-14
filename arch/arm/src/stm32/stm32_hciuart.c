@@ -207,7 +207,9 @@
 
 /* All interrupts */
 
-#define HCIUART_ALLINTS (USART_CR1_USED_INTS | USART_CR3_EIE)
+#define HCIUART_ALLINTS   (USART_CR1_USED_INTS | USART_CR3_EIE)
+#define HCIUART_RXHANDLED (1 << 0)
+#define HCIUART_TXHANDLED (1 << 1)
 
 /* Software flow control */
 
@@ -1669,8 +1671,8 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
     (const struct hciuart_config_s *)arg;
   struct hciuart_state_s *state;
   uint32_t status;
+  uint8_t handled;
   int  passes;
-  bool handled;
 
   DEBUGASSERT(config != NULL && config->state != NULL);
   state = config->state;
@@ -1685,10 +1687,10 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
    * until we have been looping for a long time.
    */
 
-  handled = true;
-  for (passes = 0; passes < 256 && handled; passes++)
+  handled = (HCIUART_RXHANDLED | HCIUART_TXHANDLED);
+  for (passes = 0; passes < 256 && handled != 0; passes++)
     {
-      handled = false;
+      handled = 0;
 
       /* Get the masked USART status word. */
 
@@ -1737,7 +1739,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
           if (state->rxhead != state->rxtail && state->callback != NULL)
             {
               state->callback(&config->lower, state->arg);
-              handled = true;
+              handled = HCIUART_RXHANDLED;
             }
         }
 
@@ -1779,6 +1781,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
           hciuart_isenabled(config, USART_CR1_TXEIE))
         {
           ssize_t nbytes;
+          uint8_t txhandled;
 
           /* Transmit data register empty ... copy data from the Tx buffer
            * to the Tx FIFO.
@@ -1786,6 +1789,29 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
 
           nbytes = hciuart_copytotxfifo(config);
           UNUSED(nbytes);
+
+          /* If the Tx buffer is now empty, then disable further Tx interrupts.
+           * Tx interrupts will only be enabled in the following circumstances:
+           *
+           * 1. The user is waiting in hciuart_write() for space to become
+           *    available in the Tx FIFO.
+           * 2. The full, outgoing message has been placed into the Tx buffer
+           *    by hciuart_write().
+           *
+           * In either case, no more Tx interrupts will be needed until more
+           * data is added to the Tx buffer.
+           */
+
+          txhandled = HCIUART_TXHANDLED;
+          if (state->txhead == state->txtail)
+            {
+              /* Disable Tx interrupts and treat the event as unhandled in
+               * order to terminate looping.
+               */
+
+              hciuart_disableints(config, USART_CR1_TXEIE);
+              txhandled = 0;
+            }
 
           /* This copy will free up space in the Tx FIFO.  Wake up any
            * threads that may have been waiting for space in the Tx
@@ -1798,7 +1824,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
               nxsem_post(&state->txwait);
             }
 
-          handled = true;
+          handled |= txhandled;
         }
     }
 
