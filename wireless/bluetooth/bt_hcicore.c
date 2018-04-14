@@ -852,7 +852,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
 
 static int hci_tx_kthread(int argc, FAR char *argv[])
 {
-  FAR const struct bt_driver_s *dev = g_btdev.dev;
+  FAR const struct bt_driver_s *btdev = g_btdev.btdev;
   int ret;
 
   wlinfo("started\n");
@@ -883,7 +883,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       wlinfo("Sending command %04x buf %p to driver\n",
              buf->u.hci.opcode, buf);
 
-      dev->send(dev, buf);
+      btdev->send(btdev, buf);
 
       /* Clear out any existing sent command */
 
@@ -1121,7 +1121,7 @@ static int hci_initialize(void)
   memset(hbs, 0, sizeof(*hbs));
   hbs->acl_mtu = BT_HOST2LE16(BLUETOOTH_MAX_FRAMELEN -
                                  sizeof(struct bt_hci_acl_hdr_s) -
-                                 g_btdev.dev->head_reserve);
+                                 g_btdev.btdev->head_reserve);
   hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_RXTHREAD_NMSGS);
 
   ret = bt_hci_cmd_send(BT_HCI_OP_HOST_BUFFER_SIZE, buf);
@@ -1262,16 +1262,16 @@ static void rx_queue_init(void)
 
 int bt_initialize(void)
 {
-  FAR const struct bt_driver_s *dev = g_btdev.dev;
+  FAR const struct bt_driver_s *btdev = g_btdev.btdev;
   int ret;
 
-  DEBUGASSERT(dev != NULL);
+  DEBUGASSERT(btdev != NULL);
   bt_buf_initialize();
 
   cmd_queue_init();
   rx_queue_init();
 
-  ret = dev->open(dev);
+  ret = btdev->open(btdev);
   if (ret < 0)
     {
       wlerr("ERROR: HCI driver open failed (%d)\n", ret);
@@ -1297,14 +1297,9 @@ int bt_initialize(void)
  *   interface prototyped in include/nuttx/wireless/bt_driver.h
  *
  *   This function associates the Bluetooth driver with the Bluetooth stack.
- *   It must be called *BEFORE* bt_netdev_register().
- *
- *   REVISIT:  This probably should be re-partitioned.  It would may more
- *   sense for the Bluetooth driver to just call bt_netdev_register() and
- *   have that function call bt_driver_register().
  *
  * Input Parameters:
- *   dev - An instance of the low-level drivers interface structure.
+ *   btdev - An instance of the low-level drivers interface structure.
  *
  * Returned Value:
  *  Zero is returned on success; a negated errno value is returned on any
@@ -1312,17 +1307,17 @@ int bt_initialize(void)
  *
  ****************************************************************************/
 
-int bt_driver_register(FAR const struct bt_driver_s *dev)
+int bt_driver_register(FAR const struct bt_driver_s *btdev)
 {
-  DEBUGASSERT(dev != NULL && dev->open != NULL && dev->send != NULL);
+  DEBUGASSERT(btdev != NULL && btdev->open != NULL && btdev->send != NULL);
 
-  if (g_btdev.dev != NULL)
+  if (g_btdev.btdev != NULL)
     {
       wlwarn("WARNING:  Already registered\n");
       return -EALREADY;
     }
 
-  g_btdev.dev = dev;
+  g_btdev.btdev = btdev;
   return 0;
 }
 
@@ -1336,16 +1331,16 @@ int bt_driver_register(FAR const struct bt_driver_s *dev)
  *   include/nuttx/wireless/bt_driver.h
  *
  * Input Parameters:
- *   dev - An instance of the low-level drivers interface structure.
+ *   btdev - An instance of the low-level drivers interface structure.
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-void bt_driver_unregister(FAR const struct bt_driver_s *dev)
+void bt_driver_unregister(FAR const struct bt_driver_s *btdev)
 {
-  g_btdev.dev = NULL;
+  g_btdev.btdev = NULL;
 }
 
 /****************************************************************************
@@ -1418,7 +1413,7 @@ FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
 
   wlinfo("opcode %x param_len %u\n", opcode, param_len);
 
-  buf = bt_buf_alloc(BT_CMD, NULL, g_btdev.dev->head_reserve);
+  buf = bt_buf_alloc(BT_CMD, NULL, g_btdev.btdev->head_reserve);
   if (!buf)
     {
       wlerr("ERROR: Cannot get free buffer\n");
@@ -1459,7 +1454,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
 
   if (opcode == BT_HCI_OP_HOST_NUM_COMPLETED_PACKETS)
     {
-      g_btdev.dev->send(g_btdev.dev, buf);
+      g_btdev.btdev->send(g_btdev.btdev, buf);
       bt_buf_release(buf);
       return 0;
     }

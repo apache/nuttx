@@ -58,9 +58,9 @@
  *   Handle network IOCTL commands directed to this device.
  *
  * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *   cmd - The IOCTL command
- *   arg - The argument for the IOCTL command
+ *   netdev - Reference to the NuttX driver state structure
+ *   cmd    - The IOCTL command
+ *   arg    - The argument for the IOCTL command
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -68,6 +68,6 @@
  ****************************************************************************/
 
 struct net_driver_s;  /* Forward reference */
-int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg);
+int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg);
 
 #endif /* __WIRELESS_BLUETOOTH_BT_IOCTL_H */

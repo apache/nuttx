@@ -256,22 +256,22 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
  *   Handle network IOCTL commands directed to this device.
  *
  * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *   cmd - The IOCTL command
- *   arg - The argument for the IOCTL command
+ *   netdev - Reference to the NuttX driver state structure
+ *   cmd    - The IOCTL command
+ *   arg    - The argument for the IOCTL command
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int btnet_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
+int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 {
   FAR struct btreq_s *btreq = (FAR struct btreq_s *)((uintptr_t)arg);
   int ret;
 
   wlinfo("cmd=%04x arg=%ul\n", cmd, arg);
-  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->d_private != NULL);
 
   if (btreq == NULL)
     {

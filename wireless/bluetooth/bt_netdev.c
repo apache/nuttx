@@ -993,14 +993,6 @@ static int btnet_properties(FAR struct radio_driver_s *netdev,
  *   Register a network driver to access the Bluetooth layer using a 6LoWPAN
  *   IPv6 or AF_BLUETOOTH socket.
  *
- *   This function should be called by the Bluetooth driver *AFTER* it has
- *   called bt_driver_register().  This function assocated the Bluetooth
- *   driver with the highe level network stack.
- *
- *   REVISIT:  This probably should be re-partitioned.  It would may more
- *   sense for the Bluetooth driver to just call bt_driver_register() and
- *   let this function performed the Bluetooth stack configuration.
- *
  * Input Parameters:
  *   btdev - An instance of the low-level drivers interface structure.
  *
@@ -1086,12 +1078,31 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
   radio->r_req_data   = btnet_req_data;    /* Enqueue frame for transmission */
   radio->r_properties = btnet_properties;  /* Return radio properties */
 
-  /* Initialize the Bluetooth stack */
+  /* Associate the driver in with the Bluetooth stack.
+   *
+   * REVISIT:  We will eventually need to remember which Bluetooth device
+   * we a serving.  Not a problem now because only a single BLE device is
+   * supported.
+   */
+
+  ret = bt_driver_register(btdev);
+  if (ret < 0)
+    {
+      nerr("ERROR: bt_driver_register() failed: %d\n", ret);
+      goto errout;
+    }
+
+  /* Initialize the Bluetooth stack.
+   *
+   * REVISIT:  This function should be called only once after all BLE
+   * drivers are registered.  Not a problem now because only a single
+   * BLE device is supported.
+   */
 
   ret = bt_initialize();
   if (ret < 0)
     {
-      nerr("ERROR: Failed to initialize Bluetooth: %d\n", ret);
+      nerr("ERROR:  bt_initialize() failed: %d\n", ret);
       goto errout;
     }
 
@@ -1099,7 +1110,9 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
 
   btnet_ifdown(netdev);
 
-  /* Register the device with the OS so that socket IOCTLs can be performed */
+  /* Register the network device with the OS so that socket IOCTLs can be
+   * performed
+   */
 
   ret = netdev_register(&priv->bd_dev.r_dev, NET_LL_BLUETOOTH);
   if (ret >= 0)
@@ -1107,10 +1120,16 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
       return OK;
     }
 
+  nerr("ERROR: netdev_register() failed: %d\n", ret);
+
 errout:
   /* Release wdog timers */
 
   wd_delete(priv->bd_txpoll);
+
+  /* Un-initialize semaphores */
+
+  nxsem_destroy(&priv->bd_exclsem);
 
   /* Free memory and return the error */
 

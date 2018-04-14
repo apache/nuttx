@@ -7396,10 +7396,16 @@ config STM32_HCIUART_SW_RXFLOW
 	bool "Use Software UART RTS flow control"
 	default n
 	---help---
-		Enable UART RTS flow control using Software. Because STM
-		Current STM32 have broken HW based RTS behavior (they assert
-		nRTS after every byte received)  Enable this setting workaround
-		this issue by using software based management of RTS
+		Enable UART RTS flow control using Software.  Current STM32 have
+		broken HW based RTS behavior (they assert nRTS after every byte
+		received)  Enable this setting workaround this issue by using
+		software based management of RTS
+
+		If HCI UART DMA is enabled, this is probably the better selection
+		as well. In that case, the Rx DMA buffer will avoid Rx overrun due
+		to short, bursty activity.  Software RTS management will probably
+		result in overall better throughput and shoudl still avoid Rx data
+		overrun conditions.
 
 config STM32_HCIUART_UPPER_WATERMARK
 	int "RTS flow control upper watermark (%)"

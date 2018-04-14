@@ -180,7 +180,7 @@ void bt_l2cap_encrypt_change(FAR struct bt_conn_s *conn)
 struct bt_buf_s *bt_l2cap_create_pdu(FAR struct bt_conn_s *conn)
 {
   size_t head_reserve = sizeof(struct bt_l2cap_hdr_s) +
-    sizeof(struct bt_hci_acl_hdr_s) + g_btdev.dev->head_reserve;
+    sizeof(struct bt_hci_acl_hdr_s) + g_btdev.btdev->head_reserve;
 
   return bt_buf_alloc(BT_ACL_OUT, NULL, head_reserve);
 }

@@ -562,7 +562,7 @@ static uint8_t att_mtu_rsp(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
   maxmtu = BLUETOOTH_MAX_FRAMELEN - (sizeof(struct bt_l2cap_hdr_s) +
                                      sizeof(struct bt_hci_acl_hdr_s) +
-                                     g_btdev.dev->head_reserve);
+                                     g_btdev.btdev->head_reserve);
   if (mtu > maxmtu)
     {
       mtu = maxmtu;
