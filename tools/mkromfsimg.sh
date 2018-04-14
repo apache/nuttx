@@ -2,7 +2,7 @@
 ############################################################################
 # tools/mkromfsimg.sh
 #
-#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,19 @@ headerfile=nsh_romfsimg.h
 
 # Get the input parameters
 
-topdir=$1
-usage="USAGE: $0 <topdir>"
+nofat=$1
+usefat=true
+topdir=$2
+usage="USAGE: $0 [-nofat] <topdir>"
+
+# Verify if we have the optional "-nofat"
+
+if [ "$nofat" == "-nofat" ]; then
+    echo "We will not mount a FAT/RAMDISK!"
+    usefat=false
+else
+    topdir=$1
+fi
 
 if [ -z "$topdir" -o ! -d "$topdir" ]; then
     echo "The full path to the NuttX base directory must be provided on the command line"
@@ -75,11 +86,16 @@ romfsmpt=`grep CONFIG_NSH_ROMFSMOUNTPT= $topdir/.config | cut -d'=' -f2`
 initscript=`grep CONFIG_NSH_INITSCRIPT= $topdir/.config | cut -d'=' -f2`
 romfsdevno=`grep CONFIG_NSH_ROMFSDEVNO= $topdir/.config | cut -d'=' -f2`
 romfssectsize=`grep CONFIG_NSH_ROMFSSECTSIZE= $topdir/.config | cut -d'=' -f2`
-fatfs=`grep CONFIG_FS_FAT= $topdir/.config | cut -d'=' -f2`
-fatdevno=`grep CONFIG_NSH_FATDEVNO= $topdir/.config | cut -d'=' -f2`
-fatsectsize=`grep CONFIG_NSH_FATSECTSIZE= $topdir/.config | cut -d'=' -f2`
-fatnsectors=`grep CONFIG_NSH_FATNSECTORS= $topdir/.config | cut -d'=' -f2`
-fatmpt=`grep CONFIG_NSH_FATMOUNTPT= $topdir/.config | cut -d'=' -f2`
+
+# If we disabled FAT FS requirement, we don't need to check it
+
+if [ "$usefat" = true ]; then
+  fatfs=`grep CONFIG_FS_FAT= $topdir/.config | cut -d'=' -f2`
+  fatdevno=`grep CONFIG_NSH_FATDEVNO= $topdir/.config | cut -d'=' -f2`
+  fatsectsize=`grep CONFIG_NSH_FATSECTSIZE= $topdir/.config | cut -d'=' -f2`
+  fatnsectors=`grep CONFIG_NSH_FATNSECTORS= $topdir/.config | cut -d'=' -f2`
+  fatmpt=`grep CONFIG_NSH_FATMOUNTPT= $topdir/.config | cut -d'=' -f2`
+fi
 
 # The following settings are required for general ROMFS support
 #
@@ -129,9 +145,9 @@ if [ "X$romfs" != "Xy" ]; then
     exit 0
 fi
 
-# The options in the default rcS.template also require FAT FS support
+# If it is the default rcS.template, then it also requires FAT FS support
 
-if [ "X$fatfs" != "Xy" ]; then
+if [ "$usefat" = true -a "X$fatfs" != "Xy" ]; then
     echo "FAT FS support is disabled in the NuttX configuration"
     echo "Set CONFIG_FS_FAT=y to continue"
     exit 0
@@ -160,19 +176,24 @@ if [ -z "$romfssectsize" ]; then
     romfssectsize=64
 fi
 
-# Supply defaults for all un-defined FAT FS settings
+# If FAT FS is a requirement
 
-if [ -z "$fatdevno" ]; then
-    fatdevno=1
-fi
-if [ -z "$fatsectsize" ]; then
-    fatsectsize=512
-fi
-if [ -z "$fatnsectors" ]; then
-    fatnsectors=1024
-fi
-if [ -z "$fatmpt" ]; then
-   fatmpt="/tmp"
+if [ "$usefat" = true ]; then
+
+  # Supply defaults for all un-defined FAT FS settings
+
+  if [ -z "$fatdevno" ]; then
+      fatdevno=1
+  fi
+  if [ -z "$fatsectsize" ]; then
+      fatsectsize=512
+  fi
+  if [ -z "$fatnsectors" ]; then
+      fatnsectors=1024
+  fi
+  if [ -z "$fatmpt" ]; then
+     fatmpt="/tmp"
+  fi
 fi
 
 # Verify the mountpoint.  Verify that it is an absolute path but not /, /dev,
@@ -238,11 +259,17 @@ if [ ! -r $rcstemplate ]; then
     exit 1
 fi
 
-cat $rcstemplate | \
-    sed -e "s,XXXMKRDMINORXXX,$fatdevno,g" | \
-    sed -e "s,XXMKRDSECTORSIZEXXX,$fatsectsize,g" | \
-    sed -e "s,XXMKRDBLOCKSXXX,$fatnsectors,g" | \
-    sed -e "s,XXXRDMOUNTPOINTXXX,$fatmpt,g" >$rcsfile
+# If we are using FAT FS with RAMDISK we need to setup it
+
+if [ "$usefat" = true ]; then
+  cat $rcstemplate | \
+      sed -e "s,XXXMKRDMINORXXX,$fatdevno,g" | \
+      sed -e "s,XXMKRDSECTORSIZEXXX,$fatsectsize,g" | \
+      sed -e "s,XXMKRDBLOCKSXXX,$fatnsectors,g" | \
+      sed -e "s,XXXRDMOUNTPOINTXXX,$fatmpt,g" >$rcsfile
+else
+  cp $rcstemplate $rcsfile
+fi
 
 # And install it at the specified relative location
 
