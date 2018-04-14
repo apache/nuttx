@@ -60,38 +60,17 @@ struct bt_driver_s
 
   /* Open the HCI transport */
 
-  CODE int (*open)(FAR const struct bt_driver_s *dev);
+  CODE int (*open)(FAR const struct bt_driver_s *btdev);
 
   /* Send data to HCI */
 
-  CODE int (*send)(FAR const struct bt_driver_s *dev,
+  CODE int (*send)(FAR const struct bt_driver_s *btdev,
                    FAR struct bt_buf_s *buf);
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: bt_netdev_register
- *
- * Description:
- *   Register a network driver to access the Bluetooth layer using a 6LoWPAN
- *   IPv6 or AF_BLUETOOTH socket.
- *
- *   This function should be called only once from board bring-up logic
- *   *AFTER* any Bluetooth devices have been registered.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  Otherwise a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int bt_netdev_register(void);
 
 /****************************************************************************
  * Name: bt_driver_register
@@ -101,8 +80,15 @@ int bt_netdev_register(void);
  *   This is called from the low-level driver and is part of the driver
  *   interface prototyped in include/nuttx/wireless/bt_driver.h
  *
+ *   This function associates the Bluetooth driver with the Bluetooth stack.
+ *   It must be called *BEFORE* bt_netdev_register().
+ *
+ *   REVISIT:  This probably should be re-partitioned.  It would may more
+ *   sense for the Bluetooth driver to just call bt_netdev_register() and
+ *   have that function call bt_driver_register().
+ *
  * Input Parameters:
- *   dev - An instance of the low-level drivers interface structure.
+ *   btdev - An instance of the low-level drivers interface structure.
  *
  * Returned Value:
  *  Zero is returned on success; a negated errno value is returned on any
@@ -110,7 +96,7 @@ int bt_netdev_register(void);
  *
  ****************************************************************************/
 
-int bt_driver_register(FAR const struct bt_driver_s *dev);
+int bt_driver_register(FAR const struct bt_driver_s *btdev);
 
 /****************************************************************************
  * Name: bt_driver_unregister
@@ -122,14 +108,40 @@ int bt_driver_register(FAR const struct bt_driver_s *dev);
  *   include/nuttx/wireless/bt_driver.h
  *
  * Input Parameters:
- *   dev - An instance of the low-level drivers interface structure.
+ *   btdev - An instance of the low-level drivers interface structure.
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-void bt_driver_unregister(FAR const struct bt_driver_s *dev);
+void bt_driver_unregister(FAR const struct bt_driver_s *btdev);
+
+/****************************************************************************
+ * Name: bt_netdev_register
+ *
+ * Description:
+ *   Register a network driver to access the Bluetooth layer using a 6LoWPAN
+ *   IPv6 or AF_BLUETOOTH socket.
+ *
+ *   This function should be called by the Bluetooth driver *AFTER* it has
+ *   called bt_driver_register().  This function assocated the Bluetooth
+ *   driver with the highe level network stack.
+ *
+ *   REVISIT:  This probably should be re-partitioned.  It would may more
+ *   sense for the Bluetooth driver to just call bt_driver_register() and
+ *   let this function performed the Bluetooth stack configuration.
+ *
+ * Input Parameters:
+ *   btdev - An instance of the low-level drivers interface structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int bt_netdev_register(FAR const struct bt_driver_s *btdev);
 
 /****************************************************************************
  * Name: bt_hci_receive

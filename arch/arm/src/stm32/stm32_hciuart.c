@@ -1215,7 +1215,7 @@ static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
 static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
 {
   struct hciuart_state_s *state;
-  ssize_t nbytes = 0;
+  ssize_t nbytes;
   uint16_t txhead;
   uint16_t txtail;
   uint8_t txbyte;
@@ -1225,6 +1225,7 @@ static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
   state  = config->state;
   txhead = state->txhead;
   txtail = state->txtail;
+  nbytes = 0;
 
   /* Compare the Tx buffer head and tail indices.  If the Tx buffer is
    * empty, then we finished with the copy.
@@ -1258,7 +1259,8 @@ static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
       nbytes++;
     }
 
-  wlinfo("nbytes %ld\n", (long)nbytes);
+  wlinfo("txhead %u txtail %u nbytes %ld\n", txhead, txtail, (long)nbytes);
+  state->txhead = txhead;
   return nbytes;
 }
 
@@ -2103,10 +2105,10 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
   hciuart_disableints(config, USART_CR1_TXEIE);
   spin_unlock_irqrestore(flags);
 
-   /* Loop until all of the user data have been moved to the Tx buffer */
+  /* Loop until all of the user data have been moved to the Tx buffer */
 
-   src       = buffer;
-   remaining = buflen;
+  src       = buffer;
+  remaining = buflen;
 
   while (remaining > 0)
     {
@@ -2187,7 +2189,7 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
   if (state->txhead != state->txtail)
     {
       flags = spin_lock_irqsave();
-      hciuart_disableints(config, USART_CR1_TXEIE);
+      hciuart_enableints(config, USART_CR1_TXEIE);
       spin_unlock_irqrestore(flags);
     }
 

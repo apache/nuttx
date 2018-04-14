@@ -91,9 +91,7 @@ int hciuart_dev_initialize(void)
       return -ENODEV;
     }
 
-  /* Then iniatialize the HCI UART upper half driver and register it as a
-   * network device.
-   */
+  /* Then initialize the HCI UART upper half driver with the bluetooth stack */
 
   ret = btuart_register(lower);
   if (ret < 0)

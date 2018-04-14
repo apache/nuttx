@@ -382,6 +382,8 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
   FAR struct btuart_upperhalf_s *upper;
   int ret;
 
+  wlinfo("lower %p\n", lower);
+
   DEBUGASSERT(lower != NULL);
 
   /* Allocate a new instance of the upper half driver state structure */
@@ -406,12 +408,29 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
 
   lower->rxattach(lower, btuart_rxcallback, upper);
 
-  /* And register the driver with the Bluetooth stack */
+  /* And register the driver with the Bluetooth stack.
+   *
+   * REVISIT: Wouldn't it be cleaner to have a single call to
+   * bt_netdev_register() that handled all of the following?
+   */
 
   ret = bt_driver_register(&upper->dev);
   if (ret < 0)
     {
+      wlerr("ERROR: bt_driver_register failed: %d\n", ret);
       kmm_free(upper);
+    }
+  else
+    {
+      /* And bring up the network driver to serve this device */
+
+      ret = bt_netdev_register(&upper->dev);
+      if (ret < 0)
+        {
+          wlerr("ERROR: bt_driver_register failed: %d\n", ret);
+          bt_driver_unregister(&upper->dev);
+          kmm_free(upper);
+        }
     }
 
   return ret;

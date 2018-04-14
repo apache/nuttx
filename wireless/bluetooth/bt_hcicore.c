@@ -139,7 +139,7 @@ static void hci_acl(FAR struct bt_buf_s *buf)
 
   if (buf->len != len)
     {
-      wlerr("ERROR: ACL data length mismatch (%u != %u)\n", buf->len, len);
+      wlerr("ERROR:  ACL data length mismatch (%u != %u)\n", buf->len, len);
       bt_buf_release(buf);
       return;
     }
@@ -147,7 +147,7 @@ static void hci_acl(FAR struct bt_buf_s *buf)
   conn = bt_conn_lookup_handle(buf->u.acl.handle);
   if (!conn)
     {
-      wlerr("ERROR: Unable to find conn for handle %u\n", buf->u.acl.handle);
+      wlerr("ERROR:  Unable to find conn for handle %u\n", buf->u.acl.handle);
       bt_buf_release(buf);
       return;
     }
@@ -175,7 +175,7 @@ static void hci_encrypt_change(FAR struct bt_buf_s *buf)
   conn = bt_conn_lookup_handle(handle);
   if (!conn)
     {
-      wlerr("ERROR: Unable to look up conn with handle %u\n", handle);
+      wlerr("ERROR:  Unable to look up conn with handle %u\n", handle);
       return;
     }
 
@@ -213,7 +213,7 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
 
   if (g_btdev.sent_cmd->u.hci.opcode != opcode)
     {
-      wlerr("ERROR: Unexpected completion of opcode 0x%04x\n", opcode);
+      wlerr("ERROR:  Unexpected completion of opcode 0x%04x\n", opcode);
       return;
     }
 
@@ -350,7 +350,7 @@ static void hci_encrypt_key_refresh_complete(FAR struct bt_buf_s *buf)
   conn = bt_conn_lookup_handle(handle);
   if (!conn)
     {
-      wlerr("ERROR: Unable to look up conn with handle %u\n", handle);
+      wlerr("ERROR:  Unable to look up conn with handle %u\n", handle);
       return;
     }
 
@@ -388,11 +388,12 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
   FAR struct bt_buf_s *rsp;
   FAR struct bt_hci_cp_le_set_scan_params_s *set_param;
   FAR struct bt_hci_cp_le_set_scan_enable_s *scan_enable;
-  int err;
+  int ret;
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_PARAMS, sizeof(*set_param));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -411,8 +412,9 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
 
   bt_hci_cmd_send(BT_HCI_OP_LE_SET_SCAN_PARAMS, buf);
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_ENABLE, sizeof(*scan_enable));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -421,39 +423,42 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
   scan_enable->filter_dup = scan_filter;
   scan_enable->enable     = BT_LE_SCAN_ENABLE;
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_SCAN_ENABLE, buf, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_SCAN_ENABLE, buf, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   /* Update scan state in case of success (0) status */
 
-  err = rsp->data[0];
-  if (!err)
+  ret = rsp->data[0];
+  if (!ret)
     {
       g_btdev.scan_enable = BT_LE_SCAN_ENABLE;
     }
 
   bt_buf_release(rsp);
-  return err;
+  return ret;
 }
 
 static int bt_hci_stop_scanning(void)
 {
   FAR struct bt_buf_s *buf, *rsp;
   FAR struct bt_hci_cp_le_set_scan_enable_s *scan_enable;
-  int err;
+  int ret;
 
   if (g_btdev.scan_enable == BT_LE_SCAN_DISABLE)
     {
+      wlwarn("WARNING:  Scan already disabled\n");
       return -EALREADY;
     }
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_ENABLE,
                           sizeof(*scan_enable));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -462,22 +467,23 @@ static int bt_hci_stop_scanning(void)
   scan_enable->filter_dup = 0x00;
   scan_enable->enable     = BT_LE_SCAN_DISABLE;
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_SCAN_ENABLE, buf, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_SCAN_ENABLE, buf, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   /* Update scan state in case of success (0) status */
 
-  err = rsp->data[0];
-  if (!err)
+  ret = rsp->data[0];
+  if (!ret)
     {
       g_btdev.scan_enable = BT_LE_SCAN_DISABLE;
     }
 
   bt_buf_release(rsp);
-  return err;
+  return ret;
 }
 
 static int hci_le_create_conn(FAR const bt_addr_le_t *addr)
@@ -486,8 +492,9 @@ static int hci_le_create_conn(FAR const bt_addr_le_t *addr)
   FAR struct bt_hci_cp_le_create_conn_s *cp;
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_CREATE_CONN, sizeof(*cp));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -519,7 +526,7 @@ static void hci_disconn_complete(FAR struct bt_buf_s *buf)
   conn = bt_conn_lookup_handle(handle);
   if (!conn)
     {
-      wlerr("ERROR: Unable to look up conn with handle %u\n", handle);
+      wlerr("ERROR:  Unable to look up conn with handle %u\n", handle);
       return;
     }
 
@@ -596,7 +603,7 @@ static void le_conn_complete(FAR struct bt_buf_s *buf)
 
   if (!conn)
     {
-      wlerr("ERROR: Unable to add new conn for handle %u\n", handle);
+      wlerr("ERROR:  Unable to add new conn for handle %u\n", handle);
       return;
     }
 
@@ -722,7 +729,7 @@ static void le_ltk_request(FAR struct bt_buf_s *buf)
   conn = bt_conn_lookup_handle(handle);
   if (!conn)
     {
-      wlerr("ERROR: Unable to lookup conn for handle %u\n", handle);
+      wlerr("ERROR:  Unable to lookup conn for handle %u\n", handle);
       return;
     }
 
@@ -740,7 +747,7 @@ static void le_ltk_request(FAR struct bt_buf_s *buf)
       buf = bt_hci_cmd_create(BT_HCI_OP_LE_LTK_REQ_REPLY, sizeof(*cp));
       if (!buf)
         {
-          wlerr("ERROR: Out of command buffers\n");
+          wlerr("ERROR:  Out of command buffers\n");
           goto done;
         }
 
@@ -757,7 +764,7 @@ static void le_ltk_request(FAR struct bt_buf_s *buf)
       buf = bt_hci_cmd_create(BT_HCI_OP_LE_LTK_REQ_NEG_REPLY, sizeof(*cp));
       if (!buf)
         {
-          wlerr("ERROR: Out of command buffers\n");
+          wlerr("ERROR:  Out of command buffers\n");
           goto done;
         }
 
@@ -836,7 +843,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
         break;
 
       default:
-        wlwarn("Unhandled event 0x%02x\n", hdr->evt);
+        wlwarn("WARNING:  Unhandled event 0x%02x\n", hdr->evt);
         break;
     }
 
@@ -882,7 +889,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
       if (g_btdev.sent_cmd)
         {
-          wlerr("ERROR: Uncleared pending sent_cmd\n");
+          wlerr("ERROR:  Uncleared pending sent_cmd\n");
           bt_buf_release(g_btdev.sent_cmd);
           g_btdev.sent_cmd = NULL;
         }
@@ -905,7 +912,7 @@ static int hci_rx_kthread(int argc, FAR char *argv[])
       ret = bt_queue_receive(g_btdev.rx_queue, &buf);
       if (ret < 0)
         {
-          wlerr("ERROR: bt_queue_receive() failed: %d\n", ret);
+          wlerr("ERROR:  bt_queue_receive() failed: %d\n", ret);
           continue;
         }
 
@@ -922,7 +929,7 @@ static int hci_rx_kthread(int argc, FAR char *argv[])
             break;
 
           default:
-            wlerr("ERROR: Unknown buf type %u\n", buf->type);
+            wlerr("ERROR:  Unknown buf type %u\n", buf->type);
             bt_buf_release(buf);
             break;
         }
@@ -1003,7 +1010,7 @@ static int hci_initialize(void)
   FAR struct bt_buf_s *buf;
   FAR struct bt_buf_s *rsp;
   FAR uint8_t *enable;
-  int err;
+  int ret;
 
   /* Send HCI_RESET */
 
@@ -1011,10 +1018,11 @@ static int hci_initialize(void)
 
   /* Read Local Supported Features */
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   read_local_features_complete(rsp);
@@ -1022,10 +1030,11 @@ static int hci_initialize(void)
 
   /* Read Local Version Information */
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_VERSION_INFO, NULL, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_VERSION_INFO, NULL, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   read_local_ver_complete(rsp);
@@ -1033,10 +1042,11 @@ static int hci_initialize(void)
 
   /* Read Bluetooth Address */
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_BD_ADDR, NULL, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_BD_ADDR, NULL, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   read_bdaddr_complete(rsp);
@@ -1046,16 +1056,17 @@ static int hci_initialize(void)
 
   if (!lmp_le_capable(g_btdev))
     {
-      wlerr("ERROR: Non-LE capable controller detected!\n");
+      wlerr("ERROR:  Non-LE capable controller detected!\n");
       return -ENODEV;
     }
 
   /* Read Low Energy Supported Features */
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_LOCAL_FEATURES, NULL, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_LOCAL_FEATURES, NULL, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   read_le_features_complete(rsp);
@@ -1063,18 +1074,20 @@ static int hci_initialize(void)
 
   /* Read LE Buffer Size */
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_BUFFER_SIZE, NULL, &rsp);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_BUFFER_SIZE, NULL, &rsp);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   le_read_buffer_size_complete(rsp);
   bt_buf_release(rsp);
 
   buf = bt_hci_cmd_create(BT_HCI_OP_SET_EVENT_MASK, sizeof(*ev));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1098,8 +1111,9 @@ static int hci_initialize(void)
   bt_hci_cmd_send_sync(BT_HCI_OP_SET_EVENT_MASK, buf, NULL);
 
   buf = bt_hci_cmd_create(BT_HCI_OP_HOST_BUFFER_SIZE, sizeof(*hbs));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1110,39 +1124,43 @@ static int hci_initialize(void)
                                  g_btdev.dev->head_reserve);
   hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_RXTHREAD_NMSGS);
 
-  err = bt_hci_cmd_send(BT_HCI_OP_HOST_BUFFER_SIZE, buf);
-  if (err)
+  ret = bt_hci_cmd_send(BT_HCI_OP_HOST_BUFFER_SIZE, buf);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send failed: %d\n", ret);
+      return ret;
     }
 
   buf = bt_hci_cmd_create(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, 1);
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
   enable  = bt_buf_extend(buf, sizeof(*enable));
   *enable = 0x01;
 
-  err = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
-  if (err)
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
     }
 
   if (lmp_bredr_capable(g_btdev))
     {
-      struct bt_hci_cp_write_le_host_supp_s *cp;
+      FAR struct bt_hci_cp_write_le_host_supp_s *cp;
 
       /* Use BR/EDR buffer size if LE reports zero buffers */
 
       if (!g_btdev.le_mtu)
         {
-          err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_BUFFER_SIZE, NULL, &rsp);
-          if (err)
+          ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_BUFFER_SIZE, NULL, &rsp);
+          if (ret < 0)
             {
-              return err;
+              wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+              return ret;
             }
 
           read_buffer_size_complete(rsp);
@@ -1150,8 +1168,9 @@ static int hci_initialize(void)
         }
 
       buf = bt_hci_cmd_create(BT_HCI_OP_LE_WRITE_LE_HOST_SUPP, sizeof(*cp));
-      if (!buf)
+      if (buf == NULL)
         {
+          wlerr("ERROR:  Failed to create buffer\n");
           return -ENOBUFS;
         }
 
@@ -1244,7 +1263,7 @@ static void rx_queue_init(void)
 int bt_initialize(void)
 {
   FAR const struct bt_driver_s *dev = g_btdev.dev;
-  int err;
+  int ret;
 
   DEBUGASSERT(dev != NULL);
   bt_buf_initialize();
@@ -1252,17 +1271,18 @@ int bt_initialize(void)
   cmd_queue_init();
   rx_queue_init();
 
-  err = dev->open(dev);
-  if (err)
+  ret = dev->open(dev);
+  if (ret < 0)
     {
-      wlerr("ERROR: HCI driver open failed (%d)\n", err);
-      return err;
+      wlerr("ERROR: HCI driver open failed (%d)\n", ret);
+      return ret;
     }
 
-  err = hci_initialize();
-  if (err)
+  ret = hci_initialize();
+  if (ret < 0)
     {
-      return err;
+      wlerr("ERROR:  hci_initialize failed: %d\n", ret);
+      return ret;
     }
 
   return bt_l2cap_init();
@@ -1275,6 +1295,13 @@ int bt_initialize(void)
  *   Register the Bluetooth low-level driver with the Bluetooth stack.
  *   This is called from the low-level driver and is part of the driver
  *   interface prototyped in include/nuttx/wireless/bt_driver.h
+ *
+ *   This function associates the Bluetooth driver with the Bluetooth stack.
+ *   It must be called *BEFORE* bt_netdev_register().
+ *
+ *   REVISIT:  This probably should be re-partitioned.  It would may more
+ *   sense for the Bluetooth driver to just call bt_netdev_register() and
+ *   have that function call bt_driver_register().
  *
  * Input Parameters:
  *   dev - An instance of the low-level drivers interface structure.
@@ -1291,6 +1318,7 @@ int bt_driver_register(FAR const struct bt_driver_s *dev)
 
   if (g_btdev.dev != NULL)
     {
+      wlwarn("WARNING:  Already registered\n");
       return -EALREADY;
     }
 
@@ -1416,8 +1444,9 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
   if (buf == NULL)
     {
       buf = bt_hci_cmd_create(opcode, 0);
-      if (!buf)
+      if (buf == NULL)
         {
+          wlerr("ERROR:  Failed to create buffer\n");
           return -ENOBUFS;
         }
     }
@@ -1458,8 +1487,9 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
   if (buf == NULL)
     {
       buf = bt_hci_cmd_create(opcode, 0);
-      if (!buf)
+      if (buf == NULL)
         {
+          wlerr("ERROR:  Failed to create buffer\n");
           return -ENOBUFS;
         }
     }
@@ -1491,6 +1521,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
     {
       if (buf->u.hci.sync == NULL)
         {
+          wlerr("ERROR:  Failed get return parameters\n");
           ret = -EIO;
         }
       else
@@ -1544,8 +1575,9 @@ int bt_start_advertising(uint8_t type, FAR const struct bt_eir_s *ad,
     }
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_ADV_DATA, sizeof(*set_data));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1576,8 +1608,9 @@ send_scan_rsp:
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_RSP_DATA,
                           sizeof(*scan_rsp));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1603,8 +1636,9 @@ send_scan_rsp:
 send_set_param:
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_ADV_PARAMETERS,
                           sizeof(*set_param));
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1619,8 +1653,9 @@ send_set_param:
   bt_hci_cmd_send(BT_HCI_OP_LE_SET_ADV_PARAMETERS, buf);
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_ADV_ENABLE, 1);
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1647,12 +1682,14 @@ int bt_stop_advertising(void)
 
   if (!g_btdev.adv_enable)
     {
+      wlwarn("WARNING:  Already advertising\n");
       return -EALREADY;
     }
 
   buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_ADV_ENABLE, 1);
-  if (!buf)
+  if (buf == NULL)
     {
+      wlerr("ERROR:  Failed to create buffer\n");
       return -ENOBUFS;
     }
 
@@ -1685,6 +1722,7 @@ int bt_start_scanning(uint8_t scan_filter, bt_le_scan_cb_t cb)
 
   if (g_scan_dev_found_cb)
     {
+      wlwarn("WARNING:  Already scanning\n");
       return -EALREADY;
     }
 
@@ -1710,8 +1748,9 @@ int bt_stop_scanning(void)
 {
   /* Return if active scanning is already disabled */
 
-  if (!g_scan_dev_found_cb)
+  if (g_scan_dev_found_cb == NULL)
     {
+      wlwarn("WARNING:  Not scanning\n");
       return -EALREADY;
     }
 

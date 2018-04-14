@@ -133,8 +133,8 @@ struct btnet_driver_s
 
 /* Utility functions ********************************************************/
 
-static int  btnet_advertise(FAR struct net_driver_s *dev);
-static inline void btnet_netmask(FAR struct net_driver_s *dev);
+static int  btnet_advertise(FAR struct net_driver_s *netdev);
+static inline void btnet_netmask(FAR struct net_driver_s *netdev);
 
 /* Bluetooth callback functions ***************************************/
 
@@ -159,22 +159,22 @@ static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
 /* Network interface support ************************************************/
 /* Common TX logic */
 
-static int  btnet_txpoll_callback(FAR struct net_driver_s *dev);
+static int  btnet_txpoll_callback(FAR struct net_driver_s *netdev);
 static void btnet_txpoll_work(FAR void *arg);
 static void btnet_txpoll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  btnet_ifup(FAR struct net_driver_s *dev);
-static int  btnet_ifdown(FAR struct net_driver_s *dev);
+static int  btnet_ifup(FAR struct net_driver_s *netdev);
+static int  btnet_ifdown(FAR struct net_driver_s *netdev);
 
 static void btnet_txavail_work(FAR void *arg);
-static int  btnet_txavail(FAR struct net_driver_s *dev);
+static int  btnet_txavail(FAR struct net_driver_s *netdev);
 
 #ifdef CONFIG_NET_IGMP
-static int  btnet_addmac(FAR struct net_driver_s *dev,
+static int  btnet_addmac(FAR struct net_driver_s *netdev,
               FAR const uint8_t *mac);
-static int  btnet_rmmac(FAR struct net_driver_s *dev,
+static int  btnet_rmmac(FAR struct net_driver_s *netdev,
               FAR const uint8_t *mac);
 #endif
 static int  btnet_get_mhrlen(FAR struct radio_driver_s *netdev,
@@ -211,11 +211,11 @@ static struct sixlowpan_reassbuf_s g_iobuffer;
  *
  ****************************************************************************/
 
-static int btnet_advertise(FAR struct net_driver_s *dev)
+static int btnet_advertise(FAR struct net_driver_s *netdev)
 {
   FAR uint8_t *addr;
 
-  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
+  DEBUGASSERT(netdev != NULL && netdev->d_private != NULL);
 
   /* Get the 6-byte local address from the device.
    *
@@ -227,20 +227,20 @@ static int btnet_advertise(FAR struct net_driver_s *dev)
 
   /* Set the MAC address using 6-byte local address from the device. */
 
-  BLUETOOTH_ADDRCOPY(dev->d_mac.radio.nv_addr, addr);
-  dev->d_mac.radio.nv_addrlen = BLUETOOTH_ADDRSIZE;
+  BLUETOOTH_ADDRCOPY(netdev->d_mac.radio.nv_addr, addr);
+  netdev->d_mac.radio.nv_addrlen = BLUETOOTH_ADDRSIZE;
 
 #ifdef CONFIG_NET_IPv6
   /* Set the IP address based on the 6-byte address */
 
-  dev->d_ipv6addr[0] = HTONS(0xfe80);
-  dev->d_ipv6addr[1] = 0;
-  dev->d_ipv6addr[2] = 0;
-  dev->d_ipv6addr[3] = 0;
-  dev->d_ipv6addr[4] = HTONS(0x0200);
-  dev->d_ipv6addr[5] = (uint16_t)addr[0] << 8 | (uint16_t)addr[1];
-  dev->d_ipv6addr[6] = (uint16_t)addr[2] << 8 | (uint16_t)addr[3];
-  dev->d_ipv6addr[7] = (uint16_t)addr[4] << 8 | (uint16_t)addr[5];
+  netdev->d_ipv6addr[0] = HTONS(0xfe80);
+  netdev->d_ipv6addr[1] = 0;
+  netdev->d_ipv6addr[2] = 0;
+  netdev->d_ipv6addr[3] = 0;
+  netdev->d_ipv6addr[4] = HTONS(0x0200);
+  netdev->d_ipv6addr[5] = (uint16_t)addr[0] << 8 | (uint16_t)addr[1];
+  netdev->d_ipv6addr[6] = (uint16_t)addr[2] << 8 | (uint16_t)addr[3];
+  netdev->d_ipv6addr[7] = (uint16_t)addr[4] << 8 | (uint16_t)addr[5];
 #endif
 
   return OK;
@@ -259,17 +259,17 @@ static int btnet_advertise(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static inline void btnet_netmask(FAR struct net_driver_s *dev)
+static inline void btnet_netmask(FAR struct net_driver_s *netdev)
 {
 #ifdef CONFIG_NET_IPv6
-  dev->d_ipv6netmask[0]  = 0xffff;
-  dev->d_ipv6netmask[1]  = 0xffff;
-  dev->d_ipv6netmask[2]  = 0xffff;
-  dev->d_ipv6netmask[3]  = 0xffff;
-  dev->d_ipv6netmask[4]  = 0;
-  dev->d_ipv6netmask[5]  = 0;
-  dev->d_ipv6netmask[6]  = 0;
-  dev->d_ipv6netmask[7]  = 0;
+  netdev->d_ipv6netmask[0]  = 0xffff;
+  netdev->d_ipv6netmask[1]  = 0xffff;
+  netdev->d_ipv6netmask[2]  = 0xffff;
+  netdev->d_ipv6netmask[3]  = 0xffff;
+  netdev->d_ipv6netmask[4]  = 0;
+  netdev->d_ipv6netmask[5]  = 0;
+  netdev->d_ipv6netmask[6]  = 0;
+  netdev->d_ipv6netmask[7]  = 0;
 #endif
 }
 
@@ -486,7 +486,7 @@ static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
  *   3. During normal TX polling
  *
  * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
+ *   netdev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -496,7 +496,7 @@ static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
  *
  ****************************************************************************/
 
-static int btnet_txpoll_callback(FAR struct net_driver_s *dev)
+static int btnet_txpoll_callback(FAR struct net_driver_s *netdev)
 {
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
@@ -586,7 +586,7 @@ static void btnet_txpoll_expiry(int argc, wdparm_t arg, ...)
  *   is provided
  *
  * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
+ *   netdev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
@@ -595,32 +595,33 @@ static void btnet_txpoll_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static int btnet_ifup(FAR struct net_driver_s *dev)
+static int btnet_ifup(FAR struct net_driver_s *netdev)
 {
   FAR struct btnet_driver_s *priv =
-    (FAR struct btnet_driver_s *)dev->d_private;
+    (FAR struct btnet_driver_s *)netdev->d_private;
   int ret;
 
   /* Set the IP address based on the addressing assigned to the node */
 
-  ret = btnet_advertise(dev);
+  ret = btnet_advertise(netdev);
   if (ret >= 0)
     {
 #ifdef CONFIG_NET_IPv6
       wlinfo("Bringing up: IP   %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-             dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-             dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-             dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+             netdev->d_ipv6addr[0], netdev->d_ipv6addr[1],
+             netdev->d_ipv6addr[2], netdev->d_ipv6addr[3],
+             netdev->d_ipv6addr[4], netdev->d_ipv6addr[5],
+             netdev->d_ipv6addr[6], netdev->d_ipv6addr[7]);
       wlinfo("             ADDR %02x:%02x:%02x:%02x:%02x:%02x\n",
-             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-             dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
-             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5]);
+             netdev->d_mac.radio.nv_addr[0], netdev->d_mac.radio.nv_addr[1],
+             netdev->d_mac.radio.nv_addr[2], netdev->d_mac.radio.nv_addr[3],
+             netdev->d_mac.radio.nv_addr[4], netdev->d_mac.radio.nv_addr[5]);
 
 #else
       wlinfo("Bringing up: %02x:%02x:%02x:%02x:%02x:%02x\n",
-             dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-             dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
-             dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5]);
+             netdev->d_mac.radio.nv_addr[0], netdev->d_mac.radio.nv_addr[1],
+             netdev->d_mac.radio.nv_addr[2], netdev->d_mac.radio.nv_addr[3],
+             netdev->d_mac.radio.nv_addr[4], netdev->d_mac.radio.nv_addr[5]);
 #endif
 
       /* Set and activate a timer process */
@@ -644,7 +645,7 @@ static int btnet_ifup(FAR struct net_driver_s *dev)
  *   NuttX Callback: Stop the interface.
  *
  * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
+ *   netdev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
@@ -653,9 +654,10 @@ static int btnet_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int btnet_ifdown(FAR struct net_driver_s *dev)
+static int btnet_ifdown(FAR struct net_driver_s *netdev)
 {
-  FAR struct btnet_driver_s *priv = (FAR struct btnet_driver_s *)dev->d_private;
+  FAR struct btnet_driver_s *priv =
+    (FAR struct btnet_driver_s *)netdev->d_private;
   irqstate_t flags;
 
   /* Disable interruption */
@@ -736,7 +738,7 @@ static void btnet_txavail_work(FAR void *arg)
  *   latency.
  *
  * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
+ *   netdev - Reference to the NuttX driver state structure
  *
  * Returned Value:
  *   None
@@ -746,9 +748,10 @@ static void btnet_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int btnet_txavail(FAR struct net_driver_s *dev)
+static int btnet_txavail(FAR struct net_driver_s *netdev)
 {
-  FAR struct btnet_driver_s *priv = (FAR struct btnet_driver_s *)dev->d_private;
+  FAR struct btnet_driver_s *priv =
+    (FAR struct btnet_driver_s *)netdev->d_private;
 
   wlinfo("Available=%u\n", work_available(&priv->bd_pollwork));
 
@@ -775,7 +778,7 @@ static int btnet_txavail(FAR struct net_driver_s *dev)
  *   address filtering
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   netdev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be added
  *
  * Returned Value:
@@ -786,7 +789,8 @@ static int btnet_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int btnet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int btnet_addmac(FAR struct net_driver_s *netdev,
+                        FAR const uint8_t *mac)
 {
   /* Add the MAC address to the hardware multicast routing table.  Not used
    * with Bluetooth.
@@ -804,7 +808,7 @@ static int btnet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *   address filtering
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   netdev  - Reference to the NuttX driver state structure
  *   mac  - The MAC address to be removed
  *
  * Returned Value:
@@ -815,7 +819,8 @@ static int btnet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int btnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int btnet_rmmac(FAR struct net_driver_s *netdev,
+                       FAR const uint8_t *mac)
 {
   /* Remove the MAC address from the hardware multicast routing table  Not used
    * with Bluetooth.
@@ -832,9 +837,9 @@ static int btnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *   Calculate the MAC header length given the frame meta-data.
  *
  * Input Parameters:
- *   netdev    - The networkd device that will mediate the MAC interface
- *   meta      - Obfuscated meta-data structure needed to create the radio
- *               MAC header
+ *   netdev  - The networkd device that will mediate the MAC interface
+ *   meta    - Obfuscated meta-data structure needed to create the radio
+ *             MAC header
  *
  * Returned Value:
  *   A non-negative MAC header length is returned on success; a negated
@@ -843,7 +848,7 @@ static int btnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 static int btnet_get_mhrlen(FAR struct radio_driver_s *netdev,
-                         FAR const void *meta)
+                            FAR const void *meta)
 {
   /* Always report the maximum frame length. */
 
@@ -988,11 +993,16 @@ static int btnet_properties(FAR struct radio_driver_s *netdev,
  *   Register a network driver to access the Bluetooth layer using a 6LoWPAN
  *   IPv6 or AF_BLUETOOTH socket.
  *
- *   This function should be called only once from board bring-up logic
- *   *AFTER* any Bluetooth devices have been registered.
+ *   This function should be called by the Bluetooth driver *AFTER* it has
+ *   called bt_driver_register().  This function assocated the Bluetooth
+ *   driver with the highe level network stack.
+ *
+ *   REVISIT:  This probably should be re-partitioned.  It would may more
+ *   sense for the Bluetooth driver to just call bt_driver_register() and
+ *   let this function performed the Bluetooth stack configuration.
  *
  * Input Parameters:
- *   None
+ *   btdev - An instance of the low-level drivers interface structure.
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
@@ -1000,11 +1010,11 @@ static int btnet_properties(FAR struct radio_driver_s *netdev,
  *
  ****************************************************************************/
 
-int bt_netdev_register(void)
+int bt_netdev_register(FAR const struct bt_driver_s *btdev)
 {
   FAR struct btnet_driver_s *priv;
   FAR struct radio_driver_s *radio;
-  FAR struct net_driver_s  *dev;
+  FAR struct net_driver_s  *netdev;
   FAR struct bt_conn_cb_s *hcicb;
   FAR struct bt_l2cap_chan_s *l2capcb;
   int ret;
@@ -1023,18 +1033,18 @@ int bt_netdev_register(void)
   /* Initialize the driver structure */
 
   radio               = &priv->bd_dev;
-  dev                 = &radio->r_dev;
-  dev->d_ifup         = btnet_ifup;        /* I/F up (new IP address) callback */
-  dev->d_ifdown       = btnet_ifdown;      /* I/F down callback */
-  dev->d_txavail      = btnet_txavail;     /* New TX data callback */
+  netdev              = &radio->r_dev;
+  netdev->d_ifup      = btnet_ifup;        /* I/F up (new IP address) callback */
+  netdev->d_ifdown    = btnet_ifdown;      /* I/F down callback */
+  netdev->d_txavail   = btnet_txavail;     /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  dev->d_addmac       = btnet_addmac;      /* Add multicast MAC address */
-  dev->d_rmmac        = btnet_rmmac;       /* Remove multicast MAC address */
+  netdev->d_addmac    = btnet_addmac;      /* Add multicast MAC address */
+  netdev->d_rmmac     = btnet_rmmac;       /* Remove multicast MAC address */
 #endif
  #ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl        = btnet_ioctl;       /* Handle network IOCTL commands */
+  netdev->d_ioctl     = btnet_ioctl;       /* Handle network IOCTL commands */
 #endif
-  dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
+  netdev->d_private   = (FAR void *)priv;  /* Used to recover private state from netdev */
 
   /* Connection status change callbacks */
 
@@ -1068,7 +1078,7 @@ int bt_netdev_register(void)
 
   /* Set the network mask. */
 
-  btnet_netmask(dev);
+  btnet_netmask(netdev);
 
   /* Initialize the Network frame-related callbacks */
 
@@ -1087,7 +1097,7 @@ int bt_netdev_register(void)
 
   /* Put the interface in the down state. */
 
-  btnet_ifdown(dev);
+  btnet_ifdown(netdev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
