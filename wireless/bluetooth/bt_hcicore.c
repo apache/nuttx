@@ -49,9 +49,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/clock.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/bluetooth.h>
@@ -70,6 +73,14 @@
  ****************************************************************************/
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+/* Wait up to 2.5 seconds for a response.  This delay is arbitrary and
+ * intended only to avoid hangs while waiting for a response.  It may need
+ * to be adjusted.
+ */
+
+#define TIMEOUT_SEC    2
+#define TIMEOUT_NSEC   500 * 1024 * 1024
 
 /****************************************************************************
  * Private Types
@@ -1491,26 +1502,68 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
 
   wlinfo("opcode %x len %u\n", opcode, buf->len);
 
+  /* Set up for the wait */
+
   nxsem_init(&sync_sem, 0, 0);
   nxsem_setprotocol(&sync_sem, SEM_PRIO_NONE);
   buf->u.hci.sync = &sync_sem;
+
+  /* Send the frame */
 
   ret = bt_queue_send(g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
   if (ret < 0)
     {
       wlerr("ERROR: bt_queue_send() failed: %d\n", ret);
     }
-
-  if (ret >= 0)
+  else
     {
-      do
+      struct timespec abstime;
+      irqstate_t flags;
+
+      /* Wait for the response to the command.  An I/O error will be
+       * declared if the response does not occur within the timeout
+       * interval.
+       *
+       * Get the current time.  Not that we must be in critical section here
+       * so that we can be assured that there will be no context switches
+       * between the time that we calculate the delay time and until we get
+       * to the wait.
+       */
+
+      flags = enter_critical_section();
+      ret   = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret >= 0)
         {
-          ret = nxsem_wait(&sync_sem);
+          /* Add the offset to the time in the future */
+
+          abstime.tv_sec  += TIMEOUT_SEC;
+          abstime.tv_nsec += TIMEOUT_NSEC;
+
+          /* Handle carry from nanoseconds to seconds */
+
+          if (abstime.tv_nsec >= NSEC_PER_SEC)
+            {
+              abstime.tv_nsec -= NSEC_PER_SEC;
+              abstime.tv_sec++;
+            }
+
+          /* Now wait for the response.  The critical section will be
+           * released while we are waiting.
+           */
+
+          do
+            {
+              /* The timed wait could also be awakened by a signal */
+
+              ret = nxsem_timedwait(&sync_sem, &abstime);
+            }
+          while (ret == -EINTR);
         }
-      while (ret == -EINTR);
+
+      leave_critical_section(flags);
     }
 
-  /* Indicate failure if we failed to get the return parameters */
+  /* Indicate failure if we failed to get the response */
 
   if (ret >= 0)
     {
@@ -1525,7 +1578,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
         }
     }
 
-  if (rsp)
+  if (rsp != NULL)
     {
       *rsp = buf->u.hci.sync;
     }
