@@ -139,3 +139,7 @@ endif
 ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += xmc4_i2c.c
 endif
+
+ifeq ($(CONFIG_XMC4_USCI_SPI),y)
+CHIP_CSRCS += xmc4_spi.c
+endif
