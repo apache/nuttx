@@ -1550,7 +1550,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
               abstime.tv_sec++;
             }
 
-          /* Now wait for the response.  The critical section will be
+          /* Now wait for the response.  The scheduler lock will be
            * released while we are waiting.
            */
 
