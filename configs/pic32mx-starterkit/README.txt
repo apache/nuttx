@@ -438,9 +438,7 @@ Toolchains
   Another option is the mips-elf toolchain used with the Pinguino project.  This
   is a relatively current mips-elf GCC and should provide free C++ support as
   well. This toolchain can be downloded from the Pinguino website:
-  http://wiki.pinguino.cc/index.php/Main_Page#Download . There is some general
-  information about using the Pinguino mips-elf toolchain in this thread:
-  https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1821
+  http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
   See also configs/mirtoo/README.txt.  There is an experimental (untested)
   configuration for the Mirtoo platform in that directory.
@@ -465,10 +463,9 @@ Toolchains
      Rename:  kseg1_datamem to kseg1_data_mem
 
   Even then, there are more warnings from the linker and some undefined symbols
-  for non-NuttX code that resides in the unused Microchip libraries.  See this
-  email thread at https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1458 for more
-  information.  You will have to solve at least this undefined symbol problem if
-  you want to used the XC32 toolchain.
+  for non-NuttX code that resides in the unused Microchip libraries.  You will
+  have to solve at least this undefined symbol problem if you want to used the
+  XC32 toolchain.
 
   Windows Native Toolchains
   -------------------------

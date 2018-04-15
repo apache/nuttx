@@ -5,7 +5,7 @@
  *   Copyright (C) 2015 Filament - www.filament.com
  *   Author: Matt Thompson <mthompson@hexwave.com>
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *   Author: Gregory Nutt <spudarnia@yahoo.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  *   SAMD/SAML Series Data Sheet

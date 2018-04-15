@@ -257,20 +257,20 @@
  */
 
 #ifndef CONFIG_STM32F4DISBB
-#  define GPIO_USART2_RX GPIO_USART2_RX_1     /* PA3 */
-#  define GPIO_USART2_TX GPIO_USART2_TX_1     /* PA2 */
+#  define GPIO_USART2_RX GPIO_USART2_RX_1     /* PA3, P1 pin 13 */
+#  define GPIO_USART2_TX GPIO_USART2_TX_1     /* PA2, P1 pin 14 */
 #endif
 
 /* USART3:
  *
  * Used in pseudoterm configuration and also with the BT860 HCI UART.
- * RTS/CTS Flow control support is need by the HCI UART.
+ * RTS/CTS Flow control support is needed by the HCI UART.
  */
 
-#define GPIO_USART3_TX   GPIO_USART3_TX_1     /* PB10 */
-#define GPIO_USART3_RX   GPIO_USART3_RX_1     /* PB11 */
-#define GPIO_USART3_CTS  GPIO_USART3_CTS_1    /* PB13 */
-#define GPIO_USART3_RTS  GPIO_USART3_RTS_1    /* PB14 */
+#define GPIO_USART3_TX   GPIO_USART3_TX_1     /* PB10, P1 pin 34 (also MP45DT02 CLK_IN) */
+#define GPIO_USART3_RX   GPIO_USART3_RX_1     /* PB11, P1 pin 35 */
+#define GPIO_USART3_CTS  GPIO_USART3_CTS_1    /* PB13, P1 pin 37 */
+#define GPIO_USART3_RTS  GPIO_USART3_RTS_1    /* PB14, P1 pin 38 */
 
 /* USART6:
  *
@@ -278,8 +278,8 @@
  * for USART6.  This is the preferred serial console for use with the STM32F4DIS-BB.
  */
 
-#define GPIO_USART6_RX   GPIO_USART6_RX_1     /* PC7 */
-#define GPIO_USART6_TX   GPIO_USART6_TX_1     /* PC6 */
+#define GPIO_USART6_RX   GPIO_USART6_RX_1     /* PC7 (also I2S3_MCK and P2 pin 48) */
+#define GPIO_USART6_TX   GPIO_USART6_TX_1     /* PC6 (also P2 pin 47) */
 
 /* PWM
  *

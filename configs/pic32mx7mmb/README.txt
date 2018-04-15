@@ -156,9 +156,6 @@ Toolchains
   Pinguino project.  This is a relatively current mips-elf GCC and should
   provide free C++ support as well. This toolchain can be downloded from the
   Pinguino website:  http://wiki.pinguino.cc/index.php/Main_Page#Download .
-  There is some general information about using the Pinguino mips-elf
-  toolchain in this thread:
-  https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1821
 
   It should be a simple matter to adapt to other toolchains by modifying the
   Make.defs file include ineach configuration.
@@ -229,10 +226,9 @@ Toolchains
      Rename:  kseg1_datamem to kseg1_data_mem
 
   Even then, there are more warnings from the linker and some undefined symbols
-  for non-NuttX code that resides in the unused Microchip libraries.  See this
-  email thread at https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1458 for more
-  information.  You will have to solve at least this undefined symbol problem if
-  you want to used the XC32 toolchain.
+  for non-NuttX code that resides in the unused Microchip libraries.  You will
+  have to solve at least this undefined symbol problem if you want to used the
+  XC32 toolchain.
 
   Update: There have since been several successful uses of XC32 toolchains with
   NuttX.  XC32 is still not supported for this board, but you can see the README.txt

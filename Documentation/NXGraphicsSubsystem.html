@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: January 21, 2018</p>
+      <p>Last Updated: April 15, 2018</p>
     </td>
   </tr>
 </table>
@@ -3719,8 +3719,8 @@ sudo ln -s libXext.so.6.4.0 libXext.so
         <p><small>
           <b>NOTE</b>: There is a workaround in this case:
           You can build for 32-bit execution on a 64-bit machine by adding <code>-m3</code> to the <code>CFLAGS</code> and <code>-m32 -m elf_i386</code> to the <code>LDFLAGS</code>.
-          See the patch file <code>0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch</code>
-          that can be found in NuttX <a href="https://groups.yahoo.com/neo/groups/nuttx/files">files</a>.
+          The configuration/build system will do this for you;
+          you simply need to select <code>CONFIG_SIM_M32=y</code> in your configuration file.
         </small></p>
         </li>
         <li><p>

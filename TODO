@@ -1720,8 +1720,6 @@ o Libraries (libc/, libm/)
                providing patches, but we found it easier just to switch the
                math library."
 
-               Ref: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/7805
-
                UPDATE: 2015-09-01: A fix for the noted problems with asin()
                has been applied.
                2016-07-30: Numerous fixes and performance improvements from
@@ -2073,11 +2071,7 @@ o Graphics Subsystem (graphics/)
 
   Title:       WIDE-FONT SUPPORT
   Description: Wide fonts are not currently supported by the NuttX graphics sub-
-               system.  There is some discussion here:
-
-                 https://groups.yahoo.com/neo/groups/nuttx/conversations/topics/3507
-                 http://www.nuttx.org/doku.php?id=wiki:graphics:wide-fonts
-
+               system.
   Status:      Open
   Priority:    Low for many, but I imagine higher in countries that use wide fonts
 
@@ -2137,9 +2131,7 @@ o Other drivers (drivers/)
 
   Title:       ADD SUPPORT FOR CONTROL-C
   Description: Add support for control-C interrupts and perhaps other
-               interrupts generated from a keyboard.  See this thread for
-               additional thoughts:
-               https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/15761
+               interrupts generated from a keyboard.
   Status:      Open
   Priority:    Low.  This would make working with tasks at the NSH terminal
                more like working with processes via a Bash shell.  That is
@@ -2286,8 +2278,7 @@ o ARM (arch/arm/)
                interrupt, the stack pointer may increment and possibly overflow.
 
                This can happen only under conditions of continuous interrupts.
-               See this email thread: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1261
-               On suggested change is:
+               One suggested change is:
 
                  ldr  r1, [r0, #(4*REG_CPSR)] /* Fetch the stored CPSR value */
                  msr spsr_cxsf, r1 /* Set the CPSR */
