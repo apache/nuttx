@@ -490,9 +490,9 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
       for (i = destndx; i < endndx; i++)
         {
 #ifndef CONFIG_BIG_ENDIAN
-          if (usemac)
+          if (!usemac)
             {
-              /* Local address is already network order.  Retain host order */
+              /* Local address is in network order.  Switch to host order */
 
               ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
             }
@@ -517,7 +517,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       if (fullmac)
         {
-          ipaddr[7] ^= 0x0200;
+          ipaddr[7] ^= usemac ? HTONS(0x0200) :0x0200;
         }
 
       /* If we took the data from packet, then update the packet pointer */
