@@ -1203,6 +1203,26 @@ Configuration Sub-directories
        changed by modifying the disambiguation definitions in
        configs/stm32f4discovery/include/board.h
 
+       I have been testing with the DVK_BT960_SA board via J10 as follows:
+
+         DVK_BT860-SA J10     STM32F4 Discovery P1
+         pin 1  GND                             P1 pin 49
+         pin 2  Module_RTS_O  USART3_CTS PB13,  P1 pin 37
+         pin 3  N/C
+         pin 4  Module_RX_I   USART3_TXD PB10,  P1 pin 34
+         pin 5  Module_TX_O   USART3_RX  PB11,  P1 pin 35
+         pin 6  Module_CTS_I  USART3_RTS PB14,  P1 pin 38
+
+    3. Due to conflicts, USART3 many not be used if Ethernet is enabled with
+       the STM32F4DIS-BB base board:
+
+         PB-11 conflicts with Ethernet TXEN
+         PB-13 conflicts with Ethernet TXD1
+
+       If you need to use the HCI uart with Ethernet, then you will need to
+       configure a new U[S]ART and/or modify the pin selections in
+       include/board.h.
+
   ipv6:
   ----
     This is another version of the NuttShell configuration for the

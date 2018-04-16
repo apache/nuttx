@@ -319,8 +319,8 @@ static int  hciuart_dma_nextrx(const struct hciuart_config_s *config);
 #endif
 
 static uint16_t hciuart_rxinuse(const struct hciuart_config_s *config);
-static inline void hciuart_rxflow_enable(const struct hciuart_config_s *config);
-static inline void hciuart_rxflow_disable(const struct hciuart_config_s *config);
+static void hciuart_rxflow_enable(const struct hciuart_config_s *config);
+static void hciuart_rxflow_disable(const struct hciuart_config_s *config);
 static ssize_t hciuart_copytorxbuffer(const struct hciuart_config_s *config);
 static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
               uint8_t *dest, size_t destlen);
@@ -941,11 +941,13 @@ static uint16_t hciuart_rxinuse(const struct hciuart_config_s *config)
  * Name: hciuart_rxflow_enable
  *
  * Description:
- *   Enable software Rx flow control.
+ *   Enable software Rx flow control, i.e., clear the RTS output.  This will
+ *   be seen as CTS on the other end of the cable and the HCI UART device
+ *   must stop sending data.
  *
  ****************************************************************************/
 
-static inline void hciuart_rxflow_enable(const struct hciuart_config_s *config)
+static void hciuart_rxflow_enable(const struct hciuart_config_s *config)
 {
 #ifdef  CONFIG_STM32_HCIUART_SW_RXFLOW
   struct hciuart_state_s *state;
@@ -963,7 +965,7 @@ static inline void hciuart_rxflow_enable(const struct hciuart_config_s *config)
         {
           wlinfo("Enable RTS flow control\n");
 
-          stm32_gpiowrite(config->rts_gpio, true);
+          stm32_gpiowrite(config->rts_gpio, false);
           state->rxflow = true;
         }
     }
@@ -974,11 +976,13 @@ static inline void hciuart_rxflow_enable(const struct hciuart_config_s *config)
  * Name: hciuart_rxflow_disable
  *
  * Description:
- *   Enable software Rx flow control.
+ *   Disable software Rx flow control, i.e., set the RTS output.  This will
+ *   be seen as CTS on the other end of the cable and the HCI UART device
+ *   can resume sending data.
  *
  ****************************************************************************/
 
-static inline void hciuart_rxflow_disable(const struct hciuart_config_s *config)
+static void hciuart_rxflow_disable(const struct hciuart_config_s *config)
 {
 #ifdef  CONFIG_STM32_HCIUART_SW_RXFLOW
   struct hciuart_state_s *state;
@@ -994,7 +998,7 @@ static inline void hciuart_rxflow_disable(const struct hciuart_config_s *config)
         {
           wlinfo("Disable RTS flow control\n");
 
-          stm32_gpiowrite(config->rts_gpio, false);
+          stm32_gpiowrite(config->rts_gpio, true);
           state->rxflow = false;
         }
     }
@@ -1575,9 +1579,15 @@ static int hciuart_configure(const struct hciuart_config_s *config)
    * have broken HW based RTS behavior (they assert nRTS after every byte
    * received)  Enable this setting workaround this issue by using software
    * based management of RTS.
+   *
+   * Convert the RTS alternate function pin to a push-pull output with
+   * initial output value of zero, i.e., rx flow control enabled.  The HCI
+   * UART device should not send data until we assert RTS.
    */
 
-  pinset = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
+  regval = GPIO_MODE_MASK | GPIO_PUPD_MASK | GPIO_OPENDRAIN |
+           GPIO_OUTPUT_SET | GPIO_EXTI;
+  pinset = (config & ~regval) | GPIO_OUTPUT;
 #endif
   stm32_configgpio(pinset);
 
@@ -1650,6 +1660,9 @@ static int hciuart_configure(const struct hciuart_config_s *config)
                  (void *)config, true);
 #endif
 
+  /* Disable Rx flow control, i.e, assert RTS. */
+
+  hciuart_rxflow_disable(config);
   return OK;
 }
 

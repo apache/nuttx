@@ -265,6 +265,16 @@
  *
  * Used in pseudoterm configuration and also with the BT860 HCI UART.
  * RTS/CTS Flow control support is needed by the HCI UART.
+ *
+ * There are conflicts with the STM32F4DIS-BB Ethernet in this configuration
+ * when Ethernet is enabled:
+ *
+ *   PB-11 conflicts with Ethernet TXEN
+ *   PB-13 conflicts with Ethernet TXD1
+ *
+ * UART3 TXD and RXD are available on CON4 PD8 and PD8 of the STM32F4DIS-BB,
+ * respectively, but not CTS or RTS.  For now we assume that Ethernet is not
+ * enabled if USART3 is used in a configuration with the STM32F4DIS-BB.
  */
 
 #define GPIO_USART3_TX   GPIO_USART3_TX_1     /* PB10, P1 pin 34 (also MP45DT02 CLK_IN) */
