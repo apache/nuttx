@@ -45,6 +45,10 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
+EXTERN(hyperflash_config)
+EXTERN(image_vector_table)
+EXTERN(boot_data)
+
 ENTRY(_stext)
 
 SECTIONS
@@ -147,3 +151,4 @@ SECTIONS
 	.debug_pubnames 0 : { *(.debug_pubnames) }
 	.debug_aranges 0 : { *(.debug_aranges) }
 }
+

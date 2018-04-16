@@ -119,9 +119,20 @@ void imxrt_clockconfig(void)
 
   /* Set Dividers */
 
-  putreg32(CCM_CACRR_ARM_PODF(IMXRT_ARM_CLOCK_DIVIDER), IMXRT_CCM_CACRR);
-  putreg32(CCM_CBCDR_AHB_PODF(IMXRT_AHB_CLOCK_DIVIDER), IMXRT_CCM_CBCDR);
-  putreg32(CCM_CBCDR_IPG_PODF(IMXRT_IPG_CLOCK_DIVIDER), IMXRT_CCM_CBCDR);
+  reg = getreg32(IMXRT_CCM_CACRR);
+  reg &= ~CCM_CACRR_ARM_PODF_MASK;
+  reg |= CCM_CACRR_ARM_PODF(IMXRT_ARM_CLOCK_DIVIDER);
+  putreg32(reg, IMXRT_CCM_CACRR);
+
+  reg = getreg32(IMXRT_CCM_CBCDR);
+  reg &= ~CCM_CBCDR_AHB_PODF_MASK;
+  reg |= CCM_CBCDR_AHB_PODF(IMXRT_AHB_CLOCK_DIVIDER);
+  putreg32(reg, IMXRT_CCM_CBCDR);
+
+  reg = getreg32(IMXRT_CCM_CBCDR);
+  reg &= ~CCM_CBCDR_IPG_PODF_MASK;
+  reg |= CCM_CBCDR_IPG_PODF(IMXRT_IPG_CLOCK_DIVIDER);
+  putreg32(reg, IMXRT_CCM_CBCDR);
 
   /* Set PRE_PERIPH_CLK to PLL1 */
 
@@ -147,13 +158,13 @@ void imxrt_clockconfig(void)
   reg = getreg32(IMXRT_CCM_CSCDR1);
   reg &= CCM_CSCDR1_UART_CLK_SEL;
   reg |= CCM_CSCDR1_UART_CLK_SEL_PLL3_80;
-  putreg32(reg, IMXRT_CCM_CBCDR);
+  putreg32(reg, IMXRT_CCM_CSCDR1);
 
   /* Set UART divider to 1 */
 
   reg = getreg32(IMXRT_CCM_CSCDR1);
   reg &= CCM_CSCDR1_UART_CLK_PODF_MASK;
   reg |= CCM_CSCDR1_UART_CLK_PODF(0);
-  putreg32(reg, IMXRT_CCM_CBCDR);
+  putreg32(reg, IMXRT_CCM_CSCDR1);
 #endif
 }
