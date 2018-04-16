@@ -517,7 +517,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       if (fullmac)
         {
-          ipaddr[7] ^= usemac ? HTONS(0x0200) :0x0200;
+          ipaddr[7] ^= HTONS(0x0200);
         }
 
       /* If we took the data from packet, then update the packet pointer */
