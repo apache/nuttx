@@ -489,10 +489,21 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       for (i = destndx; i < endndx; i++)
         {
-          /* Big-endian, network order */
+#ifndef CONFIG_BIG_ENDIAN
+          if (usemac)
+            {
+              /* Local address is already network order.  Retain host order */
 
-          ipaddr[i] = (uint16_t)srcptr[1] << 8 | (uint16_t)srcptr[0];
-          srcptr += 2;
+              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
+            }
+          else
+#endif
+            {
+              /* Big-endian, network order */
+
+              ipaddr[i] = (uint16_t)srcptr[1] << 8 | (uint16_t)srcptr[0];
+              srcptr += 2;
+            }
         }
 
       /* Handle any remaining odd byte */
