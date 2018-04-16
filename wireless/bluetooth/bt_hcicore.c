@@ -868,7 +868,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
   wlinfo("started\n");
 
-  while (1)
+  for (; ; )
     {
       FAR struct bt_buf_s *buf;
 
@@ -918,7 +918,7 @@ static int hci_rx_kthread(int argc, FAR char *argv[])
 
   wlinfo("started\n");
 
-  while (1)
+  for (; ; )
     {
       ret = bt_queue_receive(g_btdev.rx_queue, &buf);
       if (ret < 0)
