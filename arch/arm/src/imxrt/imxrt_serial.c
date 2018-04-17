@@ -51,7 +51,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/serial/serial.h>
+
 #include <arch/serial.h>
 #include <arch/board/board.h>
 
@@ -296,6 +298,16 @@
 
 /* UART, if available, should have been assigned to ttyS0-7. */
 
+/* Power management definitions */
+
+#if defined(CONFIG_PM) && !defined(CONFIG_PM_SERIAL_ACTIVITY)
+#  define CONFIG_PM_SERIAL_ACTIVITY 10
+#endif
+
+#if defined(CONFIG_PM)
+#  define PM_IDLE_DOMAIN             0 /* Revisit */
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -339,6 +351,13 @@ static void imxrt_send(struct uart_dev_s *dev, int ch);
 static void imxrt_txint(struct uart_dev_s *dev, bool enable);
 static bool imxrt_txready(struct uart_dev_s *dev);
 static bool imxrt_txempty(struct uart_dev_s *dev);
+
+#ifdef CONFIG_PM
+static void up_pm_notify(struct pm_callback_s *cb, int dowmin,
+                         enum pm_state_e pmstate);
+static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -635,6 +654,14 @@ static struct uart_dev_s g_uart8port =
 };
 #endif
 
+#ifdef CONFIG_PM
+static  struct pm_callback_s g_serial_pmcb =
+{
+  .notify  = up_pm_notify,
+  .prepare = up_pm_prepare,
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -826,6 +853,12 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct imxrt_uart_s *)dev->priv;
+
+  /* Report serial activity to the power management logic */
+
+#if defined(CONFIG_PM) && CONFIG_PM_SERIAL_ACTIVITY > 0
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_SERIAL_ACTIVITY);
+#endif
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -1053,6 +1086,113 @@ static bool imxrt_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: up_pm_notify
+ *
+ * Description:
+ *   Notify the driver of new power state. This callback is  called after
+ *   all drivers have had the opportunity to prepare for the new power state.
+ *
+ * Input Parameters:
+ *
+ *    cb - Returned to the driver. The driver version of the callback
+ *         structure may include additional, driver-specific state data at
+ *         the end of the structure.
+ *
+ *    pmstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   None - The driver already agreed to transition to the low power
+ *   consumption state when when it returned OK to the prepare() call.
+ *
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_pm_notify(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
+{
+  switch (pmstate)
+    {
+      case(PM_NORMAL):
+        {
+          /* Logic for PM_NORMAL goes here */
+
+        }
+        break;
+
+      case(PM_IDLE):
+        {
+          /* Logic for PM_IDLE goes here */
+
+        }
+        break;
+
+      case(PM_STANDBY):
+        {
+          /* Logic for PM_STANDBY goes here */
+
+        }
+        break;
+
+      case(PM_SLEEP):
+        {
+          /* Logic for PM_SLEEP goes here */
+
+        }
+        break;
+
+      default:
+        /* Should not get here */
+        break;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: up_pm_prepare
+ *
+ * Description:
+ *   Request the driver to prepare for a new power state. This is a warning
+ *   that the system is about to enter into a new power state. The driver
+ *   should begin whatever operations that may be required to enter power
+ *   state. The driver may abort the state change mode by returning a
+ *   non-zero value from the callback function.
+ *
+ * Input Parameters:
+ *
+ *    cb - Returned to the driver. The driver version of the callback
+ *         structure may include additional, driver-specific state data at
+ *         the end of the structure.
+ *
+ *    pmstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   Zero - (OK) means the event was successfully processed and that the
+ *          driver is prepared for the PM state change.
+ *
+ *   Non-zero - means that the driver is not prepared to perform the tasks
+ *              needed achieve this power setting and will cause the state
+ *              change to be aborted. NOTE: The prepare() method will also
+ *              be called when reverting from lower back to higher power
+ *              consumption modes (say because another driver refused a
+ *              lower power state change). Drivers are not permitted to
+ *              return non-zero values when reverting back to higher power
+ *              consumption modes!
+ *
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static int up_pm_prepare(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
+{
+  /* Logic to prepare for a reduced power state goes here. */
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1094,6 +1234,16 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
+#ifdef CONFIG_PM
+  int ret;
+
+  /* Register to receive power management callbacks */
+
+  ret = pm_register(&g_serial_pmcb);
+  DEBUGASSERT(ret == OK);
+  UNUSED(ret);
+#endif
+
 #ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif

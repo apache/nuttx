@@ -42,7 +42,10 @@
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/power/pm.h>
+
 #include <arch/board/board.h>
 
 #include "nvic.h"
@@ -81,6 +84,31 @@
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int imxrt_timerisr(int irq, uint32_t *regs, void *arg)'
+
+#ifdef CONFIG_PM
+static void up_pm_notify(struct pm_callback_s *cb, int dowmin,
+                         enum pm_state_e pmstate);
+static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static  struct pm_callback_s g_timer_pmcb =
+{
+  .notify  = up_pm_notify,
+  .prepare = up_pm_prepare,
+};
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -102,6 +130,69 @@ static int imxrt_timerisr(int irq, uint32_t *regs, void *arg)
 }
 
 /****************************************************************************
+ * Name: up_pm_notify
+ *
+ * Description:
+ *   Notify the driver of new power state. This callback is  called after
+ *   all drivers have had the opportunity to prepare for the new power state.
+ *
+ * Input Parameters:
+ *
+ *    cb - Returned to the driver. The driver version of the callback
+ *         structure may include additional, driver-specific state data at
+ *         the end of the structure.
+ *
+ *    pmstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   None - The driver already agreed to transition to the low power
+ *   consumption state when when it returned OK to the prepare() call.
+ *
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_pm_notify(struct pm_callback_s *cb, int domain,
+                         enum pm_state_e pmstate)
+{
+  switch (pmstate)
+    {
+      case(PM_NORMAL):
+        {
+          /* Logic for PM_NORMAL goes here */
+
+        }
+        break;
+
+      case(PM_IDLE):
+        {
+          /* Logic for PM_IDLE goes here */
+
+        }
+        break;
+
+      case(PM_STANDBY):
+        {
+          /* Logic for PM_STANDBY goes here */
+
+        }
+        break;
+
+      case(PM_SLEEP):
+        {
+          /* Logic for PM_SLEEP goes here */
+
+        }
+        break;
+
+      default:
+        /* Should not get here */
+        break;
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -117,6 +208,9 @@ static int imxrt_timerisr(int irq, uint32_t *regs, void *arg)
 void arm_timer_initialize(void)
 {
   uint32_t regval;
+#ifdef CONFIG_PM
+  int ret;
+#endif
 
   /* Configure SysTick to interrupt at the requested rate */
 
@@ -132,6 +226,14 @@ void arm_timer_initialize(void)
   regval = (NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
             NVIC_SYSTICK_CTRL_ENABLE);
   putreg32(regval, NVIC_SYSTICK_CTRL);
+
+#ifdef CONFIG_PM
+  /* Register to receive power management callbacks */
+
+  ret = pm_register(&g_timer_pmcb);
+  DEBUGASSERT(ret == OK);
+  UNUSED(ret);
+#endif
 
   /* And enable the timer interrupt */
 
