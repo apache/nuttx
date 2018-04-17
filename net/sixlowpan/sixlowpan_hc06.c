@@ -271,8 +271,13 @@ static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
     {
       /* Compress IID to 16 bits: xxxx:xxxx:xxxx:xxxx:0000:00ff:fe00:XXXX */
 
-      *g_hc06ptr++ = ipaddr[7] >> 8;      /* Big-endian, network order */
+#ifdef CONFIG_BIG_ENDIAN
+      *g_hc06ptr++ = ipaddr[7] >> 8;        /* Preserve big-endian, network order */
       *g_hc06ptr++ = ipaddr[7] & 0xff;
+#else
+      *g_hc06ptr++ = ipaddr[7] & 0xff;      /* Preserve big-endian, network order */
+      *g_hc06ptr++ = ipaddr[7] >> 8;
+#endif
 
       return 2 << bitpos;       /* 16-bits */
     }
@@ -284,8 +289,13 @@ static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
 
       for (i = 4; i < 8; i++)
         {
-          *g_hc06ptr++ = ipaddr[i] >> 8;  /* Big-endian, network order */
+#ifdef CONFIG_BIG_ENDIAN
+          *g_hc06ptr++ = ipaddr[i] >> 8;    /* Preserve big-endian, network order */
           *g_hc06ptr++ = ipaddr[i] & 0xff;
+#else
+          *g_hc06ptr++ = ipaddr[i] & 0xff;  /* Preserve big-endian, network order */
+          *g_hc06ptr++ = ipaddr[i] >> 8;
+#endif
         }
 
       return 1 << bitpos;       /* 64-bits */
@@ -489,21 +499,10 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       for (i = destndx; i < endndx; i++)
         {
-#ifndef CONFIG_BIG_ENDIAN
-          if (!usemac)
-            {
-              /* Local address is in network order.  Switch to host order */
+          /* Big-endian, network order */
 
-              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
-            }
-          else
-#endif
-            {
-              /* Big-endian, network order */
-
-              ipaddr[i] = (uint16_t)srcptr[1] << 8 | (uint16_t)srcptr[0];
-              srcptr += 2;
-            }
+          ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
+          srcptr += 2;
         }
 
       /* Handle any remaining odd byte */
@@ -517,7 +516,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       if (fullmac)
         {
-          ipaddr[7] ^= HTONS(0x0200);
+          ipaddr[7] ^= 0x0200;
         }
 
       /* If we took the data from packet, then update the packet pointer */

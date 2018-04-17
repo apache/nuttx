@@ -82,12 +82,14 @@ struct btuart_lowerhalf_s
    * rxattach() allows the upper half logic to attach a callback function
    *   that will be used to inform the upper half that an Rx frame is
    *   available.  This callback will, most likely, be invoked in the
-   *   context of an interrupt callback.  The receive() method should then
-   *   be invoked in order to receive the obtain the Rx frame data.
+   *   context of an interrupt callback.  The callback function should
+   *   defer processing to the (high priority) work queue.  The receive()
+   *   method should then be invoked from the work queue logic in order to
+   *   receive the obtain the Rx frame data.
    * rxenable() may be used to enable or disable callback events.  This
    *   probably translates to enabling and disabled Rx interrupts at
-   *   the UART.  NOTE:  Rx event notification should be done sparingly:
-   *   Rx data overrun may occur when Rx events are disabled!
+   *   the UART.  NOTE:  Disabling Rx event notification should be done
+   *   sparingly:  Rx data overrun may occur when Rx events are disabled!
    */
 
   CODE void (*rxattach)(FAR const struct btuart_lowerhalf_s *lower,
