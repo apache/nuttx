@@ -764,19 +764,22 @@ static inline void hciuart_putreg32(const struct hciuart_config_s *config,
 static void hciuart_enableints(const struct hciuart_config_s *config,
                                uint32_t intset)
 {
-  uint32_t regval;
+  uint32_t cr1;
+  uint32_t cr2;
 
   /* And restore the interrupt state (see the interrupt enable/usage table
    * above)
    */
 
-  regval  = hciuart_getreg32(config, STM32_USART_CR1_OFFSET);
-  regval |= (intset & USART_CR1_USED_INTS);
-  hciuart_putreg32(config, STM32_USART_CR1_OFFSET, regval);
+  cr1  = hciuart_getreg32(config, STM32_USART_CR1_OFFSET);
+  cr1 |= (intset & USART_CR1_USED_INTS);
+  hciuart_putreg32(config, STM32_USART_CR1_OFFSET, cr1);
 
-  regval  = hciuart_getreg32(config, STM32_USART_CR3_OFFSET);
-  regval |= (intset & USART_CR3_EIE);
-  hciuart_putreg32(config, STM32_USART_CR3_OFFSET, regval);
+  cr2  = hciuart_getreg32(config, STM32_USART_CR3_OFFSET);
+  cr2 |= (intset & USART_CR3_EIE);
+  hciuart_putreg32(config, STM32_USART_CR3_OFFSET, cr2);
+
+  wlinfo("CR1 %08x CR2 %08x\n", cr1, cr2);
 }
 
 /****************************************************************************
@@ -793,19 +796,22 @@ static void hciuart_enableints(const struct hciuart_config_s *config,
 static void hciuart_disableints(const struct hciuart_config_s *config,
                                 uint32_t intset)
 {
-  uint32_t regval;
+  uint32_t cr1;
+  uint32_t cr2;
 
   /* And restore the interrupt state (see the interrupt enable/usage table
    * above)
    */
 
-  regval  = hciuart_getreg32(config, STM32_USART_CR1_OFFSET);
-  regval &= ~(intset & USART_CR1_USED_INTS);
-  hciuart_putreg32(config, STM32_USART_CR1_OFFSET, regval);
+  cr1  = hciuart_getreg32(config, STM32_USART_CR1_OFFSET);
+  cr1 &= ~(intset & USART_CR1_USED_INTS);
+  hciuart_putreg32(config, STM32_USART_CR1_OFFSET, cr1);
 
-  regval  = hciuart_getreg32(config, STM32_USART_CR3_OFFSET);
-  regval &= ~(intset & USART_CR3_EIE);
-  hciuart_putreg32(config, STM32_USART_CR3_OFFSET, regval);
+  cr2  = hciuart_getreg32(config, STM32_USART_CR3_OFFSET);
+  cr2 &= ~(intset & USART_CR3_EIE);
+  hciuart_putreg32(config, STM32_USART_CR3_OFFSET, cr2);
+
+  wlinfo("CR1 %08x CR2 %08x\n", cr1, cr2);
 }
 
 /****************************************************************************
@@ -1426,19 +1432,12 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
   hciuart_putreg32(config, STM32_USART_CR1_OFFSET, regval);
   hciuart_putreg32(config, STM32_USART_BRR_OFFSET, brr);
 
-  /* Configure parity mode
+  /* Configure parity mode and word length
    *
-   * HCI UART spec requires:  No parity
+   * HCI UART spec requires:  8 data bits, No parity
    */
 
   regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
-
-  /* Configure word length
-   *
-   * HCI UART spec requires:  8 data bits
-   */
-
-  regval |= USART_CR1_M;
   hciuart_putreg32(config, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure STOP bits

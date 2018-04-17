@@ -1276,6 +1276,8 @@ int bt_initialize(void)
   FAR const struct bt_driver_s *btdev = g_btdev.btdev;
   int ret;
 
+  wlinfo("btdev %p\n", btdev);
+
   DEBUGASSERT(btdev != NULL);
   bt_buf_initialize();
 
