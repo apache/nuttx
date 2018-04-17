@@ -339,6 +339,8 @@ static int btuart_open(FAR const struct bt_driver_s *dev)
   FAR struct btuart_upperhalf_s *upper;
   FAR const struct btuart_lowerhalf_s *lower;
 
+  wlinfo("dev %p\n", dev);
+
   upper = (FAR struct btuart_upperhalf_s *)dev;
   DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;

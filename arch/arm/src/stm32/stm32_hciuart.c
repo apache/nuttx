@@ -827,13 +827,15 @@ static bool hciuart_isenabled(const struct hciuart_config_s *config,
    */
 
   regval  = hciuart_getreg32(config, STM32_USART_CR1_OFFSET);
-  if ((regval & USART_CR1_USED_INTS) != 0)
+  regval &= USART_CR1_USED_INTS;
+  if ((regval & intset) != 0)
     {
       return true;
     }
 
   regval  = hciuart_getreg32(config, STM32_USART_CR3_OFFSET);
-  if ((regval & USART_CR3_EIE) != 0)
+  regval &= USART_CR3_EIE;
+  if ((regval & intset) != 0)
     {
       return true;
     }
