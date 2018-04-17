@@ -1223,6 +1223,37 @@ Configuration Sub-directories
        configure a new U[S]ART and/or modify the pin selections in
        include/board.h.
 
+    4. Stack sizes are large and non-optimal.  Don't judge memory usage
+       without tuning.
+
+    5. I tested using the Laird DVK_BT860.  The BT860 defaults to 115200
+       BAUD but is capable of transfers up to 4M.  The documentation says
+       that the part supports auto baudrate detection, but I have found no
+       documentation on how to use that.
+
+       Currently only a fixed, configurable BAUD is used and this must
+       be set to the BT860 default.
+
+       Baud rate can be set with vendor-specific command.  Ideally, the
+       sequence would be:  (1) start at default baud rate, (2) get local
+       version info, (3) send the vendor-specific baud rate change command,
+       (4) wait for response, and (5) set local UART to higher baud rate.
+
+       The custom, vendor-specific command is
+
+         {0x18, 0xfc, 0x06, 0x00, 0x00, NN, NN, NN, NN}
+
+       where {NN, NN, NN, NN} is the requested baud in little endian byte order.
+
+       If an initialization script is used then (5) then send initialization
+       scripts script.  After sending the last command from the
+       initialization script, (6) reset the local UART.  Finally, (7) send
+       vendor-specific baud rate change command, (8) wait for response, and
+       (9) set local UART to high baud rate.
+
+       The command to write the initialization script into NVRAM is another
+       story for another time and another place.
+
   ipv6:
   ----
     This is another version of the NuttShell configuration for the

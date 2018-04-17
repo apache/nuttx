@@ -44,6 +44,7 @@ if DRIVERS_BLUETOOTH
 config BLUETOOTH_UART
 	bool "Bluetooth UART driver"
 	default n
+	select SCHED_HPWORK
 	---help---
 		Enable Bluetooth UART driver.
 
