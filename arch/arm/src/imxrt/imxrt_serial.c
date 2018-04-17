@@ -344,11 +344,6 @@ static bool imxrt_txempty(struct uart_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
-/* Used to assure mutually exclusive access up_putc() */
-/* REVISIT:  This is referenced anywhere and generates a warning. */
-
-static sem_t g_putc_lock = SEM_INITIALIZER(1);
-
 /* Serial driver UART operations */
 
 static const struct uart_ops_s g_uart_ops =
@@ -684,7 +679,7 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
       *ie = regval & LPUART_ALL_INTS;
     }
 
-  regval &= ~ LPUART_ALL_INTS;
+  regval &= ~LPUART_ALL_INTS;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
   leave_critical_section(flags);
 }
@@ -732,11 +727,11 @@ static int imxrt_setup(struct uart_dev_s *dev)
 
   ret = imxrt_lpuart_configure(priv->uartbase, &config);
 
-  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) | LPUART_ALL_INTS;
+  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & LPUART_ALL_INTS;
   return ret;
 
 #else
-  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) | LPUART_ALL_INTS;
+  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & LPUART_ALL_INTS;
   return OK;
 #endif
 }
@@ -949,7 +944,7 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
   uint32_t regval = 0;
 
-  /* Enable interrupts for data available at Rx FIFO */
+  /* Enable interrupts for data available at Rx */
 
   if (enable)
     {
@@ -962,7 +957,7 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
       priv->ie &= ~LPUART_CTRL_RIE;
     }
 
-  regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) | priv->ie;
+  regval = (imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & ~LPUART_ALL_INTS) | priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
 }
 
@@ -1010,9 +1005,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
   uint32_t regval = 0;
 
-  /* We won't take an interrupt until the FIFO is completely empty (although
-   * there may still be a transmission in progress).
-   */
+  /* Enable interrupt for TX complete */
 
   if (enable)
     {
@@ -1025,7 +1018,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
       priv->ie &= ~LPUART_CTRL_TCIE;
     }
 
-  regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) | priv->ie;
+  regval = (imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & ~LPUART_ALL_INTS) | priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
 }
 

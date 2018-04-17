@@ -226,9 +226,9 @@
 #define LPUART_BAUD_RDMAE              (1 << 21) /* Bit 21: Receiver Full DMA Enable */
                                                  /* Bit 22: Reserved */
 #define LPUART_BAUD_TDMAE              (1 << 23) /* Bit 23: Transmitter DMA Enable */
-#define LPUART_BAUD_OSR_SHIFT          (28)      /* Bits 24-28: Oversampling Ratio */
-#define LPUART_BAUD_OSR_MASK           (31 << LPUART_BAUD_OSR_SHIFT)
-  #define LPUART_BAUD_OSR(n)           ((uint32_t)((n) - 1) << LPUART_BAUD_OSR_SHIFT)
+#define LPUART_BAUD_OSR_SHIFT          (24)      /* Bits 24-28: Oversampling Ratio */
+#define LPUART_BAUD_OSR_MASK           (15 << LPUART_BAUD_OSR_SHIFT)
+#  define LPUART_BAUD_OSR(n)           ((uint32_t)((n) - 1) << LPUART_BAUD_OSR_SHIFT)
 #define LPUART_BAUD_M10                (1 << 29) /* Bit 20: 10-bit Mode select */
 #define LPUART_BAUD_MAEN2              (1 << 30) /* Bit 30: Match Address Mode Enable 2 */
 #define LPUART_BAUD_MAEN1              (1 << 31) /* Bit 31: Match Address Mode Enable 1 */
