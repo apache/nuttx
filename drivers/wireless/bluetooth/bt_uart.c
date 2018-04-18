@@ -212,6 +212,7 @@ static FAR struct bt_buf_s *btuart_acl_recv(FAR struct btuart_upperhalf_s *upper
 static void btuart_rxwork(FAR void *arg)
 {
   FAR struct btuart_upperhalf_s *upper;
+  FAR const struct btuart_lowerhalf_s *lower;
   static FAR struct bt_buf_s *buf;
   static unsigned int hdrlen;
   static int remaining;
@@ -219,7 +220,8 @@ static void btuart_rxwork(FAR void *arg)
   uint8_t type;
 
   upper = (FAR struct btuart_upperhalf_s *)arg;
-  DEBUGASSERT(upper != NULL);
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
+  lower = upper->lower;
 
   /* Beginning of a new packet.  Read the first byte to get the packet type. */
 
@@ -251,8 +253,7 @@ static void btuart_rxwork(FAR void *arg)
 
   if (buf == NULL)
     {
-      FAR const struct btuart_lowerhalf_s *lower = upper->lower;
-      DEBUGASSERT(lower != NULL);
+      /* Failed to allocate a buffer.  Drain the Rx data and fail the read. */
 
       nread = lower->rxdrain(lower);
       wlwarn("WARNING: Discarded %ld bytes\n", (long)nread);
@@ -276,9 +277,15 @@ static void btuart_rxwork(FAR void *arg)
       remaining -= nread;
     }
 
+  wlinfo("Full packet received\n");
+
+  /* Drain any un-read bytes from the Rx buffer */
+
+  nread = lower->rxdrain(lower);
+  wlwarn("WARNING: Discarded %ld bytes\n", (long)nread);
+
   /* Pass buffer to the stack */
 
-  wlinfo("Full packet received\n");
   upper->busy = false;
   bt_hci_receive(buf);
   return;

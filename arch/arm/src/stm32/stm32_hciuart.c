@@ -1154,7 +1154,7 @@ static ssize_t hciuart_copytorxbuffer(const struct hciuart_config_s *config)
       nxsem_post(&state->rxwait);
     }
 
-  wlinfo("nbytes %ld\n", (long)nbytes);
+  wlinfo("rxhead %u rxtail %u nbytes %ld\n", rxhead, rxtail, (long)nbytes);
   return nbytes;
 }
 
@@ -1171,7 +1171,7 @@ static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
                                         uint8_t *dest, size_t destlen)
 {
   struct hciuart_state_s *state;
-  ssize_t nbytes = 0;
+  ssize_t nbytes;
   uint16_t rxhead;
   uint16_t rxtail;
   uint8_t rxbyte;
@@ -1181,20 +1181,14 @@ static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
   state  = config->state;
   rxhead = state->rxhead;
   rxtail = state->rxtail;
+  nbytes = 0;
 
-  /* Is there data available in the Rx FIFO? */
+  /* Is there data available in the Rx buffer?  Is there space in the user
+   * buffer?
+   */
 
-  while ((hciuart_getreg32(config, STM32_USART_SR_OFFSET) & USART_SR_RXNE) != 0)
+  while (rxhead != rxtail && nbytes < destlen)
     {
-      /* Is the Rx buffer empty? Is there space in the user buffer? */
-
-      if (rxhead == rxtail && nbytes < destlen)
-        {
-          /* Yes, stop the copy and update the indices */
-
-          break;
-        }
-
       /* Get a byte from the head of the Rx buffer */
 
       rxbyte = config->rxbuffer[rxhead];
@@ -1202,6 +1196,9 @@ static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
       /* And add it to the caller's buffer buffer */
 
       dest[nbytes] = rxbyte;
+
+      /* Update indices and counts */
+
       nbytes++;
 
       if (++rxhead >= config->rxbufsize)
@@ -1218,7 +1215,7 @@ static ssize_t hciuart_copyfromrxbuffer(const struct hciuart_config_s *config,
 
   state->rxhead = rxhead;
 
-  wlinfo("nbytes %ld\n", (long)nbytes);
+  wlinfo("rxhead %u rxtail %u nbytes %ld\n", rxhead, rxtail, (long)nbytes);
   return nbytes;
 }
 
