@@ -238,6 +238,7 @@ static void hci_cmd_done(uint16_t opcode, uint8_t status,
 
       if (status != 0)
         {
+          wlwarn("WARNING: status %u\n", status);
           sent->u.hci.sync = NULL;
         }
       else
@@ -276,7 +277,7 @@ static void hci_cmd_complete(FAR struct bt_buf_s *buf)
         break;
 
       default:
-        wlinfo("Unhandled opcode %x\n", opcode);
+        wlinfo("Unhandled opcode %04x\n", opcode);
         break;
     }
 
@@ -296,14 +297,14 @@ static void hci_cmd_status(FAR struct bt_buf_s *buf)
   FAR struct bt_hci_evt_cmd_status_s *evt = (FAR void *)buf->data;
   uint16_t opcode = BT_LE162HOST(evt->opcode);
 
-  wlinfo("opcode %x\n", opcode);
+  wlinfo("opcode %04x\n", opcode);
 
   bt_buf_consume(buf, sizeof(*evt));
 
   switch (opcode)
     {
       default:
-        wlinfo("Unhandled opcode %x\n", opcode);
+        wlinfo("Unhandled opcode %04x\n", opcode);
         break;
     }
 
@@ -810,7 +811,7 @@ static void hci_le_meta_event(FAR struct bt_buf_s *buf)
         break;
 
       default:
-        wlinfo("Unhandled LE event %x\n", evt->subevent);
+        wlinfo("Unhandled LE event %04x\n", evt->subevent);
         break;
     }
 }
@@ -1131,8 +1132,8 @@ static int hci_initialize(void)
   hbs = bt_buf_extend(buf, sizeof(*hbs));
   memset(hbs, 0, sizeof(*hbs));
   hbs->acl_mtu = BT_HOST2LE16(BLUETOOTH_MAX_FRAMELEN -
-                                 sizeof(struct bt_hci_acl_hdr_s) -
-                                 g_btdev.btdev->head_reserve);
+                              sizeof(struct bt_hci_acl_hdr_s) -
+                              g_btdev.btdev->head_reserve);
   hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_RXTHREAD_NMSGS);
 
   ret = bt_hci_cmd_send(BT_HCI_OP_HOST_BUFFER_SIZE, buf);
@@ -1424,7 +1425,7 @@ FAR struct bt_buf_s *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
   FAR struct bt_hci_cmd_hdr_s *hdr;
   FAR struct bt_buf_s *buf;
 
-  wlinfo("opcode %x param_len %u\n", opcode, param_len);
+  wlinfo("opcode %04x param_len %u\n", opcode, param_len);
 
   buf = bt_buf_alloc(BT_CMD, NULL, g_btdev.btdev->head_reserve);
   if (!buf)
@@ -1459,7 +1460,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
         }
     }
 
-  wlinfo("opcode %x len %u\n", opcode, buf->len);
+  wlinfo("opcode %04x len %u\n", opcode, buf->len);
 
   /* Host Number of Completed Packets can ignore the ncmd value and does not
    * generate any cmd complete/status events.
@@ -1502,7 +1503,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
         }
     }
 
-  wlinfo("opcode %x len %u\n", opcode, buf->len);
+  wlinfo("opcode %04x len %u\n", opcode, buf->len);
 
   /* Set up for the wait */
 
@@ -1587,7 +1588,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
     {
       *rsp = buf->u.hci.sync;
     }
-  else if (buf->u.hci.sync)
+  else if (buf->u.hci.sync != NULL)
     {
       bt_buf_release(buf->u.hci.sync);
     }

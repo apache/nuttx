@@ -48,6 +48,13 @@ config BLUETOOTH_UART
 	---help---
 		Enable Bluetooth UART driver.
 
+config BLUETOOTH_UART_DUMP
+	bool "Dump HCI UART I/O buffers"
+	default n
+	depends on BLUETOOTH_UART && DEBUG_WIRELESS_INFO
+	---help---
+		Dump the full content of all outgoing and incoming messages.
+
 config BLUETOOTH_NULL
 	bool "NULL Bluetooth device"
 	default n

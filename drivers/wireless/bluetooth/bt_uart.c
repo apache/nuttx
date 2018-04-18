@@ -62,10 +62,16 @@
 
 #define H4_HEADER_SIZE  1
 
-#define H4_CMD          0x01
-#define H4_ACL          0x02
-#define H4_SCO          0x03
-#define H4_EVT          0x04
+#define H4_CMD           0x01
+#define H4_ACL           0x02
+#define H4_SCO           0x03
+#define H4_EVT           0x04
+
+#ifdef CONFIG_BLUETOOTH_UART_DUMP
+#  define BT_DUMP(m,b,l) lib_dumpbuffer(m,b,l)
+#else
+#  define BT_DUMP(m,b,l)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -265,8 +271,8 @@ static void btuart_rxwork(FAR void *arg)
       goto errout_with_buf;
     }
 
-  remaining = hdrlen - 1;
-  wlinfo("Need to get %u of %u bytes\n", remaining, hdrlen);
+  remaining = hdrlen;
+  wlinfo("Need to get %u bytes\n", remaining);
 
   while (remaining > 0)
     {
@@ -282,11 +288,16 @@ static void btuart_rxwork(FAR void *arg)
   /* Drain any un-read bytes from the Rx buffer */
 
   nread = lower->rxdrain(lower);
-  wlwarn("WARNING: Discarded %ld bytes\n", (long)nread);
+  if (nread > 0)
+    {
+      wlwarn("WARNING: Discarded %ld bytes\n", (long)nread);
+    }
 
   /* Pass buffer to the stack */
 
   upper->busy = false;
+
+  BT_DUMP("Received",  buf->data, buf->len);
   bt_hci_receive(buf);
   return;
 
@@ -358,6 +369,8 @@ static int btuart_send(FAR const struct bt_driver_s *dev,
         wlerr("Unknown buf type %u\n", buf->type);
         return -EINVAL;
     }
+
+  BT_DUMP("Sending",  buf->data, buf->len);
 
   nwritten = lower->write(lower, buf->data, buf->len);
   if (nwritten == buf->len)
