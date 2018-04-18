@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_lowputc.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Includes some logic from TI sample which has a compatibile three-clause
@@ -55,6 +55,7 @@
 #include "up_arch.h"
 
 #include "chip/tms570_sci.h"
+#include "chip/tms570_iomm.h"
 #include "tms570_lowputc.h"
 
 /****************************************************************************
@@ -112,8 +113,31 @@ static const struct sci_config_s g_console_config =
 
 static void tms570_sci_initialize(uint32_t base)
 {
+#if 0
+  uint32_t reg;
+
+  reg = 0x83e70b13u;
+  putreg32(reg,TMS570_IOMM_KICK0);
+
+  reg = 0x95a4f1e0u;
+  putreg32(reg,TMS570_IOMM_KICK1);
+
+  reg = (2 << 16);
+  putreg32(reg,TMS570_IOMM_PINMMR7);
+
+  reg = (2 << 0);
+  putreg32(reg,TMS570_IOMM_PINMMR8);
+
+  reg = 0;
+  putreg32(reg,TMS570_IOMM_KICK0);
+
+  reg = 0;
+  putreg32(reg,TMS570_IOMM_KICK1);
+#endif
+
   /* Bring SCI1 out of reset */
 
+  putreg32(0x0, base + TMS570_SCI_GCR0_OFFSET);
   putreg32(SCI_GCR0_RESET, base + TMS570_SCI_GCR0_OFFSET);
 
   /* Configure pins */
@@ -258,9 +282,9 @@ void tms570_lowsetup(void)
 
 int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
 {
-  uint64_t divb7;
-  uint64_t intpart;
-  uint64_t frac;
+  float32 divb7;
+  uint32_t intpart;
+  float32 frac;
   uint32_t p;
   uint32_t m;
   uint32_t u;
@@ -274,26 +298,11 @@ int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
    * Asynchronous timing is assumed.
    */
 
-  divb7 = ((uint64_t)BOARD_VCLK_FREQUENCY << 7) / (config->baud >> 4);
+  divb7 = BOARD_VCLK_FREQUENCY / (config->baud * 16) ;
 
   /* Break out the integer and fractional parts */
 
-  intpart = divb7 >> 7;
-  if (intpart < 1)
-    {
-      /* Baud cannot be represented */
-
-      DEBUGPANIC();
-      return -ERANGE;
-    }
-
-  if (--intpart > 0x00ffffff)
-    {
-      /* Baud cannot be represented */
-
-      DEBUGPANIC();
-      return -ERANGE;
-    }
+  intpart = (uint32_t)divb7;
 
   /* Disable all interrupts and map them all to INT0 */
 
@@ -338,14 +347,13 @@ int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
       gcr1 |= SCI_GCR1_STOP;
     }
 
+  gcr1 = 0;
+  gcr1 = (SCI_GCR1_TIMING | SCI_GCR1_CLOCK | SCI_GCR1_RXENA | SCI_GCR1_TXENA);
   putreg32(gcr1, base + TMS570_SCI_GCR1_OFFSET);
 
-  /* Set baud divisor using the pre-calculated values */
-
-  p      = (uint32_t)intpart;
-  frac   = (uint32_t)(divb7 & 0x3f);
-  m      = frac >> 3;
-  u      = frac & 3;
+  p    = (uint32_t)intpart - 1;
+  m    = (divb7 - intpart) * 16;
+  u    = 0;
 
   regval = SCI_BRS_P(p) | SCI_BRS_M(m) | SCI_BRS_U(u);
   putreg32(regval, base + TMS570_SCI_BRS_OFFSET);

@@ -176,6 +176,9 @@
 
 /* Register Bit-Field Definitions *******************************************************************/
 
+#define SYS_GLBSTAT_OSC_ERR_MASK        (0x01)
+#define SYS_GLBSTAT_OSC_ERR_CLR         (0x0301)
+
 /* SYS Pin Control Register 1 */
 
 #define SYS_PC1_ECPCLKFUN               (1 << 0)  /* Bit 0: ECLK function */
@@ -221,13 +224,17 @@
 #define SYS_CSDIS_CLKSR3OFF             (1 << 3)  /* Bit 3: Clock source 3 */
 #define SYS_CSDIS_CLKSR4OFF             (1 << 4)  /* Bit 4: Clock source 4 */
 #define SYS_CSDIS_CLKSR5OFF             (1 << 5)  /* Bit 5: Clock source 5 */
-#define SYS_CSDIS_CLKSROFFALL           (0x3b)
+#define SYS_CSDIS_CLKSR6OFF             (1 << 6)  /* Bit 4: Clock source 4 */
+#define SYS_CSDIS_CLKSR7OFF             (1 << 7)  /* Bit 5: Clock source 5 */
+#define SYS_CSDIS_CLKSROFFALL           (0xff)
 
 #define SYS_CSDIS_CLKSRC_OSC            SYS_CSDIS_CLKSR0OFF /* Oscillator */
-#define SYS_CSDIS_CLKSRC_PLL            SYS_CSDIS_CLKSR1OFF /* PLL */
-#define SYS_CSDIS_CLKSRC_EXTCLKIN       SYS_CSDIS_CLKSR3OFF /* EXTCLKIN */
+#define SYS_CSDIS_CLKSRC_PLL1           SYS_CSDIS_CLKSR1OFF /* PLL1 */
+#define SYS_CSDIS_CLKSRC_EXTCLKIN1      SYS_CSDIS_CLKSR3OFF /* EXTCLKIN */
 #define SYS_CSDIS_CLKSRC_LFLPO          SYS_CSDIS_CLKSR4OFF /* Low Frequency LPO (Low Power Oscillator) clock */
 #define SYS_CSDIS_CLKSRC_HFLPO          SYS_CSDIS_CLKSR5OFF /* High Frequency LPO (Low Power Oscillator) clock */
+#define SYS_CSDIS_CLKSRC_PLL2           SYS_CSDIS_CLKSR6OFF /* PLL2 */
+#define SYS_CSDIS_CLKSRC_EXTCLKIN2      SYS_CSDIS_CLKSR7OFF /* EXTCLKIN2 */
 
 /* Clock Domain Disable Register, Clock Domain Disable Set Register, and Clock Domain
  * Disable Clear Register.
@@ -339,6 +346,29 @@
 #  define SYS_VCLKASRC_VCLKA1S_EXTERNAL2  SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_EXTERNAL2)
 #  define SYS_VCLKASRC_VCLKA1S_VCLK       SYS_VCLKASRC_VCLKA1S(SYS_CLKSRC_VCLK)
 
+#if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+#define SYS_VCLKASRC_VCLKA2S_SHIFT      (8)      /* Bits 0-3: Peripheral asynchronous clock2 source */
+#define SYS_VCLKASRC_VCLKA2S_MASK       (15 << SYS_VCLKASRC_VCLKA2S_SHIFT)
+#  define SYS_VCLKASRC_VCLKA2S_SRC0     (0 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source0 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC1     (1 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source1 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC2     (2 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source2 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC3     (3 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source3 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC4     (4 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source4 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC5     (5 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source5 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC6     (6 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source6 for VCLKA2S */
+#  define SYS_VCLKASRC_VCLKA2S_SRC7     (7 << SYS_VCLKASRC_VCLKA2S_SHIFT) /* Clock source7 for VCLKA2S */
+
+#  define SYS_VCLKASRC_VCLKA2S(n)         ((uint32_t)(n) << SYS_VCLKASRC_VCLKA2S_SHIFT)
+#  define SYS_VCLKASRC_VCLKA2S_OSC        SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_OSC)
+#  define SYS_VCLKASRC_VCLKA2S_PLL1       SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_PLL1)
+#  define SYS_VCLKASRC_VCLKA2S_EXTERNAL1  SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_EXTERNAL1)
+#  define SYS_VCLKASRC_VCLKA2S_LPOLOW     SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_LPOLOW)
+#  define SYS_VCLKASRC_VCLKA2S_LPOHIGH    SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_LPOHIGH)
+#  define SYS_VCLKASRC_VCLKA2S_PLL2       SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_PLL2)
+#  define SYS_VCLKASRC_VCLKA2S_EXTERNAL2  SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_EXTERNAL2)
+#  define SYS_VCLKASRC_VCLKA2S_VCLK       SYS_VCLKASRC_VCLKA2S(SYS_CLKSRC_VCLK)
+#endif
+
 /* RTI Clock Source Register */
 
 #define SYS_RCLKSRC_RTI1SRC_SHIFT       (0)      /* Bits 0-3: RTI clock1 source */
@@ -401,7 +431,16 @@
 
 #if defined(CONFIG_ARCH_CHIP_TMS570LS0332PZ) || defined(CONFIG_ARCH_CHIP_TMS570LS0432PZ)
   /* From TMS570LS0x32 Data Sheet */
+#  define SYS_MSIENA_RAM                (1 << 0)
+#  define SYS_MSIENA_VIM_RAM            (1 << 2)
+#  define SYS_MSIENA_N2HET_RAM          (1 << 3)
+#  define SYS_MSIENA_HTU_RAM            (1 << 4)
+#  define SYS_MSIENA_DCAN1_RAM          (1 << 5)
+#  define SYS_MSIENA_DCAN2_RAM          (1 << 6)
+#  define SYS_MSIENA_MIBSPI1_RAM        (1 << 7)
+#  define SYS_MSIENA_MIBADC_RAM         (1 << 8)
 
+#elif defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
 #  define SYS_MSIENA_RAM                (1 << 0)
 #  define SYS_MSIENA_VIM_RAM            (1 << 2)
 #  define SYS_MSIENA_N2HET_RAM          (1 << 3)
@@ -439,7 +478,7 @@
 #define SYS_PLLCTL1_MASKSLIP_SHIFT      (29)      /* Bits 29-30: Mask detection of PLL slip */
 #define SYS_PLLCTL1_MASKSLIP_MASK       (3 << SYS_PLLCTL1_MASKSLIP_SHIFT)
 #  define SYS_PLLCTL1_MASKSLIP_DISABLE  (0 << SYS_PLLCTL1_MASKSLIP_SHIFT) /* All values but 2 disable */
-#  define SYS_PLLCTL1_MASKSLIP_ENABLE   (2 << SYS_PLLCTL1_MASKSLIP_SHIFT)
+#  define SYS_PLLCTL1_MASKSLIP_ENABLE   (1 << SYS_PLLCTL1_MASKSLIP_SHIFT)
 #define SYS_PLLCTL1_ROS                 (1 << 31)  /* Bit 31:  Reset on PLL Slip */
 
 /* PLL Control Register 2 */

@@ -56,6 +56,8 @@
 #  error No pin multiplexing for the TMS570LS0714ZWT
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS1227ZWT)
 #  error No pin multiplexing for the TMS570LS1227ZWT
+#elif defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+#  include "chip/tms570ls04x03x_pinmux.h"
 #else
 #  error "Unrecognized Hercules chip"
 #endif

@@ -132,6 +132,8 @@ void up_initial_state(struct tcb_s *tcb)
 #ifndef CONFIG_ARMV7R_DECODEFIQ
 
   cpsr |= PSR_F_BIT;
+  cpsr |= PSR_A_BIT;
+  cpsr |= PSR_E_BIT;
 
 #endif /* !CONFIG_ARMV7R_DECODEFIQ */
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */

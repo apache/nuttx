@@ -72,6 +72,8 @@
 #  error No IRQ definitions for the TMS570LS0714ZWT
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS1227ZWT)
 #  error No IRQ definitions for the TMS570LS1227ZWT
+#elif defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+#  include <arch/tms570/tms570ls31xx_irq.h>
 #else
 #  error "Unrecognized Hercules chip"
 #endif
@@ -111,4 +113,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_TMS570_IRQ_H */
-

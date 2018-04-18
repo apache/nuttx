@@ -50,9 +50,9 @@
 	.globl	up_restorefpu
 
 #ifdef CONFIG_ARCH_FPU
-	.cpu	cortex-r4
-#else
 	.cpu	cortex-r4f
+#else
+	.cpu	cortex-r4
 #endif
 	.syntax	unified
 	.file	"arm_restorefpu.S"
@@ -107,4 +107,3 @@ up_restorefpu:
 	.size	up_restorefpu, .-up_restorefpu
 #endif /* CONFIG_ARCH_FPU */
 	.end
-

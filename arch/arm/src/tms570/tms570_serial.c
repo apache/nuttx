@@ -860,7 +860,7 @@ void up_serialinit(void)
   tms570_disableallints(TTYS1_DEV.priv, NULL);
 #endif
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef CONSOLE_DEV
   /* Configure whichever one is the console.  NOTE: This was already done
    * in tms570_lowsetup().
    */

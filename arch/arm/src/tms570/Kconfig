@@ -13,6 +13,26 @@ config TMS570_HAVE_SCI2
 	bool
 	default n
 
+config TMS570_HAVE_SPI1
+	bool
+	default n
+
+config TMS570_HAVE_SPI2
+	bool
+	default n
+
+config TMS570_HAVE_SPI3
+	bool
+	default n
+
+config TMS570_HAVE_SPI4
+	bool
+	default n
+
+config TMS570_HAVE_SPI5
+	bool
+	default n
+
 # Summary Configurations
 
 # Chip Selection
@@ -53,6 +73,16 @@ config ARCH_CHIP_TMS570LS1227ZWT
 	select ARCH_CORTEXR4F
 	select TMS570_HAVE_SCI2
 
+config ARCH_CHIP_TMS570LS3137ZWT
+	bool "TI TMS570LS3137ZWT"
+	select ARCH_CORTEXR4F
+	select TMS570_HAVE_SCI2
+	select TMS570_HAVE_SPI1
+	select TMS570_HAVE_SPI2
+	select TMS570_HAVE_SPI3
+	select TMS570_HAVE_SPI4
+	select TMS570_HAVE_SPI5
+
 endchoice # TI TMS570 Chip Selection
 
 menu "TMS570 Peripheral Support"
@@ -81,9 +111,40 @@ config TMS570_DCAN1
 	bool "Controller Area Network 1 (D"
 	default n
 
-config TMS570_MIBASPI1
-	bool "Multi-Buffered Serial Peripheral Interface Module (MibSPI1)"
+config TMS570_SPI1
+	bool "SPI1"
 	default n
+	depends on TMS570_HAVE_SPI4
+	select SPI
+	select TMS570_SPI
+
+config TMS570_SPI2
+	bool "SPI2"
+	default n
+	depends on TMS570_HAVE_SPI2
+	select SPI
+	select TMS570_SPI
+
+config TMS570_SPI3
+	bool "SPI3"
+	default n
+	depends on TMS570_HAVE_SPI3
+	select SPI
+	select TMS570_SPI
+
+config TMS570_SPI4
+	bool "SPI4"
+	default n
+	depends on TMS570_HAVE_SPI4
+	select SPI
+	select TMS570_SPI
+
+config TMS570_SPI5
+	bool "SPI5"
+	default n
+	depends on TMS570_HAVE_SPI5
+	select SPI
+	select TMS570_SPI
 
 config TMS570_SCI1
 	bool "Serial Communication Interface 1 (SCI1)"

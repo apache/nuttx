@@ -40,7 +40,7 @@ HEAD_ASRC  = arm_vectortab.S
 
 # Common assembly language files
 
-CMN_ASRCS += arm_vectors.S arm_head.S arm_fullcontextrestore.S
+CMN_ASRCS += arm_vectortab.S arm_vectors.S arm_head.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
@@ -102,7 +102,7 @@ CHIP_ASRCS  =
 # SAMA5-specific C source files
 
 CHIP_CSRCS  = tms570_boot.c tms570_clockconfig.c tms570_esm.c tms570_gio.c
-CHIP_CSRCS += tms570_irq.c tms570_lowputc.c tms570_serial.c
+CHIP_CSRCS += tms570_irq.c tms570_lowputc.c tms570_serial.c tms570_spi.c
 
 # Configuration dependent C and assembly language files
 

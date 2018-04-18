@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_clockconfig.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Some logic in this file was inspired/leveraged from TI's Project0 which
@@ -50,7 +50,9 @@
 
 #include "up_arch.h"
 
+#include "chip/tms570_esm.h"
 #include "chip/tms570_sys.h"
+#include "chip/tms570_sys2.h"
 #include "chip/tms570_pcr.h"
 #include "chip/tms570_flash.h"
 #include "chip/tms570_iomm.h"
@@ -84,7 +86,7 @@
 #if BOARD_VCLK2_DIVIDER == 1
 #  define SYS_CLKCNTL_VCLKR2 SYS_CLKCNTL_VCLKR2_DIV1
 #elif BOARD_VCLK2_DIVIDER == 2
-#  define SYS_CLKCNTL_VCLKR2 SYS_CLKCNTL_VCLKR_DIV2
+#  define SYS_CLKCNTL_VCLKR2 SYS_CLKCNTL_VCLKR2_DIV2
 #else
 #  error Invalid value for SYS_CLKCNTL_VCLKR2_DIV2
 #endif
@@ -99,10 +101,10 @@
 #  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV2
 #elif BOARD_RTICLK_DIVIDER == 4
 #  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV4
-#elif BOARD_RTICLK_DIVIDER == 78
+#elif BOARD_RTICLK_DIVIDER == 8
 #  define SYS_RCLKSRC_RTI1DIV SYS_RCLKSRC_RTI1DIV_DIV8
 #else
-#  error Invalid value for SYS_CLKCNTL_VCLKR2_DIV2
+#  error Invalid value for BOARD_RTICLK_DIVIDER
 #endif
 
 /****************************************************************************
@@ -119,6 +121,205 @@ static const struct tms570_pinmux_s g_pinmux_table[] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#define ESM_SR1_PLL1SLIP     0x400
+#define ESM_SR4_PLL2SLIP     0x400
+#define dcc1CNT1_CLKSRC_PLL1 0x0000a000u
+#define dcc1CNT1_CLKSRC_PLL2 0x0000a001u
+
+/****************************************************************************
+ * Name: check_frequency
+ *
+ * Description:
+ *   This function is used to verify is the Main Clock frequency correct
+ ****************************************************************************/
+
+static uint32_t check_frequency(uint32_t cnt1_clksrc)
+{
+  uint32_t regval = 0;
+
+  /* Setup DCC1 */
+  /* DCC1 Global Control register configuration */
+
+  regval =  (uint32_t)0x5u |                   /* Disable  DCC1 */
+            (uint32_t)((uint32_t)0x5u << 4u) | /* No Error Interrupt */
+            (uint32_t)((uint32_t)0xau << 8u) | /* Single Shot mode */
+            (uint32_t)((uint32_t)0x5u << 12u); /* No Done Interrupt */
+  putreg32(regval,TMS570_DCC_BASE);
+
+  /* Clear ERR and DONE bits */
+
+  regval = 3u;
+  putreg32(regval,TMS570_DCC_BASE + 0x14);
+
+  /* DCC1 Clock0 Counter Seed value configuration */
+
+  regval = 68u;
+  putreg32(regval,TMS570_DCC_BASE + 0x08);
+
+  /* DCC1 Clock0 Valid Counter Seed value configuration */
+
+  regval = 4u;
+  putreg32(regval,TMS570_DCC_BASE + 0x0c);
+
+  /* DCC1 Clock1 Counter Seed value configuration */
+
+  regval =  972u;
+  putreg32(regval,TMS570_DCC_BASE + 0x10);
+
+  /* DCC1 Clock1 Source 1 Select */
+
+  regval = (uint32_t)((uint32_t)10u << 12u) |  /* DCC Enable / Disable Key */
+                      (uint32_t) cnt1_clksrc;  /* DCC1 Clock Source 1 */
+  putreg32(regval,TMS570_DCC_BASE + 0x24);
+
+  regval = (uint32_t)15;  /* DCC1 Clock Source 0 */
+  putreg32(regval,TMS570_DCC_BASE + 0x28);
+
+  /* DCC1 Global Control register configuration */
+
+  regval = (uint32_t)0xau |                    /* Enable  DCC1 */
+           (uint32_t)((uint32_t)0x5u << 4u) |  /* No Error Interrupt */
+           (uint32_t)((uint32_t)0xau << 8u) |  /* Single Shot mode */
+           (uint32_t)((uint32_t)0x5u << 12u);  /* No Done Interrupt */
+
+  putreg32(regval,TMS570_DCC_BASE);
+  while(getreg32(TMS570_DCC_BASE + 0x14) == 0u)
+    {
+      /* Wait */
+    }
+
+  return (getreg32(TMS570_DCC_BASE + 0x14) & 0x01u);
+}
+
+/****************************************************************************
+ * Name: _errata_SSWF021_45_both_plls
+ *
+ * Description:
+ *   This function is used to verify that PLL1 and PLL2 lock after
+ *   system start-up. If PLL does not lock after system start-up
+ *   and PLL slip occur then this function should be called at the
+ *   beginning of tms570_clockconfig. (Errata sheet TMS570)
+ *
+ ****************************************************************************/
+
+uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
+{
+  uint32_t failcode;
+  uint32_t retries;
+  uint32_t clkcntrlsave;
+  uint32_t regval;
+
+  /* Save CLKCNTL, */
+
+  clkcntrlsave = getreg32(TMS570_SYS_CLKCNTL);
+
+  /* First set VCLK2 = HCLK */
+
+  regval = clkcntrlsave & 0x000f0100u;
+  putreg32(regval, TMS570_SYS_CLKCNTL);
+
+  /* Now set VCLK = HCLK and enable peripherals */
+
+  regval = SYS_CLKCNTL_PENA;
+  putreg32(regval, TMS570_SYS_CLKCNTL);
+
+  for(retries = 0u; (retries < count) || (count == 0u); retries++)
+    {
+      failcode = 0u;
+
+      /* Disable PLL1 and PLL2 */
+
+      regval =  0x00000002u | 0x00000040u;
+      putreg32(regval, TMS570_SYS_CSDISSET);
+
+      while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+        {
+        }
+
+      /* Clear Global Status Register */
+
+      regval = 0x00000301u;
+      putreg32(regval,TMS570_SYS_GLBSTAT);
+
+      /* Clear the ESM PLL slip flags */
+
+      putreg32(ESM_SR1_PLL1SLIP,TMS570_ESM_SR1);
+      putreg32(ESM_SR4_PLL2SLIP,TMS570_ESM_SR4);
+
+      /* Set both PLLs to OSCIN/1*27/(2*1) */
+
+      regval = 0x20001a00u;
+      putreg32(regval,TMS570_SYS_PLLCTL1);
+
+      regval = 0x3fc0723du;
+      putreg32(regval,TMS570_SYS_PLLCTL2);
+
+      regval = 0x20001a00u;
+      putreg32(regval, 0xffffe100);
+
+      regval =  0x00000002u | 0x00000040u;
+      putreg32(regval, TMS570_SYS_CSDISCLR);
+
+      /* Check for (PLL1 valid or PLL1 slip) and (PLL2 valid or PLL2 slip) */
+
+      while ((((getreg32(TMS570_SYS_CSVSTAT) & SYS_CLKSRC_PLL1) == 0u) &&
+              ((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) == 0u)) ||
+             (((getreg32(TMS570_SYS_CSVSTAT) & SYS_CLKSRC_PLL2) == 0u) &&
+              ((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) == 0u)))
+         {
+           /* Wait */
+         }
+
+     /* If PLL1 valid, check the frequency */
+
+     if((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) != 0u)
+       {
+         failcode |= 1u;
+       }
+     else
+       {
+         failcode |= check_frequency(dcc1CNT1_CLKSRC_PLL1);
+       }
+
+     /* If PLL2 valid, check the frequency */
+
+     if((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) != 0u)
+       {
+         failcode |= 2u;
+       }
+     else
+       {
+         failcode |= (check_frequency(dcc1CNT1_CLKSRC_PLL2) << 1U);
+       }
+
+     if (failcode == 0u)
+       {
+         break;
+       }
+   }
+
+  /* Disable plls */
+
+  regval = 0x00000002U | 0x00000040U;
+  putreg32(regval, TMS570_SYS_CSDISSET);
+
+  while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+    {
+    }
+
+  /* restore CLKCNTL, VCLKR and PENA first */
+
+  clkcntrlsave = getreg32(TMS570_SYS_CLKCNTL);
+
+  /* First set VCLK2 = HCLK */
+
+  regval = clkcntrlsave & 0x000F0100U;
+  putreg32(regval, TMS570_SYS_CLKCNTL);
+
+  putreg32(clkcntrlsave, TMS570_SYS_CLKCNTL);
+  return failcode;
+}
 
 /****************************************************************************
  * Name: tms570_pll_setup
@@ -185,10 +386,48 @@ static void tms570_pll_setup(void)
    * NOTE: That R is temporary set to the maximum (32) here.
    */
 
+  /* Turn off PLL1 and PLL2 */
+
+  regval =  SYS_CSDIS_CLKSRC_PLL1 | SYS_CSDIS_CLKSRC_PLL2;
+  putreg32(regval, TMS570_SYS_CSDISSET);
+
+  while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+    {
+    }
+
+  /* Check for OSC failure */
+
+  regval = getreg32(TMS570_SYS_GLBSTAT);
+  if ((regval & SYS_GLBSTAT_OSC_ERR_MASK) == SYS_GLBSTAT_OSC_ERR_MASK)
+    {
+      regval = SYS_GHVSRC_GHVSRC_LPOHIGH | SYS_GHVSRC_HVLPM_LPOHIGH |
+               SYS_GHVSRC_GHVWAKE_LPOHIGH;
+      putreg32(regval, TMS570_SYS_GHVSRC);
+
+      regval =  SYS_CSDIS_CLKSRC_PLL1 | SYS_CSDIS_CLKSRC_PLL2 |
+                SYS_CSDIS_CLKSRC_OSC;
+      putreg32(regval, TMS570_SYS_CSDISSET);
+
+      while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+        {
+        }
+
+      putreg32(SYS_GLBSTAT_OSC_ERR_CLR,TMS570_SYS_GLBSTAT);
+
+      regval =  SYS_CSDIS_CLKSRC_OSC;
+      putreg32(regval, TMS570_SYS_CSDISCLR);
+
+      while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+        {
+        }
+   }
+
+  /* Setup pll control register 1 */
+
   regval = SYS_PLLCTL1_PLLMUL((BOARD_PLL_NF - 1) << 8) |
            SYS_PLLCTL1_REFCLKDIV(BOARD_PLL_NR - 1) |
            SYS_PLLCTL1_PLLDIV_MAX |
-           SYS_PLLCTL1_MASKSLIP_DISABLE;
+           (SYS_PLLCTL1_MASKSLIP_ENABLE);
   putreg32(regval, TMS570_SYS_PLLCTL1);
 
   /* Setup pll control register 2 */
@@ -206,8 +445,12 @@ static void tms570_pll_setup(void)
    * external clock remains disabled.
    */
 
-  regval = SYS_CSDIS_CLKSRC_EXTCLKIN;
-  putreg32(regval, TMS570_SYS_CSDIS);
+  regval =  SYS_CSDIS_CLKSRC_PLL1 | SYS_CSDIS_CLKSRC_PLL2;
+  putreg32(regval, TMS570_SYS_CSDISCLR);
+
+  while((getreg32(TMS570_SYS_CSDIS) & regval) != 0)
+    {
+    }
 }
 
 /****************************************************************************
@@ -333,7 +576,7 @@ static void tms570_lpo_trim(void)
 
   /* The LPO trim value may be available in TI OTP */
 
-  lotrim = (getreg32(TMS570_TITCM_LPOTRIM) & TMS570_TITCM_LPOTRIM_MASK) <<
+  lotrim = (getreg32(TMS570_TITCM_LPOTRIM) & TMS570_TITCM_LPOTRIM_MASK) >>
     TMS570_TITCM_LPOTRIM_SHIFT;
 
   /* Use if the LPO trim value TI OTP if programmed.  Otherwise, use a
@@ -348,7 +591,7 @@ static void tms570_lpo_trim(void)
     {
       regval = SYS_LPOMONCTL_BIASENABLE |
                SYS_LPOMONCTL_HFTRIM_100p00 |
-               SYS_LPOMONCTL_60p86;
+               SYS_LPOMONCTL_100p00;
     }
 
   putreg32(regval, TMS570_SYS_LPOMONCTL);
@@ -391,12 +634,13 @@ static void tms570_flash_setup(void)
   putreg32(FLASH_FSMWRENA_ENABLE, TMS570_FLASH_FSMWRENA);
   regval = FLASH_EEPROMCFG_GRACE(2) | FLASH_EEPROMCFG_EWAIT(BOARD_EWAIT);
   putreg32(regval, TMS570_FLASH_EEPROMCFG);
-  putreg32(FLASH_FSMWRENA_DISABLE, TMS570_FLASH_FSMWRENA);
+  //putreg32(FLASH_FSMWRENA_DISABLE, TMS570_FLASH_FSMWRENA);
+  putreg32(0x0a, TMS570_FLASH_FSMWRENA);
 
   /* Setup flash bank power modes */
 
   regval = FLASH_FBFALLBACK_BANKPWR0_ACTIV |
-           FLASH_FBFALLBACK_BANKPWR1_SLEEP |
+           FLASH_FBFALLBACK_BANKPWR1_ACTIV |
            FLASH_FBFALLBACK_BANKPWR7_ACTIV;
   putreg32(regval, TMS570_FLASH_FBFALLBACK);
 }
@@ -427,7 +671,7 @@ static void tms570_clocksrc_configure(void)
    *   TCLK_EQEP     Bit 9  On
    */
 
-  putreg32(0, TMS570_SYS_CDDIS);
+  putreg32(0, TMS570_SYS_CDDISSET);
 
   /* Work Around for Errata SYS#46: Errata Description: Clock Source
    * Switching Not Qualified with Clock Source Enable And Clock Source Valid
@@ -440,22 +684,16 @@ static void tms570_clocksrc_configure(void)
     {
       /* Get the set of valid clocks */
 
-      csvstat = getreg32(TMS570_SYS_CSVSTAT) & SYS_CSVSTAT_CLKSRVALL;
+      csvstat = getreg32(TMS570_SYS_CSVSTAT);
 
       /* Get the (inverted) state of each clock.  Inverted so that '1' means
        * ON not OFF.
        */
 
       csdis = (getreg32(TMS570_SYS_CSDIS) ^ SYS_CSDIS_CLKSROFFALL) &
-        SYS_CSDIS_CLKSROFFALL;
+               SYS_CSDIS_CLKSROFFALL;
     }
   while ((csvstat & csdis) != csdis);
-
-
-  /* Now the PLLs are locked and the PLL outputs can be sped up.  The R-
-   * divider was programmed to be 0xF. Now this divider is changed to
-   * programmed value
-   */
 
   regval  = getreg32(TMS570_SYS_PLLCTL1);
   regval &= ~SYS_PLLCTL1_PLLDIV_MASK;
@@ -474,21 +712,48 @@ static void tms570_clocksrc_configure(void)
            SYS_GHVSRC_GHVWAKE_PLL1;
   putreg32(regval, TMS570_SYS_GHVSRC);
 
+  /* Setup RTICLK1 and RTICLK2 clocks */
+
+  regval = SYS_RCLKSRC_RTI1SRC_VCLK;
+  putreg32(regval, TMS570_SYS_RCLKSRC);
+
+  /* Now the PLLs are locked and the PLL outputs can be sped up.  The R-
+   * divider was programmed to be 0xF. Now this divider is changed to
+   * programmed value
+   */
+
+   /* Setup asynchronous peripheral clock sources for AVCLK1 */
+
+#if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+  regval = SYS_VCLKASRC_VCLKA2S_VCLK | SYS_VCLKASRC_VCLKA1S_VCLK;
+#else
+  regval = SYS_VCLKASRC_VCLKA1S_VCLK;
+#endif
+  putreg32(regval, TMS570_SYS_VCLKASRC);
+
+#if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+  regval = SYS_VCLKASRC_VCLKA4S_VCLK |SYS_VCLKASRC_VCLKA3R_VCLK;
+  putreg32(regval, TMS570_SYS2_VCLKACON1);
+#endif
+
   /* Setup synchronous peripheral clock dividers for VCLK1, VCLK2, VCLK3 */
 
   regval  = getreg32(TMS570_SYS_CLKCNTL);
-  regval &= ~(SYS_CLKCNTL_VCLKR2_MASK | SYS_CLKCNTL_VCLKR_MASK);
-  regval |= SYS_CLKCNTL_VCLKR2 | SYS_CLKCNTL_VCLKR;
+  regval &= ~(SYS_CLKCNTL_VCLKR2_MASK);
+  regval |= SYS_CLKCNTL_VCLKR2;
   putreg32(regval, TMS570_SYS_CLKCNTL);
 
-  /* Setup RTICLK1 and RTICLK2 clocks */
+  regval  = getreg32(TMS570_SYS_CLKCNTL);
+  regval &= ~( SYS_CLKCNTL_VCLKR_MASK);
+  regval |= SYS_CLKCNTL_VCLKR;
+  putreg32(regval, TMS570_SYS_CLKCNTL);
 
-  regval = SYS_RCLKSRC_RTI1SRC_VCLK | SYS_RCLKSRC_RTI1DIV;
-  putreg32(regval, TMS570_SYS_RCLKSRC);
-
-  /* Setup asynchronous peripheral clock sources for AVCLK1 */
-
-  putreg32(SYS_VCLKASRC_VCLKA1S_VCLK, TMS570_SYS_VCLKASRC);
+#if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+  regval = getreg32(TMS570_SYS2_CLK2CNTRL);
+  regval &= ~(SYS_CLKC2NTL_VCLK3R_MASK);
+  regval |= SYS_CLK2CNTL_VCLK3R_DIV2;
+  putreg32(regval, TMS570_SYS2_CLK2CNTRL);
+#endif
 }
 
 /****************************************************************************
@@ -555,7 +820,8 @@ void tms570_clockconfig(void)
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Run eFuse controller start-up checks and start eFuse controller ECC
-   * self-test.*/
+   * self-test.
+   */
 
   tms570_efc_selftest_start();
 #endif /* CONFIG_TMS570_SELFTEST */

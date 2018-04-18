@@ -355,6 +355,43 @@
 #  undef  TMS570_RTP                     /* No RAM trace port (RTP) */
 #  undef  TMS570_DMM                     /* No DMM */
 
+#elif defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
+#  undef  TMS570_CORTEX_R4               /* Not Cortex-R4 family */
+#  define TMS570_CORTEX_R4F  1           /* Cortex-R4F family */
+#  undef  TMS570_CORTEX_R5               /* Not Cortex-R5 family */
+#  undef  TMS570_CORTEX_R5F              /* Not Cortex-R5F family */
+#  undef  TMS570_CORTEX_R7               /* Not Cortex-R7 family */
+#  undef  TMS570_CORTEX_R7F              /* Not Cortex-R7F family */
+#  define TMS570_PFLASH      (3000*1024) /* 3072 KB Program FLASH */
+#  define TMS570_SRAM        (256*1024)  /* 256 KB SRAM */
+#  define TMS570_DFLASH      (64*1024)   /* 64 KB Data FLASH (EEPROM) */
+#  define TMS570_NEMAC       1           /* One 10/100 Mbit EMAC */
+#  define TMS570_FLEXRAY_NCH 2           /* Two Flexray channels */
+#  define TMS570_NCAN        3           /* Three CAN */
+#  define TMS570_NMIBADC     2           /* Two MiBADC */
+#  define TMS570_MIBADC_NCH  24          /* 24 MibADC channels */
+#  define TMS570_NN2HET      2           /* Two N2HET */
+#  define TMS570_N2HET_NCH   44          /* 44 N2HET channels */
+#  undef TMS570_EPWM_NCH                 /* 14 ePWM channels */
+#  undef TMS570_ECAP_NCH                 /* 6 eCAP channels */
+#  undef TMS570_EQEP_NCH                 /* 2 eQEP channels */
+#  define TMS570_NMIBSPI     3           /* 3 MibSPI */
+#  define TMS570_MIBSPI1_NCS 6           /* MibSPI1: 6 chip selects */
+#  define TMS570_MIBSPI2_NCS 6           /* MibSPI2: 6 chip selects */
+#  define TMS570_MIBSPI3_NCS 4           /* MibSPI3: 4 chip selects */
+#  define TMS570_NSPI        2           /* Two SPI */
+#  define TMS570_SPI1_NCS    2           /* SPI1: Two chip selects */
+#  define TMS570_SPI2_NCS    1           /* SPI2: One chip selects */
+#  define TMS570_NSCI        2           /* Two SCI */
+#  define TMS570_SCI1_LIN    1           /* SCI1: LIN supported */
+#  undef  TMS570_SCI2_LIN                /* SCI2: LIN not supported */
+#  define TMS570_NI2C        1           /* One I2C */
+#  define TMS570_NGPIOINT    16          /* 16 GPIO interrupts */
+#  define TMS570_NEMIF16     1           /* One EMIF 16-bit data */
+#  define TMS570_ETM         1           /* 32-bit ETM (trace) */
+#  define TMS570_RTP         1           /* 16-bit trace port (RTP) */
+#  define TMS570_DMM         1           /* 16-bit DMM */
+
 #else
 #  error Unrecognized TMS570 chip
 #endif

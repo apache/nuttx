@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_timerisr.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@
  *   - The following calculation performs rounding.
  */
 
-#define RTI_CPUC0 (((BOARD_RTICLK_FREQUENCY + RTI_FRC0CLK / 2) / RTI_FRC0CLK) - 1)
+#define RTI_CPUC0 (((BOARD_RTICLK_FREQUENCY ) / RTI_FRC0CLK) - 1)
 
 /* CMP0 = CONFIG_USEC_PER_TICK * FRC0CLK / 1,000,000
  *
@@ -115,7 +115,7 @@
  *     FRCLK being a multiple of 100,000
  */
 
-#define RTI_CMP0  ((CONFIG_USEC_PER_TICK * (RTI_FRC0CLK / 100000) + 50) / 100)
+#define RTI_CMP0  ((CONFIG_USEC_PER_TICK * (RTI_FRC0CLK / 100000) + 50) / 10)
 
 /****************************************************************************
  * Private Functions
@@ -132,7 +132,7 @@
 
 static int tms570_timerisr(int irq, uint32_t *regs, void *arg)
 {
-  /* Cleear the RTI Compare 0 interrupts */
+  /* Clear the RTI Compare 0 interrupts */
 
   putreg32(RTI_INT0, TMS570_RTI_INTFLAG);
 
@@ -160,6 +160,7 @@ void arm_timer_initialize(void)
   /* Disable all RTI interrupts */
 
   up_disable_irq(TMS570_REQ_RTICMP0);
+  putreg32(0x0, TMS570_RTI_GCTRL);
   putreg32(RTI_ALLINTS, TMS570_RTI_CLEARINTENA);
 
   /* Configure RTICOMP0 register and the RTIUDCP0 Register to initialize with
@@ -173,7 +174,7 @@ void arm_timer_initialize(void)
    * calculated value.
    */
 
-  putreg32(RTI_CMP0, TMS570_RTI_CPUC0);
+  putreg32(RTI_CPUC0, TMS570_RTI_CPUC0);
 
   /* Initialize the free-running counter and the RTI up-counter */
 
@@ -182,7 +183,7 @@ void arm_timer_initialize(void)
 
   /* Clear any pending interrupts */
 
-  putreg32(RTI_ALLINTS, TMS570_RTI_COMP0);
+  putreg32(RTI_ALLINTS, TMS570_RTI_INTFLAG);
 
   /* Enable the RTI Compare 0 interrupts (still disabled at the VIM) */
 
@@ -194,7 +195,7 @@ void arm_timer_initialize(void)
 
   /* Attach the interrupt handler to the RTI Compare 0 interrupt */
 
-  DEBUGVERIFY(irq_attach(TMS570_REQ_RTICMP0, (xcpt_t)tms570_timerisr), NULL);
+  DEBUGVERIFY(irq_attach(TMS570_REQ_RTICMP0, (xcpt_t)tms570_timerisr, NULL));
 
   /* Enable RTI compare 0 interrupts at the VIM */
 
