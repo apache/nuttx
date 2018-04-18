@@ -1892,6 +1892,8 @@ nuttx/
  |   |   `- README.txt
  |   |- twr-k60n512/
  |   |   `- README.txt
+ |   |- tms570ls31x-usb-kit/
+ |   |   `- README.txt
  |   |- twr-k64f120m/
  |   |   `- README.txt
  |   |- u-blox-co27/

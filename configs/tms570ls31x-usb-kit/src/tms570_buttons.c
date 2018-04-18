@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4e-ek/src/tms570_buttons.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 
 #include "up_arch.h"
 #include "tms570_gio.h"
-#include "launchxl-tms57004.h"
+#include "tms570ls31x_usb_kit.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

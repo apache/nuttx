@@ -781,6 +781,10 @@ configs/tm4c1294-launchpad
   platform for ARM® Cortex™-M4F-based microcontrollers from Texas
   Instruments.
 
+configs/tms570ls31x-usb-kit
+  TI Hercules TMS570LS31xx Evaluation Kit (TMDS570ls31xx USB Kit)
+  featuring the Hercules TMS570LS3137ZWT chip.
+
 configs/twr-k60n512
   Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
   development board.
