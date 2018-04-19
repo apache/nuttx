@@ -401,6 +401,7 @@ static void bt_discover_destroy(FAR void *arg)
 
   wlinfo("Discover destroy.  params %p\n", params);
   DEBUGASSERT(params != NULL && g_discoverstate.bd_discovering);
+  UNUSED(params);
 
   memset(&g_discoverstate.bd_params, 0, sizeof(struct btnet_discoverstate_s));
   nxsem_destroy(&g_discoverstate.bd_exclsem);
