@@ -63,6 +63,7 @@
  ****************************************************************************/
 
 /* These structures encapsulate all globals used by the IOCTL logic. */
+/* Scan state variables */
 
 struct btnet_scanstate_s
 {
@@ -74,8 +75,14 @@ struct btnet_scanstate_s
   struct bt_scanresponse_s bs_rsp[CONFIG_BLUETOOTH_MAXSCANRESULT];
 };
 
+/* Discovery state variables.  NOTE:  This function must be cast-compatible
+ * with struct bt_gatt_discover_params_s.
+ */
+
 struct btnet_discoverstate_s
 {
+  struct bt_gatt_discover_params_s bd_params;
+  struct bt_uuid_s bd_uuid;         /* Discovery UUID */
   sem_t bd_exclsem;                 /* Manages exclusive access */
   bool bd_discovering;              /* True:  Discovery in progress */
   uint8_t bd_head;                  /* Head of circular list (for removal) */
@@ -90,8 +97,9 @@ struct btnet_discoverstate_s
 
 /* At present only a single Bluetooth device is supported.  So we can simply
  * maintain the scan and the discovery state as globals.
- * NOTE: This limits to one concurrent scan action and one concurrent
- * discovery action.
+ *
+ * NOTE: This limits to a single Bluetooth device with one concurrent scan
+ * action and one concurrent discovery action.
  */
 
 static struct btnet_scanstate_s     g_scanstate;
@@ -355,10 +363,9 @@ static void bt_discover_destroy(FAR void *arg)
    */
 
   wlinfo("Discover destroy.  params %p\n", params);
-  DEBUGASSERT(params != NULL);
-  UNUSED(params);
+  DEBUGASSERT(params != NULL && g_discoverstate.bd_discovering);
 
-  DEBUGASSERT(g_discoverstate.bd_discovering);
+  memset(&g_discoverstate.bd_params, 0, sizeof(struct btnet_discoverstate_s));
   nxsem_destroy(&g_discoverstate.bd_exclsem);
   g_discoverstate.bd_discovering = false;
 }
@@ -654,11 +661,19 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
                 }
               else
                 {
-                  struct bt_gatt_discover_params_s params;
-                  struct bt_uuid_s uuid;
-
+                  FAR struct bt_gatt_discover_params_s *params;
 
                   /* Set up the query */
+
+                  g_discoverstate.bd_uuid.type   = BT_UUID_16;
+                  g_discoverstate.bd_uuid.u.u16  = btreq->btr_duuid16;
+
+                  params                         = &g_discoverstate.bd_params;
+                  params->uuid                   = &g_discoverstate.bd_uuid;
+                  params->func                   = bt_discover_func;
+                  params->destroy                = bt_discover_destroy;
+                  params->start_handle           = btreq->btr_dstart;
+                  params->end_handle             = btreq->btr_dend;
 
                   nxsem_init(&g_discoverstate.bd_exclsem, 0, 1);
                   g_discoverstate.bd_discovering = true;
@@ -667,27 +682,18 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
                   /* Start the query */
 
-                  uuid.type           = BT_UUID_16;
-                  uuid.u.u16          = btreq->btr_duuid16;
-
-                  params.uuid         = &uuid;
-                  params.func         = bt_discover_func;
-                  params.destroy      = bt_discover_destroy;
-                  params.start_handle = btreq->btr_dstart;
-                  params.end_handle   = btreq->btr_dend;
-
                   switch (btreq->btr_dtype)
                     {
                       case GATT_DISCOVER:
-                        ret = bt_gatt_discover(conn, &params);
+                        ret = bt_gatt_discover(conn, params);
                         break;
 
                       case GATT_DISCOVER_DESC:
-                        ret = bt_gatt_discover_descriptor(conn, &params);
+                        ret = bt_gatt_discover_descriptor(conn, params);
                         break;
 
                       case GATT_DISCOVER_CHAR:
-                        ret = bt_gatt_discover_characteristic(conn, &params);
+                        ret = bt_gatt_discover_characteristic(conn, params);
                         break;
 
                       default:
@@ -699,8 +705,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
                   if (ret < 0)
                     {
                       wlerr("ERROR: Failed to start discovery: %d\n", ret);
-                      nxsem_destroy(&g_discoverstate.bd_exclsem);
-                      g_discoverstate.bd_discovering = false;
+                      bt_discover_destroy(params);
                     }
 
                   bt_conn_release(conn);
