@@ -62,7 +62,7 @@
  * Public Types
  ****************************************************************************/
 
-/* This structure encapsulates all globals used by the IOCTL logic */
+/* These structures encapsulate all globals used by the IOCTL logic. */
 
 struct btnet_scanstate_s
 {
@@ -74,15 +74,28 @@ struct btnet_scanstate_s
   struct bt_scanresponse_s bs_rsp[CONFIG_BLUETOOTH_MAXSCANRESULT];
 };
 
+struct btnet_discoverstate_s
+{
+  sem_t bd_exclsem;                 /* Manages exclusive access */
+  bool bd_discovering;              /* True:  Discovery in progress */
+  uint8_t bd_head;                  /* Head of circular list (for removal) */
+  uint8_t bd_tail;                  /* Tail of circular list (for addition) */
+
+  struct bt_discresonse_s bd_rsp[CONFIG_BLUETOOTH_MAXDISCOVER];
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* At present only a single Bluetooth device is supported.  So we can simply
- * maintain the scan state as a global.
+ * maintain the scan and the discovery state as globals.
+ * NOTE: This limits to one concurrent scan action and one concurrent
+ * discovery action.
  */
 
-static struct btnet_scanstate_s g_scanstate;
+static struct btnet_scanstate_s     g_scanstate;
+static struct btnet_discoverstate_s g_discoverstate;
 
 /****************************************************************************
  * Private Functions
@@ -179,9 +192,8 @@ static void btnet_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
  * Name: btnet_scan_result
  *
  * Description:
- *   This is an HCI callback function.  HCI provides scan result data via
- *   this callback function.  The scan result data will be added to the
- *   cached scan results.
+ *   This function implements the SIOCBTSCANGET IOCTL command.  It returns
+ *   the current, buffered discovered handles.
  *
  * Input Parameters:
  *   result - Location to return the scan result data
@@ -214,8 +226,8 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 
   /* Copy all available results */
 
-  head   = g_scanstate.bs_head;
-  tail   = g_scanstate.bs_tail;
+  head = g_scanstate.bs_head;
+  tail = g_scanstate.bs_tail;
 
   for (nrsp = 0; nrsp < maxrsp && head != tail; nrsp++)
     {
@@ -238,6 +250,177 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 
   g_scanstate.bs_head = head;
   nxsem_post(&g_scanstate.bs_exclsem);
+  return nrsp;
+}
+
+/****************************************************************************
+ * Name: bt_discover_func
+ *
+ * Description:
+ *   GATT discovery callback.  This function is called when a new handle is
+ *   discovered
+ *
+ * Input Parameters:
+ *   attr - The discovered attributes
+ *   arg  - The original discovery parameters
+ *
+ * Returned Value:
+ *   BT_GATT_ITER_CONTINUE meaning to continue the iteration.
+ *
+ ****************************************************************************/
+
+static uint8_t bt_discover_func(FAR const struct bt_gatt_attr_s *attr,
+                                FAR void *arg)
+{
+  uint8_t nexttail;
+  uint8_t head;
+  uint8_t tail;
+  int ret;
+
+  wlinfo("Discovered handle %u\n", attr->handle);
+
+  if (!g_discoverstate.bd_discovering)
+    {
+      wlerr("ERROR:  Results received while not discovering\n");
+      return BT_GATT_ITER_STOP;
+    }
+
+  /* Get exclusive access to the discovered data */
+
+  while ((ret = nxsem_wait(&g_discoverstate.bd_exclsem)) < 0)
+    {
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      if (ret != -EINTR)
+        {
+          return BT_GATT_ITER_STOP;
+        }
+    }
+
+  /* Add the discovered data to the cache */
+
+  tail     = g_discoverstate.bd_tail;
+  nexttail = tail + 1;
+
+  if (nexttail >= CONFIG_BLUETOOTH_MAXSCANRESULT)
+    {
+      nexttail = 0;
+    }
+
+  /* Is the circular buffer full? */
+
+  head = g_discoverstate.bd_head;
+  if (nexttail == head)
+    {
+      wlerr("ERROR: Too many handles discovered.  Data lost.\n");
+
+      if (++head >= CONFIG_BLUETOOTH_MAXSCANRESULT)
+        {
+          head = 0;
+        }
+
+      g_discoverstate.bd_head = head;
+    }
+
+  /* Save the newly discovered handle */
+
+  g_discoverstate.bd_rsp[tail].dr_handle = attr->handle;
+  g_discoverstate.bd_rsp[tail].dr_perm   = attr->perm;
+  g_discoverstate.bd_tail                = nexttail;
+
+  nxsem_post(&g_discoverstate.bd_exclsem);
+  return BT_GATT_ITER_CONTINUE;
+}
+
+/****************************************************************************
+ * Name: bt_discover_destroy
+ *
+ * Description:
+ *   GATT destroy callback.  This function is called when a discovery
+ *   completes.
+ *
+ * Input Parameters:
+ *   arg  - The original discovery parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void bt_discover_destroy(FAR void *arg)
+{
+  FAR struct bt_gatt_discover_params *params = arg;
+
+  /* There is nothing that needs to be down here.  The parameters were
+   * allocated on the stack and are long gone.
+   */
+
+  wlinfo("Discover destroy.  params %p\n", params);
+  DEBUGASSERT(params != NULL);
+  UNUSED(params);
+
+  DEBUGASSERT(g_discoverstate.bd_discovering);
+  nxsem_destroy(&g_discoverstate.bd_exclsem);
+  g_discoverstate.bd_discovering = false;
+}
+
+/****************************************************************************
+ * Name: btnet_discover_result
+ *
+ * Description:
+ *   This function implements the SIOCBTDISCGET IOCTL command.  It returns
+ *   the current, buffered discovered handles.
+ *
+ * Input Parameters:
+ *   result - Location to return the discovery result data
+ *   maxrsp - The maximum number of responses that can be returned.
+ *
+ * Returned Value:
+ *   On success, the actual number of discovery results obtain is returned.  A
+ *   negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int btnet_discover_result(FAR struct bt_discresonse_s *result,
+                                 uint8_t maxrsp)
+{
+  uint8_t head;
+  uint8_t tail;
+  uint8_t nrsp;
+  int ret;
+
+  wlinfo("Discovering? %s\n", g_discoverstate.bd_discovering ? "YES" : "NO");
+
+  /* Get exclusive access to the discovery data */
+
+  ret = nxsem_wait(&g_discoverstate.bd_exclsem);
+  if (ret < 0)
+    {
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
+    }
+
+  /* Copy all available results */
+
+  head = g_discoverstate.bd_head;
+  tail = g_discoverstate.bd_tail;
+
+  for (nrsp = 0; nrsp < maxrsp && head != tail; nrsp++)
+    {
+      /* Copy data from the head index into the user buffer */
+
+      result[nrsp].dr_handle = g_discoverstate.bd_rsp[head].dr_handle;
+      result[nrsp].dr_perm   = g_discoverstate.bd_rsp[head].dr_perm;
+
+      /* Increment the head index */
+
+      if (++head >= CONFIG_BLUETOOTH_MAXDISCOVER)
+        {
+          head = 0;
+        }
+    }
+
+  g_discoverstate.bd_head = head;
+  nxsem_post(&g_discoverstate.bd_exclsem);
   return nrsp;
 }
 
@@ -363,6 +546,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
           if (g_scanstate.bs_scanning)
             {
+              wlwarn("WARNING: Already scanning\n");
               ret = -EBUSY;
             }
           else
@@ -441,6 +625,103 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
                 }
 
               bt_conn_release(conn);
+            }
+        }
+        break;
+
+      /* SIOCBTDISCOVER:  Starts GATT discovery */
+
+      case SIOCBTDISCOVER:
+        {
+          FAR struct bt_conn_s *conn;
+
+          /* Check if discovery is already in progress */
+
+          if (g_discoverstate.bd_discovering)
+            {
+              wlwarn("WARNING:  Discovery is already in progress\n");
+              ret = -EBUSY;
+            }
+          else
+            {
+              /* Get the connection associated with the provided LE address */
+
+              conn = bt_conn_lookup_addr_le(&btreq->btr_dpeer);
+              if (conn == NULL)
+                {
+                  wlwarn("WARNING:  Peer not connected\n");
+                  ret = -ENOTCONN;
+                }
+              else
+                {
+                  struct bt_gatt_discover_params_s params;
+                  struct bt_uuid_s uuid;
+
+
+                  /* Set up the query */
+
+                  nxsem_init(&g_discoverstate.bd_exclsem, 0, 1);
+                  g_discoverstate.bd_discovering = true;
+                  g_discoverstate.bd_head        = 0;
+                  g_discoverstate.bd_tail        = 0;
+
+                  /* Start the query */
+
+                  uuid.type           = BT_UUID_16;
+                  uuid.u.u16          = btreq->btr_duuid16;
+
+                  params.uuid         = &uuid;
+                  params.func         = bt_discover_func;
+                  params.destroy      = bt_discover_destroy;
+                  params.start_handle = btreq->btr_dstart;
+                  params.end_handle   = btreq->btr_dend;
+
+                  switch (btreq->btr_dtype)
+                    {
+                      case GATT_DISCOVER:
+                        ret = bt_gatt_discover(conn, &params);
+                        break;
+
+                      case GATT_DISCOVER_DESC:
+                        ret = bt_gatt_discover_descriptor(conn, &params);
+                        break;
+
+                      case GATT_DISCOVER_CHAR:
+                        ret = bt_gatt_discover_characteristic(conn, &params);
+                        break;
+
+                      default:
+                        wlerr("ERROR: Unrecognized GATT discover type: %u\n",
+                              btreq->btr_dtype);
+                        ret = -EINVAL;
+                    }
+
+                  if (ret < 0)
+                    {
+                      wlerr("ERROR: Failed to start discovery: %d\n", ret);
+                      nxsem_destroy(&g_discoverstate.bd_exclsem);
+                      g_discoverstate.bd_discovering = false;
+                    }
+
+                  bt_conn_release(conn);
+                }
+            }
+        }
+        break;
+
+      /* SIOCBTDISCGET:  Return discovered results buffered since the call time
+       * that the SIOCBTDISCGET command was invoked.
+       */
+
+      case SIOCBTDISCGET:
+        {
+          ret = btnet_discover_result(btreq->btr_grsp, btreq->btr_gnrsp);
+          wlinfo("Get discovery results: %d\n", ret);
+
+          if (ret >= 0)
+            {
+              btreq->btr_nrsp = ret;
+              ret = OK;
             }
         }
         break;

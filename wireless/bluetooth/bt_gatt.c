@@ -702,6 +702,15 @@ done:
     }
 }
 
+/****************************************************************************
+ * Name: bt_gatt_discover
+ *
+ * Description:
+ *   This function implements the SIOCBTDISCOVER ioctl command for the
+ *   GATT discovery.
+ *
+ ****************************************************************************/
+
 int bt_gatt_discover(FAR struct bt_conn_s *conn,
                      FAR struct bt_gatt_discover_params_s *params)
 {
@@ -867,6 +876,15 @@ done:
     }
 }
 
+/****************************************************************************
+ * Name: bt_gatt_discover_characteristic
+ *
+ * Description:
+ *   This function implements the SIOCBTDISCOVER ioctl command for the
+ *   GATT discover characteristics type.
+ *
+ ****************************************************************************/
+
 int bt_gatt_discover_characteristic(FAR struct bt_conn_s *conn,
                                     FAR struct bt_gatt_discover_params_s *params)
 {
@@ -1013,6 +1031,15 @@ done:
       params->destroy(params);
     }
 }
+
+/****************************************************************************
+ * Name: bt_gatt_discover_descriptor
+ *
+ * Description:
+ *   This function implements the SIOCBTDISCOVER ioctl command for the
+ *   GATT discover descriptor type.
+ *
+ ****************************************************************************/
 
 int bt_gatt_discover_descriptor(FAR struct bt_conn_s *conn,
                                 FAR struct bt_gatt_discover_params_s *params)

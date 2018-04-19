@@ -98,6 +98,15 @@ config BLUETOOTH_MAXSCANRESULT
 		This contributes to a static memory allocation that will be greater
 		than CONFIG_BLUETOOTH_MAXSCANDATA * CONFIG_BLUETOOTH_MAXSCANRESULT
 
+config BLUETOOTH_MAXDISCOVER
+	int "Max GATT discovery results"
+	default 8
+	range 1 255
+	---help---
+		GATT discovery results will be buffered in memory until the user
+		requests the results.  This parameter specifies the maximum results
+		that can be buffered before discovery results are lost.
+
 config BLUETOOTH_BUFFER_PREALLOC
 	int "Number of pre-allocated buffer structures"
 	default 20
