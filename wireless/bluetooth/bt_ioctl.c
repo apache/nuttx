@@ -68,8 +68,8 @@
 struct btnet_scanstate_s
 {
   sem_t bs_exclsem;                 /* Manages exclusive access */
-  bool bs_scanning;                 /* True:  Scanning in progress */
-  uint8_t bs_head;                  /* Head of circular list (for removal) */
+  volatile bool bs_scanning;        /* True:  Scanning in progress */
+  volatile uint8_t bs_head;         /* Head of circular list (for removal) */
   uint8_t bs_tail;                  /* Tail of circular list (for addition) */
 
   struct bt_scanresponse_s bs_rsp[CONFIG_BLUETOOTH_MAXSCANRESULT];
@@ -84,9 +84,9 @@ struct btnet_discoverstate_s
   struct bt_gatt_discover_params_s bd_params;
   struct bt_uuid_s bd_uuid;         /* Discovery UUID */
   sem_t bd_exclsem;                 /* Manages exclusive access */
-  bool bd_discovering;              /* True:  Discovery in progress */
-  uint8_t bd_head;                  /* Head of circular list (for removal) */
-  uint8_t bd_tail;                  /* Tail of circular list (for addition) */
+  volatile bool bd_discovering;     /* True:  Discovery in progress */
+  volatile uint8_t bd_head;         /* Head of circular list (for removal) */
+  volatile uint8_t bd_tail;         /* Tail of circular list (for addition) */
 
   struct bt_discresonse_s bd_rsp[CONFIG_BLUETOOTH_MAXDISCOVER];
 };
@@ -96,14 +96,15 @@ struct btnet_discoverstate_s
  ****************************************************************************/
 
 /* At present only a single Bluetooth device is supported.  So we can simply
- * maintain the scan and the discovery state as globals.
+ * maintain the scan, MTU exchange, and discovery states as globals.
  *
  * NOTE: This limits to a single Bluetooth device with one concurrent scan
- * action and one concurrent discovery action.
+ * action, one concurrent MTU exchange, and one concurrent discovery action.
  */
 
 static struct btnet_scanstate_s     g_scanstate;
 static struct btnet_discoverstate_s g_discoverstate;
+static struct bt_exchangeresult_s   g_exchangeresult;
 
 /****************************************************************************
  * Private Functions
@@ -219,15 +220,17 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
   uint8_t head;
   uint8_t tail;
   uint8_t nrsp;
+  bool scanning;
   int ret;
 
-  wlinfo("Scanning? %s\n", g_scanstate.bs_scanning ? "YES" : "NO");
+  scanning = g_scanstate.bs_scanning;
+  wlinfo("Scanning? %s\n", scanning ? "YES" : "NO");
 
   /* Get exclusive access to the scan data while we are actively scanning.
    * The semaphore is uninitialized in other cases.
    */
 
-  if (g_scanstate.bs_scanning)
+  if (scanning)
    {
       /* Get exclusive access to the scan data */
 
@@ -265,12 +268,34 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 
   g_scanstate.bs_head = head;
 
-  if (g_scanstate.bs_scanning)
+  if (scanning)
    {
       nxsem_post(&g_scanstate.bs_exclsem);
    }
 
   return nrsp;
+}
+
+/****************************************************************************
+ * Name: bt_exchange_rsp
+ *
+ * Description:
+ *   Result of MTU exchange.
+ *
+ * Input Parameters:
+ *   conn   - The address of the peer in the MTU exchange
+ *   result - The result of the MTU exchange
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void bt_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
+{
+  wlinfo("Exchange %s\n", result == 0 ? "succeeded" : "failed");
+  g_exchangeresult.mx_pending = true;
+  g_exchangeresult.mx_result  = result;
 }
 
 /****************************************************************************
@@ -405,15 +430,17 @@ static int btnet_discover_result(FAR struct bt_discresonse_s *result,
   uint8_t head;
   uint8_t tail;
   uint8_t nrsp;
+  bool discovering;
   int ret;
 
-  wlinfo("Discovering? %s\n", g_discoverstate.bd_discovering ? "YES" : "NO");
+  discovering = g_discoverstate.bd_discovering;
+  wlinfo("Discovering? %s\n", discovering ? "YES" : "NO");
 
   /* Get exclusive access to the discovery data while we are actively
    * discovering. The semaphore is uninitialized in other cases.
    */
 
-  if (g_discoverstate.bd_discovering)
+  if (discovering)
    {
       ret = nxsem_wait(&g_discoverstate.bd_exclsem);
       if (ret < 0)
@@ -445,7 +472,7 @@ static int btnet_discover_result(FAR struct bt_discresonse_s *result,
 
   g_discoverstate.bd_head = head;
 
-  if (g_discoverstate.bd_discovering)
+  if (discovering)
    {
       nxsem_post(&g_discoverstate.bd_exclsem);
    }
@@ -655,6 +682,54 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
               bt_conn_release(conn);
             }
+        }
+        break;
+
+      /* SIOCBTEXCHANGE:  Exchange MTUs */
+
+      case SIOCBTEXCHANGE:
+        {
+          /* Check if we are still waiting for the result of the last exchange */
+
+          if (g_exchangeresult.mx_pending)
+            {
+              wlwarn("WARNING:  Last exchange not yet complete\n");
+              ret = -EBUSY;
+            }
+          else
+            {
+              FAR struct bt_conn_s *conn;
+
+              /* Get the connection associated with the provided LE address */
+
+              conn = bt_conn_lookup_addr_le(&btreq->btr_expeer);
+              if (conn == NULL)
+                {
+                  wlwarn("WARNING:  Peer not connected\n");
+                  ret = -ENOTCONN;
+                }
+              else
+                {
+                  ret = bt_gatt_exchange_mtu(conn, bt_exchange_rsp);
+                  if (ret == OK)
+                    {
+                      g_exchangeresult.mx_pending = true;
+                      g_exchangeresult.mx_result  = EBUSY;
+                    }
+
+                  bt_conn_release(conn);
+                }
+            }
+        }
+        break;
+
+      /* SIOCBTEXRESULT: Get the result of the MTU exchange */
+
+      case SIOCBTEXRESULT:
+        {
+          btreq->btr_expending = g_exchangeresult.mx_pending;
+          btreq->btr_exresult  = g_exchangeresult.mx_result;
+          ret                  = OK;
         }
         break;
 

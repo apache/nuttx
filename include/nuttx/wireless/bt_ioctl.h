@@ -60,7 +60,7 @@
 
 /* Bluetooth network device IOCTL commands. */
 
-#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 18
+#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 20
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 
@@ -165,6 +165,10 @@
 
 /* GATT
  *
+ * SIOCBTEXCHANGE
+ *   Exchange MTUs
+ * SIOCBTEXRESULT
+ *   Get the result of the MTU exchange
  * SIOCBTDISCOVER
  *   Starts GATT discovery
  * SIOCBTDISCGET
@@ -172,8 +176,10 @@
  *   SIOCBTDISCGET command was invoked.
  */
 
-#define SIOCBTDISCOVER         _WLIOC(WL_BLUETOOTHFIRST + 16)
-#define SIOCBTDISCGET          _WLIOC(WL_BLUETOOTHFIRST + 17)
+#define SIOCBTEXCHANGE         _WLIOC(WL_BLUETOOTHFIRST + 16)
+#define SIOCBTEXRESULT         _WLIOC(WL_BLUETOOTHFIRST + 17)
+#define SIOCBTDISCOVER         _WLIOC(WL_BLUETOOTHFIRST + 18)
+#define SIOCBTDISCGET          _WLIOC(WL_BLUETOOTHFIRST + 19)
 
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
@@ -205,6 +211,11 @@
 
 #define btr_secaddr            btru.btrse.btrse_secaddr
 #define btr_seclevel           btru.btrse.btrse_seclevel
+
+#define btr_expeer             btru.btmx.btmx_expeer
+
+#define btr_expending          btru.btmxr.mx_pending
+#define btr_exresult           btru.btmxr.mx_result
 
 #define btr_dtype              btru.btrds.btrds_dtype
 #define btr_dpeer              btru.btrds.btrds_dpeer
@@ -261,6 +272,14 @@ struct bt_discresonse_s
 {
   uint16_t dr_handle;               /* Discovered handled */
   uint8_t dr_perm;                  /* Permissions */
+};
+
+/* MTU exchange state variables. */
+
+struct bt_exchangeresult_s
+{
+  bool mx_pending;                  /* True:  We have not yet received the result */
+  uint8_t mx_result;                /* The result of the MTU exchange */
 };
 
 /* Bluetooth statistics */
@@ -361,6 +380,17 @@ struct btreq_s
         bt_addr_le_t btrse_secaddr;        /* BLE address */
         enum bt_security_e btrse_seclevel; /* Security level */
       } btrse;
+
+      /* Read-only data that accompanies SIOCBTEXCHANGE command */
+
+      struct
+      {
+        bt_addr_le_t btmx_expeer;       /* Peer address for MTU exchange */
+      } btmx;
+
+      /* Write result that accompanies SIOCBTEXRESULT command */
+
+      struct bt_exchangeresult_s btmxr;
 
       /* Read-only data that accompanies SIOCBTDISCOVER command */
 
