@@ -217,7 +217,6 @@
 
 struct bt_scanresponse_s
 {
-  char sr_name[HCI_DEVNAME_SIZE];   /* Device name */
   bt_addr_le_t sr_addr;             /* Advertiser LE address and type */
   int8_t sr_rssi;                   /* Strength of advertiser signal */
   uint8_t sr_type;                  /* Type of advertising response */

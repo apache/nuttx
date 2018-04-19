@@ -201,11 +201,7 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
   uint8_t nrsp;
   int ret;
 
-  if (!g_scanstate.bs_scanning)
-    {
-      wlerr("ERROR:  Results received while not scanning\n");
-      return -EPIPE;
-    }
+  wlinfo("Scanning? %s\n", g_scanstate.bs_scanning ? "YES" : "NO");
 
   /* Get exclusive access to the scan data */
 
