@@ -643,8 +643,10 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
             break;
           case XBEE_APIFRAME_TXSTATUS:
             {
+              wd_cancel(priv->reqdata_wd);
               xbee_process_txstatus(priv, frame->io_data[frame->io_offset],
                                     frame->io_data[frame->io_offset + 1]);
+              priv->txdone = true;
               nxsem_post(&priv->txdone_sem);
             }
             break;
@@ -1027,6 +1029,7 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
 
   priv->assocwd    = wd_create();
   priv->atquery_wd = wd_create();
+  priv->reqdata_wd = wd_create();
 
   priv->frameid = 0; /* Frame ID should never be 0, but it is incremented
                       * in xbee_next_frameid before being used so it will be 1 */

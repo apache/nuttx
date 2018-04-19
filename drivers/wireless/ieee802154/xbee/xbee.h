@@ -172,9 +172,11 @@ struct xbee_priv_s
   char querycmd[2];               /* Stores the pending AT Query command */
   bool querydone;                 /* Used to tell waiting thread query is done*/
   WDOG_ID atquery_wd;             /* Support AT Query timeout and retry */
+  WDOG_ID reqdata_wd;             /* Support send timeout and retry */
   uint8_t frameid;                /* For differentiating AT request/response */
   sem_t tx_sem;                   /* Support a single pending transmit */
   sem_t txdone_sem;               /* For signalling tx is completed */
+  bool txdone;
 
   /******************* Fields related to Xbee radio ***************************/
 
