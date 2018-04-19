@@ -234,7 +234,7 @@
 #  else
 #      define STM32F7_ITCM_SRAM_SIZE      (0)         /* No ITCM SRAM on TCM interface */
 #  endif
-#elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77X)
+#elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 #    define STM32F7_SRAM1_SIZE            (368*1024)  /* 368Kb SRAM1 on AHB bus Matrix */
 #    define STM32F7_SRAM2_SIZE            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
 #  if defined(CONFIG_ARMV7M_HAVE_DTCM)

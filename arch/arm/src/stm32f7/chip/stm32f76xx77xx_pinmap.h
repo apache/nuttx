@@ -45,7 +45,7 @@
 
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F76XX)
+#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 
 /************************************************************************************
  * Pre-processor Definitions
