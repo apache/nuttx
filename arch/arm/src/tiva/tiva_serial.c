@@ -1196,7 +1196,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in
@@ -1205,6 +1205,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NO_SERIAL_CONSOLE
 void up_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
@@ -1243,6 +1244,7 @@ void up_earlyserialinit(void)
   up_setup(&CONSOLE_DEV);
 #endif
 }
+#endif /* !CONFIG_NO_SERIAL_CONSOLE */
 
 /****************************************************************************
  * Name: up_serialinit

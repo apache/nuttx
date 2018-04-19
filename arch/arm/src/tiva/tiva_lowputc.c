@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_lowputc.c
  *
- *   Copyright (C) 2009-2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,41 +117,44 @@
 #  define TIVA_CONSOLE_BITS     CONFIG_UART7_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART7_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART7_2STOP
-#else
+#elif !defined(CONFIG_NO_SERIAL_CONSOLE)
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
 /* Get LCRH settings */
+#ifndef CONFIG_NO_SERIAL_CONSOLE
 
-#if TIVA_CONSOLE_BITS == 5
-#  define UART_LCRH_NBITS UART_LCRH_WLEN_5BITS
-#elif TIVA_CONSOLE_BITS == 6
-#  define UART_LCRH_NBITS UART_LCRH_WLEN_6BITS
-#elif TIVA_CONSOLE_BITS == 7
-#  define UART_LCRH_NBITS UART_LCRH_WLEN_7BITS
-#elif TIVA_CONSOLE_BITS == 8
-#  define UART_LCRH_NBITS UART_LCRH_WLEN_8BITS
-#else
-#  error "Number of bits not supported"
-#endif
+#  if TIVA_CONSOLE_BITS == 5
+#    define UART_LCRH_NBITS UART_LCRH_WLEN_5BITS
+#  elif TIVA_CONSOLE_BITS == 6
+#    define UART_LCRH_NBITS UART_LCRH_WLEN_6BITS
+#  elif TIVA_CONSOLE_BITS == 7
+#    define UART_LCRH_NBITS UART_LCRH_WLEN_7BITS
+#  elif TIVA_CONSOLE_BITS == 8
+#    define UART_LCRH_NBITS UART_LCRH_WLEN_8BITS
+#  else
+#    error "Number of bits not supported"
+#  endif
 
-#if TIVA_CONSOLE_PARITY == 0
-#  define UART_LCRH_PARITY (0)
-#elif TIVA_CONSOLE_PARITY == 1
-#  define UART_LCRH_PARITY UART_LCRH_PEN
-#elif TIVA_CONSOLE_PARITY == 2
-#  define UART_LCRH_PARITY (UART_LCRH_PEN|UART_LCRH_EPS)
-#else
-#  error "Invalid parity selection"
-#endif
+#  if TIVA_CONSOLE_PARITY == 0
+#    define UART_LCRH_PARITY (0)
+#  elif TIVA_CONSOLE_PARITY == 1
+#    define UART_LCRH_PARITY UART_LCRH_PEN
+#  elif TIVA_CONSOLE_PARITY == 2
+#    define UART_LCRH_PARITY (UART_LCRH_PEN|UART_LCRH_EPS)
+#  else
+#    error "Invalid parity selection"
+#  endif
 
-#if TIVA_CONSOLE_2STOP != 0
-#  define UART_LCRH_NSTOP UART_LCRH_STP2
-#else
-#  define UART_LCRH_NSTOP (0)
-#endif
+#  if TIVA_CONSOLE_2STOP != 0
+#    define UART_LCRH_NSTOP UART_LCRH_STP2
+#  else
+#    define UART_LCRH_NSTOP (0)
+#  endif
 
-#define UART_LCRH_VALUE (UART_LCRH_NBITS|UART_LCRH_PARITY|UART_LCRH_NSTOP|UART_LCRH_FEN)
+#  define UART_LCRH_VALUE (UART_LCRH_NBITS|UART_LCRH_PARITY|UART_LCRH_NSTOP|UART_LCRH_FEN)
+
+#endif /* !CONFIG_NO_SERIAL_CONSOLE */
 
 /* Calculate BAUD rate from the SYS clock:
  *
