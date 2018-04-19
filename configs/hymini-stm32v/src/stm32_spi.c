@@ -45,12 +45,13 @@
 #include <debug.h>
 
 #include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
 #include "hymini-stm32v.h"
+
+#include <arch/board/board.h>  /* Should always be included last due to dependencies */
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 

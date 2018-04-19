@@ -54,11 +54,11 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
-#include <arch/board/board.h>
-
 #include "up_arch.h"
 #include "stm32.h"
 #include "hymini-stm32v.h"
+
+#include <arch/board/board.h>  /* Should always be included last due to dependencies */
 
 /**************************************************************************************
  * Pre-processor Definitions
@@ -344,10 +344,10 @@ static void stm32_selectlcd(void)
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(
-      FSMC_BTR_ADDSET(2)|FSMC_BTR_ADDHLD(0)|FSMC_BTR_DATAST(2)|FSMC_BTR_BUSTURN(0)|
-      FSMC_BTR_CLKDIV(0)|FSMC_BTR_DATLAT(0)|FSMC_BTR_ACCMODA,
-      STM32_FSMC_BTR1);
+  putreg32(FSMC_BTR_ADDSET(2)  | FSMC_BTR_ADDHLD(0) |FSMC_BTR_DATAST(2) |
+           FSMC_BTR_BUSTURN(0) | FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA,
+           STM32_FSMC_BTR1);
 
   /* As ext mode is not active the write timing is ignored!! */
 
@@ -367,7 +367,6 @@ static void stm32_selectlcd(void)
  *
  ************************************************************************************/
 
-// FIXME: Check this code !!
 static void stm32_deselectlcd(void)
 {
   /* Restore registers to their power up settings */

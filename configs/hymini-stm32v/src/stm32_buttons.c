@@ -44,15 +44,13 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
+#include "stm32_gpio.h"
 #include "hymini-stm32v.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <arch/board/board.h>  /* Should always be included last due to dependencies */
 
 /****************************************************************************
  * Public Functions

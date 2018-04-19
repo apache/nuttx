@@ -258,6 +258,16 @@ config ARCH_BOARD_FREEDOM_KL26Z
 		This is the configuration for the NXP/FreeScale Freedom KL26Z board.  This
 		board has the K26Z128VLH4 chip with a built-in SDA debugger.
 
+config ARCH_BOARD_HYMINI_STM32V
+	bool "HY-Mini STM32v board"
+	depends on ARCH_CHIP_STM32F103VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		A configuration for the HY-Mini STM32v board.  This board is based on the
+		STM32F103VCT6 chip.
+
 config ARCH_BOARD_IMXRT1050_EVK
 	bool "NXP i.MX RT 1050 EVK"
 	depends on ARCH_CHIP_MIMXRT1052DVL6A

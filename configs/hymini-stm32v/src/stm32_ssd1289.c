@@ -48,17 +48,18 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1289.h>
 
-#include <arch/board/board.h>
-
 #include "up_arch.h"
 #include "stm32.h"
 #include "hymini-stm32v.h"
+
+#include <arch/board/board.h>  /* Should always be included last due to dependencies */
 
 #ifdef CONFIG_LCD_SSD1289
 
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
+
 /* Configuration **********************************************************************/
 
 #ifndef CONFIG_STM32_FSMC
@@ -379,9 +380,10 @@ static void stm32_selectlcd(void)
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(
-      FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(0)|FSMC_BTR_DATAST(2)|FSMC_BTR_BUSTURN(0)| FSMC_BTR_CLKDIV(0)|FSMC_BTR_DATLAT(0)|FSMC_BTR_ACCMODA,
-      STM32_FSMC_BTR1);
+  putreg32(FSMC_BTR_ADDSET(1)  | FSMC_BTR_ADDHLD(0) | FSMC_BTR_DATAST(2) |
+           FSMC_BTR_BUSTURN(0) | FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA,
+           STM32_FSMC_BTR1);
 
   /* As ext mode is not active the write timing is ignored!! */
 
@@ -390,7 +392,7 @@ static void stm32_selectlcd(void)
   /* Enable the bank by setting the MBKEN bit */
 
   putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN,
-      STM32_FSMC_BCR1);
+           STM32_FSMC_BCR1);
 }
 
 /************************************************************************************
@@ -500,7 +502,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  **************************************************************************************/
 

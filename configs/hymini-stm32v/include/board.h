@@ -40,20 +40,14 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_HYMINI_STM32V_INCLUDE_BOARD_H
+#define __CONFIGS_HYMINI_STM32V_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -181,4 +175,4 @@
 #define BUTTON_KEYA_BIT  (1 << BUTTON_KEYA)
 #define BUTTON_KEYB_BIT  (1 << BUTTON_KEYB)
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_HYMINI_STM32V_INCLUDE_BOARD_H */
