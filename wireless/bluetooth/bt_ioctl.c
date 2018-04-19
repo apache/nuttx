@@ -223,13 +223,20 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 
   wlinfo("Scanning? %s\n", g_scanstate.bs_scanning ? "YES" : "NO");
 
-  /* Get exclusive access to the scan data */
+  /* Get exclusive access to the scan data while we are actively scanning.
+   * The semaphore is uninitialized in other cases.
+   */
 
-  ret = nxsem_wait(&g_scanstate.bs_exclsem);
-  if (ret < 0)
-    {
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-      return ret;
+  if (g_scanstate.bs_scanning)
+   {
+      /* Get exclusive access to the scan data */
+
+      ret = nxsem_wait(&g_scanstate.bs_exclsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+          return ret;
+        }
     }
 
   /* Copy all available results */
@@ -257,7 +264,12 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
     }
 
   g_scanstate.bs_head = head;
-  nxsem_post(&g_scanstate.bs_exclsem);
+
+  if (g_scanstate.bs_scanning)
+   {
+      nxsem_post(&g_scanstate.bs_exclsem);
+   }
+
   return nrsp;
 }
 
@@ -397,13 +409,18 @@ static int btnet_discover_result(FAR struct bt_discresonse_s *result,
 
   wlinfo("Discovering? %s\n", g_discoverstate.bd_discovering ? "YES" : "NO");
 
-  /* Get exclusive access to the discovery data */
+  /* Get exclusive access to the discovery data while we are actively
+   * discovering. The semaphore is uninitialized in other cases.
+   */
 
-  ret = nxsem_wait(&g_discoverstate.bd_exclsem);
-  if (ret < 0)
-    {
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-      return ret;
+  if (g_discoverstate.bd_discovering)
+   {
+      ret = nxsem_wait(&g_discoverstate.bd_exclsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+          return ret;
+        }
     }
 
   /* Copy all available results */
@@ -427,7 +444,12 @@ static int btnet_discover_result(FAR struct bt_discresonse_s *result,
     }
 
   g_discoverstate.bd_head = head;
-  nxsem_post(&g_discoverstate.bd_exclsem);
+
+  if (g_discoverstate.bd_discovering)
+   {
+      nxsem_post(&g_discoverstate.bd_exclsem);
+   }
+
   return nrsp;
 }
 
