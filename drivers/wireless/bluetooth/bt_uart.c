@@ -45,55 +45,17 @@
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/wqueue.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_hci.h>
 #include <nuttx/wireless/bt_driver.h>
 #include <nuttx/wireless/bt_uart.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define H4_HEADER_SIZE  1
-
-#define H4_CMD           0x01
-#define H4_ACL           0x02
-#define H4_SCO           0x03
-#define H4_EVT           0x04
-
-#ifdef CONFIG_BLUETOOTH_UART_DUMP
-#  define BT_DUMP(m,b,l) lib_dumpbuffer(m,b,l)
-#else
-#  define BT_DUMP(m,b,l)
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct btuart_upperhalf_s
-{
-  /* This structure must appear first in the structure so that this structure
-   * is cast compatible with struct bt_driver_s.
-   */
-
-  struct bt_driver_s dev;
-
-  /* The cached lower half interface */
-
-  FAR const struct btuart_lowerhalf_s *lower;
-
-  /* Work queue support */
-
-  struct work_s work;
-  volatile bool busy;
-};
+#include "bt_uart.h"
 
 /****************************************************************************
  * Private Functions
@@ -331,8 +293,11 @@ static void btuart_rxcallback(FAR const struct btuart_lowerhalf_s *lower,
     }
 }
 
-static int btuart_send(FAR const struct bt_driver_s *dev,
-                       FAR struct bt_buf_s *buf)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf)
 {
   FAR struct btuart_upperhalf_s *upper;
   FAR const struct btuart_lowerhalf_s *lower;
@@ -386,7 +351,7 @@ static int btuart_send(FAR const struct bt_driver_s *dev,
   return -EIO;
 }
 
-static int btuart_open(FAR const struct bt_driver_s *dev)
+int btuart_open(FAR const struct bt_driver_s *dev)
 {
   FAR struct btuart_upperhalf_s *upper;
   FAR const struct btuart_lowerhalf_s *lower;
@@ -405,71 +370,12 @@ static int btuart_open(FAR const struct bt_driver_s *dev)
 
   (void)lower->rxdrain(lower);
 
+  /* Attach the Rx event handler */
+
+  lower->rxattach(lower, btuart_rxcallback, upper);
+
   /* Re-enable Rx callbacks */
 
   lower->rxenable(lower, true);
   return OK;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: btuart_register
- *
- * Description:
- *   Create the UART-based Bluetooth device and register it with the
- *   Bluetooth stack.
- *
- * Input Parameters:
- *   lower - an instance of the lower half driver interface
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
-{
-  FAR struct btuart_upperhalf_s *upper;
-  int ret;
-
-  wlinfo("lower %p\n", lower);
-
-  DEBUGASSERT(lower != NULL);
-
-  /* Allocate a new instance of the upper half driver state structure */
-
-  upper = (FAR struct btuart_upperhalf_s *)
-    kmm_zalloc(sizeof(struct btuart_upperhalf_s));
-
-  if (upper == NULL)
-    {
-      wlerr("ERROR: Failed to allocate upper-half state\n");
-      return -ENOMEM;
-    }
-
-  /* Initialize the upper half driver state */
-
-  upper->dev.head_reserve = H4_HEADER_SIZE;
-  upper->dev.open         = btuart_open;
-  upper->dev.send         = btuart_send;
-  upper->lower            = lower;
-
-  /* Attach the interrupt handler */
-
-  lower->rxattach(lower, btuart_rxcallback, upper);
-
-  /* And register the driver with the network and the Bluetooth stack. */
-
-  ret = bt_netdev_register(&upper->dev);
-  if (ret < 0)
-    {
-      wlerr("ERROR: bt_driver_register failed: %d\n", ret);
-      kmm_free(upper);
-    }
-
-  return ret;
 }

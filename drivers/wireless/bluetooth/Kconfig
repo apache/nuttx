@@ -1,43 +1,7 @@
-#############################################################################
-# wireless/bluetooth/Kconfig
-# Bluetooth LE driver configuration options
 #
-#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
 #
-# Ported from the Intel/Zephyr arduino101_firmware_source-v1.tar package
-# where the code was released with a compatible 3-clause BSD license:
-#
-#   Copyright (c) 2016, Intel Corporation
-#   All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice,
-#    this list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# 3. Neither the name of the copyright holder nor the names of its
-#    contributors may be used to endorse or promote products derived from this
-#    software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-#
-#############################################################################
 
 if DRIVERS_BLUETOOTH
 
@@ -48,12 +12,38 @@ config BLUETOOTH_UART
 	---help---
 		Enable Bluetooth UART driver.
 
+config BLUETOOTH_UART_GENERIC
+	bool
+	default n
+
+if BLUETOOTH_UART
+
+choice
+	prompt "Bluetooth UART HCI device"
+	default BLUETOOTH_UART_OTHER
+
+config BLUETOOTH_UART_BT860
+	bool "Laird BT860"
+	select BLUETOOTH_UART_GENERIC
+
+config BLUETOOTH_UART_CC2564
+	bool "TI CC2564"
+	depends on EXPERIMENTAL
+
+config BLUETOOTH_UART_OTHER
+	bool "Other generic HCI UART device"
+	select BLUETOOTH_UART_GENERIC
+
+endchoice # Bluetooth UART HCI device
+
 config BLUETOOTH_UART_DUMP
 	bool "Dump HCI UART I/O buffers"
 	default n
-	depends on BLUETOOTH_UART && DEBUG_WIRELESS_INFO
+	depends on DEBUG_WIRELESS_INFO
 	---help---
 		Dump the full content of all outgoing and incoming messages.
+
+endif # BLUETOOTH_UART
 
 config BLUETOOTH_NULL
 	bool "NULL Bluetooth device"

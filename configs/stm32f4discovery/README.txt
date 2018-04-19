@@ -1254,6 +1254,12 @@ Configuration Sub-directories
        The command to write the initialization script into NVRAM is another
        story for another time and another place.
 
+       If you use a different HCI UART, you will need to modify this setting:
+
+         CONFIG_BLUETOOTH_UART_GENERIC=y
+
+       and you may have to add some support in drivers/wireless/bluetooth.
+
   ipv6:
   ----
     This is another version of the NuttShell configuration for the

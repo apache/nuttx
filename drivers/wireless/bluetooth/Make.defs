@@ -41,6 +41,9 @@ ifeq ($(CONFIG_DRIVERS_BLUETOOTH),y)
 
 ifeq ($(CONFIG_BLUETOOTH_UART),y)
 CSRCS += bt_uart.c
+ifeq ($(CONFIG_BLUETOOTH_UART_GENERIC),y)
+CSRCS += bt_uart_generic.c
+endif
 endif
 
 ifeq ($(CONFIG_BLUETOOTH_NULL),y)
