@@ -57,6 +57,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_hci.h>
@@ -83,26 +84,124 @@
 #define TIMEOUT_NSEC   500 * 1024 * 1024
 
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
 
-enum bt_stackdir_e
-{
-  STACK_DIRECTION_UP,
-  STACK_DIRECTION_DOWN,
-};
+/* State of connected HCI device.
+ *
+ * NOTE:  Because this is a global singleton, multiple HCI devices may not
+ * be supported.
+ */
+
+struct bt_dev_s g_btdev;
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct bt_dev_s g_btdev;
 static FAR struct bt_conn_cb_s *g_callback_list;
 static bt_le_scan_cb_t *g_scan_dev_found_cb;
+
+/* Lists of pending received messages.  One for low priority input that is
+ * processed on the low priority work queue and one for high priority
+ * input that is processed on high priority work queue.
+ */
+
+static FAR struct bt_bufferlist_s g_lp_rxlist;
+static FAR struct bt_bufferlist_s g_hp_rxlist;
+
+/* Work structures: One for high priority and one for low priority work */
+
+static struct work_s g_lp_work;
+static struct work_s g_hp_work;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bt_enqueue_bufwork
+ *
+ * Description:
+ *   Add the provided buffer 'buf' to the head selected buffer list 'list'
+ *
+ * Input Parameters:
+ *   list - The buffer list to use
+ *   buf  - The buffer to be added to the head of the buffer list
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
+                               FAR struct bt_buf_s *buf)
+{
+  irqstate_t flags;
+
+  flags      = spin_lock_irqsave();
+  buf->flink = list->head;
+  if (list->head == NULL)
+    {
+      list->tail = buf;
+    }
+
+  list->head = buf;
+  spin_unlock_irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: bt_dequeue_bufwork
+ *
+ * Description:
+ *   Remove and return the buffer at the tail of the buffer list specified
+ *   by 'list'.
+ *
+ * Input Parameters:
+ *   list - The buffer list to use
+ *
+ * Returned Value:
+ *   A pointer to the buffer that was at the tail of the buffer list.  NULL
+ *   is returned if the list was empty.
+ *
+ ****************************************************************************/
+
+static FAR struct bt_buf_s *bt_dequeue_bufwork(FAR struct bt_bufferlist_s *list)
+{
+  FAR struct bt_buf_s *buf;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave();
+  buf   = list->tail;
+  if (buf != NULL)
+    {
+      if (list->head == list->tail)
+        {
+          list->head = NULL;
+          list->tail = NULL;
+        }
+      else
+        {
+          FAR struct bt_buf_s *prev;
+
+          for (prev = list->head;
+               prev && prev->flink != buf;
+               prev = prev->flink)
+           {
+           }
+
+          if (prev != NULL)
+            {
+              prev->flink = NULL;
+              list->tail  = prev;
+            }
+        }
+
+      buf->flink = NULL;
+    }
+
+  spin_unlock_irqrestore(flags);
+  return buf;
+}
 
 static void bt_connected(FAR struct bt_conn_s *conn)
 {
@@ -862,6 +961,20 @@ static void hci_event(FAR struct bt_buf_s *buf)
   bt_buf_release(buf);
 }
 
+/****************************************************************************
+ * Name: hci_tx_kthread
+ *
+ * Description:
+ *   This is a kernel thread that handles sending of commands.
+ *
+ * Input Parameters:
+ *   Standard kernel thread arguments
+ *
+ * Returned Value:
+ *   Doesn't normally return.
+ *
+ ****************************************************************************/
+
 static int hci_tx_kthread(int argc, FAR char *argv[])
 {
   FAR const struct bt_driver_s *btdev = g_btdev.btdev;
@@ -912,22 +1025,33 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
   return EXIT_SUCCESS;  /* Can't get here */
 }
 
-static int hci_rx_kthread(int argc, FAR char *argv[])
+/****************************************************************************
+ * Name: hci_rx_work
+ *
+ * Description:
+ *   This work function may operate on either the the high priority work
+ *   thread (using the high priority buffer queue), or on the low priority
+ *   work queue (using the low priority buffer queue), depending upon the
+ *   type of the incoming message
+ *
+ * Input Parameters:
+ *   arg - Indicates which buffer queue should be used
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void hci_rx_work(FAR void *arg)
 {
+  FAR struct bt_bufferlist_s *list = (FAR struct bt_bufferlist_s *)arg;
   FAR struct bt_buf_s *buf;
-  int ret;
 
-  wlinfo("started\n");
+  wlinfo("list %p\n", list);
+  DEBUGASSERT(list != NULL);
 
-  for (; ; )
+  while ((buf = bt_dequeue_bufwork(list)) != NULL)
     {
-      ret = bt_queue_receive(g_btdev.rx_queue, &buf);
-      if (ret < 0)
-        {
-          wlerr("ERROR:  bt_queue_receive() failed: %d\n", ret);
-          continue;
-        }
-
       wlinfo("buf %p type %u len %u\n", buf, buf->type, buf->len);
 
       switch (buf->type)
@@ -946,8 +1070,6 @@ static int hci_rx_kthread(int argc, FAR char *argv[])
             break;
         }
     }
-
-  return EXIT_SUCCESS;  /* Can't get here */
 }
 
 static void read_local_features_complete(FAR struct bt_buf_s *buf)
@@ -1134,7 +1256,7 @@ static int hci_initialize(void)
   hbs->acl_mtu = BT_HOST2LE16(BLUETOOTH_MAX_FRAMELEN -
                               sizeof(struct bt_hci_acl_hdr_s) -
                               g_btdev.btdev->head_reserve);
-  hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_RXTHREAD_NMSGS);
+  hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_BUFFER_PREALLOC);
 
   ret = bt_hci_cmd_send(BT_HCI_OP_HOST_BUFFER_SIZE, buf);
   if (ret < 0)
@@ -1235,28 +1357,6 @@ static void cmd_queue_init(void)
   UNUSED(pid);
 }
 
-static void rx_queue_init(void)
-{
-  pid_t pid;
-  int ret;
-
-  /* When a buffer is received from the Bluetooth driver via bt_hci_receive()
-   * on the Rx queue and received by logic on the Rx kernel thread.
-   */
-
-  g_btdev.rx_queue = NULL;
-  ret = bt_queue_open(BT_HCI_RX, O_RDWR | O_CREAT,
-                      CONFIG_BLUETOOTH_RXTHREAD_NMSGS, &g_btdev.rx_queue);
-  DEBUGASSERT(ret >= 0 &&  g_btdev.rx_queue != NULL);
-  UNUSED(ret);
-
-  pid = kthread_create("BT HCI Rx", CONFIG_BLUETOOTH_RXTHREAD_PRIORITY,
-                       CONFIG_BLUETOOTH_RXTHREAD_STACKSIZE,
-                       hci_rx_kthread, NULL);
-  DEBUGASSERT(pid > 0);
-  UNUSED(pid);
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1283,7 +1383,6 @@ int bt_initialize(void)
   bt_buf_initialize();
 
   cmd_queue_init();
-  rx_queue_init();
 
   ret = btdev->open(btdev);
   if (ret < 0)
@@ -1365,6 +1464,10 @@ void bt_driver_unregister(FAR const struct bt_driver_s *btdev)
  *   the radio.  This may be called from the low-level driver and is part of
  *   the driver interface prototyped in include/nuttx/wireless/bt_driver.h
  *
+ *   NOTE:  This function will defer all real work to the low or to the high
+ *   priority work queues.  Therefore, this function may safely be called
+ *   from interrupt handling logic.
+ *
  * Input Parameters:
  *   buf - An instance of the buffer structure providing the received frame.
  *
@@ -1376,10 +1479,13 @@ void bt_driver_unregister(FAR const struct bt_driver_s *btdev)
 void bt_hci_receive(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_hdr_s *hdr;
-  int prio = BT_NORMAL_PRIO;
   int ret;
 
   wlinfo("buf %p len %u\n", buf, buf->len);
+
+  /* Critical command complete/status events use the high priority work
+   * queue.
+   */
 
   if (buf->type != BT_ACL_IN)
     {
@@ -1397,14 +1503,45 @@ void bt_hci_receive(FAR struct bt_buf_s *buf)
           hdr->evt == BT_HCI_EVT_CMD_STATUS ||
           hdr->evt == BT_HCI_EVT_NUM_COMPLETED_PACKETS)
         {
-          prio = BT_HIGH_PRIO;
+          /* Add the buffer to the high priority Rx buffer list */
+
+          bt_enqueue_bufwork(&g_hp_rxlist, buf);
+
+          /* If there is already pending work, then do nothing.  Otherwise,
+           * schedule processing of the Rx buffer list on the high priority
+           * work queue.
+           */
+
+          if (work_available(&g_hp_work))
+            {
+              ret = work_queue(HPWORK, &g_hp_work, hci_rx_work,
+                               &g_hp_rxlist, 0);
+              if (ret < 0)
+                {
+                  wlerr("ERROR:  Failed to schedule HPWORK: %d\n", ret);
+                }
+            }
+
+          return;
         }
     }
 
-  ret = bt_queue_send(g_btdev.rx_queue, buf, prio);
-  if (ret < 0)
+  /* All others use the low priority work queue */
+  /* Add the buffer to the low priority Rx buffer list */
+
+  bt_enqueue_bufwork(&g_lp_rxlist, buf);
+
+  /* If there is already pending work, then do nothing.  Otherwise, schedule
+   * processing of the Rx buffer list on the low priority work queue.
+   */
+
+  if (work_available(&g_lp_work))
     {
-      wlerr("ERROR: bt_queue_send() failed: %d\n", ret);
+      ret = work_queue(LPWORK, &g_lp_work, hci_rx_work, &g_lp_rxlist, 0);
+      if (ret < 0)
+        {
+          wlerr("ERROR:  Failed to schedule LPWORK: %d\n", ret);
+        }
     }
 }
 

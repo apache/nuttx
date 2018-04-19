@@ -55,7 +55,6 @@
 
 #define BT_CONN_TX       "btconntx"
 #define BT_HCI_TX        "bthcitx"
-#define BT_HCI_RX        "bthcirx"
 
 /* All messages are sent FIFO at the mid-message priorities except for high-
  * priority messages received from the Bluetooth driver.
@@ -69,8 +68,7 @@
 
 /* Verify that enough messages have been allocated */
 
-#define BT_NMSGS         (CONFIG_BLUETOOTH_RXTHREAD_NMSGS + \
-                          CONFIG_BLUETOOTH_TXCMD_NMSGS + \
+#define BT_NMSGS         (CONFIG_BLUETOOTH_TXCMD_NMSGS + \
                           CONFIG_BLUETOOTH_TXCONN_NMSGS)
 
 #if BT_NMSGS > CONFIG_PREALLOC_MQ_MSGS

@@ -44,6 +44,8 @@ menuconfig WIRELESS_BLUETOOTH
 	prompt "Bluetooth LE support"
 	default n
 	select MM_IOB
+	select SCHED_HPWORK
+	select SCHED_LPWORK
 	depends on EXPERIMENTAL
 	---help---
 		This option enables Bluetooth Low Energy support.
@@ -131,19 +133,6 @@ config BLUETOOTH_BUFFER_IRQRESERVE
 		low-level Bluetooth driver needs to do such allocations.
 
 menu "Kernel Thread Configuration"
-
-config BLUETOOTH_RXTHREAD_STACKSIZE
-	int "Rx thread stack size"
-	default 1024
-
-config BLUETOOTH_RXTHREAD_PRIORITY
-	int "Rx thread priority"
-	default 100
-	range 1 255
-
-config BLUETOOTH_RXTHREAD_NMSGS
-	int "Rx thread mqueue size"
-	default 16
 
 config BLUETOOTH_TXCMD_STACKSIZE
 	int "Tx command thread stack size"

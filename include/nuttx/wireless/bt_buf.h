@@ -87,6 +87,8 @@ struct bt_buf_acl_data_s
   uint16_t handle;
 };
 
+/* This structure defines one buffer */
+
 struct iob_s;  /* Forward reference */
 
 struct bt_buf_s
@@ -108,6 +110,14 @@ struct bt_buf_s
   /* The full available buffer. */
 
   FAR struct iob_s *frame;
+};
+
+/* This structure defines a singly linked list of buffers */
+
+struct bt_bufferlist_s
+{
+  FAR struct bt_buf_s *head;
+  FAR struct bt_buf_s *tail;
 };
 
 /****************************************************************************
