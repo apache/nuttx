@@ -86,7 +86,7 @@
 #  define HAVE_CH4IN 1
 #endif
 
-#if defined(CONFIG_STM32_TIM1_CAP) || defined(CONFIG_STM32_TIM1_CAP)
+#if defined(CONFIG_STM32_TIM1_CAP) || defined(CONFIG_STM32_TIM8_CAP)
 #define USE_ADVENCED_TIM 1
 #endif
 
