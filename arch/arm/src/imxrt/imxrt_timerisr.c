@@ -87,7 +87,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int imxrt_timerisr(int irq, uint32_t *regs, void *arg)'
+static int imxrt_timerisr(int irq, uint32_t *regs, void *arg);
 
 #ifdef CONFIG_PM
 static void up_pm_notify(struct pm_callback_s *cb, int dowmin,
