@@ -89,13 +89,14 @@ enum wdg_behaviour_e
  *     debugger
  *
  * Returned Values:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NRF52_WDT
-void nrf52_wdg_initialize(FAR const char *devpath, int16_t behaviour_sleep,
-                          int16_t behaviour_halt);
+int nrf52_wdg_initialize(FAR const char *devpath, int16_t behaviour_sleep,
+                         int16_t behaviour_halt);
 #endif
 
 #undef EXTERN

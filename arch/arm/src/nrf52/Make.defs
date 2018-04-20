@@ -104,4 +104,3 @@ endif
 ifeq ($(CONFIG_NRF52_WDT),y)
 CHIP_CSRCS += nrf52_wdt.c
 endif
-

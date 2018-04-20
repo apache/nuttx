@@ -482,14 +482,16 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *     /dev/watchdog0
  *
  * Returned Values:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
-                          int16_t mode_halt)
+int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
+                         int16_t mode_halt)
 {
   FAR struct nrf52_wdg_lowerhalf_s *priv = &g_wdgdev;
+  FAR void *handle;
 
   wdinfo("Entry: devpath=%s, mode_sleep=%d, mode_halt=%d\n", devpath,
          mode_sleep, mode_halt);
@@ -515,7 +517,8 @@ void nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  handle = watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  return (handle != NULL) ? OK : -ENODEV;
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG_nrf52_IWDT */
