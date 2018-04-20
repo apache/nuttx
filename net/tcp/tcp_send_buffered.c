@@ -1086,13 +1086,21 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        */
 
       net_lock();
-      wrb = tcp_wrbuffer_alloc();
-      if (!wrb)
+      if (_SS_ISNONBLOCK(psock->s_flags))
+        {
+          wrb = tcp_wrbuffer_tryalloc();
+        }
+      else
+        {
+          wrb = tcp_wrbuffer_alloc();
+        }
+
+      if (wrb == NULL)
         {
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate write buffer\n");
-          ret = -ENOMEM;
+          ret = _SS_ISNONBLOCK(psock->s_flags) ? -EAGAIN : -ENOMEM;
           goto errout_with_lock;
         }
 
@@ -1110,7 +1118,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate callback\n");
-          ret = -ENOMEM;
+          ret = _SS_ISNONBLOCK(psock->s_flags) ? -EAGAIN : -ENOMEM;
           goto errout_with_wrb;
         }
 
@@ -1132,7 +1140,33 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       if (_SS_ISNONBLOCK(psock->s_flags))
         {
+          /* The return value from TCP_WBTRYCOPYIN is either OK or
+           * -ENOMEM if less than the entire data chunk could be allocated.
+           * If -ENOMEM is returned, check if at least a part of the data
+           * chunk was allocated. If more than zero bytes were sent
+           * we return that number and let the caller deal with sending the
+           * remaining data.
+           */
+
           result = TCP_WBTRYCOPYIN(wrb, (FAR uint8_t *)buf, len);
+          if (result == -ENOMEM)
+            {
+              if (TCP_WBPKTLEN(wrb) > 0)
+                {
+                  ninfo("INFO: Allocated part of the requested data\n");
+                  result = TCP_WBPKTLEN(wrb);
+                }
+              else
+                {
+                  nerr("ERROR: Failed to add data to the I/O buffer chain\n");
+                  ret = -EWOULDBLOCK;
+                  goto errout_with_wrb;
+                }
+            }
+          else
+            {
+              result = len;
+            }
         }
       else
         {

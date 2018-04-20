@@ -1416,6 +1416,25 @@ void tcp_wrbuffer_initialize(void);
 struct tcp_wrbuffer_s;
 
 FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
+
+/****************************************************************************
+ * Name: tcp_wrbuffer_tryalloc
+ *
+ * Description:
+ *   Try to allocate a TCP write buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from TCP logic when a buffer
+ *   of TCP data is about to be sent if the socket is non-blocking. Returns
+ *   immediately if allocation fails.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct tcp_wrbuffer_s *tcp_wrbuffer_tryalloc(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
