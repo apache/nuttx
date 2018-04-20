@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
+#include <syslog.h>
 
 /****************************************************************************
  * Public Functions
@@ -60,5 +62,18 @@
 
 int nrf52_bringup(void)
 {
+  int ret;
+
+#ifdef CONFIG_NRF52_WDT
+  /* Start Watchdog timer */
+
+  ret = nrf52_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, 1, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_wdt_initialize failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
