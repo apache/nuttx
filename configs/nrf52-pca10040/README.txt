@@ -110,3 +110,9 @@ Where <subdir> is one of the following:
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
+
+  wdog:
+  ----
+
+    This configuration is a simple NSH-based test of the nRF52 watchdog
+    timer driver using the test at apps/examples/watchdog.
