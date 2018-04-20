@@ -41,6 +41,7 @@
 
 #include <arch/board/board.h>
 
+#include "imxrt_gpio.h"
 #include "imxrt1050-evk.h"
 
 /****************************************************************************
@@ -62,7 +63,8 @@
 void board_userled_initialize(void)
 {
   /* Configure LED GPIOs for output */
-#warning Missing logic
+
+  imxrt_config_gpio(GPIO_LED0);
 }
 
 /****************************************************************************
@@ -71,7 +73,7 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-#warning Missing logic
+  imxrt_gpio_write(GPIO_LED0, !ledon);  /* Low illuminates */
 }
 
 /****************************************************************************
@@ -80,5 +82,7 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-#warning Missing logic
+  /* Low illuminates */
+
+  imxrt_gpio_write(GPIO_LED0, (ledset & BOARD_USERLED_BIT) == 0);
 }

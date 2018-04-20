@@ -48,12 +48,31 @@
 #include <arch/irq.h>
 #include <nuttx/irq.h>
 
+#include "imxrt_gpio.h"
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
 /* i.MX RT 1050 GPIO Pin Definitions ************************************************/
+
+/* LEDs
+ *
+ * There is only 1  user LED available on the IMXRT board that
+ * can be turned on and off.  The LEDs can be activated by driving the
+ * connected I/O line to GND..
+ *
+ *   ---------- ----------- ---------------------
+ *   IMXRT      Function    Shared functionality
+ *   GPIO
+ *   ---------- ----------- ---------------------
+ *   GPIO1 PIN9  USER LED
+ *   ---------- ----------- ---------------------
+ */
+
+#define GPIO_LED0     (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                       GPIO_PORT1 | GPIO_PIN9)
 
 /************************************************************************************
  * Public Types
