@@ -63,6 +63,11 @@ config NRF52_UART0
 	select UART0_SERIALDRIVER
 	select NRF52_HAVE_UART
 
+config NRF52_WDT
+	bool "Watchdog (WDT)"
+	default n
+	select WATCHDOG
+
 endmenu # NRF52 Peripheral Selection
 
 menu "GPIO Interrupt Configuration"
