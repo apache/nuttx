@@ -671,10 +671,8 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 
       if (ret == OK)
         {
-
           if (priv->dev.d_len > 0)
             {
-
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
