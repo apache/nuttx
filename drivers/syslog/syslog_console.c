@@ -47,6 +47,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/syslog/syslog.h>
 
+#include "syslog.h"
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/

@@ -54,6 +54,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/progmem.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
