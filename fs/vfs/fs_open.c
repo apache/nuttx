@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -169,7 +169,7 @@ int open(const char *path, int oflags, ...)
        fd = block_proxy(path, oflags);
        if (fd < 0)
          {
-           ret = fd;
+           ret = -fd;
            goto errout_with_search;
          }
 
