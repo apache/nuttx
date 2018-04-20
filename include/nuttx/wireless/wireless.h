@@ -160,7 +160,7 @@
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
 #define WL_BLUETOOTHFIRST     (WL_NETFIRST + WL_NNETCMDS)
-#define WL_BLUETOOTHCMDS      (20)
+#define WL_BLUETOOTHCMDS      (24)
 #define WL_IBLUETOOTHCMD(cmd) (_WLIOCVALID(cmd) && \
                               _IOC_NR(cmd) >= WL_BLUETOOTHFIRST && \
                               _IOC_NR(cmd) < (WL_BLUETOOTHFIRST + WL_BLUETOOTHCMDS))
@@ -286,6 +286,7 @@
 /* Scan-related */
 
 /* Scanning request flags */
+
 #define IW_SCAN_DEFAULT    0x0000  /* Default scan of the driver */
 #define IW_SCAN_ALL_ESSID  0x0001  /* Scan all ESSIDs */
 #define IW_SCAN_THIS_ESSID 0x0002  /* Scan only this ESSID */
@@ -295,13 +296,18 @@
 #define IW_SCAN_THIS_MODE  0x0020  /* Scan only this Mode */
 #define IW_SCAN_ALL_RATE   0x0040  /* Scan all Bit-Rates */
 #define IW_SCAN_THIS_RATE  0x0080  /* Scan only this Bit-Rate */
+
 /* struct iw_scan_req scan_type */
+
 #define IW_SCAN_TYPE_ACTIVE  0
 #define IW_SCAN_TYPE_PASSIVE 1
+
 /* Maximum size of returned data */
+
 #define IW_SCAN_MAX_DATA     4096  /* In bytes */
 
 /* Scan capability flags - in (struct iw_range *)->scan_capa */
+
 #define IW_SCAN_CAPA_NONE    0x00
 #define IW_SCAN_CAPA_ESSID   0x01
 #define IW_SCAN_CAPA_BSSID   0x02

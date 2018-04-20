@@ -104,7 +104,7 @@ struct btnet_discoverstate_s
 
 static struct btnet_scanstate_s     g_scanstate;
 static struct btnet_discoverstate_s g_discoverstate;
-static struct bt_exchangeresult_s   g_exchangeresult;
+static struct bt_result_s           g_exchangeresult;
 
 /****************************************************************************
  * Private Functions
@@ -294,8 +294,8 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 static void bt_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
 {
   wlinfo("Exchange %s\n", result == 0 ? "succeeded" : "failed");
-  g_exchangeresult.mx_pending = true;
-  g_exchangeresult.mx_result  = result;
+  g_exchangeresult.br_pending = true;
+  g_exchangeresult.br_result  = result;
 }
 
 /****************************************************************************
@@ -692,7 +692,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         {
           /* Check if we are still waiting for the result of the last exchange */
 
-          if (g_exchangeresult.mx_pending)
+          if (g_exchangeresult.br_pending)
             {
               wlwarn("WARNING:  Last exchange not yet complete\n");
               ret = -EBUSY;
@@ -714,8 +714,8 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
                   ret = bt_gatt_exchange_mtu(conn, bt_exchange_rsp);
                   if (ret == OK)
                     {
-                      g_exchangeresult.mx_pending = true;
-                      g_exchangeresult.mx_result  = EBUSY;
+                      g_exchangeresult.br_pending = true;
+                      g_exchangeresult.br_result  = EBUSY;
                     }
 
                   bt_conn_release(conn);
@@ -728,8 +728,8 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
       case SIOCBTEXRESULT:
         {
-          btreq->btr_expending = g_exchangeresult.mx_pending;
-          btreq->btr_exresult  = g_exchangeresult.mx_result;
+          btreq->btr_expending = g_exchangeresult.br_pending;
+          btreq->btr_exresult  = g_exchangeresult.br_result;
           ret                  = OK;
         }
         break;

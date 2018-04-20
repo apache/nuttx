@@ -55,12 +55,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HCI_DEVNAME_SIZE  32   /* Maximum size of node name */
-#define HCI_FEATURES_SIZE  8   /* LMP features */
+#define HCI_DEVNAME_SIZE    32   /* Maximum size of node name */
+#define HCI_FEATURES_SIZE    8   /* LMP features */
+#define HCI_GATT_MAXHANDLES  9   /* Max handles in GATT read multiple IOCTL */
 
 /* Bluetooth network device IOCTL commands. */
 
-#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 20
+#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 24
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 
@@ -174,12 +175,24 @@
  * SIOCBTDISCGET
  *   Return discovery results buffered since the call time that the
  *   SIOCBTDISCGET command was invoked.
+ * SIOCBTGATTRD
+ *   Initiate read of GATT data
+ * SIOCBTGATTRDGET
+ *   Get the result of the GATT data read
+ * SIOCBTGATTWR
+ *   Write GATT data
+ * SIOCBTGATTWRGET
+ *   Get the result of the GATT data write
  */
 
 #define SIOCBTEXCHANGE         _WLIOC(WL_BLUETOOTHFIRST + 16)
 #define SIOCBTEXRESULT         _WLIOC(WL_BLUETOOTHFIRST + 17)
 #define SIOCBTDISCOVER         _WLIOC(WL_BLUETOOTHFIRST + 18)
 #define SIOCBTDISCGET          _WLIOC(WL_BLUETOOTHFIRST + 19)
+#define SIOCBTGATTRD           _WLIOC(WL_BLUETOOTHFIRST + 20)
+#define SIOCBTGATTRDGET        _WLIOC(WL_BLUETOOTHFIRST + 21)
+#define SIOCBTGATTWR           _WLIOC(WL_BLUETOOTHFIRST + 22)
+#define SIOCBTGATTWRGET        _WLIOC(WL_BLUETOOTHFIRST + 23)
 
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
@@ -200,6 +213,8 @@
 #define btr_features1          btru.btrf.btrf_page1
 #define btr_features2          btru.btrf.btrf_page2
 
+#define btr_stats              btru.btrs
+
 #define btr_advtype            btru.btras.btras_advtype
 #define btr_advad              btru.btras.btras_advad
 #define btr_advsd              btru.btras.btras_advsd
@@ -214,8 +229,8 @@
 
 #define btr_expeer             btru.btmx.btmx_expeer
 
-#define btr_expending          btru.btmxr.mx_pending
-#define btr_exresult           btru.btmxr.mx_result
+#define btr_expending          btru.btmxr.br_pending
+#define btr_exresult           btru.btmxr.br_result
 
 #define btr_dtype              btru.btrds.btrds_dtype
 #define btr_dpeer              btru.btrds.btrds_dpeer
@@ -226,7 +241,22 @@
 #define btr_gnrsp              btru.btrdg.btrdg_gnrsp
 #define btr_grsp               btru.btrdg.btrdg_grsp
 
-#define btr_stats              btru.btrs
+#define btr_rdpeer             btru.btgrd.btgrd_rdpeer
+#define btr_rdnhandle          btru.btgrd.btgrd_rdnhandles
+#define btr_rdhandles          btru.btgrd.btgrd_rdhandles
+
+#define btr_rdpending          btru.btgrr.btgrr_rdpending
+#define btr_rdesult            btru.btgrr.btgrr_rdesult
+#define btr_rdsize             btru.btgrr.btgrr_rdsize
+#define btr_rddata             btru.btgrr.btgrr_rddata
+
+#define btr_wrpeer             btru.btgwr.btgwr_wrpeer
+#define btr_wrnbytes           btru.btgwr.btgwr_wrnbytes
+#define btr_wrhandle           btru.btgwr.btgwr_wrhandle
+#define btr_wrdata             btru.btgwr.btgwr_wrdata
+
+#define btr_wrpending          btru.btgwrr.br_pending
+#define btr_wrresult           btru.btgwrr.br_result
 
 /* btr_flags */
 
@@ -274,12 +304,12 @@ struct bt_discresonse_s
   uint8_t dr_perm;                  /* Permissions */
 };
 
-/* MTU exchange state variables. */
+/* General result of a pass/fail operation. */
 
-struct bt_exchangeresult_s
+struct bt_result_s
 {
-  bool mx_pending;                  /* True:  We have not yet received the result */
-  uint8_t mx_result;                /* The result of the MTU exchange */
+  bool br_pending;                  /* True:  The operation is not yet complete */
+  uint8_t br_result;                /* The result of the operation */
 };
 
 /* Bluetooth statistics */
@@ -331,6 +361,8 @@ struct btreq_s
          uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* Extended page 2 */
        } btrf;
 
+      struct bt_stats_s btrs;        /* Unit statistics */
+
       /* Read-only data that accompanies the SIOCBTADVSTART IOCTL command.
        * Advertising types are defined in bt_hci.h.  NOTE that btras_ad and
        * btras_sd pointers to the beginning of a list of "Extended Inquire
@@ -353,15 +385,15 @@ struct btreq_s
 
       struct
       {
-        bool btrss_dupenable;           /* True: enable duplicate filtering */
+        bool btrss_dupenable;        /* True: enable duplicate filtering */
       } btrss;
 
       /* Write-able data that accompanies the SIOCBTSCANGET IOCTL command */
 
       struct
       {
-        uint8_t brtsr_nrsp;             /* Input:  Max number of responses
-                                         * Return: Actual number of responses */
+        uint8_t brtsr_nrsp;          /* Input:  Max number of responses
+                                      * Return: Actual number of responses */
 
         /* Reference to a beginning of an array in user memory in which to
          * return the scan response data.  The size of the array is
@@ -385,31 +417,31 @@ struct btreq_s
 
       struct
       {
-        bt_addr_le_t btmx_expeer;       /* Peer address for MTU exchange */
+        bt_addr_le_t btmx_expeer;    /* Peer address for MTU exchange */
       } btmx;
 
       /* Write result that accompanies SIOCBTEXRESULT command */
 
-      struct bt_exchangeresult_s btmxr;
+      struct bt_result_s btmxr;
 
       /* Read-only data that accompanies SIOCBTDISCOVER command */
 
       struct
       {
-        uint8_t btrds_dtype;            /* Discovery type (see enum
-                                         * bt_gatt_discover_e) */
-        bt_addr_le_t btrds_dpeer;       /* Peer address */
-        uint16_t btrds_duuid16;         /* Discover UUID type */
-        uint16_t btrds_dstart;          /* Discover start handle */
-        uint16_t btrds_dend;            /* Discover end handle */
+        uint8_t btrds_dtype;         /* Discovery type (see enum
+                                      * bt_gatt_discover_e) */
+        bt_addr_le_t btrds_dpeer;    /* Peer address */
+        uint16_t btrds_duuid16;      /* Discover UUID type */
+        uint16_t btrds_dstart;       /* Discover start handle */
+        uint16_t btrds_dend;         /* Discover end handle */
       } btrds;
 
-      /* Write-able structure that accompanies SIOCBTDISCGET command. */
+      /* Write-able structure that accompanies the SIOCBTDISCGET command. */
 
       struct
       {
-        uint8_t btrdg_gnrsp;            /* Input:  Max number of responses
-                                         * Return: Actual number of responses */
+        uint8_t btrdg_gnrsp;         /* Input:  Max number of responses
+                                      * Return: Actual number of responses */
 
         /* Reference to a beginning of an array in user memory in which to
          * return the discovered data.  The size of the array is btrdg_gnrsp.
@@ -418,7 +450,39 @@ struct btreq_s
         FAR struct bt_discresonse_s *btrdg_grsp;
       } btrdg;
 
-      struct bt_stats_s btrs;           /* Unit statistics */
+      /* Read-only data that accompanies the SIOCBTGATTRD command */
+
+      struct
+      {
+        bt_addr_le_t btgrd_rdpeer;   /* Peer address */
+        uint8_t btgrd_rdnhandles;    /* Number of handles in array */
+        uint16_t btgrd_rdhandles[HCI_GATT_MAXHANDLES];
+      } btgrd;
+
+      /* Write-able data that accompanies the SIOCBTGATTRDGET command */
+
+      struct
+      {
+        bool    btgrr_rdpending;     /* True: Read not yet complete */
+        uint8_t btgrr_rdesult;       /* Result of the read */
+        uint8_t btgrr_rdsize;        /* Input:  Sizeof rddata[]
+                                      * Output: Number of valid bytes */
+        FAR uint8_t *btgrr_rddata;   /* Values returned by read */
+      } btgrr;
+
+      /* Read-only data that accompanies the SIOCBTGATTWR command */
+
+      struct
+      {
+        bt_addr_le_t btgwr_wrpeer;   /* Peer address */
+        uint8_t btgwr_wrnbytes;      /* Number of bytes to write */
+        uint16_t btgwr_wrhandle;     /* GATT handle */
+        FAR const uint8_t *btgwr_wrdata; /* Data to be written */
+      } btgwr;
+
+      /* Write result that accompanies SIOCBTGATTWRGET command */
+
+      struct bt_result_s btgwrr;
    } btru;
 };
 
