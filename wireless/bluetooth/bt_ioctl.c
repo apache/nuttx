@@ -594,6 +594,28 @@ static int btnet_read_result(FAR struct btreq_s *btreq)
 }
 
 /****************************************************************************
+ * Name: bnet_write_callback
+ *
+ * Description:
+ *   Result of write operation.
+ *
+ * Input Parameters:
+ *   conn   - The address of the peer in the MTU exchange
+ *   result - The result of the MTU exchange
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void bnet_write_callback(FAR struct bt_conn_s *conn, uint8_t result)
+{
+  wlinfo("Exchange %s\n", result == 0 ? "succeeded" : "failed");
+  g_gattwrresult.br_pending = false;
+  g_gattwrresult.br_result  = result;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1023,7 +1045,51 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
       case SIOCBTGATTWR:
         {
-          ret = -ENOSYS;
+          DEBUGASSERT(btreq->btr_wrdata != NULL);
+
+          /* Is there already a write in progress?  The current
+           * implementation can support only one write at a time.
+           * REVISIT.. see suggested design improvement above.
+           */
+
+          if (g_gattwrresult.br_pending)
+            {
+              wlwarn("WARNING:  Read pending\n");
+              ret = -EBUSY;
+            }
+          else
+            {
+              FAR struct bt_conn_s *conn;
+
+              /* Get the connection associated with the provided LE address */
+
+              conn = bt_conn_lookup_addr_le(&btreq->btr_wrpeer);
+              if (conn == NULL)
+                {
+                  wlwarn("WARNING:  Peer not connected\n");
+                  ret = -ENOTCONN;
+                }
+              else
+                {
+                  /* Set up for the write */
+
+                  g_gattwrresult.br_pending = true;
+                  g_gattwrresult.br_result  = EBUSY;
+
+                  /* Initiate write */
+
+                  ret = bt_gatt_write(conn, btreq->btr_wrhandle,
+                                      btreq->btr_wrdata,
+                                      btreq->btr_wrnbytes,
+                                      bnet_write_callback);
+                  if (ret < 0)
+                    {
+                      wlerr("ERROR:  Write operation failed: %d\n", ret);
+                    }
+
+                  bt_conn_release(conn);
+                }
+            }
         }
         break;
 

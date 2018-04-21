@@ -475,7 +475,10 @@ struct btreq_s
         FAR uint8_t *btgrr_rddata;   /* Values returned by read */
       } btgrr;
 
-      /* Read-only data that accompanies the SIOCBTGATTWR command */
+      /* Read-only data that accompanies the SIOCBTGATTWR command.
+       * NOTE:  The write data provided by the caller is not buffered
+       * and must persist until the completion of the write.
+       */
 
       struct
       {
