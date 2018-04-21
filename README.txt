@@ -2031,7 +2031,13 @@ apps/
  |   |  `- README.txt
  |   `- zmodem
  |      `- README.txt
- `- README.txt
+ `- wireless
+     |- bluetooth
+     |  `- btsak
+     |     `- README.txt
+     `- ieee802154
+        `- i8sak
+           `- README.txt
 
 Additional README.txt files in the other, related repositories:
 
