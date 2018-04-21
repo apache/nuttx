@@ -3042,7 +3042,7 @@ static FAR struct usbdev_ep_s *lpc17_allocep(FAR struct usbdev_s *dev, uint8_t e
                 {
                   /* Mark the IN/OUT endpoint no longer available */
 
-                  priv->epavail &= ~(3 << (bit & ~1));
+                  priv->epavail &= ~(3 << (epndx & ~1));
                   leave_critical_section(flags);
 
                   /* And return the pointer to the standard endpoint structure */
