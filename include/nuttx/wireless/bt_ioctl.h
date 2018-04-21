@@ -46,6 +46,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <net/if.h>
+
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/bt_core.h>
 #include <nuttx/wireless/bt_hci.h>
@@ -55,12 +57,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Size limits of things for fixed allocations (most are arbitrary) */
-
-#define HCI_DEVNAME_SIZE    32   /* Maximum size of node name */
 #define HCI_FEATURES_SIZE    8   /* LMP features */
+
+/* Arbitrary size limits of things for fixed allocations.  These could be
+ * increased with a memory usage penalty)
+ */
+
 #define HCI_GATT_MAXHANDLES  8   /* Max handles in GATT read multiple IOCTL */
 #define HCI_GATTRD_DATA     32   /* Max number of bytes in GATT read data */
+#define HCI_GATTWR_DATA     16   /* Max number of bytes in GATT write data */
 
 /* Bluetooth network device IOCTL commands. */
 
@@ -336,7 +341,7 @@ struct bt_stats_s
 
 struct btreq_s
   {
-    char btr_name[HCI_DEVNAME_SIZE]; /* Device name */
+    char btr_name[IFNAMSIZ]; /* Device name */
     union
     {
       /* Bluetooth information used by most NetBSD IOCTL commands */
@@ -485,7 +490,7 @@ struct btreq_s
         bt_addr_le_t btgwr_wrpeer;   /* Peer address */
         uint8_t btgwr_wrnbytes;      /* Number of bytes to write */
         uint16_t btgwr_wrhandle;     /* GATT handle */
-        FAR const uint8_t *btgwr_wrdata; /* Data to be written */
+        FAR uint8_t btgwr_wrdata[HCI_GATTWR_DATA]; /* Data to be written */
       } btgwr;
 
       /* Write result that accompanies SIOCBTGATTWRGET command */
