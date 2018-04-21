@@ -55,9 +55,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Size limits of things for fixed allocations (most are arbitrary) */
+
 #define HCI_DEVNAME_SIZE    32   /* Maximum size of node name */
 #define HCI_FEATURES_SIZE    8   /* LMP features */
-#define HCI_GATT_MAXHANDLES  9   /* Max handles in GATT read multiple IOCTL */
+#define HCI_GATT_MAXHANDLES  8   /* Max handles in GATT read multiple IOCTL */
+#define HCI_GATTRD_DATA     32   /* Max number of bytes in GATT read data */
 
 /* Bluetooth network device IOCTL commands. */
 
@@ -242,11 +245,12 @@
 #define btr_grsp               btru.btrdg.btrdg_grsp
 
 #define btr_rdpeer             btru.btgrd.btgrd_rdpeer
-#define btr_rdnhandle          btru.btgrd.btgrd_rdnhandles
+#define btr_rdoffset           btru.btgrd.btgrd_rdoffset
+#define btr_rdnhandles         btru.btgrd.btgrd_rdnhandles
 #define btr_rdhandles          btru.btgrd.btgrd_rdhandles
 
 #define btr_rdpending          btru.btgrr.btgrr_rdpending
-#define btr_rdesult            btru.btgrr.btgrr_rdesult
+#define btr_rdresult           btru.btgrr.btgrr_rdresult
 #define btr_rdsize             btru.btgrr.btgrr_rdsize
 #define btr_rddata             btru.btgrr.btgrr_rddata
 
@@ -456,6 +460,7 @@ struct btreq_s
       {
         bt_addr_le_t btgrd_rdpeer;   /* Peer address */
         uint8_t btgrd_rdnhandles;    /* Number of handles in array */
+        uint16_t btgrd_rdoffset;     /* Offset (Only for read single) */
         uint16_t btgrd_rdhandles[HCI_GATT_MAXHANDLES];
       } btgrd;
 
@@ -464,7 +469,7 @@ struct btreq_s
       struct
       {
         bool    btgrr_rdpending;     /* True: Read not yet complete */
-        uint8_t btgrr_rdesult;       /* Result of the read */
+        uint8_t btgrr_rdresult;      /* Result of the read */
         uint8_t btgrr_rdsize;        /* Input:  Sizeof rddata[]
                                       * Output: Number of valid bytes */
         FAR uint8_t *btgrr_rddata;   /* Values returned by read */

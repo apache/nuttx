@@ -91,6 +91,17 @@ struct btnet_discoverstate_s
   struct bt_discresonse_s bd_rsp[CONFIG_BLUETOOTH_MAXDISCOVER];
 };
 
+/* GATT read state variables. */
+
+struct btnet_rdstate_s
+{
+  bool rd_pending;                  /* True: result not yet received */
+  uint8_t rd_result;                /* The result of the read */
+  uint8_t rd_head;                  /* Start of data to read */
+  uint8_t rd_tail;                  /* End data to read */
+  uint8_t rd_data[HCI_GATTRD_DATA]; /* Data read */
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -100,11 +111,20 @@ struct btnet_discoverstate_s
  *
  * NOTE: This limits to a single Bluetooth device with one concurrent scan
  * action, one concurrent MTU exchange, and one concurrent discovery action.
+ *
+ * REVISIT: A fix might be to (1) allocate instances on each IOCTL command
+ * the starts an operation, keeping the allocated structures in a list.  (2)
+ * Return a reference number with each such command.  That reference number
+ * would then be used in each IOCTL command that gets the result of the
+ * previously requested data.  (3)  The allocated instance would be freed
+ * wither (1) it is empty or (2) it has expired without being harvested.
  */
 
 static struct btnet_scanstate_s     g_scanstate;
 static struct btnet_discoverstate_s g_discoverstate;
 static struct bt_result_s           g_exchangeresult;
+static struct btnet_rdstate_s       g_rdstate;
+static struct bt_result_s           g_gattwrresult;
 
 /****************************************************************************
  * Private Functions
@@ -277,7 +297,7 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 }
 
 /****************************************************************************
- * Name: bt_exchange_rsp
+ * Name: btnet_exchange_rsp
  *
  * Description:
  *   Result of MTU exchange.
@@ -291,15 +311,15 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
  *
  ****************************************************************************/
 
-static void bt_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
+static void btnet_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
 {
   wlinfo("Exchange %s\n", result == 0 ? "succeeded" : "failed");
-  g_exchangeresult.br_pending = true;
+  g_exchangeresult.br_pending = false;
   g_exchangeresult.br_result  = result;
 }
 
 /****************************************************************************
- * Name: bt_discover_func
+ * Name: btnet_discover_func
  *
  * Description:
  *   GATT discovery callback.  This function is called when a new handle is
@@ -314,8 +334,8 @@ static void bt_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
  *
  ****************************************************************************/
 
-static uint8_t bt_discover_func(FAR const struct bt_gatt_attr_s *attr,
-                                FAR void *arg)
+static uint8_t btnet_discover_func(FAR const struct bt_gatt_attr_s *attr,
+                                   FAR void *arg)
 {
   uint8_t nexttail;
   uint8_t head;
@@ -377,7 +397,7 @@ static uint8_t bt_discover_func(FAR const struct bt_gatt_attr_s *attr,
 }
 
 /****************************************************************************
- * Name: bt_discover_destroy
+ * Name: btnet_discover_destroy
  *
  * Description:
  *   GATT destroy callback.  This function is called when a discovery
@@ -391,7 +411,7 @@ static uint8_t bt_discover_func(FAR const struct bt_gatt_attr_s *attr,
  *
  ****************************************************************************/
 
-static void bt_discover_destroy(FAR void *arg)
+static void btnet_discover_destroy(FAR void *arg)
 {
   FAR struct bt_gatt_discover_params *params = arg;
 
@@ -479,6 +499,98 @@ static int btnet_discover_result(FAR struct bt_discresonse_s *result,
    }
 
   return nrsp;
+}
+
+/****************************************************************************
+ * Name: btnet_read_callback
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Input Parameters:
+ *   conn   - Connection of read
+ *   result - The result status of the read.
+ *   data   - The data read
+ *   length - The Number of bytes read
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void btnet_read_callback(FAR struct bt_conn_s *conn, int result,
+                                FAR const void *data, uint16_t length)
+{
+  wlinfo("Read complete: result %d length %u\n", result, length);
+
+  DEBUGASSERT(conn != NULL && g_rdstate.rd_pending);
+
+  if (length > HCI_GATTRD_DATA)
+    {
+      g_rdstate.rd_result = ENFILE;
+    }
+  else
+    {
+      DEBUGASSERT((unsigned int)result < UINT8_MAX);
+
+      g_rdstate.rd_result = result;
+      g_rdstate.rd_head   = 0;
+      g_rdstate.rd_tail   = length;
+      memcpy(g_rdstate.rd_data, data, length);
+    }
+
+  g_rdstate.rd_pending    = false;
+}
+
+/****************************************************************************
+ * Name: btnet_read_result
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Input Parameters:
+ *   btreq - IOCTL command data
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int btnet_read_result(FAR struct btreq_s *btreq)
+{
+  int head;
+  int rdlen;
+
+  DEBUGASSERT(btreq != NULL && btreq->btr_rddata != NULL);
+
+  /* Is the read complete? */
+
+  btreq->btr_rdpending = g_rdstate.rd_pending;
+  if (!g_rdstate.rd_pending)
+    {
+      return -EBUSY;
+    }
+
+  /* Yes... return the read data */
+
+  head  = g_rdstate.rd_head;
+  if (head >= g_rdstate.rd_tail)
+    {
+      return -ENODATA;
+    }
+
+  rdlen = btreq->btr_rdsize;
+  if (rdlen + head >= g_rdstate.rd_tail)
+    {
+      rdlen = g_rdstate.rd_tail - head;
+    }
+
+  btreq->btr_rdresult = g_rdstate.rd_result;
+  btreq->btr_rdsize   = rdlen;
+  memcpy(btreq->btr_rddata, &g_rdstate.rd_data[head], rdlen);
+
+  g_rdstate.rd_head = head + rdlen;
+  return OK;
 }
 
 /****************************************************************************
@@ -711,7 +823,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
                 }
               else
                 {
-                  ret = bt_gatt_exchange_mtu(conn, bt_exchange_rsp);
+                  ret = bt_gatt_exchange_mtu(conn, btnet_exchange_rsp);
                   if (ret == OK)
                     {
                       g_exchangeresult.br_pending = true;
@@ -768,8 +880,8 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
                   params                         = &g_discoverstate.bd_params;
                   params->uuid                   = &g_discoverstate.bd_uuid;
-                  params->func                   = bt_discover_func;
-                  params->destroy                = bt_discover_destroy;
+                  params->func                   = btnet_discover_func;
+                  params->destroy                = btnet_discover_destroy;
                   params->start_handle           = btreq->btr_dstart;
                   params->end_handle             = btreq->btr_dend;
 
@@ -803,7 +915,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
                   if (ret < 0)
                     {
                       wlerr("ERROR: Failed to start discovery: %d\n", ret);
-                      bt_discover_destroy(params);
+                      btnet_discover_destroy(params);
                     }
 
                   bt_conn_release(conn);
@@ -826,6 +938,102 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
               btreq->btr_nrsp = ret;
               ret = OK;
             }
+        }
+        break;
+
+      /* SIOCBTGATTRD:  Initiate read of GATT data */
+
+      case SIOCBTGATTRD:
+        {
+          /* Is there already a read in progress?  The current
+           * implementation can support only one read at a time.
+           * REVISIT.. see suggested design improvement above.
+           */
+
+          if (g_rdstate.rd_pending)
+            {
+              wlwarn("WARNING:  Read pending\n");
+              ret = -EBUSY;
+            }
+          else
+            {
+              FAR struct bt_conn_s *conn;
+
+              /* Get the connection associated with the provided LE address */
+
+              conn = bt_conn_lookup_addr_le(&btreq->btr_rdpeer);
+              if (conn == NULL)
+                {
+                  wlwarn("WARNING:  Peer not connected\n");
+                  ret = -ENOTCONN;
+                }
+              else
+                {
+                  /* Set up for the read */
+
+                  g_rdstate.rd_pending = true;
+                  g_rdstate.rd_head    = 0;
+                  g_rdstate.rd_tail    = 0;
+
+                  /* Initiate read.. single or multiple? */
+
+                  if (btreq->btr_rdnhandles == 1)
+                    {
+                      /* Read single */
+
+                      ret = bt_gatt_read(conn, btreq->btr_rdhandles[0],
+                                         btreq->btr_rdoffset,
+                                         btnet_read_callback);
+                    }
+                  else if (btreq->btr_rdnhandles < HCI_GATT_MAXHANDLES)
+                    {
+                      /* Read multiple */
+
+                      DEBUGASSERT(btreq->btr_rdnhandles > 0);
+                      ret = bt_gatt_read_multiple(conn, btreq->btr_rdhandles,
+                                                  btreq->btr_rdnhandles,
+                                                  btnet_read_callback);
+                    }
+                  else
+                    {
+                      ret = -ENFILE;
+                    }
+
+                  if (ret < 0)
+                    {
+                      wlerr("ERROR:  Read operation failed: %d\n", ret);
+                    }
+
+                  bt_conn_release(conn);
+                }
+            }
+        }
+        break;
+
+      /* SIOCBTGATTRDGET:  Get the result of the GATT data read */
+
+      case SIOCBTGATTRDGET:
+        {
+          ret = btnet_read_result(btreq);
+          wlinfo("Get read results: %d\n", ret);
+        }
+        break;
+
+      /* SIOCBTGATTWR:  Write GATT data */
+
+      case SIOCBTGATTWR:
+        {
+          ret = -ENOSYS;
+        }
+        break;
+
+      /* SIOCBTGATTWRGET:  Get the result of the GATT data write */
+
+      case SIOCBTGATTWRGET:
+        {
+          btreq->btr_wrpending = g_gattwrresult.br_pending;
+          btreq->btr_wrresult  = g_gattwrresult.br_result;
+          ret                  = OK;
         }
         break;
 

@@ -1208,7 +1208,7 @@ void bt_gatt_cancel(FAR struct bt_conn_s *conn)
 }
 
 int bt_gatt_read_multiple(FAR struct bt_conn_s *conn,
-                          FAR const uint16_t * handles, size_t count,
+                          FAR const uint16_t *handles, size_t count,
                           bt_gatt_read_func_t func)
 {
   FAR struct bt_buf_s *buf;
