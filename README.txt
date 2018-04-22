@@ -747,6 +747,13 @@ NuttX Configuration Tool
   This is pretty straight forward for creating new configurations
   but may be less intuitive for modifying existing configurations.
 
+  Another ncurses-based tool that is an option to kconfig-mconf is
+  kconfig-nconf.  The differences are primary in in the aesthetics of the
+  UI.  If you have kconfig-nconf built, then you can invoke that front end
+  with:
+
+    make nconfig
+
   If you have an environment that supports the Qt or GTK graphical systems
   (probably KDE or gnome, respectively, or Cygwin under Windows with Qt or
   GTK installed), then you can also build the graphical kconfig-frontends,
