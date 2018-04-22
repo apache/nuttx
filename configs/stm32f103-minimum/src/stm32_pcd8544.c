@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f103-minimum/src/stm32_pcd8544.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,13 +95,13 @@ int board_lcd_initialize(void)
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
-      return 0;
+      return -ENODEV;
     }
 
   stm32_gpiowrite(STM32_LCD_RST, 0);
   up_mdelay(10);
   stm32_gpiowrite(STM32_LCD_RST, 1);
-  return 1;
+  return OK;
 }
 
 /****************************************************************************

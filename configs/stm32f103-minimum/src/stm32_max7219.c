@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f103-minimum/src/stm32_max7219.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,10 +88,10 @@ int board_lcd_initialize(void)
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
-      return 0;
+      return -ENODEV;
     }
 
-  return 1;
+  return OK;
 }
 
 /****************************************************************************

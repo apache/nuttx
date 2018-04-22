@@ -88,10 +88,10 @@ int board_lcd_initialize(void)
   if (!g_i2c)
     {
       lcderr("ERROR: Failed to initialize I2C port %d\n", OLED_I2C_PORT);
-      return 0;
+      return -ENODEV;
     }
 
-  return 1;
+  return OK;
 }
 
 /****************************************************************************

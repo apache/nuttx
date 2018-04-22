@@ -376,11 +376,10 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "Initializing TFT LCD module\n");
 
   ret = board_lcd_initialize();
-  if (ret != OK)
+  if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize TFT LCD module\n");
     }
-
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER

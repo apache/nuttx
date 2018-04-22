@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/hymini-stm32v/src/stm32_r61505u.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Laurent Latil <laurent@latil.nom.fr>
  *            C. Faure 2013-05-15
@@ -924,13 +924,13 @@ int board_lcd_initialize(void)
 
   /* Check model id */
 
-  id=read_reg(0x0);
+  id = read_reg(0x0);
   if (id != LCD_ID)
     {
       /* Not a R61505U ? */
 
       lcderr("ERROR: board_lcd_initialize: LCD ctrl is not a R61505U");
-      return ERROR;
+      return -ENXIO;
     }
 
   /* Configure and enable LCD */

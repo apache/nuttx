@@ -6,7 +6,7 @@
  *
  * Based on configs/lm3s6965-ek/src/up_oled.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,13 +91,13 @@ int board_lcd_initialize(void)
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SSP port 0\n");
-      return 0;
+      return -ENODEV;
     }
 
   lpc17_gpiowrite(ZKITARM_OLED_RST, 0);
   up_mdelay(1);
   lpc17_gpiowrite(ZKITARM_OLED_RST, 1);
-  return 1;
+  return OK;
 }
 
 /****************************************************************************

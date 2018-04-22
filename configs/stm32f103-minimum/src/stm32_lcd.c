@@ -103,13 +103,13 @@ int board_lcd_initialize(void)
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
-      return 0;
+      return -ENODEV;
     }
 
   stm32_gpiowrite(STM32_LCD_RST, 0);
   up_mdelay(1);
   stm32_gpiowrite(STM32_LCD_RST, 1);
-  return 1;
+  return OK;
 }
 
 /****************************************************************************
