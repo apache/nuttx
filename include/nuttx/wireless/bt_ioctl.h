@@ -341,36 +341,36 @@ struct bt_stats_s
 
 struct btreq_s
   {
-    char btr_name[IFNAMSIZ]; /* Device name */
+    char btr_name[IFNAMSIZ];         /* IN:  Device name */
     union
     {
-      /* Bluetooth information used by most NetBSD IOCTL commands */
+      /* Bluetooth information used with informational query IOCTL commands */
 
       struct
       {
-         bt_addr_t btri_bdaddr;      /* Device bdaddr */
-         uint16_t btri_flags;        /* flags */
-         uint16_t btri_num_cmd;      /* # of free cmd buffers */
-         uint16_t btri_num_acl;      /* # of free ACL buffers */
-         uint16_t btri_num_sco;      /* # of free SCO buffers */
-         uint16_t btri_acl_mtu;      /* ACL mtu */
-         uint16_t btri_sco_mtu;      /* SCO mtu */
-         uint16_t btri_link_policy;  /* Link Policy */
-         uint16_t btri_packet_type;  /* Packet Type */
-         uint16_t btri_max_acl;      /* max ACL buffers */
-         uint16_t btri_max_sco;      /* max SCO buffers */
+         bt_addr_t btri_bdaddr;      /* IN/OUT: Device bdaddr */
+         uint16_t btri_flags;        /* OUT: flags */
+         uint16_t btri_num_cmd;      /* OUT: Number of free cmd buffers */
+         uint16_t btri_num_acl;      /* OUT: Number of free ACL buffers */
+         uint16_t btri_num_sco;      /* OUT: Number of free SCO buffers */
+         uint16_t btri_acl_mtu;      /* OUT: ACL mtu */
+         uint16_t btri_sco_mtu;      /* OUT: SCO mtu */
+         uint16_t btri_link_policy;  /* OUT: Link Policy */
+         uint16_t btri_packet_type;  /* OUT: Packet Type */
+         uint16_t btri_max_acl;      /* OUT: max ACL buffers */
+         uint16_t btri_max_sco;      /* OUT: max SCO buffers */
        } btri;
 
        /* Bluetooth Features */
 
        struct
        {
-         uint8_t btrf_page0[HCI_FEATURES_SIZE]; /* Basic */
-         uint8_t btrf_page1[HCI_FEATURES_SIZE]; /* Extended page 1 */
-         uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* Extended page 2 */
+         uint8_t btrf_page0[HCI_FEATURES_SIZE]; /* OUT: Basic */
+         uint8_t btrf_page1[HCI_FEATURES_SIZE]; /* OUT: Extended page 1 */
+         uint8_t btrf_page2[HCI_FEATURES_SIZE]; /* OUT: Extended page 2 */
        } btrf;
 
-      struct bt_stats_s btrs;        /* Unit statistics */
+      struct bt_stats_s btrs;        /* OUT: Unit statistics */
 
       /* Read-only data that accompanies the SIOCBTADVSTART IOCTL command.
        * Advertising types are defined in bt_hci.h.  NOTE that btras_ad and
@@ -381,9 +381,9 @@ struct btreq_s
 
       struct
       {
-        uint8_t btras_advtype;             /* Advertising type */
-        FAR struct bt_eir_s *btras_advad;  /* Data for advertisement packets */
-        FAR struct bt_eir_s *btras_advsd;  /* Data for scan response packets */
+        uint8_t btras_advtype;             /* IN:  Advertising type */
+        FAR struct bt_eir_s *btras_advad;  /* IN:  Data for advertisement packets */
+        FAR struct bt_eir_s *btras_advsd;  /* IN:  Data for scan response packets */
       } btras;
 
       /* NOTE: No additional data accompanies the SIOCBTADVSTOP */
@@ -394,15 +394,15 @@ struct btreq_s
 
       struct
       {
-        bool btrss_dupenable;        /* True: enable duplicate filtering */
+        bool btrss_dupenable;        /* IN:  True: enable duplicate filtering */
       } btrss;
 
       /* Write-able data that accompanies the SIOCBTSCANGET IOCTL command */
 
       struct
       {
-        uint8_t brtsr_nrsp;          /* Input:  Max number of responses
-                                      * Return: Actual number of responses */
+        uint8_t brtsr_nrsp;          /* IN:   Max number of responses
+                                      * OUT: Actual number of responses */
 
         /* Reference to a beginning of an array in user memory in which to
          * return the scan response data.  The size of the array is
@@ -418,15 +418,15 @@ struct btreq_s
 
       struct
       {
-        bt_addr_le_t btrse_secaddr;        /* BLE address */
-        enum bt_security_e btrse_seclevel; /* Security level */
+        bt_addr_le_t btrse_secaddr;        /* IN:  BLE address */
+        enum bt_security_e btrse_seclevel; /* IN:  Security level */
       } btrse;
 
       /* Read-only data that accompanies SIOCBTEXCHANGE command */
 
       struct
       {
-        bt_addr_le_t btmx_expeer;    /* Peer address for MTU exchange */
+        bt_addr_le_t btmx_expeer;    /* IN:  Peer address for MTU exchange */
       } btmx;
 
       /* Write result that accompanies SIOCBTEXRESULT command */
@@ -437,20 +437,20 @@ struct btreq_s
 
       struct
       {
-        uint8_t btrds_dtype;         /* Discovery type (see enum
-                                      * bt_gatt_discover_e) */
-        bt_addr_le_t btrds_dpeer;    /* Peer address */
-        uint16_t btrds_duuid16;      /* Discover UUID type */
-        uint16_t btrds_dstart;       /* Discover start handle */
-        uint16_t btrds_dend;         /* Discover end handle */
+        uint8_t btrds_dtype;         /* IN:  Discovery type (see enum
+                                      *      bt_gatt_discover_e) */
+        bt_addr_le_t btrds_dpeer;    /* IN:  Peer address */
+        uint16_t btrds_duuid16;      /* IN:  Discover UUID type */
+        uint16_t btrds_dstart;       /* IN:  Discover start handle */
+        uint16_t btrds_dend;         /* IN:  Discover end handle */
       } btrds;
 
       /* Write-able structure that accompanies the SIOCBTDISCGET command. */
 
       struct
       {
-        uint8_t btrdg_gnrsp;         /* Input:  Max number of responses
-                                      * Return: Actual number of responses */
+        uint8_t btrdg_gnrsp;         /* IN:  Max number of responses
+                                      * OUT: Actual number of responses */
 
         /* Reference to a beginning of an array in user memory in which to
          * return the discovered data.  The size of the array is btrdg_gnrsp.
@@ -463,9 +463,9 @@ struct btreq_s
 
       struct
       {
-        bt_addr_le_t btgrd_rdpeer;   /* Peer address */
-        uint8_t btgrd_rdnhandles;    /* Number of handles in array */
-        uint16_t btgrd_rdoffset;     /* Offset (Only for read single) */
+        bt_addr_le_t btgrd_rdpeer;   /* IN:  Peer address */
+        uint8_t btgrd_rdnhandles;    /* IN:  Number of handles in array */
+        uint16_t btgrd_rdoffset;     /* IN:  Offset (Only for read single) */
         uint16_t btgrd_rdhandles[HCI_GATT_MAXHANDLES];
       } btgrd;
 
@@ -473,11 +473,11 @@ struct btreq_s
 
       struct
       {
-        bool    btgrr_rdpending;     /* True: Read not yet complete */
-        uint8_t btgrr_rdresult;      /* Result of the read */
-        uint8_t btgrr_rdsize;        /* Input:  Sizeof rddata[]
-                                      * Output: Number of valid bytes */
-        FAR uint8_t *btgrr_rddata;   /* Values returned by read */
+        bool    btgrr_rdpending;     /* OUT: True: Read not yet complete */
+        uint8_t btgrr_rdresult;      /* OUT: Result of the read */
+        uint8_t btgrr_rdsize;        /* IN:  Sizeof rddata[]
+                                      * OUT: Number of valid bytes */
+        FAR uint8_t *btgrr_rddata;   /* OUT: Values returned by read */
       } btgrr;
 
       /* Read-only data that accompanies the SIOCBTGATTWR command.
@@ -487,15 +487,15 @@ struct btreq_s
 
       struct
       {
-        bt_addr_le_t btgwr_wrpeer;   /* Peer address */
-        uint8_t btgwr_wrnbytes;      /* Number of bytes to write */
-        uint16_t btgwr_wrhandle;     /* GATT handle */
-        FAR uint8_t btgwr_wrdata[HCI_GATTWR_DATA]; /* Data to be written */
+        bt_addr_le_t btgwr_wrpeer;   /* IN:  Peer address */
+        uint8_t btgwr_wrnbytes;      /* IN:  Number of bytes to write */
+        uint16_t btgwr_wrhandle;     /* IN:  GATT handle */
+        FAR uint8_t btgwr_wrdata[HCI_GATTWR_DATA]; /* IN:  Data to be written */
       } btgwr;
 
       /* Write result that accompanies SIOCBTGATTWRGET command */
 
-      struct bt_result_s btgwrr;
+      struct bt_result_s btgwrr;     /* OUT: Result of the write */
    } btru;
 };
 

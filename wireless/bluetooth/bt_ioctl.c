@@ -107,17 +107,22 @@ struct btnet_rdstate_s
  ****************************************************************************/
 
 /* At present only a single Bluetooth device is supported.  So we can simply
- * maintain the scan, MTU exchange, and discovery states as globals.
+ * maintain the pending scan, discovery, MTU exchange, read and write states
+ * as globals.
  *
  * NOTE: This limits to a single Bluetooth device with one concurrent scan
- * action, one concurrent MTU exchange, and one concurrent discovery action.
+ * action, one concurrent MTU exchange, one concurrent discovery action,
+ * etc.
  *
  * REVISIT: A fix might be to (1) allocate instances on each IOCTL command
  * the starts an operation, keeping the allocated structures in a list.  (2)
- * Return a reference number with each such command.  That reference number
- * would then be used in each IOCTL command that gets the result of the
- * previously requested data.  (3)  The allocated instance would be freed
- * wither (1) it is empty or (2) it has expired without being harvested.
+ * Return a reference number with each such command that starts an
+ * operation.  That reference number would then be used in each IOCTL
+ * command that gets the result of the requested operation.  (3) The
+ * allocated instance would be freed when either (1) the result has been
+ * returned or (2) it has expired without being harvested.  This implies
+ * a timer that runs while there are pending operations in order to expire
+ * the unharvested results.
  */
 
 static struct btnet_scanstate_s     g_scanstate;
