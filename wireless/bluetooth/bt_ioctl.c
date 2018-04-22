@@ -117,10 +117,10 @@ struct btnet_rdstate_s
  * REVISIT: A fix might be to (1) allocate instances on each IOCTL command
  * the starts an operation, keeping the allocated structures in a list.  (2)
  * Return a reference number with each such command that starts an
- * operation.  That reference number would then be used in each IOCTL
- * command that gets the result of the requested operation.  (3) The
- * allocated instance would be freed when either (1) the result has been
- * returned or (2) it has expired without being harvested.  This implies
+ * operation.  (3) That reference number would then be used in each IOCTL
+ * command that gets the result of the requested operation.  (4) The
+ * allocated instance would be freed when either: (a) the result has been
+ * returned or (b) it has expired without being harvested.  This implies
  * a timer that runs while there are pending operations in order to expire
  * the unharvested results.
  */
