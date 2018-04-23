@@ -3077,10 +3077,10 @@ static void lpc17_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
 
   if (priv && privep)
     {
-      /* Mark the endpoint as available */
+      /* Mark the IN/OUT endpoint as available */
 
       flags = enter_critical_section();
-      priv->epavail |= (1 << privep->epphy);
+      priv->epavail |= (3 << (privep->epphy & ~1));
       leave_critical_section(flags);
     }
 }
