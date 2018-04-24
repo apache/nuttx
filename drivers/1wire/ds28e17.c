@@ -765,7 +765,7 @@ FAR struct i2c_master_s *
 
   /* Allocate instance */
 
-  inst = kmm_malloc(sizeof(struct ds_i2c_inst_s));
+  inst = kmm_zalloc(sizeof(struct ds_i2c_inst_s));
   if (inst == NULL)
     {
       i2cerr("ERROR: Failed to allocate instance\n");
@@ -778,12 +778,12 @@ FAR struct i2c_master_s *
   inst->master    = master;
   inst->frequency = 400000;             /* power-on frequency */
   inst->stretch   = DS_DEFAULT_STRETCH;
+  inst->slave.romcode = romcode;
 
   /* We need a recursive lock as this may be called from a search callback. */
 
   onewire_sem_wait(master);
 
-  inst->slave.romcode = romcode;
   if (onewire_addslave(master, &inst->slave) < 0)
     {
       kmm_free(inst);

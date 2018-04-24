@@ -63,6 +63,15 @@
 #define NO_HOLDER ((pid_t)-1)
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate);
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -123,6 +132,87 @@ static inline void onewire_sem_init(FAR struct onewire_sem_s *sem)
 }
 
 /****************************************************************************
+ * Name: onewire_sem_destroy
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+static inline void onewire_sem_destroy(FAR struct onewire_sem_s *sem)
+{
+  nxsem_destroy(&sem->sem);
+}
+
+/************************************************************************************
+ * Name: onewire_pm_prepare
+ *
+ * Description:
+ *   Request the driver to prepare for a new power state. This is a
+ *   warning that the system is about to enter into a new power state.  The
+ *   driver should begin whatever operations that may be required to enter
+ *   power state.  The driver may abort the state change mode by returning
+ *   a non-zero value from the callback function.
+ *
+ * Input Parameters:
+ *   cb      - Returned to the driver.  The driver version of the callback
+ *             structure may include additional, driver-specific state
+ *             data at the end of the structure.
+ *   domain  - Identifies the activity domain of the state change
+ *   pmstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   0 (OK) means the event was successfully processed and that the driver
+ *   is prepared for the PM state change.  Non-zero means that the driver
+ *   is not prepared to perform the tasks needed achieve this power setting
+ *   and will cause the state change to be aborted.  NOTE:  The prepare
+ *   method will also be recalled when reverting from lower back to higher
+ *   power consumption modes (say because another driver refused a lower
+ *   power state change).  Drivers are not permitted to return non-zero
+ *   values when reverting back to higher power consumption modes!
+ *
+ ************************************************************************************/
+#ifdef CONFIG_PM
+static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  struct onewire_master_s *master =
+      (struct onewire_master_s *)((char *)cb -
+                                  offsetof(struct onewire_master_s, pm_cb));
+  int sval;
+
+  /* Logic to prepare for a reduced power state goes here. */
+
+  switch (pmstate)
+    {
+    case PM_NORMAL:
+    case PM_IDLE:
+      break;
+
+    case PM_STANDBY:
+    case PM_SLEEP:
+      /* Check if exclusive lock for the bus master is held. */
+
+      if (nxsem_getvalue(&master->devsem.sem, &sval) < 0)
+        {
+          DEBUGASSERT(false);
+          return -EINVAL;
+        }
+
+      if (sval <= 0)
+        {
+          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+
+          return -EBUSY;
+        }
+
+      break;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -167,7 +257,7 @@ void onewire_sem_wait(FAR struct onewire_master_s *master)
         }
       while (ret == -EINTR);
 
-      /* No we hold the semaphore */
+      /* Now we hold the semaphore */
 
       master->devsem.holder = me;
       master->devsem.count  = 1;
@@ -636,5 +726,39 @@ FAR struct onewire_master_s *
   master->maxslaves = maxslaves;
   master->insearch = false;
 
+#ifdef CONFIG_PM
+  master->pm_cb.prepare = onewire_pm_prepare;
+
+  /* Register to receive power management callbacks */
+
+  (void)pm_register(&master->pm_cb);
+#endif
+
   return master;
+}
+
+/****************************************************************************
+ * Name: onewire_uninitialize
+ *
+ * Description:
+ *   Release 1-wire bus master.
+ *
+ * Input Parameters:
+ *   master    - Pointer to the allocated 1-wire master
+ *
+ ****************************************************************************/
+
+int onewire_uninitialize(FAR struct onewire_master_s *master)
+{
+#ifdef CONFIG_PM
+  /* Unregister power management callbacks */
+
+  pm_unregister(&master->pm_cb);
+#endif
+
+  /* Release resources. This does not touch the underlying onewire_dev_s */
+
+  onewire_sem_destroy(&master->devsem);
+  kmm_free(master);
+  return OK;
 }

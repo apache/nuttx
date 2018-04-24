@@ -44,6 +44,7 @@
 
 #include <stdbool.h>
 #include <semaphore.h>
+#include <nuttx/power/pm.h>
 
 /****************************************************************************
  * Public Types
@@ -65,6 +66,9 @@ struct onewire_master_s
   int nslaves;                         /* Number of 1-wire slaves */
   int maxslaves;                       /* Maximum number of 1-wire slaves */
   bool insearch;                       /* If we are in middle of 1-wire search */
+#ifdef CONFIG_PM
+  struct pm_callback_s pm_cb;          /* PM callbacks */
+#endif
 };
 
 struct onewire_slave_s
@@ -176,5 +180,18 @@ int onewire_search(FAR struct onewire_master_s *master,
 
 FAR struct onewire_master_s *
   onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves);
+
+/****************************************************************************
+ * Name: onewire_uninitialize
+ *
+ * Description:
+ *   Release 1-wire bus master.
+ *
+ * Input Parameters:
+ *   master    - Pointer to the allocated 1-wire master
+ *
+ ****************************************************************************/
+
+int onewire_uninitialize(FAR struct onewire_master_s *master);
 
 #endif /* __DRIVERS_1WIRE_1WIRE_INTERNAL_H */

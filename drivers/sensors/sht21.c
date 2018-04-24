@@ -84,9 +84,15 @@ struct sht21_dev_s
   FAR struct i2c_master_s *i2c; /* I2C interface */
   uint8_t addr;                 /* I2C address */
   bool valid;                   /* If cached readings are valid */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  bool unlinked;                /* True, driver has been unlinked */
+#endif
   struct timespec last_update;  /* Last time when sensor was read */
   int temperature;              /* Cached temperature */
   int humidity;                 /* Cached humidity */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  int16_t crefs;                /* Number of open references */
+#endif
   sem_t devsem;
 };
 
@@ -107,14 +113,19 @@ static int sht21_read16(FAR struct sht21_dev_s *priv, uint8_t regaddr,
 
 /* Character driver methods */
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     sht21_open(FAR struct file *filep);
 static int     sht21_close(FAR struct file *filep);
+#endif
 static ssize_t sht21_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static ssize_t sht21_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
 static int     sht21_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     sht21_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -122,17 +133,22 @@ static int     sht21_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_sht21fops =
 {
-  sht21_open,    /* open */
-  sht21_close,   /* close */
-  sht21_read,    /* read */
-  sht21_write,   /* write */
-  NULL,          /* seek */
-  sht21_ioctl    /* ioctl */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  sht21_open,     /* open */
+  sht21_close,    /* close */
+#else
+  NULL,           /* open */
+  NULL,           /* close */
+#endif
+  sht21_read,     /* read */
+  sht21_write,    /* write */
+  NULL,           /* seek */
+  sht21_ioctl     /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , NULL         /* poll */
+  , NULL          /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
+  , sht21_unlink /* unlink */
 #endif
 };
 
@@ -362,10 +378,36 @@ static int sht21_read_values(FAR struct sht21_dev_s *priv, FAR int *temp,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int sht21_open(FAR struct file *filep)
 {
+  FAR struct inode       *inode = filep->f_inode;
+  FAR struct sht21_dev_s *priv  = inode->i_private;
+  int ret;
+
+  /* Get exclusive access */
+
+  do
+    {
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
+    }
+  while (ret == -EINTR);
+
+  /* Increment the count of open references on the driver */
+
+  priv->crefs++;
+  DEBUGASSERT(priv->crefs > 0);
+
+  nxsem_post(&priv->devsem);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: sht21_close
@@ -375,10 +417,47 @@ static int sht21_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int sht21_close(FAR struct file *filep)
 {
+  FAR struct inode       *inode = filep->f_inode;
+  FAR struct sht21_dev_s *priv  = inode->i_private;
+  int ret;
+
+  /* Get exclusive access */
+
+  do
+    {
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
+    }
+  while (ret == -EINTR);
+
+  /* Decrement the count of open references on the driver */
+
+  DEBUGASSERT(priv->crefs > 0);
+  priv->crefs--;
+
+  /* If the count has decremented to zero and the driver has been unlinked,
+   * then free memory now.
+   */
+
+  if (priv->crefs <= 0 && priv->unlinked)
+    {
+      nxsem_destroy(&priv->devsem);
+      kmm_free(priv);
+      return OK;
+    }
+
+  nxsem_post(&priv->devsem);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: sht21_read
@@ -386,7 +465,7 @@ static int sht21_close(FAR struct file *filep)
 
 static ssize_t sht21_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
-  FAR struct inode       *inode = filep->f_inode;
+  FAR struct inode       *inode  = filep->f_inode;
   FAR struct sht21_dev_s *priv   = inode->i_private;
   ssize_t                 length = 0;
   int temp;
@@ -406,6 +485,18 @@ static ssize_t sht21_read(FAR struct file *filep, FAR char *buffer, size_t bufle
       DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret == -EINTR);
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  if (priv->unlinked)
+    {
+      /* Do not allow operations on unlinked sensors. This allows
+       * sensor use on hot swappable I2C bus.
+       */
+
+      nxsem_post(&priv->devsem);
+      return -ENODEV;
+    }
+#endif
 
   ret = sht21_read_values(priv, &temp, &rh);
   if (ret < 0)
@@ -444,7 +535,7 @@ static ssize_t sht21_write(FAR struct file *filep, FAR const char *buffer,
 static int sht21_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode      *inode = filep->f_inode;
-  FAR struct sht21_dev_s *priv  = inode->i_private;
+  FAR struct sht21_dev_s *priv = inode->i_private;
   int ret;
 
   /* Get exclusive access */
@@ -460,6 +551,18 @@ static int sht21_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret == -EINTR);
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  if (priv->unlinked)
+    {
+      /* Do not allow operations on unlinked sensors. This allows
+       * sensor use on hot swappable I2C bus.
+       */
+
+      nxsem_post(&priv->devsem);
+      return -ENODEV;
+    }
+#endif
 
   switch (cmd)
     {
@@ -513,6 +616,52 @@ static int sht21_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   nxsem_post(&priv->devsem);
   return ret;
 }
+
+/****************************************************************************
+ * Name: sht21_unlink
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int sht21_unlink(FAR struct inode *inode)
+{
+  FAR struct sht21_dev_s *priv;
+  int ret;
+
+  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
+  priv = (FAR struct sht21_dev_s *)inode->i_private;
+
+  /* Get exclusive access */
+
+  do
+    {
+      ret = nxsem_wait(&priv->devsem);
+
+      /* The only case that an error should occur here is if the wait was
+       * awakened by a signal.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -EINTR);
+    }
+  while (ret == -EINTR);
+
+  /* Are there open references to the driver data structure? */
+
+  if (priv->crefs <= 0)
+    {
+      nxsem_destroy(&priv->devsem);
+      kmm_free(priv);
+      return OK;
+    }
+
+  /* No... just mark the driver as unlinked and free the resources when
+   * the last client closes their reference to the driver.
+   */
+
+  priv->unlinked = true;
+  nxsem_post(&priv->devsem);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
