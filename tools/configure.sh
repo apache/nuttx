@@ -325,4 +325,9 @@ fi
 
 echo "  Refreshing..."
 cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 1; }
-make olddefconfig 1>/dev/null
+MAKE_BIN=make
+if [ ! -z `which gmake` ]; then
+  MAKE_BIN=gmake
+fi
+
+${MAKE_BIN} olddefconfig 1>/dev/null
