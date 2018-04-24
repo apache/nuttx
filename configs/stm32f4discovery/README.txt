@@ -40,6 +40,7 @@ Contents
   - STM32F4DIS-BB
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
+  - HCI UART
   - STM32F4Discovery-specific Configuration Options
   - BASIC
   - Testing LLVM LIBC++ with NuttX
@@ -599,6 +600,123 @@ that I am using:
 Darcy Gong recently added support for the UG-2864HSWEG01 OLED which is also
 an option with this configuration.  I have little technical information about
 the UG-2864HSWEG01 interface (see configs/stm32f4discovery/src/up_ug2864hsweg01.c).
+
+HCI UART
+========
+
+BT860
+-----
+
+  I have been testing with the DVK_BT960_SA board via J10 as follows:
+
+    DVK_BT860-SA J10     STM32F4 Discovery P1
+    pin 1  GND                             P1 pin 49
+    pin 2  Module_RTS_O  USART3_CTS PB13,  P1 pin 37
+    pin 3  N/C
+    pin 4  Module_RX_I   USART3_TXD PB10,  P1 pin 34
+    pin 5  Module_TX_O   USART3_RX  PB11,  P1 pin 35
+    pin 6  Module_CTS_I  USART3_RTS PB14,  P1 pin 38
+
+  Due to conflicts, USART3 many not be used if Ethernet is enabled with
+  the STM32F4DIS-BB base board:
+
+    PB-11 conflicts with Ethernet TXEN
+    PB-13 conflicts with Ethernet TXD1
+
+  If you need to use the HCI uart with Ethernet, then you will need to
+  configure a new U[S]ART and/or modify the pin selections in
+  include/board.h.
+
+Troubleshooting
+---------------
+
+  First you should enable CONFIG_DEBUG_WIRELESS_ERR, WARN, and INFO options
+  so that you can see what the driver is doing.
+
+  The bring-up problems that I encountered mostly involved setting up the
+  4-wire UART interface:  Remember to cross Rx/Tx and RTS/CTS.  The active
+  state for RTS and CTS is low.  For bringup of the BT860, I used a Seleae
+  logic analyzer connected to the Tx, Rx, RTS, and CTS pins.  When the
+  BT860 is working correctly you would see this:
+
+    1. All signals high initially,
+    2. When NuttX starts, RTS goes low
+    3. The BT860 sees RTS go low and responds by setting CTS low after a
+       delay.  This is when it selects between USB and UART.
+    4. After another delay, the STM32 sends the 4 Tx bytes.
+    5. The BT860 responds with 3 bytes.
+    6. If successful, additional commands and responses follow.
+
+  Some of these steps may be different for other HCI UARTs. Steps 4-5 are
+  the reset sequence.  the 4 Tx bytes comes from the code in the function
+  hci_initialize() in the file wireless/bluetooth/bt_hcicore.c:
+
+    /* Send HCI_RESET */
+
+    bt_hci_cmd_send(BT_HCI_OP_RESET, NULL);
+
+  The code is actually working one command ahead.  It has already queued up
+  the reset command and is requesting the HCI UART device features while the
+  reset command is being sent:
+
+    ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
+    if (ret < 0)
+      {
+        wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+        return ret;
+      }
+
+  A common failure is to see a timeout error (-116) due to a Tx flow control
+  failure (CTS is high).  There is no timeout on the first command, the
+  timeout actually occurs on the second command in bt_hci_cmd_send_sync():
+
+     do
+       {
+         /* The timed wait could also be awakened by a signal */
+
+         ret = nxsem_timedwait(&sync_sem, &abstime);
+       }
+     while (ret == -EINTR);
+
+  The above times out and generates the 116 error.
+
+  In the case of the timeout, the second command is stuck in the message queue
+  is never processed because the Tx thread is waiting for the BT_HCI_OP_RESET
+  command to complete.  It is blocked in hci_tx_thread() kernel thread.
+
+  The Tx occurs on a kernel thread.  The Tx send of the first command causes
+  the hci_tx_kthread() to block.  It waits here until what the HCI UART
+  receives the command and responses with the command complete event:
+
+  /* Wait until ncmd > 0 */
+
+    do
+      {
+        ret = nxsem_wait(&g_btdev.ncmd_sem);
+      }
+    while (ret == -EINTR);
+
+  bt_hci_cmd_send() will block on the first BT_HCI_OP_RESET until until it
+  gets the 3-byte event (BT_EVT) that indicates that the command was
+  completed and provides the command status. See the function
+  hci_command_complete() where it posts g_btdev.ncmd_sem.
+
+    g_btdev.ncmd = 1;
+    nxsem_post(&g_btdev.ncmd_sem);
+
+  You can see such a hange in the wireless debug output
+
+    bt_hci_cmd_send: opcode 0c03 len 3                          <<< BT_HCI_OP_RESET command is queue
+    hci_tx_kthread: Sending command 0c03 buf 20002a40 to driver <<< Sent to driver from the Tx thread
+    hciuart_write: config 801d924 buffer 20002760 buflen 4      <<< Goes to STM32 HCI UART driver
+
+    bt_hci_cmd_send_sync: opcode 1003 len 3                     <<< next command is queued.
+    hciuart_copytotxfifo: txhead 1 txtail 4 nbytes 1            <<< One byte of first command written to Tx HR
+    hciuart_enableints: CR1 000020ac CR2 00000301               <<< Tx interrupts enabled
+
+!!!! No Tx interrupts, probably because of Tx flow control (CTS is high) !!!
+
+    hci_initialize: ERROR:  bt_hci_cmd_send_sync failed: -116   <<< Times out on second message
 
 STM32F4Discovery-specific Configuration Options
 ===============================================
