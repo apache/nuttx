@@ -1296,6 +1296,7 @@
 #define GPR_GPR2_QTIM4_TMR_RESET                     (1 << 31)
 
 /* General Purpose Register 3 (GPR3) */
+
 #define GPR_GPR3_OCRAM_CTL_SHIFT                     (0)
 #define GPR_GPR3_OCRAM_CTL_MASK                        (15 << GPR_GPR3_OCRAM_CTL_SHIFT)
 #   define GPR_GPR3_OCRAM_CTL_READ_DATA_PIPELINE_EN       (1 << GPR_GPR3_OCRAM_CTL_SHIFT)
@@ -1321,6 +1322,7 @@
 #define GPR_GPR4_FLEXIO2_STOP_REQ                    (1 << 13)
 
 /* General Purpose Register 5 (GPR5) */
+
 #define GPR_GPR5_WDOG1_MASK                          (1 << 6)
 #define GPR_GPR5_WDOG2_MASK                          (1 << 7)
 #define GPR_GPR5_GPT2_CAPIN1_SEL_PAD                 (0 << 23)
