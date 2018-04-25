@@ -1206,12 +1206,24 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
   net_lock();
   inet_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
 
-  /* Setup the UDP remote connection */
+  /* If the UDP socket was previously assigned a remote peer address via
+   * connect(), then it is not necessary to use recvfrom() to obtain the
+   * address of the remote peer:  UDP messages will be received only from
+   * the connected peer.  Normally recv() would be used with such connected
+   * UDP sockets.
+   */
 
-  ret = udp_connect(conn, NULL);
-  if (ret < 0)
+  if (!_SS_ISCONNECTED(psock->s_flags))
     {
-      goto errout_with_state;
+      /* Setup the UDP remote connection to accept packets from any remote
+       * address.
+       */
+
+      ret = udp_connect(conn, NULL);
+      if (ret < 0)
+        {
+          goto errout_with_state;
+        }
     }
 
 #ifdef CONFIG_NET_UDP_READAHEAD

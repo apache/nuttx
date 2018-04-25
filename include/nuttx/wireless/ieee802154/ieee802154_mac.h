@@ -595,7 +595,7 @@ struct ieee802154_pandesc_s
 
   struct ieee802154_superframespec_s sfspec;
 
-  uint8_t gtspermit;       /* 0=No GTS requests allowed
+  uint8_t gtspermit;        /* 0=No GTS requests allowed
                              * 1=GTS request allowed */
   uint8_t lqi;              /* Link Quality Indication of the beacon */
   uint32_t timestamp;       /* Time at which the beacon frame was received

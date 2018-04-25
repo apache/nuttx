@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/udp/udp_netpoll.c
  *
- *   Copyright (C) 2008-2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +48,7 @@
 #include <nuttx/net/net.h>
 
 #include <devif/devif.h>
+#include <socket/socket.h>
 #include "udp/udp.h"
 
 #ifdef HAVE_UDP_POLL
@@ -196,12 +198,22 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   info->dev = udp_find_laddr_device(conn);
 
-  /* Setup the UDP remote connection */
+  /* Check if the UDP socket was previously assigned a remote peer address
+   * via connect().  In that case, we will only be interested in poll
+   * related events associated with that address.
+   */
 
-  ret = udp_connect(conn, NULL);
-  if (ret)
+  if (!_SS_ISCONNECTED(psock->s_flags))
     {
-      goto errout_with_lock;
+      /* Setup the UDP remote connection to accept packets from any remote
+       * address.
+       */
+
+      ret = udp_connect(conn, NULL);
+      if (ret)
+        {
+          goto errout_with_lock;
+        }
     }
 
   /* Allocate a UDP callback structure */

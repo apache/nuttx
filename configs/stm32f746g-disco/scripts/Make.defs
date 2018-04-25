@@ -92,7 +92,6 @@ else
   endif
 endif
 
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif

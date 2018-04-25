@@ -247,21 +247,28 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
  * Name: udp_connect
  *
  * Description:
- *   This function sets up a new UDP connection. The function will
- *   automatically allocate an unused local port for the new
- *   connection. However, another port can be chosen by using the
- *   udp_bind() call, after the udp_connect() function has been
- *   called.
+ *   This function simply assigns a remote address to UDP "connection"
+ *   structure.  This function is called as part of the implementation of:
  *
- *   This function is called as part of the implementation of sendto
- *   and recvfrom.
+ *   - connect().  If connect() is called for a SOCK_DGRAM socket, then
+ *       this logic performs the moral equivalent of connect() operation
+ *       for the UDP socket.
+ *   - recvfrom() and sendto().  This function is called to set the
+ *       remote address of the peer.
+ *
+ *   The function will automatically allocate an unused local port for the
+ *   new connection if the socket is not yet bound to a local address.
+ *   However, another port can be chosen by using the udp_bind() call,
+ *   after the udp_connect() function has been called.
  *
  * Input Parameters:
- *   conn - A reference to UDP connection structure
+ *   conn - A reference to UDP connection structure.  A value of NULL will
+ *          disconnect from any previously connected address.
  *   addr - The address of the remote host.
  *
  * Assumptions:
- *   This function is called user code.  Interrupts may be enabled.
+ *   This function is called (indirectly) from user code.  Interrupts may
+ *   be enabled.
  *
  ****************************************************************************/
 

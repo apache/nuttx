@@ -695,7 +695,21 @@ static int inet_connect(FAR struct socket *psock,
 #if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
       case SOCK_DGRAM:
         {
-          int ret = udp_connect(psock->s_conn, addr);
+          int ret;
+
+          /* We will accept connecting to a addr == NULL for disconnection.
+           * However, the correct way is to disconnect is to provide an
+           * address with sa_family == AF_UNSPEC.
+           */
+
+          if (addr != NULL && addr->sa_family == AF_UNSPEC)
+            {
+              addr = NULL;
+            }
+
+          /* Peform the connect/disconnect operation */
+
+          ret = udp_connect(psock->s_conn, addr);
           if (ret < 0)
             {
               psock->s_flags &= ~_SF_CONNECTED;

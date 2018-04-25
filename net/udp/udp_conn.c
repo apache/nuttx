@@ -706,7 +706,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
  *   structure.  This function is called as part of the implementation of:
  *
  *   - connect().  If connect() is called for a SOCK_DGRAM socket, then
- *       this logic performs the moral equivalent of connec() operation
+ *       this logic performs the moral equivalent of connect() operation
  *       for the UDP socket.
  *   - recvfrom() and sendto().  This function is called to set the
  *       remote address of the peer.
@@ -717,11 +717,13 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
  *   after the udp_connect() function has been called.
  *
  * Input Parameters:
- *   conn - A reference to UDP connection structure
+ *   conn - A reference to UDP connection structure.  A value of NULL will
+ *          disconnect from any previously connected address.
  *   addr - The address of the remote host.
  *
  * Assumptions:
- *   This function is called user code.  Interrupts may be enabled.
+ *   This function is called (indirectly) from user code.  Interrupts may
+ *   be enabled.
  *
  ****************************************************************************/
 
@@ -740,7 +742,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* Is there a remote port (rport)? */
 
-  if (addr)
+  if (addr != NULL)
     {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6

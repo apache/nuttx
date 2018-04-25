@@ -619,6 +619,17 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   FAR struct udp_wrbuffer_s *wrb;
   int ret = OK;
 
+  /* If the UDP socket was previously assigned a remote peer address via
+   * connect(), then as with connection-mode socket, sendto() may not be
+   * used with a non-NULL destination address.  Normally send() would be
+   * used with such connected UDP sockets.
+   */
+
+  if (to != NULL && _SS_ISCONNECTED(psock->s_flags))
+    {
+      return -EISCONN;
+    }
+
   /* Make sure that we have the IP address mapping */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;

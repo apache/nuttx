@@ -324,6 +324,17 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   struct sendto_s state;
   int ret;
 
+  /* If the UDP socket was previously assigned a remote peer address via
+   * connect(), then as with connection-mode socket, sendto() may not be
+   * used with a non-NULL destination address.  Normally send() would be
+   * used with such connected UDP sockets.
+   */
+
+  if (to != NULL && _SS_ISCONNECTED(psock->s_flags))
+    {
+      return -EISCONN;
+    }
+
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR

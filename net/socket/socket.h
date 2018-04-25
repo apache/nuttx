@@ -67,7 +67,7 @@
 #define _SF_LISTENING       0x10  /* Bit 4: SOCK_STREAM is listening */
 #define _SF_BOUND           0x20  /* Bit 5: SOCK_STREAM is bound to an address */
                                   /* Bits 6-7: Connection state */
-#define _SF_CONNECTED       0x40  /* Bit 6: SOCK_STREAM is connected */
+#define _SF_CONNECTED       0x40  /* Bit 6: SOCK_STREAM/SOCK_DGRAM is connected */
 #define _SF_CLOSED          0x80  /* Bit 7: SOCK_STREAM was gracefully disconnected */
 
 /* Connection state encoding:
