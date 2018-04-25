@@ -1,7 +1,8 @@
 #!/bin/bash
 # configure.sh
 #
-#   Copyright (C) 2007, 2008, 2011, 2015, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011, 2015, 2017-2018 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -325,8 +326,9 @@ fi
 
 echo "  Refreshing..."
 cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 1; }
+
 MAKE_BIN=make
-if [ ! -z `which gmake` ]; then
+if [ ! -z `which gmake 2>/dev/null` ]; then
   MAKE_BIN=gmake
 fi
 
