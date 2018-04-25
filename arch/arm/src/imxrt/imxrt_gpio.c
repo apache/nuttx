@@ -223,7 +223,31 @@ static FAR const uint8_t *g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
   g_gpio2_padmux,                             /* GPIO2 */
   g_gpio3_padmux,                             /* GPIO3 */
   g_gpio4_padmux,                             /* GPIO4 */
+  NULL,                                       /* GPIO5 REVISIT */
   NULL                                        /* End of list */
+};
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/* Look-up table that maps GPIO1..GPIO5 indexes into GPIO register base addresses */
+
+uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
+{
+  IMXRT_GPIO1_BASE
+#if IMXRT_GPIO_NPORTS > 1
+  , IMXRT_GPIO2_BASE
+#endif
+#if IMXRT_GPIO_NPORTS > 2
+  , IMXRT_GPIO3_BASE
+#endif
+#if IMXRT_GPIO_NPORTS > 3
+  , IMXRT_GPIO4_BASE
+#endif
+#if IMXRT_GPIO_NPORTS > 4
+  , IMXRT_GPIO5_BASE
+#endif
 };
 
 /****************************************************************************
@@ -300,6 +324,8 @@ static int imxrt_gpio_configinput(gpio_pinset_t pinset)
   uintptr_t regaddr;
   unsigned int index;
 
+  DEBUGASSERT((unsigned int)port < IMXRT_GPIO_NPORTS);
+
   /* Configure pin as in input */
 
   imxrt_gpio_dirin(port, pin);
@@ -343,6 +369,8 @@ static inline int imxrt_gpio_configoutput(gpio_pinset_t pinset)
   int port   = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin    = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   bool value = ((pinset & GPIO_OUTPUT_ONE) != 0);
+
+  DEBUGASSERT((unsigned int)port < IMXRT_GPIO_NPORTS);
 
   /* Set the output value */
 
@@ -483,6 +511,8 @@ void imxrt_gpio_write(gpio_pinset_t pinset, bool value)
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
 
+  DEBUGASSERT((unsigned int)port < IMXRT_GPIO_NPORTS);
+
   flags = enter_critical_section();
   imxrt_gpio_setoutput(port, pin, value);
   leave_critical_section(flags);
@@ -502,6 +532,8 @@ bool imxrt_gpio_read(gpio_pinset_t pinset)
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   bool value;
+
+  DEBUGASSERT((unsigned int)port < IMXRT_GPIO_NPORTS);
 
   flags = enter_critical_section();
   value = imxrt_gpio_getinput(port, pin);

@@ -51,8 +51,9 @@
 #define GPIO2                     1      /* Port 2 index */
 #define GPIO3                     2      /* Port 3 index */
 #define GPIO4                     3      /* Port 4 index */
+#define GPIO5                     4      /* Port 5 index */
 
-#define IMXRT_GPIO_NPORTS         4      /* Four total ports */
+#define IMXRT_GPIO_NPORTS         5      /* Five total ports */
 #define IMXRT_GPIO_NPINS         32      /* Up to 32 pins per port */
 
 /* Register offsets *************************************************************************/
@@ -67,15 +68,6 @@
 #define IMXRT_GPIO_EDGE_OFFSET   0x001c  /* GPIO edge select register */
 
 /* Register addresses ***********************************************************************/
-
-#define IMXRT_GPIO_DR(n)         (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_DR_OFFSET)
-#define IMXRT_GPIO_GDIR(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_GDIR_OFFSET)
-#define IMXRT_GPIO_PSR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_PSR_OFFSET)
-#define IMXRT_GPIO_ICR1(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ICR1_OFFSET)
-#define IMXRT_GPIO_ICR2(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ICR2_OFFSET)
-#define IMXRT_GPIO_IMR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_IMR_OFFSET)
-#define IMXRT_GPIO_ISR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ISR_OFFSET)
-#define IMXRT_GPIO_EDGE(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_EDGE_OFFSET)
 
 #define IMXRT_GPIO1_DR           (IMXRT_GPIO1_BASE + IMXRT_GPIO_DR_OFFSET)
 #define IMXRT_GPIO1_GDIR         (IMXRT_GPIO1_BASE + IMXRT_GPIO_GDIR_OFFSET)

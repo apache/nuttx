@@ -145,7 +145,6 @@
 #define IMXRT_FLEXIO1_BASE        0x401ac000  /* 16KB FlexIO1 */
 #define IMXRT_FLEXIO2_BASE        0x401b0000  /* 16KB FlexIO2 */
                                /* 0x401b4000     16KB Reserved */
-#define IMXRT_GPIO_BASE(n)        (0x401b8000 + ((n) << 14))
 #define IMXRT_GPIO1_BASE          0x401b8000  /* 16KB GPIO1 */
 #define IMXRT_GPIO2_BASE          0x401bc000  /* 16KB GPIO2 */
 #define IMXRT_GPIO3_BASE          0x401c0000  /* 16KB GPIO3 */

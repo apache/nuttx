@@ -1367,15 +1367,18 @@ Configuration Sub-directories
        that the part supports auto baudrate detection, but I have found no
        documentation on how to use that.
 
-       Currently only a fixed, configurable BAUD is used and this must
-       be set to the BT860 default.
+       Currently the "generic" HCI UART upper half is used with the BT860
+       and that upper half driver supports only a fixed (but configurable
+       BAUD) is used and this must be set to the BT860 default (115200).
 
-       Baud rate can be set with vendor-specific command.  Ideally, the
-       sequence would be:  (1) start at default baud rate, (2) get local
-       version info, (3) send the vendor-specific baud rate change command,
-       (4) wait for response, and (5) set local UART to higher baud rate.
+       A custom BT860 upper half driver is needed that can use vendor
+       specific command:  Baud rate can be set with such a vendor-specific
+       command.  Ideally, the sequence would be:  (1) start at default baud
+       rate, (2) get local version info, (3) send the vendor-specific baud
+       rate change command, (4) wait for response, and (5) set the local
+       UART to the matching, higher baud rate.
 
-       The custom, vendor-specific command is
+       The custom, vendor-specific BT860 command is:
 
          {0x18, 0xfc, 0x06, 0x00, 0x00, NN, NN, NN, NN}
 
@@ -1401,8 +1404,8 @@ Configuration Sub-directories
     This is another version of the NuttShell configuration for the
     STM32F4-Discovery with the STM32F4DIS-BB base board.  It is very similar
     to the netnsh configuration except that it has IPv6 enabled and IPv4
-    disabled.  Several network utilities that are not yet available under
-    IPv6 are disabled.
+    disabled.  Several network utilities that are not yet available when
+    IPv6 is disabled.
 
     NOTES:
 

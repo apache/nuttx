@@ -50,6 +50,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* 32-bit Encoding:
  *
  *   ENCODING    IIXX XXXX XXXX XXXX  MMMM MMMM MMMM MMMM
@@ -86,10 +87,11 @@
 
 #define GPIO_PORT_SHIFT        (21)      /* Bits 21-23: GPIO port index */
 #define GPIO_PORT_MASK         (3 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT1           (0 << GPIO_PORT_SHIFT) /* GPIO1 */
-#  define GPIO_PORT2           (1 << GPIO_PORT_SHIFT) /* GPIO2 */
-#  define GPIO_PORT3           (2 << GPIO_PORT_SHIFT) /* GPIO3 */
-#  define GPIO_PORT4           (3 << GPIO_PORT_SHIFT) /* GPIO4 */
+#  define GPIO_PORT1           (GPIO1 << GPIO_PORT_SHIFT) /* GPIO1 */
+#  define GPIO_PORT2           (GPIO2 << GPIO_PORT_SHIFT) /* GPIO2 */
+#  define GPIO_PORT3           (GPIO3 << GPIO_PORT_SHIFT) /* GPIO3 */
+#  define GPIO_PORT4           (GPIO4 << GPIO_PORT_SHIFT) /* GPIO4 */
+#  define GPIO_PORT5           (GPIO5 << GPIO_PORT_SHIFT) /* GPIO4 */
 
 /* GPIO Pin Number:
  *
@@ -179,6 +181,19 @@
 #define GPIO_IOMUX_SHIFT       (0)       /* Bits 9-15: IOMUX pin configuration */
 #define GPIO_IOMUX_MASK        (0xffff << GPIO_IOMUX_SHIFT)
 
+/* Helper addressing macros */
+
+#define IMXRT_GPIO_BASE(n)       g_gpio_base[n]  /* Use GPIO1..GPIO5 macros as indices */
+
+#define IMXRT_GPIO_DR(n)         (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_DR_OFFSET)
+#define IMXRT_GPIO_GDIR(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_GDIR_OFFSET)
+#define IMXRT_GPIO_PSR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_PSR_OFFSET)
+#define IMXRT_GPIO_ICR1(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ICR1_OFFSET)
+#define IMXRT_GPIO_ICR2(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ICR2_OFFSET)
+#define IMXRT_GPIO_IMR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_IMR_OFFSET)
+#define IMXRT_GPIO_ISR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ISR_OFFSET)
+#define IMXRT_GPIO_EDGE(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_EDGE_OFFSET)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -199,6 +214,10 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/* Look-up table that maps GPIO1..GPIO5 indexes into GPIO register base addresses */
+
+EXTERN uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
 
 /************************************************************************************
  * Public Function Prototypes
