@@ -627,6 +627,18 @@ BT860
   configure a new U[S]ART and/or modify the pin selections in
   include/board.h.
 
+CC2564
+------
+
+  [To be provided]
+
+  One confusing thing compared with the BT860 is in the naming of the pins
+  at the 4-pin RS232 TTL interface:  The BT860 uses BT860-centric naming,
+  the Rx pin is for BT860 receive and needs to connect with the STM32 Tx
+  pin, the Tx pin is for BT860 transmit an needs to be connected with the
+  STM32 Rx pin, etc.  The CC2564, on the hand, uses host-centric naming so
+  that the CC2564 Rx pin connects to the STM32 Rx pin, Tx to Tx pin, etc.
+
 Troubleshooting
 ---------------
 
@@ -1330,6 +1342,12 @@ Configuration Sub-directories
          pin 4  Module_RX_I   USART3_TXD PB10,  P1 pin 34
          pin 5  Module_TX_O   USART3_RX  PB11,  P1 pin 35
          pin 6  Module_CTS_I  USART3_RTS PB14,  P1 pin 38
+
+       NOTICE that the BT860 uses BT860-centric naming, the Rx pin is for
+       BT860 receive and needs to connect with the STM32 Tx pin, the Tx pin
+       is for BT860 transmit an needs to be connected with the STM32 Rx pin,
+       etc.  Other parts may use host-centric naming so that the HCI UART Rx
+       pin connects to the STM32 Rx pin, Tx to Tx pin, etc.
 
     3. Due to conflicts, USART3 many not be used if Ethernet is enabled with
        the STM32F4DIS-BB base board:

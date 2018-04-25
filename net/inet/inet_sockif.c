@@ -707,15 +707,19 @@ static int inet_connect(FAR struct socket *psock,
               addr = NULL;
             }
 
-          /* Peform the connect/disconnect operation */
+          /* Perform the connect/disconnect operation */
 
           ret = udp_connect(psock->s_conn, addr);
-          if (ret < 0)
+          if (ret < 0 || addr == NULL)
             {
+              /* Failed to connect or explicitly disconnected */
+
               psock->s_flags &= ~_SF_CONNECTED;
             }
           else
             {
+              /* Successfully connected */
+
               psock->s_flags |= _SF_CONNECTED;
             }
 
