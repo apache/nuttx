@@ -6771,10 +6771,12 @@ config STM32_HCIUART1_TXBUFSIZE
 		the size of the largest frame that can be sent
 
 config STM32_HCIUART1_BAUD
-	int "HCI UART1 BAUD rate"
+	int "HCI UART1 initial BAUD rate"
 	default 115200
 	---help---
-		The configured BAUD of the USART.
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
 
 config STM32_HCIUART1_RXDMA
 	bool "HCI UART1 Rx DMA"
@@ -6856,10 +6858,12 @@ config STM32_HCIUART2_TXBUFSIZE
 		the size of the largest frame that can be sent
 
 config STM32_HCIUART2_BAUD
-	int "HCI UART2 BAUD rate"
+	int "HCI UART2 initial BAUD rate"
 	default 115200
 	---help---
-		The configured BAUD of the USART.
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
 
 config STM32_HCIUART2_RXDMA
 	bool "HCI UART2 Rx DMA"
@@ -6941,10 +6945,12 @@ config STM32_HCIUART3_TXBUFSIZE
 		the size of the largest frame that can be sent
 
 config STM32_HCIUART3_BAUD
-	int "HCI UART3 BAUD rate"
+	int "HCI UART3 initial BAUD rate"
 	default 115200
 	---help---
-		The configured BAUD of the USART.
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
 
 config STM32_HCIUART3_RXDMA
 	bool "HCI UART3 Rx DMA"
@@ -7118,10 +7124,12 @@ config STM32_HCIUART6_TXBUFSIZE
 		the size of the largest frame that can be sent
 
 config STM32_HCIUART6_BAUD
-	int "HCI UART6 BAUD rate"
+	int "HCI UART6 initial BAUD rate"
 	default 115200
 	---help---
-		The configured BAUD of the USART.
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
 
 config STM32_HCIUART6_RXDMA
 	bool "HCI UART6 Rx DMA"
@@ -7203,10 +7211,12 @@ config STM32_HCIUART7_TXBUFSIZE
 		the size of the largest frame that can be sent
 
 config STM32_HCIUART7_BAUD
-	int "HCI UART7 BAUD rate"
+	int "HCI UART7 initial BAUD rate"
 	default 115200
 	---help---
-		The configured BAUD of the USART.
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
 
 config STM32_HCIUART7_RXDMA
 	bool "HCI UART7 Rx DMA"
@@ -7288,10 +7298,12 @@ config STM32_HCIUART8_TXBUFSIZE
 		the size of the largest frame that can be sent
 
 config STM32_HCIUART8_BAUD
-	int "HCI UART8 BAUD rate"
+	int "HCI UART8 initial BAUD rate"
 	default 115200
 	---help---
-		The configured BAUD of the USART.
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
 
 config STM32_HCIUART8_RXDMA
 	bool "HCI UART8 Rx DMA"

@@ -97,6 +97,20 @@ struct btuart_lowerhalf_s
   CODE void (*rxenable)(FAR const struct btuart_lowerhalf_s *lower,
                         bool enable);
 
+  /* Change the HCI UART BAUD
+   *
+   * The HCI UART comes up with some initial BAUD rate.  Some support
+   * auto-BAUD detection, some support writing a configuration file to
+   * select the initial BAUD.  The simplest strategy, however, is simply
+   * to use the HCI UART's default initial BAUD to perform the basic
+   * bring up, then send a vendor-specific command to increase the HCI
+   * UARTs BAUD.  This method then may be used to adjust the lower half
+   * driver to the new HCI UART BAUD.
+   */
+
+ CODE int (*setbaud)(FAR const struct btuart_lowerhalf_s *lower,
+                     uint32_t baud);
+
   /* Read/write UART frames
    *
    * read() after receipt of a callback notifying the upper half of the

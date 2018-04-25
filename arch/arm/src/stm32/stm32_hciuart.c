@@ -250,6 +250,7 @@ struct hciuart_state_s
   sem_t rxwait;                      /* Supports wait for more Rx data */
   sem_t txwait;                      /* Supports wait for space in Tx buffer */
 
+  uint32_t baud;                     /* Current BAUD selection */
   volatile uint16_t rxhead;          /* Head and tail index of the Rx buffer */
   uint16_t rxtail;
   uint16_t txhead;                   /* Head and tail index of the Tx buffer */
@@ -336,6 +337,8 @@ static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
               btuart_rxcallback_t callback, void *arg);
 static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
               bool enable);
+static int hciuart_setbaud(const struct btuart_lowerhalf_s *lower,
+              uint32_t baud);
 static ssize_t hciuart_read(const struct btuart_lowerhalf_s *lower,
               void *buffer, size_t buflen);
 static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
@@ -381,6 +384,7 @@ static const struct hciuart_config_s g_hciusart1_config =
     {
       .rxattach  = hciuart_rxattach,
       .rxenable  = hciuart_rxenable,
+      .setbaud   = hciuart_setbaud,
       .read      = hciuart_read,
       .write     = hciuart_write,
       .rxdrain   = hciuart_rxdrain,
@@ -440,6 +444,7 @@ static const struct hciuart_config_s g_hciusart2_config =
     {
       .rxattach  = hciuart_rxattach,
       .rxenable  = hciuart_rxenable,
+      .setbaud   = hciuart_setbaud,
       .read      = hciuart_read,
       .write     = hciuart_write,
       .rxdrain   = hciuart_rxdrain,
@@ -495,6 +500,7 @@ static const struct hciuart_config_s g_hciusart3_config =
     {
       .rxattach  = hciuart_rxattach,
       .rxenable  = hciuart_rxenable,
+      .setbaud   = hciuart_setbaud,
       .read      = hciuart_read,
       .write     = hciuart_write,
       .rxdrain   = hciuart_rxdrain,
@@ -552,6 +558,7 @@ static const struct hciuart_config_s g_hciusart6_config =
     {
       .rxattach  = hciuart_rxattach,
       .rxenable  = hciuart_rxenable,
+      .setbaud   = hciuart_setbaud,
       .read      = hciuart_read,
       .write     = hciuart_write,
       .rxdrain   = hciuart_rxdrain,
@@ -607,6 +614,7 @@ static const struct hciuart_config_s g_hciuart7_config =
     {
       .rxattach  = hciuart_rxattach,
       .rxenable  = hciuart_rxenable,
+      .setbaud   = hciuart_setbaud,
       .read      = hciuart_read,
       .write     = hciuart_write,
       .rxdrain   = hciuart_rxdrain,
@@ -662,6 +670,7 @@ static const struct hciuart_config_s g_hciuart8_config =
     {
       .rxattach  = hciuart_rxattach,
       .rxenable  = hciuart_rxenable,
+      .setbaud   = hciuart_setbaud,
       .read      = hciuart_read,
       .write     = hciuart_write,
       .rxdrain   = hciuart_rxdrain,
@@ -1305,10 +1314,16 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
   uint32_t mantissa;
   uint32_t fraction;
 #endif
+  uint32_t baud;
   uint32_t regval;
   uint32_t brr;
 
-  wlinfo("baud %lu\n", (unsigned long)config->baud);
+  /* The current BAUD selection is part of the variable state data */
+
+  DEBUGASSERT(config != NULL && config->state != NULL);
+  baud = config->state->baud;
+
+  wlinfo("baud %lu\n", (unsigned long)baud);
 
   /* Load CR1 */
 
@@ -1327,7 +1342,7 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
    *   usartdiv8 = 2 * fCK / baud
    */
 
-   usartdiv8 = ((config->apbclock << 1) + (config->baud >> 1)) / config->baud;
+   usartdiv8 = ((config->apbclock << 1) + (baud >> 1)) / baud;
 
   /* Baud rate for standard USART (SPI mode included):
    *
@@ -1382,7 +1397,7 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
    *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
    */
 
-  usartdiv32 = config->apbclock / (config->baud >> 1);
+  usartdiv32 = config->apbclock / (baud >> 1);
 
   /* The mantissa part is then */
 
@@ -1617,8 +1632,12 @@ static int hciuart_configure(const struct hciuart_config_s *config)
 
   hciuart_putreg32(config, STM32_USART_CR3_OFFSET, regval);
 
-  /* Configure the USART line format and speed. */
+  /* Configure the USART line format and speed.  Start with the configured
+   * initial BAUD.
+   */
 
+  DEBUGASSERT(config->state != NULL);
+  config->state->baud = config->baud;
   hciuart_line_configure(config);
 
   /* Enable Rx, Tx, and the USART */
@@ -1919,6 +1938,8 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
   const struct hciuart_config_s *config =
     (const struct hciuart_config_s *)lower;
 
+  DEBUGASSERT(config != NULL && config->state != NULL);
+
 #ifdef CONFIG_STM32_HCIUART_RXDMA
   struct hciuart_state_s *state = config->state;
 
@@ -1981,6 +2002,33 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
 }
 
 /****************************************************************************
+ * Name: hciuart_setbaud
+ *
+ * Description:
+ *   The HCI UART comes up with some initial BAUD rate.  Some support
+ *   auto-BAUD detection, some support writing a configuration file to
+ *   select the initial BAUD.  The simplest strategy, however, is simply
+ *   to use the HCI UART's default initial BAUD to perform the basic
+ *   bring up, then send a vendor-specific command to increase the HCI
+ *   UARTs BAUD.  This method then may be used to adjust the lower half
+ *   driver to the new HCI UART BAUD.
+ *
+ ****************************************************************************/
+
+static int hciuart_setbaud(const struct btuart_lowerhalf_s *lower,
+                           uint32_t baud)
+{
+  const struct hciuart_config_s *config =
+    (const struct hciuart_config_s *)lower;
+
+  DEBUGASSERT(config != NULL && config->state != NULL);
+
+  config->state->baud = baud;
+  hciuart_line_configure(config);
+  return OK;
+}
+
+/****************************************************************************
  * Name: hciuart_read
  *
  * Description:
@@ -1997,7 +2045,7 @@ static ssize_t hciuart_read(const struct btuart_lowerhalf_s *lower,
 {
   const struct hciuart_config_s *config =
     (const struct hciuart_config_s *)lower;
-  struct hciuart_state_s *state = config->state;
+  struct hciuart_state_s *state;
   uint8_t *dest;
   size_t remaining;
   size_t ntotal;
@@ -2248,7 +2296,7 @@ static ssize_t hciuart_rxdrain(const struct btuart_lowerhalf_s *lower)
 {
   const struct hciuart_config_s *config =
     (const struct hciuart_config_s *)lower;
-  struct hciuart_state_s *state = config->state;
+  struct hciuart_state_s *state;
   size_t ntotal;
   ssize_t nbytes;
   bool rxenable;
