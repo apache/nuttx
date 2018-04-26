@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_OR1K
+comment "OpenRISC Options"
+
+choice
+	prompt "OpenRISC chip selection"
+	default ARCH_CHIP_MOR1KX
+
+config ARCH_CHIP_MOR1KX
+	bool "mor1kx"
+
+endchoice
+
+config ARCH_CHIP
+	string
+	default "mor1kx"	if ARCH_CHIP_MOR1KX
+
+source arch/or1k/src/mor1kx/Kconfig
+
+endif # ARCH_OR1K

@@ -221,6 +221,11 @@ arch/renesas - Support for Renesas and legacy Hitachi microcontrollers.
       arch/renesas/include/m16c and arch/renesas/src/m16c
       arch/renesas/include/sh1 and arch/renesas/src/sh1
 
+arch/or1k
+    This directory is dedicated to ports to OpenRISC architectures.
+
+    arch/or1k/include/mor1k and arch/or1k/src/mor1k
+
 arch/risc-v
     This directory is dedicated to ports to the RISC-V family.
 

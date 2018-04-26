@@ -94,6 +94,11 @@ config ARCH_Z80
 	---help---
 		ZiLOG 8-bit architectures (z80, ez80, z8).
 
+config ARCH_OR1K
+	bool "OpenRISC"
+	---help---
+		OpenRISC architectures.
+
 endchoice
 
 config ARCH
@@ -110,6 +115,7 @@ config ARCH
 	default "xtensa"  if ARCH_XTENSA
 	default "z16"     if ARCH_Z16
 	default "z80"     if ARCH_Z80
+	default "or1k"    if ARCH_OR1K
 
 source arch/arm/Kconfig
 source arch/avr/Kconfig
@@ -123,6 +129,7 @@ source arch/x86/Kconfig
 source arch/xtensa/Kconfig
 source arch/z16/Kconfig
 source arch/z80/Kconfig
+source arch/or1k/Kconfig
 
 config ARCH_TOOLCHAIN_IAR
 	bool

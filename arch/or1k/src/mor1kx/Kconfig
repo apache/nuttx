@@ -1,0 +1,41 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "OpenRISC Configuration Options"
+
+choice
+	prompt "Toolchain Selection"
+	default OR1K_TOOLCHAIN_GNU_ELF
+
+config OR1K_TOOLCHAIN_GNU_ELF
+	bool "OpenRISC GNU ELF toolchain under Linux (or other POSIX environment)"
+	---help---
+		OpenRISC GNU toolchain.
+
+endchoice
+
+menu "OpenRISC Options"
+
+config OR1K_CPU_FREQUENCY
+	int "CPU Clock Frequency"
+	default 50000000
+
+config OR1K_ICACHE
+	bool "Enable Instruction Cache"
+	default n
+
+config OR1K_DCACHE
+	bool "Enable Data Cache"
+	default n
+
+config OR1K_FPU
+	bool "Enable Floating Point Unit"
+	default n
+
+config OR1K_MMU
+	bool "Enable MMU"
+	default n
+
+endmenu # OpenRISC Options

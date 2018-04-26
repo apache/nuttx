@@ -676,6 +676,13 @@ config ARCH_BOARD_OPEN1788
 		http://wvshare.com/product/Open1788-Standard.htm for further
 		information. This board features the NXP LPC1788 MCU
 
+config ARCH_BOARD_OR1K
+	bool "OpenRISC generic board"
+	depends on ARCH_CHIP_MOR1KX
+	select ARCH_HAVE_LEDS
+	---help---
+		Generic OpenRISC board.
+
 config ARCH_BOARD_P112
 	bool "P112 Z180-based platform"
 	depends on ARCH_CHIP_Z8018216FSG
@@ -1700,6 +1707,7 @@ config ARCH_BOARD
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
 	default "olimexino-stm32"          if ARCH_BOARD_OLIMEXINO_STM32
 	default "open1788"                 if ARCH_BOARD_OPEN1788
+	default "or1k"                     if ARCH_BOARD_OR1K
 	default "p112"                     if ARCH_BOARD_P112
 	default "pcblogic-pic32mx"         if ARCH_BOARD_PCBLOGICPIC32MX
 	default "pcduino-a10"              if ARCH_BOARD_PCDUINO_A10
@@ -2046,6 +2054,9 @@ source "configs/olimexino-stm32/Kconfig"
 endif
 if ARCH_BOARD_OPEN1788
 source "configs/open1788/Kconfig"
+endif
+if ARCH_BOARD_OR1K
+source "configs/or1k/Kconfig"
 endif
 if ARCH_BOARD_PCBLOGICPIC32MX
 source "configs/pcblogic-pic32mx/Kconfig"

@@ -505,6 +505,9 @@ configs/olimex-strp711
   further information.  STATUS: Configurations for the basic OS test and NSH
   are complete and verified.
 
+configs/or1k
+  Generic OpenRISC board.
+
 configs/pcblogic-pic32mx
   This is the port of NuttX to the PIC32MX board from PCB Logic Design Co.
   This board features the MicroChip PIC32MX460F512L.
