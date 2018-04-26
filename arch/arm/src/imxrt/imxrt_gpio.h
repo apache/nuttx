@@ -86,7 +86,7 @@
  */
 
 #define GPIO_PORT_SHIFT        (21)      /* Bits 21-23: GPIO port index */
-#define GPIO_PORT_MASK         (3 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_MASK         (7 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT1           (GPIO1 << GPIO_PORT_SHIFT) /* GPIO1 */
 #  define GPIO_PORT2           (GPIO2 << GPIO_PORT_SHIFT) /* GPIO2 */
 #  define GPIO_PORT3           (GPIO3 << GPIO_PORT_SHIFT) /* GPIO3 */
@@ -100,7 +100,7 @@
  */
 
 #define GPIO_PIN_SHIFT         (16)      /* Bits 16-20: GPIO pin number */
-#define GPIO_PIN_MASK          (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN_MASK          (31 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN0            (0 << GPIO_PIN_SHIFT)  /* Pin  0 */
 #  define GPIO_PIN1            (1 << GPIO_PIN_SHIFT)  /* Pin  1 */
 #  define GPIO_PIN2            (2 << GPIO_PIN_SHIFT)  /* Pin  2 */
