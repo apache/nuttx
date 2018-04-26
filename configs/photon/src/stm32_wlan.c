@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/photon/src/stm32_wlan.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,12 @@
 #include "stm32_sdio.h"
 
 #include "photon.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
  * Public Functions
@@ -102,18 +108,19 @@ void bcmf_board_initialize(int minor)
  * Name: bcmf_board_setup_oob_irq
  ****************************************************************************/
 
-void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg)
+void bcmf_board_setup_oob_irq(int minor, int (*func)(void *), void *arg)
 {
   if (minor != SDIO_WLAN0_MINOR)
     {
       return;
     }
 
-  /* Configure interrupt pin */
+  /* Configure SDIO card in-band interrupt callback */
 
-  stm32_configgpio(GPIO_WLAN0_OOB_INT);
-
-  stm32_gpiosetevent(GPIO_WLAN0_OOB_INT, true, false, false, func, arg);
+  if (g_sdio_dev != NULL)
+    {
+      sdio_set_sdio_card_isr(g_sdio_dev, func, arg);
+    }
 }
 
 /****************************************************************************
@@ -123,15 +130,14 @@ void bcmf_board_setup_oob_irq(int minor, xcpt_t func, void *arg)
 int photon_wlan_initialize()
 {
   int ret;
-  struct sdio_dev_s *sdio_dev;
 
   /* Initialize sdio interface */
 
   wlinfo("Initializing SDIO slot %d\n", SDIO_WLAN0_SLOTNO);
 
-  sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
+  g_sdio_dev = sdio_initialize(SDIO_WLAN0_SLOTNO);
 
-  if (!sdio_dev)
+  if (!g_sdio_dev)
     {
       wlerr("ERROR: Failed to initialize SDIO with slot %d\n",
              SDIO_WLAN0_SLOTNO);
@@ -140,7 +146,7 @@ int photon_wlan_initialize()
 
   /* Bind the SDIO interface to the bcmf driver */
 
-  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, sdio_dev);
+  ret = bcmf_sdio_initialize(SDIO_WLAN0_MINOR, g_sdio_dev);
 
   if (ret != OK)
     {

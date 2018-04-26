@@ -58,6 +58,10 @@ ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43362),y)
 CSRCS += bcmf_chip_43362.c
 endif
 
+ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43438),y)
+CSRCS += bcmf_chip_43438.c
+endif
+
 endif # CONFIG_IEEE80211_BROADCOM_FULLMAC
 
 # Include IEEE 802.11 build support

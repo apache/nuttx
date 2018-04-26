@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcmf_driver.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,14 +69,42 @@
 #define BCMF_AUTH_TIMEOUT_MS   10000
 #define BCMF_SCAN_RESULT_SIZE  1024
 
+/* clm file is cut into pieces of MAX_CHUNK_LEN.
+ * It is relatively small because dongles (FW) have a small maximum size input
+ * payload restriction for ioctl's ... something like 1900'ish bytes. So chunk
+ * len should not exceed 1400 bytes
+ */
+
+#define MAX_CHUNK_LEN (CONFIG_NET_ETH_MTU > 1500 ? 1400 : CONFIG_NET_ETH_MTU - 100)
+
 /* Helper to get iw_event size */
 
 #define BCMF_IW_EVENT_SIZE(field) \
   (offsetof(struct iw_event, u)+sizeof(((union iwreq_data*)0)->field))
 
+/* Clm blob marcos */
+
+#define DLOAD_HANDLER_VER     1       /* Downloader version */
+#define DLOAD_FLAG_VER_MASK   0xf000  /* Downloader version mask */
+#define DLOAD_FLAG_VER_SHIFT  12      /* Downloader version shift */
+
+#define DL_CRC_NOT_INUSE      0x0001
+#define DL_BEGIN              0x0002
+#define DL_END                0x0004
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* clm blob download head */
+
+struct wl_dload_data
+{
+  uint16_t flag;
+  uint16_t dload_type;
+  uint32_t len;
+  uint32_t crc;
+};
 
 /* AP scan state machine status */
 
@@ -88,6 +116,14 @@ enum
   BCMF_SCAN_DONE
 };
 
+/* Generic download types & flags */
+
+enum
+{
+  DL_TYPE_UCODE = 1,
+  DL_TYPE_CLM = 2
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -96,6 +132,8 @@ static FAR struct bcmf_dev_s *bcmf_allocate_device(void);
 static void bcmf_free_device(FAR struct bcmf_dev_s *priv);
 
 static int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
+
+static int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv);
 
 // FIXME only for debug purpose
 
@@ -213,6 +251,73 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
   return OK;
 }
 
+int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
+{
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
+  FAR uint8_t *srcbuff = sbus->chip->clm_blob_image;
+  FAR uint8_t *downloadbuff;
+  unsigned int datalen = *sbus->chip->clm_blob_image_size;
+  uint16_t dl_flag;
+  int ret = 0;
+
+  if (srcbuff == NULL || datalen <= 0)
+    {
+      wlinfo("Skip clm blob...\n");
+      return 0;
+    }
+  else
+    {
+      wlinfo("Download %d bytes @ 0x%08x\n", datalen, srcbuff);
+    }
+
+  /* Divide clm blob into chunks */
+
+  downloadbuff = kmm_malloc(sizeof(struct wl_dload_data) + MAX_CHUNK_LEN);
+  if (!downloadbuff)
+    {
+      wlerr("No memory for clm data\n");
+      return -ENOMEM;
+    }
+
+  dl_flag = DL_BEGIN;
+  do
+    {
+      FAR struct wl_dload_data *dlhead;
+      unsigned int chunk_len = datalen >= MAX_CHUNK_LEN ? MAX_CHUNK_LEN : datalen;
+      uint32_t out_len;
+
+      memcpy(downloadbuff + sizeof(struct wl_dload_data), srcbuff, chunk_len);
+      datalen -= chunk_len;
+      srcbuff += chunk_len;
+
+      if (datalen <= 0)
+        {
+          dl_flag |= DL_END;
+        }
+
+      /* clm header */
+
+      dlhead             = (struct wl_dload_data *)downloadbuff;
+      dlhead->flag       = (DLOAD_HANDLER_VER << DLOAD_FLAG_VER_SHIFT) | dl_flag;
+      dlhead->dload_type = DL_TYPE_CLM;
+      dlhead->len        = chunk_len;
+      dlhead->crc        = 0;
+
+      out_len            = chunk_len + sizeof(struct wl_dload_data);
+      out_len            = (out_len + 7) & ~0x7U;
+
+      ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
+                                   IOVAR_STR_CLMLOAD, downloadbuff,
+                                   &out_len);
+
+      dl_flag &= (uint16_t)~DL_BEGIN;
+    }
+  while ((datalen > 0) && (ret == OK));
+
+  kmm_free(downloadbuff);
+  return ret;
+}
+
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
   int ret;
@@ -221,11 +326,19 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   uint8_t tmp_buf[64];
   int interface = CHIP_STA_INTERFACE;
 
+  /* Download clm blob if needed */
+
+  ret = bcmf_driver_download_clm(priv);
+  if (ret != OK)
+    {
+      return -EIO;
+    }
+
   /* Disable TX Gloming feature */
 
   out_len = 4;
-  *(uint32_t *)tmp_buf = 0;
-  ret = bcmf_cdc_iovar_request(priv, interface, false,
+  *(FAR uint32_t *)tmp_buf = 0;
+  ret = bcmf_cdc_iovar_request(priv, interface, true,
                                IOVAR_STR_TX_GLOM, tmp_buf,
                                &out_len);
   if (ret != OK)
@@ -236,9 +349,9 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   /* FIXME disable power save mode */
 
   out_len = 4;
-  value = 0;
-  ret = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_PM,
-                       (uint8_t *)&value, &out_len);
+  value   = 0;
+  ret     = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_PM,
+                           (uint8_t *)&value, &out_len);
   if (ret != OK)
     {
       return ret;
@@ -258,16 +371,17 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   /* TODO configure roaming if needed. Disable for now */
 
   out_len = 4;
-  value = 1;
-  ret = bcmf_cdc_iovar_request(priv, interface, true, IOVAR_STR_ROAM_OFF,
-                               (uint8_t *)&value,
-                               &out_len);
+  value   = 1;
+  ret     = bcmf_cdc_iovar_request(priv, interface, true,
+                                   IOVAR_STR_ROAM_OFF,
+                                   (FAR uint8_t *)&value,
+                                   &out_len);
 
   /* TODO configure EAPOL version to default */
 
   out_len = 8;
-  ((uint32_t *)tmp_buf)[0] = interface;
-  ((uint32_t *)tmp_buf)[1] = (uint32_t)-1;
+  ((FAR uint32_t *)tmp_buf)[0] = interface;
+  ((FAR uint32_t *)tmp_buf)[1] = (uint32_t)-1;
 
   if (bcmf_cdc_iovar_request(priv, interface, true,
                              "bsscfg:"IOVAR_STR_SUP_WPA2_EAPVER, tmp_buf,
@@ -279,9 +393,9 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   /* Query firmware version string */
 
   out_len = sizeof(tmp_buf);
-  ret = bcmf_cdc_iovar_request(priv, interface, false,
-                                 IOVAR_STR_VERSION, tmp_buf,
-                                 &out_len);
+  ret     = bcmf_cdc_iovar_request(priv, interface, false,
+                                   IOVAR_STR_VERSION, tmp_buf,
+                                   &out_len);
   if (ret != OK)
     {
       return -EIO;

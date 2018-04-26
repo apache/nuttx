@@ -30,11 +30,12 @@
 
 #define SDIO_DEVICE_ID_BROADCOM_43143        43143
 #define SDIO_DEVICE_ID_BROADCOM_43241        0x4324
-#define SDIO_DEVICE_ID_BROADCOM_4329        0x4329
-#define SDIO_DEVICE_ID_BROADCOM_4330        0x4330
-#define SDIO_DEVICE_ID_BROADCOM_4334        0x4334
+#define SDIO_DEVICE_ID_BROADCOM_4329         0x4329
+#define SDIO_DEVICE_ID_BROADCOM_4330         0x4330
+#define SDIO_DEVICE_ID_BROADCOM_4334         0x4334
 #define SDIO_DEVICE_ID_BROADCOM_4335_4339    0x4335
 #define SDIO_DEVICE_ID_BROADCOM_43362        43362
+#define SDIO_DEVICE_ID_BROADCOM_43430        43430
 
 /* Core reg address translation.
  * Both macro's returns a 32 bits byte address on the backplane bus.

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcmf_bdc.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,8 @@ struct __attribute__((packed)) bcmf_bdc_header
 {
   uint8_t flags;       /* bdc frame flags */
   uint8_t priority;    /* bdc frame priority */
-  uint8_t flags2;      /* bdc frame additionnal flags */
-  uint8_t data_offset; /* Offset from end of header to payload data */
+  uint8_t flags2;      /* bdc frame additional flags */
+  uint8_t data_offset; /* Offset from end of header to payload data, in 4-bytes count */
 };
 
 struct __attribute__((packed)) bcmf_eth_header
@@ -138,7 +138,7 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 
   header = (struct bcmf_bdc_header *)frame->data;
 
-  data_size -= sizeof(struct bcmf_bdc_header) + header->data_offset;
+  data_size -= sizeof(struct bcmf_bdc_header) + header->data_offset * 4;
 
   if (data_size < sizeof(struct bcmf_event_msg))
     {
@@ -151,7 +151,7 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 
   event_msg = (struct bcmf_event_msg *)(frame->data +
                                         sizeof(struct bcmf_bdc_header) +
-                                        header->data_offset);
+                                        header->data_offset * 4);
 
   if (event_msg->eth.ether_type != BCMF_EVENT_ETHER_TYPE ||
       memcmp(event_msg->bcm_eth.oui, bcmf_broadcom_oui, 3))
@@ -258,6 +258,7 @@ struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
 {
   unsigned int frame_len;
   struct bcmf_frame_s *frame = priv->bus->rxframe(priv);
+  struct bcmf_bdc_header *header;
 
   /* Process bdc header */
 
@@ -272,6 +273,7 @@ struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
 
   /* Transmit frame to upper layer */
 
-  frame->data += sizeof(struct bcmf_bdc_header);
+  header       = (struct bcmf_bdc_header*)frame->data;
+  frame->data += sizeof(struct bcmf_bdc_header) + header->data_offset * 4;
   return frame;
 }

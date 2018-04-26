@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcmf_core.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 /* Agent registers (common for every core) */
+
 #define BCMA_IOCTL           0x0408 /* IO control */
 #define BCMA_IOST            0x0500 /* IO status */
 #define BCMA_RESET_CTL       0x0800 /* Reset control */
@@ -74,8 +75,14 @@
 
 #define BCMA_RESET_CTL_RESET 0x0001
 
+/* SOCSRAM core registers */
+
+#define SOCSRAM_BANKX_INDEX  ((uint32_t) (0x18004000 + 0x10) )
+#define SOCSRAM_BANKX_PDA    ((uint32_t) (0x18004000 + 0x44) )
+
 /* Transfer size properties */
-#define BCMF_UPLOAD_TRANSFER_SIZE     (64 * 256)
+
+#define BCMF_UPLOAD_TRANSFER_SIZE  (64 * 256)
 
 /****************************************************************************
  * Private Types
@@ -87,11 +94,9 @@
 
 static int bcmf_core_set_backplane_window(FAR struct bcmf_sdio_dev_s *sbus,
                                           uint32_t address);
-
 static int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbusv,
-                                   uint32_t address, uint8_t *buf,
-                                   unsigned int len);
-
+                              uint32_t address, uint8_t *buf,
+                              unsigned int len);
 static int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus);
 
 /****************************************************************************
@@ -169,6 +174,7 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       address += size;
       buf += size;
     }
+
   return OK;
 }
 
@@ -202,7 +208,8 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Write the length token to the last word */
 
-  ret = bcmf_write_sbreg(sbus, sbus->chip->ram_size - 4, (uint8_t *)&token, 4);
+  ret = bcmf_write_sbreg(sbus, sbus->chip->ram_size - 4,
+                         (FAR uint8_t *)&token, 4);
   if (ret != OK)
     {
       return ret;
@@ -220,12 +227,19 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
  ****************************************************************************/
 
 int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
-                          uint8_t *reg, unsigned int len)
+                    FAR uint8_t *reg, unsigned int len)
 {
   int ret = bcmf_core_set_backplane_window(sbus, address);
   if (ret != OK)
     {
       return ret;
+    }
+
+  /* Map to 32-bit access if len == 4 */
+
+  if (len == 4)
+    {
+      address |= SBSDIO_SB_ACCESS_2_4B_FLAG;
     }
 
   return bcmf_transfer_bytes(sbus, false, 1,
@@ -237,13 +251,20 @@ int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
  ****************************************************************************/
 
 int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
-                          uint8_t *reg, unsigned int len)
+                     FAR uint8_t *reg, unsigned int len)
 {
 
   int ret = bcmf_core_set_backplane_window(sbus, address);
   if (ret != OK)
     {
       return ret;
+    }
+
+  /* Map to 32-bit access if len == 4 */
+
+  if (len == 4)
+    {
+      address |= SBSDIO_SB_ACCESS_2_4B_FLAG;
     }
 
   return bcmf_transfer_bytes(sbus, true, 1, address & SBSDIO_SB_OFT_ADDR_MASK,
@@ -260,11 +281,22 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 
   wlinfo("upload firmware\n");
 
-  /* Disable ARMCM3 core and reset SOCRAM core
-   * to set device in firmware upload mode */
+  /* Disable ARMCM3 core and reset SOCRAM core to set device in firmware
+   * upload mode
+   */
 
   bcmf_core_disable(sbus, WLAN_ARMCM3_CORE_ID);
   bcmf_core_reset(sbus, SOCSRAM_CORE_ID);
+
+  /* Do chip specific initialization */
+
+  if (sbus->cur_chip_id == SDIO_DEVICE_ID_BROADCOM_43430)
+    {
+      /* Disable remap for SRAM_3. Only for 4343x */
+
+      bcmf_write_sbregw(sbus, SOCSRAM_BANKX_INDEX, 0x3);
+      bcmf_write_sbregw(sbus, SOCSRAM_BANKX_PDA, 0);
+    }
 
   up_mdelay(50);
 

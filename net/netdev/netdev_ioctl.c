@@ -958,7 +958,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
 #ifdef CONFIG_NET_ETHERNET
-              if (dev->d_lltype == NET_LL_ETHERNET)
+              if (dev->d_lltype == NET_LL_ETHERNET ||
+                  dev->d_lltype == NET_LL_IEEE80211)
                 {
                   req->ifr_hwaddr.sa_family = AF_INETX;
                   memcpy(req->ifr_hwaddr.sa_data,
