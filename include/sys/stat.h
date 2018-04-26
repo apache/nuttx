@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/stat.h
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,8 @@
  *   Bits 0-2:   Permissions for others
  *   Bits 3-5:   Group permissions
  *   Bits 6-8:   Owner permissions
- *   Bits 9-11:  Not used
- *   Bits 12-14: File type bits
+ *   Bits 9-10:  Not used
+ *   Bits 11-14: File type bits
  *   Bit 15:     Symbolic link
  */
 
@@ -82,19 +82,19 @@
 #define S_ISGID     0          /* Set group ID bit (not used)*/
 #define S_ISUID     0          /* Set UID bit (not used) */
 
-#define S_IFIFO     0          /* Bits 12-14: File type bits (not all used) */
-#define S_IFCHR     (1 << 12)
-#define S_IFDIR     (2 << 12)
-#define S_IFBLK     (3 << 12)
-#define S_IFREG     (4 << 12)
-#define S_IFSOCK    0
-#define S_IFMQ      (5 << 12)
-#define S_IFSEM     (6 << 12)
-#define S_IFSHM     (7 << 12)
-#define s_IFTGT     (7 << 12)  /* May be the target of a symbolic link */
+#define S_IFIFO     0          /* Bits 11-14: File type bits (not all used) */
+#define S_IFCHR     (1 << 11)
+#define S_IFDIR     (2 << 11)
+#define S_IFBLK     (3 << 11)
+#define S_IFREG     (4 << 11)
+#define S_IFMQ      (5 << 11)
+#define S_IFSEM     (6 << 11)
+#define S_IFSHM     (7 << 11)
+#define S_IFSOCK    (8 << 11)
+#define s_IFTGT     (15 << 11) /* May be the target of a symbolic link */
 
 #define S_IFLNK     (1 << 15)  /* Bit 15: Symbolic link */
-#define S_IFMT      (15 << 15) /* Bits 12-15: Full file type */
+#define S_IFMT      (31 << 11) /* Bits 11-15: Full file type */
 
 /* File type macros that operate on an instance of mode_t */
 
@@ -104,7 +104,7 @@
 #define S_ISDIR(m)  (((m) & s_IFTGT) == S_IFDIR)
 #define S_ISBLK(m)  (((m) & s_IFTGT) == S_IFBLK)
 #define S_ISREG(m)  (((m) & s_IFTGT) == S_IFREG)
-#define S_ISSOCK(m) (0)
+#define S_ISSOCK(m) (((m) & s_IFTGT) == S_IFSOCK)
 #define S_ISMQ(m)   (((m) & s_IFTGT) == S_IFMQ)
 #define S_ISSEM(m)  (((m) & s_IFTGT) == S_IFSEM)
 #define S_ISSHM(m)  (((m) & s_IFTGT) == S_IFSHM)

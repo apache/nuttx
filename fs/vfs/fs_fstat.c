@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_fstat.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <sys/stat.h>
+
 #include <nuttx/fs/fs.h>
 #include "inode/inode.h"
 
@@ -82,10 +84,32 @@ int fstat(int fd, FAR struct stat *buf)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
+#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      if (sockfd_socket(fd) == NULL)
+        {
+          ret = -EBADF;
+          goto errout;
+        }
+      else
+        {
+          memset(buf, 0, sizeof(struct stat));
+          buf->st_mode    = S_IFSOCK;
+
+#ifdef CONFIG_NET_ETHERNET
+          /* REVISIT:  Ideally, we would get the MTU from the device that
+           * serves the connection (assuming the socket is connected).
+           */
+
+          buf->st_blksize = CONFIG_NET_ETH_MTU;
+#endif
+          return OK;
+        }
+#else
       /* No networking... it is a bad descriptor in any event */
 
       ret = -EBADF;
       goto errout;
+#endif
     }
 
   /* The descriptor is in a valid range to file descriptor... do the
