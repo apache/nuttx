@@ -709,6 +709,30 @@ Where <subdir> is one of the following:
       Terminating!
       nsh>
 
+  lgvl:
+  ----
+
+    STM32F429I-DISCO LittlevGL demo example
+
+    Configure and build
+
+      tools/configure -a <appdir> stm32f429i-disco/lvgl
+
+    Loading
+
+      st-flash write nuttx.bin 0x8000000
+
+    Executing
+
+      The ltdc is initialized during boot up.  Interaction with NSH is via
+      the serial console at 115200 8N1 baud.  From the nsh comand line
+      execute the lvgldemo example:
+
+        nsh> lvgldemo
+
+      The test will execute the calibration process and then run the
+      LittlevGL demo project.
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
