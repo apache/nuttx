@@ -168,37 +168,63 @@ static const struct uart_config_s g_console_config =
 
 void imxrt_lpuart_clock_enable (uint32_t base)
 {
+    uint32_t regval;
+
   if (base == IMXRT_LPUART1_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG12_SHIFT, IMXRT_CCM_CCGR5);
+      regval  = getreg32(IMXRT_CCM_CCGR5);
+      regval &= ~ CCM_CCGRX_CG12_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG12_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR5);
     }
   else if (base == IMXRT_LPUART2_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG14_SHIFT, IMXRT_CCM_CCGR0);
+      regval  = getreg32(IMXRT_CCM_CCGR0);
+      regval &= ~ CCM_CCGRX_CG14_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG14_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR0);
     }
   else if (base == IMXRT_LPUART3_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG6_SHIFT, IMXRT_CCM_CCGR0);
+      regval  = getreg32(IMXRT_CCM_CCGR0);
+      regval &= ~ CCM_CCGRX_CG6_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG6_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR0);
     }
   else if (base == IMXRT_LPUART4_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG12_SHIFT, IMXRT_CCM_CCGR1);
+      regval  = getreg32(IMXRT_CCM_CCGR1);
+      regval &= ~ CCM_CCGRX_CG12_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG12_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR1);
     }
   else if (base == IMXRT_LPUART5_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG1_SHIFT, IMXRT_CCM_CCGR3);
+      regval = getreg32(IMXRT_CCM_CCGR3);
+      regval &= ~ CCM_CCGRX_CG1_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG1_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR3);
     }
   else if (base == IMXRT_LPUART6_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG4_SHIFT, IMXRT_CCM_CCGR3);
+      regval  = getreg32(IMXRT_CCM_CCGR3);
+      regval &= ~ CCM_CCGRX_CG4_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG4_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR3);
     }
   else if (base == IMXRT_LPUART7_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG13_SHIFT, IMXRT_CCM_CCGR5);
+      regval = getreg32(IMXRT_CCM_CCGR5);
+      regval &= ~ CCM_CCGRX_CG13_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG13_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR5);
     }
   else if (base == IMXRT_LPUART8_BASE)
     {
-      putreg32(CCM_CG_ALL << CCM_CCGRX_CG7_SHIFT, IMXRT_CCM_CCGR6);
+      regval  = getreg32(IMXRT_CCM_CCGR6);
+      regval &= ~ CCM_CCGRX_CG7_MASK;
+      regval |= (CCM_CG_ALL << CCM_CCGRX_CG7_SHIFT);
+      putreg32(regval, IMXRT_CCM_CCGR6);
     }
 }
 
