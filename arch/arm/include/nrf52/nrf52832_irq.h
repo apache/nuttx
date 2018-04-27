@@ -58,34 +58,35 @@
 #define NRF52_IRQ_TIMER1        (NRF52_IRQ_EXTINT+9)   /* Multi-rate timer */
 #define NRF52_IRQ_TIMER2        (NRF52_IRQ_EXTINT+10)  /* Standard counter/timer CTIMER0 */
 #define NRF52_IRQ_RTC0          (NRF52_IRQ_EXTINT+11)  /* Standard counter/timer CTIMER1 */
-#define NRF52_IRQ_TEMP          (NRF52_IRQ_EXTINT+12)  /* SCTimer/PWM0 */
-#define NRF52_IRQ_RNG           (NRF52_IRQ_EXTINT+12)  /* SCTimer/PWM0 */
-#define NRF52_IRQ_ECB           (NRF52_IRQ_EXTINT+13)  /* CTIMER3 Standard counter/timer CTIMER3 */
-#define NRF52_IRQ_CCM_AAR       (NRF52_IRQ_EXTINT+14)  /* Flexcomm Interface 0 (USART, SPI, I2C) */
-#define NRF52_IRQ_WDT           (NRF52_IRQ_EXTINT+15)  /* Flexcomm Interface 1 (USART, SPI, I2C) */
-#define NRF52_IRQ_RTC1          (NRF52_IRQ_EXTINT+16)  /* Flexcomm Interface 2 (USART, SPI, I2C) */
-#define NRF52_IRQ_QDEC          (NRF52_IRQ_EXTINT+17)  /* Flexcomm Interface 3 (USART, SPI, I2C) */
-#define NRF52_IRQ_COMP_LPCOMP   (NRF52_IRQ_EXTINT+18)  /* Flexcomm Interface 4 (USART, SPI, I2C) */
-#define NRF52_IRQ_SWI0_EGU0     (NRF52_IRQ_EXTINT+19)  /* Flexcomm Interface 5 (USART, SPI, I2C) */
-#define NRF52_IRQ_SWI1_EGU1     (NRF52_IRQ_EXTINT+20)  /* Flexcomm Interface 6 (USART, SPI, I2C, I2S) */
-#define NRF52_IRQ_SWI2_EGU2     (NRF52_IRQ_EXTINT+21)  /* Flexcomm Interface 7 (USART, SPI, I2C, I2S) */
-#define NRF52_IRQ_SWI3_EGU3     (NRF52_IRQ_EXTINT+22)  /* ADC0 sequence A completion */
-#define NRF52_IRQ_SWI4_EGU4     (NRF52_IRQ_EXTINT+23)  /* ADC0 sequence B completion */
-#define NRF52_IRQ_SWI5_EGU5     (NRF52_IRQ_EXTINT+24)  /* ADC0 threshold compare and error */
-#define NRF52_IRQ_TIMER3        (NRF52_IRQ_EXTINT+25)  /* Digital microphone and audio subsystem */
-#define NRF52_IRQ_TIMER4        (NRF52_IRQ_EXTINT+26)  /* Hardware Voice Activity Detection */
-#define NRF52_IRQ_PWM0          (NRF52_IRQ_EXTINT+27)  /* USB0 Activity Interrupt */
-#define NRF52_IRQ_PDM           (NRF52_IRQ_EXTINT+28)  /* USB0 host and device */
-                                                       /* 29-30 Reserved */
-#define NRF52_IRQ_MWU           (NRF52_IRQ_EXTINT+31)  /* Pin interrupt 4 or pattern match engine slice 4 */
-#define NRF52_IRQ_PWM1          (NRF52_IRQ_EXTINT+32)  /* Pin interrupt 5 or pattern match engine slice 5 */
-#define NRF52_IRQ_PWM2          (NRF52_IRQ_EXTINT+33)  /* Pin interrupt 6 or pattern match engine slice 6 */
-#define NRF52_IRQ_SPI2          (NRF52_IRQ_EXTINT+34)  /* Pin interrupt 7 or pattern match engine slice 7 */
-#define NRF52_IRQ_RTC2          (NRF52_IRQ_EXTINT+35)  /* Standard counter/timer CTIMER2 */
-#define NRF52_IRQ_I2S           (NRF52_IRQ_EXTINT+36)  /* Standard counter/timer CTIMER4 */
-#define NRF52_IRQ_FPU           (NRF52_IRQ_EXTINT+37)  /* Repetitive Interrupt Timer */
+#define NRF52_IRQ_TEMP          (NRF52_IRQ_EXTINT+12)  /* Temperature Sensor */
+#define NRF52_IRQ_RNG           (NRF52_IRQ_EXTINT+13)  /* Random Number Generator */
+#define NRF52_IRQ_ECB           (NRF52_IRQ_EXTINT+14)  /* AES ECB Mode Encryption */
+#define NRF52_IRQ_CCM_AAR       (NRF52_IRQ_EXTINT+15)  /* AES CCM Mode Encryption/Accel. Address Resolve */
+#define NRF52_IRQ_WDT           (NRF52_IRQ_EXTINT+16)  /* Watchdog Timer */
+#define NRF52_IRQ_RTC1          (NRF52_IRQ_EXTINT+17)  /* Real-time counter 1 */
+#define NRF52_IRQ_QDEC          (NRF52_IRQ_EXTINT+18)  /* Quadrature decoder */
+#define NRF52_IRQ_COMP_LPCOMP   (NRF52_IRQ_EXTINT+19)  /* Low power comparator */
+#define NRF52_IRQ_SWI0_EGU0     (NRF52_IRQ_EXTINT+20)  /* Software interrupt 0 / Event Gen. Unit 0 */
+#define NRF52_IRQ_SWI1_EGU1     (NRF52_IRQ_EXTINT+21)  /* Software interrupt 1 / Event Gen. Unit 1 */
+#define NRF52_IRQ_SWI2_EGU2     (NRF52_IRQ_EXTINT+22)  /* Software interrupt 2 / Event Gen. Unit 2 */
+#define NRF52_IRQ_SWI3_EGU3     (NRF52_IRQ_EXTINT+23)  /* Software interrupt 3 / Event Gen. Unit 3 */
+#define NRF52_IRQ_SWI4_EGU4     (NRF52_IRQ_EXTINT+24)  /* Software interrupt 4 / Event Gen. Unit 4 */
+#define NRF52_IRQ_SWI5_EGU5     (NRF52_IRQ_EXTINT+25)  /* Software interrupt 5 / Event Gen. Unit 5 */
+#define NRF52_IRQ_TIMER3        (NRF52_IRQ_EXTINT+26)  /* Timer 3 */
+#define NRF52_IRQ_TIMER4        (NRF52_IRQ_EXTINT+27)  /* Timer 4 */
+#define NRF52_IRQ_PWM0          (NRF52_IRQ_EXTINT+28)  /* Pulse Width Modulation Unit 0 */
+#define NRF52_IRQ_PDM           (NRF52_IRQ_EXTINT+29)  /* Pulse Density Modulation (Digital Mic) Interface */
+#define NRF52_IRQ_NVMC          (NRF52_IRQ_EXTINT+30)  /* Non Volatile Memory Controller */
+#define NRF52_IRQ_PPI           (NRF52_IRQ_EXTINT+31)  /* PPI controller */
+#define NRF52_IRQ_MWU           (NRF52_IRQ_EXTINT+32)  /* Memory Watch Unit */
+#define NRF52_IRQ_PWM1          (NRF52_IRQ_EXTINT+33)  /* Pulse Width Modulation Unit 1 */
+#define NRF52_IRQ_PWM2          (NRF52_IRQ_EXTINT+34)  /* Pulse Width Modulation Unit 2 */
+#define NRF52_IRQ_SPI2          (NRF52_IRQ_EXTINT+35)  /* SPI master 2 / SPI slave 2 */
+#define NRF52_IRQ_RTC2          (NRF52_IRQ_EXTINT+36)  /* Real-time counter 2 */
+#define NRF52_IRQ_I2S           (NRF52_IRQ_EXTINT+37)  /* Inter-IC Sound interface */
+#define NRF52_IRQ_FPU           (NRF52_IRQ_EXTINT+38)  /* FPU interrupt */
 
-#define NRF52_IRQ_NEXTINT       (38)
+#define NRF52_IRQ_NEXTINT       (39)
 #define NRF52_IRQ_NIRQS         (NRF52_IRQ_EXTINT+NRF52_IRQ_NEXTINT)
 
 /* Total number of IRQ numbers */
