@@ -335,6 +335,15 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       return -EISCONN;
     }
 
+  /* Otherwise, if the socket is not connected, then a destination address
+   * must be provided.
+   */
+
+  else if (to == NULL && !_SS_ISCONNECTED(psock->s_flags))
+    {
+      return -EDESTADDRREQ;
+    }
+
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
@@ -409,18 +418,25 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_time = clock_systimer();
 #endif
 
-  /* Setup the UDP socket.  udp_connect will set the remote address in the
-   * connection structure.
-   */
+  /* Setup the UDP socket.  */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn);
 
-  ret = udp_connect(conn, to);
-  if (ret < 0)
+  /* Check if the socket is connected */
+
+  if (!_SS_ISCONNECTED(psock->s_flags))
     {
-      nerr("ERROR: udp_connect failed: %d\n", ret);
-      goto errout_with_lock;
+      /* No.. Call udp_connect() to set the remote address in the connection
+       * structure to the sendto() destination address.
+       */
+
+      ret = udp_connect(conn, to);
+      if (ret < 0)
+        {
+          nerr("ERROR: udp_connect failed: %d\n", ret);
+          goto errout_with_lock;
+        }
     }
 
   /* Get the device that will handle the remote packet transfers.  This

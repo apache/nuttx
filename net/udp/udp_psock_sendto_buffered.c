@@ -630,6 +630,15 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       return -EISCONN;
     }
 
+  /* Otherwise, if the socket is not connected, then a destination address
+   * must be provided.
+   */
+
+  else if (to == NULL && !_SS_ISCONNECTED(psock->s_flags))
+    {
+      return -EDESTADDRREQ;
+    }
+
   /* Make sure that we have the IP address mapping */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
@@ -693,8 +702,48 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
         }
 
       /* Initialize the write buffer */
+      /* Check if the socket is connected */
 
-      memcpy(&wrb->wb_dest, to, tolen);
+      if (!_SS_ISCONNECTED(psock->s_flags))
+        {
+          /* Yes.. get the connection address from the connection structure */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+          if (conn->domain == PF_INET)
+#endif
+            {
+              FAR struct sockaddr_in *addr4 =
+                (FAR struct sockaddr_in *)&wrb->wb_dest;
+
+              addr4->sin_family = AF_INET;
+              addr4->sin_port   = conn->rport;
+              net_ipv4addr_copy(addr4->sin_addr.s_addr, conn->u.ipv4.raddr);
+            }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+          else
+#endif
+            {
+              FAR struct sockaddr_in6 *addr6 =
+                (FAR struct sockaddr_in6 *)&wrb->wb_dest;
+
+              addr6->sin6_family = AF_INET6;
+              addr6->sin6_port   = conn->rport;
+              net_ipv6addr_copy(addr6->sin6_addr.s6_addr, conn->u.ipv6.raddr);
+            }
+#endif /* CONFIG_NET_IPv6 */
+        }
+
+      /* Not connected.  Use the provided destination address */
+
+      else
+        {
+          memcpy(&wrb->wb_dest, to, tolen);
+        }
+
 #ifdef CONFIG_NET_SOCKOPTS
       wrb->wb_start = clock_systimer();
 #endif
