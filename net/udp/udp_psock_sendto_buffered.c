@@ -704,7 +704,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       /* Initialize the write buffer */
       /* Check if the socket is connected */
 
-      if (!_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(psock->s_flags))
         {
           /* Yes.. get the connection address from the connection structure */
 
