@@ -217,13 +217,52 @@ static const uint8_t g_gpio4_padmux[IMXRT_GPIO_NPINS] =
   IMXRT_PADMUX_GPIO_EMC_31_INDEX              /* GPIO4 Pin 31 */
 };
 
+static const uint8_t g_gpio5_padmux[IMXRT_GPIO_NPINS] =
+{
+  IMXRT_PADMUX_WAKEUP_INDEX,                  /* GPIO5 Pin 0 */
+  IMXRT_PADMUX_PMIC_ON_REQ_INDEX,             /* GPIO5 Pin 1 */
+  IMXRT_PADMUX_PMIC_STBY_REQ_INDEX,           /* GPIO5 Pin 2 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 3 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 4 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 5 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 6 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 7 */
+
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 8 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 9 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 10 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 11 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 12 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 13 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 14 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 15 */
+
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 16 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 17 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 18 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 19 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 20 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 21 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 22 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 23 */
+
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 24 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 25 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 26 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 27 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 28 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 29 */
+  IMXRT_PADMUX_INVALID,                       /* GPIO5 Pin 30 */
+  IMXRT_PADMUX_INVALID                        /* GPIO5 Pin 31 */
+};
+
 static FAR const uint8_t *g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
 {
   g_gpio1_padmux,                             /* GPIO1 */
   g_gpio2_padmux,                             /* GPIO2 */
   g_gpio3_padmux,                             /* GPIO3 */
   g_gpio4_padmux,                             /* GPIO4 */
-  NULL,                                       /* GPIO5 REVISIT */
+  g_gpio5_padmux,                             /* GPIO5 */
   NULL                                        /* End of list */
 };
 
@@ -253,6 +292,34 @@ uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: imxrt_padmux_address
+ ****************************************************************************/
+
+static uintptr_t imxrt_padmux_address(unsigned int index)
+{
+  if (index >= IMXRT_PADMUX_WAKEUP_INDEX)
+    {
+      return (IMXRT_PADMUX_ADDRESS_SNVS(index - IMXRT_PADMUX_WAKEUP_INDEX));
+    }
+
+  return (IMXRT_PADMUX_ADDRESS(index));
+}
+
+/****************************************************************************
+ * Name: imxrt_padctl_address
+ ****************************************************************************/
+
+static uintptr_t imxrt_padctl_address(unsigned int index)
+{
+  if (index >= IMXRT_PADCTL_WAKEUP_INDEX)
+    {
+      return (IMXRT_PADCTL_ADDRESS_SNVS(index - IMXRT_PADCTL_WAKEUP_INDEX));
+    }
+
+  return (IMXRT_PADCTL_ADDRESS(index));
+}
 
 /****************************************************************************
  * Name: imxrt_gpio_dirout
@@ -344,7 +411,7 @@ static int imxrt_gpio_configinput(gpio_pinset_t pinset)
       return -EINVAL;
     }
 
-  regaddr = IMXRT_PADMUX_ADDRESS(index);
+  regaddr = imxrt_padmux_address(index);
   putreg32(PADMUX_MUXMODE_ALT5, regaddr);
 
   /* Configure pin pad settings */
@@ -355,7 +422,7 @@ static int imxrt_gpio_configinput(gpio_pinset_t pinset)
       return -EINVAL;
     }
 
-  regaddr = IMXRT_PADCTL_ADDRESS(index);
+  regaddr = imxrt_padctl_address(index);
   ioset   = (iomux_pinset_t)((pinset & GPIO_IOMUX_MASK) >> GPIO_IOMUX_SHIFT);
   return imxrt_iomux_configure(regaddr, ioset);
 }
@@ -397,7 +464,7 @@ static inline int imxrt_gpio_configperiph(gpio_pinset_t pinset)
   /* Configure pin as a peripheral */
 
   index = ((pinset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
-  regaddr = IMXRT_PADMUX_ADDRESS(index);
+  regaddr = imxrt_padmux_address(index);
 
   value = ((pinset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
   regval = (value << PADMUX_MUXMODE_SHIFT);
@@ -412,7 +479,7 @@ static inline int imxrt_gpio_configperiph(gpio_pinset_t pinset)
       return -EINVAL;
     }
 
-  regaddr = IMXRT_PADCTL_ADDRESS(index);
+  regaddr = imxrt_padctl_address(index);
   ioset   = (iomux_pinset_t)((pinset & GPIO_IOMUX_MASK) >> GPIO_IOMUX_SHIFT);
   return imxrt_iomux_configure(regaddr, ioset);
 }
