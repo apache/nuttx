@@ -1,7 +1,7 @@
 ############################################################################
 # net/socket/Make.defs
 #
-#   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015, 2017, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 SOCK_CSRCS += bind.c connect.c getsockname.c recv.c recvfrom.c send.c
 SOCK_CSRCS += sendto.c socket.c net_sockets.c net_close.c net_dupsd.c
 SOCK_CSRCS += net_dupsd2.c net_sockif.c net_clone.c net_poll.c net_vfcntl.c
+SOCK_CSRCS += net_fstat.c
 
 # TCP/IP support
 

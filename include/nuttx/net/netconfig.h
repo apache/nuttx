@@ -76,7 +76,7 @@
 
 #define __IPv4_HDRLEN 20  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
 #define __IPv6_HDRLEN 40  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
-#define __UDP_HDRLEN  8   /* Must match UDP_HDRLEN in include/nuttx/net/dup.h */
+#define __UDP_HDRLEN  8   /* Must match UDP_HDRLEN in include/nuttx/net/udp.h */
 #define __TCP_HDRLEN  20  /* Must match TCP_HDRLEN in include/nuttx/net/tcp.h */
                           /* REVISIT: Not really a constant */
 
@@ -321,8 +321,8 @@
 #  define __TUN_MIN_UDP_MSS(h)  MIN(TUN_UDP_MSS(h),__SLIP_MIN_UDP_MSS(h))
 #  define __TUN_MAX_UDP_MSS(h)  MAX(TUN_UDP_MSS(h),__SLIP_MAX_UDP_MSS(h))
 #else
-#  define __TUN_MIN_UDP_MSS(h) __SLIP_MIN_UDP_MSS(h)
-#  define __TUN_MAX_UDP_MSS(h) __SLIP_MAX_UDP_MSS(h)
+#  define __TUN_MIN_UDP_MSS(h)  __SLIP_MIN_UDP_MSS(h)
+#  define __TUN_MAX_UDP_MSS(h)  __SLIP_MAX_UDP_MSS(h)
 #endif
 
  #ifdef CONFIG_NET_IPv4

@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
- *   Copyright (C) 2007, 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2014, 2016-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -551,6 +552,7 @@ int psock_close(FAR struct socket *psock);
  ****************************************************************************/
 
 struct sockaddr; /* Forward reference. Defined in nuttx/include/sys/socket.h */
+
 int psock_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
                socklen_t addrlen);
 
@@ -1113,6 +1115,7 @@ int netdev_ioctl(int sockfd, int cmd, unsigned long arg);
 
 #ifndef CONFIG_DISABLE_POLL
 struct pollfd; /* Forward reference -- see poll.h */
+
 int psock_poll(FAR struct socket *psock, struct pollfd *fds, bool setup);
 #endif
 
@@ -1136,6 +1139,7 @@ int psock_poll(FAR struct socket *psock, struct pollfd *fds, bool setup);
 
 #ifndef CONFIG_DISABLE_POLL
 struct pollfd; /* Forward reference -- see poll.h */
+
 int net_poll(int sockfd, struct pollfd *fds, bool setup);
 #endif
 
@@ -1172,6 +1176,26 @@ int net_dupsd(int sockfd, int minsd);
  ****************************************************************************/
 
 int net_dupsd2(int sockfd1, int sockfd2);
+
+/****************************************************************************
+ * Name: net_fstat
+ *
+ * Description:
+ *   Performs fstat operations on socket
+ *
+ * Input Parameters:
+ *   sockfd - Socket descriptor of the socket to operate on
+ *   bug    - Caller-provided location in which to return the fstat data
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+struct stat;  /* Forward reference.  See sys/stat.h */
+
+int net_fstat(int sockfd, FAR struct stat *buf);
 
 /****************************************************************************
  * Name: net_clone

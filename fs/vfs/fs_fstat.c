@@ -84,28 +84,18 @@ int fstat(int fd, FAR struct stat *buf)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if (sockfd_socket(fd) == NULL)
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+      /* Let the networking logic handle the fstat() */
+
+      ret = net_fstat(fd, buf);
+      if (ret < 0)
         {
-          ret = -EBADF;
           goto errout;
         }
-      else
-        {
-          memset(buf, 0, sizeof(struct stat));
-          buf->st_mode    = S_IFSOCK;
 
-#ifdef CONFIG_NET_ETHERNET
-          /* REVISIT:  Ideally, we would get the MTU from the device that
-           * serves the connection (assuming the socket is connected).
-           */
-
-          buf->st_blksize = CONFIG_NET_ETH_MTU;
-#endif
-          return OK;
-        }
+      return OK;
 #else
-      /* No networking... it is a bad descriptor in any event */
+      /* No networking... it is just a bad descriptor */
 
       ret = -EBADF;
       goto errout;
