@@ -141,7 +141,7 @@ struct btuart_lowerhalf_s
  * Name: btuart_register
  *
  * Description:
- *   Create the UART-based Bluetooth device and register it with the
+ *   Create the generic UART-based Bluetooth device and register it with the
  *   Bluetooth stack.
  *
  * Input Parameters:

@@ -647,9 +647,7 @@ Configurations
 Each STM32F429I-DISCO configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh STM32F429I-DISCO/<subdir>
-    cd -
+    tools/configure.sh stm32f429i-disco/<subdir>
 
 Where <subdir> is one of the following:
 
@@ -712,26 +710,16 @@ Where <subdir> is one of the following:
   lgvl:
   ----
 
-    STM32F429I-DISCO LittlevGL demo example
+    STM32F429I-DISCO LittlevGL demo example.
 
-    Configure and build
+    The ltdc is initialized during boot up.  Interaction with NSH is via
+    the serial console at 115200 8N1 baud.  From the nsh comand line
+    execute the lvgldemo example:
 
-      tools/configure -a <appdir> stm32f429i-disco/lvgl
+      nsh> lvgldemo
 
-    Loading
-
-      st-flash write nuttx.bin 0x8000000
-
-    Executing
-
-      The ltdc is initialized during boot up.  Interaction with NSH is via
-      the serial console at 115200 8N1 baud.  From the nsh comand line
-      execute the lvgldemo example:
-
-        nsh> lvgldemo
-
-      The test will execute the calibration process and then run the
-      LittlevGL demo project.
+    The test will execute the calibration process and then run the
+    LittlevGL demo project.
 
   nsh:
   ---
