@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_serial.c
  *
- *   Copyright (C) 2009-2010, 2012-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2014, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -711,25 +712,23 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
 #endif
 
 /****************************************************************************
- * Name: up_setup
+ * Name: up_set_format
  *
  * Description:
- *   Configure the UART baud, bits, parity, fifos, etc. This
- *   method is called the first time that the serial port is
- *   opened.
+ *   Configure the UART baud, bits, parity, fifos, etc.
  *
  ****************************************************************************/
 
-static int up_setup(struct uart_dev_s *dev)
+static void up_set_format(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  uint32_t lcrh;
-  uint32_t ctl;
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t den;
   uint32_t brdi;
   uint32_t remainder;
   uint32_t divfrac;
+  uint32_t lcrh;
+  uint32_t ctl;
+  bool     was_active;
 
   /* Note:  The logic here depends on the fact that that the UART module
    * was enabled and the GPIOs were configured in up_lowsetup().
@@ -738,8 +737,13 @@ static int up_setup(struct uart_dev_s *dev)
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
   ctl = up_serialin(priv, TIVA_UART_CTL_OFFSET);
-  ctl &= ~UART_CTL_UARTEN;
-  up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
+  was_active = (ctl & UART_CTL_UARTEN) != 0;
+
+  if (was_active)
+    {
+      ctl &= ~UART_CTL_UARTEN;
+      up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
+    }
 
   /* Calculate BAUD rate from the SYS clock:
    *
@@ -792,31 +796,34 @@ static int up_setup(struct uart_dev_s *dev)
   switch (priv->bits)
     {
       case 5:
-        lcrh |= UART_LCRH_WLEN_5BITS;
-        break;
+          lcrh |= UART_LCRH_WLEN_5BITS;
+          break;
+
       case 6:
-        lcrh |= UART_LCRH_WLEN_6BITS;
-        break;
+          lcrh |= UART_LCRH_WLEN_6BITS;
+          break;
+
       case 7:
-        lcrh |= UART_LCRH_WLEN_7BITS;
-        break;
+          lcrh |= UART_LCRH_WLEN_7BITS;
+          break;
       case 8:
+
       default:
-        lcrh |= UART_LCRH_WLEN_8BITS;
-        break;
+          lcrh |= UART_LCRH_WLEN_8BITS;
+          break;
     }
 
   switch (priv->parity)
     {
       case 0:
       default:
-        break;
+          break;
       case 1:
-        lcrh |= UART_LCRH_PEN;
-        break;
+          lcrh |= UART_LCRH_PEN;
+          break;
       case 2:
-        lcrh |= UART_LCRH_PEN | UART_LCRH_EPS;
-        break;
+          lcrh |= UART_LCRH_PEN | UART_LCRH_EPS;
+          break;
     }
 
   if (priv->stopbits2)
@@ -825,6 +832,33 @@ static int up_setup(struct uart_dev_s *dev)
     }
 
   up_serialout(priv, TIVA_UART_LCRH_OFFSET, lcrh);
+
+  if (was_active)
+    {
+      ctl  = up_serialin(priv, TIVA_UART_CTL_OFFSET);
+      ctl |= UART_CTL_UARTEN;
+      up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
+    }
+}
+
+/****************************************************************************
+ * Name: up_setup
+ *
+ * Description:
+ *   Configure the UART baud, bits, parity, fifos, etc. This
+ *   method is called the first time that the serial port is
+ *   opened.
+ *
+ ****************************************************************************/
+
+static int up_setup(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  uint32_t lcrh = 0;
+  uint32_t ctl = 0;
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+  up_set_format(dev);
 #endif
 
   /* Set the UART to interrupt whenever the TX FIFO is almost empty or when
@@ -1005,9 +1039,12 @@ static int up_interrupt(int irq, void *context, void *arg)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
+#if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
+#endif
+#if defined(CONFIG_SERIAL_TERMIOS)
+  struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
 #endif
   int                ret    = OK;
 
@@ -1028,6 +1065,91 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
        }
        break;
 #endif
+
+#ifdef CONFIG_SERIAL_TERMIOS
+    case TCGETS:
+      {
+        struct termios *termiosp = (struct termios *)arg;
+        tcflag_t ccflag = 0;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        cfsetispeed(termiosp, priv->baud);
+
+        if (priv->bits >= 5 && priv->bits <= 8)
+          {
+            ccflag |= (CS5 + (priv->bits - 5));
+          }
+
+        if (priv->stopbits2)
+          {
+            ccflag |= CSTOPB;
+          }
+
+        if (priv->parity == 1)
+          {
+            ccflag |= PARENB;
+          }
+        else if (priv->parity == 2)
+          {
+            ccflag |= PARENB | PARODD;
+          }
+
+        /* TODO append support for HUPCL, CLOCAL and flow control bits
+         * as well as os-compliant break sequence
+         */
+
+        termiosp->c_cflag = ccflag;
+      }
+      break;
+
+    case TCSETS:
+      {
+        struct termios *termiosp = (struct termios *)arg;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Perform some sanity checks before accepting any changes */
+
+        if (termiosp->c_cflag & CRTSCTS)
+          {
+            /* We don't support for flow control right now, so we report an
+             * error
+             */
+
+            ret = -EINVAL;
+            break;
+          }
+
+        if (termiosp->c_cflag & PARENB)
+          {
+            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            priv->parity = 0;
+          }
+
+        priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+        priv->bits      = (termiosp->c_cflag & CSIZE) + 5;
+        priv->baud      = cfgetispeed(termiosp);
+
+        /* Effect the changes immediately - note that we do not implement
+         * TCSADRAIN / TCSAFLUSH
+         */
+
+        up_set_format(dev);
+      }
+      break;
+#endif /* CONFIG_SERIAL_TERMIOS */
 
     default:
       ret = -ENOTTY;
