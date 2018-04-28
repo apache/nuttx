@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -64,24 +63,26 @@
 ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len)
 {
-  FAR struct udp_conn_s *conn;
-
-  DEBUGASSERT(psock != NULL && psock->s_crefs > 0);
+  DEBUGASSERT(psock != NULL && psock->s_crefs > 0 && psock->s_conn != NULL);
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
 
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn);
-
-  /* Was the UDP socket connected via connect()? */
+  /* Was the UDP socket connected via connect()?
+   * REVISIT:  This same test is performed in psock_udp_sendto() where
+   * -EDESTADDRREQ is returned.  There is a fine distinction in the
+   * meaning of the reported errors that I am not sure I have correct.
+   */
 
   if (!_SS_ISCONNECTED(psock->s_flags))
     {
-      /* No, then it is not legal to call send() with this socket. */
+      /* No, then it is not legal to call send() with this socket.
+       * ENOTCONN - The socket is not connected or otherwise has not had
+       * the peer pre-specified.
+       */
 
       return -ENOTCONN;
     }
 
-  /* Yes, then let psock_sendto to the work */
+  /* Let psock_sendto() do all of the work work */
 
   return psock_udp_sendto(psock, buf, len, 0, NULL, 0);
 }

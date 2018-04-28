@@ -54,7 +54,7 @@ endif
 
 ifneq ($(CONFIG_DISABLE_POLL),y)
 ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
-NET_CSRCS += tcp_netpoll.c
+SOCK_CSRCS += tcp_netpoll.c
 endif
 endif
 

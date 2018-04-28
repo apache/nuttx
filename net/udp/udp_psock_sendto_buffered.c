@@ -627,6 +627,10 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (to != NULL && _SS_ISCONNECTED(psock->s_flags))
     {
+      /* EISCONN - A destination address was specified and the socket is
+       * already connected.
+       */
+
       return -EISCONN;
     }
 
@@ -636,6 +640,10 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   else if (to == NULL && !_SS_ISCONNECTED(psock->s_flags))
     {
+      /* EDESTADDRREQ - The socket is not connection-mode and no peer
+       * address is set.
+       */
+
       return -EDESTADDRREQ;
     }
 

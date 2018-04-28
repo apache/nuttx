@@ -40,7 +40,7 @@ ifneq ($(CONFIG_NET_UDP_NO_STACK),y)
 
 # Socket layer
 
-NET_CSRCS += udp_psock_send.c
+SOCK_CSRCS += udp_psock_send.c
 
 ifeq ($(CONFIG_NET_UDP_WRITE_BUFFERS),y)
 SOCK_CSRCS += udp_psock_sendto_buffered.c
@@ -50,7 +50,7 @@ endif
 
 ifneq ($(CONFIG_DISABLE_POLL),y)
 ifeq ($(CONFIG_NET_UDP_READAHEAD),y)
-NET_CSRCS += udp_netpoll.c
+SOCK_CSRCS += udp_netpoll.c
 endif
 endif
 
