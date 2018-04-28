@@ -242,11 +242,9 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     $ (cd tools; ./configure.sh nucleo-f4x1re/f401-nsh)
+     $ tools/configure.sh nucleo-l476rg/nsh
      $ make qconfig
      $ V=1 make context all 2>&1 | tee mout
-
-     Use the f411-nsh configuration if you have the Nucleo-F411RE board.
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -310,9 +308,9 @@ NXFLAT Toolchain
 mbed
 ====
 
-  The Nucleo-F401RE includes boot loader from mbed:
+  The Nucleo-L476RG includes boot loader from mbed:
 
-    https://mbed.org/platforms/ST-Nucleo-F401RE/
+    https://mbed.org/platforms/ST-Nucleo-L476RG/
     https://mbed.org/handbook/Homepage
 
   Using the mbed loader:
@@ -341,7 +339,7 @@ Hardware
                LED2=D6=PB_10  I2C1_SDA=D14=PB_9 Probe
                     D7=PA_8   I2C1_SCL=D15=PB_8 Probe
 
-  From: https://mbed.org/platforms/ST-Nucleo-F401RE/
+  From: https://mbed.org/platforms/ST-Nucleo-L476RG/
 
   Buttons
   -------
@@ -350,9 +348,9 @@ Hardware
 
   LEDs
   ----
-  The Nucleo F401RE and Nucleo F411RE provide a single user LED, LD2.  LD2
-  is the green LED connected to Arduino signal D13 corresponding to MCU I/O
-  PA5 (pin 21) or PB13 (pin 34) depending on the STM32target.
+  The Nucleo L476RG provides a single user LED, LD2.  LD2 is the green LED
+  connected to Arduino signal D13 corresponding to MCU I/O PA5 (pin 21) or
+  PB13 (pin 34) depending on the STM32target.
 
     - When the I/O is HIGH value, the LED is on.
     - When the I/O is LOW, the LED is off.
@@ -543,7 +541,7 @@ Shields
     NOTE: Button F cannot be used with the default USART1 configuration
     because PA9 is configured for USART1_RX by default.  Use select
     different USART1 pins in the board.h file or select a different
-    USART or select CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS which will
+    USART or select CONFIG_NUCLEO_L476RG_AJOY_MINBUTTONS which will
     eliminate all but buttons A, B, and C.
 
   Itead Joystick Signal interpretation:
@@ -586,7 +584,7 @@ Shields
       with a single ADC.  Right now, only one axis is being converted.
     - There is conflicts with some of the Arduino data pins and the
       default USART1 configuration.  I am currently running with USART1
-      but with CONFIG_NUCLEO_F401RE_AJOY_MINBUTTONS to eliminate the
+      but with CONFIG_NUCLEO_L476RG_AJOY_MINBUTTONS to eliminate the
       conflict.
     - Current showstopper: I appear to be getting infinite interrupts as
       soon as joystick button interrupts are enabled.
@@ -594,10 +592,10 @@ Shields
 Configurations
 ==============
 
-  f401-nsh:
+  nsh:
   ---------
     Configures the NuttShell (nsh) located at apps/examples/nsh for the
-    Nucleo-F401RE board.  The Configuration enables the serial interfaces
+    Nucleo-L476RG board.  The Configuration enables the serial interfaces
     on UART2.  Support for builtin applications is enabled, but in the base
     configuration no builtin applications are selected (see NOTES below).
 
@@ -631,7 +629,7 @@ Configurations
        Pin 20 GND
        Pin 8  U5V
 
-  f411-nsh
+  nxdemo
   --------
-    This configuration is the same as the f401-nsh configuration, except
-    that it is configured to support the Nucleo-F411RE.
+    This is an NSH configuration that enables the NX graphics demo at
+    apps/examples/nxdemo.  It uses the PCD8544 display on SPI1.
