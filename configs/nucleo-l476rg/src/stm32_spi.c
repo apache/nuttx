@@ -76,8 +76,7 @@ struct spi_dev_s *g_spi2;
  * Name: stm32l4_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Nucleo-F401RE and
- *   Nucleo-F411RE boards.
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-L476RG board.
  *
  ************************************************************************************/
 
@@ -94,6 +93,10 @@ void weak_function stm32l4_spiinitialize(void)
 
 #ifdef HAVE_MMCSD
   stm32l4_configgpio(GPIO_SPI_CS_SD_CARD);
+#endif
+
+#ifdef CONFIG_LCD_PCD8544
+  (void)stm32l4_configgpio(STM32_LCD_CS);       /* PCD8544 chip select */
 #endif
 #endif
 
@@ -147,6 +150,13 @@ void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected
   if (devid == SPIDEV_MMCSD(0))
     {
       stm32l4_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
+    }
+#endif
+
+#ifdef CONFIG_LCD_PCD8544
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32l4_gpiowrite(STM32_LCD_CS, !selected);
     }
 #endif
 }
@@ -215,7 +225,20 @@ uint8_t stm32l4_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_STM32L4_SPI1
 int stm32l4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-  return OK;
+#ifdef CONFIG_LCD_PCD8544
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      (void)stm32l4_gpiowrite(STM32_LCD_CD, !cmd);
+
+      return OK;
+    }
+#endif
+
+  return -ENODEV;
 }
 #endif
 

@@ -69,6 +69,10 @@ ifeq ($(CONFIG_CAN),y)
   CSRCS += stm32_can.c
 endif
 
+ifeq ($(CONFIG_LCD_PCD8544),y)
+CSRCS += stm32_pcd8544.c
+endif
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif

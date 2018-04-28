@@ -125,11 +125,11 @@
 /* SPI1 off */
 
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTA | GPIO_PIN7)
+                            GPIO_PORTB | GPIO_PIN5)
 #define GPIO_SPI1_MISO_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTA | GPIO_PIN6)
+                            GPIO_PORTB | GPIO_PIN4)
 #define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTA | GPIO_PIN5)
+                            GPIO_PORTB | GPIO_PIN3)
 
 #ifdef CONFIG_WL_CC1101
 #  define GPIO_CC1101_PWR  (GPIO_PORTC | GPIO_PIN6 | GPIO_OUTPUT_SET | \
@@ -153,6 +153,18 @@
 #  define GPIO_SPI_CS_SD_CARD \
     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
      GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN5)
+#endif
+
+#ifdef CONFIG_LCD_PCD8544
+
+#define STM32_LCD_CS      (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_2MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
+
+#define STM32_LCD_CD      (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_2MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN10)
+
+#define STM32_LCD_RST     (GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_2MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN13)
 #endif
 
 /* Devices on the onboard bus.

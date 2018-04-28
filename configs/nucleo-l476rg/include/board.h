@@ -120,8 +120,8 @@
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
 
-#define GPIO_UART4_RX   GPIO_UART4_RX_1    /* PA1 */
-#define GPIO_UART4_TX   GPIO_UART4_TX_1    /* PA0 */
+#define GPIO_UART4_RX    GPIO_UART4_RX_1     /* PA1 */
+#define GPIO_UART4_TX    GPIO_UART4_TX_1     /* PA0 */
 
 /* I2C
  *
@@ -154,13 +154,13 @@
 
 /* SPI */
 
-#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_2     /* PB4 */
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_2     /* PB5 */
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_2      /* PB3 */
 
-#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
-#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
-#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1     /* PB14 */
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1     /* PB15 */
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2      /* PB13 */
 
 /* LEDs
  *
@@ -266,17 +266,6 @@ extern "C"
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
-/************************************************************************************
- * Name: stm32l4_board_initialize
- *
- * Description:
- *   All STM32L4 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
-
-void stm32l4_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
