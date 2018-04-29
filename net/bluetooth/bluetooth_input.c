@@ -45,7 +45,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 #include "devif/devif.h"
 #include "bluetooth/bluetooth.h"

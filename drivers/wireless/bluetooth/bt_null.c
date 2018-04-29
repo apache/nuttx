@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/wireless/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 #include <string.h>
 #include <assert.h>
@@ -46,8 +46,8 @@
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/bluetooth.h>
-#include <nuttx/wireless/bt_hci.h>
-#include <nuttx/wireless/bt_null.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_null.h>
 
 /****************************************************************************
  * Private Function Prototypes

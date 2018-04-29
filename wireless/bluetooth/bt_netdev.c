@@ -62,7 +62,7 @@
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/net/sixlowpan.h>
-#include <nuttx/wireless/bt_core.h>
+#include <nuttx/wireless/bluetooth/bt_core.h>
 
 #include "bt_hcicore.h"
 #include "bt_l2cap.h"

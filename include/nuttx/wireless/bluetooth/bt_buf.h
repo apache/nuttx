@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/wireless/bt_buf.h
+ * include/nuttx/wireless/bluetooth/bt_buf.h
  * Bluetooth buffer management.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_BUF_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_BUF_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_BUF_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_BUF_H 1
 
 /****************************************************************************
  * Included Files
@@ -321,4 +321,4 @@ size_t bt_buf_headroom(FAR struct bt_buf_s *buf);
 
 #define bt_buf_tail(buf) ((buf)->data + (buf)->len)
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_BUF_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_BUF_H */

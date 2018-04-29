@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_UUID_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_UUID_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_UUID_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_UUID_H 1
 
 /****************************************************************************
  * Included Files
@@ -217,4 +217,4 @@ struct bt_uuid_s
 int bt_uuid_cmp(FAR const struct bt_uuid_s *u1,
                 FAR const struct bt_uuid_s *u2);
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_UUID_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_UUID_H */

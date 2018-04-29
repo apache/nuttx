@@ -284,7 +284,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
             TIVA_FLASH_FCMISC);
 
   /* Adjust the offset to the start of the partition.
-   * REVISIT:  If we really wanted to gracefully handler unaligned addresses,
+   * REVISIT:  If we really wanted to gracefully handle unaligned addresses,
    * offsets, and sizes we would have to do a little more than this.
    */
 

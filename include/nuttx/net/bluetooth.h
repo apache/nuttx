@@ -40,7 +40,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 /****************************************************************************
  * Public Function Prototypes

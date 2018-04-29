@@ -54,8 +54,8 @@
 
 #include <nuttx/kthread.h>
 #include <nuttx/mm/iob.h>
-#include <nuttx/wireless/bt_hci.h>
-#include <nuttx/wireless/bt_core.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_core.h>
 
 #include "bt_atomic.h"
 #include "bt_queue.h"

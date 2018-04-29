@@ -52,8 +52,8 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
-#include <nuttx/wireless/bt_driver.h>
-#include <nuttx/wireless/bt_null.h>
+#include <nuttx/wireless/bluetooth/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #include "up_internal.h"

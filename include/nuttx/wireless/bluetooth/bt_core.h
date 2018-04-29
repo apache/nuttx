@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_CORE_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_CORE_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_CORE_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_CORE_H 1
 
 /****************************************************************************
  * Included Files
@@ -49,8 +49,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <nuttx/wireless/bt_buf.h>
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_buf.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -223,4 +223,4 @@ static inline int bt_addr_le_to_str(FAR const bt_addr_le_t *addr, char *str,
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_CORE_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_CORE_H */

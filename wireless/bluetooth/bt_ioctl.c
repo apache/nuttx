@@ -48,9 +48,9 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/bluetooth.h>
-#include <nuttx/wireless/bt_core.h>
-#include <nuttx/wireless/bt_hci.h>
-#include <nuttx/wireless/bt_ioctl.h>
+#include <nuttx/wireless/bluetooth/bt_core.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_ioctl.h>
 
 #include "bt_hcicore.h"
 #include "bt_conn.h"

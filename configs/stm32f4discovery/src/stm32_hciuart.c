@@ -44,7 +44,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/wireless/bt_uart.h>
+#include <nuttx/wireless/bluetooth/bt_uart.h>
 
 #include "stm32_hciuart.h"
 #include "stm32f4discovery.h"

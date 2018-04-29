@@ -45,7 +45,7 @@
 #include <sys/types.h>
 #include <queue.h>
 
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 #ifdef CONFIG_NET_BLUETOOTH
 

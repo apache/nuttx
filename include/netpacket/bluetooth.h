@@ -43,7 +43,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -265,7 +265,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* See include/nuttx/wireless/bt_hci.h for address definitions.  In
+/* See include/nuttx/wireless/bluetooth/bt_hci.h for address definitions.  In
  * particular, type bt_addr_t
  */
 

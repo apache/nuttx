@@ -39,14 +39,14 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_GATT_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_GATT_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_GATT_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_GATT_H 1
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/wireless/bt_uuid.h>
+#include <nuttx/wireless/bluetooth/bt_uuid.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1044,4 +1044,4 @@ int bt_gatt_read_multiple(FAR struct bt_conn_s *conn,
                           FAR const uint16_t *handles, size_t count,
                           bt_gatt_read_func_t func);
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_GATT_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_GATT_H */

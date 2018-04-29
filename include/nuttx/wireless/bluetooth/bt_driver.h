@@ -39,14 +39,14 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_DRIVER_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_DRIVER_H 1
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/wireless/bt_buf.h>
+#include <nuttx/wireless/bluetooth/bt_buf.h>
 
 /****************************************************************************
  * Public Types
@@ -96,7 +96,7 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev);
  * Description:
  *   Called by the Bluetooth low-level driver when new data is received from
  *   the radio.  This may be called from the low-level driver and is part of
- *   the driver interface prototyped in include/nuttx/wireless/bt_driver.h
+ *   the driver interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
  *
  * Input Parameters:
  *   buf - An instance of the buffer structure providing the received frame.
@@ -108,4 +108,4 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev);
 
 void bt_hci_receive(FAR struct bt_buf_s *buf);
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_DRIVER_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_DRIVER_H */

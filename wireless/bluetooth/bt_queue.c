@@ -47,7 +47,7 @@
 
 #include <nuttx/mqueue.h>
 #include <nuttx/mm/iob.h>
-#include <nuttx/wireless/bt_buf.h>
+#include <nuttx/wireless/bluetooth/bt_buf.h>
 
 #include "bt_queue.h"
 

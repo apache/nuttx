@@ -73,7 +73,7 @@
 #endif
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH
-#  include <nuttx/wireless/bt_ioctl.h>
+#  include <nuttx/wireless/bluetooth/bt_ioctl.h>
 #endif
 
 #ifdef CONFIG_WIRELESS_IEEE802154

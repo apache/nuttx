@@ -59,8 +59,8 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/bluetooth.h>
-#include <nuttx/wireless/bt_core.h>
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_core.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 #include "bt_queue.h"
 #include "bt_buf.h"
@@ -1407,7 +1407,7 @@ int bt_initialize(void)
  * Description:
  *   Register the Bluetooth low-level driver with the Bluetooth stack.
  *   This is called from the low-level driver and is part of the driver
- *   interface prototyped in include/nuttx/wireless/bt_driver.h
+ *   interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
  *
  *   This function associates the Bluetooth driver with the Bluetooth stack.
  *
@@ -1441,7 +1441,7 @@ int bt_driver_register(FAR const struct bt_driver_s *btdev)
  *   Unregister a Bluetooth low-level driver previously registered with
  *   bt_driver_register.  This may be called from the low-level driver and
  *   is part of the driver interface prototyped in
- *   include/nuttx/wireless/bt_driver.h
+ *   include/nuttx/wireless/bluetooth/bt_driver.h
  *
  * Input Parameters:
  *   btdev - An instance of the low-level drivers interface structure.
@@ -1462,7 +1462,7 @@ void bt_driver_unregister(FAR const struct bt_driver_s *btdev)
  * Description:
  *   Called by the Bluetooth low-level driver when new data is received from
  *   the radio.  This may be called from the low-level driver and is part of
- *   the driver interface prototyped in include/nuttx/wireless/bt_driver.h
+ *   the driver interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
  *
  *   NOTE:  This function will defer all real work to the low or to the high
  *   priority work queues.  Therefore, this function may safely be called

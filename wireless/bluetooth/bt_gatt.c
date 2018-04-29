@@ -50,11 +50,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/wireless/bt_hci.h>
-#include <nuttx/wireless/bt_core.h>
-#include <nuttx/wireless/bt_buf.h>
-#include <nuttx/wireless/bt_uuid.h>
-#include <nuttx/wireless/bt_gatt.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_core.h>
+#include <nuttx/wireless/bluetooth/bt_buf.h>
+#include <nuttx/wireless/bluetooth/bt_uuid.h>
+#include <nuttx/wireless/bluetooth/bt_gatt.h>
 
 #include "bt_hcicore.h"
 #include "bt_conn.h"

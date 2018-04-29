@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_HCI_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_HCI_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_HCI_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_HCI_H 1
 
 /****************************************************************************
  * Included Files
@@ -465,4 +465,4 @@ begin_packed_struct struct bt_hci_evt_le_ltk_request_s
   uint16_t ediv;
 } end_packed_struct;
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_HCI_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_HCI_H */

@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_IOCTL_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_IOCTL_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_IOCTL_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_IOCTL_H 1
 
 /****************************************************************************
  * Included Files
@@ -49,9 +49,9 @@
 #include <net/if.h>
 
 #include <nuttx/wireless/wireless.h>
-#include <nuttx/wireless/bt_core.h>
-#include <nuttx/wireless/bt_hci.h>
-#include <nuttx/wireless/bt_gatt.h>
+#include <nuttx/wireless/bluetooth/bt_core.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_gatt.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -503,4 +503,4 @@ struct btreq_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_IOCTL_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_IOCTL_H */

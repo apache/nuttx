@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_BT_NULL_H
-#define __INCLUDE_NUTTX_WIRELESS_BT_NULL_H 1
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_NULL_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_NULL_H 1
 
 /****************************************************************************
  * Public Function Prototypes
@@ -57,4 +57,4 @@
 
 int btnull_register(void);
 
-#endif /* __INCLUDE_NUTTX_WIRELESS_BT_NULL_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_NULL_H */

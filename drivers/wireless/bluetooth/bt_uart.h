@@ -47,7 +47,7 @@
 
 #include <stdbool.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/wireless/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Pre-processor Definitions

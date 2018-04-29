@@ -52,7 +52,7 @@
 #include <semaphore.h>
 #include <mqueue.h>
 
-#include <nuttx/wireless/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -247,7 +247,7 @@ int bt_initialize(void);
  * Description:
  *   Register the Bluetooth low-level driver with the Bluetooth stack.
  *   This is called from the low-level driver and is part of the driver
- *   interface prototyped in include/nuttx/wireless/bt_driver.h
+ *   interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
  *
  *   This function associates the Bluetooth driver with the Bluetooth stack.
  *
@@ -269,7 +269,7 @@ int bt_driver_register(FAR const struct bt_driver_s *btdev);
  *   Unregister a Bluetooth low-level driver previously registered with
  *   bt_driver_register.  This may be called from the low-level driver and
  *   is part of the driver interface prototyped in
- *   include/nuttx/wireless/bt_driver.h
+ *   include/nuttx/wireless/bluetooth/bt_driver.h
  *
  * Input Parameters:
  *   btdev - An instance of the low-level drivers interface structure.

@@ -56,7 +56,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>
-#include <nuttx/wireless/bt_hci.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"

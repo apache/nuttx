@@ -48,7 +48,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <nuttx/wireless/bt_uuid.h>
+#include <nuttx/wireless/bluetooth/bt_uuid.h>
 
 /****************************************************************************
  * Private Data
