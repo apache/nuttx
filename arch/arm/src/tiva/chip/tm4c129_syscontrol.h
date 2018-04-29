@@ -118,6 +118,8 @@
 #define TIVA_SYSCON_PPEMAC_OFFSET      0x039c /* Ethernet MAC Peripheral Present */
 #define TIVA_SYSCON_PPPRB_OFFSET       0x03a0 /* Power Regulator Bus Peripheral Present */
 #define TIVA_SYSCON_PPHIM_OFFSET       0x03a4 /* Human Interface Master Peripheral Present */
+
+#define TIVA_SYSCON_SR_OFFSET          0x0500
 #define TIVA_SYSCON_SRWD_OFFSET        0x0500 /* Watchdog Timer Software Reset */
 #define TIVA_SYSCON_SRTIMER_OFFSET     0x0504 /* 16/32-Bit Timer Software Reset */
 #define TIVA_SYSCON_SRGPIO_OFFSET      0x0508 /* GPIO Software Reset */
@@ -140,6 +142,8 @@
 #define TIVA_SYSCON_SRLCD_OFFSET       0x0590 /* LCD Controller Software Reset */
 #define TIVA_SYSCON_SROWIRE_OFFSET     0x0598 /* 1-Wire Software Reset */
 #define TIVA_SYSCON_SREMAC_OFFSET      0x059c /* Ethernet MAC Software Reset */
+
+#define TIVA_SYSCON_RCGC_OFFSET        0x0600
 #define TIVA_SYSCON_RCGCWD_OFFSET      0x0600 /* Watchdog Timer Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCTIMER_OFFSET   0x0604 /* 16/32-Bit Timer Run Mode Clock Gating Control */
 #define TIVA_SYSCON_RCGCGPIO_OFFSET    0x0608 /* GPIO Run Mode Clock Gating Control */
@@ -258,6 +262,36 @@
 
 #define TIVA_SYSCON_CCMCGREQ_OFFSET    0x0204 /* Cryptographic Modules Clock Gating Request */
 
+/* System Control Legacy Register Offsets ***************************************************/
+
+#define TIVA_SYSCON_DC0_OFFSET         0x008 /* Device Capabilities 0 */
+#define TIVA_SYSCON_DC1_OFFSET         0x010 /* Device Capabilities 1 */
+#define TIVA_SYSCON_DC2_OFFSET         0x014 /* Device Capabilities 2 */
+#define TIVA_SYSCON_DC3_OFFSET         0x018 /* Device Capabilities 3 */
+#define TIVA_SYSCON_DC4_OFFSET         0x01c /* Device Capabilities 4 */
+#define TIVA_SYSCON_DC5_OFFSET         0x020 /* Device Capabilities 5 */
+#define TIVA_SYSCON_DC6_OFFSET         0x024 /* Device Capabilities 6 */
+#define TIVA_SYSCON_DC7_OFFSET         0x028 /* Device Capabilities 7 */
+#define TIVA_SYSCON_DC8_OFFSET         0x02c /* Device Capabilities 8 */
+
+#define TIVA_SYSCON_SRCR0_OFFSET       0x040 /* Software Reset Control 0 */
+#define TIVA_SYSCON_SRCR1_OFFSET       0x044 /* Software Reset Control 1 */
+#define TIVA_SYSCON_SRCR2_OFFSET       0x048 /* Software Reset Control 2 */
+
+#define TIVA_SYSCON_RCGC0_OFFSET       0x100 /* Run Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_RCGC1_OFFSET       0x104 /* Run Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_RCGC2_OFFSET       0x108 /* Run Mode Clock Gating Control Register 2 */
+
+#define TIVA_SYSCON_SCGC0_OFFSET       0x110 /* Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_SCGC1_OFFSET       0x114 /* Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_SCGC2_OFFSET       0x118 /* Sleep Mode Clock Gating Control Register 2 */
+
+#define TIVA_SYSCON_DCGC0_OFFSET       0x120 /* Deep Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_DCGC1_OFFSET       0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_DCGC2_OFFSET       0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
+
+#define TIVA_SYSCON_DC9_OFFSET         0x190 /* Device Capabilities */
+
 /* System Control Register Addresses ********************************************************/
 
 /* System Control Registers (System Control Offset) */
@@ -331,6 +365,8 @@
 #define TIVA_SYSCON_PPEMAC             (TIVA_SYSCON_BASE+TIVA_SYSCON_PPEMAC_OFFSET)
 #define TIVA_SYSCON_PPPRB              (TIVA_SYSCON_BASE+TIVA_SYSCON_PPPRB_OFFSET)
 #define TIVA_SYSCON_PPHIM              (TIVA_SYSCON_BASE+TIVA_SYSCON_PPHIM_OFFSET)
+
+#define TIVA_SYSCON_SR_BASE            (TIVA_SYSCON_BASE+TIVA_SYSCON_SR_OFFSET)
 #define TIVA_SYSCON_SRWD               (TIVA_SYSCON_BASE+TIVA_SYSCON_SRWD_OFFSET)
 #define TIVA_SYSCON_SRTIMER            (TIVA_SYSCON_BASE+TIVA_SYSCON_SRTIMER_OFFSET)
 #define TIVA_SYSCON_SRGPIO             (TIVA_SYSCON_BASE+TIVA_SYSCON_SRGPIO_OFFSET)
@@ -353,6 +389,8 @@
 #define TIVA_SYSCON_SRLCD              (TIVA_SYSCON_BASE+TIVA_SYSCON_SRLCD_OFFSET)
 #define TIVA_SYSCON_SROWIRE            (TIVA_SYSCON_BASE+TIVA_SYSCON_SROWIRE_OFFSET)
 #define TIVA_SYSCON_SREMAC             (TIVA_SYSCON_BASE+TIVA_SYSCON_SREMAC_OFFSET)
+
+#define TIVA_SYSCON_RCGC_BASE          (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGC_OFFSET)
 #define TIVA_SYSCON_RCGCWD             (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCWD_OFFSET)
 #define TIVA_SYSCON_RCGCTIMER          (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCTIMER_OFFSET)
 #define TIVA_SYSCON_RCGCGPIO           (TIVA_SYSCON_BASE+TIVA_SYSCON_RCGCGPIO_OFFSET)
@@ -470,6 +508,36 @@
 /* CCM System Control Registers (CCM Control Offset) */
 
 #define TIVA_SYSCON_CCMCGREQ           (TIVA_CCM_BASE+TIVA_SYSCON_CCMCGREQ_OFFSET)
+
+/* System Control Legacy Register Addresses *************************************************/
+
+#define TIVA_SYSCON_DC0                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC0_OFFSET)
+#define TIVA_SYSCON_DC1                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC1_OFFSET)
+#define TIVA_SYSCON_DC2                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC2_OFFSET)
+#define TIVA_SYSCON_DC3                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC3_OFFSET)
+#define TIVA_SYSCON_DC4                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC4_OFFSET)
+#define TIVA_SYSCON_DC5                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC5_OFFSET)
+#define TIVA_SYSCON_DC6                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC6_OFFSET)
+#define TIVA_SYSCON_DC7                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC7_OFFSET)
+#define TIVA_SYSCON_DC8                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC8_OFFSET)
+
+#define TIVA_SYSCON_SRCR0              (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR0_OFFSET)
+#define TIVA_SYSCON_SRCR1              (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR1_OFFSET)
+#define TIVA_SYSCON_SRCR2              (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR2_OFFSET)
+
+#define TIVA_SYSCON_RCGC0              (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC0_OFFSET)
+#define TIVA_SYSCON_RCGC1              (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC1_OFFSET)
+#define TIVA_SYSCON_RCGC2              (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC2_OFFSET)
+
+#define TIVA_SYSCON_SCGC0              (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC0_OFFSET)
+#define TIVA_SYSCON_SCGC1              (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC1_OFFSET)
+#define TIVA_SYSCON_SCGC2              (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC2_OFFSET)
+
+#define TIVA_SYSCON_DCGC0              (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC0_OFFSET)
+#define TIVA_SYSCON_DCGC1              (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC1_OFFSET)
+#define TIVA_SYSCON_DCGC2              (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC2_OFFSET)
+
+#define TIVA_SYSCON_DC9                (TIVA_SYSCON_BASE + TIVA_SYSCON_DC9_OFFSET)
 
 /* System Control Register Bit Definitions **************************************************/
 /* System Control Registers (System Control Offset) */
@@ -1083,7 +1151,6 @@
 #  define SYSCON_PPI2C_P7              (1 << 7)   /* Bit 7:  I2C Module 7 Present */
 #  define SYSCON_PPI2C_P8              (1 << 8)   /* Bit 8:  I2C Module 8 Present */
 #  define SYSCON_PPI2C_P9              (1 << 9)   /* Bit 9:  I2C Module 9 Present */
-
 
 /* USB Peripheral Present */
 

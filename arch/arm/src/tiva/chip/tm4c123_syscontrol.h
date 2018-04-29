@@ -48,164 +48,166 @@
 
 /* System Control Register Offsets **********************************************************/
 
-#define TIVA_SYSCON_DID0_OFFSET       0x000 /* Device Identification 0 */
-#define TIVA_SYSCON_DID1_OFFSET       0x004 /* Device Identification 1 */
-#define TIVA_SYSCON_PBORCTL_OFFSET    0x030 /* Brown-Out Reset Control */
-#define TIVA_SYSCON_RIS_OFFSET        0x050 /* Raw Interrupt Status */
-#define TIVA_SYSCON_IMC_OFFSET        0x054 /* Interrupt Mask Control */
-#define TIVA_SYSCON_MISC_OFFSET       0x058 /* Masked Interrupt Status and Clear */
-#define TIVA_SYSCON_RESC_OFFSET       0x05c /* Reset Cause */
-#define TIVA_SYSCON_RCC_OFFSET        0x060 /* Run-Mode Clock Configuration */
-#define TIVA_SYSCON_GPIOHBCTL_OFFSET  0x06c /* GPIO High-Performance Bus Control */
-#define TIVA_SYSCON_RCC2_OFFSET       0x070 /* Run-Mode Clock Configuration 2 */
-#define TIVA_SYSCON_MOSCCTL_OFFSET    0x07c /* Main Oscillator Control */
-#define TIVA_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration */
-#define TIVA_SYSCON_SYSPROP_OFFSET    0x14c /* System Properties */
-#define TIVA_SYSCON_PIOSCCAL_OFFSET   0x150 /* Precision Internal Oscillator Calibration */
-#define TIVA_SYSCON_PIOSCSTAT_OFFSET  0x154 /* Precision Internal Oscillator Statistics */
-#define TIVA_SYSCON_PLLFREQ0_OFFSET   0x160 /* PLL 0 Frequency */
-#define TIVA_SYSCON_PLLFREQ1_OFFSET   0x164 /* PLL 1 Frequency */
-#define TIVA_SYSCON_PLLSTAT_OFFSET    0x168 /* PLL Status */
-#define TIVA_SYSCON_SLPPWRCFG_OFFSET  0x188 /* Sleep Power Configuration */
-#define TIVA_SYSCON_DSLPPWRCFG_OFFSET 0x18c /* Deep-Sleep Power Configuration */
-#define TIVA_SYSCON_LDOSPCTL_OFFSET   0x1b4 /* LDO Sleep Power Control */
-#define TIVA_SYSCON_LDOSPCAL_OFFSET   0x1b8 /* LDO Sleep Power Calibration */
-#define TIVA_SYSCON_LDODPCTL_OFFSET   0x1bc /* LDO Deep-Sleep Power Control */
-#define TIVA_SYSCON_LDODPCAL_OFFSET   0x1c0 /* LDO Deep-Sleep Power Calibration */
-#define TIVA_SYSCON_SDPMST_OFFSET     0x1cc /* Sleep / Deep-Sleep Power Mode Status */
+#define TIVA_SYSCON_DID0_OFFSET       0x0000 /* Device Identification 0 */
+#define TIVA_SYSCON_DID1_OFFSET       0x0004 /* Device Identification 1 */
+#define TIVA_SYSCON_PBORCTL_OFFSET    0x0030 /* Brown-Out Reset Control */
+#define TIVA_SYSCON_RIS_OFFSET        0x0050 /* Raw Interrupt Status */
+#define TIVA_SYSCON_IMC_OFFSET        0x0054 /* Interrupt Mask Control */
+#define TIVA_SYSCON_MISC_OFFSET       0x0058 /* Masked Interrupt Status and Clear */
+#define TIVA_SYSCON_RESC_OFFSET       0x005c /* Reset Cause */
+#define TIVA_SYSCON_RCC_OFFSET        0x0060 /* Run-Mode Clock Configuration */
+#define TIVA_SYSCON_GPIOHBCTL_OFFSET  0x006c /* GPIO High-Performance Bus Control */
+#define TIVA_SYSCON_RCC2_OFFSET       0x0070 /* Run-Mode Clock Configuration 2 */
+#define TIVA_SYSCON_MOSCCTL_OFFSET    0x007c /* Main Oscillator Control */
+#define TIVA_SYSCON_DSLPCLKCFG_OFFSET 0x0144 /* Deep Sleep Clock Configuration */
+#define TIVA_SYSCON_SYSPROP_OFFSET    0x014c /* System Properties */
+#define TIVA_SYSCON_PIOSCCAL_OFFSET   0x0150 /* Precision Internal Oscillator Calibration */
+#define TIVA_SYSCON_PIOSCSTAT_OFFSET  0x0154 /* Precision Internal Oscillator Statistics */
+#define TIVA_SYSCON_PLLFREQ0_OFFSET   0x0160 /* PLL 0 Frequency */
+#define TIVA_SYSCON_PLLFREQ1_OFFSET   0x0164 /* PLL 1 Frequency */
+#define TIVA_SYSCON_PLLSTAT_OFFSET    0x0168 /* PLL Status */
+#define TIVA_SYSCON_SLPPWRCFG_OFFSET  0x0188 /* Sleep Power Configuration */
+#define TIVA_SYSCON_DSLPPWRCFG_OFFSET 0x018c /* Deep-Sleep Power Configuration */
+#define TIVA_SYSCON_LDOSPCTL_OFFSET   0x01b4 /* LDO Sleep Power Control */
+#define TIVA_SYSCON_LDOSPCAL_OFFSET   0x01b8 /* LDO Sleep Power Calibration */
+#define TIVA_SYSCON_LDODPCTL_OFFSET   0x01bc /* LDO Deep-Sleep Power Control */
+#define TIVA_SYSCON_LDODPCAL_OFFSET   0x01c0 /* LDO Deep-Sleep Power Calibration */
+#define TIVA_SYSCON_SDPMST_OFFSET     0x01cc /* Sleep / Deep-Sleep Power Mode Status */
 
-#define TIVA_SYSCON_PPWD_OFFSET       0x300 /* Watchdog Timer Peripheral Present */
-#define TIVA_SYSCON_PPTIMER_OFFSET    0x304 /* 16/32-Bit Timer Peripheral Present */
-#define TIVA_SYSCON_PPGPIO_OFFSET     0x308 /* GPIO Peripheral Present */
-#define TIVA_SYSCON_PPDMA_OFFSET      0x30c /* uDMA Peripheral Present */
-#define TIVA_SYSCON_PPHIB_OFFSET      0x314 /* Hibernation Peripheral Present */
-#define TIVA_SYSCON_PPUART_OFFSET     0x318 /* UART Present */
-#define TIVA_SYSCON_PPSSI_OFFSET      0x31c /* SSI Peripheral Present */
-#define TIVA_SYSCON_PPI2C_OFFSET      0x320 /* I2C Peripheral Present */
-#define TIVA_SYSCON_PPUSB_OFFSET      0x328 /* USB Peripheral Present */
-#define TIVA_SYSCON_PPCAN_OFFSET      0x334 /* CAN Peripheral Present */
-#define TIVA_SYSCON_PPADC_OFFSET      0x338 /* ADC Peripheral Present */
-#define TIVA_SYSCON_PPACMP_OFFSET     0x33c /* Analog Comparator Peripheral Present */
-#define TIVA_SYSCON_PPPWM_OFFSET      0x340 /* Pulse Width Modulator Peripheral Present */
-#define TIVA_SYSCON_PPQEI_OFFSET      0x344 /* Quadrature Encoder Peripheral Present */
-#define TIVA_SYSCON_PPEEPROM_OFFSET   0x358 /* EEPROM Peripheral Present */
-#define TIVA_SYSCON_PPWTIMER_OFFSET   0x35c /* 32/64-Bit Wide Timer Peripheral Present */
+#define TIVA_SYSCON_PPWD_OFFSET       0x0300 /* Watchdog Timer Peripheral Present */
+#define TIVA_SYSCON_PPTIMER_OFFSET    0x0304 /* 16/32-Bit Timer Peripheral Present */
+#define TIVA_SYSCON_PPGPIO_OFFSET     0x0308 /* GPIO Peripheral Present */
+#define TIVA_SYSCON_PPDMA_OFFSET      0x030c /* uDMA Peripheral Present */
+#define TIVA_SYSCON_PPHIB_OFFSET      0x0314 /* Hibernation Peripheral Present */
+#define TIVA_SYSCON_PPUART_OFFSET     0x0318 /* UART Present */
+#define TIVA_SYSCON_PPSSI_OFFSET      0x031c /* SSI Peripheral Present */
+#define TIVA_SYSCON_PPI2C_OFFSET      0x0320 /* I2C Peripheral Present */
+#define TIVA_SYSCON_PPUSB_OFFSET      0x0328 /* USB Peripheral Present */
+#define TIVA_SYSCON_PPCAN_OFFSET      0x0334 /* CAN Peripheral Present */
+#define TIVA_SYSCON_PPADC_OFFSET      0x0338 /* ADC Peripheral Present */
+#define TIVA_SYSCON_PPACMP_OFFSET     0x033c /* Analog Comparator Peripheral Present */
+#define TIVA_SYSCON_PPPWM_OFFSET      0x0340 /* Pulse Width Modulator Peripheral Present */
+#define TIVA_SYSCON_PPQEI_OFFSET      0x0344 /* Quadrature Encoder Peripheral Present */
+#define TIVA_SYSCON_PPEEPROM_OFFSET   0x0358 /* EEPROM Peripheral Present */
+#define TIVA_SYSCON_PPWTIMER_OFFSET   0x035c /* 32/64-Bit Wide Timer Peripheral Present */
 
-#define TIVA_SYSCON_SRWD_OFFSET       0x500 /* Watchdog Timer Software Reset */
-#define TIVA_SYSCON_SRTIMER_OFFSET    0x504 /* 16/32-Bit Timer Software Reset */
-#define TIVA_SYSCON_SRGPIO_OFFSET     0x508 /* GPIO Software Reset */
-#define TIVA_SYSCON_SRDMA_OFFSET      0x50c /* uDMA Software Reset */
-#define TIVA_SYSCON_SRHIB_OFFSET      0x514 /* Hibernation Software Reset */
-#define TIVA_SYSCON_SRUART_OFFSET     0x518 /* UART Software Reset*/
-#define TIVA_SYSCON_SRSSI_OFFSET      0x51c /* SSI Software Reset */
-#define TIVA_SYSCON_SRI2C_OFFSET      0x520 /* I2C Software Reset */
-#define TIVA_SYSCON_SRUSB_OFFSET      0x528 /* USB Software Reset */
-#define TIVA_SYSCON_SRCAN_OFFSET      0x534 /* CAN Software Reset */
-#define TIVA_SYSCON_SRADC_OFFSET      0x538 /* ADC Software Reset */
-#define TIVA_SYSCON_SRACMP_OFFSET     0x53c /* Analog Comparator Software Reset */
-#define TIVA_SYSCON_SRPWM_OFFSET      0x540 /* Pulse Width Modulator Software Reset */
-#define TIVA_SYSCON_SRQEI_OFFSET      0x544 /* Quadrature Encoder Interface Software Reset */
-#define TIVA_SYSCON_SREEPROM_OFFSET   0x558 /* EEPROM Software Reset */
-#define TIVA_SYSCON_SRWTIMER_OFFSET   0x55c /* 32/64-Bit Wide Timer Software Reset */
+#define TIVA_SYSCON_SR_OFFSET         0x0500
+#define TIVA_SYSCON_SRWD_OFFSET       0x0500 /* Watchdog Timer Software Reset */
+#define TIVA_SYSCON_SRTIMER_OFFSET    0x0504 /* 16/32-Bit Timer Software Reset */
+#define TIVA_SYSCON_SRGPIO_OFFSET     0x0508 /* GPIO Software Reset */
+#define TIVA_SYSCON_SRDMA_OFFSET      0x050c /* uDMA Software Reset */
+#define TIVA_SYSCON_SRHIB_OFFSET      0x0514 /* Hibernation Software Reset */
+#define TIVA_SYSCON_SRUART_OFFSET     0x0518 /* UART Software Reset*/
+#define TIVA_SYSCON_SRSSI_OFFSET      0x051c /* SSI Software Reset */
+#define TIVA_SYSCON_SRI2C_OFFSET      0x0520 /* I2C Software Reset */
+#define TIVA_SYSCON_SRUSB_OFFSET      0x0528 /* USB Software Reset */
+#define TIVA_SYSCON_SRCAN_OFFSET      0x0534 /* CAN Software Reset */
+#define TIVA_SYSCON_SRADC_OFFSET      0x0538 /* ADC Software Reset */
+#define TIVA_SYSCON_SRACMP_OFFSET     0x053c /* Analog Comparator Software Reset */
+#define TIVA_SYSCON_SRPWM_OFFSET      0x0540 /* Pulse Width Modulator Software Reset */
+#define TIVA_SYSCON_SRQEI_OFFSET      0x0544 /* Quadrature Encoder Interface Software Reset */
+#define TIVA_SYSCON_SREEPROM_OFFSET   0x0558 /* EEPROM Software Reset */
+#define TIVA_SYSCON_SRWTIMER_OFFSET   0x055c /* 32/64-Bit Wide Timer Software Reset */
 
-#define TIVA_SYSCON_RCGCWD_OFFSET     0x600 /* Watchdog Timer Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCTIMER_OFFSET  0x604 /* 16/32-Bit Timer Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCGPIO_OFFSET   0x608 /* GPIO Run Mode Clock Gating Control*/
-#define TIVA_SYSCON_RCGCDMA_OFFSET    0x60c /* uDMA Run Mode Clock Gating Control*/
-#define TIVA_SYSCON_RCGCHIB_OFFSET    0x614 /* Hibernation Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCUART_OFFSET   0x618 /* UART Run Mode Clock Gating Control*/
-#define TIVA_SYSCON_RCGCSSI_OFFSET    0x61c /* SSI Run Mode Clock Gating Control*/
-#define TIVA_SYSCON_RCGCI2C_OFFSET    0x620 /* I2C Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCUSB_OFFSET    0x628 /* USB Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCCAN_OFFSET    0x634 /* CAN Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCADC_OFFSET    0x638 /* ADC Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCACMP_OFFSET   0x63c /* Analog Comparator Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCPWM_OFFSET    0x640 /* Pulse Width Modulator Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCQEI_OFFSET    0x644 /* Quadrature Encoder Interface Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCEEPROM_OFFSET 0x658 /* EEPROM Run Mode Clock Gating Control */
-#define TIVA_SYSCON_RCGCWTIMER_OFFSET 0x65c /* 32/64-BitWide Timer Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGC_OFFSET       0x0600
+#define TIVA_SYSCON_RCGCWD_OFFSET     0x0600 /* Watchdog Timer Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCTIMER_OFFSET  0x0604 /* 16/32-Bit Timer Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCGPIO_OFFSET   0x0608 /* GPIO Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCDMA_OFFSET    0x060c /* uDMA Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCHIB_OFFSET    0x0614 /* Hibernation Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCUART_OFFSET   0x0618 /* UART Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCSSI_OFFSET    0x061c /* SSI Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCI2C_OFFSET    0x0620 /* I2C Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCUSB_OFFSET    0x0628 /* USB Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCCAN_OFFSET    0x0634 /* CAN Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCADC_OFFSET    0x0638 /* ADC Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCACMP_OFFSET   0x063c /* Analog Comparator Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCPWM_OFFSET    0x0640 /* Pulse Width Modulator Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCQEI_OFFSET    0x0644 /* Quadrature Encoder Interface Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCEEPROM_OFFSET 0x0658 /* EEPROM Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCWTIMER_OFFSET 0x065c /* 32/64-BitWide Timer Run Mode Clock Gating Control */
 
-#define TIVA_SYSCON_SCGCWD_OFFSET     0x700 /* Watchdog Timer Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCTIMER_OFFSET  0x704 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCGPIO_OFFSET   0x708 /* GPIO Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCDMA_OFFSET    0x70c /* uDMA Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCHIB_OFFSET    0x714 /* Hibernation Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCUART_OFFSET   0x718 /* UART Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCSSI_OFFSET    0x71c /* SSI Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCI2C_OFFSET    0x720 /* I2C Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCUSB_OFFSET    0x728 /* USB Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCCAN_OFFSET    0x734 /* CAN Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCADC_OFFSET    0x738 /* ADC Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCACMP_OFFSET   0x73c /* Analog Comparator Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCPWM_OFFSET    0x740 /* PulseWidthModulator Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCQEI_OFFSET    0x744 /* Quadrature Encoder Interface Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCEEPROM_OFFSET 0x758 /* EEPROM Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_SCGCWTIMER_OFFSET 0x75c /* 32/64-BitWide Timer Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCWD_OFFSET     0x0700 /* Watchdog Timer Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCTIMER_OFFSET  0x0704 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCGPIO_OFFSET   0x0708 /* GPIO Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCDMA_OFFSET    0x070c /* uDMA Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCHIB_OFFSET    0x0714 /* Hibernation Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCUART_OFFSET   0x0718 /* UART Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCSSI_OFFSET    0x071c /* SSI Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCI2C_OFFSET    0x0720 /* I2C Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCUSB_OFFSET    0x0728 /* USB Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCCAN_OFFSET    0x0734 /* CAN Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCADC_OFFSET    0x0738 /* ADC Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCACMP_OFFSET   0x073c /* Analog Comparator Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCPWM_OFFSET    0x0740 /* PulseWidthModulator Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCQEI_OFFSET    0x0744 /* Quadrature Encoder Interface Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCEEPROM_OFFSET 0x0758 /* EEPROM Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCWTIMER_OFFSET 0x075c /* 32/64-BitWide Timer Sleep Mode Clock Gating Control */
 
-#define TIVA_SYSCON_DCGCWD_OFFSET     0x800 /* Watchdog Timer Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCTIMER_OFFSET  0x804 /* Clock Gating Control */
-#define TIVA_SYSCON_DCGCGPIO_OFFSET   0x808 /* GPIO Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCDMA_OFFSET    0x80c /* uDMA Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCHIB_OFFSET    0x814 /* Hibernation Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCUART_OFFSET   0x818 /* UART Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCSSI_OFFSET    0x81c /* SSI Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCI2C_OFFSET    0x820 /* I2C Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCUSB_OFFSET    0x828 /* USB Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCCAN_OFFSET    0x834 /* CAN Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCADC_OFFSET    0x838 /* ADC Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCACMP_OFFSET   0x83c /* Analog Comparator Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCPWM_OFFSET    0x840 /* Pulse Width Modulator Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCQEI_OFFSET    0x844 /* Quadrature Encoder Interface Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCEEPROM_OFFSET 0x858 /* EEPROM Deep-Sleep Mode Clock Gating Control */
-#define TIVA_SYSCON_DCGCWTIMER_OFFSET 0x85c /* 32/64-BitWide Timer Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCWD_OFFSET     0x0800 /* Watchdog Timer Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCTIMER_OFFSET  0x0804 /* Clock Gating Control */
+#define TIVA_SYSCON_DCGCGPIO_OFFSET   0x0808 /* GPIO Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCDMA_OFFSET    0x080c /* uDMA Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCHIB_OFFSET    0x0814 /* Hibernation Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCUART_OFFSET   0x0818 /* UART Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCSSI_OFFSET    0x081c /* SSI Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCI2C_OFFSET    0x0820 /* I2C Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCUSB_OFFSET    0x0828 /* USB Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCCAN_OFFSET    0x0834 /* CAN Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCADC_OFFSET    0x0838 /* ADC Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCACMP_OFFSET   0x083c /* Analog Comparator Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCPWM_OFFSET    0x0840 /* Pulse Width Modulator Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCQEI_OFFSET    0x0844 /* Quadrature Encoder Interface Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCEEPROM_OFFSET 0x0858 /* EEPROM Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCWTIMER_OFFSET 0x085c /* 32/64-BitWide Timer Deep-Sleep Mode Clock Gating Control */
 
-#define TIVA_SYSCON_PRWD_OFFSET       0xa00 /* Watchdog Timer Peripheral Ready */
-#define TIVA_SYSCON_PRTIMER_OFFSET    0xa04 /* 16/32-Bit Timer Peripheral Ready */
-#define TIVA_SYSCON_PRGPIO_OFFSET     0xa08 /* GPIO Peripheral Ready */
-#define TIVA_SYSCON_PRDMA_OFFSET      0xa0c /* uDMA Peripheral Ready */
-#define TIVA_SYSCON_PRHIB_OFFSET      0xa14 /* Hibernation Peripheral Ready */
-#define TIVA_SYSCON_PRUART_OFFSET     0xa18 /* UART Peripheral Ready */
-#define TIVA_SYSCON_PRSSI_OFFSET      0xa1c /* SSI Peripheral Ready */
-#define TIVA_SYSCON_PRI2C_OFFSET      0xa20 /* I2C Peripheral Ready */
-#define TIVA_SYSCON_PRUSB_OFFSET      0xa28 /* USB Peripheral Ready */
-#define TIVA_SYSCON_PRCAN_OFFSET      0xa34 /* CAN Peripheral Ready */
-#define TIVA_SYSCON_PRADC_OFFSET      0xa38 /* ADC Peripheral Ready */
-#define TIVA_SYSCON_PRACMP_OFFSET     0xa3c /* Analog Comparator Peripheral Ready */
-#define TIVA_SYSCON_PRPWM_OFFSET      0xa40 /* Pulse Width Modulator Peripheral Ready */
-#define TIVA_SYSCON_PRQEI_OFFSET      0xa44 /* Quadrature Encoder Interface Peripheral Ready */
-#define TIVA_SYSCON_PREEPROM_OFFSET   0xa58 /* EEPROM Peripheral Ready */
-#define TIVA_SYSCON_PRWTIMER_OFFSET   0xa5c /* 2/64-BitWide Timer Peripheral Ready */
+#define TIVA_SYSCON_PRWD_OFFSET       0x0a00 /* Watchdog Timer Peripheral Ready */
+#define TIVA_SYSCON_PRTIMER_OFFSET    0x0a04 /* 16/32-Bit Timer Peripheral Ready */
+#define TIVA_SYSCON_PRGPIO_OFFSET     0x0a08 /* GPIO Peripheral Ready */
+#define TIVA_SYSCON_PRDMA_OFFSET      0x0a0c /* uDMA Peripheral Ready */
+#define TIVA_SYSCON_PRHIB_OFFSET      0x0a14 /* Hibernation Peripheral Ready */
+#define TIVA_SYSCON_PRUART_OFFSET     0x0a18 /* UART Peripheral Ready */
+#define TIVA_SYSCON_PRSSI_OFFSET      0x0a1c /* SSI Peripheral Ready */
+#define TIVA_SYSCON_PRI2C_OFFSET      0x0a20 /* I2C Peripheral Ready */
+#define TIVA_SYSCON_PRUSB_OFFSET      0x0a28 /* USB Peripheral Ready */
+#define TIVA_SYSCON_PRCAN_OFFSET      0x0a34 /* CAN Peripheral Ready */
+#define TIVA_SYSCON_PRADC_OFFSET      0x0a38 /* ADC Peripheral Ready */
+#define TIVA_SYSCON_PRACMP_OFFSET     0x0a3c /* Analog Comparator Peripheral Ready */
+#define TIVA_SYSCON_PRPWM_OFFSET      0x0a40 /* Pulse Width Modulator Peripheral Ready */
+#define TIVA_SYSCON_PRQEI_OFFSET      0x0a44 /* Quadrature Encoder Interface Peripheral Ready */
+#define TIVA_SYSCON_PREEPROM_OFFSET   0x0a58 /* EEPROM Peripheral Ready */
+#define TIVA_SYSCON_PRWTIMER_OFFSET   0x0a5c /* 2/64-BitWide Timer Peripheral Ready */
 
 /* System Control Legacy Register Offsets ***************************************************/
 
-#define TIVA_SYSCON_DC0_OFFSET        0x008 /* Device Capabilities 0 */
-#define TIVA_SYSCON_DC1_OFFSET        0x010 /* Device Capabilities 1 */
-#define TIVA_SYSCON_DC2_OFFSET        0x014 /* Device Capabilities 2 */
-#define TIVA_SYSCON_DC3_OFFSET        0x018 /* Device Capabilities 3 */
-#define TIVA_SYSCON_DC4_OFFSET        0x01c /* Device Capabilities 4 */
-#define TIVA_SYSCON_DC5_OFFSET        0x020 /* Device Capabilities 5 */
-#define TIVA_SYSCON_DC6_OFFSET        0x024 /* Device Capabilities 6 */
-#define TIVA_SYSCON_DC7_OFFSET        0x028 /* Device Capabilities 7 */
-#define TIVA_SYSCON_DC8_OFFSET        0x02c /* Device Capabilities 8 */
+#define TIVA_SYSCON_DC0_OFFSET        0x0008 /* Device Capabilities 0 */
+#define TIVA_SYSCON_DC1_OFFSET        0x0010 /* Device Capabilities 1 */
+#define TIVA_SYSCON_DC2_OFFSET        0x0014 /* Device Capabilities 2 */
+#define TIVA_SYSCON_DC3_OFFSET        0x0018 /* Device Capabilities 3 */
+#define TIVA_SYSCON_DC4_OFFSET        0x001c /* Device Capabilities 4 */
+#define TIVA_SYSCON_DC5_OFFSET        0x0020 /* Device Capabilities 5 */
+#define TIVA_SYSCON_DC6_OFFSET        0x0024 /* Device Capabilities 6 */
+#define TIVA_SYSCON_DC7_OFFSET        0x0028 /* Device Capabilities 7 */
+#define TIVA_SYSCON_DC8_OFFSET        0x002c /* Device Capabilities 8 */
 
-#define TIVA_SYSCON_SRCR0_OFFSET      0x040 /* Software Reset Control 0 */
-#define TIVA_SYSCON_SRCR1_OFFSET      0x044 /* Software Reset Control 1 */
-#define TIVA_SYSCON_SRCR2_OFFSET      0x048 /* Software Reset Control 2 */
+#define TIVA_SYSCON_SRCR0_OFFSET      0x0040 /* Software Reset Control 0 */
+#define TIVA_SYSCON_SRCR1_OFFSET      0x0044 /* Software Reset Control 1 */
+#define TIVA_SYSCON_SRCR2_OFFSET      0x0048 /* Software Reset Control 2 */
 
-#define TIVA_SYSCON_RCGC0_OFFSET      0x100 /* Run Mode Clock Gating Control Register 0 */
-#define TIVA_SYSCON_RCGC1_OFFSET      0x104 /* Run Mode Clock Gating Control Register 1 */
-#define TIVA_SYSCON_RCGC2_OFFSET      0x108 /* Run Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_RCGC0_OFFSET      0x0100 /* Run Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_RCGC1_OFFSET      0x0104 /* Run Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_RCGC2_OFFSET      0x0108 /* Run Mode Clock Gating Control Register 2 */
 
-#define TIVA_SYSCON_SCGC0_OFFSET      0x110 /* Sleep Mode Clock Gating Control Register 0 */
-#define TIVA_SYSCON_SCGC1_OFFSET      0x114 /* Sleep Mode Clock Gating Control Register 1 */
-#define TIVA_SYSCON_SCGC2_OFFSET      0x118 /* Sleep Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_SCGC0_OFFSET      0x0110 /* Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_SCGC1_OFFSET      0x0114 /* Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_SCGC2_OFFSET      0x0118 /* Sleep Mode Clock Gating Control Register 2 */
 
-#define TIVA_SYSCON_DCGC0_OFFSET      0x120 /* Deep Sleep Mode Clock Gating Control Register 0 */
-#define TIVA_SYSCON_DCGC1_OFFSET      0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
-#define TIVA_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_DCGC0_OFFSET      0x0120 /* Deep Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_DCGC1_OFFSET      0x0124 /* Deep Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_DCGC2_OFFSET      0x0128 /* Deep Sleep Mode Clock Gating Control Register 2 */
 
-#define TIVA_SYSCON_DC9_OFFSET        0x190 /* Device Capabilities */
-#define TIVA_SYSCON_NVMSTAT_OFFSET    0x1a0 /* Non-Volatile Memory Information */
+#define TIVA_SYSCON_DC9_OFFSET        0x0190 /* Device Capabilities */
+#define TIVA_SYSCON_NVMSTAT_OFFSET    0x01a0 /* Non-Volatile Memory Information */
 
 /* System Control Register Addresses ********************************************************/
 
@@ -252,6 +254,7 @@
 #define TIVA_SYSCON_PPEEPROM          (TIVA_SYSCON_BASE + TIVA_SYSCON_PPEEPROM_OFFSET)
 #define TIVA_SYSCON_PPWTIMER          (TIVA_SYSCON_BASE + TIVA_SYSCON_PPWTIMER_OFFSET)
 
+#define TIVA_SYSCON_SR_BASE           (TIVA_SYSCON_BASE + TIVA_SYSCON_SR_OFFSET)
 #define TIVA_SYSCON_SRWD              (TIVA_SYSCON_BASE + TIVA_SYSCON_SRWD_OFFSET)
 #define TIVA_SYSCON_SRTIMER           (TIVA_SYSCON_BASE + TIVA_SYSCON_SRTIMER_OFFSET)
 #define TIVA_SYSCON_SRGPIO            (TIVA_SYSCON_BASE + TIVA_SYSCON_SRGPIO_OFFSET)
@@ -269,6 +272,7 @@
 #define TIVA_SYSCON_SREEPROM          (TIVA_SYSCON_BASE + TIVA_SYSCON_SREEPROM_OFFSET)
 #define TIVA_SYSCON_SRWTIMER          (TIVA_SYSCON_BASE + TIVA_SYSCON_SRWTIMER_OFFSET)
 
+#define TIVA_SYSCON_RCGC_BASE         (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC_OFFSET)
 #define TIVA_SYSCON_RCGCWD            (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCWD_OFFSET)
 #define TIVA_SYSCON_RCGCTIMER         (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCTIMER_OFFSET)
 #define TIVA_SYSCON_RCGCGPIO          (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCGPIO_OFFSET)

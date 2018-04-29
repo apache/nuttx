@@ -100,6 +100,7 @@ config ARCH_CHIP_TM4C1294NC
 	select ARCH_CHIP_TM4C
 	select ARCH_CHIP_TM4C129
 	select TIVA_HAVE_ETHERNET
+	select TIVA_HAVE_EEPROM
 
 config ARCH_CHIP_TM4C129XNC
 	bool "TM4C129XNC"
@@ -289,6 +290,10 @@ config TIVA_HAVE_SSI2
 	default n
 
 config TIVA_HAVE_SSI3
+	bool
+	default n
+
+config TIVA_HAVE_EEPROM
 	bool
 	default n
 
@@ -536,6 +541,13 @@ config TIVA_FLASH
 	default n
 	---help---
 		Enable MTD driver support for internal FLASH.
+
+config TIVA_EEPROM
+	bool "Internal EEPROM driver"
+	default n
+	depends on TIVA_HAVE_EEPROM && EXPERIMENTAL
+	---help---
+		Enable MTD driver support for internal EEPROM.
 
 endmenu
 

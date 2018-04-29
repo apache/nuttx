@@ -52,19 +52,8 @@
 #include "tiva_lowputc.h"
 #include "tiva_syscontrol.h"
 #include "tiva_userspace.h"
+#include "tiva_eeprom.h"
 #include "tiva_start.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -159,6 +148,12 @@ void __start(void)
 
   tiva_boardinitialize();
   showprogress('F');
+
+#ifdef CONFIG_TIVA_EEPROM
+  /*Initialize the EEPROM */
+
+  tiva_eeprom_initialize();
+#endif
 
   /* Then start NuttX */
 
