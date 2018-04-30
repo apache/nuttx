@@ -168,7 +168,7 @@ int net_fstat(int sockfd, FAR struct stat *buf)
                /* We need the length of the IP header */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-               iplen = (conn->domain == PF_INET) ? IPv4_HDRLEN : IPv6_HDRLEN
+               iplen = (conn->domain == PF_INET) ? IPv4_HDRLEN : IPv6_HDRLEN;
 #elif defined(CONFIG_NET_IPv4)
                iplen = IPv4_HDRLEN;
 #else
