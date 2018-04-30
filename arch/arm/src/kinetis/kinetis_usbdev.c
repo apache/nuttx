@@ -517,7 +517,9 @@ static void khci_putreg(uint32_t val, uint32_t addr);
 
 /* Suspend/Resume Helpers ***************************************************/
 
+#ifndef CONFIG_KINETIS_USBOTG
 static void   khci_suspend(struct khci_usbdev_s *priv);
+#endif
 static void   khci_remote_resume(struct khci_usbdev_s *priv);
 static void   khci_resume(struct khci_usbdev_s *priv);
 
@@ -2895,7 +2897,7 @@ static int khci_interrupt(int irq, void *context, FAR void *arg)
     {
       usbtrace(TRACE_INTDECODE(KHCI_TRACEINTID_IDLE), usbir);
 
-#ifdef  CONFIG_KINETIS_USBOTG
+#ifdef CONFIG_KINETIS_USBOTG
       /* If Suspended, Try to switch to Host */
 #warning "Missing logic"
 #else
@@ -2977,6 +2979,7 @@ interrupt_exit:
  * Name: khci_suspend
  ****************************************************************************/
 
+#ifndef CONFIG_KINETIS_USBOTG
 static void khci_suspend(struct khci_usbdev_s *priv)
 {
   uint32_t regval;
@@ -3014,6 +3017,7 @@ static void khci_suspend(struct khci_usbdev_s *priv)
   kinetis_usbsuspend((struct usbdev_s *)priv, false);
 
 }
+#endif
 
 /****************************************************************************
  * Name: khci_remote_resume
