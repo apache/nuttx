@@ -108,7 +108,7 @@
  * well-known watchdog_lowerhalf_s structure.
  */
 
-struct nrf52_wdg_lowerhalf_s
+struct nrf52_wdt_lowerhalf_s
 {
   FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
   uint32_t timeout;   /* The (actual) timeout */
@@ -138,7 +138,7 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
 /* "Lower half" driver methods */
 
-static const struct watchdog_ops_s g_wdgops =
+static const struct watchdog_ops_s g_wdtops =
 {
   .start      = nrf52_start,
   .stop       = nrf52_stop,
@@ -151,7 +151,7 @@ static const struct watchdog_ops_s g_wdgops =
 
 /* "Lower half" driver state */
 
-static struct nrf52_wdg_lowerhalf_s g_wdgdev;
+static struct nrf52_wdt_lowerhalf_s g_wdtdev;
 
 /****************************************************************************
  * Private Functions
@@ -271,8 +271,8 @@ static void nrf52_wdt_reload_value_set(uint32_t reload_value)
 
 static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct nrf52_wdg_lowerhalf_s *priv =
-    (FAR struct nrf52_wdg_lowerhalf_s *)lower;
+  FAR struct nrf52_wdt_lowerhalf_s *priv =
+    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry: started=%d\n");
@@ -335,8 +335,8 @@ static int nrf52_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct nrf52_wdg_lowerhalf_s *priv =
-    (FAR struct nrf52_wdg_lowerhalf_s *)lower;
+  FAR struct nrf52_wdt_lowerhalf_s *priv =
+    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry\n");
@@ -372,8 +372,8 @@ static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
                            FAR struct watchdog_status_s *status)
 {
-  FAR struct nrf52_wdg_lowerhalf_s *priv =
-    (FAR struct nrf52_wdg_lowerhalf_s *)lower;
+  FAR struct nrf52_wdt_lowerhalf_s *priv =
+    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -432,8 +432,8 @@ static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct nrf52_wdg_lowerhalf_s *priv =
-    (FAR struct nrf52_wdg_lowerhalf_s *)lower;
+  FAR struct nrf52_wdt_lowerhalf_s *priv =
+    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
 
   wdinfo("Entry: timeout=%d\n", timeout);
   DEBUGASSERT(priv);
@@ -478,8 +478,11 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   disabled.
  *
  * Input Parameters:
- *   devpath - The full path to the watchdog.  This should be of the form
- *     /dev/watchdog0
+ *   devpath    - The full path to the watchdog.  This should be of the form
+ *                /dev/watchdog0
+ *   mode_sleep - The behaviour of watchdog when CPU enter sleep mode
+ *   mode_halt  - The behaviour of watchdog when CPU was  HALT by
+ *                debugger
  *
  * Returned Values:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -490,7 +493,7 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
                          int16_t mode_halt)
 {
-  FAR struct nrf52_wdg_lowerhalf_s *priv = &g_wdgdev;
+  FAR struct nrf52_wdt_lowerhalf_s *priv = &g_wdtdev;
   FAR void *handle;
 
   wdinfo("Entry: devpath=%s, mode_sleep=%d, mode_halt=%d\n", devpath,
@@ -498,7 +501,7 @@ int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
 
   /* Initialize the driver state structure. */
 
-  priv->ops     = &g_wdgops;
+  priv->ops     = &g_wdtops;
   priv->started = false;
   priv->mode = (mode_halt << WDT_CONFIG_HALT_POS) |
                 (mode_sleep << WDT_CONFIG_SLEEP_POS);

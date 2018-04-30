@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_wdg.h
+ * arch/arm/src/nrf52/nrf52_wdt.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_NRF52_WDG_H
-#define __ARCH_ARM_SRC_NRF52_NRF52_WDG_H
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_WDT_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_WDT_H
 
 /****************************************************************************
  * Included Files
@@ -54,6 +54,10 @@
 #define WDT_CONFIG_SLEEP_POS     0
 #define NRF_WDT_INT_TIMEOUT_MASK 1
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -63,30 +67,30 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-enum wdg_behaviour_e
+enum wdt_behaviour_e
 {
   WDG_PAUSE = 0,
   WDG_RUN = 1
 };
 
 /****************************************************************************
- * Name: nrf52_wdg_initialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_wdt_initialize
  *
  * Description:
- *   Initialize the IWDG watchdog time.  The watchdog timer is initialized
- *   and registers as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the WDT watchdog time.  The watchdog timer is initialized and
+ *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
  * Input Parameters:
- *   devpath - The full path to the watchdog.  This should be of the form
- *     /dev/watchdog0
- *   behaviour_sleep - The behaviour of watchdog when CPU enter sleep mode
- *   behaviour_halt - The behaviour of watchdog when CPU was  HALT by
- *     debugger
+ *   devpath    - The full path to the watchdog.  This should be of the form
+ *                /dev/watchdog0
+ *   mode_sleep - The behaviour of watchdog when CPU enter sleep mode
+ *   mode_halt  - The behaviour of watchdog when CPU was  HALT by
+ *                debugger
  *
  * Returned Values:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -95,8 +99,8 @@ enum wdg_behaviour_e
  ****************************************************************************/
 
 #ifdef CONFIG_NRF52_WDT
-int nrf52_wdg_initialize(FAR const char *devpath, int16_t behaviour_sleep,
-                         int16_t behaviour_halt);
+int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
+                         int16_t mode_halt);
 #endif
 
 #undef EXTERN
@@ -105,4 +109,4 @@ int nrf52_wdg_initialize(FAR const char *devpath, int16_t behaviour_sleep,
 #endif
 
 #endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDG_H */
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDT_H */
