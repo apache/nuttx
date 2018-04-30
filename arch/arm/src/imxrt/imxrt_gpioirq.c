@@ -159,7 +159,7 @@ static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
                                       FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -168,9 +168,9 @@ static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
 
   /* Decode the pending interrupts */
 
-  for (bit = 0, irq = _IMXRT_GPIO1_0_15_BASE;
+  for (bit = 0, gpioirq = _IMXRT_GPIO1_0_15_BASE;
        bit < 16 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -179,10 +179,10 @@ static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO1_ISR)
+          putreg32(mask, IMXRT_GPIO1_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -191,10 +191,11 @@ static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO1_16_31_IRQ
-static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context,
+                                       FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -203,9 +204,9 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 
   /* Decode the pending interrupts */
 
-  for (bit = 16, irq = _IMXRT_GPIO1_16_31_BASE;
+  for (bit = 16, gpioirq = _IMXRT_GPIO1_16_31_BASE;
        bit < 32 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -214,10 +215,10 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO1_ISR)
+          putreg32(mask, IMXRT_GPIO1_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -226,10 +227,11 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
-static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context,
+                                      FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -238,9 +240,9 @@ static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Decode the pending interrupts */
 
-  for (bit = 0, irq = _IMXRT_GPIO2_0_15_BASE;
+  for (bit = 0, gpioirq = _IMXRT_GPIO2_0_15_BASE;
        bit < 16 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -249,10 +251,10 @@ static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO2_ISR)
+          putreg32(mask, IMXRT_GPIO2_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -261,12 +263,11 @@ static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO2_16_31_IRQ
-static int imxrt_gpio2_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio2_16_31_interrupt(int irq, FAR void *context,
+                                       FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -275,9 +276,9 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 
   /* Decode the pending interrupts */
 
-  for (bit = 16, irq = _IMXRT_GPIO2_16_31_BASE;
+  for (bit = 16, gpioirq = _IMXRT_GPIO2_16_31_BASE;
        bit < 32 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -286,10 +287,10 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO2_ISR)
+          putreg32(mask, IMXRT_GPIO2_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -298,10 +299,11 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
-static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context,
+                                      FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -310,9 +312,9 @@ static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Decode the pending interrupts */
 
-  for (bit = 0, irq = _IMXRT_GPIO3_0_15_BASE;
+  for (bit = 0, gpioirq = _IMXRT_GPIO3_0_15_BASE;
        bit < 16 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -321,10 +323,10 @@ static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO3_ISR)
+          putreg32(mask, IMXRT_GPIO3_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -333,12 +335,11 @@ static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
-static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context,
+                                       FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -347,9 +348,9 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 
   /* Decode the pending interrupts */
 
-  for (bit = 16, irq = _IMXRT_GPIO3_16_31_BASE;
+  for (bit = 16, gpioirq = _IMXRT_GPIO3_16_31_BASE;
        bit < 32 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -358,10 +359,10 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO3_ISR)
+          putreg32(mask, IMXRT_GPIO3_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -370,10 +371,11 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
-static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context,
+                                      FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -382,9 +384,9 @@ static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Decode the pending interrupts */
 
-  for (bit = 0, irq = _IMXRT_GPIO4_0_15_BASE;
+  for (bit = 0, gpioirq = _IMXRT_GPIO4_0_15_BASE;
        bit < 16 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -393,10 +395,10 @@ static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO4_ISR)
+          putreg32(mask, IMXRT_GPIO4_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -405,12 +407,11 @@ static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO4_16_31_IRQ
-static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
-{
-static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context,
+                                       FAR void *arg)
 {
   uint32_t status;
-  int irq;
+  int gpioirq;
   int bit;
 
   /* Get the pending interrupt indications */
@@ -419,9 +420,9 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
 
   /* Decode the pending interrupts */
 
-  for (bit = 16, irq = _IMXRT_GPIO4_16_31_BASE;
+  for (bit = 16, gpioirq = _IMXRT_GPIO4_16_31_BASE;
        bit < 32 && status != 0;
-       bit++, irq++)
+       bit++, gpioirq++)
     {
       /* Is the IRQ associate with this pin pending? */
 
@@ -430,10 +431,10 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context, FAR void *arg
         {
           /* Yes, clear the status bit and dispatch the interrupt */
 
-          putreg32(mask, IMXRT_GPIO4_ISR)
+          putreg32(mask, IMXRT_GPIO4_ISR);
           status &= ~mask;
 
-          irq_dispath(irq, context);
+          irq_dispatch(gpioirq, context);
         }
     }
 
@@ -494,50 +495,50 @@ void imxrt_gpioirq_initialize(void)
    */
 
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio1_0_15_interrupt,
-                         IMXRT_IRQ_GPIO1_0_15, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO1_0_15,
+                         imxrt_gpio1_0_15_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO1_0_15);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO1_16_31_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio1_16_31_interrupt,
-                         IMXRT_IRQ_GPIO1_16_31, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO1_16_31,
+                         imxrt_gpio1_16_31_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO1_16_31);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio2_0_15_interrupt,
-                         IMXRT_IRQ_GPIO2_0_15, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO2_0_15,
+                         imxrt_gpio2_0_15_interrupt,NULL));
   up_enable_irq(IMXRT_IRQ_GPIO2_0_15);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO2_16_31_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio2_16_31_interrupt,
-                         IMXRT_IRQ_GPIO2_16_31, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO2_16_31,
+                         imxrt_gpio2_16_31_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO2_16_31);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio3_0_15_interrupt,
-                         IMXRT_IRQ_GPIO3_0_15, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO3_0_15,
+                         imxrt_gpio3_0_15_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO3_0_15);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio3_16_31_interrupt,
-                         IMXRT_IRQ_GPIO3_16_31, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO3_16_31,
+                         imxrt_gpio3_16_31_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO3_16_31);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio4_0_15_interrupt,
-                         IMXRT_IRQ_GPIO4_0_15, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO4_0_15,
+                         imxrt_gpio4_0_15_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO4_0_15);
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
-  DEBUGVERIFY(irq_attach(imxrt_gpio4_16_31_interrupt,
-                         IMXRT_IRQ_GPIO4_16_31, NULL));
+  DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO4_16_31,
+                         imxrt_gpio4_16_31_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO4_16_31);
 #endif
 }
