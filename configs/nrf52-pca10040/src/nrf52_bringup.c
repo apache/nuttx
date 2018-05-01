@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <syslog.h>
 
-#include "nrf42_wdt.h"
+#include "nrf52_wdt.h"
 
 /****************************************************************************
  * Public Functions
