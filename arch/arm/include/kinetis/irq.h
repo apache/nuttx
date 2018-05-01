@@ -80,6 +80,8 @@
 
 #if defined(CONFIG_ARCH_FAMILY_K20)
 #  include <arch/kinetis/kinetis_k20irq.h>
+#elif defined(CONFIG_ARCH_FAMILY_K28)
+#  include <arch/kinetis/kinetis_k28irq.h>
 #elif defined(CONFIG_ARCH_FAMILY_K40)
 #  include <arch/kinetis/kinetis_k40irq.h>
 #elif defined(CONFIG_ARCH_FAMILY_K60)

@@ -50,6 +50,8 @@
 
 #if defined(KINETIS_K20)
 #  include "chip/kinetis_k20memorymap.h"
+#elif defined(KINETIS_K28)
+#  include "chip/kinetis_k28memorymap.h"
 #elif defined(KINETIS_K40)
 #  include "chip/kinetis_k40memorymap.h"
 #elif defined(KINETIS_K60)

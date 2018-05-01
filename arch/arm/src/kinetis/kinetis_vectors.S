@@ -167,6 +167,8 @@ _vectors:
 
 #if defined(CONFIG_ARCH_FAMILY_K20)
 #  include "chip/kinetis_k20vectors.h"
+#elif defined(CONFIG_ARCH_FAMILY_K28)
+#  include "chip/kinetis_k28vectors.h"
 #elif defined(CONFIG_ARCH_FAMILY_K40)
 #  include "chip/kinetis_k40vectors.h"
 #elif defined(CONFIG_ARCH_FAMILY_K60)
@@ -176,7 +178,7 @@ _vectors:
 #elif defined(CONFIG_ARCH_FAMILY_K66)
 #  include "chip/kinetis_k66vectors.h"
 #else
-#  error "No vectors for Kinetis K chip"
+#  error "No vectors for Kinetis chip"
 #endif
 #endif /* CONFIG_KINETIS_NOEXT_VECTORS */
 	.size	_vectors, .-_vectors
@@ -209,6 +211,8 @@ handlers:
 
 #if defined(CONFIG_ARCH_FAMILY_K20)
 #  include "chip/kinetis_k20vectors.h"
+#elif defined(CONFIG_ARCH_FAMILY_K28)
+#  include "chip/kinetis_k28vectors.h"
 #elif defined(CONFIG_ARCH_FAMILY_K40)
 #  include "chip/kinetis_k40vectors.h"
 #elif defined(CONFIG_ARCH_FAMILY_K60)
@@ -218,7 +222,7 @@ handlers:
 #elif defined(CONFIG_ARCH_FAMILY_K66)
 #  include "chip/kinetis_k66vectors.h"
 #else
-#  error "No vectors for Kinetis K chip"
+#  error "No vectors for Kinetis chip"
 #endif
 
 #endif /* CONFIG_KINETIS_NOEXT_VECTORS */

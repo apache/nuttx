@@ -49,6 +49,14 @@ config ARCH_CHIP_MK20DX256VLH7
 	select ARCH_FAMILY_K20
 	select KINETIS_HAVE_I2C1
 
+config ARCH_CHIP_MK28FN2M0VMI15
+	bool "MK28FN2M0VMI15"
+	select ARCH_FAMILY_K28
+
+config ARCH_CHIP_MK28FN2M0CAU15R
+	bool "MK28FN2M0CAU15R"
+	select ARCH_FAMILY_K28
+
 config ARCH_CHIP_MK40N512VLQ100
 	bool "MK40N512VLQ100"
 	select ARCH_FAMILY_K40
@@ -235,6 +243,18 @@ config KINETIS_HAVE_LPUART1
 	bool
 	default n
 
+config KINETIS_HAVE_LPUART2
+	bool
+	default n
+
+config KINETIS_HAVE_LPUART3
+	bool
+	default n
+
+config KINETIS_HAVE_LPUART4
+	bool
+	default n
+
 # When there are multiple instances of a device, these "hidden" settings
 # will automatically be selected and will represent the 'OR' of the
 # instances selected.
@@ -258,6 +278,19 @@ config ARCH_FAMILY_K20
 	bool
 	default n
 	select KINETIS_HAVE_UART5
+
+config ARCH_FAMILY_K28
+	bool
+	default n
+	select KINETIS_HAVE_I2C1
+	select KINETIS_HAVE_FTM3
+	select KINETIS_HAVE_LPUART0
+	select KINETIS_HAVE_LPUART1
+	select KINETIS_HAVE_LPUART2
+	select KINETIS_HAVE_LPUART3
+	select KINETIS_HAVE_LPUART4
+	select KINETIS_HAVE_TPM1
+	select KINETIS_HAVE_TPM2
 
 config ARCH_FAMILY_K40
 	bool
@@ -411,6 +444,39 @@ config KINETIS_LPUART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Support the low power UART1
+
+config KINETIS_LPUART2
+	bool "Low power LPUART2"
+	default n
+	depends on KINETIS_HAVE_LPUART2
+	select LPUART2_SERIALDRIVER
+	select KINETIS_LPUART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Support the low power UART2
+
+config KINETIS_LPUART3
+	bool "Low power LPUART3"
+	default n
+	depends on KINETIS_HAVE_LPUART3
+	select LPUART3_SERIALDRIVER
+	select KINETIS_LPUART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Support the low power UART3
+
+config KINETIS_LPUART4
+	bool "Low power LPUART4"
+	default n
+	depends on KINETIS_HAVE_LPUART4
+	select LPUART4_SERIALDRIVER
+	select KINETIS_LPUART
+	select KINETIS_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Support the low power UART4
 
 config KINETIS_ENET
 	bool "Ethernet"

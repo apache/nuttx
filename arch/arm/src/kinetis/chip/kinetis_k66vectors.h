@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/kinetis/chip/kinetis_k64vectors.h
+ * arch/arm/src/kinetis/chip/kinetis_k66vectors.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -38,13 +38,13 @@
  * Pre-processor definitions
  ************************************************************************************/
 /* This file is included by kinetis_vectors.S.  It provides the macro VECTOR that
- * supplies ach K64 vector in terms of a (lower-case) ISR label and an
- * (upper-case) IRQ number as defined in arch/arm/include/kinetis/kinetis_k64irq.h.
+ * supplies ach K66 vector in terms of a (lower-case) ISR label and an
+ * (upper-case) IRQ number as defined in arch/arm/include/kinetis/kinetis_k66irq.h.
  * kinetis_vectors.S will defined the VECTOR in different ways in order to generate
  * the interrupt vectors and handlers in their final form.
  */
 
-#if defined(CONFIG_ARCH_FAMILY_K64)
+#if defined(CONFIG_ARCH_FAMILY_K66)
 
 /* If the common ARMv7-M vector handling is used, then all it needs is the following
  * definition that provides the number of supported vectors.
@@ -159,4 +159,4 @@ VECTOR(kinetis_can1rw, KINETIS_IRQ_CAN1RW)     /* Vector 114: CAN1 Receive Warni
 VECTOR(kinetis_can1wu, KINETIS_IRQ_CAN1WU)     /* Vector 115: CAN1 Wake UP */
 
 #  endif /* CONFIG_ARMV7M_CMNVECTOR */
-#endif /* CONFIG_ARCH_FAMILY_K64 */
+#endif /* CONFIG_ARCH_FAMILY_K66 */
