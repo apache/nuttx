@@ -164,7 +164,8 @@ static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO1_ISR) & 0x0000fffff;
+  status = getreg32(IMXRT_GPIO1_ISR) & getreg32(IMXRT_GPIO1_IMR) &
+           0x0000fffff;
 
   /* Decode the pending interrupts */
 
@@ -200,7 +201,8 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO1_ISR) & 0xffff0000;
+  status = getreg32(IMXRT_GPIO1_ISR) & getreg32(IMXRT_GPIO1_IMR) &
+           0xffff0000;
 
   /* Decode the pending interrupts */
 
@@ -236,7 +238,8 @@ static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO2_ISR) & 0x0000fffff;
+  status = getreg32(IMXRT_GPIO2_ISR) & getreg32(IMXRT_GPIO2_IMR) &
+           0x0000fffff;
 
   /* Decode the pending interrupts */
 
@@ -272,7 +275,8 @@ static int imxrt_gpio2_16_31_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO2_ISR) & 0xffff0000;
+  status = getreg32(IMXRT_GPIO2_ISR) & getreg32(IMXRT_GPIO2_IMR) &
+           0xffff0000;
 
   /* Decode the pending interrupts */
 
@@ -308,7 +312,8 @@ static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO3_ISR) & 0x0000fffff;
+  status = getreg32(IMXRT_GPIO3_ISR) & getreg32(IMXRT_GPIO3_IMR) &
+           0x0000fffff;
 
   /* Decode the pending interrupts */
 
@@ -344,7 +349,8 @@ static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO3_ISR) & 0xffff0000;
+  status = getreg32(IMXRT_GPIO3_ISR) & getreg32(IMXRT_GPIO3_IMR) &
+           0xffff0000;
 
   /* Decode the pending interrupts */
 
@@ -380,7 +386,8 @@ static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO4_ISR) & 0x0000fffff;
+  status = getreg32(IMXRT_GPIO4_ISR) & getreg32(IMXRT_GPIO4_IMR) &
+           0x0000fffff;
 
   /* Decode the pending interrupts */
 
@@ -416,7 +423,8 @@ static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context,
 
   /* Get the pending interrupt indications */
 
-  status = getreg32(IMXRT_GPIO4_ISR) & 0xffff0000;
+  status = getreg32(IMXRT_GPIO4_ISR) & getreg32(IMXRT_GPIO4_IMR) &
+           0xffff0000;
 
   /* Decode the pending interrupts */
 
@@ -594,9 +602,7 @@ int imxrt_gpioirq_enable(int irq)
   ret = imxrt_gpio_info(irq, &regaddr, &pin);
   if (ret >= 0)
     {
-      regval  = getreg32(regaddr);
-      regval |= (1 << pin);
-      putreg32(regval, regaddr);
+      modifyreg32(regaddr, 0, 1 << pin);
     }
 
   return ret;
@@ -620,9 +626,7 @@ int imxrt_gpioirq_disable(int irq)
   ret = imxrt_gpio_info(irq, &regaddr, &pin);
   if (ret >= 0)
     {
-      regval  = getreg32(regaddr);
-      regval &= ~(1 << pin);
-      putreg32(regval, regaddr);
+      modifyreg32(regaddr, 1 << pin, 0);
     }
 
   return ret;
