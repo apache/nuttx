@@ -68,7 +68,7 @@ extern "C"
  * Name: up_progmem_npages
  *
  * Description:
- *   Return number of pages
+ *   Return number of erase pages
  *
  ****************************************************************************/
 
@@ -78,7 +78,7 @@ size_t up_progmem_npages(void);
  * Name: up_progmem_isuniform
  *
  * Description:
- *   Is program memory uniform or page size differs?
+ *   Is program memory uniform or erase page and read/write page size differs?
  *
  ****************************************************************************/
 
@@ -88,17 +88,27 @@ bool up_progmem_isuniform(void);
  * Name: up_progmem_pagesize
  *
  * Description:
- *   Return page size
+ *   Return read/write page size
  *
  ****************************************************************************/
 
 size_t up_progmem_pagesize(size_t page);
 
 /****************************************************************************
+ * Name: up_progmem_erasesize
+ *
+ * Description:
+ *   Return erase page size. Must be a multiple of the read/write page size.
+ *
+ ****************************************************************************/
+
+size_t up_progmem_erasesize(size_t page);
+
+/****************************************************************************
  * Name: up_progmem_getpage
  *
  * Description:
- *   Address to page conversion
+ *   Address to read/write page conversion
  *
  * Input Parameters:
  *   addr - Address with or without flash offset (absolute or aligned to page0)
@@ -117,7 +127,7 @@ ssize_t up_progmem_getpage(size_t addr);
  * Name: up_progmem_getaddress
  *
  * Description:
- *   Page to address conversion
+ *   Read/write page to address conversion
  *
  * Input Parameters:
  *   page - page index
@@ -133,10 +143,10 @@ size_t up_progmem_getaddress(size_t page);
  * Name: up_progmem_erasepage
  *
  * Description:
- *   Erase selected page.
+ *   Erase selected erase page.
  *
  * Input Parameters:
- *   page - The page index to be erased.
+ *   page - The erase page index to be erased.
  *
  * Returned Value:
  *   Page size or negative value on error.  The following errors are reported
@@ -157,7 +167,7 @@ ssize_t up_progmem_erasepage(size_t page);
  * Name: up_progmem_ispageerased
  *
  * Description:
- *   Checks whether page is erased
+ *   Checks whether erase page is erased
  *
  * Input Parameters:
  *   page - The page index to be checked.

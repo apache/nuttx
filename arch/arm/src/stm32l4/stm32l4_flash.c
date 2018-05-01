@@ -276,6 +276,11 @@ size_t up_progmem_pagesize(size_t page)
   return STM32L4_FLASH_PAGESIZE;
 }
 
+size_t up_progmem_erasesize(size_t page)
+{
+  return STM32L4_FLASH_PAGESIZE;
+}
+
 ssize_t up_progmem_getpage(size_t addr)
 {
   if (addr >= STM32L4_FLASH_BASE)

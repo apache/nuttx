@@ -577,6 +577,11 @@ size_t up_progmem_pagesize(size_t page)
   return 0;
 }
 
+size_t up_progmem_erasesize(size_t page)
+{
+  return up_progmem_pagesize(page);
+}
+
 ssize_t up_progmem_getpage(size_t addr)
 {
 #if (EFM32_FLASH_BASE != 0)

@@ -69,7 +69,8 @@ struct progmem_dev_s
   /* Fields unique to the progmem MTD driver */
 
   bool    initialized;      /* True: Already initialized */
-  uint8_t blkshift;         /* Log2 of the flash block size */
+  uint8_t blkshift;         /* Log2 of the flash read/write block size */
+  uint8_t ersshift;         /* Log2 of the flash erase block size */
 };
 
 /****************************************************************************
@@ -314,7 +315,7 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                */
 
               geo->blocksize    = (1 << priv->blkshift);  /* Size of one read/write block */
-              geo->erasesize    = (1 << priv->blkshift);  /* Size of one erase block */
+              geo->erasesize    = (1 << priv->ersshift);  /* Size of one erase block */
               geo->neraseblocks = up_progmem_npages();    /* Number of erase blocks */
               ret               = OK;
           }
@@ -374,6 +375,7 @@ FAR struct mtd_dev_s *progmem_initialize(void)
 {
   FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)&g_progmem;
   int32_t blkshift;
+  int32_t ersshift;
 
   /* Perform initialization if necessary */
 
@@ -386,7 +388,7 @@ FAR struct mtd_dev_s *progmem_initialize(void)
 
       size_t blocksize = up_progmem_pagesize(0);
 
-     /* Calculate Log2 of the flash block size */
+      /* Calculate Log2 of the flash read/write block size */
 
       blkshift = progmem_log2(blocksize);
       if (blkshift < 0)
@@ -394,9 +396,20 @@ FAR struct mtd_dev_s *progmem_initialize(void)
           return NULL;
         }
 
+      /* Calculate Log2 of the flash erase block size */
+
+      blocksize = up_progmem_erasesize(0);
+
+      ersshift = progmem_log2(blocksize);
+      if (ersshift < 0)
+        {
+          return NULL;
+        }
+
       /* Save the configuration data */
 
       g_progmem.blkshift    = blkshift;
+      g_progmem.ersshift    = ersshift;
       g_progmem.initialized = true;
 
 #ifdef CONFIG_MTD_REGISTRATION

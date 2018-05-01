@@ -410,6 +410,19 @@ size_t up_progmem_pagesize(size_t cluster)
 }
 
 /****************************************************************************
+ * Name: up_progmem_erasesize
+ *
+ * Description:
+ *   Return cluster size
+ *
+ ****************************************************************************/
+
+size_t up_progmem_erasesize(size_t cluster)
+{
+  return SAMV7_CLUSTER_SIZE;
+}
+
+/****************************************************************************
  * Name: up_progmem_getpage
  *
  * Description:
