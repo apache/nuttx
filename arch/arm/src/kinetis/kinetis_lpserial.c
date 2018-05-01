@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_lpserial.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -88,7 +88,7 @@
  * be ttyS0.  If there is no console then will use the lowest numbered LPUART.
  */
 
-/* First pick the console and ttys0.  This could be any of LPUART0-1 */
+/* First pick the console and ttys0.  This could be any of LPUART0-4 */
 
 #if defined(CONFIG_LPUART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_lpuart0port /* LPUART0 is console */
@@ -98,18 +98,39 @@
 #    define CONSOLE_DEV         g_lpuart1port /* LPUART1 is console */
 #    define TTYS0_DEV           g_lpuart1port /* LPUART1 is ttyS0 */
 #    define LPUART1_ASSIGNED    1
+#elif defined(CONFIG_LPUART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_lpuart2port /* LPUART2 is console */
+#    define TTYS0_DEV           g_lpuart2port /* LPUART2 is ttyS0 */
+#    define LPUART2_ASSIGNED    1
+#elif defined(CONFIG_LPUART3_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_lpuart3port /* LPUART3 is console */
+#    define TTYS0_DEV           g_lpuart3port /* LPUART3 is ttyS0 */
+#    define LPUART3_ASSIGNED    1
+#elif defined(CONFIG_LPUART4_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_lpuart4port /* LPUART4 is console */
+#    define TTYS0_DEV           g_lpuart4port /* LPUART4 is ttyS0 */
+#    define LPUART4_ASSIGNED    1
 #else
-#  undef CONSOLE_DEV                        /* No console */
+#  undef CONSOLE_DEV                          /* No console */
 #  if defined(CONFIG_KINETIS_LPUART0)
 #    define TTYS0_DEV           g_lpuart0port /* LPUART0 is ttyS0 */
 #    define LPUART0_ASSIGNED    1
 #  elif defined(CONFIG_KINETIS_LPUART1)
 #    define TTYS0_DEV           g_lpuart1port /* LPUART1 is ttyS0 */
 #    define LPUART1_ASSIGNED    1
+#  elif defined(CONFIG_KINETIS_LPUART2)
+#    define TTYS0_DEV           g_lpuart2port /* LPUART2 is ttyS0 */
+#    define LPUART2_ASSIGNED    1
+#  elif defined(CONFIG_KINETIS_LPUART3)
+#    define TTYS0_DEV           g_lpuart3port /* LPUART3 is ttyS0 */
+#    define LPUART3_ASSIGNED    1
+#  elif defined(CONFIG_KINETIS_LPUART4)
+#    define TTYS0_DEV           g_lpuart4port /* LPUART4 is ttyS0 */
+#    define LPUART4_ASSIGNED    1
 #  endif
 #endif
 
-/* Pick ttys1. This could be any of LPUART0-1 excluding the console LPUART. */
+/* Pick ttys1. This could be any of LPUART0-4 excluding the console/ttyS0 LPUART. */
 
 #if defined(CONFIG_KINETIS_LPUART0) && !defined(LPUART0_ASSIGNED)
 #  define TTYS1_DEV             g_lpuart0port /* LPUART0 is ttyS1 */
@@ -117,6 +138,54 @@
 #elif defined(CONFIG_KINETIS_LPUART1) && !defined(LPUART1_ASSIGNED)
 #  define TTYS1_DEV             g_lpuart1port /* LPUART1 is ttyS1 */
 #  define LPUART1_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART2) && !defined(LPUART2_ASSIGNED)
+#  define TTYS1_DEV             g_lpuart2port /* LPUART2 is ttyS1 */
+#  define LPUART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART3) && !defined(LPUART3_ASSIGNED)
+#  define TTYS1_DEV             g_lpuart3port /* LPUART3 is ttyS1 */
+#  define LPUART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART4) && !defined(LPUART4_ASSIGNED)
+#  define TTYS1_DEV             g_lpuart4port /* LPUART4 is ttyS1 */
+#  define LPUART4_ASSIGNED      1
+#endif
+
+/* Pick ttys2. This could be any of LPUART1-4 excluding the console/ttyS0 LPUART. */
+
+#if defined(CONFIG_KINETIS_LPUART1) && !defined(LPUART1_ASSIGNED)
+#  define TTYS2_DEV             g_lpuart1port /* LPUART1 is ttyS2 */
+#  define LPUART1_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART2) && !defined(LPUART2_ASSIGNED)
+#  define TTYS2_DEV             g_lpuart2port /* LPUART2 is ttyS2 */
+#  define LPUART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART3) && !defined(LPUART3_ASSIGNED)
+#  define TTYS2_DEV             g_lpuart3port /* LPUART3 is ttyS2 */
+#  define LPUART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART4) && !defined(LPUART4_ASSIGNED)
+#  define TTYS2_DEV             g_lpuart4port /* LPUART4 is ttyS2 */
+#  define LPUART4_ASSIGNED      1
+#endif
+
+/* Pick ttys3. This could be any of LPUART2-4 excluding the console/ttyS0 LPUART. */
+
+#if defined(CONFIG_KINETIS_LPUART2) && !defined(LPUART2_ASSIGNED)
+#  define TTYS3_DEV             g_lpuart2port /* LPUART2 is ttyS3 */
+#  define LPUART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART3) && !defined(LPUART3_ASSIGNED)
+#  define TTYS3_DEV             g_lpuart3port /* LPUART3 is ttyS3 */
+#  define LPUART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART4) && !defined(LPUART4_ASSIGNED)
+#  define TTYS3_DEV             g_lpuart4port /* LPUART4 is ttyS3 */
+#  define LPUART4_ASSIGNED      1
+#endif
+
+/* Pick ttys3. This could be any of LPUART3-4 excluding the console/ttyS0 LPUART. */
+
+#if defined(CONFIG_KINETIS_LPUART3) && !defined(LPUART3_ASSIGNED)
+#  define TTYS4_DEV             g_lpuart3port /* LPUART3 is ttyS4 */
+#  define LPUART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_LPUART4) && !defined(LPUART4_ASSIGNED)
+#  define TTYS4_DEV             g_lpuart4port /* LPUART4 is ttyS4 */
+#  define LPUART4_ASSIGNED      1
 #endif
 
 #define LPUART_CTRL_ERROR_INTS  (LPUART_CTRL_ORIE | LPUART_CTRL_FEIE | \
@@ -225,6 +294,18 @@ static char g_lpuart0txbuffer[CONFIG_LPUART0_TXBUFSIZE];
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
 #endif
+#ifdef CONFIG_KINETIS_LPUART2
+static char g_lpuart2rxbuffer[CONFIG_LPUART2_RXBUFSIZE];
+static char g_lpuart2txbuffer[CONFIG_LPUART2_TXBUFSIZE];
+#endif
+#ifdef CONFIG_KINETIS_LPUART3
+static char g_lpuart3rxbuffer[CONFIG_LPUART3_RXBUFSIZE];
+static char g_lpuart3txbuffer[CONFIG_LPUART3_TXBUFSIZE];
+#endif
+#ifdef CONFIG_KINETIS_LPUART4
+static char g_lpuart4rxbuffer[CONFIG_LPUART4_RXBUFSIZE];
+static char g_lpuart4txbuffer[CONFIG_LPUART4_TXBUFSIZE];
+#endif
 
 /* This describes the state of the Kinetis LPUART0 port. */
 
@@ -303,6 +384,126 @@ static uart_dev_t g_lpuart1port =
    },
   .ops      = &g_lpuart_ops,
   .priv     = &g_lpuart1priv,
+};
+#endif
+
+/* This describes the state of the Kinetis LPUART2 port. */
+
+#ifdef CONFIG_KINETIS_LPUART2
+static struct kinetis_dev_s g_lpuart2priv =
+{
+  .uartbase       = KINETIS_LPUART2_BASE,
+  .clock          = BOARD_CORECLK_FREQ,
+  .baud           = BOARD_LPUART2_FREQ,
+  .irq            = KINETIS_IRQ_LPUART2,
+  .irqprio        = CONFIG_KINETIS_LPUART2PRIO,
+  .parity         = CONFIG_LPUART2_PARITY,
+  .bits           = CONFIG_LPUART2_BITS,
+  .stop2          = CONFIG_LPUART2_2STOP,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART2_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = PIN_LPUART2_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = PIN_LPUART2_RTS,
+#endif
+};
+
+static uart_dev_t g_lpuart2port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_LPUART2_RXBUFSIZE,
+    .buffer = g_lpuart2rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_LPUART2_TXBUFSIZE,
+    .buffer = g_lpuart2txbuffer,
+   },
+  .ops      = &g_lpuart_ops,
+  .priv     = &g_lpuart2priv,
+};
+#endif
+
+/* This describes the state of the Kinetis LPUART3 port. */
+
+#ifdef CONFIG_KINETIS_LPUART3
+static struct kinetis_dev_s g_lpuart3priv =
+{
+  .uartbase       = KINETIS_LPUART3_BASE,
+  .clock          = BOARD_CORECLK_FREQ,
+  .baud           = BOARD_LPUART3_FREQ,
+  .irq            = KINETIS_IRQ_LPUART3,
+  .irqprio        = CONFIG_KINETIS_LPUART3PRIO,
+  .parity         = CONFIG_LPUART3_PARITY,
+  .bits           = CONFIG_LPUART3_BITS,
+  .stop2          = CONFIG_LPUART3_2STOP,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART3_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = PIN_LPUART3_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = PIN_LPUART3_RTS,
+#endif
+};
+
+static uart_dev_t g_lpuart3port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_LPUART3_RXBUFSIZE,
+    .buffer = g_lpuart3rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_LPUART3_TXBUFSIZE,
+    .buffer = g_lpuart3txbuffer,
+   },
+  .ops      = &g_lpuart_ops,
+  .priv     = &g_lpuart3priv,
+};
+#endif
+
+/* This describes the state of the Kinetis LPUART4 port. */
+
+#ifdef CONFIG_KINETIS_LPUART4
+static struct kinetis_dev_s g_lpuart4priv =
+{
+  .uartbase       = KINETIS_LPUART4_BASE,
+  .clock          = BOARD_CORECLK_FREQ,
+  .baud           = BOARD_LPUART4_FREQ,
+  .irq            = KINETIS_IRQ_LPUART4,
+  .irqprio        = CONFIG_KINETIS_LPUART4PRIO,
+  .parity         = CONFIG_LPUART4_PARITY,
+  .bits           = CONFIG_LPUART4_BITS,
+  .stop2          = CONFIG_LPUART4_2STOP,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART4_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = PIN_LPUART4_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = PIN_LPUART4_RTS,
+#endif
+};
+
+static uart_dev_t g_lpuart4port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_LPUART4_RXBUFSIZE,
+    .buffer = g_lpuart4rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_LPUART4_TXBUFSIZE,
+    .buffer = g_lpuart4txbuffer,
+   },
+  .ops      = &g_lpuart_ops,
+  .priv     = &g_lpuart4priv,
 };
 #endif
 
@@ -1126,6 +1327,15 @@ void kinetis_lpuart_earlyserialinit(void)
 #ifdef TTYS1_DEV
   kinetis_restoreuartint(TTYS1_DEV.priv, 0);
 #endif
+#ifdef TTYS2_DEV
+  kinetis_restoreuartint(TTYS2_DEV.priv, 0);
+#endif
+#ifdef TTYS3_DEV
+  kinetis_restoreuartint(TTYS3_DEV.priv, 0);
+#endif
+#ifdef TTYS4_DEV
+  kinetis_restoreuartint(TTYS4_DEV.priv, 0);
+#endif
 
   /* Configuration whichever one is the console */
 
@@ -1165,17 +1375,41 @@ unsigned int kinetis_lpuart_serialinit(unsigned int first)
   /* Register all LPUARTs as LPn devices */
 
   (void)uart_register("/dev/ttyLP0", &TTYS0_DEV);
-#  ifdef TTYS1_DEV
+#ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyLP1", &TTYS1_DEV);
-#  endif
+#endif
+#ifdef TTYS2_DEV
+  (void)uart_register("/dev/ttyLP2", &TTYS2_DEV);
+#endif
+#ifdef TTYS3_DEV
+  (void)uart_register("/dev/ttyLP3", &TTYS3_DEV);
+#endif
+#ifdef TTYS4_DEV
+  (void)uart_register("/dev/ttyLP4", &TTYS4_DEV);
+#endif
+
 #else
+
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register(devname, &TTYS0_DEV);
-#  ifdef TTYS1_DEV
+#ifdef TTYS1_DEV
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
   (void)uart_register(devname, &TTYS1_DEV);
-#  endif
 #endif
+#ifdef TTYS2_DEV
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS2_DEV);
+#endif
+#ifdef TTYS3_DEV
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS3_DEV);
+#endif
+#ifdef TTYS4_DEV
+  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  (void)uart_register(devname, &TTYS4_DEV);
+#endif
+#endif
+
   return first;
 }
 

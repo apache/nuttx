@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_lowputc.c
  *
- *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2017-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane<david_s5@nscdg.com>
  *
@@ -111,6 +111,24 @@
 #if !defined(CONFIG_LPUART1_OFLOWCONTROL)
 #  define CONFIG_LPUART1_OFLOWCONTROL 0
 #endif
+#if !defined(CONFIG_LPUART2_IFLOWCONTROL)
+#  define CONFIG_LPUART2_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART2_OFLOWCONTROL)
+#  define CONFIG_LPUART2_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART3_IFLOWCONTROL)
+#  define CONFIG_LPUART3_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART3_OFLOWCONTROL)
+#  define CONFIG_LPUART3_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART4_IFLOWCONTROL)
+#  define CONFIG_LPUART4_IFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_LPUART4_OFLOWCONTROL)
+#  define CONFIG_LPUART4_OFLOWCONTROL 0
+#endif
 
 /* Select UART parameters for the selected console */
 
@@ -191,6 +209,33 @@
 #    define CONSOLE_2STOP  CONFIG_LPUART1_2STOP
 #    define CONSOLE_IFLOW  CONFIG_LPUART1_IFLOWCONTROL
 #    define CONSOLE_OFLOW  CONFIG_LPUART1_OFLOWCONTROL
+#  elif defined(CONFIG_LPUART2_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   KINETIS_LPUART2_BASE
+#    define CONSOLE_FREQ   BOARD_LPUART2_FREQ
+#    define CONSOLE_BAUD   CONFIG_LPUART2_BAUD
+#    define CONSOLE_PARITY CONFIG_LPUART2_PARITY
+#    define CONSOLE_BITS   CONFIG_LPUART2_BITS
+#    define CONSOLE_2STOP  CONFIG_LPUART2_2STOP
+#    define CONSOLE_IFLOW  CONFIG_LPUART2_IFLOWCONTROL
+#    define CONSOLE_OFLOW  CONFIG_LPUART2_OFLOWCONTROL
+#  elif defined(CONFIG_LPUART3_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   KINETIS_LPUART3_BASE
+#    define CONSOLE_FREQ   BOARD_LPUART3_FREQ
+#    define CONSOLE_BAUD   CONFIG_LPUART3_BAUD
+#    define CONSOLE_PARITY CONFIG_LPUART3_PARITY
+#    define CONSOLE_BITS   CONFIG_LPUART3_BITS
+#    define CONSOLE_2STOP  CONFIG_LPUART3_2STOP
+#    define CONSOLE_IFLOW  CONFIG_LPUART3_IFLOWCONTROL
+#    define CONSOLE_OFLOW  CONFIG_LPUART3_OFLOWCONTROL
+#  elif defined(CONFIG_LPUART4_SERIAL_CONSOLE)
+#    define CONSOLE_BASE   KINETIS_LPUART4_BASE
+#    define CONSOLE_FREQ   BOARD_LPUART4_FREQ
+#    define CONSOLE_BAUD   CONFIG_LPUART4_BAUD
+#    define CONSOLE_PARITY CONFIG_LPUART4_PARITY
+#    define CONSOLE_BITS   CONFIG_LPUART4_BITS
+#    define CONSOLE_2STOP  CONFIG_LPUART4_2STOP
+#    define CONSOLE_IFLOW  CONFIG_LPUART4_IFLOWCONTROL
+#    define CONSOLE_OFLOW  CONFIG_LPUART4_OFLOWCONTROL
 #  else
 #    error "No LPUART console is selected"
 #  endif
@@ -414,50 +459,95 @@ void kinetis_lowsetup(void)
 
   /* Clocking Source for LPUARTs 0 selected in  SIM_SOPT2 */
 
-#  if defined(CONFIG_KINETIS_LPUART0)
-    regval = getreg32(KINETIS_SIM_SOPT2);
-    regval &= ~(SIM_SOPT2_LPUARTSRC_MASK);
-    regval |= BOARD_LPUART0_CLKSRC;
-    putreg32(regval, KINETIS_SIM_SOPT2);
+#if defined(CONFIG_KINETIS_LPUART0)
+  regval = getreg32(KINETIS_SIM_SOPT2);
+  regval &= ~(SIM_SOPT2_LPUARTSRC_MASK);
+  regval |= BOARD_LPUART0_CLKSRC;
+  putreg32(regval, KINETIS_SIM_SOPT2);
 
-    /* Clocking for LPUARTs 0-1 is enabled in the SCGC2 register. */
+  /* Clocking for LPUARTs 0-1 is enabled in the SCGC2 register. */
 
-    regval = getreg32(KINETIS_SIM_SCGC2);
-    regval |= SIM_SCGC2_LPUART0;
-    putreg32(regval, KINETIS_SIM_SCGC2);
+  regval = getreg32(KINETIS_SIM_SCGC2);
+  regval |= SIM_SCGC2_LPUART0;
+  putreg32(regval, KINETIS_SIM_SCGC2);
+#endif
 
-#  endif
+#if defined(CONFIG_KINETIS_LPUART1)
+#  warning REVISIT
+#endif
+#if defined(CONFIG_KINETIS_LPUART2)
+#  warning REVISIT
+#endif
+#if defined(CONFIG_KINETIS_LPUART3)
+#  warning REVISIT
+#endif
+#if defined(CONFIG_KINETIS_LPUART4)
+#  warning REVISIT
+#endif
 
    /* Configure UART pins for the all enabled UARTs */
 
-#  ifdef CONFIG_KINETIS_LPUART0
-   kinetis_pinconfig(PIN_LPUART0_TX);
-   kinetis_pinconfig(PIN_LPUART0_RX);
-#    if CONFIG_LPUART0_IFLOWCONTROL == 1
+#ifdef CONFIG_KINETIS_LPUART0
+  kinetis_pinconfig(PIN_LPUART0_TX);
+  kinetis_pinconfig(PIN_LPUART0_RX);
+#if CONFIG_LPUART0_IFLOWCONTROL == 1
   kinetis_pinconfig(PIN_LPUART0_RTS);
-#    endif
-#    if CONFIG_LPUART0_OFLOWCONTROL == 1
+#endif
+#if CONFIG_LPUART0_OFLOWCONTROL == 1
   kinetis_pinconfig(PIN_LOUART0_CTS);
-#    endif
-#  endif
+#endif
+#endif
 
-#  ifdef CONFIG_KINETIS_LPUART1
-   kinetis_pinconfig(PIN_LPUART1_TX);
-   kinetis_pinconfig(PIN_LPUART1_RX);
-#    if CONFIG_LPUART1_IFLOWCONTROL == 1
+#ifdef CONFIG_KINETIS_LPUART1
+  kinetis_pinconfig(PIN_LPUART1_TX);
+  kinetis_pinconfig(PIN_LPUART1_RX);
+#if CONFIG_LPUART1_IFLOWCONTROL == 1
   kinetis_pinconfig(PIN_LPUART1_RTS);
-#    endif
-#    if CONFIG_LPUART1_OFLOWCONTROL == 1
+#endif
+#if CONFIG_LPUART1_OFLOWCONTROL == 1
   kinetis_pinconfig(PIN_LOUART1_CTS);
-#    endif
-#  endif
+#endif
+#endif
 
-#  if defined(HAVE_LPUART_CONSOLE) && !defined(CONFIG_SUPPRESS_LPUART_CONFIG)
+#ifdef CONFIG_KINETIS_LPUART2
+  kinetis_pinconfig(PIN_LPUART2_TX);
+  kinetis_pinconfig(PIN_LPUART2_RX);
+#if CONFIG_LPUART2_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LPUART2_RTS);
+#endif
+#if CONFIG_LPUART2_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LOUART2_CTS);
+#endif
+#endif
 
-   kinetis_lpuartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ, \
-                           CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP, \
-                           CONSOLE_IFLOW, CONSOLE_OFLOW);
-#  endif
+#ifdef CONFIG_KINETIS_LPUART3
+  kinetis_pinconfig(PIN_LPUART3_TX);
+  kinetis_pinconfig(PIN_LPUART3_RX);
+#if CONFIG_LPUART3_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LPUART3_RTS);
+#endif
+#if CONFIG_LPUART3_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LOUART3_CTS);
+#endif
+#endif
+
+#ifdef CONFIG_KINETIS_LPUART4
+  kinetis_pinconfig(PIN_LPUART4_TX);
+  kinetis_pinconfig(PIN_LPUART4_RX);
+#if CONFIG_LPUART4_IFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LPUART4_RTS);
+#endif
+#if CONFIG_LPUART4_OFLOWCONTROL == 1
+  kinetis_pinconfig(PIN_LOUART4_CTS);
+#endif
+#endif
+
+#if defined(HAVE_LPUART_CONSOLE) && !defined(CONFIG_SUPPRESS_LPUART_CONFIG)
+
+  kinetis_lpuartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ, \
+                          CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP, \
+                          CONSOLE_IFLOW, CONSOLE_OFLOW);
+#endif
 #endif /* HAVE_LPUART_DEVICE */
 }
 
