@@ -74,6 +74,18 @@
 #define GPIO_LED0     (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                        GPIO_PORT1 | GPIO_PIN9)
 
+/* Buttons
+ *
+ * The IMXRT board has one external user button
+ *
+ * 1. SW8 (IRQ0)   GPIO5-00
+ *
+ * REVISIT: Button is set to Port1 pin24 for now.
+ */
+
+#define GPIO_SW8      (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+                       GPIO_PORT1 | GPIO_PIN24)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

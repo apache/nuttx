@@ -138,6 +138,14 @@
  */
 
 /* Button definitions ***************************************************************/
+/* The IMXRT board has one external user button
+ *
+ * 1. SW8 (IRQ0)   GPIO5-00
+ */
+
+#define BUTTON_SW8        0
+
+#define BUTTON_SW8_BIT    (1 << BUTTON_SW8)
 
 /* PIO Disambiguation ***************************************************************/
 
