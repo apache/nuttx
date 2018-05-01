@@ -54,7 +54,7 @@
 /* K28 Family
  *
  * The memory map for the following parts is defined in NXP document
- * K28P144M180SF5RMV2 Rev. 2, May 2015
+ * K28P210M150SF5RM Rev. 4, August 2017
  */
 
 #if defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
