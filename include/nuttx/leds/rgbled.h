@@ -88,7 +88,11 @@ extern "C"
 
 int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
                                           FAR struct pwm_lowerhalf_s *ledg,
-                                          FAR struct pwm_lowerhalf_s *ledb);
+                                          FAR struct pwm_lowerhalf_s *ledb
+#ifdef CONFIG_PWM_MULTICHAN
+                                        , int chanr, int chang, int chanb
+#endif
+                                          );
 
 #undef EXTERN
 #ifdef __cplusplus
