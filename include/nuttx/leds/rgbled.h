@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/rgbled.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,8 @@ extern "C"
  *     drivers for the red, green, and blue LEDs, respectively.  These
  *     instances will be bound to the RGB LED driver and must persists as
  *     long as that driver persists.
+ *   chanr, chang, chanb -Red/Green/Blue PWM channels (only if
+ *     CONFIG_PWM_MULTICHAN is defined)
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.

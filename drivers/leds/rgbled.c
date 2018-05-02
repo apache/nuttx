@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/rgbled.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,13 +73,13 @@ struct rgbled_upperhalf_s
   uint8_t           crefs;    /* The number of times the device has been opened */
   volatile bool     started;  /* True: pulsed output is being generated */
   sem_t             exclsem;  /* Supports mutual exclusion */
-  struct pwm_lowerhalf_s *devledr;
-  struct pwm_lowerhalf_s *devledg;
-  struct pwm_lowerhalf_s *devledb;
+  FAR struct pwm_lowerhalf_s *devledr;
+  FAR struct pwm_lowerhalf_s *devledg;
+  FAR struct pwm_lowerhalf_s *devledb;
 #ifdef CONFIG_PWM_MULTICHAN
-  int chanr;
-  int chang;
-  int chanb;
+  int chanr;                  /* Red PWM channel */
+  int chang;                  /* Green PWM channel */
+  int chanb;                  /* Blue PWM channel */
 #endif
 };
 
@@ -386,7 +386,6 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   blue  ^= 0xffff;
 #endif
 
-
 #ifdef CONFIG_PWM_MULTICHAN
   pwm.frequency = 100;
 
@@ -395,7 +394,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   pwm.channels[i++].channel = upper->chanr;
 
   /* If the green pwm source is on the same timer as the red,
-   * set that up now too */
+   * set that up now too.
+   */
 
   if (ledr == ledg)
     {
@@ -404,7 +404,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
     }
 
   /* If the blue pwm source is on the same timer as the red,
-   * set that up now too */
+   * set that up now too.
+   */
 
   if (ledr == ledb)
     {
@@ -419,7 +420,9 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
       pwm.channels[i].channel = 0;
     }
 
-  /* If the green timer is not the same as the red timer, update it seperately */
+  /* If the green timer is not the same as the red timer, update it
+   * separately.
+   */
 
   if (ledg != ledr)
     {
@@ -428,7 +431,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
       pwm.channels[i++].channel = upper->chang;
 
       /* If the blue pwm source is on the same timer as the green,
-       * set that up now too */
+       * set that up now too.
+       */
 
       if (ledg == ledb)
         {
@@ -444,7 +448,9 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
         }
     }
 
-  /* If the blue timer is not the same as the red or green timer, update it seperately */
+  /* If the blue timer is not the same as the red or green timer, update it
+   * separately.
+   */
 
   if (ledb != ledr && ledb != ledg)
     {
@@ -491,6 +497,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
  *     drivers for the red, green, and blue LEDs, respectively.  These
  *     instances will be bound to the RGB LED driver and must persists as
  *     long as that driver persists.
+ *   chanr, chang, chanb -Red/Green/Blue PWM channels (only if
+ *     CONFIG_PWM_MULTICHAN is defined)
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
