@@ -220,6 +220,17 @@ config ARCH_BOARD_FLIPNCLICK_SAM3X
 		Like the Arduino DUE, this board features the Atmel ATSAM3X8E MCU
 		running at 84 MHz.
 
+config ARCH_BOARD_FREEDOM_K28F
+	bool "NXP Freedom-k28f development board"
+	depends on ARCH_CHIP_MK28FN2M0VMI15
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		development board.
+		This port uses the NXP/FreeScale FREEDOM-K28F development board. This
+		board uses the Kinetis K28F MK28FN2M0VMI15 Cortex-M4 MCU.
+
 config ARCH_BOARD_FREEDOM_K64F
 	bool "NXP Freedom-k64f development board"
 	depends on ARCH_CHIP_MK64FN1M0VLL12
@@ -1649,6 +1660,7 @@ config ARCH_BOARD
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
 	default "flipnclick-pic32mz"       if ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	default "flipnclick-sam3x"         if ARCH_BOARD_FLIPNCLICK_SAM3X
+	default "freedom-k28f"             if ARCH_BOARD_FREEDOM_K28F
 	default "freedom-k64f"             if ARCH_BOARD_FREEDOM_K64F
 	default "freedom-k66f"             if ARCH_BOARD_FREEDOM_K66F
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
@@ -1880,6 +1892,9 @@ source "configs/flipnclick-pic32mz/Kconfig"
 endif
 if ARCH_BOARD_FLIPNCLICK_SAM3X
 source "configs/flipnclick-sam3x/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_K28F
+source "configs/freedom-k28f/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_K64F
 source "configs/freedom-k64f/Kconfig"

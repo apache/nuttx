@@ -7,7 +7,7 @@ if ARCH_ARM
 comment "ARM Options"
 
 choice
-	prompt "ARM chip selection"
+	prompt "ARM MCU selection"
 	default ARCH_CHIP_STM32
 
 config ARCH_CHIP_A1X

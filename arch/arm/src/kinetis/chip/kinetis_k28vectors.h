@@ -57,7 +57,7 @@
 
 #  else
 
-VECTOR(kinetis_dmach0,  KINETIS_IRQ_DMACH0    /*  0: DMA channel 0, 16 transfer complete */
+VECTOR(kinetis_dmach0,  KINETIS_IRQ_DMACH0)   /*  0: DMA channel 0, 16 transfer complete */
 VECTOR(kinetis_dmach1,  KINETIS_IRQ_DMACH1)   /*  1: DMA channel 1, 17 transfer complete */
 VECTOR(kinetis_dmach2,  KINETIS_IRQ_DMACH2)   /*  2: DMA channel 2, 18 transfer complete */
 VECTOR(kinetis_dmach3,  KINETIS_IRQ_DMACH3)   /*  3: DMA channel 3, 19 transfer complete */

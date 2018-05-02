@@ -174,7 +174,7 @@
 #  define KINETIS_TPM2_BASE          0x400ca000 /* TPM2 */
 #  define KINETIS_DAC0_ALT_BASE      0x400cc000 /* Alternate address 12-bit digital-to-analog
                                                  * converter (DAC) 0 */
-#  define KINETIS_LPUART3_BASE       0x400d6000 /* LPUART3 */
+#  define KINETIS_LPUART4_BASE       0x400d6000 /* LPUART4 */
 #  define KINETIS_QSPI0C_BASE        0x400da000 /* QSPI0 controller */
 #  define KINETIS_FLEXIO0_BASE       0x400df000 /* FlexIO0 */
 #  define KINETIS_I2C2_BASE          0x400e6000 /* I2C 2 */

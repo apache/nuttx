@@ -273,6 +273,10 @@ configs/flipnclick-sam3x
   Arduino DUE, this board features the Atmel ATSAM3X8E MCU running at 84
   MHz.
 
+configs/freedom-k28f
+  This port uses the NXP/FreeScale FREEDOM-K28F development board. This
+  board uses the Kinetis K28F MK28FN2M0VMI15 Cortex-M4 MCU.
+
 configs/freedom-k64f
   This port uses the NXP/FreeScale FREEDOM-K64F development board. This board
   uses the Kinetis K64 MK64FN1M0VLL12 Cortex-M4 MCU.

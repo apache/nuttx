@@ -1682,6 +1682,8 @@ nuttx/
  |   |   `- README.txt
  |   |- flipnclick-sam3x/
  |   |   `- README.txt
+ |   |- freedom-k28f/
+ |   |   `- README.txt
  |   |- freedom-k64f/
  |   |   `- README.txt
  |   |- freedom-k66f/
