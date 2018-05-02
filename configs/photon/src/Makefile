@@ -68,4 +68,8 @@ ifeq ($(CONFIG_STM32_OTGHS),y)
 CSRCS += stm32_usb.c
 endif
 
+ifeq ($(CONFIG_RGBLED),y)
+  CSRCS += stm32_rgbled.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

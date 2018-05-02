@@ -204,6 +204,26 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
+/* TIM */
+
+#define GPIO_TIM2_CH2OUT GPIO_TIM2_CH2OUT_1
+#define GPIO_TIM2_CH3OUT GPIO_TIM2_CH3OUT_1
+#define GPIO_TIM2_CH4OUT GPIO_TIM2_CH4OUT_1
+
+/* RGB LED
+ *
+ * R = TIM2 CH2 on PA1 | G = TIM2 CH3 on PA2 | B = TIM4 CH4 on PA3
+ *
+ * Note: Pin configs: GPIO_TIM2_CH2OUT ; GPIO_TIM2_CH3OUT ; GPIO_TIM2_CH4OUT
+ */
+
+#define RGBLED_RPWMTIMER   2
+#define RGBLED_RPWMCHANNEL 2
+#define RGBLED_GPWMTIMER   2
+#define RGBLED_GPWMCHANNEL 3
+#define RGBLED_BPWMTIMER   2
+#define RGBLED_BPWMCHANNEL 4
+
 /* Button definitions ***************************************************************/
 
 #define BOARD_BUTTON1     0
