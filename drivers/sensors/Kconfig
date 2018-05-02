@@ -244,6 +244,18 @@ config INA219_I2C_FREQUENCY
 	default 400000
 	depends on SENSORS_INA219
 
+config SENSORS_INA3221
+	bool "INA3221 current and voltage monitor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments INA3221 current and voltage monitor.
+
+config INA3221_I2C_FREQUENCY
+	int "INA3221 I2C frequency"
+	default 400000
+	depends on SENSORS_INA3221
+
 config SENSORS_MB7040
 	bool "MaxBotix MB7040 Sonar support"
 	default n

@@ -133,6 +133,10 @@ ifeq ($(CONFIG_SENSORS_INA219),y)
   CSRCS += ina219.c
 endif
 
+ifeq ($(CONFIG_SENSORS_INA3221),y)
+  CSRCS += ina3221.c
+endif
+
 ifeq ($(CONFIG_SENSORS_SHT21),y)
   CSRCS += sht21.c
 endif
