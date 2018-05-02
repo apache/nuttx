@@ -158,6 +158,14 @@ config IMXRT_GPIO4_16_31_IRQ
 	bool "GPIO4 Pins 16-31 interrupts"
 	default n
 
+config IMXRT_GPIO5_0_15_IRQ
+	bool "GPIO5 Pins 0-15 interrupts"
+	default n
+
+config IMXRT_GPIO5_16_31_IRQ
+	bool "GPIO5 Pins 16-31 interrupts"
+	default n
+
 endif # IMXRT_GPIO_IRQ
 
 menu "Memory Configuration"
