@@ -156,8 +156,8 @@ static const struct file_operations g_ina3221fops =
  ****************************************************************************/
 
 static int ina3221_access(FAR struct ina3221_dev_s *priv,
-                         uint8_t start_register_address, bool reading,
-                         FAR uint8_t* register_value, uint8_t data_length)
+                          uint8_t start_register_address, bool reading,
+                          FAR uint8_t* register_value, uint8_t data_length)
 {
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
@@ -185,7 +185,7 @@ static int ina3221_access(FAR struct ina3221_dev_s *priv,
 }
 
 static int ina3221_read16(FAR struct ina3221_dev_s *priv, uint8_t regaddr,
-                         FAR uint16_t* regvalue)
+                          FAR uint16_t* regvalue)
 {
   uint8_t buf[2];
 
@@ -200,7 +200,7 @@ static int ina3221_read16(FAR struct ina3221_dev_s *priv, uint8_t regaddr,
 }
 
 static int ina3221_write16(FAR struct ina3221_dev_s *priv, uint8_t regaddr,
-                          FAR uint16_t regvalue)
+                           FAR uint16_t regvalue)
 {
   uint8_t buf[2];
 
@@ -237,7 +237,8 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
         {
           /* Read the raw bus voltage */
 
-          ret = ina3221_read16(priv, (INA3221_REG_CH1_BUS_VOLTAGE << i), &reg);
+          ret = ina3221_read16(priv, (INA3221_REG_CH1_BUS_VOLTAGE << i),
+                               &reg);
           if (ret < 0)
           {
             snerr("ERROR: ina3221_read16 failed: %d\n", ret);
@@ -251,7 +252,8 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
 
           /* Read the raw shunt voltage */
 
-          ret = ina3221_read16(priv, (INA3221_REG_CH1_SHUNT_VOLTAGE << i), &reg);
+          ret = ina3221_read16(priv, (INA3221_REG_CH1_SHUNT_VOLTAGE << i),
+                               &reg);
           if (ret < 0)
           {
             snerr("ERROR: ina3221_read16 failed: %d\n", ret);
@@ -296,6 +298,7 @@ static int ina3221_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct ina3221_dev_s *priv   = inode->i_private;
 
+  UNUSED(priv);
   return OK;
 }
 
@@ -312,6 +315,7 @@ static int ina3221_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct ina3221_dev_s *priv   = inode->i_private;
 
+  UNUSED(priv);
   return OK;
 }
 
@@ -323,7 +327,7 @@ static ssize_t ina3221_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ina3221_dev_s *priv   = inode->i_private;
+  FAR struct ina3221_dev_s *priv = inode->i_private;
   FAR struct ina3221_s *ptr;
   ssize_t nsamples;
   int i;

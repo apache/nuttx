@@ -151,8 +151,7 @@ int stm32_rgbled_setup(void)
 
       info.frequency = 100;
 
-#ifdef CONFIG_PWM_MULTICHAN  
-
+#ifdef CONFIG_PWM_MULTICHAN
       /* Setup the duty cycle and channel for red */
 
       i = 0;
@@ -174,7 +173,8 @@ int stm32_rgbled_setup(void)
         }
 
       /* Start the timer used for red, and any other colors that are
-       * sourced on a different channel of the same timer */
+       * sourced on a different channel of the same timer.
+       */
 
       ledr->ops->start(ledr, &info);
 
@@ -184,21 +184,23 @@ int stm32_rgbled_setup(void)
         {
           info.channels[i].channel = 0;
         }
-      
-      /* If the green timer is not the same as the red timer, then set it up. */
+
+      /* If the green timer is not the same as the red timer, then set it
+       * up.
+       */
 
       if (RGBLED_GPWMTIMER != RGBLED_RPWMTIMER)
         {
           i = 0;
           info.channels[i++].channel = RGBLED_GPWMCHANNEL;
-      
+
           /* If the blue timer uses the same timer and the green */
 
           if (RGBLED_GPWMTIMER == RGBLED_BPWMTIMER)
             {
               info.channels[i++].channel = RGBLED_BPWMCHANNEL;
             }
-          
+
           /* Start green timer (and maybe blue) */
 
           ledg->ops->start(ledg, &info);
@@ -211,9 +213,12 @@ int stm32_rgbled_setup(void)
             }
         }
 
-      /* If the blue timer is different than the red and the green, it must be setup seperately */
+      /* If the blue timer is different than the red and the green, it must
+       * be setup separately.
+       */
 
-      if (RGBLED_BPWMTIMER != RGBLED_RPWMTIMER && RGBLED_BPWMTIMER != RGBLED_GPWMTIMER)
+      if (RGBLED_BPWMTIMER != RGBLED_RPWMTIMER &&
+          RGBLED_BPWMTIMER != RGBLED_GPWMTIMER)
         {
           info.channels[0].channel = RGBLED_BPWMCHANNEL;
           ledb->ops->start(ledb, &info);
@@ -228,7 +233,9 @@ int stm32_rgbled_setup(void)
       /* Register the RGB LED diver at "/dev/rgbled0" */
 
 #ifdef CONFIG_PWM_MULTICHAN
-      ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb, RGBLED_RPWMCHANNEL, RGBLED_GPWMCHANNEL, RGBLED_BPWMCHANNEL);
+      ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb,
+                            RGBLED_RPWMCHANNEL, RGBLED_GPWMCHANNEL,
+                            RGBLED_BPWMCHANNEL);
 #else
       ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
 #endif
