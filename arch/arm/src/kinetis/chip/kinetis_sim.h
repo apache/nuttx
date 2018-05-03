@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_sim.h
  *
- *   Copyright (C) 2011, 2016, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -58,7 +58,9 @@
 #if defined(KINETIS_SIM_HAS_USBPHYCTL)
 #  define KINETIS_SIM_USBPHYCTL_OFFSET        0x0008  /* USB PHY Control Register */
 #endif
-#define KINETIS_SIM_SOPT2_OFFSET              0x0004  /* System Options Register 2 */
+#if defined(KINETIS_SIM_HAS_SOPT2)
+#  define KINETIS_SIM_SOPT2_OFFSET            0x0004  /* System Options Register 2 */
+#endif
 #define KINETIS_SIM_SOPT4_OFFSET              0x000c  /* System Options Register 4 */
 #define KINETIS_SIM_SOPT5_OFFSET              0x0010  /* System Options Register 5 */
 #define KINETIS_SIM_SOPT6_OFFSET              0x0014  /* System Options Register 6 */
@@ -104,7 +106,9 @@
 #if defined(KINETIS_SIM_HAS_USBPHYCTL)
 #  define KINETIS_SIM_USBPHYCTL               (KINETIS_SIMLP_BASE+KINETIS_SIM_USBPHYCTL_OFFSET)
 #endif
-#define KINETIS_SIM_SOPT2                     (KINETIS_SIM_BASE+KINETIS_SIM_SOPT2_OFFSET)
+#if defined(KINETIS_SIM_HAS_SOPT2)
+#  define KINETIS_SIM_SOPT2                   (KINETIS_SIM_BASE+KINETIS_SIM_SOPT2_OFFSET)
+#endif
 #define KINETIS_SIM_SOPT4                     (KINETIS_SIM_BASE+KINETIS_SIM_SOPT4_OFFSET)
 #define KINETIS_SIM_SOPT5                     (KINETIS_SIM_BASE+KINETIS_SIM_SOPT5_OFFSET)
 #define KINETIS_SIM_SOPT6                     (KINETIS_SIM_BASE+KINETIS_SIM_SOPT6_OFFSET)
@@ -178,9 +182,9 @@
 #  define SIM_SOPT1_USBREGEN                  (1 << 31)  /* Bit 31: USB voltage regulator enable */
 #endif
 
-#if defined(KINETIS_SIM_HAS_SOPT1CFG)
 /* SOPT1 Configuration Register */
 
+#if defined(KINETIS_SIM_HAS_SOPT1CFG)
                                                          /* Bits 0-22: Reserved */
 #  if defined(KINETIS_SIM_HAS_SOPT1CFG_URWE)
 #    define SIM_SOPT1CFG_URWE                 (1 << 24)  /* Bit 24: USB voltage regulator enable write enable */
@@ -194,10 +198,9 @@
                                                          /* Bits 27-31: Reserved */
 #endif
 
-
-#if defined(KINETIS_SIM_HAS_USBPHYCTL)
 /* USB PHY Control Register */
 
+#if defined(KINETIS_SIM_HAS_USBPHYCTL)
                                                          /* Bits 0-7: Reserved */
 #  if defined(KINETIS_SIM_HAS_USBPHYCTL_USBVREGSEL)
 #    define SIM_USBPHYCTL_USBVREGSEL          (1 << 8)   /* Bit 8: Selects the default input voltage source */
@@ -301,23 +304,28 @@
 #  if defined(KINETIS_SIM_HAS_SOPT2_TIMESRC)
 #    define SIM_SOPT2_TIMESRC_SHIFT           (20)      /* Bit 20-21: IEEE 1588 timestamp clock source select */
 #    define SIM_SOPT2_TIMESRC_MASK            (3 << SIM_SOPT2_TIMESRC_SHIFT)
-#    define SIM_SOPT2_TIMESRC_CORE            (0 << SIM_SOPT2_TIMESRC_SHIFT) /* Core/system clock */
-#    define SIM_SOPT2_TIMESRC_PLLSEL          (1 << SIM_SOPT2_TIMESRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
-                                                                                clock as selected by SOPT2[PLLFLLSEL] */
-#    define SIM_SOPT2_TIMESRC_OSCERCLK        (2 << SIM_SOPT2_TIMESRC_SHIFT) /* OSCERCLK clock */
-#    define SIM_SOPT2_TIMESRC_EXTBYP          (3 << SIM_SOPT2_TIMESRC_SHIFT) /* External bypass clock (ENET_1588_CLKIN) */
+#      define SIM_SOPT2_TIMESRC_CORE          (0 << SIM_SOPT2_TIMESRC_SHIFT) /* Core/system clock */
+#      define SIM_SOPT2_TIMESRC_PLLSEL        (1 << SIM_SOPT2_TIMESRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
+                                                                                  clock as selected by SOPT2[PLLFLLSEL] */
+#      define SIM_SOPT2_TIMESRC_OSCERCLK      (2 << SIM_SOPT2_TIMESRC_SHIFT) /* OSCERCLK clock */
+#      define SIM_SOPT2_TIMESRC_EXTBYP        (3 << SIM_SOPT2_TIMESRC_SHIFT) /* External bypass clock (ENET_1588_CLKIN) */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SOPT2_FLEXIOSRC)
-                                                        /* TBD */
+#    define SIM_SOPT2_FLEXIOSRC_SHIFT         (22)    /* Bits 22-23: FlexIO Module Clock Source Select */
+#    define SIM_SOPT2_FLEXIOSRC_MASK          (3 << SIM_SOPT2_FLEXIOSRC_SHIFT)
+#      define SIM_SOPT2_FLEXIOSRC_CORE        (0 << SIM_SOPT2_FLEXIOSRC_SHIFT) /* Core/system clock */
+#      define SIM_SOPT2_FLEXIOSRC_PLLSEL      (1 << SIM_SOPT2_FLEXIOSRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
+                                                                                * clock as selected by SOPT2[PLLFLLSEL] */
+#      define SIM_SOPT2_FLEXIOSRC_OSCERCLK    (2 << SIM_SOPT2_FLEXIOSRC_SHIFT) /* OSCERCLK clock */
+#      define SIM_SOPT2_FLEXIOSRC_MCGIRCLK    (3 << SIM_SOPT2_FLEXIOSRC_SHIFT) /* MCGIRCLK clock */
 #  endif
-                                                        /* Bits 22-23: Reserved */
 #  if defined(KINETIS_SIM_HAS_SOPT2_USBFSRC)
-#    define SIM_SOPT2_USBFSRC_SHIFT            (22)     /* Bits 22-23: USB FS clock source select */
-#    define SIM_SOPT2_USBFSRC_MASK             (3 << SIM_SOPT2_USBFSRC_SHIFT)
-#      define SIM_SOPT2_USBFSRC_MCGCLK         (0 << SIM_SOPT2_USBFSRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK clock as selected by SOPT2[PLLFLLSEL] */
-#      define SIM_SOPT2_USBFSRC_MCGPLL0CLK     (1 << SIM_SOPT2_USBFSRC_SHIFT) /* MCGPLL0CLK clock */
-#      define SIM_SOPT2_USBFSRC_MCGPLL1CLK     (2 << SIM_SOPT2_USBFSRC_SHIFT) /* MCGPLL1CLK clock */
-#      define SIM_SOPT2_USBFSRC_OCS0ERCLK      (3 << SIM_SOPT2_USBFSRC_SHIFT) /* OSC0ERCLK clock */
+#    define SIM_SOPT2_USBFSRC_SHIFT           (22)     /* Bits 22-23: USB FS clock source select */
+#    define SIM_SOPT2_USBFSRC_MASK            (3 << SIM_SOPT2_USBFSRC_SHIFT)
+#      define SIM_SOPT2_USBFSRC_MCGCLK        (0 << SIM_SOPT2_USBFSRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK clock as selected by SOPT2[PLLFLLSEL] */
+#      define SIM_SOPT2_USBFSRC_MCGPLL0CLK    (1 << SIM_SOPT2_USBFSRC_SHIFT) /* MCGPLL0CLK clock */
+#      define SIM_SOPT2_USBFSRC_MCGPLL1CLK    (2 << SIM_SOPT2_USBFSRC_SHIFT) /* MCGPLL1CLK clock */
+#      define SIM_SOPT2_USBFSRC_OCS0ERCLK     (3 << SIM_SOPT2_USBFSRC_SHIFT) /* OSC0ERCLK clock */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SOPT2_TPMSRC)
 #    define SIM_SOPT2_TPMSRC_SHIFT            (24)      /* Bits 24-25: TPM clock source select */
@@ -374,7 +382,9 @@
 
 #define SIM_SOPT4_FTM0FLT0                    (1 << 0)  /* Bit 0:  FTM0 Fault 0 Select */
 #define SIM_SOPT4_FTM0FLT1                    (1 << 1)  /* Bit 1:  FTM0 Fault 1 Select */
-#define SIM_SOPT4_FTM0FLT2                    (1 << 2)  /* Bit 2:  FTM0 Fault 2 Select */
+#if defined(KINETIS_SIM_HAS_SOPT4_FTM0FLT2)
+#  define SIM_SOPT4_FTM0FLT2                  (1 << 2)  /* Bit 2:  FTM0 Fault 2 Select */
+#endif
                                                         /* Bit 3: Reserved */
 #if defined(KINETIS_SIM_HAS_SOPT4_FTM0FLT3)
 #  define SIM_SOPT4_FTM0FLT3                  (1 << 3)  /* Bit 3:  FTM0 Fault 3 Select */
@@ -406,8 +416,8 @@
 #endif
                                                         /* Bits 22-23: Reserved */
 #if defined(KINETIS_SIM_HAS_SOPT4_FTM2CH1SRC)
-                                                        /* Bit 23: Reserved */
   #define SIM_SOPT4_FTM2CH1SRC                (1 << 22) /* Bit 22:  FTM2 channel 1 input capture source select */
+                                                        /* Bit 23: Reserved */
 #endif
 #define SIM_SOPT4_FTM0CLKSEL                  (1 << 24) /* Bit 24:  FlexTimer 0 External Clock Pin Select */
 #define SIM_SOPT4_FTM1CLKSEL                  (1 << 25) /* Bit 25:  FTM1 External Clock Pin Select */
@@ -433,26 +443,34 @@
 
 /* System Options Register 5 */
 
-#define SIM_SOPT5_UART0TXSRC_SHIFT            (0)       /* Bits 0-1: UART 0 transmit data source select */
-#define SIM_SOPT5_UART0TXSRC_MASK             (3 << SIM_SOPT5_UART0TXSRC_SHIFT)
-#  define SIM_SOPT5_UART0TXSRC_TX             (0 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX pin */
-#  define SIM_SOPT5_UART0TXSRC_FTM1           (1 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX modulated with FTM1 ch0 output */
-#  define SIM_SOPT5_UART0TXSRC_FTM2           (2 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX modulated with FTM2 ch0 output */
-#define SIM_SOPT5_UART0RXSRC_SHIFT            (2)       /* Bits 2-3: UART 0 receive data source select */
-#define SIM_SOPT5_UART0RXSRC_MASK             (3 << SIM_SOPT5_UART0RXSRC_SHIFT)
-#  define SIM_SOPT5_UART0RXSRC_RX             (0 << SIM_SOPT5_UART0RXSRC_SHIFT) /* UART0_RX pin */
-#  define SIM_SOPT5_UART0RXSRC_CMP0           (1 << SIM_SOPT5_UART0RXSRC_SHIFT) /* CMP0 */
-#  define SIM_SOPT5_UART0RXSRC_CMP1           (2 << SIM_SOPT5_UART0RXSRC_SHIFT) /* CMP1 */
-#define SIM_SOPT5_UART1TXSRC_SHIFT            (4)       /* Bits 4-5: UART 1 transmit data source select */
-#define SIM_SOPT5_UART1TXSRC_MASK             (3 << SIM_SOPT5_UART1TXSRC_SHIFT)
-#  define SIM_SOPT5_UART1TXSRC_TX             (0 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX pin */
-#  define SIM_SOPT5_UART1TXSRC_FTM1           (1 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX modulated with FTM1 ch0 output */
-#  define SIM_SOPT5_UART1TXSRC_FTM2           (2 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX modulated with FTM2 ch0 output */
-#define SIM_SOPT5_UART1RXSRC_SHIFT            (6)       /* Bits 6-7: UART 1 receive data source select */
-#define SIM_SOPT5_UART1RXSRC_MASK             (3 << SIM_SOPT5_UART1RXSRC_SHIFT)
-#  define SIM_SOPT5_UART1RXSRC_RX             (0 << SIM_SOPT5_UART1RXSRC_SHIFT) /* UART1_RX pin */
-#  define SIM_SOPT5_UART1RXSRC_CMP0           (1 << SIM_SOPT5_UART1RXSRC_SHIFT) /* CMP0 */
-#  define SIM_SOPT5_UART1RXSRC_CMP1           (2 << SIM_SOPT5_UART1RXSRC_SHIFT) /* CMP1 */
+#if defined(KINETIS_SIM_HAS_SOPT5_UART0TXSRC)
+#  define SIM_SOPT5_UART0TXSRC_SHIFT          (0)       /* Bits 0-1: UART 0 transmit data source select */
+#  define SIM_SOPT5_UART0TXSRC_MASK           (3 << SIM_SOPT5_UART0TXSRC_SHIFT)
+#    define SIM_SOPT5_UART0TXSRC_TX           (0 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX pin */
+#    define SIM_SOPT5_UART0TXSRC_FTM1         (1 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX modulated with FTM1 ch0 output */
+#    define SIM_SOPT5_UART0TXSRC_FTM2         (2 << SIM_SOPT5_UART0TXSRC_SHIFT) /* UART0_TX modulated with FTM2 ch0 output */
+#endif
+#if defined(KINETIS_SIM_HAS_SOPT5_UART0RXSRC)
+#  define SIM_SOPT5_UART0RXSRC_SHIFT          (2)       /* Bits 2-3: UART 0 receive data source select */
+#  define SIM_SOPT5_UART0RXSRC_MASK           (3 << SIM_SOPT5_UART0RXSRC_SHIFT)
+#    define SIM_SOPT5_UART0RXSRC_RX           (0 << SIM_SOPT5_UART0RXSRC_SHIFT) /* UART0_RX pin */
+#    define SIM_SOPT5_UART0RXSRC_CMP0         (1 << SIM_SOPT5_UART0RXSRC_SHIFT) /* CMP0 */
+#    define SIM_SOPT5_UART0RXSRC_CMP1         (2 << SIM_SOPT5_UART0RXSRC_SHIFT) /* CMP1 */
+#endif
+#if defined(KINETIS_SIM_HAS_SOPT5_UART1TXSRC)
+#  define SIM_SOPT5_UART1TXSRC_SHIFT          (4)       /* Bits 4-5: UART 1 transmit data source select */
+#  define SIM_SOPT5_UART1TXSRC_MASK           (3 << SIM_SOPT5_UART1TXSRC_SHIFT)
+#    define SIM_SOPT5_UART1TXSRC_TX           (0 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX pin */
+#    define SIM_SOPT5_UART1TXSRC_FTM1         (1 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX modulated with FTM1 ch0 output */
+#    define SIM_SOPT5_UART1TXSRC_FTM2         (2 << SIM_SOPT5_UART1TXSRC_SHIFT) /* UART1_TX modulated with FTM2 ch0 output */
+#endif
+#if defined(KINETIS_SIM_HAS_SOPT5_UART1RXSRC)
+#  define SIM_SOPT5_UART1RXSRC_SHIFT          (6)       /* Bits 6-7: UART 1 receive data source select */
+#  define SIM_SOPT5_UART1RXSRC_MASK           (3 << SIM_SOPT5_UART1RXSRC_SHIFT)
+#    define SIM_SOPT5_UART1RXSRC_RX           (0 << SIM_SOPT5_UART1RXSRC_SHIFT) /* UART1_RX pin */
+#    define SIM_SOPT5_UART1RXSRC_CMP0         (1 << SIM_SOPT5_UART1RXSRC_SHIFT) /* CMP0 */
+#    define SIM_SOPT5_UART1RXSRC_CMP1         (2 << SIM_SOPT5_UART1RXSRC_SHIFT) /* CMP1 */
+#endif
                                                         /* Bits 8-31: Reserved */
 #if defined(KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC)
                                                         /* Bits 8-15, 18-31: Reserved */
@@ -472,9 +490,27 @@
 #    define SIM_SOPT5_LPUART0RXSRC_TXTMP2CH0  (2 << SIM_SOPT5_LPUART0RXSRC_SHIFT) /* CMP1 output */
 #endif
 
-#if defined(KINETIS_SIM_HAS_SOPT6)
+#if defined(KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC)
+                                                        /* Bits 8-15, 18-31: Reserved */
+#  define SIM_SOPT5_LPUART1TXSRC_SHIFT        (16)      /* Bit 16:  LPUART1 transmit data source select */
+#  define SIM_SOPT5_LPUART1TXSRC_MASK         (3 << SIM_SOPT5_LPUART1TXSRC_SHIFT)
+#    define SIM_SOPT5_LPUART1TXSRC_TX         (0 << SIM_SOPT5_LPUART1TXSRC_SHIFT) /* LPUART1_TX pin */
+#    define SIM_SOPT5_LPUART1TXSRC_TXTMP1CH0  (1 << SIM_SOPT5_LPUART1TXSRC_SHIFT) /* LPUART1_TX pin modulated with TPM1 channel 0 output */
+#    define SIM_SOPT5_LPUART1TXSRC_TXTMP2CH0  (2 << SIM_SOPT5_LPUART1TXSRC_SHIFT) /* LPUART1_TX pin modulated with TPM2 channel 0 output */
+#endif
+                                                        /* Bits 8-15, 18-31: Reserved */
+#if defined(KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC)
+                                                        /* Bits 8-15, 20-31: Reserved */
+#  define SIM_SOPT5_LPUART1RXSRC_SHIFT        (18)      /* Bit 18:  LPUART1 receive data source select */
+#  define SIM_SOPT5_LPUART1RXSRC_MASK         (3 << SIM_SOPT5_LPUART1RXSRC_SHIFT)
+#    define SIM_SOPT5_LPUART1RXSRC_TX         (0 << SIM_SOPT5_LPUART1RXSRC_SHIFT) /* LPUART1_RX pin */
+#    define SIM_SOPT5_LPUART1RXSRC_TXTMP1CH0  (1 << SIM_SOPT5_LPUART1RXSRC_SHIFT) /* CMP0 output */
+#    define SIM_SOPT5_LPUART1RXSRC_TXTMP2CH0  (2 << SIM_SOPT5_LPUART1RXSRC_SHIFT) /* CMP1 output */
+#endif
+
 /* System Options Register 6 */
 
+#if defined(KINETIS_SIM_HAS_SOPT6)
                                                         /* Bits 0-23: Reserved */
 #  if defined(KINETIS_SIM_HAS_SOPT6_MCC)
                                                         /* Bits 16-23: Reserved */
@@ -660,9 +696,9 @@
 #  define SIM_SOPT7_ADC3ALTTRGEN              (1 << 31) /* Bit 31:  ADC3 alternate trigger enable */
 #endif
 
-#if defined(KINETIS_SIM_HAS_SOPT8)
 /* System Options Register 8 */
 
+#if defined(KINETIS_SIM_HAS_SOPT8)
 #  if defined(KINETIS_SIM_HAS_SOPT8_FTM0SYNCBIT)
 #    define SIM_SOPT8_FTM0SYNCBIT             (1 << 0)  /* Bit 0:  FTM0 Hardware Trigger 0 Software Synchronization */
 #  endif
@@ -726,9 +762,9 @@
 #  endif
 #endif
 
-#if defined(KINETIS_SIM_HAS_SOPT9)
 /* System Options Register 9 */
 
+#if defined(KINETIS_SIM_HAS_SOPT9)
                                                         /* Bits 0-17: Reserved */
 #  if defined(KINETIS_SIM_HAS_SOPT9_TPM1CH0SRC)
 #    define SIM_SOPT9_TPM1CH0SRC_SHIFT        (18)      /* Bits 18-19:  TPM1 channel 0 input capture source select */
@@ -773,20 +809,20 @@
 #    define SIM_SDID_FAMID_SHIFT              (4)       /* Bits 4-6: Kinetis family identification */
 #    define SIM_SDID_FAMID_MASK               (7 << SIM_SDID_FAMID_SHIFT)
 #      define SIM_SDID_FAMID_K10              (0 << SIM_SDID_FAMID_SHIFT) /* K10 */
-#      define SIM_SDID_FAMID_K20              (1 << SIM_SDID_FAMID_SHIFT)) /* K20 */
-#      define SIM_SDID_FAMID_K30              (2 << SIM_SDID_FAMID_SHIFT)) /* K30 */
-#      define SIM_SDID_FAMID_K40              (3 << SIM_SDID_FAMID_SHIFT)) /* K40 */
-#      define SIM_SDID_FAMID_K60              (4 << SIM_SDID_FAMID_SHIFT)) /* K60 */
-#      define SIM_SDID_FAMID_K70              (5 << SIM_SDID_FAMID_SHIFT)) /* K70 */
-#      define SIM_SDID_FAMID_K50              (6 << SIM_SDID_FAMID_SHIFT)) /* K50 and K52 */
-#      define SIM_SDID_FAMID_K51              (7 << SIM_SDID_FAMID_SHIFT)) /* K51 and K53 */
+#      define SIM_SDID_FAMID_K20              (1 << SIM_SDID_FAMID_SHIFT) /* K20 */
+#      define SIM_SDID_FAMID_K30              (2 << SIM_SDID_FAMID_SHIFT) /* K30 */
+#      define SIM_SDID_FAMID_K40              (3 << SIM_SDID_FAMID_SHIFT) /* K40 */
+#      define SIM_SDID_FAMID_K60              (4 << SIM_SDID_FAMID_SHIFT) /* K60 */
+#      define SIM_SDID_FAMID_K70              (5 << SIM_SDID_FAMID_SHIFT) /* K70 */
+#      define SIM_SDID_FAMID_K50              (6 << SIM_SDID_FAMID_SHIFT) /* K50 and K52 */
+#      define SIM_SDID_FAMID_K51              (7 << SIM_SDID_FAMID_SHIFT) /* K51 and K53 */
 #  else
 #      define SIM_SDID_FAMID_K1X              (0 << SIM_SDID_FAMID_SHIFT) /* K1X */
-#      define SIM_SDID_FAMID_K2X              (1 << SIM_SDID_FAMID_SHIFT)) /* K2X */
-#      define SIM_SDID_FAMID_K3X              (2 << SIM_SDID_FAMID_SHIFT)) /* K3X */
-#      define SIM_SDID_FAMID_K4X              (3 << SIM_SDID_FAMID_SHIFT)) /* K4X */
-#      define SIM_SDID_FAMID_K6X              (4 << SIM_SDID_FAMID_SHIFT)) /* K6X */
-#      define SIM_SDID_FAMID_K7X              (5 << SIM_SDID_FAMID_SHIFT)) /* K7X */
+#      define SIM_SDID_FAMID_K2X              (1 << SIM_SDID_FAMID_SHIFT) /* K2X */
+#      define SIM_SDID_FAMID_K3X              (2 << SIM_SDID_FAMID_SHIFT) /* K3X */
+#      define SIM_SDID_FAMID_K4X              (3 << SIM_SDID_FAMID_SHIFT) /* K4X */
+#      define SIM_SDID_FAMID_K6X              (4 << SIM_SDID_FAMID_SHIFT) /* K6X */
+#      define SIM_SDID_FAMID_K7X              (5 << SIM_SDID_FAMID_SHIFT) /* K7X */
 #  endif
 #endif
                                                         /* Bits 7-11: Reserved */
@@ -860,14 +896,23 @@
                                                         /* Bits 12-31: Reserved */
 #endif
 
-#if defined(KINETIS_SIM_HAS_SCGC2)
 /* System Clock Gating Control Register 2 */
 
+#if defined(KINETIS_SIM_HAS_SCGC2)
 #  if defined(KINETIS_SIM_HAS_SCGC2_ENET) && defined(KINETIS_NENET) && KINETIS_NENET > 0
 #    define SIM_SCGC2_ENET                    (1 << 0)  /* Bit 0:  ENET Clock Gate Control */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SCGC2_LPUART0)
 #    define SIM_SCGC2_LPUART0                 (1 << 4)  /* Bit 4:  LPUART0 Clock Gate Control */
+#  endif
+#  if defined(KINETIS_SIM_HAS_SCGC2_LPUART1)
+#    define SIM_SCGC2_LPUART1                 (1 << 5)  /* Bit 5:  LPUART1 Clock Gate Control */
+#  endif
+#  if defined(KINETIS_SIM_HAS_SCGC2_LPUART2)
+#    define SIM_SCGC2_LPUART2                 (1 << 6)  /* Bit 6:  LPUART2 Clock Gate Control */
+#  endif
+#  if defined(KINETIS_SIM_HAS_SCGC2_LPUART3)
+#    define SIM_SCGC2_LPUART3                 (1 << 7)  /* Bit 7:  LPUART3 Clock Gate Control */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SCGC2_TPM1)
 #    define SIM_SCGC2_TPM1                    (1 << 9)  /* Bit 9:  TPM1 Clock Gate Control */
@@ -876,15 +921,28 @@
 #    define SIM_SCGC2_TPM2                    (1 << 10) /* Bit 10:  TPM2 Clock Gate Control */
 #  endif
 #  define SIM_SCGC2_DAC0                      (1 << 12) /* Bit 12: DAC0 Clock Gate Control */
-#  define SIM_SCGC2_DAC1                      (1 << 13) /* Bit 13: DAC1 Clock Gate Control */
-                                                        /* Bits 14-31: Reserved */
+#  if defined(KINETIS_SIM_HAS_SCGC2_DAC1)
+#    define SIM_SCGC2_DAC1                    (1 << 13) /* Bit 13: DAC1 Clock Gate Control */
+#  endif
+                                                        /* Bits 14-21: Reserved */
+#  if defined(KINETIS_SIM_HAS_SCGC2_LPUART4)
+#    define SIM_SCGC2_LPUART4                 (1 << 22) /* Bit 22: LPUART4 Clock Gate Control */
+#  endif
+                                                        /* Bits 23-25: Reserved */
+#  if defined(KINETIS_SIM_HAS_SCGC2_QSPI)
+#    define SIM_SCGC2_QSPI                    (1 << 26) /* Bit 26: QSPI Clock Gate Control */
+#  endif
+                                                        /* Bits 27-30: Reserved */
+#  if defined(KINETIS_SIM_HAS_SCGC2_FLEXIO)
+#    define SIM_SCGC2_FLEXIO                  (1 << 31) /* Bit 31: FlexIO Clock Gate Control */
+#  endif
 #endif
 
-#if defined(KINETIS_SIM_HAS_SCGC3)
 /* System Clock Gating Control Register 3 */
 
+#if defined(KINETIS_SIM_HAS_SCGC3)
 #  if defined(KINETIS_SIM_HAS_SCGC3_RNGA)  && defined(KINETIS_NRNG) && KINETIS_NRNG > 0
-#    define SIM_SCGC3_RNGA                    (1 << 0)  /* Bit 0:  RNGB Clock Gate Control */
+#    define SIM_SCGC3_RNGA                    (1 << 0)  /* Bit 0:  TRNG/RNGA Clock Gate Control */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SCGC3_USBHS)
 #    define SIM_SCGC3_USBHS                   (1 << 1)  /* Bit 1:  USBHS Clock Gate Control */
@@ -905,9 +963,12 @@
 #  if defined(KINETIS_SIM_HAS_SCGC3_SPI2)
 #    define SIM_SCGC3_SPI2                    (1 << 12) /* Bit 12: SPI2 Clock Gate Control */
 #  endif
-                                                        /* Bits 13-14: Reserved */
+#  if defined(KINETIS_SIM_HAS_SCGC3_SPI3)
+#    define SIM_SCGC3_SPI3                    (1 << 13) /* Bit 13: SPI3 Clock Gate Control */
+#  endif
+                                                        /* Bit 14: Reserved */
 #  if defined(KINETIS_SIM_HAS_SCGC3_SAI1)
-#    define SIM_SCGC3_SAI1                    (1 << 15)  /* Bit 15:  SAI1 clock Gate control */
+#    define SIM_SCGC3_SAI1                    (1 << 15) /* Bit 15:  I2S1/SAI1 clock Gate control */
 #  endif
                                                         /* Bit 16: Reserved */
 #  if defined(KINETIS_SIM_HAS_SCGC3_SDHC)
@@ -967,11 +1028,14 @@
 
 /* System Clock Gating Control Register 5 */
 
-#define SIM_SCGC5_LPTIMER                     (1 << 0)  /* Bit 0:  Low Power Timer Clock Gate Control */
+#define SIM_SCGC5_LPTMR0                      (1 << 0)  /* Bit 0:  Low Power Timer 0 Clock Gate Control */
 #if defined(KINETIS_SIM_HAS_SCGC5_REGFILE)
 #  define SIM_SCGC5_REGFILE                   (1 << 1)  /* Bit 1:  Register File Clock Gate Control */
 #endif
-                                                        /* Bits 2-4: Reserved */
+                                                        /* Bits 2-3: Reserved */
+#if defined(KINETIS_SIM_HAS_SCGC5_LPTMR1)
+#  define SIM_SCGC5_LPTMR1                    (1 << 4)  /* Bit 4:  Low Power Timer 1 Clock Gate Control */
+#endif
 #if defined(KINETIS_SIM_HAS_SCGC5_TSI)
 #  define SIM_SCGC5_TSI                       (1 << 5)  /* Bit 5:  TSI Clock Gate Control */
 #endif
@@ -985,7 +1049,9 @@
 #  define SIM_SCGC5_PORTF                     (1 << 14) /* Bit 14: Port F Clock Gate Control */
 #endif
                                                 /* Bits 14-31: Reserved */
+
 /* System Clock Gating Control Register 6 */
+
 #if defined(KINETIS_SIM_HAS_SCGC6_FTFL)
 #  define SIM_SCGC6_FTFL                      (1 << 0)  /* Bit 0:  Flash Memory Clock Gate Control */
 #endif
@@ -994,7 +1060,9 @@
 #if defined(KINETIS_SIM_HAS_SCGC6_DMAMUX1)
 #  define SIM_SCGC6_DMAMUX1                   (1 << 2)  /* Bit 2:  DMA Mux 1 Clock Gate Control */
 #endif
-#define SIM_SCGC6_FLEXCAN0                    (1 << 4)  /* Bit 4:  FlexCAN0 Clock Gate Control */
+#if defined(KINETIS_SIM_HAS_SCGC6_FLEXCAN0)
+#  define SIM_SCGC6_FLEXCAN0                  (1 << 4)  /* Bit 4:  FlexCAN0 Clock Gate Control */
+#endif
                                                         /* Bits 5-9: Reserved */
 
 #if defined(KINETIS_SIM_HAS_SCGC6_RNGA)
@@ -1004,7 +1072,7 @@
 #define SIM_SCGC6_SPI0                        (1 << 12) /* Bit 12: SPI0 Clock Gate Control */
 #define SIM_SCGC6_SPI1                        (1 << 13) /* Bit 13: SPI1 Clock Gate Control */
                                                         /* Bit 14: Reserved */
-#define SIM_SCGC6_I2S                         (1 << 15) /* Bit 15: I2S Clock Gate Control */
+#define SIM_SCGC6_I2S0                        (1 << 15) /* Bit 15: I2S0 Clock Gate Control */
                                                         /* Bits 16-17: Reserved */
 #define SIM_SCGC6_CRC                         (1 << 18) /* Bit 18: CRC Clock Gate Control */
                                                         /* Bits 19-20: Reserved */
@@ -1016,7 +1084,6 @@
 #define SIM_SCGC6_PIT                         (1 << 23) /* Bit 23: PIT Clock Gate Control */
 #define SIM_SCGC6_FTM0                        (1 << 24) /* Bit 24: FTM0 Clock Gate Control */
 #define SIM_SCGC6_FTM1                        (1 << 25) /* Bit 25: FTM1 Clock Gate Control */
-                                                        /* Bit 26: Reserved */
 #if defined(KINETIS_SIM_HAS_SCGC6_FTM2)
 #  define SIM_SCGC6_FTM2                      (1 << 26) /* Bit 26: FTM2 Clock Gate Control */
 #endif
@@ -1031,9 +1098,9 @@
 #  define SIM_SCGC6_DAC0                      (1 << 31) /* Bit 31: RTC Clock Gate Control */
 #endif
 
-#if defined(KINETIS_SIM_HAS_SCGC7)
 /* System Clock Gating Control Register 7 */
 
+#if defined(KINETIS_SIM_HAS_SCGC7)
 #  if defined(KINETIS_SIM_HAS_SCGC7_FLEXBUS)
 #    define SIM_SCGC7_FLEXBUS                 (1 << 0)  /* Bit 0:  FlexBus Clock Gate Control */
 #  endif
@@ -1216,28 +1283,36 @@
 #    define SIM_FCFG1_PFSIZE_1024KB           (13 << SIM_FCFG1_PFSIZE_SHIFT)  /* 1024 KB, 32 KB protection size */
 #    define SIM_FCFG1_PFSIZE_2048KB           (15 << SIM_FCFG1_PFSIZE_SHIFT)  /* 1024 KB, 32 KB protection size */
 #  endif
-#  if defined(KINETIS_K64) || defined(KINETIS_K66)
+#  if defined(KINETIS_K28) || defined(KINETIS_K64) || defined(KINETIS_K66)
 #    define SIM_FCFG1_PFSIZE_32KB             (3 << SIM_FCFG1_PFSIZE_SHIFT)  /* 32 KB of program flash memory */
 #    define SIM_FCFG1_PFSIZE_64KB             (5 << SIM_FCFG1_PFSIZE_SHIFT)  /* 64 KB of program flash memory */
 #    define SIM_FCFG1_PFSIZE_128KB            (7 << SIM_FCFG1_PFSIZE_SHIFT)  /* 128 KB of program flash memory */
 #    define SIM_FCFG1_PFSIZE_256KB            (9 << SIM_FCFG1_PFSIZE_SHIFT)  /* 256 KB of program flash memory */
-#    define SIM_FCFG1_PFSIZE_512KB            (11 << SIM_FCFG1_PFSIZE_SHIFT)  /* 512 KB of program flash memory */
-#    define SIM_FCFG1_PFSIZE_1024KB           (13 << SIM_FCFG1_PFSIZE_SHIFT)  /* 1024 KB of program flash memory */
-#    define SIM_FCFG1_PFSIZE_2048KB           (15 << SIM_FCFG1_PFSIZE_SHIFT)  /* 2048 KB of program flash memory */
+#    define SIM_FCFG1_PFSIZE_512KB            (11 << SIM_FCFG1_PFSIZE_SHIFT) /* 512 KB of program flash memory */
+#    define SIM_FCFG1_PFSIZE_1024KB           (13 << SIM_FCFG1_PFSIZE_SHIFT) /* 1024 KB of program flash memory */
+#    define SIM_FCFG1_PFSIZE_2048KB           (15 << SIM_FCFG1_PFSIZE_SHIFT) /* 2048 KB of program flash memory */
 #  endif
 
 #if defined(KINETIS_SIM_HAS_FCFG1_NVMSIZE)
 #  define SIM_FCFG1_NVMSIZE_SHIFT             (28)      /* Bits 28-31: FlexNVM size */
 #  define SIM_FCFG1_NVMSIZE_MASK              (15 << SIM_FCFG1_NVMSIZE_SHIFT)
-#    define SIM_FCFG1_NVMSIZE_NONE            (0 << SIM_FCFG1_NVMSIZE_SHIFT)  /*  0KB FlexNVM */
+#    define SIM_FCFG1_NVMSIZE_NONE            (0 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 0KB FlexNVM */
+#  if defined(KINETIS_K28)
+#    define SIM_FCFG1_NVMSIZE_32KB            (3 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 32KB FlexNVM */
+#    define SIM_FCFG1_NVMSIZE_64KB            (5 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 64KB FlexNVM */
+#    define SIM_FCFG1_NVMSIZE_128KB           (7 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 128KB FlexNVM */
+#    define SIM_FCFG1_NVMSIZE_256KB           (9 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 256KB FlexNVM */
+#    define SIM_FCFG1_NVMSIZE_512KB           (11 << SIM_FCFG1_NVMSIZE_SHIFT) /* 512KB FlexNVM */
+#  else
 #    define SIM_FCFG1_NVMSIZE_128KB           (7 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 128KB FlexNVM, 16KB protection region */
 #    define SIM_FCFG1_NVMSIZE_256KB           (9 << SIM_FCFG1_NVMSIZE_SHIFT)  /* 256KB FlexNVM, 32KB protection region */
 #    define SIM_FCFG1_NVMSIZE_256KB2          (15 << SIM_FCFG1_NVMSIZE_SHIFT) /* 256KB FlexNVM, 32KB protection region */
+#  endif
 #endif
 
 /* Flash Configuration Register 2 */
                                                 /* Bits 0-15: Reserved */
-#if (KINETIS_SIM_HAS_FCFG2_MAXADDR1)
+#if defined(KINETIS_SIM_HAS_FCFG2_MAXADDR1)
 #  define SIM_FCFG2_MAXADDR1_SHIFT            (16)      /* Bits 16-[21|22]: Max address block 1 */
 #  define SIM_FCFG2_MAXADDR1_MASK             (KINETIS_SIM_FCFG2_MAXADDR1_MASK << SIM_FCFG2_MAXADDR1_SHIFT)
 #  define SIM_FCFG2_MAXADDR1(n)               (((n) & KINETIS_SIM_FCFG2_MAXADDR1_MASK) << SIM_FCFG2_MAXADDR1_SHIFT)
@@ -1275,9 +1350,10 @@
 #      define SIM_CLKDIV3_PLLFLLDIV(n)        ((((n)-1) & 7)  << SIM_CLKDIV3_PLLFLLDIV_SHIFT) /* n=1..8 */
 #  endif
 #endif
-#if defined(KINETIS_SIM_HAS_CLKDIV4)
+
 /* System Clock Divider Register 4 */
 
+#if defined(KINETIS_SIM_HAS_CLKDIV4)
 #  if defined(KINETIS_SIM_HAS_CLKDIV4_TRACEFRAC)
 #    define SIM_CLKDIV4_TRACEFRAC_SHIFTS      (0)      /* Bit 0: Trace clock divider fraction */
 #    define SIM_CLKDIV4_TRACEFRAC_MASK        (1 << SIM_CLKDIV4_TRACEFRAC_SHIFTS)
@@ -1300,9 +1376,9 @@
 #  endif
 #endif
 
-#if defined(KINETIS_SIM_HAS_MCR)
 /* Misc Control Register */
 
+#if defined(KINETIS_SIM_HAS_MCR)
                                                             /* Bits 0-28: Reserved */
 #  define SIM_MCR_PDBLOOP                     (1<< 29)      /* Bit 29: PDB Loop Mode */
                                                             /* Bit 30: Reserved */

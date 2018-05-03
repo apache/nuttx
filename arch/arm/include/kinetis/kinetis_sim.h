@@ -135,8 +135,14 @@
  * KINETIS_SIM_HAS_SOPT4_TPM2CH0SRC        -  SoC has SOPT4[TPM2CH0SRC]
  * KINETIS_SIM_HAS_SOPT4_TPM2CLKSEL        -  SoC has SOPT4[TPM2CLKSEL]
  * KINETIS_SIM_HAS_SOPT5                   -  SoC has SOPT5 Register
+ * KINETIS_SIM_HAS_SOPT5_UART0RXSRC        -  SoC has SOPT5[UART0RXSRC]
+ * KINETIS_SIM_HAS_SOPT5_UART0TXSRC        -  SoC has SOPT5[UART0TXSRC]
+ * KINETIS_SIM_HAS_SOPT5_UART1RXSRC        -  SoC has SOPT5[UART1RXSRC]
+ * KINETIS_SIM_HAS_SOPT5_UART1TXSRC        -  SoC has SOPT5[UART1TXSRC]
  * KINETIS_SIM_HAS_SOPT5_LPUART0RXSRC      -  SoC has SOPT5[LPUART0RXSRC]
  * KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC      -  SoC has SOPT5[LPUART0TXSRC]
+ * KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC      -  SoC has SOPT5[LPUART1RXSRC]
+ * KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC      -  SoC has SOPT5[LPUART1TXSRC]
  * KINETIS_SIM_HAS_SOPT6                   -  SoC has SOPT6 Register
  * KINETIS_SIM_HAS_SOPT6_MCC               -  SoC has SOPT6[MCC]
  * KINETIS_SIM_HAS_SOPT6_PCR               -  SoC has SOPT6[PCR]
@@ -199,8 +205,15 @@
  * KINETIS_SIM_HAS_SCGC2                   -  SoC has SCGC2 Register
  * KINETIS_SIM_HAS_SCGC2_ENET              -  SoC has SCGC2[ENET]
  * KINETIS_SIM_HAS_SCGC2_LPUART0           -  SoC has SCGC2[LPUART0]
+ * KINETIS_SIM_HAS_SCGC2_LPUART1           -  SoC has SCGC2[LPUART1]
+ * KINETIS_SIM_HAS_SCGC2_LPUART2           -  SoC has SCGC2[LPUART2]
+ * KINETIS_SIM_HAS_SCGC2_LPUART3           -  SoC has SCGC2[LPUART3]
+ * KINETIS_SIM_HAS_SCGC2_LPUART4           -  SoC has SCGC2[LPUART4]
  * KINETIS_SIM_HAS_SCGC2_TPM1              -  SoC has SCGC2[TPM1]
  * KINETIS_SIM_HAS_SCGC2_TPM2              -  SoC has SCGC2[TPM2]
+ * KINETIS_SIM_HAS_SCGC2_DAC1              -  SoC has SCGC2[DAC1]
+ * KINETIS_SIM_HAS_SCGC2_QSPI              -  SoC has SCGC2[QSPI]
+ * KINETIS_SIM_HAS_SCGC2_FLEXIO            -  SoC has SCGC2[FLEXIO]
  * KINETIS_SIM_HAS_SCGC3                   -  SoC has SCGC3 Register
  * KINETIS_SIM_HAS_SCGC3                   -  SoC has SCGC3 Register
  * KINETIS_SIM_HAS_SCGC3_RNGA              -  SoC has SCGC3[RNGA]
@@ -210,6 +223,7 @@
  * KINETIS_SIM_HAS_SCGC3_FLEXCAN1          -  SoC has SCGC3[FLEXCAN1]
  * KINETIS_SIM_HAS_SCGC3_NFC               -  SoC has SCGC3[NFC]
  * KINETIS_SIM_HAS_SCGC3_SPI2              -  SoC has SCGC3[SPI2]
+ * KINETIS_SIM_HAS_SCGC3_SPI3              -  SoC has SCGC3[SPI3]
  * KINETIS_SIM_HAS_SCGC3_SAI1              -  SoC has SCGC3[SAI1]
  * KINETIS_SIM_HAS_SCGC3_SDHC              -  SoC has SCGC3[SDHC]
  * KINETIS_SIM_HAS_SCGC3_FTM2              -  SoC has SCGC3[FTM2]
@@ -225,11 +239,13 @@
  * KINETIS_SIM_HAS_SCGC4_UART3             -  SoC has SCGC4[UART3]
  * KINETIS_SIM_HAS_SCGC5                   -  SoC has _SCGC5 Register
  * KINETIS_SIM_HAS_SCGC5_REGFILE           -  SoC has SCGC5[REGFILE]
+ * KINETIS_SIM_HAS_SCGC5_LPTMR1            -  SoC has SCGC5[LPTMR1]
  * KINETIS_SIM_HAS_SCGC5_TSI               -  SoC has SCGC5[TSI]
  * KINETIS_SIM_HAS_SCGC5_PORTF             -  SoC has SCGC5[PORTf]
  * KINETIS_SIM_HAS_SCGC6                   -  SoC has SCGC6 Register
  * KINETIS_SIM_HAS_SCGC6_FTFL              -  SoC has SCGC6[FTFL]
  * KINETIS_SIM_HAS_SCGC6_DMAMUX1           -  SoC has SCGC6[DEMUX1]
+ * KINETIS_SIM_HAS_SCGC6_FLEXCAN0          -  SoC has SCGC6[FLEXCAN0]
  * KINETIS_SIM_HAS_SCGC6_USBHS             -  SoC has SCGC6[USBHS]
  * KINETIS_SIM_HAS_SCGC6_RNGA              -  SoC has SCGC6[RNGA]
  * KINETIS_SIM_HAS_SCGC6_FTM2              -  SoC has SCGC6[FTM2]
@@ -289,6 +305,7 @@
 #define KINETIS_SIM_VERSION_01     1  /* Verified Document Number: K60P144M150SF3RM Rev. 3, November 2014 */
 #define KINETIS_SIM_VERSION_04     4  /* Verified to Document Number: K64P144M120SF5RM Rev. 2, January 2014 */
 #define KINETIS_SIM_VERSION_06     6  /* Verified to Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+#define KINETIS_SIM_VERSION_07     7  /* Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
 
 /* MK20DX/DN---VLH5
  *
@@ -329,6 +346,278 @@
       defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
 
 #  define KINETIS_SIM_VERSION KINETIS_SIM_VERSION_UKN
+
+/* MK28FN2M0---15-
+ *
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ *  PART NUMBER     CPU     PIN PACKAGE PROGRAM EEPROM SRAM  GPIO
+ *                  FREQ    CNT         FLASH
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ *  MK28FN2M0VMI15  150 MHz 169  MAPBGA  2 MB   None    1 MB  120
+ *  MK28FN2M0CAU15R 150 MHz 210  WLCSP   2 MB   None    1 MB  120
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || \
+      defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
+
+/* Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
+
+#  define KINETIS_SIM_VERSION KINETIS_SIM_VERSION_07
+
+/* SIM Register Configuration */
+
+#  define KINETIS_SIM_HAS_SOPT1                       1   /* SoC has SOPT1 Register */
+#  undef  KINETIS_SIM_HAS_SOPT1_RAMSIZE                   /* SoC does not have SOPT1[RAMSIZE] */
+#  undef  KINETIS_SIM_HAS_SOPT1_OSC32KOUT                 /* SoC does not have SOPT1[OSC32KOUT] */
+#  define KINETIS_SIM_HAS_SOPT1_OSC32KSEL             1   /* SoC has SOPT1[OSC32KSEL] */
+#  define KINETIS_SIM_HAS_SOPT1_OSC32KSEL_BITS        2   /* SoC has 1 bit SOPT1[OSC32KSEL] */
+#  define KINETIS_SIM_HAS_SOPT1_RAMSIZE               1   /* SoC has SOPT1[RAMSIZE] */
+#  define KINETIS_SIM_HAS_SOPT1_USBVSTBY              1   /* SoC has SOPT1[USBVSTBY] */
+#  define KINETIS_SIM_HAS_SOPT1_USBSSTBY              1   /* SoC has SOPT1[USBSSTBY] */
+#  define KINETIS_SIM_HAS_SOPT1_USBREGEN              1   /* SoC has SOPT1[USBREGEN] */
+
+#  define KINETIS_SIM_HAS_SOPT1CFG                        /* SoC has SOPT1CFG Register */
+#  define KINETIS_SIM_HAS_SOPT1CFG_URWE               1   /* SoC has SOPT1CFG[URWE] */
+#  define KINETIS_SIM_HAS_SOPT1CFG_USSWE              1   /* SoC has SOPT1CFG[USSWE] */
+#  define KINETIS_SIM_HAS_SOPT1CFG_UVSWE              1   /* SoC has SOPT1CFG[UVSWE] */
+
+#  define KINETIS_SIM_HAS_USBPHYCTL                   1   /* SoC has USBPHYCTL Register */
+#  define KINETIS_SIM_HAS_USBPHYCTL_USBVREGSEL        1   /* SoC has USBPHYCTL[USBVREGSEL] */
+#  define KINETIS_SIM_HAS_USBPHYCTL_USBVREGPD         1   /* SoC has USBPHYCTL[USBVREGPD] */
+#  define KINETIS_SIM_HAS_USBPHYCTL_USB3VOUTTRG       1   /* SoC has USBPHYCTL[USB3VOUTTRG] */
+#  define KINETIS_SIM_HAS_USBPHYCTL_USBDISILIM        1   /* SoC has USBPHYCTL[USBDISILIM] */
+
+#  define KINETIS_SIM_HAS_SOPT2                       1   /* SoC has SOPT2 Register */
+#  undef  KINETIS_SIM_HAS_SOPT2_MCGCLKSEL                 /* SoC does not have SOPT2[MCGCLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT2_USBSLSRC              1   /* SoC has SOPT2[USBSLSRC] */
+#  define KINETIS_SIM_HAS_SOPT2_USBREGEN              1   /* SoC has SOPT2[USBREGEN] */
+#  undef  KINETIS_SIM_HAS_SOPT2_USBHSRC                   /* SoC does not have SOPT2[USBHSRC] */
+#  define KINETIS_SIM_HAS_SOPT2_RTCCLKOUTSEL          1   /* SoC has SOPT2[RTCCLKOUTSEL] */
+#  define KINETIS_SIM_HAS_SOPT2_CLKOUTSEL             1   /* SoC has SOPT2[CLKOUTSEL] */
+#  define KINETIS_SIM_HAS_SOPT2_FBSL                  1   /* SoC has SOPT2[FBSL] */
+#  undef  KINETIS_SIM_HAS_SOPT2_CMTUARTPAD                /* SoC does not have SOPT2[CMTUARTPAD] */
+#  define KINETIS_SIM_HAS_SOPT2_PLLFLLSEL_BITS        2   /* SoC has 2 bits of SOPT2[PLLFLLSEL] */
+#  undef  KINETIS_SIM_HAS_SOPT2_PTD7PAD                   /* SoC does not have SOPT2[PTD7PAD] */
+#  define KINETIS_SIM_HAS_SOPT2_TRACECLKSEL           1   /* SoC has SOPT2[TRACECLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT2_PLLFLLSEL             1   /* SoC has SOPT2[PLLFLLSEL] */
+#  define KINETIS_SIM_HAS_SOPT2_USBSRC                1   /* SoC has SOPT2[USBSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT2_RMIISRC               1   /* SoC does not have SOPT2[RMIISRC] */
+#  undef  KINETIS_SIM_HAS_SOPT2_TIMESRC                   /* SoC does not have SOPT2[TIMESRC] */
+#  define KINETIS_SIM_HAS_SOPT2_FLEXIOSRC             1   /* SoC has SOPT2[FLEXIOSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT2_USBFSRC                   /* SoC does not have SOPT2[USBFSRC] */
+#  define KINETIS_SIM_HAS_SOPT2_TPMSRC                1   /* SoC has SOPT2[TPMSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT2_I2SSRC                    /* SoC does not have SOPT2[I2SSRC] */
+#  define KINETIS_SIM_HAS_SOPT2_LPUARTSRC             1   /* SoC has SOPT2[LPUARTSRC] */
+#  define KINETIS_SIM_HAS_SOPT2_SDHCSRC               1   /* SoC has SOPT2[SDHCSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT2_NFCSRC                    /* SoC does not have SOPT2[NFCSRC] */
+
+#  define KINETIS_SIM_HAS_SOPT4                       1   /* SoC has SOPT4 Register */
+#  define KINETIS_SIM_HAS_SOPT4_FTM0FLT0              1   /* SoC has SOPT4[FTM0FLT0] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM0FLT1              1   /* SoC has SOPT4[FTM0FLT1] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM0FLT2                  /* SoC does not have SOPT4[FTM0FLT2] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM0FLT3                  /* SoC does not have SOPT4[FTM0FLT3] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM1FLT0              1   /* SoC has SOPT4[FTM1FLT0] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM1FLT1                  /* SoC does not have SOPT4[FTM1FLT1] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM1FLT2                  /* SoC does not have SOPT4[FTM1FLT2] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM1FLT3                  /* SoC does not have SOPT4[FTM1FLT3] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM2FLT0              1   /* SoC has SOPT4[FTM2FLT0] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM2FLT1                  /* SoC does not have SOPT4[FTM2FLT1] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM2FLT2                  /* SoC does not have SOPT4[FTM2FLT2] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM2FLT3                  /* SoC does not have SOPT4[FTM2FLT3] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM3FLT0              1   /* SoC has SOPT4[FTM3FLT0] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM3FLT1                  /* SoC does not have SOPT4[FTM3FLT1] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM3FLT2                  /* SoC does not have SOPT4[FTM3FLT2] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM3FLT3                  /* SoC does not have SOPT4[FTM3FLT3] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM1CH0SRC            3   /* SoC has SOPT4[FTM1CH0SRC] 1, 3 if SOF */
+#  define KINETIS_SIM_HAS_SOPT4_FTM2CH0SRC            1   /* SoC has SOPT4[FTM2CH0SRC] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM2CH1SRC            1   /* SoC has SOPT4[FTM2CH1SRC] */
+#  undef  KINETIS_SIM_HAS_SOPT4_FTM3CH0SRC                /* SoC does not have SOPT4[FTM3CH0SRC] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM0CLKSEL            1   /* SoC has SOPT4[FTM0CLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM1CLKSEL            1   /* SoC has SOPT4[FTM1CLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM2CLKSEL            1   /* SoC has SOPT4[FTM2CLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM3CLKSEL            1   /* SoC has SOPT4[FTM3CLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM0TRG0SRC           1   /* SoC has SOPT4[FTM0TRG0SRC] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM0TRG1SRC           1   /* SoC has SOPT4[FTM0TRG1SRC] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM3TRG0SRC           1   /* SoC has SOPT4[FTM3TRG0SRC] */
+#  define KINETIS_SIM_HAS_SOPT4_FTM3TRG1SRC           1   /* SoC has SOPT4[FTM3TRG1SRC] */
+
+#  define KINETIS_SIM_HAS_SOPT5                       1   /* SoC has SOPT5 Register */
+#  undef  KINETIS_SIM_HAS_SOPT5_UART0RXSRC                /* SoC does not have SOPT5[UART0RXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_UART0TXSRC                /* SoC does not have SOPT5[UART0TXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_UART1RXSRC                /* SoC does not have SOPT5[UART1RXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_UART1TXSRC                /* SoC does not have SOPT5[UART1TXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_LPUART0RXSRC          1   /* SoC has SOPT5[LPUART0RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC          1   /* SoC has SOPT5[LPUART0TXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC          1   /* SoC has SOPT5[LPUART1RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC          1   /* SoC has SOPT5[LPUART1TXSRC] */
+
+#  undef  KINETIS_SIM_HAS_SOPT6                           /* SoC has SOPT6 Register */
+#  undef  KINETIS_SIM_HAS_SOPT6_MCC                       /* SoC has SOPT6[MCC] */
+#  undef  KINETIS_SIM_HAS_SOPT6_PCR                       /* SoC has SOPT6[PCR] */
+#  undef  KINETIS_SIM_HAS_SOPT6_RSTFLTSEL                 /* SoC has SOPT6[RSTFLTSEL] */
+#  undef  KINETIS_SIM_HAS_SOPT6_RSTFLTEN                  /* SoC has SOPT6[RSTFLTEN] */
+
+#  define KINETIS_SIM_HAS_SOPT7                       1   /* SoC has SOPT7 Register */
+#  define KINETIS_SIM_HAS_SOPT7_ADC0TRGSEL            15  /* SoC has 10 SOPT7[ADC0TRGSEL] */
+#  define KINETIS_SIM_HAS_SOPT7_ADC0PRETRGSEL         1   /* SoC has SOPT7[ADC0PRETRGSEL] */
+#  define KINETIS_SIM_SOPT7_ADC0ALTTRGEN              1   /* ADC0 alternate trigger enable */
+#  undef  KINETIS_SIM_HAS_SOPT7_ADC1TRGSEL                /* SoC does not have SOPT7[ADC1TRGSEL] */
+#  undef  KINETIS_SIM_HAS_SOPT7_ADC1PRETRGSEL             /* SoC does not have SOPT7[ADC1PRETRGSEL] */
+#  undef  KINETIS_SIM_SOPT7_ADC1ALTTRGEN                  /* ADC1 alternate trigger enable */
+#  undef  KINETIS_SIM_HAS_SOPT7_ADC2TRGSEL                /* SoC does not have SOPT7[ADC2TRGSEL] */
+#  undef  KINETIS_SIM_HAS_SOPT7_ADC2PRETRGSEL             /* SoC does not have SOPT7[ADC2PRETRGSEL] */
+#  undef  KINETIS_SIM_SOPT7_ADC2ALTTRGEN                  /* ADC2 alternate trigger enable */
+#  undef  KINETIS_SIM_HAS_SOPT7_ADC3TRGSEL                /* SoC does not have SOPT7[ADC3TRGSEL] */
+#  undef  KINETIS_SIM_HAS_SOPT7_ADC3PRETRGSEL             /* SoC does not have SOPT7[ADC3PRETRGSEL] */
+#  undef  KINETIS_SIM_SOPT7_ADC3ALTTRGEN                  /* ADC3 alternate trigger enable */
+
+#  define KINETIS_SIM_HAS_SOPT8                       1   /* SoC has SOPT8 Register */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0SYNCBIT           1   /* SoC has SOPT8[FTM0SYNCBIT] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM1SYNCBIT           1   /* SoC has SOPT8[FTM1SYNCBIT] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM2SYNCBIT           1   /* SoC has SOPT8[FTM2SYNCBIT] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3SYNCBIT           1   /* SoC has SOPT8[FTM3SYNCBIT] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH0SRC           1   /* SoC has SOPT8[FTM0OCH0SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH1SRC           1   /* SoC has SOPT8[FTM0OCH1SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH2SRC           1   /* SoC has SOPT8[FTM0OCH2SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH3SRC           1   /* SoC has SOPT8[FTM0OCH3SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH4SRC           1   /* SoC has SOPT8[FTM0OCH4SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH5SRC           1   /* SoC has SOPT8[FTM0OCH5SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH6SRC           1   /* SoC has SOPT8[FTM0OCH6SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM0OCH7SRC           1   /* SoC has SOPT8[FTM0OCH7SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH0SRC           1   /* SoC has SOPT8[FTM3OCH0SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH1SRC           1   /* SoC has SOPT8[FTM3OCH1SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH2SRC           1   /* SoC has SOPT8[FTM3OCH2SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH3SRC           1   /* SoC has SOPT8[FTM3OCH3SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH4SRC           1   /* SoC has SOPT8[FTM3OCH4SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH5SRC           1   /* SoC has SOPT8[FTM3OCH5SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH6SRC           1   /* SoC has SOPT8[FTM3OCH6SRC] */
+#  define KINETIS_SIM_HAS_SOPT8_FTM3OCH7SRC           1   /* SoC has SOPT8[FTM3OCH7SRC] */
+
+#  define KINETIS_SIM_HAS_SOPT9                       1   /* SoC has SOPT9 Register */
+#  define KINETIS_SIM_HAS_SOPT9_TPM1CH0SRC            1   /* SoC has SOPT9[TPM1CH0SRC] */
+#  define KINETIS_SIM_HAS_SOPT9_TPM2CH0SRC            1   /* SoC has SOPT9[TPM2CH0SRC] */
+#  define KINETIS_SIM_HAS_SOPT9_TPM1CLKSEL            1   /* SoC has SOPT9[TPM1CLKSEL] */
+#  define KINETIS_SIM_HAS_SOPT9_TPM2CLKSEL            1   /* SoC has SOPT9[TPM2CLKSEL] */
+
+#  define KINETIS_SIM_HAS_SDID                        1   /* SoC has SDID Register */
+#  define KINETIS_SIM_HAS_SDID_FAMID                  1   /* SoC has SDID[FAMID] */
+#  define KINETIS_SIM_HAS_SDID_FAMILYID               1   /* SoC has SDID[FAMILYID] */
+#  define KINETIS_SIM_HAS_SDID_DIEID                  1   /* SoC has SDID[DIEID] */
+#  undef  KINETIS_SIM_HAS_SDID_SRAMSIZE                   /* SoC does not have SDID[SRAMSIZE] */
+#  define KINETIS_SIM_HAS_SDID_SERIESID               1   /* SoC has SDID[SERIESID] */
+#  define KINETIS_SIM_HAS_SDID_SUBFAMID               1   /* SoC has SDID[SUBFAMID] */
+
+#  define KINETIS_SIM_HAS_SCGC1                       1   /* SoC has _SCGC1 Register */
+#  undef  KINETIS_SIM_HAS_SCGC1_OSC1                      /* SoC does not have SCGC1[OSC1] */
+#  define KINETIS_SIM_HAS_SCGC1_I2C2                  1   /* SoC has SCGC1[I2C2] */
+#  define KINETIS_SIM_HAS_SCGC1_I2C3                  1   /* SoC has SCGC1[I2C3] */
+#  undef  KINETIS_SIM_HAS_SCGC1_UART4                     /* SoC does not have SCGC1[UART4] */
+#  undef  KINETIS_SIM_HAS_SCGC1_UART5                     /* SoC does not have SCGC1[UART5] */
+
+#  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has SCGC2 Register */
+#  undef  KINETIS_SIM_HAS_SCGC2_ENET                      /* SoC does not have SCGC2[ENET] */
+#  define KINETIS_SIM_HAS_SCGC2_LPUART0               1   /* SoC has SCGC2[LPUART0] */
+#  define KINETIS_SIM_HAS_SCGC2_LPUART1               1   /* SoC has SCGC2[LPUART1] */
+#  define KINETIS_SIM_HAS_SCGC2_LPUART2               1   /* SoC has SCGC2[LPUART2] */
+#  define KINETIS_SIM_HAS_SCGC2_LPUART3               1   /* SoC has SCGC2[LPUART3] */
+#  define KINETIS_SIM_HAS_SCGC2_LPUART4               1   /* SoC has SCGC2[LPUART4] */
+#  define KINETIS_SIM_HAS_SCGC2_TPM1                  1   /* SoC has SCGC2[TPM1] */
+#  define KINETIS_SIM_HAS_SCGC2_TPM2                  1   /* SoC has SCGC2[TPM2] */
+#  undef  KINETIS_SIM_HAS_SCGC2_DAC1                      /* SoC does not have SCGC2[DAC1] */
+#  define KINETIS_SIM_HAS_SCGC2_QSPI                  1   /* SoC has SCGC2[QSPI] */
+#  define KINETIS_SIM_HAS_SCGC2_FLEXIO                1   /* SoC has SCGC2[FLEXIO] */
+
+#  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
+#  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[TRNG/RNGA] */
+#  undef  KINETIS_SIM_HAS_SCGC3_USBHS                     /* SoC does not have SCGC3[USBHS] */
+#  undef  KINETIS_SIM_HAS_SCGC3_USBHSPHY                  /* SoC does not have SCGC3[USBHSPHY] */
+#  undef  KINETIS_SIM_HAS_SCGC3_USBHSDCD                  /* SoC does not have SCGC3[USBHSDCD] */
+#  undef  KINETIS_SIM_HAS_SCGC3_FLEXCAN1                  /* SoC does not have SCGC3[FLEXCAN1] */
+#  undef  KINETIS_SIM_HAS_SCGC3_NFC                       /* SoC does not have SCGC3[NFC] */
+#  define KINETIS_SIM_HAS_SCGC3_SPI2                  1   /* SoC has SCGC3[SPI2] */
+#  define KINETIS_SIM_HAS_SCGC3_SPI3                  1   /* SoC has SCGC3[SPI3] */
+#  define KINETIS_SIM_HAS_SCGC3_SAI1                  1   /* SoC has SCGC3[SAI1] */
+#  define KINETIS_SIM_HAS_SCGC3_SDHC                  1   /* SoC has SCGC3[SDHC] */
+#  define KINETIS_SIM_HAS_SCGC3_FTM2                  1   /* SoC has SCGC3[FTM2] */
+#  define KINETIS_SIM_HAS_SCGC3_FTM3                  1   /* SoC has SCGC3[FTM3] */
+#  undef  KINETIS_SIM_HAS_SCGC3_ADC1                      /* SoC does not have SCGC3[ADC1] */
+#  undef  KINETIS_SIM_HAS_SCGC3_ADC3                      /* SoC does not have SCGC3[ADC3] */
+#  undef  KINETIS_SIM_HAS_SCGC3_SLCD                      /* SoC does not have SCGC3[SLCD] */
+
+#  define KINETIS_SIM_HAS_SCGC4                       1   /* SoC has SCGC4 Register */
+#  undef  KINETIS_SIM_HAS_SCGC4_UART0                     /* SoC does not have SCGC4[UART0] */
+#  undef  KINETIS_SIM_HAS_SCGC4_UART1                     /* SoC does not have SCGC4[UART1] */
+#  undef  KINETIS_SIM_HAS_SCGC4_UART2                     /* SoC does not have SCGC4[UART2] */
+#  undef  KINETIS_SIM_HAS_SCGC4_UART3                     /* SoC does not have SCGC4[UART3] */
+#  undef  KINETIS_SIM_HAS_SCGC4_LLWU                      /* SoC does not have SCGC4[LLWU] clock gate */
+
+#  define KINETIS_SIM_HAS_SCGC5                       1   /* SoC has _SCGC5 Register */
+#  undef  KINETIS_SIM_HAS_SCGC5_REGFILE                   /* SoC does not have SCGC5[REGFILE] */
+#  define KINETIS_SIM_HAS_SCGC5_LPTMR1                1   /* SoC has SCGC5[LPTMR1] */
+#  undef  KINETIS_SIM_HAS_SCGC5_TSI                       /* SoC does not have SCGC5[TSI] */
+#  undef  KINETIS_SIM_HAS_SCGC5_PORTF                     /* SoC does not have SCGC5[PORTF] */
+
+#  define KINETIS_SIM_HAS_SCGC6                       1   /* SoC has SCGC6 Register */
+#  define KINETIS_SIM_HAS_SCGC6_FTFL                  1   /* SoC has SCGC6[FTFL] */
+#  undef  KINETIS_SIM_HAS_SCGC6_DMAMUX1                   /* SoC does not have SCGC6[DEMUX1] */
+#  undef  KINETIS_SIM_HAS_SCGC6_FLEXCAN0                  /* SoC does not have SCGC6[FLEXCAN0] */
+#  undef  KINETIS_SIM_HAS_SCGC6_RNGA                      /* SoC does not have SCGC6[RNGA] */
+#  undef  KINETIS_SIM_HAS_SCGC6_USBHS                     /* SoC does not have SCGC6[USBHS] */
+#  define KINETIS_SIM_HAS_SCGC6_FTM2                  1   /* SoC has SCGC6[FTM2] */
+#  undef  KINETIS_SIM_HAS_SCGC6_ADC2                      /* SoC does not have SCGC6[ADC2] */
+#  define KINETIS_SIM_HAS_SCGC6_DAC0                  1   /* SoC has SCGC6[DAC0] */
+
+#  define KINETIS_SIM_HAS_SCGC7                       1   /* SoC has SCGC7 Register */
+#  define KINETIS_SIM_HAS_SCGC7_FLEXBUS               1   /* SoC has SCGC7[FLEXBUS] */
+#  define KINETIS_SIM_HAS_SCGC7_DMA                   1   /* SoC has SCGC7[DMS] */
+#  define KINETIS_SIM_HAS_SCGC7_MPU                   1   /* SoC has SCGC7[MPU] */
+#  define KINETIS_SIM_HAS_SCGC7_SDRAMC                1   /* SoC has SCGC7[SDRAMC] */
+
+#  define KINETIS_SIM_HAS_CLKDIV1                     1   /* SoC has CLKDIV1 Register */
+#  undef  KINETIS_SIM_HAS_CLKDIV1_OUTDIV5                 /* SoC does not have CLKDIV1[OUTDIV5] */
+#  define KINETIS_SIM_HAS_CLKDIV1_OUTDIV4             1   /* SoC has CLKDIV1[OUTDIV4] */
+#  define KINETIS_SIM_HAS_CLKDIV1_OUTDIV3             1   /* SoC has CLKDIV1[OUTDIV3] */
+#  define KINETIS_SIM_HAS_CLKDIV1_OUTDIV2             1   /* SoC has CLKDIV1[OUTDIV2] */
+
+#  define KINETIS_SIM_HAS_CLKDIV2                     1   /* SoC has CLKDIV2 Register */
+#  define KINETIS_SIM_HAS_CLKDIV2_USBFRAC             1   /* SoC has CLKDIV2[USBFRAC] */
+#  define KINETIS_SIM_HAS_CLKDIV2_USBDIV              1   /* SoC has CLKDIV2[USBDIV] */
+#  undef  KINETIS_SIM_HAS_CLKDIV2_USBHSFRAC               /* SoC does not have CLKDIV2[USBHSFRAC] */
+#  undef  KINETIS_SIM_HAS_CLKDIV2_USBHSDIV                /* SoC does not have CLKDIV2[USBHSDIV] */
+#  undef  KINETIS_SIM_HAS_CLKDIV2_I2SFRAC                 /* SoC does not have CLKDIV2[I2SFRAC] */
+#  undef  KINETIS_SIM_HAS_CLKDIV2_I2SDIV                  /* SoC does not have CLKDIV2[I2SDIV] */
+
+#  define KINETIS_SIM_HAS_FCFG1                       1   /* SoC has FCFG1 Register */
+#  undef  KINETIS_SIM_HAS_FCFG1_FTFDIS                    /* SoC does not have FCFG1[FTFDIS] */
+#  define KINETIS_SIM_HAS_FCFG1_FLASHDIS              1   /* SoC has FCFG1[FLASHDIS] */
+#  define KINETIS_SIM_HAS_FCFG1_FLASHDOZE             1   /* SoC has FCFG1[FLASHDOZE] */
+#  define KINETIS_SIM_HAS_FCFG1_DEPART                1   /* SoC has FCFG1[DEPART] */
+#  define KINETIS_SIM_HAS_FCFG1_EESIZE                1   /* SoC has FCFG1[EESIZE] */
+#  define KINETIS_SIM_HAS_FCFG1_NVMSIZE               1   /* SoC has FCFG1[NVMSIZE] */
+
+#  define KINETIS_SIM_HAS_FCFG2                       1   /* SoC has FCFG2 Register */
+#  define KINETIS_SIM_HAS_FCFG2_MAXADDR1              15  /* SoC has n bit of FCFG2[MAXADDR1] */
+#  define KINETIS_SIM_HAS_FCFG2_PFLSH                 1   /* SoC has FCFG2[PFLSH] */
+#  define KINETIS_SIM_HAS_FCFG2_MAXADDR0              15  /* SoC has n bit of FCFG2[MAXADDR0] */
+#  define KINETIS_SIM_HAS_FCFG2_SWAPPFLSH             1   /* SoC has FCFG2[SWAPPFLSH] */
+
+#  define KINETIS_SIM_HAS_UIDH                        1   /* SoC has UIDH Register */
+#  define KINETIS_SIM_HAS_UIDMH                       1   /* SoC has UIDMH Register */
+#  define KINETIS_SIM_HAS_UIDML                       1   /* SoC has UIDML Register */
+#  define KINETIS_SIM_HAS_UIDL                        1   /* SoC has UIDL Register */
+
+#  define KINETIS_SIM_HAS_CLKDIV3                     1   /* SoC has CLKDIV3 Register */
+#  define KINETIS_SIM_HAS_CLKDIV3_PLLFLLFRAC          1   /* SoC has CLKDIV3[PLLFLLFRAC] */
+#  define KINETIS_SIM_HAS_CLKDIV3_PLLFLLDIV           1   /* SoC has CLKDIV3[PLLFLLDIV] */
+
+#  define KINETIS_SIM_HAS_CLKDIV4                     1   /* SoC has CLKDIV4 Register */
+#  define KINETIS_SIM_HAS_CLKDIV4_TRACEFRAC           1   /* SoC has CLKDIV4[TRACEFRAC] */
+#  define KINETIS_SIM_HAS_CLKDIV4_TRACEDIV            1   /* SoC has CLKDIV4[TRACEDIV] */
+#  undef  KINETIS_SIM_HAS_CLKDIV4_NFCFRAC                 /* SoC does not have CLKDIV4[NFCFRAC] */
+#  undef  KINETIS_SIM_HAS_CLKDIV4_NFCDIV                  /* SoC does not have CLKDIV4[NFCDIV] */
+
+#  undef  KINETIS_SIM_HAS_MCR                             /* SoC does not have MCR Register */
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
       defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
@@ -490,8 +779,14 @@
 #  define KINETIS_SIM_HAS_SOPT4_TPM2CH0SRC            1   /* SoC has SOPT4[TPM2CH0SRC] */
 #  define KINETIS_SIM_HAS_SOPT4_TPM2CLKSEL            1   /* SoC has SOPT4[TPM2CLKSEL] */
 #  define KINETIS_SIM_HAS_SOPT5                       1   /* SoC has SOPT5 Register */
+#  define KINETIS_SIM_HAS_SOPT5_UART0RXSRC            1   /* SoC has SOPT5[UART0RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART0TXSRC            1   /* SoC has SOPT5[UART0TXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1RXSRC            1   /* SoC has SOPT5[UART1RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1TXSRC            1   /* SoC has SOPT5[UART1TXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT5_LPUART0RXSRC              /* SoC has SOPT5[LPUART0RXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC              /* SoC has SOPT5[LPUART0TXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC              /* SoC has SOPT5[LPUART1RXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC              /* SoC has SOPT5[LPUART1TXSRC] */
 #  define KINETIS_SIM_HAS_SOPT6                       1   /* SoC has SOPT6 Register */
 #  define KINETIS_SIM_HAS_SOPT6_MCC                   1   /* SoC has SOPT6[MCC] */
 #  define KINETIS_SIM_HAS_SOPT6_PCR                   1   /* SoC has SOPT6[PCR] */
@@ -551,12 +846,18 @@
 #  undef  KINETIS_SIM_HAS_SCGC1_I2C3                      /* SoC has SCGC1[I2C3] */
 #  undef  KINETIS_SIM_HAS_SCGC1_I2C2                      /* SoC has SCGC1[I2C2] */
 #  define KINETIS_SIM_HAS_SCGC1_OSC1                  1    /* SoC has SCGC1[OSC1] */
-#  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has _SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2_ENET                  1   /* SoC has SCGC2[ENET] */
 #  undef  KINETIS_SIM_HAS_SCGC2_LPUART0                   /* SoC has SCGC2[LPUART0] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART1                   /* SoC has SCGC2[LPUART1] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART2                   /* SoC has SCGC2[LPUART2] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART3                   /* SoC has SCGC2[LPUART3] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART4                   /* SoC has SCGC2[LPUART4] */
 #  undef  KINETIS_SIM_HAS_SCGC2_TPM1                      /* SoC has SCGC2[TPM1] */
 #  undef  KINETIS_SIM_HAS_SCGC2_TPM2                      /* SoC has SCGC2[TPM2] */
+#  define KINETIS_SIM_HAS_SCGC2_DAC1                  1   /* SoC has SCGC2[DAC1] */
+#  undef KINETIS_SIM_HAS_SCGC2_QSPI                       /* SoC has SCGC2[QSPI] */
+#  undef KINETIS_SIM_HAS_SCGC2_FLEXIO                     /* SoC has SCGC2[FLEXIO] */
 #  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
 #  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[RNGA] */
 #  undef  KINETIS_SIM_HAS_SCGC3_USBHS                     /* SoC has SCGC3[USBHS] */
@@ -565,7 +866,8 @@
 #  define KINETIS_SIM_HAS_SCGC3_FLEXCAN1              1   /* SoC has SCGC3[FLEXCAN1] */
 #  define KINETIS_SIM_HAS_SCGC3_NFC                   1   /* SoC has SCGC3[NFC] */
 #  define KINETIS_SIM_HAS_SCGC3_SPI2                  1   /* SoC has SCGC3[SPI2] */
-#  define KINETIS_SIM_HAS_SCGC3_SAI1                  1    /* SoC has SCGC3[SAI1] */
+#  undef  KINETIS_SIM_HAS_SCGC3_SPI3                      /* SoC has SCGC3[SPI3] */
+#  define KINETIS_SIM_HAS_SCGC3_SAI1                  1   /* SoC has SCGC3[SAI1] */
 #  define KINETIS_SIM_HAS_SCGC3_SDHC                  1   /* SoC has SCGC3[SDHC] */
 #  define KINETIS_SIM_HAS_SCGC3_FTM2                  1   /* SoC has SCGC3[FTM2] */
 #  define KINETIS_SIM_HAS_SCGC3_FTM3                  1   /* SoC has SCGC3[FTM3] */
@@ -580,11 +882,13 @@
 #  define KINETIS_SIM_HAS_SCGC4_UART3                 1   /* SoC has SCGC4[UART3] */
 #  define KINETIS_SIM_HAS_SCGC5                       1   /* SoC has _SCGC5 Register */
 #  undef  KINETIS_SIM_HAS_SCGC5_REGFILE                   /* SoC has SCGC5[REGFILE] */
+#  undef  KINETIS_SIM_HAS_SCGC5_LPTMR1                    /* SoC has SCGC5[LPTMR1] */
 #  define KINETIS_SIM_HAS_SCGC5_TSI                   1   /* SoC has SCGC5[TSI] */
 #  define KINETIS_SIM_HAS_SCGC5_PORTF                 1   /* SoC has SCGC5[PORTF] */
 #  define KINETIS_SIM_HAS_SCGC6                       1   /* SoC has SCGC6 Register */
 #  undef  KINETIS_SIM_HAS_SCGC6_FTFL                      /* SoC has SCGC6[FTFL] */
 #  define KINETIS_SIM_HAS_SCGC6_DMAMUX1               1   /* SoC has SCGC6[DEMUX1] */
+#  define KINETIS_SIM_HAS_SCGC6_FLEXCAN0              1   /* SoC has SCGC6[FLEXCAN0] */
 #  define KINETIS_SIM_HAS_SCGC6_USBHS                 1   /* SoC has SCGC6[USBHS] */
 #  define KINETIS_SIM_HAS_SCGC6_RNGA                  1   /* SoC has SCGC6[RNGA] */
 #  undef  KINETIS_SIM_HAS_SCGC6_FTM2                      /* SoC has SCGC6[FTM2] */
@@ -717,8 +1021,14 @@
 #  define KINETIS_SIM_HAS_SOPT4_TPM2CH0SRC            1   /* SoC has SOPT4[TPM2CH0SRC] */
 #  define KINETIS_SIM_HAS_SOPT4_TPM2CLKSEL            1   /* SoC has SOPT4[TPM2CLKSEL] */
 #  define KINETIS_SIM_HAS_SOPT5                       1   /* SoC has SOPT5 Register */
+#  define KINETIS_SIM_HAS_SOPT5_UART0RXSRC            1   /* SoC has SOPT5[UART0RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART0TXSRC            1   /* SoC has SOPT5[UART0TXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1RXSRC            1   /* SoC has SOPT5[UART1RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1TXSRC            1   /* SoC has SOPT5[UART1TXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT5_LPUART0RXSRC              /* SoC has SOPT5[LPUART0RXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC              /* SoC has SOPT5[LPUART0TXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC              /* SoC has SOPT5[LPUART1RXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC              /* SoC has SOPT5[LPUART1TXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT6                           /* SoC has SOPT6 Register */
 #  undef  KINETIS_SIM_HAS_SOPT6_MCC                       /* SoC has SOPT6[MCC] */
 #  undef  KINETIS_SIM_HAS_SOPT6_PCR                       /* SoC has SOPT6[PCR] */
@@ -778,12 +1088,18 @@
 #  undef  KINETIS_SIM_HAS_SCGC1_I2C3                      /* SoC has SCGC1[I2C3] */
 #  define KINETIS_SIM_HAS_SCGC1_I2C2                  1   /* SoC has SCGC1[I2C2] */
 #  undef  KINETIS_SIM_HAS_SCGC1_OSC1                      /* SoC has SCGC1[OSC1] */
-#  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has _SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2_ENET                  1   /* SoC has SCGC2[ENET] */
 #  undef  KINETIS_SIM_HAS_SCGC2_LPUART0                   /* SoC has SCGC2[LPUART0] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART1                   /* SoC has SCGC2[LPUART1] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART2                   /* SoC has SCGC2[LPUART2] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART3                   /* SoC has SCGC2[LPUART3] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART4                   /* SoC has SCGC2[LPUART4] */
 #  undef  KINETIS_SIM_HAS_SCGC2_TPM1                      /* SoC has SCGC2[TPM1] */
 #  undef  KINETIS_SIM_HAS_SCGC2_TPM2                      /* SoC has SCGC2[TPM2] */
+#  define KINETIS_SIM_HAS_SCGC2_DAC1                  1   /* SoC has SCGC2[DAC1] */
+#  undef KINETIS_SIM_HAS_SCGC2_QSPI                       /* SoC has SCGC2[QSPI] */
+#  undef KINETIS_SIM_HAS_SCGC2_FLEXIO                     /* SoC has SCGC2[FLEXIO] */
 #  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
 #  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[RNGA] */
 #  undef  KINETIS_SIM_HAS_SCGC3_USBHS                     /* SoC has SCGC3[USBHS] */
@@ -792,6 +1108,7 @@
 #  undef  KINETIS_SIM_HAS_SCGC3_FLEXCAN1                  /* SoC has SCGC3[FLEXCAN1] */
 #  undef  KINETIS_SIM_HAS_SCGC3_NFC                       /* SoC has SCGC3[NFC] */
 #  define KINETIS_SIM_HAS_SCGC3_SPI2                  1   /* SoC has SCGC3[SPI2] */
+#  undef  KINETIS_SIM_HAS_SCGC3_SPI3                      /* SoC has SCGC3[SPI3] */
 #  undef  KINETIS_SIM_HAS_SCGC3_SAI1                      /* SoC has SCGC3[SAI1] */
 #  define KINETIS_SIM_HAS_SCGC3_SDHC                  1   /* SoC has SCGC3[SDHC] */
 #  define KINETIS_SIM_HAS_SCGC3_FTM2                  1   /* SoC has SCGC3[FTM2] */
@@ -807,11 +1124,13 @@
 #  define KINETIS_SIM_HAS_SCGC4_UART3                 1   /* SoC has SCGC4[UART3] */
 #  define KINETIS_SIM_HAS_SCGC5                       1   /* SoC has _SCGC5 Register */
 #  undef  KINETIS_SIM_HAS_SCGC5_REGFILE                   /* SoC has SCGC5[REGFILE] */
+#  undef  KINETIS_SIM_HAS_SCGC5_LPTMR1                    /* SoC has SCGC5[LPTMR1] */
 #  undef  KINETIS_SIM_HAS_SCGC5_TSI                       /* SoC has SCGC5[TSI] */
 #  undef  KINETIS_SIM_HAS_SCGC5_PORTF                     /* SoC has SCGC5[PORTF] */
 #  define KINETIS_SIM_HAS_SCGC6                       1   /* SoC has SCGC6 Register */
 #  define KINETIS_SIM_HAS_SCGC6_FTFL                  1   /* SoC has SCGC6[FTFL] */
 #  undef  KINETIS_SIM_HAS_SCGC6_DMAMUX1                   /* SoC has SCGC6[DEMUX1] */
+#  define KINETIS_SIM_HAS_SCGC6_FLEXCAN0              1   /* SoC has SCGC6[FLEXCAN0] */
 #  undef  KINETIS_SIM_HAS_SCGC6_USBHS                     /* SoC has SCGC6[USBHS] */
 #  define KINETIS_SIM_HAS_SCGC6_RNGA                  1   /* SoC has SCGC6[RNGA] */
 #  define KINETIS_SIM_HAS_SCGC6_FTM2                  1   /* SoC has SCGC6[FTM2] */
@@ -891,15 +1210,18 @@
 #  define KINETIS_SIM_HAS_SOPT1_USBREGEN              1   /* SoC has SOPT1[USBREGEN] */
 #  define KINETIS_SIM_HAS_SOPT1_USBSSTBY              1   /* SoC has SOPT1[USBSSTBY] */
 #  define KINETIS_SIM_HAS_SOPT1_USBVSTBY              1   /* SoC has SOPT1[USBVSTBY] */
+
 #  define KINETIS_SIM_HAS_SOPT1CFG                        /* SoC has SOPT1CFG Register */
 #  define KINETIS_SIM_HAS_SOPT1CFG_URWE               1   /* SoC has SOPT1CFG[URWE] */
 #  define KINETIS_SIM_HAS_SOPT1CFG_USSWE              1   /* SoC has SOPT1CFG[USSWE] */
 #  define KINETIS_SIM_HAS_SOPT1CFG_UVSWE              1   /* SoC has SOPT1CFG[UVSWE] */
+
 #  define KINETIS_SIM_HAS_USBPHYCTL                   1   /* SoC has USBPHYCTL Register */
 #  define KINETIS_SIM_HAS_USBPHYCTL_USB3VOUTTRG       1   /* SoC has USBPHYCTL[USB3VOUTTRG] */
 #  define KINETIS_SIM_HAS_USBPHYCTL_USBDISILIM        1   /* SoC has USBPHYCTL[USBDISILIM] */
 #  define KINETIS_SIM_HAS_USBPHYCTL_USBVREGPD         1   /* SoC has USBPHYCTL[USBVREGPD] */
 #  define KINETIS_SIM_HAS_USBPHYCTL_USBVREGSEL        1   /* SoC has USBPHYCTL[USBVREGSEL] */
+
 #  define KINETIS_SIM_HAS_SOPT2                       1   /* SoC has SOPT2 Register */
 #  define KINETIS_SIM_HAS_SOPT2_FBSL                  1   /* SoC has SOPT2[FBSL] */
 #  undef  KINETIS_SIM_HAS_SOPT2_CMTUARTPAD                /* SoC has SOPT2[CMTUARTPAD] */
@@ -923,6 +1245,7 @@
 #  undef  KINETIS_SIM_HAS_SOPT2_USBHSRC                   /* SoC has SOPT2[USBHSRC] */
 #  define KINETIS_SIM_HAS_SOPT2_USBSRC                1   /* SoC has SOPT2[USBSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT2_MCGCLKSEL                 /* SoC has SOPT2[MCGCLKSEL] */
+
 #  define KINETIS_SIM_HAS_SOPT4                       1   /* SoC has SOPT4 Register */
 #  define KINETIS_SIM_HAS_SOPT4_FTM0FLT0              1   /* SoC has SOPT4[FTM0FLT0] */
 #  define KINETIS_SIM_HAS_SOPT4_FTM0FLT1              1   /* SoC has SOPT4[FTM0FLT1] */
@@ -953,14 +1276,23 @@
 #  define KINETIS_SIM_HAS_SOPT4_TPM1CLKSEL            1   /* SoC has SOPT4[TPM1CLKSEL] */
 #  define KINETIS_SIM_HAS_SOPT4_TPM2CH0SRC            1   /* SoC has SOPT4[TPM2CH0SRC] */
 #  define KINETIS_SIM_HAS_SOPT4_TPM2CLKSEL            1   /* SoC has SOPT4[TPM2CLKSEL] */
+
 #  define KINETIS_SIM_HAS_SOPT5                       1   /* SoC has SOPT5 Register */
+#  define KINETIS_SIM_HAS_SOPT5_UART0RXSRC            1   /* SoC has SOPT5[UART0RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART0TXSRC            1   /* SoC has SOPT5[UART0TXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1RXSRC            1   /* SoC has SOPT5[UART1RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1TXSRC            1   /* SoC has SOPT5[UART1TXSRC] */
 #  define KINETIS_SIM_HAS_SOPT5_LPUART0RXSRC          1   /* SoC has SOPT5[LPUART0RXSRC] */
 #  define KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC          1   /* SoC has SOPT5[LPUART0TXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC              /* SoC has SOPT5[LPUART1RXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC              /* SoC has SOPT5[LPUART1TXSRC] */
+
 #  undef  KINETIS_SIM_HAS_SOPT6                           /* SoC has SOPT6 Register */
 #  undef  KINETIS_SIM_HAS_SOPT6_MCC                       /* SoC has SOPT6[MCC] */
 #  undef  KINETIS_SIM_HAS_SOPT6_PCR                       /* SoC has SOPT6[PCR] */
 #  undef  KINETIS_SIM_HAS_SOPT6_RSTFLTSEL                 /* SoC has SOPT6[RSTFLTSEL] */
 #  undef  KINETIS_SIM_HAS_SOPT6_RSTFLTEN                  /* SoC has SOPT6[RSTFLTEN] */
+
 #  define KINETIS_SIM_HAS_SOPT7                       1   /* SoC has SOPT7 Register */
 #  define KINETIS_SIM_HAS_SOPT7_ADC0ALTTRGSEL         1   /* SoC has SOPT7[ADC0ALTTRGSEL] */
 #  define KINETIS_SIM_HAS_SOPT7_ADC1ALTTRGSEL         1   /* SoC has SOPT7[ADC1ALTTRGSEL] */
@@ -976,6 +1308,7 @@
 #  define KINETIS_SIM_SOPT7_ADC1ALTTRGEN              1   /* ADC1 alternate trigger enable */
 #  undef  KINETIS_SIM_SOPT7_ADC2ALTTRGEN                  /* ADC2 alternate trigger enable */
 #  undef  KINETIS_SIM_SOPT7_ADC3ALTTRGEN                  /* ADC3 alternate trigger enable */
+
 #  define KINETIS_SIM_HAS_SOPT8                       1   /* SoC has SOPT8 Register */
 #  define KINETIS_SIM_HAS_SOPT8_FTM0SYNCBIT           1   /* SoC has SOPT8[FTM0SYNCBIT] */
 #  define KINETIS_SIM_HAS_SOPT8_FTM1SYNCBIT           1   /* SoC has SOPT8[FTM1SYNCBIT] */
@@ -997,11 +1330,13 @@
 #  define KINETIS_SIM_HAS_SOPT8_FTM3OCH5SRC           1   /* SoC has SOPT8[FTM3OCH5SRC] */
 #  define KINETIS_SIM_HAS_SOPT8_FTM3OCH6SRC           1   /* SoC has SOPT8[FTM3OCH6SRC] */
 #  define KINETIS_SIM_HAS_SOPT8_FTM3OCH7SRC           1   /* SoC has SOPT8[FTM3OCH7SRC] */
+
 #  define KINETIS_SIM_HAS_SOPT9                       1   /* SoC has SOPT9 Register */
 #  define KINETIS_SIM_HAS_SOPT9_TPM1CH0SRC            1   /* SoC has SOPT9[TPM1CH0SRC] */
 #  define KINETIS_SIM_HAS_SOPT9_TPM2CH0SRC            1   /* SoC has SOPT9[TPM2CH0SRC] */
 #  define KINETIS_SIM_HAS_SOPT9_TPM1CLKSEL            1   /* SoC has SOPT9[TPM1CLKSEL] */
 #  define KINETIS_SIM_HAS_SOPT9_TPM2CLKSEL            1   /* SoC has SOPT9[TPM2CLKSEL] */
+
 #  define KINETIS_SIM_HAS_SDID                        1   /* SoC has SDID Register */
 #  define KINETIS_SIM_HAS_SDID_DIEID                  1   /* SoC has SDID[DIEID] */
 #  define KINETIS_SIM_HAS_SDID_FAMID                  1   /* SoC has SDID[FAMID] */
@@ -1009,18 +1344,27 @@
 #  define KINETIS_SIM_HAS_SDID_SERIESID               1   /* SoC has SDID[SERIESID] */
 #  undef  KINETIS_SIM_HAS_SDID_SRAMSIZE                   /* SoC has SDID[SRAMSIZE] */
 #  define KINETIS_SIM_HAS_SDID_SUBFAMID               1   /* SoC has SDID[SUBFAMID] */
+
 #  define KINETIS_SIM_HAS_SCGC1                       1   /* SoC has _SCGC1 Register */
 #  undef  KINETIS_SIM_HAS_SCGC1_UART5                     /* SoC has SCGC1[UART5] */
 #  define KINETIS_SIM_HAS_SCGC1_UART4                 1   /* SoC has SCGC1[UART4] */
 #  define KINETIS_SIM_HAS_SCGC1_I2C3                  1   /* SoC has SCGC1[I2C3] */
 #  define KINETIS_SIM_HAS_SCGC1_I2C2                  1   /* SoC has SCGC1[I2C2] */
 #  undef  KINETIS_SIM_HAS_SCGC1_OSC1                      /* SoC has SCGC1[OSC1] */
-#  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has _SCGC2 Register */
+
 #  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2_ENET                  1   /* SoC has SCGC2[ENET] */
 #  define KINETIS_SIM_HAS_SCGC2_LPUART0               1   /* SoC has SCGC2[LPUART0] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART1                   /* SoC has SCGC2[LPUART1] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART2                   /* SoC has SCGC2[LPUART2] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART3                   /* SoC has SCGC2[LPUART3] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART4                   /* SoC has SCGC2[LPUART4] */
 #  define KINETIS_SIM_HAS_SCGC2_TPM1                  1   /* SoC has SCGC2[TPM1] */
 #  define KINETIS_SIM_HAS_SCGC2_TPM2                  1   /* SoC has SCGC2[TPM2] */
+#  define KINETIS_SIM_HAS_SCGC2_DAC1                  1   /* SoC has SCGC2[DAC1] */
+#  undef  KINETIS_SIM_HAS_SCGC2_QSPI                      /* SoC has SCGC2[QSPI] */
+#  undef  KINETIS_SIM_HAS_SCGC2_FLEXIO                    /* SoC has SCGC2[FLEXIO] */
+
 #  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
 #  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[RNGA] */
 #  define KINETIS_SIM_HAS_SCGC3_USBHS                 1   /* SoC has SCGC3[USBHS] */
@@ -1029,6 +1373,7 @@
 #  define KINETIS_SIM_HAS_SCGC3_FLEXCAN1              1   /* SoC has SCGC3[FLEXCAN1] */
 #  undef  KINETIS_SIM_HAS_SCGC3_NFC                       /* SoC has SCGC3[NFC] */
 #  define KINETIS_SIM_HAS_SCGC3_SPI2                  1   /* SoC has SCGC3[SPI2] */
+#  undef  KINETIS_SIM_HAS_SCGC3_SPI3                      /* SoC has SCGC3[SPI3] */
 #  undef  KINETIS_SIM_HAS_SCGC3_SAI1                      /* SoC has SCGC3[SAI1] */
 #  define KINETIS_SIM_HAS_SCGC3_SDHC                  1   /* SoC has SCGC3[SDHC] */
 #  define KINETIS_SIM_HAS_SCGC3_FTM2                  1   /* SoC has SCGC3[FTM2] */
@@ -1036,34 +1381,42 @@
 #  define KINETIS_SIM_HAS_SCGC3_ADC1                  1   /* SoC has SCGC3[ADC1] */
 #  undef  KINETIS_SIM_HAS_SCGC3_ADC3                      /* SoC has SCGC3[ADC3] */
 #  undef  KINETIS_SIM_HAS_SCGC3_SLCD                      /* SoC has SCGC3[SLCD] */
+
 #  define KINETIS_SIM_HAS_SCGC4                       1   /* SoC has SCGC4 Register */
 #  undef  KINETIS_SIM_HAS_SCGC4_LLWU                      /* SoC has SCGC4[LLWU] clock gate */
 #  define KINETIS_SIM_HAS_SCGC4_UART0                 1   /* SoC has SCGC4[UART0] */
 #  define KINETIS_SIM_HAS_SCGC4_UART1                 1   /* SoC has SCGC4[UART1] */
 #  define KINETIS_SIM_HAS_SCGC4_UART2                 1   /* SoC has SCGC4[UART2] */
 #  define KINETIS_SIM_HAS_SCGC4_UART3                 1   /* SoC has SCGC4[UART3] */
+
 #  define KINETIS_SIM_HAS_SCGC5                       1   /* SoC has _SCGC5 Register */
 #  undef  KINETIS_SIM_HAS_SCGC5_REGFILE                   /* SoC has SCGC5[REGFILE] */
+#  undef  KINETIS_SIM_HAS_SCGC5_LPTMR1                    /* SoC has SCGC5[LPTMR1] */
 #  define KINETIS_SIM_HAS_SCGC5_TSI                   1   /* SoC has SCGC5[TSI] */
 #  undef  KINETIS_SIM_HAS_SCGC5_PORTF                     /* SoC has SCGC5[PORTF] */
+
 #  define KINETIS_SIM_HAS_SCGC6                       1   /* SoC has SCGC6 Register */
 #  define KINETIS_SIM_HAS_SCGC6_FTFL                  1   /* SoC has SCGC6[FTFL] */
 #  undef  KINETIS_SIM_HAS_SCGC6_DMAMUX1                   /* SoC has SCGC6[DEMUX1] */
+#  define KINETIS_SIM_HAS_SCGC6_FLEXCAN0              1   /* SoC has SCGC6[FLEXCAN0] */
 #  undef  KINETIS_SIM_HAS_SCGC6_USBHS                     /* SoC has SCGC6[USBHS] */
 #  define KINETIS_SIM_HAS_SCGC6_RNGA                  1   /* SoC has SCGC6[RNGA] */
 #  define KINETIS_SIM_HAS_SCGC6_FTM2                  1   /* SoC has SCGC6[FTM2] */
 #  undef  KINETIS_SIM_HAS_SCGC6_ADC2                      /* SoC has SCGC6[ADC2] */
 #  define KINETIS_SIM_HAS_SCGC6_DAC0                  1   /* SoC has SCGC6[DAC0] */
+
 #  define KINETIS_SIM_HAS_SCGC7                       1   /* SoC has SCGC7 Register */
 #  define KINETIS_SIM_HAS_SCGC7_FLEXBUS               1   /* SoC has SCGC7[FLEXBUS] */
 #  define KINETIS_SIM_HAS_SCGC7_DMA                   1   /* SoC has SCGC7[DMS] */
 #  define KINETIS_SIM_HAS_SCGC7_MPU                   1   /* SoC has SCGC7[MPU] */
 #  define KINETIS_SIM_HAS_SCGC7_SDRAMC                1   /* SoC has SCGC7[SDRAMC] */
+
 #  define KINETIS_SIM_HAS_CLKDIV1                     1   /* SoC has CLKDIV1 Register */
 #  define KINETIS_SIM_HAS_CLKDIV1_OUTDIV2             1   /* SoC has CLKDIV1[OUTDIV2] */
 #  define KINETIS_SIM_HAS_CLKDIV1_OUTDIV3             1   /* SoC has CLKDIV1[OUTDIV3] */
 #  define KINETIS_SIM_HAS_CLKDIV1_OUTDIV4             1   /* SoC has CLKDIV1[OUTDIV4] */
 #  undef  KINETIS_SIM_HAS_CLKDIV1_OUTDIV5                 /* SoC has CLKDIV1[OUTDIV5] */
+
 #  define KINETIS_SIM_HAS_CLKDIV2                     1   /* SoC has CLKDIV2 Register */
 #  define KINETIS_SIM_HAS_CLKDIV2_USBDIV              1   /* SoC has CLKDIV2[USBDIV] */
 #  define KINETIS_SIM_HAS_CLKDIV2_USBFRAC             1   /* SoC has CLKDIV2[USBFRAC] */
@@ -1073,6 +1426,7 @@
 #  undef  KINETIS_SIM_HAS_CLKDIV2_USBHSFRAC               /* SoC has CLKDIV2[USBHSFRAC] */
 #  undef  KINETIS_SIM_HAS_CLKDIV2_I2SDIV                  /* SoC has CLKDIV2[I2SDIV] */
 #  undef  KINETIS_SIM_HAS_CLKDIV2_I2SFRAC                 /* SoC has CLKDIV2[I2SFRAC] */
+
 #  define KINETIS_SIM_HAS_FCFG1                       1   /* SoC has FCFG1 Register */
 #  define KINETIS_SIM_HAS_FCFG1_DEPART                1   /* SoC has FCFG1[DEPART] */
 #  define KINETIS_SIM_HAS_FCFG1_EESIZE                1   /* SoC has FCFG1[EESIZE] */
@@ -1080,23 +1434,28 @@
 #  define KINETIS_SIM_HAS_FCFG1_FLASHDOZE             1   /* SoC has FCFG1[FLASHDOZE] */
 #  undef  KINETIS_SIM_HAS_FCFG1_FTFDIS                    /* SoC has FCFG1[FTFDIS] */
 #  define KINETIS_SIM_HAS_FCFG1_NVMSIZE               1   /* SoC has FCFG1[NVMSIZE] */
+
 #  define KINETIS_SIM_HAS_FCFG2                       1   /* SoC has FCFG2 Register */
 #  define KINETIS_SIM_HAS_FCFG2_MAXADDR0              7   /* SoC has n bit of FCFG2[MAXADDR0] */
 #  define KINETIS_SIM_HAS_FCFG2_MAXADDR1              7   /* SoC has n bit of FCFG2[MAXADDR1] */
 #  define KINETIS_SIM_HAS_FCFG2_PFLSH                 1   /* SoC has FCFG2[PFLSH] */
 #  define KINETIS_SIM_HAS_FCFG2_SWAPPFLSH             1   /* SoC has FCFG2[SWAPPFLSH] */
+
 #  define KINETIS_SIM_HAS_UIDH                        1   /* SoC has UIDH Register */
 #  define KINETIS_SIM_HAS_UIDMH                       1   /* SoC has UIDMH Register */
 #  define KINETIS_SIM_HAS_UIDML                       1   /* SoC has UIDML Register */
 #  define KINETIS_SIM_HAS_UIDL                        1   /* SoC has UIDL Register */
+
 #  define KINETIS_SIM_HAS_CLKDIV3                     1   /* SoC has CLKDIV3 Register */
 #  define KINETIS_SIM_HAS_CLKDIV3_PLLFLLDIV           1   /* SoC has CLKDIV3[PLLFLLDIV] */
 #  define KINETIS_SIM_HAS_CLKDIV3_PLLFLLFRAC          1   /* SoC has CLKDIV3[PLLFLLFRAC] */
+
 #  define KINETIS_SIM_HAS_CLKDIV4                     1   /* SoC has CLKDIV4 Register */
 #  define KINETIS_SIM_HAS_CLKDIV4_TRACEDIV            1   /* SoC has CLKDIV4[TRACEDIV] */
 #  define KINETIS_SIM_HAS_CLKDIV4_TRACEFRAC           1   /* SoC has CLKDIV4[TRACEFRAC] */
 #  undef  KINETIS_SIM_HAS_CLKDIV4_NFCDIV                  /* SoC has CLKDIV4[NFCDIV] */
 #  undef  KINETIS_SIM_HAS_CLKDIV4_NFCFRAC                 /* SoC has CLKDIV4[NFCFRAC] */
+
 #  undef  KINETIS_SIM_HAS_MCR                             /* SoC has MCR Register */
 #else
 #  error "Unsupported Kinetis chip"
@@ -1178,8 +1537,14 @@
 #  undef  KINETIS_SIM_HAS_SOPT4_TPM2CH0SRC                /* SoC has SOPT4[TPM2CH0SRC] */
 #  undef  KINETIS_SIM_HAS_SOPT4_TPM2CLKSEL                /* SoC has SOPT4[TPM2CLKSEL] */
 #  define KINETIS_SIM_HAS_SOPT5                           /* SoC has SOPT5 Register */
+#  define KINETIS_SIM_HAS_SOPT5_UART0RXSRC            1   /* SoC has SOPT5[UART0RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART0TXSRC            1   /* SoC has SOPT5[UART0TXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1RXSRC            1   /* SoC has SOPT5[UART1RXSRC] */
+#  define KINETIS_SIM_HAS_SOPT5_UART1TXSRC            1   /* SoC has SOPT5[UART1TXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT5_LPUART0RXSRC              /* SoC has SOPT5[LPUART0RXSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT5_LPUART0TXSRC              /* SoC has SOPT5[LPUART0TXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1RXSRC              /* SoC has SOPT5[LPUART1RXSRC] */
+#  undef  KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC              /* SoC has SOPT5[LPUART1TXSRC] */
 #  define KINETIS_SIM_HAS_SOPT6                       1   /* SoC has SOPT6 Register */
 #  undef  KINETIS_SIM_HAS_SOPT6_MCC                       /* SoC has SOPT6[MCC] */
 #  undef  KINETIS_SIM_HAS_SOPT6_PCR                       /* SoC has SOPT6[PCR] */
@@ -1218,8 +1583,15 @@
 #  define KINETIS_SIM_HAS_SCGC2                       1   /* SoC has SCGC2 Register */
 #  define KINETIS_SIM_HAS_SCGC2_ENET                  1   /* SoC has SCGC2[ENET] */
 #  undef  KINETIS_SIM_HAS_SCGC2_LPUART0                   /* SoC has SCGC2[LPUART0] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART1                   /* SoC has SCGC2[LPUART1] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART2                   /* SoC has SCGC2[LPUART2] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART3                   /* SoC has SCGC2[LPUART3] */
+#  undef  KINETIS_SIM_HAS_SCGC2_LPUART4                   /* SoC has SCGC2[LPUART4] */
 #  undef  KINETIS_SIM_HAS_SCGC2_TPM1                      /* SoC has SCGC2[TPM1] */
 #  undef  KINETIS_SIM_HAS_SCGC2_TPM2                      /* SoC has SCGC2[TPM2] */
+#  define KINETIS_SIM_HAS_SCGC2_DAC1                  1   /* SoC has SCGC2[DAC1] */
+#  undef KINETIS_SIM_HAS_SCGC2_QSPI                       /* SoC has SCGC2[QSPI] */
+#  undef KINETIS_SIM_HAS_SCGC2_FLEXIO                     /* SoC has SCGC2[FLEXIO] */
 #  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
 #  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[RNGA] */
 #  undef  KINETIS_SIM_HAS_SCGC3_USBHS                     /* SoC has SCGC3[USBHS] */
@@ -1228,6 +1600,7 @@
 #  define KINETIS_SIM_HAS_SCGC3_FLEXCAN1              1   /* SoC has SCGC3[FLEXCAN1] */
 #  undef  KINETIS_SIM_HAS_SCGC3_NFC                       /* SoC has SCGC3[NFC] */
 #  define KINETIS_SIM_HAS_SCGC3_SPI2                  1   /* SoC has SCGC3[SPI2] */
+#  undef  KINETIS_SIM_HAS_SCGC3_SPI3                      /* SoC has SCGC3[SPI3] */
 #  undef  KINETIS_SIM_HAS_SCGC3_SAI1                      /* SoC has SCGC3[SAI1] */
 #  define KINETIS_SIM_HAS_SCGC3_SDHC                  1   /* SoC has SCGC3[SDHC] */
 #  define KINETIS_SIM_HAS_SCGC3_FTM2                  1   /* SoC has SCGC3[FTM2] */
@@ -1243,11 +1616,13 @@
 #  define KINETIS_SIM_HAS_SCGC4_UART3                 1   /* SoC has SCGC4[UART3] */
 #  define KINETIS_SIM_HAS_SCGC5                       1   /* SoC has SCGC5 Register */
 #  define KINETIS_SIM_HAS_SCGC5_REGFILE               1   /* SoC has SCGC5[REGFILE] */
+#  undef  KINETIS_SIM_HAS_SCGC5_LPTMR1                    /* SoC has SCGC5[LPTMR1] */
 #  define KINETIS_SIM_HAS_SCGC5_TSI                   1   /* SoC has SCGC5[TSI] */
 #  undef  KINETIS_SIM_HAS_SCGC5_PORTF                     /* SoC has SCGC5[PORTF] */
 #  define KINETIS_SIM_HAS_SCGC6                       1   /* SoC has SCGC6 Register */
 #  define KINETIS_SIM_HAS_SCGC6_FTFL                  1   /* SoC has SCGC6[FTFL] */
 #  undef  KINETIS_SIM_HAS_SCGC6_DMAMUX1                   /* SoC has SCGC6[DEMUX1] */
+#  define KINETIS_SIM_HAS_SCGC6_FLEXCAN0              1   /* SoC has SCGC6[FLEXCAN0] */
 #  undef  KINETIS_SIM_HAS_SCGC6_USBHS                     /* SoC has SCGC6[USBHS] */
 #  undef  KINETIS_SIM_HAS_SCGC6_RNGA                      /* SoC has SCGC6[RNGA] */
 #  undef  KINETIS_SIM_HAS_SCGC6_FTM2                      /* SoC has SCGC6[FTM2] */

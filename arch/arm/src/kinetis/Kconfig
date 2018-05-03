@@ -651,11 +651,18 @@ config KINETIS_TPM2
 	---help---
 		Support TPM module 2
 
-config KINETIS_LPTIMER
-	bool "Low power timer (LPTIMER)"
+config KINETIS_LPTMR0
+	bool "Low power timer 0 (LPTMR0)"
 	default n
 	---help---
-		Support the low power timer
+		Support the low power timer 0
+
+config KINETIS_LPTMR1
+        bool "Low power timer 0 (LPTMR1)"
+        default n
+	depends on KINETIS_HAVE_LPTMR1
+        ---help---
+                Support the low power timer 1
 
 config KINETIS_RTC
 	bool "RTC"

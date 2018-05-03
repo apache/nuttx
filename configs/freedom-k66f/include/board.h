@@ -145,8 +145,7 @@
 
 /* SDHC pull-up resistors **********************************************************/
 
-/*
- * Kinetis does not have pullups on their Freedom-K66F board
+/* Kinetis does not have pullups on their Freedom-K66F board
  * So allow the board config to enable them.
  */
 
@@ -159,7 +158,7 @@
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
  * The SDHC module is always configure configured so that the core clock is the base
- * clock.  Possible values for presscaler and divisor are:
+ * clock.  Possible values for prescaler and divisor are:
  *
  *   SDCLKFS: {2, 4, 8, 16, 32, 63, 128, 256}
  *   DVS:     {1..16}
