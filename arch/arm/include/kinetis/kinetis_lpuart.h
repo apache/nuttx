@@ -65,6 +65,7 @@
 
 /* LPUART Register Configuration
  *
+ * KINETIS_LPUART_HAS_MODIR_RTSWATER    - SoC has MODIR[RTSWATER]
  * KINETIS_LPUART_HAS_FIFO              - SoC has FIFO Register
  * KINETIS_LPUART_HAS_WATER             - SoC has WATER Register
  */
@@ -143,6 +144,7 @@
 
 /* LPUART Register Configuration */
 
+#  define KINETIS_LPUART_HAS_MODIR_RTSWATER    1 /* SoC has MODIR[RTSWATER] */
 #  define KINETIS_LPUART_HAS_FIFO              1 /* SoC has FIFO Register */
 #  define KINETIS_LPUART_HAS_WATER             1 /* SoC has WATER Register */
 
@@ -260,8 +262,9 @@
 
 /* LPUART Register Configuration */
 
-#  undef  KINETIS_LPUART_HAS_FIFO              /* SoC does not have FIFO Register */
-#  undef  KINETIS_LPUART_HAS_WATER             /* SoC does not have WATER Register */
+#  undef  KINETIS_LPUART_HAS_MODIR_RTSWATER      /* SoC does not have MODIR[RTSWATER] */
+#  undef  KINETIS_LPUART_HAS_FIFO                /* SoC does not have FIFO Register */
+#  undef  KINETIS_LPUART_HAS_WATER               /* SoC does not have WATER Register */
 
 #endif
 
