@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/kinetis/kinetis_mcg.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -148,6 +148,7 @@
                                       * Verified Document Number: K60P144M150SF3RM Rev. 3, November 2014 */
 #define KINETIS_MCG_VERSION_04    4  /* Verified to Document Number: K64P144M120SF5RM Rev. 2, January 2014 */
 #define KINETIS_MCG_VERSION_06    6  /* Verified to Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+                                     /* Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
 
 /* MK20DX/DN---VLH5
  *
@@ -193,6 +194,119 @@
       defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
 
 #  define KINETIS_MCG_VERSION KINETIS_MCG_VERSION_UKN
+
+/* MK28FN2M0---15-
+ *
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ *  PART NUMBER     CPU     PIN PACKAGE PROGRAM EEPROM SRAM  GPIO
+ *                  FREQ    CNT         FLASH
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ *  MK28FN2M0VMI15  150 MHz 169  MAPBGA  2 MB   None    1 MB  120
+ *  MK28FN2M0CAU15R 150 MHz 210  WLCSP   2 MB   None    1 MB  120
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
+
+/* Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
+
+#  define KINETIS_MCG_VERSION KINETIS_MCG_VERSION_06
+
+/* MCG Configuration Parameters */
+
+#  define KINETIS_MCG_PLL_REF_MIN            8000000   /* OSCCLK/PLL_R minimum */
+#  define KINETIS_MCG_PLL_REF_MAX            16000000  /* OSCCLK/PLL_R maximum */
+
+/* TODO: The following configuration parameters have not been verified */
+#warning Unverified values from K66F
+
+#  define KINETIS_MCG_PLL_INTERNAL_DIVBY     2         /* The PLL clock is divided by 2 before VCO divider */
+#  define KINETIS_MCG_HAS_PLL_EXTRA_DIVBY    1         /* Is PLL clock divided by 1 before MCG PLL/FLL clock selection in the SIM module */
+#  define KINETIS_MCG_FFCLK_DIVBY            2         /* MCGFFCLK divided by 2 */
+#  define KINETIS_MCG_HAS_IRC_48M            1         /* Has 48MHz internal oscillator */
+#  undef  KINETIS_MCG_HAS_LOW_FREQ_IRC                 /* Has LTRIMRNG, LFRIM, LSTRIM and bit MC[LIRC_DIV2] */
+#  undef  KINETIS_MCG_HAS_HIGH_FREQ_IRC                /* Has HCTRIM, HTTRIM, HFTRIM and bit MC[HIRCEN] */
+#  undef  KINETIS_MCG_HAS_PLL_INTERNAL_MODE            /* Has PEI mode or PBI mode */
+#  undef  KINETIS_MCG_HAS_RESET_IS_BLPI                /* Has Reset clock mode is BLPI */
+
+/* MCG Register Configuration */
+
+#  define KINETIS_MCG_HAS_C1                 1         /* SoC has C1 Register */
+#  define KINETIS_MCG_HAS_C1_IREFS           1         /* SoC has C1[IREFS] */
+#  define KINETIS_MCG_HAS_C1_FRDIV           1         /* SoC has C1[FRDIV] */
+#  define KINETIS_MCG_C1_FRDIV_MAX           7         /* C1[FRDIV] maximum value 5=1024, 6=1280 7=1536 */
+
+#  define KINETIS_MCG_HAS_C2                 1         /* SoC has C2 Register */
+#  define KINETIS_MCG_HAS_C2_HGO             1         /* SoC has C2[HGO] */
+#  define KINETIS_MCG_HAS_C2_RANGE           1         /* SoC has C2[RANGE] */
+#  define KINETIS_MCG_HAS_C2_FCFTRIM         1         /* SoC has C2[FCFTRIM] */
+#  define KINETIS_MCG_HAS_C2_LOCRE0          1         /* SoC has C2[LOCRE0] */
+
+#  define KINETIS_MCG_HAS_C3                 1         /* SoC has C3 Register */
+
+#  define KINETIS_MCG_HAS_C4                 1         /* SoC has C4 Register */
+
+#  define KINETIS_MCG_HAS_C5                 1         /* SoC has C5 Register */
+#  define KINETIS_MCG_HAS_C5_PRDIV           1         /* SoC has C5[PRDIV] */
+#  define KINETIS_MCG_C5_PRDIV_BASE          1         /* PRDIV base value corresponding to 0 in C5[PRDIV] */
+#  define KINETIS_MCG_C5_PRDIV_MAX           8         /* The Maximum value of C5[PRVDIV]) */
+#  define KINETIS_MCG_C5_PRDIV_BITS          3         /* Has 3 bits of phase-locked loop (PLL) PRDIV (register C5[PRDIV] */
+#  undef  KINETIS_MCG_HAS_C5_PLLREFSEL0                /* SoC does not have C5[PLLREFSEL0] */
+
+#  define KINETIS_MCG_HAS_C6                 1         /* SoC has C6 Register */
+#  define KINETIS_MCG_HAS_C6_VDIV            1         /* SoC has C6[VDIV] */
+#  define KINETIS_MCG_C6_VDIV_BASE           16        /* VDIV base value corresponding to 0 in C6[VDIV] */
+#  define KINETIS_MCG_C6_VDIV_MAX            47        /* The Maximum value of C6[VDIV] */
+#  define KINETIS_MCG_HAS_C6_CME             1         /* SoC has C6[CME] */
+#  define KINETIS_MCG_HAS_C6_PLLS            1         /* SoC has C6[PLLS] */
+#  define KINETIS_MCG_HAS_C6_LOLIE0          1         /* SoC has C6[LOLIE0] */
+
+#  define KINETIS_MCG_HAS_S                  1         /* SoC has S Register */
+#  define KINETIS_MCG_HAS_S_PLLST            1         /* SoC has S[PLLST] */
+#  define KINETIS_MCG_HAS_S_LOCK0            1         /* SoC has S[LOCK0] */
+#  define KINETIS_MCG_HAS_S_LOLS             1         /* SoC has S[LOLS] */
+
+#  undef  KINETIS_MCG_HAS_ATC                          /* SoC does not have ATC Register */
+
+#  define KINETIS_MCG_HAS_ATCVH              1         /* SoC has ATCVH Register */
+
+#  define KINETIS_MCG_HAS_ATCVL              1         /* SoC has ATCVL Register */
+
+#  define KINETIS_MCG_HAS_SC                 1         /* SoC has SC Register */
+#  define KINETIS_MCG_HAS_SC_ATMF            1         /* SoC has SC[ATMF] */
+#  define KINETIS_MCG_HAS_SC_ATMS            1         /* SoC has SC[ATMS] */
+#  define KINETIS_MCG_HAS_SC_ATME            1         /* SoC has SC[ATME] */
+
+#  define KINETIS_MCG_HAS_C7                 1         /* SoC has C7 Register */
+#  define KINETIS_MCG_HAS_C7_OSCSEL          1         /* SoC has C7[OSCSEL] */
+#  define KINETIS_MCG_C7_OSCSEL_BITS         2         /* C7[OSCSEL] is 2 bits wide */
+
+#  define KINETIS_MCG_HAS_C8                 1         /* SoC has C8 Register */
+#  define KINETIS_MCG_HAS_C8_LOCS1           1         /* SoC has C8[LOCS1] */
+#  define KINETIS_MCG_HAS_C8_CME1            1         /* SoC has C8[CME1] */
+#  define KINETIS_MCG_HAS_C8_LOLRE           1         /* SoC has C8[LOLRE] */
+#  define KINETIS_MCG_HAS_C8_LOCRE1          1         /* SoC has C8[LOCRE1] */
+
+#  define KINETIS_MCG_HAS_C9                 1         /* SoC has C9 Register */
+#  define KINETIS_MCG_HAS_C9_EXT_PLL_LOCS    1         /* SoC has C9_EXT_PLL[LOCS] */
+#  define KINETIS_MCG_HAS_C9_PLL_LOCRE       1         /* SoC has C9_PLL[LOCRE] */
+#  define KINETIS_MCG_HAS_C9_PLL_CME         1         /* SoC has C9_PLL[CME] */
+
+#  undef  KINETIS_MCG_HAS_C10                          /* SoC does not have C10 Register */
+#  undef  KINETIS_MCG_HAS_C10_LOCS1                    /* SoC does not have C10[LOCS1] */
+
+#  define KINETIS_MCG_HAS_C11                          /* SoC has C11 Register */
+#  undef  KINETIS_MCG_HAS_C11_PLL1OSC1                 /* SoC has C1[PRDIV1], C11[PLLSTEN1], C11[PLLCLKEN1], C11[PLLREFSEL1] */
+#  define KINETIS_MCG_HAS_C11_PLLCS                    /* SoC has C11[PLLCS] */
+#  undef  KINETIS_MCG_HAS_C11_PLLREFSEL1               /* SoC has C11[PLLREFSEL1] */
+
+#  undef  KINETIS_MCG_HAS_C12                          /* SoC has not C12 Register */
+
+#  define KINETIS_MCG_HAS_S2                           /* SoC has S2 Register */
+#  undef  KINETIS_MCG_HAS_S2_PLL1OSC1                  /* SoC has S2[LOCS2], S2[OSCINIT1], S2[LOCK1], S2[LOLS1] */
+#  define KINETIS_MCG_HAS_S2_PLLCST                    /* SoC has S2[PLLCST] */
+
+#  undef  KINETIS_MCG_HAS_T3                           /* Defined but has no fields??? */
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X128VFX50) || defined(CONFIG_ARCH_CHIP_MK40X128VLH50) || \
       defined(CONFIG_ARCH_CHIP_MK40X128VLK50) || defined(CONFIG_ARCH_CHIP_MK40X128VMB50) || \
@@ -469,19 +583,24 @@
 #  define KINETIS_MCG_HAS_C1_IREFS           1         /* SoC has C1[IREFS] */
 #  define KINETIS_MCG_HAS_C1_FRDIV           1         /* SoC has C1[FRDIV] */
 #  define KINETIS_MCG_C1_FRDIV_MAX           7         /* C1[FRDIV] maximum value 5=1024, 6=1280 7=1536 */
+
 #  define KINETIS_MCG_HAS_C2                 1         /* SoC has C2 Register */
 #  define KINETIS_MCG_HAS_C2_HGO             1         /* SoC has C2[HGO] */
 #  define KINETIS_MCG_HAS_C2_RANGE           1         /* SoC has C2[RANGE] */
 #  define KINETIS_MCG_HAS_C2_FCFTRIM         1         /* SoC has C2[FCFTRIM] */
 #  define KINETIS_MCG_HAS_C2_LOCRE0          1         /* SoC has C2[LOCRE0] */
+
 #  define KINETIS_MCG_HAS_C3                 1         /* SoC has C3 Register */
+
 #  define KINETIS_MCG_HAS_C4                 1         /* SoC has C4 Register */
+
 #  define KINETIS_MCG_HAS_C5                 1         /* SoC has C5 Register */
 #  define KINETIS_MCG_HAS_C5_PRDIV           1         /* SoC has C5[PRDIV] */
 #  define KINETIS_MCG_C5_PRDIV_BASE          1         /* PRDIV base value corresponding to 0 in C5[PRDIV] */
 #  define KINETIS_MCG_C5_PRDIV_MAX           8         /* The Maximum value of C5[PRVDIV]) */
 #  define KINETIS_MCG_C5_PRDIV_BITS          3         /* Has 3 bits of phase-locked loop (PLL) PRDIV (register C5[PRDIV] */
-#  undef  KINETIS_MCG_HAS_C5_PLLREFSEL0                /* SoC has C5[PLLREFSEL0] */
+#  undef  KINETIS_MCG_HAS_C5_PLLREFSEL0                /* SoC does not have C5[PLLREFSEL0] */
+
 #  define KINETIS_MCG_HAS_C6                 1         /* SoC has C6 Register */
 #  define KINETIS_MCG_HAS_C6_VDIV            1         /* SoC has C6[VDIV] */
 #  define KINETIS_MCG_C6_VDIV_BASE           16        /* VDIV base value corresponding to 0 in C6[VDIV] */
@@ -489,39 +608,53 @@
 #  define KINETIS_MCG_HAS_C6_CME             1         /* SoC has C6[CME] */
 #  define KINETIS_MCG_HAS_C6_PLLS            1         /* SoC has C6[PLLS] */
 #  define KINETIS_MCG_HAS_C6_LOLIE0          1         /* SoC has C6[LOLIE0] */
+
 #  define KINETIS_MCG_HAS_S                  1         /* SoC has S Register */
 #  define KINETIS_MCG_HAS_S_PLLST            1         /* SoC has S[PLLST] */
 #  define KINETIS_MCG_HAS_S_LOCK0            1         /* SoC has S[LOCK0] */
 #  define KINETIS_MCG_HAS_S_LOLS             1         /* SoC has S[LOLS] */
-#  undef  KINETIS_MCG_HAS_ATC                          /* SoC has ATC Register */
+
+#  undef  KINETIS_MCG_HAS_ATC                          /* SoC does not have ATC Register */
+
 #  define KINETIS_MCG_HAS_ATCVH              1         /* SoC has ATCVH Register */
+
 #  define KINETIS_MCG_HAS_ATCVL              1         /* SoC has ATCVL Register */
+
 #  define KINETIS_MCG_HAS_SC                 1         /* SoC has SC Register */
-#  define KINETIS_MCG_HAS_SC_ATMS            1         /* SoC has SC[ATMS] */
 #  define KINETIS_MCG_HAS_SC_ATMF            1         /* SoC has SC[ATMF] */
+#  define KINETIS_MCG_HAS_SC_ATMS            1         /* SoC has SC[ATMS] */
 #  define KINETIS_MCG_HAS_SC_ATME            1         /* SoC has SC[ATME] */
+
 #  define KINETIS_MCG_HAS_C7                 1         /* SoC has C7 Register */
 #  define KINETIS_MCG_HAS_C7_OSCSEL          1         /* SoC has C7[OSCSEL] */
-#  define KINETIS_MCG_C7_OSCSEL_BITS         2         /* C7[OSCSEL] is n bits wide */
+#  define KINETIS_MCG_C7_OSCSEL_BITS         2         /* C7[OSCSEL] is 2 bits wide */
+
 #  define KINETIS_MCG_HAS_C8                 1         /* SoC has C8 Register */
 #  define KINETIS_MCG_HAS_C8_LOCS1           1         /* SoC has C8[LOCS1] */
 #  define KINETIS_MCG_HAS_C8_CME1            1         /* SoC has C8[CME1] */
 #  define KINETIS_MCG_HAS_C8_LOLRE           1         /* SoC has C8[LOLRE] */
 #  define KINETIS_MCG_HAS_C8_LOCRE1          1         /* SoC has C8[LOCRE1] */
+
 #  define KINETIS_MCG_HAS_C9                 1         /* SoC has C9 Register */
 #  define KINETIS_MCG_HAS_C9_EXT_PLL_LOCS    1         /* SoC has C9_EXT_PLL[LOCS] */
 #  define KINETIS_MCG_HAS_C9_PLL_LOCRE       1         /* SoC has C9_PLL[LOCRE] */
 #  define KINETIS_MCG_HAS_C9_PLL_CME         1         /* SoC has C9_PLL[CME] */
-#  undef  KINETIS_MCG_HAS_C10                          /* SoC has C10 Register */
-#  undef  KINETIS_MCG_HAS_C10_LOCS1                    /* SoC has C10[LOCS1] */
+
+#  undef  KINETIS_MCG_HAS_C10                          /* SoC does not have C10 Register */
+#  undef  KINETIS_MCG_HAS_C10_LOCS1                    /* SoC does not have C10[LOCS1] */
+
 #  define KINETIS_MCG_HAS_C11                          /* SoC has C11 Register */
 #  undef  KINETIS_MCG_HAS_C11_PLL1OSC1                 /* SoC has C1[PRDIV1], C11[PLLSTEN1], C11[PLLCLKEN1], C11[PLLREFSEL1] */
 #  define KINETIS_MCG_HAS_C11_PLLCS                    /* SoC has C11[PLLCS] */
 #  undef  KINETIS_MCG_HAS_C11_PLLREFSEL1               /* SoC has C11[PLLREFSEL1] */
-#  undef  KINETIS_MCG_HAS_C12                          /* SoC has C12 Register */
+
+#  undef  KINETIS_MCG_HAS_C12                          /* SoC has not C12 Register */
+
 #  define KINETIS_MCG_HAS_S2                           /* SoC has S2 Register */
 #  undef  KINETIS_MCG_HAS_S2_PLL1OSC1                  /* SoC has S2[LOCS2], S2[OSCINIT1], S2[LOCK1], S2[LOLS1] */
 #  define KINETIS_MCG_HAS_S2_PLLCST                    /* SoC has S2[PLLCST] */
+
+#  undef  KINETIS_MCG_HAS_T3                           /* Defined but has no fields??? */
 
 #else
 #  error "Unsupported Kinetis chip"

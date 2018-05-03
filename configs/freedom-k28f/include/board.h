@@ -52,96 +52,150 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The freedom-k28f has a 12MHz crystal on board */
-
-#undef  BOARD_EXTCLOCK                      /* Crystal */
-#define BOARD_EXTAL_LP                      /* Low Power, as opposed to Hi Gain */
-
-/* BOARD_FRDIV is MCG_C1_FRDIV_DIV512 from kinetis_mcg.h. According to the k20
- * reference manual, when transitioning MCG clock modes to FLL Bypassed External
- * the C1 divider must be set so that the FLL clock is between 31.25 and 39.0625 khz.
- * For freedom-k28f that works out to a divider of 512.
+/* The Freedom K28F uses a 12Mhz external Oscillator.  The Kinetis MCU startup from an
+ * internal digitally-controlled oscillator (DCO). Nuttx will enable the main external
+ * oscillator (EXTAL0/XTAL0).   The external oscillator/resonator can range from
+ * 32.768 KHz up to 50 MHz. The default external source for the MCG oscillator inputs
+ * is 12 MHz oscillator
+ *
+ * X501 a High-frequency, low-power Xtal
  */
 
-#define BOARD_FRDIV          MCG_C1_FRDIV_DIV512
+#define BOARD_EXTAL_LP       1
+#define BOARD_EXTAL_FREQ     12000000       /* 12MHz Oscillator */
+#define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-#define BOARD_EXTAL_FREQ     12000000       /* 12MHz crystal frequency (REFCLK, Y2) */
-#define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator (Y1) */
-
-/* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
- * produce a 2MHz reference clock to the PLL.  The rated speed for the MK20DX256VLH7
- * is 72MHz and 50MHz for the MK20DX128VLH5.
+/* PLL Configuration.  Either the external clock or crystal frequency is used to
+ * select the PRDIV value. Only reference clock frequencies are supported that will
+ * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX  reference
+ * clock to the PLL.
  *
- * MK20DX128VLH5 Rated Frequency 50MHz (selecting 48Mhz to use USB)
+ *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 Mhz  / 1  = 12 MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 Mhz  * 30 = 360 MHz
+ *   MCG Frequency:         PLLOUT = 180 Mhz = 360 MHz / KINETIS_MCG_PLL_INTERNAL_DIVBY
  *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*24  = 48MHz
- *   MCG Frequency:         PLLOUT = 48MHz
- *
- * MK20DX256VLH7 Rated Frequency 72MHz
- *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*36  = 72MHz
- *   MCG Frequency:         PLLOUT = 72MHz
+ * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
+ * VDIV  register value is offset by KINETIS_MCG_C6_VDIV_BASE.
  */
 
-/* PLL Configuration */
+#define BOARD_PRDIV          1             /* PLL External Reference Divider */
+#define BOARD_VDIV           30            /* PLL VCO Divider (frequency multiplier) */
 
-#define BOARD_PRDIV          8              /* PLL External Reference Divider */
-#define BOARD_VDIV           24             /* PLL VCO Divider (frequency multiplier) */
+/* Define additional MCG_C2 Setting */
 
-/* SIM CLKDIV1 dividers */
-
-#define BOARD_OUTDIV1        1              /* Core        = MCG, 48MHz */
-#define BOARD_OUTDIV2        1              /* Bus         = MCG/1, 48MHz */
-#define BOARD_OUTDIV3        0              /* N/A         = No  OUTDIV3 */
-#define BOARD_OUTDIV4        2              /* Flash clock = MCG/2, 24MHz */
+#define BOARD_MCG_C2_FCFTRIM 0              /* Do not enable FCFTRIM */
+#define BOARD_MCG_C2_LOCRE0  MCG_C2_LOCRE0  /* Enable reset on loss of clock */
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
-#define BOARD_MCG_FREQ       BOARD_PLLOUT_FREQ
+#define BOARD_MCG_FREQ       (BOARD_PLLOUT_FREQ/KINETIS_MCG_PLL_INTERNAL_DIVBY)
+
+/* SIM CLKDIV1 dividers */
+
+#define BOARD_OUTDIV1        1              /* Core        = MCG,    180   MHz */
+#define BOARD_OUTDIV2        3              /* Bus         = MCG / 3, 60   MHz */
+#define BOARD_OUTDIV3        3              /* FlexBus     = MCG / 3, 60   MHz */
+#define BOARD_OUTDIV4        7              /* Flash clock = MCG / 7, 25.7 MHz */
 
 #define BOARD_CORECLK_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
 #define BOARD_FLEXBUS_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
-/* Use MCGPLLCLK as the output SIM_SOPT2 MUX selected by
+/* Use BOARD_MCG_FREQ as the output SIM_SOPT2 MUX selected by
  * SIM_SOPT2[PLLFLLSEL]
  */
 
-#define BOARD_SOPT2_PLLFLLSEL        SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
-#define BOARD_SOPT2_FREQ             BOARD_MCG_FREQ
+#define BOARD_SOPT2_PLLFLLSEL   SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
+#define BOARD_SOPT2_FREQ        BOARD_MCG_FREQ
 
- /* Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
+/* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 Mhz Xtal
+ * Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
  *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
+ *                48Mhz = 168Mhz X [(1 + 1) / (6 + 1)]
+ *                48Mhz = 168Mhz / (6 + 1) * (1 + 1)
  */
 
-#if BOARD_SOPT2_FREQ == 96000000
-  /* USBFRAC/USBDIV = 1/2 of 96Mhz clock = 48MHz */
-
-#  define BOARD_SIM_CLKDIV2_USBFRAC  1
-#  define BOARD_SIM_CLKDIV2_USBDIV   2
-#elif BOARD_SOPT2_FREQ == 72000000
-  /* USBFRAC/USBDIV = 2/3 of 72Mhz clock = 48MHz */
-
-#  define BOARD_SIM_CLKDIV2_USBFRAC  2
-#  define BOARD_SIM_CLKDIV2_USBDIV   3
-#elif BOARD_SOPT2_FREQ == 48000000
-  /* USBFRAC/USBDIV = 1/1 of 48Mhz clock = 48MHz */
-
-#  define BOARD_SIM_CLKDIV2_USBFRAC  1
-#  define BOARD_SIM_CLKDIV2_USBDIV   1
+#if (BOARD_MCG_FREQ == 168000000L)
+#  define BOARD_SIM_CLKDIV2_USBFRAC     2
+#  define BOARD_SIM_CLKDIV2_USBDIV      7
+#  define BOARD_SIM_CLKDIV2_FREQ        (BOARD_SOPT2_FREQ / \
+                                         BOARD_SIM_CLKDIV2_USBDIV * \
+                                         BOARD_SIM_CLKDIV2_USBFRAC)
 #endif
 
-#define BOARD_SIM_CLKDIV2_FREQ       (BOARD_SOPT2_FREQ / \
-                                      BOARD_SIM_CLKDIV2_USBDIV * \
-                                      BOARD_SIM_CLKDIV2_USBFRAC)
+/* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
+ *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ × [ (PLLFLLFRAC+1) / (PLLFLLDIV+1)]
+ *            90 Mhz = 180 Mhz X [(0 + 1) / (1 + 1)]
+ *            90 Mhz = 180 Mhz / (1 + 1) * (0 + 1)
+ */
+
+#define BOARD_SIM_CLKDIV3_PLLFLLFRAC  1
+#define BOARD_SIM_CLKDIV3_PLLFLLDIV   2
+#define BOARD_SIM_CLKDIV3_FREQ        (BOARD_SOPT2_FREQ / \
+                                       BOARD_SIM_CLKDIV3_PLLFLLDIV * \
+                                       BOARD_SIM_CLKDIV3_PLLFLLFRAC)
+
+#define BOARD_LPUART0_CLKSRC SIM_SOPT2_LPUARTSRC_MCGCLK
+#define BOARD_LPUART0_FREQ   BOARD_SIM_CLKDIV3_FREQ
+
+#define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
+#define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
+
+/* SDHC pull-up resistors **********************************************************/
+
+/*
+ * Kinetis does not have pullups on their Freedom-K28F board
+ * So allow the board config to enable them.
+ */
+
+#define BOARD_SDHC_ENABLE_PULLUPS 1
+#warning REVISIT
+
+/* SDHC clocking ********************************************************************/
+
+/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+ *
+ *   SDCLK  frequency = (base clock) / (prescaler * divisor)
+ *
+ * The SDHC module is always configure configured so that the core clock is the base
+ * clock.  Possible values for presscaler and divisor are:
+ *
+ *   SDCLKFS: {2, 4, 8, 16, 32, 63, 128, 256}
+ *   DVS:     {1..16}
+ */
+
+/* Identification mode:  Optimal 400KHz, Actual 180MHz / (32 * 15) = 375 Khz */
+
+#define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV32
+#define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(15)
+
+/* MMC normal mode: Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz */
+
+#define BOARD_SDHC_MMCMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
+#define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
+
+/* SD normal mode (1-bit): Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz */
+
+#define BOARD_SDHC_SD1MODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
+#define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
+
+/* SD normal mode (4-bit): Optimal 25MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (with DMA)
+ * SD normal mode (4-bit): Optimal 20MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (no DMA)
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(4)
+#else
+#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(4)
+#endif
 
 /* Use the output of SIM_SOPT2[PLLFLLSEL] as the USB clock source */
 
-#define BOARD_USB_CLKSRC              SIM_SOPT2_USBSRC
-#define BOARD_USB_FREQ                BOARD_SIM_CLKDIV2_FREQ
+#define BOARD_USB_CLKSRC               SIM_SOPT2_USBSRC
+#define BOARD_USB_FREQ                 BOARD_SIM_CLKDIV2_FREQ
 
 /* Allow USBOTG-FS Controller to Read from FLASH */
 
@@ -203,40 +257,121 @@
 /* The freedom-k28f board has no standard GPIO contact buttons */
 
 /* Alternative pin resolution *******************************************************/
-/* The K20 has three UARTs with pin availability as follows:
+/* The Freedom K28F has five LPUARTs with pin availability as follows:
  *
- *   --------- ------ ----------- -------------------------
- *   UART      PORT   BOARD       PJRC PINOUT DESCRIPTION
- *   FUNCTION         LABEL
- *   --------- ------ ----------- -------------------------
- *   UART0_RX  PTA1   (See above) MINI54TAN / Bootloader
- *             PTB16  Pin 0       RX1 / Touch
- *             PTD6   Pin 21 / A7 RX1 / CS / PWM
- *   UART0_TX  PTA2   (See above) MINI54TAN / Bootloader
- *             PTB17  Pin 1       TX1 / Touch
- *             PTD7   Pin 5       TX1 / PWM
- *   --------- ------ ----------- -------------------------
- *   UART1_RX  PTC3   Pin 9       RX2 / CS / PWM
- *             PTE1   Pad 26      (Pad on back of board)
- *   UART1_TX  PTC4   Pin 10      TX2 / CS / PWM
- *             PTE0   Pad 31      (Pad on back of board)
- *   --------- ------ ----------- -------------------------
- *   UART2_RX  PTD2   Pin 7       RX3 / DOUT
- *   UART2_TX  PTD3   Pin 8       TX3 / DIN
- *   --------- ------ ----------- -------------------------
+ *    ----- --------------- -------------------------------
+ *    GPIO  LPUART FUNCTION BOARD CONFIGURATION
+ *    ----- --------------- -------------------------------
+ *    PTA1  LPUART0_RX      PTA1  GPIO0
+ *    PTA15 LPUART0_RX      PTA15 FXIO0_D21
+ *    PTB14 LPUART0_RX      PTB14
+ *    PTB16 LPUART0_RX      PTB16 SDRAM_D17
+ *    PTC25 LPUART0_RX      PTC25 LPUART0_RX_TGTMCU
+ *    PTD6  LPUART0_RX      PTD6  Arduino_D17_ADC0_SE7b
+ *    PTA2  LPUART0_TX      PTA2  INT
+ *    PTA14 LPUART0_TX      PTA14 FXIO0_D20
+ *    PTB15 LPUART0_TX            N/C
+ *    PTB17 LPUART0_TX      PTB17 SDRAM_D16
+ *    PTC24 LPUART0_TX      PTC24 LPUART0_TX_TGTMCU
+ *    PTD7  LPUART0_TX      PTD7  SDRAM_CKE
+ *    PTA3  LPUART0_RTS     PTA3
+ *    PTA17 LPUART0_RTS     PTA17 FXIO0_D23
+ *    PTB2  LPUART0_RTS     PTB2  Arduino_D19_ADC0_SE12/I2C0_SCL/SDRAM_WE
+ *    PTB12 LPUART0_RTS     PTB12 Arduino_D5_FTM1_CH0/FTM0_CH4
+ *    PTC27 LPUART0_RTS     PTC27 FXOS8700CQ_RESET
+ *    PTD4  LPUART0_RTS     PTD4  SDRAM_A10
+ *    PTA0  LPUART0_CTS     PTA0  K28F_SWD_CLK
+ *    PTA16 LPUART0_CTS     PTA16 FXIO0_D22
+ *    PTB3  LPUART0_CTS     PTB3  Arduino_D18_ADC0_SE13/I2C0_SDA/SDRAM_CS0
+ *    PTB13 LPUART0_CTS     PTB13 Arduino_D6_FTM1_CH1/FTM0_CH5
+ *    PTC26 LPUART0_CTS     PTC26 FXOS8700CQ_INT
+ *    PTD5  LPUART0_CTS     PTD5  SDRAM_A9
+ *    ----- --------------- -------------------------------
+ *    PTD8  LPUART1_RX      PTD8  FXIO0_D24
+ *    PTC3  LPUART1_RX      PTC3  CLKOUT
+ *    PTE1  LPUART1_RX      PTE1  QSPIA0_SCLK
+ *    PTC4  LPUART1_TX      PTC4  SDRAM_A19
+ *    PTD9  LPUART1_TX      PTD9  FXIO0_D25
+ *    PTE0  LPUART1_TX      PTE0  QSPIA0_DATA3
+ *    PTD10 LPUART1_RTS     PTD10 FXIO0_D26
+ *    PTC1  LPUART1_RTS     PTC1  SDRAM_A21
+ *    PTE3  LPUART1_RTS     PTE3  QSPIA0_DATA2
+ *    PTC2  LPUART1_CTS     PTC1  SDRAM_A21
+ *    PTD11 LPUART1_CTS     PTD11 FXIO0_D27
+ *    PTE2  LPUART1_CTS     PTE2  QSPIA0_DATA0
+ *    ----- --------------- -------------------------------
+ *    PTA25 LPUART2_RX      PTA25 SDHC0_D0/Arduino_D0_LPUART2_RX
+ *    PTD2  LPUART2_RX      PTD2  SDRAM_A12
+ *    PTE13 LPUART2_RX            N/C
+ *    PTE17 LPUART2_RX            N/C
+ *    PTA24 LPUART2_TX      PTA24 SDHC0_D1/Arduino_D1_LPUART2_TX
+ *    PTD3  LPUART2_TX      PTD3  SDRAM_A11
+ *    PTE12 LPUART2_TX      PTE12 I2S0_TX_BCLK
+ *    PTE16 LPUART2_TX            N/C
+ *    PTD0  LPUART2_RTS     PTD0  Button_LLWU_P12
+ *    PTA27 LPUART2_RTS     PTA27 SDHC0_CMD
+ *    PTE19 LPUART2_RTS           N/C
+ *    PTA26 LPUART2_CTS     PTA26 SDHC0_DCLK
+ *    PTD1  LPUART2_CTS     PTD1  Arduino_D16_ADC0_SE5b
+ *    PTE18 LPUART2_CTS           N/C
+ *    ----- --------------- -------------------------------
+ *    PTA29 LPUART3_RX      PTA29 SDHC0_D2
+ *    PTB10 LPUART3_RX      PTB10 SDRAM_D19
+ *    PTC16 LPUART3_RX      PTC16 SDRAM_DQM2
+ *    PTE5  LPUART3_RX      PTE5  QSPIA0_SS0/USB0_SOF_OUT
+ *    PTA28 LPUART3_TX      PTA28 SDHC0_D3
+ *    PTB11 LPUART3_TX      PTB11 SDRAM_D18
+ *    PTC17 LPUART3_TX      PTC17 SDRAM_DQM3
+ *    PTE4  LPUART3_TX      PTE4  QSPIA0_DATA1
+ *    PTB8  LPUART3_RTS     PTB8  SDRAM_D21
+ *    PTA31 LPUART3_RTS     PTA31
+ *    PTC18 LPUART3_RTS     PTC18 Arduino_D7
+ *    PTE7  LPUART3_RTS     PTE7  I2S0_RXD0/LEDRGB_GREEN
+ *    PTA30 LPUART3_CTS     PTA30
+ *    PTB9  LPUART3_CTS     PTB9  SDRAM_D20
+ *    PTC19 LPUART3_CTS     PTC19 Arduino_D8
+ *    PTE6  LPUART3_CTS     PTE6  I2S0_MCK/LEDRGB_RED
+ *    ----- --------------- -------------------------------
+ *    PTA21 LPUART4_RX      PTA21 TE/FXIO0_D9
+ *    PTC14 LPUART4_RX      PTC14 SDRAM_D25
+ *    PTE21 LPUART4_RX            N/C
+ *    PTA20 LPUART4_TX      PTA20 RD/FXIO0_D8
+ *    PTC15 LPUART4_TX      PTC15 SDRAM_D24
+ *    PTE20 LPUART4_TX            N/C
+ *    PTA23 LPUART4_RTS     PTA23 WR/FXIO0_D7
+ *    PTC12 LPUART4_RTS     PTC12 SDRAM_D27
+ *    PTE23 LPUART4_RTS           N/C
+ *    PTA22 LPUART4_CTS     PTA22 CS/FXIO0_D6
+ *    PTC13 LPUART4_CTS     PTC13 SDRAM_D26
+ *    PTE22 LPUART4_CTS           N/C
+ *    ----- --------------- -------------------------------
  *
- * The default serial console is UART0 on pins 0 (RX) and 1 (TX).
+ *  Arduino RS-232 Shield
+ *  ---------------------
+ *
+ *    ----- --------------- -------------------------------
+ *    GPIO  LPUART FUNCTION BOARD CONFIGURATION
+ *    ----- --------------- -------------------------------
+ *    PTA25 LPUART2_RX      PTA25 SDHC0_D0/Arduino_D0_LPUART2_RX
+ *    PTA24 LPUART2_TX      PTA24 SDHC0_D1/Arduino_D1_LPUART2_TX
+ *    ----- --------------- -------------------------------
+ *
+ *  Note:  PTA24 and PTA25 are shared between Micro SD Card circuit and
+ *  Arduino connectors. Remove R106 and R107 or R94 and R11 as necessary to
+ *  prevent contention.
+ *
+ *  TGTMCU
+ *  ------
+ *
+ *    ----- --------------- -------------------------------
+ *    GPIO  LPUART FUNCTION BOARD CONFIGURATION
+ *    ----- --------------- -------------------------------
+ *    PTC25 LPUART0_RX      PTC25 LPUART0_RX_TGTMCU
+ *    PTC24 LPUART0_TX      PTC24 LPUART0_TX_TGTMCU
+ *    ----- --------------- -------------------------------
  */
 
-#ifdef CONFIG_KINETIS_UART0
-#  define PIN_UART0_RX  PIN_UART0_RX_2
-#  define PIN_UART0_TX  PIN_UART0_TX_2
-#endif
-
-#ifdef CONFIG_KINETIS_UART1
-#  define PIN_UART0_RX  PIN_UART1_RX_1
-#  define PIN_UART0_TX  PIN_UART1_TX_1
-#endif
+/* I2C */
 
 #ifdef CONFIG_KINETIS_I2C0
 #ifdef CONFIG_FREEDOM_K28F_I2C_ALT_PINS

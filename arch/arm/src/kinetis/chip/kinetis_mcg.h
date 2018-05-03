@@ -57,7 +57,9 @@
 #define KINETIS_MCG_C4_OFFSET       0x0003 /* MCG Control 4 Register */
 #define KINETIS_MCG_C5_OFFSET       0x0004 /* MCG Control 5 Register */
 #define KINETIS_MCG_C6_OFFSET       0x0005 /* MCG Control 6 Register */
-#define KINETIS_MCG_S_OFFSET        0x0006 /* MCG Status Register */
+#if defined(KINETIS_MCG_HAS_S)
+#  define KINETIS_MCG_S_OFFSET      0x0006 /* MCG Status Register */
+#endif
 #if defined(KINETIS_MCG_HAS_ATC) && !defined(KINETIS_MCG_HAS_SC)
 #  define KINETIS_MCG_ATC_OFFSET    0x0008 /* MCG Auto Trim Control Register */
 #endif
@@ -231,6 +233,7 @@
 #endif
 
 /* MCG Control 6 Register */
+
 #if defined(KINETIS_MCG_HAS_C6_VDIV)
 #  define MCG_C6_VDIV_SHIFT         (0)       /* Bits 0-4: VCO Divider */
 #  define MCG_C6_VDIV_MASK          (31 << MCG_C6_VDIV_SHIFT)
@@ -400,7 +403,7 @@
 #  define MCG_C12_VDIV(n)           (((n)-16) << MCG_C12_VDIV1_SHIFT) /* n=16..47 */
 #  define MCG_C12_CME2              (1 << 5)  /* Bit 5:  Clock Monitor Enable2 */
                                               /* Bit 6: Reserved */
-#define MCG_C12_LOLIE1              (1 << 7)  /* Bit 7:  PLL1 Loss of Lock Interrupt Enable */
+#  define MCG_C12_LOLIE1            (1 << 7)  /* Bit 7:  PLL1 Loss of Lock Interrupt Enable */
 #endif
 
 /* MCG Control S2 Register */
