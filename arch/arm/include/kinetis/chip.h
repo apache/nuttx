@@ -45,6 +45,7 @@
 #include <arch/kinetis/kinetis_mcg.h>
 #include <arch/kinetis/kinetis_sim.h>
 #include <arch/kinetis/kinetis_pmc.h>
+#include <arch/kinetis/kinetis_lpuart.h>
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -147,11 +147,6 @@
 #  undef  KINETIS_PMC_HAS_HVDSC1              /* SoC does not have HVDSC1 Register */
 #  undef  KINETIS_PMC_HAS_SRAMCTL             /* SoC does not have SRAMCTL Register */
 
-#elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
-      defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
-
-#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
-
 /* MK28FN2M0---15-
  *
  *  --------------- ------- --- ------- ------ ------- ------ -----
@@ -163,8 +158,7 @@
  *  --------------- ------- --- ------- ------ ------- ------ -----
  */
 
-#elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || \
-      defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
+#elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
 
 /* Verified to Document Number: Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
 
@@ -183,6 +177,11 @@
 
 #  define KINETIS_PMC_HAS_HVDSC1            1 /* SoC has HVDSC1 Register */
 #  define KINETIS_PMC_HAS_SRAMCTL           1 /* SoC has SRAMCTL Register */
+
+#elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
+      defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X128VFX50) || defined(CONFIG_ARCH_CHIP_MK40X128VLH50) || \
       defined(CONFIG_ARCH_CHIP_MK40X128VLK50) || defined(CONFIG_ARCH_CHIP_MK40X128VMB50) || \
@@ -362,14 +361,6 @@
 
 #if !defined(KINETIS_PMC_VERSION)
 #  error "No KINETIS_PMC_VERSION defined!"
-#endif
-
-#if defined(KINETIS_PMC_HAS_C5_PRDIV)
-#  define KINETIS_PMC_C5_PRDIV_MASK  ((1 << (KINETIS_PMC_C5_PRDIV_BITS))-1)
-#endif
-
-#if defined(KINETIS_PMC_HAS_C7_OSCSEL)
-#  define KINETIS_PMC_C7_OSCSEL_MASK  ((1 << (KINETIS_PMC_C7_OSCSEL_BITS))-1)
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_KINETIS_KINETIS_PMC_H */
