@@ -137,7 +137,7 @@
 # define KINETIS_RTC_BASE           0x4003d000 /* Real time clock */
 # define KINETIS_VBATR_BASE         0x4003e000 /* VBAT register file */
 # define KINETIS_DAC0_BASE          0x4003f000 /* DAC0 */
-# define KINETIS_LPTMR_BASE         0x40040000 /* Low power timer */
+# define KINETIS_LPTMR0_BASE        0x40040000 /* Low power timer 0 */
 # define KINETIS_SYSR_BASE          0x40041000 /* System register file */
 # define KINETIS_TSI0_BASE          0x40045000 /* Touch sense interface */
 # define KINETIS_SIMLP_BASE         0x40047000 /* SIM low-power logic */

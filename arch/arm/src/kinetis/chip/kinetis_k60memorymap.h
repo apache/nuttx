@@ -110,7 +110,7 @@
 #define KINETIS_ADC0_BASE      0x4003b000  /* Analog-to-digital converter (ADC) 0 */
 #define KINETIS_RTC_BASE       0x4003d000  /* Real time clock */
 #define KINETIS_VBATR_BASE     0x4003e000  /* VBAT register file */
-#define KINETIS_LPTMR_BASE     0x40040000  /* Low power timer */
+#define KINETIS_LPTMR0_BASE    0x40040000  /* Low power timer 0 */
 #define KINETIS_SYSR_BASE      0x40041000  /* System register file */
 #define KINETIS_DRYICE_BASE    0x40042000  /* DryIce */
 #define KINETIS_DRYICESS_BASE  0x40043000  /* DryIce secure storage */

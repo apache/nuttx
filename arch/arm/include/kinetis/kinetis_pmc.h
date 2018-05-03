@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/kinetis/kinetis_pmc.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -72,6 +72,9 @@
  * KINETIS_PMC_HAS_REGSC_BGEN        - SoC has REGSC[BGEN]
  * KINETIS_PMC_HAS_REGSC_TRAMPO      - SoC has REGSC[TRAMPO]
  * KINETIS_PMC_HAS_REGSC_REGONS      - SoC has REGSC[REGONS]
+ *
+ * KINETIS_PMC_HAS_HVDSC1            - SoC has HVDSC1 Register
+ * KINETIS_PMC_HAS_SRAMCTL           - SoC has SRAMCTL Register
  */
 
 /* Describe the version of the PMC
@@ -86,6 +89,7 @@
                                       * K20P64M72SF1RM  Rev. 1.1, Dec 2012
                                       * K64P144M120SF5RM Rev. 2, January 2014
                                       * K66P144M180SF5RMV2 Rev. 2, May 2015 */
+#define KINETIS_PMC_VERSION_05    5  /* Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
 
 /* MK20DX/DN---VLH5
  *
@@ -132,18 +136,53 @@
 /* PMC Register Configuration */
 
 #  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
 #  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
 #  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
 #  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
 #  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
-#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#  undef  KINETIS_PMC_HAS_HVDSC1              /* SoC does not have HVDSC1 Register */
+#  undef  KINETIS_PMC_HAS_SRAMCTL             /* SoC does not have SRAMCTL Register */
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X64VFX50) || defined(CONFIG_ARCH_CHIP_MK40X64VLH50) || \
       defined(CONFIG_ARCH_CHIP_MK40X64VLK50) || defined(CONFIG_ARCH_CHIP_MK40X64VMB50)
 
 #  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_UKN
+
+/* MK28FN2M0---15-
+ *
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ *  PART NUMBER     CPU     PIN PACKAGE PROGRAM EEPROM SRAM  GPIO
+ *                  FREQ    CNT         FLASH
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ *  MK28FN2M0VMI15  150 MHz 169  MAPBGA  2 MB   None    1 MB  120
+ *  MK28FN2M0CAU15R 150 MHz 210  WLCSP   2 MB   None    1 MB  120
+ *  --------------- ------- --- ------- ------ ------- ------ -----
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || \
+      defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
+
+/* Verified to Document Number: Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
+
+#  define KINETIS_PMC_VERSION KINETIS_PMC_VERSION_05
+
+/* PMC Register Configuration */
+
+#  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+#  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
+#  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
+#  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
+#  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
+#  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
+
+#  define KINETIS_PMC_HAS_HVDSC1            1 /* SoC has HVDSC1 Register */
+#  define KINETIS_PMC_HAS_SRAMCTL           1 /* SoC has SRAMCTL Register */
 
 #elif defined(CONFIG_ARCH_CHIP_MK40X128VFX50) || defined(CONFIG_ARCH_CHIP_MK40X128VLH50) || \
       defined(CONFIG_ARCH_CHIP_MK40X128VLK50) || defined(CONFIG_ARCH_CHIP_MK40X128VMB50) || \
@@ -230,13 +269,16 @@
 /* PMC Register Configuration */
 
 #  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
 #  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
 #  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
 #  undef  KINETIS_PMC_HAS_REGSC_BGEN          /* SoC has REGSC[BGEN]    */
 #  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
-#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#  undef  KINETIS_PMC_HAS_HVDSC1              /* SoC does not have HVDSC1 Register */
+#  undef  KINETIS_PMC_HAS_SRAMCTL             /* SoC does not have SRAMCTL Register */
 
 #elif defined(CONFIG_ARCH_CHIP_MK64FN1M0VLL12) || defined(CONFIG_ARCH_CHIP_MK64FX512VLL12) || \
       defined(CONFIG_ARCH_CHIP_MK64FX512VDC12) || defined(CONFIG_ARCH_CHIP_MK64FN1M0VDC12) || \
@@ -250,13 +292,16 @@
 /* PMC Register Configuration */
 
 #  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
 #  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
 #  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
 #  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
 #  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
-#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#  undef  KINETIS_PMC_HAS_HVDSC1              /* SoC does not have HVDSC1 Register */
+#  undef  KINETIS_PMC_HAS_SRAMCTL             /* SoC does not have SRAMCTL Register */
 
 /* MK66F N/X 1M0/2M0 V MD/LQ 18
  *
@@ -280,13 +325,16 @@
 /* PMC Register Configuration */
 
 #  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
 #  define KINETIS_PMC_HAS_REGSC_ACKISO      1 /* SoC has REGSC[ACKISO]  */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPRS         /* SoC has REGSC[VLPRS]   */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
 #  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
 #  define KINETIS_PMC_HAS_REGSC_BGEN        1 /* SoC has REGSC[BGEN]    */
 #  undef  KINETIS_PMC_HAS_REGSC_TRAMPO        /* SoC has REGSC[TRAMPO]  */
-#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#  undef  KINETIS_PMC_HAS_HVDSC1              /* SoC does not have HVDSC1 Register */
+#  undef  KINETIS_PMC_HAS_SRAMCTL             /* SoC does not have SRAMCTL Register */
 
 #else
 #  error "Unsupported Kinetis chip"
@@ -299,13 +347,16 @@
 /* PMC Register Configuration */
 
 #  define KINETIS_PMC_HAS_REGSC             1 /* SoC has REGSC Register */
+#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
 #  undef  KINETIS_PMC_HAS_REGSC_ACKISO        /* SoC has REGSC[ACKISO]  */
 #  define KINETIS_PMC_HAS_REGSC_VLPRS       1 /* SoC has REGSC[VLPRS]   */
 #  undef  KINETIS_PMC_HAS_REGSC_VLPO          /* SoC has REGSC[VLPO]    */
 #  undef  KINETIS_PMC_HAS_REGSC_REGFPM        /* SoC has REGSC[REGFPM]  */
 #  undef  KINETIS_PMC_HAS_REGSC_BGEN          /* SoC has REGSC[BGEN]    */
 #  define KINETIS_PMC_HAS_REGSC_TRAMPO      1 /* SoC has REGSC[TRAMPO]  */
-#  define KINETIS_PMC_HAS_REGSC_REGONS      1 /* SoC has REGSC[REGONS]  */
+
+#  undef  KINETIS_PMC_HAS_HVDSC1              /* SoC does not have HVDSC1 Register */
+#  undef  KINETIS_PMC_HAS_SRAMCTL             /* SoC does not have SRAMCTL Register */
 
 #endif
 
