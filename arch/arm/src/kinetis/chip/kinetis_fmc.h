@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_fmc.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,16 @@
 
 #include "chip.h"
 
-/* This file is just a wrapper around pin muxing header files for the Kinetis family selected
- * by the logic in chip.h.
+/* This file is just a wrapper around FMC header files for the Kinetis family selected by
+ * the logic in chip.h.
  */
 
 #if defined(KINETIS_K20) || defined(KINETIS_K40) || defined(KINETIS_K60)
 #  include "chip/kinetis_k20k40k60fmc.h"
 #elif defined(KINETIS_K64)
 #  include "chip/kinetis_k64fmc.h"
-#elif defined(KINETIS_K66)
-#  include "chip/kinetis_k66fmc.h"
+#elif defined(KINETIS_K28) || defined(KINETIS_K66)
+#  include "chip/kinetis_k28k66fmc.h"
 #else
 #  error "No FMC definitions for this Kinetis part"
 #endif

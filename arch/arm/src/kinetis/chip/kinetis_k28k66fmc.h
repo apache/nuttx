@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/kinetis/kinetis_k66fmc.h
+ * arch/arm/src/kinetis/kinetis_k28k66fmc.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K66FMC_H
-#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K66FMC_H
+#ifndef __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K28K66FMC_H
+#define __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K28K66FMC_H
 
 /************************************************************************************
  * Included Files
@@ -306,7 +306,7 @@
 #  define FMC_PFB01CR_CRC_ALL           (0 << FMC_PFB01CR_CRC_SHIFT) /* LRU all four ways */
 #  define FMC_PFB01CR_CRC_I01D23        (2 << FMC_PFB01CR_CRC_SHIFT) /* LRU ifetches 0-1 data 2-3 */
 #  define FMC_PFB01CR_CRC_I012D3        (3 << FMC_PFB01CR_CRC_SHIFT) /* LRU ifetches 0-3 data 3 */
-                                                 /* Bits 8-16: Reserved */
+                                                  /* Bits 8-16: Reserved */
 #define FMC_PFB01CR_B0MW_SHIFT          (17)      /* Bits 17-18: Bank 0 Memory Width */
 #define FMC_PFB01CR_B0MW_MASK           (3 << FMC_PFB01CR_B0MW_SHIFT)
 #  define FMC_PFB01CR_B0MW_32BITS       (0 << FMC_PFB01CR_B0MW_SHIFT) /* 32 bits */
@@ -361,4 +361,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K66FMC_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_K28K66FMC_H */
