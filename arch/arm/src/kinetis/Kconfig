@@ -266,6 +266,7 @@ config KINETIS_SERIALDRIVER
 config KINETIS_LPUART
 	bool
 	default n
+	select MCU_SERIAL
 
 config KINETIS_UART
 	bool

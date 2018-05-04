@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
-#   Copyright (C) 2011, 2013-2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -110,12 +110,10 @@ endif
 
 CHIP_ASRCS  =
 
-CHIP_CSRCS  = kinetis_allocateheap.c kinetis_clockconfig.c
-CHIP_CSRCS += kinetis_clrpend.c kinetis_idle.c kinetis_irq.c
-CHIP_CSRCS += kinetis_lowputc.c kinetis_pin.c kinetis_pingpio.c
-CHIP_CSRCS += kinetis_serialinit.c kinetis_serial.c
-CHIP_CSRCS += kinetis_start.c kinetis_uid.c kinetis_wdog.c
-CHIP_CSRCS += kinetis_cfmconfig.c
+CHIP_CSRCS  = kinetis_allocateheap.c kinetis_clockconfig.c kinetis_clrpend.c
+CHIP_CSRCS += kinetis_idle.c kinetis_irq.c kinetis_lowputc.c kinetis_pin.c
+CHIP_CSRCS += kinetis_pingpio.c kinetis_serialinit.c kinetis_start.c
+CHIP_CSRCS += kinetis_uid.c kinetis_wdog.c kinetis_cfmconfig.c
 CHIP_CSRCS += kinetis_mpuinit.c
 
 # Configuration-dependent Kinetis files
@@ -134,6 +132,14 @@ endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += kinetis_pindump.c
+endif
+
+ifneq ($(CONFIG_KINETIS_UART),y)
+CHIP_CSRCS += kinetis_serial.c
+endif
+
+ifeq ($(CONFIG_KINETIS_LPUART),y)
+CHIP_CSRCS += kinetis_lpserial.c
 endif
 
 ifeq ($(CONFIG_KINETIS_SDHC),y)
@@ -166,10 +172,6 @@ endif
 
 ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += kinetis_i2c.c
-endif
-
-ifeq ($(CONFIG_KINETIS_LPUART),y)
-CHIP_CSRCS += kinetis_lpserial.c
 endif
 
 ifeq ($(CONFIG_RTC),y)
