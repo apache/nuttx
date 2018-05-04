@@ -1,7 +1,8 @@
 README
 ======
 
-  This port is for the FRDM-K28F development board that features the MK28FN2M0VMI15 MCU.  The features of the FRDM-K28F board are:
+  This port is for the FRDM-K28F development board that features the
+  MK28FN2M0VMI15 MCU.  The features of the FRDM-K28F board are:
 
     o Kinetis MK28FN2M0VMI15 MCU (ARM Cortex-M4 at150 MHz, 1 MB SRAM, 2 MB flash,
       HS and FS USB, 169 MAPBGA package).

@@ -533,7 +533,6 @@
 #define PIN_SDRAM_A22             (PIN_ALT5   | PIN_PORTC | PIN0)
 #define PIN_SDRAM_A23             (PIN_ALT5   | PIN_PORTB | PIN18)
 
-
 /* Secured digital host controller (SDHC) */
 
 #define PIN_SDHC0_CLKIN           (PIN_ALT4   | PIN_PORTD | PIN11)
@@ -624,7 +623,6 @@
 #define PIN_TPM_CLKIN1_1          (PIN_ALT7   | PIN_PORTA | PIN17)
 #define PIN_TPM_CLKIN1_2          (PIN_ALT7   | PIN_PORTB | PIN17)
 #define PIN_TPM_CLKIN1_3          (PIN_ALT7   | PIN_PORTC | PIN13)
-
 
 /* Touch Sensing Input (TSI) */
 

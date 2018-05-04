@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/arm/src/kinetis/chip/kinetis_pinmux.h
  *
- *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,8 @@
 
 #if defined(KINETIS_K20)
 #  include "chip/kinetis_k20pinmux.h"
+#if defined(KINETIS_K28)
+#  include "chip/kinetis_k28pinmux.h"
 #elif defined(KINETIS_K40)
 #  include "chip/kinetis_k40pinmux.h"
 #elif defined(KINETIS_K60)
