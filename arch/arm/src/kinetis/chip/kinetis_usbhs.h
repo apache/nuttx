@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Ramtin Amin <ramtin@lambdaconcept.com>
+ *           Ramtin Amin <ramtin@lambdaconcept.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -271,122 +271,122 @@
 /* Register Bit-Field Definitions ********************************************************************************** */
 /* Identification Register */
 
-#define USBHS_ID_VERSIONID_SHIFT                          (29)      /* Bits 31-29: Version ID */
+#define USBHS_ID_VERSIONID_SHIFT                          (29)      /* Bits 29-31: Version ID */
 #define USBHS_ID_VERSIONID_MASK                           (0x7 << USBHS_ID_VERSIONID_SHIFT)
-#define USBHS_ID_VERSION_SHIFT                            (25)      /* Bits 28-25: Version */
+#define USBHS_ID_VERSION_SHIFT                            (25)      /* Bits 25-28: Version */
 #define USBHS_ID_VERSION_MASK                             (0xf << USBHS_ID_VERSION_SHIFT)
-#define USBHS_ID_REVISION_SHIFT                           (21)      /* Bits 24-21: Revision */
+#define USBHS_ID_REVISION_SHIFT                           (21)      /* Bits 21-24: Revision */
 #define USBHS_ID_REVISION_MASK                            (0xf << USBHS_ID_REVISION_SHIFT)
-#define USBHS_ID_TAG_SHIFT                                (16)      /* Bits 20-16: Tag */
+#define USBHS_ID_TAG_SHIFT                                (16)      /* Bits 16-20: Tag */
 #define USBHS_ID_TAG_MASK                                 (0x1f << USBHS_ID_TAG_SHIFT)
-                                                                    /* Bits 15-14: Reserved */
-#define USBHS_ID_NID_SHIFT                                (8)       /* Bits 13-8: Ones complement version of ID */
+                                                                    /* Bits 14-15: Reserved */
+#define USBHS_ID_NID_SHIFT                                (8)       /* Bits 8-13: Ones complement version of ID */
 #define USBHS_ID_NID_MASK                                 (0x3f << USBHS_ID_NID_SHIFT)
-                                                                    /* Bits 7-6: Reserved */
-#define USBHS_ID_ID_SHIFT                                 (0)       /* Bits 6-0: ID Configuration number */
+                                                                    /* Bits 6-7: Reserved */
+#define USBHS_ID_ID_SHIFT                                 (0)       /* Bits 0-5: ID Configuration number */
 #define USBHS_ID_ID_MASK                                  (0x3f << USBHS_ID_ID_SHIFT)
 
 /* General Hardware Parameters Register */
 
-                                                                    /* Bits 31-11: Reserved */
-#define USBHS_HWGENERAL_SM_SHIFT                          (9)       /* Bits 10-9: Serial mode */
+                                                                    /* Bits 11-31: Reserved */
+#define USBHS_HWGENERAL_SM_SHIFT                          (9)       /* Bits 9-10: Serial mode */
 #define USBHS_HWGENERAL_SM_MASK                           (0x3 << USBHS_HWGENERAL_SM_SHIFT)
-#define USBHS_HWGENERAL_PHYM_SHIFT                        (6)       /* Bits 8-6: PHY Mode */
+#define USBHS_HWGENERAL_PHYM_SHIFT                        (6)       /* Bits 6-8: PHY Mode */
 #define USBHS_HWGENERAL_PHYM_MASK                         (0x7 << USBHS_HWGENERAL_PHYM_SHIFT)
-#define USBHS_HWGENERAL_PHYW_SHIFT                        (4)       /* Bits 5-4: PHY Width */
+#define USBHS_HWGENERAL_PHYW_SHIFT                        (4)       /* Bits 4-5: PHY Width */
 #define USBHS_HWGENERAL_PHYW_MASK                         (0x3 << USBHS_HWGENERAL_PHYW_SHIFT)
-                                                                    /* Bits 4-0: Reserved */
+                                                                    /* Bits 0-3: Reserved */
 
 /* Host Hardware Parameters Register */
 
-#define USBHS_HWHOST_TTPER_SHIFT                          (24)      /* Bits 31-24: Transaction translator periodic contexts */
+#define USBHS_HWHOST_TTPER_SHIFT                          (24)      /* Bits 24-31: Transaction translator periodic contexts */
 #define USBHS_HWHOST_TTPER_MASK                           (0xff << USBHS_HWHOST_TTPER_SHIFT)
-#define USBHS_HWHOST_TTASY_SHIFT                          (16)      /* Bits 23-16: Transaction translator contexts */
+#define USBHS_HWHOST_TTASY_SHIFT                          (16)      /* Bits 16-23: Transaction translator contexts */
 #define USBHS_HWHOST_TTASY_MASK                           (0xff << USBHS_HWHOST_TTASY_SHIFT)
-                                                                    /* Bits 15-4: Reserved */
-#define USBHS_HWHOST_NPORT_SHIFT                          (1)       /* Bits 3-1: Number of Ports */
+                                                                    /* Bits 5-14: Reserved */
+#define USBHS_HWHOST_NPORT_SHIFT                          (1)       /* Bits 1-3: Number of Ports */
 #define USBHS_HWHOST_NPORT_MASK                           (0x7 << USBHS_HWHOST_NPORT_SHIFT)
 #define USBHS_HWHOST_HC                                   (1 << 0)  /* Bit 0: Host Capable */
 
 /* Device Hardware Parameters Register */
 
-                                                                    /* Bits 31-6: Reserved */
-#define USBHS_HWDEVICE_DEVEP_SHIFT                        (1)       /* Bits 5-1: Device endpoints */
+                                                                    /* Bits 6-31: Reserved */
+#define USBHS_HWDEVICE_DEVEP_SHIFT                        (1)       /* Bits 1-5: Device endpoints */
 #define USBHS_HWDEVICE_DEVEP_MASK                         (0x1f << USBHS_HWDEVICE_DEVEP_SHIFT)
 #define USBHS_HWDEVICE_DC                                 (1 << 0)  /* Bit 0: Device Capable */
 
 /* Transmit Buffer Hardware Parameters Register */
 
 #define USBHS_HWTXBUF_TXLC                                (1 << 31) /* Bit 31: Transmit local Context Registers */
-                                                                    /* Bits 30-24: Reserved */
-#define USBHS_HWTXBUF_TXCHANADD_SHIFT                     (16)      /* Bits 23-16: Transmit Channel Address */
+                                                                    /* Bits 24-30: Reserved */
+#define USBHS_HWTXBUF_TXCHANADD_SHIFT                     (16)      /* Bits 16-23: Transmit Channel Address */
 #define USBHS_HWTXBUF_TXCHANADD_MASK                      (0xff << USBHS_HWTXBUF_TXCHANADD_SHIFT)
-#define USBHS_HWTXBUF_TXADD_SHIFT                         (8)       /* Bits 15-8: Transmit Address */
+#define USBHS_HWTXBUF_TXADD_SHIFT                         (8)       /* Bits 8-15: Transmit Address */
 #define USBHS_HWTXBUF_TXADD_MASK                          (0xff << USBHS_HWTXBUF_TXADD_SHIFT)
-#define USBHS_HWTXBUF_TXBURST_SHIFT                       (0)       /* Bits 8-0: Transmit Burst */
+#define USBHS_HWTXBUF_TXBURST_SHIFT                       (0)       /* Bits 0-7: Transmit Burst */
 #define USBHS_HWTXBUF_TXBURST_MASK                        (0xff << USBHS_HWTXBUF_TXBURST_SHIFT)
 
 /* Receive Buffer Hardware Parameters Register */
 
-                                                                    /* Bits 31-16: Reserved */
-#define USBHS_HWRXBUF_RXADD_SHIFT                         (8)       /* Bits 15-8: Receive Address */
+                                                                    /* Bits 16-31: Reserved */
+#define USBHS_HWRXBUF_RXADD_SHIFT                         (8)       /* Bits 8-15: Receive Address */
 #define USBHS_HWRXBUF_RXADD_MASK                          (0xff << USBHS_HWRXBUF_RXADD_SHIFT)
-#define USBHS_HWRXBUF_RXBURST_SHIFT                       (0)       /* Bits 8-0: Receive Burst */
+#define USBHS_HWRXBUF_RXBURST_SHIFT                       (0)       /* Bits 0-7: Receive Burst */
 #define USBHS_HWRXBUF_RXBURST_MASK                        (0xff << USBHS_HWRXBUF_RXBURST_SHIFT)
 
 /* General Purpose Timer n Load Register */
 
-                                                                     /* Bits 31-24: Reserved */
-#define USBHS_GPTIMERnLD_GPTLD_SHIFT                      (0)        /* Bits 24-0: Value to be loaded into the countdown timer on reset */
+                                                                     /* Bits 24-31: Reserved */
+#define USBHS_GPTIMERnLD_GPTLD_SHIFT                      (0)        /* Bits 0-23: Value to be loaded into the countdown timer on reset */
 #define USBHS_GPTIMERnLD_GPTLD_MASK                       (0xffffff << USBHS_GPTIMERnLD_GPTLD_SHIFT)
 
 /* General Purpose Timer n Control Register */
 
 #define USBHS_GPTIMERnCTL_RUN                             (1 << 31) /* Bit 31: Timer Run */
 #define USBHS_GPTIMERnCTL_RST                             (1 << 30) /* Bit 30: Timer Reset */
-                                                                    /* Bits 29-25: Reserved */
+                                                                    /* Bits 25-29: Reserved */
 #define USBHS_GPTIMERnCTL_MODE                            (1 << 24) /* Bit 24: Timer Mode */
-#define USBHS_GPTIMERnCTL_GPTCNT_SHIFT                    (0)       /* Bits 24-0: Timer Count */
+#define USBHS_GPTIMERnCTL_GPTCNT_SHIFT                    (0)       /* Bits 0-23: Timer Count */
 #define USBHS_GPTIMERnCTL_GPTCNT_MASK                     (0xffffff << USBHS_GPTIMERnCTL_GPTCNT_SHIFT)
 
 /* System Bus Interface Configuration Register */
 
-                                                                    /* Bits 31-3: Reserved */
-#define USBHS_USB_SBUSCFG_BURSTMODE_SHIFT                 (0)       /* Bits 3-0: Burst mode */
+                                                                    /* Bits 3-31: Reserved */
+#define USBHS_USB_SBUSCFG_BURSTMODE_SHIFT                 (0)       /* Bits 0-2: Burst mode */
 #define USBHS_USB_SBUSCFG_BURSTMODE_MASK                  (0x7 << USBHS_USB_SBUSCFG_BURSTMODE_SHIFT)
 
 /* Host Controller Interface Version and Capability Registers Length Register */
 
-#define USBHS_HCIVERSION_HCIVERSION_SHIFT                 (16)      /* Bits 31-16: EHCI revision number */
+#define USBHS_HCIVERSION_HCIVERSION_SHIFT                 (16)      /* Bits 16-31: EHCI revision number */
 #define USBHS_HCIVERSION_HCIVERSION_MASK                  (0xffff << USBHS_HCIVERSION_HCIVERSION_SHIFT)
-                                                                    /* Bits 15-8: Reserved */
-#define USBHS_HCIVERSION_CAPLENGTH_SHIFT                  (0)       /* Bits 8-0: Capability registers length */
+                                                                    /* Bits 8-15: Reserved */
+#define USBHS_HCIVERSION_CAPLENGTH_SHIFT                  (0)       /* Bits 0-7: Capability registers length */
 #define USBHS_HCIVERSION_CAPLENGTH_MASK                   (0xff << USBHS_HCIVERSION_CAPLENGTH_SHIFT)
 
 /* Host Controller Structural Parameters Register */
 
-                                                                    /* Bits 31-28: Reserved */
-#define USBHS_HCSPARAMS_N_TT_SHIFT                        (24)      /* Bits 27-24: Number of Transaction Translators */
+                                                                    /* Bits 28-31: Reserved */
+#define USBHS_HCSPARAMS_N_TT_SHIFT                        (24)      /* Bits 24-27: Number of Transaction Translators */
 #define USBHS_HCSPARAMS_N_TT_MASK                         (0xf << USBHS_HCSPARAMS_N_TT_SHIFT)
-#define USBHS_HCSPARAMS_N_PTT_SHIFT                       (20)      /* Bits 23-20: Ports per Transaction Translator */
+#define USBHS_HCSPARAMS_N_PTT_SHIFT                       (20)      /* Bits 22-30: Ports per Transaction Translator */
 #define USBHS_HCSPARAMS_N_PTT_MASK                        (0xf << USBHS_HCSPARAMS_N_PTT_SHIFT)
-                                                                    /* Bits 19-17: Reserved */
+                                                                    /* Bits 17-19: Reserved */
 #define USBHS_HCSPARAMS_PI                                (1 << 16) /* Bit 16: Port Indicators */
-#define USBHS_HCSPARAMS_N_CC_SHIFT                        (12)      /* Bits 15-12: Number of Companion Controllers */
+#define USBHS_HCSPARAMS_N_CC_SHIFT                        (12)      /* Bits 12-15: Number of Companion Controllers */
 #define USBHS_HCSPARAMS_N_CC_MASK                         (0xf << USBHS_HCSPARAMS_N_CC_SHIFT)
-#define USBHS_HCSPARAMS_N_PCC_SHIFT                       (8)       /* Bits 11-8: Number Ports per CC */
+#define USBHS_HCSPARAMS_N_PCC_SHIFT                       (8)       /* Bits 8-11: Number Ports per CC */
 #define USBHS_HCSPARAMS_N_PCC_MASK                        (0xf << USBHS_HCSPARAMS_N_PCC_SHIFT)
-                                                                    /* Bits 7-5: Reserved */
+                                                                    /* Bits 5-7: Reserved */
 #define USBHS_HCSPARAMS_PPC                               (1 << 4)  /* Bit 4: Power Port Control */
-#define USBHS_HCSPARAMS_N_PORTS_SHIFT                     (0)       /* Bits 4-0: Number of Ports */
+#define USBHS_HCSPARAMS_N_PORTS_SHIFT                     (0)       /* Bits 0-3: Number of Ports */
 #define USBHS_HCSPARAMS_N_PORTS_MASK                      (0xf << USBHS_HCSPARAMS_N_PORTS_SHIFT)
 
 /* Host Controller Capability Parameters Register */
 
-                                                                    /* Bits 31-16: Reserved */
-#define USBHS_HCCPARAMS_EECP_SHIFT                        (8)       /* Bits 15-8: EHCI Extended Capabilities Pointer */
+                                                                    /* Bits 16-31: Reserved */
+#define USBHS_HCCPARAMS_EECP_SHIFT                        (8)       /* Bits 8-15: EHCI Extended Capabilities Pointer */
 #define USBHS_HCCPARAMS_EECP_MASK                         (0xff << USBHS_HCCPARAMS_EECP_SHIFT)
-#define USBHS_HCCPARAMS_IST_SHIFT                         (4)       /* Bits 7-4: Isochronous Scheduling Threshold */
+#define USBHS_HCCPARAMS_IST_SHIFT                         (4)       /* Bits 4-7: Isochronous Scheduling Threshold */
 #define USBHS_HCCPARAMS_IST_MASK                          (0xf << USBHS_HCCPARAMS_IST_SHIFT)
                                                                     /* Bit 3: Reserved */
 #define USBHS_HCCPARAMS_ASP                               (1 << 2)  /* Bit 2: Asynchronous Schedule Park capability */
@@ -395,17 +395,17 @@
 
 /* Device Controller Capability Parameters */
 
-                                                                    /* Bits 31-9: Reserved */
+                                                                    /* Bits 9-31: Reserved */
 #define USBHS_DCCPARAMS_HC                                (1 << 8)  /* Bit 8: Host Capable */
 #define USBHS_DCCPARAMS_DC                                (1 << 7)  /* Bit 7: Device Capable */
-                                                                    /* Bits 6-5: Reserved */
-#define USBHS_DCCPARAMS_DEN_SHIFT                         (0)       /* Bits 5-0: Device Endpoint Number */
+                                                                    /* Bits 5-6: Reserved */
+#define USBHS_DCCPARAMS_DEN_SHIFT                         (0)       /* Bits 0-4: Device Endpoint Number */
 #define USBHS_DCCPARAMS_DEN_MASK                          (0x1f << USBHS_DCCPARAMS_DEN_SHIFT)
 
 /* USB Command Register */
 
-                                                                    /* Bits 31-24: Reserved */
-#define USBHS_USBCMD_ITC_SHIFT                            (16)      /* Bits 23-16: Interrupt Threshold Control */
+                                                                    /* Bits 24-31: Reserved */
+#define USBHS_USBCMD_ITC_SHIFT                            (16)      /* Bits 16-23: Interrupt Threshold Control */
 #define USBHS_USBCMD_ITC_MASK                             (0xff << USBHS_USBCMD_ITC_SHIFT)
 #define USBHS_USBCMD_FS2                                  (1 << 15) /* Bit 15: Frame list Size 2 */
 #define USBHS_USBCMD_ATDTW                                (1 << 14) /* Bit 14: Add dTD TripWire */
@@ -413,23 +413,23 @@
                                                                     /* Bit 12: Reserved */
 #define USBHS_USBCMD_ASPE                                 (1 << 11) /* Bit 11: Asynchronous Schedule Park mode Enable */
                                                                     /* Bit 10: Reserved */
-#define USBHS_USBCMD_ASP_SHIFT                            (8)       /* Bits 9-8: Asynchronous Schedule Park mode count */
+#define USBHS_USBCMD_ASP_SHIFT                            (8)       /* Bits 8-9: Asynchronous Schedule Park mode count */
 #define USBHS_USBCMD_ASP_MASK                             (0x3 << USBHS_USBCMD_ASP_SHIFT)
                                                                     /* Bit 7: Reserved */
 #define USBHS_USBCMD_IAA                                  (1 << 6)  /* Bit 6: Interrupt on Async Advance doorbell */
 #define USBHS_USBCMD_ASE                                  (1 << 5)  /* Bit 5: Asynchronous Schedule Enable */
 #define USBHS_USBCMD_PSE                                  (1 << 4)  /* Bit 4: Periodic Schedule Enable */
-#define USBHS_USBCMD_FS_SHIFT                             (2)       /* Bits 3-2: Frame list Size */
+#define USBHS_USBCMD_FS_SHIFT                             (2)       /* Bits 2-3: Frame list Size */
 #define USBHS_USBCMD_FS_MASK                              (0x3 << USBHS_USBCMD_FS_SHIFT)
 #define USBHS_USBCMD_RST                                  (1 << 1)  /* Bit 1: Controller Reset */
 #define USBHS_USBCMD_RS                                   (1 << 0)  /* Bit 0: Run/Stop */
 
 /* USB Status Register */
 
-                                                                    /* Bits 31-26: Reserved */
+                                                                    /* Bits 26-31: Reserved */
 #define USBHS_USBSTS_TI1                                  (1 << 25) /* Bit 25: General purpose Timer 1 Interrupt */
 #define USBHS_USBSTS_TI0                                  (1 << 24) /* Bit 24: General purpose Timer 0 Interrupt */
-                                                                    /* Bits 23-20: Reserved */
+                                                                    /* Bits 22-30: Reserved */
 #define USBHS_USBSTS_UPIUSB                               (1 << 19) /* Bit 19:  host Periodic Interrupt */
 #define USBHS_USBSTS_UAI                                  (1 << 18) /* Bit 18: USB host Asynchronous Interrupt */
                                                                     /* Bit 17: Reserved */
@@ -451,10 +451,10 @@
 
 /* USB Interrupt Enable Register */
 
-                                                                    /* Bits 31-26: Reserved */
+                                                                    /* Bits 26-31: Reserved */
 #define USBHS_USBINTR_TIE1                                (1 << 25) /* Bit 25: General purpose Timer 1 Interrupt Enable */
 #define USBHS_USBINTR_TIE0                                (1 << 24) /* Bit 24: General purpose Timer 0 Interrupt Enable */
-                                                                    /* Bits 23-20: Reserved */
+                                                                    /* Bits 22-30: Reserved */
 #define USBHS_USBINTR_UPIE                                (1 << 19) /* Bit 19: USB host Periodic Interrupt Enable */
 #define USBHS_USBINTR_UAIE                                (1 << 18) /* Bit 18: USB host Asynchronous Interrupt Enable */
                                                                     /* Bit 17: Reserved */
@@ -472,7 +472,7 @@
 
 /* Frame Index Register */
 
-                                                                    /* Bits 14-31: Reserved */
+                                                                    /* Bits 14_31: Reserved */
 #define USBHS_FRINDEX_FRINDEX_SHIFT                       (0)       /* Bits 0-13: Frame Index */
 #define USBHS_FRINDEX_FRINDEX_MASK                        (0x3fff << USBHS_FRINDEX_FRINDEX_SHIFT)
 
@@ -487,19 +487,19 @@
 #define USBHS_DEVICEADDR_USBADR_SHIFT                     (25)      /* Bits 25-31: Device Address */
 #define USBHS_DEVICEADDR_USBADR_MASK                      (0x7f << USBHS_DEVICEADDR_USBADR_SHIFT)
 #define USBHS_DEVICEADDR_USBADRA                          (1 << 24) /* Bit 24: Device Address Advance */
-                                                                    /* Bits 0-24: Reserved */
+                                                                    /* Bits 0-23: Reserved */
 
 /* Current Asynchronous List Address Register */
 
 #define USBHS_ASYNCLISTADDR_ASYBASE_SHIFT                 (5)       /* Bits 5-31: Link pointer low (LPL) */
 #define USBHS_ASYNCLISTADDR_ASYBASE_MASK                  (0x7ffffff << USBHS_ASYNCLISTADDR_ASYBASE_SHIFT)
-                                                                    /* Bits 0-5: Reserved */
+                                                                    /* Bits 0-4: Reserved */
 
 /* Endpoint List Address Register */
 
 #define USBHS_EPLISTADDR_EPBASE_SHIFT                     (11)      /* Bits 11-31: Endpoint list address */
 #define USBHS_EPLISTADDR_EPBASE_MASK                      (0x1fffff << USBHS_EPLISTADDR_EPBASE_SHIFT)
-                                                                    /* Bits 0-11: Reserved */
+                                                                    /* Bits 0-10: Reserved */
 
 /* Host TT Asynchronous Buffer Control */
 
@@ -519,10 +519,10 @@
 /* Transmit FIFO Tuning Control Register */
 
                                                                     /* Bits 31-22: Reserved */
-#define USBHS_TXFILLTUNING_TXFIFOTHRES_SHIFT              (16)      /* Bits 21-16: FIFO burst Threshold */
+#define USBHS_TXFILLTUNING_TXFIFOTHRES_SHIFT              (16)      /* Bits 16-21: FIFO burst Threshold */
 #define USBHS_TXFILLTUNING_TXFIFOTHRES_MASK               (0x3f << USBHS_TXFILLTUNING_TXFIFOTHRES_SHIFT)
                                                                     /* Bits 15-13: Reserved */
-#define USBHS_TXFILLTUNING_TXSCHHEALTH_SHIFT              (8)       /* Bits 12-8: Scheduler Health counter */
+#define USBHS_TXFILLTUNING_TXSCHHEALTH_SHIFT              (8)       /* Bits 8-12: Scheduler Health counter */
 #define USBHS_TXFILLTUNING_TXSCHHEALTH_MASK               (0x1f << USBHS_TXFILLTUNING_TXSCHHEALTH_SHIFT)
                                                                     /* Bit 7: Reserved */
 #define USBHS_TXFILLTUNING_TXSCHOH_SHIFT                  (0)       /* Bits 0-6: Scheduler Overhead */
@@ -531,10 +531,10 @@
 /* Endpoint NAK Register */
 
                                                                     /* Bits 20-31: Reserved */
-#define USBHS_ENDPTNAK_EPTN_SHIFT                         (16)      /* Bits 19-16: TX Endpoint NAK */
+#define USBHS_ENDPTNAK_EPTN_SHIFT                         (16)      /* Bits 16-19: TX Endpoint NAK */
 #define USBHS_ENDPTNAK_EPTN_MASK                          (0xf << USBHS_ENDPTNAK_EPTN_SHIFT)
                                                                     /* Bits 4-15: Reserved */
-#define USBHS_ENDPTNAK_EPRN_SHIFT                         (0)       /* Bits 0-4: RX Endpoint NAK */
+#define USBHS_ENDPTNAK_EPRN_SHIFT                         (0)       /* Bits 0-3: RX Endpoint NAK */
 #define USBHS_ENDPTNAK_EPRN_MASK                          (0xf << USBHS_ENDPTNAK_EPRN_SHIFT)
 
 /* Endpoint NAK Enable Register */
@@ -567,18 +567,18 @@
 #define USBHS_PORTSC1_PIC_MASK                            (0x3 << USBHS_PORTSC1_PIC_SHIFT)
 #define USBHS_PORTSC1_PO                                  (1 << 13) /* Bit 13: Port Owner */
 #define USBHS_PORTSC1_PP                                  (1 << 12) /* Bit 12: Port Power */
-#define USBHS_PORTSC1_LS_SHIFT                            (10)      /* Bits 11-10: Line Status */
+#define USBHS_PORTSC1_LS_SHIFT                            (10)      /* Bits 10-11: Line Status */
 #define USBHS_PORTSC1_LS_MASK                             (0x3 << USBHS_PORTSC1_LS_SHIFT)
-#define USBHS_PORTSC1_HSP                                 (1 << 9)  /* Bit 9: High Speed Port */
-#define USBHS_PORTSC1_PR                                  (1 << 8)  /* Bit 8: Port Reset */
-#define USBHS_PORTSC1_SUSP                                (1 << 7)  /* Bit 7: Suspend */
-#define USBHS_PORTSC1_FPR                                 (1 << 6)  /* Bit 6: Force Port Resume */
-#define USBHS_PORTSC1_OCC                                 (1 << 5)  /* Bit 5: Over-Current Change */
-#define USBHS_PORTSC1_OCA                                 (1 << 4)  /* Bit 4: Over-current active */
-#define USBHS_PORTSC1_PEC                                 (1 << 3)  /* Bit 3: Port Enable/disable Change */
-#define USBHS_PORTSC1_PE                                  (1 << 2)  /* Bit 2: Port Enabled/disabled */
-#define USBHS_PORTSC1_CSC                                 (1 << 1)  /* Bit 1: Connect Change Status */
-#define USBHS_PORTSC1_CCS                                 (1 << 0)  /* Bit 0: Current Connect Status */
+#define USBHS_PORTSC1_HSP                                 (1 << 9)  /* Bit 9:  High Speed Port */
+#define USBHS_PORTSC1_PR                                  (1 << 8)  /* Bit 8:  Port Reset */
+#define USBHS_PORTSC1_SUSP                                (1 << 7)  /* Bit 7:  Suspend */
+#define USBHS_PORTSC1_FPR                                 (1 << 6)  /* Bit 6:  Force Port Resume */
+#define USBHS_PORTSC1_OCC                                 (1 << 5)  /* Bit 5:  Over-Current Change */
+#define USBHS_PORTSC1_OCA                                 (1 << 4)  /* Bit 4:  Over-current active */
+#define USBHS_PORTSC1_PEC                                 (1 << 3)  /* Bit 3:  Port Enable/disable Change */
+#define USBHS_PORTSC1_PE                                  (1 << 2)  /* Bit 2:  Port Enabled/disabled */
+#define USBHS_PORTSC1_CSC                                 (1 << 1)  /* Bit 1:  Connect Change Status */
+#define USBHS_PORTSC1_CCS                                 (1 << 0)  /* Bit 0:  Current Connect Status */
 
 /* On-the-Go Status and Control Register */
 
@@ -604,16 +604,16 @@
 #define USBHS_OTGSC_BSE                                   (1 << 12) /* Bit 12: B Session End */
 #define USBHS_OTGSC_BSV                                   (1 << 11) /* Bit 11: B Session Valid */
 #define USBHS_OTGSC_ASV                                   (1 << 10) /* Bit 10: A Session Valid */
-#define USBHS_OTGSC_AVV                                   (1 << 9)  /* Bit 9: A VBus Valid */
-#define USBHS_OTGSC_ID                                    (1 << 8)  /* Bit 8: USB ID */
-#define USBHS_OTGSC_HABA                                  (1 << 7)  /* Bit 7: Hardware Assist B-Disconnect to A-connect */
-                                                                    /* Bit 6: Reserved */
-#define USBHS_OTGSC_IDPU                                  (1 << 5)  /* Bit 5: ID Pull-Up */
-#define USBHS_OTGSC_DP                                    (1 << 4)  /* Bit 4: Data Pulsing */
-#define USBHS_OTGSC_OT                                    (1 << 3)  /* Bit 3: OTG Termination */
-#define USBHS_OTGSC_HAAR                                  (1 << 2)  /* Bit 2: Hardware Assist Auto-Reset */
-#define USBHS_OTGSC_VC                                    (1 << 1)  /* Bit 1: VBUS Charge */
-#define USBHS_OTGSC_VD                                    (1 << 0)  /* Bit 0: VBUS Discharge */
+#define USBHS_OTGSC_AVV                                   (1 << 9)  /* Bit 9:  A VBus Valid */
+#define USBHS_OTGSC_ID                                    (1 << 8)  /* Bit 8:  USB ID */
+#define USBHS_OTGSC_HABA                                  (1 << 7)  /* Bit 7:  Hardware Assist B-Disconnect to A-connect */
+                                                                    /* Bit 6:  Reserved */
+#define USBHS_OTGSC_IDPU                                  (1 << 5)  /* Bit 5:  ID Pull-Up */
+#define USBHS_OTGSC_DP                                    (1 << 4)  /* Bit 4:  Data Pulsing */
+#define USBHS_OTGSC_OT                                    (1 << 3)  /* Bit 3:  OTG Termination */
+#define USBHS_OTGSC_HAAR                                  (1 << 2)  /* Bit 2:  Hardware Assist Auto-Reset */
+#define USBHS_OTGSC_VC                                    (1 << 1)  /* Bit 1:  VBUS Charge */
+#define USBHS_OTGSC_VD                                    (1 << 0)  /* Bit 0:  VBUS Discharge */
 
 /* USB Mode Register */
 
@@ -621,16 +621,16 @@
 #define USBHS_USBMODE_TXHSD_SHIFT                         (12)      /* Bits 12-14: Tx to Tx HS Delay */
 #define USBHS_USBMODE_TXHSD_MASK                          (0x7 << USBHS_USBMODE_TXHSD_SHIFT)
                                                                     /* Bits 5-11: Reserved */
-#define USBHS_USBMODE_SDIS                                (1 << 4)  /* Bit 4: Stream DISable */
-#define USBHS_USBMODE_SLOM                                (1 << 3)  /* Bit 3: Setup Lock-Out Mode */
-#define USBHS_USBMODE_ES                                  (1 << 2)  /* Bit 2: Endian Select */
-#define USBHS_USBMODE_CM_SHIFT                            (0)       /* Bits 2-0: Controller Mode */
+#define USBHS_USBMODE_SDIS                                (1 << 4)  /* Bit 4:  Stream DISable */
+#define USBHS_USBMODE_SLOM                                (1 << 3)  /* Bit 3:  Setup Lock-Out Mode */
+#define USBHS_USBMODE_ES                                  (1 << 2)  /* Bit 2:  Endian Select */
+#define USBHS_USBMODE_CM_SHIFT                            (0)       /* Bits 0-1: Controller Mode */
 #define USBHS_USBMODE_CM_MASK                             (0x3 << USBHS_USBMODE_CM_SHIFT)
 
 /* Endpoint Setup Status Register */
 
-                                                                    /* Bits 31-4: Reserved */
-#define USBHS_EPSETUPSR_EPSETUPSTAT_SHIFT                 (0)       /* Bits 4-0: Setup Endpoint Status */
+                                                                    /* Bits 4_31: Reserved */
+#define USBHS_EPSETUPSR_EPSETUPSTAT_SHIFT                 (0)       /* Bits 0-3: Setup Endpoint Status */
 #define USBHS_EPSETUPSR_EPSETUPSTAT_MASK                  (0xf << USBHS_EPSETUPSR_EPSETUPSTAT_SHIFT)
 
 /* Endpoint Initialization Register */
@@ -645,7 +645,7 @@
 /* Endpoint Flush Register */
 
                                                                     /* Bits 20-31: Reserved */
-#define USBHS_EPFLUSH_FETB_SHIFT                           (16)     /* Bits 19-16: Flush Endpoint Transmit Buffer */
+#define USBHS_EPFLUSH_FETB_SHIFT                           (16)     /* Bits 16-19: Flush Endpoint Transmit Buffer */
 #define USBHS_EPFLUSH_FETB_MASK                            (0xf << USBHS_EPFLUSH_FETB_SHIFT)
                                                                     /* Bits 4-15: Reserved */
 #define USBHS_EPFLUSH_FERB_SHIFT                           (0)      /* Bits 0-3: Flush Endpoint Receive Buffer */
@@ -654,9 +654,9 @@
 /* Endpoint Status Register */
 
                                                                     /* Bits 31-20: Reserved */
-#define USBHS_EPSR_ETBR_SHIFT                             (16)      /* Bits 19-16: Endpoint Transmit Buffer Ready */
+#define USBHS_EPSR_ETBR_SHIFT                             (16)      /* Bits 16-19: Endpoint Transmit Buffer Ready */
 #define USBHS_EPSR_ETBR_MASK                              (0xf << USBHS_EPSR_ETBR_SHIFT)
-                                                                    /* Bits 15-4: Reserved */
+                                                                    /* Bits 5-14: Reserved */
 #define USBHS_EPSR_ERBR_SHIFT                             (0)       /* Bits 0-3: Endpoint Receive Buffer Ready */
 #define USBHS_EPSR_ERBR_MASK                              (0xf << USBHS_EPSR_ERBR_SHIFT)
 
@@ -679,12 +679,12 @@
                                                                     /* Bit 17: Reserved */
 #define USBHS_EPCR0_TXS                                   (1 << 16) /* Bit 16: TX Endpoint Stall */
                                                                     /* Bits 8-15: Reserved */
-#define USBHS_EPCR0_RXE                                   (1 << 7)  /* Bit 7: RX endpoint Enable */
+#define USBHS_EPCR0_RXE                                   (1 << 7)  /* Bit 7:  RX endpoint Enable */
                                                                     /* Bits 4-6: Reserved */
 #define USBHS_EPCR0_RXT_SHIFT                             (2)       /* Bits 2-3: RX endpoint Type */
 #define USBHS_EPCR0_RXT_MASK                              (0x3 << USBHS_EPCR0_RXT_SHIFT)
-                                                                    /* Bit 1: Reserved */
-#define USBHS_EPCR0_RXS                                   (1 << 0)  /* Bit 0: RX endpoint Stall */
+                                                                    /* Bit 1:  Reserved */
+#define USBHS_EPCR0_RXS                                   (1 << 0)  /* Bit 0:  RX endpoint Stall */
 
 /* Endpoint Control Register n */
 
@@ -698,21 +698,21 @@
 #define USBHS_EPCRn_TXD                                   (1 << 17) /* Bit 17: TX endpoint Data source */
 #define USBHS_EPCRn_TXS                                   (1 << 16) /* Bit 16: TX endpoint Stall */
                                                                     /* Bits 8-15: Reserved */
-#define USBHS_EPCRn_RXE                                   (1 << 7)  /* Bit 7: RX endpoint Enable */
-#define USBHS_EPCRn_RXR                                   (1 << 6)  /* Bit 6: RX data toggle Reset */
-#define USBHS_EPCRn_RXI                                   (1 << 5)  /* Bit 5: RX data toggle Inhibit */
-                                                                    /* Bit 4: Reserved */
+#define USBHS_EPCRn_RXE                                   (1 << 7)  /* Bit 7:  RX endpoint Enable */
+#define USBHS_EPCRn_RXR                                   (1 << 6)  /* Bit 6:  RX data toggle Reset */
+#define USBHS_EPCRn_RXI                                   (1 << 5)  /* Bit 5:  RX data toggle Inhibit */
+                                                                    /* Bit 4:  Reserved */
 #define USBHS_EPCRn_RXT_SHIFT                             (2)       /* Bits 2-3: RX endpoint Type */
 #define USBHS_EPCRn_RXT_MASK                              (0x3 << USBHS_EPCRn_RXT_SHIFT)
-#define USBHS_EPCRn_RXD                                   (1 << 1)  /* Bit 1: RX endpoint Data sink */
-#define USBHS_EPCRn_RXS                                   (1 << 0)  /* Bit 0: RX endpoint Stall */
+#define USBHS_EPCRn_RXD                                   (1 << 1)  /* Bit 1:  RX endpoint Data sink */
+#define USBHS_EPCRn_RXS                                   (1 << 0)  /* Bit 0:  RX endpoint Stall */
 
 /* USB General Control Register */
 
                                                                     /* Bits 6-31: Reserved */
-#define USBHS_USBGENCTRL_WU_INT_CLR                       (1 << 5)  /* Bit 5: Wakeup Interrupt Clear */
+#define USBHS_USBGENCTRL_WU_INT_CLR                       (1 << 5)  /* Bit 5:  Wakeup Interrupt Clear */
                                                                     /* Bits 1-4: Reserved */
-#define USBHS_USBGENCTRL_WU_IE                            (1 << 0)  /* Bit 0: Wakeup Interrupt Enable */
+#define USBHS_USBGENCTRL_WU_IE                            (1 << 0)  /* Bit 0:  Wakeup Interrupt Enable */
 
 /* USB PHY Power-Down Register */
 
@@ -732,12 +732,12 @@
 #define USBPHY_TXn_USBPHY_TX_EDGECTRL_SHIFT               (29)      /* Bits 28-26: Edge-rate of the current sensing in HS transmit */
 #define USBPHY_TXn_USBPHY_TX_EDGECTRL_MASK                (0x7 << USBPHY_TXn_USBPHY_TX_EDGECTRL_SHIFT)
                                                                     /* Bit 20-25: Reserved */
-#define USBPHY_TXn_TXCAL45DP_SHIFT                        (19)      /* Bits 19-16: Trim termination resistance to the USB_DP output */
+#define USBPHY_TXn_TXCAL45DP_SHIFT                        (19)      /* Bits 16-19: Trim termination resistance to the USB_DP output */
 #define USBPHY_TXn_TXCAL45DP_MASK                         (0xf << USBPHY_TXn_TXCAL45DP_SHIFT)
                                                                     /* Bits 12-15: Reserved */
-#define USBPHY_TXn_TXCAL45DM_SHIFT                        (11)      /* Bits 11-8: Trim termination resistance to the USB_DM output */
+#define USBPHY_TXn_TXCAL45DM_SHIFT                        (11)      /* Bits 8-11: Trim termination resistance to the USB_DM output */
 #define USBPHY_TXn_TXCAL45DM_MASK                         (0xf << USBPHY_TXn_TXCAL45DM_SHIFT)
-                                                                    /* Bits 7-4: Reserved */
+                                                                    /* Bits 4-7: Reserved */
 #define USBPHY_TXn_D_CAL_SHIFT                            (0)       /* Bits 7-0: Trim current source for the High Speed TX drivers */
 #define USBPHY_TXn_D_CAL_MASK                             (0x7f << USBPHY_TXn_D_CAL_SHIFT)
 
@@ -749,7 +749,7 @@
 #define USBPHY_RXn_DISCONADJ_SHIFT                        (4)       /* Bits 6-4: Adjusts the trip point for the disconnect detector */
 #define USBPHY_RXn_DISCONADJ_MASK                         (0x7 << USBPHY_RXn_DISCONADJ_SHIFT)
                                                                     /* Bit 3: Reserved */
-#define USBPHY_RXn_ENVADJ_SHIFT                           (0)       /* Bits 3-0:  Adjusts the trip point for the envelope detector */
+#define USBPHY_RXn_ENVADJ_SHIFT                           (0)       /* Bits 0-3:  Adjusts the trip point for the envelope detector */
 #define USBPHY_RXn_ENVADJ_MASK                            (0x7 << USBPHY_RXn_ENVADJ_SHIFT)
 
 /* USB PHY General Control Register */
@@ -771,22 +771,22 @@
                                                                     /* Bit 13: Reserved */
 #define USBPHY_CTRLn_DEVPLUGIN_IRQ                        (1 << 12) /* Bit 12: Indicates device is connected */
                                                                     /* Bits 5-11: Reserved */
-#define USBPHY_CTRLn_ENDEVPLUGINDET                       (1 << 4)  /* Bit 4: Enables non-standard resistive plugged-in detection */
-#define USBPHY_CTRLn_HOSTDISCONDETECT_IRQ                 (1 << 3)  /* Bit 3: Indicates that the device has disconnected in High-Speed mode */
-                                                                    /* Bit 2: Reserved */
-#define USBPHY_CTRLn_ENHOSTDISCONDETECT                   (1 << 1)  /* Bit 1: For host mode, enables high-speed disconnect detector */
-                                                                    /* Bit 0: Reserved */
+#define USBPHY_CTRLn_ENDEVPLUGINDET                       (1 << 4)  /* Bit 4:  Enables non-standard resistive plugged-in detection */
+#define USBPHY_CTRLn_HOSTDISCONDETECT_IRQ                 (1 << 3)  /* Bit 3:  Indicates that the device has disconnected in High-Speed mode */
+                                                                    /* Bit 2:  Reserved */
+#define USBPHY_CTRLn_ENHOSTDISCONDETECT                   (1 << 1)  /* Bit 1:  For host mode, enables high-speed disconnect detector */
+                                                                    /* Bit 0:  Reserved */
 
 /* USB PHY Status Register */
 
                                                                     /* Bits 11-31: Reserved */
 #define USBPHY_STATUS_RESUME_STATUS                       (1 << 10) /* Bit 10: Indicates that the host is sending a wake-up after Suspend */
-                                                                    /* Bit 9: Reserved */
-#define USBPHY_STATUS_OTGID_STATUS                        (1 << 8)  /* Bit 8: Indicates the results of USB_ID pin on the USB cable */
+                                                                    /* Bit 9:  Reserved */
+#define USBPHY_STATUS_OTGID_STATUS                        (1 << 8)  /* Bit 8:  Indicates the results of USB_ID pin on the USB cable */
                                                                     /* Bit 7: Reserved */
-#define USBPHY_STATUS_DEVPLUGIN_STATUS                    (1 << 6)  /* Bit 6: Status indicator for non-standard resistive plugged-in detection */
+#define USBPHY_STATUS_DEVPLUGIN_STATUS                    (1 << 6)  /* Bit 6:  Status indicator for non-standard resistive plugged-in detection */
                                                                     /* Bits 4-5: Reserved */
-#define USBPHY_STATUS_HOSTDISCONDETECT_STATUS             (1 << 3)  /* Bit 3: Indicates at that the remote device has disconnected while in High-Speed mode */
+#define USBPHY_STATUS_HOSTDISCONDETECT_STATUS             (1 << 3)  /* Bit 3:  Indicates at that the remote device has disconnected while in High-Speed mode */
                                                                     /* Bits 0-2: Reserved */
 
 /* USB PHY Debug Register */
@@ -794,31 +794,31 @@
                                                                     /* Bit 31: Reserved */
 #define USBPHY_DEBUGn_CLKGATE                             (1 << 30) /* Bit 30: Gate Test Clocks */
 #define USBPHY_DEBUGn_HOST_RESUME_DEBUG                   (1 << 29) /* Bit 29: Trigger the host resume SE0 with HOST_FORCE_LS_SE0 = 0 or UTMI_SUSPEND=1 */
-#define USBPHY_DEBUGn_SQUELCHRESETLENGTH_SHIFT            (25)      /* Bits 28-25: Duration of RESET in terms of the number of 480-MHz cycles */
+#define USBPHY_DEBUGn_SQUELCHRESETLENGTH_SHIFT            (25)      /* Bits 25-28: Duration of RESET in terms of the number of 480-MHz cycles */
 #define USBPHY_DEBUGn_SQUELCHRESETLENGTH_MASK             (0xf << USBPHY_DEBUGn_SQUELCHRESETLENGTH_SHIFT)
 #define USBPHY_DEBUGn_ENSQUELCHRESET                      (1 << 24) /* Bit 24: Set bit to allow squelch to reset high-speed receive */
                                                                     /* Bits 21-23: Reserved */
-#define USBPHY_DEBUGn_SQUELCHRESETCOUNT_SHIFT             (16)       /* Bits 20-16: Delay in between the detection of squelch to the reset of high-speed RX */
+#define USBPHY_DEBUGn_SQUELCHRESETCOUNT_SHIFT             (16)       /* Bits 16-20: Delay in between the detection of squelch to the reset of high-speed RX */
 #define USBPHY_DEBUGn_SQUELCHRESETCOUNT_MASK              (0x1f << USBPHY_DEBUGn_SQUELCHRESETCOUNT_SHIFT)
                                                                     /* Bits 13-15: Reserved */
 #define USBPHY_DEBUGn_ENTX2RXCOUNT                        (1 << 12) /* Bit 12: Allow a countdown to transition in between TX and RX */
-#define USBPHY_DEBUGn_TX2RXCOUNT_SHIFT                    (8)       /* Bits 11-8: Delay in between the end of transmit to the beginning of receive */
+#define USBPHY_DEBUGn_TX2RXCOUNT_SHIFT                    (8)       /* Bits 8-11: Delay in between the end of transmit to the beginning of receive */
 #define USBPHY_DEBUGn_TX2RXCOUNT_MASK                     (0xf << USBPHY_DEBUGn_TX2RXCOUNT_SHIFT)
                                                                     /* Bits 6-7: Reserved */
-#define USBPHY_DEBUGn_ENHSTPULLDOWN_SHIFT                 (4)       /* Bits 5-4: Host pulldown overdrive mode */
+#define USBPHY_DEBUGn_ENHSTPULLDOWN_SHIFT                 (4)       /* Bits 4-5: Host pulldown overdrive mode */
 #define USBPHY_DEBUGn_ENHSTPULLDOWN_MASK                  (0x3 << USBPHY_DEBUGn_ENHSTPULLDOWN_SHIFT)
-#define USBPHY_DEBUGn_HSTPULLDOWN_SHIFT                   (2)       /* Bits 3-2: Connect pulldown resistors on USB_DP/USB_DM pins if pulldown overdrive mode enabled */
+#define USBPHY_DEBUGn_HSTPULLDOWN_SHIFT                   (2)       /* Bits 2-3: Connect pulldown resistors on USB_DP/USB_DM pins if pulldown overdrive mode enabled */
 #define USBPHY_DEBUGn_HSTPULLDOWN_MASK                    (0x3 << USBPHY_DEBUGn_HSTPULLDOWN_SHIFT)
-#define USBPHY_DEBUGn_DEBUG_INTERFACE_HOLD                (1 << 1)  /* Bit 1: Use holding registers to assist in timing for external UTMI interface */
-#define USBPHY_DEBUGn_OTGIDPIOLOCK                        (1 << 0)  /* Bit 0: Hold sampled OTG ID from USBPHY_STATUS_OTGID_STATUS */
+#define USBPHY_DEBUGn_DEBUG_INTERFACE_HOLD                (1 << 1)  /* Bit 1:  Use holding registers to assist in timing for external UTMI interface */
+#define USBPHY_DEBUGn_OTGIDPIOLOCK                        (1 << 0)  /* Bit 0:  Hold sampled OTG ID from USBPHY_STATUS_OTGID_STATUS */
 
 /* UTMI Debug Status Register 0 */
 
-#define USBPHY_DEBUG0_STATUS_SQUELCH_COUNT_SHIFT            (26)    /* Bits 31-26: Running count of the squelch reset instead of normal end for HS RX */
+#define USBPHY_DEBUG0_STATUS_SQUELCH_COUNT_SHIFT            (26)    /* Bits 26-31: Running count of the squelch reset instead of normal end for HS RX */
 #define USBPHY_DEBUG0_STATUS_SQUELCH_COUNT_MASK             (0x3f << USBPHY_DEBUG0_STATUS_SQUELCH_COUNT_SHIFT)
 #define USBPHY_DEBUG0_STATUS_UTMI_RXERROR_FAIL_COUNT_SHIFT  (16)    /* Bits 25-16: Running count of the UTMI_RXERROR */
 #define USBPHY_DEBUG0_STATUS_UTMI_RXERROR_FAIL_COUNT_MASK   (0x3ff << USBPHY_DEBUG0_STATUS_UTMI_RXERROR_FAIL_COUNT_SHIFT)
-#define USBPHY_DEBUG0_STATUS_LOOP_BACK_FAIL_COUNT_SHIFT     (0)     /* Bits 16-0: Running count of the failed pseudo-random generator loopback */
+#define USBPHY_DEBUG0_STATUS_LOOP_BACK_FAIL_COUNT_SHIFT     (0)     /* Bits 0-15: Running count of the failed pseudo-random generator loopback */
 #define USBPHY_DEBUG0_STATUS_LOOP_BACK_FAIL_COUNT_MASK      (0xffff << USBPHY_DEBUG0_STATUS_LOOP_BACK_FAIL_COUNT_SHIFT)
 
 /* UTMI Debug Status Register 1 */
@@ -830,11 +830,11 @@
 
 /* UTMI RTL Version */
 
-#define USBPHY_VERSION_MAJOR_SHIFT                        (24)       /* Bits 31-24: Fixed read-only value reflecting the MAJOR field of the RTL version */
+#define USBPHY_VERSION_MAJOR_SHIFT                        (24)       /* Bits 24-31: Fixed read-only value reflecting the MAJOR field of the RTL version */
 #define USBPHY_VERSION_MAJOR_MASK                         (0xff << USBPHY_VERSION_MAJOR_SHIFT)
-#define USBPHY_VERSION_MINOR_SHIFT                        (16)       /* Bits 23-16: Fixed read-only value reflecting the MINOR field of the RTL version */
+#define USBPHY_VERSION_MINOR_SHIFT                        (16)       /* Bits 16-23: Fixed read-only value reflecting the MINOR field of the RTL version */
 #define USBPHY_VERSION_MINOR_MASK                         (0xff << USBPHY_VERSION_MINOR_SHIFT)
-#define USBPHY_VERSION_STEP_SHIFT                         (0)       /* Bits 16-0: Fixed read-only value reflecting the stepping of the RTL version */
+#define USBPHY_VERSION_STEP_SHIFT                         (0)       /* Bits 0-15: Fixed read-only value reflecting the stepping of the RTL version */
 #define USBPHY_VERSION_STEP_MASK                          (0xffff << USBPHY_VERSION_STEP_SHIFT)
 
 /* USB PHY PLL Control/Status Register */
@@ -847,9 +847,9 @@
 #define USBPHY_PLL_SICn_PLL_POWER                         (1 << 12) /* Bit 12: Power up the USB PLL */
 #define USBPHY_PLL_SICn_PLL_HOLD_RING_OFF                 (1 << 11) /* Bit 11: Analog debug bit */
                                                                     /* Bit 10: Reserved */
-#define USBPHY_PLL_SICn_PLL_EN_USB_CLKS                   (1 << 9)  /* Bit 6: Enable the USB clock output from the USB PHY PLL */
+#define USBPHY_PLL_SICn_PLL_EN_USB_CLKS                   (1 << 9)  /* Bit 6:  Enable the USB clock output from the USB PHY PLL */
                                                                     /* Bits 2-5: Reserved */
-#define USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT                 (0)       /* Bits 5-0: Controls the USB PLL feedback loop divider */
+#define USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT                 (0)       /* Bits 0-4: Controls the USB PLL feedback loop divider */
 #define USBPHY_PLL_SICn_PLL_DIV_SEL_MASK                  (0x1f << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT)
 
 /* USB PHY VBUS Detect Control Register */
@@ -862,93 +862,93 @@
                                                                     /* Bit 19: Reserved */
 #define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_TO_SESSVALID   (1 << 18) /* Bit 18: Selects the comparator used for VBUS_VALID */
                                                                     /* Bits 11-17: Reserved */
-#define USBPHY_USB1_VBUS_DETECTn_VBUS_SOURCE_SEL_SHIFT    (9)       /* Bits 10-9: Selects the source of the VBUS_VALID signal reported to the USB controller */
+#define USBPHY_USB1_VBUS_DETECTn_VBUS_SOURCE_SEL_SHIFT    (9)       /* Bits 9-10: Selects the source of the VBUS_VALID signal reported to the USB controller */
 #define USBPHY_USB1_VBUS_DETECTn_VBUS_SOURCE_SEL_MASK     (0x3 << USBPHY_USB1_VBUS_DETECTn_VBUS_SOURCE_SEL_SHIFT)
-#define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_SEL            (1 << 8)  /* Bit 8: Selects the source of the VBUS_VALID signal reported to the USB controller */
-#define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_OVERRIDE       (1 << 7)  /* Bit 7: Override value for VBUS_VALID signal sent to USB controller */
-#define USBPHY_USB1_VBUS_DETECTn_AVALID_OVERRIDE          (1 << 6)  /* Bit 6: Override value for A-Device Session Valid */
-#define USBPHY_USB1_VBUS_DETECTn_BVALID_OVERRIDE          (1 << 5)  /* Bit 5: Override value for B-Device Session Valid */
-#define USBPHY_USB1_VBUS_DETECTn_SESSEND_OVERRIDE         (1 << 4)  /* Bit 4: Override value for SESSEND */
-#define USBPHY_USB1_VBUS_DETECTn_VBUS_OVERRIDE_EN         (1 << 3)  /* Bit 3: VBUS detect signal override enable */
-#define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_THRESH_SHIFT   (0)       /* Bits 3-0: Sets the threshold for the VBUSVALID comparator */
+#define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_SEL            (1 << 8)  /* Bit 8:  Selects the source of the VBUS_VALID signal reported to the USB controller */
+#define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_OVERRIDE       (1 << 7)  /* Bit 7:  Override value for VBUS_VALID signal sent to USB controller */
+#define USBPHY_USB1_VBUS_DETECTn_AVALID_OVERRIDE          (1 << 6)  /* Bit 6:  Override value for A-Device Session Valid */
+#define USBPHY_USB1_VBUS_DETECTn_BVALID_OVERRIDE          (1 << 5)  /* Bit 5:  Override value for B-Device Session Valid */
+#define USBPHY_USB1_VBUS_DETECTn_SESSEND_OVERRIDE         (1 << 4)  /* Bit 4:  Override value for SESSEND */
+#define USBPHY_USB1_VBUS_DETECTn_VBUS_OVERRIDE_EN         (1 << 3)  /* Bit 3:  VBUS detect signal override enable */
+#define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_THRESH_SHIFT   (0)       /* Bits 0-2: Sets the threshold for the VBUSVALID comparator */
 #define USBPHY_USB1_VBUS_DETECTn_VBUSVALID_THRESH_MASK    (0x7 << USBPHY_USB1_VBUS_DETECTn_VBUSVALID_THRESH_SHIFT)
 
 /* USB PHY VBUS Detector Status Register */
 
                                                                     /* Bits 5-31: Reserved */
-#define USBPHY_USB1_VBUS_DET_STAT_VBUS_VALID_3V           (1 << 4)  /* Bit 4: VBUS_VALID_3V detector status */
-#define USBPHY_USB1_VBUS_DET_STAT_VBUS_VALID              (1 << 3)  /* Bit 3: VBUS voltage status */
-#define USBPHY_USB1_VBUS_DET_STAT_AVALID                  (1 << 2)  /* Bit 2: A-Device Session Valid status */
-#define USBPHY_USB1_VBUS_DET_STAT_BVALID                  (1 << 1)  /* Bit 1: B-Device Session Valid status */
-#define USBPHY_USB1_VBUS_DET_STAT_SESSEND                 (1 << 0)  /* Bit 0: Session End indicator */
+#define USBPHY_USB1_VBUS_DET_STAT_VBUS_VALID_3V           (1 << 4)  /* Bit 4:  VBUS_VALID_3V detector status */
+#define USBPHY_USB1_VBUS_DET_STAT_VBUS_VALID              (1 << 3)  /* Bit 3:  VBUS voltage status */
+#define USBPHY_USB1_VBUS_DET_STAT_AVALID                  (1 << 2)  /* Bit 2:  A-Device Session Valid status */
+#define USBPHY_USB1_VBUS_DET_STAT_BVALID                  (1 << 1)  /* Bit 1:  B-Device Session Valid status */
+#define USBPHY_USB1_VBUS_DET_STAT_SESSEND                 (1 << 0)  /* Bit 0:  Session End indicator */
 
 /* USB PHY Charger Detect Status Register */
 
                                                                     /* Bits 5-31: Reserved */
-#define USBPHY_USB1_CHRG_DET_STAT_SECDET_DCP              (1 << 4)  /* Bit 4: Battery Charging Secondary Detection phase output */
-#define USBPHY_USB1_CHRG_DET_STAT_DP_STATE                (1 << 3)  /* Bit 3: Single ended receiver output for the USB_DP pin, from charger detection circuits */
-#define USBPHY_USB1_CHRG_DET_STAT_DM_STATE                (1 << 2)  /* Bit 2: Single ended receiver output for the USB_DM pin, from charger detection circuits */
-#define USBPHY_USB1_CHRG_DET_STAT_CHRG_DETECTED           (1 << 1)  /* Bit 1: Battery Charging Primary Detection phase output */
-#define USBPHY_USB1_CHRG_DET_STAT_PLUG_CONTACT            (1 << 0)  /* Bit 0: Battery Charging Data Contact Detection phase output */
+#define USBPHY_USB1_CHRG_DET_STAT_SECDET_DCP              (1 << 4)  /* Bit 4:  Battery Charging Secondary Detection phase output */
+#define USBPHY_USB1_CHRG_DET_STAT_DP_STATE                (1 << 3)  /* Bit 3:  Single ended receiver output for the USB_DP pin, from charger detection circuits */
+#define USBPHY_USB1_CHRG_DET_STAT_DM_STATE                (1 << 2)  /* Bit 2:  Single ended receiver output for the USB_DM pin, from charger detection circuits */
+#define USBPHY_USB1_CHRG_DET_STAT_CHRG_DETECTED           (1 << 1)  /* Bit 1:  Battery Charging Primary Detection phase output */
+#define USBPHY_USB1_CHRG_DET_STAT_PLUG_CONTACT            (1 << 0)  /* Bit 0:  Battery Charging Data Contact Detection phase output */
 
 /* USB PHY Analog Control Register */
 
 #define USBPHY_ANACTRLn_PFD_STABLE                        (1 << 31) /* Bit 31: PFD stable signal from the Phase Fractional Divider */
                                                                     /* Bits 16-30: Reserved */
-#define USBPHY_ANACTRLn_EMPH_CUR_CTRL_SHIFT               (14)      /* Bits 15-14: Pre-emphasis current added for the High-Speed TX drivers */
+#define USBPHY_ANACTRLn_EMPH_CUR_CTRL_SHIFT               (14)      /* Bits 14-15: Pre-emphasis current added for the High-Speed TX drivers */
 #define USBPHY_ANACTRLn_EMPH_CUR_CTRL_MASK                (0x3 << USBPHY_ANACTRLn_EMPH_CUR_CTRL_SHIFT)
 #define USBPHY_ANACTRLn_EMPH_EN                           (1 << 13) /* Bit 13: Enables pre-emphasis for the High-Speed TX drivers */
-#define USBPHY_ANACTRLn_EMPH_PULSE_CTRL_SHIFT             (11)      /* Bits 12-11: Controls pre-emphasis time duration for High Speed TX drivers */
+#define USBPHY_ANACTRLn_EMPH_PULSE_CTRL_SHIFT             (11)      /* Bits 11-12: Controls pre-emphasis time duration for High Speed TX drivers */
 #define USBPHY_ANACTRLn_EMPH_PULSE_CTRL_MASK              (0x3 << USBPHY_ANACTRLn_EMPH_PULSE_CTRL_SHIFT)
 #define USBPHY_ANACTRLn_DEV_PULLDOWN                      (1 << 10) /* Bit 10: Enable the pulldown resistors on both USB_DP and USB_DM pins */
-#define USBPHY_ANACTRLn_PFD_FRAC_SHIFT                    (4)       /* Bits 9-4: PFD fractional divider used to select the pfd_clk output frequency */
+#define USBPHY_ANACTRLn_PFD_FRAC_SHIFT                    (4)       /* Bits 4-9: PFD fractional divider used to select the pfd_clk output frequency */
 #define USBPHY_ANACTRLn_PFD_FRAC_MASK                     (0x3f << USBPHY_ANACTRLn_PFD_FRAC_SHIFT)
-#define USBPHY_ANACTRLn_PFD_CLK_SEL_SHIFT                 (2)       /* Bits 3-2: Selects the frequency relationship between pfd_clk output and exported USB1PFDCLK */
+#define USBPHY_ANACTRLn_PFD_CLK_SEL_SHIFT                 (2)       /* Bits 2-3: Selects the frequency relationship between pfd_clk output and exported USB1PFDCLK */
 #define USBPHY_ANACTRLn_PFD_CLK_SEL_MASK                  (0x3 << USBPHY_ANACTRLn_PFD_CLK_SEL_SHIFT)
-#define USBPHY_ANACTRLn_PFD_CLKGATE                       (1 << 1)  /* Bit 1: Clock gating (disabling) for the PFD */
-#define USBPHY_ANACTRLn_TESTCLK_SEL                       (1 << 0)  /* Bit 0: Test clock selection to analog test */
+#define USBPHY_ANACTRLn_PFD_CLKGATE                       (1 << 1)  /* Bit 1:  Clock gating (disabling) for the PFD */
+#define USBPHY_ANACTRLn_TESTCLK_SEL                       (1 << 0)  /* Bit 0:  Test clock selection to analog test */
 
 /* USB PHY Loopback Control/Status Register */
 
                                                                     /* Bits 24-31: Reserved */
-#define USBPHY_USB1_LOOPBACKn_TSTPKT_SHIFT                (16)      /* Bits 23-16: Selects the packet data byte used for USB loopback testing in Pulse mode */
+#define USBPHY_USB1_LOOPBACKn_TSTPKT_SHIFT                (16)      /* Bits 16-23: Selects the packet data byte used for USB loopback testing in Pulse mode */
 #define USBPHY_USB1_LOOPBACKn_TSTPKT_MASK                 (0xff << USBPHY_USB1_LOOPBACKn_TSTPKT_SHIFT)
 #define USBPHY_USB1_LOOPBACKn_TSTI_HSFS_MODE_EN           (1 << 15) /* Bit 15: Enable the loopback test to dynamically change the packet speed */
                                                                     /* Bits 9-14: Reserved */
-#define USBPHY_USB1_LOOPBACKn_UTMO_DIG_TST1               (1 << 8)  /* Bit 8: Status bit for USB loopback test */
-#define USBPHY_USB1_LOOPBACKn_UTMO_DIG_TST0               (1 << 7)  /* Bit 7: Status bit for USB loopback test */
-#define USBPHY_USB1_LOOPBACKn_TSTI_TX_HIZ                 (1 << 6)  /* Bit 6: Sets TX Hi-Z for USB loopback test */
-#define USBPHY_USB1_LOOPBACKn_TSTI_TX_EN                  (1 << 5)  /* Bit 5: Enable TX for USB loopback test */
-#define USBPHY_USB1_LOOPBACKn_TSTI_TX_LS_MODE             (1 << 4)  /* Bit 4: Choose LS/FS/HS for USB loopback testing */
-#define USBPHY_USB1_LOOPBACKn_TSTI_TX_HS_MODE             (1 << 3)  /* Bit 3: Select HS or FS mode for USB loopback testing */
-#define USBPHY_USB1_LOOPBACKn_UTMI_DIG_TST1               (1 << 2)  /* Bit 2: Mode control for USB loopback test */
-#define USBPHY_USB1_LOOPBACKn_UTMI_DIG_TST0               (1 << 1)  /* Bit 1: Mode control for USB loopback test */
-#define USBPHY_USB1_LOOPBACKn_UTMI_TESTSTART              (1 << 0)  /* Bit 0: This bit enables the USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_UTMO_DIG_TST1               (1 << 8)  /* Bit 8:  Status bit for USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_UTMO_DIG_TST0               (1 << 7)  /* Bit 7:  Status bit for USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_TSTI_TX_HIZ                 (1 << 6)  /* Bit 6:  Sets TX Hi-Z for USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_TSTI_TX_EN                  (1 << 5)  /* Bit 5:  Enable TX for USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_TSTI_TX_LS_MODE             (1 << 4)  /* Bit 4:  Choose LS/FS/HS for USB loopback testing */
+#define USBPHY_USB1_LOOPBACKn_TSTI_TX_HS_MODE             (1 << 3)  /* Bit 3:  Select HS or FS mode for USB loopback testing */
+#define USBPHY_USB1_LOOPBACKn_UTMI_DIG_TST1               (1 << 2)  /* Bit 2:  Mode control for USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_UTMI_DIG_TST0               (1 << 1)  /* Bit 1:  Mode control for USB loopback test */
+#define USBPHY_USB1_LOOPBACKn_UTMI_TESTSTART              (1 << 0)  /* Bit 0:  This bit enables the USB loopback test */
 
 /* USB PHY Loopback Packet Number Select Register */
 
-#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_SHIFT  (16)       /* Bits 31-16: Full speed packet number */
+#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_SHIFT  (16)       /* Bits 16-31: Full speed packet number */
 #define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_MASK   (0xffff << USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_SHIFT)
-#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_SHIFT  (0)       /* Bits 16-0: High speed packet number */
+#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_SHIFT  (0)       /* Bits 0-15: High speed packet number */
 #define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_MASK   (0xffff << USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_SHIFT)
 
 /* USB PHY Trim Override Enable Register */
 
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DM_SHIFT       (28)      /* Bits 31-28: IFR value of TX_CAL45DM */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DM_SHIFT       (28)      /* Bits 28-31: IFR value of TX_CAL45DM */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DM_MASK        (0xf << USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DM_SHIFT)
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DP_SHIFT       (24)      /* Bits 27-24: IFR value of TX_CAL45DP */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DP_SHIFT       (24)      /* Bits 24-27: IFR value of TX_CAL45DP */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DP_MASK        (0xf << USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_CAL45DP_SHIFT)
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_D_CAL_SHIFT         (20)      /* Bits 23-20: IFR value of TX_D_CAL */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_D_CAL_SHIFT         (20)      /* Bits 22-30: IFR value of TX_D_CAL */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_D_CAL_MASK          (0xf << USBPHY_TRIM_OVERRIDE_ENn_TRIM_USBPHY_TX_D_CAL_SHIFT)
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USB_REG_ENV_TAIL_ADJ_VD_SHIFT (18)      /* Bits 19-18: IFR value of ENV_TAIL_ADJ */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USB_REG_ENV_TAIL_ADJ_VD_SHIFT (18)      /* Bits 18-19: IFR value of ENV_TAIL_ADJ */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_USB_REG_ENV_TAIL_ADJ_VD_MASK  (0x3 << USBPHY_TRIM_OVERRIDE_ENn_TRIM_USB_REG_ENV_TAIL_ADJ_VD_SHIFT)
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_PLL_CTRL0_DIV_SEL_SHIFT       (16)      /* Bits 17-16: IFR value of PLL_DIV_SEL */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_PLL_CTRL0_DIV_SEL_SHIFT       (16)      /* Bits 16-17: IFR value of PLL_DIV_SEL */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_PLL_CTRL0_DIV_SEL_MASK        (0x3 << USBPHY_TRIM_OVERRIDE_ENn_TRIM_PLL_CTRL0_DIV_SEL_SHIFT)
                                                                               /* Bits 5-15: Reserved */
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_CAL45DM_OVERRIDE           (1 << 4)  /* Bit 4: Override enable for TX_CAL45DM, when set, the register value in USBPHY_TX[11:8] will be used */
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_CAL45DP_OVERRIDE           (1 << 3)  /* Bit 3: Override enable for TX_CAL45DP, when set, the register value in USBPHY_TX[19:16] will be used */
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_D_CAL_OVERRIDE             (1 << 2)  /* Bit 2: Override enable for TX_D_CAL, when set, the register value in USBPHY_TX[3:0] will be used */
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_ENV_TAIL_ADJ_VD_OVERRIDE      (1 << 1)  /* Bit 1: Override enable for ENV_TAIL_ADJ, when set, the register value in USBPHY_DEBUG1[14:13] will be used */
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_DIV_SEL_OVERRIDE              (1 << 0)  /* Bit 0: Override enable for PLL_DIV_SEL, when set, the register value in USBPHY_PLL_SIC[1:0] will be used */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_CAL45DM_OVERRIDE           (1 << 4)  /* Bit 4:  Override enable for TX_CAL45DM */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_CAL45DP_OVERRIDE           (1 << 3)  /* Bit 3:  Override enable for TX_CAL45DP */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_D_CAL_OVERRIDE             (1 << 2)  /* Bit 2:  Override enable for TX_D_CAL */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_ENV_TAIL_ADJ_VD_OVERRIDE      (1 << 1)  /* Bit 1:  Override enable for ENV_TAIL_ADJ */
+#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_DIV_SEL_OVERRIDE              (1 << 0)  /* Bit 0:  Override enable for PLL_DIV_SEL */
 
 #endif /* __ARCH_ARM_SRC_KINETIS_CHIP_KINETIS_USBHS_H */
