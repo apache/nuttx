@@ -134,7 +134,7 @@ ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += kinetis_pindump.c
 endif
 
-ifneq ($(CONFIG_KINETIS_UART),y)
+ifeq ($(CONFIG_KINETIS_UART),y)
 CHIP_CSRCS += kinetis_serial.c
 endif
 
