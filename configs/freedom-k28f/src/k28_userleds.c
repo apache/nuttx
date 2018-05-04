@@ -39,11 +39,17 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/board.h>
+
+#include "chip.h"
 #include "kinetis.h"
 #include "freedom-k28f.h"
+
+#include <arch/board/board.h>
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -57,7 +63,9 @@
 
 void board_userled_initialize(void)
 {
-  kinetis_pinconfig(GPIO_LED);
+  kinetis_pinconfig(GPIO_LED_R);
+  kinetis_pinconfig(GPIO_LED_G);
+  kinetis_pinconfig(GPIO_LED_B);
 }
 
 /****************************************************************************
@@ -66,10 +74,26 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == BOARD_LED)
+  uint32_t ledcfg;
+
+  if (led == BOARD_LED_R)
     {
-      kinetis_gpiowrite(GPIO_LED, ledon);
+      ledcfg = GPIO_LED_R;
     }
+  else if (led == BOARD_LED_G)
+    {
+      ledcfg = GPIO_LED_G;
+    }
+  else if (led == BOARD_LED_B)
+    {
+      ledcfg = GPIO_LED_B;
+    }
+  else
+    {
+      return;
+    }
+
+  kinetis_gpiowrite(ledcfg, !ledon); /* Low illuminates */
 }
 
 /****************************************************************************
@@ -78,7 +102,11 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-  kinetis_gpiowrite(GPIO_LED, (ledset & BOARD_LED_BIT) != 0);
+  /* Low illuminates */
+
+  kinetis_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) == 0);
+  kinetis_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) == 0);
+  kinetis_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) == 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

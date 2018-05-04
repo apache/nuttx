@@ -45,6 +45,8 @@
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 # include <stdbool.h>
+
+# include <arch/chip/kinetis_mcg.h>
 #endif
 
 /************************************************************************************
@@ -52,7 +54,7 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The Freedom K28F uses a 12Mhz external Oscillator.  The Kinetis MCU startup from an
+/* The Freedom K28F uses a 12MHz external Oscillator.  The Kinetis MCU startup from an
  * internal digitally-controlled oscillator (DCO). Nuttx will enable the main external
  * oscillator (EXTAL0/XTAL0).   The external oscillator/resonator can range from
  * 32.768 KHz up to 50 MHz. The default external source for the MCG oscillator inputs
@@ -70,16 +72,16 @@
  * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX  reference
  * clock to the PLL.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 Mhz  / 1  = 12 MHz
- *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 Mhz  * 30 = 360 MHz
- *   MCG Frequency:         PLLOUT = 180 Mhz = 360 MHz / KINETIS_MCG_PLL_INTERNAL_DIVBY
+ *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 MHz  / 1  = 12 MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 MHz  * 25 = 300 MHz
+ *   MCG Frequency:         PLLOUT = 150 MHz = 300 MHz / KINETIS_MCG_PLL_INTERNAL_DIVBY
  *
  * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
  * VDIV  register value is offset by KINETIS_MCG_C6_VDIV_BASE.
  */
 
-#define BOARD_PRDIV          1             /* PLL External Reference Divider */
-#define BOARD_VDIV           30            /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          1              /* PLL External Reference Divider */
+#define BOARD_VDIV           25             /* PLL VCO Divider (frequency multiplier) */
 
 /* Define additional MCG_C2 Setting */
 
@@ -88,7 +90,7 @@
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
-#define BOARD_MCG_FREQ       (BOARD_PLLOUT_FREQ/KINETIS_MCG_PLL_INTERNAL_DIVBY)
+#define BOARD_MCG_FREQ       (BOARD_PLLOUT_FREQ / KINETIS_MCG_PLL_INTERNAL_DIVBY)
 
 /* SIM CLKDIV1 dividers */
 
@@ -109,11 +111,11 @@
 #define BOARD_SOPT2_PLLFLLSEL   SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
 #define BOARD_SOPT2_FREQ        BOARD_MCG_FREQ
 
-/* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 Mhz Xtal
+/* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 MHz Xtal
  * Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
  *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
- *                48Mhz = 168Mhz X [(1 + 1) / (6 + 1)]
- *                48Mhz = 168Mhz / (6 + 1) * (1 + 1)
+ *                48MHz = 168MHz X [(1 + 1) / (6 + 1)]
+ *                48MHz = 168MHz / (6 + 1) * (1 + 1)
  */
 
 #if (BOARD_MCG_FREQ == 168000000L)
@@ -126,8 +128,8 @@
 
 /* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ × [ (PLLFLLFRAC+1) / (PLLFLLDIV+1)]
- *            90 Mhz = 180 Mhz X [(0 + 1) / (1 + 1)]
- *            90 Mhz = 180 Mhz / (1 + 1) * (0 + 1)
+ *            90 MHz = 180 MHz X [(0 + 1) / (1 + 1)]
+ *            90 MHz = 180 MHz / (1 + 1) * (0 + 1)
  */
 
 #define BOARD_SIM_CLKDIV3_PLLFLLFRAC  1
@@ -146,10 +148,10 @@
 
 /* Kinetis does not have pullups on their Freedom-K28F board
  * So allow the board config to enable them.
+ * REVISIT:  This was cloned from the K66F.  Need to check the K28F schematic.
  */
 
 #define BOARD_SDHC_ENABLE_PULLUPS 1
-#warning REVISIT
 
 /* SDHC clocking ********************************************************************/
 
@@ -345,7 +347,24 @@
  *    PTE22 LPUART4_CTS           N/C
  *    ----- --------------- -------------------------------
  *
- *  Arduino RS-232 Shield
+ * Virtual serial port
+ * -------------------
+ *
+ * A serial port connection is available between the OpenSDA v2.2 MCU and
+ * pins PTC24 and PTC25 of the K28 MCU:
+ *
+ *    ----- --------------- -------------------------------
+ *    GPIO  LPUART FUNCTION BOARD CONFIGURATION
+ *    ----- --------------- -------------------------------
+ *    PTC25 LPUART0_RX      PTC25 LPUART0_RX_TGTMCU
+ *    PTC24 LPUART0_TX      PTC24 LPUART0_TX_TGTMCU
+ *    ----- --------------- -------------------------------
+ */
+
+#define PIN_LPUART0_RX      PIN_LPUART0_RX_5  /* PTC25 */
+#define PIN_LPUART0_TX      PIN_LPUART0_TX_5  /* PTC24
+
+/*  Arduino RS-232 Shield
  *  ---------------------
  *
  *    ----- --------------- -------------------------------
@@ -358,17 +377,10 @@
  *  Note:  PTA24 and PTA25 are shared between Micro SD Card circuit and
  *  Arduino connectors. Remove R106 and R107 or R94 and R11 as necessary to
  *  prevent contention.
- *
- *  TGTMCU
- *  ------
- *
- *    ----- --------------- -------------------------------
- *    GPIO  LPUART FUNCTION BOARD CONFIGURATION
- *    ----- --------------- -------------------------------
- *    PTC25 LPUART0_RX      PTC25 LPUART0_RX_TGTMCU
- *    PTC24 LPUART0_TX      PTC24 LPUART0_TX_TGTMCU
- *    ----- --------------- -------------------------------
  */
+
+#define PIN_LPUART2_RX      PIN_LPUART2_RX_1  /* PTA25 */
+#define PIN_LPUART2_TX      PIN_LPUART2_TX_1  /* PTA24 */
 
 /* I2C */
 
@@ -393,5 +405,67 @@
 #  define PIN_I2C1_SDA      (PIN_I2C1_SDA_2 | PIN_ALT2_OPENDRAIN | PIN_ALT2_SLOW)
 #endif
 #endif
+
+/* LED definitions ******************************************************************/
+/* The Freedom K28F has a single RGB LED driven by the K28F as follows:
+ *
+ *   LED    K28
+ *   ------ -------------------------------------------------------
+ *   RED    PTE6
+ *   BLUE   PTE7
+ *   GREEN  PTE8
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED_R       0
+#define BOARD_LED_G       1
+#define BOARD_LED_B       2
+#define BOARD_NLEDS       3
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED_R_BIT   (1 << BOARD_LED_R)
+#define BOARD_LED_G_BIT   (1 << BOARD_LED_G)
+#define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the Freedom K28F.  The following definitions describe how NuttX controls
+ * the LEDs:
+ *
+ *   SYMBOL                Meaning                      LED state
+ *                                                      RED   GREEN  BLUE
+ *   -------------------  ----------------------------  ----------------- */
+#define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
+#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
+#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
+#define LED_STACKCREATED  3 /* Idle stack created        OFF   ON     OFF */
+#define LED_INIRQ         0 /* In an interrupt          (no change)       */
+#define LED_SIGNAL        0 /* In a signal handler      (no change)       */
+#define LED_ASSERTION     0 /* An assertion failed      (no change)       */
+#define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
+#undef  LED_IDLE            /* K28 is in sleep mode     (Not used)        */
+
+/* Button definitions ***************************************************************/
+/* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2 is
+ * connected to PTA4 and SW3 is connected to PTD0. Besides the general purpose
+ * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
+ * SW3 can be a non-maskable interrupt.
+ *
+ *   Switch    GPIO Function
+ *   --------- ---------------------------------------------------------------
+ *   SW2       PTA4/NMI_B
+ *   SW3       PTA4/NMI_B
+ */
+
+#define BUTTON_SW2        0
+#define BUTTON_SW3        1
+#define NUM_BUTTONS       2
+
+#define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
+#define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 
 #endif  /* __CONFIGS_FREEDOM_K28F_INCLUDE_BOARD_H */

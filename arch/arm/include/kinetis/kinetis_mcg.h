@@ -217,8 +217,10 @@
 #  define KINETIS_MCG_PLL_REF_MIN            8000000   /* OSCCLK/PLL_R minimum */
 #  define KINETIS_MCG_PLL_REF_MAX            16000000  /* OSCCLK/PLL_R maximum */
 
-/* TODO: The following configuration parameters have not been verified */
-#warning Unverified values from K66F
+/* TODO: The following configuration parameters have not been verified.  They were
+ * taken wholesale from the K66F.  The K66F is very similar and, most likely, the
+ * settings are corred.
+ */
 
 #  define KINETIS_MCG_PLL_INTERNAL_DIVBY     2         /* The PLL clock is divided by 2 before VCO divider */
 #  define KINETIS_MCG_HAS_PLL_EXTRA_DIVBY    1         /* Is PLL clock divided by 1 before MCG PLL/FLL clock selection in the SIM module */

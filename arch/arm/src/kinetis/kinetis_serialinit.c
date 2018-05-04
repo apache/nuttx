@@ -99,7 +99,7 @@ void kinetis_earlyserialinit(void)
 
 void up_serialinit(void)
 {
-#if defined(HAVE_UART_DEVICE) ||defined(HAVE_LUART_DEVICE)
+#if defined(HAVE_UART_DEVICE) ||defined(HAVE_LPUART_DEVICE)
   uint32_t start = 0;
 #endif
 

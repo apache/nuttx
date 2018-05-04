@@ -48,6 +48,32 @@
  ****************************************************************************/
 
 /* Freedom-K28F GPIOs *******************************************************/
+/* An RGB LED is connected through GPIO as shown below:
+ *
+ *   LED    K28
+ *   ------ -------------------------------------------------------
+ *   RED    PTE6
+ *   GREEN  PTE7
+ *   BLUE   PTE8
+ */
+
+#define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN6)
+#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN7)
+#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN8)
+
+/* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2 is
+ * connected to PTA4 and SW3 is connected to PTD0. Besides the general purpose
+ * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
+ * SW3 can be a non-maskable interrupt.
+ *
+ *   Switch    GPIO Function
+ *   --------- ---------------------------------------------------------------
+ *   SW2       PTA4/NMI_B
+ *   SW3       PTD0/LLWU_P12
+ */
+
+#define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN4)
+#define GPIO_SW3           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTD | PIN0)
 
 /****************************************************************************
  * Public Types

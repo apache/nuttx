@@ -82,8 +82,8 @@
 
 /* Output clock */
 
-#define PIN_CLKOUT                      (PIN_ALT5 | PIN_PORTA | PIN6)
-#define PIN_CLKOUT                      (PIN_ALT5 | PIN_PORTC | PIN3)
+#define PIN_CLKOUT_1                    (PIN_ALT5 | PIN_PORTA | PIN6)
+#define PIN_CLKOUT_2                    (PIN_ALT5 | PIN_PORTC | PIN3)
 
 /* Comparators */
 
@@ -242,8 +242,8 @@
 
 #define PIN_FTM1_CH0_1                  (PIN_ALT3 | PIN_PORTA | PIN12)
 #define PIN_FTM1_CH0_2                  (PIN_ALT3 | PIN_PORTA | PIN8)
-#define PIN_FTM1_CH0_1                  (PIN_ALT3 | PIN_PORTB | PIN0)
-#define PIN_FTM1_CH0_2                  (PIN_ALT3 | PIN_PORTB | PIN12)
+#define PIN_FTM1_CH0_3                  (PIN_ALT3 | PIN_PORTB | PIN0)
+#define PIN_FTM1_CH0_4                  (PIN_ALT3 | PIN_PORTB | PIN12)
 #define PIN_FTM1_CH1_1                  (PIN_ALT3 | PIN_PORTA | PIN13)
 #define PIN_FTM1_CH1_2                  (PIN_ALT3 | PIN_PORTA | PIN9)
 #define PIN_FTM1_CH1_3                  (PIN_ALT3 | PIN_PORTB | PIN1)
@@ -752,8 +752,8 @@
 #define PIN_SPI1_SIN_4                  (PIN_ALT7 | PIN_PORTE | PIN1)
 #define PIN_SPI1_SOUT_1                 (PIN_ALT2 | PIN_PORTB | PIN16)
 #define PIN_SPI1_SOUT_2                 (PIN_ALT2 | PIN_PORTE | PIN2)
-#define PIN_SPI1_SOUT_1                 (PIN_ALT7 | PIN_PORTD | PIN6)
-#define PIN_SPI1_SOUT_2                 (PIN_ALT7 | PIN_PORTE | PIN3)
+#define PIN_SPI1_SOUT_3                 (PIN_ALT7 | PIN_PORTD | PIN6)
+#define PIN_SPI1_SOUT_4                 (PIN_ALT7 | PIN_PORTE | PIN3)
 
 #define PIN_SPI2_PCS0_1                 (PIN_ALT2 | PIN_PORTB | PIN20)
 #define PIN_SPI2_PCS0_2                 (PIN_ALT2 | PIN_PORTD | PIN11)

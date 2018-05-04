@@ -30,6 +30,13 @@ README
       - Virtual serial port interface.
       - Open-source CMSIS-DAP software project.
 
+Contents
+========
+
+  o Serial Console
+  o LEDs and Buttons
+  o Configurations
+
 Serial Console
 ==============
 
@@ -134,8 +141,11 @@ Serial Console
   Arduino connectors. Remove R106 and R107 or R94 and R11 as necessary to
   prevent contention.
 
-  TGTMCU
-  ------
+  Virtual serial port
+  -------------------
+
+  A serial port connection is available between the OpenSDA v2.2 MCU and
+  pins PTC24 and PTC25 of the K28 MCU:
 
     ----- --------------- -------------------------------
     GPIO  LPUART FUNCTION BOARD CONFIGURATION
@@ -143,3 +153,50 @@ Serial Console
     PTC25 LPUART0_RX      PTC25 LPUART0_RX_TGTMCU
     PTC24 LPUART0_TX      PTC24 LPUART0_TX_TGTMCU
     ----- --------------- -------------------------------
+
+  Default Console
+  ---------------
+
+    Unless otherwise noted, LPUART0 (the virtual serial port) is the console
+    used in all Freedom-K28F configurations.
+
+  RGB LED
+  -------
+  An RGB LED is connected through GPIO as shown below:
+
+    LED    K28
+    ------ -------------------------------------------------------
+    RED    PTE6
+    GREEN  PTE7
+    BLUE   PTE8
+
+  If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+  the Freedom K28.  Usage of these LEDs is defined in include/board.h and
+  src/k28_leds.c.  The following definitions describe how NuttX controls the
+  LEDs:
+
+    SYMBOL                Meaning                 LED state
+                                                  RED   GREEN  BLUE
+    -------------------  -----------------------  -----------------
+    LED_STARTED          NuttX has been started    OFF  OFF  OFF
+    LED_HEAPALLOCATE     Heap has been allocated   OFF  OFF  ON
+    LED_IRQSENABLED      Interrupts enabled        OFF  OFF  ON
+    LED_STACKCREATED     Idle stack created        OFF  ON   OFF
+    LED_INIRQ            In an interrupt          (no change)
+    LED_SIGNAL           In a signal handler      (no change)
+    LED_ASSERTION        An assertion failed      (no change)
+    LED_PANIC            The system has crashed    FLASH OFF OFF
+    LED_IDLE             K28 is in sleep mode     (Optional, not used)
+
+  Buttons
+  -------
+  Two push button switches, SW2 and SW3, are available on the FRDM-K28F
+  board. SW2 is connected to PTA4 and SW3 is connected to PTD0.
+  Beside the general purpose IO function, both SW2 and SW3 can be used
+  as a low-leakage wakeup (LLWU) source.
+
+    Switch    GPIO Function
+    --------- ---------------------------------------------------------------
+    SW2       PTA4/NMI_B
+    SW3       PTD0/LLWU_P12
+

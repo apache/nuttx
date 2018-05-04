@@ -972,7 +972,7 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
          * TCSADRAIN / TCSAFLUSH
          */
 
-        kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
+        kinetis_lpuartconfigure(priv->uartbase, priv->baud, priv->clock,
                                 priv->parity, priv->bits, priv->stop2,
                                 iflow, oflow);
       }

@@ -336,11 +336,11 @@ void up_lowputc(char ch)
 
 void kinetis_lowsetup(void)
 {
-#if defined(HAVE_UART_DEVICE) ||defined(HAVE_LUART_DEVICE)
+#if defined(HAVE_UART_DEVICE) || defined(HAVE_LPUART_DEVICE)
   uint32_t regval;
 #endif
-#ifdef HAVE_UART_DEVICE
 
+#ifdef HAVE_UART_DEVICE
   /* Enable peripheral clocking for all enabled UARTs.  Clocking for UARTs
    * 0-3 is enabled in the SCGC4 register.
    */
@@ -456,18 +456,17 @@ void kinetis_lowsetup(void)
 #endif /* HAVE_UART_DEVICE */
 
 #ifdef HAVE_LPUART_DEVICE
-
-  /* Clocking Source for LPUARTs 0 selected in  SIM_SOPT2 */
+  /* Clocking Source for LPUART0 selected in SIM_SOPT2 */
 
 #if defined(CONFIG_KINETIS_LPUART0)
-  regval = getreg32(KINETIS_SIM_SOPT2);
+  regval  = getreg32(KINETIS_SIM_SOPT2);
   regval &= ~(SIM_SOPT2_LPUARTSRC_MASK);
   regval |= BOARD_LPUART0_CLKSRC;
   putreg32(regval, KINETIS_SIM_SOPT2);
 
   /* Clocking for LPUARTs 0-1 is enabled in the SCGC2 register. */
 
-  regval = getreg32(KINETIS_SIM_SCGC2);
+  regval  = getreg32(KINETIS_SIM_SCGC2);
   regval |= SIM_SCGC2_LPUART0;
   putreg32(regval, KINETIS_SIM_SCGC2);
 #endif
@@ -791,9 +790,9 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
 #ifdef HAVE_LPUART_DEVICE
 void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
-                           uint32_t clock, unsigned int parity,
-                           unsigned int nbits, unsigned int stop2,
-                           bool iflow, bool oflow)
+                             uint32_t clock, unsigned int parity,
+                             unsigned int nbits, unsigned int stop2,
+                             bool iflow, bool oflow)
 {
   uint32_t     sbrreg;
   uint32_t     osrreg;

@@ -183,6 +183,12 @@
                                                  * purpose input/output module that shares the
                                                  * crossbar switch slave port with the AIPS-Lite
                                                  * is accessed at this address. */
+#  define KINETIS_GPIO_BASE(n)       (0x400ff000 + ((n) << 6))
+#  define KINETIS_GPIOA_BASE         0x400ff000 /* GPIO PORTA registers */
+#  define KINETIS_GPIOB_BASE         0x400ff040 /* GPIO PORTB registers */
+#  define KINETIS_GPIOC_BASE         0x400ff080 /* GPIO PORTC registers */
+#  define KINETIS_GPIOD_BASE         0x400ff0c0 /* GPIO PORTD registers */
+#  define KINETIS_GPIOE_BASE         0x400ff100 /* GPIO PORTE registers */
 
 /* Private Peripheral Bus (PPB) Memory Map ******************************************/
 
