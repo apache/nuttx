@@ -223,7 +223,7 @@ config ARCH_BOARD_FLIPNCLICK_SAM3X
 config ARCH_BOARD_FREEDOM_K28F
 	bool "NXP Freedom-k28f development board"
 	depends on ARCH_CHIP_MK28FN2M0VMI15
-	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_LEDS if !RGBLED
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---

@@ -38,21 +38,26 @@
 ASRCS =
 CSRCS = k28_boot.c k28_bringup.c k28_spi.c k28_i2c.c
 
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += k28_appinit.c
+endif
+
+# If the RGB driver is not enabled, then treat the RGB as 3 LEDs
+
+ifneq ($(CONFIG_RGBLED),y)
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += k28_autoleds.c
 else
 CSRCS += k28_userleds.c
 endif
-ifeq ($(CONFIG_KINETIS_USBOTG),y)
-CSRCS += k28_usbdev.c
-endif
-
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += k28_appinit.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
 CSRCS += k28_pwm.c
+endif
+
+ifeq ($(CONFIG_KINETIS_USBOTG),y)
+CSRCS += k28_usbdev.c
 endif
 
 include $(TOPDIR)/configs/Board.mk
