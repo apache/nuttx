@@ -37,11 +37,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -58,15 +58,23 @@
 #include "chip/nrf52_nvmc.h"
 #include "nrf52_nvmc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define NRF52_FLASH_PAGE_SIZE  (4*1024)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_progmem_pagesize
+ *
+ * Description:
+ *   Return page size
+ *
+ ****************************************************************************/
 
 size_t up_progmem_pagesize(size_t page)
 {
@@ -83,6 +91,36 @@ size_t up_progmem_pagesize(size_t page)
     }
 }
 
+/****************************************************************************
+ * Name: up_progmem_erasesize
+ *
+ * Description:
+ *   Return erase block size
+ *
+ ****************************************************************************/
+
+size_t up_progmem_erasesize(size_t page)
+{
+  return up_progmem_pagesize(page);
+}
+
+/****************************************************************************
+ * Name: up_progmem_getpage
+ *
+ * Description:
+ *   Address to page conversion
+ *
+ * Input Parameters:
+ *   addr - Address to be converted
+ *
+ * Returned Value:
+ *   Page or negative value on error.  The following errors are reported
+ *   (errno is not set!):
+ *
+ *     -EFAULT: On invalid address
+ *
+ ****************************************************************************/
+
 ssize_t up_progmem_getpage(size_t addr)
 {
   size_t page_end = 0;
@@ -94,13 +132,25 @@ ssize_t up_progmem_getpage(size_t addr)
     }
 
   page_end = addr / NRF52_FLASH_PAGE_SIZE;
-
   return page_end;
 }
 
+/****************************************************************************
+ * Name: up_progmem_getaddress
+ *
+ * Description:
+ *   Page to address conversion
+ *
+ * Input Parameters:
+ *   page - Page to be converted
+ *
+ * Returned Value:
+ *   Base address of given page, maximum size if page is not valid.
+ *
+ ****************************************************************************/
+
 size_t up_progmem_getaddress(size_t page)
 {
-
   if (page >= up_progmem_npages())
     {
       return SIZE_MAX;
@@ -109,15 +159,54 @@ size_t up_progmem_getaddress(size_t page)
   return page * NRF52_FLASH_PAGE_SIZE;
 }
 
+/****************************************************************************
+ * Name: up_progmem_npages
+ *
+ * Description:
+ *   Return number of pages in the available FLASH memory.
+ *
+ ****************************************************************************/
+
 size_t up_progmem_npages(void)
 {
   return nrf_nvmc_get_flash_size() / NRF52_FLASH_PAGE_SIZE;
 }
 
+/****************************************************************************
+ * Name: up_progmem_isuniform
+ *
+ * Description:
+ *   Page size is uniform?  Say 'yes' even though that is not strictly
+ *   true.
+ *
+ ****************************************************************************/
+
 bool up_progmem_isuniform(void)
 {
   return true;
 }
+
+/****************************************************************************
+ * Name: up_progmem_erasepage
+ *
+ * Description:
+ *   Erase selected paged.
+ *
+ * Input Parameters:
+ *   page - Page to be erased
+ *
+ * Returned Value:
+ *   Page size or negative value on error.  The following errors are reported
+ *   (errno is not set!):
+ *
+ *     -EFAULT: On invalid page
+ *     -EIO:    On unsuccessful erase
+ *     -EROFS:  On access to write protected area
+ *     -EACCES: Insufficient permissions (read/write protected)
+ *     -EPERM:  If operation is not permitted due to some other constraints
+ *              (i.e. some internal block is not running etc.)
+ *
+ ****************************************************************************/
 
 ssize_t up_progmem_erasepage(size_t page)
 {
@@ -147,6 +236,24 @@ ssize_t up_progmem_erasepage(size_t page)
     }
 }
 
+/****************************************************************************
+ * Name: up_progmem_ispageerased
+ *
+ * Description:
+ *   Checks whether a page is erased
+ *
+ * Input Parameters:
+ *    page - Page to be checked
+ *
+ * Returned Value:
+ *   Returns number of bytes erased or negative value on error. If it
+ *   returns zero then complete page is empty (erased).
+ *
+ *   The following errors are reported (errno is not set!)
+ *     -EFAULT: On invalid page
+ *
+ ****************************************************************************/
+
 ssize_t up_progmem_ispageerased(size_t page)
 {
   size_t addr;
@@ -171,6 +278,32 @@ ssize_t up_progmem_ispageerased(size_t page)
 
   return bwritten;
 }
+
+/****************************************************************************
+ * Name: up_progmem_write
+ *
+ * Description:
+ *   Program data at given address
+ *
+ * Input Parameters:
+ *   addr  - Address with or without flash offset
+ *   buf   - Pointer to buffer
+ *   count - Number of bytes to write
+ *
+ * Returned Value:
+ *   Bytes written or negative value on error.  The following errors are
+ *   reported (errno is not set!)
+ *
+ *     EINVAL: If buflen is not aligned with the flash boundaries (i.e.
+ *             some MCU's require per half-word or even word access)
+ *     EFAULT: On invalid address
+ *     EIO:    On unsuccessful write
+ *     EROFS:  On access to write protected area
+ *     EACCES: Insufficient permissions (read/write protected)
+ *     EPERM:  If operation is not permitted due to some other constraints
+ *             (i.e. some internal block is not running etc.)
+ *
+ ****************************************************************************/
 
 ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 {
