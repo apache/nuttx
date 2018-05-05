@@ -305,7 +305,9 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   unsigned int green;
   unsigned int blue;
   char color[3];
+#ifdef CONFIG_PWM_MULTICHAN
   int i;
+#endif
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
@@ -460,16 +462,16 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
       ledb->ops->start(ledb, &pwm);
     }
 #else
-  pwminfo.frequency = 100;
+  pwm.frequency = 100;
 
-  pwminfo.duty = red;
-  ledr->ops->start(ledr, &pwminfo);
+  pwm.duty = red;
+  ledr->ops->start(ledr, &pwm);
 
-  pwminfo.duty = green;
-  ledg->ops->start(ledg, &pwminfo);
+  pwm.duty = green;
+  ledg->ops->start(ledg, &pwm);
 
-  pwminfo.duty = blue;
-  ledb->ops->start(ledb, &pwminfo);
+  pwm.duty = blue;
+  ledb->ops->start(ledb, &pwm);
 #endif
 
   return buflen;
