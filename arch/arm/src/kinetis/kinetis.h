@@ -225,7 +225,7 @@
  */
 
 #define GPIO_OUTPUT_ONE        (1 << 24)  /* Bit 24: 1:Initial output value=1 */
-#define GPIO_OUTPUT_ZER0       (0)        /* Bit 24: 0:Initial output value=0 */
+#define GPIO_OUTPUT_ZERO       (0)        /* Bit 24: 0:Initial output value=0 */
 
 /* Five bits are used to incode DMA/interrupt options:
  *

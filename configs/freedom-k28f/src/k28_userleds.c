@@ -93,7 +93,7 @@ void board_userled(int led, bool ledon)
       return;
     }
 
-  kinetis_gpiowrite(ledcfg, !ledon); /* Low illuminates */
+  kinetis_gpiowrite(ledcfg, ledon);
 }
 
 /****************************************************************************
@@ -104,9 +104,9 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  kinetis_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) == 0);
-  kinetis_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) == 0);
-  kinetis_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) == 0);
+  kinetis_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) != 0);
+  kinetis_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) != 0);
+  kinetis_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

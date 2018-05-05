@@ -237,10 +237,10 @@ TODO See README
 
 /* LEDs. Note that LED1-3 are used by system, LED4 is for user defined apps. */
 
-#define GPIO_LED1          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN6)
-#define GPIO_LED2          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN7)
-#define GPIO_LED3          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN8)
-#define GPIO_LED4          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN9)
+#define GPIO_LED1          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
+#define GPIO_LED2          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN7)
+#define GPIO_LED3          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN8)
+#define GPIO_LED4          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN9)
 
 /************************************************************************************
  * Public Types

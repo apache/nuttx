@@ -57,9 +57,9 @@
  *   BLUE   PTE8
  */
 
-#define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN6)
-#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN7)
-#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN8)
+#define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
+#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN7)
+#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN8)
 
 /* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2 is
  * connected to PTA4 and SW3 is connected to PTD0. Besides the general purpose

@@ -93,7 +93,7 @@
  */
 
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN27)
-#define GPIO_SD_CARDON     (GPIO_HIGHDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN6)
+#define GPIO_SD_CARDON     (GPIO_HIGHDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
  * ------------------- -------------------------- -------- -------------------

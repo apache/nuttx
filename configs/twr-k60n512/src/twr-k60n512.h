@@ -115,10 +115,10 @@
 #define GPIO_SW1           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN19)
 #define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN26)
 
-#define GPIO_LED1          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN11)
-#define GPIO_LED2          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN28)
-#define GPIO_LED3          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN29)
-#define GPIO_LED4          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN10)
+#define GPIO_LED1          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTA | PIN11)
+#define GPIO_LED2          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTA | PIN28)
+#define GPIO_LED3          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTA | PIN29)
+#define GPIO_LED4          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTA | PIN10)
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
  * -------------------- ------------------------- -------- -------------------

@@ -33,9 +33,44 @@ README
 Contents
 ========
 
+  o STATUS
   o Serial Console
   o LEDs and Buttons
   o Configurations
+
+STATUS
+======
+
+  2018-05-05:  The basic NSH port appears to be fully functional.  I do see
+    one anomaly:  There is a significant, long start up delay.  This delay
+    seems to be variable from immediate to several seconds.  I have not
+    studied the cause, but there are the symptoms:
+
+    This debug on, I see this output after a reset:
+
+      __start: Reset status: 00:00
+
+      NuttShell (NSH) NuttX-7.24
+      nsh> help
+      help usage:  help [-v] [<cmd>]
+
+        [           cmp         false       mkdir       rm          true
+        ?           dirname     free        mh          rmdir       uname
+        basename    dd          help        mount       set         umount
+        break       df          hexdump     mv          sh          unset
+        cat         echo        kill        mw          sleep       usleep
+        cd          exec        ls          ps          test        xd
+        cp          exit        mb          pwd         time
+
+      Builtin Apps:
+      nsh>
+
+  The delay occurs between the reset and the __start debug output.  __start
+  is the reset handler so this is very early in the logic.  On a reset, it
+  vectors to __start.  That particular debug message is output after most
+  low-level initialization has occurred.  So the delay is something within
+  the initialization sequence at the beginning of __start.  My suspicion is
+  the delays associated with the clock configuration.
 
 Serial Console
 ==============

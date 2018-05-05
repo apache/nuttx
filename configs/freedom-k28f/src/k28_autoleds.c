@@ -119,9 +119,9 @@ void board_autoled_on(int led)
 {
   if (led != LED_NOCHANGE)
     {
-      bool redoff   = true;
-      bool greenoff = true;
-      bool blueoff  = true;
+      bool redon   = false;
+      bool greenon = false;
+      bool blueon  = false;
 
       switch (led)
         {
@@ -130,21 +130,21 @@ void board_autoled_on(int led)
             break;
 
           case LED_OFF_OFF_ON:
-            blueoff = false;
+            blueon = true;
             break;
 
           case LED_OFF_ON_OFF:
-            greenoff = false;
+            greenon = true;
             break;
 
           case LED_ON_OFF_OFF:
-            redoff = false;
+            redon = true;
             break;
         }
 
-      kinetis_gpiowrite(GPIO_LED_R, redoff);
-      kinetis_gpiowrite(GPIO_LED_G, greenoff);
-      kinetis_gpiowrite(GPIO_LED_B, blueoff);
+      kinetis_gpiowrite(GPIO_LED_R, redon);
+      kinetis_gpiowrite(GPIO_LED_G, greenon);
+      kinetis_gpiowrite(GPIO_LED_B, blueon);
     }
 }
 
@@ -156,9 +156,9 @@ void board_autoled_off(int led)
 {
   if (led == LED_ON_OFF_OFF)
     {
-      kinetis_gpiowrite(GPIO_LED_R, true);
-      kinetis_gpiowrite(GPIO_LED_G, true);
-      kinetis_gpiowrite(GPIO_LED_B, true);
+      kinetis_gpiowrite(GPIO_LED_R, false);
+      kinetis_gpiowrite(GPIO_LED_G, false);
+      kinetis_gpiowrite(GPIO_LED_B, false);
     }
 }
 

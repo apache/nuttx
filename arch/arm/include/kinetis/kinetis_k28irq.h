@@ -140,7 +140,7 @@
 #define KINETIS_IRQ_SWI      (KINETIS_IRQ_FIRST+64)  /* 64: Software interrupt */
 #define KINETIS_IRQ_SPI2     (KINETIS_IRQ_FIRST+65)  /* 65: SPI2 all sources */
 #define KINETIS_IRQ_SPI3     (KINETIS_IRQ_FIRST+66)  /* 66: SPI3 all sources */
-#define KINETIS_IRQ_RESVD67  (KINETIS_IRQ_FIRST+67)  /* 66: Reserved */
+#define KINETIS_IRQ_RESVD67  (KINETIS_IRQ_FIRST+67)  /* 67: Reserved */
 #define KINETIS_IRQ_I2S1TX   (KINETIS_IRQ_FIRST+68)  /* 68: I2S1 Transmit */
 #define KINETIS_IRQ_I2S1RX   (KINETIS_IRQ_FIRST+69)  /* 69: I2S1 Receive */
 
