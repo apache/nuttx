@@ -149,6 +149,7 @@ config ARCH_CHIP_LPC17XX
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FETCHADD
+	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		NXP LPC17xx architectures (ARM Cortex-M3)
 
