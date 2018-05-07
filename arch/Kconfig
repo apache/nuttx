@@ -609,10 +609,10 @@ config ARCH_IDLE_CUSTOM
 		a custom IDLE loop may do things like a continuous built-in test or
 		perhaps or IDLE low power operations.
 
-		NOTE: As of this writing, this capability is only supported by the
-		STM32.  However, the implementation is trivial:  If CONFIG_ARCH_IDLE_CUSTOM,
-		then the default IDLE loop file is not included in the MCU-specific
-		Make.defs file.
+		NOTE: As of this writing, this capability is only supported by ARM
+		architectures.  However, the implementation is trivial:  If
+		CONFIG_ARCH_IDLE_CUSTOM is defined, then the default IDLE loop file
+		is not included in the MCU-specific Make.defs file.
 
 config ARCH_CUSTOM_PMINIT
 	bool "Custom PM initialization"

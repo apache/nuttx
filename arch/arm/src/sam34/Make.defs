@@ -1,7 +1,8 @@
 ############################################################################
 # arch/arm/src/sam34/Make.defs
 #
-#   Copyright (C) 2009-2011, 2013-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2011, 2013-2015, 2018 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,7 +59,9 @@ CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_unblocktask.c up_usestack.c
 CMN_CSRCS += up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
 
 ifneq ($(CONFIG_SMP),y)
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CMN_CSRCS += up_idle.c
+endif
 endif
 
 # Configuration-dependent common files
@@ -208,6 +211,10 @@ endif # CONFIG_SAM34_TC
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += sam4cm_cpuindex.c sam4cm_cpuidlestack.c
-CHIP_CSRCS += sam4cm_cpupause.c sam4cm_cpustart.c sam4cm_idle.c
+CHIP_CSRCS += sam4cm_cpupause.c sam4cm_cpustart.c
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += sam4cm_idle.c
+endif
 endif # CONFIG_SMP
+
 endif # CONFIG_ARCH_CHIP_SAM4CM

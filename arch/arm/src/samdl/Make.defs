@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/samdl/Make.defs
 #
-#   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014-2015, 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -64,8 +64,10 @@ CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = sam_idle.c sam_irq.c sam_lowputc.c sam_port.c sam_sercom.c
-CHIP_CSRCS += sam_serial.c sam_start.c sam_usart.c
+CHIP_CSRCS  = sam_irq.c sam_lowputc.c sam_port.c sam_sercom.c sam_serial.c
+CHIP_CSRCS += sam_start.c sam_usart.c
+
+# Configuration-dependent SAM D/L files
 
 ifeq ($(CONFIG_ARCH_FAMILY_SAMD20),y)
 CHIP_CSRCS += samd_clockconfig.c samd_gclk.c
@@ -73,6 +75,10 @@ else ifeq ($(CONFIG_ARCH_FAMILY_SAMD21),y)
 CHIP_CSRCS += samd_clockconfig.c samd_gclk.c
 else ifeq ($(CONFIG_ARCH_FAMILY_SAML21),y)
 CHIP_CSRCS += saml_clockconfig.c saml_gclk.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += sam_idle.c
 endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)

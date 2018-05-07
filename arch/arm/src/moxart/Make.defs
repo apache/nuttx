@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/moxart/Make.defs
 #
-#   Copyright (C) 2007, 2013-2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2013-2015, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 #   Copyright (C) 2011 Stefan Richter. All rights reserved.
@@ -50,5 +50,11 @@ CMN_CSRCS += up_undefinedinsn.c up_usestack.c up_vfork.c up_etherstub.c
 
 CHIP_ASRCS  = moxart_lowputc.S
 
-CHIP_CSRCS  = moxart_16550.c moxart_irq.c moxart_timer.c moxart_idle.c
-CHIP_CSRCS += moxart_systemreset.c
+CHIP_CSRCS  = moxart_16550.c moxart_irq.c moxart_timer.c moxart_systemreset.c
+
+# Configuration-dependent Kinetis K files
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += moxart_idle.c
+endif
+

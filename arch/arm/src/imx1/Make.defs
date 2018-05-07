@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/imx1/Make.defs
 #
-#   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2013-2014, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,16 @@ HEAD_ASRC = up_head.S
 CMN_ASRCS  = up_cache.S up_fullcontextrestore.S up_saveusercontext.S
 CMN_ASRCS += up_vectors.S up_vectoraddrexcptn.S up_vectortab.S vfork.S
 CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
-CMN_CSRCS += up_dataabort.c up_mdelay.c up_udelay.c up_exit.c up_idle.c
+CMN_CSRCS += up_dataabort.c up_mdelay.c up_udelay.c up_exit.c
 CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
 CMN_CSRCS += up_prefetchabort.c up_releasepending.c up_releasestack.c
 CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c
 CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_syscall.c up_unblocktask.c
 CMN_CSRCS += up_undefinedinsn.c up_usestack.c up_vfork.c
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CMN_CSRCS += up_idle.c
+endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
-#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -111,10 +111,14 @@ endif
 CHIP_ASRCS  =
 
 CHIP_CSRCS  = xmc4_allocateheap.c xmc4_clockconfig.c xmc4_clockutils.c
-CHIP_CSRCS += xmc4_clrpend.c xmc4_idle.c xmc4_irq.c xmc4_lowputc.c
-CHIP_CSRCS += xmc4_gpio.c xmc4_serial.c xmc4_start.c xmc4_usic.c
+CHIP_CSRCS += xmc4_clrpend.c xmc4_irq.c xmc4_lowputc.c xmc4_gpio.c
+CHIP_CSRCS += xmc4_serial.c xmc4_start.c xmc4_usic.c
 
 # Configuration-dependent Kinetis files
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += xmc4_idle.c
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += xmc4_timerisr.c

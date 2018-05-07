@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/lc823450/Make.defs
 #
-#   Copyright 2014,2015,2016,2017 Sony Video & Sound Products Inc.
+#   Copyright 2014, 2015, 2016, 2017 Sony Video & Sound Products Inc.
 #   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
 #   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
 #   Author: Yasuhiro Osaki <Yasuhiro.Osaki@jp.sony.com>
@@ -83,10 +83,15 @@ endif
 
 CHIP_ASRCS  =
 
-CHIP_CSRCS  = lc823450_start.c lc823450_irq.c lc823450_idle.c
-CHIP_CSRCS += lc823450_timer.c lc823450_lowputc.c
-CHIP_CSRCS += lc823450_serial.c lc823450_clockconfig.c lc823450_syscontrol.c
-CHIP_CSRCS += lc823450_gpio.c
+CHIP_CSRCS  = lc823450_start.c lc823450_irq.c .c lc823450_timer.c
+CHIP_CSRCS += lc823450_lowputc.c lc823450_serial.c lc823450_clockconfig.c
+CHIP_CSRCS += lc823450_syscontrol.c lc823450_gpio.c
+
+# Configuration-dependent LC823450 files
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += lc823450_idle.c
+endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += lc823450_wdt.c

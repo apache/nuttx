@@ -44,11 +44,15 @@ CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_vectors.S
 CMN_ASRCS += vfork.S
 CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
 CMN_CSRCS += up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c
-CMN_CSRCS += up_exit.c up_idle.c up_initialize.c up_initialstate.c
+CMN_CSRCS += up_exit.c up_initialize.c up_initialstate.c
 CMN_CSRCS += up_interruptcontext.c up_prefetchabort.c up_releasepending.c
 CMN_CSRCS += up_releasestack.c up_reprioritizertr.c up_stackframe.c
 CMN_CSRCS += up_syscall.c up_unblocktask.c up_undefinedinsn.c
 CMN_CSRCS += up_usestack.c up_lowputs.c up_vfork.c
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CMN_CSRCS += up_idle.c
+endif
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c
