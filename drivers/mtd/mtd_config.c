@@ -1441,7 +1441,7 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 int mtdconfig_register(FAR struct mtd_dev_s *mtd)
 {
-  int ret = OK;
+  int ret = -ENOMEM;
   struct mtdconfig_struct_s *dev;
   struct mtd_geometry_s geo;      /* Device geometry */
 
