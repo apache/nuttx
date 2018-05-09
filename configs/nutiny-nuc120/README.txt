@@ -45,8 +45,7 @@ NuttX Buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh nutiny-nuc120/<sub-dir>
+     tools/configure.sh nutiny-nuc120/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -268,9 +267,7 @@ Configurations
 Each NuTiny-SDK-NUC120 configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh nutiny-nuc120/<subdir>
-    cd -
+    tools/configure.sh nutiny-nuc120/<subdir>
 
 Where <subdir> is one of the following:
 

@@ -668,9 +668,7 @@ Configurations
 Each LPC4370-Link2 configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    cd tools
-    ./configure.sh LPC4370-Link2/<subdir>
-    cd -
+    tools/configure.sh LPC4370-Link2/<subdir>
 
 Where <subdir> is one of the following:
 

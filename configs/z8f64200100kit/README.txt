@@ -55,9 +55,7 @@ Variations on the basic z8f64200100kit configuration are maintained
 in subdirectories.  To configure any specific configuration, do the
 following steps:
 
-   cd <nuttx-top-directory>/tools
-   ./configure.sh z8f64200100kit/<sub-directory>
-   cd <nuttx-top-directgory>
+   tools/configure.sh z8f64200100kit/<sub-directory>
    make
 
 Where <sub-directory> is the specific board configuration that you

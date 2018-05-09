@@ -272,9 +272,7 @@ Configurations
 Each STM32Tiny configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh STM32Tiny/<subdir>
-    cd -
+    tools/configure.sh STM32Tiny/<subdir>
 
 Where <subdir> is one of the following:
 

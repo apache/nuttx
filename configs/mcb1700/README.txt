@@ -212,9 +212,7 @@ USB Host Configuration
   1. First configure to build the NSH configuration from the top-level
      NuttX directory:
 
-     cd tools
      ./configure mcb1700/nsh
-     cd ..
 
   2. Then edit the top-level .config file to enable USB host.  Make the
      following changes using 'make menuconfig':
@@ -251,9 +249,7 @@ Configurations
   Each mcb1700 configuration is maintained in a sub-directory and can be selected
   as follow:
 
-    cd tools
-    ./configure.sh mcb1700/<subdir>
-    cd -
+    tools/configure.sh mcb1700/<subdir>
 
   Where <subdir> is one of the mcb1700 subdirectories described in the
   following paragraph.

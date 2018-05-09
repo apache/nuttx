@@ -371,9 +371,7 @@ Configurations
 Each ZKit-ARM configuration is maintained in a sudirectory and can be
 selected as follow:
 
-    cd tools
-    ./configure.sh zkit-arm-1769/<subdir>
-    cd -
+    tools/configure.sh zkit-arm-1769/<subdir>
 
 Where <subdir> is one of the following:
 

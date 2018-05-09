@@ -103,9 +103,7 @@ Configurations
   Each STM32F769I-DISCO configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh stm32f769i-disco/<subdir>
-    cd -
+    tools/configure.sh stm32f769i-disco/<subdir>
 
   Where <subdir> is one of the sub-directories listed below.
 

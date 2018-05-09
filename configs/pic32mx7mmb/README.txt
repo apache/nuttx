@@ -594,9 +594,7 @@ Configurations
 Each PIC32MX configuration is maintained in a sub-directory and can be
 selected as follow:
 
-    cd tools
-    ./configure.sh pic32mx7mmb/<subdir>
-    cd -
+    tools/configure.sh pic32mx7mmb/<subdir>
 
 Where <subdir> is one of the following:
 

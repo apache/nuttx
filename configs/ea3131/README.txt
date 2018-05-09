@@ -150,8 +150,7 @@ NuttX buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh ea3131/<sub-dir>
+     tools/configure.sh ea3131/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -206,8 +205,7 @@ Image Format
   Then, to build the NuttX binary ready to load with the bootloader, just
   following these steps:
 
-  - cd tools/                     # Configure Nuttx
-  - ./configure.sh ea3131/nsh     # (using the nsh configuration for this example)
+  - tools/configure.sh ea3131/nsh # (using the nsh configuration for this example)
   - cd ..                         # Set up environment
   - make                          # Make NuttX.  This will produce nuttx.bin
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
@@ -597,9 +595,7 @@ Common Configuration Notes
   1. Each EA3131 configuration is maintained in a sub-directory and
      can be selected as follow:
 
-       cd tools
-       ./configure.sh ea3131/<subdir>
-       cd -
+       tools/configure.sh ea3131/<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

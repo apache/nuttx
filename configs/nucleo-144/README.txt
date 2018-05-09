@@ -205,7 +205,7 @@ Basic configuration & build steps
   different from the default in your PATH variable).
 
    - Configures nuttx creating .config file in the nuttx directory.
-     $ cd tools && ./configure.sh nucleo-f746zg/nsh && cd ..
+     $ tools/configure.sh nucleo-f746zg/nsh
    - Refreshes the .config file with the latest available configurations.
      $ make oldconfig
    - Select the features you want in the build.

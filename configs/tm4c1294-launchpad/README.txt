@@ -25,9 +25,7 @@ Configurations
 Each EK-TM4C1294XL configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    cd tools
-    ./configure.sh tm4c1294-launchpad/<subdir>
-    cd -
+    tools/configure.sh tm4c1294-launchpad/<subdir>
 
 Where <subdir> is one of the following:
 

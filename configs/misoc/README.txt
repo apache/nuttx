@@ -20,8 +20,7 @@ Buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh misoc/<sub-dir>
+     tools/configure.sh misoc/<sub-dir>
      make oldconfig context
 
   2. Clone the latest buildroot package into <some-dir>/buildroot

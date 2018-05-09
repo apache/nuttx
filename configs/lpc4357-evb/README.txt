@@ -665,9 +665,7 @@ Configurations
 Each LPC4357-EVB configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    cd tools
-    ./configure.sh lpc4357-evb/<subdir>
-    cd -
+    tools/configure.sh lpc4357-evb/<subdir>
 
 Where <subdir> is one of the following:
 

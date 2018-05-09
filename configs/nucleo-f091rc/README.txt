@@ -195,9 +195,7 @@ Configurations
   Each configuration is maintained in a sub-directory and can be
   selected as follow:
 
-    cd tools
-    ./configure.sh nucleo-f091rc/<subdir>
-    cd -
+    tools/configure.sh nucleo-f091rc/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

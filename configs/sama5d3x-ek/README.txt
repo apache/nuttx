@@ -211,8 +211,7 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh sama5d3x-ek/<sub-dir>
+     tools/configure.sh sama5d3x-ek/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -262,8 +261,7 @@ NXFLAT Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh sama5d3x-ek/<sub-dir>
+     tools/configure.sh sama5d3x-ek/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -369,9 +367,7 @@ Creating and Using NORBOOT
      the norboot configuration and setup the PATH variable in order to do
      the build:
 
-       cd tools
-       ./configure.sh sama5d3x-ek/<subdir>
-       cd -
+       tools/configure.sh sama5d3x-ek/<subdir>
 
      Before building, make sure the PATH environment variable includes the
      correct path to the directory than holds your toolchain binaries.
@@ -401,9 +397,7 @@ Creating and Using NORBOOT
 
        cd <nuttx>
        make distclean                 # Remove the norboot configuration
-       cd tools
-       ./configure.sh sama5d3x-ek/nsh # Establish the NSH configuration
-       cd -
+       tools/configure.sh sama5d3x-ek/nsh # Establish the NSH configuration
        make                           # Build the NSH configuration
 
      Then use SAM-BA to write the nuttx.bin binary into NOR FLASH.  This
@@ -3301,9 +3295,7 @@ Configurations
   Each SAMA5D3x-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh sama5d3x-ek/<subdir>
-    cd -
+    tools/configure.sh sama5d3x-ek/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.
@@ -3791,14 +3783,11 @@ Configurations
 
     1. Install the nxwm configuration
 
-       $ cd ~/nuttx-git/nuttx/tools
-       $ ./configure.sh sama5d3x-ek/nxwm
+       $ tools/configure.sh sama5d3x-ek/nxwm
 
     2. Make the build context (only)
 
-       $ cd ..
        $ make context
-       ...
 
     3. Install the nxwm unit test
 

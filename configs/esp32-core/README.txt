@@ -575,9 +575,7 @@ Configurations
   Each ESP32 core configuration is maintained in sub-directories and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh esp32-core/<subdir>
-    cd -
+    tools/configure.sh esp32-core/<subdir>
     make oldconfig
 
   Before building, make sure the PATH environment variable includes the

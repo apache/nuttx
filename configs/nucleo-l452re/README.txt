@@ -201,9 +201,7 @@ Configurations
   Each configuration is maintained in a sub-directory and can be
   selected as follow:
 
-    cd tools
-    ./configure.sh nucleo-l452re/<subdir>
-    cd -
+    tools/configure.sh nucleo-l452re/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

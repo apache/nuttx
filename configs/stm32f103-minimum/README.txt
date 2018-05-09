@@ -704,9 +704,7 @@ Configurations
   Each STM32F103 Minimum configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh STM32F103 Minimum/<subdir>
-    cd -
+    tools/configure.sh STM32F103 Minimum/<subdir>
 
   Where <subdir> is one of the following:
 

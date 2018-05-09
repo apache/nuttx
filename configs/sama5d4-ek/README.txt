@@ -205,8 +205,7 @@ NuttX EABI "buildroot" Toolchain
 
   1.  You must have already configured Nuttx in <some-dir>/nuttx.
 
-      cd tools
-      ./configure.sh sama5d4-ek/<sub-dir>
+      tools/configure.sh sama5d4-ek/<sub-dir>
 
   2.  Download the latest buildroot package into <some-dir>
 
@@ -256,8 +255,7 @@ NXFLAT Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh sama5d4-ek/<sub-dir>
+     tools/configure.sh sama5d4-ek/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -356,9 +354,7 @@ Creating and Using DRAMBOOT
      the dramboot configuration and setup the PATH variable in order to do
      the build:
 
-       cd tools
-       ./configure.sh sama5d4-ek/dramboot
-       cd -
+       tools/configure.sh sama5d4-ek/dramboot
 
      Before building, make sure that the PATH environment variable includes
      the correct path  to the directory than holds your toolchain binaries.
@@ -461,9 +457,7 @@ Creating and Using AT25BOOT
      the AT25BOOT configuration and setup the PATH variable in order to do
      the build:
 
-       cd tools
-       ./configure.sh sama5d4-ek/at25boot
-       cd -
+       tools/configure.sh sama5d4-ek/at25boot
 
      Before building, make sure that the PATH environment variable includes
      the correct path  to the directory than holds your toolchain binaries.
@@ -3584,9 +3578,7 @@ Configurations
   Each SAMA4D4-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh sama5d4-ek/<subdir>
-    cd -
+    tools/configure.sh sama5d4-ek/<subdir>
 
   Before building, make sure that the PATH environment variable includes
   the correct path  to the directory than holds your toolchain binaries.
@@ -4166,9 +4158,8 @@ Configurations
 
     6a. General build directions (boot from SD card):
 
-        $ cd nuttx/tools                    : Go to the tools sub-directory
-        $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
-        $ cd ..                             : Back to the NuttX build directory
+        $ cd nuttx                          : Go to the NuttX build directory
+        $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ make                              : Build the kerne with a dummy ROMFS image
                                             : This should create the nuttx ELF
@@ -4184,9 +4175,7 @@ Configurations
 
     6b. General build directions (boot from ROMFS image):
 
-        $ cd nuttx/tools                    : Go to the tools sub-directory
-        $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
-        $ cd ..                             : Back to the NuttX build directory
+        $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ touch configs/sama5d4-ek/include/boot_romfsimg.h
         $ make                              : Build the kernel with a dummy ROMFS image
@@ -4764,14 +4753,11 @@ Configurations
 
         a. Install the nxwm configuration
 
-           $ cd ~/nuttx-git/nuttx/tools
-           $ ./configure.sh sama5d4-ek/nxwm
+           $ tools/configure.sh sama5d4-ek/nxwm
 
         b. Make the build context (only)
 
-           $ cd ..
            $ make context
-           ...
 
         c. Install the nxwm unit test
 

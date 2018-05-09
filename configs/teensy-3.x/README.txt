@@ -224,9 +224,7 @@ Configurations
   Each Teensy-3.x configurations are maintained in sub-directories and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh teensy-3.x/<subdir>
-    cd -
+    tools/configure.sh teensy-3.x/<subdir>
     make oldconfig
 
   Before building, make sure that your PATH environment variable includes

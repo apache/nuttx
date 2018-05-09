@@ -340,9 +340,7 @@ Configurations
 Each Stellaris LM3S6965 Evaluation Kit configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    cd tools
-    ./configure.sh lm3s6965-ek/<subdir>
-    cd -
+    tools/configure.sh lm3s6965-ek/<subdir>
 
 Where <subdir> is one of the following:
 

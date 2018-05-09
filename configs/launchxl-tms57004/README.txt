@@ -172,9 +172,7 @@ Configurations
   Each LaunchXL-TMS50704 configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh launchxl-tms57004/<subdir>
-    cd -
+    tools/configure.sh launchxl-tms57004/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

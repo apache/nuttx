@@ -449,9 +449,7 @@ Configurations
 Each TWR-K60N512 configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh twr-k60n512/<subdir>
-    cd -
+    tools/configure.sh twr-k60n512/<subdir>
 
 Where <subdir> is one of the following:
 

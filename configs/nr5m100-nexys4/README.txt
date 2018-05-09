@@ -232,9 +232,7 @@ Configurations
 Each nr5m100-nexys4 configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh nr5m100-nexys4/<subdir>
-    cd -
+    tools/configure.sh nr5m100-nexys4/<subdir>
 
 Where <subdir> is one of the following:
 

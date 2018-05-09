@@ -389,9 +389,7 @@ Configurations
   Each SAM4L Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh sam4l-xplained/<subdir>
-    cd -
+    tools/configure.sh sam4l-xplained/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.
@@ -471,7 +469,7 @@ Configurations
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
      NuttX then you will have to 1) 'make distclean' to remove the old
-     configuration, 2) 'cd tools; ./configure.sh sam3u-ek/ksnh' to start
+     configuration, 2) 'tools/configure.sh sam3u-ek/ksnh' to start
      with a fresh configuration, and 3) perform the configuration changes
      above.
 

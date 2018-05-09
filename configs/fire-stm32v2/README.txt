@@ -563,9 +563,7 @@ Configurations
 Each M3 Wildfire configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh fire-stm32v2/<subdir>
-    cd -
+    tools/configure.sh fire-stm32v2/<subdir>
 
 Where <subdir> is one of the following:
 

@@ -2390,14 +2390,11 @@ Configuration sub-directories
 
        a. Install the VNC nxwm configuration
 
-          $ cd HOME/nuttx/tools
-          $ ./configure.sh samv71-xult/vnc
+          $ tools/configure.sh samv71-xult/vnc
 
        b. Make the build context (only)
 
-          $ cd ..
           $ make context
-          ...
 
        c. Install the nxwm unit test
 
@@ -2573,14 +2570,11 @@ Configuration sub-directories
 
        a. Install the nxwm configuration
 
-          $ cd HOME/nuttx/tools
-          $ ./configure.sh samv71-xult/nxwm
+          $ tools/configure.sh samv71-xult/nxwm
 
        b. Make the build context (only)
 
-          $ cd ..
           $ make context
-          ...
 
        c. Install the nxwm unit test
 

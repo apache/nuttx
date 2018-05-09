@@ -485,9 +485,7 @@ Configurations
 Each Shenzhou configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh shenzhou/<subdir>
-    cd -
+    tools/configure.sh shenzhou/<subdir>
 
 Where <subdir> is one of the following:
 
@@ -562,14 +560,11 @@ Where <subdir> is one of the following:
 
     1. Intall the nxwm configuration
 
-       $ cd ~/nuttx-code/tools
-       $ ./configure.sh shenzhou/nxwm
+       $ tools/configure.sh shenzhou/nxwm
 
     2. Make the build context (only)
 
-       $ cd ..
        $ make context
-       ...
 
     3. Install the nxwm unit test
 

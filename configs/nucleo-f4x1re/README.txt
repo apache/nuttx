@@ -260,7 +260,7 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     $ (cd tools; ./configure.sh nucleo-f4x1re/f401-nsh)
+     $ tools/configure.sh nucleo-f4x1re/f401-nsh
      $ make qconfig
      $ V=1 make context all 2>&1 | tee mout
 
@@ -305,8 +305,7 @@ NXFLAT Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
+     tools/configure.sh lpcxpresso-lpc1768/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 

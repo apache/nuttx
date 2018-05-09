@@ -560,9 +560,7 @@ Configurations
 Each LPCXpresso configuration is maintained in a sub-directory and can be
 selected as follow:
 
-    cd tools
-    ./configure.sh lpcxpresso-lpc1768/<subdir>
-    cd -
+    tools/configure.sh lpcxpresso-lpc1768/<subdir>
 
 Where <subdir> is one of the following:
 

@@ -357,9 +357,7 @@ NOTES:
 Each HY-MiniSTM32V configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh hymini-stm32v/<subdir>
-    cd -
+    tools/configure.sh hymini-stm32v/<subdir>
 
 Where <subdir> is one of the following:
 

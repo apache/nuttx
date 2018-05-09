@@ -313,9 +313,7 @@ Configurations
 Each KwikStik-K40 configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh kwikstik-k40/<subdir>
-    cd -
+    tools/configure.sh kwikstik-k40/<subdir>
 
 Where <subdir> is one of the following:
 

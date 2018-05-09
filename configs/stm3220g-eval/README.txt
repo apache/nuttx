@@ -504,9 +504,7 @@ Configurations
 Each STM3220G-EVAL configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh stm3220g-eval/<subdir>
-    cd -
+    tools/configure.sh stm3220g-eval/<subdir>
 
 Where <subdir> is one of the following:
 
@@ -817,14 +815,11 @@ Where <subdir> is one of the following:
 
     1. Install the nxwm configuration
 
-       $ cd ~/nuttx-code/nuttx/tools
-       $ ./configure.sh stm3220g-eval/nxwm
+       $ tools/configure.sh stm3220g-eval/nxwm
 
     2. Make the build context (only)
 
-       $ cd ..
        $ make context
-       ...
 
     3. Install the nxwm unit test
 

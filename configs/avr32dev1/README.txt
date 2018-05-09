@@ -431,9 +431,7 @@ Common Configuration Notes
   1. Each Atmel AVR32DEV configuration is maintained in a sub-directory and
      can be selected as follow:
 
-       cd tools
-       ./configure.sh avr32dev1/<subdir>
-       cd -
+       tools/configure.sh avr32dev1/<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

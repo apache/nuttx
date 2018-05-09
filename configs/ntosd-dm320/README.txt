@@ -166,8 +166,7 @@ NuttX buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>nuttx.
 
-     cd tools
-     ./configure.sh ntosd-dm320/<sub-dir>
+     tools/configure.sh ntosd-dm320/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -279,9 +278,7 @@ Common Configuration Notes
   1. Each Neuros OSD configuration is maintained in a sub-directory and
      can be selected as follow:
 
-       cd tools
-       ./configure.sh ntosd-dm320/<subdir>
-       cd -
+       tools/configure.sh ntosd-dm320/<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

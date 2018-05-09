@@ -715,7 +715,7 @@ Configurations
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
      NuttX then you will have to 1) 'make distclean' to remove the old
-     configuration, 2) 'cd tools; ./configure.sh sam3u-ek/ksnh' to start
+     configuration, 2) 'tools/configure.sh sam3u-ek/ksnh' to start
      with a fresh configuration, and 3) perform the configuration changes
      above.
 

@@ -238,9 +238,7 @@ Information Common to All Configurations
 Each Olimex STM32-P407 configuration is maintained in a sub-directory and can be
 selected as follow:
 
-    cd tools
-    ./configure.sh olimex-stm32-p407/<subdir>
-    cd -
+    tools/configure.sh olimex-stm32-p407/<subdir>
 
 Where <subdir> is one of the configuration sub-directories listed in the
 following section.

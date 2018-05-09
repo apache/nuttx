@@ -78,9 +78,7 @@ Variations on the basic ez80f910200kitg configuration are maintained
 in subdirectories.  To configure any specific configuration, do the
 following steps:
 
-   cd <nuttx-top-directory>/tools
-   ./configure.sh ez80f910200kitg/<sub-directory>
-   cd <nuttx-top-directory>
+   tools/configure.sh ez80f910200kitg/<sub-directory>
    make
 
 Where <sub-directory> is the specific board configuration that you

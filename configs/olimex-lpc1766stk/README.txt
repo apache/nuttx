@@ -631,9 +631,7 @@ USB host operations.  To make these modifications, do the following:
 1. First configure to build the NSH configuration from the top-level
    NuttX directory:
 
-     cd tools
      ./configure olimex-lpc1766stk/nsh
-     cd ..
 
 2. Modify the top-level .config file to enable USB host using:
 
@@ -673,9 +671,7 @@ Common Configuration Notes
   1. Each Olimex LPC1766-STK configuration is maintained in a
      sub-directory and can be selected as follow:
 
-       cd tools
-       ./configure.sh olimex-lpc1766stk/<subdir>
-       cd -
+       tools/configure.sh olimex-lpc1766stk/<subdir>
 
      Where <subdir> is one of the sub-directories identified in the following
      paragraphs.

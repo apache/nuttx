@@ -65,12 +65,12 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 
 3. Make sure that NuttX is configured
 
-     cd <nuttx-dir>/tools
-     ./configure.sh <nuttx-configuration>
+     cd <nuttx-dir>
+     tools/configure.sh <nuttx-configuration>
 
 4. Configure and Make the buildroot
 
-     cd buildroot
+     cd <buildroot-dir>
      cp configs/m32c-defconfig-4.2.4 .config
      make oldconfig
      make

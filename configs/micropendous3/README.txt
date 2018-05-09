@@ -287,8 +287,7 @@ NuttX buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh micropendous3/<sub-dir>
+     tools/configure.sh micropendous3/<sub-dir>
 
      NOTE: you also must copy avr-libc header files into the NuttX include
      directory with command perhaps like:
@@ -509,9 +508,7 @@ Common Configuration Notes
   1. Each Micropendous3 configuration is maintained in a sub-directory and
      can be selected as follow:
 
-       cd tools
-       ./configure.sh micropendous3/<subdir>
-       cd -
+       tools/configure.sh micropendous3/<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

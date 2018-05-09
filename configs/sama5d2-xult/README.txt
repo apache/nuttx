@@ -74,9 +74,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
      the dramboot configuration and setup the PATH variable in order to do
      the build:
 
-       cd tools
-       ./configure.sh sama5d2-xult/dramboot
-       cd -
+       tools/configure.sh sama5d2-xult/dramboot
 
      Before building, make sure the PATH environment variable includes the
      correct path to the directory than holds your toolchain binaries.
@@ -180,9 +178,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
      the AT25BOOT configuration and setup the PATH variable in order to do
      the build:
 
-       cd tools
-       ./configure.sh sama5d2-xult/at25boot
-       cd -
+       tools/configure.sh sama5d2-xult/at25boot
 
      Before building, make sure the PATH environment variable includes the
      correct path to the directory than holds your toolchain binaries.
@@ -909,9 +905,7 @@ Configurations
   Each SAMA5D2-XULT configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh sama5d2-xult/<subdir>
-    cd -
+    tools/configure.sh sama5d2-xult/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

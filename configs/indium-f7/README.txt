@@ -54,7 +54,7 @@ Basic configuration & build steps
   different from the default in your PATH variable).
 
    - Configures nuttx creating .config file in the nuttx directory.
-     $ cd tools && ./configure.sh indium-f7/f7nn-nsh && cd ..
+     $ tools/configure.sh indium-f7/f7nn-nsh
    - Refreshes the .config file with the latest available configurations.
      $ make oldconfig
    - Select the features you want in the build.
@@ -202,8 +202,8 @@ f7xx-nsh:
         see additional README.txt files in the NuttX tools repository.
 
      b. If this is the intall configuration then Execute
-           'cd tools && ./configure.sh indium-f7/nsh && cd ..'
-        in nuttx/ in order to start configuration process.
+        'tools/configure.sh indium-f7/nsh' in nuttx/ in order to start the
+        configuration process.
         Caution: Doing this step more than once will overwrite .config with
         the contents of the indium-f7/nsh/defconfig file.
 
@@ -264,8 +264,8 @@ f7xx-evalos:
        see additional README.txt files in the NuttX tools repository.
 
     b. If this is the intall configuration then Execute
-          'cd tools && ./configure.sh indium-f7/evalos && cd ..'
-       in nuttx/ in order to start configuration process.
+       'tools/configure.sh indium-f7/evalos' in nuttx/ in order to start
+       configuration process.
        Caution: Doing this step more than once will overwrite .config with
        the contents of the indium-f7/evalos/defconfig file.
 

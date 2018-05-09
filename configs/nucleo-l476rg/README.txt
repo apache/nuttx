@@ -285,8 +285,7 @@ NXFLAT Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
+     tools/configure.sh lpcxpresso-lpc1768/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 

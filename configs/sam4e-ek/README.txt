@@ -1036,9 +1036,7 @@ Configurations
   Each SAM4E-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    cd tools
-    ./configure.sh sam4e-ek/<subdir>
-    cd -
+    tools/configure.sh sam4e-ek/<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.
@@ -1093,7 +1091,7 @@ Configurations
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
      NuttX then you will have to 1) 'make distclean' to remove the old
-     configuration, 2) 'cd tools; ./configure.sh sam4e-ek/ksnh' to start
+     configuration, 2) 'tools/configure.sh sam4e-ek/ksnh' to start
      with a fresh configuration, and 3) perform the configuration changes
      above.
 
@@ -1423,14 +1421,11 @@ Configurations
 
     1. Install the nxwm configuration
 
-       $ cd ~/nuttx-git/nuttx/tools
-       $ ./configure.sh sam4e-ek/nxwm
+       $ tools/configure.sh sam4e-ek/nxwm
 
     2. Make the build context (only)
 
-       $ cd ..
        $ make context
-       ...
 
     3. Install the nxwm unit test
 

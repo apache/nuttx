@@ -469,9 +469,7 @@ Configurations
 Each LM4F120 LaunchPad configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    cd tools
-    ./configure.sh lm4f120-launchpad/<subdir>
-    cd -
+    tools/configure.sh lm4f120-launchpad/<subdir>
 
 Where <subdir> is one of the following:
 

@@ -44,8 +44,7 @@ NuttX Buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh freedom-kl25z/<sub-dir>
+     tools/configure.sh freedom-kl25z/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -282,9 +281,7 @@ Configurations
 Each FREEDOM-KL25Z configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh freedom-kl25z/<subdir>
-    cd -
+    tools/configure.sh freedom-kl25z/<subdir>
 
 If this is a Windows native build, then configure.bat should be used
 instead of configure.sh:

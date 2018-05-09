@@ -818,9 +818,7 @@ Configurations
 Each Freedom K64F configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh freedom-k64f/<subdir>
-    cd -
+    tools/configure.sh freedom-k64f/<subdir>
 
 Where <subdir> is one of the following:
 

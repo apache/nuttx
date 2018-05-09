@@ -1106,7 +1106,7 @@ Enter inside NuttX and compile it:
 
     $ cd ../nuttx
 
-    $ ./tools/configure.sh stm32f4discovery/testlibcxx
+    $ tools/configure.sh stm32f4discovery/testlibcxx
       Copy files
       Refreshing...
 
@@ -1170,9 +1170,7 @@ Common Information
 Each STM32F4Discovery configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    cd tools
-    ./configure.sh STM32F4Discovery/<subdir>
-    cd -
+    tools/configure.sh STM32F4Discovery/<subdir>
 
 Where <subdir> is one of the sub-directories listed in the next paragraph
 
@@ -1197,8 +1195,7 @@ Configuration Sub-directories
   test is used to verify the uClibc++ port to NuttX.  This configuration may
   be selected as follows:
 
-    cd <nuttx-directory>/tools
-    ./configure.sh sim/cxxtest
+    tools/configure.sh sim/cxxtest
 
   NOTES:
 

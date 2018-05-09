@@ -377,9 +377,7 @@ Configurations
 Each Bambino-200e configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    cd tools
-    ./configure.sh bambino-200e/<subdir>
-    cd -
+    tools/configure.sh bambino-200e/<subdir>
 
 Where <subdir> is one of the following:
 

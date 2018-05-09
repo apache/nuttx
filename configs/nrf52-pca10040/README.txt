@@ -90,9 +90,7 @@ Configurations
 Each PCA10040 configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    cd tools
-    ./configure.sh nrf52-pca10040/<subdir>
-    cd -
+    tools/configure.sh nrf52-pca10040/<subdir>
 
 Where <subdir> is one of the following:
 

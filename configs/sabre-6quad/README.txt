@@ -633,9 +633,7 @@ Information Common to All Configurations
 Each Sabre-6Quad configuration is maintained in a sub-directory and
 can be selected as follow:
 
-  cd tools
-  ./configure.sh sabre-6quad/<subdir>
-  cd -
+  tools/configure.sh sabre-6quad/<subdir>
 
 Before building, make sure the PATH environment variable includes the
 correct path to the directory than holds your toolchain binaries.

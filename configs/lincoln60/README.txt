@@ -248,9 +248,7 @@ host operations.  To make these modifications, do the following:
 1. First configure to build the NSH configuration from the top-level
    NuttX directory:
 
-   cd tools
    ./configure lincoln60/nsh
-   cd ..
 
 2. Then edit the top-level .config file to enable USB host.  Make the
    following changes:
@@ -277,9 +275,7 @@ Configurations
 Each Lincoln 60 configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    cd tools
-    ./configure.sh lincoln60/<subdir>
-    cd -
+    tools/configure.sh lincoln60/<subdir>
 
 Where <subdir> is one of the following:
 

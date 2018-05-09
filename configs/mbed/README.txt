@@ -211,9 +211,7 @@ USB Host Configuration
   1. First configure to build the NSH configuration from the top-level
      NuttX directory:
 
-     cd tools
      ./configure mbed/nsh
-     cd ..
 
   2. Then edit the top-level .config file to enable USB host.  Make the
      following changes using 'make menuconfig':
@@ -250,9 +248,7 @@ Configurations
   Each mbed configuration is maintained in a sub-directory and can be selected
   as follow:
 
-    cd tools
-    ./configure.sh mbed/<subdir>
-    cd -
+    tools/configure.sh mbed/<subdir>
 
   Where <subdir> is one of the mbed subdirectories described in the
   following paragraph.
