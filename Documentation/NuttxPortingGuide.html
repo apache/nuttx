@@ -1403,16 +1403,14 @@ tools/
   accomplish the same configuration:
 </p>
 <ul><pre>
-  cd tools
-  ./configure.sh <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 
 <p>
   There is an alternative Windows batch file, <code>configure.bat</code>,  that can be used instead of <code>configure.sh</code> in the windows native environment like:
 </p>
 <ul><pre>
-  cd tools
-  configure.bat <i>&lt;board-name&gt;</i>[\<i>&lt;config-dir&gt;</i>]
+  tools\configure.bat <i>&lt;board-name&gt;</i>[\<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 <p>
   See <code>tools/README.txt</code> for more information about these scripts.
@@ -1423,8 +1421,7 @@ tools/
   then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
-  cd tools
-  ./configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 
 <p>
