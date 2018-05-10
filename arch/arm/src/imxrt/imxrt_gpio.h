@@ -178,7 +178,7 @@
  * See imxrt_iomuxc.h for detailed content.
  */
 
-#define GPIO_IOMUX_SHIFT       (0)       /* Bits 9-15: IOMUX pin configuration */
+#define GPIO_IOMUX_SHIFT       (0)       /* Bits 0-15: IOMUX pin configuration */
 #define GPIO_IOMUX_MASK        (0xffff << GPIO_IOMUX_SHIFT)
 
 /* Helper addressing macros */
