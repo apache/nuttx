@@ -226,7 +226,11 @@ long sysconf(int name)
         return CONFIG_NFILE_DESCRIPTORS;
 
       default:
+#if 0 /* Assume valid but not implemented for the time being */
         errcode = EINVAL;
+#else
+        errcode = ENOSYS;
+#endif
         break;
     }
 
