@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: January 12, 2018</p>
+      <p>Last Updated: May 11, 2018</p>
     </td>
   </tr>
 </table>
@@ -2311,7 +2311,7 @@ nsh&gt;
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-mkfatfs [-F &lt;fatsize&gt;] &lt;block-driver&gt;
+mkfatfs [-F &lt;fatsize&gt;] [-r &lt;rootdirentries&gt;] &lt;block-driver&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
@@ -2319,6 +2319,13 @@ mkfatfs [-F &lt;fatsize&gt;] &lt;block-driver&gt;
   The FAT size may be provided as an option.
   Without the <code>&lt;fatsize&gt;</code> option, <code>mkfatfs</code> will select either the FAT12 or FAT16 format.
   For historical reasons, if you want the FAT32 format, it must be explicitly specified on the command line.
+</p>
+<p>
+  The <code>-r</code> option may be specified to select the the number of entries in the root directory for FAT12 and FAT16 file systems.
+  Typical values for small volumes would be 112 or 224; 512 should be used for large volumes, such as hard disks or very large SD cards.  The default is 512 entries in all cases.
+</p>
+<p>
+  The reported number of root directory entries used with FAT32 is zero because the FAT32 root directory is a cluster chain.
 </p>
 <p>
   NSH provides this command to access the <a href="mkfatfs"><code>mkfatfs()</code></a> NuttX API.
