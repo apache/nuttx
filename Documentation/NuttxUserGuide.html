@@ -833,7 +833,7 @@ pid_t vfork(void);
 </p>
 <p>
   <b>POSIX Compatibility:</b>
-  Compatible with the Unix interface of the same name.
+  Compatible with the BSD/Linux interface of the same name.  POSIX marks this interface as Obsolete.
 </p>
 
 <H3><a name="exec">2.1.12 exec</a></H3>
@@ -941,7 +941,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
 <p>
    Note the inefficiency when <code>execv()</code> or <code>execl()</code> is called in the normal, two-step process:
    (1) first call <code>vfork()</code> to create a new thread, then (2) call <code>execv()</code> or <code>execl()</code> to replace the new thread with a program from the file system.
-   Since the new thread will be terminated by the <code>execv()</code> or <code>execl()</code> call, it really served no purpose other than to support Unix compatibility.
+   Since the new thread will be terminated by the <code>execv()</code> or <code>execl()</code> call, it really served no purpose other than to support POSIX compatibility.
 </p>
 <p>
    The non-standard binfmt function <code>exec()</code> needs to have (1) a symbol table that provides the list of symbols exported by the base code, and (2) the number of symbols in that table.
@@ -991,7 +991,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
 </p>
 <p>
   <b>POSIX Compatibility:</b>
-  Similar with the Unix interface of the same name.
+  Similar with the POSIX interface of the same name.
   There are, however, several compatibility issues as detailed in the description above.
 </p>
 
@@ -1035,7 +1035,7 @@ int execl(FAR const char *path, ...);
 </p>
 <p>
   <b>POSIX Compatibility:</b>
-  Similar with the Unix interface of the same name.
+  Similar with the POSIX interface of the same name.
   There are, however, several compatibility issues as detailed in the description of <a href="#execv">execv()</a>.
 </p>
 
