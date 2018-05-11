@@ -71,8 +71,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Which LPUART with be tty0/console and which tty1-7?  The console will always
- * be ttyS0.  If there is no console then will use the lowest numbered UART.
+/* Which LPUART with be tty0/console and which tty1-7?  The console will
+ * always be ttyS0.  If there is no console then will use the lowest
+ * numbered UART.
  */
 
 /* First pick the console and ttys0.  This could be any of LPUART1-8 */
@@ -785,14 +786,15 @@ static void imxrt_shutdown(struct uart_dev_s *dev)
  * Name: imxrt_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the setup() method is called, however, the serial console may operate
+ *   in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -821,8 +823,8 @@ static int imxrt_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -850,6 +852,7 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
   struct imxrt_uart_s *priv;
   uint32_t usr;
   int passes = 0;
+  bool handled;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct imxrt_uart_s *)dev->priv;
@@ -864,40 +867,51 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
    * until we have been looping for a long time.
    */
 
-  for (; ; )
+  handled = true;
+  for (passes = 0; passes < 256 && handled; passes++)
     {
+      handled = false;
+
       /* Get the current UART status and check for loop
        * termination conditions
        */
 
-      usr = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
-      usr &= (LPUART_STAT_RDRF | LPUART_STAT_TC);
+      usr  = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
+      usr &= (LPUART_STAT_RDRF | LPUART_STAT_TC | LPUART_STAT_OR |
+              LPUART_STAT_FE);
 
-      if (usr == 0 || passes > 256)
+      /* Clear serial overrun and framing errors */
+
+      if ((usr & LPUART_STAT_OR) != 0)
         {
-          return OK;
+          imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, LPUART_STAT_OR);
+        }
+
+      if ((usr & LPUART_STAT_FE) != 0)
+        {
+          imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, LPUART_STAT_FE);
         }
 
       /* Handle incoming, receive bytes */
 
-      if (usr & LPUART_STAT_RDRF)
+      if ((usr & LPUART_STAT_RDRF) != 0 &&
+          (priv->ie & LPUART_CTRL_RIE) != 0)
         {
           uart_recvchars(dev);
+          handled = true;
         }
 
       /* Handle outgoing, transmit bytes */
 
-      if (usr & LPUART_STAT_TC)
+      if ((usr & LPUART_STAT_TC) != 0 &&
+          (priv->ie & LPUART_CTRL_TCIE) != 0)
         {
           uart_xmitchars(dev);
+          handled = true;
         }
-
-      /* Keep track of how many times we do this in case there
-       * is some hardware failure condition.
-       */
-
-      passes++;
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -959,7 +973,7 @@ static int imxrt_receive(struct uart_dev_s *dev, uint32_t *status)
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
   uint32_t rxd;
 
-  rxd    = imxrt_serialin(priv, IMXRT_LPUART_DATA_OFFSET);
+  rxd     = imxrt_serialin(priv, IMXRT_LPUART_DATA_OFFSET);
   *status = rxd >> LPUART_DATA_STATUS_SHIFT;
   return (rxd & LPUART_DATA_MASK) >> LPUART_DATA_SHIFT;
 }
@@ -982,12 +996,12 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ie |= LPUART_CTRL_RIE;
+      priv->ie |= LPUART_CTRL_RIE | LPUART_CTRL_FEIE | LPUART_CTRL_ORIE;
 #endif
     }
   else
     {
-      priv->ie &= ~LPUART_CTRL_RIE;
+      priv->ie &= ~ (LPUART_CTRL_RIE | LPUART_CTRL_FEIE | LPUART_CTRL_ORIE);
     }
 
   regval = (imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & ~LPUART_ALL_INTS) | priv->ie;
@@ -1103,7 +1117,6 @@ static bool imxrt_txempty(struct uart_dev_s *dev)
  * Returned Value:
  *   None - The driver already agreed to transition to the low power
  *   consumption state when when it returned OK to the prepare() call.
- *
  *
  ****************************************************************************/
 
