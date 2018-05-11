@@ -365,7 +365,7 @@ int     gethostname(FAR char *name, size_t size);
 int     sethostname(FAR const char *name, size_t size);
 #endif
 
-/* Get configurable system varaibles */
+/* Get configurable system variables */
 
 long    sysconf(int name);
 
