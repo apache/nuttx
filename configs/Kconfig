@@ -226,6 +226,7 @@ config ARCH_BOARD_FREEDOM_K28F
 	select ARCH_HAVE_LEDS if !RGBLED
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select KINETIS_SDHC_PULLUP if KINETIS_SDHC # REVISIT
 	---help---
 		development board.
 		This port uses the NXP/FreeScale FREEDOM-K28F development board. This
@@ -237,6 +238,7 @@ config ARCH_BOARD_FREEDOM_K64F
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select KINETIS_SDHC_PULLUP if KINETIS_SDHC
 	---help---
 		development board.
 		This port uses the NXP/FreeScale FREEDOM-K64F development board. This
@@ -248,6 +250,7 @@ config ARCH_BOARD_FREEDOM_K66F
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select KINETIS_SDHC_PULLUP if KINETIS_SDHC
 	---help---
 		development board.
 		This port uses the NXP/FreeScale FREEDOM-K66F development board. This

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_sdhc.c
  *
- *   Copyright (C) 2011-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,10 +98,10 @@
  * So allow the board config to enable them.
  */
 
-#if defined(BOARD_SDHC_ENABLE_PULLUPS)
-#  define BOARD_SDHC_PULLUP_ENABLE _PIN_INPUT_PULLUP
+#if defined(CONFIG_KINETIS_SDHC_PULLUP)
+#  define SDHC_PULLUP_ENABLE _PIN_INPUT_PULLUP
 #else
-#  define BOARD_SDHC_PULLUP_ENABLE 0
+#  define SDHC_PULLUP_ENABLE 0
 #endif
 
 /* SDCLK frequencies corresponding to various modes of operation.  These
@@ -2861,29 +2861,29 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
 #ifndef CONFIG_SDIO_MUXBUS
   /* Data width 1, 4 or 8 */
 
-  kinetis_pinconfig(PIN_SDHC0_D0 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D0 | SDHC_PULLUP_ENABLE);
 
   /* Data width 4 or 8 */
 
 #ifndef CONFIG_KINETIS_SDHC_WIDTH_D1_ONLY
-  kinetis_pinconfig(PIN_SDHC0_D1 | BOARD_SDHC_PULLUP_ENABLE);
-  kinetis_pinconfig(PIN_SDHC0_D2 | BOARD_SDHC_PULLUP_ENABLE);
-  kinetis_pinconfig(PIN_SDHC0_D3 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D1 | SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D2 | SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D3 | SDHC_PULLUP_ENABLE);
 
   /* Data width 8 (not supported) */
 
 #if 0
-  kinetis_pinconfig(PIN_SDHC0_D4 | BOARD_SDHC_PULLUP_ENABLE);
-  kinetis_pinconfig(PIN_SDHC0_D5 | BOARD_SDHC_PULLUP_ENABLE);
-  kinetis_pinconfig(PIN_SDHC0_D6 | BOARD_SDHC_PULLUP_ENABLE);
-  kinetis_pinconfig(PIN_SDHC0_D7 | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D4 | SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D5 | SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D6 | SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_D7 | SDHC_PULLUP_ENABLE);
 #endif
 #endif
 
   /* Clocking and CMD pins (all data widths) */
 
   kinetis_pinconfig(PIN_SDHC0_DCLK);
-  kinetis_pinconfig(PIN_SDHC0_CMD | BOARD_SDHC_PULLUP_ENABLE);
+  kinetis_pinconfig(PIN_SDHC0_CMD | SDHC_PULLUP_ENABLE);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured

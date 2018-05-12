@@ -973,6 +973,15 @@ config KINETIS_SDHC_DMA
 		For most usages, SD accesses will cause data overruns if used without
 		DMA.
 
+config KINETIS_SDHC_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
 config KINETIS_SDHC_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n
