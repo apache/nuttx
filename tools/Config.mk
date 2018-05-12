@@ -2,7 +2,7 @@
 # Config.mk
 # Global build rules and macros.
 #
-#   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2014, 2018 Gregory Nutt. All rights reserved.
 #   Author: Richard Cochran
 #           Gregory Nutt <gnutt@nuttx.org>
 #
@@ -65,7 +65,7 @@ else
 endif
 
 # INCDIR - Convert a list of directory paths to a list of compiler include
-#   directirves
+#   directories
 # Example: CFFLAGS += ${shell $(INCDIR) [options] "compiler" "dir1" "dir2" "dir2" ...}
 #
 # Note that the compiler string and each directory path string must quoted if
@@ -150,6 +150,14 @@ endef
 define ASSEMBLE
 	@echo "AS: $1"
 	$(Q) $(CC) -c $(AFLAGS) $1 -o $2
+endef
+
+# INSTALL_LIB - Install a library $1 into target $2
+# Example: $(call INSTALL_LIB, libabc.a, $(TOPDIR)/lib/)
+
+define INSTALL_LIB
+	@echo "IN: $1 -> $2"
+	$(Q) install -m 0644 $1 $2
 endef
 
 # MOVEOBJ - Default macro to move an object file to the correct location
