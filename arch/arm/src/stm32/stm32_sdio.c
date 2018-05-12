@@ -151,6 +151,14 @@
 #  undef CONFIG_SDIO_XFRDEBUG
 #endif
 
+/* Enable the SDIO pull-up resistors if needed */
+
+#ifdef CONFIG_STM32_SDIO_PULLUP
+#  define SDIO_PULLUP_ENABLE GPIO_PULLUP
+#else
+#  define SDIO_PULLUP_ENABLE 0
+#endif
+
 /* Friendly CLKCR bit re-definitions ****************************************/
 
 #define SDIO_CLKCR_RISINGEDGE    (0)
@@ -3038,14 +3046,14 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
 #ifndef CONFIG_SDIO_MUXBUS
-  stm32_configgpio(GPIO_SDIO_D0);
+  stm32_configgpio(GPIO_SDIO_D0 | SDIO_PULLUP_ENABLE);
 #ifndef CONFIG_STM32_SDIO_WIDTH_D1_ONLY
-  stm32_configgpio(GPIO_SDIO_D1);
-  stm32_configgpio(GPIO_SDIO_D2);
-  stm32_configgpio(GPIO_SDIO_D3);
+  stm32_configgpio(GPIO_SDIO_D1 | SDIO_PULLUP_ENABLE);
+  stm32_configgpio(GPIO_SDIO_D2 | SDIO_PULLUP_ENABLE);
+  stm32_configgpio(GPIO_SDIO_D3 | SDIO_PULLUP_ENABLE);
 #endif
-  stm32_configgpio(GPIO_SDIO_CK);
-  stm32_configgpio(GPIO_SDIO_CMD);
+  stm32_configgpio(GPIO_SDIO_CK | SDIO_PULLUP_ENABLE);
+  stm32_configgpio(GPIO_SDIO_CMD | SDIO_PULLUP_ENABLE);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured

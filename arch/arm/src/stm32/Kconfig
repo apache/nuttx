@@ -7602,6 +7602,15 @@ config STM32_SDIO_CARD
 		Build in additional support needed only for SDIO cards (vs. SD
 		memory cards)
 
+config STM32_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
 config STM32_SDIO_DMA
 	bool "Support DMA data transfers"
 	default y if STM32_DMA2

@@ -68,6 +68,10 @@ ENVIRONMENTS
       the time as Cygwin, perhaps 20 minutes for the basic Ubuntu install
       (vs. more than a day for the complete Cygwin install).
 
+      There have been even more recent ports of Linux environment to
+      Windows.  I need to update this section to include some mention of
+      these alternatives.
+
     - The MSYS environment.  I have no experience using the MSYS environment
       and that configuration will not be discussed in this README file.
       See http://www.mingw.org/wiki/MSYS if you are interested in
@@ -75,6 +79,17 @@ ENVIRONMENTS
       successfully.  I suppose that the advantages of the MSYS environment
       is that it is closer to a native Windows environment and uses only a
       minimal of add-on POSIX-land tools.
+
+    - Other POSIX environments.  Check out:
+
+        UnxUtils: https://sourceforge.net/projects/unxutils/,
+          https://en.wikipedia.org/wiki/UnxUtils
+        MobaXterm: https://mobaxterm.mobatek.net/
+        Gow`: https://github.com/bmatzelle/gow/wiki
+
+      Disclaimer:  In priniple, these should work.  However, I have never
+      used any of these environments and cannot guarantee that there is
+      not some less-than-obvious issues.
 
   NuttX can also be installed and built on a native Windows system, but with
   some potential tool-related issues (see the discussion "Native Windows
