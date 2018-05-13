@@ -198,24 +198,6 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   info->dev = udp_find_laddr_device(conn);
 
-  /* Check if the UDP socket was previously assigned a remote peer address
-   * via connect().  In that case, we will only be interested in poll
-   * related events associated with that address.
-   */
-
-  if (!_SS_ISCONNECTED(psock->s_flags))
-    {
-      /* Setup the UDP remote connection to accept packets from any remote
-       * address.
-       */
-
-      ret = udp_connect(conn, NULL);
-      if (ret)
-        {
-          goto errout_with_lock;
-        }
-    }
-
   /* Allocate a UDP callback structure */
 
   cb = udp_callback_alloc(info->dev, conn);

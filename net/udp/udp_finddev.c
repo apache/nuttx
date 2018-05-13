@@ -181,7 +181,7 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
  *   remote IP address.
  *
  * Input Parameters:
- *   conn - UDP connection structure (not currently used).
+ *   conn - UDP connection structure.
  *
  * Returned Value:
  *   A pointer to the network driver to use.

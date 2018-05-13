@@ -272,35 +272,56 @@ static inline FAR struct udp_conn_s *
       /* If the local UDP port is non-zero, the connection is considered
        * to be used. If so, then the following checks are performed:
        *
-       * - The local port number is checked against the destination port
-       *   number in the received packet.
-       * - The remote port number is checked if the connection is bound
-       *   to a remote port.
-       * - If multiple network interfaces are supported, then the local
-       *   IP address is available and we will insist that the
-       *   destination IP matches the bound address (or the destination
-       *   IP address is a broadcast address). If a socket is bound to
-       *   INADDRY_ANY (laddr), then it should receive all packets
-       *   directed to the port.
-       * - Finally, if the connection is bound to a remote IP address,
-       *   the source IP address of the packet is checked. Broadcast
-       *   addresses are also accepted.
+       * 1. The destination address is verified against the bound address
+       *    of the connection.
+       *
+       *   - The local port number is checked against the destination port
+       *     number in the received packet.
+       *   - If multiple network interfaces are supported, then the local
+       *     IP address is available and we will insist that the
+       *     destination IP matches the bound address (or the destination
+       *     IP address is a broadcast address). If a socket is bound to
+       *     INADDRY_ANY (laddr), then it should receive all packets
+       *     directed to the port.
+       *
+       * 2. If this is a connection mode UDP socket, then the source address
+       *    is verified against the connected remote address.
+       *
+       *   - The remote port number is checked if the connection is bound
+       *     to a remote port.
+       *   - Finally, if the connection is bound to a remote IP address,
+       *     the source IP address of the packet is checked. Broadcast
+       *     addresses are also accepted.
        *
        * If all of the above are true then the newly received UDP packet
        * is destined for this UDP connection.
        *
-       * To send and receive broadcast packets, the application should:
+       * To send and receive multicast packets, the application should:
        *
-       * - Bind socket to INADDR_ANY
-       * - setsockopt to SO_BROADCAST
-       * - call sendto with sendaddr.sin_addr.s_addr = <broadcast-address>
-       * - call recvfrom.
+       *   - Bind socket to INADDR6_ANY (for the all-nodes multicast address)
+       *     or to a specific <multicast-address>
+       *   - setsockopt to SO_BROADCAST (for all-nodes address)
+       *
+       * For connection-less UDP sockets:
+       *
+       *   - call sendto with sendaddr.sin_addr.s_addr = <multicast-address>
+       *   - call recvfrom.
+       *
+       * For connection-mode UDP sockets:
+       *
+       *   - call connect() to connect the UDP socket to a specific remote
+       *     address, then
+       *   - Call send() with no address address information
+       *   - call recv() (from address information should not be needed)
        *
        * REVIST: SO_BROADCAST flag is currently ignored.
        */
 
+      /* Check that there is a local port number and this is matches
+       * the port number in the destination address.
+       */
+
       if (conn->lport != 0 && udp->destport == conn->lport &&
-          (conn->rport == 0 || udp->srcport == conn->rport) &&
 
           /* Local port accepts any address on this port or there
            * is an exact match in destipaddr and the bound local
@@ -309,22 +330,53 @@ static inline FAR struct udp_conn_s *
            */
 
           (net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
-           net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)) &&
-
-          /* If not connected to a remote address, or a broadcast address
-           * destipaddr was received, or there is an exact match between the
-           * srcipaddr and the bound IP address, then accept the packet.
+           net_ipv4addr_hdrcmp(ip->destipaddr, &conn->u.ipv4.laddr)))
+        {
+          /* Check if the socket is connection mode.  In this case, only
+           * packets with source addresses from the connected remote peer
+           * will be accepted.
            */
 
-          (net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_ANY) ||
-#ifdef CONFIG_NET_BROADCAST
-           net_ipv4addr_hdrcmp(ip->destipaddr, &bcast) ||
-#endif
-           net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
-        {
-          /* Matching connection found.. return a reference to it */
+          if (_UDP_ISCONNECTMODE(conn->flags))
+            {
+              /* Check if the UDP connection is either (1) accepting packets
+               * from any port or (2) the packet srcport matches the local
+               * bound port number.
+               */
 
-          break;
+              if ((conn->rport == 0 || udp->srcport == conn->rport) &&
+
+              /* If (1) not connected to a remote address, or (2) a all-
+               * nodes multicast destipaddr was received, or (3) there is an
+               * exact match between the srcipaddr and the bound remote IP
+               * address, then accept the packet.
+               */
+
+
+
+                  (net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_ANY) ||
+#ifdef CONFIG_NET_BROADCAST
+                   net_ipv4addr_hdrcmp(ip->destipaddr, &bcast) ||
+#endif
+                   net_ipv4addr_hdrcmp(ip->srcipaddr, &conn->u.ipv4.raddr)))
+                {
+                  /* Matching connection found.. Break out of the loop and
+                   * return this reference to it.
+                   */
+
+                  break;
+                }
+            }
+          else
+            {
+              /* This UDP socket is not connected.  We need to match only
+               * the destination address with the bound socket address.
+               * Break out out of the loop and return this reference to
+               * the matching connection structure.
+               */
+
+              break;
+            }
         }
 
       /* Look at the next active connection */
@@ -356,64 +408,112 @@ static inline FAR struct udp_conn_s *
   FAR struct udp_conn_s *conn;
 
   conn = (FAR struct udp_conn_s *)g_active_udp_connections.head;
-  while (conn)
+  while (conn != NULL)
     {
       /* If the local UDP port is non-zero, the connection is considered
        * to be used. If so, then the following checks are performed:
        *
-       * - The local port number is checked against the destination port
-       *   number in the received packet.
-       * - The remote port number is checked if the connection is bound
-       *   to a remote port.
-       * - If multiple network interfaces are supported, then the local
-       *   IP address is available and we will insist that the
-       *   destination IP matches the bound address. If a socket is bound to
-       *   INADDR6_ANY (laddr), then it should receive all packets directed
-       *   to the port. REVISIT: Should also depend on SO_BROADCAST.
-       * - Finally, if the connection is bound to a remote IP address,
-       *   the source IP address of the packet is checked.
+       * 1. The destination address is verified against the bound address
+       *    of the connection.
+       *
+       *    - The local port number is checked against the destination port
+       *      number in the received packet.
+       *    - If multiple network interfaces are supported, then the local
+       *      IP address is available and we will insist that the
+       *      destination IP matches the bound address. If a socket is bound
+       *      to INADDR6_ANY (laddr), then it should receive all packets
+       *      directed to the port. REVISIT: Should also depend on SO_BROADCAST.
+       *
+       * 2. If this is a connection mode UDP socket, then the source address
+       *    is verified against the connected remote address.
+       *
+       *    - The remote port number is checked if the connection is bound
+       *      to a remote port.
+       *    - Finally, if the connection is bound to a remote IP address,
+       *      the source IP address of the packet is checked.
        *
        * If all of the above are true then the newly received UDP packet
        * is destined for this UDP connection.
        *
        * To send and receive multicast packets, the application should:
        *
-       * - Bind socket to INADDR6_ANY (for the all-nodes multicast address)
-       *   or to a specific <multicast-address>
-       * - setsockopt to SO_BROADCAST (for all-nodes address)
-       * - call sendto with sendaddr.sin_addr.s_addr = <multicast-address>
-       * - call recvfrom.
+       *   - Bind socket to INADDR6_ANY (for the all-nodes multicast address)
+       *     or to a specific <multicast-address>
+       *   - setsockopt to SO_BROADCAST (for all-nodes address)
+       *
+       * For connection-less UDP sockets:
+       *
+       *   - call sendto with sendaddr.sin_addr.s_addr = <multicast-address>
+       *   - call recvfrom.
+       *
+       * For connection-mode UDP sockets:
+       *
+       *   - call connect() to connect the UDP socket to a specific remote
+       *     address, then
+       *   - Call send() with no address address information
+       *   - call recv() (from address information should not be needed)
        *
        * REVIST: SO_BROADCAST flag is currently ignored.
        */
 
-      if (conn->lport != 0 && udp->destport == conn->lport &&
-          (conn->rport == 0 || udp->srcport == conn->rport) &&
+      /* Check that there is a local port number and this is matches
+       * the port number in the destination address.
+       */
 
-          /* Local port accepts any address on this port or there
-           * is an exact match in destipaddr and the bound local
-           * address.  This catches the cast of the all nodes multicast
-           * when the socket is bound to INADDR6_ANY.
+      if ((conn->lport != 0 && udp->destport == conn->lport &&
+
+          /* Check if the local port accepts any address on this port or
+           * that there is an exact match between the destipaddr and the
+           * bound local address.  This catches the case of the all nodes
+           * multicast when the socket is bound to INADDR6_ANY.
            */
 
           (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
-           net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr)) &&
-
-          /* If not connected to a remote address, or a all-nodes multicast
-           * destipaddr was received, or there is an exact match between the
-           * srcipaddr and the bound remote IP address, then accept the
-           * packet.
+           net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr))))
+        {
+          /* Check if the socket is connection mode.  In this case, only
+           * packets with source addresses from the connected remote peer
+           * will be accepted.
            */
 
-          (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_allzeroaddr) ||
-#ifdef CONFIG_NET_BROADCAST
-           net_ipv6addr_hdrcmp(ip->destipaddr, g_ipv6_allnodes) ||
-#endif
-           net_ipv6addr_hdrcmp(ip->srcipaddr, conn->u.ipv6.raddr)))
-        {
-          /* Matching connection found.. return a reference to it */
+          if (_UDP_ISCONNECTMODE(conn->flags))
+            {
+              /* Check if the UDP connection is either (1) accepting packets
+               * from any port or (2) the packet srcport matches the local
+               * bound port number.
+               */
 
-          break;
+              if ((conn->rport == 0 || udp->srcport == conn->rport) &&
+
+              /* If (1) not connected to a remote address, or (2) a all-
+               * nodes multicast destipaddr was received, or (3) there is an
+               * exact match between the srcipaddr and the bound remote IP
+               * address, then accept the packet.
+               */
+
+                  (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_allzeroaddr) ||
+#ifdef CONFIG_NET_BROADCAST
+                   net_ipv6addr_hdrcmp(ip->destipaddr, g_ipv6_allnodes) ||
+#endif
+                   net_ipv6addr_hdrcmp(ip->srcipaddr, conn->u.ipv6.raddr)))
+                {
+                  /* Matching connection found.. Break out of the loop and
+                   * return this reference to it.
+                   */
+
+                  break;
+                }
+            }
+          else
+            {
+              /* This UDP socket is not connected.  We need to match only
+               * the destination address with the bound socket address.
+               * Break out out of the loop and return this reference to
+               * the matching connection structure.
+               */
+
+              break;
+            }
         }
 
       /* Look at the next active connection */
