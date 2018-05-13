@@ -38,11 +38,7 @@
 # CFLAGS
 
 ifneq ($(CONFIG_BUILD_FLAT),y)
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  KDEFINE = ${shell $(TOPDIR)\tools\define.bat "$(CC)" __KERNEL__}
-else
-  KDEFINE = ${shell $(TOPDIR)/tools/define.sh "$(CC)" __KERNEL__}
-endif
+  KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
 endif
 
 # Sources and paths
