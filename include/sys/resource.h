@@ -95,15 +95,15 @@
 
 typedef uint32_t rlim_t;
 
-/* Minimal, complaint rlimit structure */
+/* Minimal, compliant rlimit structure */
 
 struct rlimit
 {
-  rlim_t rlim_cur;  /* The current (soft) limit */
-  rlim_t rlim_max;  /* The hard limit */
+  rlim_t rlim_cur;          /* The current (soft) limit */
+  rlim_t rlim_max;          /* The hard limit */
 };
 
-/* Minimal, complaint rusage structure */
+/* Minimal, compliant rusage structure */
 
 struct rlimit
 {
