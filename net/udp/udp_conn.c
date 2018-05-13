@@ -352,8 +352,6 @@ static inline FAR struct udp_conn_s *
                * address, then accept the packet.
                */
 
-
-
                   (net_ipv4addr_cmp(conn->u.ipv4.raddr, INADDR_ANY) ||
 #ifdef CONFIG_NET_BROADCAST
                    net_ipv4addr_hdrcmp(ip->destipaddr, &bcast) ||
@@ -580,6 +578,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
     {
       /* Make sure that the connection is marked as uninitialized */
 
+      conn->flags  = 0;
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain = domain;
 #endif
