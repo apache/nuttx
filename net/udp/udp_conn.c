@@ -346,8 +346,8 @@ static inline FAR struct udp_conn_s *
 
               if ((conn->rport == 0 || udp->srcport == conn->rport) &&
 
-              /* If (1) not connected to a remote address, or (2) a all-
-               * nodes multicast destipaddr was received, or (3) there is an
+              /* If (1) not connected to a remote address, or (2) a
+               * broadcast destipaddr was received, or (3) there is an
                * exact match between the srcipaddr and the bound remote IP
                * address, then accept the packet.
                */
