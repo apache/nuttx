@@ -389,6 +389,8 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 #endif
 
 #ifdef CONFIG_PWM_MULTICHAN
+
+  memset(&pwm, 0, sizeof(struct pwm_info_s));
   pwm.frequency = 100;
 
   i = 0;
