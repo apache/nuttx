@@ -106,9 +106,8 @@ int stm32_rgbled_setup(void)
   struct pwm_lowerhalf_s    *ledr;
   struct pwm_lowerhalf_s    *ledg;
   struct pwm_lowerhalf_s    *ledb;
-  struct pwm_info_s info;
-  int i;
   int ret;
+  int fd;
 
   /* Have we already initialized? */
 
@@ -147,89 +146,6 @@ int stm32_rgbled_setup(void)
 
       ledb->ops->setup(ledb);
 
-      /* Define frequency and duty cycle */
-
-      info.frequency = 100;
-
-#ifdef CONFIG_PWM_MULTICHAN
-      /* Setup the duty cycle and channel for red */
-
-      i = 0;
-      info.channels[i].duty = 0;
-      info.channels[i++].channel = RGBLED_RPWMCHANNEL;
-
-      /* If red and green use same timer, setup together */
-
-      if (RGBLED_RPWMTIMER == RGBLED_GPWMTIMER)
-        {
-          info.channels[i++].channel = RGBLED_GPWMCHANNEL;
-        }
-
-      /* If red and blue use same timer, setup together */
-
-      if (RGBLED_RPWMTIMER == RGBLED_BPWMTIMER)
-        {
-          info.channels[i++].channel = RGBLED_BPWMCHANNEL;
-        }
-
-      /* Start the timer used for red, and any other colors that are
-       * sourced on a different channel of the same timer.
-       */
-
-      ledr->ops->start(ledr, &info);
-
-      /* Clear the channels from the struct */
-
-      for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
-        {
-          info.channels[i].channel = 0;
-        }
-
-      /* If the green timer is not the same as the red timer, then set it
-       * up.
-       */
-
-      if (RGBLED_GPWMTIMER != RGBLED_RPWMTIMER)
-        {
-          i = 0;
-          info.channels[i++].channel = RGBLED_GPWMCHANNEL;
-
-          /* If the blue timer uses the same timer and the green */
-
-          if (RGBLED_GPWMTIMER == RGBLED_BPWMTIMER)
-            {
-              info.channels[i++].channel = RGBLED_BPWMCHANNEL;
-            }
-
-          /* Start green timer (and maybe blue) */
-
-          ledg->ops->start(ledg, &info);
-
-          /* Clear the channels from the struct */
-
-          for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
-            {
-              info.channels[i].channel = 0;
-            }
-        }
-
-      /* If the blue timer is different than the red and the green, it must
-       * be setup separately.
-       */
-
-      if (RGBLED_BPWMTIMER != RGBLED_RPWMTIMER &&
-          RGBLED_BPWMTIMER != RGBLED_GPWMTIMER)
-        {
-          info.channels[0].channel = RGBLED_BPWMCHANNEL;
-          ledb->ops->start(ledb, &info);
-        }
-#else
-      info.duty = 0;
-      ledr->ops->start(ledr, &info);
-      ledg->ops->start(ledg, &info);
-      ledb->ops->start(ledb, &info);
-#endif
-
       /* Register the RGB LED diver at "/dev/rgbled0" */
 
 #ifdef CONFIG_PWM_MULTICHAN
@@ -244,6 +160,18 @@ int stm32_rgbled_setup(void)
           lederr("ERROR: rgbled_register failed: %d\n", ret);
           return ret;
         }
+
+      fd = open(fd, O_WRONLY);
+      if (fd < 0)
+        {
+          lederr("ERROR: open failed: %d\n", fd);
+          return ret;
+        }
+
+      /* Initialize led off */
+
+      write(fd, "#000000", 8);
+      close(fd);
 
       /* Now we are initialized */
 
