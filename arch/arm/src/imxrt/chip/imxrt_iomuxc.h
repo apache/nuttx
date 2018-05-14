@@ -230,7 +230,6 @@
 #define IMXRT_PADMUX_OFFSET(n)                      (0x0014 + ((unsigned int)(n) << 2))
 #define IMXRT_PADMUX_OFFSET_SNVS(n)                 ((unsigned int)(n) << 2)
 
-
 #define IMXRT_PADMUX_GPIO_EMC_00_OFFSET             0x0014
 #define IMXRT_PADMUX_GPIO_EMC_01_OFFSET             0x0018
 #define IMXRT_PADMUX_GPIO_EMC_02_OFFSET             0x001c

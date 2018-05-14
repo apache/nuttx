@@ -369,17 +369,13 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   /* Convert 8bit to 16bits */
 
 #ifdef CONFIG_RGBLED_LIGHTNESS_CORRECTION
-
   red   = rgbled_lightness((unsigned char)red);
   green = rgbled_lightness((unsigned char)green);
   blue  = rgbled_lightness((unsigned char)blue);
-
 #else
-
   red   = (red   << 8) | red;
   green = (green << 8) | green;
   blue  = (blue  << 8) | blue;
-
 #endif
 
 #ifdef CONFIG_RGBLED_INVERT
@@ -389,7 +385,6 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 #endif
 
 #ifdef CONFIG_PWM_MULTICHAN
-
   memset(&pwm, 0, sizeof(struct pwm_info_s));
   pwm.frequency = 100;
 
