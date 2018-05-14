@@ -46,6 +46,7 @@
 #include "up_arch.h"
 
 #include "chip/imxrt_iomuxc.h"
+#include "chip/imxrt_pinmux.h"
 #include "chip/imxrt_ccm.h"
 #include "chip/imxrt_lpuart.h"
 #include "imxrt_config.h"
@@ -254,8 +255,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART1_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART1_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART1_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART1_TX);
 #ifdef CONFIG_LPUART1_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART1_CTS);
 #endif
@@ -270,8 +271,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART2_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART2_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART2_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART2_TX);
 #ifdef CONFIG_LPUART2_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART2_CTS);
 #endif
@@ -286,8 +287,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART3_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART3_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART3_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART3_TX);
 #ifdef CONFIG_LPUART3_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART3_CTS);
 #endif
@@ -302,8 +303,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART4_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART4_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART4_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART4_TX);
 #ifdef CONFIG_LPUART4_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART4_CTS);
 #endif
@@ -318,8 +319,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART5_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART5_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART5_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART5_TX);
 #ifdef CONFIG_LPUART5_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART5_CTS);
 #endif
@@ -334,8 +335,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART6_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART6_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART6_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART6_TX);
 #ifdef CONFIG_LPUART6_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART6_CTS);
 #endif
@@ -350,8 +351,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART7_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART7_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART7_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART7_TX);
 #ifdef CONFIG_LPUART7_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART7_CTS);
 #endif
@@ -366,8 +367,8 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART8_RX_DATA);
-  (void)imxrt_config_gpio(GPIO_LPUART8_TX_DATA);
+  (void)imxrt_config_gpio(GPIO_LPUART8_RX);
+  (void)imxrt_config_gpio(GPIO_LPUART8_TX);
 #ifdef CONFIG_LPUART8_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART8_CTS);
 #endif

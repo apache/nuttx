@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMRT_IMXRT_WDOG_H
-#define __ARCH_ARM_SRC_IMRT_IMXRT_WDOG_H
+#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_WDOG_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_WDOG_H
 
 /****************************************************************************
  * Included Files
@@ -69,4 +69,4 @@
 
 void imxrt_wdog_disable_all(void);
 
-#endif /* __ARCH_ARM_SRC_IMRT_IMXRT_WDOG_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_WDOG_H */

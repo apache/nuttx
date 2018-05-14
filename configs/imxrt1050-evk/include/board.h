@@ -74,21 +74,6 @@
 #define BOARD_CPU_FREQUENCY \
   (BOARD_XTAL_FREQUENCY * IMXRT_ARM_PLL_SELECT) / (IMXRT_ARM_CLOCK_DIVIDER + 1)
 
-/* Define lpuart RF and TX pins
- *
- * WARNING: imxrt_pinmux.h should be added and used later.
- */
-
-#define IOMUX_UART              (IOMUX_PULL_UP_100K | IOMUX_CMOS_OUTPUT | \
-                                 IOMUX_DRIVE_40OHM | IOMUX_SLEW_FAST | \
-                                 IOMUX_SPEED_MEDIUM | IOMUX_SCHMITT_TRIGGER)
-#define GPIO_LPUART1_RX_DATA    (GPIO_PERIPH | GPIO_ALT2 | \
-                                 GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_13_INDEX) | \
-                                 IOMUX_UART)
-#define GPIO_LPUART1_TX_DATA    (GPIO_PERIPH | GPIO_ALT2 | \
-                                 GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_12_INDEX) | \
-                                 IOMUX_UART)
-
 /* LED definitions ******************************************************************/
 /* There are four LED status indicators located on the EVK Board.  The functions of
  * these LEDs include:
@@ -148,6 +133,24 @@
 #define BUTTON_SW8_BIT    (1 << BUTTON_SW8)
 
 /* PIO Disambiguation ***************************************************************/
+/* LPUARTs
+ *
+ * Virtual console port provided by OpenSDA:
+ *
+ *          UART1_TXD   GPIO_AD_B0_12  LPUART1_TX
+ *          UART1_RXD   GPIO_AD_B0_13  LPUART1_RX
+ *
+ *   NOTE: There are no alternative pin configurations for LPUART1.
+ *
+ * Arduino RS-232 Shield:
+ *
+ *   J22 D0 UART_RX/D0  GPIO_AD_B1_07  LPUART3_RX
+ *   J22 D1 UART_TX/D1  GPIO_AD_B1_06  LPUART3_TX
+ */
+
+#define GPIO_LPUART3_RX   GPIO_LPUART3_RX_1  /* GPIO_AD_B1_07 */
+#define GPIO_LPUART3_TX   GPIO_LPUART3_TX_1  /* GPIO_AD_B1_06 */
+
 
 /************************************************************************************
  * Public Types

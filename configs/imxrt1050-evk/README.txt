@@ -44,10 +44,15 @@ Contents
 Serial Console
 ==============
 
-  To be provided.
+  Virtual console port provided by OpenSDA:
 
-  GPIO_AD_B0_12 LPUART1_TX UART Console
-  GPIO_AD_B0_13 LPUART1_RX UART Console
+           UART1_TXD   GPIO_AD_B0_12  LPUART1_TX
+           UART1_RXD   GPIO_AD_B0_13  LPUART1_RX
+
+  Arduino RS-232 Shield:
+
+    J22 D0 UART_RX/D0  GPIO_AD_B1_07  LPUART3_RX
+    J22 D1 UART_TX/D1  GPIO_AD_B1_06  LPUART3_TX
 
 LEDs and buttons
 ================
