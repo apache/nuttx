@@ -3780,6 +3780,21 @@ retry:
           dev->lastallocblock = allocblock;
           break;
         }
+      else
+        {
+          /* The FLASH may be not erased in the initial delivery state.
+           * Just in case for the recovery of this fatal situation,
+           * after once erasing the sector, return the sector as a free sector.
+           */
+
+          if (1 == dev->availsectperblk)
+            {
+              MTD_ERASE(dev->mtd, allocblock, 1);
+              physicalsector = i;
+              dev->lastallocblock = allocblock;
+              break;
+            }
+        }
     }
 
   if (physicalsector == 0xffff)
