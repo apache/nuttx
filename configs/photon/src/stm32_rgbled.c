@@ -41,6 +41,8 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 #include <nuttx/drivers/pwm.h>
 #include <nuttx/leds/rgbled.h>
@@ -161,7 +163,7 @@ int stm32_rgbled_setup(void)
           return ret;
         }
 
-      fd = open(fd, O_WRONLY);
+      fd = open("/dev/rgbled0", O_WRONLY);
       if (fd < 0)
         {
           lederr("ERROR: open failed: %d\n", fd);
