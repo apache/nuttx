@@ -49,6 +49,12 @@ config ARCH_FAMILY_MIMXRT1052CVL5A
 config ARCH_FAMILY_IMXRT105x
 	bool
 	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 
 # Peripheral support
 

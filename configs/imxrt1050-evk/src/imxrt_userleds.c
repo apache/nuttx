@@ -33,24 +33,33 @@
  *
  ****************************************************************************/
 
+/* There are four LED status indicators located on the EVK Board.  The
+ * functions of these LEDs include:
+ *
+ *   - Main Power Supply(D3)
+ *     Green: DC 5V main supply is normal.
+ *     Red:   J2 input voltage is over 5.6V.
+ *     Off:   The board is not powered.
+ *   - Reset RED LED(D15)
+ *   - OpenSDA LED(D16)
+ *   - USER LED(D18)
+ *
+ * Only a single LED, D18, is under software control.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <arch/board/board.h>
-
 #include "imxrt_gpio.h"
+#include "imxrt_iomuxc.h"
 #include "imxrt1050-evk.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
@@ -62,9 +71,9 @@
 
 void board_userled_initialize(void)
 {
-  /* Configure LED GPIOs for output */
+  /* Configure LED GPIO for output */
 
-  imxrt_config_gpio(GPIO_LED0);
+  imxrt_config_gpio(GPIO_LED);
 }
 
 /****************************************************************************
@@ -73,7 +82,7 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  imxrt_gpio_write(GPIO_LED0, !ledon);  /* Low illuminates */
+  imxrt_gpio_write(GPIO_LED, !ledon);  /* Low illuminates */
 }
 
 /****************************************************************************
@@ -84,5 +93,7 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  imxrt_gpio_write(GPIO_LED0, (ledset & BOARD_USERLED_BIT) == 0);
+  imxrt_gpio_write(GPIO_LED, (ledset & BOARD_USERLED_BIT) == 0);
 }
+
+#endif /* !CONFIG_ARCH_LEDS */

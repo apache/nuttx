@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/imxrt1050-evk/src/imxrt1050-evk.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __CONFIGS_IMXRT1050_EVK_SRC_IMXRT1050_EVK_H
 #define __CONFIGS_IMXRT1050_EVK_SRC_IMXRT1050_EVK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,29 +50,36 @@
 
 #include "imxrt_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
 
-/* i.MX RT 1050 GPIO Pin Definitions ************************************************/
+/* Configuration ************************************************************/
+
+/* i.MX RT 1050 GPIO Pin Definitions ****************************************/
 
 /* LEDs
  *
- * There is only 1  user LED available on the IMXRT board that
- * can be turned on and off.  The LEDs can be activated by driving the
- * connected I/O line to GND..
+ * There are four LED status indicators located on the EVK Board.  The
+ * functions of these LEDs include:
  *
- *   ---------- ----------- ---------------------
- *   IMXRT      Function    Shared functionality
- *   GPIO
- *   ---------- ----------- ---------------------
- *   GPIO1 PIN9  USER LED
- *   ---------- ----------- ---------------------
+ *   - Main Power Supply(D3)
+ *     Green: DC 5V main supply is normal.
+ *     Red:   J2 input voltage is over 5.6V.
+ *     Off:   The board is not powered.
+ *   - Reset RED LED(D15)
+ *   - OpenSDA LED(D16)
+ *   - USER LED(D18)
+ *
+ * Only a single LED, D18, is under software control.  It connects to
+ * GPIO_AD_B0_09 which is shared with JTAG_TDI and ENET_RST.  This pin
+ * must be configured as ALT5, GPIO1_IO09
  */
 
-#define GPIO_LED0     (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                       GPIO_PORT1 | GPIO_PIN9)
+#define IOMUX_LED  (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | IOMUX_DRIVE_40OHM | \
+                    IOMUX_SPEED_MEDIUM | IOMUX_SLEW_SLOW)
+#define GPIO_LED   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9 | \
+                    IOMUX_LED)
 
 /* Buttons
  *
@@ -85,27 +92,27 @@
 #define GPIO_SW8      (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
                        GPIO_PORT5 | GPIO_PIN0)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
 int imxrt_bringup(void);
@@ -129,13 +136,13 @@ int imxrt_bringup(void);
 void imxrt_autoled_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAMV71-XULT board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_HAVE_SPI
 void imxrt_spidev_initialize(void);
