@@ -590,9 +590,15 @@ static inline void rcc_enableapb2(void)
 #endif
 
 #ifdef CONFIG_STM32F7_SDMMC1
-  /* SDIO clock enable */
+  /* SDIO_1 clock enable */
 
   regval |= RCC_APB2ENR_SDMMC1EN;
+#endif
+
+#ifdef CONFIG_STM32F7_SDMMC2
+  /* SDIO_2 clock enable */
+
+  regval |= RCC_APB2ENR_SDMMC2EN;
 #endif
 
 #ifdef CONFIG_STM32F7_SPI1
