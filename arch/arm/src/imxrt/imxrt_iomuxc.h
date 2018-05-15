@@ -119,7 +119,7 @@
  *   .... .... .... .SS.
  */
 
-#define IOMUX_SPEED_SHIFT       (2)       /* Bits 2-3: Speed */
+#define IOMUX_SPEED_SHIFT       (1)       /* Bits 1-2: Speed */
 #define IOMUX_SPEED_MASK        (3 << IOMUX_SPEED_SHIFT)
 #  define IOMUX_SPEED_LOW       (SPEED_LOW    << IOMUX_SPEED_SHIFT) /* Low frequency (50 MHz) */
 #  define IOMUX_SPEED_MEDIUM    (SPEED_MEDIUM << IOMUX_SPEED_SHIFT) /* Medium frequency (100, 150 MHz) */

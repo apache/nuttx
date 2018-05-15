@@ -241,9 +241,10 @@ int imxrt_iomux_configure(uintptr_t padctl, iomux_pinset_t ioset)
 
   /* Select CMOS input or Schmitt Trigger input */
 
+  regval = 0;
   if ((ioset & IOMUX_SCHMITT_TRIGGER) != 0)
     {
-      regval |= PADCTL_SRE;
+      regval |= PADCTL_HYS;
     }
 
   /* Select drive strength */
@@ -291,7 +292,7 @@ int imxrt_iomux_configure(uintptr_t padctl, iomux_pinset_t ioset)
 
   if ((ioset & IOMUX_SLEW_FAST) != 0)
     {
-      regval |= PADCTL_HYS;
+      regval |= PADCTL_SRE;
     }
 
   /* Write the result to the specified Pad Control register */

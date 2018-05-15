@@ -140,15 +140,15 @@
  */
 
 #define GPIO_ALT_SHIFT         (27)      /* Bits 27-29: Peripheral alternate function */
-#define GPIO_ALT_MASK          (15 << GPIO_ALT_SHIFT)
-#  define GPIO_ALT0            (0 << GPIO_ALT_SHIFT)  /* Alternate function 1 */
-#  define GPIO_ALT1            (1 << GPIO_ALT_SHIFT)  /* Alternate function 2 */
-#  define GPIO_ALT2            (2 << GPIO_ALT_SHIFT)  /* Alternate function 3 */
-#  define GPIO_ALT3            (3 << GPIO_ALT_SHIFT)  /* Alternate function 4 */
-#  define GPIO_ALT4            (4 << GPIO_ALT_SHIFT)  /* Alternate function 5 */
+#define GPIO_ALT_MASK          (7 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT0            (0 << GPIO_ALT_SHIFT)  /* Alternate function 0 */
+#  define GPIO_ALT1            (1 << GPIO_ALT_SHIFT)  /* Alternate function 1 */
+#  define GPIO_ALT2            (2 << GPIO_ALT_SHIFT)  /* Alternate function 2 */
+#  define GPIO_ALT3            (3 << GPIO_ALT_SHIFT)  /* Alternate function 3 */
+#  define GPIO_ALT4            (4 << GPIO_ALT_SHIFT)  /* Alternate function 4 */
                                                       /* Alternate function 5 is GPIO */
-#  define GPIO_ALT6            (6 << GPIO_ALT_SHIFT)  /* Alternate function 1 */
-#  define GPIO_ALT7            (7 << GPIO_ALT_SHIFT)  /* Alternate function 1 */
+#  define GPIO_ALT6            (6 << GPIO_ALT_SHIFT)  /* Alternate function 6 */
+#  define GPIO_ALT7            (7 << GPIO_ALT_SHIFT)  /* Alternate function 7 */
 
 /* Interrupt edge/level configuration
  *
