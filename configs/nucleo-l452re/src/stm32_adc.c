@@ -168,7 +168,8 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
   ssize_t nbytes;
   struct adc_msg_s sample[ADC1_NCHANNELS] = { 0 };
   int nsamples;
-  int fd, ret, errval;
+  int ret;
+  int fd;
 
   fd = open("/dev/adc0", O_RDONLY);
   if (fd < 0)
@@ -245,6 +246,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
                 tsense = (110 - 30) * (sample[i].am_data - STM32_TSENSE_TSCAL1)
                                     / (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1) + 30;
                 ainfo("TSENSE: %d -> %d °C\n", sample[i].am_data, tsense);
+                UNUSED(tsense);
                 break;
 
               case ADC1_INTERNAL_VBATDIV3_CHANNEL:
