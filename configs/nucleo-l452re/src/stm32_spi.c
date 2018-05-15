@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l452re/src/stm32_spi.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,13 +45,14 @@
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
 
 #include <up_arch.h>
 #include <chip.h>
 #include <stm32l4.h>
 
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || defined(CONFIG_STM32L4_SPI3)
 

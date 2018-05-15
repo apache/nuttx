@@ -50,11 +50,12 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
-#include <arch/board/board.h>
 
 #include "stm32l4_gpio.h"
 #include "stm32l4_adc.h"
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 /************************************************************************************
  * Pre-processor Definitions

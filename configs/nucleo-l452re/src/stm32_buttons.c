@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l452re/src/stm32_buttons.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,11 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "stm32l4_gpio.h"
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_BUTTONS
 

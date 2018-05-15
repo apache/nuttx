@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/nucleo-l452re/src/stm32_appinit.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -42,9 +42,9 @@
 
 #include <stdint.h>
 
-#include <nuttx/board.h>
-
 #include "nucleo-l452re.h"
+
+#include <nuttx/board.h>
 
 /****************************************************************************
  * Public Functions

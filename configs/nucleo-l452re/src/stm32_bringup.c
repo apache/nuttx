@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/nucleo-l452re/src/stm32_bringup.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,10 @@
 #include <nuttx/leds/userled.h>
 #include <nuttx/board.h>
 
-#include <arch/board/board.h>
-
 #include "stm32l4_i2c.h"
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions

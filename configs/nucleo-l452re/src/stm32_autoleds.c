@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l452re/src/stm32_autoleds.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,13 +44,14 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32l4_gpio.h"
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_LEDS
 

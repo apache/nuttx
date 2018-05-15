@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l452re/src/stm32_userleds.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
 #include "chip.h"
@@ -51,6 +50,8 @@
 #include "up_internal.h"
 #include "stm32l4_gpio.h"
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 #ifndef CONFIG_ARCH_LEDS
 

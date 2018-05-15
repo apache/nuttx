@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l452re/src/stm32_boot.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -43,10 +43,11 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "nucleo-l452re.h"
+
+#include <arch/board/board.h>
 
 /************************************************************************************
  * Public Functions
