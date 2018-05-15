@@ -79,63 +79,63 @@
 /* First pick the console and ttys0.  This could be any of LPUART1-8 */
 
 #if defined(CONFIG_LPUART1_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart1port /* LPUART1 is console */
-#    define TTYS0_DEV           g_uart1port /* LPUART1 is ttyS0 */
-#    define UART1_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart1port /* LPUART1 is console */
+#  define TTYS0_DEV           g_uart1port /* LPUART1 is ttyS0 */
+#  define UART1_ASSIGNED      1
 #elif defined(CONFIG_LPUART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart2port /* LPUART2 is console */
-#    define TTYS0_DEV           g_uart2port /* LPUART2 is ttyS0 */
-#    define UART2_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart2port /* LPUART2 is console */
+#  define TTYS0_DEV           g_uart2port /* LPUART2 is ttyS0 */
+#  define UART2_ASSIGNED      1
 #elif defined(CONFIG_LPUART3_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart3port /* LPUART3 is console */
-#    define TTYS0_DEV           g_uart3port /* LPUART3 is ttyS0 */
-#    define UART3_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart3port /* LPUART3 is console */
+#  define TTYS0_DEV           g_uart3port /* LPUART3 is ttyS0 */
+#  define UART3_ASSIGNED      1
 #elif defined(CONFIG_LPUART4_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart4port /* LPUART4 is console */
-#    define TTYS0_DEV           g_uart4port /* LPUART4 is ttyS0 */
-#    define UART4_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart4port /* LPUART4 is console */
+#  define TTYS0_DEV           g_uart4port /* LPUART4 is ttyS0 */
+#  define UART4_ASSIGNED      1
 #elif defined(CONFIG_LPUART5_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart5port /* LPUART5 is console */
-#    define TTYS5_DEV           g_uart5port /* LPUART5 is ttyS0 */
-#    define UART5_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart5port /* LPUART5 is console */
+#  define TTYS5_DEV           g_uart5port /* LPUART5 is ttyS0 */
+#  define UART5_ASSIGNED      1
 #elif defined(CONFIG_LPUART6_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart6port /* LPUART6 is console */
-#    define TTYS6_DEV           g_uart6port /* LPUART6 is ttyS0 */
-#    define UART6_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart6port /* LPUART6 is console */
+#  define TTYS6_DEV           g_uart6port /* LPUART6 is ttyS0 */
+#  define UART6_ASSIGNED      1
 #elif defined(CONFIG_LPUART7_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart7port /* LPUART7 is console */
-#    define TTYS7_DEV           g_uart7port /* LPUART7 is ttyS0 */
-#    define UART7_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart7port /* LPUART7 is console */
+#  define TTYS7_DEV           g_uart7port /* LPUART7 is ttyS0 */
+#  define UART7_ASSIGNED      1
 #elif defined(CONFIG_LPUART8_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart8port /* LPUART8 is console */
-#    define TTYS8_DEV           g_uart8port /* LPUART8 is ttyS0 */
-#    define UART8_ASSIGNED      1
+#  define CONSOLE_DEV         g_uart8port /* LPUART8 is console */
+#  define TTYS8_DEV           g_uart8port /* LPUART8 is ttyS0 */
+#  define UART8_ASSIGNED      1
 #else
-#  undef CONSOLE_DEV                        /* No console */
+#  undef CONSOLE_DEV                      /* No console */
 #  if defined(CONFIG_IMXRT_LPUART1)
-#    define TTYS0_DEV           g_uart1port /* LPUART1 is ttyS0 */
-#    define UART1_ASSIGNED      1
+#    define TTYS0_DEV         g_uart1port /* LPUART1 is ttyS0 */
+#    define UART1_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART2)
-#    define TTYS0_DEV           g_uart2port /* LPUART2 is ttyS0 */
-#    define UART2_ASSIGNED      1
+#    define TTYS0_DEV         g_uart2port /* LPUART2 is ttyS0 */
+#    define UART2_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART3)
-#    define TTYS0_DEV           g_uart3port /* LPUART3 is ttyS0 */
-#    define UART3_ASSIGNED      1
+#    define TTYS0_DEV         g_uart3port /* LPUART3 is ttyS0 */
+#    define UART3_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART4)
-#    define TTYS0_DEV           g_uart4port /* LPUART4 is ttyS0 */
-#    define UART4_ASSIGNED      1
+#    define TTYS0_DEV         g_uart4port /* LPUART4 is ttyS0 */
+#    define UART4_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART5)
-#    define TTYS0_DEV           g_uart5port /* LPUART5 is ttyS0 */
-#    define UART5_ASSIGNED      1
+#    define TTYS0_DEV         g_uart5port /* LPUART5 is ttyS0 */
+#    define UART5_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART6)
-#    define TTYS0_DEV           g_uart6port /* LPUART6 is ttyS0 */
-#    define UART6_ASSIGNED      1
+#    define TTYS0_DEV         g_uart6port /* LPUART6 is ttyS0 */
+#    define UART6_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART7)
-#    define TTYS0_DEV           g_uart7port /* LPUART7 is ttyS0 */
-#    define UART7_ASSIGNED      1
+#    define TTYS0_DEV         g_uart7port /* LPUART7 is ttyS0 */
+#    define UART7_ASSIGNED    1
 #  elif defined(CONFIG_IMXRT_LPUART8)
-#    define TTYS0_DEV           g_uart8port /* LPUART8 is ttyS0 */
-#    define UART8_ASSIGNED      1
+#    define TTYS0_DEV         g_uart8port /* LPUART8 is ttyS0 */
+#    define UART8_ASSIGNED    1
 #  endif
 #endif
 
@@ -306,7 +306,7 @@
 #endif
 
 #if defined(CONFIG_PM)
-#  define PM_IDLE_DOMAIN             0 /* Revisit */
+#  define PM_IDLE_DOMAIN      0 /* Revisit */
 #endif
 
 /****************************************************************************
@@ -331,13 +331,13 @@ struct imxrt_uart_s
  ****************************************************************************/
 
 static inline uint32_t imxrt_serialin(struct imxrt_uart_s *priv,
-              uint32_t offset);
-static inline void imxrt_serialout(struct imxrt_uart_s *priv, uint32_t offset,
-              uint32_t value);
+                                      uint32_t offset);
+static inline void imxrt_serialout(struct imxrt_uart_s *priv,
+                                   uint32_t offset, uint32_t value);
 static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
-              uint32_t *ie);
+                                        uint32_t *ie);
 static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
-              uint32_t ie);
+                                        uint32_t ie);
 
 static int  imxrt_setup(struct uart_dev_s *dev);
 static void imxrt_shutdown(struct uart_dev_s *dev);
@@ -432,28 +432,28 @@ static char g_uart8txbuffer[CONFIG_LPUART8_TXBUFSIZE];
 #ifdef CONFIG_IMXRT_LPUART1
 static struct imxrt_uart_s g_uart1priv =
 {
-  .uartbase       = IMXRT_LPUART1_BASE,
-  .baud           = CONFIG_LPUART1_BAUD,
-  .irq            = IMXRT_IRQ_LPUART1,
-  .parity         = CONFIG_LPUART1_PARITY,
-  .bits           = CONFIG_LPUART1_BITS,
-  .stopbits2      = CONFIG_LPUART1_2STOP,
+  .uartbase     = IMXRT_LPUART1_BASE,
+  .baud         = CONFIG_LPUART1_BAUD,
+  .irq          = IMXRT_IRQ_LPUART1,
+  .parity       = CONFIG_LPUART1_PARITY,
+  .bits         = CONFIG_LPUART1_BITS,
+  .stopbits2    = CONFIG_LPUART1_2STOP,
 };
 
 static struct uart_dev_s g_uart1port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART1_RXBUFSIZE,
-    .buffer = g_uart1rxbuffer,
+    .size       = CONFIG_LPUART1_RXBUFSIZE,
+    .buffer     = g_uart1rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART1_TXBUFSIZE,
-    .buffer = g_uart1txbuffer,
+    .size       = CONFIG_LPUART1_TXBUFSIZE,
+    .buffer     = g_uart1txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart1priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart1priv,
 };
 #endif
 
@@ -462,204 +462,204 @@ static struct uart_dev_s g_uart1port =
 #ifdef CONFIG_IMXRT_LPUART2
 static struct imxrt_uart_s g_uart2priv =
 {
-  .uartbase       = IMXRT_LPUART2_BASE,
-  .baud           = CONFIG_LPUART2_BAUD,
-  .irq            = IMXRT_IRQ_LPUART2,
-  .parity         = CONFIG_LPUART2_PARITY,
-  .bits           = CONFIG_LPUART2_BITS,
-  .stopbits2      = CONFIG_LPUART2_2STOP,
+  .uartbase     = IMXRT_LPUART2_BASE,
+  .baud         = CONFIG_LPUART2_BAUD,
+  .irq          = IMXRT_IRQ_LPUART2,
+  .parity       = CONFIG_LPUART2_PARITY,
+  .bits         = CONFIG_LPUART2_BITS,
+  .stopbits2    = CONFIG_LPUART2_2STOP,
 };
 
 static struct uart_dev_s g_uart2port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
+    .size       = CONFIG_LPUART2_RXBUFSIZE,
+    .buffer     = g_uart2rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
+    .size       = CONFIG_LPUART2_TXBUFSIZE,
+    .buffer     = g_uart2txbuffer,
    },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart2priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart2priv,
 };
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART3
 static struct imxrt_uart_s g_uart3priv =
 {
-  .uartbase       = IMXRT_LPUART3_BASE,
-  .baud           = CONFIG_LPUART3_BAUD,
-  .irq            = IMXRT_IRQ_LPUART3,
-  .parity         = CONFIG_LPUART3_PARITY,
-  .bits           = CONFIG_LPUART3_BITS,
-  .stopbits2      = CONFIG_LPUART3_2STOP,
+  .uartbase     = IMXRT_LPUART3_BASE,
+  .baud         = CONFIG_LPUART3_BAUD,
+  .irq          = IMXRT_IRQ_LPUART3,
+  .parity       = CONFIG_LPUART3_PARITY,
+  .bits         = CONFIG_LPUART3_BITS,
+  .stopbits2    = CONFIG_LPUART3_2STOP,
 };
 
 static struct uart_dev_s g_uart3port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART3_RXBUFSIZE,
-    .buffer = g_uart3rxbuffer,
+    .size       = CONFIG_LPUART3_RXBUFSIZE,
+    .buffer     = g_uart3rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART3_TXBUFSIZE,
-    .buffer = g_uart3txbuffer,
+    .size       = CONFIG_LPUART3_TXBUFSIZE,
+    .buffer     = g_uart3txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart3priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart3priv,
 };
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART4
 static struct imxrt_uart_s g_uart4priv =
 {
-  .uartbase       = IMXRT_LPUART4_BASE,
-  .baud           = CONFIG_LPUART4_BAUD,
-  .irq            = IMXRT_IRQ_LPUART4,
-  .parity         = CONFIG_LPUART4_PARITY,
-  .bits           = CONFIG_LPUART4_BITS,
-  .stopbits2      = CONFIG_LPUART4_2STOP,
+  .uartbase     = IMXRT_LPUART4_BASE,
+  .baud         = CONFIG_LPUART4_BAUD,
+  .irq          = IMXRT_IRQ_LPUART4,
+  .parity       = CONFIG_LPUART4_PARITY,
+  .bits         = CONFIG_LPUART4_BITS,
+  .stopbits2    = CONFIG_LPUART4_2STOP,
 };
 
 static struct uart_dev_s g_uart4port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART4_RXBUFSIZE,
-    .buffer = g_uart4rxbuffer,
+    .size       = CONFIG_LPUART4_RXBUFSIZE,
+    .buffer     = g_uart4rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART4_TXBUFSIZE,
-    .buffer = g_uart4txbuffer,
+    .size       = CONFIG_LPUART4_TXBUFSIZE,
+    .buffer     = g_uart4txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart4priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart4priv,
 };
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART5
 static struct imxrt_uart_s g_uart5priv =
 {
-  .uartbase       = IMXRT_LPUART5_BASE,
-  .baud           = CONFIG_LPUART5_BAUD,
-  .irq            = IMXRT_IRQ_LPUART5,
-  .parity         = CONFIG_LPUART5_PARITY,
-  .bits           = CONFIG_LPUART5_BITS,
-  .stopbits2      = CONFIG_LPUART5_2STOP,
+  .uartbase     = IMXRT_LPUART5_BASE,
+  .baud         = CONFIG_LPUART5_BAUD,
+  .irq          = IMXRT_IRQ_LPUART5,
+  .parity       = CONFIG_LPUART5_PARITY,
+  .bits         = CONFIG_LPUART5_BITS,
+  .stopbits2    = CONFIG_LPUART5_2STOP,
 };
 
 static struct uart_dev_s g_uart5port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART5_RXBUFSIZE,
-    .buffer = g_uart5rxbuffer,
+    .size       = CONFIG_LPUART5_RXBUFSIZE,
+    .buffer     = g_uart5rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART5_TXBUFSIZE,
-    .buffer = g_uart5txbuffer,
+    .size       = CONFIG_LPUART5_TXBUFSIZE,
+    .buffer     = g_uart5txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart5priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart5priv,
 };
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART6
 static struct imxrt_uart_s g_uart6priv =
 {
-  .uartbase       = IMXRT_LPUART6_BASE,
-  .baud           = CONFIG_LPUART6_BAUD,
-  .irq            = IMXRT_IRQ_LPUART6,
-  .parity         = CONFIG_LPUART6_PARITY,
-  .bits           = CONFIG_LPUART6_BITS,
-  .stopbits2      = CONFIG_LPUART6_2STOP,
+  .uartbase     = IMXRT_LPUART6_BASE,
+  .baud         = CONFIG_LPUART6_BAUD,
+  .irq          = IMXRT_IRQ_LPUART6,
+  .parity       = CONFIG_LPUART6_PARITY,
+  .bits         = CONFIG_LPUART6_BITS,
+  .stopbits2    = CONFIG_LPUART6_2STOP,
 };
 
 static struct uart_dev_s g_uart6port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART6_RXBUFSIZE,
-    .buffer = g_uart6rxbuffer,
+    .size       = CONFIG_LPUART6_RXBUFSIZE,
+    .buffer     = g_uart6rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART6_TXBUFSIZE,
-    .buffer = g_uart6txbuffer,
+    .size       = CONFIG_LPUART6_TXBUFSIZE,
+    .buffer     = g_uart6txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart6priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart6priv,
 };
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART7
 static struct imxrt_uart_s g_uart7priv =
 {
-  .uartbase       = IMXRT_LPUART7_BASE,
-  .baud           = CONFIG_LPUART7_BAUD,
-  .irq            = IMXRT_IRQ_LPUART7,
-  .parity         = CONFIG_LPUART7_PARITY,
-  .bits           = CONFIG_LPUART7_BITS,
-  .stopbits2      = CONFIG_LPUART7_2STOP,
+  .uartbase     = IMXRT_LPUART7_BASE,
+  .baud         = CONFIG_LPUART7_BAUD,
+  .irq          = IMXRT_IRQ_LPUART7,
+  .parity       = CONFIG_LPUART7_PARITY,
+  .bits         = CONFIG_LPUART7_BITS,
+  .stopbits2    = CONFIG_LPUART7_2STOP,
 };
 
 static struct uart_dev_s g_uart7port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART7_RXBUFSIZE,
-    .buffer = g_uart7rxbuffer,
+    .size       = CONFIG_LPUART7_RXBUFSIZE,
+    .buffer     = g_uart7rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART7_TXBUFSIZE,
-    .buffer = g_uart7txbuffer,
+    .size       = CONFIG_LPUART7_TXBUFSIZE,
+    .buffer     = g_uart7txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart7priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart7priv,
 };
 #endif
 
 #ifdef CONFIG_IMXRT_LPUART8
 static struct imxrt_uart_s g_uart8priv =
 {
-  .uartbase       = IMXRT_LPUART8_BASE,
-  .baud           = CONFIG_LPUART8_BAUD,
-  .irq            = IMXRT_IRQ_LPUART8,
-  .parity         = CONFIG_LPUART8_PARITY,
-  .bits           = CONFIG_LPUART8_BITS,
-  .stopbits2      = CONFIG_LPUART8_2STOP,
+  .uartbase     = IMXRT_LPUART8_BASE,
+  .baud         = CONFIG_LPUART8_BAUD,
+  .irq          = IMXRT_IRQ_LPUART8,
+  .parity       = CONFIG_LPUART8_PARITY,
+  .bits         = CONFIG_LPUART8_BITS,
+  .stopbits2    = CONFIG_LPUART8_2STOP,
 };
 
 static struct uart_dev_s g_uart8port =
 {
-  .recv     =
+  .recv         =
   {
-    .size   = CONFIG_LPUART8_RXBUFSIZE,
-    .buffer = g_uart8rxbuffer,
+    .size       = CONFIG_LPUART8_RXBUFSIZE,
+    .buffer     = g_uart8rxbuffer,
   },
-  .xmit     =
+  .xmit         =
   {
-    .size   = CONFIG_LPUART8_TXBUFSIZE,
-    .buffer = g_uart8txbuffer,
+    .size       = CONFIG_LPUART8_TXBUFSIZE,
+    .buffer     = g_uart8txbuffer,
   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart8priv,
+  .ops          = &g_uart_ops,
+  .priv         = &g_uart8priv,
 };
 #endif
 
 #ifdef CONFIG_PM
 static  struct pm_callback_s g_serial_pmcb =
 {
-  .notify  = up_pm_notify,
-  .prepare = up_pm_prepare,
+  .notify       = up_pm_notify,
+  .prepare      = up_pm_prepare,
 };
 #endif
 
@@ -695,9 +695,9 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
                                         uint32_t *ie)
 {
   irqstate_t flags;
-  uint32_t regval = 0;
+  uint32_t regval;
 
-  flags  = enter_critical_section();
+  flags  = spin_lock_irqsave();
   regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
 
   /* Return the current Rx and Tx interrupt state */
@@ -709,7 +709,7 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
 
   regval &= ~LPUART_ALL_INTS;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -719,14 +719,18 @@ static inline void imxrt_disableuartint(struct imxrt_uart_s *priv,
 static inline void imxrt_restoreuartint(struct imxrt_uart_s *priv,
                                         uint32_t ie)
 {
+  irqstate_t flags;
+  uint32_t regval;
+
   /* Enable/disable any interrupts that are currently disabled but should be
    * enabled/disabled.
    */
 
-  uint32_t regval = 0;
-
-  regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) | ie;
+  regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+  regval &= ~LPUART_ALL_INTS;
+  regval |= ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -857,9 +861,9 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct imxrt_uart_s *)dev->priv;
 
+#if defined(CONFIG_PM) && CONFIG_PM_SERIAL_ACTIVITY > 0
   /* Report serial activity to the power management logic */
 
-#if defined(CONFIG_PM) && CONFIG_PM_SERIAL_ACTIVITY > 0
   pm_activity(PM_IDLE_DOMAIN, CONFIG_PM_SERIAL_ACTIVITY);
 #endif
 
@@ -989,10 +993,12 @@ static int imxrt_receive(struct uart_dev_s *dev, uint32_t *status)
 static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
-  uint32_t regval = 0;
+  irqstate_t flags;
+  uint32_t regval;
 
   /* Enable interrupts for data available at Rx */
 
+  flags = spin_lock_irqsave();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1001,11 +1007,14 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      priv->ie &= ~ (LPUART_CTRL_RIE | LPUART_CTRL_FEIE | LPUART_CTRL_ORIE);
+      priv->ie &= ~(LPUART_CTRL_RIE | LPUART_CTRL_FEIE | LPUART_CTRL_ORIE);
     }
 
-  regval = (imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & ~LPUART_ALL_INTS) | priv->ie;
+  regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+  regval &= ~LPUART_ALL_INTS;
+  regval |= priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -1019,10 +1028,12 @@ static void imxrt_rxint(struct uart_dev_s *dev, bool enable)
 static bool imxrt_rxavailable(struct uart_dev_s *dev)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
+  uint32_t regval;
 
   /* Return true is data is ready in the Rx FIFO */
 
-  return ((imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_RDRF) != 0);
+  regval = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
+  return ((regval & LPUART_STAT_RDRF) != 0);
 }
 
 /****************************************************************************
@@ -1050,10 +1061,12 @@ static void imxrt_send(struct uart_dev_s *dev, int ch)
 static void imxrt_txint(struct uart_dev_s *dev, bool enable)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
-  uint32_t regval = 0;
+  irqstate_t flags;
+  uint32_t regval;
 
   /* Enable interrupt for TX complete */
 
+  flags = spin_lock_irqsave();
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1065,8 +1078,11 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
       priv->ie &= ~LPUART_CTRL_TCIE;
     }
 
-  regval = (imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & ~LPUART_ALL_INTS) | priv->ie;
+  regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+  regval &= ~LPUART_ALL_INTS;
+  regval |= priv->ie;
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -1080,8 +1096,10 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
 static bool imxrt_txready(struct uart_dev_s *dev)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
+  uint32_t regval;
 
-  return ((imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TC) != 0);
+  regval = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
+  return ((regval & LPUART_STAT_TC) != 0);
 }
 
 /****************************************************************************
@@ -1095,8 +1113,10 @@ static bool imxrt_txready(struct uart_dev_s *dev)
 static bool imxrt_txempty(struct uart_dev_s *dev)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
+  uint32_t regval;
 
-  return ((imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) != 0);
+  regval = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
+  return ((regval & LPUART_STAT_TDRE) != 0);
 }
 
 /****************************************************************************
