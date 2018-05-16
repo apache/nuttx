@@ -70,6 +70,11 @@ endmenu # FlexIO Peripherals
 
 menu "LPUART Peripherals"
 
+config IMXRT_EDMA
+	bool "eDMA"
+	default n
+	depends on EXPERIMENTAL
+
 config IMXRT_LPUART1
 	bool "LPUART1"
 	default n

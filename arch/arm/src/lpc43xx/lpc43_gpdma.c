@@ -460,8 +460,8 @@ void lpc43_dmafree(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-int lpc43_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
+int lpc43_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                   uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
 {
   struct lpc43_dmach_s *dmach = (DMA_HANDLE)handle;
   uint32_t chbit;

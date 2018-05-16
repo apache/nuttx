@@ -132,8 +132,8 @@ void kinetis_dmafree(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-int kinetis_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                  uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
+int kinetis_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
 {
   return -1;
 }

@@ -60,12 +60,12 @@
 #define IMXRT_IRQ_EDMA7_23     (IMXRT_IRQ_EXTINT + 7)   /* eDMA Channel 7/23 Transfer Complete */
 #define IMXRT_IRQ_EDMA8_24     (IMXRT_IRQ_EXTINT + 8)   /* eDMA Channel 8/24 Transfer Complete */
 #define IMXRT_IRQ_EDMA9_25     (IMXRT_IRQ_EXTINT + 9)   /* eDMA Channel 9/25 Transfer Complete */
-#define IMXRT_IRQ_EDMA0_26     (IMXRT_IRQ_EXTINT + 10)  /* eDMA Channel 10/26 Transfer Complete */
-#define IMXRT_IRQ_EDMA1_27     (IMXRT_IRQ_EXTINT + 11)  /* eDMA Channel 11/27 Transfer Complete */
-#define IMXRT_IRQ_EDMA2_28     (IMXRT_IRQ_EXTINT + 12)  /* eDMA Channel 12/28 Transfer Complete */
-#define IMXRT_IRQ_EDMA3_29     (IMXRT_IRQ_EXTINT + 13)  /* eDMA Channel 13/29 Transfer Complete */
-#define IMXRT_IRQ_EDMA4_30     (IMXRT_IRQ_EXTINT + 14)  /* eDMA Channel 14/30 Transfer Complete */
-#define IMXRT_IRQ_EDMA5_31     (IMXRT_IRQ_EXTINT + 15)  /* eDMA Channel 15/31 Transfer Complete */
+#define IMXRT_IRQ_EDMA10_26    (IMXRT_IRQ_EXTINT + 10)  /* eDMA Channel 10/26 Transfer Complete */
+#define IMXRT_IRQ_EDMA11_27    (IMXRT_IRQ_EXTINT + 11)  /* eDMA Channel 11/27 Transfer Complete */
+#define IMXRT_IRQ_EDMA12_28    (IMXRT_IRQ_EXTINT + 12)  /* eDMA Channel 12/28 Transfer Complete */
+#define IMXRT_IRQ_EDMA13_29    (IMXRT_IRQ_EXTINT + 13)  /* eDMA Channel 13/29 Transfer Complete */
+#define IMXRT_IRQ_EDMA14_30    (IMXRT_IRQ_EXTINT + 14)  /* eDMA Channel 14/30 Transfer Complete */
+#define IMXRT_IRQ_EDMA15_31    (IMXRT_IRQ_EXTINT + 15)  /* eDMA Channel 15/31 Transfer Complete */
 #define IMXRT_IRQ_EDMA_ERROR   (IMXRT_IRQ_EXTINT + 16)  /* Error Interrupt, Channels 0-15 / 16-31 */
 #define IMXRT_IRQ_CM70         (IMXRT_IRQ_EXTINT + 17)  /* CTI trigger outputs (internal: CTIIRQ[0]) */
 #define IMXRT_IRQ_CM71         (IMXRT_IRQ_EXTINT + 18)  /* CTI trigger outputs (internal: CTIIRQ[1]) */

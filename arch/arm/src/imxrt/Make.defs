@@ -119,3 +119,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += imxrt_userspace.c
 endif
 endif
+
+ifeq ($(CONFIG_IMXRT_EDMA),y)
+CHIP_CSRCS += imxrt_edma.c
+endif
