@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imxrt/chip/imxrt_dmamux.h
+ * arch/arm/src/imxrt/chip/imxrt105x_dmamux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_DMAMUX_H
-#define __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_DMAMUX_H
+#ifndef __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT105X_DMAMUX_H
+#define __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT105X_DMAMUX_H
 
 /************************************************************************************
  * Included Files
@@ -165,4 +165,4 @@
 
 #define IMXRT_DMA_NCHANNLES          128  /* Includes reserved channels */
 
-#endif /* __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_DMAMUX_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT105X_DMAMUX_H */
