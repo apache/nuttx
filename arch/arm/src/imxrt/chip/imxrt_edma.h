@@ -1231,19 +1231,4 @@
 #define EDMA_TCD_BITER_ELINK_ELINK          (1 << 15) /* Bit 15: Enable channel-to-channel linking
                                                        * on minor-loop complete */
 
-/* TCD Structure Definitions ************************************************************************/
-
-#define EDMA_TCD_
-
-/****************************************************************************************************
- * Public Types
- ****************************************************************************************************/
-
-/* TCD Structure */
-
-struct imxrt_edma_tcd_s
-{
-  
-};
-
 #endif /* __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_EDMA_H */
