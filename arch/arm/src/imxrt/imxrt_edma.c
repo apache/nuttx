@@ -56,6 +56,7 @@
 
 #include "chip.h"
 #include "chip/imxrt_edma.h"
+#include "chip/imxrt_dmamux.h"
 #include "imxrt_edma.h"
 
 #ifdef CONFIG_IMXRT_EDMA
@@ -73,10 +74,10 @@
 struct imxrt_dmach_s
 {
   uint8_t chan;                   /* DMA channel number (0-IMXRT_EDMA_NCHANNELS) */
-  bool inuse;                     /* TRUE: The DMA channel is in use */
-  bool rx;                        /* TRUE: Peripheral to memory transfer */
+  bool inuse;                     /* true: The DMA channel is in use */
+  bool active;                    /* true: DMA has been started */
+  bool rx;                        /* true: Peripheral to memory transfer */
   uint32_t flags;                 /* DMA channel flags */
-  uint32_t cfg;                   /* Pre-calculated CFG register for transfer */
   dma_callback_t callback;        /* Callback invoked when the DMA completes */
   void *arg;                      /* Argument passed to callback function */
   uint32_t rxaddr;                /* RX memory address */
@@ -235,6 +236,7 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
 
   dmach->callback = NULL;
   dmach->arg      = NULL;
+  dmach->active   = false;
 }
 
 /****************************************************************************
@@ -253,6 +255,8 @@ static void imxrt_dmach_interrupt(struct imxrt_dmach_s *dmach)
    */
 
   /* Check if the any transfer has completed or any errors have occurred. */
+
+  imxrt_dmaterminate(dmach);
 }
 
 /****************************************************************************
@@ -282,14 +286,21 @@ static int imxrt_edma_interrupt(int irq, void *context, FAR void *arg)
 
   /* Check for an interrupt on the lower numbered DMA channel */
 
-  imxrt_dmach_interrupt(dmach);
+  if (dmach->active)
+    {
+      imxrt_dmach_interrupt(dmach);
+    }
 
   /* Check for an interrupt on the lower numbered DMA channel */
 
   chan += 16;
   DEBUGASSERT(chan < IMXRT_EDMA_NCHANNELS);
   dmach = &g_edma.dmach[chan];
-  imxrt_dmach_interrupt(dmach);
+
+  if (dmach->active)
+    {
+      imxrt_dmach_interrupt(dmach);
+    }
 
   return OK;
 }
@@ -411,6 +422,7 @@ DMA_HANDLE imxrt_dmachannel(void)
         {
           dmach         = candidate;
           dmach->inuse  = true;
+          dmach->active = false;
 
           /* Clear any pending interrupts on the channel */
 
@@ -454,7 +466,7 @@ void imxrt_dmafree(DMA_HANDLE handle)
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
 
   dmainfo("dmach: %p\n", dmach);
-  DEBUGASSERT((dmach != NULL) && (dmach->inuse));
+  DEBUGASSERT(dmach != NULL && dmach->inuse && !dmach->active);
 
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
    * operation and so should be safe.
@@ -462,6 +474,7 @@ void imxrt_dmafree(DMA_HANDLE handle)
 
   dmach->flags = 0;
   dmach->inuse = false;                   /* No longer in use */
+  dmach->inuse = active;                  /* Better not be active */
 }
 
 /****************************************************************************
@@ -491,7 +504,8 @@ int imxrt_dmatxsetup(DMA_HANDLE handle, uint8_t pchan, uint32_t maddr,
    * that this was not an RX transfer.
    */
 
-  dmach->rx = false;
+  dmach->rx     = false;
+  dmach->active = true;
 
   /* Clean caches associated with the DMA memory */
 
@@ -531,6 +545,7 @@ int imxrt_dmarxsetup(DMA_HANDLE handle, uint8_t pchan, uint32_t maddr,
   dmach->rx     = true;
   dmach->rxaddr = maddr;
   dmach->rxsize = nbytes;
+  dmach->active = true;
 
   /* Clean caches associated with the DMA memory */
 
@@ -606,15 +621,50 @@ void imxrt_dmastop(DMA_HANDLE handle)
 void imxrt_dmasample(DMA_HANDLE handle, struct imxrt_dmaregs_s *regs)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
+  uintptr_t regaddr;
+  unsigned int chan;
   irqstate_t flags;
 
-  /* Sample global registers */
+  DEBUGASSERT(dmach != NULL && regs != NULL);
+  chan           = dmach->chan;
+  regs->chan     = chan;
 
-  flags        = spin_lock_irqsave();
-#warning Missing logic
+  /* eDMA Global Registers */
 
-  /* Sample channel registers */
-#warning Missing logic
+  flags          = spin_lock_irqsave();
+
+  regs->cr       = getreg32(IMXRT_EDMA_CR);   /* Control */
+  regs->es       = getreg32(IMXRT_EDMA_ES);   /* Error Status */
+  regs->erq      = getreg32(IMXRT_EDMA_ERQ);  /* Enable Request */
+  regs->req      = getreg32(IMXRT_EDMA_INT);  /* Interrupt Request */
+  regs->err      = getreg32(IMXRT_EDMA_ERR);  /* Error */
+  regs->hrs      = getreg32(IMXRT_EDMA_HRS);  /* Hardware Request Status */
+  regs->ears     = getreg32(IMXRT_EDMA_EARS); /* Enable Asynchronous Request in Stop */
+
+  /* eDMA Channel registers */
+
+  regaddr        = IMXRT_EDMA_DCHPRI(chan);
+  regs->dchpri   = getreg8(regaddr);          /* Channel priority */
+
+  /* eDMA TCD */
+
+  base           = IMXRT_EDMA_TCD_BASE(chan);
+  regs->saddr    = getreg32(base + IMXRT_EDMA_TCD_SADDR_OFFSET);
+  regs->soff     = getreg16(base + IMXRT_EDMA_TCD_SOFF_OFFSET);
+  regs->attr     = getreg16(base + IMXRT_EDMA_TCD_ATTR_OFFSET);
+  regs->nbml     = getreg32(base + IMXRT_EDMA_TCD_NBYTES_ML_OFFSET);
+  regs->slast    = getreg32(base + IMXRT_EDMA_TCD_SLAST_OFFSET);
+  regs->daddr    = getreg32(base + IMXRT_EDMA_TCD_DADDR_OFFSET);
+  regs->doff     = getreg16(base + IMXRT_EDMA_TCD_DOFF_OFFSET);
+  regs->citer    = getreg16(base + IMXRT_EDMA_TCD_CITER_ELINK_OFFSET);
+  regs->dlastsga = getreg32(base + IMXRT_EDMA_TCD_DLASTSGA_OFFSET);
+  regs->csr      = getreg16(base + IMXRT_EDMA_TCD_CSR_OFFSET);
+  regs->biter    = getreg16(base + IMXRT_EDMA_TCD_BITER_ELINK_OFFSET);
+
+  /* DMAMUX registers */
+
+  regaddr        = IMXRT_DMAMUX_CHCF(chan);
+  regs->dmamux   = getreg32(regaddr);         /* Channel configuration */
 
   spin_unlock_irqrestore(flags);
 }
@@ -632,16 +682,48 @@ void imxrt_dmasample(DMA_HANDLE handle, struct imxrt_dmaregs_s *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void imxrt_dmadump(DMA_HANDLE handle, const struct imxrt_dmaregs_s *regs,
-                 const char *msg)
+void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg)
 {
-  struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
+  unsigned int chan;
+
+  DEBUGASSERT(regs != NULL && msg != NULL);
+
+  chan = regs->chan;
+  DEBUGASSERT(chan < IMXRT_EDMA_NCHANNELS);
 
   dmainfo("%s\n", msg);
-  dmainfo("  DMA Global Registers:\n");
-#warning Missing logic
-  dmainfo("  DMA Channel Registers:\n");
-#warning Missing logic
+  dmainfo("  eDMA Global Registers:\n");
+  dmainfo("          CR: %08x\n", regs->cr);
+  dmainfo("          ES: %08x\n", regs->es);
+  dmainfo("         ERQ: %08x\n", regs->erq);
+  dmainfo("         INT: %08x\n", regs->req);
+  dmainfo("         ERR: %08x\n", regs->err);
+  dmainfo("        EARS: %08x\n", regs->hrs);
+
+  /* eDMA Channel registers */
+
+  dmainfo("  eDMA Channel %u Registers:\n", chan);
+  dmainfo("    DCHPRI: %02x\n", regs->dchpri);
+
+  /* eDMA TCD */
+
+  dmainfo("  eDMA Channel %u TCD Registers:\n", chan);
+  dmainfo("       SADDR: %08x\n", regs->saddr);
+  dmainfo("        SOFF: %04x\n", regs->soff);
+  dmainfo("        ATTR: %04x\n", regs->attr);
+  dmainfo("        NBML: %05x\n", regs->nbml);
+  dmainfo("       SLAST: %05x\n", regs->slast);
+  dmainfo("       DADDR: %05x\n", regs->daddr);
+  dmainfo("        DOFF: %04x\n", regs->doff);
+  dmainfo("       CITER: %04x\n", regs->citer);
+  dmainfo("    DLASTSGA: %08x\n", regs->dlastsga);
+  dmainfo("         CSR: %04x\n", regs->csr);
+  dmainfo("       BITER: %04x\n", regs->biter);
+
+  /* DMAMUX registers */
+
+  dmainfo("  DMAMUX Channel %u Registers:\n", chan);
+  dmainfo("      DMAMUX: %08x\n", regs->dmamux);
 }
 #endif /* CONFIG_DEBUG_DMA */
 #endif /* CONFIG_IMXRT_EDMA */

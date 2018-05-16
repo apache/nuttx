@@ -1117,25 +1117,29 @@
 
 /* TCD Transfer Attributes */
 
+#define TCD_ATTR_SIZE_8BIT                  (0)       /* 8-bit */
+#define TCD_ATTR_SIZE_16BIT                 (1)       /* 16-bit */
+#define TCD_ATTR_SIZE_32BIT                 (2)       /* 32-bit */
+#define TCD_ATTR_SIZE_64BIT                 (3)       /* 64-bit */
+#define TCD_ATTR_SIZE_256BIT                (5)       /* 32-byte burst (4 beats of 64 bits) */
+
 #define EDMA_TCD_ATTR_DSIZE_SHIFT           (0)       /* Bits 0-2: Destination data transfer size */
 #define EDMA_TCD_ATTR_DSIZE_MASK            (7 << EDMA_TCD_ATTR_DSIZE_SHIFT)
-#  define EDMA_TCD_ATTR_DSIZE_8BIT          (0 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 8-bit */
-#  define EDMA_TCD_ATTR_DSIZE_16BIT         (1 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 16-bit */
-#  define EDMA_TCD_ATTR_DSIZE_32BIT         (2 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-bit */
-#  define EDMA_TCD_ATTR_DSIZE_64BIT         (3 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 64-bit */
-#  define EDMA_TCD_ATTR_DSIZE_4x64BIT       (5 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-byte burst (4
-                                                                              * beats of 64 bits) */
+#  define EDMA_TCD_ATTR_DSIZE_8BIT          (TCD_ATTR_SIZE_8BIT   << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 8-bit */
+#  define EDMA_TCD_ATTR_DSIZE_16BIT         (TCD_ATTR_SIZE_16BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 16-bit */
+#  define EDMA_TCD_ATTR_DSIZE_32BIT         (TCD_ATTR_SIZE_32BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-bit */
+#  define EDMA_TCD_ATTR_DSIZE_64BIT         (TCD_ATTR_SIZE_64BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 64-bit */
+#  define EDMA_TCD_ATTR_DSIZE_256BIT        (TCD_ATTR_SIZE_256BIT << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-byte burst */
 #define EDMA_TCD_ATTR_DMOD_SHIFT            (3)       /* Bits 3-7: Destination Address Modulo */
 #define EDMA_TCD_ATTR_DMOD_MASK             (31 << EDMA_TCD_ATTR_DMOD_SHIFT)
 #  define EDMA_TCD_ATTR_DMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_DMOD_SHIFT)
 #define EDMA_TCD_ATTR_SSIZE_SHIFT           (8)       /* Bits 8-10: Source data transfer size */
 #define EDMA_TCD_ATTR_SSIZE_MASK            (7 << EDMA_TCD_ATTR_SSIZE_SHIFT)
-#  define EDMA_TCD_ATTR_SSIZE_8BIT          (0 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
-#  define EDMA_TCD_ATTR_SSIZE_16BIT         (1 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 16-bit */
-#  define EDMA_TCD_ATTR_SSIZE_32BIT         (2 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
-#  define EDMA_TCD_ATTR_SSIZE_64BIT         (3 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 64-bit */
-#  define EDMA_TCD_ATTR_SSIZE_4x64BIT       (5 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-byte burst (4
-                                                                              * beats of 64 bits) */
+#  define EDMA_TCD_ATTR_SSIZE_8BIT          (TCD_ATTR_SIZE_8BIT   << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
+#  define EDMA_TCD_ATTR_SSIZE_16BIT         (TCD_ATTR_SIZE_16BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 16-bit */
+#  define EDMA_TCD_ATTR_SSIZE_32BIT         (TCD_ATTR_SIZE_32BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
+#  define EDMA_TCD_ATTR_SSIZE_64BIT         (TCD_ATTR_SIZE_64BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 64-bit */
+#  define EDMA_TCD_ATTR_SSIZE_256BIT        (TCD_ATTR_SIZE_256BIT << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-byte burst */
 #define EDMA_TCD_ATTR_SMOD_SHIFT            (11)      /* Bits 11-15: Source Address Modulo */
 #define EDMA_TCD_ATTR_SMOD_MASK             (31 << EDMA_TCD_ATTR_SMOD_SHIFT)
 #  define EDMA_TCD_ATTR_SMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_SMOD_SHIFT)
@@ -1164,7 +1168,7 @@
 #define EDMA_TCD_NBYTES_MLOFF_DMLOE         (1 << 30) /* Bit 30: Destination Minor Loop Offset enable */
 #define EDMA_TCD_NBYTES_MLOFF_SMLOE         (1 << 31) /* Bit 31: Source Minor Loop Offset Enable */
 
-/* TCD Last Source Address Adjustment (32-bit address adjustment */
+/* TCD Last Source Address Adjustment (32-bit address adjustment) */
 /* TCD Destination Address (32-bit address) */
 /* TCD Signed Destination Address Offset (32-bit signed address offset) */
 

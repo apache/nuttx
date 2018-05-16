@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include "chip/imxrt_edma.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -54,9 +55,58 @@
  * side is the peripheral and the other is memory (however, the interface could still
  * be used if, for example, both sides were memory although the naming would be
  * awkward)
+ *
+ * .... .... .... ....  .... CCCC GGBA DDSS
+ *
+ * REVISIT:  Initially, only vanilla Rx/Tx DMA block transfers are supported.
  */
 
-#define DMACH_FLAG_
+/* Source transfer size:
+ *
+ * .... .... .... ....  .... .... .... ..SS
+ */
+
+#define DMACH_FLAG_SSIZE_SHIFT        (0)      /* Bits 0-1: Source transfer size */
+#define DMACH_FLAG_SSIZE_MASK         (7 << DMACH_FLAG_SSIZE_SHIFT)
+#  define DMACH_FLAG_SSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_SSIZE_SHIFT) /* 8-bit */
+#  define DMACH_FLAG_SSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 16-bit */
+#  define DMACH_FLAG_SSIZE_32BIT      (TCD_ATTR_SIZE_32BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 32-bit */
+#  define DMACH_FLAG_SSIZE_64BIT      (TCD_ATTR_SIZE_64BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 64-bit */
+#  define DMACH_FLAG_SSIZE_256BIT     (TCD_ATTR_SIZE_256BIT << DMACH_FLAG_SSIZE_SHIFT) /* 32-byte burst */
+
+/* Destination transfer size:
+ *
+ * .... .... .... ....  .... .... .... DD..
+ */
+
+#define DMACH_FLAG_DSIZE_SHIFT        (2)      /* Bits 2-3: Destination transfer size */
+#define DMACH_FLAG_DSIZE_MASK         (7 << DMACH_FLAG_DSIZE_SHIFT)
+#  define EMACH_FLAG_DSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_DSIZE_SHIFT) /* 8-bit */
+#  define EMACH_FLAG_DSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 16-bit */
+#  define EMACH_FLAG_DSIZE_32BIT      (TCD_ATTR_SIZE_32BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 32-bit */
+#  define EMACH_FLAG_DSIZE_64BIT      (TCD_ATTR_SIZE_64BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 64-bit */
+#  define EMACH_FLAG_DSIZE_256BIT     (TCD_ATTR_SIZE_256BIT << DMACH_FLAG_DSIZE_SHIFT) /* 32-byte burst */
+
+/* Arbitration:
+ *
+ * .... .... .... ....  .... .... ..BA ....
+ */
+
+#define DMACH_FLAG_CHRR               (1 << 4)  /* Bit 4:  Round Robin Channel Arbitration */
+#define DMACH_FLAG_GRPRR              (1 << 5)  /* Bit 5:  Round Robin Group Arbitration */
+
+/* DMA Priorities:
+ *
+ * .... .... .... ....  .... CCCC GG.. ....
+ */
+
+#define DMACH_FLAG_GPPRI_SHIFT             (6)       /* Bits 6-7: Channel Group Priority */
+#define DMACH_FLAG_GRPPRI_MASK             (3 << DMACH_FLAG_GPPRI_SHIFT)
+#  define DMACH_FLAG_GRPPRI(n)             ((uint32_t)(n) << DMACH_FLAG_GPPRI_SHIFT)
+
+#define DMACH_FLAG_CHPRI_SHIFT             (8)       /* Bits 8-11: Channel Arbitration Priority */
+#define DMACH_FLAG_CHPRI_MASK              (15 << DMACH_FLAG_CHPRI_SHIFT)
+#  define DMACH_FLAG_CHPRI(n)              ((uint32_t)(n) << DMACH_FLAG_CHPRI_SHIFT)
 
 /************************************************************************************
  * Public Types
@@ -70,6 +120,8 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 #ifdef CONFIG_DEBUG_DMA
 struct imxrt_dmaregs_s
 {
+  uint8_t chan;      /* Sampled channel */
+
   /* eDMA Global Registers */
 
   uint32_t cr;       /* Control */
@@ -95,7 +147,7 @@ struct imxrt_dmaregs_s
   uint16_t doff;     /* TCD Signed Destination Address Offset */
   uint16_t citer;    /* TCD Current Minor Loop Link, Major Loop Count */
   uint32_t dlastsga; /* TCD Last Destination Address Adjustment/Scatter Gather Address */
-  uint32_t csr;      /* TCD Control and Status */
+  uint16_t csr;      /* TCD Control and Status */
   uint16_t biter;    /* TCD Beginning Minor Loop Link, Major Loop Count */
 
   /* DMAMUX registers */
@@ -233,8 +285,7 @@ void imxrt_dmasample(DMA_HANDLE handle, struct imxrt_dmaregs_s *regs);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void imxrt_dmadump(DMA_HANDLE handle, const struct imxrt_dmaregs_s *regs,
-                   const char *msg);
+void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg);
 #else
 #  define imxrt_dmadump(handle,regs,msg)
 #endif
