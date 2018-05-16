@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip/imxrt_memorymap.h"
 
 #if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
 #  include "chip/imxrt105x_dmamux.h"
