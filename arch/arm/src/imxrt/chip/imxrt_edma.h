@@ -964,67 +964,272 @@
 /* eDMA Bit-Field Definitions ***********************************************************************/
 
 /* Control */
-#define EDMA_CR_
+                                                      /* Bit 0:  Reserved */
+#define EDMA_CR_EDBG                        (1 << 1)  /* Bit 1:  Enable Debug */
+#define EDMA_CR_ERCA                        (1 << 2)  /* Bit 2:  Enable Round Robin Channel Arbitration */
+#define EDMA_CR_ERGA                        (1 << 3)  /* Bit 3:  Enable Round Robin Group Arbitration */
+#define EDMA_CR_HOE                         (1 << 4)  /* Bit 4:  Halt On Error */
+#define EDMA_CR_HALT                        (1 << 5)  /* Bit 5:  Halt DMA Operations */
+#define EDMA_CR_CLM                         (1 << 6)  /* Bit 6:  Continuous Link Mode */
+#define EDMA_CR_EMLM                        (1 << 7)  /* Bit 7:  Enable Minor Loop Mapping */
+#define EDMA_CR_GRP0PRI                     (1 << 8)  /* Bit 8:  Channel Group 0 Priority */
+                                                      /* Bit 9:  Reserved */
+#define EDMA_CR_GRP1PRI                     (1 << 10) /* Bit 10: Channel Group 1 Priority */
+                                                      /* Bits 11-15: Reserved */
+#define EDMA_CR_ECX                         (1 << 16) /* Bit 16: Error Cancel Transfer */
+#define EDMA_CR_CX                          (1 << 17) /* Bit 17: Cancel Transfer */
+                                                      /* Bits 18-23: Reserved */
+                                                      /* Bits 24-30: eDMA version number (reserved) */
+#define EDMA_CR_ACTIVE                      (1 << 31) /* Bit 31: DMA Active Status */
+
 /* Error Status */
-#define EDMA_ES_
+
+#define EDMA_ES_DBE                         (1 << 0)  /* Bit 0:  Destination Bus Error */
+#define EDMA_ES_SBE                         (1 << 1)  /* Bit 1:  Source Bus Error */
+#define EDMA_ES_SGE                         (1 << 2)  /* Bit 2:  Scatter/Gather Configuration Error */
+#define EDMA_ES_NCE                         (1 << 3)  /* Bit 3:  NBYTES/CITER Configuration Error */
+#define EDMA_ES_DOE                         (1 << 4)  /* Bit 4:  Destination Offset Error */
+#define EDMA_ES_DAE                         (1 << 5)  /* Bit 5:  Destination Address Error */
+#define EDMA_ES_SOE                         (1 << 6)  /* Bit 6:  Source Offset Error */
+#define EDMA_ES_SAE                         (1 << 7)  /* Bit 7:  Source Address Error */
+#define EDMA_ES_ERRCHN_SHIFT                (8)       /* Bits 8-12: Error Channel Number or
+                                                       *         Canceled Channel Number */
+#define EDMA_ES_ERRCHN_MASK                 (0x1f << EDMA_ES_ERRCHN_SHIFT)
+                                                      /* Bit 13: Reserved */
+#define EDMA_ES_CPE                         (1 << 14) /* Bit 14: Channel Priority Error */
+#define EDMA_ES_GPE                         (1 << 15) /* Bit 15: Group Priority Error */
+#define EDMA_ES_ECX                         (1 << 16) /* Bit 16: Transfer Canceled */
+                                                      /* Bits 17-30: Reserved */
+#define EDMA_ES_VLD                         (1 << 31) /* Bit 31: Logical OR of all ERR status bits */
+
 /* Enable Request */
-#define EDMA_ERQ_
+
+#define EDMA_ERQ(n)                         ((uint32_t)1 << (n)) /* Bit n:  Enable DMA request n */
+
 /* Enable Error Interrupt */
-#define EDMA_EEI_
+
+#define EDMA_EEI(n)                         ((uint32_t)1 << (n)) /* Bit n:  Enable error interrupt n */
+
 /* Clear Enable Error Interrupt */
-#define EDMA_CEEI_
+
+#define EDMA_CEEI_SHIFT                     (0)       /* Bits 0-4: Clear Enable Error Interrupt */
+#define EDMA_CEEI_MASK                      (0x1f << EDMA_CEEI_SHIFT)
+#  define EDMA_CEEI(n)                      ((uint32_t)(n) << EDMA_CEEI_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_CEEI_CAEE                      (1 << 6)  /* Bit 6:  Clear All Enable Error Interrupts */
+#define EDMA_CEEI_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Set Enable Error Interrupt */
-#define EDMA_SEEI_
+
+#define EDMA_SEEI_SHIFT                     (0)       /* Bits 0-4: Set Enable Error Interrupt */
+#define EDMA_SEEI_MASK                      (0x1f << EDMA_SEEI_SHIFT)
+#  define EDMA_SEEI(n)                      ((uint32_t)(n) << EDMA_SEEI_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_SEEI_SAEE                      (1 << 6)  /* Bit 6:  Set All Enable Error Interrupts */
+#define EDMA_SEEI_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Clear Enable Request */
-#define EDMA_CERQ_
+
+#define EDMA_CERQ_SHIFT                     (0)       /* Bits 0-4: Clear Enable Request */
+#define EDMA_CERQ_MASK                      (0x1f << EDMA_CERQ_SHIFT)
+#  define EDMA_CERQ(n)                      ((uint32_t)(n) << EDMA_CERQ_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_CERQ_CAER                      (1 << 6)  /* Bit 6:  Clear All Enable Requests */
+#define EDMA_CERQ_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Set Enable Request */
-#define EDMA_SERQ_
+
+#define EDMA_SERQ_SHIFT                     (0)       /* Bits 0-4: Set Enable Request */
+#define EDMA_SERQ_MASK                      (0x1f << EDMA_SERQ_SHIFT)
+#  define EDMA_SERQ(n)                      ((uint32_t)(n) << EDMA_SERQ_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_SERQ_SAER                      (1 << 6)  /* Bit 6:  Set All Enable Requests */
+#define EDMA_SERQ_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Clear DONE Status Bit */
-#define EDMA_CDNE_
+
+#define EDMA_CDNE_SHIFT                     (0)       /* Bits 0-4: Clear DONE Bit */
+#define EDMA_CDNE_MASK                      (0x1f << EDMA_CDNE_SHIFT)
+#  define EDMA_CDNE(n)                      ((uint32_t)(n) << EDMA_CDNE_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_CDNE_CADN                      (1 << 6)  /* Bit 6:  Clears All DONE Bits */
+#define EDMA_CDNE_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Set START Bit */
-#define EDMA_SSRT_
+
+#define EDMA_SSRT_SHIFT                     (0)       /* Bits 0-4: Set START Bit */
+#define EDMA_SSRT_MASK                      (0x1f << EDMA_SSRT_SHIFT)
+#  define EDMA_SSRT(n)                      ((uint32_t)(n) << EDMA_SSRT_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_SSRT_SAST                      (1 << 6)  /* Bit 6:  Set All START Bits (activates all channels) */
+#define EDMA_SSRT_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Clear Error */
-#define EDMA_CERR_
+
+#define EDMA_CERR_SHIFT                     (0)       /* Bits 0-4: Clear Error Indicator */
+#define EDMA_CERR_MASK                      (0x1f << EDMA_CERR_SHIFT)
+#  define EDMA_CERR(n)                      ((uint32_t)(n) << EDMA_CERR_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_CERR_CAEI                      (1 << 6)  /* Bit 6:  Clear All Error Indicators */
+#define EDMA_CERR_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Clear Interrupt Request */
 #define EDMA_CINT_
+
+#define EDMA_CINT_SHIFT                     (0)       /* Bits 0-4: Clear Interrupt Request */
+#define EDMA_CINT_MASK                      (0x1f << EDMA_CINT_SHIFT)
+#  define EDMA_CINT(n)                      ((uint32_t)(n) << EDMA_CINT_SHIFT)
+                                                      /* Bit 5:  Reserved */
+#define EDMA_CINT_CAIR                      (1 << 6)  /* Bit 6:  Clear All Interrupt Requests */
+#define EDMA_CINT_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
+
 /* Interrupt Request */
-#define EDMA_INT_
+
+#define EDMA_INT(n)                         ((uint32_t)1 << (n)) /* Bit n:  Interrupt Request n */
+
 /* Error */
-#define EDMA_ERR_
+
+#define EDMA_ERR(n)                         ((uint32_t)1 << (n)) /* Bit n:  Error In Channel n */
+
 /* Hardware Request Status */
-#define EDMA_HRS_
+
+#define EDMA_HRS(n)                         ((uint32_t)1 << (n)) /* Bit n:  Hardware Request Status
+                                                                  * Channel n */
 /* Enable Asynchronous Request in Stop */
-#define EDMA_EARS_
 
+#define EDMA_EARS(n)                        ((uint32_t)1 << (n)) /* Bit n:  Enable asynchronous DMA
+                                                                  * request in stop mode for channel n */
 /* Channel n Priority */
-#define EDMA_DCHPRI_
 
-/* TCD Source Address */
-#define EDMA_TCD_SADDR_
-/* TCD Signed Source Address Offset */
-#define EDMA_TCD_SOFF_
+#define EDMA_DCHPRI_CHPRI_SHIFT             (0)       /* Bits 0-3: Channel n Arbitration Priority */
+#define EDMA_DCHPRI_CHPRI_MASK              (15 << EDMA_DCHPRI_CHPRI_SHIFT)
+#  define EDMA_DCHPRI_CHPRI(n)              ((uint32_t)(n) << EDMA_DCHPRI_CHPRI_SHIFT)
+#define EDMA_DCHPRI_GRPPRI_SHIFT            (4)       /* Bits 4-5: Channel n Current Group Priority */
+#define EDMA_DCHPRI_GRPPRI_MASK             (3 << EDMA_DCHPRI_GRPPRI_SHIFT)
+#  define EDMA_DCHPRI_GRPPRI(n)             ((uint32_t)(n) << EDMA_DCHPRI_GRPPRI_SHIFT)
+#define EDMA_DCHPRI_DPA                     (1 << 6)  /* Bit 6:  Disable Preempt Ability */
+#define EDMA_DCHPRI_ECP                     (1 << 7)  /* Bit 7:  Enable Channel Preemption */
+
+/* TCD Source Address (32-bit address) */
+/* TCD Signed Source Address Offset (16-bit offset) */
+
 /* TCD Transfer Attributes */
-#define EDMA_TCD_ATTR_
+
+#define EDMA_TCD_ATTR_DSIZE_SHIFT           (0)       /* Bits 0-2: Destination data transfer size */
+#define EDMA_TCD_ATTR_DSIZE_MASK            (7 << EDMA_TCD_ATTR_DSIZE_SHIFT)
+#  define EDMA_TCD_ATTR_DSIZE_8BIT          (0 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 8-bit */
+#  define EDMA_TCD_ATTR_DSIZE_16BIT         (1 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 16-bit */
+#  define EDMA_TCD_ATTR_DSIZE_32BIT         (2 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-bit */
+#  define EDMA_TCD_ATTR_DSIZE_64BIT         (3 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 64-bit */
+#  define EDMA_TCD_ATTR_DSIZE_4x64BIT       (5 << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-byte burst (4
+                                                                              * beats of 64 bits) */
+#define EDMA_TCD_ATTR_DMOD_SHIFT            (3)       /* Bits 3-7: Destination Address Modulo */
+#define EDMA_TCD_ATTR_DMOD_MASK             (31 << EDMA_TCD_ATTR_DMOD_SHIFT)
+#  define EDMA_TCD_ATTR_DMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_DMOD_SHIFT)
+#define EDMA_TCD_ATTR_SSIZE_SHIFT           (8)       /* Bits 8-10: Source data transfer size */
+#define EDMA_TCD_ATTR_SSIZE_MASK            (7 << EDMA_TCD_ATTR_SSIZE_SHIFT)
+#  define EDMA_TCD_ATTR_SSIZE_8BIT          (0 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
+#  define EDMA_TCD_ATTR_SSIZE_16BIT         (1 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 16-bit */
+#  define EDMA_TCD_ATTR_SSIZE_32BIT         (2 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
+#  define EDMA_TCD_ATTR_SSIZE_64BIT         (3 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 64-bit */
+#  define EDMA_TCD_ATTR_SSIZE_4x64BIT       (5 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-byte burst (4
+                                                                              * beats of 64 bits) */
+#define EDMA_TCD_ATTR_SMOD_SHIFT            (11)      /* Bits 11-15: Source Address Modulo */
+#define EDMA_TCD_ATTR_SMOD_MASK             (31 << EDMA_TCD_ATTR_SMOD_SHIFT)
+#  define EDMA_TCD_ATTR_SMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_SMOD_SHIFT)
+
 /* TCD Signed Minor Loop Offset / Byte Count */
-#define EDMA_TCD_NBYTES_MLOFFNO_
-#define EDMA_TCD_NBYTES_MLOFFYES_
-#define EDMA_TCD_NBYTES_MLNO_
-/* TCD Last Source Address Adjustment */
-#define EDMA_TCD_SLAST_
-/* TCD Destination Address */
-#define EDMA_TCD_DADDR_
-/* TCD Signed Destination Address Offset */
-#define EDMA_TCD_DOFF_
-/* TCD Current Minor Loop Link, Major Loop Count */
-#define EDMA_TCD_CITER_ELINKYES_
-#define EDMA_TCD_CITER_ELINKNO_
-/* TCD Last Destination Address Adjustment/Scatter Gather Address */
-#define EDMA_TCD_DLASTSGA_
+/* Minor Byte Count (Minor Loop Mapping Disabled -- 32-bit byte count) */
+
+/* TCD Signed Minor Loop Offset / Byte Count */
+/* Minor Byte Count (Minor Loop Mapping Enabled, offset disabled) */
+
+#define EDMA_TCD_NBYTES_ML_NBYTES_SHIFT     (0)       /* Bits 0-29: Minor Byte Transfer Count */
+#define EDMA_TCD_NBYTES_ML_NBYTES_MASK      (0x3fffffff << EDMA_TCD_NBYTES_ML_NBYTES_SHIFT)
+#  define EDMA_TCD_NBYTES_ML_NBYTES(n)      ((uint32_t)(n) << EDMA_TCD_NBYTES_ML_NBYTES_SHIFT)
+#define EDMA_TCD_NBYTES_ML_DMLOE            (1 << 30) /* Bit 30: Destination Minor Loop Offset enable */
+#define EDMA_TCD_NBYTES_ML_SMLOE            (1 << 31) /* Bit 31: Source Minor Loop Offset Enable */
+
+/* TCD Signed Minor Loop Offset / Byte Count */
+/* Minor Byte Count (Minor Loop Mapping Enabled, offset enabled) */
+
+#define EDMA_TCD_NBYTES_MLOFF_NBYTES_SHIFT  (0)      /* Bits 0-9: Minor Byte Transfer Count */
+#define EDMA_TCD_NBYTES_MLOFF_NBYTES_MASK   (0x3ff << EDMA_TCD_NBYTES_MLOFF_NBYTES_SHIFT)
+#  define EDMA_TCD_NBYTES_MLOFF_NBYTES(n)   ((uint32_t)(n) << EDMA_TCD_NBYTES_MLOFF_NBYTES_SHIFT)
+#define EDMA_TCD_NBYTES_MLOFF_MLOFF_SHIFT   (10)     /* Bits 10-29: Minor Byte Transfer Count */
+#define EDMA_TCD_NBYTES_MLOFF_MLOFF_MASK    (0xfffff << EDMA_TCD_NBYTES_MLOFF_MLOFF_SHIFT)
+#  define EDMA_TCD_NBYTES_MLOFF_MLOFF(n)    ((uint32_t)(n) << EDMA_TCD_NBYTES_MLOFF_MLOFF_SHIFT)
+#define EDMA_TCD_NBYTES_MLOFF_DMLOE         (1 << 30) /* Bit 30: Destination Minor Loop Offset enable */
+#define EDMA_TCD_NBYTES_MLOFF_SMLOE         (1 << 31) /* Bit 31: Source Minor Loop Offset Enable */
+
+/* TCD Last Source Address Adjustment (32-bit address adjustment */
+/* TCD Destination Address (32-bit address) */
+/* TCD Signed Destination Address Offset (32-bit signed address offset) */
+
+/* TCD Current Minor Loop Link, Major Loop Count (Channel linking disabled) */
+
+#define EDMA_TCD_CITER_CITER_SHIFT          (0)       /* Bit 0-14: Starting Major Iteration Count */
+#define EDMA_TCD_CITER_CITER_MASK           (0x7fff << EDMA_TCD_CITER_CITER_SHIFT)
+#  define EDMA_TCD_CITER_CITER(n)           ((uint32_t)(n) << EDMA_TCD_CITER_CITER_SHIFT)
+#define EDMA_TCD_CITER_ELINK                (1 << 15) /* Bit 15: Enable channel-to-channel linking
+                                                       * on minor-loop complete */
+
+/* TCD Current Minor Loop Link, Major Loop Count (Channel linking enabled) */
+
+#define EDMA_TCD_CITER_ELINK_CITER_SHIFT    (0)       /* Bit 0-8: Current major iteration count */
+#define EDMA_TCD_CITER_ELINK_CITER_MASK     (0x1ff << EDMA_TCD_CITER_ELINK_CITER_SHIFT)
+#  define EDMA_TCD_CITER_ELINK_CITER(n)     ((uint32_t)(n) << EDMA_TCD_CITER_ELINK_CITER_SHIFT)
+#define EDMA_TCD_CITER_ELINK_LINKCH_SHIFT   (9)       /* Bit 9-13: Minor Loop Link Channel Number */
+#define EDMA_TCD_CITER_ELINK_LINKCH_MASK    (31 << EDMA_TCD_CITER_ELINK_LINKCH_SHIFT)
+#  define EDMA_TCD_CITER_ELINK_LINKCH(n)    ((uint32_t)(n) << EDMA_TCD_CITER_ELINK_LINKCH_SHIFT)
+                                                      /* Bit 14: Reserved */
+#define EDMA_TCD_CITER_ELINK_ELINK          (1 << 15) /* Bit 15: Enable channel-to-channel linking
+                                                       * on minor-loop complete */
+
+/* TCD Last Destination Address Adjustment/Scatter Gather Address (32-bit address) */
+
 /* TCD Control and Status */
-#define EDMA_TCD_CSR_
-/* TCD Beginning Minor Loop Link, Major Loop Count */
-#define EDMA_TCD_BITER_ELINKYES_
-#define EDMA_TCD_BITER_ELINKNO_
+
+#define EDMA_TCD_CSR_START                  (1 << 0)  /* Bit 0:  Channel Start */
+#define EDMA_TCD_CSR_INTMAJOR               (1 << 1)  /* Bit 1:  Enable an interrupt when major
+                                                       *         iteration count completes */
+#define EDMA_TCD_CSR_INTHALF                (1 << 2)  /* Bit 2:  Enable an interrupt when major
+                                                       *         counter is half complete */
+#define EDMA_TCD_CSR_DREQ                   (1 << 3)  /* Bit 3:  Disable Request */
+#define EDMA_TCD_CSR_ESG                    (1 << 4)  /* Bit 4:  Enable Scatter/Gather Processing */
+#define EDMA_TCD_CSR_MAJORELINK             (1 << 5)  /* Bit 5:  Enable channel-to-channel linking
+                                                       *         on major loop complete */
+#define EDMA_TCD_CSR_ACTIVE                 (1 << 6)  /* Bit 6:  Channel Active */
+#define EDMA_TCD_CSR_DONE                   (1 << 7)  /* Bit 7:  Channel Done */
+#define EDMA_TCD_CSR_MAJORLINKCH_SHIFT      (8)       /* Bits 8-12: Major Loop Link Channel Number */
+                                                      /* Bit 13: Reserved */
+#define EDMA_TCD_CSR_BWC_SHIFT              (14)      /* Bits 14-15: Bandwidth Control */
+#define EDMA_TCD_CSR_BWC_MASK               (3 << EDMA_TCD_CSR_BWC_SHIFT)
+#  define EDMA_TCD_CSR_BWC_NONE             (0 << EDMA_TCD_CSR_BWC_SHIFT) /* No eDMA engine stalls */
+#  define EDMA_TCD_CSR_BWC_4CYCLES          (2 << EDMA_TCD_CSR_BWC_SHIFT) /* eDMA engine stalls for 4
+                                                                           * cycles after each R/W */
+#  define EDMA_TCD_CSR_BWC_8CYCLES          (3 << EDMA_TCD_CSR_BWC_SHIFT) /* eDMA engine stalls for 8
+                                                                           * cycles after each R/W */
+
+/* TCD Beginning Minor Loop Link, Major Loop Count (Channel linking disabled) */
+
+#define EDMA_TCD_BITER_BITER_SHIFT          (0)       /* Bit 0-14: Starting Major Iteration Count */
+#define EDMA_TCD_BITER_BITER_MASK           (0x7fff << EDMA_TCD_BITER_BITER_SHIFT)
+#  define EDMA_TCD_BITER_BITER(n)           ((uint32_t)(n) << EDMA_TCD_BITER_BITER_SHIFT)
+#define EDMA_TCD_BITER_ELINK                (1 << 15) /* Bit 15: Enable channel-to-channel linking
+                                                       * on minor-loop complete */
+
+/* TCD Beginning Minor Loop Link, Major Loop Count (Channel linking enabled) */
+
+#define EDMA_TCD_BITER_ELINK_BITER_SHIFT    (0)       /* Bit 0-8: Current major iteration count */
+#define EDMA_TCD_BITER_ELINK_BITER_MASK     (0x1ff << EDMA_TCD_BITER_ELINK_BITER_SHIFT)
+#  define EDMA_TCD_BITER_ELINK_BITER(n)     ((uint32_t)(n) << EDMA_TCD_BITER_ELINK_BITER_SHIFT)
+#define EDMA_TCD_BITER_ELINK_LINKCH_SHIFT   (9)       /* Bit 9-13: Link Channel Number */
+#define EDMA_TCD_BITER_ELINK_LINKCH_MASK    (31 << EDMA_TCD_BITER_ELINK_LINKCH_SHIFT)
+#  define EDMA_TCD_BITER_ELINK_LINKCH(n)    ((uint32_t)(n) << EDMA_TCD_BITER_ELINK_LINKCH_SHIFT)
+                                                      /* Bit 14: Reserved */
+#define EDMA_TCD_BITER_ELINK_ELINK          (1 << 15) /* Bit 15: Enable channel-to-channel linking
+                                                       * on minor-loop complete */
 
 /* TCD Structure Definitions ************************************************************************/
 
