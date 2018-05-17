@@ -1292,7 +1292,6 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
         }
     }
 
-errout_with_state:
   net_unlock();
   inet_recvfrom_uninitialize(&state);
   return ret;

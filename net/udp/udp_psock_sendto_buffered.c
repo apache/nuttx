@@ -647,31 +647,87 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       return -EDESTADDRREQ;
     }
 
-  /* Make sure that we have the IP address mapping */
+  /* Get the underlying the UDP connection structure.  */
 
   conn = (FAR struct udp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn);
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
+  /* Assure the the IPv4 destination address maps to a valid MAC address in
+   * the ARP table.
+   */
+
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   if (psock->s_domain == PF_INET)
 #endif
     {
+      in_addr_t destipaddr;
+
+      /* Check if the socket is connection mode */
+
+      if (_SS_ISCONNECTED(psock->s_flags))
+        {
+          /* Yes.. use the connected remote address (the 'to' address is
+           * null).
+           */
+
+          destipaddr = conn->u.ipv4.raddr;
+        }
+      else
+        {
+          FAR const struct sockaddr_in *into;
+
+          /* No.. use the destination address provided by the non-NULL 'to'
+           * argument.
+           */
+
+          into       = (FAR const struct sockaddr_in *)to;
+          destipaddr = into->sin_addr.s_addr;
+        }
+
       /* Make sure that the IP address mapping is in the ARP table */
 
-      ret = arp_send(conn->u.ipv4.raddr);
+      ret = arp_send(destipaddr);
     }
 #endif /* CONFIG_NET_ARP_SEND */
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  /* Assure the the IPv6 destination address maps to a valid MAC address in
+   * the neighbor table.
+   */
+
 #ifdef CONFIG_NET_ARP_SEND
   else
 #endif
     {
+      FAR const uint16_t *destipaddr;
+
+      /* Check if the socket is connection mode */
+
+      if (_SS_ISCONNECTED(psock->s_flags))
+        {
+          /* Yes.. use the connected remote address (the 'to' address is
+           * null).
+           */
+
+          destipaddr = conn->u.ipv6.raddr;
+        }
+      else
+        {
+          FAR const struct sockaddr_in6 *into;
+
+          /* No.. use the destination address provided by the non-NULL 'to'
+           * argument.
+           */
+
+          into       = (FAR const struct sockaddr_in6 *)to;
+          destipaddr = into->sin6_addr.s6_addr16;
+        }
+
       /* Make sure that the IP address mapping is in the Neighbor Table */
 
-      ret = icmpv6_neighbor(conn->u.ipv6.raddr);
+      ret = icmpv6_neighbor(destipaddr);
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
 
