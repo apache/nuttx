@@ -56,17 +56,40 @@
  * be used if, for example, both sides were memory although the naming would be
  * awkward)
  *
- * .... .... .... ....  .... CCCC GGBA DDSS
+ * .... .... .... ....  CCCC GGBA DDSS ..TT
  *
  * REVISIT:  Initially, only vanilla Rx/Tx DMA block transfers are supported.
  */
 
-/* Source transfer size:
+/* Transfer type:
  *
- * .... .... .... ....  .... .... .... ..SS
+ * .... .... .... ....  .... .... .... ..TT
  */
 
-#define DMACH_FLAG_SSIZE_SHIFT        (0)      /* Bits 0-1: Source transfer size */
+#define TTYPE_M2M                     (0)      /* Memory-to-memory (not supported) */
+#define TTYPE_M2P                     (1)      /* Memory-to-peripheral (normal Tx) */
+#define TTYPE_P2M                     (2)      /* Peripheral-to-memory (normal Rx) */
+#define TTYPE_P2P                     (3)      /* Peripheral-to-peripheral (not supported) */
+
+#define TTYPE_2P_MASK                 (1)      /* Transfer to peripheral (M2P or P2P) */
+#define TTYPE_P2_MASK                 (2)      /* Transfer from peripheral (P2M or P2P) */
+
+#define DMACH_FLAG_TTYPE_SHIFT        (0)      /* Bits 0-1 Destination transfer size */
+#define DMACH_FLAG_TTYPE_MASK         (3 << DMACH_FLAG_TTYPE_SHIFT)
+#  define DMACH_FLAG_TTYPE_M2M        (TTYPE_M2M << DMACH_FLAG_TTYPE_SHIFT) /* Memory-to-memory */
+#  define DMACH_FLAG_TTYPE_M2P        (TTYPE_M2P << DMACH_FLAG_TTYPE_SHIFT) /* Memory-to-peripheral */
+#  define DMACH_FLAG_TTYPE_P2M        (TTYPE_P2M << DMACH_FLAG_TTYPE_SHIFT) /* Peripheral-to-memory */
+#  define DMACH_FLAG_TTYPE_P2P        (TTYPE_P2P << DMACH_FLAG_TTYPE_SHIFT) /* Peripheral-to-peripheral */
+
+#  define DMACH_FLAG_TTYPE_2P_MASK    (TTYPE_2P_MASK << DMACH_FLAG_TTYPE_SHIFT) /* Transfer to peripheral */
+#  define DMACH_FLAG_TTYPE_P2_MASK    (TTYPE_P2_MASK << DMACH_FLAG_TTYPE_SHIFT) /* Transfer from peripheral */
+
+/* Source transfer size:
+ *
+ * .... .... .... ....  .... .... ..SS ....
+ */
+
+#define DMACH_FLAG_SSIZE_SHIFT        (4)      /* Bits 4-5: Source transfer size */
 #define DMACH_FLAG_SSIZE_MASK         (7 << DMACH_FLAG_SSIZE_SHIFT)
 #  define DMACH_FLAG_SSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_SSIZE_SHIFT) /* 8-bit */
 #  define DMACH_FLAG_SSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 16-bit */
@@ -76,37 +99,37 @@
 
 /* Destination transfer size:
  *
- * .... .... .... ....  .... .... .... DD..
+ * .... .... .... ....   .... .... DD.. ....
  */
 
-#define DMACH_FLAG_DSIZE_SHIFT        (2)      /* Bits 2-3: Destination transfer size */
+#define DMACH_FLAG_DSIZE_SHIFT        (6)      /* Bits 6-7: Destination transfer size */
 #define DMACH_FLAG_DSIZE_MASK         (7 << DMACH_FLAG_DSIZE_SHIFT)
-#  define EMACH_FLAG_DSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_DSIZE_SHIFT) /* 8-bit */
-#  define EMACH_FLAG_DSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 16-bit */
-#  define EMACH_FLAG_DSIZE_32BIT      (TCD_ATTR_SIZE_32BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 32-bit */
-#  define EMACH_FLAG_DSIZE_64BIT      (TCD_ATTR_SIZE_64BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 64-bit */
-#  define EMACH_FLAG_DSIZE_256BIT     (TCD_ATTR_SIZE_256BIT << DMACH_FLAG_DSIZE_SHIFT) /* 32-byte burst */
+#  define DMACH_FLAG_DSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_DSIZE_SHIFT) /* 8-bit */
+#  define DMACH_FLAG_DSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 16-bit */
+#  define DMACH_FLAG_DSIZE_32BIT      (TCD_ATTR_SIZE_32BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 32-bit */
+#  define DMACH_FLAG_DSIZE_64BIT      (TCD_ATTR_SIZE_64BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 64-bit */
+#  define DMACH_FLAG_DSIZE_256BIT     (TCD_ATTR_SIZE_256BIT << DMACH_FLAG_DSIZE_SHIFT) /* 32-byte burst */
 
 /* Arbitration:
  *
- * .... .... .... ....  .... .... ..BA ....
+ * .... .... .... ....   .... ..BA .... ....
  */
 
-#define DMACH_FLAG_CHRR               (1 << 4)  /* Bit 4:  Round Robin Channel Arbitration */
-#define DMACH_FLAG_GRPRR              (1 << 5)  /* Bit 5:  Round Robin Group Arbitration */
+#define DMACH_FLAG_CHRR               (1 << 8)  /* Bit 8:  Round Robin Channel Arbitration */
+#define DMACH_FLAG_GRPRR              (1 << 8)  /* Bit 9:  Round Robin Group Arbitration */
 
 /* DMA Priorities:
  *
- * .... .... .... ....  .... CCCC GG.. ....
+ * .... .... .... ....   CCCC GG.. .... ....
  */
 
-#define DMACH_FLAG_GPPRI_SHIFT             (6)       /* Bits 6-7: Channel Group Priority */
-#define DMACH_FLAG_GRPPRI_MASK             (3 << DMACH_FLAG_GPPRI_SHIFT)
-#  define DMACH_FLAG_GRPPRI(n)             ((uint32_t)(n) << DMACH_FLAG_GPPRI_SHIFT)
+#define DMACH_FLAG_GPPRI_SHIFT        (10)      /* Bits 10-11: Channel Group Priority */
+#define DMACH_FLAG_GRPPRI_MASK        (3 << DMACH_FLAG_GPPRI_SHIFT)
+#  define DMACH_FLAG_GRPPRI(n)        ((uint32_t)(n) << DMACH_FLAG_GPPRI_SHIFT)
 
-#define DMACH_FLAG_CHPRI_SHIFT             (8)       /* Bits 8-11: Channel Arbitration Priority */
-#define DMACH_FLAG_CHPRI_MASK              (15 << DMACH_FLAG_CHPRI_SHIFT)
-#  define DMACH_FLAG_CHPRI(n)              ((uint32_t)(n) << DMACH_FLAG_CHPRI_SHIFT)
+#define DMACH_FLAG_CHPRI_SHIFT        (12)      /* Bits 12-15: Channel Arbitration Priority */
+#define DMACH_FLAG_CHPRI_MASK         (15 << DMACH_FLAG_CHPRI_SHIFT)
+#  define DMACH_FLAG_CHPRI(n)         ((uint32_t)(n) << DMACH_FLAG_CHPRI_SHIFT)
 
 /************************************************************************************
  * Public Types
@@ -214,32 +237,19 @@ DMA_HANDLE imxrt_dmachannel(void);
 void imxrt_dmafree(DMA_HANDLE handle);
 
 /************************************************************************************
- * Name: imxrt_dmatxsetup
+ * Name: imxrt_dmasetup
  *
  * Description:
- *   Configure DMA for transmit of one buffer (memory to peripheral).  This function
- *   may be called multiple times to handle large and/or discontinuous transfers.
- *   Calls to imxrt_dmatxsetup() and imxrt_dmarxsetup() must not be intermixed on the
- *   same transfer, however.
+ *   Configure DMA for one Rx (peripheral-to-memory) or Rx (memory-to-peripheral)
+ *   transfer of one buffer.
+ *
+ *   TODO:  This function needs to be called multiple times to handle multiple,
+ *   discontinuous transfers.
  *
  ************************************************************************************/
 
-int imxrt_dmatxsetup(DMA_HANDLE handle, uint8_t pchan, uint32_t maddr, size_t nbytes,
-                     uint32_t chflags);
-
-/************************************************************************************
- * Name: imxrt_dmarxsetup
- *
- * Description:
- *   Configure DMA for receipt of one buffer (peripheral to memory).  This function
- *   may be called multiple times to handle large and/or discontinuous transfers.
- *   Calls to imxrt_dmatxsetup() and imxrt_dmarxsetup() must not be intermixed on the
- *   same transfer, however.
- *
- ************************************************************************************/
-
-int imxrt_dmarxsetup(DMA_HANDLE handle, uint8_t pchan, uint32_t maddr, size_t nbytes,
-                     uint32_t chflags);
+int imxrt_dmasetup(DMA_HANDLE handle, uint8_t pchan, uint32_t maddr, size_t nbytes,
+                   uint32_t chflags);
 
 /************************************************************************************
  * Name: imxrt_dmastart

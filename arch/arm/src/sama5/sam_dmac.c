@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam3u_dmac.c
+ * arch/arm/src/sama5/sam_dmac.c
  *
  *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
