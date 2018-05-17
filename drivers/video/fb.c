@@ -421,6 +421,121 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 #endif
 
+#ifdef CONFIG_FB_SYNC
+      case FBIO_WAITFORVSYNC:  /* Wait upon vertical sync */
+        {
+          ret = fb->vtable->waitforvsync(fb->vtable);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_FB_OVERLAY
+      case FBIO_SELECT_OVERLAY:  /* Select video overlay */
+        {
+          struct fb_overlayinfo_s oinfo;
+
+          DEBUGASSERT(fb->vtable != NULL && fb->vtable->getoverlayinfo != NULL);
+          ret = fb->vtable->getoverlayinfo(fb->vtable, arg, &oinfo);
+          if (ret == OK)
+            {
+              fb->fbmem = oinfo.fbmem;
+              fb->fblen = oinfo.fblen;
+              fb->bpp   = oinfo.bpp;
+            }
+        }
+        break;
+
+      case FBIOGET_OVERLAYINFO:  /* Get video overlay info */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->getoverlayinfo != NULL);
+          ret = fb->vtable->getoverlayinfo(fb->vtable, oinfo->overlay, oinfo);
+        }
+        break;
+
+      case FBIOSET_TRANSP:  /* Set video overlay transparency */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->settransp != NULL);
+          ret = fb->vtable->settransp(fb->vtable, oinfo);
+        }
+        break;
+
+      case FBIOSET_CHROMAKEY:  /* Set video overlay chroma key */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->setchromakey != NULL);
+          ret = fb->vtable->setchromakey(fb->vtable, oinfo);
+        }
+        break;
+
+      case FBIOSET_COLOR:  /* Set video overlay color */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->setcolor != NULL);
+          ret = fb->vtable->setcolor(fb->vtable, oinfo);
+        }
+        break;
+
+      case FBIOSET_BLANK:  /* Blank or unblank video overlay */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->setblank != NULL);
+          ret = fb->vtable->setblank(fb->vtable, oinfo);
+        }
+        break;
+
+      case FBIOSET_AREA:  /* Set active video overlay area */
+        {
+          FAR struct fb_overlayinfo_s *oinfo =
+            (FAR struct fb_overlayinfo_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(oinfo != 0 && fb->vtable != NULL &&
+                      fb->vtable->setarea != NULL);
+          ret = fb->vtable->setarea(fb->vtable, oinfo);
+        }
+        break;
+
+#ifdef CONFIG_FB_OVERLAY_BLIT
+      case FBIOSET_BLIT:  /* Blit operation between video overlays */
+        {
+          FAR struct fb_overlayblit_s *blit =
+            (FAR struct fb_overlayblit_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(blit != 0 && fb->vtable != NULL &&
+                      fb->vtable->blit != NULL);
+          ret = fb->vtable->blit(fb->vtable, blit);
+        }
+        break;
+
+      case FBIOSET_BLEND:  /* Blend operation between video overlays */
+        {
+          FAR struct fb_overlayblend_s *blend =
+            (FAR struct fb_overlayblend_s *)((uintptr_t)arg);
+
+          DEBUGASSERT(blend != 0 && fb->vtable != NULL &&
+                      fb->vtable->blend != NULL);
+          ret = fb->vtable->blend(fb->vtable, blend);
+        }
+        break;
+#endif
+#endif /* CONFIG_FB_OVERLAY */
+
       default:
         gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
         ret = -ENOTTY;
@@ -462,6 +577,9 @@ int fb_register(int display, int plane)
   FAR struct fb_chardev_s *fb;
   struct fb_videoinfo_s vinfo;
   struct fb_planeinfo_s pinfo;
+#ifdef CONFIG_FB_OVERLAY
+  struct fb_overlayinfo_s oinfo;
+#endif
   char devname[16];
   int nplanes;
   int ret;
@@ -521,6 +639,24 @@ int fb_register(int display, int plane)
   /* Clear the framebuffer memory */
 
   memset(pinfo.fbmem, 0, pinfo.fblen);
+
+#ifdef CONFIG_FB_OVERLAY
+  /* Initialize first overlay but do not select */
+
+  DEBUGASSERT(fb->vtable->getoverlayinfo != NULL);
+  ret = fb->vtable->getoverlayinfo(fb->vtable, 0, &oinfo);
+  if (ret < 0)
+    {
+      gerr("ERROR: getoverlayinfo() failed: %d\n", ret);
+      goto errout_with_fb;
+    }
+
+  /* Clear the overlay memory. Necessary when plane 0 and overlay 0
+   * different.
+   */
+
+  memset(oinfo.fbmem, 0, oinfo.fblen);
+#endif
 
   /* Register the framebuffer device */
 

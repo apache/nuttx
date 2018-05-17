@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/video/fb.h
  *
- *   Copyright (C) 2008-2011, 2013, 2016-2017 Gregory Nutt. All rights
+ *   Copyright (C) 2008-2011, 2013, 2016-2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -193,40 +193,97 @@
 #define FB_CUR_XOR         0x10        /* Use XOR vs COPY ROP on image */
 #endif
 
+/* Hardware overlay acceleration *******************************************/
+
+#ifdef CONFIG_FB_OVERLAY
+#define FB_ACCL_TRANSP     0x01        /* Hardware tranparency support */
+#define FB_ACCL_CHROMA     0x02        /* Hardware chromakey support */
+#define FB_ACCL_COLOR      0x04        /* Hardware color support */
+#define FB_ACCL_AREA       0x08        /* Hardware support area selection */
+
+#ifdef CONFIG_FB_OVERLAY_BLIT
+#define FB_ACCL_BLIT       0x10        /* Hardware blit support */
+#define FB_ACCL_BEND       0x20        /* Hardware blend support */
+#endif
+
+/* Overlay transparency mode ************************************************/
+
+#define FB_CONST_ALPHA     0x00         /* Transparency by alpha value */
+#define FB_PIXEL_ALPHA     0x01         /* Transparency by pixel alpha value */
+
+#endif /* CONFIG_FB_OVERLAY */
+
 /* FB character driver IOCTL commands ***************************************/
 
 /* ioctls */
 
-#define FBIOGET_VIDEOINFO  _FBIOC(0x0001)  /* Get color plane info */
-                                           /* Argument: writable struct
-                                            *           fb_videoinfo_s */
-#define FBIOGET_PLANEINFO  _FBIOC(0x0002)  /* Get video plane info */
-                                           /* Argument: writable struct
-                                            *           fb_planeinfo_s */
+#define FBIOGET_VIDEOINFO     _FBIOC(0x0001)  /* Get color plane info */
+                                              /* Argument: writable struct
+                                               *           fb_videoinfo_s */
+#define FBIOGET_PLANEINFO     _FBIOC(0x0002)  /* Get video plane info */
+                                              /* Argument: writable struct
+                                               *           fb_planeinfo_s */
+
 #ifdef CONFIG_FB_CMAP
-#  define FBIOGET_CMAP     _FBIOC(0x0003)  /* Get RGB color mapping */
-                                           /* Argument: writable struct
-                                            *           fb_cmap_s */
-#  define FBIOPUT_CMAP     _FBIOC(0x0004)  /* Put RGB color mapping */
-                                           /* Argument: read-only struct
-                                            *           fb_cmap_s */
+#  define FBIOGET_CMAP        _FBIOC(0x0003)  /* Get RGB color mapping */
+                                              /* Argument: writable struct
+                                               *           fb_cmap_s */
+#  define FBIOPUT_CMAP        _FBIOC(0x0004)  /* Put RGB color mapping */
+                                              /* Argument: read-only struct
+                                               *           fb_cmap_s */
 #endif
 
 #ifdef CONFIG_FB_HWCURSOR
-#  define FBIOGET_CURSOR   _FBIOC(0x0005)  /* Get cursor attributes */
-                                           /* Argument: writable struct
-                                            *           fb_cursorattrib_s */
-#  define FBIOPUT_CURSOR   _FBIOC(0x0006)  /* Set cursor attributes */
-                                           /* Argument: read-only struct
-                                            *           fb_setcursor_s */
+#  define FBIOGET_CURSOR      _FBIOC(0x0005)  /* Get cursor attributes */
+                                              /* Argument: writable struct
+                                               *           fb_cursorattrib_s */
+#  define FBIOPUT_CURSOR      _FBIOC(0x0006)  /* Set cursor attributes */
+                                              /* Argument: read-only struct
+                                               *           fb_setcursor_s */
 #endif
 
 #ifdef CONFIG_LCD_UPDATE
-#  define FBIO_UPDATE      _FBIOC(0x0007)  /* Update a rectangular region in
-                                            * the framebuffer
-                                            * Argument: read-only struct
-                                            *           nxgl_rect_s */
+#  define FBIO_UPDATE         _FBIOC(0x0007)  /* Update a rectangular region in
+                                               * the framebuffer
+                                               * Argument: read-only struct
+                                               *           nxgl_rect_s */
 #endif
+
+#ifdef CONFIG_FB_SYNC
+#  define FBIO_WAITFORVSYNC   _FBIOC(0x0008)  /* Wait for vertical sync */
+#endif
+
+#ifdef CONFIG_FB_OVERLAY
+#  define FBIOGET_OVERLAYINFO _FBIOC(0x0009)  /* Get video overlay info */
+                                              /* Argument: writable struct
+                                               *           fb_overlayinfo_s */
+#  define FBIO_SELECT_OVERLAY _FBIOC(0x000a)  /* Select overlay */
+                                              /* Argument: read-only
+                                               *           unsigned long */
+#  define FBIOSET_TRANSP      _FBIOC(0x000b)  /* Set opacity or transparency
+                                               * Argument: read-only struct
+                                               *           fb_overlayinfo_s */
+#  define FBIOSET_CHROMAKEY   _FBIOC(0x000c)  /* Set chroma key
+                                               * Argument: read-only struct
+                                               *           fb_overlayinfo_s */
+#  define FBIOSET_COLOR       _FBIOC(0x000d)  /* Set color
+                                               * Aŕgument: read-only struct
+                                               *           fb_overlayinfo_s */
+#  define FBIOSET_BLANK       _FBIOC(0x000e)  /* Blank or unblank
+                                               * Argument: read-only struct
+                                               *           fb_overlayinfo_s */
+#  define FBIOSET_AREA        _FBIOC(0x000f)  /* Set active overlay area
+                                               * Argument: read-only struct
+                                               *           fb_overlayinfo_s */
+#ifdef CONFIG_FB_OVERLAY_BLIT
+#  define FBIOSET_BLIT        _FBIOC(0x0010)  /* Blit area between overlays
+                                               * Argument: read-only struct
+                                               *           fb_overlayblit_s */
+#  define FBIOSET_BLEND       _FBIOC(0x0011)  /* Blend area between overlays
+                                               * Argument: read-only struct
+                                               *           fb_overlayblend_s */
+#endif
+#endif /* CONFIG_FB_OVERLAY */
 
 /****************************************************************************
  * Public Types
@@ -246,6 +303,9 @@ struct fb_videoinfo_s
   fb_coord_t xres;        /* Horizontal resolution in pixel columns */
   fb_coord_t yres;        /* Vertical resolution in pixel rows */
   uint8_t    nplanes;     /* Number of color planes supported */
+#ifdef CONFIG_FB_OVERLAY
+  uint8_t    noverlays;   /* Number of overlays supported */
+#endif
 };
 
 /* This structure describes one color plane.  Some YUV formats may support
@@ -260,6 +320,70 @@ struct fb_planeinfo_s
   uint8_t    display;     /* Display number */
   uint8_t    bpp;         /* Bits per pixel */
 };
+
+#ifdef CONFIG_FB_OVERLAY
+/* This structure describes the transparency. */
+
+struct fb_transp_s
+{
+  uint8_t    transp;      /* Transparency */
+  uint8_t    transp_mode; /* Transparency mode */
+};
+
+/* This structure describes an area. */
+
+struct fb_area_s
+{
+  uint32_t x;             /* x-offset of the area */
+  uint32_t y;             /* y-offset of the area */
+  uint32_t w;             /* Width of the area */
+  uint32_t h;             /* Height of the area */
+};
+
+/* This structure describes one overlay. */
+
+struct fb_overlayinfo_s
+{
+  FAR void   *fbmem;          /* Start of frame buffer memory */
+  uint32_t   fblen;           /* Length of frame buffer memory in bytes */
+  fb_coord_t stride;          /* Length of a line in bytes */
+  uint32_t   overlay;         /* Overlay number */
+  uint8_t    bpp;             /* Bits per pixel */
+  uint8_t    blank;           /* Blank or unblank */
+  uint32_t   chromakey;       /* Chroma key argb8888 formatted */
+  uint32_t   color;           /* Color argb8888 formatted */
+  struct fb_transp_s transp;  /* Transparency */
+  struct fb_area_s sarea;     /* Selected area within the overlay */
+  uint32_t   accl;            /* Supported hardware acceleration */
+};
+
+#ifdef CONFIG_FB_OVERLAY_BLIT
+/* This structure describes an overlay area within a whole overlay */
+
+struct fb_overlayarea_s
+{
+  uint32_t overlay;      /* Number overlay */
+  struct fb_area_s area; /* Overlay area */
+};
+
+/* This structure describes blit operation */
+
+struct fb_overlayblit_s
+{
+  struct fb_overlayarea_s dest;       /* The destination overlay area */
+  struct fb_overlayarea_s src;        /* The source overlay area */
+};
+
+/* This structure describes blend operation */
+
+struct fb_overlayblend_s
+{
+  struct fb_overlayarea_s dest;       /* The destination overlay area */
+  struct fb_overlayarea_s foreground; /* The foreground overlay area */
+  struct fb_overlayarea_s background; /* The background overlay area */
+};
+#endif
+#endif /* CONFIG_FB_OVERLAY */
 
 /* On video controllers that support mapping of a pixel palette value
  * to an RGB encoding, the following structure may be used to define
@@ -380,6 +504,72 @@ struct fb_vtable_s
                    FAR struct fb_cursorattrib_s *attrib);
   int (*setcursor)(FAR struct fb_vtable_s *vtable,
                    FAR struct fb_setcursor_s *settings);
+#endif
+
+#ifdef CONFIG_FB_SYNC
+  /* The following are provided only if the video hardware signals
+   * vertical snyc.
+   */
+
+  int (*waitforvsync)(FAR struct fb_vtable_s *vtable);
+#endif
+
+#ifdef CONFIG_FB_OVERLAY
+  /* Get information about the video controller configuration and the
+   * configuration of each overlay.
+   */
+
+  int (*getoverlayinfo)(FAR struct fb_vtable_s *vtable, int overlayno,
+                        FAR struct fb_overlayinfo_s *oinfo);
+
+  /* The following are provided only if the video hardware supports
+   * transparency
+   */
+
+  int (*settransp)(FAR struct fb_vtable_s *vtable,
+                   FAR const struct fb_overlayinfo_s *oinfo);
+
+  /* The following are provided only if the video hardware supports
+   * chromakey
+   */
+
+  int (*setchromakey)(FAR struct fb_vtable_s *vtable,
+                      FAR const struct fb_overlayinfo_s *oinfo);
+
+  /* The following are provided only if the video hardware supports
+   * filling the overlay with a color.
+   */
+
+  int (*setcolor)(FAR struct fb_vtable_s *vtable,
+                  FAR const struct fb_overlayinfo_s *oinfo);
+
+  /* The following allows to switch the overlay on or off */
+
+  int (*setblank)(FAR struct fb_vtable_s *vtable,
+                  FAR const struct fb_overlayinfo_s *oinfo);
+
+  /* The following allows to set the active area for subsequently overlay
+   * operations.
+   */
+
+  int (*setarea)(FAR struct fb_vtable_s *vtable,
+                 FAR const struct fb_overlayinfo_s *oinfo);
+
+# ifdef CONFIG_FB_OVERLAY_BLIT
+  /* The following are provided only if the video hardware supports
+   * blit operation between overlays.
+   */
+
+  int (*blit)(FAR struct fb_vtable_s *vtable,
+              FAR const struct fb_overlayblit_s *blit);
+
+  /* The following are provided only if the video hardware supports
+   * blend operation between overlays.
+   */
+
+  int (*blend)(FAR struct fb_vtable_s *vtable,
+               FAR const struct fb_overlayblend_s *blend);
+# endif
 #endif
 };
 
