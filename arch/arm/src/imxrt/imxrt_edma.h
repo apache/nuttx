@@ -153,7 +153,7 @@ struct imxrt_dmaregs_s
   uint32_t req;      /* Interrupt Request */
   uint32_t err;      /* Error */
   uint32_t hrs;      /* Hardware Request Status */
-  uint32_t ears;     /*  Enable Asynchronous Request in Stop */
+  uint32_t ears;     /* Enable Asynchronous Request in Stop */
 
   /* eDMA Channel registers */
 
@@ -248,7 +248,7 @@ void imxrt_dmafree(DMA_HANDLE handle);
  *
  ************************************************************************************/
 
-int imxrt_dmasetup(DMA_HANDLE handle, uint8_t pchan, uint32_t maddr, size_t nbytes,
+int imxrt_dmasetup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr, size_t nbytes,
                    uint32_t chflags);
 
 /************************************************************************************
