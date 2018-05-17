@@ -242,7 +242,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   ipv6tcp->tcp.destport  = conn->rport;           /* Connected remote port */
 
   ipv6tcp->tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
-  ipv6tcp->tcp.flags     = 0;                     /* No urgent data */
+  ipv6tcp->tcp.flags     = TCP_ACK | TCP_PSH;     /* No urgent data */
   ipv6tcp->tcp.urgp[0]   = 0;                     /* No urgent data */
   ipv6tcp->tcp.urgp[1]   = 0;
 
