@@ -43,7 +43,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdint.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -317,7 +316,7 @@ struct fb_videoinfo_s
 struct fb_planeinfo_s
 {
   FAR void  *fbmem;       /* Start of frame buffer memory */
-  size_t t   fblen;       /* Length of frame buffer memory in bytes */
+  size_t     fblen;       /* Length of frame buffer memory in bytes */
   fb_coord_t stride;      /* Length of a line in bytes */
   uint8_t    display;     /* Display number */
   uint8_t    bpp;         /* Bits per pixel */
