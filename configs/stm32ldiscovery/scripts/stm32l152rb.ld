@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32fldiscovery/scripts/ld.script
+ * configs/stm32fldiscovery/scripts/stm32l152rb.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,15 +43,16 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 16K
+	flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 16K
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	.text : {
+	.text :
+	{
 		_stext = ABSOLUTE(.);
 		*(.vectors)
 		*(.text .text.*)
@@ -67,25 +68,29 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	.init_section : {
+	.init_section :
+	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
 	} > flash
 
-	.ARM.extab : {
+	.ARM.extab :
+	{
 		*(.ARM.extab*)
 	} > flash
 
 	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
+	.ARM.exidx :
+	{
 		*(.ARM.exidx*)
 	} > flash
 	__exidx_end = ABSOLUTE(.);
 
 	_eronly = ABSOLUTE(.);
 
-	.data : {
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -93,7 +98,8 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	} > sram AT > flash
 
-	.bss : {
+	.bss :
+	{
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
@@ -102,6 +108,7 @@ SECTIONS
 	} > sram
 
 	/* Stabs debugging sections. */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

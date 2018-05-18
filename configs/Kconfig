@@ -1339,12 +1339,13 @@ config ARCH_BOARD_STM32L476_MDK
 
 config ARCH_BOARD_STM32L_DISCOVERY
 	bool "STMicro STM32L-Discovery board"
-	depends on ARCH_CHIP_STM32L152RB
+	depends on ARCH_CHIP_STM32L152RB || ARCH_CHIP_STM32L152RC
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro STM32L-Discovery board based on the STMicro STM32L152RB MCU.
+		STMicro STM32L-Discovery board based on the STMicro STM32L152RBT6 or
+		STM32L1 MCUs.
 
 config ARCH_BOARD_STM32VL_DISCOVERY
 	bool "STMicro STM32VL-Discovery board"
