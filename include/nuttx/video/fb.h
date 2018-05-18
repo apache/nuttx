@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -315,7 +316,7 @@ struct fb_videoinfo_s
 struct fb_planeinfo_s
 {
   FAR void  *fbmem;       /* Start of frame buffer memory */
-  uint32_t   fblen;       /* Length of frame buffer memory in bytes */
+  size_t t   fblen;       /* Length of frame buffer memory in bytes */
   fb_coord_t stride;      /* Length of a line in bytes */
   uint8_t    display;     /* Display number */
   uint8_t    bpp;         /* Bits per pixel */
@@ -334,10 +335,10 @@ struct fb_transp_s
 
 struct fb_area_s
 {
-  uint32_t x;             /* x-offset of the area */
-  uint32_t y;             /* y-offset of the area */
-  uint32_t w;             /* Width of the area */
-  uint32_t h;             /* Height of the area */
+  fb_coord_t x;           /* x-offset of the area */
+  fb_coord_t y;           /* y-offset of the area */
+  fb_coord_t w;           /* Width of the area */
+  fb_coord_t h;           /* Height of the area */
 };
 
 /* This structure describes one overlay. */
@@ -345,9 +346,9 @@ struct fb_area_s
 struct fb_overlayinfo_s
 {
   FAR void   *fbmem;          /* Start of frame buffer memory */
-  uint32_t   fblen;           /* Length of frame buffer memory in bytes */
+  size_t     fblen;           /* Length of frame buffer memory in bytes */
   fb_coord_t stride;          /* Length of a line in bytes */
-  uint32_t   overlay;         /* Overlay number */
+  uint8_t    overlay;         /* Overlay number */
   uint8_t    bpp;             /* Bits per pixel */
   uint8_t    blank;           /* Blank or unblank */
   uint32_t   chromakey;       /* Chroma key argb8888 formatted */
@@ -362,7 +363,7 @@ struct fb_overlayinfo_s
 
 struct fb_overlayarea_s
 {
-  uint32_t overlay;      /* Number overlay */
+  uint8_t  overlay;      /* Number overlay */
   struct fb_area_s area; /* Overlay area */
 };
 
