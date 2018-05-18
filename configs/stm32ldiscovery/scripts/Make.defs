@@ -39,10 +39,9 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_STM32L152RB),y)
   LDSCRIPT = stm32l152rb.ld
-else
-ifeq ($(CONFIG_ARCH_CHIP_STM32L152RC),y)
+else ifeq ($(CONFIG_ARCH_CHIP_STM32L152RC),y)
   LDSCRIPT = stm32l152rc.ld
-else
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
