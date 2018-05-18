@@ -2254,7 +2254,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F4XXX)
 static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
                                           bool enable)
 {
@@ -2294,6 +2295,38 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
   ainfo("STM32_ADC_CR2 value: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #endif /* CONFIG_STM32_ADC1 */
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_enable_vbat_channel
+ *
+ * Description:
+ *   Enable/disable the Vbat voltage measurement channel.
+ *
+ * Input Parameters:
+ *   dev - pointer to device structure used by the driver
+ *   enable - true:  Vbat input channel enabled (ch 18)
+ *            false: Vbat input channel disabled (ch 18)
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+static void adc_enable_vbat_channel(FAR struct adc_dev_s *dev, bool enable)
+{
+  if (enable)
+    {
+      stm32_modifyreg32(STM32_ADC_CCR, 0, ADC_CCR_VBATE);
+    }
+  else
+    {
+      stm32_modifyreg32(STM32_ADC_CCR, ADC_CCR_VBATE, 0);
+    }
+
+  ainfo("STM32_ADC_CCR value: 0x%08x\n", getreg32(STM32_ADC_CCR));
 }
 #endif
 
@@ -2696,9 +2729,13 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         adc_ioc_enable_tvref_register(dev, *(bool *)arg);
         break;
 
-#elif defined(CONFIG_STM32_STM32F20XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
       case IO_ENABLE_TEMPER_VOLT_CH:
         adc_ioc_enable_tvref_register(dev, *(bool *)arg);
+        break;
+
+      case IO_ENABLE_DISABLE_VBAT_CH:
+        adc_enable_vbat_channel(dev, *(bool *)arg);
         break;
 
 #elif defined(CONFIG_STM32_STM32L15XX)

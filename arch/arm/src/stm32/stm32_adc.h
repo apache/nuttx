@@ -1862,10 +1862,11 @@ enum adc_io_cmds_e
   IO_ENABLE_TEMPER_VOLT_CH = 0,
 };
 
-#elif defined(CONFIG_STM32_STM32F20XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 enum adc_io_cmds_e
 {
   IO_ENABLE_TEMPER_VOLT_CH = 0,
+  IO_ENABLE_DISABLE_VBAT_CH,
 };
 
 #elif defined(CONFIG_STM32_STM32L15XX)
