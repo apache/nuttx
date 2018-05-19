@@ -1188,6 +1188,85 @@ Where <subdir> is one of the sub-directories listed in the next paragraph
 Configuration Sub-directories
 -------------------------
 
+  audio:
+  -----
+
+  This configuration is a variant of the NSH configuration used for
+  demonstrating PCM audio using the CS43L22 stereo DAC/amplifier on board
+  the STM32F4 Discovery and the STM32 I2S DMA interface.  In uses the
+  file player at apps/system/nxplayer.
+
+  The original CS43L22 and STM32 I2S drivers were contribued by Taras
+  Drozdovsky in May of 2017.  The audio configuration was contributed by
+  Alan Carvalho de Assis and derives, in part, from the work of Taras at https://github.com/tdrozdovskiy/CS43L22-Audio-driver.
+
+  Usage instructions from the README file at the location:
+
+  1. Prepare USB flash storage.  This configuration depends on .WAV files
+     provided to the system via a USB flash stick.  There are some sample
+     audio files at https://github.com/tdrozdovskiy/CS43L22-Audio-driver
+     and these steps will put those sample .WAV files onto the USB flash: 
+
+     a. Format the USB flash storage into FAT. For example by next command
+
+       $ mkfs.vfat /dev/sdb1
+
+     b. Create folder /music
+
+       $ mkdir music
+
+     c. Copy files from /audio_samples/ to /music folder of USB flash storage
+
+      $ cp <repo>/audio_samples/* /mnt/media/music/
+
+  2. Example usage CS43L22 Audio driver
+
+    a. Power On or reset the STM32F4 Discovery board.  We can see the Nuttx
+       command line prompt:
+
+      NuttShell (NSH)
+      nsh>
+
+    b. Mount the usb flash device into our file system
+
+      nsh> mount -t vfat /dev/sda/ /mnt/sda
+
+    c. Start the NxPlayer program and Enter the help command to view the list
+       of commands
+
+      nsh> nxplayer
+      NxPlayer version 1.04
+      h for commands, q to exit
+      nxplayer> h
+      NxPlayer commands
+      ================
+        balance d%      : Set balance percentage (< 50% means more left)
+        device devfile  : Specify a preferred audio device
+        h               : Display help for commands
+        help            : Display help for commands
+        mediadir path   : Change the media directory
+        play filename   : Play a media file
+        pause           : Pause playback
+        resume          : Resume playback
+        stop            : Stop playback
+        tone freq secs  : Produce a pure tone
+        q               : Exit NxPlayer
+        quit            : Exit NxPlayer
+        volume d%       : Set volume to level specified
+
+    d. Play the test sample track (cu44k.wav - 44100Hz, 16bit, stereo).
+
+      nxplayer> play cu44k.wav
+
+    e. Set the volume value to 50%.
+
+      nxplayer> volume 50
+
+    f. Stop the current track and play another one
+
+      nxplayer> stop
+      nxplayer> play hn.wav
+
   cxxtest:
   -------
 

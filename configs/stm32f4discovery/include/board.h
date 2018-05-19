@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm32f4discovery/include/board.h
  *
- *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -314,11 +314,25 @@
 #define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
 
+/* SPI DMA -- As used for I2S DMA transfer with the audio configuration */
+
+#define DMACHAN_SPI1_RX DMAMAP_SPI1_RX_1
+#define DMACHAN_SPI1_TX DMAMAP_SPI1_TX_1
+
 /* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
 
 #define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_1
+
+/* SPI3 DMA -- As used for I2S DMA transfer with the audio configuration */
+
+#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_1
+#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_1
+#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_1
+
+#define DMACHAN_SPI3_RX  DMAMAP_SPI3_RX_1
+#define DMACHAN_SPI3_TX  DMAMAP_SPI3_TX_1
 
 /* I2S3 - CS43L22 configuration uses I2S3 */
 

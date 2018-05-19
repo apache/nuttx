@@ -85,6 +85,10 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "stm32_dma.h"
+#include "stm32_spi.h"
+#include "stm32_rcc.h"
+
 #if defined(CONFIG_STM32_I2S2) || defined(CONFIG_STM32_I2S3)
 
 /****************************************************************************
