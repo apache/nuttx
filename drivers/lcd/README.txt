@@ -100,10 +100,6 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
     Technology Co., Ltd.  This LCD is based on the Ilitek ILI9341 LCD
     controller.
 
-  nokia6100.c.  Supports the Nokia 6100 display with either the Philips
-    PCF883 or the Epson S1D15G10 display controller.  This LCD is used
-    with the Olimex LPC1766-STK (but has not been fully integrated).
-
   ssd12989.c.  Generic LCD driver for LCDs based on the Solomon Systech
     SSD1289 LCD controller. Think of this as a template for an LCD driver
     that you will probably have to customize for any particular LCD
@@ -176,13 +172,6 @@ that makes then less re-usable:
 
     configs/kwikstik-k40/src/k40_lcd.c.  Don't waste your time.  This is
       just a stub.
-
-  Nokia LCD Drivers:
-
-    configs/olimex-lpc1766stk/src/lpc17_lcd.c.  This examples is the
-      bottom half for the driver at drivers/lcd/nokia6100.c.
-      This was never completely debugged ... there are probably issues
-      with that nasty 9-bit SPI interfaces.
 
   HX8346:
 

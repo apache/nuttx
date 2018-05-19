@@ -46,10 +46,6 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc17_usbmsc.c
 endif
 
-ifeq ($(CONFIG_NX_LCDDRIVER),y)
-CSRCS += lpc17_lcd.c
-endif
-
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += lpc17_buttons.c
 endif

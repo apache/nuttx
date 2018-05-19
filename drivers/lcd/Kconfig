@@ -86,8 +86,7 @@ config LCD_NOGETRUN
 config LCD_MAXCONTRAST
 	int "LCD maximum contrast"
 	default 31 if AQM_1248A
-	default 63 if NOKIA6100_S1D15G10 || LCD_SHARP_MEMLCD
-	default 127 if NOKIA6100_PCF8833
+	default 63 if LCD_SHARP_MEMLCD
 	default 255 if LCD_P14201 || LCD_LCD1602
 	default 63
 	range 1 255
@@ -160,110 +159,6 @@ config P14201_FRAMEBUFFER
 		LCD framebuffer.  This internal framebuffer support should not be
 		enabled with CONFIG_LCD_FRAMBEBUFFER because this external commone
 		framebuffer interface will provide the necessary buffering.
-endif
-
-config LCD_NOKIA6100
-	bool "Nokia 6100 display support"
-	default n
-	---help---
-		nokia6100.c.  Supports the Nokia 6100 display with either the Philips
-		PCF883 or the Epson S1D15G10 display controller.  This LCD is used
-		with the Olimex LPC1766-STK (but has not been fully integrated).
-
-if LCD_NOKIA6100
-
-config NOKIA6100_NINTERFACES
-	int "Number of physical NOKIA6100 devices"
-	default 1
-	range 1 1
-	---help---
-		Specifies the number of physical Nokia
-		6100 devices that will be supported.
-
-choice NOKIA6100_CONTROLLER
-	prompt "Controller Setup"
-	default NOKIA6100_S1D15G10
-
-config NOKIA6100_S1D15G10
-	bool "S1D15G10 controller"
-	---help---
-		Selects the Epson S1D15G10 display controller
-
-config NOKIA6100_PCF8833
-	bool "PCF8833 controller"
-	---help---
-		Selects the Phillips PCF8833 display controller
-
-endchoice
-
-config NOKIA6100_SPIMODE
-	int "SPI mode"
-	default 0
-	range 0 3
-	---help---
-		Controls the SPI mode
-
-config NOKIA6100_FREQUENCY
-	int "SPI frequency"
-	default 1000000
-	---help---
-		Define to use a different bus frequency
-
-config NOKIA6100_BPP
-	int "Display bits per pixel"
-	default 8
-	---help---
-		Device supports 8, 12, and 16 bits per pixel.
-
-config NOKIA6100_BLINIT
-	int "Back light initial"
-	default 40
-	---help---
-		Initial backlight setting
-
-config NOKIA6100_INVERT
-	int "Display inversion"
-	default 1
-	range 0 1
-	---help---
-		Display inversion, 0 or 1, Default: 1
-
-config NOKIA6100_MY
-	int "Display row direction"
-	default 0
-	range 0 1
-	---help---
-		Display row direction, 0 or 1, Default: 0
-
-config NOKIA6100_MX
-	int "Display column direction"
-	default 1
-	range 0 1
-	---help---
-		Display column direction, 0 or 1, Default: 1
-
-config NOKIA6100_V
-	int "Display address direction"
-	default 0
-	range 0 1
-	---help---
-		Display address direction, 0 or 1, Default: 0
-
-config NOKIA6100_ML
-	int "Display scan direction"
-	default 0
-	range 0 1
-	---help---
-		Display scan direction, 0 or 1, Default: 0
-
-config NOKIA6100_RGBORD
-	int "Display RGB order"
-	default 0
-	range 0 1
-	---help---
-		Display RGB order, 0 or 1, Default: 0
-		Required LCD driver settings:
-
 endif
 
 config LCD_MAX7219

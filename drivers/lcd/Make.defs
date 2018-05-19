@@ -56,10 +56,6 @@ ifeq ($(CONFIG_LCD_P14201),y)
   CSRCS += p14201.c
 endif
 
-ifeq ($(CONFIG_LCD_NOKIA6100),y)
-  CSRCS += nokia6100.c
-endif
-
 ifeq ($(CONFIG_LCD_UG2864AMBAG01),y)
   CSRCS += ug-2864ambag01.c
 endif

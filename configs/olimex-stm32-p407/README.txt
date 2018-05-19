@@ -43,9 +43,9 @@ The following peripherals are available in this configuration.
 
  - LCD:        Nokia 6610. This is similar the Nokia 6100 LCD used on other
                Olimex boards.  There is a driver for that LCD at
-               drivers/lcd/nokia6100.c, however, it is not properly
-               integrated.  It uses a 9-bit SPI interface which is difficult
-               to get working properly.
+               Obsoleted/nuttx/drivers/lcd/nokia6100.c, however, it was removed
+               because it was not properly integrated.  It uses a 9-bit SPI
+               interface which is difficult to get working properly.
 
 - External     Support is included for the onboard SRAM.  It uses SRAM
   SRAM:        settings from another board that might need to be tweaked.
