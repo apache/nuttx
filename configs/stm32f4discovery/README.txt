@@ -1198,7 +1198,8 @@ Configuration Sub-directories
 
   The original CS43L22 and STM32 I2S drivers were contribued by Taras
   Drozdovsky in May of 2017.  The audio configuration was contributed by
-  Alan Carvalho de Assis and derives, in part, from the work of Taras at https://github.com/tdrozdovskiy/CS43L22-Audio-driver.
+  Alan Carvalho de Assis and derives, in part, from the work of Taras at
+  https://github.com/tdrozdovskiy/CS43L22-Audio-driver.
 
   Usage instructions from the README file at the location:
 
@@ -1218,6 +1219,9 @@ Configuration Sub-directories
      c. Copy files from /audio_samples/ to /music folder of USB flash storage
 
       $ cp <repo>/audio_samples/* /mnt/media/music/
+
+     You should be able to use either Taras' .wav files like that or, if
+     you like, your own compatible .wav files.
 
   2. Example usage CS43L22 Audio driver
 
