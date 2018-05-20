@@ -518,14 +518,18 @@ DMA_HANDLE imxrt_dmachannel(uint32_t dmamux)
           dmach->state = IMXRT_DMA_IDLE;
 
           /* Clear any pending interrupts on the channel */
-#warning Missing Logic
 
-          /* Disable the channel. */
-#warning Missing Logic
+          DEBUASSERT(chndx == dmach->chan);
+          regaddr = IMXRT_EDMA_TCD_CSR(chndx);
+          putreg(0, regaddr);
+
+          /* Make sure that the channel is disabled. */
+
+          regval8 = EDMA_CERQ(chndx);
+          putreg8(reqval8, IMXRT_EDMA_CERQ);
 
           /* Set the DMAMUX register associated with this channel */
 
-          DEBUASSERT(chndx == dmach->chan);
           regaddr = IMXRT_DMAMUX_CHCF(chndx);
           putreg32(dmamux, regaddr);
           break;
@@ -565,6 +569,7 @@ void imxrt_dmafree(DMA_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   uintptr_t regaddr;
+  uint8_t regval8;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL && dmach->inuse && dmach->state != IMXRT_DMA_ACTIVE);
@@ -576,6 +581,11 @@ void imxrt_dmafree(DMA_HANDLE handle)
   dmach->flags = 0;
   dmach->inuse = false;                   /* No longer in use */
   dmach->state = IMXRT_DMA_IDLE;          /* Better not be active! */
+
+  /* Make sure that the channel is disabled. */
+
+  regval8 = EDMA_CERQ(chndx);
+  putreg8(reqval8, IMXRT_EDMA_CERQ);
 
   /* Disable the associated DMAMUX */
 
