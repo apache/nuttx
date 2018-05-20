@@ -349,7 +349,7 @@ struct lpc17_usbdev_s
   uint8_t                 selfpowered:1; /* 1: Device is self powered */
   uint8_t                 paddrset:1;    /* 1: Peripheral addr has been set */
   uint8_t                 attached:1;    /* 1: Host attached */
-  uint8_t                 rxpending:1;   /* 1: RX pending */
+  uint8_t                 rxpending:2;   /* 2: RX pending */
   uint32_t                softprio;      /* Bitset of high priority interrupts */
   uint32_t                epavail;       /* Bitset of available endpoints */
 #ifdef CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
@@ -2326,7 +2326,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                               else
                                 {
                                   uinfo("Pending data on OUT endpoint\n");
-                                  priv->rxpending = 1;
+                                  DEBUGASSERT(priv->rxpending < 3);
+                                  priv->rxpending++;
                                 }
                             }
                         }
@@ -2862,10 +2863,10 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
       /* This there a incoming data pending the availability of a request? */
 
-      if (priv->rxpending)
+      if (priv->rxpendinig > 0)
         {
           ret = lpc17_rdrequest(privep);
-          priv->rxpending = 0;
+          priv->rxpending--;
         }
     }
 
