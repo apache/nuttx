@@ -225,8 +225,18 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
   struct imxrt_edma_s *dmac = imxrt_controller(dmach);
 
   /* Disable all channel interrupts */
+  /* Disable channel ERROR interrupts */
+
+  regval8         = EDMA_CEEI(chan);
+  putreg8(regval8, IMXRT_EDMA_CEEI);
+
+  /* Disable the DONE interrupt when the major iteration count completes. */
+
+  regaddr         = IMXRT_EDMA_TCD_CSR(chan);
+  modifyreg16(regaddr, EDMA_TCD_CSR_INTMAJOR | EDMA_TCD_CSR_INTHALF, 0);
 
   /* Disable the channel. */
+#warning Missing logic
 
   /* If this was an RX DMA (peripheral-to-memory), then invalidate the cache
    * to force reloads from memory.
@@ -379,6 +389,7 @@ static int imxrt_edma_interrupt(int irq, void *context, FAR void *arg)
 
 void weak_function up_dmainitialize(void)
 {
+  uintptr_t regaddr;
   uint32_t regval;
   int i;
 
@@ -414,7 +425,7 @@ void weak_function up_dmainitialize(void)
 
   /* Initialize data structures */
 
-  memset(&g_edma, 0, sizeof());
+  memset(&g_edma, 0, sizeof(struct imxrt_edma_s));
   for (i = 0; i < IMXRT_EDMA_NCHANNELS; i++)
     {
       g_edma.dmach[i].chan = i;
@@ -449,9 +460,15 @@ void weak_function up_dmainitialize(void)
 
   /* Disable all DMA interrupts at the eDMA controller */
 
-  /* Disable all DMA channels */
+  putreg32(0, IMXRT_EDMA_EEEI); /* Disable error interrupts */
 
-  /* Enable the DMA controller */
+  for (i = 0; i < IMXRT_EDMA_NCHANNELS; i++)
+    {
+      /* Disable all DMA channels and DMA channel interrupts */
+
+      regaddr = IMXRT_EDMA_TCD_CSR(i);
+      putreg(0, regaddr);
+    }
 
   /* Enable the IRQ at the NVIC (still disabled at the eDMA controller) */
 
@@ -700,11 +717,21 @@ int imxrt_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   dmach->arg      = arg;
   dmach->state    = IMXRT_DMA_ACTIVE;
 
-  /* Enable the DONE interrupt when the major interation count completes. */
-#warning Missing logic
-
   /* Enable channel ERROR interrupts */
-#warning Missing logic
+
+  regval8         = EDMA_SEEI(chan);
+  putreg8(regval8, IMXRT_EDMA_SEEI);
+
+  /* Enable the DONE interrupt when the major iteration count completes. */
+
+  regaddr         = IMXRT_EDMA_TCD_CSR(chan);
+  modifyreg16(regaddr, 0, EDMA_TCD_CSR_INTMAJOR);
+
+#if 0 /* Not yet controlled */
+  /* Enable the DONE interrupt when the half the major iteration count completes. */
+
+  modifyreg16(regaddr, 0, EDMA_TCD_CSR_INTHALF);
+#endif
 
   /* Enable the DMA request for this channel */
 
