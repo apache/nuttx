@@ -355,6 +355,7 @@ static int imxrt_edma_interrupt(int irq, void *context, FAR void *arg)
 
 void weak_function up_dmainitialize(void)
 {
+  uint32_t regval;
   int i;
 
   dmainfo("Initialize eDMA\n");
@@ -362,6 +363,30 @@ void weak_function up_dmainitialize(void)
   /* Enable peripheral clocking to eDMA and DMAMUX modules */
 
   imxrt_clockrun_dma();
+
+  /* Configure the eDMA controller */
+
+  regval = getreg32(IMXRT_EDMA_CR);
+  regval &= ~(EDMA_CR_EDBG | EDMA_CR_ERCA | EDMA_CR_HOE | EDMA_CR_CLM |
+              EDMA_CR_EMLM);
+
+#ifdef CONFIG_IMXRT_EDMA_EDBG
+  regval |= EDMA_CR_EDBG;   /* Enable Debug */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_ERCA
+  regval |= EDMA_CR_ERCA;   /* Enable Round Robin Channel Arbitration */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_HOE
+  regval |= EDMA_CR_HOE;    /* Halt On Error */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_CLM
+  regval |= EDMA_CR_CLM;    /*  Continuous Link Mode */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_EMLIM
+  regval |= EDMA_CR_EMLM;   /*  Enable Minor Loop Mapping */
+#endif
+
+  putreg32(regval, IMXRT_EDMA_CR);
 
   /* Initialize data structures */
 
@@ -560,6 +585,9 @@ int imxrt_dmasetup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr, size_t nby
   /* To initialize the eDMA:
    *
    *   1. Write to the CR if a configuration other than the default is desired.
+   *
+   *      We always use the global default setup by up_dmainitialize()
+   *
    *   2. Write the channel priority levels to the DCHPRIn registers if a
    *      configuration other than the default is desired.
    *   3. Enable error interrupts in the EEI register if so desired.

@@ -73,6 +73,7 @@ menu "LPUART Peripherals"
 config IMXRT_EDMA
 	bool "eDMA"
 	default n
+	select ARCH_DMA
 	depends on EXPERIMENTAL
 
 config IMXRT_LPUART1
@@ -332,4 +333,29 @@ config IMXRT_SRAM_HEAPOFFSET
 
 endmenu  # i.MX6 Primary RAM
 endmenu # Memory Configuration
+
+menu "eDMA Configuration"
+	depends on IMXRT_EDMA
+
+config IMXRT_EDMA_ERCA
+	bool "Round Robin Channel Arbitration"
+	default n
+
+config IMXRT_EDMA_HOE
+	bool "Halt On Error"
+	default y
+
+config IMXRT_EDMA_CLM
+	bool "Continuous Link Mode"
+	default n
+
+config IMXRT_EDMA_EMLIM
+	bool "Minor Loop Mapping"
+	default n
+
+config IMXRT_EDMA_EDBG
+	bool "Enable Debug"
+	default n
+
+endmenu # eDMA Global Configuration
 endif # ARCH_CHIP_IMXRT
