@@ -260,17 +260,28 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
 static void imxrt_dmach_interrupt(struct imxrt_dmach_s *dmach)
 {
   uintptr_t regaddr;
+  uint32_t regval32;
   uint16_t regval16;
   uint8_t regval8;
+  unsigned int chan;
   int result;
 
-  /* Is (or was) DMA active on this channel? */
+  /* Check for a pending interrupt on this channel */
 
-  if (dmach->state == IMXRT_DMA_ACTIVE)
+  chan     = dmach->chan;
+  regval32 = getreg32(IMXRT_EDMA_INT);
+
+  if ((regval32 & EDMA_INT(chan)) != 0)
     {
+      /* An interrupt is pending.  This should only happen if the channel is
+       * active.
+       */
+
+      DEBUGASSERT(dmach->state == IMXRT_DMA_ACTIVE);
+
       /* Yes.. Get the eDMA TCD Control and Status register value. */
 
-      regaddr = IMXRT_EDMA_TCD_CSR(dmach->chan);
+      regaddr = IMXRT_EDMA_TCD_CSR(chan);
 
       /* Check if the transfer is done */
 
@@ -278,20 +289,33 @@ static void imxrt_dmach_interrupt(struct imxrt_dmach_s *dmach)
         {
           /* Clear the pending DONE interrupt status. */
 
-          regval8 = EDMA_CDNE(dmach->chan);
+          regval8 = EDMA_CDNE(chan);
           putreg8(regval8, IMXRT_EDMA_CDNE);
           result   = OK;
         }
-
-      /* Check if any errors have occurred. */
-#warning Missing logic
-
+      else
         {
-          /* Clear the pending error interrupt status. */
-#warning Missing logic
+          /* Check if any errors have occurred. */
 
-          result = -EIO;
+          regval32 = getreg32(IMXRT_EDMA_ERR);
+          if ((regval32 & EDMA_ERR(n)(chan)) != 0)
+            {
+              dmaerr("ERROR: eDMA ES=%08lx\n",
+                     (unsigned long)getreg32(IMXRT_EDMA_ES));
+
+              /* Clear the pending error interrupt status. */
+
+              regval8 = EDMA_CERR(chan);
+              putreg32(regval8, IMXRT_EDMA_CERR);
+              result = -EIO;
+            }
         }
+
+      /* Clear the pending interrupt */
+
+      regval8 = EDMA_CINT(chan);
+      putreg32(regval8, IMXRT_EDMA_CINT);
+      result = -EIO;
 
       /* Terminate the transfer */
 
@@ -312,7 +336,7 @@ static int imxrt_edma_interrupt(int irq, void *context, FAR void *arg)
   struct imxrt_dmach_s *dmach;
   unsigned int chan;
 
-  /* 'arg' should the the DMA channel instance.
+  /* 'arg' should the DMA channel instance.
    *
    * NOTE that there are only 16 vectors for 32 DMA channels.  The 'arg' will
    * always be the lower-numbered DMA channel.  The other DMA channel will
