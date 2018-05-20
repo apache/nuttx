@@ -1193,8 +1193,8 @@ Configuration Sub-directories
 
   This configuration is a variant of the NSH configuration used for
   demonstrating PCM audio using the CS43L22 stereo DAC/amplifier on board
-  the STM32F4 Discovery and the STM32 I2S DMA interface.  In uses the
-  file player at apps/system/nxplayer.
+  the STM32F4 Discovery and the STM32 I2S DMA interface.  It uses the
+  file player at apps/system/nxplayer.  The serial console is on USART2.
 
   The original CS43L22 and STM32 I2S drivers were contribued by Taras
   Drozdovsky in May of 2017.  The audio configuration was contributed by

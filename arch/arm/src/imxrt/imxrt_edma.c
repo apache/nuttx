@@ -57,6 +57,7 @@
 #include "chip.h"
 #include "chip/imxrt_edma.h"
 #include "chip/imxrt_dmamux.h"
+#include "imxrt_periphclks.h"
 #include "imxrt_edma.h"
 
 #ifdef CONFIG_IMXRT_EDMA
@@ -358,9 +359,11 @@ void weak_function up_dmainitialize(void)
 
   dmainfo("Initialize eDMA\n");
 
-  /* Enable peripheral clock */
+  /* Enable peripheral clocking to eDMA and DMAMUX modules */
 
-  /* Enable data structures */
+  imxrt_clockrun_dma();
+
+  /* Initialize data structures */
 
   memset(&g_edma, 0, sizeof());
   for (i = 0; i < IMXRT_EDMA_NCHANNELS; i++)
@@ -424,13 +427,20 @@ void weak_function up_dmainitialize(void)
 /****************************************************************************
  * Name: imxrt_dmachannel
  *
- *   Allocate a DMA channel.  This function sets aside a DMA channel then
- *   gives the caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel,
+ *   initializes the DMAMUX for the channel, then gives the caller exclusive
+ *   access to the DMA channel.
  *
- *   The naming convention in all of the DMA interfaces is that one side is
- *   the 'peripheral' and the other is 'memory'.  However, the interface
- *   could still be used if, for example, both sides were memory although
- *   the naming would be awkward.
+ * Input Parameters:
+ *   dmamux - DMAMUX configuration see DMAMUX channel configuration register
+ *            bit-field definitions in chip/imxrt_dmamux.h.  Settings include:
+ *
+ *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
+ *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
+ *            DMAMUX_CHCFG_TRIG       DMA Channel Trigger Enable (optional)
+ *            DMAMUX_CHCFG_ENBL       DMA Mux Channel Enable (required)
+ *
+ *            A value of zero will disable the DMAMUX channel.
  *
  * Returned Value:
  *   If a DMA channel is available, this function returns a non-NULL, void*
@@ -438,7 +448,7 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE imxrt_dmachannel(void)
+DMA_HANDLE imxrt_dmachannel(uint32_t dmamux)
 {
   struct imxrt_dmach_s *dmach;
   unsigned int chndx;
@@ -450,6 +460,8 @@ DMA_HANDLE imxrt_dmachannel(void)
   for (chndx = 0; chndx < SAM_NDMACHAN; chndx++)
     {
       struct imxrt_dmach_s *candidate = &g_edma.dmach[chndx];
+      uintptr_t regaddr;
+
       if (!candidate->inuse)
         {
           dmach        = candidate;
@@ -457,9 +469,16 @@ DMA_HANDLE imxrt_dmachannel(void)
           dmach->state = IMXRT_DMA_IDLE;
 
           /* Clear any pending interrupts on the channel */
+#warning Missing Logic
 
           /* Disable the channel. */
+#warning Missing Logic
 
+          /* Set the DMAMUX register associated with this channel */
+
+          DEBUASSERT(chndx == dmach->chan);
+          regaddr = IMXRT_DMAMUX_CHCF(chndx);
+          putreg32(dmamux, regaddr);
           break;
         }
     }
@@ -496,6 +515,7 @@ DMA_HANDLE imxrt_dmachannel(void)
 void imxrt_dmafree(DMA_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
+  uintptr_t regaddr;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL && dmach->inuse && dmach->state != IMXRT_DMA_ACTIVE);
@@ -507,6 +527,11 @@ void imxrt_dmafree(DMA_HANDLE handle)
   dmach->flags = 0;
   dmach->inuse = false;                   /* No longer in use */
   dmach->state = IMXRT_DMA_IDLE;          /* Better not be active! */
+
+  /* Disable the associated DMAMUX */
+
+  regaddr = IMXRT_DMAMUX_CHCF(chndx);
+  putreg32(0, regaddr);
 }
 
 /************************************************************************************

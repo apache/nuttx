@@ -184,7 +184,7 @@
                                                            /* Bits 6-31:  Reserved */
 /* Clock Switcher Register */
 
-#define CCM_CCSR_PLL3_SW_CLK_SEL	               (1 << 0)  /* Bit 0: Selects source to generate pll3_sw_clk */
+#define CCM_CCSR_PLL3_SW_CLK_SEL                 (1 << 0)  /* Bit 0: Selects source to generate pll3_sw_clk */
 
 /* Arm Clock Root Register */
 
@@ -581,6 +581,10 @@
 #define CCM_CG_RUN                               (1)  /* Clock is on in run mode, but off in WAIT and STOP modes */
 #define CCM_CG_ALL                               (3)  /* Clock is on during all modes, except STOP mode. */
 
+#define CCM_CCGRX_CG_SHIFT(r)                    ((r) << 1)
+#define CCM_CCGRX_CG_MASK(r)                     (0x3 << CCM_CCGRX_CG_SHIFT(r))
+#  define CCM_CCGRX_CG(r,v)                      ((uint32_t)(v) << CCM_CCGRX_CG_SHIFT(r))
+
 #define CCM_CCGRX_CG0_SHIFT                      (0)
 #define CCM_CCGRX_CG0_MASK                       (0x3 << CCM_CCGRX_CG0_SHIFT)
 #  define CCM_CCGRX_CG0(n)                       ((uint32_t)(n) << CCM_CCGRX_CG0_SHIFT)
@@ -630,7 +634,122 @@
 #define CCM_CCGRX_CG15_MASK                      (0x3 << CCM_CCGRX_CG15_SHIFT)
 #  define CCM_CCGRX_CG15(n)                      ((uint32_t)(n) << CCM_CCGRX_CG15_SHIFT)
 
-/* Module Enable Overide Register */
+/* Macros used by imxrt_periphclks.h */
+
+#define CCM_CCGR_GPIO2                           IMXRT_CCM_CCGR0, 15
+#define CCM_CCGR_LPUART2                         IMXRT_CCM_CCGR0, 14
+#define CCM_CCGR_GPT2_SERIAL                     IMXRT_CCM_CCGR0, 13
+#define CCM_CCGR_GPT2_BUS                        IMXRT_CCM_CCGR0, 12
+#define CCM_CCGR_TRACE                           IMXRT_CCM_CCGR0, 11
+#define CCM_CCGR_CAN2_SERIAL                     IMXRT_CCM_CCGR0, 10
+#define CCM_CCGR_CAN2                            IMXRT_CCM_CCGR0, 9
+#define CCM_CCGR_CAN1_SERIAL                     IMXRT_CCM_CCGR0, 8
+#define CCM_CCGR_CAN1                            IMXRT_CCM_CCGR0, 7
+#define CCM_CCGR_LPUART3                         IMXRT_CCM_CCGR0, 6
+#define CCM_CCGR_DCP                             IMXRT_CCM_CCGR0, 5
+#define CCM_CCGR_MQS                             IMXRT_CCM_CCGR0, 2
+#define CCM_CCGR_AIPS_TZ2                        IMXRT_CCM_CCGR0, 1
+#define CCM_CCGR_AIPS_TZ1                        IMXRT_CCM_CCGR0, 0
+
+#define CCM_CCGR_CSU                             IMXRT_CCM_CCGR1, 14
+#define CCM_CCGR_GPIO1                           IMXRT_CCM_CCGR1, 13
+#define CCM_CCGR_LPUART4                         IMXRT_CCM_CCGR1, 12
+#define CCM_CCGR_GPT_SERIAL                      IMXRT_CCM_CCGR1, 11
+#define CCM_CCGR_GPT_BUS                         IMXRT_CCM_CCGR1, 10
+#define CCM_CCGR_ADC1                            IMXRT_CCM_CCGR1, 8
+#define CCM_CCGR_AOI2                            IMXRT_CCM_CCGR1, 7
+#define CCM_CCGR_PIT                             IMXRT_CCM_CCGR1, 6
+#define CCM_CCGR_ENET                            IMXRT_CCM_CCGR1, 5
+#define CCM_CCGR_ADC2                            IMXRT_CCM_CCGR1, 4
+#define CCM_CCGR_LPSPI4                          IMXRT_CCM_CCGR1, 3
+#define CCM_CCGR_LPSPI3                          IMXRT_CCM_CCGR1, 2
+#define CCM_CCGR_LPSPI2                          IMXRT_CCM_CCGR1, 1
+#define CCM_CCGR_LPSPI1                          IMXRT_CCM_CCGR1, 0
+
+#define CCM_CCGR_PXP                             IMXRT_CCM_CCGR2, 15
+#define CCM_CCGR_LCD                             IMXRT_CCM_CCGR2, 14
+#define CCM_CCGR_GPIO3                           IMXRT_CCM_CCGR2, 13
+#define CCM_CCGR_XBAR2                           IMXRT_CCM_CCGR2, 12
+#define CCM_CCGR_XBAR1                           IMXRT_CCM_CCGR2, 11
+#define CCM_CCGR_IPMUX3                          IMXRT_CCM_CCGR2, 10
+#define CCM_CCGR_IPMUX2                          IMXRT_CCM_CCGR2, 9
+#define CCM_CCGR_IPMUX1                          IMXRT_CCM_CCGR2, 8
+#define CCM_CCGR_XBAR3                           IMXRT_CCM_CCGR2, 7
+#define CCM_CCGR_OCOTP_CTRL                      IMXRT_CCM_CCGR2, 6
+#define CCM_CCGR_LPI2C3                          IMXRT_CCM_CCGR2, 5
+#define CCM_CCGR_LPI2C2                          IMXRT_CCM_CCGR2, 4
+#define CCM_CCGR_LPI2C1                          IMXRT_CCM_CCGR2, 3
+#define CCM_CCGR_IOMUXC_SNVS                     IMXRT_CCM_CCGR2, 2
+#define CCM_CCGR_CSI                             IMXRT_CCM_CCGR2, 1
+
+#define CCM_CCGR_IOMUXC_SNVS_GPR                 IMXRT_CCM_CCGR3, 15
+#define CCM_CCGR_OCRAM                           IMXRT_CCM_CCGR3, 14
+#define CCM_CCGR_ACMP4                           IMXRT_CCM_CCGR3, 13
+#define CCM_CCGR_ACMP3                           IMXRT_CCM_CCGR3, 12
+#define CCM_CCGR_ACMP2                           IMXRT_CCM_CCGR3, 11
+#define CCM_CCGR_ACMP1                           IMXRT_CCM_CCGR3, 10
+#define CCM_CCGR_FLEXRAM                         IMXRT_CCM_CCGR3, 9
+#define CCM_CCGR_WDOG1                           IMXRT_CCM_CCGR3, 8
+#define CCM_CCGR_EWM                             IMXRT_CCM_CCGR3, 7
+#define CCM_CCGR_GPIO4                           IMXRT_CCM_CCGR3, 6
+#define CCM_CCGR_LCDIF_PIX                       IMXRT_CCM_CCGR3, 5
+#define CCM_CCGR_AOI1                            IMXRT_CCM_CCGR3, 4
+#define CCM_CCGR_LPUART6                         IMXRT_CCM_CCGR3, 3
+#define CCM_CCGR_SEMC                            IMXRT_CCM_CCGR3, 2
+#define CCM_CCGR_LPUART5                         IMXRT_CCM_CCGR3, 1
+#define CCM_CCGR_FLEXIO2                         IMXRT_CCM_CCGR3, 0
+
+#define CCM_CCGR_ENC4                            IMXRT_CCM_CCGR4, 15
+#define CCM_CCGR_ENC3                            IMXRT_CCM_CCGR4, 14
+#define CCM_CCGR_ENC2                            IMXRT_CCM_CCGR4, 13
+#define CCM_CCGR_ENC1                            IMXRT_CCM_CCGR4, 12
+#define CCM_CCGR_PWM4                            IMXRT_CCM_CCGR4, 11
+#define CCM_CCGR_PWM3                            IMXRT_CCM_CCGR4, 10
+#define CCM_CCGR_PWM2                            IMXRT_CCM_CCGR4, 9
+#define CCM_CCGR_PWM1                            IMXRT_CCM_CCGR4, 8
+#define CCM_CCGR_SIM_EMS                         IMXRT_CCM_CCGR4, 7
+#define CCM_CCGR_SIM_M                           IMXRT_CCM_CCGR4, 6
+#define CCM_CCGR_TSC_DIG                         IMXRT_CCM_CCGR4, 5
+#define CCM_CCGR_SIM_M7                          IMXRT_CCM_CCGR4, 4
+#define CCM_CCGR_BEE                             IMXRT_CCM_CCGR4, 3
+#define CCM_CCGR_IOMUXC_GPR                      IMXRT_CCM_CCGR4, 2
+#define CCM_CCGR_IOMUXC                          IMXRT_CCM_CCGR4, 1
+
+#define CCM_CCGR_SNVS_LP                         IMXRT_CCM_CCGR5, 15
+#define CCM_CCGR_SNVS_HP                         IMXRT_CCM_CCGR5, 14
+#define CCM_CCGR_LPUART7                         IMXRT_CCM_CCGR5, 13
+#define CCM_CCGR_LPUART1                         IMXRT_CCM_CCGR5, 12
+#define CCM_CCGR_SAI3                            IMXRT_CCM_CCGR5, 11
+#define CCM_CCGR_SAI2                            IMXRT_CCM_CCGR5, 10
+#define CCM_CCGR_SAI1                            IMXRT_CCM_CCGR5, 9
+#define CCM_CCGR_SIM_MAIN                        IMXRT_CCM_CCGR5, 8
+#define CCM_CCGR_SPDIF                           IMXRT_CCM_CCGR5, 7
+#define CCM_CCGR_AIPSTZ4                         IMXRT_CCM_CCGR5, 6
+#define CCM_CCGR_WDOG2                           IMXRT_CCM_CCGR5, 5
+#define CCM_CCGR_KPP                             IMXRT_CCM_CCGR5, 4
+#define CCM_CCGR_DMA                             IMXRT_CCM_CCGR5, 3
+#define CCM_CCGR_WDOG3                           IMXRT_CCM_CCGR5, 2
+#define CCM_CCGR_FLEXIO1                         IMXRT_CCM_CCGR5, 1
+#define CCM_CCGR_ROM                             IMXRT_CCM_CCGR5, 0
+
+#define CCM_CCGR_TIMER3                          IMXRT_CCM_CCGR6, 15
+#define CCM_CCGR_TIMER2                          IMXRT_CCM_CCGR6, 14
+#define CCM_CCGR_TIMER1                          IMXRT_CCM_CCGR6, 13
+#define CCM_CCGR_LPI2C4_SERIAL                   IMXRT_CCM_CCGR6, 12
+#define CCM_CCGR_ANADIG                          IMXRT_CCM_CCGR6, 11
+#define CCM_CCGR_SIM_PER                         IMXRT_CCM_CCGR6, 10
+#define CCM_CCGR_AIPS_TZ3                        IMXRT_CCM_CCGR6, 9
+#define CCM_CCGR_TIMER4                          IMXRT_CCM_CCGR6, 8
+#define CCM_CCGR_LPUART8                         IMXRT_CCM_CCGR6, 7
+#define CCM_CCGR_TRNG                            IMXRT_CCM_CCGR6, 6
+#define CCM_CCGR_FLEXSPI                         IMXRT_CCM_CCGR6, 5
+#define CCM_CCGR_IPMUX4                          IMXRT_CCM_CCGR6, 4
+#define CCM_CCGR_DCDC                            IMXRT_CCM_CCGR6, 3
+#define CCM_CCGR_USDHC2                          IMXRT_CCM_CCGR6, 2
+#define CCM_CCGR_USDHC1                          IMXRT_CCM_CCGR6, 1
+#define CCM_CCGR_USBOH3                          IMXRT_CCM_CCGR6, 0
+
+/* Module Enable Override Register */
 
                                                            /* Bits 0-4: Reserved */
 #define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Overide clock enable signal from GPT */

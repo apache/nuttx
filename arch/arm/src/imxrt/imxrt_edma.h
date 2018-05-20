@@ -49,7 +49,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* DMA ******************************************************************************/
+/* eDMA Configuration ***************************************************************/
 
 /* Flags used to characterize the DMA channel.  The naming convention is that one
  * side is the peripheral and the other is memory (however, the interface could still
@@ -202,25 +202,31 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_dmachannel
  *
- * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel then gives the
- *   caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel,
+ *   initializes the DMAMUX for the channel, then gives the caller exclusive
+ *   access to the DMA channel.
  *
- *   The naming convention in all of the DMA interfaces is that one side is the
- *   'peripheral' and the other is 'memory'.  However, the interface could still
- *   be used if, for example, both sides were memory although the naming would be
- *   awkward.
+ * Input Parameters:
+ *   dmamux - DMAMUX configuration see DMAMUX channel configuration register
+ *            bit-field definitions in chip/imxrt_dmamux.h.  Settings include:
+ *
+ *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
+ *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
+ *            DMAMUX_CHCFG_TRIG       DMA Channel Trigger Enable (optional)
+ *            DMAMUX_CHCFG_ENBL       DMA Mux Channel Enable (required)
+ *
+ *            A value of zero will disable the DMAMUX channel.
  *
  * Returned Value:
- *   If a DMA channel is available, this function returns a non-NULL, void* DMA
- *   channel handle.  NULL is returned on any failure.
+ *   If a DMA channel is available, this function returns a non-NULL, void*
+ *   DMA channel handle.  NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-DMA_HANDLE imxrt_dmachannel(void);
+DMA_HANDLE imxrt_dmachannel(uint32_t dmamux);
 
 /************************************************************************************
  * Name: imxrt_dmafree

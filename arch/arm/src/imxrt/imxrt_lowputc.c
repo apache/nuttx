@@ -50,6 +50,7 @@
 #include "chip/imxrt_ccm.h"
 #include "chip/imxrt_lpuart.h"
 #include "imxrt_config.h"
+#include "imxrt_periphclks.h"
 #include "imxrt_iomuxc.h"
 #include "imxrt_gpio.h"
 #include "imxrt_lowputc.h"
@@ -169,63 +170,37 @@ static const struct uart_config_s g_console_config =
 
 void imxrt_lpuart_clock_enable (uint32_t base)
 {
-    uint32_t regval;
-
   if (base == IMXRT_LPUART1_BASE)
     {
-      regval  = getreg32(IMXRT_CCM_CCGR5);
-      regval &= ~ CCM_CCGRX_CG12_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG12_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR5);
+      imxrt_clockall_lpuart1();
     }
   else if (base == IMXRT_LPUART2_BASE)
     {
-      regval  = getreg32(IMXRT_CCM_CCGR0);
-      regval &= ~ CCM_CCGRX_CG14_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG14_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR0);
+      imxrt_clockall_lpuart2();
     }
   else if (base == IMXRT_LPUART3_BASE)
     {
-      regval  = getreg32(IMXRT_CCM_CCGR0);
-      regval &= ~ CCM_CCGRX_CG6_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG6_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR0);
+      imxrt_clockall_lpuart3();
     }
   else if (base == IMXRT_LPUART4_BASE)
     {
-      regval  = getreg32(IMXRT_CCM_CCGR1);
-      regval &= ~ CCM_CCGRX_CG12_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG12_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR1);
+      imxrt_clockall_lpuart4();
     }
   else if (base == IMXRT_LPUART5_BASE)
     {
-      regval = getreg32(IMXRT_CCM_CCGR3);
-      regval &= ~ CCM_CCGRX_CG1_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG1_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR3);
+      imxrt_clockall_lpuart5();
     }
   else if (base == IMXRT_LPUART6_BASE)
     {
-      regval  = getreg32(IMXRT_CCM_CCGR3);
-      regval &= ~ CCM_CCGRX_CG4_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG4_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR3);
+      imxrt_clockall_lpuart6();
     }
   else if (base == IMXRT_LPUART7_BASE)
     {
-      regval = getreg32(IMXRT_CCM_CCGR5);
-      regval &= ~ CCM_CCGRX_CG13_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG13_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR5);
+      imxrt_clockall_lpuart7();
     }
   else if (base == IMXRT_LPUART8_BASE)
     {
-      regval  = getreg32(IMXRT_CCM_CCGR6);
-      regval &= ~ CCM_CCGRX_CG7_MASK;
-      regval |= (CCM_CG_ALL << CCM_CCGRX_CG7_SHIFT);
-      putreg32(regval, IMXRT_CCM_CCGR6);
+      imxrt_clockall_lpuart8();
     }
 }
 
