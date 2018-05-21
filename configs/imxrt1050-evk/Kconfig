@@ -4,4 +4,17 @@
 #
 
 if ARCH_BOARD_IMXRT1050_EVK
+
+choice
+	prompt "Boot Flash"
+	default IMXRT1050_EVK_HYPER_FLASH
+
+config IMXRT1050_EVK_HYPER_FLASH
+	bool "HYPER Flash"
+
+config IMXRT1050_EVK_NOR_FLASH
+	bool "Serial NOR Flash"
+
+endchoice # Boot Flash
+
 endif

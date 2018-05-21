@@ -45,7 +45,7 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
-EXTERN(hyperflash_config)
+EXTERN(flash_config)
 EXTERN(image_vector_table)
 EXTERN(boot_data)
 
