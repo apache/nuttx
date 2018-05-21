@@ -2863,7 +2863,7 @@ static int lpc17_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
 
       /* This there a incoming data pending the availability of a request? */
 
-      if (priv->rxpendinig > 0)
+      if (priv->rxpending > 0)
         {
           ret = lpc17_rdrequest(privep);
           priv->rxpending--;
