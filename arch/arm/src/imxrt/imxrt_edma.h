@@ -4,6 +4,13 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Portions of the eDMA logic derive from NXP sample code which has a compatible
+ * BSD 3-clause license:
+ *
+ *   Copyright (c) 2015, Freescale Semiconductor, Inc.
+ *   Copyright 2016-2017 NXP
+ *   All rights reserved
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -49,94 +56,39 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* eDMA Configuration ***************************************************************/
-
-/* Flags used to characterize the DMA channel.  The naming convention is that one
- * side is the peripheral and the other is memory (however, the interface could still
- * be used if, for example, both sides were memory although the naming would be
- * awkward)
- *
- * .... .... .... ....  CCCC GGBA DDSS ..TT
- *
- * REVISIT:  Initially, only vanilla Rx/Tx DMA block transfers are supported.
- */
-
-/* Transfer type:
- *
- * .... .... .... ....  .... .... .... ..TT
- */
-
-#define TTYPE_M2M                     (0)      /* Memory-to-memory (not supported) */
-#define TTYPE_M2P                     (1)      /* Memory-to-peripheral (normal Tx) */
-#define TTYPE_P2M                     (2)      /* Peripheral-to-memory (normal Rx) */
-#define TTYPE_P2P                     (3)      /* Peripheral-to-peripheral (not supported) */
-
-#define TTYPE_2P_MASK                 (1)      /* Transfer to peripheral (M2P or P2P) */
-#define TTYPE_P2_MASK                 (2)      /* Transfer from peripheral (P2M or P2P) */
-
-#define DMACH_FLAG_TTYPE_SHIFT        (0)      /* Bits 0-1 Destination transfer size */
-#define DMACH_FLAG_TTYPE_MASK         (3 << DMACH_FLAG_TTYPE_SHIFT)
-#  define DMACH_FLAG_TTYPE_M2M        (TTYPE_M2M << DMACH_FLAG_TTYPE_SHIFT) /* Memory-to-memory */
-#  define DMACH_FLAG_TTYPE_M2P        (TTYPE_M2P << DMACH_FLAG_TTYPE_SHIFT) /* Memory-to-peripheral */
-#  define DMACH_FLAG_TTYPE_P2M        (TTYPE_P2M << DMACH_FLAG_TTYPE_SHIFT) /* Peripheral-to-memory */
-#  define DMACH_FLAG_TTYPE_P2P        (TTYPE_P2P << DMACH_FLAG_TTYPE_SHIFT) /* Peripheral-to-peripheral */
-
-#  define DMACH_FLAG_TTYPE_2P_MASK    (TTYPE_2P_MASK << DMACH_FLAG_TTYPE_SHIFT) /* Transfer to peripheral */
-#  define DMACH_FLAG_TTYPE_P2_MASK    (TTYPE_P2_MASK << DMACH_FLAG_TTYPE_SHIFT) /* Transfer from peripheral */
-
-/* Source transfer size:
- *
- * .... .... .... ....  .... .... ..SS ....
- */
-
-#define DMACH_FLAG_SSIZE_SHIFT        (4)      /* Bits 4-5: Source transfer size */
-#define DMACH_FLAG_SSIZE_MASK         (7 << DMACH_FLAG_SSIZE_SHIFT)
-#  define DMACH_FLAG_SSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_SSIZE_SHIFT) /* 8-bit */
-#  define DMACH_FLAG_SSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 16-bit */
-#  define DMACH_FLAG_SSIZE_32BIT      (TCD_ATTR_SIZE_32BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 32-bit */
-#  define DMACH_FLAG_SSIZE_64BIT      (TCD_ATTR_SIZE_64BIT  << DMACH_FLAG_SSIZE_SHIFT) /* 64-bit */
-#  define DMACH_FLAG_SSIZE_256BIT     (TCD_ATTR_SIZE_256BIT << DMACH_FLAG_SSIZE_SHIFT) /* 32-byte burst */
-
-/* Destination transfer size:
- *
- * .... .... .... ....   .... .... DD.. ....
- */
-
-#define DMACH_FLAG_DSIZE_SHIFT        (6)      /* Bits 6-7: Destination transfer size */
-#define DMACH_FLAG_DSIZE_MASK         (7 << DMACH_FLAG_DSIZE_SHIFT)
-#  define DMACH_FLAG_DSIZE_8BIT       (TCD_ATTR_SIZE_8BIT   << DMACH_FLAG_DSIZE_SHIFT) /* 8-bit */
-#  define DMACH_FLAG_DSIZE_16BIT      (TCD_ATTR_SIZE_16BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 16-bit */
-#  define DMACH_FLAG_DSIZE_32BIT      (TCD_ATTR_SIZE_32BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 32-bit */
-#  define DMACH_FLAG_DSIZE_64BIT      (TCD_ATTR_SIZE_64BIT  << DMACH_FLAG_DSIZE_SHIFT) /* 64-bit */
-#  define DMACH_FLAG_DSIZE_256BIT     (TCD_ATTR_SIZE_256BIT << DMACH_FLAG_DSIZE_SHIFT) /* 32-byte burst */
-
-/* Arbitration:
- *
- * .... .... .... ....   .... ..BA .... ....
- */
-
-#define DMACH_FLAG_CHRR               (1 << 8)  /* Bit 8:  Round Robin Channel Arbitration */
-#define DMACH_FLAG_GRPRR              (1 << 8)  /* Bit 9:  Round Robin Group Arbitration */
-
-/* DMA Priorities:
- *
- * .... .... .... ....   CCCC GG.. .... ....
- */
-
-#define DMACH_FLAG_GPPRI_SHIFT        (10)      /* Bits 10-11: Channel Group Priority */
-#define DMACH_FLAG_GRPPRI_MASK        (3 << DMACH_FLAG_GPPRI_SHIFT)
-#  define DMACH_FLAG_GRPPRI(n)        ((uint32_t)(n) << DMACH_FLAG_GPPRI_SHIFT)
-
-#define DMACH_FLAG_CHPRI_SHIFT        (12)      /* Bits 12-15: Channel Arbitration Priority */
-#define DMACH_FLAG_CHPRI_MASK         (15 << DMACH_FLAG_CHPRI_SHIFT)
-#  define DMACH_FLAG_CHPRI(n)         ((uint32_t)(n) << DMACH_FLAG_CHPRI_SHIFT)
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
-typedef FAR void *DMA_HANDLE;
-typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
+typedef FAR void *DMACH_HANDLE;
+typedef void (*dma_callback_t)(DMACH_HANDLE handle, void *arg, int result);
+
+/* eDMA transfer type */
+
+enum imxrt_edma_xfrtype_e
+{
+  eDMA_MEMORY2MEMORY = 0,  /* Transfer from memory to memory */
+  eDMA_PERIPH2MEMORY,      /* Transfer from peripheral to memory */
+  eDMA_MEMORY2PERIPH,      /* Transfer from memory to peripheral */
+};
+
+/* This structure holds the source/destination transfer attribute configuration. */
+
+struct imxrt_edma_xfrconfig_s
+{
+    uint32_t saddr;    /* Source data address. */
+    uint32_t daddr;    /* Destination data address. */
+    uint8_t  ssize;    /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in chip/. */
+    uint8_t  dsize;    /* Destination data transfer size. */
+    int16_t soff;      /* Sign-extended offset for current source address. */
+    int16_t doff;      /* Sign-extended offset for current destination address. */
+    uint16_t iter;     /* Major loop iteration count. */
+#ifdef CONFIG_IMXRT_EDMA_EMLIM
+    uint16_t nbytes;   /* Bytes to transfer in a minor loop */
+#else
+    uint32_t nbytes;   /* Bytes to transfer in a minor loop */
+#endif
+};
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
@@ -202,7 +154,7 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: imxrt_dmachannel
  *
  *   Allocate a DMA channel.  This function sets aside a DMA channel,
@@ -224,9 +176,9 @@ extern "C"
  *   If a DMA channel is available, this function returns a non-NULL, void*
  *   DMA channel handle.  NULL is returned on any failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-DMA_HANDLE imxrt_dmachannel(uint32_t dmamux);
+DMACH_HANDLE imxrt_dmachannel(uint32_t dmamux);
 
 /************************************************************************************
  * Name: imxrt_dmafree
@@ -240,7 +192,121 @@ DMA_HANDLE imxrt_dmachannel(uint32_t dmamux);
  *
  ************************************************************************************/
 
-void imxrt_dmafree(DMA_HANDLE handle);
+void imxrt_dmafree(DMACH_HANDLE handle);
+
+/****************************************************************************
+ * Name: imxrt_tcd_alloc
+ *
+ * Description:
+ *   Allocate an in-memory, TCD
+ *
+ ****************************************************************************/
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+struct imxrt_edmatcd_s *imxrt_tcd_alloc(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_tcd_free()
+ *
+ * Description:
+ *   Free an in-memory, TCD
+ *
+ ****************************************************************************/
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd);
+#endif
+
+/************************************************************************************
+ * Name: imxrt_dmach_reset
+ *
+ * Description:
+ *   Sets all TCD registers to default values..
+ *
+ *   NOTE:  This function enables the auto stop request feature.
+ *
+ ************************************************************************************/
+
+void imxrt_dmach_reset(DMACH_HANDLE handle);
+
+/*******************************************************************************
+ * Name: imxrt_dmach_initconfig
+ *
+ * Description:
+ *   This function initializes the transfer configuration structure according
+ *   to the user-provided input configuration.
+ *
+ * Input Parameters:
+ *   saddr     - eDMA transfer source address.
+ *   srcwidth  - eDMA transfer source address width(bytes).
+ *   daddr     - eDMA transfer destination address.
+ *   destwidth - eDMA transfer destination address width(bytes).
+ *   reqsize   - eDMA transfer bytes per channel request.
+ *   nbytes    - eDMA transfer bytes to be transferred.
+ *   type      - eDMA transfer type.
+ *   config    - The user configuration structure of type struct
+ *               imxrt_edma_xfrconfig_s.
+ *
+ *   NOTE: The data address and the data width must be consistent. For example,
+ *   if the SRC is 4 bytes, the source address must be 4 bytes aligned, or it
+ *   results in  source address error (SAE).
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int imxrt_dmach_initconfig(void *saddr, uint32_t srcwidth,
+                           void *daddr, uint32_t destwidth,
+                           uint32_t reqsize, uint32_t nbytes,
+                           edma_transfer_type_t type,
+                           struct imxrt_edma_xfrconfig_s *config);
+
+/*******************************************************************************
+ * Name: imxrt_dmach_setconfig
+ *
+ * Description:
+ *   This function configures the transfer attribute, including source address,
+ *   destination address, transfer size, address offset, and so on. It also
+ *   configures the scatter gather feature if the user supplies the TCD address.
+ *
+ *   Example:
+ *
+ *      edma_transfer_t config;
+ *      struct imxrt_edmatcd_s tcd;
+ *      config.saddr = ..;
+ *      config.daddr = ..;
+ *      ...
+ *      dmach = imxrt_dmachannel(dmamux);
+ *      ...
+ *      tcd = imxrt_tcd_alloc(dmach)
+ *      ...
+ *      imxrt_dmach_setconfig(dmach, &config, &tcd);
+ *
+ * Input Parameters:
+ *   handle  - DMA channel handle created by imxrt_dmachannel()
+ *   channel - eDMA channel number.
+ *   config  - Pointer to eDMA transfer configuration structure.
+ *   next    - Points to a TCD structure previously allocated via
+ *             imxrt_tcd_alloc(). 'next' can be NULL if the caller does not
+ *             wish to enable scatter/gather feature.
+ *
+ *   NOTE: If 'next' is not NULL, it means scatter gather feature is enabled
+ *         and DREQ bit is cleared in the previous transfer configuration.
+ *         That bit was set in imxrt_dmach_reset().
+ *
+ ******************************************************************************/
+
+#ifdef CONFIG_IMXRT_EDMA_NTCD > 0
+void imxrt_dmach_setconfig(DMACH_HANDLE handle,
+                           const struct imxrt_edma_xfrconfig_s *config,
+                           struct imxrt_edmatcd_s *next);
+#else
+void imxrt_dmach_setconfig(DMACH_HANDLE handle,
+                           const struct imxrt_edma_xfrconfig_s *config);
+#endif
 
 /************************************************************************************
  * Name: imxrt_dmasetup
@@ -254,8 +320,8 @@ void imxrt_dmafree(DMA_HANDLE handle);
  *
  ************************************************************************************/
 
-int imxrt_dmasetup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr, size_t nbytes,
-                   uint32_t chflags);
+int imxrt_dmasetup(DMACH_HANDLE handle, uint32_t saddr, uint32_t daddr,
+                   size_t nbytes, uint32_t chflags);
 
 /************************************************************************************
  * Name: imxrt_dmastart
@@ -265,7 +331,7 @@ int imxrt_dmasetup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr, size_t nby
  *
  ************************************************************************************/
 
-int imxrt_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
+int imxrt_dmastart(DMACH_HANDLE handle, dma_callback_t callback, void *arg);
 
 /************************************************************************************
  * Name: imxrt_dmastop
@@ -276,7 +342,7 @@ int imxrt_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  *
  ************************************************************************************/
 
-void imxrt_dmastop(DMA_HANDLE handle);
+void imxrt_dmastop(DMACH_HANDLE handle);
 
 /************************************************************************************
  * Name: imxrt_dmasample
@@ -287,7 +353,7 @@ void imxrt_dmastop(DMA_HANDLE handle);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void imxrt_dmasample(DMA_HANDLE handle, struct imxrt_dmaregs_s *regs);
+void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs);
 #else
 #  define imxrt_dmasample(handle,regs)
 #endif

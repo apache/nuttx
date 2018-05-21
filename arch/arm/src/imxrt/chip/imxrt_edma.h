@@ -44,7 +44,7 @@
 #include "chip/imxrt_memorymap.h"
 
 /****************************************************************************************************
- * Pre-processor definitions
+ * Pre-processor Definitions
  ****************************************************************************************************/
 
 #define IMXRT_EDMA_NCHANNELS                32
@@ -102,6 +102,8 @@
 #define IMXRT_EDMA_DCHPRI30_OFFSET          0x011d  /* Channel 9 Priority */
 #define IMXRT_EDMA_DCHPRI29_OFFSET          0x011e  /* Channel 0 Priority */
 #define IMXRT_EDMA_DCHPRI28_OFFSET          0x011f  /* Channel 1 Priority */
+
+/* Transfer Control Descriptor (TCD) */
 
 #define IMXRT_EDMA_TCD_OFFSET(n)            (0x1000 + ((n) << 5))
 #define IMXRT_EDMA_TCD_SADDR_OFFSET         0x0000  /* TCD Source Address */
@@ -565,6 +567,8 @@
 #define IMXRT_EDMA_DCHPRI30                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
 #define IMXRT_EDMA_DCHPRI29                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
 #define IMXRT_EDMA_DCHPRI28                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
+
+/* Transfer Control Descriptor (TCD) */
 
 #define IMXRT_EDMA_TCD_BASE(n)              (IMXRT_EDMA_BASE + IMXRT_EDMA_TCD_OFFSET(n))
 #define IMXRT_EDMA_TCD_SADDR(n)             (IMXRT_EDMA_TCD_BASE(n) + IMXRT_EDMA_TCD_SADDR_OFFSET)
@@ -1125,6 +1129,7 @@
 
 #define EDMA_TCD_ATTR_DSIZE_SHIFT           (0)       /* Bits 0-2: Destination data transfer size */
 #define EDMA_TCD_ATTR_DSIZE_MASK            (7 << EDMA_TCD_ATTR_DSIZE_SHIFT)
+#  define EDMA_TCD_ATTR_DSIZE(n)            ((uint32_t)(n)        << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 8-bit */
 #  define EDMA_TCD_ATTR_DSIZE_8BIT          (TCD_ATTR_SIZE_8BIT   << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 8-bit */
 #  define EDMA_TCD_ATTR_DSIZE_16BIT         (TCD_ATTR_SIZE_16BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 16-bit */
 #  define EDMA_TCD_ATTR_DSIZE_32BIT         (TCD_ATTR_SIZE_32BIT  << EDMA_TCD_ATTR_DSIZE_SHIFT) /* 32-bit */
@@ -1135,6 +1140,7 @@
 #  define EDMA_TCD_ATTR_DMOD(n)             ((uint32_t)(n) << EDMA_TCD_ATTR_DMOD_SHIFT)
 #define EDMA_TCD_ATTR_SSIZE_SHIFT           (8)       /* Bits 8-10: Source data transfer size */
 #define EDMA_TCD_ATTR_SSIZE_MASK            (7 << EDMA_TCD_ATTR_SSIZE_SHIFT)
+#  define EDMA_TCD_ATTR_SSIZE(n)            ((uint32_t)(n)        << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
 #  define EDMA_TCD_ATTR_SSIZE_8BIT          (TCD_ATTR_SIZE_8BIT   << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
 #  define EDMA_TCD_ATTR_SSIZE_16BIT         (TCD_ATTR_SIZE_16BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 16-bit */
 #  define EDMA_TCD_ATTR_SSIZE_32BIT         (TCD_ATTR_SIZE_32BIT  << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
@@ -1236,5 +1242,26 @@
                                                       /* Bit 14: Reserved */
 #define EDMA_TCD_BITER_ELINK_ELINK          (1 << 15) /* Bit 15: Enable channel-to-channel linking
                                                        * on minor-loop complete */
+
+/****************************************************************************************************
+ * Public Types
+ ****************************************************************************************************/
+
+/* In-memory representation of the 32-byte Transfer Control Descriptor (TCD) */
+
+struct imxrt_edmatcd_s
+{
+  uint32_t saddr;         /* Offset: 0x0000  TCD Source Address */
+  uint16_t soff;          /* Offset: 0x0004  TCD Signed Source Address Offset */
+  uint16_t attr;          /* Offset: 0x0006  TCD Transfer Attributes */
+  uint32_t nbytes;        /* Offset: 0x0008  TCD Signed Minor Loop Offset / Byte Count */
+  uint32_t slast;         /* Offset: 0x000c  TCD Last Source Address Adjustment */
+  uint32_t daddr;         /* Offset: 0x0010  TCD Destination Address */
+  uint16_t doff;          /* Offset: 0x0014  TCD Signed Destination Address Offset */
+  uint16_t citer;         /* Offset: 0x0016  TCD Current Minor Loop Link, Major Loop Count */
+  uint32_t dlastsga;      /* Offset: 0x0018  TCD Last Destination Address Adjustment/Scatter Gather Address */
+  uint16_t csr;           /* Offset: 0x001c  TCD Control and Status */
+  uint16_t biter;         /* Offset: 0x001e  TCD Beginning Minor Loop Link, Major Loop Count */
+};
 
 #endif /* __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_EDMA_H */

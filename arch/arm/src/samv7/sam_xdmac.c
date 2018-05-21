@@ -1598,6 +1598,12 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 
   nxsem_init(&xdmac->chsem, 0, 1);
   nxsem_init(&xdmac->dsem, 0, SAMV7_NDMACHAN);
+
+  /* The 'dsem' is used for signaling rather than mutual exclusion and,
+   * hence, should not have priority inheritance enabled.
+   */
+
+  nxsem_setprotocol(&xdmac->dsem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

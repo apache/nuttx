@@ -4,6 +4,13 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Portions of the eDMA logic derive from NXP sample code which has a compatible
+ * BSD 3-clause license:
+ *
+ *   Copyright (c) 2015, Freescale Semiconductor, Inc.
+ *   Copyright 2016-2017 NXP
+ *   All rights reserved
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -43,6 +50,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <semaphore.h>
+#include <queue.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -65,6 +73,32 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* TCD Alignment.
+ *
+ * eDMA TCDs must be aligned with the D-Cache line boundaries to facilitate
+ * cache operations on the TCDs when the D-Cache is enabled.
+ *
+ * NOTE:  The TCDs are 32-bytes in length.  We implicitly assume that the
+ * D-Cache line size is also 32-bits.  Otherwise, padding would be required
+ * at the ends of the TCDS and buffers to protect data after the end of from
+ * invalidation.
+ */
+
+#ifdef CONFIG_ARMV7M_DCACHE
+/* Align to the cache line size which we assume is >= 8 */
+
+#  define EDMA_ALIGN        ARMV7M_DCACHE_LINESIZE
+#  define EDMA_ALIGN_MASK   (EDMA_ALIGN-1)
+#  define EDMA_ALIGN_UP(n)  (((n) + EDMA_ALIGN_MASK) & ~EDMA_ALIGN_MASK)
+
+#else
+/* Special alignment is not required in this case, but we will align to 8-bytes */
+
+#  define EDMA_ALIGN        8
+#  define EDMA_ALIGN_MASK   7
+#  define EDMA_ALIGN_UP(n)  (((n) + 7) & ~7)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -92,6 +126,16 @@ struct imxrt_dmach_s
   void *arg;                      /* Argument passed to callback function */
   uint32_t rxaddr;                /* RX memory address */
   size_t rxsize;                  /* Size of RX memory region */
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+  /* That TCD list is linked through the DLAST SGA field.  The first transfer
+   * to be performed is at the head of the list.  Subsequent TCDs are added at
+   * the tail of the list.
+   */
+
+  struct imxrt_edmatcd_s *head;   /* First TCD in the list */
+  struct imxrt_edmatcd_s *tail;   /* Last TCD in the list */
+#endif
 };
 
 /* This structure describes the state of the eDMA controller */
@@ -101,7 +145,9 @@ struct imxrt_edma_s
   /* These semaphores protect the DMA channel and descriptor tables */
 
   sem_t chsem;                    /* Protects channel table */
-  sem_t dsem;                     /* Protects descriptor table */
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+  sem_t dsem;                     /* Supports wait for free descriptors */
+#endif
 
   /* This array describes each DMA channel */
 
@@ -116,6 +162,17 @@ struct imxrt_edma_s
 
 static struct imxrt_edma_s g_edma;
 
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+/* This is a singly-linked list of free TCDs */
+
+static sq_queue_t g_tcd_free;
+
+/* This is a pool of pre-allocated TCDs */
+
+static struct imxrt_edmatcd_s g_tcd_pool[CONFIG_IMXRT_EDMA_NTCD]
+              __attribute__((aligned(EDMA_ALIGN)));
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -124,7 +181,8 @@ static struct imxrt_edma_s g_edma;
  * Name: imxrt_takechsem() and imxrt_givechsem()
  *
  * Description:
- *   Used to get exclusive access to the DMA channel table
+ *   Used to get exclusive access to the DMA channel table for channel
+ *   allocation.
  *
  ****************************************************************************/
 
@@ -160,6 +218,7 @@ static inline void imxrt_givechsem(void)
  *
  ****************************************************************************/
 
+#if CONFIG_IMXRT_EDMA_NTCD > 0
 static void imxrt_takedsem(void)
 {
   int ret;
@@ -183,6 +242,36 @@ static inline void imxrt_givedsem(void)
 {
   (void)nxsem_post(&g_edma.dsem);
 }
+#endif
+
+/****************************************************************************
+ * Name: imxrt_tcd_initialize()
+ *
+ * Description:
+ *   Initialize the TCD free list from the pool of pre-allocated TCDs.
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence so no special protection is
+ *   necessary.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+static inline void imxrt_tcd_initialize(void)
+{
+  sq_entry_t *tcd;
+  int i;
+
+  /* Add each pre-allocated TCD to the tail of the TCD free list */
+
+  sq_init(&g_tcd_free);
+  for (i = 0; i < CONFIG_IMXRT_EDMA_NTCD; i++)
+    {
+      tcd = (sq_entry_t *)&g_tcd_poll[i];
+      sq_add_last(tcd, &g_tcd_free);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: imxrt_getdmach
@@ -213,6 +302,130 @@ static inline void imxrt_putdmach(struct imxrt_dmach_s *dmach, uint32_t value,
 }
 
 /****************************************************************************
+ * Name: imxrt_tcd_reset
+ *
+ * Description:
+ *  Reset all TCD registers to default values.  'tcd' is an 'overlay' that
+ *  may refer either to either the TCD register set or to an in-memory TCD
+ *  structure.
+ *
+ ****************************************************************************/
+
+static void imxrt_tcd_reset(struct imxrt_edmatcd_s *tcd)
+{
+  /* Reset channel TCD */
+
+  tcd->saddr    = 0;
+  tcd->soff     = 0;
+  tcd->attr     = 0;
+  tcd->nbytes   = 0;
+  tcd->slast    = 0;
+  tcd->daddr    = 0;
+  tcd->doff     = 0;
+  tcd->citer    = 0;
+  tcd->dlastsga = 0;
+
+  /* Enable auto disable request feature */
+
+  tcd->csr      = EDMA_TCD_CSR_DREQ;
+  tcd->biter    = 0;
+}
+
+/****************************************************************************
+ * Name: imxrt_tcd_configure
+ *
+ * Description:
+ *  Configure all TCD registers to the specified values.  'tcd' is an
+ *  'overlay' that may refer either to either the TCD register set or to an
+ *  in-memory TCD structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_EDMA_NTCD > 0
+void imxrt_tcd_configure(struct imxrt_edmatcd_s *tcd,
+                         const struct imxrt_edma_xfrconfig_s *config,
+                         struct imxrt_edmatcd_s *next)
+#else
+void imxrt_tcd_configure(struct imxrt_edmatcd_s *tcd,
+                         const struct imxrt_edma_xfrconfig_s *config)
+#endif
+{
+  tcd->saddr  = config->saddr;                        /* Source Address */
+  tcd->soff   = config->soff;                         /* Signed Source Address Offset */
+  tcd->attr   = EDMA_TCD_ATTR_SSIZE(config->ssize) |  /* Transfer Attributes */
+                EDMA_TCD_ATTR_DSIZE(config->destTransferSize);
+  tcd->nbytes = config->nbytes;                       /* Signed Minor Loop Offset / Byte Count */
+  tcd->slast  = tcd->slast;                           /* Last Source Address Adjustment */
+  tcd->daddr  = config->daddr;                        /* Destination Address */
+  tcd->doff   = config->doff;                         /* Signed Destination Address Offset */
+  tcd->citer  = config->iter;                         /* Current Minor Loop Link, Major Loop Count */
+  tcd->biter  = config->iter;                         /* Beginning Minor Loop Link, Major Loop Count */
+
+#ifdef CONFIG_IMXRT_EDMA_NTCD > 0
+  /* Enable scatter/gather processing */
+
+  if (next != NULL)
+    {
+      uint16_t regval16;
+
+      /* Set the next TCD address */
+
+      tcd->dlastsga = (uint32_t)next;
+
+      /* Before calling imxrt_tcd_configure or imxrt_dmach_setconfig, the
+       * user must call imxrt_tcd_reset or imxrt_dmach_reset which will set
+       * DREQ, so must use "|" or "&" rather than "=".
+       *
+       *  Clear the DREQ bit because scatter gather has been enabled, so the
+       *  previous transfer is not the last transfer, and channel request should
+       *  be enabled at the next transfer(the next TCD).
+       */
+
+      regval16  = tcd->csr;
+      regval16 &= ~EDMA_TCD_CSR_DREQ;
+      regval16 |= EDMA_TCD_CSR_ESG
+      tcd->csr  = regval16;
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: imxrt_tcd_instantiate
+ *
+ * Description:
+ *   Copy an in-memory TCD into eDMA channel TCD registers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_EDMA_NTCD > 0
+static void imxrt_tcd_instantiate(struct imxrt_dmach_s *dmach,
+                                  const struct imxrt_edmatcd_s *tcd)
+{
+  uintptr_t base = IMXRT_EDMA_TCD_BASE(dmach->chan);
+
+  /* Push tcd into hardware TCD register */
+
+  putreg32(tcd->saddr,    base + IMXRT_EDMA_TCD_SADDR_OFFSET);
+  putreg16(tcd->soff,     base + IMXRT_EDMA_TCD_SOFF_OFFSET);
+  putreg16(tcd->attr,     base + IMXRT_EDMA_TCD_ATTR_OFFSET);
+  putreg32(tcd->nbytes,   base + IMXRT_EDMA_TCD_NBYTES_ML_OFFSET);
+  putreg32(tcd->slast,    base + IMXRT_EDMA_TCD_SLAST_OFFSET);
+  putreg32(tcd->daddr,    base + IMXRT_EDMA_TCD_DADDR_OFFSET);
+  putreg16(tcd->doff,     base + IMXRT_EDMA_TCD_DOFF_OFFSET);
+  putreg16(tcd->citer,    base + IMXRT_EDMA_TCD_CITER_ELINK_OFFSET);
+  putreg32(tcd->dlastsga, base + IMXRT_EDMA_TCD_DLASTSGA_OFFSET);
+
+  /* Clear DONE bit first, otherwise ESG cannot be set */
+
+  putreg16(0,             base + IMXRT_EDMA_TCD_CSR_OFFSET);
+  putreg16(tcd->csr,      base + IMXRT_EDMA_TCD_CSR_OFFSET);
+
+  putreg16(tcd->biter,    base + IMXRT_EDMA_TCD_BITER_ELINK_OFFSET);
+  base->TCD[channel].BITER_ELINKNO = tcd->biter;
+}
+#endif
+
+/****************************************************************************
  * Name: imxrt_dmaterminate
  *
  * Description:
@@ -224,19 +437,34 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
 {
   struct imxrt_edma_s *dmac = imxrt_controller(dmach);
 
-  /* Disable all channel interrupts */
   /* Disable channel ERROR interrupts */
 
   regval8         = EDMA_CEEI(chan);
   putreg8(regval8, IMXRT_EDMA_CEEI);
 
-  /* Disable the DONE interrupt when the major iteration count completes. */
+  /* Disable channel IRQ requests */
+
+  regval8         = EDMA_CERQ(chan);
+  putreg8(regval8, IMXRT_EDMA_CERQ);
+
+  /* Clear CSR to disable channel. Because if the given channel started,
+   * transfer CSR will be not zero. Because if it is the last transfer, DREQ
+   * will be set.  If not, ESG will be set.
+   */
 
   regaddr         = IMXRT_EDMA_TCD_CSR(chan);
-  modifyreg16(regaddr, EDMA_TCD_CSR_INTMAJOR | EDMA_TCD_CSR_INTHALF, 0);
+  putreg16(0, regaddr);
 
-  /* Disable the channel. */
+  /* Cancel all next TCD transfer. */
+
+  regaddr         = IMXRT_EDMA_TCD_DLASTSGA(chan);
+  putreg16(0, regaddr);
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+  /* Return all allocated TCDs to the free list */
 #warning Missing logic
+
+#endif
 
   /* If this was an RX DMA (peripheral-to-memory), then invalidate the cache
    * to force reloads from memory.
@@ -251,7 +479,7 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
 
   if (dmach->callback)
     {
-      dmach->callback((DMA_HANDLE)dmach, dmach->arg, result);
+      dmach->callback((DMACH_HANDLE)dmach, dmach->arg, result);
     }
 
   dmach->callback = NULL;
@@ -434,7 +662,19 @@ void weak_function up_dmainitialize(void)
   /* Initialize semaphores */
 
   nxsem_init(&g_edma.chsem, 0, 1);
-  nxsem_init(&g_edma.dsem, 0, SAM_NDMACHAN);
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+  nxsem_init(&g_edma.dsem, 0, CONFIG_IMXRT_EDMA_NTCD);
+
+  /* The 'dsem' is used for signaling rather than mutual exclusion and,
+   * hence, should not have priority inheritance enabled.
+   */
+
+  nxsem_setprotocol(&g_edma.dsem, SEM_PRIO_NONE);
+
+  /* Initialize the list of of free TCDs from the pool of pre-allocated TCDs. */
+
+  imxrt_tcd_initialize();
+#endif
 
   /* Attach DMA interrupt vectors.
    *
@@ -514,7 +754,7 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE imxrt_dmachannel(uint32_t dmamux)
+DMACH_HANDLE imxrt_dmachannel(uint32_t dmamux)
 {
   struct imxrt_dmach_s *dmach;
   unsigned int chndx;
@@ -566,7 +806,7 @@ DMA_HANDLE imxrt_dmachannel(uint32_t dmamux)
       dmaerr("ERROR: Failed allocate eDMA channel\n");
     }
 
-  return (DMA_HANDLE)dmach;
+  return (DMACH_HANDLE)dmach;
 }
 
 /****************************************************************************
@@ -582,7 +822,7 @@ DMA_HANDLE imxrt_dmachannel(uint32_t dmamux)
  *
  ****************************************************************************/
 
-void imxrt_dmafree(DMA_HANDLE handle)
+void imxrt_dmafree(DMACH_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   uintptr_t regaddr;
@@ -610,6 +850,253 @@ void imxrt_dmafree(DMA_HANDLE handle)
   putreg32(0, regaddr);
 }
 
+/****************************************************************************
+ * Name: imxrt_tcd_alloc
+ *
+ * Description:
+ *   Allocate an in-memory, TCD
+ *
+ ****************************************************************************/
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+struct imxrt_edmatcd_s *imxrt_tcd_alloc(void)
+{
+  struct imxrt_edmatcd_s *tcd;
+  irqstate_t flags;
+
+  /* Take the 'dsem'.  When we hold the the 'dsem', then we know that one
+   * TCD is reserved for us in the free list.
+   *
+   * NOTE: We use a critical section here because we may block waiting for
+   * the 'dsem'.  The critical section will be suspended while we are
+   * waiting.
+   */
+
+  flags = enter_critical_section();
+  imxrt_takedsem();
+
+  /* Now there should be a TCD in the free list reserved just for us */
+
+  tcd = (struct imxrt_edmatcd_s *)sq_remfirst(&g_tcd_free);
+  DEBUGASSERT(tcd != NULL);
+
+  leave_critical_section(flags);
+  return tcd;
+}
+#endif
+
+/****************************************************************************
+ * Name: imxrt_tcd_free()
+ *
+ * Description:
+ *   Free an in-memory, TCD
+ *
+ ****************************************************************************/
+
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd)
+{
+  irqstate_t flags;
+
+  /* Add the the TCD to the end of the free list and post the 'dsem',
+   * possibly waking up another thread that might be waiting for
+   * a TCD.
+   */
+
+  flags = spin_lock_irqsave();
+  sq_add_last((sq_entry_t *)tcd, &g_tcd_free);
+  (void)imxrt_givedsem();
+  spin_unlock_irqrestore(flags);
+}
+#endif
+
+/************************************************************************************
+ * Name: imxrt_dmach_reset
+ *
+ * Description:
+ *   Sets all TCD registers to default values..
+ *
+ *   NOTE:  This function enables the auto stop request feature.
+ *
+ ************************************************************************************/
+
+void imxrt_dmach_reset(DMACH_HANDLE handle)
+{
+  struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
+
+  dmainfo("dmach: %p\n", dmach);
+  DEBUGASSERT(dmach != NULL && dmach->inuse && dmach->state != IMXRT_DMA_ACTIVE);
+
+  imxrt_tcd_reset((struct imxrt_edmatcd_s *)IMXRT_EDMA_TCD_BASE(dmach->chan));
+}
+
+/*******************************************************************************
+ * Name: imxrt_dmach_initconfig
+ *
+ * Description:
+ *   This function initializes the transfer configuration structure according
+ *   to the user-provided input configuration.
+ *
+ * Input Parameters:
+ *   saddr     - eDMA transfer source address.
+ *   srcwidth  - eDMA transfer source address width(bytes).
+ *   daddr     - eDMA transfer destination address.
+ *   destwidth - eDMA transfer destination address width(bytes).
+ *   reqsize   - eDMA transfer bytes per channel request.
+ *   nbytes    - eDMA transfer bytes to be transferred.
+ *   type      - eDMA transfer type.
+ *   config    - The user configuration structure of type struct
+ *               imxrt_edma_xfrconfig_s.
+ *
+ *   NOTE: The data address and the data width must be consistent. For example,
+ *   if the SRC is 4 bytes, the source address must be 4 bytes aligned, or it
+ *   results in  source address error (SAE).
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ******************************************************************************/
+
+int imxrt_dmach_initconfig(void *saddr, uint32_t srcwidth,
+                           void *daddr, uint32_t destwidth,
+                           uint32_t reqsize, uint32_t nbytes,
+                           edma_transfer_type_t type,
+                           struct imxrt_edma_xfrconfig_s *config)
+{
+  config->daddr  = (uint32_t)daddr;
+  config->saddr  = (uint32_t)saddr;
+  config->nbytes = reqsize;
+  config->iter   = nbytes / reqsize;
+
+  switch (srcwidth)
+    {
+      case 1:
+        config->ssize = TCD_ATTR_SIZE_8BIT;
+        break;
+
+      case 2:
+        config->ssize = TCD_ATTR_SIZE_16BIT;
+        break;
+
+      case 4:
+        config->ssize = TCD_ATTR_SIZE_32BIT;
+        break;
+
+      case 8:
+        config->ssize = TCD_ATTR_SIZE_64BIT;
+        break;
+
+      case 32:
+        config->ssize = TCD_ATTR_SIZE_256BIT;
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  switch (destwidth)
+    {
+        case 1:
+            config->dsize = TCD_ATTR_SIZE_8BIT;
+            break;
+
+        case 2:
+            config->dsize = TCD_ATTR_SIZE_16BIT;
+            break;
+
+        case 4U
+            config->dsize = TCD_ATTR_SIZE_32BIT;
+            break;
+
+        case 8:
+            config->dsize = TCD_ATTR_SIZE_64BIT;
+            break;
+
+        case 32:
+            config->dsize = TCD_ATTR_SIZE_256BIT;
+            break;
+
+      default:
+        return -EINVAL;
+    }
+
+  switch (type)
+    {
+      case kEDMA_MemoryToMemory:
+        config->doff = destwidth;
+        config->soff = srcwidth;
+        break;
+
+      case kEDMA_MemoryToPeripheral:
+        config->doff = 0;
+        config->soff = srcwidth;
+        break;
+
+      case kEDMA_PeripheralToMemory:
+        config->doff = destwidth;
+        config->soff = 0;
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: imxrt_dmach_setconfig
+ *
+ * Description:
+ *   This function configures the transfer attribute, including source address,
+ *   destination address, transfer size, address offset, and so on. It also
+ *   configures the scatter gather feature if the user supplies the TCD address.
+ *
+ *   Example:
+ *
+ *      edma_transfer_t config;
+ *      struct imxrt_edmatcd_s tcd;
+ *      config.saddr = ..;
+ *      config.daddr = ..;
+ *      ...
+ *      dmach = imxrt_dmachannel(dmamux);
+ *      ...
+ *      tcd = imxrt_tcd_alloc(dmach)
+ *      ...
+ *      imxrt_dmach_setconfig(dmach, &config, &tcd);
+ *
+ * Input Parameters:
+ *   handle  - DMA channel handle created by imxrt_dmachannel()
+ *   channel - eDMA channel number.
+ *   config  - Pointer to eDMA transfer configuration structure.
+ *   next    - Points to a TCD structure previously allocated via
+ *             imxrt_tcd_alloc(). 'next' can be NULL if the caller does not
+ *             wish to enable scatter/gather feature.
+ *
+ *   NOTE: If 'next' is not NULL, it means scatter gather feature is enabled
+ *         and DREQ bit is cleared in the previous transfer configuration.
+ *         That bit was set in imxrt_dmach_reset().
+ *
+ ******************************************************************************/
+
+#ifdef CONFIG_IMXRT_EDMA_NTCD > 0
+void imxrt_dmach_setconfig(DMACH_HANDLE handle,
+                          const struct imxrt_edma_xfrconfig_s *config,
+                          struct imxrt_edmatcd_s *next)
+{
+  imxrt_tcd_configure((struct imxrt_edmatcd_s *)IMXRT_EDMA_TCD_BASE(dmach->chan)),
+                      config, next);
+}
+#else
+void imxrt_dmach_setconfig(DMACH_HANDLE handle,
+                          const struct imxrt_edma_xfrconfig_s *config)
+{
+  imxrt_tcd_configure((struct imxrt_edmatcd_s *)IMXRT_EDMA_TCD_BASE(dmach->chan)),
+                      config);
+}
+#endif
+
 /************************************************************************************
  * Name: imxrt_dmasetup
  *
@@ -622,8 +1109,8 @@ void imxrt_dmafree(DMA_HANDLE handle)
  *
  ************************************************************************************/
 
-int imxrt_dmasetup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr, size_t nbytes,
-                   uint32_t chflags);
+int imxrt_dmasetup(DMACH_HANDLE handle, uint32_t saddr, uint32_t daddr,
+                   size_t nbytes, uint32_t chflags);
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   int ret = OK;
@@ -697,7 +1184,7 @@ int imxrt_dmasetup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr, size_t nby
  *
  ****************************************************************************/
 
-int imxrt_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
+int imxrt_dmastart(DMACH_HANDLE handle, dma_callback_t callback, void *arg)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   irqstate_t flags;
@@ -764,7 +1251,7 @@ int imxrt_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
  *
  ****************************************************************************/
 
-void imxrt_dmastop(DMA_HANDLE handle)
+void imxrt_dmastop(DMACH_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   irqstate_t flags;
@@ -789,7 +1276,7 @@ void imxrt_dmastop(DMA_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void imxrt_dmasample(DMA_HANDLE handle, struct imxrt_dmaregs_s *regs)
+void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
   uintptr_t regaddr;
