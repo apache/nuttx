@@ -352,67 +352,61 @@ static inline void imxrt_tcd_initialize(void)
  *
  ************************************************************************************/
 
-static void imxrt_tcd_chanlink(uint8_t flags, uint8_t chan,
-                               struct imxrt_edmatcd_s *tcd)
+#ifdef CONFIG_IMXRT_EDMA_ELINK
+static inline void imxrt_tcd_chanlink(uint8_t flags, struct imxrt_dmach_s *linkch,
+                                      struct imxrt_edmatcd_s *tcd)
 {
-  switch (flags & EDMA_CONFIG_LINKTYPE_MASK)
+  uint16_t regval16;
+
+  flags &= EDMA_CONFIG_LINKTYPE_MASK;
+
+  if (linkch == NULL || flags == EDMA_CONFIG_LINKTYPE_LINKNONE)
     {
-      case EDMA_CONFIG_LINKTYPE_MINORLINK: /* Minor link config */
-        {
-          uint16_t regval16;
+      /* No link or no link channel provided */
+      /* Disable minor links */
 
-          /* Enable minor link */
+      tcd->citer &= ~EDMA_TCD_CITER_ELINK;
+      tcd->biter &= ~EDMA_TCD_BITER_ELINK;
 
-          tcd->citer |= EDMA_TCD_CITER_ELINK_ELINK;
-          tcd->biter |= EDMA_TCD_BITER_ELINK_ELINK;
+      /* Disable major link */
 
-          /* Set linked channel */
+      tcd->csr   &= ~EDMA_TCD_CSR_MAJORELINK;
+    }
+  else if (flags == EDMA_CONFIG_LINKTYPE_MINORLINK) /* Minor link config */
+    {
+      /* Enable minor link */
 
-          regval16    = tcd->citer;
-          regval16   &= ~EDMA_TCD_CITER_ELINK_LINKCH_MASK;
-          regval16   |= EDMA_TCD_CITER_ELINK_LINKCH(chan);
-          tcd->citer  = regval16;
+      tcd->citer |= EDMA_TCD_CITER_ELINK_ELINK;
+      tcd->biter |= EDMA_TCD_BITER_ELINK_ELINK;
 
-          regval16    = tcd->biter;
-          regval16   &= ~EDMA_TCD_BITER_ELINK_LINKCH_MASK;
-          regval16   |= EDMA_TCD_BITER_ELINK_LINKCH(chan);
-          tcd->biter  = regval16;
-        }
-        break;
+      /* Set linked channel */
 
-      case EDMA_CONFIG_LINKTYPE_MAJORLINK: /* Major link config */
-        {
-          uint16_t regval16;
+      regval16    = tcd->citer;
+      regval16   &= ~EDMA_TCD_CITER_ELINK_LINKCH_MASK;
+      regval16   |= EDMA_TCD_CITER_ELINK_LINKCH(linkch->chan);
+      tcd->citer  = regval16;
 
-          /* Enable major link */
+      regval16    = tcd->biter;
+      regval16   &= ~EDMA_TCD_BITER_ELINK_LINKCH_MASK;
+      regval16   |= EDMA_TCD_BITER_ELINK_LINKCH(linkch->chan);
+      tcd->biter  = regval16;
+    }
+  else /* if (flags == EDMA_CONFIG_LINKTYPE_MAJORLINK)  Major link config */
+    {
+      /* Enable major link */
 
-          regval16    = tcd->csr;
-          regval16   |= EDMA_TCD_CSR_MAJORELINK;
-          tcd->csr    = regval16;
+      regval16    = tcd->csr;
+      regval16   |= EDMA_TCD_CSR_MAJORELINK;
+      tcd->csr    = regval16;
 
-          /* Set major linked channel */
+      /* Set major linked channel */
 
-          regval16   &= ~EDMA_TCD_CSR_MAJORLINKCH_MASK;
-          regval16   |=  EDMA_TCD_CSR_MAJORLINKCH(chan);
-          tcd->csr    = regval16;
-        }
-        break;
-
-      case EDMA_CONFIG_LINKTYPE_LINKNONE: /* link none */
-      default:
-        {
-          /* Disable minor links */
-
-          tcd->citer &= ~EDMA_TCD_CITER_ELINK;
-          tcd->biter &= ~EDMA_TCD_BITER_ELINK;
-
-          /* Disable major link */
-
-          tcd->csr   &= ~EDMA_TCD_CSR_MAJORELINK;
-        }
-        break;
+      regval16   &= ~EDMA_TCD_CSR_MAJORLINKCH_MASK;
+      regval16   |=  EDMA_TCD_CSR_MAJORLINKCH(linkch->chan);
+      tcd->csr    = regval16;
     }
 }
+#endif
 
 /****************************************************************************
  * Name: imxrt_tcd_configure
@@ -435,14 +429,19 @@ static inline void imxrt_tcd_configure(struct imxrt_edmatcd_s *tcd,
   tcd->slast    = tcd->slast;
   tcd->daddr    = config->daddr;
   tcd->doff     = config->doff;
-  tcd->citer    = config->iter;
-  tcd->biter    = config->iter;
+  tcd->citer    = config->iter & EDMA_TCD_CITER_CITER_MASK;
+  tcd->biter    = config->iter & EDMA_TCD_BITER_BITER_MASK;
   tcd->csr      = EDMA_TCD_CSR_DREQ; /* Assume last transfer */
   tcd->dlastsga = 0;
 
   /* And special case flags */
 
-  imxrt_tcd_chanlink(config->flags, config->linkch, tcd);
+#ifdef CONFIG_IMXRT_EDMA_ELINK
+  /* Configure major/minor link mapping */
+
+  imxrt_tcd_chanlink(config->flags, (struct imxrt_dmach_s *)config->linkch,
+                     tcd);
+#endif
 }
 
 /****************************************************************************
@@ -841,6 +840,15 @@ void weak_function up_dmainitialize(void)
  *            DMAMUX_CHCFG_ENBL       DMA Mux Channel Enable (required)
  *
  *            A value of zero will disable the DMAMUX channel.
+ *   dchpri - DCHPRI channel priority configuration.  See DCHPRI channel
+ *            configuration register bit-field definitions in
+ *            chip/imxrt_edma.h.  Meaningful settings include:
+ *
+ *            EDMA_DCHPRI_CHPRI       Channel Arbitration Priority
+ *            DCHPRI_DPA              Disable Preempt Ability
+ *            DCHPRI_ECP              Enable Channel Preemption
+ *
+ *            The power-on default, 0x05, is a reasonable choice.
  *
  * Returned Value:
  *   If a DMA channel is available, this function returns a non-NULL, void*
@@ -848,7 +856,7 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMACH_HANDLE imxrt_dmach_alloc(uint32_t dmamux)
+DMACH_HANDLE imxrt_dmach_alloc(uint32_t dmamux, uint8_t dchpri)
 {
   struct imxrt_dmach_s *dmach;
   unsigned int chndx;

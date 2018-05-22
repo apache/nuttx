@@ -43,6 +43,56 @@
 #ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
 #define __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
 
+/* General Usage:
+ *
+ * 1. Allocate a DMA channel
+ *
+ *      DMACH_HANDLE handle;
+ *      handle = edma_dmach_alloc(dmamux, dchpri);
+ *
+ *    Where 'dmamux' is the channel DMAMUX configuration register setting and
+ *    'dchpri' is the channel DCHPRIO priority register setting.
+ *
+ * 2. Create the transfer configuration:
+ *
+ *      struct imxrt_edma_xfrconfig_s config;
+ *      config.saddr = ..;
+ *      config.daddr = ..;
+ *      etc.
+ *
+ * 3. Setup the transfer in hardware:
+ *
+ *      int ret;
+ *      ret = imxrt_dmach_xfrsetup(handle, &config);
+ *
+ * 4. If you are setting up a scatter gather DMA (with CONFIG_IMXRT_EDMA_NTCD > 0),
+ *    then repeat steps 2 and 3 for each segment of the transfer.
+ *
+ * 5. Start the DMA:
+ *
+ *      ret = imxrt_dmach_start(handle, my_callback_func, priv);
+ *
+ *    Where my_callback_func() is called when the DMA completes or an error occurs.
+ *    'priv' represents some internal driver state that will be provided with the
+ *    callback.
+ *
+ * 6. If you need to stop the DMA and free resources (such as if a timeout occurs),
+ *    then:
+ *
+ *     i mxrt_dmach_stop(handle);
+ *
+ * 7. The callback will be received when the DMA completes (or an error occurs).
+ *    After that, you may free  the DMA channel, or re-use it on subsequent DMAs.
+ *
+ *      imxrt_dmach_free(handle);
+ *
+ * Almost non-invasive debug instrumentation is available.  You may call
+ * imxrt_dmasample() to save the current state of the eDMA registers at any given
+ * point in time.  At some later, postmortem analysis, you can dump the content of
+ * the buffered registers with imxrt_dmadump().  imxrt_dmasample() is also available
+ * for monitoring DMA progress.
+ */
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
@@ -59,9 +109,8 @@
 /* Configuration flags.
  *
  * REVISIT:  Many missing options that should be represented as flags:
- * 1. DCHPRIO priority, pre-emption flags
- * 2. Bandwidth
- * 3. Source/Destination modulo
+ * 1. Bandwidth
+ * 2. Source/Destination modulo
  */
 
 #define EDMA_CONFIG_LINKTYPE_SHIFT       (0) /* Bits 0-1: Link type */
@@ -81,29 +130,31 @@ typedef void (*edma_callback_t)(DMACH_HANDLE handle, void *arg, bool done, int r
 
 enum imxrt_edma_xfrtype_e
 {
-  eDMA_MEM2MEM = 0,    /* Transfer from memory to memory */
-  eDMA_PERIPH2MEM,     /* Transfer from peripheral to memory */
-  eDMA_MEM2PERIPH,     /* Transfer from memory to peripheral */
+  eDMA_MEM2MEM = 0,      /* Transfer from memory to memory */
+  eDMA_PERIPH2MEM,       /* Transfer from peripheral to memory */
+  eDMA_MEM2PERIPH,       /* Transfer from memory to peripheral */
 };
 
 /* This structure holds the source/destination transfer attribute configuration. */
 
 struct imxrt_edma_xfrconfig_s
 {
-    uint32_t saddr;    /* Source data address. */
-    uint32_t daddr;    /* Destination data address. */
-    int16_t  soff;     /* Sign-extended offset for current source address. */
-    int16_t  doff;     /* Sign-extended offset for current destination address. */
-    uint16_t iter;     /* Major loop iteration count. */
-    uint8_t  flags;    /* See EDMA_CONFIG_* definitions */
-    uint8_t  ssize;    /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in chip/. */
-    uint8_t  dsize;    /* Destination data transfer size. */
-    uint8_t  ttype;    /* Transfer type (see enum imxrt_edma_xfrtype_e). */
-    uint8_t  linkch;   /* Link channel (With  EDMA_CONFIG_LINKTYPE_* flags) */
+    uint32_t saddr;      /* Source data address. */
+    uint32_t daddr;      /* Destination data address. */
+    int16_t  soff;       /* Sign-extended offset for current source address. */
+    int16_t  doff;       /* Sign-extended offset for current destination address. */
+    uint16_t iter;       /* Major loop iteration count. */
+    uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
+    uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in chip/. */
+    uint8_t  dsize;      /* Destination data transfer size. */
+    uint8_t  ttype;      /* Transfer type (see enum imxrt_edma_xfrtype_e). */
 #ifdef CONFIG_IMXRT_EDMA_EMLIM
-    uint16_t nbytes;   /* Bytes to transfer in a minor loop */
+    uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else
-    uint32_t nbytes;   /* Bytes to transfer in a minor loop */
+    uint32_t nbytes;     /* Bytes to transfer in a minor loop */
+#endif
+#ifdef CONFIG_IMXRT_EDMA_ELINK
+    DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
 #endif
 };
 
@@ -112,39 +163,39 @@ struct imxrt_edma_xfrconfig_s
 #ifdef CONFIG_DEBUG_DMA
 struct imxrt_dmaregs_s
 {
-  uint8_t chan;        /* Sampled channel */
+  uint8_t chan;          /* Sampled channel */
 
   /* eDMA Global Registers */
 
-  uint32_t cr;         /* Control */
-  uint32_t es;         /* Error Status */
-  uint32_t erq;        /* Enable Request */
-  uint32_t req;        /* Interrupt Request */
-  uint32_t err;        /* Error */
-  uint32_t hrs;        /* Hardware Request Status */
-  uint32_t ears;       /* Enable Asynchronous Request in Stop */
+  uint32_t cr;           /* Control */
+  uint32_t es;           /* Error Status */
+  uint32_t erq;          /* Enable Request */
+  uint32_t req;          /* Interrupt Request */
+  uint32_t err;          /* Error */
+  uint32_t hrs;          /* Hardware Request Status */
+  uint32_t ears;         /* Enable Asynchronous Request in Stop */
 
   /* eDMA Channel registers */
 
-  uint8_t dchpri;      /* Channel priority */
+  uint8_t dchpri;        /* Channel priority */
 
   /* eDMA TCD */
 
-  uint32_t saddr;      /* TCD Source Address */
-  uint16_t soff;       /* TCD Signed Source Address Offset */
-  uint16_t attr;       /* TCD Transfer Attributes */
-  uint32_t nbml;       /* TCD Signed Minor Loop Offset / Byte Count */
-  uint32_t slast;      /* TCD Last Source Address Adjustment */
-  uint32_t daddr;      /* TCD Destination Address */
-  uint16_t doff;       /* TCD Signed Destination Address Offset */
-  uint16_t citer;      /* TCD Current Minor Loop Link, Major Loop Count */
-  uint32_t dlastsga;   /* TCD Last Destination Address Adjustment/Scatter Gather Address */
-  uint16_t csr;        /* TCD Control and Status */
-  uint16_t biter;      /* TCD Beginning Minor Loop Link, Major Loop Count */
+  uint32_t saddr;        /* TCD Source Address */
+  uint16_t soff;         /* TCD Signed Source Address Offset */
+  uint16_t attr;         /* TCD Transfer Attributes */
+  uint32_t nbml;         /* TCD Signed Minor Loop Offset / Byte Count */
+  uint32_t slast;        /* TCD Last Source Address Adjustment */
+  uint32_t daddr;        /* TCD Destination Address */
+  uint16_t doff;         /* TCD Signed Destination Address Offset */
+  uint16_t citer;        /* TCD Current Minor Loop Link, Major Loop Count */
+  uint32_t dlastsga;     /* TCD Last Destination Address Adjustment/Scatter Gather Address */
+  uint16_t csr;          /* TCD Control and Status */
+  uint16_t biter;        /* TCD Beginning Minor Loop Link, Major Loop Count */
 
   /* DMAMUX registers */
 
-  uint32_t dmamux;     /* Channel configuration */
+  uint32_t dmamux;       /* Channel configuration */
 };
 #endif /* CONFIG_DEBUG_DMA */
 
@@ -171,7 +222,7 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_dmach_alloc
  *
  *   Allocate a DMA channel.  This function sets aside a DMA channel,
@@ -188,14 +239,23 @@ extern "C"
  *            DMAMUX_CHCFG_ENBL       DMA Mux Channel Enable (required)
  *
  *            A value of zero will disable the DMAMUX channel.
+ *   dchpri - DCHPRI channel priority configuration.  See DCHPRI channel
+ *            configuration register bit-field definitions in
+ *            chip/imxrt_edma.h.  Meaningful settings include:
+ *
+ *            EDMA_DCHPRI_CHPRI       Channel Arbitration Priority
+ *            DCHPRI_DPA              Disable Preempt Ability
+ *            DCHPRI_ECP              Enable Channel Preemption
+ *
+ *            The power-on default, 0x05, is a reasonable choice.
  *
  * Returned Value:
  *   If a DMA channel is available, this function returns a non-NULL, void*
  *   DMA channel handle.  NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-DMACH_HANDLE imxrt_dmach_alloc(uint32_t dmamux);
+DMACH_HANDLE imxrt_dmach_alloc(uint32_t dmamux, uint8_t dchpri);
 
 /************************************************************************************
  * Name: imxrt_dmach_free

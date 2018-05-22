@@ -345,6 +345,26 @@ config IMXRT_EDMA_NTCD
 		which case only the TCD channel registers will be used and scatter-
 		will not be supported.
 
+config IMXRT_EDMA_ELINK
+	bool "Channeling Linking"
+	default n
+	---help---
+		This option enables optional minor or major loop channel linking:
+
+		Minor loop channel linking:  As the channel completes the minor
+		loop, this flag enables linking to another channel. The link target
+		channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the specified
+		channel.
+
+		If minor loop channel linking is disabled, this link mechanism is
+		suppressed in favor of the major loop channel linking.
+
+		Major loop channel linking:  As the channel completes the minor
+		loop, this option enables the linking to another channel. The link
+		target channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the linked channel.
+
 config IMXRT_EDMA_ERCA
 	bool "Round Robin Channel Arbitration"
 	default n
@@ -379,7 +399,7 @@ config IMXRT_EDMA_EMLIM
 	---help---
 		Normally TCD word 2 is a 32-bit NBYTES field.  When this option is
 		enabled, TCD word 2 is redefined to include individual enable fields,
-		an offset field, and the NBYTES field. The individual enable fields
+		an offset field, and the NBYTES field.  The individual enable fields
 		allow the minor loop offset to be applied to the source address, the
 		destination address, or both. The NBYTES field is reduced when either
 		offset is enabled.
