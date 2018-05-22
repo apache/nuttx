@@ -89,10 +89,10 @@
 #define IMXRT_DMACHAN_FLEXPWM3_RX1    41  /* FlexPWM3 RX sub-module1 capture */
 #define IMXRT_DMACHAN_FLEXPWM3_RX2    42  /* FlexPWM3 RX sub-module2 capture */
 #define IMXRT_DMACHAN_FLEXPWM3_RX3    43  /* FlexPWM3 RX sub-module3 capture */
-#define IMXRT_DMACHAN_FLEXPWM1_TX0    44  /* FlexPWM3 TX sub-module0 value */
-#define IMXRT_DMACHAN_FLEXPWM1_TX1    45  /* FlexPWM3 TX sub-module1 value */
-#define IMXRT_DMACHAN_FLEXPWM1_TX2    46  /* FlexPWM3 TX sub-module2 value */
-#define IMXRT_DMACHAN_FLEXPWM1_TX3    47  /* FlexPWM3 TX sub-module3 value */
+#define IMXRT_DMACHAN_FLEXPWM3_TX0    44  /* FlexPWM3 TX sub-module0 value */
+#define IMXRT_DMACHAN_FLEXPWM3_TX1    45  /* FlexPWM3 TX sub-module1 value */
+#define IMXRT_DMACHAN_FLEXPWM3_TX2    46  /* FlexPWM3 TX sub-module2 value */
+#define IMXRT_DMACHAN_FLEXPWM3_TX3    47  /* FlexPWM3 TX sub-module3 value */
 #define IMXRT_DMACHAN_QTIMER1_RX0     48  /* QTimer1 RX capture timer 0 */
 #define IMXRT_DMACHAN_QTIMER1_RX1     49  /* QTimer1 RX capture timer 1 */
 #define IMXRT_DMACHAN_QTIMER1_RX2     50  /* QTimer1 RX capture timer 2 */

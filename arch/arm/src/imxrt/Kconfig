@@ -64,17 +64,16 @@ config IMXRT_HAVE_LPUART
 
 menu "i.MX RT Peripheral Selection"
 
+config IMXRT_EDMA
+	bool "eDMA"
+	default n
+	select ARCH_DMA
+
 menu "FlexIO Peripherals"
 
 endmenu # FlexIO Peripherals
 
 menu "LPUART Peripherals"
-
-config IMXRT_EDMA
-	bool "eDMA"
-	default n
-	select ARCH_DMA
-	depends on EXPERIMENTAL
 
 config IMXRT_LPUART1
 	bool "LPUART1"

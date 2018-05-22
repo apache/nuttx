@@ -120,7 +120,7 @@
                                /* 0x400e0000     16KB Reserved */
                                /* 0x400e4000     16KB Reserved */
 #define IMXRT_EDMA_BASE           0x400e8000  /* 16KB EDMA */
-#define IMXRT_DMACHMUX_BASE       0x400ec000  /* 16KB DMA_CH_MUX */
+#define IMXRT_DMAMUX_BASE         0x400ec000  /* 16KB DMA_CH_MUX */
                                /* 400f0000       16KB Reserved */
 #define IMXRT_GPC_BASE            0x400f4000  /* 16KB GPC */
 #define IMXRT_SRC_BASE            0x400f8000  /* 16KB SRC */

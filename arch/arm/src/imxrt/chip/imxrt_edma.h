@@ -70,38 +70,38 @@
 
 #define IMXRT_EDMA_DCHPRI_OFFSET(n)         (0x0100 + ((n) & ~3) + (3 - ((n) & 3)))
 
-#define IMXRT_EDMA_DCHPRI3_OFFSET           0x0100  /* Channel 0 Priority */
-#define IMXRT_EDMA_DCHPRI2_OFFSET           0x0101  /* Channel 1 Priority */
-#define IMXRT_EDMA_DCHPRI1_OFFSET           0x0102  /* Channel 2 Priority */
-#define IMXRT_EDMA_DCHPRI0_OFFSET           0x0103  /* Channel 3 Priority */
-#define IMXRT_EDMA_DCHPRI7_OFFSET           0x0104  /* Channel 4 Priority */
-#define IMXRT_EDMA_DCHPRI6_OFFSET           0x0105  /* Channel 5 Priority */
-#define IMXRT_EDMA_DCHPRI5_OFFSET           0x0106  /* Channel 6 Priority */
-#define IMXRT_EDMA_DCHPRI4_OFFSET           0x0107  /* Channel 7 Priority */
-#define IMXRT_EDMA_DCHPRI11_OFFSET          0x0108  /* Channel 8 Priority */
-#define IMXRT_EDMA_DCHPRI10_OFFSET          0x0109  /* Channel 9 Priority */
-#define IMXRT_EDMA_DCHPRI9_OFFSET           0x010a  /* Channel 0 Priority */
-#define IMXRT_EDMA_DCHPRI8_OFFSET           0x010b  /* Channel 1 Priority */
-#define IMXRT_EDMA_DCHPRI15_OFFSET          0x010c  /* Channel 2 Priority */
-#define IMXRT_EDMA_DCHPRI14_OFFSET          0x010d  /* Channel 3 Priority */
-#define IMXRT_EDMA_DCHPRI13_OFFSET          0x010e  /* Channel 4 Priority */
-#define IMXRT_EDMA_DCHPRI12_OFFSET          0x010f  /* Channel 5 Priority */
-#define IMXRT_EDMA_DCHPRI19_OFFSET          0x0110  /* Channel 6 Priority */
-#define IMXRT_EDMA_DCHPRI18_OFFSET          0x0111  /* Channel 7 Priority */
-#define IMXRT_EDMA_DCHPRI17_OFFSET          0x0112  /* Channel 8 Priority */
-#define IMXRT_EDMA_DCHPRI16_OFFSET          0x0113  /* Channel 9 Priority */
-#define IMXRT_EDMA_DCHPRI23_OFFSET          0x0114  /* Channel 0 Priority */
-#define IMXRT_EDMA_DCHPRI22_OFFSET          0x0115  /* Channel 1 Priority */
-#define IMXRT_EDMA_DCHPRI21_OFFSET          0x0116  /* Channel 2 Priority */
-#define IMXRT_EDMA_DCHPRI20_OFFSET          0x0117  /* Channel 3 Priority */
-#define IMXRT_EDMA_DCHPRI27_OFFSET          0x0118  /* Channel 4 Priority */
-#define IMXRT_EDMA_DCHPRI26_OFFSET          0x0119  /* Channel 5 Priority */
-#define IMXRT_EDMA_DCHPRI25_OFFSET          0x011a  /* Channel 6 Priority */
-#define IMXRT_EDMA_DCHPRI24_OFFSET          0x011b  /* Channel 7 Priority */
-#define IMXRT_EDMA_DCHPRI31_OFFSET          0x011c  /* Channel 8 Priority */
-#define IMXRT_EDMA_DCHPRI30_OFFSET          0x011d  /* Channel 9 Priority */
-#define IMXRT_EDMA_DCHPRI29_OFFSET          0x011e  /* Channel 0 Priority */
-#define IMXRT_EDMA_DCHPRI28_OFFSET          0x011f  /* Channel 1 Priority */
+#define IMXRT_EDMA_DCHPRI3_OFFSET           0x0100  /* Channel 3 Priority */
+#define IMXRT_EDMA_DCHPRI2_OFFSET           0x0101  /* Channel 2 Priority */
+#define IMXRT_EDMA_DCHPRI1_OFFSET           0x0102  /* Channel 1 Priority */
+#define IMXRT_EDMA_DCHPRI0_OFFSET           0x0103  /* Channel 0 Priority */
+#define IMXRT_EDMA_DCHPRI7_OFFSET           0x0104  /* Channel 7 Priority */
+#define IMXRT_EDMA_DCHPRI6_OFFSET           0x0105  /* Channel 6 Priority */
+#define IMXRT_EDMA_DCHPRI5_OFFSET           0x0106  /* Channel 5 Priority */
+#define IMXRT_EDMA_DCHPRI4_OFFSET           0x0107  /* Channel 4 Priority */
+#define IMXRT_EDMA_DCHPRI11_OFFSET          0x0108  /* Channel 11 Priority */
+#define IMXRT_EDMA_DCHPRI10_OFFSET          0x0109  /* Channel 10 Priority */
+#define IMXRT_EDMA_DCHPRI9_OFFSET           0x010a  /* Channel 9 Priority */
+#define IMXRT_EDMA_DCHPRI8_OFFSET           0x010b  /* Channel 8 Priority */
+#define IMXRT_EDMA_DCHPRI15_OFFSET          0x010c  /* Channel 15 Priority */
+#define IMXRT_EDMA_DCHPRI14_OFFSET          0x010d  /* Channel 14 Priority */
+#define IMXRT_EDMA_DCHPRI13_OFFSET          0x010e  /* Channel 13 Priority */
+#define IMXRT_EDMA_DCHPRI12_OFFSET          0x010f  /* Channel 12 Priority */
+#define IMXRT_EDMA_DCHPRI19_OFFSET          0x0110  /* Channel 19 Priority */
+#define IMXRT_EDMA_DCHPRI18_OFFSET          0x0111  /* Channel 18 Priority */
+#define IMXRT_EDMA_DCHPRI17_OFFSET          0x0112  /* Channel 17 Priority */
+#define IMXRT_EDMA_DCHPRI16_OFFSET          0x0113  /* Channel 16 Priority */
+#define IMXRT_EDMA_DCHPRI23_OFFSET          0x0114  /* Channel 23 Priority */
+#define IMXRT_EDMA_DCHPRI22_OFFSET          0x0115  /* Channel 22 Priority */
+#define IMXRT_EDMA_DCHPRI21_OFFSET          0x0116  /* Channel 21 Priority */
+#define IMXRT_EDMA_DCHPRI20_OFFSET          0x0117  /* Channel 20 Priority */
+#define IMXRT_EDMA_DCHPRI27_OFFSET          0x0118  /* Channel 27 Priority */
+#define IMXRT_EDMA_DCHPRI26_OFFSET          0x0119  /* Channel 26 Priority */
+#define IMXRT_EDMA_DCHPRI25_OFFSET          0x011a  /* Channel 25 Priority */
+#define IMXRT_EDMA_DCHPRI24_OFFSET          0x011b  /* Channel 24 Priority */
+#define IMXRT_EDMA_DCHPRI31_OFFSET          0x011c  /* Channel 31 Priority */
+#define IMXRT_EDMA_DCHPRI30_OFFSET          0x011d  /* Channel 30 Priority */
+#define IMXRT_EDMA_DCHPRI29_OFFSET          0x011e  /* Channel 29 Priority */
+#define IMXRT_EDMA_DCHPRI28_OFFSET          0x011f  /* Channel 28 Priority */
 
 /* Transfer Control Descriptor (TCD) */
 
@@ -539,34 +539,67 @@
 #define IMXRT_EDMA_DCHPRI1                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
 #define IMXRT_EDMA_DCHPRI2                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
 #define IMXRT_EDMA_DCHPRI3                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
-#define IMXRT_EDMA_DCHPRI7                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI7_OFFSET)
-#define IMXRT_EDMA_DCHPRI6                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI6_OFFSET)
-#define IMXRT_EDMA_DCHPRI5                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI5_OFFSET)
 #define IMXRT_EDMA_DCHPRI4                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI4_OFFSET)
-#define IMXRT_EDMA_DCHPRI11                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI11_OFFSET)
+#define IMXRT_EDMA_DCHPRI5                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI5_OFFSET)
+#define IMXRT_EDMA_DCHPRI6                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI6_OFFSET)
+#define IMXRT_EDMA_DCHPRI7                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI7_OFFSET)
+#define IMXRT_EDMA_DCHPRI8                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI8_OFFSET)
+#define IMXRT_EDMA_DCHPRI9                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI9_OFFSET)
 #define IMXRT_EDMA_DCHPRI10                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI10_OFFSET)
-#define IMXRT_EDMA_DCHPRI9                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI8_OFFSET)
-#define IMXRT_EDMA_DCHPRI8                  (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI9_OFFSET)
-#define IMXRT_EDMA_DCHPRI15                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI0_OFFSET)
-#define IMXRT_EDMA_DCHPRI14                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
-#define IMXRT_EDMA_DCHPRI13                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
-#define IMXRT_EDMA_DCHPRI12                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
-#define IMXRT_EDMA_DCHPRI19                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI0_OFFSET)
-#define IMXRT_EDMA_DCHPRI18                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
-#define IMXRT_EDMA_DCHPRI17                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
-#define IMXRT_EDMA_DCHPRI16                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
-#define IMXRT_EDMA_DCHPRI23                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI0_OFFSET)
-#define IMXRT_EDMA_DCHPRI22                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
-#define IMXRT_EDMA_DCHPRI21                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
-#define IMXRT_EDMA_DCHPRI10                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
-#define IMXRT_EDMA_DCHPRI27                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI0_OFFSET)
-#define IMXRT_EDMA_DCHPRI26                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
-#define IMXRT_EDMA_DCHPRI25                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
-#define IMXRT_EDMA_DCHPRI24                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
-#define IMXRT_EDMA_DCHPRI31                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI0_OFFSET)
-#define IMXRT_EDMA_DCHPRI30                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI1_OFFSET)
-#define IMXRT_EDMA_DCHPRI29                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI2_OFFSET)
-#define IMXRT_EDMA_DCHPRI28                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI3_OFFSET)
+#define IMXRT_EDMA_DCHPRI11                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI11_OFFSET)
+#define IMXRT_EDMA_DCHPRI12                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI12_OFFSET)
+#define IMXRT_EDMA_DCHPRI13                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI13_OFFSET)
+#define IMXRT_EDMA_DCHPRI14                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI14_OFFSET)
+#define IMXRT_EDMA_DCHPRI15                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI15_OFFSET)
+#define IMXRT_EDMA_DCHPRI16                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI16_OFFSET)
+#define IMXRT_EDMA_DCHPRI17                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI17_OFFSET)
+#define IMXRT_EDMA_DCHPRI18                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI18_OFFSET)
+#define IMXRT_EDMA_DCHPRI19                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI19_OFFSET)
+#define IMXRT_EDMA_DCHPRI20                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI20_OFFSET)
+#define IMXRT_EDMA_DCHPRI21                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI21_OFFSET)
+#define IMXRT_EDMA_DCHPRI22                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI22_OFFSET)
+#define IMXRT_EDMA_DCHPRI23                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI23_OFFSET)
+#define IMXRT_EDMA_DCHPRI24                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI24_OFFSET)
+#define IMXRT_EDMA_DCHPRI25                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI25_OFFSET)
+#define IMXRT_EDMA_DCHPRI26                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI26_OFFSET)
+#define IMXRT_EDMA_DCHPRI27                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI27_OFFSET)
+#define IMXRT_EDMA_DCHPRI28                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI28_OFFSET)
+#define IMXRT_EDMA_DCHPRI29                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI29_OFFSET)
+#define IMXRT_EDMA_DCHPRI30                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI30_OFFSET)
+#define IMXRT_EDMA_DCHPRI31                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI31_OFFSET)
+
+#define IMXRT_EDMA_DCHPRI3_OFFSET           0x0100  /* Channel 3 Priority */
+#define IMXRT_EDMA_DCHPRI2_OFFSET           0x0101  /* Channel 2 Priority */
+#define IMXRT_EDMA_DCHPRI1_OFFSET           0x0102  /* Channel 1 Priority */
+#define IMXRT_EDMA_DCHPRI0_OFFSET           0x0103  /* Channel 0 Priority */
+#define IMXRT_EDMA_DCHPRI7_OFFSET           0x0104  /* Channel 7 Priority */
+#define IMXRT_EDMA_DCHPRI6_OFFSET           0x0105  /* Channel 6 Priority */
+#define IMXRT_EDMA_DCHPRI5_OFFSET           0x0106  /* Channel 5 Priority */
+#define IMXRT_EDMA_DCHPRI4_OFFSET           0x0107  /* Channel 4 Priority */
+#define IMXRT_EDMA_DCHPRI11_OFFSET          0x0108  /* Channel 11 Priority */
+#define IMXRT_EDMA_DCHPRI10_OFFSET          0x0109  /* Channel 10 Priority */
+#define IMXRT_EDMA_DCHPRI9_OFFSET           0x010a  /* Channel 9 Priority */
+#define IMXRT_EDMA_DCHPRI8_OFFSET           0x010b  /* Channel 8 Priority */
+#define IMXRT_EDMA_DCHPRI15_OFFSET          0x010c  /* Channel 15 Priority */
+#define IMXRT_EDMA_DCHPRI14_OFFSET          0x010d  /* Channel 14 Priority */
+#define IMXRT_EDMA_DCHPRI13_OFFSET          0x010e  /* Channel 13 Priority */
+#define IMXRT_EDMA_DCHPRI12_OFFSET          0x010f  /* Channel 12 Priority */
+#define IMXRT_EDMA_DCHPRI19_OFFSET          0x0110  /* Channel 19 Priority */
+#define IMXRT_EDMA_DCHPRI18_OFFSET          0x0111  /* Channel 18 Priority */
+#define IMXRT_EDMA_DCHPRI17_OFFSET          0x0112  /* Channel 17 Priority */
+#define IMXRT_EDMA_DCHPRI16_OFFSET          0x0113  /* Channel 16 Priority */
+#define IMXRT_EDMA_DCHPRI23_OFFSET          0x0114  /* Channel 23 Priority */
+#define IMXRT_EDMA_DCHPRI22_OFFSET          0x0115  /* Channel 22 Priority */
+#define IMXRT_EDMA_DCHPRI21_OFFSET          0x0116  /* Channel 21 Priority */
+#define IMXRT_EDMA_DCHPRI20_OFFSET          0x0117  /* Channel 20 Priority */
+#define IMXRT_EDMA_DCHPRI27_OFFSET          0x0118  /* Channel 27 Priority */
+#define IMXRT_EDMA_DCHPRI26_OFFSET          0x0119  /* Channel 26 Priority */
+#define IMXRT_EDMA_DCHPRI25_OFFSET          0x011a  /* Channel 25 Priority */
+#define IMXRT_EDMA_DCHPRI24_OFFSET          0x011b  /* Channel 24 Priority */
+#define IMXRT_EDMA_DCHPRI31_OFFSET          0x011c  /* Channel 31 Priority */
+#define IMXRT_EDMA_DCHPRI30_OFFSET          0x011d  /* Channel 30 Priority */
+#define IMXRT_EDMA_DCHPRI29_OFFSET          0x011e  /* Channel 29 Priority */
+#define IMXRT_EDMA_DCHPRI28_OFFSET          0x011f  /* Channel 28 Priority */
 
 /* Transfer Control Descriptor (TCD) */
 
@@ -1214,6 +1247,8 @@
 #define EDMA_TCD_CSR_ACTIVE                 (1 << 6)  /* Bit 6:  Channel Active */
 #define EDMA_TCD_CSR_DONE                   (1 << 7)  /* Bit 7:  Channel Done */
 #define EDMA_TCD_CSR_MAJORLINKCH_SHIFT      (8)       /* Bits 8-12: Major Loop Link Channel Number */
+#define EDMA_TCD_CSR_MAJORLINKCH_MASK       (31 << EDMA_TCD_CSR_MAJORLINKCH_SHIFT)
+#  define EDMA_TCD_CSR_MAJORLINKCH(n)       ((uint32_t)(n) << EDMA_TCD_CSR_MAJORLINKCH_SHIFT)
                                                       /* Bit 13: Reserved */
 #define EDMA_TCD_CSR_BWC_SHIFT              (14)      /* Bits 14-15: Bandwidth Control */
 #define EDMA_TCD_CSR_BWC_MASK               (3 << EDMA_TCD_CSR_BWC_SHIFT)
