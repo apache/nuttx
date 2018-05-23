@@ -307,6 +307,11 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
  *   should be called after the final call to imxrt_dmasetup() in order to avoid
  *   race conditions.
  *
+ *   At the conclusion of each major DMA loop, a callback to the user-provided
+ *   function is made:  |For "normal" DMAs, this will correspond to the DMA DONE
+ *   interrupt; for scatter gather DMAs, multiple interrupts will be generated
+ *   with the final being the DONE interrupt.
+ *
  *   At the conclusion of the DMA, the DMA channel is reset, all TCDs are freed, and
  *   the callback function is called with the the success/fail result of the DMA.
  *
