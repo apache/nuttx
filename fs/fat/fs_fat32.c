@@ -217,11 +217,18 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
       /* The name exists -- but is it a file or a directory? */
 
-      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-      if (dirinfo.fd_root ||
-         (DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY))
+      if (dirinfo.fd_root)
         {
-          /* It is a directory */
+          /* It is the root directory */
+
+          ret = -EISDIR;
+          goto errout_with_semaphore;
+        }
+
+      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+      if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) != 0)
+        {
+          /* It is a regular directory */
 
           ret = -EISDIR;
           goto errout_with_semaphore;
@@ -1576,8 +1583,6 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       goto errout_with_semaphore;
     }
 
-  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-
   /* Check if this is the root directory */
 
   if (dirinfo.fd_root)
@@ -1591,26 +1596,30 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       dir->u.fat.fd_currsector   = dirinfo.dir.fd_currsector;
       dir->u.fat.fd_index        = dirinfo.dir.fd_index;
     }
-
-  /* This is not the root directory.  Verify that it is some kind of directory */
-
-  else if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) == 0)
-    {
-       /* The entry is not a directory */
-
-       ret = -ENOTDIR;
-       goto errout_with_semaphore;
-    }
   else
     {
-       /* The entry is a directory (but not the root directory) */
+      /* This is not the root directory.  Verify that it is some kind of directory */
 
-      dir->u.fat.fd_startcluster =
-          ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
-                   DIR_GETFSTCLUSTLO(direntry);
-      dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
-      dir->u.fat.fd_currsector   = fat_cluster2sector(fs, dir->u.fat.fd_currcluster);
-      dir->u.fat.fd_index        = 2;
+      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+
+      if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) == 0)
+        {
+           /* The entry is not a directory */
+
+           ret = -ENOTDIR;
+           goto errout_with_semaphore;
+        }
+      else
+        {
+           /* The entry is a directory (but not the root directory) */
+
+          dir->u.fat.fd_startcluster =
+              ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+                         DIR_GETFSTCLUSTLO(direntry);
+          dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
+          dir->u.fat.fd_currsector   = fat_cluster2sector(fs, dir->u.fat.fd_currcluster);
+          dir->u.fat.fd_index        = 2;
+        }
     }
 
   fat_semgive(fs);
