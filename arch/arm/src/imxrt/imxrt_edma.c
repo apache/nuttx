@@ -1105,7 +1105,8 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
 
       /* Clean cache associated with the previous TCD memory */
 
-      arch_clean_dcache(prev, sizeof(struct imxrt_edmatcd_s));
+      arch_clean_dcache((uintptr_t)prev,
+                        (uintptr_t)prev + sizeof(struct imxrt_edmatcd_s));
 
       /* Check if the TCD block in the DMA channel registers is the same as
        * the previous previous TCD.  This can happen if the previous TCD was
@@ -1129,11 +1130,14 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
 
   /* Clean cache associated with the TCD memory */
 
-  arch_clean_dcache(tcd, sizeof(struct imxrt_edmatcd_s));
+  arch_clean_dcache((uintptr_t)tcd,
+                    (uintptr_t)tcd + sizeof(struct imxrt_edmatcd_s));
 #else
   /* Scatter/gather DMA is NOT supported */
 
-  /* Check if eDMA is busy: if the channel has started transfer, CSR will be non-zero. */
+  /* Check if eDMA is busy: if the channel has started transfer, CSR will be
+   * non-zero.
+   */
 
   regaddr  = IMXRT_EDMA_TCD_CSR(dmach->chan);
   regval16 = getreg16(regaddr);
@@ -1164,7 +1168,8 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
        * is one.
        */
 
-      arch_invalidate_dcache(config->daddr, config->nbytes);
+      arch_invalidate_dcache((uintptr_t)config->daddr,
+                             (uintptr_t)config->daddr + config->nbytes);
     }
 
   /* Check for an Tx (peripheral-to-memory/memory-to-memory) DMA transfer */
@@ -1178,7 +1183,8 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
        */
 #warning Missing logic
 
-      arch_clean_dcache(config->saddr, config->nbytes);
+      arch_clean_dcache((uintptr_t)config->saddr,
+                        (uintptr_t)config->saddr + config->nbytes);
     }
 
   dmach->state = IMXRT_DMA_CONFIGURED;
