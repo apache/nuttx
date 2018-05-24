@@ -53,7 +53,7 @@
  * Name: imxrt_boardinitialize
  *
  * Description:
- *   All SAMV7 architectures must provide the following entry point.  This
+ *   All i.MX RT architectures must provide the following entry point.  This
  *   entry point is called early in the initialization -- after clocking and
  *   memory have been configured but before caches have been enabled and
  *   before any devices have been initialized.

@@ -38,7 +38,7 @@
 ASRCS =
 CSRCS = imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c
 
-ifeq ($(CONFIG_SAMV7_SDRAMC),y)
+ifeq ($(CONFIG_IMXRT_SDRAMC),y)
 CSRCS += imxrt_sdram.c
 endif
 

@@ -48,7 +48,7 @@
  *
  * This LED is not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/sam_autoleds.c. The LED is used to encode
+ * include/board.h and src/imxrt_autoleds.c. The LED is used to encode
  * OS-related events as follows:
  *
  *   -------------------- ----------------------- ------

@@ -170,4 +170,5 @@ Configuration sub-directories
 
     Configures the NuttShell (nsh) located at examples/nsh.  This NSH
     configuration is focused on low level, command-line driver testing.
-    It has no network.
+    Built-in applications are supported, but none are enabled.  This
+    configuration does not support a network.

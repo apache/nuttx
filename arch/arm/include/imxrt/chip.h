@@ -59,7 +59,7 @@
     defined(CONFIG_ARCH_CHIP_MIMXRT1052DVL6A) || \
     defined(CONFIG_ARCH_CHIP_MIMXRT1052CVL5A)
 
-#define IMXRT_OCRAM_SIZE              (512 * 1024) /* 512Kb OCRAM */
+#  define IMXRT_OCRAM_SIZE            (512 * 1024) /* 512Kb OCRAM */
 #else
 #  error "Unknown i.MX RT chip type"
 #endif

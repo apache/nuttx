@@ -140,7 +140,7 @@ void imxrt_autoled_initialize(void);
  * Name: imxrt_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAMV71-XULT board.
+ *   Called to configure SPI chip select GPIO pins for the i.MXRT1050 EVK.
  *
  ****************************************************************************/
 
