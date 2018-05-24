@@ -518,7 +518,7 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
   regaddr         = IMXRT_EDMA_TCD_CSR(chan);
   putreg16(0, regaddr);
 
-  /* Cancel all next TCD transfer. */
+  /* Cancel next TCD transfer. */
 
   regaddr         = IMXRT_EDMA_TCD_DLASTSGA(chan);
   putreg16(0, regaddr);
@@ -1101,6 +1101,11 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
       prev->csr      = regval16;
 
       prev->dlastsga = (uint32_t)tcd;
+      dmach->tail    = tcd;
+
+      /* Clean cache associated with the previous TCD memory */
+
+      arch_clean_dcache(prev, sizeof(struct imxrt_edmatcd_s));
 
       /* Check if the TCD block in the DMA channel registers is the same as
        * the previous previous TCD.  This can happen if the previous TCD was
