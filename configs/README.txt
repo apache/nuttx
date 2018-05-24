@@ -293,15 +293,6 @@ configs/hymini-stm32v
   A configuration for the HY-Mini STM32v board.  This board is based on the
   STM32F103VCT chip.
 
-configs/indium-f7
-  This subdirectory holds board support for the RAF Research Indium-F7 board
-  and using STMicro Nucleo-144 boards for interim support.  The Indium-F7
-  board is a special purpose board created by RAF Research LLC.  It is
-  possible to develop basic Indium-F7 software using STMicro Nucleo-144
-  development boards. This board support directory provides support for
-  developing software on both native Indium-F7 hardware and for three
-  STM32F7 Nucleo-144 development boards.
-
 configs/kwikstik-k40.
   Kinetis K40 Cortex-M4 MCU.  This port uses the NXP/FreeScale KwikStik-K40
   development board.

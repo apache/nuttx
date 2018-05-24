@@ -1711,8 +1711,6 @@ nuttx/
  |   |   `- README.txt
  |   |- imxrt1050-evk
  |   |   `- README.txt
- |   |- indium-f7
- |   |   `- README.txt
  |   |- kwikstik-k40/
  |   |   `- README.txt
  |   |- launchxl-tms57004/
