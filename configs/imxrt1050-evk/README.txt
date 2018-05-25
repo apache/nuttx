@@ -173,8 +173,18 @@ Configuration sub-directories
     focused on network-related testing.
 
     NOTES:
+
     1. LED support is disabled because there is a conflict between the LED
        GPIO and PHY pin usage.
+
+    2. Telnet is enabled.  But since both IPv4 and IPv6 are enabled, it
+       will default to IPv6.  That means that to connect a Telnet session
+       from a PC, you will need to use the IPv6 address which by defaault
+       is:
+
+         telnet fc00::2
+
+       Or, disable IPv4 support so that only IPv4 addressing is used.
 
   nsh:
 
