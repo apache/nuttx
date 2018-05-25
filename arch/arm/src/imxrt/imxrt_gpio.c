@@ -463,11 +463,16 @@ static inline int imxrt_gpio_configperiph(gpio_pinset_t pinset)
 
   /* Configure pin as a peripheral */
 
-  index = ((pinset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
+  index   = ((pinset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
   regaddr = imxrt_padmux_address(index);
 
-  value = ((pinset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
-  regval = (value << PADMUX_MUXMODE_SHIFT);
+  value   = ((pinset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
+#if GPIO_SION_SHIFT >= PADMUX_SION_SHIFT
+  value  |= ((pinset & GPIO_SION_MASK) >> (GPIO_SION_SHIFT - PADMUX_SION_SHIFT));
+#else
+  value  |= ((pinset & GPIO_SION_MASK) << (PADMUX_SION_SHIFT - GPIO_SION_SHIFT));
+#endif
+  regval  = (value << PADMUX_MUXMODE_SHIFT);
 
   putreg32(regval, regaddr);
 

@@ -123,3 +123,7 @@ endif
 ifeq ($(CONFIG_IMXRT_EDMA),y)
 CHIP_CSRCS += imxrt_edma.c
 endif
+
+ifeq ($(CONFIG_IMXRT_ENET),y)
+CHIP_CSRCS += imxrt_enet.c
+endif

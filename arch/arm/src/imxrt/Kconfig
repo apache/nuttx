@@ -69,6 +69,12 @@ config IMXRT_EDMA
 	default n
 	select ARCH_DMA
 
+config IMXRT_ENET
+	bool "Ethernet"
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
 menu "FlexIO Peripherals"
 
 endmenu # FlexIO Peripherals
@@ -178,6 +184,38 @@ config IMXRT_GPIO5_16_31_IRQ
 	default n
 
 endif # IMXRT_GPIO_IRQ
+
+menu "Ethernet Configuration"
+	depends on IMXRT_ENET
+
+config MXRT_ENET_NRXBUFFERS
+	int "Number Rx buffers"
+	default 6
+
+config IMXRT_ENET_NTXBUFFERS
+	int "Number Tx buffers"
+	default 2
+
+config IMXRT_ENET_ENHANCEDBD
+	bool # not optional
+	default n
+
+config IMXRT_ENET_NETHIFS
+	int  # Not optional
+	default 1
+
+config IMXRT_ENET_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_IMXRT_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imxrt_phy_boardinitialize();  The i.MXRT ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # IMXRT_ENET
 
 menu "Memory Configuration"
 

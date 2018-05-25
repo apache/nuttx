@@ -55,8 +55,8 @@
  *
  *   ENCODING    IIXX XXXX XXXX XXXX  MMMM MMMM MMMM MMMM
  *   GPIO INPUT  00.. ..EE .GGP PPPP  MMMM MMMM MMMM MMMM
- *   GPIO OUTPUT 01V. .... .GGP PPPP  MMMM MMMM MMMM MMMM
- *   PERIPHERAL  10AA A... IIII IIII  MMMM MMMM MMMM MMMM
+ *   GPIO OUTPUT 01V. .S.. .GGP PPPP  MMMM MMMM MMMM MMMM
+ *   PERIPHERAL  10AA AS.. IIII IIII  MMMM MMMM MMMM MMMM
  */
 
 /* Input/Output Selection:
@@ -136,7 +136,7 @@
 
 /* Peripheral Alternate Function:
  *
- *   PERIPHERAL  10AA A... .... ....  MMMM MMMM MMMM MMMM
+ *   PERIPHERAL  ..AA A... .... ....  .... .... .... ....
  */
 
 #define GPIO_ALT_SHIFT         (27)      /* Bits 27-29: Peripheral alternate function */
@@ -149,6 +149,15 @@
                                                       /* Alternate function 5 is GPIO */
 #  define GPIO_ALT6            (6 << GPIO_ALT_SHIFT)  /* Alternate function 6 */
 #  define GPIO_ALT7            (7 << GPIO_ALT_SHIFT)  /* Alternate function 7 */
+
+/* Peripheral Software Input On Field:
+ *
+ *   PERIPHERAL  .... .S.. .... ....  .... .... .... ....
+ */
+
+#define GPIO_SION_SHIFT        (26)      /* Bits 26: Peripheral SION function */
+#define GPIO_SION_MASK         (1 << GPIO_SION_SHIFT)
+#  define GPIO_SION_ENABLE     (1 << GPIO_SION_SHIFT)  /* enable SION */
 
 /* Interrupt edge/level configuration
  *

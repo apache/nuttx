@@ -1359,7 +1359,8 @@
 #  define PADMUX_MUXMODE_ALT4                 (4 << PADMUX_MUXMODE_SHIFT)
 #  define PADMUX_MUXMODE_ALT5                 (5 << PADMUX_MUXMODE_SHIFT)
 #  define PADMUX_MUXMODE_ALT7                 (7 << PADMUX_MUXMODE_SHIFT)
-#define PADMUX_SION                           (1 << 4)  /* Bit 4: Software Input On Field */
+#define PADMUX_SION_SHIFT                     (4)       /* Bit 4: Software Input On Field */
+#  define PADMUX_SION                         (1 << PADMUX_SION_SHIFT)
 
 /* Pad Control Registers */
 

@@ -199,6 +199,28 @@
 # undef CONFIG_LPUART7_FLOWCONTROL
 # undef CONFIG_LPUART8_FLOWCONTROL
 
+/* Ethernet controller configuration */
+
+#ifndef CONFIG_IMXRT_ENET_NRXBUFFERS
+#  define CONFIG_IMXRT_ENET_NRXBUFFERS 6
+#endif
+
+#ifndef CONFIG_IMXRT_ENET_NTXBUFFERS
+#  define CONFIG_IMXRT_ENET_NTXBUFFERS 2
+#endif
+
+#ifndef CONFIG_IMXRT_ENET_NETHIFS
+#  define CONFIG_IMXRT_ENET_NETHIFS 1
+#endif
+
+#define IMXRT_ENET_HAS_DBSWAP 1
+
+/* EMAC Default Interrupt Priorities */
+
+#ifndef CONFIG_IMXRT_ENET_PRIO
+#  define CONFIG_IMXRT_ENET_PRIO  NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/

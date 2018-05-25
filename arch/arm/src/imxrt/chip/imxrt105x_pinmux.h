@@ -41,6 +41,7 @@
  *****************************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip/imxrt_iomuxc.h"
 
 /*****************************************************************************************************
  * Pre-processor Definitions
@@ -187,7 +188,8 @@
 #define GPIO_ENET_RX_ER_2              (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_26_INDEX))
 #define GPIO_ENET_TDATA00              (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_22_INDEX))
 #define GPIO_ENET_TDATA01              (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_21_INDEX))
-#define GPIO_ENET_TX_CLK_1             (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_B1_10_INDEX) | \
+#define GPIO_ENET_TX_CLK_1             (GPIO_PERIPH | GPIO_ALT6 | GPIO_SION_ENABLE | \
+                                        GPIO_PADMUX(IMXRT_PADMUX_GPIO_B1_10_INDEX) | \
                                         IOMUX_SLEW_FAST | IOMUX_DRIVE_40OHM | IOMUX_SPEED_LOW | \
                                         IOMUX_PULL_DOWN_100K | IOMUX_PULL_KEEP)
 #define GPIO_ENET_TX_CLK_2             (GPIO_PERIPH | GPIO_ALT3 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_25_INDEX))

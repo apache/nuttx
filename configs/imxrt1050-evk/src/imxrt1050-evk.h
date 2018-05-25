@@ -49,6 +49,7 @@
 #include <nuttx/irq.h>
 
 #include "imxrt_gpio.h"
+#include "imxrt_iomuxc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,10 +77,11 @@
  * must be configured as ALT5, GPIO1_IO09
  */
 
-#define IOMUX_LED  (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | IOMUX_DRIVE_40OHM | \
-                    IOMUX_SPEED_MEDIUM | IOMUX_SLEW_SLOW)
-#define GPIO_LED   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9 | \
-                    IOMUX_LED)
+#define IOMUX_LED       (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | \
+                         IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
+                         IOMUX_SLEW_SLOW)
+#define GPIO_LED        (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | \
+                         GPIO_PIN9 | IOMUX_LED)
 
 /* Buttons
  *
@@ -88,9 +90,28 @@
  * 1. SW8 (IRQ88)   GPIO5-00
  *
  */
+#define IOMUX_SW8       (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_SW8        (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+                         GPIO_PORT5 | GPIO_PIN0 | IOMUX_SW8)
 
-#define GPIO_SW8      (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
-                       GPIO_PORT5 | GPIO_PIN0)
+/* GPIOAD_B0_10 */
+
+#define IOMUX_ENET_INT  (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_ENET_INT   (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                         GPIO_PORT1 | GPIO_PIN10 | IOMUX_ENET_INT)
+#define GPIO_ENET_IRQ   IMXRT_IRQ_GPIO1_10
+
+/* GPIOAD_B0_09 */
+
+#define IOMUX_ENET_RST  (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_ENET_RST   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                          GPIO_PORT1 | GPIO_PIN9 | IOMUX_ENET_RST)
 
 /****************************************************************************
  * Public Types
