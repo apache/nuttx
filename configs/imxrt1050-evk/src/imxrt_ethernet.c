@@ -50,6 +50,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -129,7 +130,7 @@ static void imxrt_enet_phy_enable(bool enable)
  *
  ************************************************************************************/
 
-void weak_function imxrt_phy_boardinitialize(void)
+int imxrt_phy_boardinitialize(int intf)
 {
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
   /* Configure the PHY interrupt pin */
@@ -138,10 +139,19 @@ void weak_function imxrt_phy_boardinitialize(void)
   imxrt_config_gpio(GPIO_ENET_INT);
 #endif
 
-  /* Configure the PHY reset pin.  This will also take the PHY out of reset. */
+  /* Configure the PHY reset pin.
+   *
+   * The #RST uses inverted logic.  The initial value of zero will put the
+   * PHY into the reset state.
+   */
 
   phyinfo("Configuring reset: %08x\n", GPIO_ENET_RST);
   imxrt_config_gpio(GPIO_ENET_RST);
+
+  /* Take the PHY out of reset. */
+
+  imxrt_gpio_write(GPIO_ENET_RST, true);
+  return OK;
 }
 
 /****************************************************************************
@@ -211,7 +221,6 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
                  phy_enable_t *enable)
 {
   irqstate_t flags;
-  gpio_pinset_t pinset;
   phy_enable_t enabler;
   int irq;
 
@@ -222,15 +231,13 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
 
   if (strcmp(intf, IMXRT_ENET_DEVNAME) == 0)
     {
-      phyinfo("Select EMAC\n");
-      pinset   = GPIO_ENET_INT;
-      irq      = GPIO_ENET_IRQ;
-      enabler  = imxrt_enet_phy_enable;
+      irq     = GPIO_ENET_IRQ;
+      enabler = imxrt_enet_phy_enable;
     }
   else
     {
       nerr("ERROR: Unsupported interface: %s\n", intf);
-      return NULL;
+      return -EINVAL;
     }
 
   /* Disable interrupts until we are done.  This guarantees that the

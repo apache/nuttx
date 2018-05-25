@@ -56,6 +56,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/phy.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT
@@ -334,6 +335,9 @@ static int  imxrt_ioctl(struct net_driver_s *dev, int cmd,
 
 /* PHY/MII support */
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int imxrt_phyintenable(struct imxrt_driver_s *priv);
+#endif
 static inline void imxrt_initmii(struct imxrt_driver_s *priv);
 static int imxrt_writemii(struct imxrt_driver_s *priv, uint8_t phyaddr,
              uint8_t regaddr, uint16_t data);
@@ -644,9 +648,9 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
    pkt_input(&priv->dev);
 #endif
 
-  /* We only accept IP packets of the configured type and ARP packets */
-
 #ifdef CONFIG_NET_IPv4
+  /* Check for an IPv4 packet */
+
   if (BUF->type == HTONS(ETHTYPE_IP))
     {
       ninfo("IPv4 frame\n");
@@ -688,6 +692,8 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_IPv6
+  /* Check for an IPv6 packet */
+
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
       ninfo("Iv6 frame\n");
@@ -726,6 +732,8 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
+  /* Check for an ARP packet */
+
   if (BUF->type == htons(ETHTYPE_ARP))
     {
       NETDEV_RXARP(&priv->dev);
@@ -1544,6 +1552,22 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+    {
+          struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = imxrt_phyintenable(priv);
+            }
+        }
+        break;
+#endif
+
       case SIOCGMIIPHY: /* Get MII PHY address */
         {
           struct mii_ioctl_data_s *req =
@@ -1568,7 +1592,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
           ret = imxrt_writemii(priv, req->phy_id, req->reg_num, req->val_in);
         }
         break;
-#endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
 
       default:
         ret = -ENOTTY;
@@ -1578,6 +1602,54 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 #endif /* CONFIG_NETDEV_IOCTL */
+
+/****************************************************************************
+ * Function: imxrt_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts.  The interrupt protocol is like this:
+ *
+ *  - Interrupt status is cleared when the interrupt is enabled.
+ *  - Interrupt occurs.  Interrupt is disabled (at the processor level) when
+ *    is received.
+ *  - Interrupt status is cleared when the interrupt is re-enabled.
+ *
+ * Input Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int imxrt_phyintenable(struct imxrt_driver_s *priv)
+{
+#if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
+    defined(CONFIG_ETH0_PHY_KSZ8081)
+  uint16_t phyval;
+  int ret;
+
+  /* Read the interrupt status register in order to clear any pending
+   * interrupts
+   */
+
+  ret = imxrt_readmii(priv, priv->phyaddr, MII_KSZ8081_INT, &phyval);
+  if (ret == OK)
+    {
+      /* Enable link up/down interrupts */
+
+      ret = imxrt_writemii(priv, priv->phyaddr, MII_KSZ8081_INT,
+                           (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+    }
+
+  return ret;
+#else
+#  error Unrecognized PHY
+  return -ENOSYS;
+#endif
+}
+#endif
 
 /****************************************************************************
  * Function: imxrt_initmii
@@ -2238,7 +2310,6 @@ int imxrt_netinitialize(int intf)
   mac[3] = (uidl &  0x00ff0000) >> 16;
   mac[4] = (uidl &  0x0000ff00) >> 8;
   mac[5] = (uidl &  0x000000ff);
-
 #endif
 
 #ifdef CONFIG_IMXRT_ENET_PHYINIT

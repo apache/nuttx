@@ -404,9 +404,9 @@ static void skel_receive(FAR struct skel_driver_s *priv)
        pkt_input(&priv->sk_dev);
 #endif
 
-      /* We only accept IP packets of the configured type and ARP packets */
-
 #ifdef CONFIG_NET_IPv4
+      /* Check for an IPv4 packet */
+
       if (BUF->type == HTONS(ETHTYPE_IP))
         {
           ninfo("IPv4 frame\n");
@@ -426,6 +426,8 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_IPv6
+      /* Check for an IPv6 packet */
+
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           ninfo("Iv6 frame\n");
@@ -442,6 +444,8 @@ static void skel_receive(FAR struct skel_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
+      /* Check for an ARP packet */
+
       if (BUF->type == htons(ETHTYPE_ARP))
         {
           /* Dispatch ARP packet to the network layer */

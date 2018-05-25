@@ -186,6 +186,31 @@ Configuration sub-directories
 
        Or, disable IPv4 support so that only IPv4 addressing is used.
 
+    3. The network monitor is not enabled in this configuration.  As a
+       result, the Ethernet cable must be connected when the board is
+       powered up.  Otherwise, it will stall for a long period of time
+       before the NSH prompt appears and you will not be able to used
+       the board.
+
+       The following configuration options should be added to your
+       configuration in order to use the network monitor:
+
+         CONFIG_IMXRT_ENET_PHYINIT=y
+         CONFIG_IMXRT_GPIO1_0_15_IRQ=y
+         CONFIG_IMXRT_GPIO_IRQ=y
+         CONFIG_NETDEV_IOCTL=y
+         CONFIG_NETDEV_PHY_IOCTL=y
+         CONFIG_NSH_NETINIT_MONITOR=y
+         CONFIG_NSH_NETINIT_RETRYMSEC=2000
+         CONFIG_NSH_NETINIT_SIGNO=18
+         CONFIG_NSH_NETINIT_THREAD=y
+         CONFIG_NSH_NETINIT_THREAD_PRIORITY=80
+         CONFIG_NSH_NETINIT_THREAD_STACKSIZE=1568
+
+       STATUS: As of this writing, I get a hardfault when I enable the PHY
+       interrupt so I suspect that there is something incorrect in that
+       pin configuration.
+
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  This NSH
