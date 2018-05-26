@@ -2,10 +2,12 @@
 /bdf-converter
 /cmpconfig
 /configure
+/gencromfs
 /initialconfig
 /mkconfig
 /mkdeps
 /cnvwindeps
+/logparser
 /mksymtab
 /mksyscall
 /mkversion
