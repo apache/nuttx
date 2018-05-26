@@ -2,6 +2,7 @@
 /bdf-converter
 /cmpconfig
 /configure
+/initialconfig
 /mkconfig
 /mkdeps
 /cnvwindeps
