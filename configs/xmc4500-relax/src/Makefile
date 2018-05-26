@@ -48,6 +48,10 @@ else
 CSRCS += xmc4_userleds.c
 endif
 
+ifeq ($(CONFIG_XMC4_USCI_SPI),y)
+CSRCS += xmc4_spi.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += xmc4_appinit.c
 endif
