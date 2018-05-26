@@ -257,8 +257,10 @@
  */
 
 #ifndef CONFIG_STM32F4DISBB
-#  define GPIO_USART2_RX GPIO_USART2_RX_1     /* PA3, P1 pin 13 */
-#  define GPIO_USART2_TX GPIO_USART2_TX_1     /* PA2, P1 pin 14 */
+#  define GPIO_USART2_RX  GPIO_USART2_RX_1     /* PA3, P1 pin 13 */
+#  define GPIO_USART2_TX  GPIO_USART2_TX_1     /* PA2, P1 pin 14 */
+#  define GPIO_USART2_CTS GPIO_USART2_CTS_1    /* PA0, P1 pin 11 */
+#  define GPIO_USART2_RTS GPIO_USART2_RTS_1    /* PA1, P1 pin 12 (conflict with USER button) */
 #endif
 
 /* USART3:
@@ -277,19 +279,21 @@
  * enabled if USART3 is used in a configuration with the STM32F4DIS-BB.
  */
 
-#define GPIO_USART3_TX   GPIO_USART3_TX_1     /* PB10, P1 pin 34 (also MP45DT02 CLK_IN) */
-#define GPIO_USART3_RX   GPIO_USART3_RX_1     /* PB11, P1 pin 35 */
-#define GPIO_USART3_CTS  GPIO_USART3_CTS_1    /* PB13, P1 pin 37 */
-#define GPIO_USART3_RTS  GPIO_USART3_RTS_1    /* PB14, P1 pin 38 */
+#define GPIO_USART3_TX    GPIO_USART3_TX_1     /* PB10, P1 pin 34 (also MP45DT02 CLK_IN) */
+#define GPIO_USART3_RX    GPIO_USART3_RX_1     /* PB11, P1 pin 35 */
+#define GPIO_USART3_CTS   GPIO_USART3_CTS_1    /* PB13, P1 pin 37 */
+#define GPIO_USART3_RTS   GPIO_USART3_RTS_1    /* PB14, P1 pin 38 */
 
 /* USART6:
  *
  * The STM32F4DIS-BB base board provides RS-232 drivers and a DB9 connector
  * for USART6.  This is the preferred serial console for use with the STM32F4DIS-BB.
+ *
+ * NOTE: CTS and RTS are not brought out to the RS-232 connector on the baseboard.
  */
 
-#define GPIO_USART6_RX   GPIO_USART6_RX_1     /* PC7 (also I2S3_MCK and P2 pin 48) */
-#define GPIO_USART6_TX   GPIO_USART6_TX_1     /* PC6 (also P2 pin 47) */
+#define GPIO_USART6_RX    GPIO_USART6_RX_1     /* PC7 (also I2S3_MCK and P2 pin 48) */
+#define GPIO_USART6_TX    GPIO_USART6_TX_1     /* PC6 (also P2 pin 47) */
 
 /* PWM
  *
@@ -297,51 +301,51 @@
  * configured to output a pulse train using TIM4 CH2 on PD13.
  */
 
-#define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
+#define GPIO_TIM4_CH2OUT  GPIO_TIM4_CH2OUT_2
 
 /* RGB LED
  *
  * R = TIM1 CH1 on PE9 | G = TIM2 CH2 on PA1 | B = TIM3 CH3 on PB0
  */
 
-#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2
-#define GPIO_TIM2_CH2OUT GPIO_TIM2_CH2OUT_1
-#define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2
+#define GPIO_TIM2_CH2OUT  GPIO_TIM2_CH2OUT_1
+#define GPIO_TIM3_CH3OUT  GPIO_TIM3_CH3OUT_1
 
 /* SPI - There is a MEMS device on SPI1 using these pins: */
 
-#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
+#define GPIO_SPI1_MISO    GPIO_SPI1_MISO_1
+#define GPIO_SPI1_MOSI    GPIO_SPI1_MOSI_1
+#define GPIO_SPI1_SCK     GPIO_SPI1_SCK_1
 
 /* SPI DMA -- As used for I2S DMA transfer with the audio configuration */
 
-#define DMACHAN_SPI1_RX DMAMAP_SPI1_RX_1
-#define DMACHAN_SPI1_TX DMAMAP_SPI1_TX_1
+#define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_1
+#define DMACHAN_SPI1_TX   DMAMAP_SPI1_TX_1
 
 /* SPI2 - Test MAX31855 on SPI2 PB10 = SCK, PB14 = MISO */
 
-#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
-#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
-#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_1
+#define GPIO_SPI2_MISO    GPIO_SPI2_MISO_1
+#define GPIO_SPI2_MOSI    GPIO_SPI2_MOSI_1
+#define GPIO_SPI2_SCK     GPIO_SPI2_SCK_1
 
 /* SPI3 DMA -- As used for I2S DMA transfer with the audio configuration */
 
-#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_1
-#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_1
-#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_1
+#define GPIO_SPI3_MISO    GPIO_SPI3_MISO_1
+#define GPIO_SPI3_MOSI    GPIO_SPI3_MOSI_1
+#define GPIO_SPI3_SCK     GPIO_SPI3_SCK_1
 
-#define DMACHAN_SPI3_RX  DMAMAP_SPI3_RX_1
-#define DMACHAN_SPI3_TX  DMAMAP_SPI3_TX_1
+#define DMACHAN_SPI3_RX   DMAMAP_SPI3_RX_1
+#define DMACHAN_SPI3_TX   DMAMAP_SPI3_TX_1
 
 /* I2S3 - CS43L22 configuration uses I2S3 */
 
-#define GPIO_I2S3_SD     GPIO_I2S3_SD_2
-#define GPIO_I2S3_CK     GPIO_I2S3_CK_2
-#define GPIO_I2S3_WS     GPIO_I2S3_WS_1
+#define GPIO_I2S3_SD      GPIO_I2S3_SD_2
+#define GPIO_I2S3_CK      GPIO_I2S3_CK_2
+#define GPIO_I2S3_WS      GPIO_I2S3_WS_1
 
-#define DMACHAN_I2S3_RX  DMAMAP_SPI3_RX_2
-#define DMACHAN_I2S3_TX  DMAMAP_SPI3_TX_2
+#define DMACHAN_I2S3_RX   DMAMAP_SPI3_RX_2
+#define DMACHAN_I2S3_TX   DMAMAP_SPI3_TX_2
 
 /* I2C.  Only I2C1 is available on the stm32f4discovery.  I2C1_SCL and I2C1_SDA are
  * available on the following pins:
@@ -350,16 +354,16 @@
  * - PB9  is I2C1_SDA
  */
 
-#define GPIO_I2C1_SCL    GPIO_I2C1_SCL_1
-#define GPIO_I2C1_SDA    GPIO_I2C1_SDA_2
+#define GPIO_I2C1_SCL     GPIO_I2C1_SCL_1
+#define GPIO_I2C1_SDA     GPIO_I2C1_SDA_2
 
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 
-#define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2
-#define GPIO_TIM2_CH2IN  GPIO_TIM2_CH2IN_1
+#define GPIO_TIM2_CH1IN   GPIO_TIM2_CH1IN_2
+#define GPIO_TIM2_CH2IN   GPIO_TIM2_CH2IN_1
 
-#define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
-#define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
+#define GPIO_TIM8_CH1IN   GPIO_TIM8_CH1IN_1
+#define GPIO_TIM8_CH2IN   GPIO_TIM8_CH2IN_1
 
 /* Ethernet *************************************************************************/
 
