@@ -1768,7 +1768,7 @@ static int i2s_checkwidth(struct stm32_i2s_s *priv, int bits)
  * Description:
  *   Set the I2S RX sample rate.  NOTE:  This will have no effect if (1) the
  *   driver does not support an I2C receiver or if (2) the sample rate is
- *   driven by the I2C frame clock.  This may also have unexpected side-
+ *   driven by the I2S frame clock.  This may also have unexpected side-
  *   effects of the RX sample is coupled with the TX sample rate.
  *
  * Input Parameters:
@@ -1966,8 +1966,8 @@ static int roundf(float num)
  *
  * Description:
  *   Set the I2S TX sample rate.  NOTE:  This will have no effect if (1) the
- *   driver does not support an I2C transmitter or if (2) the sample rate is
- *   driven by the I2C frame clock.  This may also have unexpected side-
+ *   driver does not support an I2S transmitter or if (2) the sample rate is
+ *   driven by the I2S frame clock.  This may also have unexpected side-
  *   effects of the TX sample is coupled with the RX sample rate.
  *
  * Input Parameters:

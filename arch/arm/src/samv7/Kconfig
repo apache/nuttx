@@ -1145,7 +1145,7 @@ config SAMV7_SSC0_RX_STTDLY
 endif # SAMV7_SSC0_RX
 
 config SAMV7_SSC0_TX
-	bool "Enable I2C transmitter"
+	bool "Enable I2S transmitter"
 	default n
 	---help---
 		Enable I2S transmission logic
@@ -1317,7 +1317,7 @@ config SAMV7_SSC1_RX_STTDLY
 endif # SAMV7_SSC1_RX
 
 config SAMV7_SSC1_TX
-	bool "Enable I2C transmitter"
+	bool "Enable I2S transmitter"
 	default n
 	---help---
 		Enable I2S transmission logic

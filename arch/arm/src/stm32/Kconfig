@@ -7506,7 +7506,7 @@ config STM32_I2S3_RX
 		Enable I2S receipt logic
 
 config STM32_I2S3_TX
-	bool "Enable I2C transmitter"
+	bool "Enable I2S transmitter"
 	default n
 	---help---
 		Enable I2S transmission logic
