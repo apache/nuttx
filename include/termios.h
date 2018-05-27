@@ -222,9 +222,8 @@
 
 /* Line Control (used with tcflush()) */
 
-#define TCIFLUSH  0         /* Flush pending input. Flush untransmitted
-                             * output */
-#define TCIOFLUSH 1         /* Flush both pending input and untransmitte
+#define TCIFLUSH  0         /* Flush pending input */
+#define TCIOFLUSH 1         /* Flush both pending input and untransmitted
                              * output */
 #define TCOFLUSH  2         /* Flush untransmitted output */
 

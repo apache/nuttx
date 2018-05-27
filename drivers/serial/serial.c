@@ -51,6 +51,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
@@ -109,7 +110,7 @@ static void    uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset);
 static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock);
 static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
                                     size_t buflen);
-static int     uart_tcdrain(FAR uart_dev_t *dev);
+static int     uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout);
 
 /* Character driver methods */
 
@@ -396,7 +397,7 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
  *
  ************************************************************************************/
 
-static int uart_tcdrain(FAR uart_dev_t *dev)
+static int uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout)
 {
   int ret;
 
@@ -411,6 +412,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev)
   if (ret >= 0)
     {
       irqstate_t flags;
+      systime_t start;
 
       /* Trigger emission to flush the contents of the tx buffer */
 
@@ -431,7 +433,13 @@ static int uart_tcdrain(FAR uart_dev_t *dev)
       else
 #endif
         {
-          /* Continue waiting while the TX buffer is not empty */
+          /* Continue waiting while the TX buffer is not empty.
+           *
+           * NOTE: There is no timeout on the following loop.  In
+           * situations were this loop could hang (with hardware flow
+           * control, as an example),  the caller should call
+           * tcflush() first to discard this buffered Tx data.
+           */
 
           ret = OK;
           while (ret >= 0 && dev->xmit.head != dev->xmit.tail)
@@ -443,7 +451,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev)
               /* Wait for some characters to be sent from the buffer with
                * the TX interrupt enabled.  When the TX interrupt is
                * enabled, uart_xmitchars() should execute and remove some
-               * of the data from the TX buffer.  We mayhave to wait several
+               * of the data from the TX buffer.  We may have to wait several
                * times for the TX buffer to be entirely emptied.
                *
                * NOTE that interrupts will be re-enabled while we wait for
@@ -466,15 +474,29 @@ static int uart_tcdrain(FAR uart_dev_t *dev)
        * this event, so we have to do a busy wait poll.
        */
 
+      /* Set up for the timeout */
+
+      start = clock_systimer();
+
       if (ret >= 0)
         {
           while (!uart_txempty(dev))
             {
+              systime_t elapsed;
+
 #ifndef CONFIG_DISABLE_SIGNALS
               nxsig_usleep(POLL_DELAY_USEC);
 #else
               up_mdelay(POLL_DELAY_MSEC);
 #endif
+
+              /* Check for a timeout */
+
+              elapsed = clock_systimer() - start;
+              if (elapsed >= timeout)
+                {
+                  return -ETIMEDOUT;
+                }
             }
          }
 
@@ -657,7 +679,7 @@ static int uart_close(FAR struct file *filep)
     {
       /* Now we wait for the transmit buffer(s) to clear */
 
-      (void)uart_tcdrain(dev);
+      (void)uart_tcdrain(dev, 4 * TICK_PER_SEC);
     }
 
   /* Free the IRQ and disable the UART */
@@ -1345,7 +1367,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCDRN:
             {
-              ret = uart_tcdrain(dev);
+              ret = uart_tcdrain(dev, 10 * TICK_PER_SEC);
             }
             break;
 #endif
