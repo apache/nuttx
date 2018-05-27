@@ -943,7 +943,7 @@ Configuration Sub-Directories
        In principle, Zmodem transfers could be performed on the any serial
        device, including the console device.  However, only the LPC17xx
        UART1 supports hardware flow control which is required for Zmodem
-       trasnfers.  Also, this configuration permits debug output on the
+       transfers.  Also, this configuration permits debug output on the
        serial console while the transfer is in progress without interfering
        with the file transfer.
 
@@ -1135,11 +1135,15 @@ Configuration Sub-Directories
         best thing to do would be to use the matching NuttX sz on the Linux
         host side.
 
-    2013-7-16. More Testing against the NuttX rz/sz on Both Ends.
+      2013-7-16. More Testing against the NuttX rz/sz on Both Ends.
 
-      The NuttX sz/rz commands have been modified so that they can be
-      built and executed under Linux.  In this case, there are no
-      transfer problems at all in either direction and with large or
-      small files.  This configuration could probably run at much higher
-      serial speeds and with much smaller buffers (although that has not
-      been verified as of this writing).
+        The NuttX sz/rz commands have been modified so that they can be
+        built and executed under Linux.  In this case, there are no
+        transfer problems at all in either direction and with large or
+        small files.  This configuration could probably run at much higher
+        serial speeds and with much smaller buffers (although that has not
+        been verified as of this writing).
+
+        CONCLUSION:  You really do need proper hardware flow control to
+        use zmodem.  That is not currently implemented in the LPC17xx
+        family.

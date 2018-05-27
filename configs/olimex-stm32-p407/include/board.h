@@ -310,10 +310,21 @@
  * if we set aside more DMA channels/streams.
  *
  * SDIO DMA
- *   DMAMAP_SDIO_1 = Channel 4, Stream 3
- *   DMAMAP_SDIO_2 = Channel 4, Stream 6
+ *   DMAMAP_SDIO_1      = Channel 4, Stream 3
+ *   DMAMAP_SDIO_2      = Channel 4, Stream 6
  */
 
 #define DMAMAP_SDIO       DMAMAP_SDIO_1
+
+/* USART6
+ *
+ *   DMAMAP_USART6_RX_1 = Channel 5, Stream1
+ *   DMAMAP_USART6_RX_2 = Channel 5, Stream2
+ *   DMAMAP_USART6_TX_1 = Channel 5, Stream6
+ *   DMAMAP_USART6_TX_2 = Channel 5, Stream7
+ */
+
+#define DMAMAP_USART6_RX  DMAMAP_USART6_RX_1
+#define DMAMAP_USART6_TX  DMAMAP_USART6_TX_1
 
 #endif /* __CONFIGS_OLIMEX_STM32_P407_INCLUDE_BOARD_H */
