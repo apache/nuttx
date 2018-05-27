@@ -481,5 +481,10 @@ STATUS
   CCM memory is not included in the heap (CONFIG_STM32_CCMEXCLUDE=y) because
   it does not suport DMA, leaving only 128KiB for program usage.
 
-2107-01-23:  Added the knsh configuration and support for the PROTECTED
+2017-01-23:  Added the knsh configuration and support for the PROTECTED
   build mode.
+
+2018-05-29:  Added the zmodem configuration.  Verified correct operation
+  with host-to-target transfers.  There appears to be problems still host
+  target-to-host transfers and with use of the NuttX versions of rx/sz on
+  the host.

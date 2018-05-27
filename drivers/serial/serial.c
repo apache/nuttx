@@ -474,7 +474,12 @@ static int uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout)
        * this event, so we have to do a busy wait poll.
        */
 
-      /* Set up for the timeout */
+      /* Set up for the timeout
+       *
+       * REVISIT:  This is a kludge.  The correct fix would be add an
+       * interface to the lower half driver so that the tcflush() operation
+       * all also cause the lower half driver to clear and reset the Tx FIFO.
+       */
 
       start = clock_systimer();
 
