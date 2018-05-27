@@ -1024,6 +1024,7 @@ Configuration Sub-Directories
 
          $ sudo stty -F /dev/ttyS0 2400     # Select 2400 BAUD
          $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking *
+         $ sudo stty -F /dev/ttyS0 raw      # Puts the TTY in raw mode
          $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
 
          * Only is hardware flow control is enabled.  It is *not* in this
@@ -1070,6 +1071,7 @@ Configuration Sub-Directories
 
          $ sudo stty -F /dev/ttyS0 2400     # Select 2400 BAUD
          $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking *
+         $ sudo stty -F /dev/ttyS0 raw      # Puts the TTY in raw mode
          $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
 
          * Only is hardware flow control is enabled.  It is *not* in this
@@ -1086,7 +1088,12 @@ Configuration Sub-Directories
 
        Then use the sz command on Linux to send the file to the target:
 
-         $ sudo sz <filename> t </dev/ttyS0 >/dev/ttyS0
+         $ sudo sz <filename> [-l nnnn] </dev/ttyS0 >/dev/ttyS0
+
+       Where <filename> is the file that you want to send. If -l nnnn is not
+       specified, then there will likely be packet buffer overflow errors.
+       nnnn should be set to a value less than or equal to
+       CONFIG_SYSTEM_ZMODEM_PKTBUFSIZE
 
        Where <filename> is the file that you want to send.
 

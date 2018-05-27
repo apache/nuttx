@@ -13,8 +13,6 @@ Contents
   o Board Support
   o microSD Card Interface
   o OTGFS Host
-  o Using NuttX Zmodem with a Linux Host
-  o Building the Zmodem Tools to Run Under Linux
   o Configurations
 
 Board Support
@@ -232,121 +230,6 @@ OTGFS Host
   some logic issues, probably in drivers/usbhost/usbhost_hidkbd, with polling and
   data filtering.
 
-Using NuttX Zmodem with a Linux Host
-====================================
-
-    Sending Files from the Target to the Linux Host PC
-    --------------------------------------------------
-    The NuttX Zmodem commands have been verified against the rzsz programs
-    running on a Linux PC.  To send a file to the PC, first make sure that
-    the serial port is configured to work with the board (Assuming you are
-    using 9600 baud for the data transfers -- high rates may result in data
-    overruns):
-
-      $ sudo stty -F /dev/ttyS0 9600     # Select 9600 BAUD
-      $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking *
-      $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
-
-      * Only is hardware flow control is enabled.
-
-    Start rz on the Linux host (using /dev/ttyS0 as an example):
-
-      $ sudo rz </dev/ttyS0 >/dev/ttyS0
-
-    You can add the rz -v option multiple times, each increases the level
-    of debug output.  If you want to capture the Linux rz output, then
-    re-direct stderr to a log file by adding 2>rz.log to the end of the
-    rz command.
-
-    NOTE: The NuttX Zmodem does sends rz\n when it starts in compliance with
-    the Zmodem specification.  On Linux this, however, seems to start some
-    other, incompatible version of rz.  You need to start rz manually to
-    make sure that the correct version is selected.  You can tell when this
-    evil rz/sz has inserted itself because you will see the '^' (0x5e)
-    character replacing the standard Zmodem ZDLE character (0x19) in the
-    binary data stream.
-
-    If you don't have the rz command on your Linux box, the package to
-    install rzsz (or possibily lrzsz).
-
-    Then on the target (using /dev/ttyS1 as an example).
-
-      > sz -d /dev/ttyS1 <filename>
-
-    Where filename is the full path to the file to send (i.e., it begins
-    with the '/' character).  /dev/ttyS1 or whatever device you select
-    *MUST* support Hardware flow control in order to throttle therates of
-    data transfer to fit within the allocated buffers.
-
-    Receiving Files on the Target from the Linux Host PC
-    ----------------------------------------------------
-    NOTE:  There are issues with using the Linux sz command with the NuttX
-    rz command. See "Status" below.  It is recommended that you use the
-    NuttX sz command on Linux as described in the next paragraph.
-
-    To send a file to the target, first make sure that the serial port on the
-    host is configured to work with the board (Assuming that you are using
-    9600 baud for the data transfers -- high rates may result in data
-    overruns):
-
-      $ sudo stty -F /dev/ttyS0 9600     # Select 9600 (or other) BAUD
-      $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking *
-      $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
-
-     * Only is hardware flow control is enabled.
-
-    Start rz on the on the target.  Here, in this example, we are using
-    /dev/ttyS1 to perform the transfer
-
-      nsh> rz -d /dev/ttyS1
-
-    /dev/ttyS1 or whatever device you select *MUST* support Hardware flow
-    control in order to throttle therates of data transfer to fit within the
-    allocated buffers.
-
-    Then use the sz command on Linux to send the file to the target:
-
-      $ sudo sz <filename> </dev/ttyS0 >/dev/ttyS0
-
-    Where <filename> is the file that you want to send.
-
-    The resulting file will be found where you have configured the Zmodem
-    "sandbox" via CONFIG_SYSTEM_ZMODEM_MOUNTPOINT.
-
-    You can add the sz -v option multiple times, each increases the level
-    of debug output.  If you want to capture the Linux rz output, then
-    re-direct stderr to a log file by adding 2>az.log to the end of the
-    rz command.
-
-    If you don't have the az command on your Linux box, the package to
-    install rzsz (or possibily lrzsz).
-
-Building the Zmodem Tools to Run Under Linux
-============================================
-
-  Build support has been added so that the NuttX Zmodem implementation
-  can be executed on a Linux host PC.  This can be done by
-
-    - Change to the apps/systems/zmodem directory
-    - Make using the special makefile, Makefile.host
-
-  NOTES:
-
-  1. TOPDIR and APPDIR must be defined on the make command line:  TOPDIR is
-     the full path to the nuttx/ directory;  APPDIR is the full path to the
-     apps/ directory.  For example, if you installed nuttx at
-     /home/me/projects/nuttx and apps at /home/me/projects/apps, then the
-     correct make command line would be:
-
-       make -f Makefile.host TOPDIR=/home/me/projects/nuttx APPDIR=/home/me/projects/apps
-
-  2. Add CONFIG_DEBUG_FEATURES=1 to the make command line to enable debug output
-  3. Make sure to clean old target .o files before making new host .o files.
-
-  This build is has been verified as of 2013-7-16 using Linux to transfer
-  files with an Olimex LPC1766STK board.  It works great and seems to solve
-  all of the problems found with the Linux sz/rz implementation.
-
 Configurations
 ==============
 
@@ -484,11 +367,11 @@ must be is one of the following.
   nsh:
 
     This is the NuttShell (NSH) using the NSH startup logic at
-    apps/examples/nsh.
+    apps/examples/nsh
 
     NOTES:
 
-    1. USB host support for USB FLASH sticks is enbabled.  See the notes
+    1. USB host support for USB FLASH sticks is enabled.  See the notes
        above under "OTGFS Host".
 
        STATUS: I have seen this work with some FLASH sticks but not with
@@ -532,10 +415,21 @@ must be is one of the following.
 
   zmodem:
 
-    This configuration was used to test the zmodem utilities at apps/system/zmodem.  Two serial ports are used in this configuration:
+    This configuration was used to test the zmodem utilities at
+    apps/system/zmodem.  Two serial ports are used in this configuration:
 
-      1. USART6 (RS232_1) is the serial console (because it does not support hardware flow control).
-      2. USART3 (RS232_2) is the zmodem port and does require that hardware flow control be enabled for use.
+      1. USART6 (RS232_1) is the serial console (because it does not support
+         hardware flow control). It is configured 115200 8N1.
+      2. USART3 (RS232_2) is the zmodem port and does require that hardware
+         flow control be enabled for use.  It is configured 9600 8N1.
+
+    On the target these will correspond to /dev/ttyS0 and /dev/ttyS1,
+    respectively.
+
+    It is possible to configure a system without hardware flow control and
+    using the same USART for both the serial console and for zmodem.
+    However, you would have to take extreme care with buffering and data
+    throughput considerations to assure that there is no Rx data overrun.
 
     General usage instructions:
 
@@ -545,13 +439,33 @@ must be is one of the following.
       [on Linux host]
       $ sudo stty -F /dev/ttyS0 9600
       $ sudo stty -F /dev/ttyS0 crtscts
+      $ sudo stty -F /dev/ttyS0 raw
       $ sudo stty -F /dev/ttyS0
 
       [on target]
       nsh> rz
 
       [on host]
-      $ sudo sz doarm.sh </dev/ttyS0 >/dev/ttyS0
+      $ sudo sz <filename> [-l nnnn] </dev/ttyS0 >/dev/ttyS0
+
+    Where <filename> is the file that you want to send. If -l nnnn is not
+    specified, then there will likely be packet buffer overflow errors.
+    nnnn should be set to a value less than or equal to
+    CONFIG_SYSTEM_ZMODEM_PKTBUFSIZE
+
+    If you are using the NuttX implementation of rz and sz on the Linux host,
+    then the last command simplies to just:
+
+      [on host]
+      $ cp README.txt /tmp/.
+      $ sudo ./sz -d /dev/ttyS1 README.txt
+
+    Assuming that /dev/ttyS0 is the serial and /dev/ttyS1 is the zmodem port
+    on the Linux host as well.  NOTE:  By default, files will be transferred
+    to and from the /tmp directory only.
+
+    Refer to the README file at apps/examples/zmodem for detailed information
+    about building rz/sz for the host and about zmodem usage in general.
 
 STATUS
 ======
