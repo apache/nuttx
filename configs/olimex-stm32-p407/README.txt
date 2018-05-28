@@ -433,8 +433,10 @@ must be is one of the following.
 
     General usage instructions:
 
+    1. Common Setup
+
       [on target]
-      1. nsh> mount -t vfat /dev/sda /mnt
+      nsh> mount -t vfat /dev/sda /mnt
 
       [on Linux host]
       $ sudo stty -F /dev/ttyS0 9600
@@ -442,19 +444,21 @@ must be is one of the following.
       $ sudo stty -F /dev/ttyS0 raw
       $ sudo stty -F /dev/ttyS0
 
+    2. Host-to-Target File Transfer
+
       [on target]
       nsh> rz
 
       [on host]
       $ sudo sz <filename> [-l nnnn] </dev/ttyS0 >/dev/ttyS0
 
-    Where <filename> is the file that you want to send. If -l nnnn is not
-    specified, then there will likely be packet buffer overflow errors.
+    Where <filename> is the file that you want to transfer. If -l nnnn is
+    not specified, then there will likely be packet buffer overflow errors.
     nnnn should be set to a value less than or equal to
     CONFIG_SYSTEM_ZMODEM_PKTBUFSIZE
 
     If you are using the NuttX implementation of rz and sz on the Linux host,
-    then the last command simplies to just:
+    then the last command simplifies to just:
 
       [on host]
       $ cp README.txt /tmp/.
@@ -466,6 +470,28 @@ must be is one of the following.
 
     Refer to the README file at apps/examples/zmodem for detailed information
     about building rz/sz for the host and about zmodem usage in general.
+
+    3. Target-to-Host File Transfer
+
+      [on host]
+      $ rz </dev/ttyS0 >/dev/ttyS0
+
+    The transferred file will end up in the current directory.
+
+    If you are using the NuttX implementation of rz and sz on the Linux host,
+    then the last command simplifies to just:
+
+      [on host]
+      $ ./rz
+
+    The transferred file will lie in the /tmp directory.
+
+    Thn on the target side:
+
+      [on target]
+      nsh sz <filename>
+
+    Where <filename> is the file that you want to transfer.
 
 STATUS
 ======
@@ -484,7 +510,10 @@ STATUS
 2017-01-23:  Added the knsh configuration and support for the PROTECTED
   build mode.
 
-2018-05-29:  Added the zmodem configuration.  Verified correct operation
-  with host-to-target transfers.  There appears to be problems still host
-  target-to-host transfers and with use of the NuttX versions of rx/sz on
-  the host.
+2018-05-27:  Added the zmodem configuration.  Verified correct operation
+  with host-to-target transfers (using Linux sz command).  There appears
+  to be a problem using the NuttX sz command running on the host???
+
+2018-05-28:  Verified correct operation with target-to-host transfers (using
+  Linux rz command).  There appears to be a problem using the NuttX rz
+  command running on the host???
