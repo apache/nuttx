@@ -1662,7 +1662,7 @@ endmenu
 
 menu "Graphics Support"
 source graphics/Kconfig
-source libnx/Kconfig
+source libs/libnx/Kconfig
 endmenu
 
 menu "Memory Management"
@@ -1682,8 +1682,8 @@ source binfmt/Kconfig
 endmenu
 
 menu "Library Routines"
-source libc/Kconfig
-source libxx/Kconfig
+source libs/libc/Kconfig
+source libs/libxx/Kconfig
 endmenu
 
 menu "Application Configuration"

@@ -1,0 +1,327 @@
+############################################################################
+# libs/libnx/nxfonts/Makefile.sources
+#
+#   Copyright (C) 2008, 2013, 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+-include $(TOPDIR)/Make.defs
+
+ifdef NXFONTS_BITSPERPIXEL
+ifeq ($(NXFONTS_BITSPERPIXEL),1)
+NXFONTS_SUFFIX := _1bpp
+GEN_CSRC := nxfonts_convert_1bpp.c
+endif
+ifeq ($(NXFONTS_BITSPERPIXEL),2)
+NXFONTS_SUFFIX := _2bpp
+GEN_CSRC := nxfonts_convert_2bpp.c
+endif
+ifeq ($(NXFONTS_BITSPERPIXEL),4)
+NXFONTS_SUFFIX := _4bpp
+GEN_CSRC := nxfonts_convert_4bpp.c
+endif
+ifeq ($(NXFONTS_BITSPERPIXEL),8)
+NXFONTS_SUFFIX := _8bpp
+GEN_CSRC := nxfonts_convert_8bpp.c
+endif
+ifeq ($(NXFONTS_BITSPERPIXEL),16)
+NXFONTS_SUFFIX := _16bpp
+GEN_CSRC := nxfonts_convert_16bpp.c
+endif
+ifeq ($(NXFONTS_BITSPERPIXEL),24)
+NXFONTS_SUFFIX := _24bpp
+GEN_CSRC := nxfonts_convert_24bpp.c
+endif
+ifeq ($(NXFONTS_BITSPERPIXEL),32)
+NXFONTS_SUFFIX := _32bpp
+GEN_CSRC := nxfonts_convert_32bpp.c
+endif
+
+DEPENDENCY := nxfonts_convert.c
+CPPFLAGS += -DNXFONTS_BITSPERPIXEL=$(NXFONTS_BITSPERPIXEL)
+CPPFLAGS += -DNXFONTS_SUFFIX=$(NXFONTS_SUFFIX)
+endif
+
+ifdef NXFONTS_FONTID
+
+# MONO
+
+ifeq ($(NXFONTS_FONTID),18)
+NXFONTS_PREFIX := g_mono5x8_
+GEN_CSRC = nxfonts_bitmaps_mono5x8.c
+endif
+
+# SANS
+
+ifeq ($(NXFONTS_FONTID),14)
+NXFONTS_PREFIX := g_sans17x22_
+GEN_CSRC = nxfonts_bitmaps_sans17x22.c
+endif
+
+ifeq ($(NXFONTS_FONTID),15)
+NXFONTS_PREFIX := g_sans20x26_
+GEN_CSRC = nxfonts_bitmaps_sans20x26.c
+endif
+
+ifeq ($(NXFONTS_FONTID),1)
+NXFONTS_PREFIX := g_sans23x27_
+GEN_CSRC = nxfonts_bitmaps_sans23x27.c
+endif
+
+ifeq ($(NXFONTS_FONTID),2)
+NXFONTS_PREFIX := g_sans22x29_
+GEN_CSRC = nxfonts_bitmaps_sans22x29.c
+endif
+
+ifeq ($(NXFONTS_FONTID),3)
+NXFONTS_PREFIX := g_sans28x37_
+GEN_CSRC = nxfonts_bitmaps_sans28x37.c
+endif
+
+ifeq ($(NXFONTS_FONTID),4)
+NXFONTS_PREFIX := g_sans39x48_
+GEN_CSRC = nxfonts_bitmaps_sans39x48.c
+endif
+
+# SANS-BOLD
+
+ifeq ($(NXFONTS_FONTID),16)
+NXFONTS_PREFIX := g_sans17x23b_
+GEN_CSRC = nxfonts_bitmaps_sans17x23b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),17)
+NXFONTS_PREFIX := g_sans20x27b_
+GEN_CSRC = nxfonts_bitmaps_sans20x27b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),5)
+NXFONTS_PREFIX := g_sans22x29b_
+GEN_CSRC = nxfonts_bitmaps_sans22x29b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),6)
+NXFONTS_PREFIX := g_sans28x37b_
+GEN_CSRC = nxfonts_bitmaps_sans28x37b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),7)
+NXFONTS_PREFIX := g_sans40x49b_
+GEN_CSRC = nxfonts_bitmaps_sans40x49b.c
+endif
+
+# SERIF
+
+ifeq ($(NXFONTS_FONTID),8)
+NXFONTS_PREFIX := g_serif22x29_
+GEN_CSRC = nxfonts_bitmaps_serif22x29.c
+endif
+
+ifeq ($(NXFONTS_FONTID),9)
+NXFONTS_PREFIX := g_serif29x37_
+GEN_CSRC = nxfonts_bitmaps_serif29x37.c
+endif
+
+ifeq ($(NXFONTS_FONTID),10)
+NXFONTS_PREFIX := g_serif38x48_
+GEN_CSRC = nxfonts_bitmaps_serif38x48.c
+endif
+
+# SERIF-BOLD
+
+ifeq ($(NXFONTS_FONTID),11)
+NXFONTS_PREFIX := g_serif22x28b_
+GEN_CSRC = nxfonts_bitmaps_serif22x28b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),12)
+NXFONTS_PREFIX := g_serif27x38b_
+GEN_CSRC = nxfonts_bitmaps_serif27x38b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),13)
+NXFONTS_PREFIX := g_serif38x49b_
+GEN_CSRC = nxfonts_bitmaps_serif38x49b.c
+endif
+
+# Pixel fonts
+
+ifeq ($(NXFONTS_FONTID),19)
+NXFONTS_PREFIX := g_pixel_unicode_
+GEN_CSRC = nxfonts_bitmaps_pixel-unicode.c
+endif
+
+ifeq ($(NXFONTS_FONTID),20)
+NXFONTS_PREFIX := g_pixel_lcd_machine_
+GEN_CSRC = nxfonts_bitmaps_pixel-lcd-machine.c
+endif
+
+# X11-misc-fixed fonts
+
+ifeq ($(NXFONTS_FONTID),21)
+NXFONTS_PREFIX := g_x11_misc_fixed_4x6_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-4x6.c
+endif
+
+ifeq ($(NXFONTS_FONTID),22)
+NXFONTS_PREFIX := g_x11_misc_fixed_5x7_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-5x7.c
+endif
+
+ifeq ($(NXFONTS_FONTID),23)
+NXFONTS_PREFIX := g_x11_misc_fixed_5x8_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-5x8.c
+endif
+
+ifeq ($(NXFONTS_FONTID),24)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x9_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x9.c
+endif
+
+ifeq ($(NXFONTS_FONTID),25)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x10_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x10.c
+endif
+
+ifeq ($(NXFONTS_FONTID),26)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x12_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x12.c
+endif
+
+ifeq ($(NXFONTS_FONTID),27)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x13_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13.c
+endif
+
+ifeq ($(NXFONTS_FONTID),28)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x13B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),29)
+NXFONTS_PREFIX := g_x11_misc_fixed_6x13O_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-6x13O.c
+endif
+
+ifeq ($(NXFONTS_FONTID),30)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x13_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13.c
+endif
+
+ifeq ($(NXFONTS_FONTID),31)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x13B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),32)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x13O_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x13O.c
+endif
+
+ifeq ($(NXFONTS_FONTID),33)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x14_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x14.c
+endif
+
+ifeq ($(NXFONTS_FONTID),34)
+NXFONTS_PREFIX := g_x11_misc_fixed_7x14B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-7x14B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),35)
+NXFONTS_PREFIX := g_x11_misc_fixed_8x13_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13.c
+endif
+
+ifeq ($(NXFONTS_FONTID),36)
+NXFONTS_PREFIX := g_x11_misc_fixed_8x13B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),37)
+NXFONTS_PREFIX := g_x11_misc_fixed_8x13O_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-8x13O.c
+endif
+
+ifeq ($(NXFONTS_FONTID),38)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x15_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x15.c
+endif
+
+ifeq ($(NXFONTS_FONTID),39)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x15B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x15B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),40)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x18_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x18.c
+endif
+
+ifeq ($(NXFONTS_FONTID),41)
+NXFONTS_PREFIX := g_x11_misc_fixed_9x18B_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-9x18B.c
+endif
+
+ifeq ($(NXFONTS_FONTID),42)
+NXFONTS_PREFIX := g_x11_misc_fixed_10x20_
+GEN_CSRC = nxfonts_bitmaps_x11-misc-fixed-10x20.c
+endif
+
+# Tom Thumb mono-space 4x6 font
+
+ifeq ($(NXFONTS_FONTID),43)
+NXFONTS_PREFIX := g_tom_thumb_4x6_
+GEN_CSRC = nxfonts_tom-thumb-4x6.c
+endif
+
+DEPENDENCY := nxfonts_bitmaps.c
+CPPFLAGS += -DNXFONTS_FONTID=$(NXFONTS_FONTID)
+CPPFLAGS += -DNXFONTS_PREFIX=$(NXFONTS_PREFIX)
+endif
+
+GEN_TMP = $(GEN_CSRC:.c=.i)
+
+all: $(GEN_CSRC)
+.PHONY : clean distclean
+
+$(GEN_CSRC) : $(DEPENDENCY)
+	$(call PREPROCESS, $<, $(GEN_TMP))
+	$(Q) cat $(GEN_TMP) | sed -e "/^#/d" >$@
+	$(Q) rm -f  $(GEN_TMP)
+
+clean:
+	$(call DELFILE, *.i)
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, nxfonts_convert_*bpp.c)
+	$(call DELFILE, nxfonts_bitmaps_*.c)

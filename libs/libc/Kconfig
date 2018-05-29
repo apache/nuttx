@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Standard C Library Options"
+
+source libs/libc/stdio/Kconfig
+source libs/libc/math/Kconfig
+source libs/libc/machine/Kconfig
+source libs/libc/stdlib/Kconfig
+source libs/libc/unistd/Kconfig
+source libs/libc/string/Kconfig
+source libs/libc/dllfcn/Kconfig
+source libs/libc/modlib/Kconfig
+source libs/libc/wchar/Kconfig
+source libs/libc/locale/Kconfig
+source libs/libc/lzf/Kconfig
+source libs/libc/time/Kconfig
+source libs/libc/tls/Kconfig
+source libs/libc/net/Kconfig
+source libs/libc/netdb/Kconfig
+source libs/libc/misc/Kconfig
+source libs/libc/wqueue/Kconfig
+source libs/libc/hex2bin/Kconfig
+source libs/libc/userfs/Kconfig

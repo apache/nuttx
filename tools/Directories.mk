@@ -73,6 +73,12 @@ endif
 #   be cleaned to prevent garbage from collecting in them when changing
 #   configurations.
 
+ifeq ($(CONFIG_LIBCXX),y)
+LIBXX=libcxx
+else
+LIBXX=libxx
+endif
+
 NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS = fs binfmt
 CONTEXTDIRS = configs $(APPDIR)
@@ -81,27 +87,27 @@ OTHERDIRS = lib
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 
-USERDIRS += libc mm $(USER_ADDONS)
+USERDIRS += libs$(DELIM)libc mm $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libxx
+USERDIRS += libs$(DELIM)$(LIBXX)
 endif
 
 else
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 
-USERDIRS += libc mm
+USERDIRS += libs$(DELIM)libc mm
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libxx
+USERDIRS += libs$(DELIM)$(LIBXX)
 endif
 
 else
 
-NONFSDIRS += libc mm
+NONFSDIRS += libs$(DELIM)libc mm
 OTHERDIRS += $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
-NONFSDIRS += libxx
+NONFSDIRS += libs$(DELIM)$(LIBXX)
 else
-OTHERDIRS += libxx
+OTHERDIRS += libs$(DELIM)$(LIBXX)
 endif
 
 endif
@@ -116,18 +122,18 @@ OTHERDIRS += syscall
 endif
 
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-CONTEXTDIRS += libc
+CONTEXTDIRS += libs$(DELIM)libc
 endif
 
 ifeq ($(CONFIG_NX),y)
-NONFSDIRS += graphics libnx
-CONTEXTDIRS += graphics libnx
+NONFSDIRS += graphics libs$(DELIM)libnx
+CONTEXTDIRS += graphics libs$(DELIM)libnx
 else ifeq ($(CONFIG_NXFONTS),y)
-NONFSDIRS += libnx
-CONTEXTDIRS += libnx
+NONFSDIRS += libs$(DELIM)libnx
+CONTEXTDIRS += libs$(DELIM)libnx
 OTHERDIRS += graphics
 else
-OTHERDIRS += graphics libnx
+OTHERDIRS += graphics libs$(DELIM)libnx
 endif
 
 ifeq ($(CONFIG_AUDIO),y)

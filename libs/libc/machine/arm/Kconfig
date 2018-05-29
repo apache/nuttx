@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS
+source libs/libc/machine/arm/arm/Kconfig
+endif
+
+if ARCH_CORTEXA5 || ARCH_CORTEXA8 || ARCH_CORTEXA9
+source libs/libc/machine/arm/armv7-a/Kconfig
+endif
+
+if ARCH_CORTEXR4 || ARCH_CORTEXR4F || ARCH_CORTEXR5 || ARCH_CORTEXR5F || ARCH_CORTEXR7 || ARCH_CORTEXR7F
+source libs/libc/machine/arm/armv7-r/Kconfig
+endif
+
+if ARCH_CORTEXM0
+source libs/libc/machine/arm/armv6-m/Kconfig
+endif
+
+if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
+source libs/libc/machine/arm/armv7-m/Kconfig
+endif
+
+if ARCH_CORTEXM33
+source libs/libc/machine/arm/armv8/Kconfig
+endif

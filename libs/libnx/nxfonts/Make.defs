@@ -1,0 +1,239 @@
+############################################################################
+# libs/libnx/nxfonts/Make.defs
+#
+#   Copyright (C) 2008, 2013, 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Expose NXFONT interfaces to applications
+
+ifeq ($(CONFIG_NXFONTS),y)
+
+CSRCS += nxfonts_getfont.c nxfonts_cache.c
+CSRCS += nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c
+CSRCS += nxfonts_convert_4bpp.c nxfonts_convert_8bpp.c
+CSRCS += nxfonts_convert_16bpp.c nxfonts_convert_24bpp.c
+CSRCS += nxfonts_convert_32bpp.c
+
+# Monospace fonts
+
+ifeq ($(CONFIG_NXFONT_MONO5X8),y)
+CSRCS += nxfonts_bitmaps_mono5x8.c
+endif
+
+# Sans serif fonts
+
+ifeq ($(CONFIG_NXFONT_SANS17X22),y)
+CSRCS += nxfonts_bitmaps_sans17x22.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS20X26),y)
+CSRCS += nxfonts_bitmaps_sans20x26.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+CSRCS += nxfonts_bitmaps_sans23x27.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS22X29),y)
+CSRCS += nxfonts_bitmaps_sans22x29.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS28X37),y)
+CSRCS += nxfonts_bitmaps_sans28x37.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS39X48),y)
+CSRCS += nxfonts_bitmaps_sans39x48.c
+endif
+
+# Sans serif bold fonts
+
+ifeq ($(CONFIG_NXFONT_SANS17X23B),y)
+CSRCS += nxfonts_bitmaps_sans17x23b.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS20X27B),y)
+CSRCS += nxfonts_bitmaps_sans20x27b.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS22X29B),y)
+CSRCS += nxfonts_bitmaps_sans22x29b.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
+CSRCS += nxfonts_bitmaps_sans28x37b.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
+CSRCS += nxfonts_bitmaps_sans40x49b.c
+endif
+
+# Serif fonts
+
+ifeq ($(CONFIG_NXFONT_SERIF22X29),y)
+CSRCS += nxfonts_bitmaps_serif22x29.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
+CSRCS += nxfonts_bitmaps_serif29x37.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SERIF38X48),y)
+CSRCS += nxfonts_bitmaps_serif38x48.c
+endif
+
+# Serif bold fonts
+
+ifeq ($(CONFIG_NXFONT_SERIF22X28B),y)
+CSRCS += nxfonts_bitmaps_serif22x28b.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
+CSRCS += nxfonts_bitmaps_serif27x38b.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SERIF38X49B),y)
+CSRCS += nxfonts_bitmaps_serif38x49b.c
+endif
+
+# Pixel fonts
+
+ifeq ($(CONFIG_NXFONT_PIXEL_UNICODE),y)
+CSRCS += nxfonts_bitmaps_pixel-unicode.c
+endif
+
+ifeq ($(CONFIG_NXFONT_PIXEL_LCD_MACHINE),y)
+CSRCS += nxfonts_bitmaps_pixel-lcd-machine.c
+endif
+
+# X11 misc fixed fonts
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_4X6),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-4x6.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_5X7),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-5x7.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_5X8),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-5x8.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X9),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x9.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X10),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x10.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X12),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x12.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X13),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x13.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X13B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x13B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_6X13O),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-6x13O.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X13),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x13.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X13B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x13B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X13O),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x13O.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X14),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x14.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_7X14B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-7x14B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_8X13),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-8x13.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_8X13B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-8x13B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_8X13O),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-8x13O.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X15),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x15.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X15B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x15B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X18),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x18.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_9X18B),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-9x18B.c
+endif
+
+ifeq ($(CONFIG_NXFONT_X11_MISC_FIXED_10X20),y)
+CSRCS += nxfonts_bitmaps_x11-misc-fixed-10x20.c
+endif
+
+# Tom Thumb mono-space 4x6 font
+
+ifeq ($(CONFIG_NXFONT_TOM_THUMB_4X6),y)
+CSRCS += nxfonts_tom-thumb-4x6.c
+endif
+
+# Add the nxfont/ directory to the build
+
+DEPPATH += --dep-path nxfonts
+VPATH += :nxfonts
+
+endif

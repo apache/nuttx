@@ -264,6 +264,9 @@ include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
 tools/mkconfig$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig$(HOSTEXEEXT)
 
+staging:
+	$(Q) mkdir staging
+
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
 	$(Q) tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
@@ -338,7 +341,7 @@ dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(
 # the config.h and version.h header files in the include/nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: check_context include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h dirlinks
+context: check_context staging include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h dirlinks
 	$(Q) for dir in $(CONTEXTDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context; \
 	done
@@ -392,9 +395,6 @@ include tools/LibTargets.mk
 # some modification to this Makefile would be required if CONFIG_PASS1_OBJECT
 # is an archive.  Exactly what is performed during pass1 or what it generates
 # is unknown to this makefile unless CONFIG_PASS1_OBJECT is defined.
-
-staging:
-	$(Q) mkdir staging
 
 pass1deps: pass1dep $(USERLIBS)
 
@@ -458,7 +458,7 @@ endif
 # pass1 dependencies and pass1 first, then build pass2 dependencies and pass2.
 # in that case, execute 'make pass1 pass2' from the command line.
 
-$(BIN): staging pass1deps pass2deps pass1 pass2
+$(BIN): pass1deps pass2deps pass1 pass2
 
 # download
 #
@@ -580,7 +580,6 @@ clean: subdir_clean
 	$(call DELFILE, nuttx_user*)
 	$(call DELFILE, .cproject)
 	$(call DELFILE, .project)
-	$(call DELDIR, staging)
 	$(call CLEAN)
 
 subdir_distclean:
@@ -598,6 +597,7 @@ endif
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)
+	$(call DELDIR, staging)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,

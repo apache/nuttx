@@ -1,0 +1,70 @@
+############################################################################
+# libs/libc/machine/arm/Make.defs
+#
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+ifeq ($(CONFIG_ARCH_ARM7TDMI),y)        # ARM7TDMI is ARMv4T
+include ${TOPDIR}/libs/libc/machine/arm/arm/Make.defs
+else ifeq ($(CONFIG_ARCH_ARM920T),y)    # ARM920T is ARMv4T
+include ${TOPDIR}/libs/libc/machine/arm/arm/Make.defs
+else ifeq ($(CONFIG_ARCH_ARM926EJS),y)  # ARM926EJS is ARMv5TE
+include ${TOPDIR}/libs/libc/machine/arm/arm/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXA5),y)   # Cortex-A5 is ARMv7-A
+include ${TOPDIR}/libs/libc/machine/arm/armv7-a/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXA8),y)   # Cortex-A8 is ARMv7-A
+include ${TOPDIR}/libs/libc/machine/arm/armv7-a/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXA9),y)   # Cortex-A9 is ARMv7-A
+include ${TOPDIR}/libs/libc/machine/arm/armv7-a/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXR4),y)   # Cortex-R4 is ARMv7-R
+include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXR4F),y)  # Cortex-R4F is ARMv7-R
+include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXR5),y)   # Cortex-R5 is ARMv7-R
+include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXR5F),y)  # Cortex-R5F is ARMv7-R
+include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXR7),y)   # Cortex-R7 is ARMv7-R
+include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXR7F),y)  # Cortex-R7F is ARMv7-R
+include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
+include ${TOPDIR}/libs/libc/machine/arm/armv6-m/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXM3),y)   # Cortex-M3 is ARMv7-M
+include ${TOPDIR}/libs/libc/machine/arm/armv7-m/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXM33),y)  # Cortex-M33 is ARMv8-M
+include ${TOPDIR}/libs/libc/machine/arm/armv8/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXM4),y)   # Cortex-M4 is ARMv7E-M
+include ${TOPDIR}/libs/libc/machine/arm/armv7-m/Make.defs
+else ifeq ($(CONFIG_ARCH_CORTEXM7),y)   # Cortex-M4 is ARMv7E-M
+include ${TOPDIR}/libs/libc/machine/arm/armv7-m/Make.defs
+endif

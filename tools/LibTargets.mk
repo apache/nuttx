@@ -40,16 +40,16 @@
 #
 # Possible kernel-mode builds
 
-libc$(DELIM)libkc$(LIBEXT): context
-	$(Q) $(MAKE) -C libc TOPDIR="$(TOPDIR)" libkc$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+libs$(DELIM)libc$(DELIM)libkc$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libkc$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 
-staging$(DELIM)libkc$(LIBEXT): libc$(DELIM)libkc$(LIBEXT)
+staging$(DELIM)libkc$(LIBEXT): libs$(DELIM)libc$(DELIM)libkc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-libnx$(DELIM)libknx$(LIBEXT): context
-	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libknx$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+libs$(DELIM)libnx$(DELIM)libknx$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libknx$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 
-staging$(DELIM)libknx$(LIBEXT): libnx$(DELIM)libknx$(LIBEXT)
+staging$(DELIM)libknx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libknx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 mm$(DELIM)libkmm$(LIBEXT): context
@@ -140,16 +140,16 @@ staging$(DELIM)libstubs$(LIBEXT): syscall$(DELIM)libstubs$(LIBEXT)
 
 # Possible user-mode builds
 
-libc$(DELIM)libuc$(LIBEXT): context
-	$(Q) $(MAKE) -C libc TOPDIR="$(TOPDIR)" libuc$(LIBEXT) KERNEL=n
+libs$(DELIM)libc$(DELIM)libuc$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libuc$(LIBEXT) KERNEL=n
 
-staging$(DELIM)libuc$(LIBEXT): libc$(DELIM)libuc$(LIBEXT)
+staging$(DELIM)libuc$(LIBEXT): libs$(DELIM)libc$(DELIM)libuc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-libnx$(DELIM)libunx$(LIBEXT): context
-	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT) KERNEL=n
+libs$(DELIM)libnx$(DELIM)libunx$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT) KERNEL=n
 
-staging$(DELIM)libunx$(LIBEXT): libnx$(DELIM)libunx$(LIBEXT)
+staging$(DELIM)libunx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libunx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 mm$(DELIM)libumm$(LIBEXT): context
@@ -164,10 +164,10 @@ $(ARCH_SRC)$(DELIM)libuarch$(LIBEXT): context
 staging$(DELIM)libuarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libuarch$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-libxx$(DELIM)libcxx$(LIBEXT): context
-	$(Q) $(MAKE) -C libxx TOPDIR="$(TOPDIR)" libcxx$(LIBEXT) KERNEL=n
+libs$(DELIM)libxx$(DELIM)$(LIBXX)$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" $(LIBXX)$(LIBEXT) KERNEL=n
 
-staging$(DELIM)libcxx$(LIBEXT): libxx$(DELIM)libcxx$(LIBEXT)
+staging$(DELIM)$(LIBXX)$(LIBEXT): libs$(DELIM)libxx$(DELIM)$(LIBXX)$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(APPDIR)$(DELIM)libapps$(LIBEXT): context
@@ -184,16 +184,16 @@ staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
 
 # Possible non-kernel builds
 
-libc$(DELIM)libc$(LIBEXT): context
-	$(Q) $(MAKE) -C libc TOPDIR="$(TOPDIR)" libc$(LIBEXT)
+libs$(DELIM)libc$(DELIM)libc$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libc$(LIBEXT)
 
-staging$(DELIM)libc$(LIBEXT): libc$(DELIM)libc$(LIBEXT)
+staging$(DELIM)libc$(LIBEXT): libs$(DELIM)libc$(DELIM)libc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-libnx$(DELIM)libnx$(LIBEXT): context
-	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)
+libs$(DELIM)libnx$(DELIM)libnx$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)
 
-staging$(DELIM)libnx$(LIBEXT): libnx$(DELIM)libnx$(LIBEXT)
+staging$(DELIM)libnx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libnx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 mm$(DELIM)libmm$(LIBEXT): context
