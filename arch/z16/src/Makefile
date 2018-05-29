@@ -111,7 +111,7 @@ nuttx.linkcmd: $(LINKCMDTEMPLATE)
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 	@echo "$(TOPDIR)\nuttx"= \>>nuttx.linkcmd
 	@echo   "$(ARCHSRCDIR)\$(HEAD_OBJ)", \>>nuttx.linkcmd
-	$(Q) for %%G in ($(LINKLIBS)) do ( echo   "$(TOPDIR)\lib\%%G", \>>nuttx.linkcmd )
+	$(Q) for %%G in ($(LINKLIBS)) do ( echo   "$(TOPDIR)\staging\%%G", \>>nuttx.linkcmd )
 	@echo   "$(ARCHSRCDIR)\board\libboard$(LIBEXT)", \>>nuttx.linkcmd
 	@echo   "$(ZDSSTDLIBDIR)\chelpld$(LIBEXT)", \>>nuttx.linkcmd
 	@echo   "$(ZDSSTDLIBDIR)\fpld$(LIBEXT)">>nuttx.linkcmd
@@ -119,7 +119,7 @@ else
 	@echo "\"${shell cygpath -w $(TOPDIR)/nuttx}\"= \\" >>nuttx.linkcmd
 	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_OBJ)}\", \\" >>nuttx.linkcmd
 	$(Q) ( for lib in $(LINKLIBS); do \
-		echo "  \"`cygpath -w $(TOPDIR)/lib/$${lib}`\", \\" >>nuttx.linkcmd; \
+		echo "  \"`cygpath -w $(TOPDIR)/staging/$${lib}`\", \\" >>nuttx.linkcmd; \
 	done ; )
 	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/board/libboard$(LIBEXT)}\", \\"  >>nuttx.linkcmd
 	@echo "  \"${shell cygpath -w $(ZDSSTDLIBDIR)/chelpld$(LIBEXT)}\", \\"  >>nuttx.linkcmd

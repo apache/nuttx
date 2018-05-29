@@ -99,7 +99,7 @@ nuttx.linkcmd: $(LINKCMDTEMPLATE)
 	$(Q) cp -f $(LINKCMDTEMPLATE) nuttx.linkcmd
 	@echo "$(TOPDIR)\nuttx"= \>>nuttx.linkcmd
 	@echo   "$(ARCHSRCDIR)\$(HEAD_OBJ)", \>>nuttx.linkcmd
-	$(Q) for %%G in ($(LINKLIBS)) do ( echo   "$(TOPDIR)\lib\%%G", \>>nuttx.linkcmd )
+	$(Q) for %%G in ($(LINKLIBS)) do ( echo   "$(TOPDIR)\staging\%%G", \>>nuttx.linkcmd )
 	@echo   "$(ARCHSRCDIR)\board\libboard$(LIBEXT)", \>>nuttx.linkcmd
 ifeq ($(CONFIG_ARCH_CHIP_Z8F640X),y)
 	@echo   "$(ZDSSTDLIBDIR)\chelprevaaD$(LIBEXT)", \>>nuttx.linkcmd

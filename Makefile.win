@@ -150,7 +150,7 @@ endif
 # LINKLIBS derives from NUTTXLIBS and is simply the same list with the
 #   subdirectory removed
 
-LINKLIBS = $(patsubst lib\\%,%,$(NUTTXLIBS))
+LINKLIBS = $(patsubst staging\\%,%,$(NUTTXLIBS))
 
 # Export tool definitions
 
@@ -405,6 +405,9 @@ include LibTargets.mk
 # is an archive.  Exactly what is performed during pass1 or what it generates
 # is unknown to this makefile unless CONFIG_PASS1_OBJECT is defined.
 
+staging:
+	$(Q) mkdir staging
+
 pass1deps: pass1dep $(USERLIBS)
 
 pass1: pass1deps
@@ -453,7 +456,7 @@ endif
 # pass1 dependencies and pass1 first, then build pass2 dependencies and pass2.
 # in that case, execute 'make pass1 pass2' from the command line.
 
-$(BIN): pass1deps pass2deps pass1 pass2
+$(BIN): staging pass1deps pass2deps pass1 pass2
 
 # download
 #

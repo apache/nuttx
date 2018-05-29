@@ -1,7 +1,7 @@
 ############################################################################
-# KernalLibs.mk
+# KernelLibs.mk
 #
-#   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,84 +42,84 @@
 # EXPORTLIBS is the list of libraries that should be exported by
 #   'make export' is
 
-NUTTXLIBS = lib$(DELIM)libsched$(LIBEXT)
+NUTTXLIBS = staging$(DELIM)libsched$(LIBEXT)
 USERLIBS =
 
 # Driver support.  Generally depends on file descriptor support but there
 # are some components in the drivers directory that are needed even if file
 # descriptors are not supported.
 
-NUTTXLIBS += lib$(DELIM)libdrivers$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
 # Add libraries for board support
 
-NUTTXLIBS += lib$(DELIM)libconfigs$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libconfigs$(LIBEXT)
 
 # Add libraries for syscall support.  The C library will be needed by
 # both the kernel- and user-space builds.  For now, the memory manager (mm)
 # is placed in user space (only).
 
-NUTTXLIBS += lib$(DELIM)libstubs$(LIBEXT) lib$(DELIM)libkc$(LIBEXT)
-NUTTXLIBS += lib$(DELIM)libkmm$(LIBEXT) lib$(DELIM)libkarch$(LIBEXT)
-USERLIBS  += lib$(DELIM)libproxies$(LIBEXT) lib$(DELIM)libuc$(LIBEXT)
-USERLIBS  += lib$(DELIM)libumm$(LIBEXT) lib$(DELIM)libuarch$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libstubs$(LIBEXT) staging$(DELIM)libkc$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
+USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libuc$(LIBEXT)
+USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERLIBS += lib$(DELIM)libcxx$(LIBEXT)
+USERLIBS += staging$(DELIM)libcxx$(LIBEXT)
 endif
 
 # Add libraries for network support
 
 ifeq ($(CONFIG_NET),y)
-NUTTXLIBS += lib$(DELIM)libnet$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libnet$(LIBEXT)
 endif
 
 # Add libraries for Crypto API support
 
 ifeq ($(CONFIG_CRYPTO),y)
-NUTTXLIBS += lib$(DELIM)libcrypto$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libcrypto$(LIBEXT)
 endif
 
 # Add libraries for file system support
 
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-NUTTXLIBS += lib$(DELIM)libfs$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libfs$(LIBEXT)
 endif
 else
-NUTTXLIBS += lib$(DELIM)libfs$(LIBEXT) lib$(DELIM)libbinfmt$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libfs$(LIBEXT) staging$(DELIM)libbinfmt$(LIBEXT)
 endif
 
 # Add libraries for the NX graphics sub-system
 
 ifeq ($(CONFIG_NX),y)
-NUTTXLIBS += lib$(DELIM)libgraphics$(LIBEXT)
-NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
-USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libgraphics$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libknx$(LIBEXT)
+USERLIBS  += staging$(DELIM)libunx$(LIBEXT)
 else ifeq ($(CONFIG_NXFONTS),y)
-NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
-USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libknx$(LIBEXT)
+USERLIBS  += staging$(DELIM)libunx$(LIBEXT)
 endif
 
 # Add libraries for the Audio sub-system
 
 ifeq ($(CONFIG_AUDIO),y)
-NUTTXLIBS += lib$(DELIM)libaudio$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libaudio$(LIBEXT)
 endif
 
 # Add libraries for the Wireless sub-system
 
 ifeq ($(CONFIG_WIRELESS),y)
-NUTTXLIBS += lib$(DELIM)libwireless$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libwireless$(LIBEXT)
 endif
 
 # Add C++ library
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-NUTTXLIBS += lib$(DELIM)libcxx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libcxx$(LIBEXT)
 endif
 
 # Export only the user libraries

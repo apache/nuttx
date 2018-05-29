@@ -153,7 +153,7 @@ define ASSEMBLE
 endef
 
 # INSTALL_LIB - Install a library $1 into target $2
-# Example: $(call INSTALL_LIB, libabc.a, $(TOPDIR)/lib/)
+# Example: $(call INSTALL_LIB, libabc.a, $(TOPDIR)/staging/)
 
 define INSTALL_LIB
 	@echo "IN: $1 -> $2"

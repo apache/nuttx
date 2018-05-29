@@ -211,7 +211,7 @@ endif
 
 LINKLIBS ?=
 RELLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))
-RELPATHS += -L"$(TOPDIR)/lib"
+RELPATHS += -L"$(TOPDIR)/staging"
 
 # Add the board-specific library and directory
 

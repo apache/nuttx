@@ -89,48 +89,48 @@ $(COBJS): %$(OBJEXT): %.c
 
 # This is a kludge to work around some conflicting symbols in the SDCC libraries
 
-$(TOPDIR)/lib/$(SDCCLIB): $(SDCC_LIBDIR)/$(SDCCLIB)
-	$(Q) cp $(SDCC_LIBDIR)/$(SDCCLIB) $(TOPDIR)/lib/$(SDCCLIB)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) calloc.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) malloc.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) realloc.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) free.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) printf_large.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) sprintf.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) vprintf.rel
+$(TOPDIR)/staging/$(SDCCLIB): $(SDCC_LIBDIR)/$(SDCCLIB)
+	$(Q) cp $(SDCC_LIBDIR)/$(SDCCLIB) $(TOPDIR)/staging/$(SDCCLIB)
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) calloc.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) malloc.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) realloc.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) free.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) printf_large.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) sprintf.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) vprintf.rel
 ifneq ($(CONFIG_LIBC_ARCH_STRCPY),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) strcpy.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) strcpy.rel
 endif
 ifneq ($(CONFIG_LIBC_ARCH_STRLEN),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) strlen.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) strlen.rel
 endif
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strcat.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strcat.rel
 ifneq ($(CONFIG_LIBC_ARCH_STRCHR),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strchr.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strchr.rel
 endif
 ifneq ($(CONFIG_LIBC_ARCH_STRCMP),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strcmp.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strcmp.rel
 endif
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strcspn.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strncat.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strncmp.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strcspn.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strncat.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strncmp.rel
 ifneq ($(CONFIG_LIBC_ARCH_STRNCPY),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strncpy.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strncpy.rel
 endif
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strpbrk.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strrchr.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strspn.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strstr.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _strtok.rel
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memchr.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strpbrk.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strrchr.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strspn.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strstr.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _strtok.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _memchr.rel
 ifneq ($(CONFIG_LIBC_ARCH_MEMCMP),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memcmp.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _memcmp.rel
 endif
 ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memcpy.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _memcpy.rel
 endif
 ifneq ($(CONFIG_LIBC_ARCH_MEMSET),y)
-	$(Q) sdar d $(TOPDIR)/lib/$(SDCCLIB) _memset.rel
+	$(Q) sdar d $(TOPDIR)/staging/$(SDCCLIB) _memset.rel
 endif
 
 # Create a header file that contains addressing information needed by the
@@ -158,10 +158,10 @@ nuttx.lnk:
 	@echo "LD: nuttx.lnk"
 	@echo "--" >nuttx.lnk						# Non-interactive
 	@echo "-k $(BOARDDIR)" >>nuttx.lnk			# Path to board library
-	@echo "-k $(TOPDIR)/lib" >>nuttx.lnk		# Path to top-level lib directory
+	@echo "-k $(TOPDIR)/staging" >>nuttx.lnk	# Path to top-level staging directory
 	@echo "-l libboard$(LIBEXT)" >>nuttx.lnk	# Name of board library
 	$(Q) for LIB in $(LINKLIBS); do \
-		echo "-l $(TOPDIR)/lib/$$LIB" >> nuttx.lnk ;\
+		echo "-l $(TOPDIR)/staging/$$LIB" >> nuttx.lnk ;\
 	done
 	@echo "-l $(SDCCLIB)" >>nuttx.lnk			# Name of SDCC z80 library
 ifneq ($(CONFIG_LINKER_HOME_AREA),)
@@ -185,7 +185,7 @@ endif
 	@echo "$(HEAD_OBJ)" >>nuttx.lnk				# Path to head object
 	@echo "-e" >>nuttx.lnk						# End of script
 
-nuttx$(EXEEXT): asm_mem.h $(TOPDIR)/lib/$(SDCCLIB) $(HEAD_OBJ) board/libboard$(LIBEXT) nuttx.lnk
+nuttx$(EXEEXT): asm_mem.h $(TOPDIR)/staging/$(SDCCLIB) $(HEAD_OBJ) board/libboard$(LIBEXT) nuttx.lnk
 	@echo "LD: nuttx.ihx"
 	$(Q) $(LD) -f nuttx.lnk
 	$(Q) cp -f nuttx.map $(TOPDIR)/.
