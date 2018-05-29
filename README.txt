@@ -1975,17 +1975,17 @@ nuttx/
  |       `- README.txt
  |- graphics/
  |   `- README.txt
- |- lib/
- |   `- README.txt
- |- libc/
- |   |- zoneinfo
+ |- libs/
+ |   |- README.txt
+ |   |- libc/
+ |   |   |- zoneinfo
+ |   |   |   `- README.txt
  |   |   `- README.txt
- |   `- README.txt
- |- libnx/
- |   |- nxfongs
+ |   |- libnx/
+ |   |   |- nxfongs
+ |   |   |   `- README.txt
  |   |   `- README.txt
- |   `- README.txt
- |- libxx/
+ |   |- libxx/
  |   `- README.txt
  |- mm/
  |   |- shm/
