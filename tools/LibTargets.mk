@@ -1,5 +1,5 @@
 ############################################################################
-# LibTargets.mk
+# tools/LibTargets.mk
 #
 #   Copyright (C) 2007-2012, 2014, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

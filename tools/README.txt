@@ -12,10 +12,19 @@ README.txt
 
   This file!
 
-Config.mk
+Makefile.*
+----------
+
+  Makefile.unix is the Makefile used when building NuttX in Unix-like
+  systems.  It is selected from the top-level Makefile.
+
+  Makefile.win is the Makefile used when building natively under
+  Windows.  It is selected from the top-level Makefile.
+
+*.mk
 ---------
 
-  This file contains common definitions used by many configuration files.
+  Config.mk contains common definitions used by many configuration files.
   This file (along with <nuttx>/.config) must be included at the top of
   each configuration-specific Make.defs file like:
 
@@ -24,6 +33,11 @@ Config.mk
 
   Subsequent logic within the configuration-specific Make.defs file may then
   override these default definitions as necessary.
+
+  Libraries.mk has the build rules for all NuttX libraries.
+
+  FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk:  These control the
+  selection of libraries to be built, depending on the selected build mode.
 
 configure.sh
 configure.bat

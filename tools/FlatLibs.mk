@@ -1,7 +1,8 @@
 ############################################################################
-# KernelLibs.mk
+# tools/FlatLibs.mk
 #
-#   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2016-2018 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -55,20 +56,26 @@ NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
 NUTTXLIBS += staging$(DELIM)libconfigs$(LIBEXT)
 
-# Add libraries for syscall support.  The C library will be needed by
-# both the kernel- and user-space builds.  For now, the memory manager (mm)
-# is placed in user space (only).
+# Add libraries for syscall support.
 
-NUTTXLIBS += staging$(DELIM)libstubs$(LIBEXT) staging$(DELIM)libkc$(LIBEXT)
-NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
-USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libuc$(LIBEXT)
-USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libc$(LIBEXT) staging$(DELIM)libmm$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libarch$(LIBEXT)
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+NUTTXLIBS += staging$(DELIM)libstubs$(LIBEXT)
+USERLIBS  += staging$(DELIM)libproxies$(LIBEXT)
+endif
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERLIBS += staging$(DELIM)libcxx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libcxx$(LIBEXT)
+endif
+
+# Add library for application support.
+
+ifneq ($(APPDIR),)
+NUTTXLIBS += staging$(DELIM)libapps$(LIBEXT)
 endif
 
 # Add libraries for network support
@@ -97,11 +104,9 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += staging$(DELIM)libgraphics$(LIBEXT)
-NUTTXLIBS += staging$(DELIM)libknx$(LIBEXT)
-USERLIBS  += staging$(DELIM)libunx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libnx$(LIBEXT)
 else ifeq ($(CONFIG_NXFONTS),y)
-NUTTXLIBS += staging$(DELIM)libknx$(LIBEXT)
-USERLIBS  += staging$(DELIM)libunx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libnx$(LIBEXT)
 endif
 
 # Add libraries for the Audio sub-system
@@ -122,6 +127,6 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 NUTTXLIBS += staging$(DELIM)libcxx$(LIBEXT)
 endif
 
-# Export only the user libraries
+# Export all libraries
 
-EXPORTLIBS = $(USERLIBS)
+EXPORTLIBS = $(NUTTXLIBS)

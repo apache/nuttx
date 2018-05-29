@@ -1,5 +1,5 @@
 ############################################################################
-# Directories.mk
+# tools/Directories.mk
 #
 #   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights
 #     reserved.

@@ -1,8 +1,7 @@
 ############################################################################
-# ProtectedLibs.mk
+# tools/KernelLibs.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2016-2018 Gregory Nutt. All rights
-#     reserved.
+#   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -70,12 +69,6 @@ USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
 
 ifeq ($(CONFIG_HAVE_CXX),y)
 USERLIBS += staging$(DELIM)libcxx$(LIBEXT)
-endif
-
-# Add library for application support.
-
-ifneq ($(APPDIR),)
-USERLIBS += staging$(DELIM)libapps$(LIBEXT)
 endif
 
 # Add libraries for network support
