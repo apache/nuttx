@@ -440,9 +440,12 @@ must be is one of the following.
 
       [on Linux host]
       $ sudo stty -F /dev/ttyS0 9600
-      $ sudo stty -F /dev/ttyS0 crtscts
+      $ sudo stty -F /dev/ttyS0 crtscts *
       $ sudo stty -F /dev/ttyS0 raw
       $ sudo stty -F /dev/ttyS0
+
+      * Because hardware flow control will be enabled on the target side
+        in this configuration.
 
     2. Host-to-Target File Transfer
 
