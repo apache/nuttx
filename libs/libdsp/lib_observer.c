@@ -54,7 +54,6 @@
  * Public Functions
  ****************************************************************************/
 
-
 /****************************************************************************
  * Name: motor_observer_init
  *
@@ -317,7 +316,7 @@ void motor_observer_smo(FAR struct motor_observer_s *observer, FAR ab_frame_t *i
 
 #if 1
   /* Some assertions
-   * TODO: simplyfy
+   * TODO: simplify
    */
 
   if (angle != angle) angle = 0.0;

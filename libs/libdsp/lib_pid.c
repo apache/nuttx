@@ -250,7 +250,7 @@ float pid_controller(FAR pid_controller_t *pid, float err)
 
   pid->part[2] = pid->KD * (err - pid->err_prev);
 
-  /* Add diverative part to the PI part */
+  /* Add derivative part to the PI part */
 
   pid->out +=  pid->part[2];
 

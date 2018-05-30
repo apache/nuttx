@@ -1981,6 +1981,8 @@ nuttx/
  |   |   |- zoneinfo
  |   |   |   `- README.txt
  |   |   `- README.txt
+ |   |- libdsp/
+ |   |   `- README.txt
  |   |- libnx/
  |   |   |- nxfongs
  |   |   |   `- README.txt
