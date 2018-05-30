@@ -955,7 +955,7 @@ if __name__ == '__main__':
             lib_prj.make_src_nodes(group_src_list)
             lib_prj.make_include(group_src_list)
             lib_prj.make_output_dir(lib_name)
-            if lib_name == 'libcxx':
+            if lib_name == 'libxx' or lib_name == 'libcxx':
                 lib_prj.add_misc('cxx_misc')
                 lib_prj.add_define('cxx_def', 'CONFIG_WCHAR_BUILTIN')
             else:

@@ -69,7 +69,7 @@ USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERLIBS += staging$(DELIM)libcxx$(LIBEXT)
+USERLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
 endif
 
 # Add library for application support.
@@ -126,7 +126,7 @@ endif
 # Add C++ library
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-NUTTXLIBS += staging$(DELIM)libcxx$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
 endif
 
 # Export only the user libraries

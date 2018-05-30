@@ -22,4 +22,12 @@ creatures.  The have these properties:
    nxsem_wait() must be used.  Within libraries, the macro  _SEM_WAIT()
    (as defined in include/nuttx/semaphore.h) is used instead.  The
    definition of this macro accounts for the different usage environments.
- 
+
+NOTE:  The libraries under libs/ build differently from other NuttX
+components:  There are no build-related files in the libs/ directory; it
+is simply a container for other well-known, individual library directories.
+The upper level Makefile logic is aware of the libraries within the libs/
+container.
+
+The only real function of the libs/ directory is to prevent the top-level
+directory from becoming cluttered with individual libraries.
