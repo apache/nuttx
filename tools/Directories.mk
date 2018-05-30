@@ -148,6 +148,12 @@ else
 OTHERDIRS += wireless
 endif
 
+ifeq ($(CONFIG_LIBDSP),y)
+NONFSDIRS += libs$(DELIM)libdsp
+else
+OTHERDIRS += libs$(DELIM)libdsp
+endif
+
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.

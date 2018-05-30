@@ -122,6 +122,12 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 NUTTXLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
 endif
 
+# Add DSP library
+
+ifeq ($(CONFIG_LIBDSP),y)
+NUTTXLIBS += staging$(DELIM)libdsp$(LIBEXT)
+endif
+
 # Export only the user libraries
 
 EXPORTLIBS = $(USERLIBS)

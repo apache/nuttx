@@ -130,6 +130,12 @@ $(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
 staging$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libdsp TOPDIR="$(TOPDIR)" libdsp$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 # Special case
 
 syscall$(DELIM)libstubs$(LIBEXT): context

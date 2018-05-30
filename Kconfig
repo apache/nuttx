@@ -1686,6 +1686,10 @@ source libs/libc/Kconfig
 source libs/libxx/Kconfig
 endmenu
 
+menu "DSP Library"
+source libs/libdsp/Kconfig
+endmenu
+
 menu "Application Configuration"
 source "$APPSDIR/Kconfig"
 endmenu
