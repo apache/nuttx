@@ -698,7 +698,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   /* Set the BRFA field (retaining other bits in the UARTx_C4 register) */
 
-  regval  = getreg8(uart_base+KINETIS_UART_C4_OFFSET)& ~UART_C4_BRFA_MASK;
+  regval  = getreg8(uart_base+KINETIS_UART_C4_OFFSET) & ~UART_C4_BRFA_MASK;
   regval |= ((uint8_t)brfa << UART_C4_BRFA_SHIFT) & UART_C4_BRFA_MASK;
   putreg8(regval, uart_base+KINETIS_UART_C4_OFFSET);
 
