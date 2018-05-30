@@ -457,8 +457,8 @@ must be is one of the following.
 
     Where <filename> is the file that you want to transfer. If -l nnnn is
     not specified, then there will likely be packet buffer overflow errors.
-    nnnn should be set to a value less than or equal to
-    CONFIG_SYSTEM_ZMODEM_PKTBUFSIZE
+    nnnn should be set to a strictly less than CONFIG_SYSTEM_ZMODEM_PKTBUFSIZE.
+    All testing was performed with -l 512.
 
     If you are using the NuttX implementation of rz and sz on the Linux host,
     then the last command simplifies to just:
