@@ -645,9 +645,12 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
       DEBUGASSERT(parity == 0);
     }
 
-  /* Check for 9-bit operation */
+  /* Check for 9-bit operation or enter 9 bit mode for 8 bit with parity
+   * see K66 Sub-Family Reference Manual, Rev. 2, May 2015
+   * 59.5.4 Data format
+   */
 
-  if (nbits == 9)
+  if (nbits == 9 || (nbits == 8 && parity != 0))
     {
       regval |= UART_C1_M;
     }
