@@ -72,20 +72,31 @@ ENVIRONMENTS
       Windows.  I need to update this section to include some mention of
       these alternatives.
 
-    - The MSYS environment.  I have no experience using the MSYS environment
-      and that configuration will not be discussed in this README file.
-      See http://www.mingw.org/wiki/MSYS if you are interested in
-      using MSYS.  People report to me that they have used MSYS
-      successfully.  I suppose that the advantages of the MSYS environment
-      is that it is closer to a native Windows environment and uses only a
-      minimal of add-on POSIX-land tools.
+    - The MSYS environment.  See http://www.mingw.org/wiki/MSYS if you
+      are interested in using MSYS.  People report to me that they have
+      used MSYS successfully.  I suppose that the advantages of the MSYS
+      environment is that it is closer to a native Windows environment and
+      uses only a minimal number of add-on POSIX-land tools.
+
+      The download link in that Wiki takes you to the SourceForge download
+      site.  The SourceForge MSYS project has been stagnant for some time.
+      The MSYS project has more recently moved to
+      http://odsn.net/projects/sfnet_mingwbundle.  Downloads of current .zip
+      files are available there but no instructions for the installation.
+
+    - MSYS2 appears to a be newer re-write of MSYS.  Is it available at
+      https://www.msys2.org.  A windows installer is available at that site
+      along with very good installation instructions.  The download is
+      relatively quick (at least compared to Cygwin) and the'pacman' package
+      management tool supports supports simple system updates.  For example,
+      'pacman -S git' will install the GIT command line utilities.
 
     - Other POSIX environments.  Check out:
 
         UnxUtils: https://sourceforge.net/projects/unxutils/,
           https://en.wikipedia.org/wiki/UnxUtils
         MobaXterm: https://mobaxterm.mobatek.net/
-        Gow`: https://github.com/bmatzelle/gow/wiki
+        Gow: https://github.com/bmatzelle/gow/wiki
 
       Disclaimer:  In priniple, these should work.  However, I have never
       used any of these environments and cannot guarantee that there is
