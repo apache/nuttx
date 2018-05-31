@@ -72,11 +72,13 @@ ENVIRONMENTS
       Windows.  I need to update this section to include some mention of
       these alternatives.
 
-    - The MSYS environment.  See http://www.mingw.org/wiki/MSYS if you
-      are interested in using MSYS.  People report to me that they have
-      used MSYS successfully.  I suppose that the advantages of the MSYS
-      environment is that it is closer to a native Windows environment and
-      uses only a minimal number of add-on POSIX-land tools.
+    - The MSYS environment.  MSYS derives from an older version of Cygwin
+      adapted to work more naturally in the Windows environment.  See
+      http://www.mingw.org/wiki/MSYS if you are interested in using MSYS.
+      People report to me that they have used MSYS successfully.  I
+      suppose that the advantages of the MSYS environment is that it is
+      closer to a native Windows environment and uses only a minimal
+      number of add-on POSIX-land tools.
 
       The download link in that Wiki takes you to the SourceForge download
       site.  The SourceForge MSYS project has been stagnant for some time.
@@ -84,12 +86,13 @@ ENVIRONMENTS
       http://odsn.net/projects/sfnet_mingwbundle.  Downloads of current .zip
       files are available there but no instructions for the installation.
 
-    - MSYS2 appears to a be newer re-write of MSYS.  Is it available at
-      https://www.msys2.org.  A windows installer is available at that site
-      along with very good installation instructions.  The download is
-      relatively quick (at least compared to Cygwin) and the'pacman' package
-      management tool supports supports simple system updates.  For example,
-      'pacman -S git' will install the GIT command line utilities.
+    - MSYS2 appears to be a re-write of MSYS based on a newer version of
+      Cygwin.  Is it available at https://www.msys2.org.  A windows
+      installer is available at that site along with very good installation
+      instructions.  The download is relatively quick (at least compared to
+      Cygwin) and the 'pacman' package management tool supports supports
+      simple system updates.  For example, 'pacman -S git' will install the
+      GIT command line utilities.
 
     - Other POSIX environments.  Check out:
 
@@ -154,6 +157,22 @@ Installing Cygwin
   UPDATE: The last time I installed EVERYTHING, the download was
   about 5GiB.  The server I selected was also very slow so it took
   over a day to do the whole install!
+
+Using MSYS
+----------
+
+  MSYS is an environment the derives from Cygwin.  Thus, most things said
+  about Cygwin apply equally to MSYS.  This section will, then, focus on
+  the differences when using MSYS, specifically MSYS2.
+
+  Here is it assumed that you have already downloaded and installed MSYS2
+  from https://www.msys2.org using the windows installer available at that
+  location.  It is also assumed that you have brought in the necessary
+  tools using the 'pacman' package management tool Tools needed include:
+
+    pacman -S git
+
+  And possibly others depending upon your usage.
 
 Ubuntu Bash under Windows 10
 ----------------------------

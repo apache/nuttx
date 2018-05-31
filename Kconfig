@@ -79,7 +79,7 @@ config WINDOWS_UBUNTU
 		POSIX style paths (like /mnt/c/Program Files)
 
 config WINDOWS_MSYS
-	bool "MSYS"
+	bool "MSYS or MSYS2"
 	select TOOLCHAIN_WINDOWS
 	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like
