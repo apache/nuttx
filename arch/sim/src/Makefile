@@ -256,6 +256,9 @@ GNU:
 GNU/Linux-names.dat: GNU nuttx-names.dat
 	$(Q) cp nuttx-names.dat $@
 
+Msys-names.dat: GNU nuttx-names.dat
+	$(Q) cp nuttx-names.dat $@
+
 Cygwin-names.dat: nuttx-names.dat
 ifeq ($())CONFIG_SIM_CYGWIN_DECORATED),y)
 	$(Q) cat $^ | sed -e "s/^/_/g" >$@

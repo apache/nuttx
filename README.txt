@@ -187,7 +187,23 @@ Using MSYS
 
   Because of some versioning issues, I had to run 'aclocal' prior to
   running the kconfig-frontends configure script.  See "Configuring NuttX"
-  below for futher information.
+  below for futher information.ifq
+
+  Unlike Cygwin, MSYS does not support symbolic links.  The 'ln -s' commnad
+  will, in fact, copy a directory!  This means that you Make.defs file will
+  have to include  defintion like:
+
+    ifeq ($(CONFIG_WINDOWS_MSYS),y)
+      DIRLINK = $(TOPDIR)/tools/copydir.sh
+      DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+    endif
+
+  This will force the directory copies to work in a way that can be handled
+  by the NuttX build system.
+
+  To build the simulator under MSYS, you also need:
+
+    pacman -S zlib-devel
 
 Ubuntu Bash under Windows 10
 ----------------------------
