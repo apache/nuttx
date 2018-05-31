@@ -76,8 +76,9 @@ ENVIRONMENTS
       simplified and adapted to work more naturally in the Windows
       environment.  See http://www.mingw.org/wiki/MSYS if you are
       interested in using MSYS.  The advantages of the MSYS environment is
-      that it is closer to a native Windows environment and uses only a
-      minimal number of add-on POSIX-land tools.
+      that it is better integrted with the native Windows environment and
+      lighter weight; it uses only a  minimal number of add-on POSIX-land
+      tools.
 
       The download link in that Wiki takes you to the SourceForge download
       site.  The SourceForge MSYS project has been stagnant for some time.
@@ -204,6 +205,19 @@ Using MSYS
   To build the simulator under MSYS, you also need:
 
     pacman -S zlib-devel
+
+  It appears that you cannot use directory names with spaces in them like
+  "/c/Program\ Files \(86\)" in the MSYS path variable.  I worked around this
+  by create Windows junctions like this::
+
+    1. Open the a windows command terminal,
+    2. CD to c:\msys64, then
+    3. mklink /j programfiles "C:/Program\ Files" and
+    4. mklink /j programfiles86 "C:/Program\ Files\ \(x86\)"
+
+  Then using those names in the PATH variable.  I had to do something similar
+  for the path to the GNU Tools ARM Embedded toolchain which also has spaces
+  in the path name.
 
 Ubuntu Bash under Windows 10
 ----------------------------
