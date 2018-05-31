@@ -73,12 +73,11 @@ ENVIRONMENTS
       these alternatives.
 
     - The MSYS environment.  MSYS derives from an older version of Cygwin
-      adapted to work more naturally in the Windows environment.  See
-      http://www.mingw.org/wiki/MSYS if you are interested in using MSYS.
-      People report to me that they have used MSYS successfully.  I
-      suppose that the advantages of the MSYS environment is that it is
-      closer to a native Windows environment and uses only a minimal
-      number of add-on POSIX-land tools.
+      simplified and adapted to work more naturally in the Windows
+      environment.  See http://www.mingw.org/wiki/MSYS if you are
+      interested in using MSYS.  The advantages of the MSYS environment is
+      that it is closer to a native Windows environment and uses only a
+      minimal number of add-on POSIX-land tools.
 
       The download link in that Wiki takes you to the SourceForge download
       site.  The SourceForge MSYS project has been stagnant for some time.
@@ -168,11 +167,27 @@ Using MSYS
   Here is it assumed that you have already downloaded and installed MSYS2
   from https://www.msys2.org using the windows installer available at that
   location.  It is also assumed that you have brought in the necessary
-  tools using the 'pacman' package management tool Tools needed include:
+  tools using the 'pacman' package management tool Tools needed including:
 
     pacman -S git
+    pacman -S make
+    pacman -S gcc
 
-  And possibly others depending upon your usage.
+  And possibly others depending upon your usage.  Then you will need to
+  build and install kconfig-frontends per the instructions of the top-level
+  README.txt file in the tools repository.  This required the following
+  additional tools:
+
+    pacman -S bison
+    pacman -S gperf
+    pacman -S ncurses-devel
+    pacman -S automake-wrapper
+    pacman -S autoconf
+    pacman -S pkg-config
+
+  Because of some versioning issues, I had to run 'aclocal' prior to
+  running the kconfig-frontends configure script.  See "Configuring NuttX"
+  below for futher information.
 
 Ubuntu Bash under Windows 10
 ----------------------------
@@ -880,6 +895,10 @@ Make Sure that You are on the Right Platform
   Or, if you are on a Windows/Cygwin 64-bit platform:
 
     tools/sethost.sh -c
+
+  Or, for MSYS/MSYS2:
+
+    tools/sethost.sh -g
 
   Other options are available from the help option built into the
   script.  You can see all options with:

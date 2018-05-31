@@ -37,13 +37,14 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-l|m|c|u|n] [-a <app-dir>] <board-name>/<config-name>
+USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>/<config-name>
 
 Where:
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
   -u selects the Windows host and Ubuntu under Windows 10 (u) environment.
+  -g selects the Windows host and MinGW/MSYS environment.
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
@@ -81,6 +82,10 @@ while [ ! -z "$1" ]; do
       ;;
     -d )
       set -x
+      ;;
+    -g )
+      host=windows
+      wenv=msys
       ;;
     -h )
       echo "$USAGE"
@@ -306,6 +311,11 @@ if [ ! -z "$host" ]; then
           "cygwin")
             echo "  Select CONFIG_WINDOWS_CYGWIN=y"
             echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
+            ;;
+
+          "msys")
+            echo "  Select CONFIG_WINDOWS_MSYS=y"
+            echo "CONFIG_WINDOWS_MSYS=y" >> "${dest_config}"
             ;;
 
           "ubuntu")
