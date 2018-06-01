@@ -364,6 +364,36 @@ must be is one of the following.
        If you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
+  module:
+
+    A simple stripped down NSH configuration that was used for testing NuttX
+    OS modules.  Key difference from the nsh configuration include these
+    additions to the configuration file:
+
+      CONFIG_BOARDCTL_OS_SYMTAB=y
+      CONFIG_EXAMPLES_MODULE=y
+      CONFIG_EXAMPLES_MODULE_BUILTINFS=y
+      CONFIG_EXAMPLES_MODULE_DEVMINOR=0
+      CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
+      CONFIG_FS_ROMFS=y
+      CONFIG_LIBC_ARCH_ELF=y
+      CONFIG_MODULE=y
+      CONFIG_LIBC_MODLIB=y
+      CONFIG_MODLIB_MAXDEPEND=2
+      CONFIG_MODLIB_ALIGN_LOG2=2
+      CONFIG_MODLIB_BUFFERSIZE=128
+      CONFIG_MODLIB_BUFFERINCR=32
+
+     The could be followed may be added for testing shared libraries in the
+     FLAT build:
+
+      CONFIG_LIBC_DLLFCN=y
+      CONFIG_EXAMPLES_SOTEST=y
+      CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
+
+    STATUS:
+    2018-06-01: Configuration added.  Works perfectly.
+
   nsh:
 
     This is the NuttShell (NSH) using the NSH startup logic at
@@ -520,3 +550,5 @@ STATUS
 2018-05-28:  Verified correct operation with target-to-host transfers (using
   Linux rz command).  There appears to be a problem using the NuttX rz
   command running on the host???
+
+2018-06-01: Added the module configuration.  Works perfectly.
