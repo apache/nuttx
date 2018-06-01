@@ -84,7 +84,7 @@ int rmmod(FAR void *handle)
   ret = modlib_registry_verify(modp);
   if (ret < 0)
     {
-      serr("ERROR: Failed to verify module: %d\n", ret);
+      berr("ERROR: Failed to verify module: %d\n", ret);
       goto errout_with_lock;
     }
 
@@ -93,7 +93,7 @@ int rmmod(FAR void *handle)
 
   if (modp->dependents > 0)
     {
-      serr("ERROR: Module has dependents: %d\n", modp->dependents);
+      berr("ERROR: Module has dependents: %d\n", modp->dependents);
       ret = -EBUSY;
       goto errout_with_lock;
     }
@@ -111,7 +111,7 @@ int rmmod(FAR void *handle)
 
       if (ret < 0)
         {
-          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
+          berr("ERROR: Failed to uninitialize the module: %d\n", ret);
           goto errout_with_lock;
         }
 
@@ -148,7 +148,7 @@ int rmmod(FAR void *handle)
   ret = modlib_registry_del(modp);
   if (ret < 0)
     {
-      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      berr("ERROR: Failed to remove the module from the registry: %d\n", ret);
       goto errout_with_lock;
     }
 

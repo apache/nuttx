@@ -110,7 +110,7 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
   ssize_t nbytes;      /* Number of bytes read */
   off_t   rpos;        /* Position returned by lseek */
 
-  sinfo("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
+  binfo("Read %ld bytes from offset %ld\n", (long)readsize, (long)offset);
 
   /* Loop until all of the requested data has been read. */
 
@@ -122,7 +122,7 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
       if (rpos != offset)
         {
           int errval = get_errno();
-          serr("ERROR: Failed to seek to position %lu: %d\n",
+          berr("ERROR: Failed to seek to position %lu: %d\n",
                (unsigned long)offset, errval);
           return -errval;
         }
@@ -138,14 +138,14 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
            if (errval != EINTR)
              {
-               serr("ERROR: Read from offset %lu failed: %d\n",
+               berr("ERROR: Read from offset %lu failed: %d\n",
                     (unsigned long)offset, errval);
                return -errval;
              }
          }
        else if (nbytes == 0)
          {
-           serr("ERROR: Unexpected end of file\n");
+           berr("ERROR: Unexpected end of file\n");
            return -ENODATA;
          }
        else

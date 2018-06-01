@@ -153,7 +153,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
-  sinfo("Loaded sections:\n");
+  binfo("Loaded sections:\n");
   text = (FAR uint8_t *)loadinfo->textalloc;
   data = (FAR uint8_t *)loadinfo->datastart;
 
@@ -193,7 +193,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
           ret = modlib_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
-              serr("ERROR: Failed to read section %d: %d\n", i, ret);
+              berr("ERROR: Failed to read section %d: %d\n", i, ret);
               return ret;
             }
         }
@@ -209,7 +209,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
       /* Update sh_addr to point to copy in memory */
 
-      sinfo("%d. %08lx->%08lx\n", i,
+      binfo("%d. %08lx->%08lx\n", i,
             (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
 
       shdr->sh_addr = (uintptr_t)*pptr;
@@ -243,7 +243,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
 
-  sinfo("loadinfo: %p\n", loadinfo);
+  binfo("loadinfo: %p\n", loadinfo);
   DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
 
   /* Load section headers into memory */
@@ -251,7 +251,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   ret = modlib_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      serr("ERROR: modlib_loadshdrs failed: %d\n", ret);
+      berr("ERROR: modlib_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -266,7 +266,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   loadinfo->textalloc = (uintptr_t)lib_zalloc(loadinfo->textsize + loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
-      serr("ERROR: Failed to allocate memory for the module\n");
+      berr("ERROR: Failed to allocate memory for the module\n");
       ret = -ENOMEM;
       goto errout_with_buffers;
     }
@@ -278,7 +278,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   ret = modlib_loadfile(loadinfo);
   if (ret < 0)
     {
-      serr("ERROR: modlib_loadfile failed: %d\n", ret);
+      berr("ERROR: modlib_loadfile failed: %d\n", ret);
       goto errout_with_buffers;
     }
 

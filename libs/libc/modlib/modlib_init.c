@@ -66,7 +66,7 @@
 #endif
 
 #ifdef CONFIG_MODLIB_DUMPBUFFER
-# define modlib_dumpbuffer(m,b,n) sinfodumpbuffer(m,b,n)
+# define modlib_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else
 # define modlib_dumpbuffer(m,b,n)
 #endif
@@ -99,7 +99,7 @@ static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo,
   if (ret < 0)
     {
       int errval = get_errno();
-      serr("ERROR: Failed to stat file: %d\n", errval);
+      berr("ERROR: Failed to stat file: %d\n", errval);
       return -errval;
     }
 
@@ -107,7 +107,7 @@ static inline int modlib_filelen(FAR struct mod_loadinfo_s *loadinfo,
 
   if (!S_ISREG(buf.st_mode))
     {
-      serr("ERROR: Not a regular file.  mode: %d\n", buf.st_mode);
+      berr("ERROR: Not a regular file.  mode: %d\n", buf.st_mode);
       return -ENOENT;
     }
 
@@ -143,7 +143,7 @@ int modlib_initialize(FAR const char *filename,
 {
   int ret;
 
-  sinfo("filename: %s loadinfo: %p\n", filename, loadinfo);
+  binfo("filename: %s loadinfo: %p\n", filename, loadinfo);
 
   /* Clear the load info structure */
 
@@ -154,7 +154,7 @@ int modlib_initialize(FAR const char *filename,
   ret = modlib_filelen(loadinfo, filename);
   if (ret < 0)
     {
-      serr("ERROR: modlib_filelen failed: %d\n", ret);
+      berr("ERROR: modlib_filelen failed: %d\n", ret);
       return ret;
     }
 
@@ -164,7 +164,7 @@ int modlib_initialize(FAR const char *filename,
   if (loadinfo->filfd < 0)
     {
       int errval = get_errno();
-      serr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
+      berr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
       return -errval;
     }
 
@@ -174,7 +174,7 @@ int modlib_initialize(FAR const char *filename,
                     sizeof(Elf32_Ehdr), 0);
   if (ret < 0)
     {
-      serr("ERROR: Failed to read ELF header: %d\n", ret);
+      berr("ERROR: Failed to read ELF header: %d\n", ret);
       return ret;
     }
 
@@ -193,7 +193,7 @@ int modlib_initialize(FAR const char *filename,
        * is not correctly formed.
        */
 
-      serr("ERROR: Bad ELF header: %d\n", ret);
+      berr("ERROR: Bad ELF header: %d\n", ret);
       return ret;
     }
 

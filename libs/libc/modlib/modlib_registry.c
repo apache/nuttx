@@ -223,7 +223,7 @@ int modlib_registry_del(FAR struct module_s *modp)
 
   if (curr == NULL)
     {
-      serr("ERROR: Could not find module entry\n");
+      berr("ERROR: Could not find module entry\n");
       return -ENOENT;
     }
 

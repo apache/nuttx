@@ -81,7 +81,7 @@ int modlib_verifyheader(FAR const Elf32_Ehdr *ehdr)
 {
   if (!ehdr)
     {
-      serr("ERROR: NULL ELF header!");
+      berr("ERROR: NULL ELF header!");
       return -ENOEXEC;
     }
 
@@ -89,7 +89,7 @@ int modlib_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (memcmp(ehdr->e_ident, g_modmagic, EI_MAGIC_SIZE) != 0)
     {
-      sinfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
+      binfo("Not ELF magic {%02x, %02x, %02x, %02x}\n",
             ehdr->e_ident[0], ehdr->e_ident[1], ehdr->e_ident[2], ehdr->e_ident[3]);
       return -ENOEXEC;
     }
@@ -98,7 +98,7 @@ int modlib_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_type != ET_REL)
     {
-      serr("ERROR: Not a relocatable file: e_type=%d\n", ehdr->e_type);
+      berr("ERROR: Not a relocatable file: e_type=%d\n", ehdr->e_type);
       return -EINVAL;
     }
 
@@ -106,7 +106,7 @@ int modlib_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   if (!up_checkarch(ehdr))
     {
-      serr("ERROR: Not a supported architecture\n");
+      berr("ERROR: Not a supported architecture\n");
       return -ENOEXEC;
     }
 

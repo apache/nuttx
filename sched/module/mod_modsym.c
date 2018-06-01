@@ -93,7 +93,7 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
   ret = modlib_registry_verify(modp);
   if (ret < 0)
     {
-      serr("ERROR: Failed to verify module: %d\n", ret);
+      berr("ERROR: Failed to verify module: %d\n", ret);
       err = -ret;
       goto errout_with_lock;
     }
@@ -102,7 +102,7 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
 
   if (modp->modinfo.exports == NULL || modp->modinfo.nexports == 0)
     {
-      serr("ERROR: Module has no symbol table\n");
+      berr("ERROR: Module has no symbol table\n");
       err = ENOENT;
       goto errout_with_lock;
     }
@@ -113,7 +113,7 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
                              modp->modinfo.nexports);
   if (symbol == NULL)
     {
-      serr("ERROR: Failed to find symbol in symbol \"$s\" in table\n", name);
+      berr("ERROR: Failed to find symbol in symbol \"$s\" in table\n", name);
       err = ENOENT;
       goto errout_with_lock;
     }
