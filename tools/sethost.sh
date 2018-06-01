@@ -233,7 +233,7 @@ else
     fi
 fi
 
-kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OSX
+kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
 kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OTHER
 
 echo "  Refreshing..."

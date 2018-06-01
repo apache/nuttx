@@ -157,7 +157,7 @@ else
 
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
 
-  # SDCC for Linux, OSX, or Cygwin understands symbolic links.  Windows SDCC
+  # SDCC for Linux, macOS, or Cygwin understands symbolic links.  Windows SDCC
   # running under Cygwin does not
 
 ifeq ($(WINTOOL),y)

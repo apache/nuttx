@@ -89,7 +89,7 @@ Development Environment
 
   Several possible development environments may be used:
 
-  - Linux or OSX native
+  - Linux or macOS native
   - Cygwin unders Windows
   - MinGW + MSYS under Windows
   - Windows native (with GNUMake from GNUWin32).

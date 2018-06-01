@@ -40,11 +40,11 @@
 # http://sdcc.sourceforge.net/.  Source and pre-built SDCC binaries can be
 # downloaded from the SDCC SourceForge site:
 # http://sourceforge.net/projects/sdcc/files/.  Pre-built binaries are
-# available for Linux, MAC OSX, and for Win32.  In addition, SDCC can be
+# available for Linux, macOS, and for Win32.  In addition, SDCC can be
 # built to run on Windows as a POSIX toolchain.  The various SDCC options are
 # selected in the NuttX configuration with:
 #
-#  CONFIG_Z80_TOOLCHAIN_SDCCL=y : SDCC for Linux, MAC OSX or Cygwin
+#  CONFIG_Z80_TOOLCHAIN_SDCCL=y : SDCC for Linux, macOS or Cygwin
 #  CONFIG_Z80_TOOLCHAIN_SDCCW=y : SDCC for Win32
 #
 
@@ -59,7 +59,7 @@ ifeq ($(filter y, \
   CONFIG_Z80_TOOLCHAIN ?= SDCCWIN32
 endif
 
-# SDCC toolchain under Linux, MAC OSX or Cygwin
+# SDCC toolchain under Linux, macOS or Cygwin
 
 ifeq ($(CONFIG_Z80_TOOLCHAIN),POSIX)
 endif

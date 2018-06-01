@@ -11,7 +11,7 @@ choice
 	default Z80_TOOLCHAIN_SDCCL if !TOOLCHAIN_WINDOWS
 
 config Z80_TOOLCHAIN_SDCCL
-        bool "SDCC for Linux, MAC OSX, or Cygwin"
+        bool "SDCC for Linux, macOS, or Cygwin"
 	depends on !WINDOWS_NATIVE
 
 config Z80_TOOLCHAIN_SDCCW

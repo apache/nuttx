@@ -41,7 +41,7 @@ ENVIRONMENTS
 ^^^^^^^^^^^^
 
   NuttX requires a POSIX development environment such as you would find under
-  Linux or OSX.  NuttX may also be installed and built on Windows system
+  Linux or macOS.  NuttX may also be installed and built on Windows system
   if you also provide such a POSIX development environment.  Options for a
   POSIX development environment under Windows include:
 

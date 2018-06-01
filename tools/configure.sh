@@ -279,7 +279,7 @@ fi
 if [ ! -z "$host" ]; then
   sed -i -e "/CONFIG_HOST_LINUX/d" ${dest_config}
   sed -i -e "/CONFIG_HOST_WINDOWS/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_OSX/d" ${dest_config}
+  sed -i -e "/CONFIG_HOST_MACOS/d" ${dest_config}
   sed -i -e "/CONFIG_HOST_OTHER/d" ${dest_config}
   sed -i -e "/CONFIG_WINDOWS_NATIVE/d" ${dest_config}
   sed -i -e "/CONFIG_WINDOWS_CYGWIN/d" ${dest_config}
@@ -298,8 +298,8 @@ if [ ! -z "$host" ]; then
       ;;
 
     "macos")
-      echo "  Select CONFIG_HOST_OSX=y"
-      echo "CONFIG_HOST_OSX=y" >> "${dest_config}"
+      echo "  Select CONFIG_HOST_MACOS=y"
+      echo "CONFIG_HOST_MACOS=y" >> "${dest_config}"
       ;;
 
     "windows")

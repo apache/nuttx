@@ -207,7 +207,7 @@ function configure {
         kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_M32
     fi
 
-    kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OSX
+    kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OTHER
 
     if [ "X$sizet" == "Xlong" ]; then

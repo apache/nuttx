@@ -996,7 +996,7 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_HOST_LINUX");
           disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-          disable_feature(destconfig, "CONFIG_HOST_OSX");
+          disable_feature(destconfig, "CONFIG_HOST_MACOS");
 
           disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
           disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
@@ -1016,7 +1016,7 @@ static void set_host(const char *destconfig)
 
           disable_feature(destconfig, "CONFIG_HOST_LINUX");
           disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
-          enable_feature(destconfig, "CONFIG_HOST_OSX");
+          enable_feature(destconfig, "CONFIG_HOST_MACOS");
 
           disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
           disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
@@ -1034,7 +1034,7 @@ static void set_host(const char *destconfig)
         {
           enable_feature(destconfig, "CONFIG_HOST_WINDOWS");
           disable_feature(destconfig, "CONFIG_HOST_LINUX");
-          disable_feature(destconfig, "CONFIG_HOST_OSX");
+          disable_feature(destconfig, "CONFIG_HOST_MACOS");
 
           disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
           disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");

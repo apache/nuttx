@@ -56,7 +56,7 @@ ifeq ($(CONFIG_LPC43_BOOT_CS0FLASH),y)
   LDSCRIPT = cs0flash.ld
 endif
 
-# Setup for Windows vs Linux/Cygwin/OSX environments
+# Setup for Windows vs Linux/Cygwin/macOS environments
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains

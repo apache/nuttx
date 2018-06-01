@@ -53,7 +53,7 @@ ifeq ($(COMPILER),sdcc)
     include Makefile.sdccw
   else
 
-    # SDCC in a POSIX environment (Linux, OSX, or Cygwin/MSYS)
+    # SDCC in a POSIX environment (Linux, macOS, or Cygwin/MSYS)
 
     include Makefile.sdccl
   endif

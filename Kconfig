@@ -34,8 +34,8 @@ choice
 config HOST_LINUX
 	bool "Linux"
 
-config HOST_OSX
-	bool "OSX"
+config HOST_MACOS
+	bool "macOS"
 
 config HOST_WINDOWS
 	bool "Windows"

@@ -10,7 +10,7 @@ choice
 	prompt "Toolchain"
 	default AVR_WINAVR_TOOLCHAIN if TOOLCHAIN_WINDOWS
 	default AVR_BUILDROOT_TOOLCHAIN if HOST_LINUX
-	default AVR_CROSSPACK_TOOLCHAIN if HOST_OSX
+	default AVR_CROSSPACK_TOOLCHAIN if HOST_MACOS
 
 config AVR_WINAVR_TOOLCHAIN
 	bool "WinAVR"
@@ -41,7 +41,7 @@ config AVR_LINUXGCC_TOOLCHAIN
 
 config AVR_CROSSPACK_TOOLCHAIN
 	bool "CrossPack-AVR"
-	depends on HOST_OSX
+	depends on HOST_MACOS
 	---help---
 		For OS X, the AVR CrossPack toolchain is supported:
 		http://www.obdev.at/products/crosspack/index.html

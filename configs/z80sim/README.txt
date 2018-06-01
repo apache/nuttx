@@ -12,7 +12,7 @@ Contents
 
   o Configuring NuttX
   o Reconfiguring NuttX
-  o Reconfiguring for Windows Native, Cygwin, or OSX
+  o Reconfiguring for Windows Native, Cygwin, or macOS
   o SDCC
   o Building the SDCC toolchain
 
@@ -51,7 +51,7 @@ Configuring NuttX
 
     2. The default setup for this configuration builds under Linux.
        See the section entitled "Reconfiguring for Windows Native, Cygwin,
-       or OSX" which will give you the steps you would need to do to convert
+       or macOS" which will give you the steps you would need to do to convert
        this configuration to build in other environments.
 
     3. This configuration was last verified sucessfully prior to the
@@ -93,7 +93,7 @@ Configuring NuttX
 
     2. The default setup for this configuration uses a windows native build.
        See the section entitled "Reconfiguring for Windows Native, Cygwin,
-       or OSX" which will give you the steps you would need to do to convert
+       or macOS" which will give you the steps you would need to do to convert
        this configuration to build in other environments.
 
     3. This configuration was last verified sucessfully prior to the
@@ -136,7 +136,7 @@ Configuring NuttX
 
     2. The default setup for this configuration uses a windows native build.
        See the section entitled "Reconfiguring for Windows Native, Cygwin,
-       or OSX" which will give you the steps you would need to do to convert
+       or macOS" which will give you the steps you would need to do to convert
        this configuration to build in other environments.
 
     3. This configuration was last verified sucessfully prior to the
@@ -155,7 +155,7 @@ tool.  To change this configuration using that tool, you should:
   b. Execute 'make menuconfig' in nuttx/ in order to start the reconfiguration
      process.
 
-Reconfiguring for Windows Native, Cygwin, or OSX
+Reconfiguring for Windows Native, Cygwin, or macOS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All of the z80 configurations in this this directory are set up to build
@@ -184,10 +184,10 @@ SDCC
 These z80 configurations all use the SDCC toolchain (http://sdcc.sourceforge.net/).
 Source and pre-built SDCC binaries can be downloaded from the SDCC SourceForge
 site: http://sourceforge.net/projects/sdcc/files/ .  Pre-built binaries are
-available for Linux, MAC OSX, and for Win32.  Various SDCC options can be
+available for Linux, macOS, and for Win32.  Various SDCC options can be
 selected with:
 
-  CONFIG_Z80_TOOLCHAIN_SDCCL=y : SDCC for Linux, MAC OSX or Cygwin (see below)
+  CONFIG_Z80_TOOLCHAIN_SDCCL=y : SDCC for Linux, macOS or Cygwin (see below)
   CONFIG_Z80_TOOLCHAIN_SDCCW=y : SDCC for Win32
 
 SDCC versions 3.2.0 or higher are recommended.
