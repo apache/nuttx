@@ -385,11 +385,18 @@ must be is one of the following.
       CONFIG_MODLIB_BUFFERINCR=32
 
      The could be followed may be added for testing shared libraries in the
-     FLAT build:
+     FLAT build (assuming that you also have SD card support enabled and that
+     the SD card is mount at /mnt/sdcard):
 
       CONFIG_LIBC_DLLFCN=y
       CONFIG_EXAMPLES_SOTEST=y
       CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
+
+    NOTE: You must always have:
+
+      CONFIG_STM32_CCMEXCLUDE=y
+
+    because code cannot be executed from CCM memory.
 
     STATUS:
     2018-06-01: Configuration added.  Works perfectly.
@@ -538,7 +545,7 @@ STATUS
   feature configurations.
 
   CCM memory is not included in the heap (CONFIG_STM32_CCMEXCLUDE=y) because
-  it does not suport DMA, leaving only 128KiB for program usage.
+  it does not support DMA, leaving only 128KiB for program usage.
 
 2017-01-23:  Added the knsh configuration and support for the PROTECTED
   build mode.
