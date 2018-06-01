@@ -42,11 +42,11 @@ unset configfile
 
 function showusage {
     echo ""
-    echo "USAGE: $progname [-w|l] [-c|u|g|n] [-32|64] [<config>]"
+    echo "USAGE: $progname [-w|l|m] [-c|u|g|n] [-32|64] [<config>]"
     echo "       $progname -h"
     echo ""
     echo "Where:"
-    echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
+    echo "  -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux"
     echo "  -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under"
     echo "     Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin"
     echo "  -32|64 selects 32- or 64-bit host.  Default 64"
@@ -60,40 +60,44 @@ function showusage {
 while [ ! -z "$1" ]; do
     case $1 in
     -w )
-    host=windows
-    ;;
+      host=windows
+      ;;
     -l )
-    host=linux
-    ;;
+      host=linux
+      ;;
     -c )
-    host=windows
-    wenv=cygwin
-    ;;
-    -c )
-    host=windows
-    wenv=msys
+      host=windows
+      wenv=cygwin
+      ;;
+    -g )
+      host=windows
+      wenv=msys
+      ;;
     -u )
-    host=windows
-    wenv=ubuntu
-    ;;
+      host=windows
+      wenv=ubuntu
+      ;;
+    -m )
+      host=macos
+      ;;
     -n )
-    host=windows
-    wenv=native
-    ;;
+      host=windows
+      wenv=native
+      ;;
     -32 )
-    hsize=32
-    ;;
+      hsize=32
+      ;;
     -64 )
-    hsize=32
-    ;;
+      hsize=32
+      ;;
     -h )
-    showusage
-    ;;
+      showusage
+      ;;
     * )
-    configfile="$1"
-    shift
-    break;
-    ;;
+      configfile="$1"
+      shift
+      break;
+      ;;
   esac
   shift
 done
@@ -172,12 +176,25 @@ fi
 
 # Modify the configuration
 
-if [ "X$host" == "Xlinux" ]; then
-    echo "  Select CONFIG_HOST_LINUX=y"
+if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" ]; then
 
-    kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_LINUX
+    # Enable Linux or macOS
+
+    if [ "X$host" == "Xlinux" ]; then
+      echo "  Select CONFIG_HOST_LINUX=y"
+
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_LINUX
+      kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
+    else
+      echo "  Select CONFIG_HOST_MACOS=y"
+
+      kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_LINUX
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_MACOS
+    fi
+
+    # Disable all Windows options
+
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_WINDOWS
-
     kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_X8664_MICROSOFT
     kconfig-tweak --file $nuttx/.config --enable CONFIG_SIM_X8664_SYSTEMV
 
@@ -192,11 +209,17 @@ if [ "X$host" == "Xlinux" ]; then
     kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_M32
 else
     echo "  Select CONFIG_HOST_WINDOWS=y"
+
+    # Enable Windows
+
     kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_WINDOWS
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_LINUX
+    kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
 
     kconfig-tweak --file $nuttx/.config --enable CONFIG_SIM_X8664_MICROSOFT
     kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_X8664_SYSTEMV
+
+    # Enable Windows environment
 
     kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_OTHER
     if [ "X$wenv" == "Xcygwin" ]; then
