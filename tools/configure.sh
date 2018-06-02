@@ -1,5 +1,5 @@
 #!/bin/bash
-# configure.sh
+# tools/configure.sh
 #
 #   Copyright (C) 2007, 2008, 2011, 2015, 2017-2018 Gregory Nutt. All rights
 #     reserved.

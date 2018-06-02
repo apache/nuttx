@@ -18867,4 +18867,588 @@
 	  CONFIG_DISABLE_PSEUDOFS_OPERATIONS, fix bad NULL checks  From Juha Niskanen
 	  (2018-03-01).
 
-7.25 2018-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.25 2018-06-02 Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/stm32/stm32f33xxx_adc.c:  Fix bug in RCC reset logic that
+	  resets ADC1 configuration when both ADC1 and ADC2 are in use  From Mateusz
+	  Szafoni (2018-03-02).
+	* drivers/wireless/cc1101.c:  Driver improvements from from lihaichen
+	  (2018-03-03).
+	* Remove all usage of printf() from the OS.  That is not an acceptable
+	  context for the use of an application-oriented interface that depends on a
+	  task-specific file descriptor and C buffered I/O.  From Gregory Nutt
+	  (2018-03-03).
+	* stm32_hrtim: fix capture_get function, add software capture trigger, add
+	  software reset trigger, add outputs polarization configuration  From
+	  raiden00pl (2018-03-04).
+	* Per OpenGroup.org, syslog -- and, hence, nonstandard vsyslog, and debug
+	  wrappers -- does not return a value.  Rename _vsyslog to nx_vsyslog.  Use
+	  internal nx_vsyslog in the few cases where a return value is required.
+	  From Gregory Nutt (2018-03-04).
+	* arch/srm/src/stm32f7:  Add CONFIG_RTC_PERIODIC support.  Also makes the
+	  RTC lowerhalf more like in STM32L4.  From Juha Niskanen (2018-03-05).
+	* drivers/i2c:  Add support for the pca9540bdp i2cmultiplexer.  From Giorgio
+	  Groß (2018-03-05).
+	* arch/arm/src/stm32:  Add support for the STM32F401xB and STM32F401xC
+	  families.  From Gregory Nutt (2018-03-05).
+	* drivers/power:  Add pm_unregister  From Juha Niskanen (2018-03-06).
+	* arch/srm/src/stm32f7: add PM hooks to ADC, I2C and SPI.  From Juha
+	  Niskanen (2018-03-06).
+	* Makefile.unix:  Eliminate the spurious errors reported by 'make
+	  savedefconfig'  From Gregory Nutt (2018-03-07).
+	* drivers/net/phy_notify.c:  Use phy debug macros instead of net debug
+	  macros.  ninfo() and nerr() are used a bit too much, so the console output
+	  is difficult to read with network debug.  From Sebastien Lorquet
+	  (2018-03-09).
+	* drivers/lcd/ft80x:  ACTIVE host command appears to be formatted
+	  differently than other host commands; Fix ROM CHIPID.  Appears to be
+	  big-ending, BCD.  Fix some compile issues when debug features are
+	  enabled.  From Gregory Nutt (2018-03-09).
+	* drivers/lcd/ft80x:  Fix a typo that caused the driver to fail to recognize
+	  the ft801 chip version. From Gregory Nutt (2018-03-11).
+	* drivrs/leds:   Userled driver was using LCD debug output instead of LED
+	  debug output.  From Sebastien Lorquet (2018-03-11).
+	* net/tcp:  Add support for TCP Keepalive, add SO_KEEPALIVE socket option.
+	  Adds socket options needed to manage TCP-keepalive and TCP state machine
+	  logic to detect if that the remote peer is alive.  From Gregory Nutt
+	  (2018-03-12).
+	* arch/arm/src/stm32/usb: skip recipient check for descriptor related
+	  requests  From Simon Piriou (2018-03-12).
+	* net/tcp:  In tcp_input(), add the logic to detect, decode, and respond to
+	  TCP Keep-Alive packets.  In tcp_timer(), fix some problems with the way
+	  that TCP Keep-Alive probes were being formatted.  From Gregory Nutt
+	  (2018-03-12).
+	* stm32f103-minimum: add support for DFU bootloader  From Simon Piriou
+	  (2018-03-12).
+	* arch/arm/src/stm32/lowputc:  Fix uart glitch when lowputc is enabled..
+	  From Simon Piriou (2018-03-12).
+	* libc/time:  Add an implementation of clock()  From Gregory Nutt
+	  (2018-03-13).
+	* drivers/sensors:  Add support for Sensirion SHT2x humidity sensor  From
+	  Juha Niskanen (2018-03-13).
+	* drivers/serial/Kconfig:  Kconfig is too big, divide into Kconfig,
+	  Kconfig-uart, Kconfig-usart, Kconfig-sci, Kconfig-16550.  More than one
+	  MCU supports LPUARTs.  Add Kconfig-lpuart and remove MCU-specific LPUART
+	  definitions.  Affects Kinetis and STM32L4.  From Gregory Nutt (2018-03-14).
+	* libc/lzf:  Add Marc Alexander Lehmann's LIBLZF3.6 library  From Boris
+	  Astardzhiev (2018-03-14).
+	* configs/stm32f4discover/posix_spawn:  With recent changes, needs to enable
+	  boardctl() w/symbol table support.  From Gregory Nutt (2018-03-16).
+	* fs/craomfs:  Add CROMFS file system.  CROMFS is a commpressed, in-memory
+	  read-only file system based on LZF.  From Gregory Nutt (2018-03-19).
+	* sched/sched: Fix a deadlock in SMP mode.  Two months ago, I introduced
+	  sched_tasklist_lock() and sched_tasklist_unlock() to protect tasklists in
+	  SMP mode.  This change works well for HTTP audio streaming aging test with
+	  lc823450-xgevk.  However, I found a deadlock in the scheduler when I tried
+	  similar aging tests with DVFS autonomous mode where CPU clock speed
+	  changed based on cpu load. In this case, call sequences were as follows.
+	  To avoid this deadlock, I added sched_tasklist_unlock() when calling
+	  up_cpu_pause() and sched_addreadytorun(). Also, added
+	  sched_tasklist_lock() after the call.  Also added critical sections to
+	  lib_filesem.c, mm_sem.c, and net_lock.c for SMP for SMP.  From Masayuki
+	  Ishikawa (2018-03-20).
+	* arch/arm/src/stm32l4:  Port 1wire driver from stm32.  From Juha Niskanen
+	  (2018-03-20).
+	* mm/iob/iob_copyin.c:  Fixed problem with send() ret value when using
+	  nonblocking io over buffered tcp socket  From Dmitriy Linikov (2018-03-20).
+	* tools/gencromfs.c:  Adds tools/gencromfs.c, a tool that can be used to
+	  generate CROMFS file system images.  From Gregory Nutt (2018-03-20).
+	* |arch/arm/src/stm32l4:  Add PM hooks to I2C, SPI and 1-wire  From Juha
+	  Niskanen (2018-03-21).
+	* drivrs/sensors/lis2dh:  Clear INT1 at SNIOC_WRITE_INT1THRESHOLD ioctl
+	  From Jussi Kivilinna (2018-03-21).
+	* drivers/sensors/sht21:  Change I2C_TRANSFER return value so that it return
+	  on zero on success, not the count of bytes transferred.  From Juha
+	  Niskanen (2018-03-22).
+	* i2c/i2c_master.h:   Change incorrect comment about I2C_TRANSFER return
+	  value to indicate that the method returns zero on success rather than the
+	  number of bytes transferred.  From Juha Niskanen (2018-03-22).
+	* configs/: Remove configurations using canutils/libuavcan and
+	  examples/uavcan.  libuavcan has not built for a year or so.  The basic
+	  problem is that as NuttX advances, the old frozen versino of libuavcan has
+	  become absolute because it violates the portable POSIX OS interface.  No
+	  one is maintaining the port so there is no alternative but to remove it.
+	  From Gregory Nutt (2018-03-23).
+	* STM32, STM32L4:  Add one bit read and write to 1-wire interface.  This is
+	  needed for devices that require single bit timeslot generation and for
+	  1-Wire search algorithm triplets.  From Juha Niskanen (2018-03-23).
+	* arch/arm/src/imx6:  Bring in a few i.MX6 fixes that were committed on the
+	  i.MX RT branch.  From Gregory Nutt (2018-03-23).
+	* configs/:  Add definition of strip to many Make.defs files.  From Gregory
+	  Nutt (2018-03-25).
+	* arch/arm/src/nrf52:  Initial support for the NRF52 include UART and GPIO
+	  support.  From Janne Rosberg (2018-03-26).
+	* Per Matias Edlund:  I recently used the tcflush function and found that it
+	  failed with ENOTTY. The reason is that the TCFLSH case in the function
+	  uart_ioctl in the file drivers/serial/serial.c does not update the ret
+	  value."  On success, the TCFLSH IOCTL logic needs to explicitly set the
+	  return value (ret) to zero.  From Gregory Nutt (2018-03-26).
+	* netdb: Fix boundary conditions in dns_recv_response().  Fix typos in
+	  include/nuttx/net/dns.h  From Masayuki Ishikawa (2018-03-27).
+	* configs/nrf52-pca10040:  Add support for the NRF52-PCA10040 board
+	  including LEDs and buttons  From Janne Rosberg (2018-03-27).
+	* arch/arm/src/stm32:  In case of PHY failure, usually because of the lack
+	  of 25/50 MHz REFCLK input, the Ethernet block would lock up in a while
+	  loop waiting for readiness, which will never happened.  This prevented the
+	  board from starting at all in the case of a PHY failure.  This commit adds
+	  a retry loop to avoid bricking the board if the Ethernet block is unable
+	  to start.  From Sebastien Lorquet (2018-03-27).
+	* mac802154: Adds basic support for RX-ENABLE.request primitive  From
+	  Anthony Merlino (2018-03-28).
+	* mac802154: Adds ackreq flag to TX descriptor for use by radio driver.  The
+	  radio layer is responsible for a full "transaction". Because of
+	  differences in radio capabilities, the radio must be responsible for the
+	  handling of acks and retransmissions. This commit simply passes the ackreq
+	  meta-data flag along to the radio.  Also Fixes bug where primitive was
+	  freed when it shouldn't have been, causing double free call.  From Anthony
+	  Merlino (2018-03-28).
+	* wireless/bluetooth:  Bring in the Bluetooth stack from the Intel/Zephyr
+	  arduino101_firmware_source-v1.tar package.
+	* drivers/bluetooth:  Adds re-architected version of the Bluetooth UART
+	  driver from the Intel/Zephyr arduino101_firmware_source-v1.tar package.
+	  From Gregory Nutt (2018-03-29).
+	* wireless/bluetooth and include/nutt/net:  Add support for Bluetooth IOCTL
+	  commands.  From Gregory Nutt (2018-03-30).
+	* net/bluetooth:  Adds basic support for AF_BLUETOOTH sockets.  From Gregory
+	  Nutt (2018-03-31).
+	* arch/arm/src/tiva: Fix compilation errors on Tiva ADC code when ADC is
+	  enable.  From Vinicius Maciel (2018-04-01).
+	* drivers/wireless/bluetooth:  Add a NULL device to support some very low
+	  level testing on the Simulator.  From Gregory Nutt (2018-04-03).
+	* configs/sim:  Add a configuration that will support some limited testing
+	  of the Bluetooth stack.  From Gregory Nutt (2018-04-03).
+	* Change all Sony related copyright to conform with our company's internal
+	  rules.  From Masayuki Ishikawa (2018-04-04).
+	* drivers/wireless/cc3000:  Eliminate support for the CC3000 wireless part
+	  because it doesn't use the USRSOCKET.  From Alan Carvalho de Assis
+	  (2018-04-04).
+	* configs/spark:  Removes Spark board configuration.  Still available in the
+	  Obsoleted repository.  If there is no CC3000 support, then there is no
+	  purpose in supporting the Spark either.  From Gregory Nutt (2018-04-04).
+	* drivers/1wire:  Add 1-wire subsystem and ds28e17 driver  From Juha
+	  Niskanen (2018-04-04).
+	* stm32/Kconfig:  Add ADC injected channels configuration; stm32f334-disco:
+	  Add buck/boost converter example configuration  From Mateusz Szafoni
+	  (2018-04-04).
+	* drivers/mtd/w25.c:  Fix w25_cacheflush sector bug.  From lihaichen
+	  (2018-04-04).
+	* arch/arm/src/stm32 and stm32l4:  In 1wire driver, do not write useless
+	  WRITEBIT zero return value to const buffer  From Juha Niskanen (2018-04-04).
+	* drivers/sensors:  Add LSM330 SPI and ADXL372 drivers along with the
+	  cluster driver infrastructure.  From Bob Feratich (2018-04-07).
+	* drivers/power/motor.c:  Add generic upper-half motor driver  From Mateusz
+	  Szafoni (2018-04-09).
+	* drivers/sensors/max31855: Add multiple max31855 sensors feature and
+	  support for bambino-200e and stm32f4discovery  From Tiago Almeida
+	  (2018-04-09).
+	* arch/arm/include/tiva and configs/cc3200-launchpad:  Remove all support
+	  for the CC3200 and CC3200-Launchpad.  This was a port that was started but
+	  never completed.  What good is partial CC3200-Launchpad board support with
+	  no wireless support?  From Gregory Nutt (2018-04-09).
+	* drivers/sensors/apds9960.c:  Fix APDS9960 work queue BUG found by Kyle
+	  Lei  From Alan Carvalho de Assis (2018-04-10).
+	* tools/uncrustify.cfg:  An initial cut at an uncrustify C formatting
+	  script.  From Gregory Nutt (2018-04-11) Updated, corrected, and verified.
+	  From Bob Feretich (2018-04-11).
+	* tools/nxstyle.c;:  Add check for blank lines before and after single line
+	  comments.  From Bob Feretich (2018-04-11).
+	* arch/arm/src/:  Problem: stm32f30xx hangs waiting for LSE to initialize.
+	  Reason for hang is that operation of setting LSE_ON does not take effect
+	  because there is no clock on PWR peripheral.  this is initialized later in
+	  the code  From Michał Łyszczek (2018-04-11).
+	* arch/arm/src/imxrt:  Brings in basic support for the i.MX RT 1050
+	  'crossover' SoC.   Includes timer and UART support.  This port was the
+	  joint effort of Janne Rosberg, Ivan Ucherdzhiev, and myself.  I give
+	  credit to Ivan for the kill because he is the one to held on to the end.
+	  From Ivan Ucherdzhiev (2018-04-12).
+	* sched/sched:  Change ordering of round-robin time slice check
+	  (sched_process_scheduler()) and processing of wdog timers (wd_timer()).
+	  wd_timer()'s callback function can change current running task and, hence,
+	  must be done after the time slice check.  The time slice check will
+	  decrement the currently running task's time slice allotment.  If such a
+	  context switch occurs, then the newly started task will lost one could of
+	  that allotment before it even has a chance to run.  From EunBong Song
+	  (2018-04-13).
+	* arch/arm/src/stm32:  Adds a Bluetooth HCI UART lower half driver for the
+	  STM32.  From Gregory Nutt (2018-04-13).
+	* configs/imxrt1050-evk:  This commit adds support for booting from the on
+	  board HYPER Flash.  From Ivan Ucherdzhiev (2018-04-13).
+	* configs/stm32fdiscovery:  Add support in bringup logic to initialize the
+	  HCI UART and register the HCI UART network device.  From Gregory Nutt
+	  (2018-04-13).
+	* fs/smartfs:  Fix a hardfault in SmartFS.  Problem occurred when opening a
+	  file with O_CREAT (only) when the file arelready exists but has a size of
+	  zero.  From Michał Łyszczek (2018-04-14).
+	* arch/arm/src/xmc4:  Add SPI support for Infineon XMC45xx microcontroller
+	  From Alan Carvalho de Assis (2018-04-14).
+	* fs/mount:  Fix wrong size reported by df -h.  Reason is that size in bytes
+	  is calculated always on uint32_t types and cards bigger than 4GB will
+	  overflow uint32_t type. Solution is to use uint64_t where possible.  From
+	  Michał Łyszczek (2018-04-14).
+	* tools/mkromfsimg.sh:  Include an option in mkromfsimg.sh to ignore
+	  FAT/RAMDISK. This permits you to build tiny systems with ROMFS but with
+	  the rather large FAT FS support.  From Alan Carvalho de Assis (2018-04-14).
+	* arch/arm/src/imxrt:  Corrects error in serial interrupts and baud setup.
+	  Now the basic IMXRT1050-EVK port is ready. The console is working.  From
+	  Ivan Ucherdzhiev (2018-04-17).
+	* arch/arm/src/imxrt:  Add power management hooks  From Gregory Nutt
+	  (2018-04-17).
+	* net/sixlowpan:  Fix a nasty, byte-ordering/endian-ness problem.  The root
+	  cause has been found and corrected.  And a half dozen or so bandaid fixes
+	  were reverted.  From Gregory Nutt (2018-04-17).
+	* arch/arm/include/tms570, arm/src/armv7-r, and arm/src/tms570:  Adds
+	  support for the TMS570LS3137ZWT and corrects seversl ARMv7-R and TMS570
+	  issues  From Gregory Nutt (2018-04-18).
+	* configs/tms570ls31x-usb-kit:  Adds support for the TI Hercules TMS570LS31x
+	  USB Kit  From Ivan Ucherdzhiev (2018-04-18).
+	* drivers/ieee802154/xbee:  Adds a timeout to send logic to handle case
+	  where XBee module fails to respond to a Transmit request with a Transmit
+	  Status  From Anthony Merlino (2018-04-19).
+	* arch/arm/src/tiva:  Allow building of Tiva platform with no serial
+	  console.  From Dmitry Sharihin (2018-04-19).
+	* drivers/net:  Add TAP (network bridge) mode to tun.c.   In previous
+	  implementation, TAP mode did not handle a packet correctly. Also, the
+	  driver did not set the link layer type and could not assign the interface
+	  name. This change fixes such issues and supports TAP mode correctly.  From
+	  Masayuki Ishikawa (2018-04-20).
+	* arch/arm/src/nrf52:  Add watchdog timer drivers.  Includes significant
+	  updates from Alan Carvalho de Assis <acassis@gmail.com>  From Levin Li
+	  (2018-04-20).
+	* configs/nrf52-pca10040:  Add support for starting the watchdog timer on
+	  the nRF52.  From Alan Carvalho de Assis (2018-04-20).
+	* net/tcp: Extended support for sending to non-blocking tcp sockets.  From
+	  Pelle Windestam (2018-04-20).
+	* configs/nrf52-pca10040:  Add a configuration for testing the watchdog
+	  timer.  From Alan Carvalho de Assis (2018-04-20).
+	* arch/arm/src/nrf52: nrf52_wdt_initialize() should return a success/fail
+	  indication.  From Gregory Nutt (2018-04-20).
+	* arch/arm/src/stm32:  Enable DMA for SPI on stm32f30xxx MCUs.  From Michał
+	  Łyszczek (2018-04-20).
+	* configs/imxrt1050-evk:  Add logic to support user LED  From Jake Choy
+	  (2018-04-20).
+	* fs/vfs:  Fix negative errno set in fs_open.c  From Michał Łyszczek
+	  (2018-04-20).
+	* /arch/arm/src/lpc17xx: Fix USB device endpoint allocation bookkeeping.
+	  From Michael Jung (2018-04-21).
+	* configs/stm32f4discovery:  Add MAX7219 support to STM32F4Discovery board
+	  From Alan Carvalho de Assis (2018-04-21).
+	* configs:  Review all implementations of board_lcd_initialize().  The NuttX
+	  convention is that all internal functions that return errors as an 'int'
+	  must return a negated errno value on failure and a non-negative value on
+	  success.  Most were right but eight of them had cloned logic that returns
+	  1 on success and zero on failure... both of which are interpreted as
+	  success by the caller since they are non-negative.  From Gregory Nutt
+	  (2018-04-21).
+	* Makefile: Add support for nconfig frontend for 'make nconfig'  From Michał
+	  Łyszczek (2018-04-22).
+	* arch/arm/sc/lpc17xx:  Freeing endpoints should be set the same allocations
+	  as when endpoint was allocated.  From Gregory Nutt (2018-04-23).
+	* configs/imxrt1050-evk:  Add procfs auto-mount support in imxrt_bringup.c.
+	  From Ivan Ucherdzhiev (2018-04-24).
+	* drivers/1wire:  Add PM hooks and unlink support to sht21 sensor (allowing
+	  hot-swappable I2C bus from 1-wire converter).  Unlike most other unlink
+	  implementations in NuttX drivers, this one does not allow any I2C
+	  operations after unlink, making it possible to deallocate the I2C bus.
+	  From Juha Niskanen (2018-04-24).
+	* configs/ stm32f746g-disco.  Add clang support to stm32f746g-disco board
+	  From Goran Mekić (2018-04-24).
+	* net/udp:  Fix several issues using connected UDP sockets:  sendto() should
+	  not accept an address.  Normally send() should be used with connect UDP
+	  sockets instead.  recvfrom() is no longer necessary.  recvfrom() and
+	  poll() should not reset to accept any addresses but should, instead, only
+	  accept inputs and events from the connected remore peer.  On of these
+	  issues was noted by 李桂丁 <liguiding@pinecone.net>.  Changes were made as
+	  summarized here:
+	  http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html
+	  From Gregory Nutt (2018-04-25).
+	* include/nuttx/wireless:  Add a setbaud() method to the HCI UART lower half
+	  interface that can be used to change the default BAUD selection.
+	  arch/arm/src/stm32:  Implement the setbaud() method for the STM32 HCI
+	  UART.  From Gregory Nutt (2018-04-25).
+	* arch/arm/src/imxrt:  Minor repartitioning to account for the fact that the
+	  GPIO5 base address is not contiguous with the GPIO1-4 base addresses.
+	  From Gregory Nutt (2018-04-25).
+	* arch/arm/src/imxrt/chip:  Add some missing definitions for GPIO5  From
+	  Gregory Nutt (2018-04-25).
+	* fs/vfs:  Added support for checking if a descriptor is a socket in
+	  fstat().  From Pelle Windestam (2018-04-26).
+	* drivers/wiresless/ieee80211:  Correct some initialization problems with
+	  BCM43362 chip.  Adds BCM43428 support.  arch/arm/src: Add support for SDIO
+	  card to SDIO driver.  From hhuysqt (2018-04-26).
+	* arch/arm/src/imxrt:  Add LIBCXX test configuration for IMXRT.  From
+	  Gregory Nutt (2018-04-26).
+	* configs/photon:  Configurations the use the SDIO card interface must
+	  support CONFIG_STM32_SDIO_CARD.  From Gregory Nutt (2018-04-26).
+	* arch/or1k/src and configs/or1k.  Adds basic architectural support for the
+	  OpenRISK mor1kx architecture.  The initial commit was verified on a Qemu
+	  simulation but is otherwise untested.  From Matt Thompson (2018-04-26).
+	* configs/stm32f429i-disco: Add a LittlevGL configuration for
+	  stm32f429i-disco  From seyyah (2018-04-26).
+	* net/udp:  Correct an error introduce in recent fixes for UDP connected
+	  sockets.  The interaction between psock_udp_send() and psock_udp_sendto()
+	  was perverse:  It should always pass a NULL destinatino address.  From
+	  Gregory Nutt (2018-04-26).
+	* Costmetic changes to README and to comments.  From Gregory Nutt
+	  (2018-04-26).
+	* arch/arm/include/nrf52:  All nRF52 IRQs above NRF52_IRQ_TEMP were wrong.
+	  From Alan Carvalho de Assis (2018-04-26).
+	* net/udp:  Fix a backward conditional test added in commit
+	  434da18cd71ae667c801f41291fbbc205b24320b.  From Gregory Nutt (2018-04-27).
+	* arch/arm/src/imxrt:  IMXRT LPUART Clock enable fix.  From Ivan Ucherdzhiev
+	  (2018-04-27).
+	* fs/vfs and net/udp:  Repartition logic of commit
+	  0c963449d6e8f5f8b2dfe96e9de3116633a3749a, moving into net/udp.  Add
+	  support to handle connected UDP sockets.  The correct 'optimal blksize' to
+	  return is the MSS.  The MTU is always too big.  From Gregory Nutt
+	  (2018-04-27).
+	* arch/arm/src/imxrt:  Add IOMUX implemention for GPIO5.  From Jake
+	  (2018-04-27).
+	* net/udp:  Remove an unused variable warning.  Add some comments.  From
+	  Gregory Nutt (2018-04-27).
+	* arch/arm/src/kinetis: USB device fixes:  Use correct CONFIG OTG control,
+	  Fix interrupt storm when cable is disconnected.  The DM, DP state were
+	  incorrect because the pulldowns were not enabled.  Also the pending
+	  asynchronous resume interrupt needed to be re-armed after the suspend is
+	  in effect. This is now done in the isr.  From David Sidrane (2018-04-28).
+	* arch/arm/src/tiva:  Add TERMIOS IOCTL support to the Tiva serial driver.
+	  From Dmitry Sharihin (2018-04-28).
+	* configs/nucleo-l476rg:  Add support to Nokia LCD PCD8544 on nucleo-l476rg
+	  From Alan Carvalho de Assis (2018-04-28).
+	* configs/nucleo-l476rg:  Add nxdemo configuration to nucleo-l476rg using
+	  PCD8544  From Alan Carvalho de Assis (2018-04-28).
+	* Makefile.unix:  There is a sort command in the 'make savedefconfig' file.
+	  I found that sort behaves differently on different platforms based on the
+	  environment variable LC_ALL.  Now, Makefile.unix will force LC_ALL=C just
+	  for the sort command so that we can all generate equivalent defconfig
+	  files.  From Gregory Nutt (2018-04-29).
+	* arch/arm/src/tiva:  Implements an EEPROM driver in compliance with MTD
+	  driver as provided by NUTTX for TM4C1294.  The EEPROM driver currently
+	  supports only two functionalities - read bytes(multiple of 4) and write
+	  bytes (multiple of 4).  From Shirshak Sengupta (2018-04-29).
+	* arch/arm/src/tiva:  Implemented Flash CONFIG_MTD_BYTE_WRITE for TM4c1294.
+	  Implemented the tiva_write function which will write an arbitrary number
+	  of bytes to flash (in multiple of 4).  From Shirshak Sengupta (2018-04-29).
+	* progmem interface: Discern r/w and erase page sizes.  Introduce new
+	  up_progmem_erasesize architecture API to be able to communicate the
+	  read/write page size independently from erase page size.  Implement
+	  up_progmem_erasesize for all architectures that already support progmem,
+	  assuming that for those architectures the sizes of both read/write and
+	  erase pages are identical.  From Michael Jung (2018-05-01).
+	* arch/arm/src/include/kinetis and src/kinetis:  Beginning to the K28F.
+	  From Gregory Nutt (2018-05-01).
+	* arch/arm/src/imxrt: This commit fixes more issues with the i.MX RT GPIO
+	  IRQ.  Add check for interrupt mask register before dispatching ISR. The
+	  GPIO_ISR bits are set independent of the GPIO_IMR bits. Fixed a range
+	  check for extint in function imxrt_irqinfo().  From Jake Choy (2018-05-01).
+	* configs/imxrt1050-evk:  This commit adds support for the imxrt button.
+	  From Jake Choy (2018-05-01).
+	* arch/arm/src/lpc17xx: This commit adds a configurable option to allow
+	  using a part of LPC17xx's internal flash memory as a Memory Technology
+	  Device via NuttX' mtd_progmem infrastructure. Tested with LPC1769.  From
+	  Michael Jung (2018-05-01).
+	* arch/arm/src/imxrt:  Add GPIO5 IRQ support.  From Jake Choy (2018-05-02).
+	* configs/freedome-k28f.  Adds support for the Kinetis Freedom-K28F board.
+	  From Gregory Nutt (2018-05-02).
+	* fs/nfs/rpc_clnt.c:  Commit 091e3f7 broke the NFS client.  sendto() can
+	  (correctly) no longer be used with a connected UDP socket.  In that case,
+	  send() must be used instead.  From Michael Jung (2018-05-02).
+	* drivers/rgbled: Adds support for multichannel PWM (multiple PWM channels
+	  on a single timer)  From Anthony Merlino (2018-05-02).
+	* drivers/sensors: Adds support for INA3221 power sensor. This has a 3
+	  channel bus/shunt voltage pairs.  From Anthony Merlino (2018-05-02).
+	* configs/photon: Adds RGB led support  From Anthony Merlino (2018-05-02).
+	* arch/arm/src/nrf52:  Add nRF52 Flash PROGMEM support  From Alan Carvalho
+	  de Assis (2018-05-04).
+	* configs/freedom-k28f:  The NSH configuration is now functional on the
+	  freedom-k28f board.  Also fixes corrects the active logic level for the
+	  RGB LED.   arch/arm/src/kinetis/chip:  Fixes an error in vector
+	  configuration.  From Gregory Nutt (2018-05-05).
+	* configs/freedom-k28f:  If drivers/leds/rgbled.c is enabled, then treat the
+	  board as though it had no discrete LEDs.  From Gregory Nutt (2018-05-05).
+	* arch/arm/src/lpc17xx:  Add support for ARMv7-M run time stack checking on
+	  NXP LPC17xx MCUs based on CONFIG_ARMV7M_STACKCHECK. Basically copied from
+	  stm32.  From Michael Jung (2018-05-06).
+	* arch/arm/src:  All ARM and MIPS architectures now support
+	  CONFIG_ARCH_IDLE_CUSTOM  From Gregory Nutt (2018-05-07).
+	* drivers/mtd/mtd_config.c: mtdconfig_register() returned OK instead of
+	  -ENOMEM on failed malloc  From Michał Łyszczek (2018-05-08).
+	* configs/teensy-3.x/usbnsh:  Remove CONFIG_USBDEV_DUALSPEED from
+	  configuration.  Hardware supports only FS.  From Gregory Nutt (2018-05-09).
+	* libc/unistd:  Initial, minimal implementation of sysconf().  Only
+	  sufficient to support the functionality of less standard
+	  getdtabilesize().  From Michael Jung (2018-05-10).
+	* Documentation/NuttShell.html:  Document the mkfatfs the -r option which
+	  can be used to specify the number of entries in the FAT12/FAT16 root
+	  directory.  From Gregory Nutt (2018-05-11).
+	* LibTargets.mk, tools/Config.mk:  Drop executable bit on installed
+	  libraries. The rules to install libraries under lib/ were modified to use
+	  mode 0644 instead of the default 0755.  From Andrey Zabolotnyi (2018-05-12).
+	* arch/arm/src/stm32: Add internal pull-up option for SDIO pins (also picks
+	  up an unrelated change to a README.txt file)  From Alan Carvalho de Assis
+	  (2018-05-12).
+	* arch/arm/src/kinetis + SDHC configs:  Make Kinetis SDHC pullups work the
+	  same as the STM32 SDIO pullups  From Gregory Nutt (2018-05-12).
+	* net/udp: Resolve race condition in connection-less UDP sockets with
+	  read-ahead buffering.  In connection-mode UDP sockets, a remote address is
+	  retained in the UDP connection structure.  This determines both there
+	  send() will send the packets and which packets recv() will accept.  This
+	  same mechanism is used for connection-less UDP sendto:  A temporary remote
+	  address is written into the connection structure to support the sendto()
+	  operation.  That address persists until the next recvfrom() when it is
+	  reset to accept any address.  When UDP read-ahead buffering is enabled,
+	  however, that means that the old, invalid remote address can be left in
+	  the connection structure for some time.  This can cause read-ahead buffer
+	  to fail, dropping UDP packets.  Shortening the time between when he remote
+	  address is reset (i.e., immediately after the sendto() completes) is not a
+	  solution, that does not eliminate the race condition; in only makes it
+	  smaller.  With this change, a flag was added to the connection structure
+	  to indicate if the UDP socket is in connection mode or if it is
+	  connection-less.  This change effects only UDP receive operations:  The
+	  remote address in the UDP connection is always ignored if the UDP socket
+	  is not in connection-mode.  No for connection-mode sockets, that remote
+	  address behaves as before.  But for connection-less sockets, it is only
+	  used by sendto().  From Gregory Nutt (2018-05-13).
+	* include/sys:  Add resource.h  From Gregory Nutt (2018-05-13).
+	* rgbled: Fixes led issues caused by uninitialized memory with
+	  CONFIG_RGBLED_MULTICHAN.  The uninitialized pwm_info_s struct caused a
+	  rogue channel to be started causing errros in the pwm driver  From Anthony
+	  Merlino (2018-05-14).
+	* arch/arm/src/imxrt/chip:  Add pin multiplexing header files.  From Gregory
+	  Nutt (2018-05-14).
+	* configs/nucleo-l452re:  Add buttons example  From Juha Niskanen
+	  (2018-05-15).
+	* arch/arm/src/imxrt/imxrt_serial.c:  Fix some interrupt instabilities; must
+	  be in a critical section when modifying serial interrupts.
+	  configs/imxrt1050-evk/nsh/defconfig:  Use the BASEPRI register to
+	  enable/disable interrupts; enable the PROCFS file system.  From Gregory
+	  Nutt (2018-05-15).
+	* arch/arm/src/imxrt:  Add missing support for the Cortex-M7 caches;
+	  configs/imxrt1050-evk:  Enable I- and D-Caches in the nsh configuration.
+	  Calibrate the delay loop.  Add support for the on-board LED.  From Gregory
+	  Nutt (2018-05-15).
+	* arch/arm/src/imxrt:  Corrects some IOMUX controls.  From Jake Choy
+	  (2018-05-15).
+	* net/sixlowpan:  Preserve big-endian (network order) when uncompressing
+	  address.  From Anthony Merlino (2018-05-15).
+	* arch/arm/src/imxrt/chip:  Add DMA channel assignments.  From Gregory Nutt
+	  (2018-05-15).
+	* arch/arm/src/stm32f7:  Add support for the second SDMMC device.  The
+	  second SDMMC device was already supported but the clock was never
+	  enabled.  This fixes that.  From William Douglas (2018-05-15).
+	* arch/arm/src/imxrt:  Add eDMA support (unverified).  From Gregory Nutt
+	  (2018-05-16).
+	* net/sixlowpan: TCP send should have PSH and ACK flags set when sending.
+	  This matches the standard network (Ethernet) TCP send logic.  From Anthony
+	  Merlino (2018-05-17).
+	* net/udp: Recent changes to UDP in order to correct problems with UDP
+	  connection mode introduced a new bug:  The 'to' address passed to sendto()
+	  must now be NULL in connection mode.  But there are errors because there
+	  was one place where the 'to' address was still being used.  This commit
+	  adds logic to first check for UDP connection mode.  If the UDP socket is
+	  connected, then the NULL 'to' address is ignored and saved connection
+	  address is used instead.  From Gregory Nutt (2018-05-17).
+	* arch/arm/src/stm32:  Added Vbat measurement to adc driver for STM32F20xx
+	  and STM32F4xxx.  As with the MCU temperature and VREFINT measurement, this
+	  change requires user to enable the corresponding channel first.  For Vbat
+	  channel the ioctl cmd is IO_ENABLE_DISABLE_VBAT_CH, and its arg should be
+	  a pointer to bool which must be true to enable and false to disable the
+	  Vbat channel.  Moreover, since Vbat input contains a built-in voltage
+	  divider, it is highly suggested to disable Vbat input channel after
+	  measurement is done in order to prevent battery drain through the
+	  divider.  From Dmitriy Linikov (2018-05-18).
+	* configs/stm32l1discovery:  Add support for the STM32L152RCT6 version.
+	  From Gregory Nutt (2018-05-18).
+	* configs/stm32f4discovery/audio: Add board configuration for CS43L22 audio
+	  example.  From Alan Carvalho de Assis (2018-05-19).
+	* drivers/lcd and configs/olimex-lpc1766stk:  Remove support for the
+	  Nokia6100 LCD.  That LCD uses a 9-bit SPI interface (the 9th bit being the
+	  command/data bit that is normally a discrete).  That communication was
+	  never successfully integrated.  I now believe that it would would require
+	  some special support from the low-level, MCU SPI driver to manage that 9th
+	  bit.  The deleted code is still available in the Obsoleted repository in
+	  the nuttx/drivers/lcd, nuttx/configs/olimex-lpc1766stk, and Patches
+	  directories.  From Gregory Nutt (2018-05-19).
+	* arch/arm/src/lpc17xx/lpc17_usbdev.c:  Fix loss of RX initiatives.  USB
+	  bulk endpoints are double buffered on LPC17xx MCUs.  This means that up to
+	  two packets might be received on an OUT endpoint that can not be handled
+	  immediately if the receive request queue is empty.  Thus, rxpending must
+	  be a counter not a boolean flag.  From Michael Jung (2018-05-20).
+	* configs/imxrt1050-evk/src:  Add support for on-board NOR FLASH boot.  From
+	  Ivan Ucherdzhiev (2018-05-21).
+	* fs/fat: In fs_stat(), when stat'ing the root directory, avoid calculating
+	  the address of the root directory entry.  The calculation is bogus (but
+	  not harmful) because the root directory does not have a directory entry.
+	  Noted by Boris Astardzhiev.  From Gregory Nutt (2018-05-23).
+	* fs/fat:  Avoid calculating the bogus directory entry address for the FAT
+	  root directory (since it has no directory entry).  This change should have
+	  no effect, other than making the logic clearer.  From Boris Astardzhiev
+	  (2018-05-24).
+	* configs/indium-f7:  Removes support for the Indium-F7 board.  This was
+	  done for two reasons:  (1) The board support was just clone of the
+	  Nucleo-144 board support with naming changes.  There has been no support
+	  and no further development for the board support.  (2) There does not seem
+	  to be any available Indium-F7 board available to the public anywhere on
+	  the internet.  There is not even a reference to the board on the
+	  rafresearch.com web stie.  Gotta go.  Its in the way.  From Gregory Nutt
+	  (2018-05-24).
+	* arch/arm/src/imxrt:  Add Ethernet driver.  From Jake Choy (2018-05-25).
+	* arch/arm/src/imxrt:  Add cache operations to permit the Ethernet driver to
+	  work with the D-Cache enabled, at least in write-through mode.  Add
+	  support for PHY interrupts and PHY IOCTLs.
+	* configs/imxrt1050-evk/netnsh/defconfig:  Disable LED support because pins
+	  conflict with PHY.  Enable device statists.  Enable NSH ifup and ifdown
+	  commmands.  Add an NSH configuration for testing Ethernet.  From Gregory
+	  Nutt (2018-05-25).
+	* configs/xmc4500-relax: Add board support for SPI  From Alan Carvalho de
+	  Assis (2018-05-26).
+	* configs/olimex-stm32-p407:  Add a zmodem test configuration.  From Gregory
+	  Nutt (2018-05-26).
+	* drivers/serial:  Add a timeout to uart_tcdrain().  Even if tcflush() is
+	  used to discard buffered data, the close() can still hang if (a) hardware
+	  flow control is enabled, (b) CTS == 1, and (c) there is data stuck in the
+	  hardware Tx FIFO.  tcflush() does not currently clear the MCU serial
+	  drivers' hardware Tx FIFOs.  This is a workaround for that.  From Gregory
+	  Nutt (2018-05-27).
+	* Build system:  Remove fixed lib/ subdirectory and its content.  Replace
+	  with new directory called staging/ that is created dynamically when
+	  building and removed when 'make clean' is done.  This both improves the
+	  name and eliminates a garbage directory from the repository.  From Gregory
+	  Nutt (2018-05-29).
+	* Build system:  Move all build-related files (except the top-level
+	  Makefile) into the tools/ sub-directory.  This really cleans up the
+	  top-level directory.  From Gregory Nutt (2018-05-29).
+	* libs/:  This commit moves all of the libraries under a common directory
+	  called libs/ (libc, libnx, and libxx).  This most certainly break libcxx
+	  for now.  From Gregory Nutt (2018-05-29).
+	* libs/libdsp:  Adds DSP support library.  From Mateusz Szafoni (2018-05-30).
+	* arch/arm/src/kinetis:  In kinetis_lowputc.c, fix esBRFA calculation
+	  effecting baudrate.  Previous BRFA was not cleared and or-ed into new
+	  BRFA, hence, buadrate was wrong.  Where Baud Rate Fractional Divisor
+	  (BRFD) UART baud rate = clock / (16 * (SBR + BRFD))  From David Sidrane
+	  (2018-05-30).
+	* arch/arm/src/kinetis:  In kinetis_lowputc.c, fixed parity settings.
+	  Kinetis UART must be placed in 9 bit mode (M=1) with when 8 bit data with
+	  parity is required. If left in 8 bit mode (M=0) with parity then D7 of the
+	  TX/RX register becomes parity bit.  Hence what is called 9-bit or 8-bit
+	  Mode Select is a misnomer.  8 bit mode when parity is enabled is realy 7
+	  bit with parity.  From David Sidrane (2018-05-30).
+	* arch/sim:  Various fixes necessary to build the simulator under MSYS2.
+	  From Gregory Nutt (2018-05-31).
+	* Makefile: The clean_context target needs to invoke a corresponding
+	  clean_context target in the apps/Makefile in order to remove linkages
+	  From Gregory Nutt (2018-05-31).
+	* configs/stm32f4discovery:  Add Load Modules flags to STM32F4Discovery
+	  board  From Alan Carvalho de Assis (2018-06-01).
+	* libs/libc/modlib/modlib_verify.c:  Fix backward test for an error.  From
+	  Gregory Nutt (2018-06-01).
+	* Change all references from OSX to macOS  From Gregory Nutt (2018-06-01).
+	* tools/sethost.sh:  Add support for macOS  From Gregory Nutt (2018-06-01).
+	* configs/olimex-stm32-p407:  Add the module configuration.  From Gregory
+	  Nutt (2018-06-01).
+	* configs/xmc4500-relax/src: Call xmc4_spidev_initialize() in xmc4_boot.c.
+	  From Alan Carvalho de Assis (2018-06-02).
+	* configs/stm32f4discovery:  Add a module configuration for testing the
+	  kernel module example with the STM32F4Discovery board.  From Alan Carvalho
+	  de Assis (2018-06-02).
+
+7.26 2018-xx-xx Gregory Nutt <gnutt@nuttx.org>

@@ -690,7 +690,11 @@ kconfig.bat
 logparser.c
 -----------
 
-  Convert a git log to ChangeLog format.
+  Convert a git log to ChangeLog format.  Recommended usage:
+
+    git log --date-order --reverse <rev1>..<rev2>|HEAD >_git_log.tmp
+    logparser _git_log.tmp >_changelog.txt
+    rm -f _git_log.tmp
 
 mkimage.sh
 ----------
