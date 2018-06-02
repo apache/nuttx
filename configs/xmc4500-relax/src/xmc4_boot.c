@@ -65,6 +65,10 @@ void xmc4_board_initialize(void)
 
   board_autoled_initialize();
 #endif
+
+#ifdef CONFIG_XMC4_USCI_SPI
+  xmc4_spidev_initialize();
+#endif
 }
 
 /****************************************************************************
