@@ -775,16 +775,18 @@ sethost.sh
 
   Other options are available:
 
-    $ tools/sethost.sh -h
+    $ ./sethost.sh -h
 
-    USAGE: tools/sethost.sh [-w|l] [-c|n] [-32|64] [<config>]
-           tools/sethost.sh -h
+    USAGE: ./sethost.sh [-w|l|m] [-c|u|g|n] [-32|64] [<config>]
+           ./sethost.sh -h
 
     Where:
-      -w|l selects Windows (w) or Linux (l).  Default: Linux
-      -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin
-      -32|64 selects 32- or 64-bit host (Only for Cygwin).  Default 64
+      -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux
+      -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under
+         Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin
+      -32|64 selects 32- or 64-bit host.  Default 64
       -h will show this help test and terminate
+      <config> selects configuration file.  Default: .config
 
 refresh.sh
 ----------
@@ -812,13 +814,15 @@ refresh.sh
     $ tools/refresh.sh --help
     tools/refresh.sh is a tool for refreshing board configurations
 
-    USAGE: tools/refresh.sh [--debug|--help] <board>/<config>
+    USAGE: ./refresh.sh [options] <board>/<config>
 
-    Where:
+    Where [options] include:
       --debug
          Enable script debug
       --silent
          Update board configuration without interaction
+      --defaults
+         Do not prompt for new default selections; accept all recommended default values
       --help
          Show this help message and exit
       <board>
@@ -878,13 +882,18 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-w|l] [-c|n] [-s] <testlist-file>
-    USAGE: ./testbuild.sh -h
+    USAGE: ./testbuild.sh [-w|l] [-c|u|n] [-s] [-a <appsdir>] [-n <nxdir>] <testlist-file>
+           ./testbuild.sh -h
 
-    where
+    Where:
       -w|l selects Windows (w) or Linux (l).  Default: Linux
-      -c|n selects Windows native (n) or Cygwin (c).  Default Cygwin
-      -s Use C++ long size_t in new operator. Default unsigned long
+      -c|u|n selects Windows environment option:  Cygwin (c), Ubuntu under
+         Windows 10 (u), or Windows native (n).  Default Cygwin
+      -s Use C++ unsigned long size_t in new operator. Default unsigned int
+      -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
+      -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets
+      -d enables script debug output
+      -x exit on build failures
       -h will show this help test and terminate
       <testlist-file> selects the list of configurations to test.  No default
 
