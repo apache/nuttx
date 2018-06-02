@@ -1864,7 +1864,7 @@
 	  There are some issues on initial check-in:  NuttX doesn't have termios and the
 	  console device has special properties that make using NSH awkward.  Examples:
 	  No CR-LF expansion, no character echoing, no command line editting.
-	* arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct seversl bugs
+	* arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct several bugs
 	  involving serial port configuration.  These bugs are only critical if you
 	  are trying to using multiple UARTs on STM32.
 	* configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
@@ -18867,7 +18867,7 @@
 	  CONFIG_DISABLE_PSEUDOFS_OPERATIONS, fix bad NULL checks  From Juha Niskanen
 	  (2018-03-01).
 
-7.25 2018-06-02 Gregory Nutt <gnutt@nuttx.org>
+7.25 2018-06-03 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/stm32/stm32f33xxx_adc.c:  Fix bug in RCC reset logic that
 	  resets ADC1 configuration when both ADC1 and ADC2 are in use  From Mateusz
@@ -18965,7 +18965,7 @@
 	  number of bytes transferred.  From Juha Niskanen (2018-03-22).
 	* configs/: Remove configurations using canutils/libuavcan and
 	  examples/uavcan.  libuavcan has not built for a year or so.  The basic
-	  problem is that as NuttX advances, the old frozen versino of libuavcan has
+	  problem is that as NuttX advances, the old frozen version of libuavcan has
 	  become absolute because it violates the portable POSIX OS interface.  No
 	  one is maintaining the port so there is no alternative but to remove it.
 	  From Gregory Nutt (2018-03-23).
@@ -19097,7 +19097,7 @@
 	  cause has been found and corrected.  And a half dozen or so bandaid fixes
 	  were reverted.  From Gregory Nutt (2018-04-17).
 	* arch/arm/include/tms570, arm/src/armv7-r, and arm/src/tms570:  Adds
-	  support for the TMS570LS3137ZWT and corrects seversl ARMv7-R and TMS570
+	  support for the TMS570LS3137ZWT and corrects several ARMv7-R and TMS570
 	  issues  From Gregory Nutt (2018-04-18).
 	* configs/tms570ls31x-usb-kit:  Adds support for the TI Hercules TMS570LS31x
 	  USB Kit  From Ivan Ucherdzhiev (2018-04-18).
@@ -19156,7 +19156,7 @@
 	  not accept an address.  Normally send() should be used with connect UDP
 	  sockets instead.  recvfrom() is no longer necessary.  recvfrom() and
 	  poll() should not reset to accept any addresses but should, instead, only
-	  accept inputs and events from the connected remore peer.  On of these
+	  accept inputs and events from the connected remote peer.  On of these
 	  issues was noted by 李桂丁 <liguiding@pinecone.net>.  Changes were made as
 	  summarized here:
 	  http://www.masterraghu.com/subjects/np/introduction/unix_network_programming_v1.3/ch08lev1sec11.html
@@ -19188,7 +19188,7 @@
 	  sockets.  The interaction between psock_udp_send() and psock_udp_sendto()
 	  was perverse:  It should always pass a NULL destinatino address.  From
 	  Gregory Nutt (2018-04-26).
-	* Costmetic changes to README and to comments.  From Gregory Nutt
+	* Cosmetic changes to README and to comments.  From Gregory Nutt
 	  (2018-04-26).
 	* arch/arm/include/nrf52:  All nRF52 IRQs above NRF52_IRQ_TEMP were wrong.
 	  From Alan Carvalho de Assis (2018-04-26).
@@ -19234,8 +19234,8 @@
 	  up_progmem_erasesize for all architectures that already support progmem,
 	  assuming that for those architectures the sizes of both read/write and
 	  erase pages are identical.  From Michael Jung (2018-05-01).
-	* arch/arm/src/include/kinetis and src/kinetis:  Beginning to the K28F.
-	  From Gregory Nutt (2018-05-01).
+	* arch/arm/src/include/kinetis and src/kinetis:  Add architecture support
+	  for the Kinetis K28F.  From Gregory Nutt (2018-05-01).
 	* arch/arm/src/imxrt: This commit fixes more issues with the i.MX RT GPIO
 	  IRQ.  Add check for interrupt mask register before dispatching ISR. The
 	  GPIO_ISR bits are set independent of the GPIO_IMR bits. Fixed a range
@@ -19396,7 +19396,7 @@
 	  work with the D-Cache enabled, at least in write-through mode.  Add
 	  support for PHY interrupts and PHY IOCTLs.
 	* configs/imxrt1050-evk/netnsh/defconfig:  Disable LED support because pins
-	  conflict with PHY.  Enable device statists.  Enable NSH ifup and ifdown
+	  conflict with PHY.  Enable device statistics.  Enable NSH ifup and ifdown
 	  commmands.  Add an NSH configuration for testing Ethernet.  From Gregory
 	  Nutt (2018-05-25).
 	* configs/xmc4500-relax: Add board support for SPI  From Alan Carvalho de
