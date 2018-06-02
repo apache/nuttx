@@ -367,8 +367,8 @@ must be is one of the following.
   module:
 
     A simple stripped down NSH configuration that was used for testing NuttX
-    OS modules.  Key difference from the nsh configuration include these
-    additions to the configuration file:
+    OS modules using the test at apps/examples/module.  Key difference from
+    the nsh configuration include these additions to the configuration file:
 
       CONFIG_BOARDCTL_OS_SYMTAB=y
       CONFIG_EXAMPLES_MODULE=y
@@ -385,8 +385,8 @@ must be is one of the following.
       CONFIG_MODLIB_BUFFERINCR=32
 
      The could be followed may be added for testing shared libraries in the
-     FLAT build (assuming that you also have SD card support enabled and that
-     the SD card is mount at /mnt/sdcard):
+     FLAT build using apps/examples/sotest (assuming that you also have SD
+     card support enabled and that the SD card is mount at /mnt/sdcard):
 
       CONFIG_LIBC_DLLFCN=y
       CONFIG_EXAMPLES_SOTEST=y

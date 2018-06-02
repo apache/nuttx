@@ -1644,6 +1644,44 @@ Configuration Sub-directories
        you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
+  module:
+  ------
+
+    A simple stripped down NSH configuration that was used for testing NuttX
+    OS modules using the test at apps/examples/module.  Key difference from
+    other NSH configurations include these additions to the configuration file:
+
+      CONFIG_BOARDCTL_OS_SYMTAB=y
+      CONFIG_EXAMPLES_MODULE=y
+      CONFIG_EXAMPLES_MODULE_BUILTINFS=y
+      CONFIG_EXAMPLES_MODULE_DEVMINOR=0
+      CONFIG_EXAMPLES_MODULE_DEVPATH="/dev/ram0"
+      CONFIG_FS_ROMFS=y
+      CONFIG_LIBC_ARCH_ELF=y
+      CONFIG_MODULE=y
+      CONFIG_LIBC_MODLIB=y
+      CONFIG_MODLIB_MAXDEPEND=2
+      CONFIG_MODLIB_ALIGN_LOG2=2
+      CONFIG_MODLIB_BUFFERSIZE=128
+      CONFIG_MODLIB_BUFFERINCR=32
+
+     The could be followed may be added for testing shared libraries in the
+     FLAT build using apps/examples/sotest (assuming that you also have SD
+     card support enabled and that the SD card is mount at /mnt/sdcard):
+
+      CONFIG_LIBC_DLLFCN=y
+      CONFIG_EXAMPLES_SOTEST=y
+      CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
+
+    NOTE: You must always have:
+
+      CONFIG_STM32_CCMEXCLUDE=y
+
+    because code cannot be executed from CCM memory.
+
+    STATUS:
+    2018-06-02: Configuration added by Alan Carvalho de Assis.
+
   netnsh:
   ------
     This is a special version of the NuttShell (nsh) configuration that is
