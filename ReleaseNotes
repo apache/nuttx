@@ -17582,8 +17582,8 @@ Additional new features and extended functionality:
 
     * Nordic NRF52:
 
-      - NRF52:  Initial support for the NRF52 including UART and GPIO
-        support.  From Janne Rosberg.
+      - NRF52:  Initial support for the NRF52 including UART, Timer, and
+        GPIO support.  From Janne Rosberg.
 
     * Nordic NRF52 Drivers:
 
@@ -17594,8 +17594,8 @@ Additional new features and extended functionality:
 
     * Nordic NRF52 Boards:
 
-      - NRF52:  Added support for the NRF52 including initially UART, Timer
-        and GPIO support.  From Janne Rosberg.
+      - configs/nrf52-pca10040:  Added support for the NRF52-PCA10040
+        development board.  From Janne Rosberg.
 
     * NXP Freescale LPC43xx Drivers:
 
