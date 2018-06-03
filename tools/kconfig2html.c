@@ -2223,7 +2223,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
  *
  ****************************************************************************/
 
-static void process_kconfigfile(const char *kconfigdir); /* Forward reference */
+static void process_kconfigfile(const char *kconfigdir, const char *kconfigname); /* Forward reference */
 static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 {
   enum token_type_e tokid;
@@ -2253,6 +2253,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                   source = dequote(source);
                   if (source)
                     {
+                      char *configname = basename(source);
                       char *subdir = dirname(source);
                       char *dirpath;
 
@@ -2289,7 +2290,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
                       /* Then recurse */
 
-                      process_kconfigfile(dirpath);
+                      process_kconfigfile(dirpath, configname);
                       token = NULL;
                       free(dirpath);
                     }
@@ -2398,14 +2399,15 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
  *
  ****************************************************************************/
 
-static void process_kconfigfile(const char *kconfigdir)
+static void process_kconfigfile(const char *kconfigdir,
+                                const char *kconfigname)
 {
   FILE *stream;
   char *kconfigpath;
 
   /* Create the full path to the Kconfig file */
 
-  asprintf(&kconfigpath, "%s/Kconfig", kconfigdir);
+  asprintf(&kconfigpath, "%s/%s", kconfigdir, kconfigname);
   debug("process_kconfigfile: Entry\n");
   debug("  kconfigdir:  %s\n", kconfigdir);
   debug("  kconfigpath: %s\n", kconfigpath);
@@ -2654,7 +2656,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Process the Kconfig files through recursive descent */
 
-  process_kconfigfile(g_kconfigroot);
+  process_kconfigfile(g_kconfigroot, "Kconfig");
 
   /* Terminate the table of contents */
 
