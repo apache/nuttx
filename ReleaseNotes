@@ -17594,11 +17594,6 @@ Additional new features and extended functionality:
 
     * Nordic NRF52 Boards:
 
-      - configs/nrf52-pca10040:  Added support for the NRF52-PCA10040
-        development board.  From Janne Rosberg.
-
-    * NXP Freescale LPC43xx Drivers:
-
       - configs/nrf52-pca10040:  Added support for the NRF52-PCA10040 board
         including LEDs and buttons  From Janne Rosberg.
       - configs/nrf52-pca10040:  Added support for starting the watchdog
@@ -17606,12 +17601,7 @@ Additional new features and extended functionality:
       - configs/nrf52-pca10040:  Added a configuration for testing the
         watchdog timer.  From Alan Carvalho de Assis.
 
-    * NXP Freescale LPC43xx Boards:
-
-      - configs/bambino-200e:  Added support for multiple MAX31855 sensors
-        to the bambino-200e.  From Tiago Almeida.
-
-    * NXP i.MX RT:
+    * NXP Freescale i.MX RT:
 
       - i.MX RT:  Brings in basic support for the i.MX RT 1050 'crossover'
         SoC.   Includes timer and UART support.  This port was the joint
@@ -17619,7 +17609,7 @@ Additional new features and extended functionality:
         credit to Ivan for the kill because he is the one to held on to
         the end.  From Ivan Ucherdzhiev.
 
-    * NXP i.MX RT Drivers:
+    * NXP Freescale i.MX RT Drivers:
 
       - i.MX RT:  Added power management hooks.
       - i.MX RT:  Added eDMA support (unverified).
@@ -17628,7 +17618,7 @@ Additional new features and extended functionality:
         work with the D-Cache enabled, at least in write-through mode.
         Added support for PHY interrupts and PHY IOCTLs.
 
-    * NXP i.MX RT Boards:
+    * NX FreescaleP i.MX RT Boards:
 
       - IMXRT1050-EVK:  Added support for booting from the on board HYPER
         Flash.  From Ivan Ucherdzhiev.
@@ -17645,16 +17635,16 @@ Additional new features and extended functionality:
         Enable device statistics.  Enable NSH ifup and ifdown commmands.
         Added an NSH configuration for testing Ethernet.
 
-    * NXP Kinetis:
+    * NXP Freescale Kinetis:
 
       - K28F:  Added architecture support for the Kinetis K28F.
 
-    * NXP Kinetis Drivers:
+    * NXP Freescale Kinetis Drivers:
 
       - SDHC:  Make Kinetis SDHC pullups work the same as the STM32 SDIO
         pullups.
 
-    * NXP Kinetis Boards:
+    * NXP Freescale Kinetis Boards:
 
       - Freedom-K28F.  Added support for the Kinetis Freedom-K28F board.
 
@@ -17677,6 +17667,11 @@ Additional new features and extended functionality:
         LCD uses a 9-bit SPI interface (the 9th bit being the command/data
         bit that is normally a discrete).  That communication was never
         successfully integrated.
+
+    * NXP LPC43xx Boards:
+
+      - configs/bambino-200e:  Added support for multiple MAX31855 sensors
+        to the bambino-200e.  From Tiago Almeida.
 
     * OpenRISC
 
@@ -17820,6 +17815,8 @@ Additional new features and extended functionality:
         getdtabilesize().  From Michael Jung.
       - libs/libdsp:  Added DSP support library.  From Mateusz Szafoni.
       - include/sys:  Added resource.h.
+      - include/nuttx/video:  Add overlay support to framebuffer interface
+        definition. From Marco Krahl.
 
     * Tools:
 
