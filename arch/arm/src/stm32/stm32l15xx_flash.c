@@ -121,24 +121,6 @@ static inline void sem_unlock(void)
   nxsem_post(&g_sem);
 }
 
-#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
-static void data_cache_disable(void)
-{
-  modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCEN, 0);
-}
-
-static void data_cache_enable(void)
-{
-  /* Reset data cache */
-
-  modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCRST);
-
-  /* Enable data cache */
-
-  modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
-}
-#endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
-
 static void stm32_eeprom_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)

@@ -128,24 +128,6 @@ static void flash_lock(void)
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
-#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
-static void data_cache_disable(void)
-{
-  modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCEN, 0);
-}
-
-static void data_cache_enable(void)
-{
-  /* Reset data cache */
-
-  modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCRST);
-
-  /* Enable data cache */
-
-  modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
-}
-#endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -321,10 +303,6 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   flash_unlock();
 
-#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
-  data_cache_disable();
-#endif
-
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
 
   for (addr += STM32_FLASH_BASE; count; count -= 2, hword++, addr += 2)
@@ -353,10 +331,6 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
     }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-
-#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
-  data_cache_enable();
-#endif
 
   sem_unlock();
   return written;
