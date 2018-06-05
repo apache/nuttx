@@ -249,12 +249,10 @@ ssize_t up_progmem_erasepage(size_t page)
       base = STM32_FLASH_BANK1_BASE;
     }
   else
+#endif
     {
       base = STM32_FLASH_BANK0_BASE;
     }
-#else
-  base = STM32_FLASH_BANK0_BASE;
-#endif
 
   sem_lock();
 
@@ -311,12 +309,10 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       base = STM32_FLASH_BANK1_BASE;
     }
   else
+#endif
     {
       base = STM32_FLASH_BANK0_BASE;
     }
-#else
-  base = STM32_FLASH_BANK0_BASE;
-#endif
 
   /* STM32 requires half-word access */
 
