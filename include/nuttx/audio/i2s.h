@@ -223,6 +223,12 @@ struct i2s_ops_s
   CODE int      (*i2s_send)(FAR struct i2s_dev_s *dev,
                   FAR struct ap_buffer_s *apb, i2s_callback_t callback,
                   FAR void *arg, uint32_t timeout);
+
+  /* Ioctl */
+
+  CODE int      (*i2s_ioctl)(FAR struct i2s_dev_s *dev,
+                             int cmd, unsigned long arg);
+
 };
 
 /* I2S private data.  This structure only defines the initial fields of the

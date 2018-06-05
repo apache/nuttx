@@ -152,7 +152,7 @@
   1 << 16 | /* 0: GPIO18, 1:MCLK0,   2:MCLK1 */             \
   1 << 18 | /* 0: GPIO19, 1:BCK0,    2:DMCKO1 */            \
   1 << 20 | /* 0: GPIO1A, 1:LRCK0,   2:DMDIN1 */            \
-  1 << 22 | /* 0: GPIO1B, 1:DIN0,    2:DMDIN0 */            \
+  2 << 22 | /* 0: GPIO1B, 1:DIN0,    2:DMDIN0 */            \
   1 << 24 | /* 0: GPIO1C, 1:DOUT0,   2:DMCKO0 */            \
   1 << 26 | /* 0: GPIO1D, 1:SCK0 */                         \
   0 << 28 | /* 0: GPIO1E, 1:SDI0 */                         \

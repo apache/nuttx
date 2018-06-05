@@ -103,6 +103,8 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 
+static int     i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -114,7 +116,7 @@ static const struct file_operations i2schar_fops =
   i2schar_read,         /* read  */
   i2schar_write,        /* write */
   NULL,                 /* seek  */
-  NULL,                 /* ioctl */
+  i2schar_ioctl,        /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   NULL,                 /* poll  */
 #endif
@@ -341,6 +343,39 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
 errout_with_reference:
   apb_free(apb);
   nxsem_post(&priv->exclsem);
+  return ret;
+}
+
+
+/************************************************************************************
+ * Name: i2char_ioctl
+ *
+ * Description:
+ *   Perform I2S device ioctl if exists
+ *
+ ************************************************************************************/
+
+static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct i2schar_dev_s *priv;
+  int ret = -ENOTTY;
+
+  /* Get our private data structure */
+
+  DEBUGASSERT(filep);
+
+  inode = filep->f_inode;
+  DEBUGASSERT(inode);
+
+  priv = (FAR struct i2schar_dev_s *)inode->i_private;
+  DEBUGASSERT(priv && priv->i2s && priv->i2s->ops);
+
+  if (priv->i2s->ops->i2s_ioctl)
+    {
+      ret = priv->i2s->ops->i2s_ioctl(priv->i2s, cmd, arg);
+    }
+
   return ret;
 }
 
