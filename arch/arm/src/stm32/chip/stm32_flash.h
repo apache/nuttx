@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_flash.h
  *
- *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           David Sidrane <david_s5@nscdg.com>
  *
@@ -224,6 +224,19 @@
 #  define STM32_FLASH_SIZE            (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
 #endif
 
+/* STM32F101 and STM32F103 with flash size > 512kB are dual-bank devices.
+ * where bank 0 contains pages 0..255 and bank 1 contains the rest.
+ */
+
+#if defined(CONFIG_STM32_STM32F10XX) && (STM32_FLASH_NPAGES > 256)
+#  define STM32_FLASH_DUAL_BANK      1
+#  define STM32_FLASH_BANK0_NPAGES   256
+#  define STM32_FLASH_BANK1_NPAGES   (STM32_FLASH_NPAGES - STM32_FLASH_BANK0_NPAGES)
+#  define STM32_FLASH_BANK0_BASE     (STM32_FLASH_BASE)
+#  define STM32_FLASH_BANK1_BASE     \
+      (STM32_FLASH_BASE + STM32_FLASH_PAGESIZE * STM32_FLASH_BANK0_NPAGES)
+#endif
+
 /* Register Offsets *****************************************************************/
 
 #define STM32_FLASH_ACR_OFFSET       0x0000
@@ -256,7 +269,17 @@
 
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
     defined(CONFIG_STM32_STM32F469)
-#  define STM32_FLASH_OPTCR1_OFFSET 0x0018
+#  define STM32_FLASH_OPTCR1_OFFSET  0x0018
+#endif
+
+#if defined(CONFIG_STM32_STM32F10XX) && defined(STM32_FLASH_DUAL_BANK)
+#  define STM32_FLASH_BANK0_REGS_OFFSET 0
+#  define STM32_FLASH_BANK1_REGS_OFFSET 0x40
+
+#  define STM32_FLASH_KEYR1_OFFSET   0x0044
+#  define STM32_FLASH_SR1_OFFSET     0x004c
+#  define STM32_FLASH_CR1_OFFSET     0x0050
+#  define STM32_FLASH_AR2_OFFSET     0x0054
 #endif
 
 /* Register Addresses ***************************************************************/
@@ -292,6 +315,13 @@
       defined(CONFIG_STM32_STM32F469)
 #    define STM32_FLASH_OPTCR1       (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR1_OFFSET)
 #  endif
+#endif
+
+#if defined(CONFIG_STM32_STM32F10XX) && defined(STM32_FLASH_DUAL_BANK)
+#  define STM32_FLASH_KEYR1          (STM32_FLASHIF_BASE+STM32_FLASH_KEYR1_OFFSET)
+#  define STM32_FLASH_SR1            (STM32_FLASHIF_BASE+STM32_FLASH_SR1_OFFSET)
+#  define STM32_FLASH_CR1            (STM32_FLASHIF_BASE+STM32_FLASH_CR1_OFFSET)
+#  define STM32_FLASH_AR2            (STM32_FLASHIF_BASE+STM32_FLASH_AR1_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ****************************************************/
