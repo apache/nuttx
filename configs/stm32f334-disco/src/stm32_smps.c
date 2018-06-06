@@ -47,6 +47,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <debug.h>
+#include <dsp.h>
 
 #include <sys/boardctl.h>
 #include <sys/ioctl.h>
@@ -67,6 +68,10 @@
 #include "stm32_adc.h"
 
 #if defined(CONFIG_EXAMPLES_SMPS) && defined(CONFIG_DRIVERS_SMPS)
+
+#ifndef CONFIG_LIBDSP
+#  error CONFIG_LIBDSP is required
+#endif
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 #  error CONFIG_ARCH_HIPRI_INTERRUPT is required
@@ -211,14 +216,14 @@ struct smps_lower_dev_s
 
 struct smps_priv_s
 {
-  uint8_t  conv_mode;            /* Converter mode */
-  uint16_t v_in_raw;             /* Voltage input RAW value */
-  uint16_t v_out_raw;            /* Voltage output RAW value */
-  float    v_in;                 /* Voltage input real value in V */
-  float    v_out;                /* Voltage output real value in V  */
-  bool     running;              /* Running flag */
-  float    state[3];             /* Controller state vartiables */
-  float    *c_limit_tab;         /* Current limit tab */
+  uint8_t           conv_mode;   /* Converter mode */
+  uint16_t          v_in_raw;    /* Voltage input RAW value */
+  uint16_t          v_out_raw;   /* Voltage output RAW value */
+  float             v_in;        /* Voltage input real value in V */
+  float             v_out;       /* Voltage output real value in V  */
+  bool              running;     /* Running flag */
+  pid_controller_t  pid;         /* PID controller */
+  float            *c_limit_tab; /* Current limit tab */
 };
 
 /****************************************************************************
@@ -403,6 +408,16 @@ static int smps_start(FAR struct smps_dev_s *dev)
   /* Reset SMPS private structure */
 
   memset(priv, 0, sizeof(struct smps_priv_s));
+
+#ifdef SMPS_CONTROLLER_PID
+  /* Initialize PID controller */
+
+  pid_controller_init(&priv->pid, PID_KP, PID_KI, PID_KD);
+
+  /* Set PID controller saturation */
+
+  pid_saturation_set(&priv->pid, 0.0, BOOST_VOLT_MAX);
+#endif
 
   /* Get TIMA period value for given frequency */
 
@@ -660,40 +675,20 @@ static int smps_ioctl(FAR struct smps_dev_s *dev, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: pid_controller
- ****************************************************************************/
-
-static float pid_controller(struct smps_priv_s *priv, float err)
-{
-  float out;
-  float A0 = PID_KP + PID_KD + PID_KI;
-  float A1 = -PID_KP - 2.0*PID_KD;
-  float A2 = PID_KD;
-
-  /* Get PID controller output */
-
-  out = (A0 * err) + (A1 * priv->state[0]) + (A2 * priv->state[1]) + priv->state[2];
-
-  /* Store PID contrroller variables */
-
-  priv->state[1] = priv->state[0];
-  priv->state[0] = err;
-  priv->state[2] = out;
-
-  return out;
-}
-
-/****************************************************************************
  * Name: smps_controller
  ****************************************************************************/
 
-static float smps_controller(struct smps_priv_s *priv, float err)
+static float smps_controller(FAR struct smps_priv_s *priv, float err)
 {
+  float out = 0.0;
+
 #ifdef SMPS_CONTROLLER_PID
-  return pid_controller(priv, err);
+  out = pid_controller(&priv->pid, err);
 #else
 #  error "At this time only PID controller implemented"
 #endif
+
+  return out;
 }
 
 /****************************************************************************
