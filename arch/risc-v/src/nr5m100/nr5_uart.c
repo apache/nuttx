@@ -30,13 +30,27 @@
  *
  ************************************************************************************/
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 
 #include "nr5.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
 #define MAKE_UINT32(a,b,c,d)  (((a) << 24) | ((b) << 16) | ((c) << 8) | d)
+
+/************************************************************************************
+ * Private Types
+ ************************************************************************************/
 
 struct nr5_uart_buffer_s
 {
@@ -48,27 +62,27 @@ struct nr5_uart_buffer_s
 
 struct nr5_uart_regs_s
 {
-   uint32_t* pBaud;        // Data status port
-   uint32_t* pStat;        // Data status port
-   uint8_t*  pTx;          // Data TX port
-   uint8_t*  pRx;          // Data RX port
-   uint32_t* pIntCtrl;     // Interrupt enable control
-   int       rx_irq;       // IRQ number
-   int       tx_irq;       // IRQ number
+   uint32_t* pbaud;        /* Data status port */
+   uint32_t* pstat;        /* Data status port */
+   uint8_t*  ptx;          /* Data TX port */
+   uint8_t*  prx;          /* Data RX port */
+   uint32_t* pintctrl;     /* Interrupt enable control */
+   int       rxirq;        /* IRQ number */
+   int       txirq;        /* IRQ number */
 };
 
 struct nr5_uart_s
 {
-  volatile struct nr5_uart_regs_s * regs;
-  struct nr5_uart_buffer_s        * tx_buf;
-  struct nr5_uart_buffer_s        * rx_buf;
+  volatile struct nr5_uart_regs_s *regs;
+  struct nr5_uart_buffer_s        *txbuf;
+  struct nr5_uart_buffer_s        *rxbuf;
 };
 
-/*
-==============================================================================
-Static global pointers to access the hardware
-==============================================================================
-*/
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/* Static global pointers to access the hardware */
 
 #ifdef CONFIG_NR5_HAVE_UART1
 static char g_uart1_rx_buf[CONFIG_NR5_UART_RX_BUF_SIZE];
@@ -76,51 +90,52 @@ static char g_uart1_tx_buf[CONFIG_NR5_UART_TX_BUF_SIZE];
 
 static struct nr5_uart_buffer_s g_nr5_uart1_rx_buf =
 {
-  .head = 0,
-  .tail = 0,
-  .size = CONFIG_NR5_UART_RX_BUF_SIZE,
-  .buffer = g_uart1_rx_buf,
+  .head     = 0,
+  .tail     = 0,
+  .size     = CONFIG_NR5_UART_RX_BUF_SIZE,
+  .buffer   = g_uart1_rx_buf,
 };
 
 static struct nr5_uart_buffer_s g_nr5_uart1_tx_buf =
 {
-  .head = 0,
-  .tail = 0,
-  .size = CONFIG_NR5_UART_TX_BUF_SIZE,
-  .buffer = g_uart1_tx_buf,
+  .head     = 0,
+  .tail     = 0,
+  .size     = CONFIG_NR5_UART_TX_BUF_SIZE,
+  .buffer   = g_uart1_tx_buf,
 };
 
 static volatile struct nr5_uart_regs_s g_nr5_uart1_regs =
 {
-  .pBaud    = (uint32_t *) NR5_UART1_BAUD_RATE_REG,
-  .pStat    = (uint32_t *) NR5_UART1_STATUS_REG,
-  .pRx      = (uint8_t *)  NR5_UART1_RX_REG,
-  .pTx      = (uint8_t *)  NR5_UART1_TX_REG,
-  .pIntCtrl = (uint32_t *) NR5_UART1_CTRL_REG,
-  .rx_irq   = NR5_IRQ_UART1_RX,
-  .tx_irq   = NR5_IRQ_UART1_TX,
+  .pbaud    = (uint32_t *) NR5_UART1_BAUD_RATE_REG,
+  .pstat    = (uint32_t *) NR5_UART1_STATUS_REG,
+  .prx      = (uint8_t *)  NR5_UART1_RX_REG,
+  .ptx      = (uint8_t *)  NR5_UART1_TX_REG,
+  .pintctrl = (uint32_t *) NR5_UART1_CTRL_REG,
+  .rxirq    = NR5_IRQ_UART1_RX,
+  .txirq    = NR5_IRQ_UART1_TX,
 };
 
 static struct nr5_uart_s g_nr5_uart1 =
 {
-  .regs = &g_nr5_uart1_regs,
-  .rx_buf = &g_nr5_uart1_rx_buf,
-  .tx_buf = &g_nr5_uart1_tx_buf,
+  .regs     = &g_nr5_uart1_regs,
+  .rxbuf    = &g_nr5_uart1_rx_buf,
+  .txbuf    = &g_nr5_uart1_tx_buf,
 };
 #endif
 
-/*
-==============================================================================
-ISR for NanoRisc5 UART RX availalbe.
-==============================================================================
-*/
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/* ISR for NanoRisc5 UART RX available. */
+
 int nr5_uart_rx_isr(int irq_num, void *context)
 {
   struct nr5_uart_s *dev = NULL;
   char rxdata;
 
 #ifdef CONFIG_NR5_HAVE_UART1
-  if (irq_num == g_nr5_uart1_regs.rx_irq)
+  if (irq_num == g_nr5_uart1_regs.rxirq)
     {
       dev = &g_nr5_uart1;
     }
@@ -132,88 +147,83 @@ int nr5_uart_rx_isr(int irq_num, void *context)
     {
       /* Read the RX byte */
 
-      rxdata = *dev->regs->pRx;
-      *dev->regs->pTx = rxdata;
+      rxdata = *dev->regs->prx;
+      *dev->regs->ptx = rxdata;
 
-      dev->rx_buf->buffer[dev->rx_buf->head++] = rxdata;
-      if (dev->rx_buf->head == dev->rx_buf->size)
-        dev->rx_buf->head = 0;
+      dev->rxbuf->buffer[dev->rxbuf->head++] = rxdata;
+      if (dev->rxbuf->head == dev->rxbuf->size)
+        {
+          dev->rxbuf->head = 0;
+        }
     }
 
   return 0;
 }
 
-/*
-==============================================================================
-Routine to initialize the HAL layer.  Must be called prior to any other
-HAL function.
-==============================================================================
-*/
+/* Routine to initialize the HAL layer.  Must be called prior to any other
+ * HAL function.
+ */
+
 void nr5_uart_init(int uart)
 {
   volatile struct nr5_uart_s *dev = NULL;
   uint32_t cmpval = MAKE_UINT32('F', 'P', 'G', 'A');
 
   switch (uart)
-  {
+    {
 #ifdef CONFIG_NR5_HAVE_UART1
-    case 1:
-      dev = &g_nr5_uart1;
+      case 1:
+        dev = &g_nr5_uart1;
 #endif
-  }
+    }
 
-  // If a device was selected above, then initilize it
-  //
+  /* If a device was selected above, then initialize it. */
+
   if (dev != NULL)
     {
-      /* Attache the ISR and enable the IRQ with the EPIC */
+      /* Attach the ISR and enable the IRQ with the EPIC */
 
-      //irq_attach(dev->regs->rx_irq, &nr5_uart_rx_isr, NULL);
-      //up_enable_irq(dev->regs->rx_irq);
+      //irq_attach(dev->regs->rxirq, &nr5_uart_rx_isr, NULL);
+      //up_enable_irq(dev->regs->rxirq);
 
-      // Set the baud rate
+      /* Set the baud rate */
 
       if (up_getimpid() == cmpval)
         {
-          *dev->regs->pBaud = 0x0d;
+          *dev->regs->pbaud = 0x0d;
         }
 
       /* Now enable the RX IRQ in the UART peripheral */
 
-      //*dev->regs->pIntCtrl = NR5_UART_CTRL_ENABLE_RX_IRQ;
+      //*dev->regs->pintctrl = NR5_UART_CTRL_ENABLE_RX_IRQ;
     }
 }
 
-/*
-==============================================================================
-Routine to get RX byte from console UART
-==============================================================================
-*/
+/* Routine to get RX byte from console UART. */
+
 uint8_t nr5_uart_get_rx()
 {
   uint8_t rxdata = 0;
 
   up_disableints();
-  if (g_nr5_uart1.rx_buf->head != g_nr5_uart1.rx_buf->tail)
+  if (g_nr5_uart1.rxbuf->head != g_nr5_uart1.rxbuf->tail)
     {
-      struct nr5_uart_buffer_s *pBuf = g_nr5_uart1.rx_buf;
+      struct nr5_uart_buffer_s *pBuf = g_nr5_uart1.rxbuf;
 
       rxdata = pBuf->buffer[pBuf->tail++];
       if (pBuf->tail == pBuf->size)
         pBuf->tail = 0;
     }
+
   up_enableints();
   return rxdata;
 }
 
-/*
-==============================================================================
-Routine to test if RX byte available at console UART
-==============================================================================
-*/
+/* Routine to test if RX byte available at console UART */
+
 int nr5_uart_test_rx_avail()
 {
-  struct nr5_uart_buffer_s *pBuf = g_nr5_uart1.rx_buf;
+  struct nr5_uart_buffer_s *pBuf = g_nr5_uart1.rxbuf;
   int  avail;
 
   up_disableints();
@@ -221,34 +231,33 @@ int nr5_uart_test_rx_avail()
   up_enableints();
 
   /* If no RX data available then halt the processor until an interrupt */
+
   if (!avail)
-     __asm__ volatile ("wfi");
+    {
+       __asm__ volatile ("wfi");
+    }
 
   return avail;
 }
 
-/*
-==============================================================================
-Routine to test if RX byte available at console UART
-==============================================================================
-*/
+/* Routine to test if RX byte available at console UART. */
+
 int nr5_uart_test_tx_empty()
 {
-   return *g_nr5_uart1.regs->pStat & NR5_UART_STATUS_TX_EMPTY;
+   return *g_nr5_uart1.regs->pstat & NR5_UART_STATUS_TX_EMPTY;
 }
 
-/*
-==============================================================================
-Routine to send TX byte to console UART
-==============================================================================
-*/
+/* Routine to send TX byte to console UART. */
+
 void nr5_uart_put_tx(uint8_t ch)
 {
-   // Wait for TX to be empty
-   while (!(*g_nr5_uart1.regs->pStat & NR5_UART_STATUS_TX_EMPTY))
+   /* Wait for TX to be empty */
+
+   while (!(*g_nr5_uart1.regs->pstat & NR5_UART_STATUS_TX_EMPTY))
       ;
 
-   // Write to TX
-   *g_nr5_uart1.regs->pTx = ch;
+   /* Write to TX */
+
+   *g_nr5_uart1.regs->ptx = ch;
 }
 

@@ -64,8 +64,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-void up_enable_irq(int irq);
-
 irqstate_t up_irq_save(void);
 void up_irq_restore(irqstate_t irqstate);
 

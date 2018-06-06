@@ -48,6 +48,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
+
 #include "chip.h"
 #include "up_internal.h"
 #include "up_arch.h"
