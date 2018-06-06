@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/z80/src/z80/z80_irq.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,11 +70,11 @@ volatile chipreg_t *g_current_regs;
 irqstate_t up_irq_save(void) __naked
 {
   __asm
-	ld	a, i		; AF Parity bit holds interrupt state
-	di			; Interrupts are disabled
+	ld		a, i	; AF Parity bit holds interrupt state
+	di				; Interrupts are disabled
 	push	af		; Return AF in HL
-	pop	hl		;
-	ret			;
+	pop		hl		;
+	ret				;
   __endasm;
 }
 
@@ -88,14 +89,33 @@ irqstate_t up_irq_save(void) __naked
 void up_irq_restore(irqstate_t flags) __naked
 {
   __asm
-	di			; Assume disabled
-	pop	hl		; HL = return address
-	pop	af		; AF Parity bit holds interrupt state
-	jp	po, statedisable
+	di				; Assume disabled
+	pop		hl		; HL = return address
+	pop		af		; AF Parity bit holds interrupt state
+	jp		po, statedisable
 	ei
 statedisable:
 	push	af		; Restore stack
 	push	hl		;
-	ret			; and return
+	ret				; and return
+  __endasm;
+}
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Enable all interrupts; return previous interrupt state
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_enable(void) __naked
+{
+  __asm
+	ld		a, i	; AF Parity bit holds interrupt state
+	ei				; Interrupts are enabled
+	push	af		; Return AF in HL
+	pop		hl		;
+	ret				;
   __endasm;
 }

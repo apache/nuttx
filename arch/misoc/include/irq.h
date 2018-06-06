@@ -70,6 +70,7 @@ extern "C"
 
 irqstate_t up_irq_save(void);
 void up_irq_restore(irqstate_t flags);
+irqstate_t up_irq_enable(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_irq.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,8 @@ void up_irqinitialize(void)
  * Name: up_irq_save
  *
  * Description:
- *   Disable all interrupts; return previous interrupt state
+ *   Disable all interrupts; return previous interrupt state.
+ *   REVISIT:  Doen't TDI() do all of this?
  *
  ****************************************************************************/
 
@@ -123,10 +124,37 @@ void up_irq_restore(irqstate_t flags)
 
   if ((flags & 0x80) != 0)
     {
-      /* The IRQE bit was set, re-enable interrupts */
+      /* The IRQE bit was set, re-enable interrupts.
+       * REVISIT: Could not RI() so all of this?
+       */
 
       EI();
     }
+}
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Enable all interrupts; return previous interrupt state
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_enable(void)
+{
+  /* Bit 7 (IRQE) of the IRQCTL register determines if interrupts were
+   * enabled when this function was called.
+   */
+
+  register irqstate_t retval = getreg8(IRQCTL);
+
+  /* Enable interrupts */
+
+  EI();
+
+  /* Return the previous interrupt state */
+
+  return retval;
 }
 
 /****************************************************************************

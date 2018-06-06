@@ -1,7 +1,7 @@
 ;**************************************************************************
 ; arch/z80/src/ez80/ez80_irqsave.asm
 ;
-;   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+;   Copyright (C) 2008, 2018 Gregory Nutt. All rights reserved.
 ;   Author: Gregory Nutt <gnutt@nuttx.org>
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -60,11 +60,11 @@
 ;**************************************************************************
 
 _up_irq_save:
-	ld	a, i		; AF = interrupt state
-	di			; Interrupts are disabled (does not affect F)
-	push	af		; Transfer to HL via the stack
-	pop	hl		;
-	ret			; And return
+	ld		a, i			; AF = interrupt state
+	di						; Interrupts are disabled (does not affect F)
+	push	af				; Transfer to HL via the stack
+	pop		hl				;
+	ret						; And return
 
 ;**************************************************************************
 ;* Name: void up_irq_restore(irqstate_t flags)
@@ -75,14 +75,29 @@ _up_irq_save:
 ;**************************************************************************
 
 _up_irq_restore:
-	di			; Assume disabled
-	pop	hl		; HL = return address
-	pop	af		; AF Parity bit holds interrupt state
-	jp	po, _disabled	; Skip over re-enable if Parity odd
-	ei			; Re-enable interrupts
+	di						; Assume disabled
+	pop		hl				; HL = return address
+	pop		af				; AF Parity bit holds interrupt state
+	jp		po, _disabled	; Skip over re-enable if Parity odd
+	ei						; Re-enable interrupts
 _disabled:
-	push	af		; Restore stack
-	push	hl		;
-	ret			; and return
+	push	af				; Restore stack
+	push	hl				;
+	ret						; and return
+
+;**************************************************************************
+;* Name: irqstate_t up_irq_enable(void)
+;*
+;* Description:
+;*   Enable all interrupts; return previous interrupt state
+;*
+;**************************************************************************
+
+up_irq_enable:
+	ld		a, i			; AF = interrupt state
+	ei						; Interrupts are enabled (does not affect F)
+	push	af				; Transfer to HL via the stack
+	pop		hl				;
+	ret						; And return
 
 	end

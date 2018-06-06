@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/mips32/up_irq.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ irqstate_t up_irq_save(void)
  * Name: up_irq_restore
  *
  * Description:
- *   Restore the previous interrutp state (i.e., the one previously returned
+ *   Restore the previous up_irq_enable state (i.e., the one previously returned
  *   by up_irq_save())
  *
  * Input Parameters:
@@ -99,4 +99,39 @@ void up_irq_restore(irqstate_t irqstate)
   status   |= irqstate;             /* Set new interrupt mask bits */
   status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
   cp0_putstatus(status);            /* Restore interrupt state */
+}
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Enable interrupts
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_irq_enable(void)
+{
+  register irqstate_t status;
+
+  /* Set the status register.  It will be the same as the current status
+   * register with some changes:
+   *
+   * 1. Clear the BEV bit (This bit should already be clear)
+   * 2. Clear the UM bit so that the task executes in kernel mode
+   *   (This bit should already be clear)
+   * 3. Make sure the IE is set
+   * 4. Make sure the S/W interrupts are enabled
+   * 5. Set the interrupt mask bits
+   */
+
+  status  = cp0_getstatus();
+  status &= ~(CP0_STATUS_BEV | CP0_STATUS_UM);
+  status |=  (CP0_STATUS_IE | CP0_STATUS_IM_SWINTS | CP0_STATUS_IM_ALL);
+  cp0_putstatus(status);
 }

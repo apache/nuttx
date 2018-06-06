@@ -118,19 +118,19 @@
 /* This struct defines the way the registers are stored.  We
  * need to save:
  *
- *  1	CPSR
- *  7	Static registers, v1-v7 (aka r4-r10)
- *  1	Frame pointer, fp (aka r11)
- *  1	Stack pointer, sp (aka r13)
- *  1	Return address, lr (aka r14)
+ *  1  CPSR
+ *  7  Static registers, v1-v7 (aka r4-r10)
+ *  1  Frame pointer, fp (aka r11)
+ *  1  Stack pointer, sp (aka r13)
+ *  1  Return address, lr (aka r14)
  * ---
- * 11	(XCPTCONTEXT_USER_REG)
+ * 11  (XCPTCONTEXT_USER_REG)
  *
  * On interrupts, we also need to save:
- *  4	Volatile registers, a1-a4 (aka r0-r3)
- *  1	Scratch Register, ip (aka r12)
- *---
- *  5	(XCPTCONTEXT_IRQ_REGS)
+ *  4  Volatile registers, a1-a4 (aka r0-r3)
+ *  1  Scratch Register, ip (aka r12)
+ * ---
+ *  5  (XCPTCONTEXT_IRQ_REGS)
  *
  * For a total of 17 (XCPTCONTEXT_REGS)
  */
@@ -211,6 +211,23 @@ static inline void up_irq_restore(irqstate_t flags)
      :
      : "r" (flags)
      : "memory");
+}
+
+/* Enable IRQs and return the previous IRQ state */
+
+static inline irqstate_t up_irq_enable(void)
+{
+  unsigned int flags;
+  unsigned int temp;
+  __asm__ __volatile__
+    (
+     "\tmrs    %0, cpsr\n"
+     "\tbic    %1, %0, #128\n"
+     "\tmsr    cpsr_c, %1"
+     : "=r" (flags), "=r" (temp)
+     :
+     : "memory");
+  return flags;
 }
 #endif /* __ASSEMBLY__ */
 

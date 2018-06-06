@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/renesas/include/m16c/irq.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -289,31 +289,46 @@ extern "C"
  * leave_critical section(), are probably what you really want.
  */
 
-/* Save the current interrupt enable state & disable IRQs */
+/* Return the current interrupt enable state and disable IRQs */
 
 static inline irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
   __asm__ __volatile__
     (
-     "\tstc	flg, %0\n"
-     "\tfclr	I\n"
+     "\tstc  flg, %0\n"
+     "\tfclr I\n"
      : "=r" (flags)
      :
      : "memory");
   return flags;
 }
 
-/* Restore saved IRQ & FIQ state */
+/* Restore saved IRQ state */
 
 static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
-     "ldc	%0, flg"
+     "ldc    %0, flg"
      :
      : "r" (flags)
      : "memory");
+}
+
+/* Return the current interrupt enable state and enable IRQs */
+
+static inline irqstate_t up_irq_enable(void)
+{
+  irqstate_t flags;
+  __asm__ __volatile__
+    (
+     "\tstc  flg, %0\n"
+     "\tfset I\n"
+     : "=r" (flags)
+     :
+     : "memory");
+  return flags;
 }
 
 #endif

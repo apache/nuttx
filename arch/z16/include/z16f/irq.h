@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/include/z16f/irq.h
  *
- *   Copyright (C) 2008, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2012, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -198,6 +198,7 @@ struct xcptcontext
  *
  *   irqstate_t up_irq_save(void);
  *   void up_irq_restore(irqstate_t flags);
+ *   void up_irq_enable(void);
  *
  * NOTE: These functions should never be called from application code and,
  * as a general rule unless you really know what you are doing, this
@@ -209,6 +210,7 @@ struct xcptcontext
 #ifdef __ZILOG__
 #  define up_irq_save()     TDI()
 #  define up_irq_restore(f) RI(f)
+#  define up_irq_enable()   EI()
 #endif
 
 /****************************************************************************

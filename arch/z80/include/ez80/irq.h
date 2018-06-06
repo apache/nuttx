@@ -251,7 +251,7 @@ extern "C"
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
- * NOTE: This function should never be called from application code and,
+ * NOTE: These functions should never be called from application code and,
  * as a general rule unless you really know what you are doing, this
  * function should not be called directly from operation system code either:
  * Typically, the wrapper functions, enter_critical_section() and
@@ -259,7 +259,8 @@ extern "C"
  */
 
 irqstate_t up_irq_save(void);
-void up_irq_restore(irqstate_t flags);
+void       up_irq_restore(irqstate_t flags);
+irqstate_t up_irq_enable(void);
 
 #undef EXTERN
 #ifdef __cplusplus

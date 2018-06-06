@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/include/avr32/irq.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,7 +167,7 @@ static inline uint32_t avr32_evba(void)
   return evba;
 }
 
-/* Save the current interrupt enable state & disable all interrupts */
+/* Return the current interrupt enable state and disable all interrupts */
 
 static inline irqstate_t up_irq_save(void)
 {
@@ -185,7 +185,7 @@ static inline irqstate_t up_irq_save(void)
 /* Restore saved interrupt state */
 
 static inline void up_irq_restore(irqstate_t flags)
-{
+{ 
   if ((flags & AVR32_SR_GM_MASK) == 0)
     {
       __asm__ __volatile__ (
@@ -196,6 +196,21 @@ static inline void up_irq_restore(irqstate_t flags)
         : "i" (AVR32_SR_GM_SHIFT)
       );
     }
+}
+
+/* Return the current interrupt enable state and enable all interrupts */
+
+static inline irqstate_t up_irq_enable(void)
+{
+  irqstate_t sr = (irqstate_t)avr32_sr();
+  __asm__ __volatile__ (
+    "csrf\t%0\n\t"
+    "nop\n\t"
+    "nop"
+    :
+    : "i" (AVR32_SR_GM_SHIFT)
+  );
+  return sr;
 }
 
 #endif /* __ASSEMBLY__ */

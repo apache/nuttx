@@ -82,6 +82,7 @@ void lm32_irq_initialize(void)
  * Name: up_irq_save
  *
  * Description:
+ *   Return the current interrupt enable state and disable all interrupts.
  *
  ****************************************************************************/
 
@@ -103,6 +104,7 @@ irqstate_t up_irq_save(void)
  * Name: up_irq_restore
  *
  * Description:
+ *   Restore saved interrupt state
  *
  ****************************************************************************/
 
@@ -111,6 +113,28 @@ void up_irq_restore(irqstate_t flags)
   /* Restore the interrupt state returned by up_save_irq() */
 
   irq_setie(flags);
+}
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Return the current interrupt enable state and enable all interrupts
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_restore(irqstate_t flags)
+{
+  irqstate_t flags;
+
+  /* Get the previous value of IE */
+
+  flags = irq_getie();
+
+  /* Enable interrupts and return the previous interrupt state */
+
+  irq_setie(1);
+  return flags;
 }
 
 /****************************************************************************

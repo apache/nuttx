@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/include/mips32/irq.h
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -556,6 +556,22 @@ irqstate_t up_irq_save(void);
  ****************************************************************************/
 
 void up_irq_restore(irqstate_t irqtate);
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Enable interrupts
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_irq_enable(void);
 
 #undef EXTERN
 #ifdef __cplusplus

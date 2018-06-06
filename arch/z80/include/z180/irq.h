@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/include/z180/irq.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -233,6 +233,7 @@ extern "C"
 
 irqstate_t up_irq_save(void) __naked;
 void       up_irq_restore(irqstate_t flags) __naked;
+irqstate_t up_irq_enable(void);
 
 #undef EXTERN
 #ifdef __cplusplus

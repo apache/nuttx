@@ -204,7 +204,6 @@ void up_irqinitialize(void)
   /* Now enable Global Interrupts */
 
   __asm__ volatile("csrrs a0, %0, 3" :: "i"(NR5_EPIC_PRIMASK));
-
 }
 
 /****************************************************************************
@@ -283,31 +282,31 @@ int up_prioritize_irq(int irq, int priority)
 #endif
 
 /****************************************************************************
- * Name: irqsave
+ * Name: up_irq_save
  *
  * Description:
- *   Disable IRQs while returning the previous IRQ state
+ *   Return the current interrupt state and disable interrupts
  *
  ****************************************************************************/
 
 irqstate_t up_irq_save(void)
 {
-  irqstate_t   newIrqPri = (2 << 2) | 3;
-  irqstate_t   oldIrqPri;
+  irqstate_t   newpri = (2 << 2) | 3;
+  irqstate_t   oldpri;
 
   /* Set the new IRQ Priority level to level 2, enabled.
    * This will allow SW and DEBUG / TRAP interrupts to
    * continue to fire, but no general purpose ints.
    */
 
-  __asm__ volatile("csrrw %0, %1, %2" : "=r"(oldIrqPri) :
-               "i"(NR5_EPIC_PRIMASK), "r"(newIrqPri));
+  __asm__ volatile("csrrw %0, %1, %2" : "=r"(oldpri) :
+                   "i"(NR5_EPIC_PRIMASK), "r"(newpri));
 
-  return oldIrqPri;
+  return oldpri;
 }
 
 /****************************************************************************
- * Name: irqrestore
+ * Name: up_irq_restore
  *
  * Description:
  *   Restore previous IRQ mask state
@@ -317,4 +316,27 @@ irqstate_t up_irq_save(void)
 void up_irq_restore(irqstate_t pri)
 {
   __asm__ volatile("csrw %0, %1" :: "i"(NR5_EPIC_PRIMASK), "r"(pri));
+}
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Return the current interrupt state and enable interrupts
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_enable(void)
+{
+  irqstate_t   newpri = up_get_newintctx();
+  irqstate_t   oldpri;
+
+  /* Set the new IRQ Priority level to level 5, enabled.  This will allow
+   * all interrupt.
+   */
+
+  __asm__ volatile("csrrw %0, %1, %2" : "=r"(oldpri) :
+                   "i"(NR5_EPIC_PRIMASK), "r"(newpri));
+
+  return oldpri;
 }
