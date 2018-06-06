@@ -671,7 +671,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
  * Name: lc823450_dmic_enable
  ****************************************************************************/
 
-static void lc823450_dmic_enable()
+static void lc823450_dmic_enable(void)
 {
   /* Disable clock for DGMIC */
 
