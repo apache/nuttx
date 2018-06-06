@@ -116,9 +116,9 @@ void up_sigdeliver(void)
    * run with interrupts enabled.
    *
    * REVISIT: 'irqcount' could still be greater than zero in the SMP case.
-   * This would be an issue if the signal handler were to suspend because
-   * the critical section would be re-established when the signal handler
-   * resumes.
+   * This is an issue because (1) global spinlocks are still held and (2) if
+   * the signal handler were to suspend the the critical section would be
+   * re-established when the signal handler resumes.
    */
 
   up_irq_enable();
