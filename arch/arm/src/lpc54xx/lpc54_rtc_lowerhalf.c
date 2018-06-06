@@ -566,7 +566,7 @@ static int lpc54_setperiodic(FAR struct rtc_lowerhalf_s *lower,
   FAR struct lpc54_lowerhalf_s *priv;
   int ret;
 
-  ASSERT(lower != NULL && alarminfo != NULL);
+  DEBUGASSERT(lower != NULL && alarminfo != NULL);
   priv = (FAR struct lpc54_lowerhalf_s *)lower;
 
   ret = nxsem_wait(&priv->devsem);

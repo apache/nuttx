@@ -807,7 +807,7 @@ static int stm32l4_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
 {
   uint32_t data, tmp;
 
-  ASSERT(tp != NULL);
+  DEBUGASSERT(tp != NULL);
 
   /* Sample the data time register. */
 
@@ -1367,7 +1367,7 @@ int stm32l4_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   rtc_alarmreg_t alarmreg;
   int ret = -EINVAL;
 
-  ASSERT(alminfo != NULL);
+  DEBUGASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
 
   /* Make sure the alarm interrupt is enabled at the NVIC */
@@ -1559,7 +1559,7 @@ int stm32l4_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
   rtc_alarmreg_t alarmreg;
   int ret = -EINVAL;
 
-  ASSERT(alminfo != NULL);
+  DEBUGASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->ar_id);
 
   switch (alminfo->ar_id)
