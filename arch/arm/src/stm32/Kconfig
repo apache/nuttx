@@ -2446,6 +2446,8 @@ config STM32_LTDC
 config STM32_DMA2D
 	bool "DMA2D"
 	default n
+	select FB
+	select FB_OVERLAY
 	depends on STM32_STM32F429
 	---help---
 		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation

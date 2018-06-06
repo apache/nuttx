@@ -557,11 +557,10 @@
 /* Acceleration support for DMA2D overlays */
 
 #ifdef CONFIG_FB_CMAP
-#  define DMA2D_ACCL                FB_ACCL_BLIT | FB_ACCL_AREA
+#  define DMA2D_ACCL                LTDC_BLIT_ACCL
 #else
-#  define DMA2D_ACCL                FB_ACCL_BLIT   | FB_ACCL_AREA  | \
-                                    FB_ACCL_TRANSP | FB_ACCL_COLOR | \
-                                    FB_ACCL_BLEND
+#  define DMA2D_ACCL                LTDC_BLIT_ACCL | FB_ACCL_TRANSP | \
+                                    FB_ACCL_COLOR  | FB_ACCL_BLEND
 #endif
 
 /* Helper */
@@ -680,8 +679,10 @@ static void stm32_ltdc_linit(uint8_t lid);
 
 #ifdef CONFIG_STM32_DMA2D
 static void stm32_ltdc_dma2dlinit(void);
+#ifdef CONFIG_FB_OVERLAY_BLIT
 static bool stm32_ltdc_lvalidate(FAR const struct stm32_ltdc_s *layer,
                                  FAR const struct fb_area_s *area);
+#endif
 #endif
 
 #ifdef CONFIG_FB_CMAP
@@ -2014,7 +2015,7 @@ static void stm32_ltdc_lclear(uint8_t overlayno)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_DMA2D
+#if defined(CONFIG_STM32_DMA2D) && defined(CONFIG_FB_OVERLAY_BLIT)
 static bool stm32_ltdc_lvalidate(FAR const struct stm32_ltdc_s *layer,
                                  FAR const struct fb_area_s *area)
 {
