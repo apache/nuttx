@@ -121,7 +121,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           if (!CURRENT_REGS)
             {
-              /* In this case just deliver the signal now. */
+              /* In this case just deliver the signal now.
+               * REVISIT:  Signal handler will run in a critical section!
+               */
 
               sigdeliver(tcb);
             }
@@ -227,7 +229,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           if (cpu == me && !CURRENT_REGS)
             {
-              /* In this case just deliver the signal now. */
+              /* In this case just deliver the signal now.
+               * REVISIT:  Signal handler will run in a critical section!
+               */
 
               sigdeliver(tcb);
             }

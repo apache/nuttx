@@ -101,9 +101,24 @@ void up_sigdeliver(void)
   sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
+#ifdef CONFIG_SMP
+  /* In the SMP case, up_schedule_sigaction(0) will have incremented
+   * 'irqcount' in order to force us into a critical section.  At a minimum,
+   * we must call leave_critical_section() at least once in order to
+   * compensate for that.
+   */
+
+  leave_critical_section(regs[REG_CPSR]);
+#endif /* CONFIG_SMP */
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
    * run with interrupts enabled.
+   *
+   * REVISIT: 'irqcount' could still be greater than zero in the SMP case.
+   * This would be an issue if the signal handler were to suspend because
+   * the critical section would be re-established when the signal handler
+   * resumes.
    */
 
   up_irq_enable();

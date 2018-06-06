@@ -615,7 +615,7 @@ struct tcb_s
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 #ifdef CONFIG_SMP
-  int16_t  irqcount;                     /* 0=interrupts enabled                */
+  int16_t  irqcount;                     /* 0=Not in critical section           */
 #endif
 #ifdef CONFIG_CANCELLATION_POINTS
   int16_t  cpcount;                      /* Nested cancellation point count     */
