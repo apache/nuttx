@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/src/common/up_sigdeliver.c
  *
- *   Copyright (C) 2008-2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,12 +103,13 @@ void up_sigdeliver(void)
   sigdeliver           = (sig_deliver_t)rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
-  /* Then restore the task interrupt state. */
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Then make sure that interrupts are enabled.  Signal handlers must always
+   * run with interrupts enabled.
+   */
 
-  if ((regs[REG_FLAGS] & Z16F_CNTRL_FLAGS_IRQE) != 0)
-    {
-       EI();
-    }
+  up_irq_enable();
+#endif
 
   /* Deliver the signals */
 

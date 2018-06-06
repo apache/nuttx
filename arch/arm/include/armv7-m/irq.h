@@ -292,7 +292,7 @@ static inline irqstate_t up_irq_save(void)
 static inline void up_irq_enable(void) inline_function;
 static inline void up_irq_enable(void)
 {
-  setbasepri(0);
+  setbasepri(NVIC_SYSH_PRIORITY_MIN);
   __asm__ __volatile__ ("\tcpsie  i\n");
 }
 

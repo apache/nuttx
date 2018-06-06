@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_sigdeliver.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,9 +101,13 @@ void lm32_sigdeliver(void)
   sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
-  /* Then restore the task interrupt state */
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Then make sure that interrupts are enabled.  Signal handlers must always
+   * run with interrupts enabled.
+   */
 
-  up_irq_restore((irqstate_t)regs[REG_INT_CTX]);
+  up_irq_enable();
+#endif
 
   /* Deliver the signals */
 

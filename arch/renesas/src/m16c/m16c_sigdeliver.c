@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/renesas/src/m16c/m16c_sigdeliver.c
  *
- *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,9 +115,13 @@ void up_sigdeliver(void)
   sigdeliver           = rtcb->xcp.sigdeliver;
   rtcb->xcp.sigdeliver = NULL;
 
-  /* Then restore the task interrupt state. */
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Then make sure that interrupts are enabled.  Signal handlers must always
+   * run with interrupts enabled.
+   */
 
-  up_irq_restore(rtcb->xcp.saved_flg);
+  up_irq_enable();
+#endif
 
   /* Deliver the signals */
 
