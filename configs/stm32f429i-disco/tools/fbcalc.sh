@@ -61,7 +61,7 @@ EOF
 }
 
 fbinfo()
-{ 
+{
   # $1: LTDC start address
   # $2: LTDC len
   # $3: DMA2D len

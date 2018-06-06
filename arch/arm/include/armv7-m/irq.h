@@ -49,6 +49,7 @@
 #include <nuttx/irq.h>
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
+#  include <arch/chip/chip.h>
 #  include <stdint.h>
 #endif
 
