@@ -320,6 +320,7 @@ static int stm32_ili9341_initialize(void)
 #ifdef CONFIG_DEBUG_LCD_INFO
   /* Read display identification */
 
+  uint8_t param;
   lcd->sendcmd(lcd, ILI9341_READ_ID1);
   lcd->recvparam(lcd, &param);
   lcdinfo("ili9341 LCD driver: LCD modules manufacturer ID: %d\n", param);
@@ -590,24 +591,4 @@ void up_fbuninitialize(int display)
 {
   stm32_ltdcuninitialize();
 }
-
-/************************************************************************************
- * Name: up_ltdcgetlayer
- *
- * Description:
- *   The application function name to get a reference to the hardware layer of
- *   the ltdc device.
- *
- * Input Parameters:
- *   lid - The specific layer identifier
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_LTDC_INTERFACE
-FAR struct ltdc_layer_s *up_ltdcgetlayer(int lid)
-{
-  return stm32_ltdcgetlayer(lid);
-}
-#endif
-
 #endif /* CONFIG_STM32_LTDC */

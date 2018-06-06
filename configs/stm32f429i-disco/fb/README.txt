@@ -11,56 +11,88 @@ cd tools
 cd ..
 make
 
-Note!
-In the current implementation the DMA2D driver only supports clut pixel format
-if the LTDC driver it does.  Otherwise it will not be compatible with the NX
-framework.  If CONFIG_FB_CMAP is configured, NX expects that any pixel format
-supports color lookup tables. This is also the case for non CLUT formats e.g.
-FB_FMT_RGB16_565. This may result in wrong color representation by NX if the
-pixel format is unequal to FB_FMT_RGB8.
 
-On the other hand layers with CLUT pixel format are not supported by the DMA2D
-controller, in the case they will be used as destination layer for the following
-operations:
+Frambuffer calculation
+----------------------
 
-- blit
-- blend
-- fillarea
+Use the helper script configs/stm32f429i-disco/tools/fbcalc.sh for calculating
+the heap2 and framebuffer memory region. The script assumes that all overlay
+buffers (LTDC and DMA2D) located in heap2 memory region starting at address
+0xD0000000. When changing the display size (when using a custom display), DMA2D
+overlay size or the pixel format you have to recalculate the heap2 settings.
+In this configuration all overlays (LTDC and DMA2D) positioned at the end of
+heap2.
 
-To enable clut support in both LTDC and DMA2D driver the following
-configurations are valid:
 
-1.
+LTDC hardware acceleration
+--------------------------
 
-- Enable LTDC_INTERFACE and LAYER1/LAYER2
-- Layer1 FB_FMT_RGB8
-- Layer2 any non clut format
+The LTDC driver provides two 2 LTDC overlays and supports the following hardware
+acceleration and features:
 
-But Layer2 can only be used as destination layer for dma2d operations above.
-This configuration is not compatibly to NX because LAYER2 will be referenced
-by up_fbgetvplane and is an invalid CLUT pixel format.
+Configured at build time
+- background color
+- default color (outside visible screen)
 
-2.
+Configurable by nuttx frambuffer interface
+- cmap support (color table is shared by both LTDC overlays and DMA2D when
+  enabled)
 
-- Enable LTDC_INTERFACE and LAYER1/LAYER2
-- Layer2 FB_FMT_RGB8
-- Layer1 any non clut format
+Configurable via the nuttx framebuffer interface (for each layer separately)
+- chromakey
+- transparency (const alpha and pixel alpha)
+- blank
+- color (if DMA2D is enabled and cmap is disabled)
+- blit (if DMA2D is enabled)
+- blend (if DMA2D is enabled and cmap is disabled)
 
-But Layer1 can only be used as destination layer for dma2d operations above.
-This configuration should be compatibly to NX because LAYER2 will be referenced
-by up_fbgetvplane and is an valid CLUT pixel format.
+LTDC overlays are similar to a non-destructive overlay. Both LTDC overlays will
+be permanently blended in the order (background -> overlay 0 -> overlay 1) and
+converted to a resulting video signal by the LTDC controller. That means each
+operation with a LTDC overlay (Overlay 0 and Overlay 1) via nuttx framebuffer
+interface will be visible immediatelly.
+Think about continuous blending between both overlays.
 
-All other non clut configuration work fine.
 
-If using the DMA2D controller without the LTDC controller e.g. camera interface
-than enable CONFIG_FB_CMAP and optional CONFIG_FB_TRANSPARENCY in your board
-specific configuration.
+DMA2D hardware acceleration
+---------------------------
+
+The DMA2D driver implements the following hardware acceleration:
+
+Configurable via the nuttx framebuffer interface
+- cmap support (color table is shared by all DMA2D overlays and LTDC overlays)
+
+Configurable via the nuttx framebuffer interface (for each layer separately)
+
+- color (fill memory region with a specific ARGB8888 color immediatelly), if
+  cmap is disabled
+- blit (copy memory region to another memory region with pixel format
+  conversion if neccessary)
+- blend (blend two memory regions and copy the result to a third memory region
+  with pixel format conversion if neccessary), if cmap is disabled
+
+Blit and blend operation using a fixes memory size defined by the background
+layer. DMA2D controller doesn't support scaling.
+
+DMA2D overlays are similar to destructive overlays. They are invisible. They can
+be used for image preprocessing. The memory region affected by the operations
+(color, blit, blend) can be addressed by the area control command before. The
+configured overlay transparency of DMA2D overlays will be used for subsequently
+blend operation and is valid for the whole overlay.
+
+
+Configuration
+------------
+
+This configuration provides 2 LTDC (visible overlays) and 2 DMA2D overlays with
+pixel format RGB565 and a resolution of 240x320.
 
 
 Loading
 -------
 
 st-flash write nuttx.bin 0x8000000
+
 
 Executing
 ---------
@@ -70,5 +102,11 @@ console at 115200 8N1 baud.  From the nsh comandline execute the fb example:
 
   nsh> fb
 
-The test will put a pattern of concentric squares in the framebuffer and terminate.
+The test will put a pattern of concentric squares in the framebuffer and
+terminate.
+
+You can also test overlay hardware acceleration functionality by executing the
+follwing command (shows a commandline help):
+
+  nsh> fboverlay
 
