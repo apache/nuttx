@@ -557,10 +557,23 @@
 /* Acceleration support for DMA2D overlays */
 
 #ifdef CONFIG_FB_CMAP
-#  define DMA2D_ACCL                LTDC_BLIT_ACCL
+#  ifdef CONFIG_OVERLAY_BLIT
+#    define DMA2D_ACCL              FB_ACCL_BLIT | FB_ACCL_AREA
+#  else
+#    define DMA2D_ACCL              FB_ACCL_AREA
+#  endif
 #else
-#  define DMA2D_ACCL                LTDC_BLIT_ACCL | FB_ACCL_TRANSP | \
-                                    FB_ACCL_COLOR  | FB_ACCL_BLEND
+#  ifdef CONFIG_OVERLAY_BLIT
+#    define DMA2D_ACCL              FB_ACCL_AREA  | \
+                                    FB_ACCL_TRANSP | \
+                                    FB_ACCL_COLOR | \
+                                    FB_ACCL_BLIT | \
+                                    FB_ACCL_BLEND
+#  else
+#    define DMA2D_ACCL              FB_ACCL_AREA  | \
+                                    FB_ACCL_TRANSP | \
+                                    FB_ACCL_COLOR
+#  endif
 #endif
 
 /* Helper */
@@ -679,10 +692,11 @@ static void stm32_ltdc_linit(uint8_t lid);
 
 #ifdef CONFIG_STM32_DMA2D
 static void stm32_ltdc_dma2dlinit(void);
-#ifdef CONFIG_FB_OVERLAY_BLIT
+
+#  ifdef CONFIG_FB_OVERLAY_BLIT
 static bool stm32_ltdc_lvalidate(FAR const struct stm32_ltdc_s *layer,
                                  FAR const struct fb_area_s *area);
-#endif
+#  endif
 #endif
 
 #ifdef CONFIG_FB_CMAP
@@ -2026,7 +2040,7 @@ static bool stm32_ltdc_lvalidate(FAR const struct stm32_ltdc_s *layer,
 
   return (offset <= layer->oinfo.fblen && area->w > 0 && area->h > 0);
 }
-#endif
+#endif /* defined(CONFIG_STM32_DMA2D) && defined(CONFIG_FB_OVERLAY_BLIT) */
 
 /****************************************************************************
  * Name: stm32_ltdc_linit
@@ -2646,8 +2660,6 @@ static int stm32_setblank(FAR struct fb_vtable_s *vtable,
 static int stm32_setarea(FAR struct fb_vtable_s *vtable,
                          FAR const struct fb_overlayinfo_s *oinfo)
 {
-  FAR struct stm32_ltdcdev_s *priv = (FAR struct stm32_ltdcdev_s*)vtable;
-
   DEBUGASSERT(vtable != NULL && priv == &g_vtable && oinfo != NULL);
   lcdinfo("vtable=%p, overlay=%d, x=%d, y=%d, w=%d, h=%d\n", vtable,
           oinfo->overlay, oinfo->sarea.x, oinfo->sarea.y, oinfo->sarea.w,
@@ -2662,7 +2674,8 @@ static int stm32_setarea(FAR struct fb_vtable_s *vtable,
 #  ifdef CONFIG_STM32_DMA2D
   if (oinfo->overlay < LTDC_NOVERLAYS)
     {
-      FAR struct stm32_ltdc_s * layer = &priv->layer[oinfo->overlay];
+      FAR struct stm32_ltdcdev_s *priv = (FAR struct stm32_ltdcdev_s*)vtable;
+      FAR struct stm32_ltdc_s * layer  = &priv->layer[oinfo->overlay];
 
       nxsem_wait(layer->lock);
       memcpy(&layer->oinfo.sarea, &oinfo->sarea, sizeof(struct fb_area_s));

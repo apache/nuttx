@@ -2436,6 +2436,8 @@ config STM32_I2C3
 config STM32_LTDC
 	bool "LTDC"
 	default n
+	select FB
+	select FB_OVERLAY
 	depends on STM32_HAVE_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
