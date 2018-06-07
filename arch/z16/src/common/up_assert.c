@@ -77,6 +77,10 @@
 
 static void _up_assert(int errorcode) /* noreturn_function */
 {
+  /* Flush any buffered SYSLOG data */
+
+  (void)syslog_flush();
+
   /* Are we in an interrupt handler or the idle task? */
 
   if (up_interrupt_context() || this_task()->pid == 0)
@@ -143,6 +147,10 @@ void up_assert(void)
 
   board_autoled_on(LED_ASSERTION);
 
+  /* Flush any buffered SYSLOG data (from prior to the assertion) */
+
+  (void)syslog_flush();
+
 #ifdef CONFIG_HAVE_FILENAME
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
@@ -167,6 +175,10 @@ void up_assert(void)
 
   (void)usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
+
+  /* Flush any buffered SYSLOG data (from the above) */
+
+  (void)syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), this_task(), filename, lineno);

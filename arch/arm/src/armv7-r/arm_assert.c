@@ -337,6 +337,10 @@ static void up_dumpstate(void)
 static void _up_assert(int errorcode) noreturn_function;
 static void _up_assert(int errorcode)
 {
+  /* Flush any buffered SYSLOG data */
+
+  (void)syslog_flush();
+
   /* Are we in an interrupt handler or the idle task? */
 
   if (CURRENT_REGS || (this_task())->pid == 0)
@@ -371,7 +375,12 @@ void up_assert(const uint8_t *filename, int lineno)
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = this_task();
 #endif
+
   board_autoled_on(LED_ASSERTION);
+
+  /* Flush any buffered SYSLOG data (prior to the assertion) */
+
+  (void)syslog_flush();
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
@@ -380,7 +389,12 @@ void up_assert(const uint8_t *filename, int lineno)
   _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
+
   up_dumpstate();
+
+  /* Flush any buffered SYSLOG data (from the above) */
+
+  (void)syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), this_task(), filename, lineno);

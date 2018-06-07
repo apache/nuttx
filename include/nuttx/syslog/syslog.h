@@ -243,6 +243,14 @@ int syslog_file_channel(FAR const char *devpath);
  *   Interrupts are disabled at the time of the crash and this logic must
  *   perform the flush using low-level, non-interrupt driven logic.
  *
+ *   REVISIT:  There is an implementation problem in that if a character
+ *   driver is the underlying device, then there is no mechanism to flush
+ *   the data buffered in the driver with interrupts disabled.
+ *
+ *   Currently, this function on (a) dumps the interrupt buffer (if the
+ *   SYSLOG interrupt buffer is enabled), and (b) only the SYSLOG interface
+ *   supports supports the 'sc_force()' method.
+ *
  * Input Parameters:
  *   None
  *
@@ -252,15 +260,7 @@ int syslog_file_channel(FAR const char *devpath);
  *
  ****************************************************************************/
 
-#if 0
-/* REVISIT: (1) Not yet integrated into assertion handlers and (2) there is
- * an implementation problem in that if a character driver is the underlying
- * device, then there is no mechanism to flush the data buffered in the
- * driver with interrupts disabled.
- */
-
 int syslog_flush(void);
-#endif
 
 /****************************************************************************
  * Name: nx_vsyslog
