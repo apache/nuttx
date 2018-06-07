@@ -542,7 +542,7 @@ A: Yes with the following modifications to the procedure above.
        gdb> mon halt
        gdb> load nuttx <-- Loads NuttX into RAM at 0x010800000
        gdb> file nuttx
-       gdb> mon set pc 0x10800040
+       gdb> mon reg pc 0x10800040
        gdb> s
 
 SMP
