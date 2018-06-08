@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/netdb/lib_dnsbind.c
+ * libs/libc/netdb/lib_gaistrerror.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,85 +39,87 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
-#include <unistd.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/net/dns.h>
-
-#include "netdb/lib_dns.h"
+#include <stdint.h>
+#include <netdb.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Types
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS < 1
-#  error CONFIG_NSOCKET_DESCRIPTORS must be greater than zero
-#endif
+struct errno_strmap_s
+{
+  uint8_t     errnum;
+  const char *str;
+};
 
-#if CONFIG_NET_SOCKOPTS < 1
-#  error CONFIG_NET_SOCKOPTS required by this logic
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_GAISTRERROR
+
+/* This table maps all error numbers to descriptive strings.
+ * The only assumption that the code makes with regard to this
+ * this table is that it is ordered by error number.
+ *
+ * The size of this table is quite large.  Its size can be
+ * reduced by eliminating some of the more obscure error
+ * strings.
+ *
+ * Only short names are currently supported.
+ */
+
+static const struct errno_strmap_s g_gaierrnomap[] =
+{
+  { EAI_AGAIN,           "EAI_AGAIN"         },
+  { EAI_BADFLAGS,        "EAI_BADFLAGS"      },
+  { EAI_FAIL,            "EAI_FAIL"          },
+  { EAI_FAMILY,          "EAI_FAMILY"        },
+  { EAI_MEMORY,          "EAI_MEMORY"        },
+  { EAI_NONAME,          "EAI_NONAME"        },
+  { EAI_SERVICE,         "EAI_SERVICE"       },
+  { EAI_SOCKTYPE,        "EAI_SOCKTYPE"      },
+  { EAI_SYSTEM,          "EAI_SYSTEM"        },
+  { EAI_OVERFLOW,        "EAI_OVERFLOW"      },
+};
+
+#define NERRNO_STRS (sizeof(g_gaierrnomap) / sizeof(struct errno_strmap_s))
+
+#endif /* CONFIG_LIBC_GAISTRERROR */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dns_bind
- *
- * Description:
- *   Initialize the DNS resolver and return a socket bound to the DNS name
- *   server.  The name server was previously selected via dns_server().
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   On success, the bound, non-negative socket descriptor is returned.  A
- *   negated errno value is returned on any failure.
- *
+ * Name: gai_strerror
  ****************************************************************************/
 
-int dns_bind(void)
+FAR const char *gai_strerror(int errnum)
 {
-  struct timeval tv;
-  int errcode;
-  int sd;
-  int ret;
+#ifdef CONFIG_LIBC_GAISTRERROR
+  int ndxlow = 0;
+  int ndxhi  = NERRNO_STRS - 1;
+  int ndxmid;
 
-  /* Has the DNS client been properly initialized? */
-
-  if (!dns_initialize())
+  do
     {
-      nerr("ERROR: DNS client has not been initialized\n");
-      return -EDESTADDRREQ;
+      ndxmid = (ndxlow + ndxhi) >> 1;
+      if (errnum > g_gaierrnomap[ndxmid].errnum)
+        {
+          ndxlow = ndxmid + 1;
+        }
+      else if (errnum < g_gaierrnomap[ndxmid].errnum)
+        {
+          ndxhi = ndxmid - 1;
+        }
+      else
+        {
+          return g_gaierrnomap[ndxmid].str;
+        }
     }
-
-  /* Create a new socket */
-
-  sd = socket(PF_INET, SOCK_DGRAM, 0);
-  if (sd < 0)
-    {
-      errcode = get_errno();
-      nerr("ERROR: socket() failed: %d\n", errcode);
-      return -errcode;
-    }
-
-  /* Set up a receive timeout */
-
-  tv.tv_sec  = 30;
-  tv.tv_usec = 0;
-
-  ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
-  if (ret < 0)
-    {
-      errcode = get_errno();
-      nerr("ERROR: setsockopt() failed: %d\n", errcode);
-      close(sd);
-      return -errcode;
-    }
-
-  return sd;
+  while (ndxlow <= ndxhi);
+#endif
+  return "Unknown error";
 }
+

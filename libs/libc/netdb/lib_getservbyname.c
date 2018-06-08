@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/netdb/lib_dnsbind.c
+ * libs/libc/netdb/lib_getservbyname.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,85 +39,28 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
-#include <unistd.h>
-#include <errno.h>
-#include <debug.h>
+#include <netdb.h>
 
-#include <nuttx/net/dns.h>
-
-#include "netdb/lib_dns.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS < 1
-#  error CONFIG_NSOCKET_DESCRIPTORS must be greater than zero
-#endif
-
-#if CONFIG_NET_SOCKOPTS < 1
-#  error CONFIG_NET_SOCKOPTS required by this logic
-#endif
+#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dns_bind
- *
- * Description:
- *   Initialize the DNS resolver and return a socket bound to the DNS name
- *   server.  The name server was previously selected via dns_server().
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   On success, the bound, non-negative socket descriptor is returned.  A
- *   negated errno value is returned on any failure.
- *
+ * Name: getservbyname
  ****************************************************************************/
 
-int dns_bind(void)
+FAR struct servent *getservbyname(FAR const char *name, FAR const char *proto)
 {
-  struct timeval tv;
-  int errcode;
-  int sd;
+  static struct servent ent;
+  static char *buf[2];
+  struct servent *res;
   int ret;
 
-  /* Has the DNS client been properly initialized? */
-
-  if (!dns_initialize())
-    {
-      nerr("ERROR: DNS client has not been initialized\n");
-      return -EDESTADDRREQ;
-    }
-
-  /* Create a new socket */
-
-  sd = socket(PF_INET, SOCK_DGRAM, 0);
-  if (sd < 0)
-    {
-      errcode = get_errno();
-      nerr("ERROR: socket() failed: %d\n", errcode);
-      return -errcode;
-    }
-
-  /* Set up a receive timeout */
-
-  tv.tv_sec  = 30;
-  tv.tv_usec = 0;
-
-  ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
-  if (ret < 0)
-    {
-      errcode = get_errno();
-      nerr("ERROR: setsockopt() failed: %d\n", errcode);
-      close(sd);
-      return -errcode;
-    }
-
-  return sd;
+  ret = getservbyname_r(name, proto, &ent, (void *)buf, sizeof buf, &res);
+  return (ret != OK) ? NULL : res;
 }
+
+#endif /* CONFIG_LIBC_NETDB */
+

@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/netdb/lib_dnsbind.c
+ * libs/libc/netdb/lib_freeaddrinfo.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,85 +39,30 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
-#include <unistd.h>
-#include <errno.h>
-#include <debug.h>
+#include <netdb.h>
 
-#include <nuttx/net/dns.h>
-
-#include "netdb/lib_dns.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS < 1
-#  error CONFIG_NSOCKET_DESCRIPTORS must be greater than zero
-#endif
-
-#if CONFIG_NET_SOCKOPTS < 1
-#  error CONFIG_NET_SOCKOPTS required by this logic
-#endif
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dns_bind
- *
- * Description:
- *   Initialize the DNS resolver and return a socket bound to the DNS name
- *   server.  The name server was previously selected via dns_server().
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   On success, the bound, non-negative socket descriptor is returned.  A
- *   negated errno value is returned on any failure.
- *
+ * Name: freeaddrinfo
  ****************************************************************************/
 
-int dns_bind(void)
+void freeaddrinfo(FAR struct addrinfo *ai)
 {
-  struct timeval tv;
-  int errcode;
-  int sd;
-  int ret;
+  FAR struct addrinfo *p;
 
-  /* Has the DNS client been properly initialized? */
+  DEBUGASSERT(ai != NULL);
 
-  if (!dns_initialize())
+  do
     {
-      nerr("ERROR: DNS client has not been initialized\n");
-      return -EDESTADDRREQ;
+      p = ai;
+      ai = ai->ai_next;
+      lib_free(p);
     }
-
-  /* Create a new socket */
-
-  sd = socket(PF_INET, SOCK_DGRAM, 0);
-  if (sd < 0)
-    {
-      errcode = get_errno();
-      nerr("ERROR: socket() failed: %d\n", errcode);
-      return -errcode;
-    }
-
-  /* Set up a receive timeout */
-
-  tv.tv_sec  = 30;
-  tv.tv_usec = 0;
-
-  ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
-  if (ret < 0)
-    {
-      errcode = get_errno();
-      nerr("ERROR: setsockopt() failed: %d\n", errcode);
-      close(sd);
-      return -errcode;
-    }
-
-  return sd;
+  while (ai != NULL);
 }
+

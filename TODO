@@ -1177,7 +1177,7 @@ o Network (net/, drivers/net)
 
   Title:       MISSING netdb INTERFACES
   Description: There is no implementation for many netdb interfaces such as
-               getaddrinfo(), freeaddrinfo(), getnameinfo(), etc.
+               getnetbyname(), getprotobyname(), getnameinfo(), etc.
   Status:      Open
   Priority:    Low
 

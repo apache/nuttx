@@ -38,6 +38,8 @@ ifeq ($(CONFIG_LIBC_NETDB),y)
 # Add the netdb C files to the build
 
 CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
+CSRCS += lib_getservbyname.c lib_getservbynamer.c
+CSRCS += lib_gaistrerror.c lib_freeaddrinfo.c lib_getaddrinfo.c
 
 # Add host file support
 
@@ -56,7 +58,7 @@ CSRCS += lib_dnscache.c
 endif
 endif
 
-# Add the net directory to the build
+# Add the netdb directory to the build
 
 DEPPATH += --dep-path netdb
 VPATH += :netdb

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/netdb/lib_dnscache.c
+ * libs/libc/netdb/lib_dnsinit.c
  *
  *   Copyright (C) 2007, 2009, 2012, 2014-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

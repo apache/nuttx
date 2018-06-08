@@ -697,7 +697,7 @@ errorout_with_herrnocode:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gethostname_r
+ * Name: gethostbyname_r
  *
  * Description:
  *   The gethostbyname_r() function returns a structure of type hostent for

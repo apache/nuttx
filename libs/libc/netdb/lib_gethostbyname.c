@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gethostname
+ * Name: gethostbyname
  *
  * Description:
  *   The gethostbyname() function returns a structure of type hostent for
