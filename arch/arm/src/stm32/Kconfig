@@ -2437,7 +2437,6 @@ config STM32_LTDC
 	bool "LTDC"
 	default n
 	select FB
-	select FB_OVERLAY
 	depends on STM32_HAVE_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
@@ -8180,13 +8179,17 @@ config STM32_LTDC_FB_SIZE
     ---help---
         Must be the whole size of the active LTDC layer.
 
-config STM32_LTDC_L1_CHROMAKEY
+config STM32_LTDC_L1_CHROMAKEYEN
 	bool "Enable chromakey support for layer 1"
 	default y
 
+config STM32_LTDC_L1_CHROMAKEY
+	hex "Layer L1 initial chroma key"
+	default 0x00000000
+
 config STM32_LTDC_L1_COLOR
-    hex "Layer L1 default color"
-    default 0x00000000
+	hex "Layer L1 default color"
+	default 0x00000000
 
 choice
 	prompt "Layer 1 color format"
@@ -8236,9 +8239,13 @@ config STM32_LTDC_L2_COLOR
 	hex "Layer L2 default color"
 	default 0x00000000
 
-config STM32_LTDC_L2_CHROMAKEY
+config STM32_LTDC_L2_CHROMAKEYEN
 	bool "Enable chromakey support for layer 2"
 	default y
+
+config STM32_LTDC_L2_CHROMAKEY
+	hex "Layer L2 initial chroma key"
+	default 0x00000000
 
 choice
 	prompt "Layer 2 (top layer) color format"

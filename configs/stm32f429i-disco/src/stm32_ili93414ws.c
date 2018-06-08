@@ -513,9 +513,9 @@ static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
 
 static uint16_t stm32_ili93414ws_recvword(void)
 {
-  volatile uint8_t   n;
-          uint16_t   regval;
-        irqstate_t   flags;
+  volatile int       n;
+  volatile uint16_t  regval;
+         irqstate_t  flags;
 
   /* Disable interrupts during time critical spi sequence.
    * In bidrectional receive mode the data transfer can only be stopped by
