@@ -54,6 +54,7 @@
  *
  * Description: Return true is we are currently executing in
  * the interrupt handler context.
+ *
  ****************************************************************************/
 
 bool up_interrupt_context(void)
