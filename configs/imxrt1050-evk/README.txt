@@ -76,7 +76,7 @@ LEDs and buttons
 
   This LED is not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
-  include/board.h and src/sam_autoleds.c. The LED is used to encode
+  include/board.h and src/imxrt_autoleds.c. The LED is used to encode
   OS-related events as follows:
 
     ------------------- ----------------------- ------
@@ -165,6 +165,88 @@ Configurations
 
 Configuration sub-directories
 -----------------------------
+
+  knsh:
+
+    This is identical to the nsh configuration below except that NuttX
+    is built as a protected mode, monolithic module and the user applications
+    are built separately.  It is recommends to use a special make command;
+    not just 'make' but make with the following two arguments:
+
+        make pass1 pass2
+
+    In the normal case (just 'make'), make will attempt to build both user-
+    and kernel-mode blobs more or less interleaved.  This actual works!
+    However, for me it is very confusing so I prefer the above make command:
+    Make the user-space binaries first (pass1), then make the kernel-space
+    binaries (pass2)
+
+    NOTES:
+
+    1. At the end of the build, there will be several files in the top-level
+       NuttX build directory:
+
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
+
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
+
+       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
+       formats.
+
+    2. Combining .hex files.  If you plan to use the .hex files with your
+       debugger or FLASH utility, then you may need to combine the two hex
+       files into a single .hex file.  Here is how you can do that.
+
+       a. The 'configs/samv71-xult/knsh/defconfigtail' of the nuttx.hex file should look something like this
+          (with my comments added beginning with #):
+
+            $ tail nuttx.hex
+            #xx xxxx 00 data records
+            ...
+            :10 C93C 00 000000000040184000C2010000000000 90
+            :10 C94C 00 2400080000801B4000C01B4000001C40 5D
+            :10 C95C 00 00401C4000000C4050BF0060FF000100 74
+            #xx xxxx 05 Start Linear Address Record
+            :04 0000 05 6000 02C1 D4
+            #xx xxxx 01 End Of File record
+            :00 0000 01 FF
+
+          Use an editor such as vi to remove the 05 and 01 records.
+
+       b. The 'head' of the nuttx_user.hex file should look something like
+          this (again with my comments added beginning with #):
+
+            $ head nuttx_user.hex
+            #xx xxxx 04 Extended Linear Address Record
+            :02 0000 04 6020 7A
+            #xx xxxx 00 data records
+            :10 0000 00 8905206030002060F2622060FC622060 80
+            :10 0010 00 0000242008002420080024205C012420 63
+            :10 0020 00 140024203D0020603100206071052060 14
+            ...
+
+          Nothing needs to be done here.  The nuttx_user.hex file should
+          be fine.
+
+       c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
+          file to produce a single combined hex file:
+
+          $ cat nuttx.hex nuttx_user.hex >combined.hex
+
+       Then use the combined.hex file with the to write the FLASH image.
+       If you do this a lot, you will probably want to invest a little time
+       to develop a tool to automate these steps.
+
+    STATUS:  This configuration was added on 8 June 2018 primarily to assure
+    that all of the components are in place to support the PROTECTED mode
+    build.  This configuration, however, has not been verified as of this
+    writing.
 
   netnsh:
 

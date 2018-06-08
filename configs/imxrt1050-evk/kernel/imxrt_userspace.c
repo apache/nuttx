@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/imxrt/imxrt_mpuinit.c
+ * configs/imxrt1050-evk/kernel/imxrt_userspace.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,103 +39,94 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
+#include <stdlib.h>
 
 #include <nuttx/userspace.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/mm/mm.h>
 
-#include "mpu.h"
-#include "cache.h"
-#include "chip/imxrt_memorymap.h"
-
-#include "imxrt_mpuinit.h"
-
-#ifdef CONFIG_ARM_MPU
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
-#ifndef MAX
-#  define MAX(a,b) a > b ? a : b
+#ifndef CONFIG_NUTTX_USERSPACE
+#  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#ifndef MIN
-#  define MIN(a,b) a < b ? a : b
+#if CONFIG_NUTTX_USERSPACE != 0x60200000
+#  error "CONFIG_NUTTX_USERSPACE must be 0x60200000 to match user-space.ld"
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* These 'addresses' of these values are setup by the linker script.  They are
+ * not actual uint32_t storage locations! They are only used meaningfully in the
+ * following way:
+ *
+ *  - The linker script defines, for example, the symbol_sdata.
+ *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *    that the value _sdata is the address of a uint32_t variable _data (it is
+ *    not!).
+ *  - We can recoved the linker value then by simply taking the address of
+ *    of _data.  like:  uint32_t *pdata = &_sdata;
+ */
+
+extern uint32_t _stext;           /* Start of .text */
+extern uint32_t _etext;           /* End_1 of .text + .rodata */
+extern const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
+extern uint32_t _sdata;           /* Start of .data */
+extern uint32_t _edata;           /* End+1 of .data */
+extern uint32_t _sbss;            /* Start of .bss */
+extern uint32_t _ebss;            /* End+1 of .bss */
+
+/* This is the user space entry point */
+
+int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
+
+const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
+{
+  /* General memory map */
+
+  .us_entrypoint    = (main_t)CONFIG_USER_ENTRYPOINT,
+  .us_textstart     = (uintptr_t)&_stext,
+  .us_textend       = (uintptr_t)&_etext,
+  .us_datasource    = (uintptr_t)&_eronly,
+  .us_datastart     = (uintptr_t)&_sdata,
+  .us_dataend       = (uintptr_t)&_edata,
+  .us_bssstart      = (uintptr_t)&_sbss,
+  .us_bssend        = (uintptr_t)&_ebss,
+
+  /* Memory manager heap structure */
+
+  .us_heap          = &g_mmheap,
+
+  /* Task/thread startup routines */
+
+  .task_startup     = task_startup,
+#ifndef CONFIG_DISABLE_PTHREAD
+  .pthread_startup  = pthread_startup,
+#endif
+
+  /* Signal handler trampoline */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  .signal_handler   = up_signal_handler,
+#endif
+
+  /* User-space work queue support (declared in include/nuttx/wqueue.h) */
+
+#ifdef CONFIG_LIB_USRWORK
+  .work_usrstart    = work_usrstart,
+#endif
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: imxrt_mpu_initialize
- *
- * Description:
- *   Configure the MPU to permit user-space access to only restricted i.MXRT
- *   resources.
- *
- ****************************************************************************/
-
-void imxrt_mpu_initialize(void)
-{
-#ifdef CONFIG_BUILD_PROTECTED
-  uintptr_t datastart;
-  uintptr_t dataend;
-#endif
-
-  /* Show MPU information */
-
-  mpu_showtype();
-
-#ifdef CONFIG_ARMV7M_DCACHE
-  /* Memory barrier */
-
-  ARM_DMB();
-
-#ifdef CONFIG_IMXFT_QSPI
-  /* Make QSPI memory region strongly ordered */
-
-  mpu_priv_stronglyordered(IMXRT_QSPIMEM_BASE, IMXRT_QSPIMEM_SIZE);
-
-#endif
-#endif
-
-#ifdef CONFIG_BUILD_PROTECTED
-  /* Configure user flash and SRAM space */
-
-  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart);
-
-  mpu_user_flash(USERSPACE->us_textstart,
-                 USERSPACE->us_textend - USERSPACE->us_textstart);
-
-  datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
-  dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
-
-  DEBUGASSERT(dataend >= datastart);
-
-  mpu_user_intsram(datastart, dataend - datastart);
-#endif
-
-  /* Then enable the MPU */
-
-  mpu_control(true, false, true);
-}
-
-/****************************************************************************
- * Name: imxrt_mpu_uheap
- *
- * Description:
- *  Map the user-heap region.
- *
- *  This logic may need an extension to handle external SDRAM).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BUILD_PROTECTED
-void imxrt_mpu_uheap(uintptr_t start, size_t size)
-{
-  mpu_user_intsram(start, size);
-}
-#endif
-
-#endif /* CONFIG_ARM_MPU */
+#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

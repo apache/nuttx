@@ -717,8 +717,8 @@ config ARM_MPU
 	depends on ARCH_HAVE_MPU
 	select ARCH_USE_MPU
 	---help---
-		Build in support for the ARM Cortex-M3/4 Memory Protection Unit (MPU).
-		Check your chip specifications first; not all Cortex-M3/4 chips
+		Build in support for the ARM Cortex-M3/4/7 Memory Protection Unit (MPU).
+		Check your chip specifications first; not all Cortex-M3/4/7 chips
 		support the MPU.
 
 config ARM_MPU_NREGIONS

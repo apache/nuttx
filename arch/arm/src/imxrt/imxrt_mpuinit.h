@@ -72,7 +72,7 @@ extern "C"
  * Name: imxrt_mpu_initialize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only unrestricted SAMV7
+ *   Configure the MPU to permit user-space access to only unrestricted i.MXRT
  *   resources.
  *
  ****************************************************************************/

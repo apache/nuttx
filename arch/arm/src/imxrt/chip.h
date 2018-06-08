@@ -57,7 +57,7 @@
 
 #define ARMV7M_PERIPHERAL_INTERRUPTS IMXRT_IRQ_NEXTINT
 
-/* Cache line sizes (in bytes)for the SAMV71 */
+/* Cache line sizes (in bytes)for the i.MX RT */
 
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
