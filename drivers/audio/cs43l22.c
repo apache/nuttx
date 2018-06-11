@@ -2,7 +2,7 @@
  * drivers/audio/cs43l22.c
  * Audio device driver for Cirrus logic CS43L22 Audio codec.
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Taras Drozdovskiy <t.drozdovskiy@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -726,12 +726,10 @@ cs43l22_configure(FAR struct audio_lowerhalf_s *dev,
                   FAR const struct audio_caps_s *caps)
 #endif
 {
-#if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) || !defined(CONFIG_AUDIO_EXCLUDE_TONE)
   FAR struct cs43l22_dev_s *priv = (FAR struct cs43l22_dev_s *)dev;
-#endif
   int ret = OK;
 
-  DEBUGASSERT(priv && caps);
+  DEBUGASSERT(priv != NULL && caps != NULL);
   audinfo("ac_type: %d\n", caps->ac_type);
 
   /* Process the configure operation */

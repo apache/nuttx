@@ -3,7 +3,7 @@
  *
  * Audio device driver for Wolfson Microelectronics WM8904 Audio codec.
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1143,12 +1143,10 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
                             FAR const struct audio_caps_s *caps)
 #endif
 {
-#if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) || !defined(CONFIG_AUDIO_EXCLUDE_TONE)
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
-#endif
   int ret = OK;
 
-  DEBUGASSERT(priv && caps);
+  DEBUGASSERT(priv != NULL && caps != NULL);
   audinfo("ac_type: %d\n", caps->ac_type);
 
   /* Process the configure operation */
