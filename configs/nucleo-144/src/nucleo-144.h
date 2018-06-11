@@ -66,8 +66,8 @@
 /* LED
  *
  * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a
- * Blue LED and LD3 a Red LED, that can be controlled by software. The following definitions assume
- * the default Solder Bridges are installed.
+ * Blue LED and LD3 a Red LED, that can be controlled by software. The following
+ * definitions assume the default Solder Bridges are installed.
  */
 
 #define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
