@@ -303,6 +303,12 @@ int cfsetspeed(FAR struct termios *termiosp, speed_t speed);
 #define cfsetispeed(termiosp,speed) cfsetspeed(termiosp,speed)
 #define cfsetospeed(termiosp,speed) cfsetspeed(termiosp,speed)
 
+/* The cfmakeraw() function is a non-POSIX function that sets the terminal
+ * to something like the "raw" mode.
+ */
+
+void cfmakeraw(FAR struct termios *termiosp);
+
 /* Wait for transmission of output */
 
 int tcdrain(int fd);
