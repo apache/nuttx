@@ -55,7 +55,8 @@
  ****************************************************************************/
 
 #define XBEE_ASSOC_POLLDELAY 100
-#define XBEE_RESPONSE_TIMEOUT 100
+
+#define XBEE_RESPONSE_TIMEOUT MSEC2TICK(100)
 
 /****************************************************************************
  * Private Types

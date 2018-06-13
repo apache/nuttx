@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define XBEE_ATQUERY_TIMEOUT 100
+#define XBEE_ATQUERY_TIMEOUT MSEC2TICK(100)
 
 /****************************************************************************
  * Private Types
@@ -624,6 +624,11 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                     {
                       wlinfo("Sleep Period: %dsec\n",
                              frame->io_data[frame->io_offset]/100);
+                    }
+                  else if (memcmp(command, "RR", 2) == 0)
+                    {
+                      wlinfo("XBee Retries: %d\n",
+                             frame->io_data[frame->io_offset]);
                     }
                   else
                     {
@@ -1557,4 +1562,5 @@ void xbee_regdump(FAR struct xbee_priv_s *priv)
   xbee_send_atquery(priv, "A1");
   xbee_send_atquery(priv, "A2");
   xbee_send_atquery(priv, "SP");
+  xbee_send_atquery(priv, "RR");
 }
