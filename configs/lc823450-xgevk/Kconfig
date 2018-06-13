@@ -4,4 +4,9 @@
 #
 
 if ARCH_BOARD_LC823450_XGEVK
+
+config LC823450_XGEVK_BTPOWER
+	bool "Enable bluetooth power control on lc823450-xgevk"
+	default n
+
 endif

@@ -80,4 +80,8 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += lc823450_autoleds.c
 endif
 
+ifeq ($(CONFIG_LC823450_XGEVK_BTPOWER),y)
+CSRCS += lc823450_bt.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

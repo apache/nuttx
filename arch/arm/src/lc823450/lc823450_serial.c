@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_serial.c
  *
- *   Copyright 2014,2015,2016,2017 Sony Video & Sound Products Inc.
+ *   Copyright 2014,2015,2016,2017,2018 Sony Video & Sound Products Inc.
  *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
@@ -176,13 +176,13 @@ struct up_dev_s
   uint8_t  irq;      /* IRQ associated with this UART */
   uint8_t  parity;   /* 0=none, 1=odd, 2=even */
   uint8_t  bits;     /* Number of bits (7 or 8) */
-  uint8_t  cts;
-  uint8_t  rts;
   bool    stopbits2; /* true: Configure with 2 stop bits instead of 1 */
   uint32_t rowe;     /* receive register over write error */
   uint32_t pe;       /* parity error */
   uint32_t fe;       /* framing error */
   uint32_t rxowe;    /* RX FIFO over write error */
+  bool iflow;        /* input flow control (RTS) enabled */
+  bool oflow;        /* output flow control (CTS) enabled */
 #ifdef CONFIG_HSUART
   DMA_HANDLE       hrxdma;
   DMA_HANDLE       htxdma;
@@ -538,7 +538,7 @@ static int up_setup(struct uart_dev_s *dev)
       ctl |= UART_UMD_STL;
     }
 
-  if (priv->cts)
+  if (priv->oflow)
     {
       ctl |= UART_UMD_CTSEN;
     }
@@ -547,7 +547,7 @@ static int up_setup(struct uart_dev_s *dev)
       ctl &= ~UART_UMD_CTSEN;
     }
 
-  if (priv->rts)
+  if (priv->iflow)
     {
       ctl |= UART_UMD_RTSEN;
     }
@@ -782,7 +782,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #endif
                               CS8;
 
-          /* TODO: CCTS_IFLOW, CCTS_OFLOW */
         }
         break;
 
@@ -809,10 +808,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-          priv->cts = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+          priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-          priv->rts = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+          priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
 
           /* Note that since there is no way to request 9-bit mode
