@@ -270,12 +270,12 @@ void                 endnetent(void);
 void                 endprotoent(void);
 void                 endservent(void);
 #endif
-void                 freeaddrinfo(FAR struct addrinfo *);
+void                 freeaddrinfo(FAR struct addrinfo *ai);
 FAR const char      *gai_strerror(int);
-int                  getaddrinfo(FAR const char *restrict,
-                                 FAR const char *restrict,
-                                 FAR const struct addrinfo *restrict,
-                                 FAR struct addrinfo **restrict);
+int                  getaddrinfo(FAR const char *nodename,
+                                 FAR const char *servname,
+                                 FAR const struct addrinfo *hints,
+                                 FAR struct addrinfo **res);
 
 FAR struct hostent  *gethostbyaddr(FAR const void *addr, socklen_t len,
                                    int type);
@@ -285,21 +285,21 @@ FAR struct servent  *getservbyname(FAR const char *name,
 
 #if 0 /* None of these are yet supported */
 FAR struct hostent  *gethostent(void);
-int                  getnameinfo(FAR const struct sockaddr *restrict,
-                                 socklen_t, FAR char *restrict,
-                                 socklen_t, FAR char *restrict,
-                                 socklen_t, int);
-FAR struct netent   *getnetbyaddr(uint32_t, int);
-FAR struct netent   *getnetbyname(FAR const char *);
+int                  getnameinfo(FAR const struct sockaddr *sa,
+                                 socklen_t salen, FAR char *node,
+                                 socklen_t nodelen, FAR char *service,
+                                 socklen_t servicelen, int flags);
+FAR struct netent   *getnetbyaddr(uint32_t net, int type);
+FAR struct netent   *getnetbyname(FAR const char *name);
 FAR struct netent   *getnetent(void);
-FAR struct protoent *getprotobyname(FAR const char *);
-FAR struct protoent *getprotobynumber(int);
+FAR struct protoent *getprotobyname(FAR const char *name);
+FAR struct protoent *getprotobynumber(int proto);
 FAR struct protoent *getprotoent(void);
-FAR struct servent  *getservbyport(int, FAR const char *);
+FAR struct servent  *getservbyport(int port, FAR const char *proto);
 FAR struct servent  *getservent(void);
 void                 sethostent(int);
-void                 setnetent(int);
-void                 setprotoent(int);
+void                 setnetent(int stayopen);
+void                 setprotoent(int stayopen);
 void                 setservent(int);
 
 #endif /* None of these are yet supported */
