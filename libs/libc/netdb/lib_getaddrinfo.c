@@ -112,10 +112,8 @@ FAR static struct ai_s *alloc_ai(int family, int port, FAR void *addr)
  * Name: getaddrinfo
  ****************************************************************************/
 
-int getaddrinfo(FAR const char *restrict hostname,
-                FAR const char *restrict servname,
-                FAR const struct addrinfo *restrict hint,
-                FAR struct addrinfo **restrict res)
+int getaddrinfo(FAR const char *hostname, FAR const char *servname,
+                FAR const struct addrinfo *hint, FAR struct addrinfo **res)
 {
   int family = AF_UNSPEC;
   int port = 0;
@@ -137,9 +135,9 @@ int getaddrinfo(FAR const char *restrict hostname,
 
   if (hint)
     {
-      family = hint->ai_family;
-      flags = hint->ai_flags;
-      proto = hint->ai_protocol;
+      family   = hint->ai_family;
+      flags    = hint->ai_flags;
+      proto    = hint->ai_protocol;
       socktype = hint->ai_socktype;
 
       if ((flags & valid_flags) != flags)
@@ -308,4 +306,3 @@ int getaddrinfo(FAR const char *restrict hostname,
 
   return EAI_AGAIN;
 }
-
