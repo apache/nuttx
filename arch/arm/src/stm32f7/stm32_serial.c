@@ -1926,6 +1926,22 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_STM32F7_USART_SINGLEWIRE
     case TIOCSSINGLEWIRE:
       {
+        uint32_t cr1;
+        uint32_t cr1_ue;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        /* Get the original state of UE */
+
+        cr1  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        cr1_ue = cr1 & USART_CR1_UE;
+        cr1 &= ~USART_CR1_UE;
+
+        /* Disable UE, HDSEL can only be written when UE=0 */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
+
         /* Change the TX port to be open-drain/push-pull and enable/disable
          * half-duplex mode.
          */
@@ -1944,6 +1960,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
 
         up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
+
+        /* Re-enable UE if appropriate */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+        leave_critical_section(flags);
       }
      break;
 #endif
