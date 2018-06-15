@@ -477,6 +477,14 @@ config SHT21_DEBUG
 
 endif # SENSORS_SHT21
 
+config SENSORS_T67XX
+	bool "Telair T6713 carbon dioxide sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Telair T6713 and T6703 carbon
+		dioxide sensors.
+
 config SENSORS_QENCODER
 	bool "Qencoder"
 	default n
