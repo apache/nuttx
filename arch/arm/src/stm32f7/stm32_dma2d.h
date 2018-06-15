@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_dma2d.h
+ * arch/arm/src/stm32f7/stm32_dma2d.h
  *
- *   Copyright (C) 2014-2015 Marco Krahl. All rights reserved.
+ *   Copyright (C) 2014-2015, 2018 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,374 +44,145 @@
 #include <nuttx/video/fb.h>
 #include "stm32_ltdc.h"
 
-#ifdef CONFIG_STM32F7_DMA2D
+#ifdef CONFIG_FB_OVERLAY
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-struct ltdc_area_s; /* see arch/arm/src/stm32f7/stm32_ltdc.h */
+/* This structure describes DMA2D overlay information */
 
-/* Blend mode definitions */
-
-enum dma2d_blend_e
+struct stm32_dma2d_overlay_s
 {
-  DMA2D_BLEND_NONE           = 0,   /* Disable all blend operation */
-  DMA2D_BLEND_ALPHA          = 0x1, /* Enable alpha blending */
-  DMA2D_BLEND_PIXELALPHA     = 0x2, /* Enable alpha blending from pixel color */
+  uint8_t    fmt;                         /* DMA2D pixel format */
+  uint8_t    transp_mode;                 /* DMA2D transparency mode */
+  fb_coord_t xres;                        /* X-resolution overlay */
+  fb_coord_t yres;                        /* Y-resolution overlay */
+  FAR struct fb_overlayinfo_s *oinfo;     /* Framebuffer overlay information */
 };
 
-/* The layer is controlled through the following structure */
+/* DMA2D is controlled by the following interface */
 
 struct dma2d_layer_s
 {
-  /* Name: getvideoinfo
-   *
-   * Description:
-   *   Get video information about the layer
-   *
-   * Parameter:
-   *   layer  - Reference to the layer control structure
-   *   vinfo  - Reference to the video info structure
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error   - -EINVAL
-   */
-
-  int (*getvideoinfo)(FAR struct dma2d_layer_s *layer,
-                    FAR struct fb_videoinfo_s *vinfo);
-
-  /* Name: getplaneinfo
-   *
-   * Description:
-   *   Get plane information about the layer
-   *
-   * Parameter:
-   *   layer   - Reference to the layer control structure
-   *   planeno - Number of the plane
-   *   pinfo   - Reference to the plane info structure
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error   - -EINVAL
-   */
-
-  int (*getplaneinfo)(FAR struct dma2d_layer_s *layer, int planeno,
-                      FAR struct fb_planeinfo_s *pinfo);
-
-  /* Name: getlid
-   *
-   * Description:
-   *   Get a specific layer identifier.
-   *
-   * Parameter:
-   *   layer - Reference to the layer structure
-   *   lid   - Reference to store the layer id
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error   - -EINVAL
-   */
-
-  int (*getlid)(FAR struct dma2d_layer_s *layer, int *lid);
-
-#ifdef CONFIG_STM32F7_DMA2D_L8
   /* Name: setclut
    *
    * Description:
-   *   Configure layer clut (color lookup table).
-   *   Non clut is defined during initializing.
+   *   Set the cmap table for both foreground and background layer.
+   *   Up to 256 colors supported.
    *
    * Parameter:
-   *   layer  - Reference to the layer structure
-   *   cmap   - color lookup table with up the 256 entries
+   *   cmap  - Reference to the cmap table
    *
    * Returned Value:
    *   On success - OK
    *   On error   - -EINVAL
    */
 
-  int (*setclut)(FAR struct dma2d_layer_s *layer,
-                    const FAR struct fb_cmap_s *cmap);
-
-  /* Name: getclut
-   *
-   * Description:
-   *   Get configured layer clut (color lookup table).
-   *
-   * Parameter:
-   *   layer - Reference to the layer structure
-   *   cmap  - Reference to valid color lookup table accept up the 256 color
-   *           entries
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error   - -EINVAL
-   */
-
-  int (*getclut)(FAR struct dma2d_layer_s *layer, FAR struct fb_cmap_s *cmap);
+#ifdef CONFIG_FB_CMAP
+  int (*setclut)(FAR const struct fb_cmap_s * cmap);
 #endif
 
-  /* Name: setalpha
+  /* Name: fillcolor
    *
    * Description:
-   *   Configure layer alpha value factor into blend operation.
-   *   During the layer blend operation the source alpha value is multiplied
-   *   with this alpha value. If the source color format doesn't support alpha
-   *   channel (e.g. non ARGB8888) this alpha value will be used as constant
-   *   alpha value for blend operation.
-   *   Default value during initializing: 0xff
+   *   Fill a specific memory region with a color.
+   *   The caller must ensure that the memory region (area) is within the entire
+   *   overlay.
    *
    * Parameter:
-   *   layer - Reference to the layer structure
-   *   alpha - Alpha value
+   *   oinfo  - Reference to overlay information
+   *   area   - Reference to the area to fill
+   *   argb   - argb8888 color
    *
    * Returned Value:
    *   On success - OK
-   *   On error - -EINVAL
+   *   On error   - -EINVAL
    */
 
-  int (*setalpha)(FAR struct dma2d_layer_s *layer, uint8_t alpha);
-
-  /* Name: getalpha
-   *
-   * Description:
-   *   Get configured layer alpha value factor for blend operation.
-   *
-   * Parameter:
-   *   layer - Reference to the layer structure
-   *   alpha - Reference to store the alpha value
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error - -EINVAL
-   */
-
-  int (*getalpha)(FAR struct dma2d_layer_s *layer, uint8_t *alpha);
-
-  /* Name: setblendmode
-   *
-   * Description:
-   *   Configure blend mode of the layer.
-   *   Default mode during initializing: DMA2D_BLEND_NONE
-   *   Blendmode is active after next update.
-   *
-   * Parameter:
-   *   layer - Reference to the layer structure
-   *   mode  - Blend mode (see DMA2D_BLEND_*)
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error - -EINVAL
-   *
-   * Procedure information:
-   *   DMA2D_BLEND_NONE:
-   *     Informs the driver to disable all blend operation for the given layer.
-   *     That means the layer is opaque.
-   *
-   *   DMA2D_BLEND_ALPHA:
-   *     Informs the driver to enable alpha blending for the given layer.
-   *
-   *   DMA2D_BLEND_PIXELALPHA:
-   *     Informs the driver to use the pixel alpha value of the layer instead
-   *     the constant alpha value. This is only useful for ARGB8888
-   *     color format.
-   */
-
-  int (*setblendmode)(FAR struct dma2d_layer_s *layer, uint32_t mode);
-
-  /* Name: getblendmode
-   *
-   * Description:
-   *   Get configured blend mode of the layer.
-   *
-   * Parameter:
-   *   layer - Reference to the layer structure
-   *   mode  - Reference to store the blend mode
-   *
-   * Returned Value:
-   *   On success - OK
-   *   On error - -EINVAL
-   */
-
-  int (*getblendmode)(FAR struct dma2d_layer_s *layer, uint32_t *mode);
+  int (*fillcolor)(FAR struct stm32_dma2d_overlay_s *oinfo,
+                   FAR const struct fb_area_s *area, uint32_t argb);
 
   /* Name: blit
    *
    * Description:
-   *   Copy selected area from a source layer to selected position of the
-   *   destination layer.
+   *   Copies memory from a source overlay (defined by sarea) to destination
+   *   overlay position (defined by destxpos and destypos) without pixelformat
+   *   conversion. The caller must ensure that the memory region (area) is
+   *   within the entire overlay.
    *
    * Parameter:
-   *   dest     - Reference to the destination layer
-   *   destxpos - Selected x target position of the destination layer
-   *   destypos - Selected y target position of the destination layer
-   *   src      - Reference to the source layer
-   *   srcarea  - Reference to the selected area of the source layer
+   *   doverlay - Reference destination overlay
+   *   destxpos - x-Offset destination overlay
+   *   destypos - y-Offset destination overlay
+   *   soverlay - Reference source overlay
+   *   sarea    - Reference source area
    *
    * Returned Value:
-   *    OK        - On success
-   *   -EINVAL    - If one of the parameter invalid or if the size of the
-   *                selected source area outside the visible area of the
-   *                destination layer. (The visible area usually represents the
-   *                display size)
-   *   -ECANCELED - Operation cancelled, something goes wrong.
+   *   On success - OK
+   *   On error   - -EINVAL
    */
 
-   int (*blit)(FAR struct dma2d_layer_s *dest,
-                fb_coord_t destxpos, fb_coord_t destypos,
-                FAR const struct dma2d_layer_s *src,
-                FAR const struct ltdc_area_s *srcarea);
+  int (*blit)(FAR struct stm32_dma2d_overlay_s *doverlay,
+              uint32_t destxpos, uint32_t destypos,
+              FAR struct stm32_dma2d_overlay_s *soverlay,
+              FAR const struct fb_area_s *sarea);
 
   /* Name: blend
    *
    * Description:
-   *   Blends the selected area from a background layer with selected position
-   *   of the foreground layer. Copies the result to the selected position of
-   *   the destination layer. Note! The content of the foreground and background
-   *   layer keeps unchanged as long destination layer is unequal to the
-   *   foreground and background layer.
+   *   Blends two source memory areas to a destination memory area with
+   *   pixelformat conversion if necessary. The caller must ensure that the
+   *   memory region (area) is within the entire overlays.
    *
    * Parameter:
-   *   dest     - Reference to the destination layer
-   *   fore     - Reference to the foreground layer
-   *   forexpos - Selected x target position of the foreground layer
-   *   foreypos - Selected y target position of the foreground layer
-   *   back     - Reference to the background layer
-   *   backarea - Reference to the selected area of the background layer
+   *   doverlay - Destination overlay
+   *   destxpos - x-Offset destination overlay
+   *   destypos - y-Offset destination overlay
+   *   foverlay - Foreground overlay
+   *   forexpos - x-Offset foreground overlay
+   *   foreypos - y-Offset foreground overlay
+   *   boverlay - Background overlay
+   *   barea    - x-Offset, y-Offset, x-resolution and y-resolution of
+   *              background overlay
    *
    * Returned Value:
-   *    OK        - On success
-   *   -EINVAL    - If one of the parameter invalid or if the size of the
-   *                selected source area outside the visible area of the
-   *                destination layer. (The visible area usually represents the
-   *                display size)
-   *   -ECANCELED - Operation cancelled, something goes wrong.
+   *   On success - OK
+   *   On error   - -EINVAL or -ECANCELED
    */
 
-   int (*blend)(FAR struct dma2d_layer_s *dest,
-                fb_coord_t destxpos, fb_coord_t destypos,
-                FAR const struct dma2d_layer_s *fore,
-                fb_coord_t forexpos, fb_coord_t foreypos,
-                FAR const struct dma2d_layer_s *back,
-                FAR const struct ltdc_area_s *backarea);
-
-  /* Name: fillarea
-   *
-   * Description:
-   *   Fill the selected area of the whole layer with a specific color.
-   *
-   * Parameter:
-   *   layer    - Reference to the layer structure
-   *   area     - Reference to the valid area structure select the area
-   *   color    - Color to fill the selected area. Color must be formatted
-   *              according to the layer pixel format.
-   *
-   * Returned Value:
-   *    OK        - On success
-   *   -EINVAL    - If one of the parameter invalid or if the size of the
-   *                selected area outside the visible area of the layer.
-   *   -ECANCELED - Operation cancelled, something goes wrong.
-   */
-
-   int (*fillarea)(FAR struct dma2d_layer_s *layer,
-                    FAR const struct ltdc_area_s *area,
-                    uint32_t color);
+  int (*blend)(FAR struct stm32_dma2d_overlay_s *doverlay,
+               uint32_t destxpos, uint32_t destypos,
+               FAR struct stm32_dma2d_overlay_s *foverlay,
+               uint32_t forexpos, uint32_t foreypos,
+               FAR struct stm32_dma2d_overlay_s *boverlay,
+               FAR const struct fb_area_s *barea);
 };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-struct stm32_ltdc_s; /* Forward declaration */
-
 /****************************************************************************
- * Name: stm32_dma2dinitltdc
+ * Name: stm32_dma2ddev
  *
  * Description:
- *   Get a reference to the dma2d layer coupled with the ltdc layer.
- *   It not intends to use this function by user space applications.
- *   It resolves the following requirements:
- *   1. Share the color lookup table
- *   2. Share the planeinfo information
- *   3. Share the videoinfo information
- *
- * Input Parameters:
- *   layer  - a valid reference to the low level ltdc layer structure
+ *   Get a reference to the DMA2D controller.
  *
  * Returned Value:
- *   On success - A valid dma2d layer reference
+ *   On success - A valid DMA2D controller reference
  *   On error   - NULL and errno is set to
  *                -EINVAL if one of the parameter is invalid
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s *stm32_dma2dinitltdc(FAR struct stm32_ltdc_s *layer);
-
-/****************************************************************************
- * Name: up_dma2dgetlayer
- *
- * Description:
- *   Get a dma2d layer structure by the layer identifier
- *
- * Input Parameters:
- *   lid - Layer identifier
- *
- * Returned Value:
- *   Reference to the dma2d layer control structure on success or Null if no
- *   related exist.
- *
- ****************************************************************************/
-
-FAR struct dma2d_layer_s *up_dma2dgetlayer(int lid);
-
-/****************************************************************************
- * Name: up_dma2dcreatelayer
- *
- * Description:
- *   Create a new dma2d layer object to interact with the dma2d controller
- *
- * Input Parameters:
- *   width  - Layer width
- *   height - Layer height
- *   fmt    - Pixel format of the layer
- *
- * Returned Value:
- *   On success - A valid dma2d layer reference
- *   On error   - NULL and errno is set to
- *                -EINVAL if one of the parameter is invalid
- *                -ENOMEM if no memory available or exceeds
- *                 CONFIG_STM32F7_DMA2D_NLAYERS
- *
- ****************************************************************************/
-
-FAR struct dma2d_layer_s *up_dma2dcreatelayer(fb_coord_t width,
-                                              fb_coord_t height,
-                                              uint8_t fmt);
-
-/****************************************************************************
- * Name: up_dma2dremovelayer
- *
- * Description:
- *  Remove and deallocate the dma2d layer
- *
- * Input Parameters:
- *   layer  - Reference to the layer to remove
- *
- * Returned Value:
- *   On success - OK
- *   On error   - -EINVAL
- *
- ****************************************************************************/
-
-int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer);
+FAR struct dma2d_layer_s *stm32_dma2ddev(void);
 
 /****************************************************************************
  * Name: up_dma2dinitialize
  *
  * Description:
- *   Initialize the dma2d controller
+ *   Initialize the DMA2D controller
  *
  * Returned Value:
  *   OK - On success
@@ -419,17 +190,17 @@ int up_dma2dremovelayer(FAR struct dma2d_layer_s *layer);
  *
  ****************************************************************************/
 
-int up_dma2dinitialize(void);
+int stm32_dma2dinitialize(void);
 
 /****************************************************************************
  * Name: up_dma2duninitialize
  *
  * Description:
- *   Uninitialize the dma2d controller
+ *   Uninitialize the DMA2D controller
  *
  ****************************************************************************/
 
-void up_dma2duninitialize(void);
+void stm32_dma2duninitialize(void);
 
-#endif /* CONFIG_STM32F7_DMA2D */
+#endif /* CONFIG_FB_OVERLAY */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H */

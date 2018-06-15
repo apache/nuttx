@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/chip/stm32_dma2d.h
+ * arch/arm/src/stm32f7/chip/stm32_dma2d.h
  *
  *   Copyright (C) 2014-2015 Marco Krahl. All rights reserved.
  *   Author: Marco Krahl <ocram.lhark@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA2D_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA2D_H
+#ifndef __ARCH_ARM_SRC_STM32F7_CHIP_STM32_DMA2D_H
+#define __ARCH_ARM_SRC_STM32F7_CHIP_STM32_DMA2D_H
 
 /****************************************************************************
  * Included Files
@@ -70,29 +70,29 @@
 #define STM32_DMA2D_OOR_OFFSET      0x0040 /* DMA2D Output Offset Register */
 #define STM32_DMA2D_NLR_OFFSET      0x0044 /* DMA2D Number Of Line Register */
 #define STM32_DMA2D_LWR_OFFSET      0x0048 /* DMA2D Line Watermark Register */
-#define STM32_DMA2D_AMTCR_OFFSET    0x004C /* DMA2D AHB Master Time Configuration Register */
+#define STM32_DMA2D_AMTCR_OFFSET    0x004c /* DMA2D AHB Master Time Configuration Register */
 
 /* DMA2D Register Addresses **************************************************/
 
-#define STM32_DMA2D_CR              (STM32_DMA2D_BASE+STM32_DMA2D_CR_OFFSET)
-#define STM32_DMA2D_ISR             (STM32_DMA2D_BASE+STM32_DMA2D_ISR_OFFSET)
-#define STM32_DMA2D_IFCR            (STM32_DMA2D_BASE+STM32_DMA2D_IFCR_OFFSET)
-#define STM32_DMA2D_FGMAR           (STM32_DMA2D_BASE+STM32_DMA2D_FGMAR_OFFSET)
-#define STM32_DMA2D_FGOR            (STM32_DMA2D_BASE+STM32_DMA2D_FGOR_OFFSET)
-#define STM32_DMA2D_BGMAR           (STM32_DMA2D_BASE+STM32_DMA2D_BGMAR_OFFSET)
-#define STM32_DMA2D_BGOR            (STM32_DMA2D_BASE+STM32_DMA2D_BGOR_OFFSET)
-#define STM32_DMA2D_FGPFCCR         (STM32_DMA2D_BASE+STM32_DMA2D_FGPFCCR_OFFSET)
-#define STM32_DMA2D_FGCOLR          (STM32_DMA2D_BASE+STM32_DMA2D_FGCOLR_OFFSET)
-#define STM32_DMA2D_BGPFCCR         (STM32_DMA2D_BASE+STM32_DMA2D_BGPFCCR_OFFSET)
-#define STM32_DMA2D_BGCOLR          (STM32_DMA2D_BASE+STM32_DMA2D_BGCOLR_OFFSET)
-#define STM32_DMA2D_FGCMAR          (STM32_DMA2D_BASE+STM32_DMA2D_FGCMAR_OFFSET)
-#define STM32_DMA2D_BGCMAR          (STM32_DMA2D_BASE+STM32_DMA2D_BGCMAR_OFFSET)
-#define STM32_DMA2D_OPFCCR          (STM32_DMA2D_BASE+STM32_DMA2D_OPFCCR_OFFSET)
-#define STM32_DMA2D_OCOLR           (STM32_DMA2D_BASE+STM32_DMA2D_OCOLR_OFFSET)
-#define STM32_DMA2D_OMAR            (STM32_DMA2D_BASE+STM32_DMA2D_OMAR_OFFSET)
-#define STM32_DMA2D_OOR             (STM32_DMA2D_BASE+STM32_DMA2D_OOR_OFFSET)
-#define STM32_DMA2D_NLR             (STM32_DMA2D_BASE+STM32_DMA2D_NLR_OFFSET)
-#define STM32_DMA2D_LWR             (STM32_DMA2D_BASE+STM32_DMA2D_LWR_OFFSET)
+#define STM32_DMA2D_CR              (STM32_DMA2D_BASE + STM32_DMA2D_CR_OFFSET)
+#define STM32_DMA2D_ISR             (STM32_DMA2D_BASE + STM32_DMA2D_ISR_OFFSET)
+#define STM32_DMA2D_IFCR            (STM32_DMA2D_BASE + STM32_DMA2D_IFCR_OFFSET)
+#define STM32_DMA2D_FGMAR           (STM32_DMA2D_BASE + STM32_DMA2D_FGMAR_OFFSET)
+#define STM32_DMA2D_FGOR            (STM32_DMA2D_BASE + STM32_DMA2D_FGOR_OFFSET)
+#define STM32_DMA2D_BGMAR           (STM32_DMA2D_BASE + STM32_DMA2D_BGMAR_OFFSET)
+#define STM32_DMA2D_BGOR            (STM32_DMA2D_BASE + STM32_DMA2D_BGOR_OFFSET)
+#define STM32_DMA2D_FGPFCCR         (STM32_DMA2D_BASE + STM32_DMA2D_FGPFCCR_OFFSET)
+#define STM32_DMA2D_FGCOLR          (STM32_DMA2D_BASE + STM32_DMA2D_FGCOLR_OFFSET)
+#define STM32_DMA2D_BGPFCCR         (STM32_DMA2D_BASE + STM32_DMA2D_BGPFCCR_OFFSET)
+#define STM32_DMA2D_BGCOLR          (STM32_DMA2D_BASE + STM32_DMA2D_BGCOLR_OFFSET)
+#define STM32_DMA2D_FGCMAR          (STM32_DMA2D_BASE + STM32_DMA2D_FGCMAR_OFFSET)
+#define STM32_DMA2D_BGCMAR          (STM32_DMA2D_BASE + STM32_DMA2D_BGCMAR_OFFSET)
+#define STM32_DMA2D_OPFCCR          (STM32_DMA2D_BASE + STM32_DMA2D_OPFCCR_OFFSET)
+#define STM32_DMA2D_OCOLR           (STM32_DMA2D_BASE + STM32_DMA2D_OCOLR_OFFSET)
+#define STM32_DMA2D_OMAR            (STM32_DMA2D_BASE + STM32_DMA2D_OMAR_OFFSET)
+#define STM32_DMA2D_OOR             (STM32_DMA2D_BASE + STM32_DMA2D_OOR_OFFSET)
+#define STM32_DMA2D_NLR             (STM32_DMA2D_BASE + STM32_DMA2D_NLR_OFFSET)
+#define STM32_DMA2D_LWR             (STM32_DMA2D_BASE + STM32_DMA2D_LWR_OFFSET)
 
 /* DMA2D Register Bit Definitions ********************************************/
 
@@ -156,6 +156,12 @@
 #define DMA2D_xGPFCCR_ALPHA_MASK    (0xFF << DMA2D_xGPFCCR_ALPHA_SHIFT)
 #define DMA2D_xGPFCCR_ALPHA(n)      ((uint32_t)(n) << DMA2D_xGPFCCR_ALPHA_SHIFT)
 
+/* DMA2D PFC alpha mode */
+
+#define STM32_DMA2D_PFCCR_AM_NONE   0
+#define STM32_DMA2D_PFCCR_AM_CONST  1
+#define STM32_DMA2D_PFCCR_AM_PIXEL  2
+
 /* DMA2D Foreground/Background Color Register */
 
 #define DMA2D_xGCOLR_BLUE_SHIFT     (0)  /* Bits 0-7 Blue Value */
@@ -177,6 +183,20 @@
 #define DMA2D_OPFCCR_CM_SHIFT       (0)  /* Bits 0-2 Color Mode */
 #define DMA2D_OPFCCR_CM_MASK        (7 << DMA2D_OPFCCR_CM_SHIFT)
 #define DMA2D_OPFCCR_CM(n)          ((uint32_t)(n) << DMA2D_OPFCCR_CM_SHIFT)
+
+/* DMA2D PFC Pixel Format */
+
+#define DMA2D_PF_ARGB8888           0
+#define DMA2D_PF_RGB888             1
+#define DMA2D_PF_RGB565             2
+#define DMA2D_PF_ARGB1555           3
+#define DMA2D_PF_ARGB14444          4
+#define DMA2D_PF_L8                 5
+#define DMA2D_PF_AL44               6
+#define DMA2D_PF_AL88               7
+#define DMA2D_PF_L4                 8
+#define DMA2D_PF_A8                 9
+#define DMA2D_PF_A4                 10
 
 /* DMA2D Output Color Register */
 
@@ -227,4 +247,4 @@
  * Public Types
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA2D_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_DMA2D_H */

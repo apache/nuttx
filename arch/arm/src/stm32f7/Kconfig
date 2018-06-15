@@ -1317,6 +1317,8 @@ config STM32F7_DSIHOST
 config STM32F7_DMA2D
 	bool "DMA2D"
 	default n
+	select FB
+	select FB_OVERLAY
 	depends on STM32F7_HAVE_DMA2D
 	---help---
 		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
@@ -1379,6 +1381,7 @@ config STM32F7_LPTIM1
 config STM32F7_LTDC
 	bool "LTDC"
 	default n
+	select FB
 	depends on STM32F7_HAVE_LTDC
 	---help---
 		The STM32 LTDC is an LCD-TFT Display Controller available on
@@ -4881,12 +4884,6 @@ if STM32F7_LTDC
 
 menu "LTDC Configuration"
 
-config STM32F7_LTDC_INTERFACE
-	bool "LTDC interface support"
-	default n
-	---help---
-		Enable the ltdc interface to support ltdc layer control.
-
 config STM32F7_LTDC_USE_DSI
 	bool "Use DSI as display connection"
 	default n
@@ -4942,6 +4939,7 @@ config STM32F7_LTDC_DITHER_BLUE
 
 config STM32F7_LTDC_FB_BASE
 	hex "Framebuffer memory start address"
+	default 0
 	---help---
 		If you are using the LTDC, then you must provide the address
 		of the start of the framebuffer.  This address will typically
@@ -4950,6 +4948,20 @@ config STM32F7_LTDC_FB_BASE
 config STM32F7_LTDC_FB_SIZE
 	int "Framebuffer memory size (bytes)"
 	default 0
+	 ---help---
+		Must be the whole size of the active LTDC layer.
+
+config STM32F7_LTDC_L1_CHROMAKEYEN
+	bool "Enable chromakey support for layer 1"
+	default y
+
+config STM32F7_LTDC_L1_CHROMAKEY
+	hex "Layer L1 initial chroma key"
+	default 0x00000000
+
+config STM32F7_LTDC_L1_COLOR
+	hex "Layer L1 default color"
+	default 0x00000000
 
 choice
 	prompt "Layer 1 color format"
@@ -4957,27 +4969,35 @@ choice
 
 config STM32F7_LTDC_L1_L8
 	bool "8 bpp L8 (8-bit CLUT)"
+	depends on FB_CMAP
 
 config STM32F7_LTDC_L1_AL44
 	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	depends on FB_CMAP
 
 config STM32F7_LTDC_L1_AL88
 	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	depends on FB_CMAP
 
 config STM32F7_LTDC_L1_RGB565
 	bool "16 bpp RGB 565"
+	depends on !FB_CMAP
 
 config STM32F7_LTDC_L1_ARGB4444
 	bool "16 bpp ARGB 4444"
+	depends on !FB_CMAP
 
 config STM32F7_LTDC_L1_ARGB1555
 	bool "16 bpp ARGB 1555"
+	depends on !FB_CMAP
 
 config STM32F7_LTDC_L1_RGB888
 	bool "24 bpp RGB 888"
+	depends on !FB_CMAP
 
 config STM32F7_LTDC_L1_ARGB8888
 	bool "32 bpp ARGB 8888"
+	depends on !FB_CMAP
 
 endchoice # Layer 1 color format
 
@@ -4987,39 +5007,57 @@ config STM32F7_LTDC_L2
 
 if STM32F7_LTDC_L2
 
+config STM32F7_LTDC_L2_COLOR
+	hex "Layer L2 default color"
+	default 0x00000000
+
+config STM32F7_LTDC_L2_CHROMAKEYEN
+	bool "Enable chromakey support for layer 2"
+	default y
+
+config STM32F7_LTDC_L2_CHROMAKEY
+	hex "Layer L2 initial chroma key"
+	default 0x00000000
+
 choice
 	prompt "Layer 2 (top layer) color format"
 	default STM32F7_LTDC_L2_RGB565
 
 config STM32F7_LTDC_L2_L8
+	depends on STM32F7_LTDC_L1_L8
 	bool "8 bpp L8 (8-bit CLUT)"
 
 config STM32F7_LTDC_L2_AL44
+	depends on STM32F7_LTDC_L1_AL44
 	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
 
 config STM32F7_LTDC_L2_AL88
+	depends on STM32F7_LTDC_L1_AL88
 	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
 
 config STM32F7_LTDC_L2_RGB565
+	depends on STM32F7_LTDC_L1_RGB565
 	bool "16 bpp RGB 565"
 
 config STM32F7_LTDC_L2_ARGB4444
+	depends on STM32F7_LTDC_L1_ARGB4444
 	bool "16 bpp ARGB 4444"
 
 config STM32F7_LTDC_L2_ARGB1555
+	depends on STM32F7_LTDC_L1_ARGB1555
 	bool "16 bpp ARGB 1555"
 
 config STM32F7_LTDC_L2_RGB888
+	depends on STM32F7_LTDC_L1_RGB888
 	bool "24 bpp RGB 888"
 
 config STM32F7_LTDC_L2_ARGB8888
+	depends on STM32F7_LTDC_L1_ARGB8888
 	bool "32 bpp ARGB 8888"
 
 endchoice # Layer 2 color format
 
 endif # STM32F7_LTDC_L2
-
-if STM32F7_LTDC_L1_L8 || STM32F7_LTDC_L2_L8
 
 config FB_CMAP
 	bool "Enable color map support"
@@ -5030,11 +5068,10 @@ config FB_CMAP
 config FB_TRANSPARENCY
 	bool "Enable transparency color map support"
 	default y
+	depends on FB_CMAP
 	---help---
 		Enabling transparency color map support is neccessary for
 		ltdc L8 format.
-
-endif
 
 config STM32F7_LTDC_REGDEBUG
 	bool "Enable LTDC register value debug messages"
@@ -5053,49 +5090,93 @@ if STM32F7_DMA2D
 menu "DMA2D Configuration"
 
 config STM32F7_DMA2D_NLAYERS
-	int "Number DMA2D layers"
-	default 2
+	int "Number DMA2D overlays"
+	default 1
+	range 1 256
 	---help---
-		Number of allocatable DMA2D layers except the LTDC layer.
+		Number of supported DMA2D layer.
+
+config STM32F7_DMA2D_LAYER_SHARED
+	bool "Overlays shared memory region"
+	default n
+	---help---
+		Several overlays can share the same memory region.
+		Setup a whole memory area (usually multiple size of the visible screen)
+		allows image preprocessing before they become visible by blit operation.
+
+config STM32F7_DMA2D_LAYER_PPLINE
+	int "Pixel per line"
+	default 1
+	range 1 65535
+	---help---
+		If you are using the DMA2D, then you must provide the pixel per line or
+		width of the overlay.
+
+config STM32F7_DMA2D_FB_BASE
+	hex "Framebuffer memory start address"
+	default 0
+	---help---
+		If you are using the DMA2D, then you must provide the address
+		of the start of the DMA2D overlays framebuffer. This address will typically
+		be in the SRAM or SDRAM memory region of the FSMC.
+
+config STM32F7_DMA2D_FB_SIZE
+	int "Framebuffer memory size (bytes)"
+	default 0
+	---help---
+		Must be the whole size of all DMA2D overlays.
 
 menu "Supported pixel format"
 
 config STM32F7_DMA2D_L8
-	depends on FB_CMAP
+	depends on FB_CMAP && STM32F7_LTDC_L1_L8
 	bool "8 bpp L8 (8-bit CLUT)"
 	default y
 
 config STM32F7_DMA2D_AL44
-	depends on FB_CMAP
+	depends on FB_CMAP && STM32F7_LTDC_L1_AL44
 	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
-	default n
+	default y
 
 config STM32F7_DMA2D_AL88
-	depends on FB_CMAP
+	depends on FB_CMAP && STM32F7_LTDC_L1_AL88
 	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
-	default n
+	default y
 
 config STM32F7_DMA2D_RGB565
 	bool "16 bpp RGB 565"
+	depends on STM32F7_LTDC_L1_RGB565
 	default y
 
 config STM32F7_DMA2D_ARGB4444
 	bool "16 bpp ARGB 4444"
-	default n
+	depends on STM32F7_LTDC_L1_ARGB4444
+	default y
 
 config STM32F7_DMA2D_ARGB1555
 	bool "16 bpp ARGB 1555"
-	default n
+	depends on STM32F7_LTDC_L1_ARGB15555
+	default y
 
 config STM32F7_DMA2D_RGB888
 	bool "24 bpp RGB 888"
+	depends on STM32F7_LTDC_L1_RGB888
 	default y
 
 config STM32F7_DMA2D_ARGB8888
 	bool "32 bpp ARGB 8888"
-	default n
+	depends on STM32F7_LTDC_L1_ARGB8888
+	default y
 
 endmenu
+
+config STM32F7_DMA2D_REGDEBUG
+	bool "DMA2D Register level debug"
+	depends on DEBUG_INFO && DEBUG_LCD
+	default n
+	---help---
+		Output detailed register-level DMA2D device debug information.
+
 endmenu
 endif # STM32F7_DMA2D
 

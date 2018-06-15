@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32_ltdc.h
+ * arch/arm/src/stm32f7/chip/stm32_ltdc.h
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>

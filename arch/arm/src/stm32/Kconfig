@@ -8176,8 +8176,8 @@ config STM32_LTDC_FB_BASE
 config STM32_LTDC_FB_SIZE
 	int "Framebuffer memory size (bytes)"
 	default 0
-    ---help---
-        Must be the whole size of the active LTDC layer.
+	---help---
+		Must be the whole size of the active LTDC layer.
 
 config STM32_LTDC_L1_CHROMAKEYEN
 	bool "Enable chromakey support for layer 1"
