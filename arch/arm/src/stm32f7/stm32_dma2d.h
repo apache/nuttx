@@ -42,7 +42,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/video/fb.h>
-#include "stm32_ltdc.h"
 
 #ifdef CONFIG_FB_OVERLAY
 

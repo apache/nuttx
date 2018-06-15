@@ -243,7 +243,7 @@ static int stm32_dma2d_blend(FAR struct stm32_dma2d_overlay_s *doverlay,
  * Private Data
  ****************************************************************************/
 
-/* The initalized state of the driver */
+/* The initialized state of the driver */
 
 static bool g_initialized;
 
@@ -278,19 +278,19 @@ static struct stm32_interrupt_s g_interrupt =
 
 static struct stm32_dma2d_s g_dma2ddev =
 {
-    .dma2d =
-      {
+  .dma2d =
+  {
 #ifdef CONFIG_FB_CMAP
-        .setclut   = stm32_dma2d_setclut,
+    .setclut   = stm32_dma2d_setclut,
 #endif
-        .fillcolor = stm32_dma2d_fillcolor,
-        .blit      = stm32_dma2d_blit,
-        .blend     = stm32_dma2d_blend
-      },
+    .fillcolor = stm32_dma2d_fillcolor,
+    .blit      = stm32_dma2d_blit,
+    .blend     = stm32_dma2d_blend
+  },
 #ifdef CONFIG_FB_CMAP
-    .clut = g_clut,
+  .clut = g_clut,
 #endif
-    .lock = &g_lock
+  .lock = &g_lock
 };
 
 /****************************************************************************

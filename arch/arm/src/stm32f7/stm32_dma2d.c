@@ -74,11 +74,11 @@
 
 /* DMA2D blender control */
 
-#define STM32F7_DMA2D_CR_MODE_BLIT          DMA2D_CR_MODE(0)
-#define STM32F7_DMA2D_CR_MODE_BLITPFC       DMA2D_CR_MODE(1)
-#define STM32F7_DMA2D_CR_MODE_BLEND         DMA2D_CR_MODE(2)
-#define STM32F7_DMA2D_CR_MODE_COLOR         DMA2D_CR_MODE(3)
-#define STM32F7_DMA2D_CR_MODE_CLEAR         STM32_DMA2D_CR_MODE_BLITPFC | \
+#define STM32_DMA2D_CR_MODE_BLIT            DMA2D_CR_MODE(0)
+#define STM32_DMA2D_CR_MODE_BLITPFC         DMA2D_CR_MODE(1)
+#define STM32_DMA2D_CR_MODE_BLEND           DMA2D_CR_MODE(2)
+#define STM32_DMA2D_CR_MODE_COLOR           DMA2D_CR_MODE(3)
+#define STM32_DMA2D_CR_MODE_CLEAR           STM32_DMA2D_CR_MODE_BLITPFC | \
                                             STM32_DMA2D_CR_MODE_BLEND   | \
                                             STM32_DMA2D_CR_MODE_COLOR
 
@@ -88,7 +88,7 @@
 
 /* CC clut size */
 
-#define DMA2D_CLUT_SIZE                     STM32F7_DMA2D_NCLUT - 1
+#define DMA2D_CLUT_SIZE                     STM32_DMA2D_NCLUT - 1
 
 /* Layer argb cmap conversion */
 
@@ -456,7 +456,6 @@ static int stm32_dma2d_waitforirq(void)
   return ret;
 }
 
-#ifdef CONFIG_STM32F7_DMA2D_L8
 /****************************************************************************
  * Name: stm32_dma2d_loadclut
  *

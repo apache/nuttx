@@ -1330,8 +1330,12 @@ static void stm32_ltdc_periphconfig(void)
 
   /* Configure LTDC_GCR */
 
-  regval = (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL
-           | STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
+  regval  = getreg32(STM32_LTDC_GCR);
+  regval &= ~(LTDC_GCR_PCPOL | LTDC_GCR_DEPOL | LTDC_GCR_VSPOL |
+              LTDC_GCR_HSPOL);
+  regval |= (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL |
+             STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
+
   reginfo("set LTDC_GCR=%08x\n", regval);
   putreg32(regval, STM32_LTDC_GCR);
   reginfo("configured LTDC_GCR=%08x\n", getreg32(STM32_LTDC_GCR));
@@ -1400,7 +1404,7 @@ static void stm32_ltdc_bgcolor(uint32_t rgb)
 static void stm32_ltdc_dither(bool enable, uint8_t red,
                               uint8_t green, uint8_t blue)
 {
-  uint32_t    regval;
+  uint32_t regval;
 
   regval = getreg32(STM32_LTDC_GCR);
 
@@ -1413,8 +1417,7 @@ static void stm32_ltdc_dither(bool enable, uint8_t red,
       regval &= ~LTDC_GCR_DEN;
     }
 
-  regval &= ~(!LTDC_GCR_DEN | LTDC_GCR_DRW(0) |
-                LTDC_GCR_DGW(0) | LTDC_GCR_DBW(0));
+  regval &= ~(LTDC_GCR_DBW_MASK | LTDC_GCR_DGW_MASK | LTDC_GCR_DRW_MASK);
   regval |= (LTDC_GCR_DRW(red) | LTDC_GCR_DGW(green) | LTDC_GCR_DBW(blue));
 
   reginfo("set LTDC_GCR=%08x\n", regval);
@@ -2945,6 +2948,21 @@ static int stm32_blend(FAR struct fb_vtable_s *vtable,
 }
 #  endif /* CONFIG_FB_OVERLAY_BLIT */
 #endif /* CONFIG_FB_OVERLAY */
+
+/****************************************************************************
+ * Name: stm32_ltdcreset
+ *
+ * Description:
+ *   Reset LTDC via APB2RSTR
+ *
+ ****************************************************************************/
+
+void stm32_ltdcreset(void)
+{
+  uint32_t regval = getreg32(STM32_RCC_APB2RSTR);
+  putreg32(regval | RCC_APB2RSTR_LTDCRST, STM32_RCC_APB2RSTR);
+  putreg32(regval & ~RCC_APB2RSTR_LTDCRST, STM32_RCC_APB2RSTR);
+}
 
 /****************************************************************************
  * Name: stm32_ltdcinitialize

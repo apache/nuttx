@@ -1330,11 +1330,11 @@ static void stm32_ltdc_periphconfig(void)
 
   /* Configure LTDC_GCR */
 
-  regval = getreg32(STM32_LTDC_GCR);
+  regval  = getreg32(STM32_LTDC_GCR);
   regval &= ~(LTDC_GCR_PCPOL | LTDC_GCR_DEPOL | LTDC_GCR_VSPOL |
               LTDC_GCR_HSPOL);
-  regval |=  (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL |
-              STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
+  regval |= (STM32_LTDC_GCR_PCPOL | STM32_LTDC_GCR_DEPOL |
+             STM32_LTDC_GCR_VSPOL | STM32_LTDC_GCR_HSPOL);
 
   reginfo("set LTDC_GCR=%08x\n", regval);
   putreg32(regval, STM32_LTDC_GCR);

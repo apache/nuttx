@@ -43,10 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/video/fb.h>
 
-#  ifdef CONFIG_FB_OVERLAY
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_FB_OVERLAY
 
 /****************************************************************************
  * Public Types
@@ -81,9 +78,9 @@ struct dma2d_layer_s
    *   On error   - -EINVAL
    */
 
-#    ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_FB_CMAP
   int (*setclut)(FAR const struct fb_cmap_s * cmap);
-#    endif
+#endif
 
   /* Name: fillcolor
    *
@@ -162,14 +159,6 @@ struct dma2d_layer_s
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -212,5 +201,5 @@ int stm32_dma2dinitialize(void);
 
 void stm32_dma2duninitialize(void);
 
-#  endif /* CONFIG_FB_OVERLAY */
+#endif /* CONFIG_FB_OVERLAY */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_DMA2D_H */
