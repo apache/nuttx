@@ -1925,7 +1925,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
   chan->xfrd   = 0;
 
   start = clock_systimer();
-  while ((chan->xfrd < chan->buflen > 0)
+  while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
 

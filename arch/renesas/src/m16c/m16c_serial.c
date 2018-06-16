@@ -582,7 +582,7 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->uartno == 2)
     {
       regval  = getreg8(M16C_U2C1);
-      regval |= ((UART_C1_U2IRS|UART_C1_U2RRM);
+      regval |= (UART_C1_U2IRS|UART_C1_U2RRM);
       putreg8(regval, M16C_U2C1);
     }
   else

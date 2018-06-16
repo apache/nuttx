@@ -755,7 +755,7 @@ static int efm32_rxinterrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int efm32_txinterrupt((int irq, void *context, void *arg)
+static int efm32_txinterrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct efm32_usart_s *priv;
