@@ -1431,19 +1431,18 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           data = 0xffff;
         }
 
-      /* Set the PCS field in the value written to the TDR */
-
-      /*data |= pcs; */
-
-      /* Wait for any previous data written to the TDR to be transferred
-       * to the serializer.
-       */
-
-      /*while ((spi_getreg(spi, XMC4_SPI_SR_OFFSET) & SPI_INT_TDRE) == 0); */
-
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
       spi_putreg(spi, data, XMC4_USIC_TBUF_OFFSET);
+
+      /* Wait until the last bit be transfered */
+
+      while ((spi_getreg(spi, XMC4_USIC_PSR_OFFSET) &
+             (USIC_PSR_TSIF)) == 0)
+        {
+        }
+
+      spi_putreg(spi, USIC_PSCR_CTSIF, XMC4_USIC_PSCR_OFFSET);
 
       /* Wait to get some data */
 
@@ -1451,6 +1450,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
              (USIC_PSR_RIF | USIC_PSR_AIF)) == 0)
         {
         }
+
+      spi_putreg(spi, (USIC_PSCR_CRIF | USIC_PSCR_CAIF), XMC4_USIC_PSCR_OFFSET);
 
       /* Read the received data from the SPI Data Register. */
 
