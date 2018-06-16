@@ -7,6 +7,16 @@ described in license (below), respect Trademarks, and include a
 copy of the BSD license.  Please feel free to contact me if you
 have any licensing concerns.
 
+Copyright Date Notation:  Copyright information is provided in the header
+of each file.  This copyright information includes the year(s) in which
+copyrighted additions to the file were made.  A comma ('.') is used to
+separate years in the list of years.  A hyphen ('-') is used as a more
+compact notation when additions were made over several consecutive years.
+So for example, "2007, 2011" would mean that copyrighted addtiions
+were made during the years of 2007 and 2011.  Whereas "2007-2011"
+would indicate copyrighted additions in the years 2007, 2008, 2009,
+2010, and 2011.
+
 NuttX
 ^^^^^
 
