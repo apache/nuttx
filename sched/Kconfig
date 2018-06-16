@@ -716,6 +716,7 @@ config CPULOAD_ONESHOT_ENTROPY
 	int "Bits of entropy"
 	default 6
 	range 0 30
+	depends on CPULOAD_ONESHOT
 	---help---
 		This is the number of bits of entropy that will be applied. The
 		oneshot will be set to this interval:
@@ -728,8 +729,7 @@ config CPULOAD_ONESHOT_ENTROPY
 			CPULOAD_ONESHOT_NOMINAL is the nominal sample internval implied
 			by CONFIG_SCHED_CPULOAD_TICKSPERSEC in units of microseconds.
 			CPULOAD_ONESHOT_ENTROPY is (1 << CONFIG_CPULOAD_ONESHOT_ENTROPY),
-			and
-			'error' is an error value that is retained from interval to
+			and 'error' is an error value that is retained from interval to
 			interval so that although individual intervals are randomized,
 			the average will still be CONFIG_SCHED_CPULOAD_TICKSPERSEC.
 
